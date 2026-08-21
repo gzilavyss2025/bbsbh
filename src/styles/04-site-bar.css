@@ -404,16 +404,18 @@
    .banner and .plink rules it leans on come from 29-team-transactions.css and
    01-base.css and are deliberately not restated; the two scoped overrides below
    win on specificity, not on order. */
+/* One word, over the ledger's top rule. The 48-hour window and the story count
+   used to ride at the right of this row and were dropped: every dateline in the
+   list below already spells out its day and carries that day's count, so the
+   head was restating the ledger to itself. */
 .wirerail__head {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: var(--space-2);
   padding-bottom: 6px;
   border-bottom: var(--bw-hair) solid var(--rule-soft);
 }
-.wirerail__title,
-.wirerail__note {
+.wirerail__title {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -421,10 +423,6 @@
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-caption);
-}
-.wirerail__note {
-  font-weight: var(--w-semibold);
-  color: var(--graphite-soft);
 }
 .wirerail__list {
   list-style: none;

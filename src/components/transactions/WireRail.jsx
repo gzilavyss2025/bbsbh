@@ -19,10 +19,10 @@ import { MoveItems, flattenDays } from './MoveRow.jsx'
 // so roughly 480px of the page sat empty while the games were pushed off it.
 //
 // So the wire stops taking VERTICAL space and starts taking HORIZONTAL space.
-// It runs down the right of the games in margin the page was already wasting,
-// sticky, scrolling on its own. This is the shape every dense data site
-// converges on for a secondary feed beside a primary one, and the reason is
-// always the same: horizontal space costs the primary content nothing.
+// It runs down the right of the games in margin the page was already wasting.
+// This is the shape every dense data site converges on for a secondary feed
+// beside a primary one, and the reason is always the same: horizontal space
+// costs the primary content nothing.
 //
 // What that buys, measured against the card it replaces at 1440x900:
 //
@@ -32,15 +32,21 @@ import { MoveItems, flattenDays } from './MoveRow.jsx'
 //
 // The rail is BETTER for the wire, not a demotion of it. That is worth stating
 // plainly, because "move it out of the way" usually means "show less of it",
-// and here it does not: the whole 48 hours is on screen at once, and a busy
-// day (a measured month's worst held 125 stories) scrolls inside the rail
-// rather than pushing the slate down.
+// and here it does not: every story is drawn, however busy the 48 hours were,
+// and none of them costs the games a pixel of height.
+//
+// THE RAIL IS NOT ITS OWN SCROLLER. It was, briefly — capped to the viewport,
+// sticky, `overscroll-behavior: contain` — and that cost the wheel: with the
+// cursor over the rail, scrolling stopped moving the games. It scrolls with the
+// page now, so the slate has exactly one scroller and no gesture has to be
+// routed between two. 25-wide-layout.css carries the full reasoning, including
+// why sticky had to go with the cap.
 //
 // THREE THINGS THIS FILE NO LONGER DOES, all of which the card had to:
 //   * No fitted-row measurement. The card walked its rendered rows to find how
 //     many cleared a height budget, re-probing on every resize, because it had
-//     to end on a whole row at the fold. A rail that scrolls has no fold to end
-//     at, so `useFittedRows` and its MIN/MAX/DEFAULT row counts are gone.
+//     to end on a whole row at the fold. A rail beside the games has no fold to
+//     end at, so `useFittedRows` and its MIN/MAX/DEFAULT row counts are gone.
 //   * No door. "All 10 moves" existed because the fit hid some; nothing is
 //     hidden now.
 //   * No expanded state. Same reason.
@@ -78,10 +84,17 @@ export function WireRail({ endDate, onPresence }) {
   if (total === 0) return null
 
   return (
-    <aside className="wirerail" aria-label="Roster moves around the league">
+    // The visible head is the one word. The window and the count are NOT
+    // repeated beside it: every row below already carries a spelled-out
+    // dateline ("Thursday, August 20") with that day's count on it, so a
+    // "48h · 10" in the head restated what the ledger says twice over. The
+    // accessible name keeps the window, because a screen reader landing on
+    // this region has not read the datelines yet.
+    <aside className="wirerail" aria-label="Transactions around the league, last 48 hours">
       <div className="wirerail__head">
-        <h2 className="wirerail__title">Around the league</h2>
-        <span className="wirerail__note">48h · {total}</span>
+        {/* Mixed case here on purpose: the CSS applies the app's ALL-CAPS
+            invariant, never a per-component .toUpperCase() (ADR-0017). */}
+        <h2 className="wirerail__title">Transactions</h2>
       </div>
       <ul className="wirerail__list">
         <MoveItems items={items} compact />

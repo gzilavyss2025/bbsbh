@@ -11,8 +11,8 @@ import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
 // and trimmed itself to end on a whole row, so the old spec was almost entirely
 // about that measurement: whether the fit could grow again after a resize,
 // whether the last row was drawn cut in half, whether the door cleared the
-// fold. None of it survives, because none of the mechanism does — a rail that
-// scrolls has no fold to end at, so there is no fit, no trim and no door.
+// fold. None of it survives, because none of the mechanism does — a rail beside
+// the games has no fold to end at, so there is no fit, no trim and no door.
 //
 // What IS worth a browser now is the claim the rail actually makes, and it is
 // a claim about LAYOUT, which the unit suite structurally cannot see:
@@ -33,6 +33,10 @@ import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
 //     leave it at 960 — the last of those being the case GameSelect reserves
 //     the width for up front and gives back, so it is the one that can regress
 //     into 288px of empty margin.
+//  5. **The wheel belongs to the slate.** With the cursor over the rail, a
+//     wheel still moves the games. That is a fact about how a real wheel event
+//     routes between scrollers, so it needs a real wheel; nothing below the DOM
+//     can see it.
 //
 // The wire is stubbed rather than read live, for a reason worth stating: the
 // feed shows today and yesterday, so a captured response would be one day stale
@@ -170,7 +174,7 @@ test('the wire runs beside the games, not above them', async ({ page }) => {
   await page.setViewportSize({ width: TWO_COL_W, height: 900 })
   await openSlate(page)
   await expect(page.locator('.wirerail')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Around the league' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Transactions' })).toBeVisible()
 
   const slate = await readSlate(page)
   // THE POINT OF THE WHOLE CHANGE: the first game card starts level with the
@@ -205,19 +209,44 @@ test('every move is on the rail — there is no door and nothing is trimmed', as
   await expect(page.locator('.wirerail')).toBeVisible()
 
   await expect(page.locator('.wire__row')).toHaveCount(TOTAL_STORIES)
-  // The count in the rail's own head agrees with what it drew.
-  await expect(page.locator('.wirerail__note')).toContainText(String(TOTAL_STORIES))
+  // The head is the one word — no window and no count beside it. Every dateline
+  // in the list already spells out its day and carries that day's count, so a
+  // second tally up top restated the ledger to itself.
+  await expect(page.locator('.wirerail__head')).toHaveText(/^transactions$/i)
   // The card's door and its expanded state are gone, not merely hidden.
   await expect(page.locator('.wirecard__door')).toHaveCount(0)
   await expect(page.locator('.wirecard')).toHaveCount(0)
 
-  // A rail taller than the window scrolls inside itself rather than pushing
-  // the slate down — which is what lets it hold a busy day.
-  const scrolls = await page.evaluate(() => {
-    const rail = document.querySelector('.wirerail')
-    return rail.scrollHeight > rail.clientHeight
+})
+
+test('the wheel scrolls the slate even with the cursor over the rail', async ({ page }) => {
+  // The rail used to be its own scroller — capped to the viewport, sticky, and
+  // `overscroll-behavior: contain`. A wheel with the cursor over it then moved
+  // the rail and not the games, and on a light wire it moved nothing at all:
+  // the rail sat a hair over its cap, so it owned the gesture to travel two
+  // pixels and `contain` swallowed the rest.
+  //
+  // A browser test, because the failure is entirely in how a real wheel event
+  // is routed between two scrollers. Nothing below the DOM can see it.
+  await page.setViewportSize({ width: TWO_COL_W, height: 900 })
+  await openSlate(page)
+  await expect(page.locator('.wirerail')).toBeVisible()
+
+  const rail = page.locator('.wirerail')
+  const box = await rail.boundingBox()
+  await page.mouse.move(box.x + box.width / 2, box.y + Math.min(200, box.height / 2))
+  await page.mouse.wheel(0, 600)
+  await expect.poll(async () => page.evaluate(() => Math.round(window.scrollY))).toBeGreaterThan(0)
+
+  // And the rail is not quietly holding a scroll position of its own — there is
+  // exactly one scroller on this page, which is what makes the gesture
+  // unambiguous rather than merely working today.
+  const railScroll = await page.evaluate(() => {
+    const el = document.querySelector('.wirerail')
+    return { top: el.scrollTop, overflowing: el.scrollHeight > el.clientHeight + 1 }
   })
-  expect(scrolls).toBe(true)
+  expect(railScroll.overflowing).toBe(false)
+  expect(railScroll.top).toBe(0)
 })
 
 test('the games drop to one column when the rail leaves room for one', async ({ page }) => {

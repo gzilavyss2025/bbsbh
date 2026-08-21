@@ -148,6 +148,26 @@
     max-width: 1272px;
   }
 
+  /* THE RAIL IS NOT ITS OWN SCROLLER, and that is a decision rather than an
+     omission. It was one: capped to the viewport with `overflow-y: auto`,
+     sticky, and `overscroll-behavior: contain`. That is the textbook sticky
+     sidebar and it was wrong here for a plain reason — a wheel with the cursor
+     over the rail stopped moving the games. Worse on a light wire than a busy
+     one: at ten moves the rail sat a hair OVER its own cap, so it owned the
+     wheel to scroll two pixels and `contain` refused to pass the rest on. The
+     page simply did not move.
+
+     So the rail scrolls with the page, like the column of content it is. The
+     wheel belongs to the slate everywhere on the slate; nothing has to guess
+     which of two scrollers a gesture meant, because there is only one.
+
+     Sticky went with the cap, and had to: `position: sticky` on something
+     taller than the window pins its top and puts its tail permanently out of
+     reach, and a real 48 hours runs 30 to 54 stories — taller than the window
+     and often taller than the game list beside it. Sticky is only safe on a
+     rail you have measured, and measuring the wire is what the card this
+     replaced did badly (ADR-0062). The cost is real and accepted: on a quiet
+     wire the column empties out before the games do. */
   .wirerail {
     flex: 0 0 auto;
     width: 288px;
@@ -155,17 +175,6 @@
        rail's head starts level with the first card's top edge instead of 14px
        above it. The two move together — change one, change the other. */
     margin-top: 14px;
-    /* Sticky, so the 48 hours stay beside the reader for the whole scroll —
-       which is the rail earning its width rather than just occupying it. Held
-       clear of the pinned .topbar--slate (48px) above it. */
-    position: sticky;
-    top: 56px;
-    max-height: calc(100vh - 72px);
-    overflow-y: auto;
-    /* A busy day (a measured month's worst held 125 stories) scrolls in here;
-       `contain` keeps that scroll from chaining into the slate behind it once
-       the rail bottoms out. */
-    overscroll-behavior: contain;
   }
 
   /* auto-fit, not a fixed 2: the games column is 928 with a rail beside it and

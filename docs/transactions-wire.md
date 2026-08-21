@@ -556,7 +556,7 @@ A typical 48 hours runs 30 to 54 stories. **The worst 48 hours of the month held
 why the home slate draws this feed as a vertical ledger rather than the team
 page's horizontal deck of cards — 125 cards is not a swipe, it is a chore — and
 it is also why neither of the ledger's two surfaces stands in the slate's flow.
-Wide, it is a sticky rail down the right of the games (`WireRail.jsx`,
-ADR-0062), scrolling on its own so a 125-story day costs the games no height at
-all; on a phone it is the bottom-anchored dock (`WireDock.jsx`, ADR-0061).
+Wide, it is a rail down the right of the games (`WireRail.jsx`, ADR-0062), so a
+125-story day costs the games no height at all; on a phone it is the
+bottom-anchored dock (`WireDock.jsx`, ADR-0061).
 `e2e/wire-rail.spec.js` and `e2e/wire-dock.spec.js` hold the two apart.

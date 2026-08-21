@@ -39,8 +39,8 @@ made of.
 ## Decision
 
 **The wire stops taking vertical space and starts taking horizontal space.** It
-runs down the right of the games as a sticky, independently scrolling rail
-(`WireRail.jsx`), in margin the page was already wasting.
+runs down the right of the games as a rail (`WireRail.jsx`), in margin the page
+was already wasting.
 
 Three numbers, and they are related — change them together:
 
@@ -91,11 +91,10 @@ Measured against the card it replaces, at 1440 x 900:
 
 **The rail is better for the wire, not a demotion of it.** That is worth stating
 plainly, because "move it out of the way" usually means "show less of it", and
-here it does not. The whole 48 hours is on screen at once; a busy day (a
-measured month's worst held 125 stories) scrolls inside the rail instead of
-pushing the slate down. Three mechanisms went with the card and are not coming
-back: the fitted-row measurement, the "All N moves" door, and the expanded
-state. A rail that scrolls has no fold to end on.
+here it does not. Every story is drawn, however busy the 48 hours were, and none
+of them costs the games a pixel of height. Three mechanisms went with the card
+and are not coming back: the fitted-row measurement, the "All N moves" door, and
+the expanded state. A rail beside the games has no fold to end on.
 
 **The slate is now the only screen in the app that goes past 960px**, and only
 when a rail is actually there to fill the extra. `.screen`'s global cap is
@@ -109,9 +108,22 @@ first paint. In season the reserved case is right essentially always; the
 give-back is the offseason path, and `e2e/wire-rail.spec.js` covers it, because
 the failure mode is 288px of margin holding nothing.
 
-**The rail sticks for the games column, then releases.** Its containing block is
-the two-column wrapper, so it stays beside the reader for the whole game list
-and then scrolls away rather than floating beside the footer.
+**The rail is not its own scroller, and is not sticky.** It was both at first —
+capped to the viewport with `overflow-y: auto`, sticky at `top: 56px`,
+`overscroll-behavior: contain`. That is the textbook sticky sidebar and it broke
+the wheel: with the cursor over the rail, scrolling stopped moving the games.
+The light-wire case was the worst of it — at ten moves the rail sat a hair OVER
+its own cap, so it claimed the gesture to travel two pixels and `contain`
+refused to pass the remainder on. The page did not move at all.
+
+The rail scrolls with the page now. The slate has exactly one scroller, so no
+gesture has to be routed between two. Sticky went with the cap and had to:
+`position: sticky` on an element taller than the window pins its top and puts
+its tail permanently out of reach, and a real 48 hours runs 30 to 54 stories —
+taller than the window, often taller than the game list beside it. Sticky is
+only safe on a rail whose height you have measured, and measuring the wire is
+exactly what the card this replaced did badly. The cost is accepted: on a quiet
+wire the column empties out before the games do.
 
 **On a light slate the rail can be the tallest thing on the page** — a
 three-game day with a busy wire. It is capped at one viewport

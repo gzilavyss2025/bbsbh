@@ -445,7 +445,7 @@ export function WireDock({ endDate, onPresence }) {
               className="wiredock__head"
               aria-hidden={index === RAIL ? 'true' : undefined}
             >
-              <h2 className="wiredock__title">Around the league</h2>
+              <h2 className="wiredock__title">Transactions</h2>
               <span className="wiredock__note">Last 48 hours · {total}</span>
               <button
                 type="button"
