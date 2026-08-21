@@ -379,10 +379,10 @@
   dominant-baseline: middle;
 }
 
-/* Facts strip: opened / roof / capacity. A second strip (avg/high/low
-   attendance) can follow directly beneath it — .bpsheet__facts + .bpsheet__facts
-   drops the shared border to a single hairline between them rather than
-   doubling it up. */
+/* Facts strip: opened / roof / capacity. Further strips (avg/high/low
+   attendance, then sellouts and the league ranks) can follow directly beneath
+   it — .bpsheet__facts + .bpsheet__facts drops the shared border to a single
+   hairline between them rather than doubling it up. */
 .bpsheet__facts {
   display: flex;
   margin: 6px 0 4px;
@@ -417,6 +417,18 @@
   font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
+}
+
+/* The optional second line under a value — the league a rank was taken in, the
+   figure it was ordered on, the threshold a count was counted at. Its own
+   block so the value above it stays the thing the eye lands on, and quiet
+   enough that a strip of three reads as three facts rather than six. */
+.bpfact__note {
+  display: block;
+  margin-top: 1px;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-muted);
 }
 
 /* Ranked dimensions — a horizontal strip of posts in fence order (LF -> LC ->

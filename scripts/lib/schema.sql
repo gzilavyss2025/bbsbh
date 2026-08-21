@@ -419,30 +419,6 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_ingested_games (
   PRIMARY KEY (game_pk, level)
 );
 
--- Per-team, per-season HOME-game attendance totals (gen-attendance.mjs) — the
--- season average, high, and low a Ballpark card ranks against the other 29
--- clubs. Counted only for the HOME club: attendance is a fact about that
--- club's own park, not the visiting side, so an away game folds in nothing.
--- `sum`/`games` give the average; `high`/`low` are the season's best/worst
--- single gate. MLB only — see the generator's own header.
-CREATE TABLE IF NOT EXISTS attendance_team_totals (
-  team_id INTEGER NOT NULL,
-  season  INTEGER NOT NULL,
-  games   INTEGER NOT NULL DEFAULT 0,
-  sum     INTEGER NOT NULL DEFAULT 0,
-  high    INTEGER,
-  low     INTEGER,
-  PRIMARY KEY (team_id, season)
-);
-
--- Idempotency guard for attendance_team_totals: which gamePks are already
--- folded in (a game with no parseable Att figure is still marked here, so a
--- permanently-missing gate is never re-fetched every run).
-CREATE TABLE IF NOT EXISTS attendance_ingested_games (
-  game_pk INTEGER PRIMARY KEY,
-  season  INTEGER NOT NULL
-);
-
 -- One row per (game, club) — the raw per-game FACTS every situational team
 -- record is summed from, at MLB and the four full-season MiLB levels. Written
 -- by gen-team-records.mjs.

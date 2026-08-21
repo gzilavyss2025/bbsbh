@@ -5,11 +5,13 @@
 //   /attendance  ("The Gate")  — src/screens/around-the-game/AttendancePage.jsx
 //   /pace-of-play ("The Clock") — src/screens/around-the-game/PacePage.jsx
 //
-// SOURCE, and why this generator is cheap where gen-attendance.mjs is not.
-// gen-attendance.mjs fetches ONE BOXSCORE PER GAME to read the `Att` row out
-// of info[] — 1,869 requests for a season, which is why it needs SQLite, an
-// ingested-games table and an incremental trailing window. It did not have to.
-// The SCHEDULE endpoint hydrates the same figures directly:
+// SOURCE, and the endpoint this generator found. gen-attendance.mjs used to
+// fetch ONE BOXSCORE PER GAME to read the `Att` row out of info[] — 1,869
+// requests for a season, which is why it needed SQLite, an ingested-games
+// table and an incremental trailing window. It did not have to, and since
+// this file proved the point it no longer does: it now sweeps the same
+// endpoint through this file's own `toRow`. The SCHEDULE endpoint hydrates
+// the figures directly:
 //
 //   /api/v1/schedule?sportId=1&startDate=..&endDate=..&gameType=R&hydrate=gameInfo
 //     -> games[].gameInfo = { attendance, firstPitch, gameDurationMinutes,
@@ -19,11 +21,11 @@
 // gameDurationMinutes 159, delayDurationMinutes 0). So a whole season is ~12
 // requests, one per month, and this script can rebuild from scratch every
 // night with no database and no incremental state at all. That is the whole
-// reason it is a separate generator rather than an extension of the existing
-// one: gen-attendance.mjs owns the Ballpark card's contract
-// (public/data/attendance.json) and is not worth destabilising, and a
-// stateless full rebuild is strictly simpler than the machinery it would have
-// had to inherit.
+// reason it stayed a separate generator rather than becoming an extension of
+// the existing one: gen-attendance.mjs owns the Ballpark card's contract
+// (public/data/attendance.json), which is ~4 KB shaped for one club against
+// the 30 KB of splits the two report pages here want — and the team Overview
+// loads it on every MLB club page.
 //
 // WHAT IT SHIPS: FACTS, NOT THE INDEX. Every ranking, fill rate, percentile
 // and league-average comparison the two pages draw is computed in
