@@ -14,7 +14,7 @@ import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { CareerRegister } from '../components/player/CareerRegister.jsx'
 import { LevelProgressionCard } from '../components/player/LevelProgressionCard.jsx'
 import { MilestoneWatchCard } from '../components/playerstats/MilestoneWatchCard.jsx'
-import { TrophyCase } from '../components/player/TrophyCase.jsx'
+import { AwardsLedger } from '../components/player/AwardsLedger.jsx'
 import { CareerTimeline } from '../components/player/CareerTimeline.jsx'
 import { TransactionTimeline } from '../components/transactions/TransactionTimeline.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
@@ -291,16 +291,22 @@ export function PlayerPage({ id, asOf, sportId }) {
 
         {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
 
-        {/* Trophy Case stays here as identity — "who is this guy" — ahead of
-            the stat tables; a player with none renders nothing and the page
-            falls straight through into stats. Milestone Watch and Firsts used
-            to sit in this zone too, but neither is backward-looking the way
-            Trophy Case is: Milestone Watch is a forward-looking pace fact
-            that previews the Career register's totals row (now sits between
-            Game log and the register, below), and Firsts is a set of dated
-            origin-story events that reads better beside Team History / Path
-            to the Majors / Transactions (now opens that archive, below). */}
-        <TrophyCase trophyCase={data.trophyCase} />
+        {/* Awards stays here as identity — "who is this guy" — ahead of the
+            stat tables; a player with none renders nothing and the page falls
+            straight through into stats. Milestone Watch and Firsts used to sit
+            in this zone too, but neither is backward-looking the way this is:
+            Milestone Watch is a forward-looking pace fact that previews the
+            Career register's totals row (now sits between Game log and the
+            register, below), and Firsts is a set of dated origin-story events
+            that reads better beside Team History / Path to the Majors /
+            Transactions (now opens that archive, below).
+
+            One of the eight club-barred top-level sections, unlike the Trophy
+            Case it replaces: that was a compact card in the achievements zone,
+            this is a content-rich block on the footing of Career stats and
+            Game log. Hence section__title--bar here, and the --aside modifier
+            for its counts. */}
+        <AwardsLedger ledger={data.awardLedger} />
 
         {blocks.map((block) => {
           // A debuted player whose current-season tiles are at a MiLB level (an

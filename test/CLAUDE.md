@@ -88,6 +88,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | play-diamond-out-geometry.test.js | 5 | src/components/scoring/playDiamondGeometry.js | outLegBases geometry |
 | playbyplay-pitching-change.test.js | 7 | src/api/playbyplay.js | Now Pitching card step-boundary logic |
 | pre-pitch-selectors.test.js | 12 | src/api/select.js | Caller-gated pre-pitch selectors (ADR-0010) |
+| preferred-lineup-team-scope.test.js | 7 | src/screens/team/data/shared.js (preferTeamSplits, preferredLineupFrom) | A position/level-agnostic roster fetch (rosterType=sport level, not per-team) must not credit a rostered-but-unplayed pickup with another team's stats, must still credit a player promoted within the org, and must exclude one the club has since released — pinned on real captured statsapi rows (Bae/Williams/Lara/Marte, 2026-08-21) |
 | pregame-avg.test.js | 3 | src/api/boxscore.js | preGameAvg |
 | print-sheet.test.js | 14 | src/screens/sheet/sheetModel.js | Tonight's printable scorecard: the pre-pitch model + its MiLB blank-line degradations, and the spoiler boundary — screens/sheet/ imports only select.js, and the printed at-bat grid stays EMPTY (docs/print-sheet.md) |
 | preview-resolver.test.js | 6 | src/copy/previewResolver.js, registry.js | Consent-modal copy slot resolution |

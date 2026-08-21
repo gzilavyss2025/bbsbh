@@ -61,7 +61,7 @@
 @import './styles/25-wide-layout.css';
 @import './styles/26-player-page.css';
 @import './styles/72-player-hover-card.css';
-@import './styles/67-trophy-case.css';
+@import './styles/67-awards-ledger.css';
 @import './styles/27-player-position-innings.css';
 @import './styles/69-pitch-arsenal.css';
 @import './styles/28-team-hub.css';
@@ -152,4 +152,5 @@
      61-ballpark-admin        screens/team/modules/ballpark/BallparkAdminBar.jsx,
                               screens/team/modules/ballpark/BallparkEditFields.jsx
      65-team-records          screens/team/modules/records/RecordsCard.jsx
+     72-club-transactions     screens/team/TeamTransactionsPage.jsx
    ------------------------------------------------------------ */

@@ -11,6 +11,11 @@ import { teamTabPath } from '../../lib/route.js'
 // A caller whose own subject IS one tab's content should say so explicitly
 // (see StandingsPage.jsx's `tab="numbers"`) rather than land a visitor on a
 // preview of the very table they just clicked out of.
+//
+// It names the SEGMENT after the club, which is not always a hub tab: the
+// club's standalone pages sit at the same depth, so `tab="transactions"` lands
+// on the club's roster-move ledger (MoveRow.jsx's club chip). Anything
+// route.js parses at `/team/{id}/{segment}` is fair game.
 // `name` is what puts the person's name in the address bar rather than a bare
 // id (route.js, ADR-0057). It defaults to the children when they are already a
 // plain string, which is the ordinary case here — the link IS the name — so

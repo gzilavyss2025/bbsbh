@@ -342,7 +342,10 @@ const BUDGETS = {
   // check-file-size.mjs's 600-line ceiling — and that guard's remedy is to
   // split, not to raise. Same trade the 21/21a, 26/26a and 48/48-stamp-strip
   // entries above record.
-  'src/styles': 98,
+  // +1 for 72-club-transactions.css, the club roster-move ledger page. Page-only
+  // rules, so folding them into 29-team-transactions.css would put them in the
+  // core sheet every other page loads.
+  'src/styles': 99,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -404,6 +407,12 @@ const BUDGETS = {
   // +1 for playerHoverCard.js — the hover card's lean data loader. Flat for
   // the check-spoiler-manifest reason above.
   'src/api': 101,
+  // src/api/person, 13: awards.js, the player page's Awards section, split OUT
+  // of transactions.js when the honors half it carried outgrew that file's
+  // 600-line budget. It belongs beside its siblings — same "nothing here
+  // fetches" convention, same person-shaping job — and a subdirectory for one
+  // module would only hide it from check-spoiler-manifest's flat classification.
+  'src/api/person': 13,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly

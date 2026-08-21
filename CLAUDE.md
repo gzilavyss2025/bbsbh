@@ -142,9 +142,9 @@ reveal through a `storage` listener in `useRevealProgress.js`.
 render Open Graph cards, failing safe to the default (ADR-0012). Reveal sync (Clerk-gated) mirrors
 `revealedThrough` via `reveal.js` + Upstash Redis, ratcheted both sides (ADR-0022);
 `spoiled-days.js` mirrors which DAYS the user consented to spoil — consent, reversible (ADR-0026).
-`copy.js` + `src/copy/` store editable wording behind a cached read and an allowlisted write,
-edited ON the page that renders it — the Ballpark card's gear, whose `ballpark-photo.js` puts
-images in Vercel Blob (ADR-0025/0044). `identity.js` + `src/lib/identity/` overlay a CLUB's
+`copy.js` + `src/copy/` store editable wording — and, since ADR-0063, the player page's award
+weight order — behind a cached read and an allowlisted write, edited at `/admin` or ON the page that
+renders it (the Ballpark gear, whose `ballpark-photo.js` puts images in Vercel Blob, ADR-0025/0044). `identity.js` + `src/lib/identity/` overlay a CLUB's
 identity under the pure resolvers, gated twice on WCAG AA; `identity-logo.js` takes a mark's
 BYTES the same way, feeding the overlay's `logo` URLs (ADR-0050, `docs/identity-overrides.md`). **My
 Tally**'s `preferences.js` + `src/lib/account/` mirror a CLOSED four-field set, last-write-wins;

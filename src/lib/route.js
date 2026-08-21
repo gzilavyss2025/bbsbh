@@ -66,6 +66,9 @@
 //   '/team/{id}/photos'                 -> { name: 'team-photos', id, asOf, sportId }
 //                                          (professional photos across the season's decided games,
 //                                           unsealed like '/photos'. NOT a tab — the Photos rail's own door.)
+//   '/team/{id}/transactions'           -> { name: 'team-transactions', id, asOf, sportId }
+//                                          (the club's roster moves, whole season, spoiler-free.
+//                                           NOT a tab — where the home slate's wire sends a reader.)
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
 //   '/leaders/org/{orgId}'              -> { name: 'leaders', scope: 'org', orgId, asOf, sportId }
@@ -496,6 +499,13 @@ export function parseRoute(url) {
   // sixth tab, same reasoning and same placement as stamp-in just above.
   if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'photos')
     return { name: 'team-photos', id: idFromSlug(parts[1]), asOf, sportId }
+  // A club's roster moves, the whole season, one day under another. Reached
+  // from the club's own Transactions deck and — the reason it exists — from
+  // every row of the home slate's wire, which used to land a reader on the
+  // Games tab with the deck four sections below the fold. Not a sixth tab
+  // either, same reasoning and same placement as the two above.
+  if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'transactions')
+    return { name: 'team-transactions', id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
     return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 3) {
@@ -740,6 +750,12 @@ export function teamStampInPath(id, opts = {}) {
 // every other team link.
 export function teamPhotosPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/photos${linkQuery(opts)}`
+}
+// A club's roster moves for the whole season (spoiler-free — a move carries no
+// score). Built in two places: the club's own Transactions deck, and every club
+// chip on the home slate's wire.
+export function teamTransactionsPath(id, opts = {}) {
+  return `/team/${teamSegment(id, opts.name)}/transactions${linkQuery(opts)}`
 }
 // The broader leader pages. `mlb` is the bare `/leaders` (the top-level entry);
 // every other league/level scope carries its key. Org leaders take a club id.

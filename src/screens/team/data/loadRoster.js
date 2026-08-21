@@ -61,7 +61,7 @@ export async function loadRoster(id, asOf) {
   const season = seasonOf(asOf)
   const standingsDate = cutoffFor(asOf)
 
-  const [roster, fullRoster, ilRoster, allStarIds, warData, prospectsSnapshot, rookiesData, schedule] =
+  const [roster, fullRoster, seasonRoster, ilRoster, allStarIds, warData, prospectsSnapshot, rookiesData, schedule] =
     await Promise.all([
       fetchTeamRoster(id, season, { sportId }),
       // 40Man superset of the active roster above — the projection deliberately
@@ -69,6 +69,14 @@ export async function loadRoster(id, asOf) {
       // being the club's preferred answer at his spot just because he's hurt
       // right now (the Injured List shelf flags that separately).
       fetchTeamRoster(id, season, { sportId, rosterType: '40Man' }),
+      // Every player who appeared for this exact club this season, feeding
+      // preferredLineupFrom ONLY — a player since promoted or optioned to
+      // another level of the org (a AAA regular called up to the majors) is
+      // still this season's real answer at his spot, and this is the one
+      // roster type wide enough to still carry him (see preferredLineupFrom,
+      // shared.js). Top Substitutes and the pitching staff below stay scoped
+      // to fullRoster — those answer "who's actually on this roster."
+      fetchTeamRoster(id, season, { sportId, rosterType: 'fullSeason' }),
       fetchTeamIL(id, season),
       sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
       sportId === 1 ? fetchWarData() : Promise.resolve({ season: null, bat: {}, pit: {} }),
@@ -174,10 +182,11 @@ export async function loadRoster(id, asOf) {
     },
   )
 
-  // Preferred Lineup — one player per field position, off the 40Man
-  // fullRoster. Shared with the Overview's lineup preview so both show the same
-  // nine; see preferredLineupFrom for how a spot is decided.
-  const preferredLineup = preferredLineupFrom(fullRoster, id)
+  // Preferred Lineup — one player per field position, off the season-wide
+  // seasonRoster (not fullRoster — see the fetch above). Shared with the
+  // Overview's lineup preview so both show the same nine; see
+  // preferredLineupFrom for how a spot is decided.
+  const preferredLineup = preferredLineupFrom(seasonRoster, id)
 
   // Top Substitutes — position players who didn't win a diamond spot, ranked
   // by games played, capped at 6.

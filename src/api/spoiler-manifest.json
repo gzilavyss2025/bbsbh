@@ -425,6 +425,10 @@
       "class": "spoiler-free",
       "why": "Player-page advanced-stat shaping. Season aggregates."
     },
+    "person/awards.js": {
+      "class": "spoiler-free",
+      "why": "The player page's Awards section — every award the /people/{id}/awards feed carries, shaped and ranked. Season-level career facts on a surface deliberately outside the scoring flow (ADR-0034): no linescore, no box score, no play. It honours the player page's own asOf cutoff so a dated view cannot show an award not yet won, which is a date rule, not a seal."
+    },
     "person/careerRegister.js": {
       "class": "spoiler-free",
       "why": "The year-by-year career register. Season lines."
@@ -754,6 +758,10 @@
     "teamTransactions.js": {
       "class": "spoiler-free",
       "why": "Roster moves and their dates carry no score — as spoiler-free as rehab.js/rookies.js."
+    },
+    "transactions/clubFeed.js": {
+      "class": "spoiler-free",
+      "why": "The club Transactions card's live window, laid over the nightly per-club file so a move filed today reaches the club's own page as fast as it reaches the home slate's wire. Runs the generator's own bucket/de-dupe/filter/group steps over live /transactions rows and merges by day. Roster moves, clubs and dates only — no linescore, no game feed, no score anywhere on the path."
     },
     "transactions/cutline.js": {
       "class": "spoiler-free",

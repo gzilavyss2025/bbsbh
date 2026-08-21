@@ -218,11 +218,21 @@ const SAME_PLAYER_SUBTYPES = new Set(['double', 'departure', 'arrival'])
 // 351-character one, and a cap of three strands 14 parts with no mix.
 // Within-day significance order: trade -> injured-list -> shuffle/roster-move
 // -> signing -> suspension. (Ties within a bucket keep discovery order, which
-// is already the raw feed's own id-ascending order.) Exported because the
-// league-wide pass has to interleave thirty clubs' days and wants the same
-// order across them, rather than a second opinion about what matters.
+// groupIntoStories puts in id-ascending order first — the feed itself does not
+// arrive that way.) Exported because the league-wide pass has to interleave
+// thirty clubs' days and wants the same order across them, rather than a second
+// opinion about what matters.
 export const STORY_TYPE_RANK = {
   trade: 0, 'injured-list': 1, shuffle: 2, 'roster-move': 2, signing: 3, suspension: 4,
+}
+
+// Id-ascending, with an unnumbered row last rather than first — a row with no
+// id is the odd one out and should not lead a story. Ids are numeric on the
+// wire (verified over 39,247 rows, docs/transactions-wire.md §2).
+function byRowId(a, b) {
+  if (a.id == null) return b.id == null ? 0 : 1
+  if (b.id == null) return -1
+  return a.id - b.id
 }
 
 const SHUFFLE_CAP = 4
@@ -529,6 +539,22 @@ function shapeStory(draft, ctx) {
   }
 }
 
+// Every day's rows are put in id-ascending order before they are grouped, which
+// is what STORY_TYPE_RANK's "ties keep discovery order" has always MEANT and
+// never enforced. The wire does NOT hand them over that way: a day comes back
+// in an arbitrary order (stable across identical queries, verified three times
+// on 2026-08-19; not stable across different ones), and Step 2 pairs an arrival
+// with a departure in the order it finds them. So the feed, not the pipeline,
+// decided which of two recalls was told beside the Mets' 2026-08-19 injured-
+// list placement — the nightly file and a live five-day pull disagreed about
+// that on 3 of 30 club-days, from the identical set of rows. Both tellings were
+// correct and neither was chosen.
+//
+// Sorting makes the grouping a function of its rows alone. That is what lets
+// the club page lay a live window over the nightly file and get the same
+// stories back (transactions/clubFeed.js) — measured with the sort in place,
+// a season-long pull and a five-day one agree on 30 of 30 club-days.
+//
 // One org's already-bucketed, deduped, filtered rows -> [{ date, stories }],
 // newest day first. `ctx.positions` is the generator's batched /people
 // fallback; `ctx.orgId` is required (drives trade in/out + headshot tint);
@@ -542,7 +568,10 @@ export function groupIntoStories(rows, ctx = {}) {
     byDate.get(date).push(t)
   }
   const dates = [...byDate.keys()].sort((a, b) => (a < b ? 1 : a > b ? -1 : 0))
-  return dates.map((date) => ({ date, stories: buildDayStories(byDate.get(date), ctx) }))
+  return dates.map((date) => ({
+    date,
+    stories: buildDayStories(byDate.get(date).sort(byRowId), ctx),
+  }))
 }
 
 // ---------------------------------------------------------------------------

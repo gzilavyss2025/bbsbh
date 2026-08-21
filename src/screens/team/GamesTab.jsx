@@ -1,4 +1,7 @@
 import { useAsync } from '../../hooks/useAsync.js'
+import { useNav } from '../../lib/nav.js'
+import { teamTransactionsPath } from '../../lib/route.js'
+import { ChevronLink } from '../../components/ui/ChevronLink.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { TeamTransactionsCard } from '../../components/transactions/TeamTransactionsCard.jsx'
 import { isMlbTeamId } from '../../lib/teams.js'
@@ -20,6 +23,7 @@ function isoToday() {
 // tab that owns games shows them all — then Photos and Transactions, each its
 // own full card. See data/loadGames.js for what this tab fetches and why.
 export function GamesTab({ id, asOf, sportId }) {
+  const navigate = useNav()
   const teamId = Number(id)
   const identity = useAsync(() => loadTeamIdentity(teamId, asOf), [teamId, asOf])
   const games = useAsync(() => loadGames(teamId, asOf), [teamId, asOf])
@@ -76,14 +80,29 @@ export function GamesTab({ id, asOf, sportId }) {
       )}
 
       {transactionsPage.days.length > 0 && (
-        <TeamTransactionsCard
-          key={`${team.id}-${asOf ?? ''}`}
-          teamId={team.id}
-          asOf={asOf}
-          initialDays={transactionsPage.days}
-          initialCursor={transactionsPage.cursor}
-          initialHasMore={transactionsPage.hasMore}
-        />
+        <>
+          <TeamTransactionsCard
+            key={`${team.id}-${asOf ?? ''}`}
+            teamId={team.id}
+            asOf={asOf}
+            initialDays={transactionsPage.days}
+            initialCursor={transactionsPage.cursor}
+            initialHasMore={transactionsPage.hasMore}
+          />
+          {/* The deck can page the whole season sideways, but it cannot be
+              skimmed backwards. The ledger page is the same moves upright —
+              and it is where the home slate's wire lands, so a reader who
+              arrives from there and then walks the club sees one shape. */}
+          <div className="thub-door">
+            <ChevronLink
+              onClick={() =>
+                navigate(teamTransactionsPath(team.id, { name: team.name, d: asOf, s: sportId }))
+              }
+            >
+              All transactions
+            </ChevronLink>
+          </div>
+        </>
       )}
     </TeamHubShell>
   )

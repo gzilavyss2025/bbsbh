@@ -166,7 +166,7 @@ Related research docs, worth reading before wiring a NEW source:
   distinct events hiding inside two of them, how the wire repeats itself, and
   the 40-man/26-man roster rules the sentences encode but never state. Read it
   before touching `teamTransactions.js` or building anything league-wide. The
-  pipeline sits in five files along four seams: `transactions/vocabulary.js`
+  pipeline sits in six files along five seams: `transactions/vocabulary.js`
   answers *is this row news, and whose?*; `teamTransactions.js` decides which
   rows belong in one story; `transactions/cutline.js` turns a story into words;
   `transactions/league.js` runs the whole thing once per OWNING club over
@@ -182,5 +182,12 @@ Related research docs, worth reading before wiring a NEW source:
   WIDER than the window it shows (the endpoint filters on a row's filed date,
   the grouper buckets by its effective one — ADR-0058), and the `/people`
   prefilter is safe only because `leagueCandidateIds` is a superset of the
-  final rows.
+  final rows. `transactions/clubFeed.js` is the sixth: the club card reads the
+  nightly file for the season and lays a live three-day window over its newest
+  days, so a move filed at noon reaches the club's own page as fast as it
+  reaches the wire. It re-runs the club pipeline rather than filtering the
+  league feed — that feed gives a trade ONE owner, so filtered to one club a
+  deal the club sold in would vanish from its own page. Safe to merge because
+  the grouping is a function of its rows alone (`groupIntoStories` orders a
+  day by row id first) and because the join is by DAY, never by story.
 - `docs/MLB_STATS_API.md` — the endpoint reference.

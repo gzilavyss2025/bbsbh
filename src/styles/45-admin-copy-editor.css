@@ -296,3 +296,252 @@
   font-size: var(--fs-caption);
   color: var(--text-warning, var(--accent-primary));
 }
+
+/* ---------------------------------------------------------------------------
+   AWARD WEIGHT — the panel's one non-text editor
+   (components/admin/AwardOrderEditor.jsx, ADR-0063). A reorder list on the
+   left, a live rehearsal against one real career on the right. The tier chip
+   reuses the player page's own .tier-* colours (67-awards-ledger.css) so a row
+   here and the rule it produces there are visibly the same thing.
+   --------------------------------------------------------------------------- */
+.awardord__caps {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-bottom: var(--space-2);
+}
+.awardord__stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.awardord__steplabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.awardord__step {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  cursor: pointer;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.awardord__step:hover:not(:disabled) {
+  background: var(--field-soft);
+  border-color: var(--field);
+}
+.awardord__step:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.awardord__stepval {
+  min-width: 16px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-field);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+.awardord__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-6);
+  margin-top: var(--space-3);
+}
+.awardord__listcol {
+  flex: 1 1 420px;
+  min-width: 0;
+}
+.awardord__previewcol {
+  flex: 0 1 280px;
+  min-width: 0;
+}
+.awardord__hd {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.awardord__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  overflow: hidden;
+}
+.awardord__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border-top: var(--bw-hair) solid var(--rule-grid);
+}
+.awardord__row:first-child {
+  border-top: none;
+}
+.awardord__n {
+  flex: none;
+  width: 20px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--graphite-soft);
+}
+.awardord__name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.awardord__tier {
+  flex: none;
+  padding: 1px var(--space-2);
+  border: var(--bw-hair) solid currentColor;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.awardord__ct {
+  flex: none;
+  width: 32px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.awardord__ct--none {
+  color: var(--border-rule);
+}
+.awardord__mv {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  cursor: pointer;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-muted);
+}
+.awardord__mv:hover:not(:disabled) {
+  background: var(--field-soft);
+  border-color: var(--field);
+  color: var(--field-deep);
+}
+.awardord__mv:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.awardord__preview {
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.awardord__who {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+.awardord__whoLine {
+  margin: 1px 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.awardord__pv {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 6px 0;
+}
+.awardord__pvN {
+  flex: none;
+  width: 14px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--graphite-soft);
+}
+.awardord__pvNm {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+.awardord__pvCt {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--award-ink);
+}
+/* Where the phone's shorter cap falls, drawn across the desktop list rather
+   than shown as a second list — one career, one order, one boundary. */
+.awardord__cut {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--clay-deep);
+}
+.awardord__cut > span[aria-hidden='true'] {
+  flex: 1;
+  height: 0;
+  border-top: var(--bw-hair) dashed var(--clay);
+}
+.awardord__note {
+  margin: var(--space-2) 0 0;
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) dashed var(--border-rule);
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  line-height: var(--lh-prose);
+  color: var(--text-caption);
+}

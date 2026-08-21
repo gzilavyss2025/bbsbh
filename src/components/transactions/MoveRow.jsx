@@ -12,6 +12,16 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // surface is now WireRail.jsx (beside the games) and the phone's is WireDock.jsx
 // (the bottom-anchored sheet). Both import from here; neither re-derives.
 //
+// It is also where the PRIMITIVES a roster move is drawn from live, for every
+// surface and not only these two: the tone maps, the dateline, and the cutline
+// renderer. The club deck (TeamTransactionsCard.jsx) and the club ledger page
+// (screens/team/TeamTransactionsPage.jsx) keep their own layout — a deck and a
+// page are not a wire — but they import the parts that MUST agree from here.
+// They kept private copies of all four until the club surfaces were folded
+// in — byte-identical, and free to drift: a banner tone or a dateline could
+// have changed on one surface and not the other, and nothing would have
+// caught it.
+//
 // Everything below is spoiler-free by construction — a roster move and its date
 // carry no score (see api/transactions/leagueFeed.js) — so nothing here is
 // wrapped in a SealBox and none is wanted.
@@ -22,17 +32,21 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // everyone. A third face would push the row past the sentence beside it.
 const FACES_PER_ROW = 2
 
-const BANNER_TONE = { in: 'banner--in', out: 'banner--out', move: 'banner--move' }
-// The same per-story tone map the team page's card uses, so an add-flavoured
-// story reads green and a health/departure one reads clay on both surfaces.
+export const BANNER_TONE = { in: 'banner--in', out: 'banner--out', move: 'banner--move' }
+// The per-story tone map every roster-move surface reads — so an
+// add-flavoured story is green and a health/departure one is clay on the wire,
+// in the dock, on the club deck and on the club's own ledger page.
 //
 // `roster-move` is deliberately absent, and that absence is the rule: it is
-// the pipeline's DEFAULT type, so on a real 48 hours it labelled 16 of 35 rows
-// "Roster move" beside a banner already reading Up, Down, In or IL-60. A label
-// on every row is not a label — it is noise with a heading's weight. What is
-// left flags the rows worth a second look (a trade, an injured list, a
-// shuffle) and stays silent on the routine ones.
-const TYPE_TONE = {
+// the pipeline's DEFAULT type, so a label on it says only that the row is a
+// roster move, which is what the whole surface is. Measured twice, on both
+// sides: over a real 48 hours league-wide it labelled 16 of 35 rows, and over
+// the shipped 2026 club files it labels 1,138 of 3,199 stories (36%) — 5 of
+// the Brewers' first 12 cards. A label on a third of the rows is not a label,
+// it is noise with a heading's weight. What is left flags the rows worth a
+// second look (a trade, an injured list, a shuffle) and stays silent on the
+// routine ones.
+export const TYPE_TONE = {
   trade: 'add',
   signing: 'add',
   'injured-list': 'out',
@@ -45,15 +59,23 @@ const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
-// Spelled-out dateline, matching the team card's. Mixed-case here on purpose:
-// the CSS applies the app's ALL-CAPS invariant, never a per-component
-// .toUpperCase() (ADR-0017 / check-name-casing.mjs).
-export function dateline(iso) {
+// Spelled-out dateline. Mixed-case here on purpose: the CSS applies the
+// app's ALL-CAPS invariant, never a per-component .toUpperCase() (ADR-0017 /
+// check-name-casing.mjs).
+//
+// `datelineParts` is the same walk stopped one step early, for the day
+// markers that write the date abbreviated and stacked (TxStory.jsx's DayTab).
+// One weekday table and one month table for every surface, so a deck tab and
+// a wire row can never name the same day differently.
+export function datelineParts(iso) {
   const [y, m, d] = iso.split('-').map(Number)
   const date = new Date(Date.UTC(y, m - 1, d))
-  return `${WEEKDAYS[date.getUTCDay()]}, ${MONTHS[m - 1]} ${d}`
+  return { weekday: WEEKDAYS[date.getUTCDay()], month: MONTHS[m - 1], day: d }
 }
-
+export function dateline(iso) {
+  const { weekday, month, day } = datelineParts(iso)
+  return `${weekday}, ${month} ${day}`
+}
 // The days flattened into one ordered run of datelines and stories, so a
 // surface can render, scroll or clip anywhere in the run without having to
 // reason about which day a row belongs to.
@@ -138,10 +160,15 @@ function Face({ slot }) {
 }
 
 // The owning club is the one name the cutline never carries, so this link is
-// the row's subject rather than an extra. `tab="games"` because that is the
-// tab the club's own Transactions card lives on — TeamLink's header asks a
-// caller whose subject IS one tab's content to say so, instead of landing the
-// reader on an Overview preview of what they just tapped out of.
+// the row's subject rather than an extra. It goes to the club's own roster-move
+// ledger (`/team/{id}/transactions`), which is a page holding one thing.
+//
+// It used to go to the Games tab, on the reasoning that the club's Transactions
+// deck lives there. True, and not enough: that deck is the LAST section of that
+// tab, under the series strip, every game of the season, the highlights rail
+// and the photos rail. A reader who tapped a club to read the move they had
+// just seen landed at the top of a very long page with four sections between
+// them and it. Right tab, wrong place on it.
 //
 // `compact` is the WIRE RAIL's row (WireRail.jsx): the same story with the
 // photo rail dropped and the leading banner moved up beside the club. It is a
@@ -184,7 +211,7 @@ export function MoveRow({ story, compact = false }) {
           )}
           <TeamLink
             id={story.teamId}
-            tab="games"
+            tab="transactions"
             className="wire__club"
             ariaLabel={`${abbr} transactions`}
           >
