@@ -223,3 +223,96 @@ now default `through` to `-1`: nothing revealed. A forgotten option draws the
 blank card, which is the product anyway. The Lab says `{ through: Infinity }` out
 loud, and `test/scorecard-game.test.js` pins both halves — that a caller with no
 clamp gets an empty card, and that the full card still draws when asked for.
+
+## Amendment (2026-08-21): one row per slot, and the marks a scorer actually draws
+
+Six changes, all from reading the live sheet against a real game (gamePk
+823747, 2026-08-20 SEA@MIL) and against a #22 in hand. Four are notation, two
+are the page.
+
+**A slot is ONE row, however many men bat in it.** The sheet used to open a
+fresh row of the grid for every occupant — the starter, then a row of his own
+for each substitute. That is not what a scorer does and it read badly: every
+starter who was ever lifted left a full-height band of empty boxes under his
+line, and his replacement's at-bats sat a row below the inning they belong to.
+The rail STACKS a written line per occupant instead (`slot.lines` — his name,
+his position, his number, his own AB/H/R/RBI, stacked in step in the Pos and
+summary columns through a shared `--sc-line-h`), and the boxes stay one row. A
+column holds one card for the slot no matter who batted it, so `slot.cells` was
+always the right shape; the per-occupant `rows` split was the mistake.
+
+`ScorecardSheet` renders `SLOTS.map` to exactly nine `<tr>`, and the frontier
+seal no longer needs an `isLast` test to find the current occupant's row —
+there is only one.
+
+**Two handover marks, both on the ARRIVING box.** With one row per slot there
+is no outgoing row left to rule off, so the mark moved to where the change
+takes effect, which is also where a scorer draws it:
+
+- the **substitution mark** (`subMarks`) — the incoming batter's number, on the
+  first box he bats in;
+- the **pitching change** (`pitcherMarks`) — new, and the sheet was simply
+  missing it. The opposing club's arms changed several times a game and nothing
+  said so. The incoming pitcher's number, on the box of the first batter he
+  faces.
+
+Both draw the same way (`.sc-sub`): a red rule across the box's top edge with
+the number above it, pitcher's first. The mark takes NO layout — the box under
+it is a real plate appearance now — so it is absolutely positioned and the
+numbers hang into the bottom-left of the box above, which is blank on every box
+the sheet draws (the out circle and the end-of-inning slash both live in the
+bottom RIGHT). A double switch sets both on one box and they read left to
+right.
+
+The pitching change is found by walking every card on the side **in
+`atBatIndex` order, never column order** — an inning that batted around widens
+into sub-columns whose left-to-right order is per-slot, and walking columns
+hands a reliever's mark to whichever sub-column sorted first rather than to the
+batter who actually led off against him. The starter takes no mark (the first
+card only sets the comparison), and a placed runner carries no pitcher, so he
+neither draws one nor breaks the chain across the half he opens.
+
+Both live in `api/scorecard/handover.js`, classified **spoiler-free** and
+meaning it: they are pure functions over cards the caller has already clamped,
+and neither can produce a mark for a card it was not handed. A sealed half
+yields no marks by construction, not by a check either function has to
+remember.
+
+**The out circle inks red.** Counting outs is what you do most on a live sheet,
+so the ringed 1/2/3 takes the app's second ink (`--accent-negative`, 5.05:1 on
+`--surface-card`) and the notation around it stays pencil.
+
+**WP/LP/SV carry their figure.** Each pitcher of record now reads the way a box
+score writes him — `Chad Patrick (7-4)`, `Trevor Megill (23)` — off his own
+boxscore `seasonStats.pitching`, which include tonight.
+`api/scorecard/decisions.js` is **caller-gated**: it takes
+`scorecardScoreboard`'s own `done` (Final AND fully revealed, the same flag the
+FINAL block waits on) and returns empty strings until then. Which pitcher won
+is as score-revealing as the score. A missing line degrades to a bare name; the
+screen builds the brackets only around a figure that exists, so `()` can never
+render.
+
+**The sheet runs the window on desktop.** A #22 in your hands is a wide piece of
+paper — you take the whole order and most of the game in at once, and the zoom
+control exists because a phone cannot. From 740px up the whole scorecard (header
+band, grid and footer trio — one printed page, not a grid with chrome around it)
+steps out of the app's 960px reading column and runs gutter to gutter. Classic
+negative-margin full-bleed; `+ var(--app-gutter)` both keeps a page margin and
+covers the classic scrollbar's share of `100vw`, without which the PAGE gained a
+horizontal scrollbar, which is the one thing a sheet must never do. The phone is
+untouched.
+
+**A CSS trap, and it was a real bug.** `.sc-sheet__name` was `display: flex`. A
+flexed `<td>` stops behaving like a cell — it shrinks to its content's height
+instead of stretching to the row's — and since this is the STICKY rail, the
+part of the row its background no longer covered was a window the inning
+columns scrolled *through*: pan right and the grid visibly ran under the names.
+The cell is a plain table cell again and the written lines inside it do the
+flexing. Same family as the strip/slash trap above: a rule that computes fine
+and paints wrong.
+
+Two file caps came due in the same work (ADR-0038). `scorecardGame.js` shed
+`scorecard/handover.js` and `scorecard/decisions.js`; `41-scorecard.css` split
+three ways and moved to `src/styles/scorecard/` (`grid.css`, `box.css`,
+`page.css`, imported in that order, which is the order the one file read top to
+bottom), which also took `src/styles` back under its own directory budget.

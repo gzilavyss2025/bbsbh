@@ -1,0 +1,285 @@
+/* ============================================================
+   SCORECARD / GRID — Numbers Game "22" sheet
+   A by-hand baseball scorecard rendered in the paper-scorebook system. THE
+   GRID lives here — the pane, the sticky Player/Pos rail and its stacked
+   written lines, the inning columns and the P/WH/FO foot row. One at-bat box
+   and every mark that lands on it is box.css; the page chrome around the sheet
+   (header band, footer trio, zoom control, editor) is page.css. The three were
+   one file, split at the 600-line cap and moved into this directory at the
+   src/styles file cap (ADR-0038); index.css imports them in this order, which
+   is exactly the order that one file read top to bottom.
+   ============================================================ */
+.scorecard {
+  /* Cell + column geometry, shared by the grid and its sticky frame. These
+     four widths are also what the zoom control measures the sheet by (see
+     ScorecardSheet's naturalWidth) — change one and the fit-the-pane zoom
+     floor follows on its own.
+
+     The rail is sized for the NAME now, not for the phone. It used to be
+     squeezed to 96px so a phone kept room for inning columns, which cost
+     every long surname an ellipsis; the pane zooms instead of scrolling, so
+     the rail can be as wide as a written name needs and the reader pulls
+     back to see more innings. */
+  --sc-cell-w: 86px;
+  --sc-cell-h: 90px;
+  --sc-pos-w: 28px;
+  --sc-name-w: 144px;
+  --sc-sum-w: 34px;
+  /* One written line of the rail. Shared by the name stack, the Pos stack and
+     the AB/H/R/RBI stacks so a substitute's line, his position and his figures
+     all land on the same line as each other. */
+  --sc-line-h: 17px;
+  --sc-strike-fill: color-mix(in srgb, var(--graphite) 15%, var(--surface-card));
+  margin-top: var(--space-4);
+}
+@media (min-width: 740px) {
+  .scorecard {
+    --sc-cell-w: 92px;
+    --sc-pos-w: 34px;
+    --sc-name-w: 168px;
+  }
+}
+
+/* ---- Main grid: a pannable window onto the sheet ---- */
+/* The pane is bounded on BOTH axes so the frame pins on three sides while
+   you pan: the Player/Pos rail (sticky left), the inning numbers (sticky
+   top), and the P/WH/FO + TOTALS row (sticky bottom). Without the vertical
+   bound the inning header was sticky against a container that never scrolled
+   vertically — mid-grid on a phone the numbers sat 400px off-screen and you
+   lost which inning you were reading. The dvh line wins where supported
+   (tracks mobile browser chrome); the vh line above it is the fallback. */
+.sc-sheet__frame {
+  margin-top: var(--space-3);
+}
+.sc-sheet__scroll {
+  overflow: auto;
+  max-height: calc(100vh - 120px);
+  max-height: calc(100dvh - 120px);
+  -webkit-overflow-scrolling: touch;
+  border: var(--bw-hair) solid var(--border-rule);
+  /* No bars. The sheet is paper you slide, and the zoom control above is
+     what tells you there is more of it — a scroll bar on a scorebook page
+     read as a broken layout. Panning by drag/swipe is unchanged. */
+  scrollbar-width: none;
+}
+.sc-sheet__scroll::-webkit-scrollbar {
+  display: none;
+}
+.sc-sheet {
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface-card);
+}
+.sc-sheet th,
+.sc-sheet td {
+  border-right: var(--bw-hair) solid var(--rule-grid);
+  border-bottom: var(--bw-hair) solid var(--rule-grid);
+}
+
+/* Inning + summary headers, pinned to the top edge as the sheet scrolls up. */
+.sc-sheet thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: var(--space-1) 0;
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-sheet__inning-h {
+  width: var(--sc-cell-w);
+}
+.sc-sheet__sum-h,
+.sc-sheet__sum {
+  width: var(--sc-sum-w);
+  min-width: var(--sc-sum-w);
+}
+
+/* The two left columns stay put as the innings pan sideways — PLAYER first,
+   then Pos, the #22's own order. One written line of the rail: the
+   batting-order number, the name, and the uniform number pinned to the right
+   edge, starter and substitute alike.
+
+   A NAME NEVER WRAPS. Two-line names jittered the row heights and broke the
+   grid's alignment with the inning columns beside it, so the rail is sized
+   for a written name (--sc-name-w) and the name is set small and nowrap.
+   Anything past even that clips at the rule, surname-first. */
+/* Left as a TABLE CELL, never `display: flex`. A flexed <td> stops behaving
+   like a cell: it shrinks to its content's height instead of stretching to the
+   row's, and since this is the sticky rail, the part of the row its background
+   no longer covers is a window the inning columns scroll THROUGH — the grid
+   visibly ran under the names as you panned right. The written lines below do
+   the flexing; the cell just holds them and paints the paper. */
+.sc-sheet__name {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: var(--sc-name-w);
+  min-width: var(--sc-name-w);
+  max-width: var(--sc-name-w);
+  padding: 3px var(--space-1) 0 var(--space-2);
+  vertical-align: top;
+  background: var(--surface-card);
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+/* One written line of the rail — the batting-order number (first line only),
+   the name, and the uniform number pinned to the right edge. A slot stacks one
+   per man who batted in it. */
+.sc-sheet__line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  line-height: var(--sc-line-h);
+}
+.sc-sheet__who {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The uniform number, inked green the way a scorer writes a number beside a
+   name — the one value on the rail that is not the name, so it takes its own
+   colour rather than another weight of the same ink. */
+.sc-sheet__jersey {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--accent-positive);
+}
+/* The position sits on the SAME written line as the name beside it, not
+   floated to the middle of a 90px-tall row — the two are one entry on the
+   rail, read across. Both cells hang their text off the row's top edge. */
+.sc-sheet__pos {
+  position: sticky;
+  left: var(--sc-name-w);
+  z-index: 1;
+  width: var(--sc-pos-w);
+  min-width: var(--sc-pos-w);
+  padding-top: 3px;
+  vertical-align: top;
+  background: var(--surface-card);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+}
+/* The batting-order number leading a starter's name, printed small in the
+   pencil ink the paper sheet preprints it in. */
+.sc-sheet__slotnum {
+  display: inline-block;
+  min-width: 12px;
+  margin-right: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+/* A substitute's line beneath the slot's starter — the way a scorer adds a
+   line under the man he lifted, not a new row of the grid. Inset and set in
+   the lighter caption ink so the starter still reads as the slot's head. His
+   position and uniform number repeat on his own line: he is a different player
+   at a possibly different spot, and the sheet says so. */
+.sc-sheet__line--sub {
+  padding-left: var(--space-3);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
+/* The Pos and AB/H/R/RBI cells stack in step with the rail's lines, so every
+   man's position and his own line of figures sit on HIS line, not the slot's.
+   Same line box as .sc-sheet__line so the three stacks stay registered. */
+.sc-sheet__posline,
+.sc-sheet__sumline {
+  display: block;
+  line-height: var(--sc-line-h);
+}
+.sc-sheet__posline ~ .sc-sheet__posline,
+.sc-sheet__sumline ~ .sc-sheet__sumline {
+  color: var(--text-caption);
+}
+
+/* The corner cells sit at both sticky intersections, so they outrank both. */
+.sc-sheet__corner {
+  z-index: 3;
+}
+
+.sc-sheet__cell {
+  width: var(--sc-cell-w);
+  height: var(--sc-cell-h);
+  padding: 0;
+  vertical-align: top;
+  background: var(--surface-inset);
+}
+.sc-sheet__sum {
+  background: var(--surface-inset);
+}
+
+/* An inning's first column carries a heavier left rule, so the eye can still
+   group innings once batting-around has widened one into several columns. */
+.sc-sheet__inning-h--start,
+.sc-sheet__cell--start {
+  border-left: var(--bw-rule) solid var(--rule-grid);
+}
+
+/* The foot row across the grid: P / WH / FO per inning — pitches seen,
+   swings and misses, balls fouled off — then the AB/H/R/RBI sums under the
+   amber TOTALS bar. Pinned to the pane's bottom edge (see .sc-sheet__scroll)
+   so the line stays in view while you pan the grid above it. */
+.sc-sheet__totals td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  height: 26px;
+  background: var(--bg-page);
+  border-top: var(--bw-rule) solid var(--rule-grid);
+}
+.sc-sheet__totals .sc-sheet__name {
+  z-index: 3;
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-sheet__totals .sc-sheet__pos {
+  z-index: 3;
+  background: var(--bg-page);
+}
+/* The P/WH/FO trio — three equal slots side by side, in the label cell and
+   in each inning's first column alike, so the numbers sit under their
+   captions the way the printed gutter lines them up. */
+.sc-sheet__ptl {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: baseline;
+  justify-items: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-body);
+}
+.sc-sheet__ptlLabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* The TOTALS bar: the four summary sums on the sheet's kraft-amber plate. */
+.sc-sheet__totbar {
+  background: var(--seal-cover);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  text-align: center;
+  color: var(--text-on-seal);
+}

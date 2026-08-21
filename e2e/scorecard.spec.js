@@ -91,6 +91,11 @@ test('full reveal: the completed sheet, its totals, decisions, marks and PR case
   await expect(page.locator('.sc-final tbody tr').first()).toContainText('10')
   await expect(page.locator('.sc-decisions')).toContainText('Robert Gasser')
   await expect(page.locator('.sc-decisions')).toContainText('Hunter Dobbins')
+  // Each pitcher of record reads with his figure in parentheses — his season
+  // record, or the save count for the man who finished it. This fixture is
+  // trimmed of boxscore seasonStats, so the figures degrade away; what must
+  // never appear is the bracket without one.
+  await expect(page.locator('.sc-decisions')).not.toContainText('()')
   // The end-of-inning slash closes each half's own last box: nine halves,
   // nine slashed boxes, on a fully revealed 9-inning sheet. It is the sheet's
   // ONLY end-of-half mark — the leadoff boxes stay blank.
@@ -105,6 +110,53 @@ test('full reveal: the completed sheet, its totals, decisions, marks and PR case
   // surname-first with the uniform number pinned to the column's right edge.
   await expect(page.locator('.sc-pitchers')).toContainText('Dobbins, Hunter')
   await expect(page.locator('.sc-pitchers__jersey').first()).toHaveText('40')
+})
+
+test('a slot is one row: the sub takes a written line, not a band of empty boxes', async ({ page }) => {
+  await openWithMark(page, FULL)
+  // Bauers is lifted for Mitchell in the 5 slot. Both names are in the rail…
+  const slotRow = page.locator('tr', { has: page.getByText('Bauers, Jake') }).first()
+  await expect(slotRow.locator('.sc-sheet__line')).toHaveCount(2)
+  await expect(slotRow.locator('.sc-sheet__line').nth(1)).toContainText('Mitchell, Garrett')
+  // …on ONE row, so both men's positions and both lines of figures stack in it.
+  await expect(slotRow.locator('.sc-sheet__posline')).toHaveCount(2)
+  await expect(slotRow.locator('.sc-sheet__sum').first().locator('.sc-sheet__sumline')).toHaveCount(2)
+  // Nine batting-order slots, nine rows — never one per man who batted.
+  await expect(page.locator('.sc-sheet__row--slot')).toHaveCount(9)
+
+  // The handover is drawn instead: a rule on the box the new man arrives on,
+  // his number in red beside it. Mitchell's number is 5, and the box under his
+  // mark is HIS plate appearance, not an empty cell left on a retired row.
+  const arriving = slotRow.locator('.sc-ab', { has: page.locator('.sc-sub__num--batter') })
+  await expect(arriving).toHaveCount(1)
+  await expect(arriving.locator('.sc-sub__num--batter')).toHaveText('5')
+  await expect(arriving.locator('.sc-ab__type')).not.toHaveText('')
+
+  // And the pitching change takes the same mark on the sheet of the club that
+  // has to face it: one per RELIEVER (the starter takes none), each on the box
+  // of the first batter he faced. The Cardinals used four arms tonight.
+  // Compared as a SET: the marks are laid out by batting-order row, and which
+  // row a change lands on is whoever happened to be up, not the order the arms
+  // entered. The pitcher table below the grid is what carries that order.
+  const arms = await page.locator('.sc-sub__num--pitcher').allTextContents()
+  expect(arms.sort()).toEqual(['39', '44', '68'])
+  for (const n of arms) await expect(page.locator('.sc-pitchers')).toContainText(n)
+})
+
+test('the sticky rail stays opaque for the whole row height', async ({ page }) => {
+  await openWithMark(page, FULL)
+  // A flexed <td> shrank to one line of text and let the inning columns show
+  // THROUGH the rail as you panned right. The cell must be as tall as its row.
+  const measured = await page.evaluate(() => {
+    const td = document.querySelector('tbody .sc-sheet__row--slot .sc-sheet__name')
+    return {
+      cell: Math.round(td.getBoundingClientRect().height),
+      row: Math.round(td.closest('tr').getBoundingClientRect().height),
+      opaque: getComputedStyle(td).backgroundColor,
+    }
+  })
+  expect(measured.cell).toBe(measured.row)
+  expect(measured.opaque).not.toBe('rgba(0, 0, 0, 0)')
 })
 
 test('a tapped box takes a penciled override, persists it, and gives it back', async ({ page }) => {

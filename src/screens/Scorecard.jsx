@@ -117,6 +117,15 @@ function Field({ label, value = '', wide = false }) {
   )
 }
 
+// A pitcher of record, written the way a box score writes him: the name, then
+// his figure in parentheses. No name means the game hasn't been revealed to
+// its end (or nobody earned the save), and the field stays a blank line to
+// write on — never an empty pair of brackets.
+function decision(name, note) {
+  if (!name) return ''
+  return note ? `${name} (${note})` : name
+}
+
 // One of the KEEPING SCORE BY choices — a small ring you'd fill with a pencil,
 // before a caption (or a write-in line for the third, unnamed one). Purely a
 // write-in surface, like every line on this sheet: the app never marks one.
@@ -376,10 +385,15 @@ function FinalBlock({ board }) {
           ))}
         </tbody>
       </table>
+      {/* Each pitcher of record with the figure a box score prints after his
+          name: the season record the decision moved for the two starters of
+          record, the count of saves for the man who finished it. Both come off
+          his own boxscore seasonStats and include tonight, so the line reads
+          the way it will read in the morning paper. */}
       <div className="sc-decisions">
-        <Field label="WP" value={board?.decisions?.wp ?? ''} />
-        <Field label="LP" value={board?.decisions?.lp ?? ''} />
-        <Field label="SV" value={board?.decisions?.sv ?? ''} />
+        <Field label="WP" value={decision(board?.decisions?.wp, board?.decisions?.wpNote)} />
+        <Field label="LP" value={decision(board?.decisions?.lp, board?.decisions?.lpNote)} />
+        <Field label="SV" value={decision(board?.decisions?.sv, board?.decisions?.svNote)} />
       </div>
     </div>
   )

@@ -1,13 +1,13 @@
 /* ============================================================
-   SCORECARD PAGE CHROME — the sheet's frame around the grid.
-   41-scorecard.css draws the grid and its at-bat boxes; this partial is
+   SCORECARD / PAGE CHROME — the sheet's frame around the grid.
+   grid.css and box.css draw the grid and its at-bat boxes; this partial is
    everything around them on the #22 sheet: the header band (logo, team over
    manager, the crew pairs, KEEPING SCORE BY, FIRST PITCH), the footer trio
    (defense diamond, pitcher table, scoreboard + FINAL block + decisions),
    the notation editor's bottom sheet, the Top/Bottom control bar, and the
-   Lab's own load row. Split out of 41-scorecard.css at the 600-line file cap
-   (ADR-0038); imported by index.css immediately after it, so the cascade
-   order is exactly what one file's top-to-bottom order was.
+   Lab's own load row. Split out of grid.css at the 600-line file cap
+   (ADR-0038); imported by index.css last of the three, so the cascade order is
+   exactly what one file's top-to-bottom order was.
    ============================================================ */
 .sc-labctl {
   display: flex;
@@ -511,4 +511,33 @@
   display: flex;
   gap: var(--space-2);
   justify-content: flex-end;
+}
+
+/* ---- Desktop: the sheet at the size a sheet is ---- */
+/* A #22 in your hands is a WIDE piece of paper — you take the whole batting
+   order and most of the game in at once, and the reason the phone gets a zoom
+   control is that it cannot. A desktop can, so from the wide breakpoint up the
+   scorecard steps OUT of the app's centred reading column (`.screen`, 960px)
+   and runs the full width of the window, gutter to gutter. Everything on the
+   sheet goes with it — the header band, the grid, and the footer trio — because
+   they are one printed page, not a grid with chrome stacked around it.
+
+   The classic full-bleed: a negative margin of half the difference between the
+   viewport and this element's own containing block, so `width: auto` refills to
+   the window. `+ var(--app-gutter)` keeps a page margin AND covers the classic
+   scrollbar's share of `100vw` on the platforms that still take one out of the
+   client width — without it the page gained a horizontal scrollbar of its own,
+   which is the one thing a sheet must never do (the pane inside it is what
+   pans). Nothing here applies below 740px: the phone keeps the single column
+   and its zoom. */
+@media (min-width: 740px) {
+  .scorecard {
+    margin-inline: calc(50% - 50vw + var(--app-gutter));
+  }
+  /* The pane can give the grid more height too, now that it is not competing
+     with a phone's browser chrome for the viewport. */
+  .scorecard .sc-sheet__scroll {
+    max-height: calc(100vh - 96px);
+    max-height: calc(100dvh - 96px);
+  }
 }

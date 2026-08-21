@@ -25,10 +25,16 @@ import { cellNote } from '../../lib/scorecardNotes.js'
 //    [{ pos, name, jersey }]) fills only the left column.
 //  • Loaded game (`grid` from api/scorecardGame.js) — one plate appearance per
 //    cell. Most innings are one column; an inning where a slot batted around
-//    widens into extra columns (the inning number only labels its first). Each
-//    slot renders one row per player who occupied it — the starter, then a
-//    sub-line for each substitute — so a pinch-hitter gets his own name, his
-//    own position and his own number instead of sharing the starter's.
+//    widens into extra columns (the inning number only labels its first).
+//
+// ONE ROW PER SLOT. However many men batted in a slot, they share its row of
+// boxes; the rail STACKS a written line for each (`slot.lines` — his own name,
+// position, number, and his own AB/H/R/RBI in the summary columns), the way a
+// scorer adds a line under the man he lifted rather than opening a fresh row
+// of the grid. A row per occupant was tried first and left a full-height band
+// of empty boxes under every starter who was ever pinch-hit for. The handover
+// is drawn instead: `subMarks` rules off the box the incoming batter's first
+// trip lands in, `pitcherMarks` the box of the first batter a new arm faces.
 //
 // `notes` + `onCellTap` are the override layer (lib/scorecardNotes.js): each
 // cell renders its own note over the derived marks, and on an editable
@@ -55,47 +61,37 @@ const ZOOM_STEP = 1.25
 // this the floor still left the last summary column half over the edge.
 const FIT_SLACK = 12
 
-// The display rows for one batting-order slot: one per occupant in a loaded
-// game (starter first, then each sub as its own sub-line), or a single blank
-// row from the pre-pitch lineup for the empty template / a slot nobody batted.
-// The slot's leadoff boxes ride the FIRST row — they name an unused box,
-// which no occupant's card competes with.
-function slotRows(grid, lineup, slotIndex) {
+// One slot's row: its written lines for the rail (starter first, then each
+// substitute), its shared cells, and its two handover marks. A loaded game
+// takes them from the grid; the empty template / a slot nobody batted takes a
+// single line off the pre-pitch lineup and has no cards at all.
+function slotRow(grid, lineup, slotIndex) {
   const slot = grid?.slots?.[slotIndex]
-  if (slot?.rows?.length) {
-    return slot.rows.map((occ, oi) => ({
-      key: occ.id ?? oi,
-      pos: occ.pos,
-      name: occ.name,
-      jersey: occ.jersey,
-      cells: occ.cells,
-      subMarks: occ.subMarks,
-      leadoffCells: oi === 0 ? slot.leadoffCells : null,
-      ab: occ.ab,
-      h: occ.h,
-      r: occ.r,
-      rbi: occ.rbi,
-      isSub: oi > 0,
-      // The frontier seal rides the slot's LAST display row — the current
-      // occupant is the one due up.
-      isLast: oi === slot.rows.length - 1,
+  if (slot?.lines?.length) {
+    return {
+      lines: slot.lines.map((occ, oi) => ({ key: occ.id ?? oi, ...occ })),
+      cells: slot.cells,
+      subMarks: slot.subMarks,
+      pitcherMarks: slot.pitcherMarks,
+      leadoffCells: slot.leadoffCells,
       hasStats: true,
-    }))
+    }
   }
-  return [
-    {
-      key: 'starter',
-      pos: lineup[slotIndex]?.pos ?? '',
-      name: lineup[slotIndex]?.name ?? '',
-      jersey: lineup[slotIndex]?.jersey ?? '',
-      cells: null,
-      subMarks: null,
-      leadoffCells: grid?.slots?.[slotIndex]?.leadoffCells ?? null,
-      isSub: false,
-      isLast: true,
-      hasStats: false,
-    },
-  ]
+  return {
+    lines: [
+      {
+        key: 'starter',
+        pos: lineup[slotIndex]?.pos ?? '',
+        name: lineup[slotIndex]?.name ?? '',
+        jersey: lineup[slotIndex]?.jersey ?? '',
+      },
+    ],
+    cells: null,
+    subMarks: null,
+    pitcherMarks: null,
+    leadoffCells: slot?.leadoffCells ?? null,
+    hasStats: false,
+  }
 }
 
 export function ScorecardSheet({
@@ -217,22 +213,35 @@ export function ScorecardSheet({
             </tr>
           </thead>
           <tbody>
-            {SLOTS.map((slot, i) =>
-              slotRows(grid, lineup, i).map((row, ri) => (
-                <tr
-                  key={`${slot}-${row.key}`}
-                  className={`${row.isSub ? 'sc-sheet__row--sub' : 'sc-sheet__row--slot'}`}
-                >
-                  <td className={`sc-sheet__name ${row.isSub ? 'sc-sheet__name--sub' : ''}`}>
-                    {/* The batting-order number leads the starter's name the way
-                        the paper sheet preprints it; a sub-line drops it. The
-                        uniform number closes every line, starter and sub
-                        alike, pinned to the rail's right edge. */}
-                    {ri === 0 && !row.isSub && <span className="sc-sheet__slotnum">{slot}</span>}
-                    <span className="sc-sheet__who">{row.name}</span>
-                    <span className="sc-sheet__jersey">{row.jersey}</span>
+            {SLOTS.map((slot, i) => {
+              const row = slotRow(grid, lineup, i)
+              return (
+                <tr key={slot} className="sc-sheet__row--slot">
+                  <td className="sc-sheet__name">
+                    {/* The rail's stack: the starter's written line, then one
+                        for each man who took the slot after him. The
+                        batting-order number leads the first line the way the
+                        paper sheet preprints it and no other; the uniform
+                        number closes every line, pinned to the rail's right
+                        edge. */}
+                    {row.lines.map((line, li) => (
+                      <span
+                        key={line.key}
+                        className={`sc-sheet__line ${li > 0 ? 'sc-sheet__line--sub' : ''}`}
+                      >
+                        {li === 0 && <span className="sc-sheet__slotnum">{slot}</span>}
+                        <span className="sc-sheet__who">{line.name}</span>
+                        <span className="sc-sheet__jersey">{line.jersey}</span>
+                      </span>
+                    ))}
                   </td>
-                  <td className="sc-sheet__pos">{row.pos}</td>
+                  <td className="sc-sheet__pos">
+                    {row.lines.map((line) => (
+                      <span key={line.key} className="sc-sheet__posline">
+                        {line.pos}
+                      </span>
+                    ))}
+                  </td>
                   {columns.map((col) => {
                     const card = col.colIndex != null ? row.cells?.[col.colIndex] ?? null : null
                     // The reveal frontier: the next plate appearance's own box,
@@ -241,7 +250,6 @@ export function ScorecardSheet({
                     const isFrontier =
                       onFrontierTap != null &&
                       card == null &&
-                      row.isLast &&
                       grid?.frontier != null &&
                       grid.frontier.slot === slot &&
                       grid.frontier.colIndex === col.colIndex
@@ -251,12 +259,15 @@ export function ScorecardSheet({
                     const leadoffInning =
                       col.colIndex != null ? row.leadoffCells?.[col.colIndex] ?? null : null
                     const isFlip = flip != null && leadoffInning != null && leadoffInning === flip.inning
-                    // The handover mark, on the line of the man LEAVING: the
-                    // column his replacement first bats in (api/scorecardGame.js).
+                    // The two handover marks, both ruled off the ARRIVING box:
+                    // the incoming batter's number where he takes the slot over,
+                    // the incoming pitcher's where his first batter comes up
+                    // (api/scorecardGame.js). A double switch can set both on
+                    // one box, and they sit on opposite sides of the rule.
                     const subJersey =
-                      col.colIndex != null && card == null
-                        ? row.subMarks?.[col.colIndex] ?? null
-                        : null
+                      col.colIndex != null ? row.subMarks?.[col.colIndex] ?? null : null
+                    const pitcherJersey =
+                      col.colIndex != null ? row.pitcherMarks?.[col.colIndex] ?? null : null
                     return (
                       <td
                         key={col.key}
@@ -282,28 +293,33 @@ export function ScorecardSheet({
                               {flip.label} <span aria-hidden="true">›</span>
                             </span>
                           </button>
-                        ) : subJersey != null ? (
-                          <span className="sc-sub">
-                            <span className="sc-sub__num">{subJersey}</span>
-                          </span>
                         ) : (
                           <AtBatBox
                             atbat={card}
                             note={cellNote(notes, card?.atBatIndex)}
                             onEdit={onCellTap && card ? () => onCellTap(card) : null}
                             fresh={Boolean(card && fresh?.has(card.atBatIndex))}
+                            subJersey={subJersey}
+                            pitcherJersey={pitcherJersey}
                           />
                         )}
                       </td>
                     )
                   })}
-                  <td className="sc-sheet__sum">{row.hasStats ? row.ab : ''}</td>
-                  <td className="sc-sheet__sum">{row.hasStats ? row.h : ''}</td>
-                  <td className="sc-sheet__sum">{row.hasStats ? row.r : ''}</td>
-                  <td className="sc-sheet__sum">{row.hasStats ? row.rbi : ''}</td>
+                  {['ab', 'h', 'r', 'rbi'].map((k) => (
+                    <td key={k} className="sc-sheet__sum">
+                      {row.hasStats
+                        ? row.lines.map((line) => (
+                            <span key={line.key} className="sc-sheet__sumline">
+                              {line[k]}
+                            </span>
+                          ))
+                        : ''}
+                    </td>
+                  ))}
                 </tr>
-              )),
-            )}
+              )
+            })}
             {/* The #22's foot row: P / WH / FO under each inning's first
                 column (a widened inning's extra columns stay blank, same as
                 the header number), the AB/H/R/RBI sums under the amber TOTALS

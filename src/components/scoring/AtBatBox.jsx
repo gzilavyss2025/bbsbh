@@ -21,9 +21,19 @@ import { PlayDiamond } from './PlayDiamond.jsx'
 //    this sheet's center chip is single-line (see scorecardCenterCode)
 //  • rbi, reached/scored/legNotations/outAt/outCode/outNumber — the diamond
 //
-// A substitution leaves NO mark on this box. The scorer draws the change on
-// the line of the man LEAVING, not the man arriving, so the sheet paints it
-// on the outgoing row instead (ScorecardSheet's `subMarks`).
+// TWO HANDOVER MARKS ride the TOP EDGE of this box, both drawn the way a
+// scorer rules one off: a red line across the box, with a uniform number in
+// red beside it. The line means "what is under it is a different man than
+// what was above it".
+//  • `subJersey` — the batting order changed here. Every man who fills a slot
+//    shares its one row of boxes (his name goes on a written line of its own
+//    in the rail), so the rule falls on the first box the INCOMING batter
+//    bats in, and his number sits UNDER the line, in the box that is now his.
+//  • `pitcherJersey` — the club in the field changed arms. The rule falls on
+//    the box of the first batter the new pitcher faces, and his number sits
+//    ABOVE the line, on the side of it his work begins.
+// A double switch can set both on one box; the two numbers never collide
+// because they take opposite sides of the same rule.
 //
 // Three marks the paper sheet carries that this box also draws:
 //  • `note` — the scorer's own override (lib/scorecardNotes.js): the outcome
@@ -86,7 +96,14 @@ export function atBatMarks(atbat) {
   return { isPlaced, kind, outcome, center, rbi }
 }
 
-export function AtBatBox({ atbat = null, note = null, onEdit = null, fresh = false }) {
+export function AtBatBox({
+  atbat = null,
+  note = null,
+  onEdit = null,
+  fresh = false,
+  subJersey = null,
+  pitcherJersey = null,
+}) {
   const marks = atBatMarks(atbat)
   const { isPlaced, kind } = marks
   // The pitch ladder split into its three columns: balls (white), then two
@@ -115,12 +132,21 @@ export function AtBatBox({ atbat = null, note = null, onEdit = null, fresh = fal
   const prJersey = pinchRunners?.length ? pinchRunners[pinchRunners.length - 1].jersey : null
   const editable = Boolean(onEdit && atbat && !isPlaced)
 
+  const handover = subJersey != null || pitcherJersey != null
+
   return (
     <div
       className={`sc-ab ${note ? 'sc-ab--noted' : ''} ${
         atbat?.endsHalf ? 'sc-ab--halfend' : ''
-      } ${fresh ? 'sc-ab--fresh' : ''}`}
+      } ${fresh ? 'sc-ab--fresh' : ''} ${handover ? 'sc-ab--handover' : ''}`}
     >
+      {handover && (
+        <span className="sc-sub" aria-hidden="true">
+          {pitcherJersey != null && <span className="sc-sub__num sc-sub__num--pitcher">{pitcherJersey}</span>}
+          <span className="sc-sub__rule" />
+          {subJersey != null && <span className="sc-sub__num sc-sub__num--batter">{subJersey}</span>}
+        </span>
+      )}
       <div className="sc-ab__main">
         <div className="sc-ab__head">
           <span

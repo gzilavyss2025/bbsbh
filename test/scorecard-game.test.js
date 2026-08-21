@@ -61,7 +61,7 @@ test('nothing on the sheet before the first reveal', () => {
   const sb = scorecardScoreboard(FEED, { through: -1 })
   assert.equal(sb.done, false)
   assert.equal(sb.away.final, null)
-  assert.deepEqual(sb.decisions, { wp: '', lp: '', sv: '' })
+  assert.deepEqual(sb.decisions, { wp: '', wpNote: '', lp: '', lpNote: '', sv: '', svNote: '' })
   for (const i of sb.innings) {
     assert.equal(i.away, '')
     assert.equal(i.home, '')
@@ -169,7 +169,17 @@ test('the finished scoreboard fills the FINAL block from the linescore totals', 
   assert.equal(home.runs, 2)
   // The real decisions, by name; a 10–2 final has no save, and the label
   // degrades blank rather than inventing one.
-  assert.deepEqual(sb.decisions, { wp: 'Robert Gasser', lp: 'Hunter Dobbins', sv: '' })
+  assert.deepEqual(sb.decisions, {
+    wp: 'Robert Gasser',
+    // The trimmed fixture keeps no boxscore seasonStats, so the parenthetical
+    // degrades to nothing rather than inventing a record. The synthetic feed
+    // below is what pins the figure itself.
+    wpNote: '',
+    lp: 'Hunter Dobbins',
+    lpNote: '',
+    sv: '',
+    svNote: '',
+  })
 })
 
 test('visible innings match unlockedInnings at every mark (the two walks never drift)', () => {
@@ -184,6 +194,91 @@ test('visible innings match unlockedInnings at every mark (the two walks never d
     )
     const sb = scorecardScoreboard(FEED, { through })
     assert.equal(sb.innings.length, unlockedInnings(regulation, actual, through))
+  }
+})
+
+// ONE ROW PER SLOT, with a written line per man who batted in it, and the
+// handover ruled off the box the new man arrives on. Pinned on the anchor
+// game, whose top sheet has both kinds of change: Bauers gives way to Mitchell
+// in the slot, and three relievers follow Dobbins to the mound.
+test('a slot keeps one row of boxes however many men bat in it', () => {
+  const grid = scorecardPlays(FEED, 'top', { through: Infinity })
+  const slot5 = grid.slots[4]
+  assert.deepEqual(
+    slot5.lines.map((l) => `${l.name} ${l.jersey} ${l.pos}`),
+    ['Bauers, Jake 9 LF', 'Mitchell, Garrett 5 CF'],
+  )
+  // Two men, ONE set of cells: every card in the slot hangs off the slot, so
+  // there is no second row of empty boxes under the starter.
+  const cols = Object.keys(slot5.cells).map(Number).sort((a, b) => a - b)
+  assert.ok(cols.length >= 4, `slot 5 should have batted more than ${cols.length} times`)
+  // Each man's own line of figures rides his own written line, and the slot's
+  // totals are still the sum of them.
+  assert.equal(
+    slot5.lines.reduce((n, l) => n + l.ab, 0),
+    slot5.ab,
+  )
+
+  // The substitution mark: the incoming batter's number, on the FIRST box he
+  // bats in — not on a row of the man he replaced, who no longer has one.
+  assert.deepEqual(slot5.subMarks, { 8: '5' })
+  assert.equal(slot5.cells[8].batter.jersey, '5')
+  // …and the box before it — the last trip the starter took — is his, unmarked.
+  const before = cols.filter((c) => c < 8).pop()
+  assert.equal(slot5.cells[before].batter.jersey, '9')
+  assert.equal(slot5.subMarks[before], undefined)
+
+  // A slot nobody was lifted from carries one line and no mark at all.
+  const slot8 = grid.slots[7]
+  assert.equal(slot8.lines.length, 1)
+  assert.deepEqual(slot8.subMarks, {})
+})
+
+test('a pitching change rules off the box of the first batter the new arm faces', () => {
+  for (const [side, expected] of [
+    // The starter takes no mark; every reliever after him takes one, in the
+    // order the pitcher table lists them.
+    ['top', ['68', '44', '39']],
+    ['bottom', ['48']],
+  ]) {
+    const grid = scorecardPlays(FEED, side, { through: Infinity })
+    const marks = grid.slots
+      .flatMap((s) => Object.entries(s.pitcherMarks ?? {}).map(([ci, j]) => ({ ci: Number(ci), j, slot: s.slot })))
+      .sort((a, b) => a.ci - b.ci)
+    const relievers = scorecardPitchers(FEED, side, { through: Infinity })
+      .slice(1)
+      .map((p) => p.jersey)
+    assert.deepEqual(marks.map((m) => m.j), expected, side)
+    assert.deepEqual(marks.map((m) => m.j), relievers, `${side}: one mark per reliever`)
+    // Every mark lands on a real card — the box the new man's first batter
+    // filled — never on an empty cell.
+    for (const m of marks) {
+      assert.ok(grid.slots[m.slot - 1].cells[m.ci], `${side}: mark at col ${m.ci} has no card`)
+    }
+  }
+})
+
+test('the handover marks are clamped like everything else on the sheet', () => {
+  // Sealed: no cards, so no marks of either kind can exist in the DOM.
+  const sealed = scorecardPlays(FEED, 'top', { through: -1 })
+  for (const s of sealed.slots) {
+    assert.deepEqual(s.subMarks, {})
+    assert.equal(s.pitcherMarks, null)
+  }
+  // Through the top of the 3rd, before any change on this sheet: still none.
+  const early = scorecardPlays(FEED, 'top', { through: halfIndex(3, 'top') })
+  assert.equal(
+    early.slots.reduce((n, s) => n + Object.keys(s.pitcherMarks ?? {}).length, 0),
+    0,
+    'no reliever has entered by the top of the 3rd',
+  )
+  // And a mark never outruns the reveal it belongs to: every marked column is
+  // inside the clamp because it is a column that has a card.
+  const mid = scorecardPlays(FEED, 'top', { through: halfIndex(6, 'top') })
+  for (const s of mid.slots) {
+    for (const ci of Object.keys(s.pitcherMarks ?? {})) {
+      assert.ok(s.cells[ci], 'a mark with no card under it')
+    }
   }
 })
 
@@ -263,7 +358,14 @@ test('a skipped final bottom reads X once the game is done — and not before', 
   assert.equal(done.done, true)
   assert.equal(done.innings[8].home, 'X')
   assert.equal(done.innings[8].away, 0)
-  assert.deepEqual(done.decisions, { wp: 'Winnie Winner', lp: 'Louie Loser', sv: '' })
+  assert.deepEqual(done.decisions, {
+    wp: 'Winnie Winner',
+    wpNote: '',
+    lp: 'Louie Loser',
+    lpNote: '',
+    sv: '',
+    svNote: '',
+  })
   assert.deepEqual(done.home.final, { r: 2, h: 5, e: 0, lob: 3 })
 
   // Revealed only through the 8th: the top 9 cell AND the skipped bottom stay
@@ -274,6 +376,54 @@ test('a skipped final bottom reads X once the game is done — and not before', 
   assert.equal(partial.innings[8].home, '')
   assert.equal(partial.away.final, null)
   assert.equal(partial.decisions.wp, '')
+})
+
+// The figure a box score prints after each pitcher of record: the season
+// record for the two starters of record, the count of saves for the man who
+// finished it. Shape verified against gamePk 823747 (2026-08-20 SEA@MIL) —
+// decisions.winner 694477 carries seasonStats.pitching { wins: 7, losses: 4 },
+// decisions.save 656730 carries { saves: 23 } — and reproduced here so the
+// reader never has to have the network to run this.
+test('the decisions carry the record and the save count, from seasonStats', () => {
+  const feed = skippedBottomFeed()
+  feed.liveData.decisions.save = { id: 12, fullName: 'Sal Savior' }
+  feed.liveData.boxscore.teams = {
+    away: {
+      players: {
+        ID11: { seasonStats: { pitching: { wins: 8, losses: 10, saves: 0 } } },
+      },
+    },
+    home: {
+      players: {
+        ID10: { seasonStats: { pitching: { wins: 7, losses: 4, saves: 5 } } },
+        ID12: { seasonStats: { pitching: { wins: 2, losses: 2, saves: 23 } } },
+      },
+    },
+  }
+  const done = scorecardScoreboard(feed, { through: Infinity })
+  assert.equal(done.decisions.wpNote, '7-4')
+  assert.equal(done.decisions.lpNote, '8-10')
+  // The saver's own W-L is beside the point; his line reads the save count.
+  assert.equal(done.decisions.svNote, '23')
+
+  // A 0-0 record is a real record, not a missing one — the guard is on the
+  // fields existing, never on them being truthy.
+  feed.liveData.boxscore.teams.home.players.ID10.seasonStats.pitching = { wins: 0, losses: 0 }
+  assert.equal(scorecardScoreboard(feed, { through: Infinity }).decisions.wpNote, '0-0')
+
+  // And a pitcher the boxscore has no line for degrades to a bare name, never
+  // to an empty pair of brackets (the screen builds the parentheses only when
+  // there is a figure — see Scorecard.jsx's `decision`).
+  delete feed.liveData.boxscore.teams.home.players.ID10
+  const bare = scorecardScoreboard(feed, { through: Infinity })
+  assert.equal(bare.decisions.wp, 'Winnie Winner')
+  assert.equal(bare.decisions.wpNote, '')
+
+  // Nothing here outruns the FINAL block it sits under: a game still sealed
+  // short of its end has no decisions at all, notes included.
+  const partial = scorecardScoreboard(feed, { through: halfIndex(8, 'bottom') })
+  assert.equal(partial.decisions.wpNote, '')
+  assert.equal(partial.decisions.svNote, '')
 })
 
 test('extra innings unlock scoreboard columns one at a time (ADR-0008)', () => {
