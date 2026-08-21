@@ -207,7 +207,9 @@ export function TeamPage({ id, asOf, sportId }) {
       />
 
       {/* Latest moves — the three most recent transaction stories, paging off
-          (see TeamTransactionsCard's `limit`). */}
+          (see TeamTransactionsCard's `limit`). The door goes to the club's own
+          roster-move ledger rather than the Games tab: the deck IS on that tab,
+          but as its last section, under four others. */}
       {transactionsPage.days.length > 0 && (
         <>
           <TeamTransactionsCard
@@ -219,7 +221,7 @@ export function TeamPage({ id, asOf, sportId }) {
             initialHasMore={transactionsPage.hasMore}
             limit={PREVIEW_TRANSACTIONS}
           />
-          <PreviewDoor label="All transactions" onClick={() => go('games')} />
+          <PreviewDoor label="All transactions" onClick={() => go('transactions')} />
         </>
       )}
 

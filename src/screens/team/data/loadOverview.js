@@ -13,7 +13,7 @@ import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor }
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
 import { fetchAttendance, attendanceRatesFor } from '../../../api/attendance.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
-import { loadMoreTeamTransactions } from '../../../api/teamTransactions.js'
+import { loadClubTransactionsPage } from '../../../api/transactions/clubFeed.js'
 import {
   seasonOf,
   cutoffFor,
@@ -109,11 +109,13 @@ export async function loadOverview(id, asOf) {
     isMilb ? Promise.resolve(null) : fetchSeasonScores(),
     isMilb ? Promise.resolve(null) : fetchTeamScores(),
     isMilb ? Promise.resolve(null) : fetchPostseasonOdds(),
-    // MLB orgs only in phase 1 (see data-layer-scope.md). Just the first 45-day
-    // page; the preview shows three of it and the Games tab pages further back.
+    // MLB orgs only in phase 1 (see data-layer-scope.md). The first 45-day page
+    // of the nightly file with today's live window laid over it
+    // (transactions/clubFeed.js); the preview shows three of it and the Games
+    // tab pages further back.
     isMilb
       ? Promise.resolve({ days: [], cursor: null, hasMore: false })
-      : loadMoreTeamTransactions(id, null, asOf).catch(() => ({ days: [], cursor: null, hasMore: false })),
+      : loadClubTransactionsPage(id, asOf).catch(() => ({ days: [], cursor: null, hasMore: false })),
     // The mirror image of every line above it: MiLB only. A farm club's
     // big-league alumni are the one thing about it no other tab records; a
     // big-league club's are just its own roster history. One ~900-byte static

@@ -1,0 +1,129 @@
+/* ------------------------------------------------- club transactions page
+   /team/{id}/transactions — a club's roster moves, the whole season, one day
+   under another (screens/team/TeamTransactionsPage.jsx). Imported by that
+   page alone, not by the core sheet.
+
+   Almost nothing here is new. The CARD is .txstory, already defined in
+   29-team-transactions.css for the club deck and shared by both surfaces
+   (TxStory.jsx) — this partial only takes it out of the deck's fixed-width
+   flex line and lets it fill a reading column. The day heading is the wire's
+   own dateline row, upright.
+   ------------------------------------------------------------------------ */
+
+.txpage__days {
+  display: grid;
+  gap: 18px;
+  margin: 12px 0 20px;
+}
+
+/* The day heading: the date, a rule running out to the margin, and the day's
+   count at the end of it — the same three parts, in the same order, as the
+   wire's .wire__date row on the home slate. A reader who has used one has
+   used the other. */
+.txpage__dateline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.txpage__rule {
+  flex: 1;
+  height: var(--bw-hair);
+  background: var(--rule-soft);
+}
+.txpage__count {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* One card per row. The deck sizes .txstory to 320px (360px --wide) because a
+   swipe needs a card the thumb can land on; a page has the whole measure, so
+   the width is released and the cutline wraps at the reading column instead.
+
+   On a wide layout the photo rail stops FLOATING and becomes a real second
+   column. In the deck a float is exactly right — the cutline runs to eight or ten lines in a
+   320px card and wraps around the photos like a magazine caption. At page
+   width most cutlines are one or two lines, and text that short never reaches
+   down past the rail, so a float left the card standing at the rail's height
+   with an obvious hole under the sentence. A grid says the same thing on
+   purpose: words on the left, faces on the right, the card as tall as
+   whichever is taller.
+
+   Only the two columns are declared. A .photorail--strip (a rail past
+   RAIL_FLOAT_MAX, which un-floats itself) lands in the same cell and needs no
+   second rule. */
+.txpage__stories {
+  display: grid;
+  gap: 10px;
+}
+.txpage__stories .txstory,
+.txpage__stories .txstory--wide {
+  width: auto;
+  max-width: 100%;
+}
+
+/* The two columns are a WIDE-layout rule, at the app's own 740px breakpoint.
+   Below it there is no second column to give: a phone is 390px, a three-face
+   rail is 174px of that, and the sentence beside it wrapped every three words.
+   Narrow, the card keeps the deck's own float — which is what the deck has
+   always used at exactly this measure, and it reads correctly there. */
+@media (min-width: 740px) {
+  .txpage__stories .txstory,
+  .txpage__stories .txstory--wide {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    /* Two rows, and the second takes every spare pixel. Without that the
+       rail's height is split between them and the slack lands BETWEEN the pill
+       and the sentence it labels, which reads as two unrelated things. Under
+       the sentence it reads as the margin of a short entry, which is what it
+       is. */
+    grid-template-rows: auto 1fr;
+    column-gap: 14px;
+    align-items: start;
+  }
+  .txpage__stories .photorail {
+    float: none;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+  .txpage__stories .txstory__type,
+  .txpage__stories .txstory__cutline {
+    grid-column: 1;
+  }
+}
+
+.txpage__empty {
+  margin: 20px 0;
+}
+
+/* The pager. Same dashed-to-solid treatment as the deck's own .txcard__more,
+   laid across the page instead of standing at the end of a scroll row. */
+.txpage__more {
+  display: block;
+  width: 100%;
+  margin: 4px 0 20px;
+  padding: 12px;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font: inherit;
+  font-weight: var(--w-semibold);
+  cursor: pointer;
+}
+.txpage__more:hover:not(:disabled),
+.txpage__more:focus-visible {
+  color: var(--text-body);
+  border-style: solid;
+}
+.txpage__more:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}

@@ -751,6 +751,10 @@
       "class": "spoiler-free",
       "why": "Roster moves and their dates carry no score — as spoiler-free as rehab.js/rookies.js."
     },
+    "transactions/clubFeed.js": {
+      "class": "spoiler-free",
+      "why": "The club Transactions card's live window, laid over the nightly per-club file so a move filed today reaches the club's own page as fast as it reaches the home slate's wire. Runs the generator's own bucket/de-dupe/filter/group steps over live /transactions rows and merges by day. Roster moves, clubs and dates only — no linescore, no game feed, no score anywhere on the path."
+    },
     "transactions/cutline.js": {
       "class": "spoiler-free",
       "why": "The prose half of teamTransactions.js — a finished story draft in, the cutline's segment array out, plus the label helpers the rail half shares. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."

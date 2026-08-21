@@ -110,7 +110,7 @@ export function shapeLeagueFeed(rows, ctx, window) {
 // option or a call-up logged only against the Triple-A club stops finding its
 // parent. Worth failing soft for — the card is still a card without it.
 let affiliateMap = null
-async function fetchAffiliateParentMap() {
+export async function fetchAffiliateParentMap() {
   if (affiliateMap) return affiliateMap
   affiliateMap = (async () => {
     const map = new Map()
@@ -137,7 +137,7 @@ async function fetchAffiliateParentMap() {
 // suppresses an anonymous minor-league signing. Without that set the feed is
 // 45% larger and nearly all of the growth is signing spam (measured, twice).
 const PEOPLE_BATCH = 100
-async function fetchPeople(ids, signal) {
+export async function fetchPeople(ids, signal) {
   const positions = {}
   const debutedIds = new Set()
   for (let i = 0; i < ids.length; i += PEOPLE_BATCH) {

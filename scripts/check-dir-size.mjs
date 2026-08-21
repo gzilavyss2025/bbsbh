@@ -339,7 +339,10 @@ const BUDGETS = {
   // check-file-size.mjs's 600-line ceiling — and that guard's remedy is to
   // split, not to raise. Same trade the 21/21a, 26/26a and 48/48-stamp-strip
   // entries above record.
-  'src/styles': 97,
+  // +1 for 72-club-transactions.css, the club roster-move ledger page. Page-only
+  // rules, so folding them into 29-team-transactions.css would put them in the
+  // core sheet every other page loads.
+  'src/styles': 98,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

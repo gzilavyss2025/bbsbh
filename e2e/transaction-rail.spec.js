@@ -19,7 +19,7 @@ import { test, expect } from './fixtures.js'
 // the app reads, finds a club whose visible cards actually include a wide rail,
 // and goes there.
 
-// Mirrors TeamTransactionsCard.jsx. A rail past RAIL_FLOAT_MAX lays out as a
+// Mirrors TxStory.jsx. A rail past RAIL_FLOAT_MAX lays out as a
 // full-measure strip instead of a float; at or below it the float is what the
 // deck is designed around and must be left alone.
 const RAIL_FLOAT_MAX = 3
@@ -86,8 +86,14 @@ test('a story\'s photo rail never escapes its own card', async ({ page }) => {
         escapeLeft = Math.max(escapeLeft, card.left - b.left)
         escapeRight = Math.max(escapeRight, b.right - card.right)
       }
+      // The day the card belongs to now sits on the DAY TAB before its run
+      // (TxStory.jsx's DayTab) rather than on the card, so walk back to it —
+      // this is only the label on a failure message, but a blank one is a
+      // failure message that names no card.
+      let tab = story.previousElementSibling
+      while (tab && !tab.classList.contains('txday')) tab = tab.previousElementSibling
       out.push({
-        date: story.querySelector('.txstory__date')?.textContent ?? '',
+        date: (tab?.textContent ?? '').replace(/s+/g, ' ').trim(),
         slots: story.querySelectorAll('.photorail__slot').length,
         isStrip: rail.classList.contains('photorail--strip'),
         escapeLeft: Math.round(escapeLeft),

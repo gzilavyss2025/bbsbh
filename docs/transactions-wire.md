@@ -9,7 +9,8 @@ and check whether the wire has changed.
 **Status: v1.** §1–§7 cover the wire's shape, its vocabulary and the roster
 rules that vocabulary encodes. §8 onward record what has been decided on top of
 it and what has not: §10 settles which rows are news, §11 settles whose story a
-row is league-wide, and §9 is what is still argued.
+row is league-wide, §13 settles how one club's page gets today's moves, and §9
+is what is still argued.
 
 ## How to re-verify anything here
 
@@ -291,7 +292,7 @@ pipeline, not of the wire.
 
 ## 8. Where the existing implementation sits
 
-Five files along four seams, plus the generator:
+Six files along five seams, plus the generator:
 
 | File | Answers |
 | --- | --- |
@@ -300,6 +301,7 @@ Five files along four seams, plus the generator:
 | `src/api/transactions/cutline.js` | What does that story say? |
 | `src/api/transactions/league.js` | Whose story is a row, league-wide? (§11) |
 | `src/api/transactions/leagueFeed.js` | What does a browser fetch to read that live? (§12) |
+| `src/api/transactions/clubFeed.js` | How does ONE club's page get today's moves? (§13) |
 
 `scripts/gen-team-transactions.mjs` runs the first three nightly to build the
 team page's Transactions card: per-org, per-season static files. That path is
@@ -565,3 +567,36 @@ fitted to the games column so the wire fills the page and never lengthens it,
 with the remainder behind one control; on a phone it is the bottom-anchored dock
 (`WireDock.jsx`, ADR-0061). `e2e/wire-rail.spec.js` and `e2e/wire-dock.spec.js`
 hold the two apart.
+
+## 13. The club's own page, live over the file — measured 2026-08-21
+
+Settled in ADR-0063. The club surfaces read the nightly file for the season and
+lay a **live three-day window** over its newest days, so a move filed at noon
+reaches the club's own page as fast as it reaches the home wire. The cron writes
+those files at 07:00 UTC, so the gap being closed is up to a full day.
+
+Three measurements decided the shape.
+
+**The live leg re-runs the club pipeline; it does not filter the league feed.**
+§11 gives every row ONE owning club, and for a trade that owner is the acquiring
+side. Filtered to one club, a deal the club SOLD in has no owner on its own page
+and disappears from it. The club path buckets instead (`bucketToOrg`), which is
+why a trade shows on both clubs' pages.
+
+**The wire does not order a day's rows, so the pipeline has to.** Repeated
+identical queries return a day in the same order (verified three times on
+2026-08-19); *different* queries do not, and the order is never id-ascending.
+The pairing step took an arrival and a departure in the order it met them, so
+the nightly file and a live five-day pull disagreed on **3 of 30 club-days**
+about which of the Mets' two 2026-08-19 recalls was told beside the injured-list
+placement — the identical set of rows, two correct tellings, neither chosen.
+`groupIntoStories` now sorts a day by row id first. With that in place a
+season-long pull and a five-day pull agree on **30 of 30** club-days
+(`.scratch/club-live-overlay/probe-order.mjs`).
+
+**The join is by day, never by story.** A day is told by exactly one source:
+live inside the window, the file outside it, and the file inside it for a date
+live never saw (a post-dated row filed more than `FETCH_DAYS` before it took
+effect). Merging on story identity is the failure §11 already measured — 24 of
+193 rows escaped a de-duplication built on it, because two groupings of one
+event share no key.

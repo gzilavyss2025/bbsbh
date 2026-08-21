@@ -1,8 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { loadMoreTeamTransactions } from '../../api/teamTransactions.js'
-import { Headshot } from '../player/Headshot.jsx'
-import { PlayerLink } from '../player/PlayerLink.jsx'
-import { TeamLink } from '../team/TeamLink.jsx'
+import { DayTab, TxStory, dayTabParts } from './TxStory.jsx'
 import { DeckNudge } from '../teamstats/DeckNudge.jsx'
 
 // The deck's per-card scroll step (card width + gap, both from .txcard__scroll
@@ -10,118 +8,6 @@ import { DeckNudge } from '../teamstats/DeckNudge.jsx'
 // (360px for a --wide 3-headshot rail), so this lands a click short of a
 // full card on those; the deck's own scroll-snap settles the rest.
 const CARD_STEP = 330
-
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
-// Full spelled-out dateline ("Sunday, July 12") per the locked design — the
-// CSS applies the app's ALL-CAPS invariant, so this stays mixed-case here
-// (no per-component .toUpperCase(), see ADR-0017 / check-name-casing.mjs).
-function dateline(iso) {
-  const [y, m, d] = iso.split('-').map(Number)
-  const date = new Date(Date.UTC(y, m - 1, d))
-  return `${WEEKDAYS[date.getUTCDay()]}, ${MONTHS[m - 1]} ${d}`
-}
-
-const BANNER_TONE = { in: 'banner--in', out: 'banner--out', move: 'banner--move' }
-// Reuses the same three-tone system TransactionTimeline's own chips already
-// use (add/out/move — field/clay/muted), mapped per story type rather than
-// per row: an add-flavored story (a trade-in, a signing) reads green, a
-// health/departure story (an IL placement, a suspension) reads clay, and a
-// mixed/neutral one (a shuffle, a solo roster move) stays graphite.
-const TYPE_TONE = {
-  trade: 'add',
-  signing: 'add',
-  'injured-list': 'out',
-  suspension: 'out',
-  shuffle: 'move',
-  'roster-move': 'move',
-}
-
-// Above this many headshots the rail stops floating and lays out as a
-// full-measure strip instead (.photorail--strip). The number is a measurement,
-// not a taste call: at --shot-sm-w with a 6px gap a rail is `60n - 6` px wide,
-// against the 340px of measure a --wide card has. A 4th photo leaves the
-// cutline ~96px to wrap in, a 5th leaves ~36px, and a 6th is wider than the
-// card outright — and a RIGHT float wider than its container overflows to the
-// LEFT, which is what used to paint a big shuffle's photos over its own
-// sentence and across the neighbouring card. Three still leaves a readable
-// ~156px, so the magazine-caption float this deck was designed around is
-// untouched for the ~95% of stories at or below it.
-const RAIL_FLOAT_MAX = 3
-
-// One rail slot: kicker banner (In/Out/Up/Down/Up-Down/IL-N) over a headshot,
-// a surname caption below that links to the player's page (same spoiler-safe
-// PlayerLink treatment used everywhere else in the app).
-//
-// `tintTeamId` is the MLB parent org for every slot, prospects included, so
-// `isMlb` must come from the slot itself — Headshot's teamId-derived default
-// would read a farmhand as a major-leaguer and skip his MiLB photo rung.
-function RailSlot({ slot }) {
-  return (
-    <div className="photorail__slot">
-      <span className={`banner ${BANNER_TONE[slot.role] ?? 'banner--move'}`}>{slot.banner}</span>
-      <Headshot
-        personId={slot.playerId}
-        name={slot.name}
-        teamId={slot.tintTeamId}
-        isMlb={slot.isMlb ?? false}
-        className="txstory__shot"
-      />
-      <PlayerLink id={slot.playerId} className="photo__cap">{slot.surname}</PlayerLink>
-    </div>
-  )
-}
-
-// A cutline's segment array — plain sentence text, with any segment carrying
-// a playerId or teamId linked to that player's/team's page (same PlayerLink/
-// TeamLink treatment used elsewhere, e.g. TransactionTimeline's own
-// linkifyNames). Only a player's name gets the bold "headline word"
-// treatment (txstory__namelink, styled in index.css) — a team name is a
-// plain link, so it doesn't compete with the player for emphasis.
-function Cutline({ segments }) {
-  return (
-    <p className="txstory__cutline">
-      {segments.map((seg, i) => {
-        if (seg.playerId) {
-          return <PlayerLink key={i} id={seg.playerId} className="txstory__namelink">{seg.text}</PlayerLink>
-        }
-        if (seg.teamId) {
-          return <TeamLink key={i} id={seg.teamId}>{seg.text}</TeamLink>
-        }
-        return <Fragment key={i}>{seg.text}</Fragment>
-      })}
-    </p>
-  )
-}
-
-// One swipeable card — its own dateline (consecutive cards can span
-// different days once the day-header is gone), rail, type pill, cutline.
-function TxStory({ story }) {
-  const tone = TYPE_TONE[story.type] ?? 'move'
-  // A 3-headshot rail (a shuffle, a multi-player trade) crowds the base
-  // width's cutline wrap — a wider card for those specifically. Still worth it
-  // once the rail goes to a strip: the extra 40px buys a fourth slot per row
-  // and shortens the long cutline those stories carry.
-  const wide = story.rail.length >= 3
-  const strip = story.rail.length > RAIL_FLOAT_MAX
-  return (
-    <div className={`txstory${wide ? ' txstory--wide' : ''}`}>
-      <div className="txstory__date">{dateline(story.date)}</div>
-      {story.rail.length > 0 && (
-        <div className={`photorail${strip ? ' photorail--strip' : ''}`}>
-          {story.rail.map((slot, i) => (
-            <RailSlot key={slot.playerId ?? i} slot={slot} />
-          ))}
-        </div>
-      )}
-      <span className={`txstory__type txstory__type--${tone}`}>{story.typeLabel}</span>
-      <Cutline segments={story.cutline} />
-    </div>
-  )
-}
 
 // How many story cards render up front, and how many more each lazy-load
 // batch reveals — either from days already fetched (just widen the visible
@@ -148,7 +34,17 @@ const REVEAL_BATCH = 8
 // newest stories and turns paging off entirely — no "Load more" button, no
 // trailing sentinel, so a preview can never quietly page the whole season in
 // behind a swipe. The card is otherwise identical; the Games tab is where the
-// full timeline lives.
+// full timeline lives — and, past the 45 days this pages through, the club's
+// own ledger page (`/team/{id}/transactions`), which is where a reader arriving
+// from the home slate's wire lands.
+//
+// A card is drawn by TxStory.jsx, shared with that page. What the deck adds
+// around it is the DAY TAB: one narrow divider standing before each day's run
+// of cards, carrying the date the cards themselves no longer repeat. It is the
+// wire's own dateline row turned on its side, and it exists for the same
+// reason — a deck of cards each headed with its own date restated the previous
+// card's date on 950 of 3,199 stories (29.7%), and still showed a day boundary
+// nowhere.
 export function TeamTransactionsCard({
   teamId,
   asOf,
@@ -171,6 +67,14 @@ export function TeamTransactionsCard({
     [days],
   )
   const visibleStories = flatStories.slice(0, limit ?? visibleCount)
+  // What each day tab counts: the cards on that day the deck is actually
+  // SHOWING, not the day's whole total. The Overview's three-card preview
+  // would otherwise head a lone card "3" and leave nothing to swipe to.
+  const dayCounts = useMemo(() => {
+    const counts = new Map()
+    for (const story of visibleStories) counts.set(story.date, (counts.get(story.date) ?? 0) + 1)
+    return counts
+  }, [visibleStories])
   const canRevealMore = !limit && (visibleCount < flatStories.length || hasMore)
 
   const scrollRef = useRef(null)
@@ -239,8 +143,13 @@ export function TeamTransactionsCard({
         aria-label="Team transaction stories"
         tabIndex={0}
       >
-        {visibleStories.map((story) => (
-          <TxStory key={story.id} story={story} />
+        {visibleStories.map((story, i) => (
+          <Fragment key={story.id}>
+            {(i === 0 || visibleStories[i - 1].date !== story.date) && (
+              <DayTab {...dayTabParts(story.date)} count={dayCounts.get(story.date)} />
+            )}
+            <TxStory story={story} />
+          </Fragment>
         ))}
         {canRevealMore && (
           <button
