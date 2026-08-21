@@ -45,7 +45,7 @@ import { stampLogoTuningRecord } from '../../../../lib/stampLogoTuning.js'
 import { monoInkFor } from '../../../../lib/monoInk.js'
 import { BAND_COLOR_OVERRIDES, WPA_TREATMENT_BAND_COLOR_OVERRIDES } from '../../../../lib/wpa/wpaBandColors.js'
 import { WPA_LOGO_LAYOUT_OVERRIDES, WPA_OWN_ART, WPA_WORDMARK_OVERRIDES } from '../../../../lib/wpa/wpaLogo.js'
-import { parkWashColorOverride, parkWashIntensity, tileColorFor } from '../../../../lib/ballpark/parkWash.js'
+import { parkWashColorOverride, tileColorFor } from '../../../../lib/ballpark/parkWash.js'
 import {
   IDENTITY_DIMENSIONS,
   MLB_TREATMENTS,
@@ -382,33 +382,30 @@ export function identityGroups(teamId, { isMilb, treatment }) {
     })
   }
 
-  // The slate card's hover/press wash over this club's HOME ballpark photo
+  // The slate card's wash over this club's HOME ballpark photo
   // (06a-gamecard-parkart.css, src/lib/ballpark/parkWash.js). Not `fieldsFrom`, like
-  // the logo group above it: the landed values are the app's own COMPUTED
-  // defaults (the home tile colour, the app-wide 0.55 opacity), not a raw
-  // store record — an override is this club's escape hatch on top of those,
-  // the same relationship mainOverrideLogoUrl has to the plain CDN mark.
+  // the logo group above it: the landed value is the app's own COMPUTED
+  // default (the home tile colour), not a raw store record — an override is
+  // this club's escape hatch on top of it, the same relationship
+  // mainOverrideLogoUrl has to the plain CDN mark.
+  //
+  // ONE field, where there were two. The wash prints at full strength for
+  // every club now, so the `intensity` dial that sat under this colour is
+  // gone — see IDENTITY_DIMENSIONS.parkWash for what that retires.
   groups.push({
     key: 'parkwash',
-    title: 'Ballpark hover wash',
+    title: 'Ballpark wash',
     preview: 'parkwash',
     fields: [
       {
         id: identityFieldId('parkWash', id, 'color'),
         name: 'color',
         label: 'Wash color',
+        hint: 'The colour the park photo is washed with — always at full strength.',
         spec: IDENTITY_DIMENSIONS.parkWash.fields.color,
         landed: text(
           parkWashColorOverride(teamId) ?? tileColorFor(teamId, defaultHomeTreatmentFor(teamId) ?? 'main', 'home'),
         ),
-      },
-      {
-        id: identityFieldId('parkWash', id, 'intensity'),
-        name: 'intensity',
-        label: 'Wash intensity',
-        hint: '0 is invisible, 1 is a solid fill — the app ships 0.55.',
-        spec: IDENTITY_DIMENSIONS.parkWash.fields.intensity,
-        landed: text(parkWashIntensity(teamId)),
       },
     ],
   })
