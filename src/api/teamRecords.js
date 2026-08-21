@@ -67,8 +67,6 @@ export const RECORD_GROUPS = [
       { id: 'opp-scored-first', k: 'Opponent scores first', p: (g) => g.sf === -1 },
       { id: 'scored-4-plus', k: 'Scoring 4+ runs', p: (g) => g.rs >= 4 },
       { id: 'scored-3-fewer', k: 'Scoring 3 or fewer', p: (g) => g.rs <= 3 },
-      { id: 'shutout-thrown', k: 'Pitching a shutout', p: (g) => g.ra === 0 },
-      { id: 'shutout-suffered', k: 'Shut out', p: (g) => g.rs === 0 },
     ],
   },
   {
@@ -294,6 +292,12 @@ export const COUNT_METRICS = [
   // won anyway.
   { id: 'count-wins-after-trailing', k: 'Wins after trailing', better: 'high', get: (c) => c.comebackWins },
   { id: 'count-losses-after-leading', k: 'Losses after leading', better: 'low', get: (c) => c.lossesAfterLeading },
+  // A W-L record for these would be redundant with the win column itself — a
+  // shutout thrown is a game the pitching side cannot lose, and a shutout
+  // suffered is one the batting side cannot win. Counting them, like every
+  // other single-number achievement here, is the honest shape.
+  { id: 'count-shutouts-thrown', k: 'Shutouts thrown', better: 'high', get: (c) => c.shutoutsThrown },
+  { id: 'count-shutouts-suffered', k: 'Times shut out', better: 'low', get: (c) => c.shutoutsSuffered },
   { id: 'count-walk-off-wins', k: 'Walk-off wins', better: 'high', get: (c) => c.walkOffWins },
   { id: 'count-walk-off-losses', k: 'Walk-off losses', better: 'low', get: (c) => c.walkOffLosses },
   { id: 'count-batted-around', k: 'Times batted around', better: 'high', get: (c) => c.battedAround },
@@ -408,6 +412,8 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
       battedAround: games.reduce((n, g) => n + (g.ba ?? 0), 0),
       walkOffWins: games.filter((g) => g.wo === 1).length,
       walkOffLosses: games.filter((g) => g.wo === -1).length,
+      shutoutsThrown: games.filter((g) => g.ra === 0).length,
+      shutoutsSuffered: games.filter((g) => g.rs === 0).length,
       ...sweepCounts(games),
       streaks: longestStreaks(games),
       daysAtPlace: daysAtPlace(data.dailyRank, { cutoff, half, allStarDate }),
