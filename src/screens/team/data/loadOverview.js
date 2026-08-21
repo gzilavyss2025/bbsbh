@@ -79,6 +79,7 @@ export async function loadOverview(id, asOf) {
     standings,
     manager,
     fullRoster,
+    seasonRoster,
     ilRoster,
     leaderPool,
     schedule,
@@ -93,10 +94,16 @@ export async function loadOverview(id, asOf) {
     // Degrades to null on a thin MiLB feed (see fetchManager's own try/catch) —
     // the header line then hides.
     fetchManager(id, season),
-    // 40Man rather than the active roster: the preferred lineup deliberately
-    // keeps an injured regular, since a season's answer at a spot doesn't change
-    // because he's hurt today (the diamond marks him instead).
+    // 40Man rather than the active roster: the Starting Pitchers/Closer preview
+    // deliberately keeps an injured regular, since a season's answer at a spot
+    // doesn't change because he's hurt today (the diamond marks him instead).
     fetchTeamRoster(id, season, { sportId, rosterType: '40Man' }),
+    // The Lineup preview's own roster — season-wide (rosterType=fullSeason), not
+    // the 40Man one above, so a player since promoted or optioned to another
+    // level of the org still counts as this season's real answer at his spot.
+    // Feeds preferredLineupFrom ONLY; see loadRoster.js's copy of this fetch and
+    // shared.js's preferredLineupFrom for the full reasoning.
+    fetchTeamRoster(id, season, { sportId, rosterType: 'fullSeason' }),
     fetchTeamIL(id, season),
     // The leaderboard pool is built from the club's season stats rather than its
     // current roster, so a player traded away or promoted off the club still
@@ -177,7 +184,7 @@ export async function loadOverview(id, asOf) {
     // is set, so a `?d=` link still freezes the page at that date.
     photoGames: asOf ? allDecidedGames(schedule) : allStartedGames(schedule),
     // Lineup preview.
-    lineupDefense: lineupDefenseFrom(preferredLineupFrom(fullRoster, id), injuredIds),
+    lineupDefense: lineupDefenseFrom(preferredLineupFrom(seasonRoster, id), injuredIds),
     previewStartingPitchers,
     previewCloser,
     // Leaders preview.
