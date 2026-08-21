@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures.js'
 import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
+import { VIEWPORT_MARGIN } from '../src/lib/playerHoverPosition.js'
 
 // The home slate's league roster wire on the WIDE surface — the rail down the
 // right of the games (WireRail.jsx, issue #772). Below WIDE_QUERY the same feed
@@ -406,4 +407,84 @@ test('a phone gets the dock, never the rail', async ({ page }) => {
   await openSlate(page)
   await expect(page.locator('.wiredock')).toBeVisible()
   await expect(page.locator('.wirerail')).toHaveCount(0)
+})
+
+test('hovering a player name opens the card at the name, not the corner', async ({ page }) => {
+  // .wire__cutline .plink is display:contents (04-site-bar.css) so a long
+  // name wraps mid-sentence like the prose around it — a fix that predates
+  // the hover card and left the trigger <button> with no box of its own.
+  // PlayerLink's hover handler used to read that box straight off the
+  // button; getBoundingClientRect() on a display:contents element is always
+  // all-zero, and playerHoverCardPosition (playerHoverPosition.js) clamps a
+  // zero rect to (VIEWPORT_MARGIN, VIEWPORT_MARGIN) — the card landed in the
+  // page's top-left corner regardless of which name was hovered.
+  await page.setViewportSize({ width: TWO_COL_W, height: 900 })
+  await openSlate(page)
+  await expect(page.locator('.wirerail')).toBeVisible()
+
+  // The card is gated on a real mouse (HOVER_CARD_QUERY, useMediaQuery.js) —
+  // a wide-but-touch project (ipad) would otherwise wait out the full
+  // timeout for a card that correctly never opens.
+  const hoverCapable = await page.evaluate(() => matchMedia('(hover: hover) and (pointer: fine)').matches)
+  test.skip(!hoverCapable, 'no real mouse on this project — desktop covers this test')
+
+  // The hover card's own three requests (bio, transactions, one season stat
+  // line — api/playerHoverCard.js), stubbed for the wire's first name
+  // (personId 900000, day 0 / club 0's recall) so it resolves real data and
+  // stays open. Left unstubbed, fetchPerson's 404 on this fake id resolves
+  // to `null` and the card unmounts before an assertion can run.
+  await page.route('**/api/v1/transactions*', async (route) => {
+    const url = new URL(route.request().url())
+    if (!url.searchParams.get('playerId')) return route.fallback()
+    await route.fulfill({ json: { transactions: [] } })
+  })
+  await page.route('**/api/v1/people/900000*', async (route) => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/stats')) {
+      await route.fulfill({
+        json: {
+          stats: [{
+            splits: [{
+              stat: {
+                era: '3.50', whip: '1.10', wins: 5, losses: 3,
+                strikeOuts: 60, saves: 0, gamesPitched: 12, gamesStarted: 12,
+              },
+            }],
+          }],
+        },
+      })
+      return
+    }
+    await route.fulfill({
+      json: {
+        people: [{
+          id: 900_000,
+          fullName: 'Test Player900000',
+          primaryPosition: { abbreviation: 'RHP', type: 'Pitcher', code: '1' },
+          currentTeam: { id: 108, name: 'Los Angeles Angels', sport: { id: 1 } },
+          mlbDebutDate: '2024-04-01',
+          rosterEntries: [],
+        }],
+      },
+    })
+  })
+
+  const row = page.locator('.wire__row', { hasText: 'Test Player900000' })
+  const rowBox = await row.boundingBox()
+  // `force: true`: Playwright's own actionability check can't find a
+  // hoverable point on a display:contents element either (same box-less
+  // quirk this test exists to guard), so it never resolves without this —
+  // a real mouse has no such trouble, since the rendered TEXT still occupies
+  // real pixels; only the wrapping <button>'s own box is gone.
+  await row.locator('.wire__namelink').hover({ force: true })
+
+  const card = page.locator('#player-hover-card')
+  await expect(card).toBeVisible()
+  const cardBox = await card.boundingBox()
+
+  // Anchored near the row that was hovered...
+  expect(Math.abs(cardBox.y - rowBox.y)).toBeLessThan(300)
+  // ...not clamped to the page's top-left corner, which sits far above any
+  // wire row on a full 900px-tall slate.
+  expect(cardBox.y).toBeGreaterThan(VIEWPORT_MARGIN + 100)
 })

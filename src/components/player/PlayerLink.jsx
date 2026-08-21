@@ -4,6 +4,22 @@ import { playerPath } from '../../lib/route.js'
 import { useMediaQuery, HOVER_CARD_QUERY } from '../../hooks/useMediaQuery.js'
 import { scheduleHoverShow, scheduleHoverHide } from '../../lib/playerHoverStore.js'
 
+// A trigger's own box, or — when that box has collapsed to nothing — the box
+// of what it actually renders. `.wire__cutline .plink` and
+// `.txstory__cutline .plink` both go `display: contents` so a player's name
+// wraps mid-sentence with the prose around it (04-site-bar.css,
+// 29-team-transactions.css), predating this card; a `display: contents`
+// element generates no box of its own, so its own getBoundingClientRect() is
+// always all-zero even while it's on screen and hovered. Its rendered
+// content still has a box, reached here through a Range over its children.
+function triggerRect(el) {
+  const own = el.getBoundingClientRect()
+  if (own.width || own.height) return own
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  return range.getBoundingClientRect()
+}
+
 // Wraps a player's name (already rendered as children) in a plain, no-underline
 // button that navigates to their page. SPOILER-SAFE for the reason that
 // matters: it injects no stat or score into the DOM at the link site — the
@@ -46,7 +62,7 @@ export function PlayerLink({ id, name, className = '', ariaLabel, children }) {
   const displayName = name ?? nameFromChildren(children)
   const showHoverCard = (opts) => {
     if (!hoverCapable || !btnRef.current) return
-    scheduleHoverShow(id, displayName, btnRef.current.getBoundingClientRect(), opts)
+    scheduleHoverShow(id, displayName, triggerRect(btnRef.current), opts)
   }
   const hideHoverCard = () => {
     if (!hoverCapable) return
