@@ -20,8 +20,12 @@ actually kills processes, and only with your confirmation each time.
    port + worktree name) so the user picks which ones to actually kill. Always
    let them select from the full list, including active ones, in case they
    know better than the merge-status heuristic — just don't pre-select those.
-4. For each PID the user selected, kill it with
-   `taskkill /PID <pid> /F` (Windows; this repo's only dev machine) and report
-   the outcome per PID.
+4. For each PID the user selected, kill it and report the outcome per PID.
+   The command depends on the machine:
+   - macOS / Linux: `kill -TERM <pid>`, then `kill -9 <pid>` only if the
+     process is still there a couple of seconds later.
+   - Windows: `taskkill /PID <pid> /F`.
+   Then re-run `node scripts/dev-servers.mjs` and confirm the killed entries
+   are gone.
 5. Never kill a process the user didn't explicitly select. Never re-run this
    automatically — it's on-demand only, unlike the SessionStart report.
