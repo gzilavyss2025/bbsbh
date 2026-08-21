@@ -1,4 +1,4 @@
-# ADR-0060 — The wire docks to the thumb on a phone, and the games keep the top
+# ADR-0061 — The wire docks to the thumb on a phone, and the games keep the top
 
 Status: accepted (2026-08-20)
 
