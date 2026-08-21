@@ -147,7 +147,7 @@
    Foul Balls, Pitches, Pitches Like under Analytics; Situational, Splits vs
    Team under Splits; Innings by position, Firsts, Path to the Majors, Team
    history, Transactions under Player history) stay the plain unthemed
-   label, same as Trophy Case and Milestone Watch. Not tied to any one game,
+   label, same as Milestone Watch. Not tied to any one game,
    so PlayerPage.jsx always resolves the club's Main/Home triad rather than
    a jersey actually worn tonight. */
 .player.is-themed .section__title--bar {

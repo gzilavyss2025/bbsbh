@@ -75,12 +75,23 @@ export {
 } from './person/careerRegister.js'
 
 export {
-  MAJOR_AWARDS,
-  trophyCaseView,
   tradeKey,
   signedFallback,
   transactionTimelineView,
 } from './person/transactions.js'
+
+export {
+  MAJOR_AWARDS,
+  DEFAULT_AWARD_ORDER,
+  awardLeague,
+  awardsView,
+  rankAwards,
+  rankKeyOf,
+  parseAwardOrder,
+  formatAwardOrder,
+  parseAwardCap,
+  knownRankKeys,
+} from './person/awards.js'
 
 export {
   detectRehabAssignment,

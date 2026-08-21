@@ -1,8 +1,9 @@
 // The copy registry — the single source of truth for every piece of
 // admin-editable UI text in the app. It is a plain, side-effect-free module —
-// its only imports are the two static ballpark tables (MLB's hand-authored
-// measurements, MiLB's generated venue list), which it reads to derive the
-// per-park fields below — so three very different consumers can share ONE
+// every import is a leaf table it reads to build a field's id or its default
+// (MLB's hand-authored ballpark measurements, MiLB's generated venue list, the
+// landing-page slots, and the shipped award weight order) — so three very
+// different consumers can share ONE
 // definition of what a copy key is, what it defaults to, and what a valid value
 // looks like:
 //
@@ -28,6 +29,7 @@
 // provide, so the trade must be stated plainly even while having fun with it.
 
 import { landingFields } from './landing/fields.js'
+import { awardFields } from './awardFields.js'
 import { BALLPARKS } from '../lib/ballpark/ballparkData.js'
 import { venueKey } from '../lib/ballpark/ballparkArt.js'
 import MILB_BALLPARKS from '../lib/data/milb-ballparks.json' with { type: 'json' }
@@ -45,6 +47,7 @@ export const GROUPS = [
   { id: 'ballparks', label: 'Ballparks (team hub → Overview)' },
   { id: 'ballparksMilb', label: 'Ballparks — Minor League (team hub → Overview)' },
   { id: 'learn', label: 'Guides (/learn — the server-rendered landing pages)' },
+  { id: 'awards', label: 'Award weight (player page → Awards)', editor: 'awardOrder' },
 ]
 
 // Each field: a dotted id (`group.slot`), the group it renders under, a short
@@ -438,6 +441,7 @@ export const FIELDS = [
     multiline: false,
     default: 'Back to the schedule',
   },
+  ...awardFields(),
   ...parkFields(),
   ...milbParkFields(),
   ...landingFields(),

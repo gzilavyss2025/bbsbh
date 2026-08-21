@@ -460,7 +460,7 @@
 /* ---- collapsed-career expand/collapse — same "real show-all action, never
    a dead-end +N more" convention as .ledger-expand/.ledger-collapse, but in
    neutral ink rather than those two's medal-amber (this ledger is roster
-   moves, not honors, so the award tint would misread as a Trophy Case tie-in). ---- */
+   moves, not honors, so the award tint would misread as an Awards tie-in). ---- */
 .txntl-expand {
   display: block;
   width: 100%;

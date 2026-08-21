@@ -1,0 +1,360 @@
+/* ============================================================
+   AWARDS LEDGER
+   The player page's career-honors section
+   (components/player/AwardsLedger.jsx). Was 67-trophy-case.css, and the
+   rename is the change: the Trophy Case promoted ONE honor to a marquee
+   and listed the rest as loose date strings, which flattered a single
+   award and told you nothing about the shape of a career.
+
+   The shape here is MLB.com's — one table per award, Year / Team /
+   League, the club and league printed on every row. What is ours is the
+   paper. A ruled ledger on manila, a tier-coloured rule under each
+   award's name (the one motif kept from the marquee it replaces), the
+   club's own mark in front of its name, and the same "one card, sections
+   inside" body every other multi-row block on this page uses. See
+   ADR-0063 for why the cap sits on TABLES rather than on information.
+   ============================================================ */
+
+/* One card holding every award table, hairline-divided — not one bordered
+   box per award, which at three-to-six awards reads as a stack of unrelated
+   receipts rather than one page of a ledger. */
+.awards {
+  margin: 0 2px;
+  padding: 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+/* "3 of 43 · 89 selections" — the aside on the section's own club bar. Mono,
+   because it is a pair of counts and the digits should line up between
+   players, not a phrase. */
+.awards__tally {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  font-style: normal;
+}
+
+/* ---- one award's block ---- */
+.awardblk + .awardblk {
+  margin-top: 15px;
+  padding-top: 14px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.awardblk__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.awardblk__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+.awardblk__count {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
+}
+/* The tier rule. Kept from the retired marquee, and it is the only place the
+   weight tiers are visible on the page: a reader never sees the order, but a
+   gold rule over a blue one over a kraft one says, without a legend, that
+   these are different KINDS of honor. Full width here because it heads a
+   table rather than a headline. */
+.awardblk__rule {
+  display: block;
+  height: 2px;
+  margin: 5px 0 0;
+  border-radius: var(--radius-xs);
+}
+
+/* The six weight tiers, plus `other` for an award nobody has ranked — which
+   takes the in-season graphite deliberately: a neutral pencil rule makes no
+   claim about weight, which is exactly right for one nobody has placed. */
+.tier-yearEnd.awardblk__rule { background: var(--award-line); }
+.tier-yearEnd.awardblk__count,
+.tier-yearEnd.awardidx__ct { color: var(--award-ink); }
+.tier-allStar.awardblk__rule { background: var(--allstar-blue); }
+.tier-allStar.awardblk__count,
+.tier-allStar.awardidx__ct { color: var(--allstar-blue-deep); }
+.tier-press.awardblk__rule { background: var(--field); }
+.tier-press.awardblk__count,
+.tier-press.awardidx__ct { color: var(--field-deep); }
+.tier-inSeason.awardblk__rule,
+.tier-other.awardblk__rule { background: var(--graphite-soft); }
+.tier-inSeason.awardblk__count,
+.tier-inSeason.awardidx__ct,
+.tier-other.awardblk__count,
+.tier-other.awardidx__ct { color: var(--graphite); }
+.tier-intl.awardblk__rule { background: var(--clay); }
+.tier-intl.awardblk__count,
+.tier-intl.awardidx__ct { color: var(--clay-deep); }
+.tier-minors.awardblk__rule { background: var(--seal); }
+.tier-minors.awardblk__count,
+.tier-minors.awardidx__ct { color: var(--kraft-board); }
+
+/* ---- the table ---- Same cell vocabulary as the box score's .bs__grid
+   (tight padding, tabular figures, a hairline under every row), at the
+   slightly larger size a three-column table can afford. */
+.awardtbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2px;
+}
+.awardtbl th {
+  padding: 8px 0 5px;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.awardtbl td {
+  padding: 7px 0;
+  vertical-align: baseline;
+  border-bottom: var(--bw-hair) solid var(--rule-grid);
+}
+.awardtbl tr:last-child td {
+  border-bottom: none;
+}
+.awardtbl__yr {
+  width: 62px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+}
+.awardtbl__tm {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+.awardtbl__lgcol,
+.awardtbl__lg {
+  width: 52px;
+  text-align: right;
+}
+.awardtbl__none {
+  color: var(--graphite-soft);
+}
+
+/* The club's mark ahead of its name. Height-constrained with auto width, since
+   the CDN's marks are every aspect ratio there is — a cap silhouette is much
+   taller than it is wide, a wordmark much wider. */
+.awardtbl__club {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.awardtbl__mark {
+  flex: none;
+  height: 17px;
+  width: auto;
+  max-width: 26px;
+  object-fit: contain;
+}
+
+/* AL / NL / MLB, or a minor-league level code. Bordered rather than filled:
+   filled would make a structural label compete with the tier rules, which are
+   the only colour on the card that means anything. */
+.awardtbl__chip {
+  display: inline-block;
+  min-width: 20px;
+  padding: 1px 5px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-inset);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-align: center;
+  color: var(--text-muted);
+}
+.awardtbl__chip--none {
+  border-style: dashed;
+  background: transparent;
+  color: var(--graphite-soft);
+}
+
+/* ---- the index: everything below the cap ---- One line per award, carrying
+   the same count / dates / league a table would. Not a truncation and not a
+   "+N more": the section's whole claim is that the cap ranks, never hides. */
+.awardidx {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.awardidx__group + .awardidx__group {
+  margin-top: 16px;
+}
+.awardidx__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 1px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.awardidx__rule {
+  flex: 1;
+  height: var(--bw-hair);
+  background: var(--border-hairline);
+}
+.awardidx__n {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--graphite-soft);
+}
+.awardidx__row {
+  padding: 7px 0;
+  border-bottom: var(--bw-hair) solid var(--rule-grid);
+}
+.awardidx__row:last-child {
+  border-bottom: none;
+}
+.awardidx__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.awardidx__nm {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+.awardidx__ct {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+}
+.awardidx__btm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: 2px;
+}
+/* Every date, wrapping across as many lines as it needs. A twelve-time
+   All-Star's twelve years are the row's content, not an overflow problem. */
+.awardidx__when {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-loose);
+  color: var(--graphite-soft);
+}
+
+/* ---- the two actions ---- The kraft-taped "open it" the retired ledger used,
+   kept: it is the same gesture (this card has more inside it) in the same
+   place, so the muscle memory survives the redesign. */
+.awards__expand {
+  display: block;
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: 14px;
+  padding: 10px;
+  appearance: none;
+  cursor: pointer;
+  border: var(--bw-hair) dashed var(--award-line);
+  border-radius: var(--radius-sm);
+  background: var(--award-soft);
+  color: var(--award-ink);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.awards__expand:hover {
+  background: var(--award-line);
+  color: var(--paper-2);
+}
+.awards__expand:focus-visible,
+.awards__collapse:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.awards__collapse {
+  display: block;
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: 10px;
+  padding: 4px;
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.awards__collapse:hover {
+  color: var(--text-body);
+}
+
+/* ---- wide layout ---- Past the app's one breakpoint (25-wide-layout.css)
+   .screen opens from 440px to 960px, and a three-column table in a single
+   928px run is mostly empty middle. The tables pair off instead, each taking
+   its own card since a grid cell has no hairline neighbour to divide from.
+   The index below them stays one column: its rows are already single lines. */
+@media (min-width: 740px) {
+  .awards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5) var(--space-6);
+    align-items: start;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+  .awardblk {
+    padding: 12px;
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+  }
+  .awardblk + .awardblk {
+    margin-top: 0;
+    padding-top: 12px;
+    border-top: var(--bw-hair) solid var(--border-rule);
+  }
+  /* The index and both actions span the pair — they are about the whole
+     section, not about the column they happen to land in. */
+  .awardidx,
+  .awards__expand,
+  .awards__collapse {
+    grid-column: 1 / -1;
+  }
+  .awardidx {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+}

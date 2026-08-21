@@ -34,7 +34,7 @@ function linkifyNames(text, links) {
 // reads top-to-bottom as most-recent to least-recent (see api/person.js
 // transactionTimelineView for the curation that trims the raw feed's
 // number-change / roster-status noise and folds the IL rows into one row per
-// stint). Career honors live in the Trophy Case card instead,
+// stint). Career honors live in the Awards section instead,
 // not here. Rendered as a vertical timeline: a graphite rail down the middle
 // with a tone-colored node per move — field green when a club gained him, clay
 // when one lost him, neutral for a lateral move — the date penciled to its
@@ -45,7 +45,7 @@ function linkifyNames(text, links) {
 // raw rookie who's only ever been signed). A long career's full ledger can run
 // dozens of rows deep, so it opens collapsed to the most recent VISIBLE_LIMIT
 // with a real "show all" action — never an always-open list dominating the
-// bottom of the page (same convention as Trophy Case's dense-career collapse).
+// bottom of the page (same convention as the Awards section's own index).
 //
 // That collapse STRETCHES rather than truncating blind, because IL stints ride
 // this timeline now and a tenured star who hasn't changed clubs in years can

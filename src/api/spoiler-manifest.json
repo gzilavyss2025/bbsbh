@@ -425,6 +425,10 @@
       "class": "spoiler-free",
       "why": "Player-page advanced-stat shaping. Season aggregates."
     },
+    "person/awards.js": {
+      "class": "spoiler-free",
+      "why": "The player page's Awards section — every award the /people/{id}/awards feed carries, shaped and ranked. Season-level career facts on a surface deliberately outside the scoring flow (ADR-0034): no linescore, no box score, no play. It honours the player page's own asOf cutoff so a dated view cannot show an award not yet won, which is a date rule, not a seal."
+    },
     "person/careerRegister.js": {
       "class": "spoiler-free",
       "why": "The year-by-year career register. Season lines."
