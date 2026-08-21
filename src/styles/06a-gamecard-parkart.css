@@ -25,14 +25,36 @@
    all until they happened to hover a card. Phone and desktop now share the
    one reveal rule below.
 
-   Hover still does ONE thing, further down: it recolours the already-loaded
-   wash toward the HOME club's own tile colour (`--park-tint`, GameCard.jsx's
-   `parkTint`) via `mix-blend-mode: color` on a second layer stacked over the
-   photo. That mode keeps the photo's luminance (so navy ink still reads the
-   same over it) and only shifts hue/saturation, which is why it can afford to
-   apply on top of an already-tuned opacity rather than needing its own
-   contrast pass. No second fetch either way — the colour is a value already
-   resolved client-side, not an image. */
+   THE COLOUR WASH, and who gets it when. A second layer stacked over the photo
+   fills with the HOME club's own tile colour (`--park-tint`, GameCard.jsx's
+   `parkTint`) through `mix-blend-mode: color`. That mode keeps the photo's
+   luminance (so navy ink still reads the same over it) and only shifts
+   hue/saturation, which is why it can afford to apply on top of an
+   already-tuned opacity rather than needing its own contrast pass. No fetch
+   either way — the colour is a value already resolved client-side, not an
+   image.
+
+   It prints at FULL strength (`opacity: 1`), for every club. There used to be
+   a per-club dial beside the colour in the identity drawer — landed at 0.55,
+   tuned to ~0.8 for most of the thirty — and the site owner asked for one
+   full-strength wash instead; src/lib/ballpark/parkWash.js records what
+   dropping that field retires. Full strength is not a solid swatch: the whole
+   photo layer is still held at 0.24 over manila paper, so what lands on the
+   card is a light club-coloured cast, not a block of colour.
+
+   A TOUCH DEVICE SHOWS IT AT REST; a mouse still asks for it. There is no
+   hover on a phone, so gating the wash on one meant the platform this app is
+   built for never saw a club colour at all — it got the grayscale photo and
+   nothing else. Below, `@media (hover: none)` turns the wash on with the photo
+   itself, and `@media (hover: hover)` keeps the pointer's reveal exactly where
+   it was, just at the new strength. Same layer, same colour, same one fetch.
+
+   THE MOBILE SHEEN. `.gamecard__sheen`, at the foot of this file, rakes a soft
+   band of light down each card as it travels the screen — a scroll-DRIVEN
+   animation, not a timed one, so it tracks the thumb instead of playing at it.
+   It lives here rather than in a partial of its own because src/styles/ is at
+   its `check-dir-size` budget, and because it belongs to the same story as the
+   rest of this file: what a slate card looks like while it is on screen. */
 
 /* The clipping frame: the card's own interior, corners and all. It holds no
    image itself, only the ::before that carries one, because a background
@@ -79,13 +101,14 @@
   filter: grayscale(1);
 }
 
-/* The hover tint: a second layer, same crop as the photo it sits over, that
-   stays invisible (opacity 0) until a hover pointer reveals it further down.
-   `mix-blend-mode: color` takes hue/saturation from THIS layer's flat
-   `--park-tint` fill and luminance from what's already painted underneath (the
-   grayscale photo), which is what recolours the wash toward the home club
-   without flattening it into a solid swatch — the photo's own light and dark
-   areas stay readable underneath the tint. */
+/* The colour wash: a second layer, same crop as the photo it sits over, that
+   starts invisible (opacity 0) and is turned on further down — with the photo
+   on a touch device, on hover with a mouse. `mix-blend-mode: color` takes
+   hue/saturation from THIS layer's flat `--park-tint` fill and luminance from
+   what's already painted underneath (the grayscale photo), which is what
+   recolours the wash toward the home club without flattening it into a solid
+   swatch — the photo's own light and dark areas stay readable underneath the
+   tint. */
 .gamecard__parkart::after {
   content: '';
   position: absolute;
@@ -126,17 +149,33 @@
   opacity: 0.24;
 }
 
-/* The '@' is printed very faint by design (7%/10%), which is right on bare
-   paper and washes out over a photograph. It inks UP with the park so the
-   mark stays the thing in front — enough to hold its own against the busiest
-   frame in the set, still a watermark rather than a glyph. Nothing here is
-   persistent: these rules only apply while the card is in view, so a card
-   scrolled past is byte-for-byte the one 06-loader-and-cards.css prints. */
+/* THE SIGN, INVERTED over a photograph.
+
+   The '@' is printed very faint by design (7%/10%) in kraft amber under navy,
+   two layers a couple px out of register — the misregistration of a real
+   ballpark-program print run. That is right on bare paper. Over a photograph
+   carrying its club's colour it is the wrong pair twice over: both inks are
+   DARKER than the manila they were tuned against, so the sign sinks into the
+   picture instead of standing on it, and the amber lands in the same warm
+   quarter of the wheel as half the thirty clubs.
+
+   So the ghost layer inverts — kraft amber becomes the brightest paper in the
+   set — and the ink layer deepens to the darkest. The register offset does the
+   rest: a light edge on one side of a dark body reads as a sign lit from the
+   side, which is exactly what holds against a busy frame. It is a two-tone
+   knockout that cannot lose, because whatever the photo and the club colour do
+   underneath, one of the two layers is further from it than either ink was.
+
+   Nothing here is persistent: these rules only apply while the card is in
+   view, so a card scrolled past is byte-for-byte the one
+   06-loader-and-cards.css prints. */
 .gamecard--parkinview .gamecard__atmark-ink {
-  opacity: 0.28;
+  color: var(--ink-0);
+  opacity: 0.38;
 }
 .gamecard--parkinview .gamecard__atmark-ghost {
-  opacity: 0.3;
+  color: var(--paper-3);
+  opacity: 0.7;
 }
 
 /* The park's name (.gamecard__parkname, styled in
@@ -148,21 +187,25 @@
   opacity: 1;
 }
 
-/* The hover-only tint (see .gamecard__parkart::after above). Keyed on the
-   CARD, not the button, so the box-score row at the foot of a past game's
-   card counts as hovering the game too — the whole card is one object.
-   `:focus-within` covers the keyboard path to the same state. `--park-tint`
-   is absent for a team with no curated colour, so `background: none` above
-   just leaves the plain untinted wash — no separate fallback needed here. */
+/* No hover to wait for, so the club's colour arrives with its photograph. This
+   is the branch a phone takes, and the phone is what this app is for. */
+@media (hover: none) {
+  .gamecard--parkinview .gamecard__parkart::after {
+    opacity: 1;
+  }
+}
+
+/* A mouse still asks for it — the pointer's reveal is the one thing about this
+   wash that did not change, only its strength. Keyed on the CARD, not the
+   button, so the box-score row at the foot of a past game's card counts as
+   hovering the game too: the whole card is one object. `:focus-within` covers
+   the keyboard path to the same state. `--park-tint` is absent for a team with
+   no curated colour, so `background: none` above just leaves the plain
+   untinted photo — no separate fallback needed here. */
 @media (hover: hover) {
   .gamecard:hover .gamecard__parkart::after,
   .gamecard:focus-within .gamecard__parkart::after {
-    /* Strong enough to read as "this club's colour," restrained enough that
-       the photo underneath (and the ink over it) stays the thing you see.
-       Overridable per home club from the identity drawer's Ballpark wash
-       group (--park-wash-intensity, GameCard.jsx's `parkWashOpacity`) — kept
-       in step with src/lib/ballpark/parkWash.js's PARK_WASH_DEFAULT_INTENSITY. */
-    opacity: var(--park-wash-intensity, 0.55);
+    opacity: 1;
   }
 }
 
@@ -173,5 +216,133 @@
   .gamecard__atmark-ink,
   .gamecard__parkname {
     transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   THE SHEEN — a phone-only band of light, driven by the scroll itself.
+
+   Scrolling a slate is the one thing everybody does on this page, and until now
+   the cards took no part in it: fifteen flat rectangles going past. This rakes a
+   soft highlight down each card as the card crosses the screen, the way light
+   moves across a card you are actually tilting in your hand.
+
+   IT IS SCROLL-DRIVEN, NOT TIMED, and that distinction is the whole feature. A
+   view timeline binds the animation's progress to the card's own travel through
+   the viewport, so the light tracks the thumb: stop scrolling and it stops,
+   scroll back and it runs backwards. A keyframe animation on a timer would play
+   AT the reader on some trigger and then be over. The browser also runs this off
+   the main thread — no scroll listener, no `getBoundingClientRect` per frame,
+   nothing this app has to keep in sync.
+
+   WHICH WAY IT TRAVELS is physics, not taste. Think of one fixed light over the
+   screen. A card entering from the bottom meets it top-edge first, and as the
+   card rises the lit part of it moves DOWN — so the band runs top to bottom over
+   `cover 0%` → `cover 100%`, the full trip from just below the fold to just past
+   the top. Run it the other way and the light reads as attached to the card,
+   which is the effect of a loading skeleton.
+
+   PHONE ONLY, three times over. `@media (hover: none)` is the platform gate the
+   colour wash above already uses — a mouse gets the hover reveal instead, and a
+   sheen answering to a scroll wheel on a wide screen is noise on a page that is
+   mostly card. `@supports` is the capability gate: a browser without
+   scroll-driven timelines would otherwise park the band mid-card and hold it
+   there, so those browsers get today's card, unchanged. And reduced motion turns
+   it off outright rather than slowing it — there is no slower version of light
+   moving; there is only moving or not.
+
+   The frame clips; the ::before inside it carries the gradient and is the only
+   thing that moves, on `transform` alone, which is what keeps this a compositor
+   job. `mix-blend-mode: soft-light` sits on the FRAME rather than the band, so
+   the group blends once against the finished card underneath — the navy tiles,
+   the park photo, the manila between them all take the light differently, as
+   they would if it were real. A plain white overlay instead of a blend would
+   fog the tiles into milk. */
+.gamecard__sheen {
+  /* Off unless a phone-shaped browser turns it on below. */
+  display: none;
+  position: absolute;
+  inset: 0;
+  /* Above the card's own content (.gamecard__open and friends sit at 1) —
+     light falls ON a card, it does not sit under the print. */
+  z-index: 2;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  /* Same flip-card guard as .gamecard__parkart above. */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  mix-blend-mode: soft-light;
+}
+
+.gamecard__sheen::before {
+  content: '';
+  position: absolute;
+  /* Wider than the frame so the raked band never shows an end, and twice its
+     height so the band can start above the card and finish below it without
+     the gradient's own soft ends ever coming into view. Every percentage in
+     the keyframes below is against THIS box, so the two are one measurement:
+     ±32% of a box twice the card's height sweeps a little past both edges. */
+  left: -30%;
+  right: -30%;
+  top: -50%;
+  bottom: -50%;
+  /* A raked band of light with a shaded shoulder on each side of it, a few
+     degrees off horizontal so it reads as light crossing the card rather than a
+     horizontal wipe. The shoulders are what make it legible: a lone bright band
+     under `soft-light` lifts so gently that it reads as nothing, while the same
+     band between two barely-darker edges reads as a raking highlight — the
+     contrast against its own surroundings is the effect, not the brightness.
+     --paper-3 is the brightest paper in the set and --ink-0 the darkest ink, so
+     the whole sweep is drawn in the scorebook's own two extremes. */
+  background: linear-gradient(
+    172deg,
+    transparent 32%,
+    color-mix(in srgb, var(--ink-0) 22%, transparent) 42%,
+    color-mix(in srgb, var(--paper-3) 92%, transparent) 50%,
+    color-mix(in srgb, var(--ink-0) 18%, transparent) 58%,
+    transparent 68%
+  );
+}
+
+@media (hover: none) {
+  @supports (animation-timeline: view()) {
+    /* A NAMED timeline, not the anonymous `view()`, and that is not a
+       stylistic choice. `view()` resolves against the animated element's own
+       box inside its nearest ancestor SCROLL CONTAINER — and `overflow: hidden`
+       makes one, so the band above would measure itself against the frame
+       clipping it, a box it never moves inside. Progress pinned at one value,
+       forever. Naming the timeline on the CARD instead measures the thing that
+       actually travels, in the scroller that actually scrolls (the document),
+       and the band just reads it. */
+    .gamecard {
+      view-timeline-name: --gamecard-travel;
+      view-timeline-axis: block;
+    }
+    .gamecard__sheen {
+      display: block;
+    }
+    .gamecard__sheen::before {
+      /* The duration is ignored on a progress-based timeline — the card's own
+         travel is the clock — but a named duration is still required syntax. */
+      animation: gamecard-sheen 1s linear both;
+      animation-timeline: --gamecard-travel;
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@keyframes gamecard-sheen {
+  from {
+    transform: translate3d(0, -32%, 0);
+  }
+  to {
+    transform: translate3d(0, 32%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gamecard__sheen {
+    display: none;
   }
 }

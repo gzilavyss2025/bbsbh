@@ -29,8 +29,11 @@ export function DelayCard({ delay }) {
   )
 }
 
-// "2 hr 42 min" / "1 hr" / "38 min".
-function formatDelay(min) {
+// "2 hr 42 min" / "1 hr" / "38 min". Exported for the play-by-play feed's own
+// delay card (DelayNotice in playbyplay/EventCards.jsx), which reports the same
+// stoppage from inside the half rather than above it, and must spell its length
+// the same way this one does.
+export function formatDelay(min) {
   const h = Math.floor(min / 60)
   const m = min % 60
   if (h && m) return `${h} hr ${m} min`

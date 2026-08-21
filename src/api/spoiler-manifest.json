@@ -587,7 +587,8 @@
       "why": "Private helpers for the playbyplay/ split — name linkification and the base-name table. Barrel-internal; classified with its directory.",
       "importers": [
         "api/playbyplay/firsts.js",
-        "api/playbyplay/halfInningFeed.js"
+        "api/playbyplay/halfInningFeed.js",
+        "api/playbyplay/notificationCards.js"
       ]
     },
     "postseasonHistory.js": {

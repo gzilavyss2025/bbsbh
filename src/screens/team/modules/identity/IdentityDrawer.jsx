@@ -240,18 +240,15 @@ function BarPreview({ teamId, name, treatment, fields }) {
   )
 }
 
-// The slate card's ballpark wash, at the intensity a hover (or a phone's
-// press-and-hold) shows it — not the resting 0.24 grayscale-only state,
-// because the whole point of tuning this group is judging the COLOUR, and a
-// resting card never shows one. No team page otherwise renders this wash at
-// all (GameCard is a slate-only component), so unlike the header bar above —
-// which the lineup page at least shows somewhere — this drawer is the only
-// place it can be judged full stop.
+// The slate card's ballpark wash, at the one strength every club's card now
+// prints it. No team page otherwise renders this wash at all (GameCard is a
+// slate-only component), so unlike the header bar above — which the lineup
+// page at least shows somewhere — this drawer is the only place the colour can
+// be judged full stop.
 function ParkWashPreview({ venueName, fields }) {
   const { t } = useCopy()
   const park = venueName ? parkBackdrop(venueName, t) : null
   const color = fieldValue(fields, 'color')
-  const intensity = fieldValue(fields, 'intensity')
   if (!park) {
     return (
       <p className="iddrawer__note">
@@ -267,7 +264,6 @@ function ParkWashPreview({ venueName, fields }) {
         '--park-art': park.cssUrl,
         '--park-focus': park.focus,
         ...(color ? { '--park-tint': color } : null),
-        '--park-wash-intensity': intensity || undefined,
       }}
     >
       <span className="iddrawer__parkwash__photo" aria-hidden="true" />

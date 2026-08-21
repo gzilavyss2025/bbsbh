@@ -5,7 +5,7 @@ import { doubleHeaderLabel } from '../../lib/resultCards.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchJerseysData } from '../../api/jerseys.js'
 import { parkBackdrop } from '../../lib/ballpark/parkBackdrop.js'
-import { parkWashColorOverride, parkWashIntensity } from '../../lib/ballpark/parkWash.js'
+import { parkWashColorOverride } from '../../lib/ballpark/parkWash.js'
 import { useCopy } from '../../copy/copyContext.js'
 import {
   resolveTreatment,
@@ -110,14 +110,13 @@ export function GameCard({
   // screen (06a-gamecard-parkart.css), kept in sync with the IntersectionObserver
   // below — the SAME trigger and the SAME small photo (park.cssUrl) on every
   // device now. A hover pointer used to be a second, separate trigger that
-  // fetched the full 1000px photo instead; that bought nothing (the wash
+  // fetched the full 1000px photo instead; that bought nothing (the photo
   // renders grayscale at 0.24 opacity either way) and meant a mouse user saw
   // no backdrop at all until they happened to hover a card, so it was dropped
   // in favor of one mechanism that shows the same recognizable photo to
-  // everyone, phone or desktop, as soon as their card is in view. Hover is
-  // still a desktop-only extra, just a cheaper one now: no second fetch, only
-  // the `--park-tint` colour recolouring an already-loaded photo — see
-  // 06a-gamecard-parkart.css's `@media (hover: hover)` block.
+  // everyone, phone or desktop, as soon as their card is in view. The club
+  // colour that recolours it (`--park-tint`) rides the same class now, so a
+  // phone sees the wash a mouse used to have to hover for.
   const [parkInView, setParkInView] = useState(false)
   const cardRef = useRef(null)
   // Skipped outright under Data Saver, a real signal the visitor already gave
@@ -137,28 +136,25 @@ export function GameCard({
     return () => io.disconnect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game.venue?.name])
-  // The home club's own tile colour, so a hover on desktop recolours the
-  // grayscale wash toward the club actually playing there instead of a
-  // neutral wash — the AWAY club's colour would tint a park in someone else's
+  // The home club's own tile colour, which recolours the grayscale photo
+  // toward the club actually playing there instead of leaving a neutral
+  // wash — the AWAY club's colour would tint a park in someone else's
   // livery, which reads wrong for a stadium. Uses the SAME treatment jerseysData/
   // liveJerseys already resolve for the home TeamMark below (resolveTreatment),
   // so a same-day City Connect posting tints the same colour its tile wears.
   // null for a team with no curated colour on file — the CSS var() fallback
-  // then shows the same untinted wash a hover always has. `parkWashColorOverride`
+  // then leaves the plain untinted grayscale photo. `parkWashColorOverride`
   // is this club's own escape hatch (the identity drawer's Ballpark wash group,
   // src/lib/ballpark/parkWash.js) — checked first, same precedence every other identity
-  // field gives its override over the app's own computed default.
+  // field gives its override over the app's own computed default. There is no
+  // matching intensity escape hatch any more: the wash prints at full strength
+  // for every club (06a-gamecard-parkart.css).
   const homeTreatment = park
     ? resolveTreatment(game.home, 'home', game.gamePk, game.officialDate, jerseysData, liveJerseys)
     : null
   const parkTint = park
     ? (parkWashColorOverride(game.home.id) ?? tileColorFor(game.home.id, homeTreatment, 'home'))
     : null
-  // This club's own wash opacity, or the app's default (06a-gamecard-parkart.css's
-  // hard-coded 0.55, restated as PARK_WASH_DEFAULT_INTENSITY so the two can't
-  // drift) — set unconditionally on every park-carrying card so an override
-  // takes effect even where --park-tint is the untinted CSS fallback.
-  const parkWashOpacity = park ? parkWashIntensity(game.home.id) : null
   // --pin-accent drives the pinned border/gradient + star (see index.css) and is
   // left unset when not pinned or the team has no known color, so the CSS
   // var(--pin-accent, var(--field)) fallback takes over. Same idea for the park
@@ -169,7 +165,6 @@ export function GameCard({
     ...(park ? { '--park-focus': park.focus } : null),
     ...(park && parkArmed ? { '--park-art': park.cssUrl } : null),
     ...(parkTint ? { '--park-tint': parkTint } : null),
-    ...(parkWashOpacity != null ? { '--park-wash-intensity': parkWashOpacity } : null),
   }
   const card = (
     // No native `title` tooltip on this card — the backdrop's park name prints
@@ -319,6 +314,15 @@ export function GameCard({
           Box score ›
         </button>
       )}
+      {/* The band of light a phone rakes down this card as it crosses the
+          screen — last child so it falls ON everything above, and decorative
+          in the strictest sense: no state, no props, no JS at all. The whole
+          effect is a scroll-driven CSS animation
+          (06a-gamecard-parkart.css's .gamecard__sheen), which is why there is
+          no scroll listener anywhere near this component. A browser without
+          scroll-driven timelines, a mouse pointer, or reduced motion leaves
+          the layer `display: none` and this span costs one empty element. */}
+      <span className="gamecard__sheen" aria-hidden="true" />
     </div>
   )
   if (!stacked) return card

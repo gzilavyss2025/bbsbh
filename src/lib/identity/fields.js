@@ -403,15 +403,20 @@ export const IDENTITY_DIMENSIONS = {
     },
   },
 
-  // The slate card's hover/press wash over this club's HOME ballpark photo
-  // (src/lib/ballpark/parkWash.js, GameCardParts.jsx's `tileColorFor`). Team-level, not
-  // per-treatment: the wash is a fact about which club plays there, not which
-  // jersey it wears that day.
+  // The slate card's wash over this club's HOME ballpark photo
+  // (src/lib/ballpark/parkWash.js, GameCardParts.jsx's `tileColorFor`). Team-level,
+  // not per-treatment: a fact about which club plays there, not which jersey.
+  //
+  // COLOUR ONLY. An `intensity` field sat beside it and is gone: the wash prints
+  // at full strength for every club now (06a-gamecard-parkart.css). Dropping it
+  // from this CLOSED catalog is also what retires the per-club values stored
+  // against it — sanitizeIdentityOverrides refuses an id no dimension names, on
+  // read and on write alike, so no migration had to run.
   parkWash: {
     store: () => 'park-wash-tuning',
     teamLevel: true,
     path: (teamId, field) => [teamId, field],
-    fields: { color: color(), intensity: number(0, 1, 0.05) },
+    fields: { color: color() },
   },
 
   // The mark a treatment's tile wears, as a URL — the runtime counterpart to

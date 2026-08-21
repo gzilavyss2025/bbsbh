@@ -334,6 +334,14 @@ function Section({
     // The benches lead and the facts follow, not the other way round: the
     // lists answer a question the current half is asking, the facts answer one
     // asked once at the top of the game and then only occasionally.
+    //
+    // EACH LIST IS READ AS OF THE HALF ON SCREEN, not as of the reveal mark —
+    // `halfIdx` below. The two agree while the reader is scoring forward, and
+    // part company the moment they page BACK through a game they have already
+    // unsealed: the bench that half opened with is the one this page is about,
+    // so a pinch-hitter who bats in the 8th is not crossed off in the 1st.
+    // The reveal mark still rides along as the other ceiling — see
+    // `enteredAsOf` (api/select.js), which takes both and keeps the lower.
     const battingSide = effHalf === 'top' ? 'away' : 'home'
     const sides = [
       { side: battingSide, groups: ['bench'] },
@@ -350,6 +358,7 @@ function Section({
             side={side}
             treatment={treatment?.[side]}
             revealedThrough={revealedThrough}
+            halfIdx={halfIndex(effInning, effHalf)}
             prospectsData={prospectsData}
             rookiesData={rookiesData}
             isMlb={isMlb}

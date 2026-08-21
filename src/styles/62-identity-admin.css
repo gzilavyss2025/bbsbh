@@ -543,18 +543,16 @@
   color: var(--graphite);
 }
 
-/* ---- the Ballpark hover wash group's preview ----
+/* ---- the Ballpark wash group's preview ----
 
    A fixed mock of what 06a-gamecard-parkart.css's .gamecard__parkart /
-   ::before / ::after layers paint on a slate card — always shown at the
-   HOVERED strength, never the resting 0.24-grayscale-only state, since the
-   whole point here is judging a colour a resting card never shows. Not the
-   same elements as the real card (a `<span>` pair rather than pseudo-
-   elements), because those two layers are reused across the Ballpark hover
-   wash preview and nothing else here needs them — but the same three custom
-   properties (`--park-art`/`--park-focus`/`--park-tint`) and the same
-   `--park-wash-intensity` opacity var feed both, so what is judged here is
-   never a second recipe that could quietly disagree with the real card's. */
+   ::before / ::after layers paint on a slate card. Not the same elements as
+   the real card (a `<span>` pair rather than pseudo-elements), because those
+   two layers are reused across the Ballpark wash preview and nothing else
+   here needs them — but the same three custom properties
+   (`--park-art`/`--park-focus`/`--park-tint`) and the same full-strength tint
+   feed both, so what is judged here is never a second recipe that could
+   quietly disagree with the real card's. */
 .iddrawer__parkwash {
   position: relative;
   aspect-ratio: 3 / 2;
@@ -579,7 +577,9 @@
   inset: -5%;
   background: var(--park-tint, none);
   mix-blend-mode: color;
-  opacity: var(--park-wash-intensity, 0.55);
+  /* Full strength, the one value the real card paints — there is no per-club
+     intensity to preview any more (src/lib/ballpark/parkWash.js). */
+  opacity: 1;
 }
 .iddrawer__parkwash__label {
   position: relative;

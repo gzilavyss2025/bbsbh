@@ -81,6 +81,21 @@ storing a blank — the same delete semantics `mergeOverrides` has for copy.
 | `milbWpaTreatment` | `milb-treatment-tuning` | `{team}.treatments.{side}.{wpaLayout.field \| field}` | same seven layout numbers (under `wpaLayout`, not `layout`), `band`, `wpaWordmark` (no `ownArt`) |
 | `logo` | `logo-url-overrides` | `{team}.{slot}` | (no field segment — an https URL per tile mark) |
 | `mono` | `mono-ink` | `{team}.{field}` | `parts` (a shape-index pin map, JSON-encoded), `source`, `art` |
+| `parkWash` | `park-wash-tuning` | `{team}.{field}` | `color` (team-level, no treatment segment) |
+
+**`parkWash` is colour only, and it used to be colour and strength.** The wash
+laid over a slate card's ballpark photo (`src/lib/ballpark/parkWash.js`,
+`src/styles/06a-gamecard-parkart.css`) had an `intensity` field beside the
+colour, landed at 0.55 and tuned to roughly 0.8 for most of the thirty clubs.
+The site owner asked for one full-strength wash for every club, so the field
+left this catalog and the CSS prints `opacity: 1` outright. **That removal is
+also the migration**: this catalog is closed, so `sanitizeIdentityOverrides`
+drops `identity.parkWash.{team}.intensity` on the API's read as well as its
+write, and the ~30 stored values went inert with no data edit and no deploy
+ordering to get right. Restoring the dial means restoring the field — the old
+values are still in Redis, unread. WHICH colour a park wears stays per club,
+because that is a fact about the club; how hard it is pressed is a fact about
+the app.
 
 **There are two header dimensions, not one.** MLB clubs are keyed by treatment
 and MiLB affiliates by game side — the split the rest of `src/lib` keeps — and

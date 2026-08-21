@@ -126,7 +126,11 @@ async function openSlate(page, path = '/') {
 }
 
 test("today's slate shows the card, and every row on it is whole", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 })
+  // WIDE. Below WIDE_QUERY (740px) this same feed renders as the bottom dock
+  // instead — e2e/wire-dock.spec.js owns that half. The split is the point:
+  // in the flow the card sits above the game list, which is most of a phone's
+  // first screen spent on other clubs' paperwork.
+  await page.setViewportSize({ width: 900, height: 844 })
   await openSlate(page)
   await expect(page.locator('.wirecard')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Around the league' })).toBeVisible()
@@ -148,7 +152,7 @@ test("today's slate shows the card, and every row on it is whole", async ({ page
 })
 
 test('the door opens onto the rest of the moves', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 })
+  await page.setViewportSize({ width: 900, height: 844 })
   await openSlate(page)
   const door = page.locator('.wirecard__door')
   await expect(door).toBeVisible()
@@ -168,6 +172,7 @@ test('a browsed-to past day does not claim the last 48 hours', async ({ page }) 
   await openSlate(page, `/${m}${d}${y}`)
   await expect(page.locator('.gamecard').first()).toBeVisible()
   await expect(page.locator('.wirecard')).toHaveCount(0)
+  await expect(page.locator('.wiredock')).toHaveCount(0)
 })
 
 test('a Triple-A slate does not show a major-league wire', async ({ page }) => {
@@ -175,6 +180,7 @@ test('a Triple-A slate does not show a major-league wire', async ({ page }) => {
   await openSlate(page, '/aaa')
   await expect(page.locator('.datenav')).toBeVisible()
   await expect(page.locator('.wirecard')).toHaveCount(0)
+  await expect(page.locator('.wiredock')).toHaveCount(0)
 })
 
 // The two guards for the ratchet-down bug. The fit has to be able to GROW,

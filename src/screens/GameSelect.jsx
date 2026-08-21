@@ -29,6 +29,8 @@ import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/account/FavoriteTeamModal.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
 import { LeagueMovesCard } from '../components/transactions/LeagueMovesCard.jsx'
+import { WireDock } from '../components/transactions/WireDock.jsx'
+import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
 import {
@@ -106,6 +108,22 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   const todayStr = toApiDate(new Date())
   const dateStr = date ?? todayStr
   const isToday = dateStr === todayStr
+
+  // The league's roster moves have two presentations of the SAME feed, split at
+  // the app's one layout breakpoint. Wide, the in-flow LeagueMovesCard fits
+  // itself to the space above the game list. On a phone that space is the whole
+  // first screen, so the wire docks to the bottom edge instead (WireDock) and
+  // the games get the top back — which is the entire point of the split. Both
+  // draw a move through MoveRow.jsx.
+  const wide = useMediaQuery(WIDE_QUERY)
+  const showWire = isToday && sportId === SPORT_IDS.MLB
+  // The dock renders nothing on a quiet 48 hours, and only IT knows that (the
+  // answer arrives with the fetch). It reports back so the slate pads its floor
+  // for a rail that actually exists — see .screen--wiredock in
+  // 04a-wire-dock.css, and note the padding is what keeps the dock off the
+  // Reveal all results bar.
+  const [dockPresent, setDockPresent] = useState(false)
+  const docked = showWire && !wide && dockPresent
 
   // Site-wide "Scores Unlocked" pass. The toggle is only OFFERED on today's
   // slate — you can't retroactively consent to a day you've paged back to — but
@@ -504,7 +522,11 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   }, [rosterIds.data, prospects.data])
 
   return (
-    <div className={`screen screen--slate${coldLoad ? ' screen--coldload' : ''}`}>
+    <div
+      className={`screen screen--slate${coldLoad ? ' screen--coldload' : ''}${
+        docked ? ' screen--wiredock' : ''
+      }`}
+    >
       {/* Title + league toggle + search share one row: the Tally wordmark
           reloads THIS league's slate for today on the left (a full page load —
           see lib/home.js), the condensed MLB/AAA/… buttons — the URL's own
@@ -732,9 +754,10 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
       {/* Roster moves from the last 48 hours, live off the wire (issue #772).
           TODAY's MLB slate only — "the last 48 hours" is a claim about now, so
           on a browsed-to past day it would read as a bug, not as news. Renders
-          null while loading, on failure, and on a quiet 48 hours, and sizes
-          itself to the space it has. See LeagueMovesCard.jsx. */}
-      {isToday && sportId === SPORT_IDS.MLB && <LeagueMovesCard endDate={dateStr} />}
+          null while loading, on failure, and on a quiet 48 hours. WIDE ONLY:
+          the phone's copy of this feed is the dock at the foot of this screen.
+          See LeagueMovesCard.jsx. */}
+      {showWire && wide && <LeagueMovesCard endDate={dateStr} />}
 
       <AsyncStatus
         loading={loading}
@@ -891,6 +914,14 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
           }}
         />
       )}
+
+      {/* Last child on purpose: the dock is fixed, so its position on the page
+          is decided by CSS, but being last puts it after RevealAllBar in the
+          DOM — which is the tab order a thumb-height control should have, and
+          which keeps the slate's own content ahead of it for a screen reader.
+          It publishes --wire-rail-h and reports whether it rendered at all;
+          `docked` above turns that into the screen's bottom padding. */}
+      {showWire && !wide && <WireDock endDate={dateStr} onPresence={setDockPresent} />}
     </div>
   )
 }

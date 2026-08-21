@@ -39,6 +39,7 @@ import {
   BASERUNNER_EVENTS,
   BaserunningNote,
   EVENT_CODES,
+  DelayNotice,
   EjectionBar,
   EventCard,
   EventNote,
@@ -390,9 +391,14 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // (who, by which umpire), so there's nothing else to add to a card.
           node = <EjectionBar text={entry.text} />
         } else if (entry.eventType === 'game_advisory') {
-          // A delay advisory (injury, on-field, weather) — same card family
-          // as an ejection, since neither has a person to put a headshot to.
-          node = <EjectionBar code="DELAY" text={entry.text} />
+          // A delay (injury, on-field, weather) that came to something — the
+          // only kind that reaches the feed now (ADR-0060). Same card family as
+          // an ejection, but with the subject the feed itself gets wrong: the
+          // man who LEFT, not whoever was batting when play stopped. His club
+          // is whichever side the change came off (entry.subjectSide); an
+          // umpire change belongs to neither and carries no headshot at all.
+          const delayTeamId = entry.subjectSide === 'batting' ? battingTeamId : pitchingTeamId
+          node = <DelayNotice entry={entry} teamId={delayTeamId} />
         } else if (entry.eventType === 'pinch_running') {
           // A pinch runner entering mid-flow gets the same headshot card as a
           // pitching/defensive change — on the BATTING team's side, since he's
