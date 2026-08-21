@@ -3,13 +3,7 @@ import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Headshot } from './Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { usePlayerHoverStats } from '../../hooks/usePlayerHoverStats.js'
-import {
-  subscribeHover,
-  getHoverSnapshot,
-  cancelHoverSchedule,
-  scheduleHoverHide,
-  hideHoverNow,
-} from '../../lib/playerHoverStore.js'
+import { subscribeHover, getHoverSnapshot, hideHoverNow } from '../../lib/playerHoverStore.js'
 import { playerHoverCardPosition } from '../../lib/playerHoverPosition.js'
 import { teamPrimaryColor } from '../../lib/teams.js'
 
@@ -35,13 +29,20 @@ export function PlayerHoverCard() {
     }
     // A captured rect describes where the trigger WAS — once the page moves
     // the card is no longer anchored to anything real, so it closes rather
-    // than tracking the scroll live.
-    const onScroll = () => hideHoverNow()
+    // than tracking the scroll live. `wheel` and `touchmove` close it for a
+    // reason `scroll` alone misses: a wheel tick over a page (or a pane) with
+    // nothing left to scroll fires NO scroll event, so the intent to travel
+    // is there and the card would sit through it.
+    const close = () => hideHoverNow()
     window.addEventListener('keydown', onKey)
-    window.addEventListener('scroll', onScroll, { capture: true, passive: true })
+    window.addEventListener('scroll', close, { capture: true, passive: true })
+    window.addEventListener('wheel', close, { passive: true })
+    window.addEventListener('touchmove', close, { passive: true })
     return () => {
       window.removeEventListener('keydown', onKey)
-      window.removeEventListener('scroll', onScroll, { capture: true })
+      window.removeEventListener('scroll', close, { capture: true })
+      window.removeEventListener('wheel', close)
+      window.removeEventListener('touchmove', close)
     }
   }, [active])
 
@@ -62,8 +63,6 @@ export function PlayerHoverCard() {
           top: pos.top,
           ...(accent ? { '--phcard-accent': accent } : undefined),
         }}
-        onMouseEnter={cancelHoverSchedule}
-        onMouseLeave={() => scheduleHoverHide(id)}
       >
         {data ? <PlayerHoverCardBody data={data} /> : <div className="phcard__loading" aria-hidden="true" />}
       </div>
