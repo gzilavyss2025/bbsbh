@@ -41,7 +41,7 @@ import { teamClubNameShort } from '../../lib/teams.js'
 // comparison in the league, and a best match of 67 rather than 90 is the
 // honest answer. Printing it lets a reader calibrate instead of taking three
 // names on faith. It is a match SCORE on a 0-100 scale, never a probability —
-// the "match" unit under it and the note beneath the grid both say so, and
+// the "match" unit under it and the legend's "Not" row both say so, and
 // neither may be dropped now that the figure carries a percent sign.
 //
 // `measure` is the legend's term list, and it is the point of the card as much
@@ -51,22 +51,40 @@ import { teamClubNameShort } from '../../lib/teams.js'
 // those terms from the ranking model's own key list where they can, so the
 // legend can't drift from what the math actually compares — and it lists what
 // is SCORED, so a term belongs here only if the distance function reads it.
-export function SimilarPlayerGrid({ rows, measure, note }) {
+//
+// `excludes` is the same idea run in reverse — the one thing a reader would
+// otherwise assume is in the comparison and isn't (results, for a pitcher;
+// production, for a hitter). It used to be its own italic sentence ("What he
+// throws, not how he fares with it.") underneath the chips, which read as ad
+// copy the moment the terms above it stopped being one too: a reader who just
+// finished NOT reading a run-on phrase hit a full clause one line later. A
+// second labeled row in the same idiom — "Measured on" gets chips, "Not"
+// gets one — says the same thing without switching registers.
+export function SimilarPlayerGrid({ rows, measure, excludes }) {
   if (!rows?.length) return null
 
   return (
     <div className="simlike">
-      {/* One legend block, not three loose fragments. What the comparison runs
-          on and what it stops short of claiming are the same thought, and they
-          used to sit at opposite ends of the card with the three faces between
-          them — the caveat in particular read as a stray line of copy that had
-          drifted under the grid. Stated together, before the evidence. */}
+      {/* One legend block, not three loose fragments — what the comparison
+          runs on and what it deliberately leaves out are the same thought,
+          and used to sit at opposite ends of the card with the three faces
+          between them. Stated together, before the evidence, both as
+          label-plus-chip rows so neither reads as a sentence to parse. */}
       <div className="simlike__legend">
-        <p className="simlike__measure">
+        <div className="simlike__measure">
           <span className="simlike__measurelabel">Measured on</span>
-          <span className="simlike__measureterms">{measure.join(' · ')}</span>
-        </p>
-        <p className="simlike__note">{note}</p>
+          <ul className="simlike__terms">
+            {measure.map((term) => (
+              <li key={term} className="simlike__term">{term}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="simlike__measure simlike__measure--excludes">
+          <span className="simlike__measurelabel">Not</span>
+          <ul className="simlike__terms">
+            <li className="simlike__term simlike__term--muted">{excludes}</li>
+          </ul>
+        </div>
       </div>
       <ul className="simlike__list">
         {rows.map((p) => {

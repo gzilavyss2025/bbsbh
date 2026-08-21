@@ -81,8 +81,9 @@ export function SimilarHitters({ similar }) {
       rows={rows}
       measure={MEASURE}
       // The one thing the card has to disclaim: this compares the skills he
-      // SHOWS, not the line he puts up with them.
-      note="How he hits, not how well he hits."
+      // SHOWS, not the line he puts up with them. Same fragment-not-sentence
+      // move as the pitching card's `excludes` — see SimilarPitchers.jsx.
+      excludes="Production"
     />
   )
 }
