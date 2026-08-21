@@ -7,6 +7,12 @@ import { useEffect, useState } from 'react'
 // the width the CSS starts laying columns.
 export const WIDE_QUERY = '(min-width: 740px)'
 
+// The player hover card's own gate — "desktop" as this app already means it
+// (WIDE_QUERY's width) PLUS an actual mouse (hover: hover, pointer: fine), so
+// a wide touchscreen tablet — which would otherwise fire a synthetic
+// mouseenter on tap with no real "leave" — never triggers a fetch-on-hover.
+export const HOVER_CARD_QUERY = '(min-width: 740px) and (hover: hover) and (pointer: fine)'
+
 export function useMediaQuery(query) {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
 

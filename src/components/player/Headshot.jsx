@@ -37,10 +37,19 @@ import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../../
 // MLB org for a prospect (his card tints with the org but he's not a
 // major-leaguer) pass `isMlb` explicitly from his ACTUAL team so he keeps the
 // milb rung.
+//
+// `fallbackTeamId` (optional) is a SECOND team to try `teamLogoUrl` on if
+// `teamId`'s own mark 404s, tried before the monogram — the player hover
+// card's own need: a MiLB affiliate's mark can be missing from the CDN, and
+// the parent MLB org's mark is a better miss than a bare initial. Absent for
+// every other caller, which is what keeps this rung invisible to them (their
+// primary mark practically always resolves, since it's usually the player's
+// own MLB club).
 export function Headshot({
   personId,
   name,
   teamId = null,
+  fallbackTeamId = null,
   coach = false,
   isMlb,
   className = '',
@@ -54,24 +63,28 @@ export function Headshot({
   const mlb = isMlb ?? isMlbTeamId(teamId)
   const sources = headshotSources(personId, { coach, mlb })
   const [rung, setRung] = useState(0)
-  const [logoFailed, setLogoFailed] = useState(false)
+  // 'primary' -> teamId's own mark; 'fallback' -> fallbackTeamId's; 'failed'
+  // -> neither loaded, render the monogram.
+  const [logoStage, setLogoStage] = useState('primary')
   // Reset the fallback progress when the identity this shot describes changes
   // — computed during render (React's documented "adjust state while
   // rendering" escape hatch), not in an effect, so there's no extra
   // stale-photo render before the reset takes effect.
-  const identityKey = `${personId}|${teamId}|${coach}|${mlb}`
+  const identityKey = `${personId}|${teamId}|${fallbackTeamId}|${coach}|${mlb}`
   const [prevIdentityKey, setPrevIdentityKey] = useState(identityKey)
   if (identityKey !== prevIdentityKey) {
     setPrevIdentityKey(identityKey)
     setRung(0)
-    setLogoFailed(false)
+    setLogoStage('primary')
   }
 
   // A single-letter monogram fallback, not a re-uppercase of displayed text.
   const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
   const photoUrl = sources[rung] ?? null
   const bg = teamTintColor(teamId)
-  const logoUrl = !photoUrl && teamId && !logoFailed ? teamLogoUrl(teamId) : null
+  const logoTeamId =
+    logoStage === 'primary' ? teamId : logoStage === 'fallback' ? fallbackTeamId : null
+  const logoUrl = !photoUrl && logoTeamId ? teamLogoUrl(logoTeamId) : null
 
   // Optional: lets a caller react to "no real photo" — e.g. moving a detail
   // normally anchored to the photo (a position tag) into plain text instead
@@ -103,7 +116,9 @@ export function Headshot({
             alt=""
             loading="lazy"
             decoding="async"
-            onError={() => setLogoFailed(true)}
+            onError={() =>
+              setLogoStage((s) => (s === 'primary' && fallbackTeamId ? 'fallback' : 'failed'))
+            }
             aria-hidden="true"
           />
         </span>

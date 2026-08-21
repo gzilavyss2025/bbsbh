@@ -595,6 +595,10 @@
         "api/playbyplay/notificationCards.js"
       ]
     },
+    "playerHoverCard.js": {
+      "class": "spoiler-free",
+      "why": "The global name-link hover card (PlayerLink, desktop only) — season stat tiles, same open-surface footing as the player page's own season tiles (person/stats.js). No per-game result."
+    },
     "postseasonHistory.js": {
       "class": "spoiler-free",
       "why": "Static postseason-history.json — completed brackets back to 2000. Immutable history, outside the rule's scope."

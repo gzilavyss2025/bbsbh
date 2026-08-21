@@ -6,6 +6,7 @@ import { NavProvider } from './lib/nav.jsx'
 import { isClerkEnabled } from './lib/clerkConfig.js'
 import { Loader } from './components/ui/Loader.jsx'
 import { SyncStatusProvider } from './components/sync/SyncStatusProvider.jsx'
+import { PlayerHoverCard } from './components/player/PlayerHoverCard.jsx'
 import { useMotionPreference } from './hooks/preferences/useMotionPreference.js'
 import { useIdentityVersion } from './lib/identity/useIdentityVersion.js'
 import {
@@ -495,6 +496,11 @@ export default function App() {
   // name anywhere can navigate without threading a prop through the tree.
   return (
     <NavProvider navigate={go}>
+      {/* The one global player hover card (desktop only — see PlayerLink.jsx).
+          An external store like SyncStatusProvider below, not Context: a page
+          can carry dozens of PlayerLinks, and this is the only component that
+          re-renders when the hovered player changes. */}
+      <PlayerHoverCard />
       {/* Mounted unconditionally — it touches no Clerk API of its own, and the
           sync receipt has to be able to say "this deploy has no account
           feature" rather than rendering nothing. It is an external store, so
