@@ -157,11 +157,13 @@ function isUndebutedSigning(t, debutedIds) {
 // outright/release from the org's own 40-man, so an affiliate-level DFA row
 // IS the MLB-relevant event. `bucketToOrg` (already run before this
 // function — see the generator) is the only org-touch gate this code needs.
-// This exemption is only safe as long as that holds: `filterStoryworthy` has
-// exactly one caller in the codebase (gen-team-transactions.mjs), and it
-// always runs bucketToOrg first. A future second caller MUST do the same, or
-// re-add a direct-touch check scoped to just that caller — don't loosen this
-// gate itself.
+// This exemption is only safe as long as that holds — so every caller of
+// `filterStoryworthy` must put a row through an org-touch gate FIRST. All three
+// do: gen-team-transactions.mjs and transactions/clubFeed.js run bucketToOrg,
+// and transactions/league.js runs assignRowOwners, which reaches an org the
+// same way (either club, mapped up through the affiliate table) and then keeps
+// only one of them. A future caller MUST do the same, or re-add a direct-touch
+// check scoped to just that caller — don't loosen this gate itself.
 const DIRECT_TOUCH_EXEMPT_CODES = new Set(['DFA'])
 
 export function filterStoryworthy(rows, ctx = {}) {

@@ -497,9 +497,13 @@ test('Jul 7: injured-list+replacement, 3-player shuffle, transfer with its own p
   ])
 
   const shuffle = stories[1]
+  // Lara (925497) before Gasser (925499): a story's rows are ordered by the id
+  // the wire filed them under, not by where they happened to sit in the
+  // response array. This fixture is verbatim from the real pull, and the real
+  // pull did not return that day in id order — see groupIntoStories.
   assert.deepEqual(shuffle.rail.map((r) => [r.role, r.banner, r.surname]), [
-    ['in', 'Up', 'Gasser'],
     ['in', 'Up', 'Lara'],
+    ['in', 'Up', 'Gasser'],
     ['out', 'Down', 'Perkins'],
   ])
   // Two different affiliates in one story (Gasser from ACL Brewers, Lara from
@@ -549,15 +553,37 @@ test('Jul 10: a same-day DFA + option + signing cluster into one shuffle', () =>
   const { stories } = days[0]
   assert.equal(stories.length, 1)
   assert.equal(stories[0].type, 'shuffle')
+  // Arrivals first, then departures in filing order — Rom (926754) before
+  // McGee (926755), which is NOT the order this fixture's array holds them in.
   assert.deepEqual(stories[0].rail.map((r) => [r.role, r.banner, r.surname]), [
     ['in', 'Up', 'Wilson'],
-    ['out', 'Down', 'McGee'],
     ['out', 'Down', 'Rom'],
+    ['out', 'Down', 'McGee'],
   ])
   assert.equal(
     stories[0].cutline.map((s) => s.text).join(''),
-    'Signed free agent RHP Bryse Wilson; designated RHP Easton McGee for assignment; optioned LHP Drew Rom to Nashville Sounds.',
+    'Signed free agent RHP Bryse Wilson; optioned LHP Drew Rom to Nashville Sounds; designated RHP Easton McGee for assignment.',
   )
+})
+
+// ---------------------------------------------------------------------------
+// Row order in, same stories out
+// ---------------------------------------------------------------------------
+// The club page lays a live three-day window over the nightly file
+// (api/transactions/clubFeed.js) and lets one of the two tell each day. That is
+// only safe if both tell it the same way — and they were not: the wire returns
+// a day in an arbitrary order, the same rows arrive in a different order from a
+// season-long query than from a five-day one, and Step 2 paired an arrival with
+// a departure in whatever order it met them. Measured on 2026-08-19, the file
+// and a live pull disagreed on 3 of 30 club-days about which of the Mets' two
+// recalls was told beside the injured-list placement — from the identical set
+// of rows.
+test('a day groups the same however the feed orders its rows', () => {
+  const forward = storiesFor(JUL07)
+  const reversed = storiesFor([...JUL07].reverse())
+  const shuffled = storiesFor([...JUL07].slice(3).concat([...JUL07].slice(0, 3)))
+  assert.deepEqual(reversed, forward)
+  assert.deepEqual(shuffled, forward)
 })
 
 test('Jun 24: a solo signing and a solo suspension, not merged into one story', () => {

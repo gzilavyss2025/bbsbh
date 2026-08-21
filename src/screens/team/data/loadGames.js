@@ -1,7 +1,7 @@
 import { fetchTeam } from '../../../api/team.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../../../api/schedule.js'
 import { allDecidedGames, allStartedGames } from '../../../api/scheduleGames.js'
-import { loadMoreTeamTransactions } from '../../../api/teamTransactions.js'
+import { loadClubTransactionsPage } from '../../../api/transactions/clubFeed.js'
 import { seasonOf, cutoffFor } from './shared.js'
 
 // The Games tab's own data — the season schedule, every decided game so far,
@@ -28,10 +28,13 @@ export async function loadGames(id, asOf) {
     // belongs in their strip.
     sportId === 1 ? fetchAllStarGame(season) : Promise.resolve(null),
     // MLB only in phase 1 (see data-layer-scope.md) — a MiLB affiliate gets no
-    // card. Just the first 45-day page; "Load more" pages further back on
-    // demand from inside the card itself.
+    // card. The first 45-day page of the nightly file WITH the live window laid
+    // over its newest days (transactions/clubFeed.js), so a move filed this
+    // morning is on the club's own page as fast as it is on the home slate's
+    // wire. "Load more" pages further back from inside the card itself, and
+    // stays on the file — nothing live reaches that far.
     sportId === 1
-      ? loadMoreTeamTransactions(id, null, asOf).catch(() => ({ days: [], cursor: null, hasMore: false }))
+      ? loadClubTransactionsPage(id, asOf).catch(() => ({ days: [], cursor: null, hasMore: false }))
       : Promise.resolve({ days: [], cursor: null, hasMore: false }),
   ])
 

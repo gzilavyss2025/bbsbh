@@ -118,18 +118,62 @@
    a .photorail--strip and no longer floats at all, but the width still earns
    its keep there: it fits a 4th slot per row and takes a line or two off the
    long cutline those stories carry. See the wide flag in
-   TeamTransactionsCard.jsx. */
+   TxStory.jsx. */
 .txstory--wide {
   width: 360px;
 }
-.txstory__date {
-  margin: 0 0 4px;
+/* THE DAY TAB — one divider standing in the deck before each day's run of
+   cards (DayTab in TxStory.jsx). It replaced a dateline printed on every card,
+   which restated the previous card's date 29.7% of the time and marked a day
+   boundary not at all.
+
+   A ledger tab, so it reads as the paper it is imitating: a kraft hairline
+   either side, the day written short and stacked, the day's card count under
+   it. Stretched to the deck's own height rather than the tallest card's
+   content, which is what makes the rules read as one continuous divider down
+   the deck instead of a floating label.
+
+   Stacked short tokens, NOT rotated text: the deck is only as tall as its
+   tallest card, and a quiet day of one-line cutlines leaves under 100px to
+   write in — stacked lines reflow, a rotated dateline would clip. */
+.txday {
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 2px;
+  width: 40px;
+  padding: 2px 8px 0 0;
+  border-right: var(--bw-hair) solid var(--rule-soft);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-caption);
+  /* A snap target like every other item in the row, and it has to be: a
+     scroller settles on its FIRST snap target, so leaving the tab out opened
+     the deck 66px in with the day it names already off the left edge. Snapping
+     to a divider costs nothing — it is 40px wide, so a swipe that lands on one
+     brings the day's first card with it. */
+  scroll-snap-align: start;
+}
+/* The day number is the tab's anchor — the eye finds a numeral in a stack of
+   three-letter tokens faster than it reads any of them. */
+.txday__day {
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+}
+/* The day's count, set apart from the date above it the way the wire's own
+   dateline row sets its count apart from the rule — a number on its own line
+   reads as a tally, not as part of the date. */
+.txday__count {
+  margin-top: 2px;
+  padding-top: 3px;
+  border-top: var(--bw-hair) solid var(--rule-soft);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* The rail floats top-right; the type pill + cutline run as normal text flow
@@ -142,7 +186,7 @@
    A right float that overflows does so to the LEFT, i.e. straight over the
    PREVIOUS card in the deck, which is exactly the escape a big roster shuffle
    used to stage (photos and banners printed across a neighbour's sentence).
-   TeamTransactionsCard sends any rail past RAIL_FLOAT_MAX to --strip below
+   TxStory sends any rail past RAIL_FLOAT_MAX to --strip below
    before it can get there; these two declarations mean a rail that somehow
    arrives here anyway wraps inside its own card instead of escaping it. */
 .photorail {
@@ -235,7 +279,9 @@
   color: var(--graphite);
 }
 /* Same three-tone system as .txntl__chip--add/--out/--move, mapped per story
-   type (see TYPE_TONE in TeamTransactionsCard.jsx) rather than per row. */
+   type (see TYPE_TONE in MoveRow.jsx, shared with the wire) rather than per
+   row. A story the pipeline typed `roster-move` gets NO pill at all — see that
+   constant for why a label on a third of the rows is not a label. */
 .txstory__type--add { color: var(--field-deep); }
 .txstory__type--out { color: var(--clay-deep); }
 .txstory__type--move { color: var(--text-muted); }

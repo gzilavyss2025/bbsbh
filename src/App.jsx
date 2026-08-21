@@ -164,6 +164,10 @@ const MinorsTab = lazyNamed(() => import('./screens/team/MinorsTab.jsx'), 'Minor
 // it (or for its own stylesheet).
 const StampInPage = lazyNamed(() => import('./screens/team/StampInPage.jsx'), 'StampInPage')
 const TeamPhotosPage = lazyNamed(() => import('./screens/team/TeamPhotosPage.jsx'), 'TeamPhotosPage')
+const TeamTransactionsPage = lazyNamed(
+  () => import('./screens/team/TeamTransactionsPage.jsx'),
+  'TeamTransactionsPage',
+)
 const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
 const UmpireRankingsPage = lazyNamed(
@@ -436,6 +440,8 @@ export default function App() {
     content = <StampInPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team-photos') {
     content = <TeamPhotosPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'team-transactions') {
+    content = <TeamTransactionsPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {
     content = (
       <LeadersPage

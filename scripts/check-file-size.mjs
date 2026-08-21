@@ -89,7 +89,7 @@ const BUDGETS = {
   'src/styles/26-player-page.css': 1200, // 1125 — the Trophy Case split out to 67-trophy-case.css
   'src/styles/27-player-position-innings.css': 700, // 636 — "Pitches like" / "Hits like" moved to 51-similar-players.css
   'src/styles/28-team-hub.css': 900, // 859 — the identity hero split out to 28a-team-hub-hero.css
-  'src/styles/29-team-transactions.css': 900, // 844
+  'src/styles/29-team-transactions.css': 950, // 844 -> 941: the deck's day tab (.txday), one divider standing before each day's run of cards. It replaced a dateline printed on EVERY card, which restated the previous card's date on 29.7% of them; the rule it enforces and the reason the tab is stacked rather than rotated are what the added prose carries.
   'src/styles/31-wild-card.css': 1100, // 1088
   'src/styles/35-postseason-series.css': 700, // 693
   'src/styles/42-first-scorebook.css': 900, // 854
