@@ -21,19 +21,20 @@ import { PlayDiamond } from './PlayDiamond.jsx'
 //    this sheet's center chip is single-line (see scorecardCenterCode)
 //  • rbi, reached/scored/legNotations/outAt/outCode/outNumber — the diamond
 //
-// TWO HANDOVER MARKS ride the TOP EDGE of this box, both drawn the way a
-// scorer rules one off: a red line across the box, with a uniform number in
-// red beside it. The line means "what is under it is a different man than
-// what was above it".
+// TWO HANDOVER MARKS can land on this box. Both are a red rule with a uniform
+// number in red beside it, and both mean "past this line it was a different
+// man" — but they are ruled on DIFFERENT EDGES, because they cut across
+// different things.
 //  • `subJersey` — the batting order changed here. Every man who fills a slot
-//    shares its one row of boxes (his name goes on a written line of its own
-//    in the rail), so the rule falls on the first box the INCOMING batter
-//    bats in, and his number sits UNDER the line, in the box that is now his.
-//  • `pitcherJersey` — the club in the field changed arms. The rule falls on
-//    the box of the first batter the new pitcher faces, and his number sits
-//    ABOVE the line, on the side of it his work begins.
-// A double switch can set both on one box; the two numbers never collide
-// because they take opposite sides of the same rule.
+//    shares its one row of boxes (his name goes on a written line of its own in
+//    the rail), so the rule stands DOWN THE LEFT EDGE of the first box the
+//    incoming batter bats in: it closes off the man before him along the row he
+//    is taking over, which is how the row reads — left to right, trip by trip.
+//  • `pitcherJersey` — the club in the field changed arms. That cuts across the
+//    ORDER, not along it, so its rule lies ACROSS THE TOP EDGE of the box of
+//    the first batter the new arm faces, his number above it.
+// A double switch sets both on one box and they never collide: one is vertical
+// at the left, the other horizontal along the top.
 //
 // Three marks the paper sheet carries that this box also draws:
 //  • `note` — the scorer's own override (lib/scorecardNotes.js): the outcome
@@ -76,15 +77,23 @@ const STRIKE_COL_CAP = 7
 //
 // THE BACKWARDS K IS A CENTER MARK, not an outcome. A called third strike is
 // still a strikeout, so the box reads SO like any other; what tells it apart is
-// the ꓘ a scorer draws where the K would go, in the middle of the diamond. It
-// used to sit in the outcome box INSTEAD of the SO, which left the sheet's one
-// column of out categories with a hole in it and put the strikeout's own
-// notation nowhere. Its `code` is often empty on a called strike (see
-// entriesView's `atbat.code || 'K'`), so the glyph is written here rather than
-// read off the feed.
+// the backwards K a scorer draws where the K would go, in the middle of the
+// diamond. It used to sit in the outcome box INSTEAD of the SO, which left the
+// sheet's one column of out categories with a hole in it and put the
+// strikeout's own notation nowhere. Its `code` is often empty on a called
+// strike (see entriesView's `atbat.code || 'K'`), so the mark is decided here
+// rather than read off the feed.
+//
+// A REAL "K", MIRRORED — never the ꓘ character (U+A4D8, a Lisu letter). This
+// is the app's own way of drawing it (`.pbp__klooking`, the play-by-play card's
+// same mark) and the reason is type, not taste: JetBrains Mono has no glyph at
+// U+A4D8, so the character silently fell back to whatever system face did, and
+// one mark on a sheet of mono notation was set in a different font. `looking`
+// is returned as a flag so the CALLER flips it in CSS.
 export function atBatMarks(atbat) {
   const isPlaced = atbat?.kind === 'placed'
   const kind = atbat?.codeKind ?? ''
+  const looking = kind === 'out' && Boolean(atbat?.calledLooking)
   const outcome = isPlaced
     ? 'AR'
     : kind === 'out'
@@ -94,15 +103,9 @@ export function atBatMarks(atbat) {
         : atbat?.code ?? ''
   const centerText = atbat?.centerCode ?? atbat?.code ?? ''
   const center =
-    kind === 'out'
-      ? atbat?.calledLooking
-        ? 'ꓘ'
-        : centerText
-      : kind === 'interrupted'
-        ? centerText
-        : ''
+    kind === 'out' ? (looking ? 'K' : centerText) : kind === 'interrupted' ? centerText : ''
   const rbi = !isPlaced && atbat?.rbi ? String(atbat.rbi) : ''
-  return { isPlaced, kind, outcome, center, rbi }
+  return { isPlaced, kind, outcome, center, rbi, looking }
 }
 
 export function AtBatBox({
@@ -149,11 +152,16 @@ export function AtBatBox({
         atbat?.endsHalf ? 'sc-ab--halfend' : ''
       } ${fresh ? 'sc-ab--fresh' : ''} ${handover ? 'sc-ab--handover' : ''}`}
     >
-      {handover && (
-        <span className="sc-sub" aria-hidden="true">
-          {pitcherJersey != null && <span className="sc-sub__num sc-sub__num--pitcher">{pitcherJersey}</span>}
+      {pitcherJersey != null && (
+        <span className="sc-sub sc-sub--pitcher" aria-hidden="true">
+          <span className="sc-sub__num sc-sub__num--pitcher">{pitcherJersey}</span>
           <span className="sc-sub__rule" />
-          {subJersey != null && <span className="sc-sub__num sc-sub__num--batter">{subJersey}</span>}
+        </span>
+      )}
+      {subJersey != null && (
+        <span className="sc-sub sc-sub--batter" aria-hidden="true">
+          <span className="sc-sub__rule" />
+          <span className="sc-sub__num sc-sub__num--batter">{subJersey}</span>
         </span>
       )}
       <div className="sc-ab__main">
@@ -190,6 +198,11 @@ export function AtBatBox({
                 kind === 'interrupted' && note?.center == null
                   ? 'sc-ab__center--interrupted'
                   : 'sc-ab__center--out'
+              } ${
+                /* Only the DERIVED called strike is mirrored. A scorer who
+                   pencils his own mark over this box gets the letters he
+                   typed, the right way round. */
+                marks.looking && note?.center == null ? 'sc-ab__center--looking' : ''
               }`}
             >
               {center}

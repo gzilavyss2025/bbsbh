@@ -18,59 +18,97 @@
   height: 100%;
   box-sizing: border-box;
 }
-/* ---- The handover mark ---- */
+/* ---- The handover marks ---- */
 /* A scorer RULES OFF the box where a change takes effect and writes the
-   incoming man's uniform number by the line: everything under the line was a
-   different man than everything above it. Two changes take this same mark, and
-   both are anchored on the ARRIVING box — the first box the new batter bats
-   in, the box of the first batter a new pitcher faces. Inked seam-red, the
-   app's own "this changed mid-game" colour (the defense diamond's entering
-   fielder and the pinch-runner mark wear the same red), so a handover is
-   tellable from notation at arm's length.
+   incoming man's uniform number by the line: past it, a different man. Two
+   changes take this mark, both anchored on the ARRIVING box, and both inked
+   seam-red — the app's own "this changed mid-game" colour, the same red the
+   defense diamond's entering fielder and the pinch-runner mark wear, so a
+   handover is tellable from notation at arm's length.
 
-   The mark takes NO layout of its own — the box under it is a real plate
-   appearance now, not an empty cell the mark can have to itself. It is
-   absolutely positioned on the box's top edge and the numbers hang ABOVE the
-   rule, into the bottom-left of the box above, which is blank on every box the
-   sheet draws (the out circle and the end-of-inning slash both live in the
-   bottom RIGHT). Cells don't clip, so the overhang paints.
+   THEY RULE DIFFERENT EDGES, because they cut across different things.
 
-   Its host .sc-ab is already `position: relative` for the out circle, and this
-   sits above the strip's opaque fill by z-index rather than by tree order,
-   since the strip is deliberately unpositioned (see .sc-ab__strip). */
+   The BATTING ORDER change stands DOWN THE LEFT EDGE. Every man who fills a
+   slot shares its one row of boxes, so the rule closes off the man before him
+   ALONG that row — left to right, trip by trip, which is the direction the row
+   is read. His number rides the rule at mid-height, on a small paper chip so it
+   stays legible where the diamond's left vertex reaches under it (the same
+   trick .sc-ab__center uses to sit over the diamond).
+
+   The PITCHING change lies ACROSS THE TOP EDGE, cutting across the order rather
+   than along it, with the number above the rule — hanging into the bottom-left
+   of the box above, which is blank on every box the sheet draws (the out circle
+   and the end-of-inning slash both live in the bottom RIGHT). Cells don't clip,
+   so the overhang paints.
+
+   Neither mark takes any LAYOUT: the box under it is a real plate appearance
+   now, not an empty cell it can have to itself. Both are absolutely positioned
+   on .sc-ab, which is already `position: relative` for the out circle, and both
+   sit above the strip's opaque fill by z-index rather than by tree order, since
+   the strip is deliberately unpositioned (see .sc-ab__strip). */
 .sc-sub {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
   z-index: 2;
   display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 0;
-  padding-left: 3px;
   pointer-events: none;
 }
 .sc-sub__rule {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
   background: var(--accent-negative);
 }
-/* Both numbers ride above the rule, the pitcher's first: a double switch sets
-   both on one box and they read left to right as "this arm, then this bat". */
 .sc-sub__num {
   position: relative;
-  bottom: 2px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
   line-height: var(--lh-solid);
   color: var(--accent-negative);
 }
+
+/* The pitching change: along the top, number above the rule. `height: 0` with
+   the items aligned to its end is what lifts them clear of the box entirely. */
+.sc-sub--pitcher {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  align-items: flex-end;
+  padding-left: 3px;
+}
+.sc-sub--pitcher .sc-sub__rule {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+.sc-sub__num--pitcher {
+  bottom: 2px;
+}
+
+/* The batting-order change: down the left edge, number on the rule at
+   mid-height. */
+.sc-sub--batter {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  align-items: center;
+}
+.sc-sub--batter .sc-sub__rule {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+}
+.sc-sub__num--batter {
+  left: 3px;
+  padding: 0 1px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-inset);
+}
+
 /* The END-OF-INNING SLASH: the half ENDED on this plate appearance, so its
    box takes the scorer's mark for it — a short "/" drawn ACROSS THE
    LOWER-RIGHT CORNER, cutting the corner off. This is the standard notation
@@ -277,6 +315,7 @@
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
   color: var(--text-body);
 }
 /* A base hit: the outcome inks green and is ringed, the way a scorer circles a
@@ -305,7 +344,11 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  /* Centred with the standalone `translate` property, NOT inside `transform` —
+     which leaves `transform` free for the called strike's mirror below. The
+     play-by-play's copy of this mark learned the same lesson; see
+     .pbp__code--center. */
+  translate: -50% -50%;
   padding: 0 1px;
   border-radius: var(--radius-xs);
   background: var(--surface-inset);
@@ -314,6 +357,7 @@
      in the box, penciled big the way a scorer fills the middle of the diamond. */
   font-size: var(--fs-h3);
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
   line-height: var(--lh-solid);
   white-space: nowrap;
 }
@@ -332,11 +376,14 @@
    earlier draft floated it at mid-height on the strip divider, which is
    not where the paper puts it). */
 /* THE OUT NUMBER, ringed and inked RED. A scorer circles the 1st, 2nd and 3rd
-   out of a half in a colour of its own so the three read off the page while
-   the notation around them stays pencil — counting outs is what you do most on
-   a live sheet. Seam-red is the app's own second ink (--accent-negative, the
-   same red the handover rule above and the pinch-runner mark wear); at 5.05:1
-   on --surface-card it clears AA as normal text, and the ring is UI at 3:1. */
+   out of a half in a colour of its own so the three read off the page while the
+   notation around them stays pencil — counting outs is what you do most on a
+   live sheet.
+
+   Dressed exactly as the play-by-play card dresses the SAME mark
+   (.pbp__outcircle): --clay-deep on a --clay-soft plate inside a --clay ring,
+   not clay ink on bare paper. Two surfaces drawing one notation should not each
+   invent a treatment for it. 6.2:1, comfortably past AA. */
 .sc-ab__out {
   position: absolute;
   bottom: 6px;
@@ -347,12 +394,13 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 1.5px solid var(--accent-negative);
-  background: var(--surface-card);
+  border: 1.5px solid var(--clay);
+  background: var(--clay-soft);
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  color: var(--accent-negative);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
+  color: var(--clay-deep);
 }
 /* Nothing to ring when there was no out on the box — hide the empty circle. */
 .sc-ab__out:empty {
@@ -390,10 +438,25 @@
 .sc-ab__strike {
   background: var(--sc-strike-fill);
 }
+/* THE CALLED THIRD STRIKE: a real "K", mirrored — the app's own way of drawing
+   it (.pbp__klooking, on the play-by-play card's same mark). Never the ꓘ
+   character: JetBrains Mono has no glyph at U+A4D8, so it fell back to whatever
+   system face had one and set a single mark on a sheet of mono notation in a
+   different font.
+
+   The chip is absolutely positioned, so it already has a box to flip; what it
+   needed was for its CENTRING to stop occupying `transform` (see the rule
+   above). */
+.sc-ab__center--looking {
+  transform: scaleX(-1);
+}
+
 /* One pitch mark — its 1-based place in the at-bat, or an X for a ball in play. */
 .sc-ab__pip {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
   line-height: var(--lh-title);
   color: var(--text-body);
 }

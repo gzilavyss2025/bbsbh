@@ -347,3 +347,78 @@ Two file caps came due in the same work (ADR-0038). `scorecardGame.js` shed
 three ways and moved to `src/styles/scorecard/` (`grid.css`, `box.css`,
 `page.css`, imported in that order, which is the order the one file read top to
 bottom), which also took `src/styles` back under its own directory budget.
+
+## Amendment (2026-08-21): the page, the foot row, and a type audit
+
+A second read of the live sheet, same game (823747). Five more.
+
+**The two handover marks rule different edges.** Both were drawn across the top
+in the round above, which was wrong about the batting-order one. A slot's men
+share ONE row of boxes, so the change between them cuts ALONG that row — left to
+right, trip by trip — and a scorer closes the previous man off with a rule down
+the LEFT EDGE of the box the new man takes over. That is where it stands now
+(`.sc-sub--batter`), the incoming number riding the rule at mid-height on a
+small paper chip so it stays legible where the diamond's left vertex reaches
+under it. The PITCHING change cuts across the order rather than along it, so it
+keeps the top edge (`.sc-sub--pitcher`), number above the rule. A double switch
+sets both on one box and they cannot collide: one is vertical at the left, the
+other horizontal along the top.
+
+**The foot row is a real `<tfoot>`, and only now does it pin.** The comment
+above it had claimed for months that it was "pinned to the pane's bottom edge";
+it never was. It was the last `<tr>` of the tbody with `position: sticky; bottom:
+0` on its cells, and a sticky table CELL is clamped by its own ROW — there was
+nowhere for `bottom: 0` to move it to, so the line simply scrolled away with the
+grid. Sticking the ROW GROUP is the shape browsers honour. Where a browser does
+not, the row still renders in place unpinned, which is what it did before.
+
+**It says what it counts.** P / WH / FO across a three-column grid in the rail
+became PITCHES · WHIFFS · FOULS, one run of small caps. The initials were the
+printed sheet's shorthand for a scorer who already knows the sheet, and the
+3-column grid was matched to the three figures in each inning column — which
+never lined up anyway, the rail and an inning column being different widths.
+
+**THE PAGE is one cream plate.** `.scorecard` is now only the ROOM the sheet may
+run into; `.scorecard__page` inside it is the sheet — capped to the grid's drawn
+width, centred, and painted `--bg-page`, the app's own "standard page" cream and
+already what the grid's sticky top and foot bands use. It is a shade deeper than
+the cells above it, so the grid still reads as raised. Opaque is the point: the
+body's 24px graph-paper ruling showed through every gap between header, grid and
+footer, and the three read as three cards on a desk rather than one printed
+page. Two arithmetic notes on the cap, both found by measuring: `box-sizing` is
+border-box here, so the plate's own padding has to be added back or the grid
+loses that much width; and so does the pane's hairline frame, without which the
+last summary column sat 2px over the edge and the sheet panned on a screen it
+otherwise fits.
+
+**A type audit, and it found three real divergences.** Every rule already used
+the `--font-*` role tokens — the drift was in what those roles were given
+alongside them.
+
+- **The backwards K was set in a different FONT.** It was the ꓘ character
+  (U+A4D8, a Lisu letter). JetBrains Mono has no glyph there, so it fell back to
+  whatever system face did, and one mark on a sheet of mono notation was in
+  another typeface. The app's own way of drawing it is a real "K" mirrored in
+  CSS (`.pbp__klooking`, the play-by-play card's same mark), which is what the
+  sheet does now. Its centring had to move from `transform` to the standalone
+  `translate` property first, so the flip has `transform` to itself — the
+  play-by-play's copy learned the same lesson, and its rule says so.
+- **Figures were missing `--ls-num`.** Every numeric run on the sheet — the
+  uniform numbers, the AB/H/R/RBI columns, the foot figures, the TOTALS bar, the
+  pitch pips, the handover numbers — set `--font-mono` without the letter-
+  spacing the app's numeric role carries (`.t-num`, and the shared mono-figure
+  helper the lineup and roster jerseys ride). That is why the sheet's numbers
+  read a shade tighter than the same numbers everywhere else.
+- **The out circle invented its own treatment.** The play-by-play draws this
+  exact mark as `--clay-deep` on a `--clay-soft` plate inside a `--clay` ring;
+  the sheet had clay ink on bare paper. Two surfaces drawing one notation should
+  not each invent a dress for it. 6.2:1.
+
+The outcome codes also took `--ls-title`, matching `.pbp__code`, which renders
+the same scorebook codes one surface over.
+
+And the header's team/manager pair stopped growing: it carries `flex: 1` so it
+is never squeezed on a narrow row, which on a wide one made it absorb all the
+spare space and run two writing lines halfway across the band under a club name
+and a surname. Capped at what the longest of them needs; the slack goes to
+UNIFORMS beside it, whose line genuinely wants the room.

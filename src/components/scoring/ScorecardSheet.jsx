@@ -49,8 +49,11 @@ import { cellNote } from '../../lib/scorecardNotes.js'
 // leadoff box stays blank.
 const SUMMARY = ['AB', 'H', 'R', 'RBI']
 const SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-// The foot row's three readings, in the order the sheet prints them.
-const FOOT_LABELS = ['P', 'WH', 'FO']
+// The foot row's three readings, in the order the sheet prints them — written
+// out rather than initialled. P/WH/FO is the printed sheet's own shorthand, but
+// it is shorthand for a scorer who already knows the sheet; the words cost the
+// rail nothing it was using and stop the line being a riddle on first read.
+const FOOT_LABELS = ['Pitches', 'Whiffs', 'Fouls']
 // How far the zoom control can pull past full size, and the factor one press
 // of −/+ moves. The floor is never fixed: it is whatever fits the pane.
 const ZOOM_MAX = 1.5
@@ -331,17 +334,31 @@ export function ScorecardSheet({
                 </tr>
               )
             })}
-            {/* The #22's foot row: P / WH / FO under each inning's first
-                column (a widened inning's extra columns stay blank, same as
-                the header number), the AB/H/R/RBI sums under the amber TOTALS
-                bar at the right. Blank until a half is revealed. */}
-            <tr className="sc-sheet__totals">
-              <td className="sc-sheet__name sc-sheet__ptl">
-                {FOOT_LABELS.map((l) => (
-                  <span key={l} className="sc-sheet__ptlLabel">
-                    {l}
-                  </span>
-                ))}
+          </tbody>
+          {/* The #22's foot row: PITCHES · WHIFFS · FOULS under each inning's
+              first column (a widened inning's extra columns stay blank, same as
+              the header number), the AB/H/R/RBI sums under the amber TOTALS bar
+              at the right. Blank until a half is revealed.
+
+              A REAL <tfoot>, and that is what makes it pin. It was the last
+              <tr> of the tbody with `position: sticky; bottom: 0` on its cells,
+              which never engaged: a sticky table CELL is clamped by its own
+              ROW, so it can never rise over the rows above it, and the line
+              simply scrolled away with the grid. A sticky <tfoot> is the shape
+              browsers actually pin to the bottom of a scrollport. Where it is
+              unsupported the row still renders in place, unpinned — the same
+              thing it did before, so this can only be an improvement. */}
+          <tfoot className="sc-sheet__totals">
+            <tr>
+              <td className="sc-sheet__name sc-sheet__foot">
+                <span className="sc-sheet__footlabel">
+                  {FOOT_LABELS.map((l, i) => (
+                    <span key={l}>
+                      {i > 0 && <span className="sc-sheet__footdot" aria-hidden="true"> · </span>}
+                      {l}
+                    </span>
+                  ))}
+                </span>
               </td>
               <td className="sc-sheet__pos" />
               {columns.map((col) => {
@@ -366,7 +383,7 @@ export function ScorecardSheet({
               <td className="sc-sheet__sum sc-sheet__totbar">{grid ? grid.totals.r : ''}</td>
               <td className="sc-sheet__sum sc-sheet__totbar">{grid ? grid.totals.rbi : ''}</td>
             </tr>
-          </tbody>
+          </tfoot>
         </table>
       </div>
     </div>

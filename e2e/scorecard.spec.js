@@ -131,6 +131,18 @@ test('a slot is one row: the sub takes a written line, not a band of empty boxes
   await expect(arriving).toHaveCount(1)
   await expect(arriving.locator('.sc-sub__num--batter')).toHaveText('5')
   await expect(arriving.locator('.sc-ab__type')).not.toHaveText('')
+  // The two marks rule DIFFERENT EDGES, because they cut across different
+  // things: the batting-order change stands down the LEFT of the box, closing
+  // off the man before him along the row; the pitching change lies across the
+  // TOP, cutting across the order rather than along it.
+  const edges = await arriving.evaluate((box) => {
+    const b = box.getBoundingClientRect()
+    const r = box.querySelector('.sc-sub--batter .sc-sub__rule').getBoundingClientRect()
+    return { tall: r.height > r.width, atLeft: Math.round(r.left - b.left), spans: Math.round(b.height - r.height) }
+  })
+  expect(edges.tall).toBe(true)
+  expect(edges.atLeft).toBeLessThanOrEqual(1)
+  expect(edges.spans).toBeLessThanOrEqual(1)
 
   // And the pitching change takes the same mark on the sheet of the club that
   // has to face it: one per RELIEVER (the starter takes none), each on the box
@@ -141,6 +153,19 @@ test('a slot is one row: the sub takes a written line, not a band of empty boxes
   const arms = await page.locator('.sc-sub__num--pitcher').allTextContents()
   expect(arms.sort()).toEqual(['39', '44', '68'])
   for (const n of arms) await expect(page.locator('.sc-pitchers')).toContainText(n)
+  // Ruled ACROSS THE TOP of that box — the other edge from the batting-order
+  // mark, so a double switch can set both without them colliding.
+  const rule = await page
+    .locator('.sc-ab', { has: page.locator('.sc-sub__num--pitcher') })
+    .first()
+    .evaluate((box) => {
+      const b = box.getBoundingClientRect()
+      const r = box.querySelector('.sc-sub--pitcher .sc-sub__rule').getBoundingClientRect()
+      return { wide: r.width > r.height, atTop: Math.round(r.top - b.top), spans: Math.round(b.width - r.width) }
+    })
+  expect(rule.wide).toBe(true)
+  expect(rule.atTop).toBeLessThanOrEqual(1)
+  expect(rule.spans).toBeLessThanOrEqual(1)
 })
 
 test('the header band and footer trio stop where the columns stop', async ({ page }) => {
@@ -181,20 +206,50 @@ test('the header band and footer trio stop where the columns stop', async ({ pag
 
 test('a called third strike reads SO in the box and a backwards K in the diamond', async ({ page }) => {
   await openWithMark(page, FULL)
-  // The ꓘ is a CENTRE mark — it belongs where the fielding chain goes, which is
-  // where a swinging K's own mark sits. It used to take the outcome box
-  // instead, which left the sheet's column of out categories with a hole in it.
-  const called = page.locator('.sc-ab', { has: page.locator('.sc-ab__center', { hasText: 'ꓘ' }) })
-  await expect(called.first()).toBeVisible()
-  await expect(called.first().locator('.sc-ab__type')).toHaveText('SO')
-  // Every one of them, not just the first — and no outcome box anywhere on the
-  // sheet carries the glyph.
+  // The backwards K is a CENTRE mark — it belongs where the fielding chain
+  // goes, which is where a swinging K's own mark sits. It used to take the
+  // outcome box instead, which left the sheet's column of out categories with a
+  // hole in it and put the strikeout's own notation nowhere.
+  const looking = page.locator('.sc-ab__center--looking')
+  await expect(looking.first()).toBeVisible()
+  const called = page.locator('.sc-ab', { has: looking })
   for (const t of await called.locator('.sc-ab__type').allTextContents()) expect(t).toBe('SO')
-  expect((await page.locator('.sc-ab__type').allTextContents()).join('')).not.toContain('ꓘ')
-  // A swinging strikeout still reads SO over its own K, so the two are told
-  // apart by the centre mark alone.
-  const swinging = page.locator('.sc-ab', { has: page.locator('.sc-ab__center', { hasText: /^K$/ }) })
-  await expect(swinging.first().locator('.sc-ab__type')).toHaveText('SO')
+
+  // A REAL "K", MIRRORED IN CSS — never the ꓘ character (U+A4D8). JetBrains
+  // Mono has no glyph there, so the character fell back to whatever system face
+  // did and set one mark on a sheet of mono notation in a different font. This
+  // is the assertion that keeps it from creeping back.
+  await expect(looking.first()).toHaveText('K')
+  expect(await page.locator('.sc-sheet').innerText()).not.toContain('ꓘ')
+  const flip = await looking.first().evaluate((el) => getComputedStyle(el).transform)
+  expect(flip).toBe('matrix(-1, 0, 0, 1, 0, 0)')
+
+  // A swinging strikeout reads the same SO over the same K, unmirrored — the
+  // two are told apart by the flip alone, exactly as on paper.
+  const swinging = page
+    .locator('.sc-ab__center--out', { hasText: /^K$/ })
+    .and(page.locator(':not(.sc-ab__center--looking)'))
+  await expect(swinging.first()).toBeVisible()
+  expect(await swinging.first().evaluate((el) => getComputedStyle(el).transform)).toBe('none')
+})
+
+test('the foot row names its readings and stays pinned to the pane', async ({ page }) => {
+  await openWithMark(page, FULL)
+  await expect(page.locator('.sc-sheet__footlabel')).toHaveText('Pitches · Whiffs · Fouls')
+
+  // It PINS. As the last <tr> of the tbody it never did: a sticky table CELL is
+  // clamped by its own ROW, so `bottom: 0` had nowhere to move it and the line
+  // scrolled away with the grid. It is a <tfoot> now.
+  await expect(page.locator('.sc-sheet tfoot.sc-sheet__totals')).toHaveCount(1)
+  const pinned = await page.evaluate(async () => {
+    const pane = document.querySelector('.sc-sheet__scroll')
+    if (pane.scrollHeight <= pane.clientHeight + 1) return null // nothing to scroll past
+    pane.scrollTop = Math.min(300, pane.scrollHeight - pane.clientHeight)
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+    const foot = document.querySelector('.sc-sheet__totals td').getBoundingClientRect()
+    return Math.round(pane.getBoundingClientRect().bottom - foot.bottom)
+  })
+  if (pinned != null) expect(Math.abs(pinned)).toBeLessThanOrEqual(2)
 })
 
 test('the sticky rail stays opaque for the whole row height', async ({ page }) => {

@@ -2,7 +2,7 @@
    SCORECARD / GRID — Numbers Game "22" sheet
    A by-hand baseball scorecard rendered in the paper-scorebook system. THE
    GRID lives here — the pane, the sticky Player/Pos rail and its stacked
-   written lines, the inning columns and the P/WH/FO foot row. One at-bat box
+   written lines, the inning columns and the sticky foot row. One at-bat box
    and every mark that lands on it is box.css; the page chrome around the sheet
    (header band, footer trio, zoom control, editor) is page.css. The three were
    one file, split at the 600-line cap and moved into this directory at the
@@ -43,7 +43,7 @@
 /* ---- Main grid: a pannable window onto the sheet ---- */
 /* The pane is bounded on BOTH axes so the frame pins on three sides while
    you pan: the Player/Pos rail (sticky left), the inning numbers (sticky
-   top), and the P/WH/FO + TOTALS row (sticky bottom). Without the vertical
+   top), and the foot row + TOTALS bar (a sticky <tfoot>). Without the vertical
    bound the inning header was sticky against a container that never scrolled
    vertically — mid-grid on a phone the numbers sat 400px off-screen and you
    lost which inning you were reading. The dvh line wins where supported
@@ -147,13 +147,21 @@
 }
 /* The uniform number, inked green the way a scorer writes a number beside a
    name — the one value on the rail that is not the name, so it takes its own
-   colour rather than another weight of the same ink. */
+   colour rather than another weight of the same ink.
+
+   FIGURES ON THIS SHEET TAKE --ls-num, here and in every mono run below. It is
+   the app's own numeric role (typography.css's `.t-num`, and the shared
+   mono-figure helper .lineup__jersey/.roster__jersey ride in
+   02-wordmark-lab.css); the scorecard had been setting mono without it, which
+   is why its figures read a shade tighter than the same numbers everywhere
+   else. */
 .sc-sheet__jersey {
   flex: 0 0 auto;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
   color: var(--accent-positive);
 }
 /* The position sits on the SAME written line as the name beside it, not
@@ -231,6 +239,7 @@
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
 }
 
 /* An inning's first column carries a heavier left rule, so the eye can still
@@ -240,10 +249,13 @@
   border-left: var(--bw-rule) solid var(--rule-grid);
 }
 
-/* The foot row across the grid: P / WH / FO per inning — pitches seen,
-   swings and misses, balls fouled off — then the AB/H/R/RBI sums under the
-   amber TOTALS bar. Pinned to the pane's bottom edge (see .sc-sheet__scroll)
-   so the line stays in view while you pan the grid above it. */
+/* The foot row across the grid: pitches seen, swings and misses and balls
+   fouled off per inning, then the AB/H/R/RBI sums under the amber TOTALS bar.
+   PINNED to the pane's bottom edge so the line stays in view while you read the
+   grid above it — and it is a real <tfoot> for that reason. As the last <tr> of
+   the tbody it never pinned at all: a sticky table CELL is clamped by its own
+   ROW, so `bottom: 0` had nowhere to move it to and the line just scrolled away
+   with the grid. Sticking the ROW GROUP is the shape browsers honour. */
 .sc-sheet__totals td {
   position: sticky;
   bottom: 0;
@@ -255,11 +267,28 @@
 .sc-sheet__totals .sc-sheet__name {
   z-index: 3;
   background: var(--bg-page);
+}
+/* PITCHES · WHIFFS · FOULS, written out. The three readings used to sit in the
+   rail as P / WH / FO across a 3-column grid, matched to the three figures in
+   each inning column — but the rail and an inning column are different widths,
+   so the two never lined up anyway, and the initials read as a riddle. One run
+   of small caps with the app's own separator dot instead, sized to the rail. */
+.sc-sheet__foot {
+  white-space: nowrap;
+}
+.sc-sheet__footlabel {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
   color: var(--text-caption);
+}
+.sc-sheet__footdot {
+  /* The separator, one step quieter than the words it divides — but NOT
+     --rule-grid, which is tuned to disappear into the paper (1.06:1 on
+     --bg-page) and made the dots invisible rather than quiet. */
+  color: var(--border-rule);
 }
 .sc-sheet__totals .sc-sheet__pos {
   z-index: 3;
@@ -276,6 +305,7 @@
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
   color: var(--text-body);
 }
 .sc-sheet__ptlLabel {
@@ -291,6 +321,7 @@
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
   text-align: center;
   color: var(--text-on-seal);
 }

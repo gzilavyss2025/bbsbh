@@ -74,18 +74,27 @@ export function Scorecard({
       className="scorecard"
       style={sheetWidth ? { '--sc-sheet-w': `${Math.round(sheetWidth)}px` } : undefined}
     >
-      <ScorecardHeader side={side} view={view} />
-      <ScorecardSheet
-        lineup={view?.lineup ?? []}
-        grid={view?.grid ?? null}
-        notes={notes}
-        onCellTap={onCellTap}
-        onFrontierTap={onFrontierTap}
-        fresh={fresh}
-        flip={flip}
-        onWidth={holdToSheet}
-      />
-      <ScorecardFooter view={view} />
+      {/* THE PAGE. `.scorecard` is only the room the sheet is allowed to run
+          into (full-bleed past the reading column on a wide screen); this is
+          the sheet itself — one cream plate carrying the header band, the grid
+          and the footer trio, capped to the grid's own width and centred in
+          that room. It is what stops the body's graph-paper ruling showing
+          between the three, which read as three separate cards on a desk
+          rather than one printed page. */}
+      <div className="scorecard__page">
+        <ScorecardHeader side={side} view={view} />
+        <ScorecardSheet
+          lineup={view?.lineup ?? []}
+          grid={view?.grid ?? null}
+          notes={notes}
+          onCellTap={onCellTap}
+          onFrontierTap={onFrontierTap}
+          fresh={fresh}
+          flip={flip}
+          onWidth={holdToSheet}
+        />
+        <ScorecardFooter view={view} />
+      </div>
     </div>
   )
 }

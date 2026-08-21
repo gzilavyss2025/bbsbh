@@ -114,28 +114,48 @@
    into a ragged stack at 390px — a fixed two-up reads like a form). The
    wide breakpoint restores the #22's one-band flow, TOP standing at the
    left of the whole row. */
-/* THE BAND STOPS WHERE THE COLUMNS STOP. `--sc-sheet-w` is the grid's own drawn
-   width, measured by ScorecardSheet and set on .scorecard by Scorecard.jsx —
-   Player + Pos + the innings + AB/H/R/RBI, hairlines included, at whatever zoom
-   is showing. On a wide screen the scorecard runs the whole window (ADR-0047's
-   full-bleed) and without this the header's two heavy rules ran on past the
-   last summary column, which reads as a banner laid across a desk rather than
-   as the top of a printed page.
+/* THE PAGE — one cream plate under the header band, the grid and the footer
+   trio, so the three read as one printed sheet rather than three cards laid on
+   a desk. `--bg-page` is the app's own "standard page" cream, already what the
+   grid's sticky top and foot bands are painted in, and a shade deeper than the
+   cells above it (--surface-card / --surface-inset), so the grid still reads as
+   raised on the paper. Opaque, which is the point: the body's 24px graph-paper
+   ruling (01-base.css) used to show through every gap between the three.
 
-   `min(…, 100%)` is what keeps the phone out of it: there the grid is WIDER
-   than the column it is read in — that is what the zoom control is for — and a
-   band held to the grid's width would run off the screen. The fallback covers
-   the first paint, before the grid has been measured. */
-.sc-header,
-.sc-footer,
-.sc-sheet__frame {
-  max-width: min(var(--sc-sheet-w, 100%), 100%);
-  /* CENTRED, always. The sheet is a page on a desk, not a column pinned to the
-     left of one — so once the three bands are held to the grid's width, the
-     spare room on a wide screen falls equally either side of them. Below the
-     breakpoint the cap resolves to 100% and auto margins have nothing to
-     divide, so the phone is untouched. */
+   THE PLATE STOPS WHERE THE COLUMNS STOP. `--sc-sheet-w` is the grid's own
+   drawn width, measured by ScorecardSheet and set on .scorecard by
+   Scorecard.jsx — Player + Pos + the innings + AB/H/R/RBI, hairlines included,
+   at whatever zoom is showing. Without it the header's two heavy rules and the
+   footer trio ran on past the last summary column on a wide screen, which reads
+   as a banner laid across a desk rather than the top of a page. The padding is
+   added back into the cap because box-sizing is border-box here: capped at the
+   bare width, the plate's content box would come up short by its own padding
+   and the grid would gain a scroll bar it does not need. The pane's own
+   hairline frame (.sc-sheet__scroll's border) is added back for the same
+   reason — without those two pixels the last summary column sat just over the
+   edge and the sheet panned by 2px on a screen it otherwise fits.
+
+   `min(…, 100%)` and a 0 pad below the breakpoint are what keep the phone out
+   of it: there the grid is far WIDER than the column it is read in — that is
+   what the zoom control is for — so the plate simply fills the column, flush.
+   The auto margins then have nothing to divide; on a wide screen they centre
+   the page in the room .scorecard gives it. */
+.scorecard__page {
+  --sc-page-pad: 0px;
+  max-width: min(
+    calc(var(--sc-sheet-w, 100%) + 2 * var(--sc-page-pad) + 2 * var(--bw-hair)),
+    100%
+  );
   margin-inline: auto;
+  padding: var(--sc-page-pad);
+  background: var(--bg-page);
+}
+@media (min-width: 740px) {
+  .scorecard__page {
+    --sc-page-pad: var(--space-3);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-raised);
+  }
 }
 .sc-header {
   display: flex;
@@ -177,6 +197,17 @@
     display: flex;
     flex-wrap: wrap;
     align-content: center;
+  }
+  /* A WRITING LINE IS AS LONG AS WHAT GOES ON IT. The team/manager pair carries
+     `flex: 1` so it never gets squeezed on a narrow row, but on a wide one that
+     made it absorb ALL the spare space and the two rules ran halfway across the
+     band under a club name and a surname. Capped at what the longest of them
+     actually needs — a MiLB club name like RANCHO CUCAMONGA QUAKES is the wide
+     case, around 140px, and a manager's name is shorter still. The slack it
+     gives up goes to UNIFORMS beside it (.sc-field--wide, also `flex: 1`),
+     whose line genuinely does want the room. */
+  .sc-header__stack--wide {
+    max-width: 220px;
   }
 }
 .sc-field {
