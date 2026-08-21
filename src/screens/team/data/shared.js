@@ -173,11 +173,17 @@ export function injuredIdsFrom(ilRoster) {
 // splits[0] silently picked up whichever row sorted first, which could be an
 // ex-team's line — a Brewers page showing a recent pickup's FULL season numbers.
 // Narrow to the CURRENT team's own row(s) first, falling back to the raw list
-// only when nothing is team-tagged (the normal case for someone who's been here
-// all year).
+// only when nothing is team-tagged at all (the normal case for someone who's
+// been here all year, one untagged split). A player with only OTHER teams'
+// rows — added to this roster but not yet appeared in this uniform — has
+// nothing here to prefer; returning those rows anyway read as this team's own
+// numbers to every caller (a AAA roster's stats hydrate is scoped by LEVEL,
+// not by team — see fetchTeamRoster, api/team.js — so a rostered-but-unplayed
+// pickup's season-elsewhere splits ride along in the same response).
 export function preferTeamSplits(splits, teamId) {
   const teamRows = splits.filter((s) => s.team?.id === teamId)
-  return teamRows.length ? teamRows : splits
+  if (teamRows.length) return teamRows
+  return splits.some((s) => s.team?.id != null) ? [] : splits
 }
 
 // A roster row's season pitching stat object. Callers must pre-filter to actual
@@ -265,23 +271,46 @@ export function closerFrom(fullPitchers, startingIds) {
 // order (DefenseDiamond itself lays the field spots out; DH rides beneath).
 const PREFERRED_LINEUP_POSITIONS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
 
-// One player per field position off the 40Man roster (so an injured/rehabbing
-// regular still counts — the Injured List flags that separately), keyed FIRST
-// off each player's CURRENT primary position rather than season-cumulative games
-// started: a player who's since moved off a position still owns the season's
-// higher games-started total there, so ranking each position independently by GS
-// double-booked him at both spots. GS only breaks ties among teammates who share
-// a primary position (rare — a real battle for a spot).
+// Roster-entry status codes that mean a player has LEFT the organization
+// entirely, rather than merely being unavailable within it. `fullRoster` here
+// is a `rosterType=fullSeason` fetch (see loadRoster.js/loadOverview.js) so a
+// player promoted or optioned to a different level of the SAME org this
+// season still counts toward his old club's Preferred Lineup — but a release,
+// trade, waiver claim (by another club), or free agency ends that: the club
+// that let him go doesn't get to keep crediting him. Real case: the Royals
+// released Starling Marte on 2026-08-19; two days later he was still the
+// fullSeason roster's highest-GS right fielder. Codes observed on live rosters
+// (`RL`/`TR`/`CL`/`FA`); every other status (active, any IL length, rehab,
+// reassigned/assigned within org, taxi squad, development list, not-yet-
+// reported) leaves the player eligible, same as the second pass's fallback.
+const ORG_DEPARTURE_STATUSES = new Set(['RL', 'TR', 'CL', 'FA'])
+
+// One player per field position off a season-wide roster (`rosterType=fullSeason`,
+// so a player promoted or optioned elsewhere within the org this season still
+// counts — an injured/rehabbing regular counts the same way, the Injured List
+// shelf flags that separately — but see ORG_DEPARTURE_STATUSES for who
+// doesn't), keyed FIRST off each player's CURRENT primary position rather than
+// season-cumulative games started: a player who's since moved off a position
+// still owns the season's higher games-started total there, so ranking each
+// position independently by GS double-booked him at both spots. GS only
+// breaks ties among teammates who share a primary position (rare — a real
+// battle for a spot).
 //
-// A position can still come up empty on primary position alone (a thin feed, or
-// a tag that hasn't caught up with a recent move) — a SECOND pass fills any
-// position still open with whoever has the most games started there among
-// players not already claimed elsewhere. DH skips the first pass entirely (it's
-// almost never anyone's primary position) and goes straight to that fallback.
+// The primary-position pass still requires at least one game started IN THIS
+// UNIFORM: a player rostered but not yet appeared for the club (a fresh pickup
+// or MiLB roster addition) carries his most recent position tag from wherever
+// he last played, and would otherwise "win" his tagged spot on zero games for
+// this team — the whole point of a PREFERRED lineup. A position can also come
+// up empty on primary position alone (a thin feed, or a tag that hasn't caught
+// up with a recent move) — a SECOND pass fills any position still open with
+// whoever has the most games started there FOR THIS TEAM among players not
+// already claimed elsewhere. DH skips the first pass entirely (it's almost
+// never anyone's primary position) and goes straight to that fallback.
 //
 // Shared by the Roster tab's projection and the Overview's lineup preview, which
 // must show the same nine.
 export function preferredLineupFrom(fullRoster, teamId) {
+  const eligible = fullRoster.filter((r) => !ORG_DEPARTURE_STATUSES.has(r.status?.code))
   const gsAt = (r, pos) =>
     Number(
       rosterFieldingSplits(r, teamId).find((s) => s.position?.abbreviation === pos)?.stat?.gamesStarted,
@@ -290,9 +319,11 @@ export function preferredLineupFrom(fullRoster, teamId) {
   const claimed = new Set()
   for (const pos of PREFERRED_LINEUP_POSITIONS) {
     if (pos === 'DH') continue
-    const candidates = fullRoster.filter((r) => r.person?.id && r.position?.abbreviation === pos)
+    const candidates = eligible.filter((r) => r.person?.id && r.position?.abbreviation === pos)
     if (!candidates.length) continue
     const best = candidates.reduce((a, b) => (gsAt(b, pos) > gsAt(a, pos) ? b : a))
+    const gs = gsAt(best, pos)
+    if (gs === 0) continue
     bestByPosition[pos] = {
       position: pos,
       id: best.person.id,
@@ -301,14 +332,14 @@ export function preferredLineupFrom(fullRoster, teamId) {
       // link ADDRESSES the whole name — ADR-0057. Two different jobs, so both
       // spellings ride along rather than one being derived from the other.
       name: firstLast(best.person),
-      gs: gsAt(best, pos),
+      gs,
     }
     claimed.add(best.person.id)
   }
   for (const pos of PREFERRED_LINEUP_POSITIONS) {
     if (bestByPosition[pos]) continue
     let best = null
-    for (const r of fullRoster) {
+    for (const r of eligible) {
       const pid = r.person?.id
       if (!pid || claimed.has(pid)) continue
       const gs = gsAt(r, pos)
