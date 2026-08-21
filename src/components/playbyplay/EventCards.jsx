@@ -2,6 +2,7 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherPhoto } from './PitcherNotice.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { UsagePips } from '../charts/UsagePips.jsx'
+import { formatDelay } from '../inning/DelayCard.jsx'
 
 // THE NOTIFICATION-CARD FAMILY of the half-inning feed — everything
 // PlayByPlay.jsx renders BETWEEN plate appearances, plus the two shorthand
@@ -33,10 +34,10 @@ const EVENT_ICONS = {
   ejection: '🚫',
   pinch_running: '🏃',
   pinch_hitting: '🏏',
-  // A delay advisory (injury, on-field, weather) — why a half stopped. Unlike
-  // the rows above, EventNote is this one's INTENDED home rather than a
-  // fallback: there is no person to card, and nothing to add to the sentence
-  // the feed already wrote.
+  // A delay advisory (injury, on-field, weather). Belt and braces only:
+  // PlayByPlay routes every delay that reaches the feed to DelayNotice below,
+  // so nothing has taken this path — it is here so a future caller that hands
+  // EventNote a delay gets a pause glyph rather than the swap arrows.
   game_advisory: '⏸',
 }
 
@@ -151,12 +152,15 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
   )
 }
 
-// An ejection (or a delay advisory — injury, on-field, weather — passing
-// `code="DELAY"`): the same kraft-amber notification card, captioned in the
+// An ejection: the same kraft-amber notification card, captioned in the
 // negative accent instead of an icon — the description sentence already
-// carries every detail worth showing, so there's nothing else to add. A
-// delay has no one person to card the way a substitution does, so it shares
-// this shape rather than getting a bespoke one; may be worth its own later.
+// carries every detail worth showing (who, by which umpire), so there's
+// nothing else to add.
+//
+// This used to caption delay advisories too, on the reasoning that a delay had
+// no one person to card. It has one — just not the one the feed names — so
+// delays moved to DelayNotice below (ADR-0060). The `code` prop stays because
+// it costs nothing and the default is what every caller passes.
 export function EjectionBar({ text, code = 'EJ' }) {
   return (
     <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
@@ -187,6 +191,46 @@ export function EventCard({ code, runnerId, teamId, segments }) {
             seg.text
           ),
         )}
+      </span>
+    </div>
+  )
+}
+
+// A DELAY that came to something — an injury or on-field stoppage that took a
+// player out of the game, an umpire change, or a stoppage long enough to be
+// worth a mark on its own. The same kraft-amber notification card as an
+// ejection, given the one thing a delay card was always missing: a subject.
+//
+// The feed's own account of a delay is two words ("Injury Delay.") attached to
+// whoever happened to be batting, so the card used to land beside a plate
+// appearance it had nothing to do with and say nothing about it. Everything
+// here is the answer to that — `title` is the stoppage in readable words,
+// `detail` says what became of the man it was actually about, `playerId` is
+// that man rather than the batter, and `minutes` is how long play stopped. A
+// delay that can fill none of them never reaches this component: the feed
+// builder drops it (api/playbyplay/notificationCards.js's delayNoteFields,
+// ADR-0060), which is four delay advisories in five.
+//
+// The whole entry comes in rather than five props because the caller has one
+// thing left to decide — `teamId`, the club the subject came off, which the
+// entry gives as a side ('pitching'/'batting') and only PlayByPlay can resolve
+// to an id. An umpire change belongs to neither club and carries no headshot.
+export function DelayNotice({ entry, teamId }) {
+  const { title, detail, minutes, playerId } = entry
+  // The length rides INSIDE the heading rather than as a right-hand tail like
+  // the mound-visit card's "N left". Tried as a tail first and it loses at
+  // phone width: the tail will not shrink, so the sentence absorbs every pixel
+  // it takes and "Inclement weather delay — Grant Taylor leaves the game"
+  // broke over five lines beside it. In the heading it costs four words and
+  // the sentence keeps the whole card.
+  const lead = minutes != null ? `${title} (${formatDelay(minutes)})` : title
+  return (
+    <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
+      <span className="pitchernotice__code pitchernotice__code--alert">DELAY</span>
+      {playerId != null && <PitcherPhoto personId={playerId} teamId={teamId} />}
+      <span className="pitchernotice__eventtext">
+        <b>{lead}</b>
+        {detail ? ` — ${detail}` : ''}
       </span>
     </div>
   )

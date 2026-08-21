@@ -27,7 +27,7 @@ import {
   STOPPAGE_EVENTS,
   isDelayAdvisory,
 } from './eventTypes.js'
-import { sentenceCaseEventText, runnerLastName } from './notificationCards.js'
+import { sentenceCaseEventText, runnerLastName, delayNoteFields } from './notificationCards.js'
 import { uncoveredRunnerNotes } from './runnerNotes.js'
 import { pitchCardInfo, matchupPitcher } from './pitchInfo.js'
 import { scorebookCode } from './scorebookCode.js'
@@ -183,7 +183,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // interrupted the at-bat in progress rather than following the previous
     // one, which is what decides the step it belongs to (see nextStepBoundary).
     let pitchInPlay = false
-    for (const e of play.playEvents ?? []) {
+    for (const [evIndex, e] of (play.playEvents ?? []).entries()) {
       if (e.isPitch) {
         anyPitchInHalf = true
         pitchInPlay = true
@@ -209,16 +209,25 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // stoppages (injury, on-field, weather), which ARE the account of why a
         // half stopped. isDelayAdvisory draws that line; see its own doc.
         if (!isDelayAdvisory(e.details?.description)) continue
+        // Of those stoppages, only the ones that PRODUCED something — a
+        // personnel change before the next pitch — or that ran long enough to
+        // be worth a mark on their own get a card. delayNoteFields returns null
+        // for the other four in five, which said nothing and landed beside a
+        // plate appearance they had nothing to do with (ADR-0060; the rule and
+        // its sweep are in notificationCards.js).
+        const delay = delayNoteFields(feed, e, play.playEvents ?? [], evIndex, nameIndex)
+        if (!delay) continue
         const text = sentenceCaseEventText(e.details.description)
         entries.push({
           kind: 'event',
           eventType: GAME_ADVISORY_EVENT_TYPE,
           midAtBat: pitchInPlay,
-          // The man the delay is about when the feed names one — an injury
-          // delay carries the injured player, which is who the note is for.
-          playerId: e.player?.id ?? null,
           text,
           segments: linkifyNames(text, nameIndex),
+          // title / detail / playerId / subjectSide / minutes — see
+          // delayNoteFields. `playerId` is the man who LEFT, NOT the advisory's
+          // own `player` (that one is whoever was batting).
+          ...delay,
         })
         continue
       }
