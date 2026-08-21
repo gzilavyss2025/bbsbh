@@ -25,7 +25,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | career-register.test.js | 12 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels + chronological multi-org register rows/subtotals + the Team history rail's org order |
 | challenges.test.js | 7 | src/api/challenges.js | ABS challenge tracking |
 | comeback-wins.test.js | 13 | scripts/gen-comeback-wins.mjs, src/api/comebackWins.js | Comeback-wins card |
-| compute-batter-line.test.js | 4 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
+| compute-batter-line.test.js | 5 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
 | condensed-day-index.test.js | 14 | scripts/lib/highlights.mjs, src/api/gamePhotos.js | Day-index generation policy: condensed-cut selection (never the recap) + hero-photo pick for the slate's revealed result cards |
 | copy-registry.test.js | 36 | src/copy/registry.js | Admin-editable consent copy (ADR-0025/0026), MLB + MiLB ballpark field derivation |
 | crawl-body.test.js | 18 | api/_lib/crawl.js, api/_lib/cards.js, api/preview.js, scripts/gen-sitemap.mjs | The readable body a rewritten deep link now carries (ADR-0059) — what a player and a club page say, that the layer cannot reach a game and a game route gets no body at all, where the markup sits relative to #root, and the sitemap's club listing |
@@ -102,6 +102,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | rookies.test.js | 18 | src/api/rookies.js | Rookie pill + the sharded reads (compact status map, per-id record shard) |
 | roster-availability.test.js | 3 | src/api/select.js | The bench/bullpen strike-through's two ceilings (`enteredAsOf`) — the reveal mark AND the half on screen, so a replayed inning shows the bench that half opened with |
 | route.test.js | 36 | src/lib/route.js | Full router surface |
+| sac-bunt-double-play.test.js | 4 | src/api/boxscore.js, src/api/scorecard/notation.js, src/api/playbyplay/scorebookCode.js, src/api/scorecardGame.js | sac_bunt_double_play IS an at-bat, unlike sac_fly_double_play — Rule 9.08(c) credits no sacrifice, scored as an ordinary double play (issue #765) |
 | sac-reached-notation.test.js | 3 | src/api/playbyplay.js | Sac-bunt error/FC notation edge cases |
 | scorecard-game.test.js | 9 | src/api/scorecardGame.js | The live scorecard's reveal clamp, P/TP/LOB agreement with derive/linescore, FINAL block + decisions gating, inning-end diagonals, skipped-half X, pinch-runner run on the origin card — pinned on the captured real feed |
 | scorecard-notes.test.js | 6 | src/lib/scorecardNotes.js | Per-cell notation override store: malformed-storage tolerance, trim/cap hygiene, same-reference no-op writes |
@@ -137,7 +138,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | worktrees.test.js | 15 | scripts/worktrees.mjs | Git-worktree staleness classification |
 | wpa-logo.test.js | 18 | src/lib/wpa/wpaLogo.js, teams.js, logoArt.js | WPA band logo resolver/recolor guard |
 
-Last full audit: 2026-07-31 — all 88 files' imports resolved (87 since
+Last full audit: 2026-07-31 — all 89 files' imports resolved (87 since
 lineup-strength.test.js went with its feature), all features traced to
 a currently-documented behavior, no dead code found. Two soft consolidation
 candidates noted, not acted on: `milb-color-chain.test.js` +

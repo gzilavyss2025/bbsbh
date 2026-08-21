@@ -23,11 +23,10 @@ export const NON_AB_EVENTS = new Set([
   // sacrifice AND an at-bat for one plate appearance.
   'sac_fly_double_play',
   'sac_bunt',
-  // sac_bunt_double_play is deliberately NOT listed here — unlike the fly
-  // ball case, a sacrifice bunt is not credited at all when a runner is
-  // retired advancing on it, so whether this is an at-bat depends on how MLB
-  // actually scored it, which this eventType name doesn't say on its own.
-  // See docs/unresolved-scoring-conventions.md.
+  // sac_bunt_double_play is deliberately NOT listed here — Rule 9.08(c) gives
+  // no sacrifice credit at all when a runner is retired advancing on a bunt,
+  // unlike the fly-ball case above, so an at-bat IS charged. classifyOut
+  // agrees: it routes this eventType to 'DP', not 'SAC'.
   'catcher_interf',
 ])
 
@@ -38,10 +37,16 @@ export const NON_AB_EVENTS = new Set([
 // the fielder chain still shows in the diamond center. Only meaningful for outs.
 export function classifyOut(eventType, desc = '') {
   if (eventType === 'strikeout' || eventType === 'strikeout_double_play') return 'SO'
-  // Sacrifices first, so a sac fly/bunt that also turned a double play is still
-  // marked as the sacrifice it was for the batter (matches scorebookCode's SF/SAC).
+  // Sacrifices first, so a sac fly that also turned a double play is still
+  // marked as the sacrifice it was for the batter (matches scorebookCode's SF).
   if (eventType === 'sac_fly' || eventType === 'sac_fly_double_play' || /sacrifice fly/i.test(desc)) return 'SF'
-  if (eventType === 'sac_bunt' || eventType === 'sac_bunt_double_play' || /sacrifice (bunt|hit)/i.test(desc)) return 'SAC'
+  // sac_bunt_double_play checked BEFORE the sac-bunt branch, and by eventType
+  // alone: Rule 9.08(c) credits no sacrifice when a runner is retired
+  // advancing on a bunt, so this is an ordinary double play, not a "SAC" —
+  // and a description that still reads "sacrifice bunt" must not route it
+  // there via the desc fallback below (matches scorebookCode's DP handling).
+  if (eventType === 'sac_bunt_double_play') return 'DP'
+  if (eventType === 'sac_bunt' || /sacrifice (bunt|hit)/i.test(desc)) return 'SAC'
   if (/double play|grounded into/i.test(desc)) return 'DP'
   if (/lines? (out|into)/i.test(desc)) return 'LO'
   if (/pops? (out|into)/i.test(desc)) return 'PO'

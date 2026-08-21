@@ -127,6 +127,10 @@ export function preGameAvg(boxPlayer) {
   return (h / ab).toFixed(3).replace(/^0\./, '.')
 }
 
+// sac_bunt_double_play is deliberately NOT here — Rule 9.08(c) credits no
+// sacrifice when a runner is retired advancing on a bunt, so the batter is
+// charged a time at bat (unlike sac_fly_double_play, still a sacrifice under
+// 9.08(d)). See src/api/scorecard/notation.js's NON_AB_EVENTS, which agrees.
 const NOT_AN_AT_BAT = new Set([
   'walk',
   'intent_walk',
@@ -134,7 +138,6 @@ const NOT_AN_AT_BAT = new Set([
   'sac_bunt',
   'sac_fly',
   'sac_fly_double_play',
-  'sac_bunt_double_play',
   'catcher_interf',
 ])
 // The scorebug's "H-AB this game" line, reveal-gated — see

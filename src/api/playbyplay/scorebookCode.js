@@ -31,10 +31,13 @@ const REACH_CODES = {
 const HIT_EVENTS = new Set(['single', 'double', 'triple', 'home_run'])
 
 // Sacrifices — a plate appearance that is not an at-bat, each with its own
-// scorebook mark. The `_double_play` variants are a sacrifice on which a second
-// runner was also retired; the batter's own mark is still the sacrifice.
+// scorebook mark. sac_fly_double_play is still a sacrifice on which a second
+// runner was also retired (Rule 9.08(d)); the batter's own mark stays "SF".
+// sac_bunt_double_play is NOT a sacrifice at all under 9.08(c) — no credit
+// when a runner is retired advancing on a bunt — so it's deliberately absent
+// here and instead routed to the ordinary double-play code below.
 const SAC_FLY_EVENTS = new Set(['sac_fly', 'sac_fly_double_play'])
-const SAC_BUNT_EVENTS = new Set(['sac_bunt', 'sac_bunt_double_play'])
+const SAC_BUNT_EVENTS = new Set(['sac_bunt'])
 
 // The FULL fielding chain for a ground-ball double/triple play, walked across
 // EVERY runner retired on the play (in the order they were put out) rather
@@ -176,7 +179,14 @@ export function scorebookCode(play, batterRunner) {
     if (reachedOnSac) return sacReachCode('SF', batterRunner)
     return { code: `SF${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
   }
-  if (SAC_BUNT_EVENTS.has(et) || /sacrifice (bunt|hit)/i.test(desc)) {
+  // sac_bunt_double_play is excluded here even though its description often
+  // still reads "sacrifice bunt" — checked by eventType, not desc, so it
+  // can't fall into the SAC branch. Rule 9.08(c): no sacrifice is credited
+  // when a runner is retired advancing on a bunt, so this batter's own out
+  // is scored as the double play it is (dpTag below), same as an ordinary
+  // grounded_into_double_play, and he's charged an at-bat (see boxscore.js's
+  // NOT_AN_AT_BAT / scorecard/notation.js's NON_AB_EVENTS).
+  if (et !== 'sac_bunt_double_play' && (SAC_BUNT_EVENTS.has(et) || /sacrifice (bunt|hit)/i.test(desc))) {
     if (reachedOnSac) return sacReachCode('SAC', batterRunner)
     const c = chain.length === 1 ? `${chain[0]}U` : chain.join('-')
     return { code: c ? `SAC ${c}` : 'SAC', codeKind: 'out' }
@@ -185,7 +195,7 @@ export function scorebookCode(play, batterRunner) {
   // too (the erased runner's card already gets one via runnerOutCode) — a bare
   // "6-4-3" doesn't say it turned two.
   const dpTag =
-    et === 'grounded_into_double_play' || /into a double play/i.test(desc)
+    et === 'grounded_into_double_play' || et === 'sac_bunt_double_play' || /into a double play/i.test(desc)
       ? 'DP '
       : et === 'triple_play' || et === 'grounded_into_triple_play' || /into a triple play/i.test(desc)
         ? 'TP '
