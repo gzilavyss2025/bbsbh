@@ -172,8 +172,11 @@ Related research docs, worth reading before wiring a NEW source:
   `transactions/league.js` runs the whole thing once per OWNING club over
   the entire league, for the home feed; and `transactions/leagueFeed.js` is the
   LIVE reader beside the build-time-fetch pattern above — the home slate's
-  48-hour card reads the wire on page load, because a card headed "the last 48
-  hours" fed from a nightly file is up to a day behind. A league-wide feed is
+  rolling roster wire reads on page load, because a feed claiming "the last
+  three days" fed from a nightly file is up to a day behind. The window is
+  three days and NOT two: two means today and yesterday, which is 48 hours only
+  late in the evening (`WINDOW_DAYS`, and `FETCH_DAYS` is backtested against
+  it — read the header before moving either). A league-wide feed is
   never a merge of the thirty per-club files — §11 of the wire doc has the
   measurements, §12 what the live read costs. Two traps there: the fetch is
   WIDER than the window it shows (the endpoint filters on a row's filed date,

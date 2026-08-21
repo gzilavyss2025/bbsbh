@@ -1,11 +1,11 @@
-// The home slate's 48-hour roster-move card reads the wire LIVE (issue #772,
+// The home slate's roster-move wire is read LIVE (issue #772,
 // product decision 4). This module is the reader: it owns the window
 // arithmetic and the fetch chain, and hands the rows straight to
 // `groupLeagueWide` — there is no second grouping path here, and there must
 // not be one.
 //
 // Why not the nightly precompute the team page reads? A card headed "the last
-// 48 hours" fed from a file built at 3 a.m. is up to a day behind, which is
+// three days" fed from a file built at 3 a.m. is up to a day behind, which is
 // the one thing this surface cannot be.
 //
 // Spoiler note: a roster move and its date carry no score, so nothing here is
@@ -20,10 +20,12 @@
 //
 // Those disagree on 108 of 8,184 rows over a 30-day pull, in both directions.
 // So the fetch reaches further back than the window and the result is trimmed
-// afterwards. Backtested over 22 consecutive 48-hour windows against an
-// unbounded-back reference, a 4-day fetch is the narrowest that misses
-// nothing: 3 days misses one story, 2 days misses twelve
-// (.scratch/home-transactions/probe-card-shape.mjs, Q6).
+// afterwards. Backtested against an unbounded-back (14-day) reference over 12
+// consecutive windows, a **5-day** fetch is the narrowest that misses nothing
+// for the 3-day window: 4 days and 3 days each miss one story. The same
+// backtest under the old 2-day window put the floor at 4 days, so widening the
+// window by a day moved the fetch by a day — re-run it before changing
+// WINDOW_DAYS again rather than assuming the margin holds.
 //
 // One thing the trim knowingly leaves out, measured rather than assumed: a
 // move FILED inside the window but backdated outside it — "placed C Hunter
@@ -44,10 +46,28 @@ import { groupLeagueWide, leagueCandidateIds } from './league.js'
 // below degrade to nothing without taking the card with it.
 import MLB_TEAM_COLORS_JSON from '../../lib/data/mlb-team-colors.json' with { type: 'json' }
 
-// "The last 48 hours" can only ever mean today and yesterday: a transaction
-// carries dates, never a time (docs/transactions-wire.md §1).
-export const WINDOW_DAYS = 2
-export const FETCH_DAYS = 4
+// A transaction carries dates, never a time (docs/transactions-wire.md §1), so
+// the window can only ever be counted in whole days — which is why it is three
+// and not two.
+//
+// Two days means today and yesterday, and that is "the last 48 hours" only for
+// a reader who opens the app late in the evening. At 10am it is about 34 hours,
+// and just after midnight it is barely 24. Measured on a Friday morning it
+// showed 10 stories while Wednesday's 31 sat one day outside the window —
+// three times as much news, excluded for being on the wrong side of a calendar
+// boundary rather than for being old.
+//
+// Three days is the narrowest window that is AT LEAST 48 hours at every hour of
+// the day (it runs 48 to 72), which is the promise the surface makes. It costs
+// the rail nothing: it fits itself to the games column beside it and puts the
+// rest behind one control (WireRail.jsx), so a fuller window fills the space
+// that exists instead of lengthening the page.
+//
+// Expect 41 to 65 stories over 12 consecutive measured windows, median ~55 —
+// against 30 to 54 for two days. FETCH_DAYS is backtested, not derived; see
+// THE WINDOW IS NOT THE FETCH above before touching either.
+export const WINDOW_DAYS = 3
+export const FETCH_DAYS = 5
 
 const MLB_TEAM_IDS = Object.keys(MLB_TEAM_COLORS_JSON).map(Number)
 

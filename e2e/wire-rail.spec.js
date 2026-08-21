@@ -1,7 +1,7 @@
 import { test, expect } from './fixtures.js'
 import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
 
-// The home slate's 48-hour roster wire on the WIDE surface — the rail down the
+// The home slate's league roster wire on the WIDE surface — the rail down the
 // right of the games (WireRail.jsx, issue #772). Below WIDE_QUERY the same feed
 // is the bottom-anchored dock instead; e2e/wire-dock.spec.js owns that half.
 //
@@ -9,10 +9,11 @@ import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
 // supersedes, and the swap is worth recording because what is worth testing
 // changed completely with it. That card measured the space above the game list
 // and trimmed itself to end on a whole row, so the old spec was almost entirely
-// about that measurement: whether the fit could grow again after a resize,
-// whether the last row was drawn cut in half, whether the door cleared the
-// fold. None of it survives, because none of the mechanism does — a rail beside
-// the games has no fold to end at, so there is no fit, no trim and no door.
+// about that measurement, and against the VIEWPORT: whether the fit could grow
+// again after a resize, whether the last row was drawn cut in half, whether the
+// door cleared the fold. The rail fits itself too, but to the GAMES COLUMN
+// beside it rather than to the window — a different budget, changing for
+// different reasons, so every case below is rewritten around it.
 //
 // What IS worth a browser now is the claim the rail actually makes, and it is
 // a claim about LAYOUT, which the unit suite structurally cannot see:
@@ -22,8 +23,14 @@ import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
 //     this is the whole point of the change, and it is the one thing a
 //     regression would silently undo (put the rail back in the flow and every
 //     assertion about its contents still passes).
-//  2. **Nothing is hidden.** The card showed 7 of 10 behind a door. The rail
-//     shows every story it was given.
+//  2. **The fit.** The window is three days and runs 41 to 65 stories — far
+//     more rail than the games beside it. So the rail ends where the games end:
+//     it measures the column and keeps the last WHOLE row that clears it, with
+//     the rest behind one control. Rows are not a fixed height (a cutline runs
+//     one line to three), so that is a measurement of rendered boxes; there is
+//     nothing to assert on without a browser. The bug it guards is the one the
+//     card this replaced actually shipped: measuring the ALREADY-TRIMMED list,
+//     so the count could only ratchet DOWN and never recover.
 //  3. **The games and the rail trade width.** Two columns where there is room
 //     for two, one where the rail leaves too little — the auto-fit rule in
 //     25-wide-layout.css, which is a computed-style fact, not a source fact.
@@ -39,8 +46,8 @@ import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
 //     can see it.
 //
 // The wire is stubbed rather than read live, for a reason worth stating: the
-// feed shows today and yesterday, so a captured response would be one day stale
-// on the day after it was taken and empty every winter. The rows below are real
+// feed is a rolling three days, so a captured response would be a day stale the
+// day after it was taken and empty every winter. The rows below are real
 // shapes from a real pull (typeCode CU, 2026-08-19) with the ids, names and
 // dates rewritten per run, so the spec exercises the real pipeline on a wire
 // that is always in the window.
@@ -58,6 +65,9 @@ const ONE_COL_W = 1000
 // a plain slate. This absorbs the rows the games column may legitimately grow
 // above the grid (a filter bar, a break banner) without absorbing a regression.
 const LEVEL_SLOP = 48
+// Mirrors WireRail's own floor: beside a very short games column the rail holds
+// its ground rather than shrinking to a stub.
+const MIN_ROWS = 4
 
 // Real clubs, real names — the cutline is parsed out of the wire's own
 // sentence, so the names have to be the ones the wire actually writes.
@@ -82,11 +92,13 @@ function dayBefore(iso) {
 
 // One recall per club per day: the wire's own CU shape, which owns cleanly
 // (the sending club is a farm club naming no other major-league org) and so
-// becomes one story per club rather than one grouped shuffle. Two days of
-// sixteen clubs is 32 stories — comfortably more than the old card's eight-row
-// ceiling, which is what makes "nothing is hidden" a real assertion.
+// becomes one story per club rather than one grouped shuffle. THREE days,
+// matching WINDOW_DAYS — 48 stories, comfortably more rail than the games
+// column can hold, which is what makes the fit a real assertion rather than a
+// test of a list that happened to fit anyway.
+const WINDOW_DAYS = 3
 const STORIES_PER_DAY = CLUBS.length
-const TOTAL_STORIES = STORIES_PER_DAY * 2
+const TOTAL_STORIES = STORIES_PER_DAY * WINDOW_DAYS
 
 function wireFor(dates) {
   const rows = []
@@ -125,7 +137,9 @@ function peopleFor(ids) {
 async function stubWire(page, rows = null) {
   await page.route('**/api/v1/transactions*', async (route) => {
     const end = new URL(route.request().url()).searchParams.get('endDate')
-    await route.fulfill({ json: { transactions: rows ?? wireFor([end, dayBefore(end)]) } })
+    const days = [end]
+    while (days.length < WINDOW_DAYS) days.push(dayBefore(days[days.length - 1]))
+    await route.fulfill({ json: { transactions: rows ?? wireFor(days) } })
   })
   await page.route('**/api/v1/people*', async (route) => {
     const ids = (new URL(route.request().url()).searchParams.get('personIds') ?? '').split(',')
@@ -160,6 +174,32 @@ async function readSlate(page) {
       // rather than as a subtle overlap.
       overflowsSideways:
         document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    }
+  })
+}
+
+// The boxes the FIT is a claim about, read in one pass so they describe the
+// same frame.
+async function readFit(page) {
+  return await page.evaluate(() => {
+    const rail = document.querySelector('.wirerail')
+    const main = document.querySelector('.slatebody__main')
+    const list = document.querySelector('.wirerail__list')
+    const rows = [...document.querySelectorAll('.wirerail__list .wire__row')]
+    const last = rows[rows.length - 1]?.getBoundingClientRect()
+    const listBox = list?.getBoundingClientRect()
+    return {
+      rowsShown: rows.length,
+      mainH: main ? Math.round(main.getBoundingClientRect().height) : null,
+      // <= 0 means the rail's foot is at or above the games column's, which is
+      // the whole promise: the wire fills the page, it never lengthens it.
+      railBottomVsMain:
+        rail && main
+          ? Math.round(rail.getBoundingClientRect().bottom - main.getBoundingClientRect().bottom)
+          : null,
+      // > 0 is a row drawn past the clamp — painted cut in half, since the list
+      // clips at overflow: hidden.
+      lastRowOverhang: last && listBox ? Math.round(last.bottom - listBox.bottom) : null,
     }
   })
 }
@@ -203,20 +243,79 @@ test('the wire runs beside the games, not above them', async ({ page }) => {
   await expect(firstRow.locator('.wire__cutline')).not.toBeEmpty()
 })
 
-test('every move is on the rail — there is no door and nothing is trimmed', async ({ page }) => {
+test('the head is the one word', async ({ page }) => {
   await page.setViewportSize({ width: TWO_COL_W, height: 900 })
   await openSlate(page)
   await expect(page.locator('.wirerail')).toBeVisible()
-
-  await expect(page.locator('.wire__row')).toHaveCount(TOTAL_STORIES)
-  // The head is the one word — no window and no count beside it. Every dateline
-  // in the list already spells out its day and carries that day's count, so a
-  // second tally up top restated the ledger to itself.
+  // No window and no count beside it: every dateline in the list already spells
+  // out its day and carries that day's count, so a second tally up top restated
+  // the ledger to itself.
   await expect(page.locator('.wirerail__head')).toHaveText(/^transactions$/i)
-  // The card's door and its expanded state are gone, not merely hidden.
-  await expect(page.locator('.wirecard__door')).toHaveCount(0)
+  // The in-flow card the rail replaced is gone, not merely hidden.
   await expect(page.locator('.wirecard')).toHaveCount(0)
+})
 
+test('the rail ends where the games end, on a whole row', async ({ page }) => {
+  await page.setViewportSize({ width: TWO_COL_W, height: 900 })
+  await openSlate(page)
+  await expect(page.locator('.wirerail')).toBeVisible()
+  await expect(page.locator('.wirerail__door')).toBeVisible()
+
+  const fit = await readFit(page)
+  // The wire may FILL the page and must never LENGTHEN it: the rail's foot
+  // lands at or above the games column's, so the slate is exactly as long as
+  // the games make it.
+  expect(fit.railBottomVsMain).toBeLessThanOrEqual(0)
+  // Every drawn row is whole. The list clips at overflow:hidden, so a row past
+  // the budget is painted cut in half — which is the visible failure.
+  expect(fit.lastRowOverhang).toBeLessThanOrEqual(0)
+  // Trimmed, but not to a stub, and not to everything.
+  expect(fit.rowsShown).toBeGreaterThanOrEqual(MIN_ROWS)
+  expect(fit.rowsShown).toBeLessThan(TOTAL_STORIES)
+})
+
+test('the more control opens onto the rest of the window, and closes again', async ({ page }) => {
+  await page.setViewportSize({ width: TWO_COL_W, height: 900 })
+  await openSlate(page)
+  const door = page.locator('.wirerail__door')
+  await expect(door).toBeVisible()
+
+  const collapsed = await readFit(page)
+  const hidden = Number((await door.textContent()).match(/\d+/)[0])
+  expect(collapsed.rowsShown + hidden).toBe(TOTAL_STORIES)
+
+  await door.click()
+  await expect(page.locator('.wirerail__list .wire__row')).toHaveCount(TOTAL_STORIES)
+  await expect(door).toHaveText(/show fewer/i)
+
+  // Closing must return to the SAME fit. This is the ratchet guard: the
+  // measurement runs against the full list, so re-collapsing cannot land on a
+  // smaller count than it did the first time. The card this replaced got this
+  // wrong and shrank a little further on every cycle.
+  await door.click()
+  await expect(page.locator('.wirerail__list .wire__row')).toHaveCount(collapsed.rowsShown)
+  const reclosed = await readFit(page)
+  expect(reclosed.rowsShown).toBe(collapsed.rowsShown)
+  expect(reclosed.lastRowOverhang).toBeLessThanOrEqual(0)
+})
+
+test('a taller games column earns the rail more rows', async ({ page }) => {
+  // The fit tracks the column, not the viewport — so the same window at the
+  // same window height fits MORE moves when the games run to one column and
+  // twice the height. The other half of the ratchet guard: the count has to be
+  // able to grow, not only shrink.
+  await page.setViewportSize({ width: TWO_COL_W, height: 900 })
+  await openSlate(page)
+  await expect(page.locator('.wirerail__door')).toBeVisible()
+  const twoUp = await readFit(page)
+
+  await page.setViewportSize({ width: ONE_COL_W, height: 900 })
+  await expect.poll(async () => (await readFit(page)).mainH).toBeGreaterThan(twoUp.mainH)
+  const oneUp = await readFit(page)
+
+  expect(oneUp.rowsShown).toBeGreaterThan(twoUp.rowsShown)
+  expect(oneUp.railBottomVsMain).toBeLessThanOrEqual(0)
+  expect(oneUp.lastRowOverhang).toBeLessThanOrEqual(0)
 })
 
 test('the wheel scrolls the slate even with the cursor over the rail', async ({ page }) => {

@@ -69,6 +69,24 @@ export function flattenDays(days) {
   return items
 }
 
+// The first `n` stories, with their datelines — and never a dateline left
+// standing over nothing, which is what a naive slice produces whenever the cut
+// lands on a day's first story. The rail's collapsed state is the only caller;
+// the dock shows every story it has.
+export function takeStories(items, n) {
+  const out = []
+  let seen = 0
+  for (const item of items) {
+    if (item.kind === 'story') {
+      if (seen >= n) break
+      seen += 1
+    }
+    out.push(item)
+  }
+  while (out.length && out[out.length - 1].kind === 'date') out.pop()
+  return out
+}
+
 // A cutline's segments — plain prose, with any segment carrying a playerId or
 // teamId linked. Identical treatment to the team card's, including the rule
 // that only a player's name takes the bold headline weight so a club name

@@ -91,10 +91,9 @@ Measured against the card it replaces, at 1440 x 900:
 
 **The rail is better for the wire, not a demotion of it.** That is worth stating
 plainly, because "move it out of the way" usually means "show less of it", and
-here it does not. Every story is drawn, however busy the 48 hours were, and none
-of them costs the games a pixel of height. Three mechanisms went with the card
-and are not coming back: the fitted-row measurement, the "All N moves" door, and
-the expanded state. A rail beside the games has no fold to end on.
+here it does not: it carries a WIDER window than the card ever did (three days
+rather than two — see the amendment below), and none of it costs the games a
+pixel of height.
 
 **The slate is now the only screen in the app that goes past 960px**, and only
 when a rail is actually there to fill the extra. `.screen`'s global cap is
@@ -145,3 +144,49 @@ chips, 230px instead of 658px. The most at home in a paper-scorebook app, and it
 needs no breakpoint or interaction. Rejected because it still spends vertical
 space the rail spends none of: 4 games above the fold against the rail's 6. It
 remains the natural fallback if the rail ever proves too much at narrow widths.
+
+## Amendment, 2026-08-21 — a three-day window, and a fit to the games
+
+Two things landed after a day of use, and they turn out to be one thing.
+
+**The window was really about 34 hours, not 48.** `WINDOW_DAYS = 2` means today
+and yesterday by calendar date, and a transaction carries a date but no time, so
+a rolling 48-hour cutoff is not computable. Two days is 48 hours only for a
+reader who opens the app late in the evening; at 10am it is ~34, and just after
+midnight it is barely 24. Measured on a Friday morning the rail showed **10
+stories while Wednesday's 31 sat one day outside** — three times the news,
+excluded for being on the wrong side of a calendar boundary rather than for
+being old.
+
+`WINDOW_DAYS` is **3**: the narrowest window that clears 48 hours at every hour
+of the day (it runs 48 to 72). `FETCH_DAYS` goes 4 → **5**, backtested the same
+way the original was — against a 14-day reference over 12 consecutive windows, 5
+misses nothing and 4 misses one story. Re-run that backtest before moving the
+window again; the margin is measured, not derived.
+
+**Which made the rail too long, so it now fits itself to the games.** Three days
+runs 41 to 65 stories — around 4,000px of rail against a games column that is
+typically 1,900. Left alone the wire would have set the length of the slate,
+which is the original mistake turned on its side.
+
+So the rail ends where the games end: it measures the column beside it, keeps
+the last WHOLE row that clears that height, and puts the rest behind one
+control. **The wire may fill the page; it may never lengthen it.** The space the
+games do leave is filled rather than left blank, which also settles the
+emptying-out that dropping sticky introduced.
+
+This is a measurement, and this ADR is on record calling the old card's
+measurement its worst feature, so the difference matters. That card measured
+against the VIEWPORT — a budget that moves for reasons the slate's content knows
+nothing about. This measures a SIBLING ELEMENT, which changes only when the
+slate's own content does (a filter applied, the fetch landing, an Off Day
+section appearing), and it watches it with a ResizeObserver rather than
+re-probing on window resize. The bug the old one shipped is still the bug to
+avoid and is guarded the same way: a measurement can only see rows that are IN
+the list, so measuring the already-trimmed list ratchets the count down and
+never recovers. Every measurement runs against the FULL list, rendered for
+exactly the frame the measurement needs.
+
+Below `MIN_ROWS` (4) the rail holds its ground and overhangs the games instead.
+Beside a two-game slate that is the right trade; a column showing one move is
+not a ledger.

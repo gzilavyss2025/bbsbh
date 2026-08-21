@@ -373,7 +373,7 @@ export function WireDock({ endDate, onPresence }) {
   }, [index, present])
 
   // Renders nothing while loading, on a failed fetch, and on a genuinely quiet
-  // 48 hours — the slate is the page, and an empty rail pinned across the
+  // window — the slate is the page, and an empty rail pinned across the
   // bottom of it would cost a permanent strip of screen to say nothing.
   if (!present) return null
 
@@ -446,7 +446,7 @@ export function WireDock({ endDate, onPresence }) {
               aria-hidden={index === RAIL ? 'true' : undefined}
             >
               <h2 className="wiredock__title">Transactions</h2>
-              <span className="wiredock__note">Last 48 hours · {total}</span>
+              <span className="wiredock__note">Last 3 days · {total}</span>
               <button
                 type="button"
                 className="wiredock__close"

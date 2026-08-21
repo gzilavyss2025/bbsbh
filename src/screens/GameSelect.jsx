@@ -118,7 +118,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // MoveRow.jsx — the rail asks for its compact variant.
   const wide = useMediaQuery(WIDE_QUERY)
   const showWire = isToday && sportId === SPORT_IDS.MLB
-  // The dock renders nothing on a quiet 48 hours, and only IT knows that (the
+  // The dock renders nothing on a quiet window, and only IT knows that (the
   // answer arrives with the fetch). It reports back so the slate pads its floor
   // for a rail that actually exists — see .screen--wiredock in
   // 04a-wire-dock.css, and note the padding is what keeps the dock off the
@@ -130,9 +130,14 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // be wide from first paint, because widening it a beat later would slide the
   // whole game grid sideways under the reader. So this starts true — the room
   // is reserved on what is known synchronously — and WireRail reports back only
-  // to take it away, on a quiet 48 hours or a failed fetch. See WireRail.jsx.
+  // to take it away, on a quiet window or a failed fetch. See WireRail.jsx.
   const [railPresent, setRailPresent] = useState(true)
   const railed = showWire && wide && railPresent
+  // The rail ends where the games end (WireRail.jsx's fit). It measures this
+  // column rather than the viewport, so the ref is handed down explicitly — a
+  // querySelector inside the rail would hide the dependency from the one file
+  // that renders both halves.
+  const gamesColRef = useRef(null)
 
   // Site-wide "Scores Unlocked" pass. The toggle is only OFFERED on today's
   // slate — you can't retroactively consent to a day you've paged back to — but
@@ -765,7 +770,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
           the rail is not rendered at all — the phone gets the dock at the foot
           of this screen instead. See .slatebody in 25-wide-layout.css. */}
       <div className="slatebody">
-        <div className="slatebody__main">
+        <div className="slatebody__main" ref={gamesColRef}>
           <AsyncStatus
             loading={loading}
             error={error}
@@ -885,14 +890,17 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
           </div>
         </div>
 
-        {/* Roster moves from the last 48 hours, live off the wire (issue #772).
-            TODAY's MLB slate only — "the last 48 hours" is a claim about now, so
-            on a browsed-to past day it would read as a bug, not as news. Renders
-            null while loading, on failure, and on a quiet 48 hours, and reports
+        {/* The league's roster moves from the last three days, live off the wire
+            (issue #772). TODAY's MLB slate only — a rolling window is a claim
+            about now, so on a browsed-to past day it would read as a bug rather
+            than as news. Renders null while loading, on failure, and on a quiet
+            window, and reports
             which back so the shell can give the reserved width up. WIDE ONLY:
             the phone's copy of this feed is the dock at the foot of this
             screen. See WireRail.jsx. */}
-        {showWire && wide && <WireRail endDate={dateStr} onPresence={setRailPresent} />}
+        {showWire && wide && (
+          <WireRail endDate={dateStr} onPresence={setRailPresent} fitTo={gamesColRef} />
+        )}
       </div>
 
       <SiteFooter onShowLogos={onShowLogos} />

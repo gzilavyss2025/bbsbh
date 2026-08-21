@@ -148,26 +148,16 @@
     max-width: 1272px;
   }
 
-  /* THE RAIL IS NOT ITS OWN SCROLLER, and that is a decision rather than an
-     omission. It was one: capped to the viewport with `overflow-y: auto`,
-     sticky, and `overscroll-behavior: contain`. That is the textbook sticky
-     sidebar and it was wrong here for a plain reason — a wheel with the cursor
-     over the rail stopped moving the games. Worse on a light wire than a busy
-     one: at ten moves the rail sat a hair OVER its own cap, so it owned the
-     wheel to scroll two pixels and `contain` refused to pass the rest on. The
-     page simply did not move.
-
-     So the rail scrolls with the page, like the column of content it is. The
-     wheel belongs to the slate everywhere on the slate; nothing has to guess
-     which of two scrollers a gesture meant, because there is only one.
-
-     Sticky went with the cap, and had to: `position: sticky` on something
-     taller than the window pins its top and puts its tail permanently out of
-     reach, and a real 48 hours runs 30 to 54 stories — taller than the window
-     and often taller than the game list beside it. Sticky is only safe on a
-     rail you have measured, and measuring the wire is what the card this
-     replaced did badly (ADR-0062). The cost is real and accepted: on a quiet
-     wire the column empties out before the games do. */
+  /* THE RAIL IS NOT ITS OWN SCROLLER, and is not sticky. Both are deliberate
+     and both were tried: as a viewport-capped sticky sidebar with
+     `overscroll-behavior: contain`, a wheel with the cursor over the rail
+     stopped moving the games — and on a light wire it moved nothing at all,
+     because the rail sat a hair over its own cap and swallowed the gesture to
+     travel two pixels. One scroller on the slate means no gesture has to be
+     routed between two. Sticky went with it: `position: sticky` on something
+     taller than the window pins its top and puts its tail out of reach, and
+     this wire runs 41 to 65 stories. Height is bounded by the FIT instead —
+     WireRail measures the games column and clamps its list to it (ADR-0062). */
   .wirerail {
     flex: 0 0 auto;
     width: 288px;
@@ -175,6 +165,95 @@
        rail's head starts level with the first card's top edge instead of 14px
        above it. The two move together — change one, change the other. */
     margin-top: 14px;
+  }
+
+  /* ---- the rail's own chrome: its head, its clamped list, its one control,
+     and the compact row it asks MoveRow for. All of it sits inside this media
+     query because the rail is rendered ONLY at WIDE_QUERY (a phone gets
+     WireDock), so every rule here is wide-only by construction. The shared
+     .wire__* ledger rules stay in 04-site-bar.css — the dock wears those too. */
+  /* One word, over the ledger's top rule. The 48-hour window and the story count
+     used to ride at the right of this row and were dropped: every dateline in the
+     list below already spells out its day and carries that day's count, so the
+     head was restating the ledger to itself. */
+  .wirerail__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding-bottom: 6px;
+    border-bottom: var(--bw-hair) solid var(--rule-soft);
+  }
+  .wirerail__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--text-caption);
+  }
+  /* Clamped to the height WireRail measured off the games column (an inline
+     max-height, collapsed only) — which is what stops the frame BEFORE that
+     measurement painting a longer list than the fit is about to allow. */
+  .wirerail__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* The rest of the window, behind one control. Quieter than the card's old
+     full-width door: it sits at the foot of a 288px column beside the games, so
+     it reads as the end of the ledger rather than as a second call to action
+     competing with the slate. */
+  .wirerail__door {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: var(--tap-min);
+    margin-top: var(--space-2);
+    padding: 0 var(--space-3);
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-sm);
+    background: none;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--accent-link);
+  }
+  .wirerail__door:hover,
+  .wirerail__door:active {
+    background: var(--surface-inset);
+  }
+
+
+  /* The RAIL's row (MoveRow's `compact`). Same spine, same kicker, same cutline
+     voice — the photo rail is what goes, because at 288px a 33px face column plus
+     its gap leaves about 220px for a sentence that runs to 104 characters. The
+     grid above exists only to seat those faces, so with them gone the row is a
+     plain block and the body takes the full width.
+
+     Everything else here is one step down in size, which is what a column a third
+     the ledger's width asks for. The cutline stays Lora: a narrower measure is a
+     reason to set prose smaller, never a reason to stop setting it as prose. */
+  .wire__row--compact {
+    display: block;
+    padding: var(--space-2) 0 var(--space-2) 10px;
+  }
+  .wire__row--compact .wire__kicker {
+    gap: 6px;
+  }
+  .wire__row--compact .wire__cutline {
+    font-size: var(--fs-compact);
+  }
+  /* The banner rides in the kicker here rather than over a headshot, so it needs
+     the kicker's own baseline rather than the face column's centring. */
+  .wire__row--compact .banner {
+    flex: 0 0 auto;
   }
 
   /* auto-fit, not a fixed 2: the games column is 928 with a rail beside it and
