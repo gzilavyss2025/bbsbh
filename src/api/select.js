@@ -337,6 +337,32 @@ export function selectBench(feed, side) {
     .sort((a, b) => a.nameLastFirst.localeCompare(b.nameLastFirst))
 }
 
+// Is a bench/bullpen card entry crossed off — already IN the game — as the half
+// on screen stands? The two card selectors above hand every entry an
+// `enteredIdx`; this is the one place that decides what to do with it, and it
+// answers to TWO ceilings, both of which are ceilings and neither of which is
+// the whole answer on its own:
+//
+//  • `revealedThrough` is the SPOILER ceiling. An entry the reader has not
+//    reached yet renders like any other available player, so the card never
+//    hints at what a still-sealed half holds (ADR-0005 — the strike-through is
+//    the only thing on a roster row that a game event may move at all).
+//  • `halfIdx` is the ACCURACY ceiling — the half being read. A reader who has
+//    unsealed the whole game and paged back to the 1st is REPLAYING it, and a
+//    pinch-hitter who bats in the 8th sat on that bench in the 1st. Striking
+//    him there spoils nothing — the reader already owns the whole game — it is
+//    simply wrong about the moment the page is showing.
+//
+// The lower of the two wins, which is what leaves the live flow untouched: at
+// the frontier the half on screen IS the reveal mark, so the two ceilings agree
+// and a sub who enters in the half being scored still strikes through as he
+// always did. Pass `halfIdx` null on a surface with no one half in view.
+export function enteredAsOf(player, revealedThrough, halfIdx = null) {
+  const at = player?.enteredIdx
+  if (at == null) return false
+  return at <= Math.min(revealedThrough, halfIdx ?? Infinity)
+}
+
 // Team-level meta for a side: name, record, manager placeholder (manager is
 // fetched separately), and probable pitcher with handedness.
 export function selectTeamMeta(feed, side) {
