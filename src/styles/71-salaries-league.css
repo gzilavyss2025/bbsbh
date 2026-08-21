@@ -344,6 +344,13 @@
   text-transform: uppercase;
   color: var(--text-heading);
 }
+/* The off-field buckets ("Pitcher, unassigned", "Outfield, unassigned") are
+   long enough to wrap the fixed 84px label to two lines on a phone; that
+   grows `.posspend__row`'s height, and `align-items: center` above then
+   floats the track and dollar figure at the row's new vertical middle
+   instead of riding the label's first line (same shape as issue #766 — see
+   29-team-transactions.css). Pin both to the top so a wrapped label reads as
+   a longer left column, not a stray gap before the bar and figure. */
 .posspend__track {
   flex: 1;
   min-width: 0;
@@ -351,6 +358,7 @@
   border-radius: 2px;
   background: var(--bg-page);
   overflow: hidden;
+  align-self: flex-start;
 }
 .posspend__fill {
   display: block;
@@ -367,6 +375,7 @@
   font-size: var(--fs-small);
   font-weight: var(--w-bold);
   color: var(--text-heading);
+  align-self: flex-start;
 }
 
 /* ------------------------------------------------------------ attribution
