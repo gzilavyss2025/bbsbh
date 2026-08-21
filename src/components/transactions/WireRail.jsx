@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { fetchLeagueMoves } from '../../api/transactions/leagueFeed.js'
+import { fetchLeagueMoves, windowDaysFor } from '../../api/transactions/leagueFeed.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { MoveItems, flattenDays, takeStories } from './MoveRow.jsx'
 
@@ -33,10 +33,14 @@ import { MoveItems, flattenDays, takeStories } from './MoveRow.jsx'
 // ---------------------------------------------------------------------------
 // THE FIT: the wire may fill the page, never lengthen it
 // ---------------------------------------------------------------------------
-// The window is three days (leagueFeed.js explains why two was really ~34
+// MLB's window is three days (leagueFeed.js explains why two was really ~34
 // hours), which runs 41 to 65 stories — around 4,000px of rail against a games
-// column that is typically 1,900. Left alone the wire would set the length of
-// the slate, which is the same mistake the old card made, turned on its side.
+// column that is typically 1,900. AA/A+/A read wider windows off the same
+// module (`windowDaysFor`) to make up for a level's own thinner news, so the
+// story count below varies by level; the FIT below reads whatever the list
+// holds rather than assuming MLB's count, so it needs no per-level branch.
+// Left alone the wire would set the length of the slate, which is the same
+// mistake the old card made, turned on its side.
 //
 // So the rail ends where the games end. It measures the column beside it and
 // keeps the last WHOLE row that clears that height; the rest go behind one
@@ -127,12 +131,15 @@ function useFitToColumn(listRef, fitTo, ready) {
 // 25-wide-layout.css), and it cannot wait for the fetch to do it: reserving the
 // width only once the moves land would slide the game grid sideways a beat
 // after first paint. So the slate reserves the room up front on what it knows
-// synchronously (today + MLB + wide) and this reports back only to take it away
+// synchronously (today + wide) and this reports back only to take it away
 // again, which in season is the rare case. Reporting is deliberately held until
 // the fetch settles for exactly that reason — an eager "nothing yet" would
 // cause the very jump the arrangement exists to avoid.
-export function WireRail({ endDate, onPresence, fitTo }) {
-  const { data, loading } = useAsync((signal) => fetchLeagueMoves(endDate, { signal }), [endDate])
+export function WireRail({ endDate, sportId, onPresence, fitTo }) {
+  const { data, loading } = useAsync(
+    (signal) => fetchLeagueMoves(endDate, sportId, { signal }),
+    [endDate, sportId],
+  )
   const [expanded, setExpanded] = useState(false)
   const listRef = useRef(null)
 
@@ -162,7 +169,10 @@ export function WireRail({ endDate, onPresence, fitTo }) {
     // "48h · 10" in the head restated what the ledger says twice over. The
     // accessible name keeps the window, because a screen reader landing on
     // this region has not read the datelines yet.
-    <aside className="wirerail" aria-label="Transactions around the league, last three days">
+    <aside
+      className="wirerail"
+      aria-label={`Transactions around the league, last ${windowDaysFor(sportId)} days`}
+    >
       <div className="wirerail__head">
         {/* Mixed case here on purpose: the CSS applies the app's ALL-CAPS
             invariant, never a per-component .toUpperCase() (ADR-0017). */}

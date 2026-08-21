@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
+import { isMlbTeamId, teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
@@ -183,6 +183,16 @@ function Face({ slot }) {
 // keeps its type label — "Roster shuffle" beside one Up chip reads correctly,
 // and two chips plus a mark plus an abbreviation plus a label do not fit 288px
 // without wrapping the kicker onto a second line.
+// `TeamLink`'s `tab` for the club chip. `transactions` is the club's own
+// roster-move ledger — but that page reads only the MLB-org nightly file
+// (`screens/team/data/loadTransactions.js`) and resolves empty for a farm
+// club, so a MiLB story would land its own club chip on a page it just
+// disproved. Send those to the hub's front door instead, same as any other
+// caller with no tab opinion; the MLB fold-up keeps the real ledger.
+function clubTabFor(teamId) {
+  return isMlbTeamId(teamId) ? 'transactions' : 'overview'
+}
+
 export function MoveRow({ story, compact = false }) {
   const tone = TYPE_TONE[story.type]
   const abbr = teamAbbr({ id: story.teamId })
@@ -211,7 +221,7 @@ export function MoveRow({ story, compact = false }) {
           )}
           <TeamLink
             id={story.teamId}
-            tab="transactions"
+            tab={clubTabFor(story.teamId)}
             className="wire__club"
             ariaLabel={`${abbr} transactions`}
           >

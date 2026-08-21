@@ -825,6 +825,46 @@ test('buildCutline: injured-list without a replacement has no secondary clause',
   )
 })
 
+// A club whose own name carries an abbreviation period — St. Louis Cardinals,
+// St. Paul Saints (Twins Triple-A), St. Lucie Mets (Mets Single-A) — used to
+// break `ilReason`'s naive split on every ". " in the description: it read
+// "St." as the whole first sentence and turned the rest of the CLUB's own
+// name into a fabricated "reason". Reproduced live against a real St. Lucie
+// Mets row (2026-08-21) while building the MiLB wire.
+test('buildCutline: injured-list survives a club name with its own abbreviation period', () => {
+  const row = {
+    id: 938753,
+    person: { id: 836171, fullName: 'Austin Brown' },
+    toTeam: { id: 507, name: 'St. Lucie Mets' },
+    date: '2026-08-21',
+    effectiveDate: '2026-08-21',
+    typeCode: 'SC',
+    description: 'St. Lucie Mets placed RHP Austin Brown on the 7-day injured list.',
+  }
+  const segs = buildCutline({ storyType: 'injured-list', rows: [{ row, role: 'out' }] }, {})
+  assert.equal(
+    segs.map((s) => s.text).join(''),
+    'Placed RHP Austin Brown on the 7-day injured list.',
+  )
+})
+
+test('buildCutline: a real injury reason still survives the same club name', () => {
+  const row = {
+    id: 1,
+    person: { id: 2, fullName: 'Some Guy' },
+    toTeam: { id: 138, name: 'St. Louis Cardinals' },
+    date: '2026-08-21',
+    effectiveDate: '2026-08-21',
+    typeCode: 'SC',
+    description: 'St. Louis Cardinals placed RHP Some Guy on the 15-day injured list. Right shoulder inflammation.',
+  }
+  const segs = buildCutline({ storyType: 'injured-list', rows: [{ row, role: 'out' }] }, {})
+  assert.equal(
+    segs.map((s) => s.text).join(''),
+    'Placed RHP Some Guy on the 15-day injured list (right shoulder inflammation).',
+  )
+})
+
 // ---------------------------------------------------------------------------
 // §5 Reader — per-club, per-season pagination over a mocked fetch
 // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { fetchLeagueMoves } from '../../api/transactions/leagueFeed.js'
+import { fetchLeagueMoves, windowDaysFor } from '../../api/transactions/leagueFeed.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
@@ -110,8 +110,11 @@ function liveOffset(el, fallback) {
 
 // ---------------------------------------------------------------------------
 
-export function WireDock({ endDate, onPresence }) {
-  const { data } = useAsync((signal) => fetchLeagueMoves(endDate, { signal }), [endDate])
+export function WireDock({ endDate, sportId, onPresence }) {
+  const { data } = useAsync(
+    (signal) => fetchLeagueMoves(endDate, sportId, { signal }),
+    [endDate, sportId],
+  )
 
   const rootRef = useRef(null)
   const sheetRef = useRef(null)
@@ -446,7 +449,7 @@ export function WireDock({ endDate, onPresence }) {
               aria-hidden={index === RAIL ? 'true' : undefined}
             >
               <h2 className="wiredock__title">Transactions</h2>
-              <span className="wiredock__note">Last 3 days · {total}</span>
+              <span className="wiredock__note">Last {windowDaysFor(sportId)} days · {total}</span>
               <button
                 type="button"
                 className="wiredock__close"

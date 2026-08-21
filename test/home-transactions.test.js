@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { groupLeagueWide, leagueCandidateIds } from '../src/api/transactions/league.js'
-import { feedWindow, shapeLeagueFeed } from '../src/api/transactions/leagueFeed.js'
+import { feedWindow, shapeLeagueFeed, windowDaysFor } from '../src/api/transactions/leagueFeed.js'
+import { SPORT_IDS } from '../src/lib/teams.js'
 
 // ---------------------------------------------------------------------------
 // The home slate's 48-hour roster-move card (issue #772, segment 3).
@@ -126,6 +127,21 @@ const AFFILIATE_ONLY = {
   description: 'OF Someone Else assigned to New Hampshire Fisher Cats from Buffalo Bisons.',
 }
 
+// Logged entirely at a single affiliate — no MLB club on either side, but a
+// STORY_WORTHY_CODES member (unlike ASG above). vocabulary.js's header names
+// this exact shape: "Wilson Warbirds released RHP Melvin Hernandez," toTeam
+// the affiliate, no fromTeam, never touching an MLB roster.
+const BISONS_RELEASE = {
+  id: 938701,
+  person: { id: 700002, fullName: 'Some Farmhand' },
+  toTeam: BISONS,
+  date: '2026-08-19',
+  effectiveDate: '2026-08-19',
+  typeCode: 'REL',
+  typeDesc: 'Released',
+  description: 'Buffalo Bisons released RHP Some Farmhand.',
+}
+
 const ctx = {
   mlbTeamIds: MLB_TEAM_IDS,
   affilToOrg: AFFIL_TO_ORG,
@@ -155,6 +171,32 @@ test('feedWindow crosses a month boundary without drifting', () => {
   const w = feedWindow('2026-09-01')
   assert.equal(w.windowStart, '2026-08-30')
   assert.equal(w.fetchStart, '2026-08-28')
+})
+
+// ---------------------------------------------------------------------------
+// Per-level windows — AA/A+/A read fewer storyworthy rows per club than MLB
+// or AAA (backtested in .scratch/milb-wire/backtest.md), so they widen past
+// MLB's 3/5 to have anything to show most days.
+// ---------------------------------------------------------------------------
+
+test('MLB and AAA keep the three-day window; AA/A+/A widen to seven', () => {
+  assert.equal(windowDaysFor(SPORT_IDS.MLB), 3)
+  assert.equal(windowDaysFor(SPORT_IDS.AAA), 3)
+  assert.equal(windowDaysFor(SPORT_IDS.AA), 7)
+  assert.equal(windowDaysFor(SPORT_IDS['A+']), 7)
+  assert.equal(windowDaysFor(SPORT_IDS.A), 7)
+})
+
+test('feedWindow widens for a level that reads fewer storyworthy rows', () => {
+  const mlb = feedWindow('2026-08-20', SPORT_IDS.MLB)
+  const aa = feedWindow('2026-08-20', SPORT_IDS.AA)
+  assert.equal(mlb.windowStart, '2026-08-18')
+  assert.equal(mlb.fetchStart, '2026-08-16')
+  assert.equal(aa.windowStart, '2026-08-14')
+  assert.equal(aa.fetchStart, '2026-08-12')
+  // Omitting sportId still means MLB — clubFeed.js's own club page never
+  // passes one, and never should: a club's own ledger is always MLB-org-scoped.
+  assert.deepEqual(feedWindow('2026-08-20'), mlb)
 })
 
 test('the window reaches two days back, not one', () => {
@@ -229,6 +271,35 @@ test('the debut set still suppresses an anonymous signing on this path', () => {
   // ...and it is the debut set doing it, not the window.
   const without = shapeLeagueFeed([HAGEDORN_SIGNING], { ...ctx, debutedIds: null }, window)
   assert.equal(without.flatMap((d) => d.stories).length, 1)
+})
+
+// ---------------------------------------------------------------------------
+// A MiLB level's own scope — its thirty clubs are the TOP set groupLeagueWide
+// walks, not an affiliate folded up under an MLB parent (leagueFeed.js's
+// `scopeFor`). No `affilToOrg`, and no `debutedIds`: `isUndebutedSigning`
+// only fires when a debut set is given, so simply not fetching one at a MiLB
+// level is what lets an undebuted signee's own story through.
+// ---------------------------------------------------------------------------
+
+test('a row invisible at MLB scope becomes its own AAA story once AAA is the top set', () => {
+  // BISONS_RELEASE names no MLB club at all, so the MLB-scoped ctx above (its
+  // mlbTeamIds is five MLB clubs, none of them 422) drops it outright — as
+  // 43 of the 60-day window's REL rows did in the live pull vocabulary.js's
+  // header measured. Scoped to Triple-A's own thirty clubs, 422 IS in the top
+  // set, so the row is Buffalo's own story rather than nobody's.
+  assert.deepEqual(groupLeagueWide([BISONS_RELEASE], ctx), [])
+  const days = groupLeagueWide([BISONS_RELEASE], { mlbTeamIds: [422] })
+  const stories = days.flatMap((d) => d.stories)
+  assert.equal(stories.length, 1)
+  assert.equal(stories[0].teamId, 422)
+})
+
+test('a MiLB-scoped ctx does not suppress an undebuted signing', () => {
+  // Same row the MLB-scoped debut set drops (line 253 above) — scoped to the
+  // Brewers' own MLB club id with no debutedIds at all, it survives, because
+  // suppression is opt-in by the PRESENCE of a debut set, not a flag.
+  const days = groupLeagueWide([HAGEDORN_SIGNING], { mlbTeamIds: [158] })
+  assert.equal(days.flatMap((d) => d.stories).length, 1)
 })
 
 // ---------------------------------------------------------------------------
