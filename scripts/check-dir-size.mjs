@@ -399,6 +399,12 @@ const BUDGETS = {
   // manifest classifies the flat set, and a subdirectory would quietly take a
   // new module out of the thing that proves it carries a classification at all.
   'src/api': 100,
+  // src/api/person, 13: awards.js, the player page's Awards section, split OUT
+  // of transactions.js when the honors half it carried outgrew that file's
+  // 600-line budget. It belongs beside its siblings — same "nothing here
+  // fetches" convention, same person-shaping job — and a subdirectory for one
+  // module would only hide it from check-spoiler-manifest's flat classification.
+  'src/api/person': 13,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly

@@ -7,6 +7,7 @@ import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { FIELDS, GROUPS, defaultCopy, fillTokens, sanitizeOverrides } from '../copy/registry.js'
 import { ConsentModal } from '../components/seal/ConsentModal.jsx'
 import { makePreviewResolver } from '../copy/previewResolver.js'
+import { AwardOrderEditor } from '../components/admin/AwardOrderEditor.jsx'
 import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 
 // The admin copy editor (route: /admin, unlinked). Lets the site owner tune the
@@ -407,6 +408,12 @@ function Editor({ onDirty, focus }) {
         // ballpark notes are 30 independent paragraphs on a plain page, so they
         // render as a bare field list — no preview pane, no "View real modal".
         const stageable = group.preview === 'consentModal'
+        // Award weight is the one group that is not copy: an ordering plus two
+        // numbers. It stores the same bounded registry values every other
+        // group does — and reads back into a plain text box if this ever
+        // breaks — but an ordering is compared, not retyped, so it gets a
+        // reorder list instead of a textarea. See AwardOrderEditor.
+        const custom = group.editor === 'awardOrder'
         return (
           <section key={group.id} className="admincopy__group" aria-label={group.label}>
             <div className="admincopy__groupHead">
@@ -421,6 +428,14 @@ function Editor({ onDirty, focus }) {
                 </button>
               )}
             </div>
+            {custom ? (
+              <AwardOrderEditor
+                fields={groupFields}
+                values={values}
+                onChange={onChange}
+                onReset={onReset}
+              />
+            ) : (
             <div className={stageable ? 'admincopy__groupGrid' : 'admincopy__groupGrid admincopy__groupGrid--plain'}>
               <div className="admincopy__fields">
                 {subgroups(groupFields).map(({ title, fields }) => (
@@ -440,6 +455,7 @@ function Editor({ onDirty, focus }) {
               </div>
               {stageable && <ModalPreview values={values} ids={ids} />}
             </div>
+            )}
           </section>
         )
       })}

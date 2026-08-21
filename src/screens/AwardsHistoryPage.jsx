@@ -298,7 +298,7 @@ function AllMlbYear({ year, first, second, favoriteTeamId, showYearLabel = true 
 }
 
 // League-wide Awards History: who won each major MLB award (the same hardware
-// set the player page's Trophy Case counts, MAJOR_AWARDS in api/person.js) over
+// set the player page's own award labels, MAJOR_AWARDS in api/person.js) over
 // the last several seasons — the standalone counterpart to that per-player
 // card ("what has THIS player won" vs. "who won THIS award"). Toggles between
 // "By Award" (award-first, then season) and "By Year" (season-first, then

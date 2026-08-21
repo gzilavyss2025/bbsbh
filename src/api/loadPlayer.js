@@ -59,7 +59,7 @@ import {
   detectRehabAssignment,
   detectInjuredList,
   transactionTimelineView,
-  trophyCaseView,
+  awardsView,
   tradeKey,
   positionPlayerPastNote,
   fieldingView,
@@ -407,9 +407,14 @@ export async function loadPlayer(id, asOf) {
   // rather than affiliate name — see person.js's ilArcClause), the other
   // players in each trade (named only as free text on the player's own row),
   // and his draft record. Gathered here, then shaped by
-  // transactionTimelineView. The same awards fetch also feeds the Trophy Case
-  // card (trophyCaseView, below) — awards are MLB-only, so only fetch them for
-  // a debuted player (a pure prospect has none in either allowlist).
+  // transactionTimelineView. The same awards fetch also feeds the Awards
+  // section (awardsView, below), which is why it is no longer conditional on
+  // `bio.debut`: the old Trophy Case read two major-league allowlists, so a
+  // prospect genuinely had nothing to show and the request was waste. The
+  // ledger ranks EVERY award the feed carries, and a prospect's case — league
+  // MVP, Futures Game, the Baseball America teams — is the whole section for
+  // him. Skipping the fetch would have made his page the one that shows
+  // nothing (./person/awards.js).
   const asgTeamIds = new Set()
   const trades = []
   for (const t of txns) {
@@ -427,7 +432,7 @@ export async function loadPlayer(id, asOf) {
     // Level per affiliate id, from the static team snapshot (reliable at the
     // standard levels, unlike the live teams endpoint's default-season sportId).
     Promise.all([...asgTeamIds].map(async (tid) => [tid, (await fetchTeam(tid))?.sport?.id ?? null])),
-    bio.debut ? fetchPlayerAwards(id) : Promise.resolve([]),
+    fetchPlayerAwards(id),
     // One team+date lookup per trade returns every player in that swap.
     Promise.all(
       trades.map(async (t) => {
@@ -457,7 +462,7 @@ export async function loadPlayer(id, asOf) {
     rookieUntil: rookieInfo?.rookieUntil ?? null,
     endDate,
   })
-  const trophyCase = trophyCaseView(awards, endDate)
+  const awardLedger = awardsView(awards, endDate)
   const blocks = results.map((r) => r.block)
   // "Last played in 2022" — the banner under the masthead for someone who isn't
   // on a club AND hasn't appeared in a game this season. Only for the unrostered:
@@ -734,7 +739,7 @@ export async function loadPlayer(id, asOf) {
     rosterStatus, lastPlayedYear,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
     prospectCard, prospectCardGroup,
-    conversionNote, positionInnings, transactions, trophyCase,
+    conversionNote, positionInnings, transactions, awardLedger,
     contract,
     vsTeam: vsTeamSplitsFor(vsTeamData, bio.id),
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,

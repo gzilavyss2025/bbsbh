@@ -1,7 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useNav, useRouteLink } from '../../lib/nav.js'
 import { MENU_GROUPS, isGuidePath } from '../../lib/reportPages.js'
+import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { DirectoryHeading } from './DirectoryHeading.jsx'
+
+// AdminMenuLink.jsx imports @clerk/clerk-react at its top, so it is only
+// dynamically imported — and only then does that SDK reach a device — when a
+// deploy actually configures Clerk. Same arrangement SiteHeader uses for
+// AccountButton, for the same reason. It renders null for everyone who is not
+// a signed-in admin, so mounting it unconditionally below is safe.
+const AdminMenuLink = isClerkEnabled
+  ? lazy(() => import('../account/AdminMenuLink.jsx').then((m) => ({ default: m.AdminMenuLink })))
+  : null
 
 // A persistent icon button, sibling to SiteSearchButton, that opens a sheet
 // listing the app's standalone pages — grouped now, not one flat run of
@@ -161,6 +171,16 @@ function SiteMenuModal({ onClose }) {
                     </li>
                   )
                 })}
+                {/* The admin row rides the last group's list ("The site"),
+                    which is already where the site's own pages live. It is not
+                    a MENU_GROUPS entry: that registry also feeds both footers
+                    and /more, none of which is role-aware, so an entry there
+                    would print /admin for every visitor. See AdminMenuLink. */}
+                {AdminMenuLink && group.id === MENU_GROUPS[MENU_GROUPS.length - 1].id && (
+                  <Suspense fallback={null}>
+                    <AdminMenuLink onNavigate={onClose} />
+                  </Suspense>
+                )}
               </ul>
             </section>
           ))}
