@@ -63,6 +63,20 @@ test('walks, HBP, and sacrifices are plate appearances but not at-bats', () => {
   assert.deepEqual(computeBatterLine(feed, 1, 5), { hits: 1, atBats: 1 })
 })
 
+// Rule 9.08(c): no sacrifice is credited when a runner is retired advancing
+// on a bunt, so unlike sac_fly_double_play above, this IS an at-bat. Filed
+// as issue #765 — NOT_AN_AT_BAT used to wrongly exclude this eventType.
+test('a bunt that also turns a double play is charged an at-bat, unlike a sac fly double play', () => {
+  const feed = {
+    liveData: {
+      plays: {
+        allPlays: [play(1, 'top', 1, 'sac_bunt_double_play'), play(2, 'top', 1, 'sac_fly_double_play')],
+      },
+    },
+  }
+  assert.deepEqual(computeBatterLine(feed, 1, 5), { hits: 0, atBats: 1 })
+})
+
 test('ignores another batter\'s plays entirely', () => {
   const feed = {
     liveData: {
