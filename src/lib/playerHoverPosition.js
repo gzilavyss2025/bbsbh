@@ -17,13 +17,25 @@ const ESTIMATED_CARD_HEIGHT = 210 // a card with the level/rehab pill line — t
 // either viewport edge, and flipped ABOVE the trigger when there isn't room
 // below but there is above.
 export function playerHoverCardPosition(rect, viewport) {
+  return hoverCardPosition(rect, viewport)
+}
+
+// The same clamp and flip for a popover of any size — the ball-flight card
+// (components/charts/BallFlight.jsx) is a different shape off a different
+// trigger, and the arithmetic never depended on which card it was. `size`
+// defaults to the player card's own numbers, so its caller above is unchanged.
+export function hoverCardPosition(
+  rect,
+  viewport,
+  { width = CARD_WIDTH, height = ESTIMATED_CARD_HEIGHT } = {},
+) {
   const left = Math.max(
     VIEWPORT_MARGIN,
-    Math.min(rect.left - LEFT_NUDGE, viewport.width - CARD_WIDTH - VIEWPORT_MARGIN),
+    Math.min(rect.left - LEFT_NUDGE, viewport.width - width - VIEWPORT_MARGIN),
   )
   const below = rect.bottom + TRIGGER_GAP
-  const fitsBelow = below + ESTIMATED_CARD_HEIGHT <= viewport.height - VIEWPORT_MARGIN
-  const above = rect.top - TRIGGER_GAP - ESTIMATED_CARD_HEIGHT
+  const fitsBelow = below + height <= viewport.height - VIEWPORT_MARGIN
+  const above = rect.top - TRIGGER_GAP - height
   const flipUp = !fitsBelow && above >= VIEWPORT_MARGIN
   const top = Math.max(VIEWPORT_MARGIN, flipUp ? above : below)
   return { left, top, flipped: flipUp }

@@ -586,3 +586,233 @@
 .hitchart .bpdiagram__wallh {
   display: none;
 }
+
+/* ── Ball flight ─────────────────────────────────────────────────────────────
+   The hit chart's per-play sibling (components/charts/BallFlight.jsx): ONE
+   batted ball, its path from the plate drawn over the park, the measurements
+   underneath. It lives in this partial rather than a file of its own because it
+   is the same picture at a different scope — same marks, same heat ring, same
+   drawing — and two stylesheets would let the two drift apart.
+
+   Two shells, one body: a popover on a pointer, a centred sheet on a tap. Both
+   are portalled to <body>, OUTSIDE #root, so this block re-states the ALL-CAPS
+   INVARIANT for its own subtree the way the player hover card's partial does —
+   `#root *` cannot reach a body-portalled node. */
+.bflight * {
+  text-transform: uppercase;
+}
+
+/* THE HANDLE, AND WHY IT IS THE WHOLE CELL. The tally cell's scorer marks — a
+   fielding chain penciled dead centre, the red out-number circle — are
+   absolutely positioned ON TOP of the diamond drawing, so a button wrapped
+   round the drawing alone would lose every pointer that landed on a mark.
+   Nothing else in the cell is interactive, so the cell is the target: an
+   invisible layer over all of it, sized by its positioned parent. */
+.pbp__flightbtn {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pbp__flightbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.bflight {
+  width: 300px;
+  max-width: 100%;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-raised);
+  font-family: var(--font-body);
+  padding: 12px 12px 4px;
+}
+
+.bflight--hover {
+  position: fixed;
+  z-index: 100;
+  /* THE CARD TAKES NO POINTER. It is read-only — a drawing and three numbers —
+     so a reader travelling down the feed's diamonds passes straight through it
+     onto the next one, which re-anchors the card, instead of having to steer
+     around it. Anything clickable added in here turns this back on and owes the
+     trigger-to-card gap a safe polygon, not a plain grace period. The SHEET is
+     the opposite and must stay so: its whole surface is a dismiss target. */
+  pointer-events: none;
+}
+
+.bflight--modal {
+  position: relative;
+  /* Wider than the popover: a sheet is the whole screen's attention, and the
+     drawing is the point of it. The head reserves the corner the close button
+     sits in, so a long denotation can never end up underneath it. */
+  width: 340px;
+  animation: fade var(--dur-med) var(--ease-out);
+}
+
+.bflight--modal .bflight__head {
+  padding-right: 30px;
+}
+
+/* Small, and out of the drawing's way. Tapping anywhere on the sheet already
+   dismisses it (BallFlight.jsx); this is the affordance for a pointer that
+   expects a corner control, and the real focus target a keyboard needs. */
+.bflight__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-inset);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+.bflight__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  padding-bottom: 8px;
+}
+
+.bflight__who {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The scorer's own denotation, in his own hand — the mono face every other
+   scorebook mark in the app is set in. */
+.bflight__code {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-title);
+  color: var(--text-caption);
+}
+
+.bflight .bflight__field {
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 4px 0 0;
+}
+
+/* ---- The path ---- */
+
+/* Pencil, not ink: the flight is the scorer's own trace over a printed field,
+   and a solid rule at this weight would out-shout the landing mark it leads to.
+   The round cap is what keeps it from ending in a blunt edge under that mark. */
+.bflight__path {
+  fill: none;
+  stroke: var(--graphite);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+/* A ball that never left the ground: dashed as well as straight, so the line
+   reads as the route it was run down along rather than as a flight. */
+.bflight__path--ground {
+  stroke-dasharray: 11 9;
+  opacity: 0.7;
+}
+
+/* ---- The marks: the hit chart's, at this card's scale ---- */
+
+.bflight__hit {
+  fill: var(--accent-primary);
+  stroke: var(--paper-3);
+  stroke-width: 2.4;
+}
+
+.bflight__out {
+  fill: var(--surface-card);
+  stroke: var(--graphite);
+  stroke-width: 3.6;
+}
+
+.bflight__hr {
+  fill: var(--award-ink);
+  stroke: var(--paper-3);
+  stroke-width: 2.4;
+}
+
+.bflight__heat {
+  fill: none;
+  stroke-width: 5;
+}
+
+.bflight__heat-from {
+  stop-color: var(--clay);
+}
+
+.bflight__heat-to {
+  stop-color: var(--award-line);
+}
+
+/* ---- The numbers ---- */
+
+.bflight__facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  margin-top: 6px;
+}
+
+.bflight__fact {
+  padding: 8px 0 10px;
+  text-align: center;
+}
+
+.bflight__fact + .bflight__fact {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+
+.bflight__factlabel {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.bflight__factvalue {
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+
+/* The unit rides small beside its figure, the same way the RBI chip's does. */
+.bflight__unit {
+  font-family: var(--font-display);
+  font-size: 0.62em;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}

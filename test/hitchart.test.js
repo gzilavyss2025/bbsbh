@@ -46,6 +46,7 @@ import {
   HIT_COORD_FT_PER_UNIT,
   hitCoordToSvg,
   selectBattedBalls,
+  selectPlayBattedBall,
 } from '../src/api/hitchart.js'
 
 const FEED = JSON.parse(
@@ -331,4 +332,63 @@ test("HARD_HIT_MPH is Statcast's own 95 mph line", () => {
   assert.equal(balls.filter((b) => b.exitVelo != null && b.exitVelo >= HARD_HIT_MPH).length, 27)
   assert.equal(ball(balls, 'Brian Navarreto', 6).exitVelo >= HARD_HIT_MPH, true)
   assert.equal(ball(balls, 'Luis Arraez', 1).exitVelo >= HARD_HIT_MPH, false)
+})
+
+// The per-play selector behind the flight card the play-by-play diamond opens.
+// It answers for ONE play what selectBattedBalls answers for a game, and the
+// two must never disagree about where a ball came down — the same play's dot on
+// the hit chart and its own flight are the same picture at two scales.
+test('selectPlayBattedBall agrees with the whole-game walk, play for play', () => {
+  const plays = FEED.liveData.plays.allPlays
+  const balls = selectBattedBalls(FEED)
+  assert.equal(balls.length, 62)
+
+  let found = 0
+  for (const [i, play] of plays.entries()) {
+    const one = selectPlayBattedBall(play)
+    if (!one) continue
+    found++
+    // The whole-game walk keys each ball on the play's atBatIndex, falling back
+    // to its position in allPlays — which is what this trimmed capture uses,
+    // its trimmer having dropped the index. Either way the play's own terminal
+    // ball is the LAST of that play's entries there.
+    const key = play.about?.atBatIndex ?? i
+    const fromWalk = balls.filter((b) => b.id.startsWith(`${key}-`)).at(-1)
+    assert.ok(fromWalk, `no walk entry for play ${key}`)
+    for (const field of ['x', 'y', 'exitVelo', 'launchAngle', 'distance', 'trajectory', 'hit', 'homeRun']) {
+      assert.deepEqual(one[field], fromWalk[field], `${field} disagrees on ${play.result.eventType}`)
+    }
+  }
+  assert.equal(found, 62)
+})
+
+test('a plate appearance with no ball in play has no flight', () => {
+  // A strikeout: pitches, no hitData anywhere on the play.
+  assert.equal(selectPlayBattedBall({ playEvents: [{ details: { isStrike: true } }] }), null)
+  assert.equal(selectPlayBattedBall({}), null)
+  assert.equal(selectPlayBattedBall(null), null)
+  // And a park that tracked the swing but not where the ball landed — the MiLB
+  // case, where the diamond simply offers no handle.
+  assert.equal(
+    selectPlayBattedBall({ playEvents: [{ hitData: { launchSpeed: 88.1, totalDistance: 210 } }] }),
+    null,
+  )
+})
+
+test('the flight reads the LAST tracked ball on the play, not the first', () => {
+  // A park that records a foul ball's hitData as well as the one that ended the
+  // at-bat: the play's result describes the terminal ball, so that is the one
+  // drawn. No play in the captured game carries two, so this is stated against
+  // a built feed rather than found in one.
+  const play = {
+    result: { eventType: 'double' },
+    playEvents: [
+      { hitData: { launchSpeed: 70, coordinates: { coordX: 40, coordY: 220 } } },
+      { hitData: { launchSpeed: 104.6, coordinates: { coordX: 60.5, coordY: 90.25 } } },
+    ],
+  }
+  const ball = selectPlayBattedBall(play)
+  assert.equal(ball.exitVelo, 104.6)
+  assert.equal(ball.hit, true)
+  assert.deepEqual({ x: ball.x, y: ball.y }, hitCoordToSvg(60.5, 90.25))
 })
