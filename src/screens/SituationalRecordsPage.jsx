@@ -1,7 +1,7 @@
 import '../styles/66-situational-records.css'
 import '../styles/situational-records/66a-detail.css'
 import { useMemo } from 'react'
-import { fetchLevelTeamRecords, buildRankingIndex, rankMetric, defaultOrder } from '../api/situationalRecordRankings.js'
+import { fetchLevelTeamRecords, buildRankingIndex, rankMetric, bestOrder } from '../api/situationalRecordRankings.js'
 import { HALVES } from '../api/teamRecords.js'
 import { seasonOf, cutoffFor } from './team/data/shared.js'
 import { SPORT_LABEL, offDayTreatmentFor } from '../lib/teams.js'
@@ -143,39 +143,28 @@ function SituationalIndex({ groups, favoriteTeamId, pathFor, linkProps, preview 
       </nav>}
 
       <div className="trrank__index">
-        {groups.map((group, index) => {
-          const visibleResults = preview ? group.results.slice(0, 2) : group.results
-          return (
-            <section className="trrank__group" id={`record-group-${index}`} key={group.title}>
-              <header className="trrank__grouphead">
-                <span className="trrank__groupnum">{String(group.order).padStart(2, '0')}</span>
-                <span>
-                  <h2>{group.title}</h2>
-                  <p>{GROUP_NOTES[group.title] ?? 'Every club, ranked in this split.'}</p>
-                </span>
-              </header>
-              <div className="trrank__tilegrid">
-                {visibleResults.map((result) => (
-                  <SituationTile
-                    key={result.metric.id}
-                    result={result}
-                    favoriteTeamId={favoriteTeamId}
-                    path={pathFor({ category: null, metric: result.metric.id, sort: null, order: null })}
-                    linkProps={linkProps}
-                  />
-                ))}
-              </div>
-              {preview && group.results.length > visibleResults.length && (
-                <a
-                  className="trrank__groupdoor"
-                  {...linkProps(pathFor({ category: group.key, metric: null, sort: null, order: null }))}
-                >
-                  Explore all {group.results.length} {group.title} records <span aria-hidden="true">›</span>
-                </a>
-              )}
-            </section>
-          )
-        })}
+        {groups.map((group, index) => (
+          <section className="trrank__group" id={`record-group-${index}`} key={group.title}>
+            <header className="trrank__grouphead">
+              <span className="trrank__groupnum">{String(group.order).padStart(2, '0')}</span>
+              <span>
+                <h2>{group.title}</h2>
+                <p>{GROUP_NOTES[group.title] ?? 'Every club, ranked in this split.'}</p>
+              </span>
+            </header>
+            <div className="trrank__tilegrid">
+              {group.results.map((result) => (
+                <SituationTile
+                  key={result.metric.id}
+                  result={result}
+                  favoriteTeamId={favoriteTeamId}
+                  path={pathFor({ category: null, metric: result.metric.id, sort: null, order: null })}
+                  linkProps={linkProps}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </>
   )
@@ -261,13 +250,12 @@ export function SituationalRecordsPage({
   const showHalves = (data ?? []).some((entry) => entry.data?.allStarDate)
   const dir = result?.order ?? 'desc'
   const flipLabel = result?.byQuality
-    ? dir === defaultOrder(metric)
+    ? dir === bestOrder(metric)
       ? 'Best first'
       : 'Worst first'
     : dir === 'desc'
       ? 'Highest first'
       : 'Lowest first'
-  const halfShortLabel = half === 'pre' ? 'Pre-ASG' : half === 'post' ? 'Post-ASG' : 'Full'
 
   useDocumentTitle(
     metric
@@ -302,11 +290,6 @@ export function SituationalRecordsPage({
         <span className="trrank__eyebrow">{season} {SPORT_LABEL[sportId] ?? ''} season</span>
         <h1>Situational Records</h1>
         <p>W–L records and season totals for every club, split by game situation.</p>
-        <dl className="trrank__herostats">
-          <div><dt>Clubs</dt><dd>{data?.length || '—'}</dd></div>
-          <div><dt>Situations</dt><dd>{index.metrics.size || '—'}</dd></div>
-          <div><dt>Range</dt><dd>{halfShortLabel}</dd></div>
-        </dl>
       </header>
 
       <section className="trrank__scope" aria-label="Situational record filters">
