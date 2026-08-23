@@ -463,6 +463,19 @@ export async function loadPlayer(id, asOf) {
     endDate,
   })
   const awardLedger = awardsView(awards, endDate)
+  // The MLB column's affiliate rows: awardsView leaves orgId null for anything
+  // that isn't already an MLB club (it can't fetch — see that module's
+  // header), so resolve each (affiliate, season) here the same way a career
+  // timeline entry is resolved — historicalParentOrg first, live parentOrgId
+  // second — rather than the affiliate's CURRENT org, which is wrong for an
+  // old award won under a since-reassigned affiliate.
+  const milbAwardRows = awardLedger.categories.flatMap((c) => c.rows).filter((r) => r.teamId && r.orgId == null)
+  if (milbAwardRows.length) {
+    const orgOf = await resolveCareerOrgs(
+      milbAwardRows.map((r) => ({ team: { id: r.teamId }, season: r.year, sport: { id: 11 } })),
+    )
+    for (const r of milbAwardRows) r.orgId = orgOf(r.teamId, r.year)
+  }
   const blocks = results.map((r) => r.block)
   // "Last played in 2022" — the banner under the masthead for someone who isn't
   // on a club AND hasn't appeared in a game this season. Only for the unrostered:
