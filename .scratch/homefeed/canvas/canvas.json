@@ -6,7 +6,7 @@
     },
     {
       "id": "page-2",
-      "name": "Review fixes"
+      "name": "Edges & the minors"
     },
     {
       "id": "page-3",
@@ -16,18 +16,27 @@
   "artboards": [
     {
       "file": "Main.dc.html",
-      "title": "1 · The feed — all 15 games",
+      "title": "1 · The feed — dark",
       "page": "page-1",
       "x": 0,
       "y": 0,
       "w": 390,
-      "h": 1838
+      "h": 2080
+    },
+    {
+      "file": "FeedLight.dc.html",
+      "title": "1L · The feed — light",
+      "page": "page-1",
+      "x": 500,
+      "y": 0,
+      "w": 390,
+      "h": 2135
     },
     {
       "file": "Opening.dc.html",
       "title": "2 · Opening a game — 440ms, on a loop",
       "page": "page-1",
-      "x": 500,
+      "x": 1000,
       "y": 0,
       "w": 390,
       "h": 844
@@ -36,7 +45,7 @@
       "file": "Poster.dc.html",
       "title": "3 · The game",
       "page": "page-1",
-      "x": 1000,
+      "x": 1500,
       "y": 0,
       "w": 390,
       "h": 844
@@ -45,17 +54,26 @@
       "file": "Lineups.dc.html",
       "title": "4 · Lineups",
       "page": "page-1",
-      "x": 1500,
+      "x": 2000,
       "y": 0,
       "w": 390,
-      "h": 844
+      "h": 1360
+    },
+    {
+      "file": "HoverCard.dc.html",
+      "title": "4b · Hover card — desktop",
+      "page": "page-1",
+      "x": 2500,
+      "y": 0,
+      "w": 350,
+      "h": 430
     },
     {
       "file": "Innings.dc.html",
       "title": "5 · Innings — sealed",
       "page": "page-1",
-      "x": 2000,
-      "y": 0,
+      "x": 2500,
+      "y": 560,
       "w": 390,
       "h": 844
     },
@@ -63,16 +81,16 @@
       "file": "InningsOpen.dc.html",
       "title": "5b · Innings — opened",
       "page": "page-1",
-      "x": 2500,
+      "x": 3000,
       "y": 0,
       "w": 390,
-      "h": 844
+      "h": 1080
     },
     {
       "file": "BoxScore.dc.html",
       "title": "6 · Box score — sealed",
       "page": "page-1",
-      "x": 3000,
+      "x": 3500,
       "y": 0,
       "w": 390,
       "h": 844
@@ -81,34 +99,25 @@
       "file": "BoxOpen.dc.html",
       "title": "6b · Box score — opened",
       "page": "page-1",
-      "x": 3500,
+      "x": 4000,
       "y": 0,
       "w": 390,
-      "h": 844
+      "h": 1010
     },
     {
       "file": "Desktop.dc.html",
       "title": "The feed at 1440",
       "page": "page-1",
-      "x": 500,
-      "y": 1080,
+      "x": 1000,
+      "y": 1500,
       "w": 1440,
-      "h": 760
-    },
-    {
-      "file": "FeedLight.dc.html",
-      "title": "Light ground — the same feed, same bands",
-      "page": "page-2",
-      "x": 0,
-      "y": 0,
-      "w": 390,
-      "h": 1882
+      "h": 1090
     },
     {
       "file": "Edges.dc.html",
-      "title": "Edge cases the mock was dodging",
+      "title": "Edge cases",
       "page": "page-2",
-      "x": 500,
+      "x": 0,
       "y": 0,
       "w": 390,
       "h": 880
@@ -117,16 +126,16 @@
       "file": "MiLB.dc.html",
       "title": "Double-A — where the art is the point",
       "page": "page-2",
-      "x": 1000,
+      "x": 500,
       "y": 0,
       "w": 390,
-      "h": 744
+      "h": 790
     },
     {
       "file": "MiLBPoster.dc.html",
       "title": "Binghamton at Hartford",
       "page": "page-2",
-      "x": 1500,
+      "x": 1000,
       "y": 0,
       "w": 390,
       "h": 844
@@ -175,71 +184,55 @@
       "x": -470,
       "y": 0,
       "w": 420,
-      "text": "A INTO D\nThe band and the poster are the same composition at two scales, which is what lets one become the other: the band’s wedge and the poster’s diagonal are ONE four-point clip-path. The opening is that path un-clipping.\n\nThe poster is the door, not a destination — the five ways out of a game sit across its foot, and 4–6 are what they open. Each screen now has BOTH states: sealed, and opened. Drawing five locked doors and never opening one was the biggest gap in the first cut.\n\nThe feed shows all fifteen games with the fold marked, so density is something you can look at rather than a claim."
+      "text": "ONE LIST, BOTH MODES\nThe feed is flat: your club pinned, then first-pitch order. The old \"on now / first pitch to come / earlier today\" grouping was itself a spoiler — it told you which games were still going before you asked. Now every band is the same size, and state lives inside it: LIVE, a time, or SEALED.\n\nLight and dark both ship. The bands are club colour and identical in both; the chrome, seals and tables carry the theme.\n\nBack from the shipping page: the club strip (one tap to a team page, your club centred), the Wire dock resting at the fold, and the networks’ own PNG logos on the rail."
+    },
+    {
+      "id": "flow-band",
+      "page": "page-1",
+      "x": 0,
+      "y": -300,
+      "w": 420,
+      "text": "THE BAND\nAbbreviation over MASCOT — MIL over BREWERS, not over Milwaukee.\n\nTHE SHEEN: the shipping slate’s scroll-driven band of light, same soft-light blend and softened stops as 06a-gamecard-parkart.css. In the app it rides a view timeline and tracks the thumb; here it loops so you can see it. Off under reduced motion.\n\nTHE JERSEY: when tonight’s jersey is known (uniforms feed same-day, jerseys.json ahead), the band wears it — the field takes the jersey tile’s tint and the bag prints that jersey’s art. Boston is drawn in City Connect green as the demo."
+    },
+    {
+      "id": "flow-base",
+      "page": "page-1",
+      "x": 500,
+      "y": -300,
+      "w": 420,
+      "text": "THE BASE, PHOTO-REAL\nRedrawn from reference: an 18-inch Hollywood base is heavy-gauge rubber over a foam core — a white pillow with a rolled bevel and rounded corners. One SVG: pebbled rubber lit through a real lighting model (feTurbulence → feDiffuseLighting), beveled walls, slide scuffs broken by a displacement map, clay ground into the corners. The middle gets stepped clean, which is what lets the mark print. Scaled down it loses texture the way a photo does.\n\nThe feed prints the mark in pencil grayscale; opening the game inks it in."
     },
     {
       "id": "flow-motion",
       "page": "page-1",
-      "x": 500,
-      "y": -300,
-      "w": 390,
-      "text": "THE OPENING — REWRITTEN AFTER REVIEW\nThe first cut ran nine beats across 3.19 SECONDS (iOS push is 350ms) and animated `top`/`height` on a full-bleed element carrying two 74px strings and two 400px images — layout and paint every frame, while the note beside it claimed transform-only. Both were wrong and both are fixed.\n\nNow: 440ms, three beats, clip-path and opacity only. The hero is always full height in poster layout; the feed state is a clip, and opening is one interpolated inset(). Band type and poster type overlap so there is never a frame with neither — the old timing left a 600px empty hole for about a second.\n\nAnd the band expands OVER the list rather than clearing it. Tapping game 12 of 15 would have split the slate and thrown eleven bands upward."
-    },
-    {
-      "id": "flow-seal",
-      "page": "page-1",
-      "x": 2000,
+      "x": 1000,
       "y": -240,
-      "w": 890,
-      "text": "SEALED, THEN OPENED\nNothing loosens the spoiler rule; the kraft tape is redrawn as the ground itself, raked in the one signal colour. It still says what it says today: this half only, nothing else moves, the innings after it stay shut.\n\n5b and 6b are the states that were missing. The revealed half lands in exactly the 212px the seal held, so opening one does not shove the page down. 6b proves the table styling the system had never been asked for: tabular mono on a hairline grid, the club colour as the row header, totals in the signal colour — and the linescore, which is the one place a run total belongs."
+      "w": 390,
+      "text": "THE OPENING\n440ms, three beats, clip-path and opacity only. The band’s wedge and the poster’s diagonal are ONE four-point path; opening is that path un-clipping, over the list, not through it."
     },
     {
       "id": "flow-scope",
       "page": "page-1",
-      "x": 1500,
-      "y": -240,
-      "w": 390,
-      "text": "SCOPE OF 4–6\nThese carry the LANGUAGE, not the whole screen. The real lineup page also holds weather, attendance, the season series, umpire tendencies, the defensive alignment and former teammates; the real innings page holds play-by-play and the pitch chart. Nothing here proposes dropping any of it."
+      "x": 2000,
+      "y": -300,
+      "w": 420,
+      "text": "SCREENS 4–6, WITH THEIR OWN FURNITURE\nRedrawn carrying what the shipping pages already have: the opposing starter’s headshot card, the batting order in its real anatomy (order · name · number · position), the defense diamond with surnames and scorer’s numbers, the play diamonds with their advance notations (1B¹, 2B³, F8), and the desktop hover card. Nothing the real pages hold is proposed dropped."
     },
     {
-      "id": "fix-ground",
+      "id": "flow-seal",
+      "page": "page-1",
+      "x": 3000,
+      "y": -240,
+      "w": 890,
+      "text": "SEALED, THEN OPENED\nNothing loosens the spoiler rule. The revealed half lands in exactly the 212px the seal held, so opening one does not shove the page down. The box score opens whole and stays open — ADR-0049."
+    },
+    {
+      "id": "edge-note",
       "page": "page-2",
       "x": -470,
       "y": 0,
       "w": 420,
-      "text": "THE ONE OPEN QUESTION — which ground?\n\nOn #0A0B0D, 17 of 30 club primaries sit under 1.4:1 against the page. Tigers and Yankees are 1.25:1; Pirates and White Sox 1.29; Padres 1.30; Brewers 1.34. More than half the league does not read as a colour block at all — which is the generic dark sports app this was written to escape. 17 of 30 primaries are also blue or navy, so “a rack of jerseys” is, on a real slate, a rack of navy.\n\nOn this ground (#E7E6E1, a cool grey-white — NOT the app’s #F6EFDC manila) only Miami (2.50) and the Giants (2.75) fall under 3:1, and the median is 10.59:1. Two things come free: the separator becomes a 4px GAP of page instead of a drawn line, which is what a rack of jerseys actually looks like; and a finished game reads as finished by desaturating, with no extra device.\n\nThe break that mattered — full-bleed club colour replacing cards — survives either way. This is the call I would not make for you."
-    },
-    {
-      "id": "fix-list",
-      "page": "page-2",
-      "x": 500,
-      "y": -400,
-      "w": 390,
-      "text": "ALSO FIXED AFTER REVIEW\n\nSEAM. Was the away club’s secondary — another club colour. 173 of 435 matchups put two primaries within 1.35:1 (Tigers/Yankees and Pirates/White Sox are byte-identical), and Braves-at-Brewers drew a #13274F line on #12284B: 1.00:1. Now a fixed white rule, ink for Miami, which separates all 435. The secondary stays as a 2px accent inside it.\n\nLIVE. #E9DA00 loose on club colour was 1.98:1 on Miami, 2.18 on the Giants, and 1.31 against the A’s own gold sitting 20px away. It is now always an ink chip: one object, 10.5:1, on every club.\n\nTYPE. 26 of 53 home-screen nodes were under 9px against the app’s own 11px floor, in four sizes inside 2px. Floored at 10px, dim text lifted.\n\nTARGETS. Level tabs were 21×13, day chevrons 8×17. All 44×44.\n\nTHE SEAL CHIP became a label and stopped being the ADR-0026 Scores Unlocked switch — it kept the nagging half and dropped the control. It is a switch again.\n\nHIERARCHY. Live, upcoming and finished were drawn at one height and one saturation, so fifteen games shouted fifteen times. Height and saturation now carry state: 118 / 88 / 68.\n\nAlso: the pin ring stopped borrowing the LIVE colour; the caption rail is ink, so the home park is no longer captioned inside the visitor’s block; the wedge is 45% so the HOME club actually has the field, as the note always claimed; search, Game Log and the menu are back on mobile."
-    },
-    {
-      "id": "fix-edges",
-      "page": "page-2",
-      "x": 500,
-      "y": 920,
-      "w": 390,
-      "text": "The three-state mock (live / pre / sealed) had no drawing for a postponement, a doubleheader, or a row with no usable colour. The nickname strip proves the fit rule: DIAMONDBACKS at 74px was 434px wide in a 368px slot, and the data had been quietly writing \"D-backs\" to dodge it."
-    },
-    {
-      "id": "fix-marks",
-      "page": "page-2",
-      "x": 1000,
-      "y": -420,
-      "w": 390,
-      "text": "THE LOGOS ARE BACK — and they are now a two-part idea, not a texture.\n\nWhat was wrong: every mark ran at 14–17% opacity, about 1.15:1 against its own field. That is not a watermark, it is a deleted asset — and it deleted the best logo art in American sport along with it.\n\nWhat is wrong with the obvious fix: a straight knockout at full opacity deletes the ARTWORK instead. `brightness(0) invert(1)` turns every opaque pixel white, so Milwaukee’s ball-in-glove, the Orioles bird and the Astros star all collapse into a white disc.\n\nSo: the FEED shows the mark in grayscale, which keeps every internal shape — and is the most Tally-specific choice available, since the whole app exists to be sketched in pencil and /logos is already a printable grayscale sheet. The POSTER shows it in full colour at 104px.\n\nAND IT PRINTS ON A BASE. A competition base is moulded rubber over a foam core, and its top is a traction surface — a dense field of small raised nubs. That is the thing you actually recognise in a close-up, so it is the thing this draws: each nub is a lit cap with its own shadow offset down-right, about 24 across, on a domed top with a rolled bevel and the stitched seam set in from it. Clay goes on OVER the nubs on multiply, so it darkens the gaps between them rather than covering them — which is where dirt really collects, and why the texture reads strongest at the corners while the middle stays stepped-clean and white enough to print a mark on.\n\nTwo passes were wrong before this one. Crossed lines drew plaid — continuous rules read as a weave, and at feed size the channels were a quarter of each cell wide. Discrete nubs at seven across read as polka dots. Texture has to be small and dense enough to be a SURFACE rather than a motif. It also fades as the bag shrinks, because a base seen small loses its texture rather than gaining a coarser one.\n\nNo cleat marks: a rake across the top read as damage instead of texture, and it fought whatever was printed over it. All CSS, no image files. A club with no art on file still gets the bag, empty — the honest drawing for “the game is there, the logo is not”.\n\nWhich gives the opening something to be FOR: the mark you meet in the feed is the pencil version, and opening the game is where it inks in."
-    },
-    {
-      "id": "fix-milb",
-      "page": "page-2",
-      "x": 1500,
-      "y": -420,
-      "w": 390,
-      "text": "AND THIS IS WHY IT MATTERS MOST DOWN HERE.\n\nRumble Ponies, Yard Goats, Trash Pandas, Biscuits, Sod Poodles, Flying Squirrels — this is the best logo work in the sport, and a design premised on club COLOUR was throwing all of it away.\n\nIt matters more at Double-A than in MLB for a reason the repo already knows: 50 of the 117 MiLB clubs in `milb-colors.json` have a primary under L 0.02 (four are literally #000000), and 107 of 117 are flagged \"confidence: medium\", sourced from Wikipedia. The COLOUR data is the untrustworthy half. The art is not.\n\nSo down here the mark is not decoration on top of a colour system — it is the part of the identity you can actually rely on."
+      "text": "THE ROWS A REAL SLATE HANDS YOU\nA postponement, a doubleheader, a club with no usable colour, and the long-name fit rule (74/62/52/44 by length).\n\nDown a level, the mark carries the identity: 50 of 117 MiLB clubs have a primary under L 0.02 and 107 of 117 are flagged \"confidence: medium\" — the colour data is the untrustworthy half, the art is not."
     },
     {
       "id": "dir-brief",
@@ -247,7 +240,7 @@
       "x": -470,
       "y": 0,
       "w": 420,
-      "text": "THE PROBLEM\nTally is the only sports feed with no numbers in it. The spoiler rule forbids scores, records and odds on the slate — so the feed cannot lean on the thing every other scores app leads with.\n\nThat is the opening, not the handicap. What is left is exactly what a college-football gameday poster is made of: two identities, a place, a time, and anticipation.\n\nThese four are the original sketches, kept as drawn. Everything they got wrong is fixed on pages 1 and 2, not here."
+      "text": "THE PROBLEM\nTally is the only sports feed with no numbers in it — the spoiler rule forbids scores, records and odds on the slate. What is left is what a college-football gameday poster is made of: two identities, a place, a time, and anticipation.\n\nThese four are the original sketches, kept as drawn."
     },
     {
       "id": "note-a",
@@ -255,7 +248,7 @@
       "x": 0,
       "y": -240,
       "w": 390,
-      "text": "A · MARQUEE — colour blocking, edge to edge\nNo card, no gutter, no radius, no shadow. Each game is a full-bleed band. Chosen, with D.\n\nWhat review caught here: the seam was a club colour and died on 8 of the 15 games in this very artboard, and every band was the same height whatever the game was doing. Both fixed on page 1."
+      "text": "A · MARQUEE — colour blocking, edge to edge. No card, no gutter, no radius. Chosen, with D."
     },
     {
       "id": "note-b",
@@ -263,7 +256,7 @@
       "x": 500,
       "y": -240,
       "w": 390,
-      "text": "B · RUNDOWN — the departure board\nMonospaced, dense, near-monochrome; the dotted leader is the character of it. Not chosen for the phone, but it survives twice: as the feed’s compact density, and as the right-hand rail of the desktop layout."
+      "text": "B · RUNDOWN — the departure board. Not chosen for the phone; survives as the desktop rail."
     },
     {
       "id": "note-c",
@@ -271,7 +264,7 @@
       "x": 1000,
       "y": -240,
       "w": 390,
-      "text": "C · STUB — a printed artifact\nTwo-ink screenprint, fluorescent pink a hair out of register, halftone and grain, perforated stub, rotated stamp.\n\nNot chosen — and the review’s fair hit is that this is the only one of the four a machine would not have produced, so cutting it is where the set got timid. It remains the strongest candidate for the Game Log’s stamps and shelf, where a printed artifact is what the thing actually is."
+      "text": "C · STUB — a printed artifact. Not chosen here; the strongest candidate for the Game Log’s stamps and shelf."
     },
     {
       "id": "note-d",
@@ -279,7 +272,7 @@
       "x": 1500,
       "y": -240,
       "w": 390,
-      "text": "D · SPLIT — one game, one poster\nHard diagonal seam, marks bleeding off the corners, the app’s own @ cut through the middle.\n\nChosen, with A — but promoted out of the feed. As fifteen snap-scrolled screens it was beautiful and unusable; as the ONE screen you land on after tapping a band, the cost disappears. See page 1."
+      "text": "D · SPLIT — one game, one poster. Chosen, with A — promoted out of the feed to the screen you land on."
     }
   ],
   "launch": {

@@ -16,93 +16,33 @@
     @keyframes tallypulse { 0%,100% { opacity: 1 } 50% { opacity: .28 } }
     .pulse { animation: tallypulse 1.9s ease-in-out infinite; }
     @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
-    /* THE BASE. The logo does not sit on a swatch, it sits on a bag.
-       A competition base is moulded rubber over a foam core, and its top is a
-       traction surface: a regular grid of small raised nubs with narrow
-       channels between them. That grid is the thing you actually recognise in
-       a close-up photo, so it is the thing this draws — four layers, no image
-       files.
+    /* THE BASE — a photo of a base (one SVG data URI: lit pebbled rubber,
+       beveled walls, slide scuffs, clay in the corners; the middle stepped
+       clean so the mark prints). See the generator for the drawing. */
+    .base { position: relative; background: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%3E%20%3Cdefs%3E%20%3CradialGradient%20id%3D%22dome%22%20cx%3D%2236%25%22%20cy%3D%2228%25%22%20r%3D%2292%25%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FFFFFF%22%2F%3E%20%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23F8F5EC%22%2F%3E%20%3Cstop%20offset%3D%22.8%22%20stop-color%3D%22%23EDE7D6%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23DCD3BE%22%2F%3E%20%3C%2FradialGradient%3E%20%3ClinearGradient%20id%3D%22wall%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FDFCF8%22%2F%3E%20%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23D9D2C0%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23AFA48D%22%2F%3E%20%3C%2FlinearGradient%3E%20%3Cfilter%20id%3D%22rubber%22%20x%3D%22-5%25%22%20y%3D%22-5%25%22%20width%3D%22110%25%22%20height%3D%22110%25%22%3E%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.5%22%20numOctaves%3D%222%22%20seed%3D%227%22%20result%3D%22n%22%2F%3E%20%3CfeDiffuseLighting%20in%3D%22n%22%20lighting-color%3D%22%23ffffff%22%20surfaceScale%3D%220.9%22%20diffuseConstant%3D%221.08%22%20result%3D%22l%22%3E%20%3CfeDistantLight%20azimuth%3D%22235%22%20elevation%3D%2262%22%2F%3E%20%3C%2FfeDiffuseLighting%3E%20%3CfeComposite%20in%3D%22l%22%20in2%3D%22SourceGraphic%22%20operator%3D%22arithmetic%22%20k1%3D%221%22%20k2%3D%220%22%20k3%3D%220%22%20k4%3D%220%22%2F%3E%20%3C%2Ffilter%3E%20%3Cfilter%20id%3D%22streak%22%20x%3D%22-30%25%22%20y%3D%22-30%25%22%20width%3D%22160%25%22%20height%3D%22160%25%22%3E%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.010%200.14%22%20numOctaves%3D%223%22%20seed%3D%2211%22%20result%3D%22t%22%2F%3E%20%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22t%22%20scale%3D%2216%22%2F%3E%20%3CfeGaussianBlur%20stdDeviation%3D%220.7%22%2F%3E%20%3C%2Ffilter%3E%20%3Cfilter%20id%3D%22blotch%22%20x%3D%22-20%25%22%20y%3D%22-20%25%22%20width%3D%22140%25%22%20height%3D%22140%25%22%3E%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.085%22%20numOctaves%3D%223%22%20seed%3D%224%22%20result%3D%22t%22%2F%3E%20%3CfeColorMatrix%20in%3D%22t%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201.5%20-0.45%22%20result%3D%22m%22%2F%3E%20%3CfeComposite%20in%3D%22SourceGraphic%22%20in2%3D%22m%22%20operator%3D%22in%22%2F%3E%20%3C%2Ffilter%3E%20%3CradialGradient%20id%3D%22clay%22%20cx%3D%2250%25%22%20cy%3D%2250%25%22%20r%3D%2250%25%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2396713F%22%20stop-opacity%3D%22.8%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2396713F%22%20stop-opacity%3D%220%22%2F%3E%20%3C%2FradialGradient%3E%20%3CclipPath%20id%3D%22top%22%3E%3Crect%20x%3D%229%22%20y%3D%229%22%20width%3D%22142%22%20height%3D%22136%22%20rx%3D%2210%22%2F%3E%3C%2FclipPath%3E%20%3C%2Fdefs%3E%20%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%22152%22%20height%3D%22152%22%20rx%3D%2214%22%20fill%3D%22url(%23wall)%22%2F%3E%20%3Crect%20x%3D%229%22%20y%3D%229%22%20width%3D%22142%22%20height%3D%22136%22%20rx%3D%2210%22%20fill%3D%22url(%23dome)%22%20filter%3D%22url(%23rubber)%22%2F%3E%20%3Crect%20x%3D%2214%22%20y%3D%2214%22%20width%3D%22132%22%20height%3D%22126%22%20rx%3D%227%22%20fill%3D%22none%22%20stroke%3D%22%23FFFFFF%22%20stroke-opacity%3D%22.55%22%20stroke-width%3D%222%22%2F%3E%20%3Crect%20x%3D%2215.5%22%20y%3D%2215.5%22%20width%3D%22132%22%20height%3D%22126%22%20rx%3D%227%22%20fill%3D%22none%22%20stroke%3D%22%23A08D6C%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.6%22%2F%3E%20%3Cg%20clip-path%3D%22url(%23top)%22%3E%20%3Cg%20filter%3D%22url(%23streak)%22%20opacity%3D%22.55%22%3E%20%3Crect%20x%3D%2218%22%20y%3D%2252%22%20width%3D%22118%22%20height%3D%225%22%20fill%3D%22%236E675C%22%20opacity%3D%22.5%22%20transform%3D%22rotate(-14%2080%2080)%22%2F%3E%20%3Crect%20x%3D%2230%22%20y%3D%2272%22%20width%3D%22112%22%20height%3D%223.4%22%20fill%3D%22%237A7368%22%20opacity%3D%22.42%22%20transform%3D%22rotate(-12%2080%2080)%22%2F%3E%20%3Crect%20x%3D%2212%22%20y%3D%2296%22%20width%3D%22104%22%20height%3D%224.2%22%20fill%3D%22%235E574C%22%20opacity%3D%22.38%22%20transform%3D%22rotate(-15%2080%2080)%22%2F%3E%20%3Crect%20x%3D%2244%22%20y%3D%22116%22%20width%3D%2290%22%20height%3D%222.6%22%20fill%3D%22%236E675C%22%20opacity%3D%22.4%22%20transform%3D%22rotate(-11%2080%2080)%22%2F%3E%20%3C%2Fg%3E%20%3Cg%20filter%3D%22url(%23blotch)%22%20style%3D%22mix-blend-mode%3Amultiply%22%3E%20%3Ccircle%20cx%3D%228%22%20cy%3D%228%22%20r%3D%2246%22%20fill%3D%22url(%23clay)%22%2F%3E%20%3Ccircle%20cx%3D%22152%22%20cy%3D%22148%22%20r%3D%2252%22%20fill%3D%22url(%23clay)%22%2F%3E%20%3Ccircle%20cx%3D%22152%22%20cy%3D%2210%22%20r%3D%2232%22%20fill%3D%22url(%23clay)%22%20opacity%3D%22.6%22%2F%3E%20%3Ccircle%20cx%3D%228%22%20cy%3D%22148%22%20r%3D%2242%22%20fill%3D%22url(%23clay)%22%20opacity%3D%22.8%22%2F%3E%20%3Cellipse%20cx%3D%2280%22%20cy%3D%22152%22%20rx%3D%2284%22%20ry%3D%2222%22%20fill%3D%22url(%23clay)%22%20opacity%3D%22.7%22%2F%3E%20%3C%2Fg%3E%20%3C%2Fg%3E%20%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%22152%22%20height%3D%22152%22%20rx%3D%2214%22%20fill%3D%22none%22%20stroke%3D%22%236B5B41%22%20stroke-opacity%3D%22.26%22%20stroke-width%3D%221.4%22%2F%3E%20%3C%2Fsvg%3E") center / 100% 100% no-repeat; }
 
-       1. .base            the fill, the rolled bevel, the stitched seam
-       2. .base-nubs       the moulded grid: a lit edge on each nub, a shadowed
-                           channel around it
-       3. .base-dirt       clay, laid OVER the grid on multiply so it darkens
-                           the channels rather than covering them — which is
-                           where dirt actually goes and why the grid reads
-                           strongest at the corners
-       4. .base-grain      rubber tooth
+    /* THE SHEEN — the shipping slate's scroll-driven band of light
+       (06a-gamecard-parkart.css), same soft-light blend and the same softened
+       stops. In the app it rides a view timeline and tracks the thumb; an
+       artboard cannot scroll for you, so here the same band loops slowly,
+       staggered down the slate, to show the effect. */
+    .bandsheen { position: absolute; inset: 0; z-index: 3; overflow: hidden;
+      pointer-events: none; mix-blend-mode: soft-light; }
+    .bandsheen::before { content: ''; position: absolute;
+      left: -30%; right: -30%; top: -50%; bottom: -50%;
+      background: linear-gradient(172deg,
+        transparent 26%, rgba(10,11,13,.10) 40%,
+        rgba(252,250,244,.46) 50%, rgba(10,11,13,.08) 60%, transparent 74%);
+      animation: bandsheen 9s linear infinite; animation-delay: var(--d, 0s); }
+    @keyframes bandsheen {
+      0% { transform: translate3d(0,-34%,0) }
+      52% { transform: translate3d(0,34%,0) }
+      100% { transform: translate3d(0,34%,0) }
+    }
+    @media (prefers-reduced-motion: reduce) { .bandsheen { display: none } }
 
-       No cleat marks. A rake across the top read as damage rather than as
-       texture, and it fought whatever mark was printed over it. */
-    .base {
-      position: relative;
-      border-radius: 2px;
-      background-image:
-        radial-gradient(ellipse 78% 64% at 34% 28%, rgba(255, 255, 255, .95) 0, transparent 68%),
-        linear-gradient(158deg, #FCFAF4 0%, #F7F3EA 58%, #EDE7D9 100%);
-      box-shadow:
-        inset 0 0 0 1.5px rgba(255, 255, 255, .7),
-        inset 0 0 0 3px rgba(146, 114, 74, .3),
-        inset 0 -3px 5px rgba(126, 88, 48, .1);
-    }
-    /* The stitched seam, set in from the rolled edge the way a real bag's is. */
-    .base::after {
-      content: '';
-      position: absolute;
-      inset: 10%;
-      border: 1px solid rgba(126, 88, 48, .18);
-      border-radius: 1px;
-      pointer-events: none;
-    }
-    /* The traction surface: DISCRETE nubs, not a grid of lines.
-       Crossed repeating lines drew plaid — continuous rules read as a weave,
-       and at feed size the channels were a quarter of each cell wide, so the
-       bag came out tartan. Moulded rubber is a field of separate bumps, so
-       each nub is drawn as one: a lit cap, and a shadow offset half a pixel
-       down-right, on a square tile.
-
-       --nub is the pitch, set per tile so a nub stays the same PHYSICAL size
-       whether the bag is 104px on a poster or 44px in a feed; --nubop fades
-       the whole layer as the bag shrinks, because a real base seen small
-       does not grow coarser texture, it loses it. */
-    .base-nubs {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 2px;
-      opacity: var(--nubop, .7);
-      background-image:
-        radial-gradient(circle at 60% 64%, rgba(118, 90, 56, .24) 0 26%, transparent 31%),
-        radial-gradient(circle at 43% 41%, rgba(255, 255, 255, .68) 0 26%, transparent 32%);
-      background-size: var(--nub) var(--nub), var(--nub) var(--nub);
-    }
-    /* Clay, over the grid. The middle of a bag gets stepped clean and stays
-       white, which is also what lets a mark print over it. */
-    .base-dirt {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 2px;
-      mix-blend-mode: multiply;
-      background-image:
-        radial-gradient(circle at 2% 3%, rgba(150, 110, 66, .5) 0, transparent 30%),
-        radial-gradient(circle at 98% 96%, rgba(150, 110, 66, .46) 0, transparent 28%),
-        radial-gradient(circle at 97% 3%, rgba(168, 132, 86, .34) 0, transparent 24%),
-        radial-gradient(circle at 3% 97%, rgba(168, 132, 86, .38) 0, transparent 26%),
-        radial-gradient(ellipse 130% 34% at 50% 108%, rgba(150, 110, 66, .38) 0, transparent 60%);
-    }
-    .base-grain {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      mix-blend-mode: multiply;
-      opacity: .16;
-      border-radius: 2px;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='3'/></filter><rect width='90' height='90' filter='url(%23b)' opacity='0.5'/></svg>");
-    }
-
-    /* The seal's own surface: the one signal colour, raked. It is the kraft
-       tape of this palette — same job, drawn in the ink the screen is in. */
+    /* The seal's own surface: the one signal colour, raked — the kraft tape
+       of this palette. */
     .hatch { position: absolute; inset: 0; pointer-events: none; opacity: .13;
       background-image: repeating-linear-gradient(-38deg, #E9DA00 0 2px, transparent 2px 11px); }
   </style>
@@ -111,65 +51,106 @@
 <div style="position:relative;width:390px;background:#0A0B0D;overflow:hidden">
 
   <div style="position:absolute;left:0;right:0;top:844px;height:0;pointer-events:none;z-index:9">
-    <div style="border-top:1px dashed rgba(255,255,255,.5)"></div>
-    <span style="position:absolute;right:8px;top:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,.6)">FOLD &#183; IPHONE 14 PRO</span>
+    <div style="border-top:1px dashed rgba(255,255,255,0.5)"></div>
+    <span style="position:absolute;right:8px;top:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.6)">FOLD &#183; IPHONE 14 PRO</span>
+  </div>
+
+  <div style="position:absolute;left:0;right:0;top:782px;height:62px;z-index:8;background:#101216;border-top:1px solid rgba(255,255,255,.12);border-radius:12px 12px 0 0;box-shadow:0 -8px 22px rgba(10,11,13,.55)">
+    <div style="display:flex;justify-content:center;padding-top:6px">
+      <span style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.3)"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 16px 0 14px">
+      <span style="width:3px;align-self:stretch;background:#12284B;flex:none"></span>
+      <img src="mil.svg" alt="" style="width:20px;height:20px;object-fit:contain;flex:none" />
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.85);flex:none">MIL</span>
+      <span style="font-family:'Lora',Georgia,serif;font-size:12.5px;line-height:1.35;color:rgba(255,255,255,0.72);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1">Brewers reinstate RHP Freddy Peralta from the 15-day injured list</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.55);flex:none">27</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;font-weight:400;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,0.6);flex:none">&#8963;</span>
+    </div>
   </div>
 
   <header style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px 10px;border-bottom:1px solid rgba(255,255,255,.12)">
     <div style="display:flex;align-items:center;gap:9px">
       <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:66%;font-variation-settings:'wdth' 66,'wght' 900;font-weight:900;font-size:23px;line-height:0.84;letter-spacing:0.005em;word-spacing:0.09em;text-transform:uppercase;color:#fff">TAL<span style="color:#E9DA00">1</span>Y</span>
-      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,.62);padding-top:3px">BASEBALL</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.62);padding-top:3px">BASEBALL</span>
     </div>
     <div style="display:flex;align-items:center;gap:14px">
-      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><circle cx="7.5" cy="7.5" r="5.2" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/><path d="M11.4 11.4 15 15" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="square"/></svg></span>
-      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><rect x="2" y="2.5" width="12" height="13" rx="1" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/><path d="M5.2 2.5v13" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/></svg></span>
-      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="square"/></svg></span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><circle cx="7.5" cy="7.5" r="5.2" stroke="rgba(255,255,255,0.82)" stroke-width="1.6"/><path d="M11.4 11.4 15 15" stroke="rgba(255,255,255,0.82)" stroke-width="1.6" stroke-linecap="square"/></svg></span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><rect x="2" y="2.5" width="12" height="13" rx="1" stroke="rgba(255,255,255,0.82)" stroke-width="1.6"/><path d="M5.2 2.5v13" stroke="rgba(255,255,255,0.82)" stroke-width="1.6"/></svg></span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="rgba(255,255,255,0.82)" stroke-width="1.6" stroke-linecap="square"/></svg></span>
     </div>
   </header>
-  <!-- Every one of these was a 21x13 label. WCAG 2.2 AA (2.5.8) wants 24x24;
-       Apple wants 44pt. They are controls, so they get 44. -->
   <nav style="display:flex;align-items:center;gap:2px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.12)">
     
     <span style="display:grid;place-items:center;min-width:46px;height:44px;background:#E9DA00;">
       <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0A0B0D">MLB</span>
     </span>
     <span style="display:grid;place-items:center;min-width:46px;height:44px;">
-      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">AAA</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.6)">AAA</span>
     </span>
     <span style="display:grid;place-items:center;min-width:46px;height:44px;">
-      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">AA</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.6)">AA</span>
     </span>
     <span style="display:grid;place-items:center;min-width:46px;height:44px;">
-      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">A+</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.6)">A+</span>
     </span>
     <span style="display:grid;place-items:center;min-width:46px;height:44px;">
-      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">A</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.6)">A</span>
     </span>
   </nav>
 
   <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 14px;border-bottom:1px solid rgba(255,255,255,.12)">
     <div style="display:flex;align-items:center;gap:4px">
-      <span style="display:grid;place-items:center;width:44px;height:44px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;font-weight:400;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.66)">&#8249;</span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;font-weight:400;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,0.66)">&#8249;</span>
       <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:78%;font-variation-settings:'wdth' 78,'wght' 800;font-weight:800;font-size:19px;line-height:0.84;letter-spacing:0.01em;word-spacing:0.09em;text-transform:uppercase;color:#fff">SAT 22 AUG</span>
-      <span style="display:grid;place-items:center;width:44px;height:44px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;font-weight:400;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.66)">&#8250;</span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;font-weight:400;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,0.66)">&#8250;</span>
     </div>
-    <!-- This is the ADR-0026 Scores Unlocked switch, not a status label. Drawn
-         as a label it removed the control and kept only the nagging half — the
-         one consented, reversible way out of the seal, turned into a scold. -->
-    <span style="display:flex;align-items:center;gap:7px;min-height:44px;border:1px solid rgba(255,255,255,.28);padding:0 11px">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,.8)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,.8)" stroke-width="1.4"/></svg>
-      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.8)">SEALED</span>
-      <span style="width:26px;height:15px;border:1px solid rgba(255,255,255,.4);position:relative;display:block">
-        <span style="position:absolute;left:1px;top:1px;width:11px;height:11px;background:rgba(255,255,255,.6)"></span>
+    <span style="display:flex;align-items:center;gap:7px;min-height:44px;border:1px solid rgba(255,255,255,0.28);padding:0 11px">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,0.8)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,0.8)" stroke-width="1.4"/></svg>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.8)">SEALED</span>
+      <span style="width:26px;height:15px;border:1px solid rgba(255,255,255,0.4);position:relative;display:block">
+        <span style="position:absolute;left:1px;top:1px;width:11px;height:11px;background:rgba(255,255,255,0.6)"></span>
       </span>
     </span>
   </div>
 
-  <div style="display:flex;align-items:center;gap:10px;padding:9px 20px 8px;background:rgba(255,255,255,.035)">
-    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,.74)">YOUR CLUB</span>
-    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.6)">01</span>
-    <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-    
+  <div style="position:relative;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.12)">
+    <div style="display:flex;gap:6px;justify-content:center;overflow:hidden;-webkit-mask-image:linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent);mask-image:linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent)">
+      
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none">
+        <img src="chc.svg" alt="Cubs" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none">
+        <img src="stl.svg" alt="Cardinals" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none">
+        <img src="cin.svg" alt="Reds" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none">
+        <img src="pit.svg" alt="Pirates" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none">
+        <img src="atl.svg" alt="Braves" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none;box-shadow:inset 0 -2px 0 #E9DA00">
+        <img src="mil.svg" alt="Brewers" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none">
+        <img src="nyy.svg" alt="Yankees" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none">
+        <img src="lad.svg" alt="Dodgers" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none">
+        <img src="bos.svg" alt="Red Sox" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none">
+        <img src="hou.svg" alt="Astros" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none">
+        <img src="sea.svg" alt="Mariners" style="width:36px;height:36px;object-fit:contain" />
+      </span>
+    </div>
   </div>
 
     <article style="position:relative;height:118px;overflow:hidden;background:#12284B;border-bottom:1px solid rgba(255,255,255,.16);box-shadow:inset 0 0 0 2px #FFFFFF">
@@ -178,47 +159,128 @@
       <div style="position:absolute;inset:0;width:45%;background:#CE1141;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
       <img src="atl.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
       <img src="mil.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <span style="position:absolute;inset:0;background:rgba(10,11,13,.46);pointer-events:none"></span>
+      <span style="position:absolute;inset:0;background:rgba(10,11,13,.46);pointer-events:none;z-index:2"></span>
       <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="atl.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="atl.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">ATL</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Atlanta</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Braves</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">MIL</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Milwaukee</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Brewers</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="mil.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="mil.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true" style="flex:none"><path d="M6 0.6l1.6 3.5 3.8.4-2.8 2.6.8 3.8L6 9l-3.4 1.9.8-3.8L.6 4.5l3.8-.4z" fill="#FFFFFF"/></svg><span style="overflow:hidden;text-overflow:ellipsis">American Family Field</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
           
           <span style="display:flex;align-items:center;gap:5px"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/></svg><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.78)">SEALED</span></span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-0.00s"></span>
     </article>
-
-  <div style="display:flex;align-items:center;gap:10px;padding:9px 20px 8px;background:rgba(255,255,255,.035)">
-    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,.74)">ON NOW</span>
-    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.6)">08</span>
-    <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-    
-    <span style="display:flex;flex:none;border:1px solid rgba(255,255,255,.28)">
-      <span style="display:grid;place-items:center;width:44px;height:32px;background:#E9DA00">
-        <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect width="12" height="4" fill="#0A0B0D"/><rect y="6" width="12" height="4" fill="#0A0B0D"/></svg>
-      </span>
-      <span style="display:grid;place-items:center;width:44px;height:32px">
-        <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect y="0.4" width="12" height="1.5" fill="rgba(255,255,255,.5)"/><rect y="4.2" width="12" height="1.5" fill="rgba(255,255,255,.5)"/><rect y="8" width="12" height="1.5" fill="rgba(255,255,255,.5)"/></svg>
-      </span>
-    </span>
-  </div>
-
+    <article style="position:relative;height:118px;overflow:hidden;background:#0C2340;border-bottom:1px solid rgba(255,255,255,.16)">
+      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#E8291C;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:45%;background:#134A8E;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <img src="tor.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="nyy.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <span style="position:absolute;inset:0;background:rgba(10,11,13,.46);pointer-events:none;z-index:2"></span>
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="tor.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
+          <div style="min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">TOR</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Blue Jays</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <div style="text-align:right;min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">NYY</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Yankees</div>
+          </div>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="nyy.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
+        </div>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
+        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Yankee Stadium</span></span>
+        <span style="display:flex;align-items:center;gap:9px;flex:none">
+          
+          <span style="display:flex;align-items:center;gap:5px"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/></svg><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.78)">SEALED</span></span>
+        </span>
+      </div>
+      <span class="bandsheen" style="--d:-1.15s"></span>
+    </article>
+    <article style="position:relative;height:118px;overflow:hidden;background:#00A3E0;border-bottom:1px solid rgba(255,255,255,.16)">
+      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#0A0B0D;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#14225A;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:45%;background:#AB0003;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <img src="wsh.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="mia.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <span style="position:absolute;inset:0;background:rgba(10,11,13,.46);pointer-events:none;z-index:2"></span>
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="wsh.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
+          <div style="min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">WSH</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Nationals</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <div style="text-align:right;min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#0A0B0D">MIA</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(10,11,13,.74);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Marlins</div>
+          </div>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="mia.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
+        </div>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
+        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">loanDepot park</span></span>
+        <span style="display:flex;align-items:center;gap:9px;flex:none">
+          <img src="tv-fs1.png" alt="FS1" style="height:13px;width:auto;max-width:52px;display:block;" />
+          <span style="display:flex;align-items:center;gap:5px"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/></svg><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.78)">SEALED</span></span>
+        </span>
+      </div>
+      <span class="bandsheen" style="--d:-2.30s"></span>
+    </article>
+    <article style="position:relative;height:118px;overflow:hidden;background:#E81828;border-bottom:1px solid rgba(255,255,255,.16)">
+      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#0C2340;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:45%;background:#C41E3A;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <img src="stl.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="phi.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <span style="position:absolute;inset:0;background:rgba(10,11,13,.46);pointer-events:none;z-index:2"></span>
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="stl.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
+          <div style="min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">STL</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Cardinals</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <div style="text-align:right;min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">PHI</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Phillies</div>
+          </div>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="phi.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
+        </div>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
+        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Citizens Bank Park</span></span>
+        <span style="display:flex;align-items:center;gap:9px;flex:none">
+          
+          <span style="display:flex;align-items:center;gap:5px"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/></svg><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.78)">SEALED</span></span>
+        </span>
+      </div>
+      <span class="bandsheen" style="--d:-3.45s"></span>
+    </article>
     <article style="position:relative;height:118px;overflow:hidden;background:#DF4601;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
       <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#8FBCE6;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
@@ -227,28 +289,29 @@
       <img src="bal.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
       
       <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="tb.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="tb.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">TB</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Tampa Bay</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Rays</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">BAL</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Baltimore</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Orioles</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="bal.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="bal.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Oriole Park at Camden Yards</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
           
           <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-4.60s"></span>
     </article>
     <article style="position:relative;height:118px;overflow:hidden;background:#003278;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
@@ -258,28 +321,29 @@
       <img src="tex.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
       
       <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="laa.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="laa.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">LAA</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Los Angeles</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Angels</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">TEX</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Texas</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Rangers</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="tex.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="tex.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Globe Life Field</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
           
           <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-5.75s"></span>
     </article>
     <article style="position:relative;height:118px;overflow:hidden;background:#002D62;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
@@ -289,28 +353,29 @@
       <img src="hou.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
       
       <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="ath.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="ath.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">ATH</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">It's just</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Athletics</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">HOU</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Houston</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Astros</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="hou.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="hou.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Daikin Park</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
           
           <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-6.90s"></span>
     </article>
     <article style="position:relative;height:118px;overflow:hidden;background:#27251F;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
@@ -320,28 +385,29 @@
       <img src="cws.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
       
       <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="nym.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="nym.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">NYM</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">New York</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Mets</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">CWS</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Chicago</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">White Sox</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="cws.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="cws.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Rate Field</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
           
           <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-8.05s"></span>
     </article>
     <article style="position:relative;height:118px;overflow:hidden;background:#004687;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
@@ -351,28 +417,29 @@
       <img src="kc.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
       
       <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="det.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="det.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">DET</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Detroit</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Tigers</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">KC</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Kansas City</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Royals</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="kc.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="kc.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Kauffman Stadium</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
           
           <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-0.00s"></span>
     </article>
     <article style="position:relative;height:118px;overflow:hidden;background:#005A9C;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
@@ -382,28 +449,29 @@
       <img src="lad.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
       
       <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="pit.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="pit.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">PIT</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Pittsburgh</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Pirates</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">LAD</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Los Angeles</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Dodgers</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="lad.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="lad.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Dodger Stadium</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
-          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.5);padding:2px 4px 1px">FOX</span>
+          <img src="tv-fox.png" alt="FOX" style="height:13px;width:auto;max-width:52px;display:block;filter:invert(1);opacity:.92" />
           <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-1.15s"></span>
     </article>
     <article style="position:relative;height:118px;overflow:hidden;background:#0C2C56;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
@@ -413,30 +481,31 @@
       <img src="sea.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
       
       <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="chc.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="chc.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">CHC</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Chicago</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Cubs</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">SEA</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Seattle</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Mariners</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="sea.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="sea.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">T-Mobile Park</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
-          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.5);padding:2px 4px 1px">FOX</span>
+          <img src="tv-fox.png" alt="FOX" style="height:13px;width:auto;max-width:52px;display:block;filter:invert(1);opacity:.92" />
           <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-2.30s"></span>
     </article>
-    <article style="position:relative;height:118px;overflow:hidden;background:#BD3039;border-bottom:1px solid rgba(255,255,255,.16)">
+    <article style="position:relative;height:118px;overflow:hidden;background:#5A8D84;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
       <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#27251F;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
       <div style="position:absolute;inset:0;width:45%;background:#FD5A1E;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
@@ -444,231 +513,127 @@
       <img src="bos.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
       
       <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="sf.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="sf.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#0A0B0D">SF</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(10,11,13,.72);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">San Francisco</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(10,11,13,.74);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Giants</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
             <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">BOS</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Boston</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Red Sox</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="bos.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="cc-bos.png" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:brightness(0) opacity(.82)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Fenway Park</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
-          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.5);padding:2px 4px 1px">FOX</span>
+          <img src="tv-fox.png" alt="FOX" style="height:13px;width:auto;max-width:52px;display:block;filter:invert(1);opacity:.92" />
           <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-3.45s"></span>
     </article>
-
-  <div style="display:flex;align-items:center;gap:10px;padding:9px 20px 8px;background:rgba(255,255,255,.035)">
-    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,.74)">FIRST PITCH TO COME</span>
-    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.6)">03</span>
-    <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-    
-  </div>
-
-    <article style="position:relative;height:88px;overflow:hidden;background:#A71930;border-bottom:1px solid rgba(255,255,255,.16)">
+    <article style="position:relative;height:118px;overflow:hidden;background:#A71930;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
       <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#000000;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
       <div style="position:absolute;inset:0;width:45%;background:#C6011F;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <img src="cin.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:136px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <img src="ari.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:142px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <span style="position:absolute;inset:0;background:rgba(10,11,13,.16);pointer-events:none"></span>
-      <div style="position:absolute;left:0;right:0;top:0;height:58px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:36px;height:36px;padding:6px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="cin.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+      <img src="cin.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="ari.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <span style="position:absolute;inset:0;background:rgba(10,11,13,.16);pointer-events:none;z-index:2"></span>
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="cin.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:34px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">CIN</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Cincinnati</div>
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">CIN</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Reds</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:30px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">ARI</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Arizona</div>
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">ARI</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">D-backs</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:36px;height:36px;padding:6px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="ari.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="ari.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Chase Field</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
           
           <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.82)">7:10 PM</span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-4.60s"></span>
     </article>
-    <article style="position:relative;height:88px;overflow:hidden;background:#333366;border-bottom:1px solid rgba(255,255,255,.16)">
+    <article style="position:relative;height:118px;overflow:hidden;background:#333366;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
       <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#E50022;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
       <div style="position:absolute;inset:0;width:45%;background:#00385D;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <img src="cle.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:136px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <img src="col.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:142px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <span style="position:absolute;inset:0;background:rgba(10,11,13,.16);pointer-events:none"></span>
-      <div style="position:absolute;left:0;right:0;top:0;height:58px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:36px;height:36px;padding:6px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="cle.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+      <img src="cle.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="col.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <span style="position:absolute;inset:0;background:rgba(10,11,13,.16);pointer-events:none;z-index:2"></span>
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="cle.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:34px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">CLE</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Cleveland</div>
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">CLE</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Guardians</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:30px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">COL</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Colorado</div>
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">COL</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Rockies</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:36px;height:36px;padding:6px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="col.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="col.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Coors Field</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
           
           <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.82)">7:10 PM</span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-5.75s"></span>
     </article>
-    <article style="position:relative;height:88px;overflow:hidden;background:#2F241D;border-bottom:1px solid rgba(255,255,255,.16)">
+    <article style="position:relative;height:118px;overflow:hidden;background:#2F241D;border-bottom:1px solid rgba(255,255,255,.16)">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
       <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#D31145;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
       <div style="position:absolute;inset:0;width:45%;background:#002B5C;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <img src="min.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:136px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <img src="sd.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:142px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <span style="position:absolute;inset:0;background:rgba(10,11,13,.16);pointer-events:none"></span>
-      <div style="position:absolute;left:0;right:0;top:0;height:58px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:36px;height:36px;padding:6px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="min.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+      <img src="min.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="sd.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <span style="position:absolute;inset:0;background:rgba(10,11,13,.16);pointer-events:none;z-index:2"></span>
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="min.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
           <div style="min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:34px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">MIN</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Minnesota</div>
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">MIN</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Twins</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:30px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">SD</div>
-            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">San Diego</div>
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">SD</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.84);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Padres</div>
           </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:36px;height:36px;padding:6px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="sd.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <span class="base" style="display:grid;place-items:center;width:48px;height:48px;padding:9px;flex:none"><img src="sd.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.08)" /></span>
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D;z-index:2">
         <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Petco Park</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
           
           <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.82)">7:40 PM</span>
         </span>
       </div>
+      <span class="bandsheen" style="--d:-6.90s"></span>
     </article>
-
-  <div style="display:flex;align-items:center;gap:10px;padding:9px 20px 8px;background:rgba(255,255,255,.035)">
-    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,.74)">EARLIER TODAY &#183; TAP TO UNSEAL</span>
-    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.6)">04</span>
-    <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-    
-  </div>
-
-    <article style="position:relative;height:68px;overflow:hidden;background:#0C2340;border-bottom:1px solid rgba(255,255,255,.16)">
-      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#E8291C;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <div style="position:absolute;inset:0;width:45%;background:#134A8E;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <img src="tor.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:116px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <img src="nyy.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:122px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <span style="position:absolute;inset:0;background:rgba(10,11,13,.46);pointer-events:none"></span>
-      <div style="position:absolute;left:0;right:0;top:0;height:38px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:28px;height:28px;padding:4px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="tor.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
-          <div style="min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:27px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">TOR</div>
-            
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <div style="text-align:right;min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:24px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">NYY</div>
-            
-          </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:28px;height:28px;padding:4px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="nyy.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
-        </div>
-      </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
-        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Yankee Stadium</span></span>
-        <span style="display:flex;align-items:center;gap:9px;flex:none">
-          
-          <span style="display:flex;align-items:center;gap:5px"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/></svg><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.78)">SEALED</span></span>
-        </span>
-      </div>
-    </article>
-    <article style="position:relative;height:68px;overflow:hidden;background:#00A3E0;border-bottom:1px solid rgba(255,255,255,.16)">
-      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#0A0B0D;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#14225A;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <div style="position:absolute;inset:0;width:45%;background:#AB0003;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <img src="wsh.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:116px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <img src="mia.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:122px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <span style="position:absolute;inset:0;background:rgba(10,11,13,.46);pointer-events:none"></span>
-      <div style="position:absolute;left:0;right:0;top:0;height:38px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:28px;height:28px;padding:4px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="wsh.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
-          <div style="min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:27px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">WSH</div>
-            
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <div style="text-align:right;min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:24px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#0A0B0D">MIA</div>
-            
-          </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:28px;height:28px;padding:4px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="mia.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
-        </div>
-      </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
-        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">loanDepot park</span></span>
-        <span style="display:flex;align-items:center;gap:9px;flex:none">
-          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.5);padding:2px 4px 1px">FS1</span>
-          <span style="display:flex;align-items:center;gap:5px"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/></svg><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.78)">SEALED</span></span>
-        </span>
-      </div>
-    </article>
-    <article style="position:relative;height:68px;overflow:hidden;background:#E81828;border-bottom:1px solid rgba(255,255,255,.16)">
-      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#0C2340;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <div style="position:absolute;inset:0;width:45%;background:#C41E3A;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
-      <img src="stl.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:116px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <img src="phi.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:122px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
-      <span style="position:absolute;inset:0;background:rgba(10,11,13,.46);pointer-events:none"></span>
-      <div style="position:absolute;left:0;right:0;top:0;height:38px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:28px;height:28px;padding:4px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="stl.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
-          <div style="min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:27px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">STL</div>
-            
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <div style="text-align:right;min-width:0">
-            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:24px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">PHI</div>
-            
-          </div>
-          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:28px;height:28px;padding:4px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="phi.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
-        </div>
-      </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
-        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Citizens Bank Park</span></span>
-        <span style="display:flex;align-items:center;gap:9px;flex:none">
-          
-          <span style="display:flex;align-items:center;gap:5px"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,.78)" stroke-width="1.4"/></svg><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.78)">SEALED</span></span>
-        </span>
-      </div>
-    </article>
+  <div style="height:70px"></div>
 </div>
 </x-dc>
 </body>

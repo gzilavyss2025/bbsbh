@@ -16,93 +16,33 @@
     @keyframes tallypulse { 0%,100% { opacity: 1 } 50% { opacity: .28 } }
     .pulse { animation: tallypulse 1.9s ease-in-out infinite; }
     @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
-    /* THE BASE. The logo does not sit on a swatch, it sits on a bag.
-       A competition base is moulded rubber over a foam core, and its top is a
-       traction surface: a regular grid of small raised nubs with narrow
-       channels between them. That grid is the thing you actually recognise in
-       a close-up photo, so it is the thing this draws — four layers, no image
-       files.
+    /* THE BASE — a photo of a base (one SVG data URI: lit pebbled rubber,
+       beveled walls, slide scuffs, clay in the corners; the middle stepped
+       clean so the mark prints). See the generator for the drawing. */
+    .base { position: relative; background: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%3E%20%3Cdefs%3E%20%3CradialGradient%20id%3D%22dome%22%20cx%3D%2236%25%22%20cy%3D%2228%25%22%20r%3D%2292%25%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FFFFFF%22%2F%3E%20%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23F8F5EC%22%2F%3E%20%3Cstop%20offset%3D%22.8%22%20stop-color%3D%22%23EDE7D6%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23DCD3BE%22%2F%3E%20%3C%2FradialGradient%3E%20%3ClinearGradient%20id%3D%22wall%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FDFCF8%22%2F%3E%20%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23D9D2C0%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23AFA48D%22%2F%3E%20%3C%2FlinearGradient%3E%20%3Cfilter%20id%3D%22rubber%22%20x%3D%22-5%25%22%20y%3D%22-5%25%22%20width%3D%22110%25%22%20height%3D%22110%25%22%3E%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.5%22%20numOctaves%3D%222%22%20seed%3D%227%22%20result%3D%22n%22%2F%3E%20%3CfeDiffuseLighting%20in%3D%22n%22%20lighting-color%3D%22%23ffffff%22%20surfaceScale%3D%220.9%22%20diffuseConstant%3D%221.08%22%20result%3D%22l%22%3E%20%3CfeDistantLight%20azimuth%3D%22235%22%20elevation%3D%2262%22%2F%3E%20%3C%2FfeDiffuseLighting%3E%20%3CfeComposite%20in%3D%22l%22%20in2%3D%22SourceGraphic%22%20operator%3D%22arithmetic%22%20k1%3D%221%22%20k2%3D%220%22%20k3%3D%220%22%20k4%3D%220%22%2F%3E%20%3C%2Ffilter%3E%20%3Cfilter%20id%3D%22streak%22%20x%3D%22-30%25%22%20y%3D%22-30%25%22%20width%3D%22160%25%22%20height%3D%22160%25%22%3E%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.010%200.14%22%20numOctaves%3D%223%22%20seed%3D%2211%22%20result%3D%22t%22%2F%3E%20%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22t%22%20scale%3D%2216%22%2F%3E%20%3CfeGaussianBlur%20stdDeviation%3D%220.7%22%2F%3E%20%3C%2Ffilter%3E%20%3Cfilter%20id%3D%22blotch%22%20x%3D%22-20%25%22%20y%3D%22-20%25%22%20width%3D%22140%25%22%20height%3D%22140%25%22%3E%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.085%22%20numOctaves%3D%223%22%20seed%3D%224%22%20result%3D%22t%22%2F%3E%20%3CfeColorMatrix%20in%3D%22t%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201.5%20-0.45%22%20result%3D%22m%22%2F%3E%20%3CfeComposite%20in%3D%22SourceGraphic%22%20in2%3D%22m%22%20operator%3D%22in%22%2F%3E%20%3C%2Ffilter%3E%20%3CradialGradient%20id%3D%22clay%22%20cx%3D%2250%25%22%20cy%3D%2250%25%22%20r%3D%2250%25%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2396713F%22%20stop-opacity%3D%22.8%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2396713F%22%20stop-opacity%3D%220%22%2F%3E%20%3C%2FradialGradient%3E%20%3CclipPath%20id%3D%22top%22%3E%3Crect%20x%3D%229%22%20y%3D%229%22%20width%3D%22142%22%20height%3D%22136%22%20rx%3D%2210%22%2F%3E%3C%2FclipPath%3E%20%3C%2Fdefs%3E%20%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%22152%22%20height%3D%22152%22%20rx%3D%2214%22%20fill%3D%22url(%23wall)%22%2F%3E%20%3Crect%20x%3D%229%22%20y%3D%229%22%20width%3D%22142%22%20height%3D%22136%22%20rx%3D%2210%22%20fill%3D%22url(%23dome)%22%20filter%3D%22url(%23rubber)%22%2F%3E%20%3Crect%20x%3D%2214%22%20y%3D%2214%22%20width%3D%22132%22%20height%3D%22126%22%20rx%3D%227%22%20fill%3D%22none%22%20stroke%3D%22%23FFFFFF%22%20stroke-opacity%3D%22.55%22%20stroke-width%3D%222%22%2F%3E%20%3Crect%20x%3D%2215.5%22%20y%3D%2215.5%22%20width%3D%22132%22%20height%3D%22126%22%20rx%3D%227%22%20fill%3D%22none%22%20stroke%3D%22%23A08D6C%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.6%22%2F%3E%20%3Cg%20clip-path%3D%22url(%23top)%22%3E%20%3Cg%20filter%3D%22url(%23streak)%22%20opacity%3D%22.55%22%3E%20%3Crect%20x%3D%2218%22%20y%3D%2252%22%20width%3D%22118%22%20height%3D%225%22%20fill%3D%22%236E675C%22%20opacity%3D%22.5%22%20transform%3D%22rotate(-14%2080%2080)%22%2F%3E%20%3Crect%20x%3D%2230%22%20y%3D%2272%22%20width%3D%22112%22%20height%3D%223.4%22%20fill%3D%22%237A7368%22%20opacity%3D%22.42%22%20transform%3D%22rotate(-12%2080%2080)%22%2F%3E%20%3Crect%20x%3D%2212%22%20y%3D%2296%22%20width%3D%22104%22%20height%3D%224.2%22%20fill%3D%22%235E574C%22%20opacity%3D%22.38%22%20transform%3D%22rotate(-15%2080%2080)%22%2F%3E%20%3Crect%20x%3D%2244%22%20y%3D%22116%22%20width%3D%2290%22%20height%3D%222.6%22%20fill%3D%22%236E675C%22%20opacity%3D%22.4%22%20transform%3D%22rotate(-11%2080%2080)%22%2F%3E%20%3C%2Fg%3E%20%3Cg%20filter%3D%22url(%23blotch)%22%20style%3D%22mix-blend-mode%3Amultiply%22%3E%20%3Ccircle%20cx%3D%228%22%20cy%3D%228%22%20r%3D%2246%22%20fill%3D%22url(%23clay)%22%2F%3E%20%3Ccircle%20cx%3D%22152%22%20cy%3D%22148%22%20r%3D%2252%22%20fill%3D%22url(%23clay)%22%2F%3E%20%3Ccircle%20cx%3D%22152%22%20cy%3D%2210%22%20r%3D%2232%22%20fill%3D%22url(%23clay)%22%20opacity%3D%22.6%22%2F%3E%20%3Ccircle%20cx%3D%228%22%20cy%3D%22148%22%20r%3D%2242%22%20fill%3D%22url(%23clay)%22%20opacity%3D%22.8%22%2F%3E%20%3Cellipse%20cx%3D%2280%22%20cy%3D%22152%22%20rx%3D%2284%22%20ry%3D%2222%22%20fill%3D%22url(%23clay)%22%20opacity%3D%22.7%22%2F%3E%20%3C%2Fg%3E%20%3C%2Fg%3E%20%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%22152%22%20height%3D%22152%22%20rx%3D%2214%22%20fill%3D%22none%22%20stroke%3D%22%236B5B41%22%20stroke-opacity%3D%22.26%22%20stroke-width%3D%221.4%22%2F%3E%20%3C%2Fsvg%3E") center / 100% 100% no-repeat; }
 
-       1. .base            the fill, the rolled bevel, the stitched seam
-       2. .base-nubs       the moulded grid: a lit edge on each nub, a shadowed
-                           channel around it
-       3. .base-dirt       clay, laid OVER the grid on multiply so it darkens
-                           the channels rather than covering them — which is
-                           where dirt actually goes and why the grid reads
-                           strongest at the corners
-       4. .base-grain      rubber tooth
+    /* THE SHEEN — the shipping slate's scroll-driven band of light
+       (06a-gamecard-parkart.css), same soft-light blend and the same softened
+       stops. In the app it rides a view timeline and tracks the thumb; an
+       artboard cannot scroll for you, so here the same band loops slowly,
+       staggered down the slate, to show the effect. */
+    .bandsheen { position: absolute; inset: 0; z-index: 3; overflow: hidden;
+      pointer-events: none; mix-blend-mode: soft-light; }
+    .bandsheen::before { content: ''; position: absolute;
+      left: -30%; right: -30%; top: -50%; bottom: -50%;
+      background: linear-gradient(172deg,
+        transparent 26%, rgba(10,11,13,.10) 40%,
+        rgba(252,250,244,.46) 50%, rgba(10,11,13,.08) 60%, transparent 74%);
+      animation: bandsheen 9s linear infinite; animation-delay: var(--d, 0s); }
+    @keyframes bandsheen {
+      0% { transform: translate3d(0,-34%,0) }
+      52% { transform: translate3d(0,34%,0) }
+      100% { transform: translate3d(0,34%,0) }
+    }
+    @media (prefers-reduced-motion: reduce) { .bandsheen { display: none } }
 
-       No cleat marks. A rake across the top read as damage rather than as
-       texture, and it fought whatever mark was printed over it. */
-    .base {
-      position: relative;
-      border-radius: 2px;
-      background-image:
-        radial-gradient(ellipse 78% 64% at 34% 28%, rgba(255, 255, 255, .95) 0, transparent 68%),
-        linear-gradient(158deg, #FCFAF4 0%, #F7F3EA 58%, #EDE7D9 100%);
-      box-shadow:
-        inset 0 0 0 1.5px rgba(255, 255, 255, .7),
-        inset 0 0 0 3px rgba(146, 114, 74, .3),
-        inset 0 -3px 5px rgba(126, 88, 48, .1);
-    }
-    /* The stitched seam, set in from the rolled edge the way a real bag's is. */
-    .base::after {
-      content: '';
-      position: absolute;
-      inset: 10%;
-      border: 1px solid rgba(126, 88, 48, .18);
-      border-radius: 1px;
-      pointer-events: none;
-    }
-    /* The traction surface: DISCRETE nubs, not a grid of lines.
-       Crossed repeating lines drew plaid — continuous rules read as a weave,
-       and at feed size the channels were a quarter of each cell wide, so the
-       bag came out tartan. Moulded rubber is a field of separate bumps, so
-       each nub is drawn as one: a lit cap, and a shadow offset half a pixel
-       down-right, on a square tile.
-
-       --nub is the pitch, set per tile so a nub stays the same PHYSICAL size
-       whether the bag is 104px on a poster or 44px in a feed; --nubop fades
-       the whole layer as the bag shrinks, because a real base seen small
-       does not grow coarser texture, it loses it. */
-    .base-nubs {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 2px;
-      opacity: var(--nubop, .7);
-      background-image:
-        radial-gradient(circle at 60% 64%, rgba(118, 90, 56, .24) 0 26%, transparent 31%),
-        radial-gradient(circle at 43% 41%, rgba(255, 255, 255, .68) 0 26%, transparent 32%);
-      background-size: var(--nub) var(--nub), var(--nub) var(--nub);
-    }
-    /* Clay, over the grid. The middle of a bag gets stepped clean and stays
-       white, which is also what lets a mark print over it. */
-    .base-dirt {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 2px;
-      mix-blend-mode: multiply;
-      background-image:
-        radial-gradient(circle at 2% 3%, rgba(150, 110, 66, .5) 0, transparent 30%),
-        radial-gradient(circle at 98% 96%, rgba(150, 110, 66, .46) 0, transparent 28%),
-        radial-gradient(circle at 97% 3%, rgba(168, 132, 86, .34) 0, transparent 24%),
-        radial-gradient(circle at 3% 97%, rgba(168, 132, 86, .38) 0, transparent 26%),
-        radial-gradient(ellipse 130% 34% at 50% 108%, rgba(150, 110, 66, .38) 0, transparent 60%);
-    }
-    .base-grain {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      mix-blend-mode: multiply;
-      opacity: .16;
-      border-radius: 2px;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='3'/></filter><rect width='90' height='90' filter='url(%23b)' opacity='0.5'/></svg>");
-    }
-
-    /* The seal's own surface: the one signal colour, raked. It is the kraft
-       tape of this palette — same job, drawn in the ink the screen is in. */
+    /* The seal's own surface: the one signal colour, raked — the kraft tape
+       of this palette. */
     .hatch { position: absolute; inset: 0; pointer-events: none; opacity: .13;
       background-image: repeating-linear-gradient(-38deg, #E9DA00 0 2px, transparent 2px 11px); }
   </style>
@@ -124,11 +64,9 @@
     </span>
   </div>
 
-  <!-- THE ART, IN COLOUR. This is the one screen where a club's own mark is the
-       loudest object rather than a texture behind the type — and the reason the
-       feed shows a grayscale patch: opening a game is where the logo inks in. -->
+  <!-- THE ART, IN COLOUR — the reason the feed's mark is a pencil patch. -->
   <div style="position:absolute;left:22px;top:86px;display:flex;align-items:flex-start;gap:18px">
-    <span class="base" style="--nub:4.3px;--nubop:0.85;display:grid;place-items:center;width:104px;height:104px;padding:16px;box-shadow:0 3px 0 rgba(10,11,13,.42);flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="ath.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain" /></span>
+    <span class="base" style="display:grid;place-items:center;width:104px;height:104px;padding:19px;filter:drop-shadow(0 5px 7px rgba(10,11,13,.4));flex:none"><img src="ath.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply" /></span>
     <div style="padding-top:3px;min-width:0">
       <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,.78);margin-bottom:9px">VISITOR</div>
       <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:68%;font-variation-settings:'wdth' 68,'wght' 800;font-weight:800;font-size:25px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.82)">It's just</div>
@@ -146,7 +84,7 @@
       <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:68%;font-variation-settings:'wdth' 68,'wght' 800;font-weight:800;font-size:25px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.82)">Houston</div>
       <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:52px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;margin-top:2px">Astros</div>
     </div>
-    <span class="base" style="--nub:4.3px;--nubop:0.85;display:grid;place-items:center;width:104px;height:104px;padding:16px;box-shadow:0 3px 0 rgba(10,11,13,.42);flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="hou.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain" /></span>
+    <span class="base" style="display:grid;place-items:center;width:104px;height:104px;padding:19px;filter:drop-shadow(0 5px 7px rgba(10,11,13,.4));flex:none"><img src="hou.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply" /></span>
   </div>
 
   <div style="position:absolute;left:0;right:0;bottom:0">

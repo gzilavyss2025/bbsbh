@@ -7,26 +7,12 @@
 
 export function flowArtboards(k) {
   const { T, GAMES, g, SIGNAL, INK, head, tail, disp, mono, ghost, liveDot, sealGlyph,
-          starGlyph, masthead, dayrail, sectionRule, marqueeBand, nickSize, liveChip, chestMark, colourMark } = k
+          masthead, dayrail, logoStrip, marqueeBand, nickSize, liveChip, chestMark,
+          colourMark, FEED_ORDER } = k
 
   /* ------------------------------------------------------------ shared bits */
 
-  // Bands or lines. The honest answer to direction A's one real cost: a
-  // 118px band shows five games where a 56px line shows eleven, so the reader
-  // gets the switch rather than an argument about which is right.
-  const densityToggle = `
-    <span style="display:flex;flex:none;border:1px solid rgba(255,255,255,.28)">
-      <span style="display:grid;place-items:center;width:44px;height:32px;background:${SIGNAL}">
-        <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect width="12" height="4" fill="${INK}"/><rect y="6" width="12" height="4" fill="${INK}"/></svg>
-      </span>
-      <span style="display:grid;place-items:center;width:44px;height:32px">
-        <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect y="0.4" width="12" height="1.5" fill="rgba(255,255,255,.5)"/><rect y="4.2" width="12" height="1.5" fill="rgba(255,255,255,.5)"/><rect y="8" width="12" height="1.5" fill="rgba(255,255,255,.5)"/></svg>
-      </span>
-    </span>`
-
-  // The five doors out of a game — the same set the app's tab row already has
-  // (away club, home club, innings, box, scorecard). On the poster this row IS
-  // the call to action; on the screens behind it, it is the nav.
+  // The five doors out of a game — the same set the app's tab row already has.
   const doorRow = (active, away, home) => {
     const doors = [
       { k: 'away', label: away, chip: T[away].p },
@@ -46,10 +32,7 @@ export function flowArtboards(k) {
       </nav>`
   }
 
-  // The seal, in this language. The paper app tapes a game shut with kraft
-  // amber; here the seal is the ground itself, hatched in the one signal
-  // colour — same promise (nothing under this can spoil you until you say so),
-  // stated in the palette the rest of the screen is drawn in.
+  // The seal, in this language — same promise as the kraft tape.
   const sealSlab = (title, sub, h = 232) => `
     <div style="position:relative;height:${h}px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;background:#101216;border:1px solid rgba(233,218,0,.34);overflow:hidden">
       <span class="hatch"></span>
@@ -58,11 +41,7 @@ export function flowArtboards(k) {
       <span style="position:relative;${mono(8.5, { ls: '0.18em', color: 'rgba(255,255,255,.66)' })};text-align:center;max-width:250px;line-height:1.7">${sub}</span>
     </div>`
 
-  // Nine innings, two halves each: filled where you have already broken the
-  // seal, hollow where you have not. It draws a fact the app already keeps
-  // (revealedThrough) and the box score already states in a sentence — the
-  // point of drawing it is that "how far in am I" is the one question a
-  // second-screen scorer asks between pitches.
+  // Nine innings, two halves each: filled where you have broken the seal.
   const cell = (on) =>
     `<span style="height:12px;background:${on ? SIGNAL : 'transparent'};` +
     `border:1px solid ${on ? SIGNAL : 'rgba(255,255,255,.42)'}"></span>`
@@ -87,60 +66,107 @@ ${Array.from({ length: 9 }, (_, i) => `
       <span style="display:flex;align-items:center;gap:6px;flex:none">${liveDot(SIGNAL, 5)}<span style="${mono(8.5, { wt: 700, ls: '0.18em', color: SIGNAL })}">${label}</span></span>
     </header>`
 
-  /* -------------------------------------------------- MAIN — the feed (A)
-     The WHOLE fifteen-game slate, not the four games that made the first cut
-     look roomy. The dashed rule marks the iPhone fold, so the density question
-     is answered by looking rather than by a claim. */
+  // A headshot in the app's own frame: the MLB silo cutout, cropped 3:4 from
+  // the top, on a faint well — Headshot.jsx's shape at this palette.
+  const shot = (file, w, h) => `
+    <span style="width:${w}px;height:${h}px;flex:none;display:block;overflow:hidden;` +
+      `background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14)">` +
+      `<img src="${file}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 8%;display:block" />` +
+    `</span>`
+
   const fold = `
   <div style="position:absolute;left:0;right:0;top:844px;height:0;pointer-events:none;z-index:9">
     <div style="border-top:1px dashed rgba(255,255,255,.5)"></div>
     <span style="position:absolute;right:8px;top:5px;${mono(9, { wt: 700, ls: '0.18em', color: 'rgba(255,255,255,.6)' })}">FOLD &#183; IPHONE 14 PRO</span>
   </div>`
-  const main = head() + `
-<div style="position:relative;width:390px;background:${INK};overflow:hidden">
-${fold}
-${masthead()}
-${dayrail()}
-${sectionRule('YOUR CLUB', '01')}
-${marqueeBand(g('ATL', 'MIL'), 118)}
-${sectionRule('ON NOW', '08', densityToggle)}
-${GAMES.slice(0, 8).map((x) => marqueeBand(x)).join('')}
-${sectionRule('FIRST PITCH TO COME', '03')}
-${GAMES.slice(8, 11).map((x) => marqueeBand(x)).join('')}
-${sectionRule('EARLIER TODAY &#183; TAP TO UNSEAL', '04')}
-${GAMES.slice(12, 15).map((x) => marqueeBand(x)).join('')}
-</div>
-` + tail
+
+  const sectionLabel = (label, right = '') => `
+    <div style="display:flex;align-items:center;gap:12px;padding:18px 0 11px">
+      <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">${label}</span>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
+      ${right ? `<span style="${mono(8, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">${right}</span>` : ''}
+    </div>`
+
+  /* -------------------------------------------- PLAY DIAMOND, with notations
+     PlayDiamond.jsx redrawn at this palette: HOME (50,80) → FIRST (80,50) →
+     SECOND (50,20) → THIRD (20,50); ghost outline, inked legs, a filled
+     diamond for a run scored, and the scorer's advance codes at the bases —
+     1B at first, 2B&#179; at home (advanced by the 3-hitter), F8 in the
+     middle for a fly out. */
+  const pdPts = { home: [50, 80], first: [80, 50], second: [50, 20], third: [20, 50] }
+  const pdLegPath = (n) => {
+    const order = ['home', 'first', 'second', 'third', 'home']
+    let d = ''
+    for (let i = 0; i < n; i++) {
+      const [x1, y1] = pdPts[order[i]]
+      const [x2, y2] = pdPts[order[i + 1]]
+      d += `M${x1} ${y1}L${x2} ${y2}`
+    }
+    return d
+  }
+  const playDiamond = (size, { scored = false, legs = 0, notes = {}, center = null } = {}) => {
+    const poly = '50,80 80,50 50,20 20,50'
+    const lbl = {
+      first: 'left:100%;top:50%;transform:translate(2px,-50%)',
+      second: 'left:50%;bottom:100%;transform:translate(-50%,-1px)',
+      third: 'right:100%;top:50%;transform:translate(-2px,-50%)',
+      home: 'left:50%;top:100%;transform:translate(-50%,1px)',
+    }
+    return `
+      <span style="position:relative;width:${size}px;height:${size}px;flex:none;display:block">
+        <svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true" style="display:block;overflow:visible">
+          <polygon points="${poly}" fill="${scored ? 'rgba(233,218,0,.92)' : 'none'}" stroke="${scored ? SIGNAL : 'rgba(255,255,255,.34)'}" stroke-width="2"/>
+          ${!scored && legs ? `<path d="${pdLegPath(legs)}" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round"/>` : ''}
+        </svg>
+        ${center ? `<span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);${mono(10, { wt: 700, ls: '0.02em', color: 'rgba(255,255,255,.85)' })}">${center}</span>` : ''}
+        ${Object.entries(notes).map(([base, code]) => `
+        <span style="position:absolute;${lbl[base]};${mono(10, { wt: 700, ls: '0.02em', color: base === 'home' && scored ? SIGNAL : 'rgba(255,255,255,.8)' })};white-space:nowrap">${code}</span>`).join('')}
+      </span>`
+  }
+
+  /* ---------------------------------------------- DEFENSE DIAMOND (lineups)
+     DefenseDiamond.jsx redrawn: each fielder's surname on a writing line with
+     the scorer's position number beneath, at the shipping component's own
+     percent spots; the infield square on its point, a ring for the mound. */
+  const DEF_SPOTS = {
+    CF: [50, 4], LF: [16, 13], RF: [84, 13], SS: [30, 36], '2B': [70, 36],
+    '3B': [13, 60], '1B': [87, 60], C: [50, 82],
+  }
+  const defenseDiamond = (nine, pitcher, dh, w = 350, h = 250) => `
+    <div style="position:relative;width:${w}px;height:${h}px;margin:0 auto">
+      <svg viewBox="0 0 350 250" width="${w}" height="${h}" aria-hidden="true" style="position:absolute;inset:0">
+        <polygon points="175,225 265,150 175,75 85,150" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.5"/>
+        <circle cx="175" cy="150" r="17" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+        <path d="M85 150 A 128 128 0 0 1 265 150" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1.5"/>
+      </svg>
+      <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-56%);text-align:center">
+        <span style="${mono(10, { wt: 700, ls: '0.06em', color: '#fff' })};display:block;border-bottom:1px solid rgba(255,255,255,.35);padding:0 6px 2px">${pitcher}</span>
+        <span style="${mono(7.5, { ls: '0.1em', color: 'rgba(255,255,255,.55)' })};display:block;margin-top:3px">1</span>
+      </span>
+      ${nine.map(([pos, name, num]) => `
+      <span style="position:absolute;left:${DEF_SPOTS[pos][0]}%;top:${DEF_SPOTS[pos][1]}%;transform:translateX(-50%);text-align:center">
+        <span style="${mono(10, { wt: 700, ls: '0.06em', color: '#fff' })};display:block;border-bottom:1px solid rgba(255,255,255,.35);padding:0 6px 2px">${name}</span>
+        <span style="${mono(7.5, { ls: '0.1em', color: 'rgba(255,255,255,.55)' })};display:block;margin-top:3px">${num}</span>
+      </span>`).join('')}
+      <span style="position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);${mono(8, { ls: '0.16em', color: 'rgba(255,255,255,.6)' })}">DH &#183; ${dh}</span>
+    </div>`
 
   /* ------------------------------------------- OPENING — the A → D motion
-     The band and the poster are the SAME composition at two scales, which is
-     why one can become the other: the band's wedge and the poster's diagonal
-     are one clip-path with one set of four points, and the whole opening is
-     that path travelling. Nothing cross-fades except the type, which has to —
-     TB is not RAYS. */
+     The band and the poster are the SAME composition at two scales: the
+     band's wedge and the poster's diagonal are one clip-path, and the whole
+     opening is that path travelling. 440ms, three beats, clip-path and
+     opacity only. */
   const OP = g('TB', 'BAL')
   const OA = T[OP.a]
   const OH = T[OP.h]
-  const HERO_TOP = 132
+  const HERO_TOP = 219
   const BAND_H = 118
-  // 3.2s loop, 440ms of it moving. The first cut ran nine beats from 5% to 64%
-  // of a 5.4s loop — 3.19 SECONDS, against an iOS push of 350ms — and animated
-  // `top` and `height` on a full-bleed element carrying two 74px strings and
-  // two 400px images, which is layout and paint every frame. Three beats now,
-  // on clip-path and opacity only, and the band expands OVER the list instead
-  // of clearing it: a tap on game 12 of 15 would have split the slate in half
-  // and thrown eleven bands upward, which is motion nobody asked for.
   const opening = head(`
-    /* The hero is ALWAYS full height and full poster layout; the feed state is
-       a clip. Un-clipping is one interpolated inset() — no geometry changes, so
-       nothing reflows. */
     @keyframes op-open {
       0%, 12% { clip-path: inset(${HERO_TOP}px 0 ${844 - HERO_TOP - BAND_H}px 0) }
       26%, 92% { clip-path: inset(0px 0 0px 0) }
       92.01%, 100% { clip-path: inset(${HERO_TOP}px 0 ${844 - HERO_TOP - BAND_H}px 0) }
     }
-    /* The band's own type and the poster's overlap deliberately: there is never
-       a frame with neither, which is what left a 600px hole in the first cut. */
     @keyframes op-bandtype {
       0%, 13% { opacity: 1 }
       19%, 92% { opacity: 0 }
@@ -171,8 +197,6 @@ ${GAMES.slice(12, 15).map((x) => marqueeBand(x)).join('')}
     .op-hero { animation: op-open 3.2s cubic-bezier(.32,.72,0,1) infinite, op-press 3.2s ease-out infinite; }
     .op-bandtype { animation: op-bandtype 3.2s linear infinite; }
     .op-postertype { animation: op-postertype 3.2s cubic-bezier(.32,.72,0,1) infinite; }
-    /* There is no slower version of a screen opening; there is opening or
-       already open. Reduced motion gets the destination, held. */
     @media (prefers-reduced-motion: reduce) {
       .stage, .stage * { animation: none !important; }
       .op-chrome, .op-rest, .op-bandtype { opacity: 0 !important; }
@@ -184,16 +208,15 @@ ${GAMES.slice(12, 15).map((x) => marqueeBand(x)).join('')}
 
   <div class="op-chrome" style="position:absolute;left:0;right:0;top:0;z-index:3">
 ${masthead()}
-${sectionRule('ON NOW', '08', densityToggle)}
+${dayrail()}
+${logoStrip()}
   </div>
 
   <div class="op-rest" style="position:absolute;left:0;right:0;top:${HERO_TOP + BAND_H}px;z-index:1">
-${GAMES.slice(1, 6).map((x) => marqueeBand(x)).join('')}
+${FEED_ORDER.filter((x) => x !== OP).slice(0, 5).map((x, i) => marqueeBand(x, 118, i)).join('')}
   </div>
 
-  <!-- Full-height poster, clipped down to the band. The wedge and the diagonal
-       are the same four-point path at two scales, so this ONE element is both
-       states — that is why the band can become the poster at all. -->
+  <!-- Full-height poster, clipped down to the band. -->
   <div class="op-hero" style="position:absolute;inset:0;background:${OH.p};overflow:hidden;z-index:4;transform-origin:50% ${HERO_TOP + BAND_H / 2}px">
     ${ghost(OP.h, 'right:-118px;bottom:-64px;height:420px;opacity:.17')}
     <div style="position:absolute;inset:0;background:#FFFFFF;clip-path:polygon(0 0, 100% 0, 100% 27.6%, 0 69.8%)"></div>
@@ -206,13 +229,13 @@ ${GAMES.slice(1, 6).map((x) => marqueeBand(x)).join('')}
         ${chestMark(OP.a, 48)}
         <div>
           <div style="${disp(44)};color:#fff">${OP.a}</div>
-          <div style="${mono(10, { ls: '0.18em', color: 'rgba(255,255,255,.86)' })};margin-top:5px">${OA.city}</div>
+          <div style="${mono(10, { wt: 700, ls: '0.14em', color: 'rgba(255,255,255,.86)' })};margin-top:5px">${OA.nick}</div>
         </div>
       </div>
       <div style="position:absolute;right:18px;top:18px;display:flex;align-items:center;gap:10px">
         <div style="text-align:right">
           <div style="${disp(39)};color:#fff">${OP.h}</div>
-          <div style="${mono(10, { ls: '0.18em', color: 'rgba(255,255,255,.86)' })};margin-top:5px">${OH.city}</div>
+          <div style="${mono(10, { wt: 700, ls: '0.14em', color: 'rgba(255,255,255,.86)' })};margin-top:5px">${OH.nick}</div>
         </div>
         ${chestMark(OP.h, 48)}
       </div>
@@ -278,9 +301,7 @@ ${doorRow(null, OP.a, OP.h)}
     </span>
   </div>
 
-  <!-- THE ART, IN COLOUR. This is the one screen where a club's own mark is the
-       loudest object rather than a texture behind the type — and the reason the
-       feed shows a grayscale patch: opening a game is where the logo inks in. -->
+  <!-- THE ART, IN COLOUR — the reason the feed's mark is a pencil patch. -->
   <div style="position:absolute;left:22px;top:86px;display:flex;align-items:flex-start;gap:18px">
     ${colourMark(PG.a, 104)}
     <div style="padding-top:3px;min-width:0">
@@ -318,76 +339,122 @@ ${doorRow(null, PG.a, PG.h)}
 </div>
 ` + tail
 
-  /* --------------------------------------------------------- LINEUPS (ATH) */
+  /* --------------------------------------------------------- LINEUPS (ATH)
+     The real page's furniture, in this language: the club bar themed to
+     tonight's jersey, the starting pitcher, the OPPOSING starter's headshot
+     card, the batting order in its shipping anatomy (order · name · number ·
+     position — no stat column), and the defense diamond with surnames and
+     scorer's numbers. The page scrolls; the dashed rule is the fold. */
   const ATH_ORDER = [
-    ['1', 'BOLTE', 'HENRY', '33', 'CF', '.264'],
-    ['2', 'McNEIL', 'JEFF', '22', '2B', '.263'],
-    ['3', 'GELOF', 'ZACK', '20', '3B', '.262'],
-    ['4', 'WILLIAMS', 'ALIKA', '12', 'PH', '.261'],
-    ['5', 'BUTLER', 'LAWRENCE', '4', 'RF', '.217'],
-    ['6', 'WHITE', 'TOMMY', '47', '1B', '.259'],
-    ['7', 'HEIM', 'JONAH', '15', 'C', '.205'],
-    ['8', 'WALTON', 'DONOVAN', '29', 'SS', '.285'],
-    ['9', 'MUNCY', 'MAX', '3', 'DH', '.215'],
+    ['1', 'BOLTE', 'HENRY', '33', 'CF'],
+    ['2', 'McNEIL', 'JEFF', '22', '2B'],
+    ['3', 'GELOF', 'ZACK', '20', '3B'],
+    ['4', 'WILLIAMS', 'ALIKA', '12', 'LF'],
+    ['5', 'BUTLER', 'LAWRENCE', '4', 'RF'],
+    ['6', 'WHITE', 'TOMMY', '47', '1B'],
+    ['7', 'HEIM', 'JONAH', '15', 'C'],
+    ['8', 'WALTON', 'DONOVAN', '29', 'SS'],
+    ['9', 'MUNCY', 'MAX', '3', 'DH'],
+  ]
+  const ATH_DEFENSE = [
+    ['C', 'HEIM', '2'], ['1B', 'WHITE', '3'], ['2B', 'McNEIL', '4'],
+    ['3B', 'GELOF', '5'], ['SS', 'WALTON', '6'], ['LF', 'WILLIAMS', '7'],
+    ['CF', 'BOLTE', '8'], ['RF', 'BUTLER', '9'],
   ]
   const lineups = head() + `
-<div style="position:relative;width:390px;height:844px;background:${INK};overflow:hidden;display:flex;flex-direction:column">
+<div style="position:relative;width:390px;background:${INK};overflow:hidden">
+${fold}
 ${gameHeader(PG.a, PG.h, 'TOP 1ST')}
 
-  <!-- Themed to the jersey this club is wearing tonight, the way the paper app
-       already themes its club bar. Identity, never game state. -->
-  <div style="position:relative;background:${PA.p};padding:20px 20px 18px;overflow:hidden;flex:none">
+  <!-- Themed to the jersey this club is wearing tonight — identity, never
+       game state. The chip names the treatment the uniforms feed resolved. -->
+  <div style="position:relative;background:${PA.p};padding:18px 20px 16px;overflow:hidden">
     ${ghost(PG.a, 'right:-40px;top:-34px;height:200px;opacity:.16')}
-    <div style="position:relative">
-      <div style="${mono(8.5, { wt: 700, ls: '0.3em', color: 'rgba(255,255,255,.74)' })};margin-bottom:8px">VISITOR</div>
-      <div style="${disp(46)};color:#fff">${PA.city}</div>
+    <div style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+      <div>
+        <div style="${mono(8.5, { wt: 700, ls: '0.3em', color: 'rgba(255,255,255,.74)' })};margin-bottom:8px">VISITOR</div>
+        <div style="${disp(46)};color:#fff">${PA.city}</div>
+      </div>
+      <span style="${mono(8, { wt: 700, ls: '0.16em', color: 'rgba(255,255,255,.8)' })};border:1px solid rgba(255,255,255,.35);padding:4px 7px 3px;flex:none">KELLY GREEN ALT</span>
     </div>
   </div>
 
-  <div style="flex:1;overflow:hidden">
-    <div style="display:flex;align-items:center;gap:12px;padding:16px 20px 11px">
-      <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">STARTING PITCHER</span>
-      <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-    </div>
-    <div style="display:flex;align-items:center;gap:14px;padding:0 20px 16px">
-      <span style="${disp(40, { w: 70, wt: 900 })};color:${SIGNAL};min-width:44px">57</span>
+  <div style="padding:0 20px">
+${sectionLabel('STARTING PITCHER')}
+    <div style="display:flex;align-items:center;gap:14px;padding:0 0 4px">
+      ${shot('h-lopez.png', 54, 72)}
       <div style="min-width:0;flex:1">
         <div style="${disp(26, { w: 70, wt: 800 })};color:#fff">LOPEZ, JACOB</div>
-        <div style="${mono(8, { ls: '0.17em', color: 'rgba(255,255,255,.64)' })};margin-top:5px">LHP &#183; 5&#8211;4 &#183; 4.98 ERA &#183; 118.2 IP</div>
+        <div style="${mono(8, { ls: '0.17em', color: 'rgba(255,255,255,.64)' })};margin-top:6px">#57 &#183; LHP &#183; 5&#8211;4 &#183; 4.98 ERA &#183; 118.2 IP</div>
       </div>
     </div>
 
-    <div style="display:flex;align-items:center;gap:12px;padding:6px 20px 9px">
-      <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">BATTING ORDER</span>
-      <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-      <span style="${mono(8, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">AVG</span>
+${sectionLabel('THE MAN THEY FACE')}
+    <div style="display:flex;gap:14px;border:1px solid rgba(255,255,255,.14);padding:13px 14px">
+      ${shot('h-brown.png', 88, 117)}
+      <div style="min-width:0;flex:1;padding-top:2px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="width:14px;height:3px;background:${PH.p};flex:none"></span>
+          <span style="${mono(8, { wt: 700, ls: '0.2em', color: 'rgba(255,255,255,.6)' })}">ASTROS &#183; RHP</span>
+        </div>
+        <div style="${disp(26, { w: 70, wt: 800 })};color:#fff;margin-top:8px">BROWN, HUNTER</div>
+        <div style="${mono(8, { ls: '0.17em', color: 'rgba(255,255,255,.64)' })};margin-top:7px">#58 &#183; 11&#8211;4 &#183; 2.21 ERA &#183; 173 K</div>
+        <div style="font-family:'Lora',Georgia,serif;font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.68);margin-top:9px">Last start: 7 innings, one run, 9 strikeouts against Seattle.</div>
+      </div>
     </div>
-${ATH_ORDER.map(([n, last, first, num, pos, avg]) => `
-    <div style="display:grid;grid-template-columns:19px minmax(0,1fr) 30px 46px;gap:12px;align-items:center;height:52px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075)">
+
+${sectionLabel('BATTING ORDER')}
+${ATH_ORDER.map(([n, last, first, num, pos]) => `
+    <div style="display:grid;grid-template-columns:19px minmax(0,1fr) 34px 36px;gap:12px;align-items:center;height:52px;border-bottom:1px solid rgba(255,255,255,.075)">
       <span style="${mono(12, { wt: 700, ls: '0', color: SIGNAL })}">${n}</span>
       <span style="min-width:0">
         <span style="${disp(20, { w: 74, wt: 800 })};color:#fff;display:block">${last}</span>
-        <span style="${mono(7.5, { ls: '0.16em', color: 'rgba(255,255,255,.62)' })};display:block;margin-top:3px">${first} &#183; #${num}</span>
+        <span style="${mono(7.5, { ls: '0.16em', color: 'rgba(255,255,255,.62)' })};display:block;margin-top:3px">${first}</span>
       </span>
-      <span style="${mono(9, { wt: 700, ls: '0.1em', color: 'rgba(255,255,255,.78)' })};text-align:center">${pos}</span>
-      <span style="${mono(12, { wt: 500, ls: '0.02em', color: 'rgba(255,255,255,.85)' })};text-align:right;font-variant-numeric:tabular-nums">${avg}</span>
+      <span style="${mono(11, { wt: 700, ls: '0.02em', color: SIGNAL })};text-align:right">${num}</span>
+      <span style="${mono(9, { wt: 700, ls: '0.1em', color: 'rgba(255,255,255,.78)' })};text-align:right">${pos}</span>
     </div>`).join('')}
+
+${sectionLabel('HOW THEY LINE UP')}
+    <div style="padding:8px 0 40px">
+${defenseDiamond(ATH_DEFENSE, 'LOPEZ', 'MUNCY', 330, 240)}
+    </div>
   </div>
 
 ${doorRow('away', PG.a, PG.h)}
 </div>
 ` + tail
 
-  /* ---------------------------------------------------------- INNINGS (top 1st) */
-  const diamond = `
-    <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true" style="flex:none">
-      <g transform="rotate(45 28 28)">
-        <rect x="30" y="30" width="13" height="13" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="1.6"/>
-        <rect x="13" y="30" width="13" height="13" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="1.6"/>
-        <rect x="13" y="13" width="13" height="13" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="1.6"/>
-        <rect x="30" y="13" width="13" height="13" fill="${SIGNAL}"/>
-      </g>
-    </svg>`
+  /* ------------------------------------------------- HOVER CARD (desktop)
+     PlayerHoverCard redrawn: club spine, the silo headshot, name, position ·
+     bats · number, the club crest, four stat tiles. Pointer-only, ≥740px;
+     read-only, so the pointer passes through it. */
+  const hoverCard = head() + `
+<div style="position:relative;width:350px;height:430px;background:${INK};overflow:hidden;display:grid;place-items:center">
+  <div style="position:relative;width:300px;background:#12141A;border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 40px rgba(0,0,0,.5)">
+    <span style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${PA.p}"></span>
+    <div style="display:flex;gap:13px;padding:15px 16px 12px 19px">
+      ${shot('h-bolte.png', 54, 72)}
+      <div style="min-width:0;flex:1;padding-top:2px">
+        <div style="${disp(22, { w: 72, wt: 800 })};color:#fff">HENRY BOLTE</div>
+        <div style="${mono(8, { ls: '0.16em', color: 'rgba(255,255,255,.64)' })};margin-top:7px">CF &#183; BATS R &#183; #33</div>
+        <div style="${mono(7.5, { ls: '0.14em', color: 'rgba(255,255,255,.5)' })};margin-top:5px">IT'S JUST ATHLETICS</div>
+      </div>
+      <img src="ath.svg" alt="" style="width:30px;height:30px;object-fit:contain;flex:none;align-self:flex-start" />
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.12);margin:0 16px 0 19px"></div>
+    <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:1px;background:rgba(255,255,255,.09);border-top:1px solid transparent;margin:12px 16px 15px 19px;border:1px solid rgba(255,255,255,.12)">
+      ${[['AVG', '.264'], ['HR', '19'], ['RBI', '55'], ['OPS', '.784']].map(([l, v]) => `
+      <span style="display:flex;flex-direction:column;align-items:center;gap:5px;background:#12141A;padding:9px 0 8px">
+        <span style="${mono(11, { wt: 700, ls: '0.02em', color: '#fff' })};font-variant-numeric:tabular-nums">${v}</span>
+        <span style="${mono(7.5, { ls: '0.14em', color: 'rgba(255,255,255,.5)' })}">${l}</span>
+      </span>`).join('')}
+    </div>
+  </div>
+</div>
+` + tail
+
+  /* ---------------------------------------------------------- INNINGS (top 2nd) */
   const innings = head() + `
 <div style="position:relative;width:390px;height:844px;background:${INK};overflow:hidden;display:flex;flex-direction:column">
 ${gameHeader(PG.a, PG.h, 'LIVE')}
@@ -399,14 +466,17 @@ ${gameHeader(PG.a, PG.h, 'LIVE')}
   </div>
 
   <div style="flex:1;overflow:hidden;padding:0 20px">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 0 16px;border-bottom:1px solid rgba(255,255,255,.09)">
-      <div style="min-width:0">
-        <div style="${mono(8, { wt: 700, ls: '0.24em', color: SIGNAL })};margin-bottom:8px">NOW BATTING &#183; 4TH</div>
-        <div style="${disp(34, { w: 70 })};color:#fff">WILLIAMS</div>
-        <div style="${mono(8, { ls: '0.17em', color: 'rgba(255,255,255,.64)' })};margin-top:6px">ALIKA &#183; #12 &#183; .261 &#183; VS BROWN, RHP</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 0 16px;border-bottom:1px solid rgba(255,255,255,.09)">
+      <div style="display:flex;gap:13px;min-width:0">
+        ${shot('h-williams.png', 54, 72)}
+        <div style="min-width:0">
+          <div style="${mono(8, { wt: 700, ls: '0.24em', color: SIGNAL })};margin-bottom:8px">NOW BATTING &#183; 4TH</div>
+          <div style="${disp(34, { w: 70 })};color:#fff">WILLIAMS</div>
+          <div style="${mono(8, { ls: '0.17em', color: 'rgba(255,255,255,.64)' })};margin-top:6px">ALIKA &#183; #12 &#183; VS BROWN, RHP</div>
+        </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex:none">
-        ${diamond}
+        ${playDiamond(56, { legs: 1 })}
         <span style="display:flex;gap:5px">
           <span style="width:7px;height:7px;border-radius:50%;background:${SIGNAL}"></span>
           <span style="width:7px;height:7px;border-radius:50%;border:1.4px solid rgba(255,255,255,.4)"></span>
@@ -415,30 +485,19 @@ ${gameHeader(PG.a, PG.h, 'LIVE')}
       </div>
     </div>
 
-    <div style="display:flex;align-items:center;gap:12px;padding:16px 0 11px">
-      <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">RUNS THIS HALF</span>
-      <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-    </div>
+${sectionLabel('RUNS THIS HALF')}
 ${sealSlab('TAP TO REVEAL', 'This half only. Nothing else on the page moves,<br />and the innings after it stay shut.', 212)}
 
-    <div style="display:flex;align-items:center;gap:12px;padding:18px 0 11px">
-      <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">DUE UP</span>
-      <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-    </div>
+${sectionLabel('DUE UP')}
     <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:9px">
-${[['5', 'BUTLER', '.217'], ['6', 'WHITE', '.259'], ['7', 'HEIM', '.205']].map(([n, last, avg]) => `
+${[['5', 'BUTLER'], ['6', 'WHITE'], ['7', 'HEIM']].map(([n, last]) => `
       <div style="border:1px solid rgba(255,255,255,.14);padding:10px 11px 11px">
         <div style="${mono(8, { wt: 700, ls: '0.14em', color: SIGNAL })}">${n}</div>
         <div style="${disp(18, { w: 72, wt: 800 })};color:#fff;margin-top:7px">${last}</div>
-        <div style="${mono(8, { ls: '0.1em', color: 'rgba(255,255,255,.62)' })};margin-top:5px">${avg}</div>
       </div>`).join('')}
     </div>
 
-    <div style="display:flex;align-items:center;gap:12px;padding:20px 0 12px">
-      <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">YOUR SCOREBOOK</span>
-      <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-      <span style="${mono(8, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">3 OF 18 HALVES</span>
-    </div>
+${sectionLabel('YOUR SCOREBOOK', '3 OF 18 HALVES')}
 ${revealRail(3)}
   </div>
 
@@ -451,19 +510,35 @@ ${doorRow('inn', PG.a, PG.h)}
 ` + tail
 
   /* -------------------------------------------------------------- BOX SCORE */
+  const ON_FIELD = [
+    ['LOPEZ', '1'], ['HEIM', '2'], ['WHITE', '3'], ['McNEIL', '4'], ['GELOF', '5'],
+    ['WALTON', '6'], ['WILLIAMS', '7'], ['BOLTE', '8'], ['BUTLER', '9'],
+  ]
   const boxscore = head() + `
 <div style="position:relative;width:390px;height:844px;background:${INK};overflow:hidden;display:flex;flex-direction:column">
 ${gameHeader(PG.a, PG.h, 'LIVE')}
 
   <div style="flex:1;overflow:hidden;padding:0 20px">
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:22px 0 16px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:20px 0 14px">
       <span style="${disp(34, { w: 72 })};color:#fff">BOX SCORE</span>
       <span style="${mono(8, { ls: '0.16em', color: 'rgba(255,255,255,.62)' })};padding-bottom:5px">AS OF 9:26 PM</span>
     </div>
 
-${sealSlab('TAP TO REVEAL', 'The whole box score, all at once. Once you open it,<br />it stays open &#8212; on this phone and every device you own.', 392)}
+${sealSlab('TAP TO REVEAL', 'The whole box score, all at once. Once you open it,<br />it stays open &#8212; on every device you own.', 300)}
 
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.16);padding:15px 16px;margin-top:14px">
+    <div style="display:flex;align-items:center;gap:12px;padding:16px 0 10px">
+      <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">ON THE FIELD &#183; ATHLETICS</span>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+${ON_FIELD.map(([name, num]) => `
+      <span style="display:flex;align-items:baseline;gap:5px;border:1px solid rgba(255,255,255,.14);padding:5px 8px 4px">
+        <span style="${mono(9, { wt: 700, ls: '0.06em', color: '#fff' })}">${name}</span>
+        <span style="${mono(7.5, { ls: '0', color: 'rgba(255,255,255,.5)' })}">${num}</span>
+      </span>`).join('')}
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.16);padding:13px 16px;margin-top:16px">
       <div style="min-width:0">
         <div style="${mono(8, { wt: 700, ls: '0.22em', color: 'rgba(255,255,255,.62)' })}">NEW TO THIS?</div>
         <div style="${disp(21, { w: 74, wt: 800 })};color:#fff;margin-top:7px">HOW TO READ A BOX SCORE</div>
@@ -471,24 +546,16 @@ ${sealSlab('TAP TO REVEAL', 'The whole box score, all at once. Once you open it,
       <span style="${mono(15, { wt: 400, ls: '0', color: 'rgba(255,255,255,.66)' })};flex:none">&#8250;</span>
     </div>
 
-    <div style="display:flex;align-items:center;gap:12px;padding:22px 0 12px">
-      <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">YOUR SCOREBOOK</span>
-      <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-      <span style="${mono(8, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">THROUGH TOP 2ND</span>
-    </div>
+${sectionLabel('YOUR SCOREBOOK', 'THROUGH TOP 2ND')}
 ${revealRail(3)}
-
-    <div style="display:flex;align-items:center;justify-content:center;gap:9px;height:50px;margin-top:22px;border:1px solid rgba(255,255,255,.2)">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M10.4 6a4.4 4.4 0 1 1-1.3-3.1M10.4 1v2.6H7.8" stroke="rgba(255,255,255,.72)" stroke-width="1.3" stroke-linecap="square"/></svg>
-      <span style="${mono(9, { wt: 700, ls: '0.2em', color: 'rgba(255,255,255,.72)' })}">REFRESH</span>
-    </div>
   </div>
 
 ${doorRow('box', PG.a, PG.h)}
 </div>
 ` + tail
 
-  // doorRow and gameHeader go out too: the revealed states in extras.mjs are
-  // the same screens, so they must be the same chrome, not a second copy.
-  return { main, opening, poster, lineups, innings, boxscore, doorRow, gameHeader, revealRail }
+  // doorRow, gameHeader, revealRail, shot and playDiamond go out too: the
+  // revealed states in extras.mjs are the same screens, same furniture.
+  return { opening, poster, lineups, hoverCard, innings, boxscore,
+           doorRow, gameHeader, revealRail, shot, playDiamond, sectionLabel }
 }

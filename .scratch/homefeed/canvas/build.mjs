@@ -49,6 +49,9 @@ const T = {
 }
 
 // state: 'live' | 'pre' | 'sealed'   (never a score — see the spoiler rule)
+// `jh` / `ja` = tonight's KNOWN jersey for the home / away club: the tile tint
+// and the jersey's own logo art, the same two values the app resolves from the
+// uniforms feed and jerseys.json (BOS drawn in City Connect as the demo).
 const GAMES = [
   { a: 'TB',  h: 'BAL', t: '6:05', park: 'Oriole Park at Camden Yards',  state: 'live' },
   { a: 'LAA', h: 'TEX', t: '6:05', park: 'Globe Life Field',             state: 'live' },
@@ -57,7 +60,8 @@ const GAMES = [
   { a: 'DET', h: 'KC',  t: '6:15', park: 'Kauffman Stadium',             state: 'live' },
   { a: 'PIT', h: 'LAD', t: '6:15', park: 'Dodger Stadium',    tv: 'FOX', state: 'live' },
   { a: 'CHC', h: 'SEA', t: '6:15', park: 'T-Mobile Park',     tv: 'FOX', state: 'live' },
-  { a: 'SF',  h: 'BOS', t: '6:15', park: 'Fenway Park',       tv: 'FOX', state: 'live' },
+  { a: 'SF',  h: 'BOS', t: '6:15', park: 'Fenway Park',       tv: 'FOX', state: 'live',
+    jh: { tint: '#5A8D84', logo: 'cc-bos.png', ink: true } },
   { a: 'CIN', h: 'ARI', t: '7:10', park: 'Chase Field',       in: 'IN 55M',    state: 'pre' },
   { a: 'CLE', h: 'COL', t: '7:10', park: 'Coors Field',       in: 'IN 55M',    state: 'pre' },
   { a: 'MIN', h: 'SD',  t: '7:40', park: 'Petco Park',        in: 'IN 1H 25M', state: 'pre' },
@@ -69,6 +73,20 @@ const GAMES = [
 
 const g = (a, h) => GAMES.find((x) => x.a === a && x.h === h)
 
+// ONE list, first-pitch order, your club pinned on top. The shipping slate is
+// already a flat list; the sectioned draft ("on now / earlier today") was this
+// canvas's invention, and the grouping itself was a spoiler — walking up to the
+// slate told you which games were still going before you asked. Start-time
+// order says nothing you did not already know from the schedule.
+const FEED_ORDER = (() => {
+  const pin = GAMES.find((x) => x.pin)
+  const mins = (t) => {
+    const [h, m] = t.split(':').map(Number)
+    return ((h % 12) + (h <= 7 ? 12 : 0)) * 60 + m // 12:35 PM .. 7:40 PM
+  }
+  return [pin, ...GAMES.filter((x) => !x.pin).sort((a, b) => mins(a.t) - mins(b.t))]
+})()
+
 /* --------------------------------------------------------------- helpers */
 // WCAG relative luminance, so the seam and the LIVE chip are decided by
 // measurement rather than by looking at the six clubs a mock happens to show.
@@ -77,20 +95,16 @@ const lum = (hex) => {
     .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
   return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
 }
-// Which ink a club's own field can carry. White type was hardcoded, which is
-// right for the 25 clubs with a dark primary and wrong for the rest: white on
-// Montgomery's #febe28 is 1.7:1, on Miami's #00A3E0 2.5:1, on the Giants'
-// #FD5A1E 2.8:1. Same measurement that picks the seam picks the ink.
-const onField = (c) => (contrast('#FFFFFF', c) >= 3.4 ? '#FFFFFF' : '#0A0B0D')
-const dimOn = (c) => (contrast('#FFFFFF', c) >= 3.4 ? 'rgba(255,255,255,.8)' : 'rgba(10,11,13,.72)')
-
 const contrast = (a, b) => {
   const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m)
   return (x + 0.05) / (y + 0.05)
 }
+// Which ink a club's own field can carry. Same measurement that picks the seam.
+const onField = (c) => (contrast('#FFFFFF', c) >= 3.4 ? '#FFFFFF' : '#0A0B0D')
+const dimOn = (c) => (contrast('#FFFFFF', c) >= 3.4 ? 'rgba(255,255,255,.84)' : 'rgba(10,11,13,.74)')
 
 const SIGNAL = '#E9DA00'      // scoreboard-bulb yellow: the one non-club colour
-const INK = '#0A0B0D'         // near-black ground for the dark concepts
+const INK = '#0A0B0D'         // near-black ground for the dark mode
 
 const FONTS =
   'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900' +
@@ -103,24 +117,16 @@ const disp = (size, { w = 62, wt = 900, ls = '-0.02em', lh = 0.84 } = {}) =>
   `font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:${w}%;` +
   `font-variation-settings:'wdth' ${w},'wght' ${wt};font-weight:${wt};` +
   `font-size:${size}px;line-height:${lh};letter-spacing:${ls};` +
-  // A compressed face at a negative track closes its own word space; this
-  // opens it back up without loosening the letter fit the face was cut for.
   `word-spacing:0.09em;text-transform:uppercase`
 
 const mono = (size, { wt = 500, ls = '0.16em', color = null } = {}) =>
-  // 10px floor, enforced here rather than at 40-odd call sites. The four
-  // sizes this set used to carry between 7.5 and 9.5 were not a scale, they
-  // were noise inside 2px.
+  // 10px floor, enforced here rather than at 40-odd call sites.
   `font-family:'JetBrains Mono',ui-monospace,monospace;font-size:${Math.max(size, 10)}px;` +
   `font-weight:${wt};letter-spacing:${ls};text-transform:uppercase` +
   (color ? `;color:${color}` : '')
 
-// A club mark knocked out to a flat white silhouette — the jersey-chest
-// treatment. Colour marks would fight the colour block they sit on.
-// DIAMONDBACKS set at 74px in this face is 434px wide in a 368px slot, and
-// RUMBLE PONIES is 429. The mock had been dodging it by writing "D-backs" in
-// the data. Step the size by length instead — the poster keeps one line, and
-// the longest name in the affiliated game still fits.
+// DIAMONDBACKS at 74px in this face is 434px wide in a 368px slot. Step the
+// size by length instead — the poster keeps one line.
 const nickSize = (nick) =>
   nick.length <= 7 ? 74 : nick.length <= 9 ? 62 : nick.length <= 11 ? 52 : 44
 
@@ -131,67 +137,119 @@ const ghost = (team, css) =>
       `filter:brightness(0) invert(1);pointer-events:none" />`
     : ''
 
-// A base, with a mark printed on it. The container the club's art sits on is
-// the bag it is played on — worn canvas, clay in the corners, cleat marks —
-// which is a better object than a neutral swatch for the same reason the seal
-// is tape rather than a grey box: it is a thing from the game, not a UI shape.
-// Takes a filename rather than a team key so the minor-league boards, which
-// carry their own club table, print on the same bag.
-const baseTileSrc = (src, size, { colour = false } = {}) => {
-  const pad = Math.round(size * (colour ? 0.15 : 0.16))
-  // One nub per ~13px of bag, floored so the grid never closes up into a flat
-  // tint at feed size.
-  // ~24 nubs across, which is roughly a real bag's density. The first pass ran
-  // seven across and came out as polka dots; the texture has to be small and
-  // dense enough to read as a SURFACE rather than as a motif. Floored at 2.6px
-  // so it never aliases into moiré, and the layer fades as the bag shrinks —
-  // a base seen small loses its texture, it does not gain a coarser one.
-  const nub = Math.min(6, Math.max(2.6, Math.round((size / 24) * 10) / 10))
-  const nubop = size >= 90 ? 0.85 : size >= 60 ? 0.6 : 0.45
-  // Only the big bag carries a cast shadow; at 48px in a feed it reads as a
-  // blur rather than as a bag sitting in dirt.
-  const lift = colour ? 'box-shadow:0 3px 0 rgba(10,11,13,.42);' : ''
-  return `<span class="base" style="--nub:${nub}px;--nubop:${nubop};display:grid;place-items:center;` +
+/* ------------------------------------------------------------- THE BASE
+   Redrawn photo-real after review. The reference is the thing itself: an
+   18-inch Hollywood base is heavy-gauge rubber over a foam core — a white
+   pillow with a slight dome, a rolled bevel on every side, and rounded
+   corners ("looks like a pizza box" — Alex Cora, 2023). What a close-up
+   photograph actually shows:
+
+   - a pebbled rubber top, lit — drawn with feTurbulence bumped through
+     feDiffuseLighting, a real lighting model, not a dot pattern
+   - the beveled side walls, brightest on the lit edge, falling to shadow
+   - slide scuffs: gray streaks dragged across the top, broken up by a
+     displacement map so no streak has a straight edge
+   - clay ground into the corners and the foot; the middle gets stepped
+     clean and stays white — which is what lets a mark print there
+   - at poster size, a cast shadow: the bag sits ON something
+
+   One SVG, generated below, shipped as a data URI — the tile is a photo
+   of a base the way the park backdrop is a photo of a park. Scaled down,
+   it loses texture the way a photo does; no per-size layers. */
+const baseArtSvg = () => `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <defs>
+    <radialGradient id="dome" cx="36%" cy="28%" r="92%">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset=".45" stop-color="#F8F5EC"/>
+      <stop offset=".8" stop-color="#EDE7D6"/>
+      <stop offset="1" stop-color="#DCD3BE"/>
+    </radialGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FDFCF8"/>
+      <stop offset=".45" stop-color="#D9D2C0"/>
+      <stop offset="1" stop-color="#AFA48D"/>
+    </linearGradient>
+    <filter id="rubber" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="2" seed="7" result="n"/>
+      <feDiffuseLighting in="n" lighting-color="#ffffff" surfaceScale="0.9" diffuseConstant="1.08" result="l">
+        <feDistantLight azimuth="235" elevation="62"/>
+      </feDiffuseLighting>
+      <feComposite in="l" in2="SourceGraphic" operator="arithmetic" k1="1" k2="0" k3="0" k4="0"/>
+    </filter>
+    <filter id="streak" x="-30%" y="-30%" width="160%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.010 0.14" numOctaves="3" seed="11" result="t"/>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale="16"/>
+      <feGaussianBlur stdDeviation="0.7"/>
+    </filter>
+    <filter id="blotch" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.085" numOctaves="3" seed="4" result="t"/>
+      <feColorMatrix in="t" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.5 -0.45" result="m"/>
+      <feComposite in="SourceGraphic" in2="m" operator="in"/>
+    </filter>
+    <radialGradient id="clay" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#96713F" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#96713F" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="top"><rect x="9" y="9" width="142" height="136" rx="10"/></clipPath>
+  </defs>
+  <rect x="4" y="4" width="152" height="152" rx="14" fill="url(#wall)"/>
+  <rect x="9" y="9" width="142" height="136" rx="10" fill="url(#dome)" filter="url(#rubber)"/>
+  <rect x="14" y="14" width="132" height="126" rx="7" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="2"/>
+  <rect x="15.5" y="15.5" width="132" height="126" rx="7" fill="none" stroke="#A08D6C" stroke-opacity=".22" stroke-width="1.6"/>
+  <g clip-path="url(#top)">
+    <g filter="url(#streak)" opacity=".55">
+      <rect x="18" y="52" width="118" height="5" fill="#6E675C" opacity=".5" transform="rotate(-14 80 80)"/>
+      <rect x="30" y="72" width="112" height="3.4" fill="#7A7368" opacity=".42" transform="rotate(-12 80 80)"/>
+      <rect x="12" y="96" width="104" height="4.2" fill="#5E574C" opacity=".38" transform="rotate(-15 80 80)"/>
+      <rect x="44" y="116" width="90" height="2.6" fill="#6E675C" opacity=".4" transform="rotate(-11 80 80)"/>
+    </g>
+    <g filter="url(#blotch)" style="mix-blend-mode:multiply">
+      <circle cx="8" cy="8" r="46" fill="url(#clay)"/>
+      <circle cx="152" cy="148" r="52" fill="url(#clay)"/>
+      <circle cx="152" cy="10" r="32" fill="url(#clay)" opacity=".6"/>
+      <circle cx="8" cy="148" r="42" fill="url(#clay)" opacity=".8"/>
+      <ellipse cx="80" cy="152" rx="84" ry="22" fill="url(#clay)" opacity=".7"/>
+    </g>
+  </g>
+  <rect x="4" y="4" width="152" height="152" rx="14" fill="none" stroke="#6B5B41" stroke-opacity=".26" stroke-width="1.4"/>
+</svg>`
+const BASE_ART = 'data:image/svg+xml;utf8,' + encodeURIComponent(baseArtSvg().replace(/\n\s*/g, ' ').trim())
+
+// A base, with a mark printed on it. Takes a filename rather than a team key
+// so the minor-league boards, which carry their own club table, print on the
+// same bag. The mark multiplies onto the rubber — ink on a white surface, so
+// the pebble grain shows through the print the way it does on a real
+// special-event bag. A club with no art still gets the bag, empty: the honest
+// drawing for "the game is there, the logo is not".
+const baseTileSrc = (src, size, { colour = false, ink = false } = {}) => {
+  const pad = Math.round(size * 0.18)
+  const lift = colour && size >= 90 ? 'filter:drop-shadow(0 5px 7px rgba(10,11,13,.4));' : ''
+  // `ink`: jersey art shipped as a white knockout (cut for a tinted tile)
+  // would multiply away on the white bag — print it as ink instead.
+  const markFilter = ink ? ';filter:brightness(0) opacity(.82)' : colour ? '' : ';filter:grayscale(1) contrast(1.08)'
+  return `<span class="base" style="display:grid;place-items:center;` +
     `width:${size}px;height:${size}px;padding:${pad}px;${lift}flex:none">` +
-    `<span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span>` +
     (src
-      ? `<img src="${src}" alt="" style="position:relative;width:100%;height:100%;object-fit:contain` +
-        `${colour ? '' : ';filter:grayscale(1) contrast(1.08)'}" />`
+      ? `<img src="${src}" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;` +
+        `mix-blend-mode:multiply${markFilter}" />`
       : '') +
     `</span>`
 }
 
-// A club with no mark on file still gets the bag — empty. Which is the honest
-// drawing for it: the game is there, the art is not (see `docs` on MiLB feeds
-// degrading gracefully), and a blank bag says that where a grey rectangle just
-// looks broken.
 const baseTile = (team, size, opts = {}) => baseTileSrc(T[team].logo || null, size, opts)
 
-// CHEST MARK — the feed's treatment. The first cut ran every logo at 14–17%
-// opacity, about 1.15:1 against its own field: not a watermark, a deleted
-// asset, and it deleted the best logo art in American sport along with it. A
-// straight knockout is no better — `brightness(0) invert(1)` turns every opaque
-// pixel white, so Milwaukee's ball-in-glove, the Orioles bird and the Astros
-// star all collapse into one white disc. Grayscale keeps every internal shape,
-// and it is the most Tally-specific choice available: this app exists to be
-// sketched in pencil and /logos is already a printable grayscale sheet.
-const chestMark = (team, size, css = '') => baseTile(team, size)
-
-// COLOUR MARK — the payoff, and what the opening is FOR. Same bag, same
-// position, filter off: the mark you meet in the feed is the pencil version,
-// and opening the game is where it inks in.
-const colourMark = (team, size, css = '') => baseTile(team, size, { colour: true })
+// CHEST MARK — the feed's treatment: grayscale, the pencil version.
+const chestMark = (team, size) => baseTile(team, size)
+// COLOUR MARK — the payoff: opening the game is where the mark inks in.
+const colourMark = (team, size) => baseTile(team, size, { colour: true })
 
 const liveDot = (color = SIGNAL, size = 6) =>
   `<span class="pulse" style="width:${size}px;height:${size}px;border-radius:50%;` +
   `background:${color};display:inline-block;flex:none"></span>`
 
-// The LIVE marker is ONE object at ONE contrast, everywhere. Loose on the band
-// it inherited whatever the home club was wearing: #E9DA00 on Miami's #00A3E0
-// is 1.98:1, on the Giants' #FD5A1E 2.18:1 — under 4.5:1 for a 10px label. It
-// also read as a club's own gold on the five clubs that own yellow (the A's
-// #EFB21E sat 20px away at 1.31:1). Sunk into an ink chip it is 10.5:1 against
-// whatever it lands on, and it can no longer be mistaken for identity.
+// The LIVE marker is ONE object at ONE contrast, everywhere: an ink chip,
+// 10.5:1 on whatever club colour it lands on.
 const liveChip = (label = 'LIVE', dot = 6) =>
   `<span style="display:flex;align-items:center;gap:6px;flex:none;background:${INK};` +
   `padding:4px 7px 3px">${liveDot(SIGNAL, dot)}` +
@@ -206,6 +264,56 @@ const sealGlyph = (color, size = 11) =>
 const starGlyph = (color, size = 11) =>
   `<svg width="${size}" height="${size}" viewBox="0 0 12 12" aria-hidden="true" style="flex:none">` +
   `<path d="M6 0.6l1.6 3.5 3.8.4-2.8 2.6.8 3.8L6 9l-3.4 1.9.8-3.8L.6 4.5l3.8-.4z" fill="${color}"/></svg>`
+
+// The shipping app's national-broadcast mark is the network's own PNG logo
+// (public/broadcast-logos/, 16px tall on the card) — kept, on the ink rail.
+// FOX ships as black-on-transparent and inverts to print on ink; FS1 carries
+// its own navy box and needs nothing.
+const TV_LOGOS = { FOX: { src: 'tv-fox.png', css: 'filter:invert(1);opacity:.92' }, FS1: { src: 'tv-fs1.png', css: '' } }
+const tvMark = (tv) => {
+  const t = TV_LOGOS[tv]
+  if (!t) return `<span style="${mono(8, { wt: 700, ls: '0.12em', color: 'rgba(255,255,255,.88)' })};border:1px solid rgba(255,255,255,.5);padding:2px 4px 1px">${tv}</span>`
+  return `<img src="${t.src}" alt="${tv}" style="height:13px;width:auto;max-width:52px;display:block;${t.css}" />`
+}
+
+/* ------------------------------------------------------------- themes
+   Light and dark both ship — the app already renders in the reader's theme.
+   The bands are club colour and identical in both; the theme is carried by
+   the chrome, the seals and the tables. Dark separates bands with a hairline
+   (band and page share a value too often for a gap); light separates with a
+   4px gap of page, which is what a rack of jerseys actually looks like. */
+const THEMES = {
+  dark: {
+    key: 'dark',
+    page: INK,
+    tx: (a) => `rgba(255,255,255,${a})`,
+    rule: 'rgba(255,255,255,.12)',
+    logoTint: null,
+    wordmark: '#fff',
+    signal: SIGNAL,
+    tabBg: SIGNAL, tabInk: INK,
+    bandSep: 'border-bottom:1px solid rgba(255,255,255,.16)',
+    bandGap: 0,
+    scrim: { live: null, pre: 'rgba(10,11,13,.16)', sealed: 'rgba(10,11,13,.46)' },
+    pinRing: '#FFFFFF',
+    sheet: '#101216',
+  },
+  light: {
+    key: 'light',
+    page: '#E7E6E1',
+    tx: (a) => `rgba(16,17,20,${a})`,
+    rule: 'rgba(16,17,20,.16)',
+    logoTint: null,
+    wordmark: '#101114',
+    signal: '#B8A800', // the bulb, dimmed to hold 3:1 on the light page
+    tabBg: '#101114', tabInk: '#E7E6E1',
+    bandSep: '',
+    bandGap: 4,
+    scrim: { live: null, pre: 'rgba(231,230,225,.18)', sealed: 'rgba(231,230,225,.52)' },
+    pinRing: '#101114',
+    sheet: '#FFFFFF',
+  },
+}
 
 /* ------------------------------------------------------------- shell/head */
 const head = (extraStyle = '') => `<!doctype html>
@@ -226,93 +334,33 @@ const head = (extraStyle = '') => `<!doctype html>
     @keyframes tallypulse { 0%,100% { opacity: 1 } 50% { opacity: .28 } }
     .pulse { animation: tallypulse 1.9s ease-in-out infinite; }
     @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
-    /* THE BASE. The logo does not sit on a swatch, it sits on a bag.
-       A competition base is moulded rubber over a foam core, and its top is a
-       traction surface: a regular grid of small raised nubs with narrow
-       channels between them. That grid is the thing you actually recognise in
-       a close-up photo, so it is the thing this draws — four layers, no image
-       files.
+    /* THE BASE — a photo of a base (one SVG data URI: lit pebbled rubber,
+       beveled walls, slide scuffs, clay in the corners; the middle stepped
+       clean so the mark prints). See the generator for the drawing. */
+    .base { position: relative; background: url("${BASE_ART}") center / 100% 100% no-repeat; }
 
-       1. .base            the fill, the rolled bevel, the stitched seam
-       2. .base-nubs       the moulded grid: a lit edge on each nub, a shadowed
-                           channel around it
-       3. .base-dirt       clay, laid OVER the grid on multiply so it darkens
-                           the channels rather than covering them — which is
-                           where dirt actually goes and why the grid reads
-                           strongest at the corners
-       4. .base-grain      rubber tooth
+    /* THE SHEEN — the shipping slate's scroll-driven band of light
+       (06a-gamecard-parkart.css), same soft-light blend and the same softened
+       stops. In the app it rides a view timeline and tracks the thumb; an
+       artboard cannot scroll for you, so here the same band loops slowly,
+       staggered down the slate, to show the effect. */
+    .bandsheen { position: absolute; inset: 0; z-index: 3; overflow: hidden;
+      pointer-events: none; mix-blend-mode: soft-light; }
+    .bandsheen::before { content: ''; position: absolute;
+      left: -30%; right: -30%; top: -50%; bottom: -50%;
+      background: linear-gradient(172deg,
+        transparent 26%, rgba(10,11,13,.10) 40%,
+        rgba(252,250,244,.46) 50%, rgba(10,11,13,.08) 60%, transparent 74%);
+      animation: bandsheen 9s linear infinite; animation-delay: var(--d, 0s); }
+    @keyframes bandsheen {
+      0% { transform: translate3d(0,-34%,0) }
+      52% { transform: translate3d(0,34%,0) }
+      100% { transform: translate3d(0,34%,0) }
+    }
+    @media (prefers-reduced-motion: reduce) { .bandsheen { display: none } }
 
-       No cleat marks. A rake across the top read as damage rather than as
-       texture, and it fought whatever mark was printed over it. */
-    .base {
-      position: relative;
-      border-radius: 2px;
-      background-image:
-        radial-gradient(ellipse 78% 64% at 34% 28%, rgba(255, 255, 255, .95) 0, transparent 68%),
-        linear-gradient(158deg, #FCFAF4 0%, #F7F3EA 58%, #EDE7D9 100%);
-      box-shadow:
-        inset 0 0 0 1.5px rgba(255, 255, 255, .7),
-        inset 0 0 0 3px rgba(146, 114, 74, .3),
-        inset 0 -3px 5px rgba(126, 88, 48, .1);
-    }
-    /* The stitched seam, set in from the rolled edge the way a real bag's is. */
-    .base::after {
-      content: '';
-      position: absolute;
-      inset: 10%;
-      border: 1px solid rgba(126, 88, 48, .18);
-      border-radius: 1px;
-      pointer-events: none;
-    }
-    /* The traction surface: DISCRETE nubs, not a grid of lines.
-       Crossed repeating lines drew plaid — continuous rules read as a weave,
-       and at feed size the channels were a quarter of each cell wide, so the
-       bag came out tartan. Moulded rubber is a field of separate bumps, so
-       each nub is drawn as one: a lit cap, and a shadow offset half a pixel
-       down-right, on a square tile.
-
-       --nub is the pitch, set per tile so a nub stays the same PHYSICAL size
-       whether the bag is 104px on a poster or 44px in a feed; --nubop fades
-       the whole layer as the bag shrinks, because a real base seen small
-       does not grow coarser texture, it loses it. */
-    .base-nubs {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 2px;
-      opacity: var(--nubop, .7);
-      background-image:
-        radial-gradient(circle at 60% 64%, rgba(118, 90, 56, .24) 0 26%, transparent 31%),
-        radial-gradient(circle at 43% 41%, rgba(255, 255, 255, .68) 0 26%, transparent 32%);
-      background-size: var(--nub) var(--nub), var(--nub) var(--nub);
-    }
-    /* Clay, over the grid. The middle of a bag gets stepped clean and stays
-       white, which is also what lets a mark print over it. */
-    .base-dirt {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 2px;
-      mix-blend-mode: multiply;
-      background-image:
-        radial-gradient(circle at 2% 3%, rgba(150, 110, 66, .5) 0, transparent 30%),
-        radial-gradient(circle at 98% 96%, rgba(150, 110, 66, .46) 0, transparent 28%),
-        radial-gradient(circle at 97% 3%, rgba(168, 132, 86, .34) 0, transparent 24%),
-        radial-gradient(circle at 3% 97%, rgba(168, 132, 86, .38) 0, transparent 26%),
-        radial-gradient(ellipse 130% 34% at 50% 108%, rgba(150, 110, 66, .38) 0, transparent 60%);
-    }
-    .base-grain {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      mix-blend-mode: multiply;
-      opacity: .16;
-      border-radius: 2px;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='3'/></filter><rect width='90' height='90' filter='url(%23b)' opacity='0.5'/></svg>");
-    }
-
-    /* The seal's own surface: the one signal colour, raked. It is the kraft
-       tape of this palette — same job, drawn in the ink the screen is in. */
+    /* The seal's own surface: the one signal colour, raked — the kraft tape
+       of this palette. */
     .hatch { position: absolute; inset: 0; pointer-events: none; opacity: .13;
       background-image: repeating-linear-gradient(-38deg, #E9DA00 0 2px, transparent 2px 11px); }
 ${extraStyle}  </style>
@@ -324,86 +372,110 @@ const tail = `</x-dc>
 </html>
 `
 
-/* ------------------------------------------------- shared dark-concept bits */
-// The masthead. TAL1Y keeps the app's own wordmark joke (the 1 for an L).
-// Search, Game Log and the menu were on the shipping masthead and fell off this
-// one. They are drawn at 44x44 because they are controls, not decoration.
-const iconBtn = (kind) => {
+/* ------------------------------------------------- shared chrome, themed */
+const iconBtn = (kind, tx) => {
+  const c = tx(0.82)
   const path = {
-    search: '<circle cx="7.5" cy="7.5" r="5.2" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/><path d="M11.4 11.4 15 15" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="square"/>',
-    log: '<rect x="2" y="2.5" width="12" height="13" rx="1" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/><path d="M5.2 2.5v13" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/>',
-    menu: '<path d="M2 4h14M2 9h14M2 14h14" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="square"/>',
+    search: `<circle cx="7.5" cy="7.5" r="5.2" stroke="${c}" stroke-width="1.6"/><path d="M11.4 11.4 15 15" stroke="${c}" stroke-width="1.6" stroke-linecap="square"/>`,
+    log: `<rect x="2" y="2.5" width="12" height="13" rx="1" stroke="${c}" stroke-width="1.6"/><path d="M5.2 2.5v13" stroke="${c}" stroke-width="1.6"/>`,
+    menu: `<path d="M2 4h14M2 9h14M2 14h14" stroke="${c}" stroke-width="1.6" stroke-linecap="square"/>`,
   }[kind]
   return `<span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px">` +
     `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">${path}</svg></span>`
 }
 
-const masthead = (level = 'MLB') => `
-  <header style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px 10px;border-bottom:1px solid rgba(255,255,255,.12)">
+const masthead = (level = 'MLB', th = THEMES.dark) => `
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px 10px;border-bottom:1px solid ${th.rule}">
     <div style="display:flex;align-items:center;gap:9px">
-      <span style="${disp(23, { w: 66, ls: '0.005em' })};color:#fff">TAL<span style="color:${SIGNAL}">1</span>Y</span>
-      <span style="${mono(8, { ls: '0.3em', color: 'rgba(255,255,255,.62)' })};padding-top:3px">BASEBALL</span>
+      <span style="${disp(23, { w: 66, ls: '0.005em' })};color:${th.wordmark}">TAL<span style="color:${th.signal}">1</span>Y</span>
+      <span style="${mono(8, { ls: '0.3em', color: th.tx(0.62) })};padding-top:3px">BASEBALL</span>
     </div>
     <div style="display:flex;align-items:center;gap:14px">
-      ${iconBtn('search')}
-      ${iconBtn('log')}
-      ${iconBtn('menu')}
+      ${iconBtn('search', th.tx)}
+      ${iconBtn('log', th.tx)}
+      ${iconBtn('menu', th.tx)}
     </div>
   </header>
-  <!-- Every one of these was a 21x13 label. WCAG 2.2 AA (2.5.8) wants 24x24;
-       Apple wants 44pt. They are controls, so they get 44. -->
-  <nav style="display:flex;align-items:center;gap:2px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.12)">
+  <nav style="display:flex;align-items:center;gap:2px;padding:0 14px;border-bottom:1px solid ${th.rule}">
     ${['MLB', 'AAA', 'AA', 'A+', 'A'].map((lv) => `
-    <span style="display:grid;place-items:center;min-width:46px;height:44px;${lv === level ? `background:${SIGNAL};` : ''}">
-      <span style="${mono(10, { wt: 700, ls: '0.14em', color: lv === level ? INK : 'rgba(255,255,255,.6)' })}">${lv}</span>
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;${lv === level ? `background:${th.tabBg};` : ''}">
+      <span style="${mono(10, { wt: 700, ls: '0.14em', color: lv === level ? th.tabInk : th.tx(0.6) })}">${lv}</span>
     </span>`).join('')}
   </nav>`
 
-// Date rail + the sealed-state chip. On a spoiler-safe app the seal IS the
-// status bar: it says, up front, that no number on this screen can spoil you.
-const dayrail = () => `
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 14px;border-bottom:1px solid rgba(255,255,255,.12)">
+// Date rail + the ADR-0026 Scores Unlocked switch (a control, not a label).
+const dayrail = (th = THEMES.dark) => `
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 14px;border-bottom:1px solid ${th.rule}">
     <div style="display:flex;align-items:center;gap:4px">
-      <span style="display:grid;place-items:center;width:44px;height:44px;${mono(15, { wt: 400, ls: '0', color: 'rgba(255,255,255,.66)' })}">&#8249;</span>
-      <span style="${disp(19, { w: 78, wt: 800, ls: '0.01em' })};color:#fff">SAT 22 AUG</span>
-      <span style="display:grid;place-items:center;width:44px;height:44px;${mono(15, { wt: 400, ls: '0', color: 'rgba(255,255,255,.66)' })}">&#8250;</span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;${mono(15, { wt: 400, ls: '0', color: th.tx(0.66) })}">&#8249;</span>
+      <span style="${disp(19, { w: 78, wt: 800, ls: '0.01em' })};color:${th.wordmark}">SAT 22 AUG</span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;${mono(15, { wt: 400, ls: '0', color: th.tx(0.66) })}">&#8250;</span>
     </div>
-    <!-- This is the ADR-0026 Scores Unlocked switch, not a status label. Drawn
-         as a label it removed the control and kept only the nagging half — the
-         one consented, reversible way out of the seal, turned into a scold. -->
-    <span style="display:flex;align-items:center;gap:7px;min-height:44px;border:1px solid rgba(255,255,255,.28);padding:0 11px">
-      ${sealGlyph('rgba(255,255,255,.8)', 12)}
-      <span style="${mono(10, { wt: 700, ls: '0.16em', color: 'rgba(255,255,255,.8)' })}">SEALED</span>
-      <span style="width:26px;height:15px;border:1px solid rgba(255,255,255,.4);position:relative;display:block">
-        <span style="position:absolute;left:1px;top:1px;width:11px;height:11px;background:rgba(255,255,255,.6)"></span>
+    <span style="display:flex;align-items:center;gap:7px;min-height:44px;border:1px solid ${th.tx(0.28)};padding:0 11px">
+      ${sealGlyph(th.tx(0.8), 12)}
+      <span style="${mono(10, { wt: 700, ls: '0.16em', color: th.tx(0.8) })}">SEALED</span>
+      <span style="width:26px;height:15px;border:1px solid ${th.tx(0.4)};position:relative;display:block">
+        <span style="position:absolute;left:1px;top:1px;width:11px;height:11px;background:${th.tx(0.6)}"></span>
       </span>
     </span>
   </div>`
 
-const sectionRule = (label, count, right = '') => `
-  <div style="display:flex;align-items:center;gap:10px;padding:9px 20px 8px;background:rgba(255,255,255,.035)">
-    <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">${label}</span>
-    ${count ? `<span style="${mono(8.5, { wt: 400, ls: '0.1em', color: 'rgba(255,255,255,.6)' })}">${count}</span>` : ''}
-    <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-    ${right}
+/* -------------------------------------------------------- THE CLUB STRIP
+   Back from the shipping page (TeamFilterStrip): every club at this level,
+   full colour, one tap to its team page, your club centred. 36px marks in
+   48px targets, edge-faded, scrolls sideways. */
+const STRIP_CLUBS = ['CHC', 'STL', 'CIN', 'PIT', 'ATL', 'MIL', 'NYY', 'LAD', 'BOS', 'HOU', 'SEA']
+const logoStrip = (th = THEMES.dark) => `
+  <div style="position:relative;padding:9px 0;border-bottom:1px solid ${th.rule}">
+    <div style="display:flex;gap:6px;justify-content:center;overflow:hidden;` +
+      `-webkit-mask-image:linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent);` +
+      `mask-image:linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent)">
+      ${STRIP_CLUBS.map((k) => `
+      <span style="display:grid;place-items:center;width:48px;height:48px;flex:none${k === 'MIL' ? `;box-shadow:inset 0 -2px 0 ${th.signal}` : ''}">
+        <img src="${T[k].logo}" alt="${T[k].nick}" style="width:36px;height:36px;object-fit:contain" />
+      </span>`).join('')}
+    </div>
+  </div>`
+
+/* ---------------------------------------------------------- THE WIRE DOCK
+   Back from the shipping page (WireDock): the league's roster moves, resting
+   as a one-line sheet at the foot of the screen; drag up for the feed. Club
+   spine, club mark, the latest move in reading type, the count. */
+const wireDock = (th = THEMES.dark) => `
+  <div style="position:absolute;left:0;right:0;top:${844 - 62}px;height:62px;z-index:8;` +
+    `background:${th.sheet};border-top:1px solid ${th.rule};border-radius:12px 12px 0 0;` +
+    `box-shadow:0 -8px 22px rgba(10,11,13,${th.key === 'dark' ? '.55' : '.18'})">
+    <div style="display:flex;justify-content:center;padding-top:6px">
+      <span style="width:36px;height:4px;border-radius:2px;background:${th.tx(0.3)}"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 16px 0 14px">
+      <span style="width:3px;align-self:stretch;background:${T.MIL.p};flex:none"></span>
+      <img src="${T.MIL.logo}" alt="" style="width:20px;height:20px;object-fit:contain;flex:none" />
+      <span style="${mono(10, { wt: 700, ls: '0.1em', color: th.tx(0.85) })};flex:none">MIL</span>
+      <span style="font-family:'Lora',Georgia,serif;font-size:12.5px;line-height:1.35;color:${th.tx(0.72)};` +
+        `overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1">` +
+        `Brewers reinstate RHP Freddy Peralta from the 15-day injured list</span>
+      <span style="${mono(10, { wt: 700, ls: '0.08em', color: th.tx(0.55) })};flex:none">27</span>
+      <span style="${mono(12, { wt: 400, ls: '0', color: th.tx(0.6) })};flex:none">&#8963;</span>
+    </div>
   </div>`
 
 /* ------------------------------------------------------------ MARQUEE band
-   A full-bleed colour block, no gutter and no card. The away club enters as a
-   hard wedge from the left with its own secondary showing as a 5px piping
-   along the seam — a jersey sash, not a divider. */
-// A LIVE game, a game two hours out and a game finished four hours ago were
-// drawn at identical height and identical saturation, so a fifteen-game
-// Saturday shouted fifteen times and there was nothing to skim. Height and
-// saturation now carry state, which is a better answer than a density toggle
-// because it gives the feed a SHAPE — and it drops a full slate from 1770px to
-// about 1450px as a side effect.
-const BAND_H = { live: 118, pre: 88, sealed: 68 }
-const bandScrim = { live: null, pre: 'rgba(10,11,13,.16)', sealed: 'rgba(10,11,13,.46)' }
-
-function marqueeBand(game, h = BAND_H[game.state] ?? 118) {
+   A full-bleed colour block, no gutter and no card. ONE height for every
+   game — the same width and the same size, whatever the game is doing, so
+   the slate ranks nothing. State lives inside the band: the chip says LIVE,
+   a time, or SEALED, and a played game desaturates under its scrim.
+   When tonight's jersey is KNOWN (uniforms feed by day, jerseys.json ahead),
+   the band wears it: the field takes the jersey tile's tint and the bag
+   prints that jersey's own art. */
+const BAND_H = 118
+function marqueeBand(game, h = BAND_H, idx = 0, th = THEMES.dark) {
   const A = T[game.a]
   const H = T[game.h]
+  const aTint = game.ja?.tint || A.p
+  const hTint = game.jh?.tint || H.p
+  const aLogo = game.ja?.logo || A.logo
+  const hLogo = game.jh?.logo || H.logo
   const big = h >= 108
   const mid = h >= 88
   const abbrA = big ? 44 : mid ? 34 : 27
@@ -411,17 +483,10 @@ function marqueeBand(game, h = BAND_H[game.state] ?? 118) {
   const rail = big ? 32 : 30
   const markSize = big ? 48 : mid ? 36 : 28
   const wedge = 'polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)'
-  // THE SEAM IS ACHROMATIC, ALWAYS. It used to be the away club's secondary,
-  // which is just another club colour: 173 of the league's 435 matchups put two
-  // primaries within 1.35:1 of each other (two pairs are byte-identical —
-  // Tigers/Yankees, Pirates/White Sox), and 250 of 870 secondary-on-primary
-  // orderings fall under 1.6:1. Braves at Brewers drew a #13274F line on
-  // #12284B: 1.00:1, an invisible divider on a band whose whole job is to show
-  // two clubs meeting. A fixed white rule separates all 435 pairs. White clears
-  // WCAG's 3:1 non-text threshold against every primary except Miami's #00A3E0
-  // (2.87:1), which takes the ink rule instead. The away secondary stays, as a
-  // 2px accent INSIDE the seam — a piping detail, no longer the separator.
-  const seam = contrast('#FFFFFF', A.p) < 3 || contrast('#FFFFFF', H.p) < 3 ? '#0A0B0D' : '#FFFFFF'
+  // THE SEAM IS ACHROMATIC, ALWAYS — 173 of 435 matchups put two primaries
+  // within 1.35:1. White separates every pair but Miami's; that takes ink.
+  const seam = contrast('#FFFFFF', aTint) < 3 || contrast('#FFFFFF', hTint) < 3 ? '#0A0B0D' : '#FFFFFF'
+  const scrim = th.scrim[game.state]
   const status =
     game.state === 'live'
       ? liveChip()
@@ -429,44 +494,43 @@ function marqueeBand(game, h = BAND_H[game.state] ?? 118) {
         ? `<span style="display:flex;align-items:center;gap:5px">${sealGlyph('rgba(255,255,255,.78)', 10)}<span style="${mono(9, { wt: 700, ls: '0.2em', color: 'rgba(255,255,255,.78)' })}">SEALED</span></span>`
         : `<span style="${mono(9, { wt: 700, ls: '0.2em', color: 'rgba(255,255,255,.82)' })}">${game.t} PM</span>`
   return `
-    <article style="position:relative;height:${h}px;overflow:hidden;background:${H.p};border-bottom:1px solid rgba(255,255,255,.16)${game.pin ? ';box-shadow:inset 0 0 0 2px #FFFFFF' : ''}">
+    <article style="position:relative;height:${h}px;overflow:hidden;background:${hTint};${th.bandSep}${game.pin ? `;box-shadow:inset 0 0 0 2px ${th.pinRing}` : ''}">
       <div style="position:absolute;inset:0;width:calc(45% + 6px);background:${seam};clip-path:${wedge}"></div>
       <div style="position:absolute;inset:0;width:calc(45% + 2px);background:${A.s};clip-path:${wedge}"></div>
-      <div style="position:absolute;inset:0;width:45%;background:${A.p};clip-path:${wedge}"></div>
+      <div style="position:absolute;inset:0;width:45%;background:${aTint};clip-path:${wedge}"></div>
       ${ghost(game.a, `left:-30px;top:-18px;height:${h + 48}px;opacity:.09`)}
       ${ghost(game.h, `right:-26px;top:-22px;height:${h + 54}px;opacity:.09`)}
-      ${bandScrim[game.state] ? `<span style="position:absolute;inset:0;background:${bandScrim[game.state]};pointer-events:none"></span>` : ''}
+      ${scrim ? `<span style="position:absolute;inset:0;background:${scrim};pointer-events:none;z-index:2"></span>` : ''}
       <div style="position:absolute;left:0;right:0;top:0;height:${h - rail}px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
-          ${chestMark(game.a, markSize)}
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 20px)">
+          ${baseTileSrc(aLogo, markSize, { ink: game.ja?.ink })}
           <div style="min-width:0">
-            <div style="${disp(abbrA)};color:${onField(A.p)}">${game.a}</div>
-            ${mid ? `<div style="${mono(8, { ls: '0.2em' })};color:${dimOn(A.p)};margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${A.city}</div>` : ''}
+            <div style="${disp(abbrA)};color:${onField(aTint)}">${game.a}</div>
+            ${mid ? `<div style="${mono(8, { wt: 700, ls: '0.14em' })};color:${dimOn(aTint)};margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${A.nick}</div>` : ''}
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <div style="text-align:right;min-width:0">
-            <div style="${disp(abbrH)};color:${onField(H.p)}">${game.h}</div>
-            ${mid ? `<div style="${mono(8, { ls: '0.2em' })};color:${dimOn(H.p)};margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${H.city}</div>` : ''}
+            <div style="${disp(abbrH)};color:${onField(hTint)}">${game.h}</div>
+            ${mid ? `<div style="${mono(8, { wt: 700, ls: '0.14em' })};color:${dimOn(hTint)};margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${H.nick}</div>` : ''}
           </div>
-          ${chestMark(game.h, markSize)}
+          ${baseTileSrc(hLogo, markSize, { ink: game.jh?.ink })}
         </div>
       </div>
-      <div style="position:absolute;left:0;right:0;bottom:0;height:${rail}px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:${INK}">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:${rail}px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:${INK};z-index:2">
         <span style="display:flex;align-items:center;gap:5px;${mono(8, { ls: '0.17em', color: 'rgba(255,255,255,.74)' })};overflow:hidden;white-space:nowrap">${game.pin ? starGlyph('#FFFFFF', 10) : ''}<span style="overflow:hidden;text-overflow:ellipsis">${game.park}</span></span>
         <span style="display:flex;align-items:center;gap:9px;flex:none">
-          ${game.tv ? `<span style="${mono(8, { wt: 700, ls: '0.12em', color: 'rgba(255,255,255,.88)' })};border:1px solid rgba(255,255,255,.5);padding:2px 4px 1px">${game.tv}</span>` : ''}
+          ${game.tv ? tvMark(game.tv) : ''}
           ${status}
         </span>
       </div>
+      <span class="bandsheen" style="--d:-${((idx % 8) * 1.15).toFixed(2)}s"></span>
     </article>`
 }
 
 /* ----------------------------------------------------------- RUNDOWN row
-   Departure board. The dotted leader between the two clubs is the whole
-   character of it — a rule that stretches to fill, the way a timetable sets
-   a destination against its platform. */
-function rundownRow(game, h = 56) {
+   Departure board. Survives as the desktop rail and the compact density. */
+function rundownRow(game, h = 56, th = THEMES.dark) {
   const A = T[game.a]
   const H = T[game.h]
   const sealed = game.state === 'sealed'
@@ -493,21 +557,127 @@ function rundownRow(game, h = 56) {
           <span style="width:16px;height:3px;background:${A.p};flex:none"></span>
           <span style="width:16px;height:3px;background:${H.p};flex:none"></span>
           <span style="${mono(7.5, { ls: '0.15em', color: 'rgba(255,255,255,.62)' })};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${game.park}</span>
-          ${game.tv ? `<span style="${mono(7.5, { wt: 700, ls: '0.1em', color: 'rgba(255,255,255,.74)' })};border:1px solid rgba(255,255,255,.3);padding:1px 3px;flex:none">${game.tv}</span>` : ''}
+          ${game.tv ? `<span style="flex:none">${tvMark(game.tv)}</span>` : ''}
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end">${right}</div>
     </div>`
 }
 
-/* ============================================================== ARTBOARDS */
+/* ------------------------------------------------------- THE FEED, themed
+   One builder, both modes. Flat list: your club pinned, then first pitch
+   order. The dashed rule marks the iPhone fold. */
+const fold = (th) => `
+  <div style="position:absolute;left:0;right:0;top:844px;height:0;pointer-events:none;z-index:9">
+    <div style="border-top:1px dashed ${th.tx(0.5)}"></div>
+    <span style="position:absolute;right:8px;top:5px;${mono(9, { wt: 700, ls: '0.18em', color: th.tx(0.6) })}">FOLD &#183; IPHONE 14 PRO</span>
+  </div>`
 
-/* -- A. MARQUEE ---------------------------------------------------------- */
+const feed = (themeKey = 'dark') => {
+  const th = THEMES[themeKey]
+  const bands = FEED_ORDER.map((x, i) => marqueeBand(x, BAND_H, i, th)).join(
+    th.bandGap ? `<div style="height:${th.bandGap}px"></div>` : ''
+  )
+  return head() + `
+<div style="position:relative;width:390px;background:${th.page};overflow:hidden">
+${fold(th)}
+${wireDock(th)}
+${masthead('MLB', th)}
+${dayrail(th)}
+${logoStrip(th)}
+${bands}
+  <div style="height:70px"></div>
+</div>
+` + tail
+}
+
+const main = feed('dark')
+const feedLight = feed('light')
+
+/* -- DESKTOP: the same system at 1440, flat, with the wire as the rail ---- */
+const flushRow = (s) => s.replace('padding:0 20px', 'padding:0')
+const WIRE_ROWS = [
+  ['MIL', T.MIL.p, 'Brewers reinstate RHP Freddy Peralta from the 15-day injured list', 'IL'],
+  ['NYM', T.NYM.p, 'Mets acquire OF Jordan Walker from the Cardinals for two prospects', 'TRADE'],
+  ['SEA', T.SEA.p, 'Mariners select the contract of C Harry Ford from Tacoma', 'CALL-UP'],
+  ['BOS', T.BOS.p, 'Red Sox place LHP Garrett Crochet on the paternity list', 'MOVE'],
+  ['LAD', T.LAD.p, 'Dodgers option RHP Bobby Miller to Oklahoma City', 'MOVE'],
+]
+const wireRailRow = ([abbr, colour, text, kind]) => `
+  <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.075)">
+    <span style="width:3px;align-self:stretch;background:${colour};flex:none"></span>
+    <div style="min-width:0">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="${mono(10, { wt: 700, ls: '0.1em', color: 'rgba(255,255,255,.85)' })}">${abbr}</span>
+        <span style="${mono(7.5, { wt: 700, ls: '0.14em', color: 'rgba(255,255,255,.5)' })};margin-left:auto">${kind}</span>
+      </div>
+      <div style="font-family:'Lora',Georgia,serif;font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.72);margin-top:4px">${text}</div>
+    </div>
+  </div>`
+
+const desktop = head() + `
+<div style="width:1440px;min-height:900px;background:${INK};overflow:hidden">
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:22px 60px;border-bottom:1px solid rgba(255,255,255,.12)">
+    <div style="display:flex;align-items:center;gap:34px">
+      <span style="${disp(26, { w: 66, ls: '0.005em' })};color:#fff">TAL<span style="color:${SIGNAL}">1</span>Y</span>
+      <nav style="display:flex;align-items:center;gap:16px">
+        <span style="${mono(10, { wt: 700, ls: '0.14em', color: INK })};background:${SIGNAL};padding:5px 8px 4px">MLB</span>
+        <span style="${mono(10, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">AAA</span>
+        <span style="${mono(10, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">AA</span>
+        <span style="${mono(10, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">A+</span>
+        <span style="${mono(10, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">A</span>
+      </nav>
+    </div>
+    <div style="display:flex;align-items:center;gap:22px">
+      <span style="${disp(20, { w: 78, wt: 800, ls: '0.01em' })};color:#fff">SAT 22 AUG</span>
+      <span style="display:flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.22);padding:6px 10px 5px">
+        ${sealGlyph('rgba(255,255,255,.6)', 11)}<span style="${mono(9, { wt: 700, ls: '0.18em', color: 'rgba(255,255,255,.6)' })}">SCORES SEALED</span>
+      </span>
+      <span style="${mono(9, { wt: 700, ls: '0.18em', color: INK })};background:#fff;padding:6px 10px 5px">GAME LOG</span>
+    </div>
+  </header>
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:44px;padding:30px 60px 40px">
+    <section style="min-width:0">
+      <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:2px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.16)">
+${FEED_ORDER.slice(0, 6).map((x, i) => marqueeBand(x, 172, i)).join('')}
+      </div>
+      <div style="height:26px"></div>
+      <div style="border-top:1px solid rgba(255,255,255,.12)">
+${FEED_ORDER.slice(6, 12).map((x) => flushRow(rundownRow(x, 64))).join('')}
+      </div>
+    </section>
+    <aside style="border-left:1px solid rgba(255,255,255,.12);padding-left:30px;min-width:0">
+      <div style="display:flex;align-items:center;gap:10px;padding:0 0 10px">
+        <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">THE WIRE</span>
+        <span style="${mono(8.5, { wt: 400, ls: '0.1em', color: 'rgba(255,255,255,.6)' })}">LAST 3 DAYS &#183; 27</span>
+        <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
+      </div>
+${WIRE_ROWS.map(wireRailRow).join('')}
+      <div style="display:flex;align-items:center;justify-content:center;height:44px;margin-top:12px;border:1px solid rgba(255,255,255,.2)">
+        <span style="${mono(9, { wt: 700, ls: '0.2em', color: 'rgba(255,255,255,.72)' })}">22 MORE &#8250;</span>
+      </div>
+      <div style="height:26px"></div>
+${FEED_ORDER.slice(12).map((x) => flushRow(rundownRow(x, 64))).join('')}
+    </aside>
+  </div>
+</div>
+` + tail
+
+/* ------------------------------------------- the original four directions
+   Kept as drawn (page 3): the sketches the chosen system came from. */
+const sectionRule = (label, count, right = '') => `
+  <div style="display:flex;align-items:center;gap:10px;padding:9px 20px 8px;background:rgba(255,255,255,.035)">
+    <span style="${mono(8.5, { wt: 700, ls: '0.24em', color: 'rgba(255,255,255,.74)' })}">${label}</span>
+    ${count ? `<span style="${mono(8.5, { wt: 400, ls: '0.1em', color: 'rgba(255,255,255,.6)' })}">${count}</span>` : ''}
+    <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
+    ${right}
+  </div>`
+
 const marquee = head() + `
 <div style="width:390px;min-height:844px;background:${INK};overflow:hidden">
 ${masthead()}
 ${dayrail()}
-${GAMES.slice(0, 6).map((x) => marqueeBand(x)).join('')}
+${GAMES.slice(0, 6).map((x, i) => marqueeBand(x, 118, i)).join('')}
   <article style="position:relative;height:30px;overflow:hidden;background:${T.SEA.p}">
     <div style="position:absolute;inset:0;width:57%;background:${T.CHC.p};clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
     <div style="position:absolute;left:20px;top:5px;${disp(22)};color:rgba(255,255,255,.9)">CHC</div>
@@ -516,7 +686,6 @@ ${GAMES.slice(0, 6).map((x) => marqueeBand(x)).join('')}
 </div>
 ` + tail
 
-/* -- B. RUNDOWN ---------------------------------------------------------- */
 const rundown = head(
   `    .vgrid { position:absolute; inset:0; pointer-events:none;
       background-image: repeating-linear-gradient(to right, rgba(255,255,255,.05) 0 1px, transparent 1px 78px);
@@ -532,7 +701,7 @@ ${GAMES.slice(0, 8).map((x) => rundownRow(x)).join('')}
 ${sectionRule('FIRST PITCH TO COME', '03')}
 ${GAMES.slice(8, 11).map((x) => rundownRow(x)).join('')}
 ${sectionRule('EARLIER TODAY', '04')}
-${rundownRow(GAMES[11])}
+${rundownRow(GAMES[12])}
   </div>
 </div>
 ` + tail
@@ -675,80 +844,35 @@ const split = head() + `
 </div>
 ` + tail
 
-/* -- DESKTOP: the same system at 1440 ------------------------------------ */
-const flat = (s) => s.replace('padding:9px 20px 8px', 'padding:0 0 10px')
-const flush = (s) => s.replace('padding:0 20px', 'padding:0')
-const desktop = head() + `
-<div style="width:1440px;min-height:760px;background:${INK};overflow:hidden">
-  <header style="display:flex;align-items:center;justify-content:space-between;padding:22px 60px;border-bottom:1px solid rgba(255,255,255,.12)">
-    <div style="display:flex;align-items:center;gap:34px">
-      <span style="${disp(26, { w: 66, ls: '0.005em' })};color:#fff">TAL<span style="color:${SIGNAL}">1</span>Y</span>
-      <nav style="display:flex;align-items:center;gap:16px">
-        <span style="${mono(10, { wt: 700, ls: '0.14em', color: INK })};background:${SIGNAL};padding:5px 8px 4px">MLB</span>
-        <span style="${mono(10, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">AAA</span>
-        <span style="${mono(10, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">AA</span>
-        <span style="${mono(10, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">A+</span>
-        <span style="${mono(10, { ls: '0.14em', color: 'rgba(255,255,255,.6)' })}">A</span>
-      </nav>
-    </div>
-    <div style="display:flex;align-items:center;gap:22px">
-      <span style="${disp(20, { w: 78, wt: 800, ls: '0.01em' })};color:#fff">SAT 22 AUG</span>
-      <span style="display:flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.22);padding:6px 10px 5px">
-        ${sealGlyph('rgba(255,255,255,.6)', 11)}<span style="${mono(9, { wt: 700, ls: '0.18em', color: 'rgba(255,255,255,.6)' })}">SCORES SEALED</span>
-      </span>
-      <span style="${mono(9, { wt: 700, ls: '0.18em', color: INK })};background:#fff;padding:6px 10px 5px">GAME LOG</span>
-    </div>
-  </header>
-  <div style="display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:44px;padding:30px 60px 40px">
-    <section style="min-width:0">
-${flat(sectionRule('ON NOW', '08'))}
-      <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:2px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.16)">
-${GAMES.slice(0, 4).map((x) => marqueeBand(x, 172)).join('')}
-      </div>
-      <div style="height:30px"></div>
-${flat(sectionRule('FIRST PITCH TO COME', '03'))}
-      <div style="border-top:1px solid rgba(255,255,255,.12)">
-${GAMES.slice(8, 11).map((x) => flush(rundownRow(x, 64))).join('')}
-      </div>
-    </section>
-    <aside style="border-left:1px solid rgba(255,255,255,.12);padding-left:30px;min-width:0">
-${flat(sectionRule('ALSO ON NOW', '04'))}
-${GAMES.slice(4, 8).map((x) => flush(rundownRow(x, 64))).join('')}
-      <div style="height:30px"></div>
-${flat(sectionRule('EARLIER TODAY &#183; TAP TO UNSEAL', '04'))}
-${GAMES.slice(11, 15).map((x) => flush(rundownRow(x, 64))).join('')}
-    </aside>
-  </div>
-</div>
-` + tail
-
 /* The chosen flow (flow.mjs) is handed the same helpers these sketches use, so
    the feed, the poster and the three screens behind it cannot drift apart. */
 const KIT = {
   T, GAMES, g, SIGNAL, INK, head, tail, disp, mono, ghost, liveDot, sealGlyph,
-  starGlyph, masthead, dayrail, sectionRule, marqueeBand, nickSize, liveChip, contrast,
-  chestMark, colourMark, baseTileSrc,
+  starGlyph, masthead, dayrail, logoStrip, wireDock, marqueeBand, nickSize, liveChip,
+  contrast, chestMark, colourMark, baseTileSrc, tvMark, THEMES, FEED_ORDER,
 }
 const flow = flowArtboards(KIT)
-const extra = extraArtboards({ ...KIT, doorRow: flow.doorRow, gameHeader: flow.gameHeader, revealRail: flow.revealRail })
+const extra = extraArtboards({ ...KIT, doorRow: flow.doorRow, gameHeader: flow.gameHeader,
+  revealRail: flow.revealRail, shot: flow.shot, playDiamond: flow.playDiamond, sectionLabel: flow.sectionLabel })
 const milb = milbArtboards(KIT)
 
 /* ------------------------------------------------------------------ write */
 const files = {
   // The flow, in the order you walk it.
-  'Main.dc.html': flow.main,
+  'Main.dc.html': main,
+  'FeedLight.dc.html': feedLight,
   'Opening.dc.html': flow.opening,
   'Poster.dc.html': flow.poster,
   'Lineups.dc.html': flow.lineups,
+  'HoverCard.dc.html': flow.hoverCard,
   'Innings.dc.html': flow.innings,
-  'BoxScore.dc.html': flow.boxscore,
-  'FeedLight.dc.html': extra.feedLight,
   'InningsOpen.dc.html': extra.inningsOpen,
+  'BoxScore.dc.html': flow.boxscore,
   'BoxOpen.dc.html': extra.boxOpen,
+  'Desktop.dc.html': desktop,
   'Edges.dc.html': extra.edges,
   'MiLB.dc.html': milb.milbFeed,
   'MiLBPoster.dc.html': milb.milbPoster,
-  'Desktop.dc.html': desktop,
   // The four directions, kept on their own page.
   'Marquee.dc.html': marquee,
   'Rundown.dc.html': rundown,
@@ -760,23 +884,24 @@ for (const [name, src] of Object.entries(files)) out(name, src)
 const canvas = {
   pages: [
     { id: 'page-1', name: 'The flow' },
-    { id: 'page-2', name: 'Review fixes' },
+    { id: 'page-2', name: 'Edges & the minors' },
     { id: 'page-3', name: 'Directions' },
   ],
   artboards: [
-    { file: 'Main.dc.html', title: '1 · The feed — all 15 games', page: 'page-1', x: 0, y: 0, w: 390, h: 1838 },
-    { file: 'Opening.dc.html', title: '2 · Opening a game — 440ms, on a loop', page: 'page-1', x: 500, y: 0, w: 390, h: 844 },
-    { file: 'Poster.dc.html', title: '3 · The game', page: 'page-1', x: 1000, y: 0, w: 390, h: 844 },
-    { file: 'Lineups.dc.html', title: '4 · Lineups', page: 'page-1', x: 1500, y: 0, w: 390, h: 844 },
-    { file: 'Innings.dc.html', title: '5 · Innings — sealed', page: 'page-1', x: 2000, y: 0, w: 390, h: 844 },
-    { file: 'InningsOpen.dc.html', title: '5b · Innings — opened', page: 'page-1', x: 2500, y: 0, w: 390, h: 844 },
-    { file: 'BoxScore.dc.html', title: '6 · Box score — sealed', page: 'page-1', x: 3000, y: 0, w: 390, h: 844 },
-    { file: 'BoxOpen.dc.html', title: '6b · Box score — opened', page: 'page-1', x: 3500, y: 0, w: 390, h: 844 },
-    { file: 'Desktop.dc.html', title: 'The feed at 1440', page: 'page-1', x: 500, y: 1080, w: 1440, h: 760 },
-    { file: 'FeedLight.dc.html', title: 'Light ground — the same feed, same bands', page: 'page-2', x: 0, y: 0, w: 390, h: 1882 },
-    { file: 'Edges.dc.html', title: 'Edge cases the mock was dodging', page: 'page-2', x: 500, y: 0, w: 390, h: 880 },
-    { file: 'MiLB.dc.html', title: 'Double-A — where the art is the point', page: 'page-2', x: 1000, y: 0, w: 390, h: 744 },
-    { file: 'MiLBPoster.dc.html', title: 'Binghamton at Hartford', page: 'page-2', x: 1500, y: 0, w: 390, h: 844 },
+    { file: 'Main.dc.html', title: '1 · The feed — dark', page: 'page-1', x: 0, y: 0, w: 390, h: 2080 },
+    { file: 'FeedLight.dc.html', title: '1L · The feed — light', page: 'page-1', x: 500, y: 0, w: 390, h: 2135 },
+    { file: 'Opening.dc.html', title: '2 · Opening a game — 440ms, on a loop', page: 'page-1', x: 1000, y: 0, w: 390, h: 844 },
+    { file: 'Poster.dc.html', title: '3 · The game', page: 'page-1', x: 1500, y: 0, w: 390, h: 844 },
+    { file: 'Lineups.dc.html', title: '4 · Lineups', page: 'page-1', x: 2000, y: 0, w: 390, h: 1360 },
+    { file: 'HoverCard.dc.html', title: '4b · Hover card — desktop', page: 'page-1', x: 2500, y: 0, w: 350, h: 430 },
+    { file: 'Innings.dc.html', title: '5 · Innings — sealed', page: 'page-1', x: 2500, y: 560, w: 390, h: 844 },
+    { file: 'InningsOpen.dc.html', title: '5b · Innings — opened', page: 'page-1', x: 3000, y: 0, w: 390, h: 1080 },
+    { file: 'BoxScore.dc.html', title: '6 · Box score — sealed', page: 'page-1', x: 3500, y: 0, w: 390, h: 844 },
+    { file: 'BoxOpen.dc.html', title: '6b · Box score — opened', page: 'page-1', x: 4000, y: 0, w: 390, h: 1010 },
+    { file: 'Desktop.dc.html', title: 'The feed at 1440', page: 'page-1', x: 1000, y: 1500, w: 1440, h: 1090 },
+    { file: 'Edges.dc.html', title: 'Edge cases', page: 'page-2', x: 0, y: 0, w: 390, h: 880 },
+    { file: 'MiLB.dc.html', title: 'Double-A — where the art is the point', page: 'page-2', x: 500, y: 0, w: 390, h: 790 },
+    { file: 'MiLBPoster.dc.html', title: 'Binghamton at Hartford', page: 'page-2', x: 1000, y: 0, w: 390, h: 844 },
     { file: 'Marquee.dc.html', title: 'A · Marquee — chosen', page: 'page-3', x: 0, y: 0, w: 390, h: 920 },
     { file: 'Rundown.dc.html', title: 'B · Rundown', page: 'page-3', x: 500, y: 0, w: 390, h: 940 },
     { file: 'Stub.dc.html', title: 'C · Stub', page: 'page-3', x: 1000, y: 0, w: 390, h: 880 },
@@ -787,85 +912,73 @@ const canvas = {
       id: 'flow-brief',
       page: 'page-1',
       x: -470, y: 0, w: 420,
-      text: 'A INTO D\nThe band and the poster are the same composition at two scales, which is what lets one become the other: the band\u2019s wedge and the poster\u2019s diagonal are ONE four-point clip-path. The opening is that path un-clipping.\n\nThe poster is the door, not a destination \u2014 the five ways out of a game sit across its foot, and 4\u20136 are what they open. Each screen now has BOTH states: sealed, and opened. Drawing five locked doors and never opening one was the biggest gap in the first cut.\n\nThe feed shows all fifteen games with the fold marked, so density is something you can look at rather than a claim.',
+      text: 'ONE LIST, BOTH MODES\nThe feed is flat: your club pinned, then first-pitch order. The old "on now / first pitch to come / earlier today" grouping was itself a spoiler — it told you which games were still going before you asked. Now every band is the same size, and state lives inside it: LIVE, a time, or SEALED.\n\nLight and dark both ship. The bands are club colour and identical in both; the chrome, seals and tables carry the theme.\n\nBack from the shipping page: the club strip (one tap to a team page, your club centred), the Wire dock resting at the fold, and the networks’ own PNG logos on the rail.',
+    },
+    {
+      id: 'flow-band',
+      page: 'page-1',
+      x: 0, y: -300, w: 420,
+      text: 'THE BAND\nAbbreviation over MASCOT — MIL over BREWERS, not over Milwaukee.\n\nTHE SHEEN: the shipping slate’s scroll-driven band of light, same soft-light blend and softened stops as 06a-gamecard-parkart.css. In the app it rides a view timeline and tracks the thumb; here it loops so you can see it. Off under reduced motion.\n\nTHE JERSEY: when tonight’s jersey is known (uniforms feed same-day, jerseys.json ahead), the band wears it — the field takes the jersey tile’s tint and the bag prints that jersey’s art. Boston is drawn in City Connect green as the demo.',
+    },
+    {
+      id: 'flow-base',
+      page: 'page-1',
+      x: 500, y: -300, w: 420,
+      text: 'THE BASE, PHOTO-REAL\nRedrawn from reference: an 18-inch Hollywood base is heavy-gauge rubber over a foam core — a white pillow with a rolled bevel and rounded corners. One SVG: pebbled rubber lit through a real lighting model (feTurbulence → feDiffuseLighting), beveled walls, slide scuffs broken by a displacement map, clay ground into the corners. The middle gets stepped clean, which is what lets the mark print. Scaled down it loses texture the way a photo does.\n\nThe feed prints the mark in pencil grayscale; opening the game inks it in.',
     },
     {
       id: 'flow-motion',
       page: 'page-1',
-      x: 500, y: -300, w: 390,
-      text: 'THE OPENING \u2014 REWRITTEN AFTER REVIEW\nThe first cut ran nine beats across 3.19 SECONDS (iOS push is 350ms) and animated `top`/`height` on a full-bleed element carrying two 74px strings and two 400px images \u2014 layout and paint every frame, while the note beside it claimed transform-only. Both were wrong and both are fixed.\n\nNow: 440ms, three beats, clip-path and opacity only. The hero is always full height in poster layout; the feed state is a clip, and opening is one interpolated inset(). Band type and poster type overlap so there is never a frame with neither \u2014 the old timing left a 600px empty hole for about a second.\n\nAnd the band expands OVER the list rather than clearing it. Tapping game 12 of 15 would have split the slate and thrown eleven bands upward.',
-    },
-    {
-      id: 'flow-seal',
-      page: 'page-1',
-      x: 2000, y: -240, w: 890,
-      text: 'SEALED, THEN OPENED\nNothing loosens the spoiler rule; the kraft tape is redrawn as the ground itself, raked in the one signal colour. It still says what it says today: this half only, nothing else moves, the innings after it stay shut.\n\n5b and 6b are the states that were missing. The revealed half lands in exactly the 212px the seal held, so opening one does not shove the page down. 6b proves the table styling the system had never been asked for: tabular mono on a hairline grid, the club colour as the row header, totals in the signal colour \u2014 and the linescore, which is the one place a run total belongs.',
+      x: 1000, y: -240, w: 390,
+      text: 'THE OPENING\n440ms, three beats, clip-path and opacity only. The band’s wedge and the poster’s diagonal are ONE four-point path; opening is that path un-clipping, over the list, not through it.',
     },
     {
       id: 'flow-scope',
       page: 'page-1',
-      x: 1500, y: -240, w: 390,
-      text: 'SCOPE OF 4\u20136\nThese carry the LANGUAGE, not the whole screen. The real lineup page also holds weather, attendance, the season series, umpire tendencies, the defensive alignment and former teammates; the real innings page holds play-by-play and the pitch chart. Nothing here proposes dropping any of it.',
+      x: 2000, y: -300, w: 420,
+      text: 'SCREENS 4–6, WITH THEIR OWN FURNITURE\nRedrawn carrying what the shipping pages already have: the opposing starter’s headshot card, the batting order in its real anatomy (order · name · number · position), the defense diamond with surnames and scorer’s numbers, the play diamonds with their advance notations (1B¹, 2B³, F8), and the desktop hover card. Nothing the real pages hold is proposed dropped.',
     },
     {
-      id: 'fix-ground',
+      id: 'flow-seal',
+      page: 'page-1',
+      x: 3000, y: -240, w: 890,
+      text: 'SEALED, THEN OPENED\nNothing loosens the spoiler rule. The revealed half lands in exactly the 212px the seal held, so opening one does not shove the page down. The box score opens whole and stays open — ADR-0049.',
+    },
+    {
+      id: 'edge-note',
       page: 'page-2',
       x: -470, y: 0, w: 420,
-      text: 'THE ONE OPEN QUESTION \u2014 which ground?\n\nOn #0A0B0D, 17 of 30 club primaries sit under 1.4:1 against the page. Tigers and Yankees are 1.25:1; Pirates and White Sox 1.29; Padres 1.30; Brewers 1.34. More than half the league does not read as a colour block at all \u2014 which is the generic dark sports app this was written to escape. 17 of 30 primaries are also blue or navy, so \u201ca rack of jerseys\u201d is, on a real slate, a rack of navy.\n\nOn this ground (#E7E6E1, a cool grey-white \u2014 NOT the app\u2019s #F6EFDC manila) only Miami (2.50) and the Giants (2.75) fall under 3:1, and the median is 10.59:1. Two things come free: the separator becomes a 4px GAP of page instead of a drawn line, which is what a rack of jerseys actually looks like; and a finished game reads as finished by desaturating, with no extra device.\n\nThe break that mattered \u2014 full-bleed club colour replacing cards \u2014 survives either way. This is the call I would not make for you.',
-    },
-    {
-      id: 'fix-list',
-      page: 'page-2',
-      x: 500, y: -400, w: 390,
-      text: 'ALSO FIXED AFTER REVIEW\n\nSEAM. Was the away club\u2019s secondary \u2014 another club colour. 173 of 435 matchups put two primaries within 1.35:1 (Tigers/Yankees and Pirates/White Sox are byte-identical), and Braves-at-Brewers drew a #13274F line on #12284B: 1.00:1. Now a fixed white rule, ink for Miami, which separates all 435. The secondary stays as a 2px accent inside it.\n\nLIVE. #E9DA00 loose on club colour was 1.98:1 on Miami, 2.18 on the Giants, and 1.31 against the A\u2019s own gold sitting 20px away. It is now always an ink chip: one object, 10.5:1, on every club.\n\nTYPE. 26 of 53 home-screen nodes were under 9px against the app\u2019s own 11px floor, in four sizes inside 2px. Floored at 10px, dim text lifted.\n\nTARGETS. Level tabs were 21\u00d713, day chevrons 8\u00d717. All 44\u00d744.\n\nTHE SEAL CHIP became a label and stopped being the ADR-0026 Scores Unlocked switch \u2014 it kept the nagging half and dropped the control. It is a switch again.\n\nHIERARCHY. Live, upcoming and finished were drawn at one height and one saturation, so fifteen games shouted fifteen times. Height and saturation now carry state: 118 / 88 / 68.\n\nAlso: the pin ring stopped borrowing the LIVE colour; the caption rail is ink, so the home park is no longer captioned inside the visitor\u2019s block; the wedge is 45% so the HOME club actually has the field, as the note always claimed; search, Game Log and the menu are back on mobile.',
-    },
-    {
-      id: 'fix-edges',
-      page: 'page-2',
-      x: 500, y: 920, w: 390,
-      text: 'The three-state mock (live / pre / sealed) had no drawing for a postponement, a doubleheader, or a row with no usable colour. The nickname strip proves the fit rule: DIAMONDBACKS at 74px was 434px wide in a 368px slot, and the data had been quietly writing "D-backs" to dodge it.',
-    },
-    {
-      id: 'fix-marks',
-      page: 'page-2',
-      x: 1000, y: -420, w: 390,
-      text: 'THE LOGOS ARE BACK \u2014 and they are now a two-part idea, not a texture.\n\nWhat was wrong: every mark ran at 14\u201317% opacity, about 1.15:1 against its own field. That is not a watermark, it is a deleted asset \u2014 and it deleted the best logo art in American sport along with it.\n\nWhat is wrong with the obvious fix: a straight knockout at full opacity deletes the ARTWORK instead. `brightness(0) invert(1)` turns every opaque pixel white, so Milwaukee\u2019s ball-in-glove, the Orioles bird and the Astros star all collapse into a white disc.\n\nSo: the FEED shows the mark in grayscale, which keeps every internal shape \u2014 and is the most Tally-specific choice available, since the whole app exists to be sketched in pencil and /logos is already a printable grayscale sheet. The POSTER shows it in full colour at 104px.\n\nAND IT PRINTS ON A BASE. A competition base is moulded rubber over a foam core, and its top is a traction surface \u2014 a dense field of small raised nubs. That is the thing you actually recognise in a close-up, so it is the thing this draws: each nub is a lit cap with its own shadow offset down-right, about 24 across, on a domed top with a rolled bevel and the stitched seam set in from it. Clay goes on OVER the nubs on multiply, so it darkens the gaps between them rather than covering them \u2014 which is where dirt really collects, and why the texture reads strongest at the corners while the middle stays stepped-clean and white enough to print a mark on.\n\nTwo passes were wrong before this one. Crossed lines drew plaid \u2014 continuous rules read as a weave, and at feed size the channels were a quarter of each cell wide. Discrete nubs at seven across read as polka dots. Texture has to be small and dense enough to be a SURFACE rather than a motif. It also fades as the bag shrinks, because a base seen small loses its texture rather than gaining a coarser one.\n\nNo cleat marks: a rake across the top read as damage instead of texture, and it fought whatever was printed over it. All CSS, no image files. A club with no art on file still gets the bag, empty \u2014 the honest drawing for \u201cthe game is there, the logo is not\u201d.\n\nWhich gives the opening something to be FOR: the mark you meet in the feed is the pencil version, and opening the game is where it inks in.',
-    },
-    {
-      id: 'fix-milb',
-      page: 'page-2',
-      x: 1500, y: -420, w: 390,
-      text: 'AND THIS IS WHY IT MATTERS MOST DOWN HERE.\n\nRumble Ponies, Yard Goats, Trash Pandas, Biscuits, Sod Poodles, Flying Squirrels \u2014 this is the best logo work in the sport, and a design premised on club COLOUR was throwing all of it away.\n\nIt matters more at Double-A than in MLB for a reason the repo already knows: 50 of the 117 MiLB clubs in `milb-colors.json` have a primary under L 0.02 (four are literally #000000), and 107 of 117 are flagged "confidence: medium", sourced from Wikipedia. The COLOUR data is the untrustworthy half. The art is not.\n\nSo down here the mark is not decoration on top of a colour system \u2014 it is the part of the identity you can actually rely on.',
+      text: 'THE ROWS A REAL SLATE HANDS YOU\nA postponement, a doubleheader, a club with no usable colour, and the long-name fit rule (74/62/52/44 by length).\n\nDown a level, the mark carries the identity: 50 of 117 MiLB clubs have a primary under L 0.02 and 107 of 117 are flagged "confidence: medium" — the colour data is the untrustworthy half, the art is not.',
     },
     {
       id: 'dir-brief',
       page: 'page-3',
       x: -470, y: 0, w: 420,
-      text: 'THE PROBLEM\nTally is the only sports feed with no numbers in it. The spoiler rule forbids scores, records and odds on the slate \u2014 so the feed cannot lean on the thing every other scores app leads with.\n\nThat is the opening, not the handicap. What is left is exactly what a college-football gameday poster is made of: two identities, a place, a time, and anticipation.\n\nThese four are the original sketches, kept as drawn. Everything they got wrong is fixed on pages 1 and 2, not here.',
+      text: 'THE PROBLEM\nTally is the only sports feed with no numbers in it — the spoiler rule forbids scores, records and odds on the slate. What is left is what a college-football gameday poster is made of: two identities, a place, a time, and anticipation.\n\nThese four are the original sketches, kept as drawn.',
     },
     {
       id: 'note-a',
       page: 'page-3',
       x: 0, y: -240, w: 390,
-      text: 'A \u00b7 MARQUEE \u2014 colour blocking, edge to edge\nNo card, no gutter, no radius, no shadow. Each game is a full-bleed band. Chosen, with D.\n\nWhat review caught here: the seam was a club colour and died on 8 of the 15 games in this very artboard, and every band was the same height whatever the game was doing. Both fixed on page 1.',
+      text: 'A · MARQUEE — colour blocking, edge to edge. No card, no gutter, no radius. Chosen, with D.',
     },
     {
       id: 'note-b',
       page: 'page-3',
       x: 500, y: -240, w: 390,
-      text: 'B \u00b7 RUNDOWN \u2014 the departure board\nMonospaced, dense, near-monochrome; the dotted leader is the character of it. Not chosen for the phone, but it survives twice: as the feed\u2019s compact density, and as the right-hand rail of the desktop layout.',
+      text: 'B · RUNDOWN — the departure board. Not chosen for the phone; survives as the desktop rail.',
     },
     {
       id: 'note-c',
       page: 'page-3',
       x: 1000, y: -240, w: 390,
-      text: 'C \u00b7 STUB \u2014 a printed artifact\nTwo-ink screenprint, fluorescent pink a hair out of register, halftone and grain, perforated stub, rotated stamp.\n\nNot chosen \u2014 and the review\u2019s fair hit is that this is the only one of the four a machine would not have produced, so cutting it is where the set got timid. It remains the strongest candidate for the Game Log\u2019s stamps and shelf, where a printed artifact is what the thing actually is.',
+      text: 'C · STUB — a printed artifact. Not chosen here; the strongest candidate for the Game Log’s stamps and shelf.',
     },
     {
       id: 'note-d',
       page: 'page-3',
       x: 1500, y: -240, w: 390,
-      text: 'D \u00b7 SPLIT \u2014 one game, one poster\nHard diagonal seam, marks bleeding off the corners, the app\u2019s own @ cut through the middle.\n\nChosen, with A \u2014 but promoted out of the feed. As fifteen snap-scrolled screens it was beautiful and unusable; as the ONE screen you land on after tapping a band, the cost disappears. See page 1.',
+      text: 'D · SPLIT — one game, one poster. Chosen, with A — promoted out of the feed to the screen you land on.',
     },
   ],
   launch: { view: 'canvas', page: 'page-1' },

@@ -7,6 +7,31 @@ commit on this branch and has nothing to do with these files.
 
 The canvas itself is a published Artifact; the files here are what generates it.
 
+## Revised after owner review (23 Aug)
+
+- **One flat list.** The sectioned draft ("Your Club / On Now / First Pitch to
+  Come / Earlier Today") is gone — the grouping itself was a spoiler. Your club
+  pinned, then first-pitch order, every band the same size. (The shipping slate
+  never had those sections; the draft invented them.)
+- **Light AND dark ship.** The light ground stopped being an open question;
+  `feed(theme)` in `build.mjs` draws both from one builder.
+- **Abbreviation over mascot** — MIL over BREWERS, not over MILWAUKEE.
+- **The base is photo-real now**: one SVG (feTurbulence → feDiffuseLighting
+  pebbled rubber, beveled walls, displaced slide scuffs, clay in the corners),
+  drawn from reference — an 18" Hollywood base is rubber over a foam core,
+  a rounded-corner pillow, not a nub grid. Marks multiply on like ink.
+- **Back from the shipping page**: the club strip (TeamFilterStrip), the Wire
+  dock at the fold (WireDock), and the networks' PNG logos
+  (`public/broadcast-logos/`) on the rail.
+- **The band sheen** loops the shipping scroll-driven sheen's exact stops.
+- **Jersey-known games wear the jersey**: field takes the tile tint, the bag
+  prints that jersey's art (BOS drawn in City Connect; white knockout art
+  prints as ink — see `ink` in `baseTileSrc`).
+- **Boards 4–6b carry the pages' real furniture**: starter-card and hover-card
+  headshots (real silo cutouts, ids from the ATH/HOU rosters), the batting
+  order in its shipping anatomy, the defense diamond, and PlayDiamond's
+  advance notations on every at-bat of the opened half.
+
 ## The brief
 
 Redraw the mobile game feed so it is (1) legibly designed by a person rather
