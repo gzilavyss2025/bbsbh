@@ -10,6 +10,7 @@ import { BattedBallMix } from '../../components/charts/BattedBallMix.jsx'
 import { SimilarPitchers } from '../../components/playercard/SimilarPitchers.jsx'
 import { SimilarHitters } from '../../components/playercard/SimilarHitters.jsx'
 import { FoulCard } from '../../components/playerstats/FoulCard.jsx'
+import { SprayMapSection } from '../../components/playerstats/SprayMapSection.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
 import { SectionTitle } from './parts.jsx'
@@ -113,6 +114,13 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
               <BattedBallMix battedBall={block.battedBall} />
             </>
           )}
+
+          {/* Where that contact GOES — the season spray map, directly under
+              the mix that says what kind of contact it was. Self-contained
+              (it owns its own section title and its own fetch) and it stands
+              itself down for a pitcher, a spoiler `asOf`, or a batter under
+              the balls-in-play floor. */}
+          <SprayMapSection playerId={bio.id} group={block.group} asOf={asOf} />
 
           {/* Directly under the mix it's derived from — the three players
               whose own profile looks most like the rows just above, which
