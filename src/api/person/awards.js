@@ -21,6 +21,7 @@
 // cannot show an award he had not won yet on that date.
 
 import { MONTH_ABBR } from './shared.js'
+import { isMlbTeamId } from '../../lib/teams.js'
 
 // The majors, keyed by the stable award `id` (league-prefixed AL*/NL* pairs),
 // mapped to the short label both leagues' versions collapse into. Still
@@ -143,12 +144,12 @@ const TIER_BY_KEY = new Map(AWARD_WEIGHTS)
 // Team" does too (its second letter is lowercase).
 const LEADING_CODE = /^([A-Z]{2,4}) (?=\S)/
 
-// Which league or level an award belongs to, for the table's League column.
+// Which league an award belongs to, for the AL/NL label fold below (labelFor)
+// — no longer rendered as its own table column (see orgIdFor for that).
 // Ordering is load-bearing: an id like MLBPCALOP carries BOTH a leading "MLB"
 // in its name and a standalone " AL " inside it, and the AL half is the one
 // that says which league actually voted. Returns null when nothing in the
-// feed says — MiLB and writers' awards mostly — and the column prints a dash
-// rather than guessing, the same graceful degradation every MiLB field gets.
+// feed says — MiLB and writers' awards mostly.
 export function awardLeague(award) {
   const name = award?.name ?? ''
   if (/\bNL\b/.test(name)) return 'NL'
@@ -179,6 +180,18 @@ export function rankKeyOf(award) {
 // one weight entry governs both.
 function categoryKeyOf(award) {
   return CURATED[award?.id] ?? award?.name ?? award?.id ?? ''
+}
+
+// The MLB org a row's club belongs to — the table's MLB column, which took the
+// place of the old AL/NL/level-code League column: a fan does not remember
+// which league Wisconsin's Rawlings MiLB Gold Glove came from, but "MIL" says
+// something. An MLB club is its own org, resolvable with no fetch at all; an
+// affiliate needs a (club, season) org lookup this pure module can't make —
+// this module doesn't fetch (see header) — so it's left null here and filled
+// in by loadPlayer.js's careerTimeline.js-style historical resolution, the
+// same one a career timeline entry gets. Returns null (a dash) until then.
+export function orgIdFor(teamId) {
+  return teamId && isMlbTeamId(teamId) ? teamId : null
 }
 
 function monthYear(iso) {
@@ -213,7 +226,9 @@ function labelFor(baseLabel, rows) {
 //
 // Rows carry `teamId` as well as the name so the table can draw the club's own
 // mark (teamLogoUrl in lib/teams.js). A row whose feed entry names no club
-// leaves it null and the cell prints the name alone.
+// leaves it null and the cell prints the name alone. `orgId` is the CURRENT
+// answer for the MLB column; loadPlayer.js overwrites it with the historically
+// correct org, when milbHistory.js's era data covers that club and season.
 export function awardsView(awards, endDate = null) {
   const byKey = new Map()
   let selections = 0
@@ -243,6 +258,7 @@ export function awardsView(awards, endDate = null) {
       teamId: a.team?.id ?? null,
       teamName: a.team?.teamName ?? '',
       league: awardLeague(a),
+      orgId: orgIdFor(a.team?.id ?? null),
     })
     selections += 1
   }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { rankAwards, parseAwardOrder, parseAwardCap } from '../../api/person/awards.js'
 import { useCopy } from '../../copy/copyContext.js'
 import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
-import { teamFullName, teamLogoUrl } from '../../lib/teams.js'
+import { teamAbbr, teamFullName, teamLogoUrl } from '../../lib/teams.js'
 
 // Awards — the player page's career-honors section (api/person/awards.js's
 // awardsView). Replaces the Trophy Case, which promoted ONE honor to a marquee
@@ -10,13 +10,17 @@ import { teamFullName, teamLogoUrl } from '../../lib/teams.js'
 // a fragment of itself and a prospect's showed nothing at all.
 //
 // The shape is MLB.com's, deliberately: one table per award, columns Year /
-// Team / League, the club and the league printed on EVERY row rather than
-// collapsed into a run. Nine identical "Los Angeles Angels · AL" lines under a
+// Team / MLB, the club and its parent MLB org printed on EVERY row rather than
+// collapsed into a run. Nine identical "Los Angeles Angels · LAA" lines under a
 // nine-time Silver Slugger is not redundancy to design away — it is the table
 // saying, row by row, that none of those nine was won anywhere else. What is
 // ours is the paper: a ruled ledger on manila, a tier-coloured rule under each
 // award's name, and the club's own mark in front of its name so a career that
 // moved reads as one at a glance.
+//
+// The MLB column replaced League: a reader knows what the Brewers' system
+// looks like far better than which league voted, and for a MiLB award the old
+// column mostly printed a dash anyway (see api/person/awards.js's orgIdFor).
 //
 // THE CAP IS ON TABLES, NEVER ON INFORMATION. Only the top few awards by the
 // site owner's weight order get a table (three on a phone, six on a wide
@@ -94,7 +98,7 @@ function AwardTable({ category }) {
             <th scope="col">Year</th>
             <th scope="col">Team</th>
             <th scope="col" className="awardtbl__lgcol">
-              League
+              MLB
             </th>
           </tr>
         </thead>
@@ -106,7 +110,7 @@ function AwardTable({ category }) {
                 <TeamCell row={row} />
               </td>
               <td className="awardtbl__lg">
-                <LeagueChip league={row.league} />
+                <OrgChip orgId={row.orgId} />
               </td>
             </tr>
           ))}
@@ -140,16 +144,18 @@ function TeamCell({ row }) {
   )
 }
 
-// AL / NL / MLB, or a minor-league level code (MID, TEX, ACL) — whatever the
-// feed's own award name says. A dashed, dimmed dash where it says nothing,
-// which is most writers' and minor-league awards; see awardLeague.
-function LeagueChip({ league }) {
-  if (!league) return <span className="awardtbl__chip awardtbl__chip--none">—</span>
-  return <span className="awardtbl__chip">{league}</span>
+// The parent MLB org's own abbreviation (MIL) — an MLB award's own club, or a
+// MiLB award's affiliate resolved up to whichever org fielded that club that
+// season (api/person/awards.js's orgIdFor + loadPlayer.js's historical
+// refinement). A dimmed dash for the rare club neither resolves.
+function OrgChip({ orgId }) {
+  const abbr = orgId ? teamAbbr({ id: orgId }) : ''
+  if (!abbr) return <span className="awardtbl__chip awardtbl__chip--none">—</span>
+  return <span className="awardtbl__chip">{abbr}</span>
 }
 
 // Everything below the cap, grouped by tier in weight order: name, count, every
-// date, the league. Same information a table carries, one line per award
+// date, the org. Same information a table carries, one line per award
 // instead of a table per award.
 function AwardIndex({ categories }) {
   const groups = []
@@ -176,7 +182,7 @@ function AwardIndex({ categories }) {
               </div>
               <div className="awardidx__btm">
                 <span className="awardidx__when">{cat.rows.map((r) => r.when).join(', ')}</span>
-                <LeagueChip league={cat.rows[0].league} />
+                <OrgChip orgId={cat.rows[0].orgId} />
               </div>
             </div>
           ))}
