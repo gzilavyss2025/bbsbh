@@ -7,11 +7,12 @@ import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from 
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
-import { useNav } from '../lib/nav.js'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { CareerRegister } from '../components/player/CareerRegister.jsx'
+import { GameLog } from '../components/player/GameLog.jsx'
+import { GameLink } from '../components/player/GameLink.jsx'
 import { LevelProgressionCard } from '../components/player/LevelProgressionCard.jsx'
 import { MilestoneWatchCard } from '../components/playerstats/MilestoneWatchCard.jsx'
 import { AwardsLedger } from '../components/player/AwardsLedger.jsx'
@@ -450,29 +451,12 @@ export function PlayerPage({ id, asOf, sportId }) {
             )}
 
             {block.gameLog && (
-              <>
-                <SectionTitle
-                  title="Game log"
-                  bar
-                  note={`last ${block.gameLog.rows.length} · ${data.onRehab ? 'MLB + rehab' : asOf ? `entering ${monthDay(asOf)}` : 'entering today'}`}
-                />
-                <ul className="gamelog">
-                  {block.gameLog.rows.map((r) => (
-                    <li className="gamelog__row" key={r.gamePk ?? r.date}>
-                      <div className="gamelog__meta">
-                        <span className="gamelog__date">{r.date}</span>
-                        <span className="gamelog__opp">
-                          {r.home ? 'vs' : '@'}{' '}
-                          <GameLink path={r.boxscorePath}>{r.opp}</GameLink>
-                          {r.level && <span className="gamelog__level">{r.level}</span>}
-                          {r.qs && <span className="gamelog__qs" title="Quality start">QS</span>}
-                        </span>
-                      </div>
-                      <div className="gamelog__line">{r.line}</div>
-                    </li>
-                  ))}
-                </ul>
-              </>
+              <GameLog
+                gameLog={block.gameLog}
+                gameLogAlt={block.gameLogAlt}
+                altLevel={block.gameLogAltLevel}
+                note={data.onRehab ? 'MLB + rehab' : asOf ? `entering ${monthDay(asOf)}` : 'entering today'}
+              />
             )}
 
             {/* Recent pitcher workload (gen-workload.mjs) — right after the
@@ -619,25 +603,6 @@ function roleWord(role) {
   return role === 'SP' ? 'starter' : role === 'CL' ? 'closer' : 'reliever'
 }
 
-
-// A plain, spoiler-safe link to a game's (sealed) box score — the game-log
-// opponent and the MLB-debut fact. Mirrors PlayerLink/TeamLink: no underline at
-// rest, renders plain children when no path could be resolved.
-function GameLink({ path, className = '', children }) {
-  const navigate = useNav()
-  if (!path) {
-    return <span className={className}>{children}</span>
-  }
-  return (
-    <button
-      type="button"
-      className={`plink ${className}`}
-      onClick={() => navigate(path)}
-    >
-      {children}
-    </button>
-  )
-}
 
 // Fetches this player's own this-season MLB game list (gamePk + date) and
 // hands it to PlayerPhotosRail for the live walk-back. A dedicated fetch
