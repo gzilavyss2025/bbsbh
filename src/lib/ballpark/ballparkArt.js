@@ -91,6 +91,7 @@ export const CREDITS = {
   fenwaypark: { artist: 'Rick Berry', license: 'Public domain', source: 'https://commons.wikimedia.org/wiki/File%3A131023-F-PR861-033_Hanscom_participates_in_World_Series_pregame_events.jpg' },
   globelifefield: { artist: 'slgckgc', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File%3AGlobeLifeField2021.jpg' },
   greatamericanballpark: { artist: 'Laslovarga', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File%3A10Cincinnati_2015_(2).jpg' },
+  journeybankballpark: { artist: 'Ruhrfisch', license: 'CC BY 4.0', source: 'https://commons.wikimedia.org/wiki/File:Bowman_Field_MLB_Little_League_Classic_2018_03.jpg' },
   kauffmanstadium: { artist: 'Chibears85', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File%3AKauffman2017.jpg' },
   loandepotpark: { artist: 'Ven-Lib', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File%3ALOAN_DEPOT_PARK.jpg' },
   nationalspark: { artist: 'APK', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File%3ANationals_Park_8.16.19_-_7.jpg' },
