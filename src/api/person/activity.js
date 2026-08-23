@@ -442,7 +442,7 @@ export function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSe
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, levelOnlyStat, levelOnlySplits, logTagLevel = false, warByYear = {}, transactions = [], orgOf = null }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, altGameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, levelOnlyStat, levelOnlySplits, logTagLevel = false, warByYear = {}, transactions = [], orgOf = null }) {
   // The date-cut current-season stat at the player's CURRENT level. It leads
   // the "Current season" tiles, so it can't move mid-game. `tileStat` (see
   // loadPlayer) resolves to the live level for an active MLB/single-level
@@ -466,6 +466,10 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     { mlbSplits: mlbYbySplits, tileStat: tile, tileSportId: currentSportId, currentSeason },
     group,
   )
+  const otherLevels = otherLevelSeasonBlocks({
+    mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, currentSeason, currentSportId,
+  })
+  const logLimit = group === 'pitching' ? 6 : 8
   return {
     group,
     role,
@@ -478,12 +482,24 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     // The current season's line at each OTHER level he played this year (the
     // AAA half of an up-and-down big leaguer, say) — promoted to their own tile
     // row beside the main tiles rather than buried in the register footnote.
-    otherLevels: otherLevelSeasonBlocks({
-      mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, currentSeason, currentSportId,
-    }),
+    otherLevels,
     arsenal: group === 'pitching' ? arsenalView(arsenalSplits) : null,
     splits: splitsView(lrSplits, group),
-    gameLog: gameLogView(gameLogSplits, group, cutoff, group === 'pitching' ? 6 : 8, { tagLevel: logTagLevel }),
+    gameLog: gameLogView(gameLogSplits, group, cutoff, logLimit, { tagLevel: logTagLevel }),
+    // The Game log's level toggle — offered only when `otherLevels` (above)
+    // already found a second level worth a promoted tile THIS season, so the
+    // toggle never appears without the tile giving it context. Reuses that
+    // same gate rather than inventing a separate games-played floor: an
+    // up-and-down player's AAA half is either substantial enough to headline
+    // its own tile, or it isn't shown at all, and the log toggle should agree.
+    // `altGameLogSplits` is fetched by loadPlayer for exactly the highest
+    // other level (`otherLevels[0]`, already sorted MLB-first) — null here
+    // for everyone else, including a rehab combined log (already both levels,
+    // per-row tagged) so the two ways of seeing a split level never compete.
+    gameLogAlt: otherLevels?.length
+      ? gameLogView(altGameLogSplits, group, cutoff, logLimit)
+      : null,
+    gameLogAltLevel: otherLevels?.length ? otherLevels[0].level : null,
     // The unified MLB + MiLB career table. `career` (the API's MLB career line
     // for a debuted player) foots the MLB total; the current-season rows use
     // the date-cut `levelOnlySplits` so they can't move mid-game — the raw

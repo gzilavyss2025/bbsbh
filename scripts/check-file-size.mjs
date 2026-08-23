@@ -190,7 +190,7 @@ const BUDGETS = {
   // 800 -> 830 for the Career register's MLB-only pill: three lines of filter
   // state in CareerRegister, the .mastheadpill button in its SectionTitle, and
   // an `aside` slot on that local SectionTitle. No logic worth its own module.
-  'src/screens/PlayerPage.jsx': 830, // 817 — Prospect Card remains, duplicate trendBySportId progression wiring removed
+  'src/screens/PlayerPage.jsx': 800, // 830 -> 800 — GameLink and the Game log card's toggle rendering moved out to src/components/player/GameLink.jsx and GameLog.jsx
   // 700 -> 750 for Focus Mode's matchup header: threading pitchingTeamId and
   // a focusHeader flag into AtBatCard, plus the buildTrailItems import for
   // the at-bat trail. The header itself (AtBatHero.jsx), the trail's

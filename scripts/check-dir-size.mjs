@@ -613,7 +613,13 @@ const BUDGETS = {
   'src/screens/identity-lab': 15,
   // New entry: +1 for PlayerHoverCard.jsx — a player-identity primitive like
   // Headshot/PlayerLink beside it, not one of this bucket's ten player-PAGE cards.
-  'src/components/player': 13,
+  // 13 -> 15 for GameLog.jsx (the Game log card, split out of PlayerPage.jsx so
+  // its MLB/AAA level toggle can own its own useState — PlayerPage can't add a
+  // hook past its `if (gate) return gate` loading gate, same reason
+  // CareerRegister is its own component) and GameLink.jsx (the boxscore link
+  // GameLog.jsx needs, promoted out of PlayerPage.jsx so the two other
+  // PlayerPage call sites and this one share one definition instead of three).
+  'src/components/player': 15,
 }
 
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git'])

@@ -54,6 +54,7 @@ import {
   aggregateSplits,
   pitcherRole,
   buildBlock,
+  otherLevelSeasonBlocks,
   levelProgressionView,
   dropRehabStints,
   detectRehabAssignment,
@@ -324,9 +325,25 @@ export async function loadPlayer(id, asOf) {
         // transaction wire is sparse.
         const registerOrgOf = await resolveCareerOrgs([...mlbYbySplits, ...milbYbySplits])
         const role = group === 'pitching' ? pitcherRole(tileStat) : null
+        // The Game log's level-toggle fetch — the highest OTHER level (if any)
+        // the player had real season action at, same gate buildBlock's
+        // `otherLevels` promoted-tile row uses (see activity.js), so the
+        // toggle only ever appears beside a tile that already promised a
+        // second level. Skipped under onRehab: that game log already combines
+        // both levels, tagged per row, so a second toggle would compete with
+        // it instead of adding anything.
+        const altLevel = onRehab
+          ? null
+          : otherLevelSeasonBlocks({
+              mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group,
+              currentSeason: season, currentSportId: tileSportId,
+            })?.[0]
+        const altGameLogSplits = altLevel
+          ? await fetchPersonStats(id, { type: 'gameLog', group, season, sportId: altLevel.sportId })
+          : []
         const block = buildBlock({
           group, role, seasonSplits, careerSplits, lrSplits,
-          gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff,
+          gameLogSplits, altGameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff,
           currentSeason: season, currentSportId: tileSportId, debutYear, tileStat, levelOnlyStat, levelOnlySplits,
           logTagLevel: onRehab,
           warByYear: warByYearFor(id, group, warCurrent, warHistory),
