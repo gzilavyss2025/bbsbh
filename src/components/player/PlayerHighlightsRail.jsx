@@ -3,6 +3,7 @@ import { fetchTeamHighlights, flattenPositiveClips } from '../../api/gamehighlig
 import { useAsync } from '../../hooks/useAsync.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { HighlightClipCard } from '../highlights/HighlightClipCard.jsx'
+import { ChevronLink } from '../ui/ChevronLink.jsx'
 
 // A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
 // copy of this helper for why `scroll-behavior: smooth` has to be bypassed.
@@ -52,7 +53,7 @@ function clipCaption(clip) {
 // Empty renders nothing (no section, no spinner-that-never-resolves) — a
 // bench player's genuinely sparse rail is expected per the PRD's
 // "Drawbacks", not a bug.
-export function PlayerHighlightsRail({ playerId, teamId }) {
+export function PlayerHighlightsRail({ playerId, teamId, limit }) {
   const trackRef = useRef(null)
   const userScrolledBackRef = useRef(false)
 
@@ -60,12 +61,16 @@ export function PlayerHighlightsRail({ playerId, teamId }) {
   const [atStart, setAtStart] = useState(true)
   const [atEnd, setAtEnd] = useState(true)
   const [openClip, setOpenClip] = useState(null)
+  const [expanded, setExpanded] = useState(!limit)
 
   const { data, loading } = useAsync(() => fetchTeamHighlights(teamId), [teamId])
-  const clips = useMemo(
+  const allClips = useMemo(
     () => flattenPositiveClips(data).filter((c) => c.playerId === playerId),
     [data, playerId],
   )
+  // Newest clip is anchored to the right edge (see the header above), so a
+  // capped preview keeps the newest `limit` — the tail of the array.
+  const clips = !expanded && limit ? allClips.slice(-limit) : allClips
 
   useLayoutEffect(() => {
     const el = trackRef.current
@@ -125,7 +130,7 @@ export function PlayerHighlightsRail({ playerId, teamId }) {
     el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
   }
 
-  if (!loading && clips.length === 0) return null
+  if (!loading && allClips.length === 0) return null
 
   return (
     <section>
@@ -171,6 +176,11 @@ export function PlayerHighlightsRail({ playerId, teamId }) {
           </button>
         )}
       </div>
+      {!expanded && allClips.length > limit && (
+        <div className="thub-door">
+          <ChevronLink onClick={() => setExpanded(true)}>See all</ChevronLink>
+        </div>
+      )}
       {openClip && <HighlightSheet item={openClip} onClose={() => setOpenClip(null)} />}
     </section>
   )

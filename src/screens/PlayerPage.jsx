@@ -3,28 +3,56 @@ import { loadPlayerOverview } from '../api/player/overview.js'
 import { fetchPersonStats } from '../api/person-fetch.js'
 import { SPORT_LABEL, isMlbTeamId } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useNav } from '../lib/nav.js'
+import { playerTabPath } from '../lib/route.js'
 import { GameLink } from '../components/player/GameLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { CareerTimeline } from '../components/player/CareerTimeline.jsx'
 import { LevelProgressionCard } from '../components/player/LevelProgressionCard.jsx'
+import { GameLog } from '../components/player/GameLog.jsx'
+import { StatcastPercentiles } from '../components/charts/StatcastPercentiles.jsx'
+import { ProspectCard } from '../components/playerstats/ProspectCard.jsx'
+import { AwardsLedger } from '../components/player/AwardsLedger.jsx'
 import { MilestoneWatchCard } from '../components/playerstats/MilestoneWatchCard.jsx'
 import { PlayerContractCard } from '../components/playerstats/PlayerContractCard.jsx'
 import { PlayerPhotosRail } from '../components/player/PlayerPhotosRail.jsx'
 import { PlayerHighlightsRail } from '../components/player/PlayerHighlightsRail.jsx'
+import { ChevronLink } from '../components/ui/ChevronLink.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './player/PlayerHubShell.jsx'
+import { gameLogDoorLabel } from './player/overviewPreview.js'
 import { DASH, Fact, SectionTitle, StatGrid, debutLabel, isoToday, monthDay, roleWord } from './player/parts.jsx'
 
 // The player hub's OVERVIEW tab — the bare `/player/{id}`, and the tab the
 // other three hang off (screens/player/PlayerHubShell.jsx). Who he is now: the
-// fact grid, his contract, this season's tiles with their league-rank chips and
-// any other level he has played at this year, what he is closing in on, and the
-// season's pictures.
+// fact grid, this season's tiles with their league-rank chips and any other
+// level he has played at this year, a taste of the game log, his contract,
+// a taste of the analytics shelf, what he is closing in on, his award count,
+// and the season's pictures — each preview ending in a door into the tab
+// that holds the whole thing (the same "preview + door, never a smaller
+// duplicate" convention the team hub's Overview uses, TeamPage.jsx).
 //
-// Everything else moved to a tab of its own, each with its own loader and its
-// own route: the game log / splits / career register to `/stats`, the Statcast
-// and arsenal shelf to `/analytics`, the awards, firsts, path and transactions
-// to `/history`. See src/api/player/context.js for the data rules.
+// Everything a preview points at moved to a tab of its own, each with its own
+// loader and its own route: the game log / splits / career register to
+// `/stats`, the Statcast/prospect card and arsenal shelf to `/analytics`, the
+// full awards ledger, firsts, path and transactions to `/history`. See
+// src/api/player/context.js for the data rules and docs/player-hub.md for the
+// tab map.
+const PREVIEW_STATCAST_ROWS = 3
+const PREVIEW_AWARD_CHIPS = 4
+const PREVIEW_PHOTOS = 6
+const PREVIEW_HIGHLIGHTS = 6
+
+// The door itself — same shared ChevronLink the team hub's PreviewDoor
+// builds on, so the two hubs' doors can't drift into two different-looking
+// controls.
+function PreviewDoor({ label, onClick }) {
+  return (
+    <div className="thub-door">
+      <ChevronLink onClick={onClick}>{label}</ChevronLink>
+    </div>
+  )
+}
 
 function draftLabel(draft, signedYear) {
   if (draft && draft.year) {
@@ -38,6 +66,7 @@ function draftLabel(draft, signedYear) {
 export function PlayerPage({ id, asOf, sportId }) {
   const core = useAsync(() => loadPlayerCore(id, asOf), [id, asOf])
   const overview = useAsync(() => loadPlayerOverview(id, asOf), [id, asOf])
+  const navigate = useNav()
   const back = () => window.history.back()
 
   const gate = AsyncGate({
@@ -55,6 +84,24 @@ export function PlayerPage({ id, asOf, sportId }) {
   const status = core.data.rosterStatus
   const club = status ? null : bio.team
   const enteringLabel = asOf ? `entering ${monthDay(asOf)}` : 'season to date'
+  // The game-log preview's own note — the Stats tab's own wording
+  // ("entering today"/"entering Jul 5"), not the tiles' "season to date".
+  const gameLogNote = asOf ? `entering ${monthDay(asOf)}` : 'entering today'
+  // Every door goes through playerTabPath -> linkQuery, so a dated link's
+  // `?d=` (the spoiler cutoff) and `?s=` survive the jump — the same rule
+  // the team hub's own doors follow (TeamPage.jsx).
+  const go = (tab) => navigate(playerTabPath(id, tab, { d: asOf, s: sportId }))
+
+  // The Analytics preview's Prospect Card teaser only earns a spot when it has
+  // something to say — same gate PlayerAnalyticsTab's full card uses.
+  const showProspectCard = Boolean(
+    data.sportId !== 1 &&
+      data.prospectCard &&
+      (core.data.prospectRank ||
+        core.data.orgProspectRank ||
+        data.prospectCard.state !== 'none' ||
+        data.prospectCard.ageEdge),
+  )
 
   return (
     <PlayerHubShell core={core.data} asOf={asOf} sportId={sportId} active="overview">
@@ -97,16 +144,14 @@ export function PlayerPage({ id, asOf, sportId }) {
         )}
       </div>
 
-      {/* A player with a major-league contract whose club is an affiliate is
-          optioned down, not a minor leaguer — the card labels its figures so
-          the deal is not read as what he draws at that level. */}
-      <PlayerContractCard
-        contract={data.contract}
-        optioned={Boolean(data.contract && bio.debut && club && !isMlbTeamId(club.id))}
-      />
-
       {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
 
+      {/* Season tiles + rank chips + other-level rows + a game-log taste,
+          one section per stat block (batting, then pitching for a two-way
+          player). The Contract card and the Analytics/Milestone pair sit
+          OUTSIDE this loop (below), per the approved page order — a two-way
+          player still gets two of each, just not interleaved with each
+          other's tiles. */}
       {blocks.map((block) => {
         // A debuted player whose current-season tiles are at a MiLB level (an
         // aging lifer or a full-season option-down with no MLB games this year)
@@ -170,17 +215,87 @@ export function PlayerPage({ id, asOf, sportId }) {
               </div>
             ))}
 
-            {/* What this season is heading toward — "X shy of Y", the forward-
-                looking caption for the tiles above it. */}
-            <MilestoneWatchCard
-              playerId={bio.id}
-              asOf={asOf}
-              milestones={block.milestones}
-              groupLabel={blocks.length > 1 ? block.title : null}
-            />
+            {/* Game log preview — the last 3 rows, the exact row rendering
+                the Stats tab's GameLog draws in full, at a `limit` this
+                Overview asks for. The door counts the SEASON, not the 3 rows
+                shown (gameLogDoorLabel, overviewPreview.js). */}
+            {block.gameLogPreview && (
+              <>
+                <GameLog gameLog={block.gameLogPreview} note={gameLogNote} limit={3} />
+                <PreviewDoor
+                  label={gameLogDoorLabel(block.seasonGames)}
+                  onClick={() => go('stats')}
+                />
+              </>
+            )}
           </section>
         )
       })}
+
+      {/* A player with a major-league contract whose club is an affiliate is
+          optioned down, not a minor leaguer — the card labels its figures so
+          the deal is not read as what he draws at that level. */}
+      <PlayerContractCard
+        contract={data.contract}
+        optioned={Boolean(data.contract && bio.debut && club && !isMlbTeamId(club.id))}
+      />
+
+      {/* Analytics preview — Statcast's top 3 percentile bars for an MLB
+          batter/pitcher, or the Prospect Card's one-line teaser below the
+          majors. The two are mutually exclusive per block (Savant carries no
+          MiLB rows, and the Prospect Card only renders below the majors), so
+          nothing here decides which one a block gets — the data already
+          says so. */}
+      {blocks.map((block) => (
+        <section key={`analytics-${block.group}`}>
+          {blocks.length > 1 && <h2 className="player__blocktitle">{block.title}</h2>}
+
+          {block.savant && (
+            <StatcastPercentiles
+              savant={block.savant}
+              raw={block.savantRaw}
+              group={block.group}
+              limit={PREVIEW_STATCAST_ROWS}
+            />
+          )}
+
+          {showProspectCard && block.group === data.prospectCardGroup && (
+            <ProspectCard
+              view={data.prospectCard}
+              level={SPORT_LABEL[data.sportId] ?? ''}
+              group={block.group}
+              badge={{
+                rank: core.data.prospectRank,
+                orgRank: core.data.orgProspectRank,
+                orgTeamId: club?.parentOrgId ?? club?.id,
+                orgTeamName: club?.parentOrgName ?? club?.name,
+              }}
+              preview
+            />
+          )}
+
+          {(block.savant || (showProspectCard && block.group === data.prospectCardGroup)) && (
+            <PreviewDoor label="Full analytics" onClick={() => go('analytics')} />
+          )}
+
+          {/* What this season is heading toward — "X shy of Y", the forward-
+              looking caption for the tiles above it. */}
+          <MilestoneWatchCard
+            playerId={bio.id}
+            asOf={asOf}
+            milestones={block.milestones}
+            groupLabel={blocks.length > 1 ? block.title : null}
+          />
+        </section>
+      ))}
+
+      {/* Awards — compact count chips ("All-Star ×3"), never the full ledger
+          (that stays History's alone). Renders nothing for a player with no
+          awards. */}
+      <AwardsLedger ledger={data.awardLedger} preview limit={PREVIEW_AWARD_CHIPS} />
+      {data.awardLedger?.categories?.length > 0 && (
+        <PreviewDoor label="History" onClick={() => go('history')} />
+      )}
 
       {/* Photos + Highlights — both only for a player who has appeared in
           an MLB game this season (the primary block's tiles resolving to MLB
@@ -191,7 +306,10 @@ export function PlayerPage({ id, asOf, sportId }) {
           doesn't (see PlayerHighlightsRail's issue) — same `!asOf` gate, for
           v1 simplicity and consistency with the box score/team rail's
           "decided games only" footing rather than a dated cutoff. Each
-          renders nothing itself if it turns up empty. */}
+          renders nothing itself if it turns up empty. Both are capped to one
+          row here (`limit`), each with its own in-place "See all" — there is
+          no separate media tab to link out to, so it expands rather than
+          navigating (unlike every other door above). */}
       {!asOf && bio.debut && (() => {
         const primaryGroup = bio.isPitcher ? 'pitching' : 'hitting'
         const primaryBlock = blocks.find((b) => b.group === primaryGroup) ?? blocks[0]
@@ -199,7 +317,7 @@ export function PlayerPage({ id, asOf, sportId }) {
         return (
           <>
             <PlayerPhotosSection playerId={bio.id} group={primaryGroup} season={data.season} />
-            <PlayerHighlightsRail playerId={bio.id} teamId={club?.id} />
+            <PlayerHighlightsRail playerId={bio.id} teamId={club?.id} limit={PREVIEW_HIGHLIGHTS} />
           </>
         )
       })()}
@@ -228,5 +346,5 @@ function PlayerPhotosSection({ playerId, group, season }) {
     .map((s) => ({ gamePk: s.game.gamePk, apiDate: s.date }))
     .sort((a, b) => (a.apiDate < b.apiDate ? -1 : a.apiDate > b.apiDate ? 1 : 0))
   if (!rows.length) return null
-  return <PlayerPhotosRail personId={playerId} games={rows} />
+  return <PlayerPhotosRail personId={playerId} games={rows} limit={PREVIEW_PHOTOS} />
 }

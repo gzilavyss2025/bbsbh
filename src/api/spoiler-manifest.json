@@ -626,7 +626,7 @@
     },
     "player/overview.js": {
       "class": "spoiler-free",
-      "why": "The player hub's Overview tab loader — the fact grid, the contract card, the season tiles with their rank chips and promoted other-level rows, and Milestone Watch. Season aggregates over completed games."
+      "why": "The player hub's Overview tab loader — the fact grid, the contract card, the season tiles with their rank chips and promoted other-level rows, Milestone Watch, and four preview doors into the other tabs (a trimmed game log, a Statcast/prospect teaser, an awards-chip strip). Season aggregates and a cutoff-filtered game log, over completed games."
     },
     "player/stats.js": {
       "class": "spoiler-free",

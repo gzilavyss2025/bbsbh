@@ -22,9 +22,13 @@ import { PercentileStrip } from './PercentileStrip.jsx'
 // element to add. Tapping a row still turns up the plain-language definition
 // the flip cards carried — as an inline disclosure now, which keeps the
 // columns aligned where a flipping tile would not. ADR-0040.
-export function StatcastPercentiles({ savant, raw, group }) {
-  const rows = percentileRows(savant, raw, group)
-  if (!rows) return null
+// `limit` trims to the strip's own leading rows (its canonical metric order,
+// unchanged) — the Overview's preview asks for the top 3; the Analytics tab
+// leaves it unset and gets every metric, same as before this prop existed.
+export function StatcastPercentiles({ savant, raw, group, limit }) {
+  const allRows = percentileRows(savant, raw, group)
+  if (!allRows) return null
+  const rows = limit ? allRows.slice(0, limit) : allRows
 
   return (
     <section className="statcast-section">

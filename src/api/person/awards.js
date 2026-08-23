@@ -299,6 +299,18 @@ export function rankAwards(categories, order = DEFAULT_AWARD_ORDER) {
   })
 }
 
+// Compact count chips for the Overview preview — "All-Star ×3, Silver Slugger
+// ×2" — the same rank order and ties the full ledger's tables use, trimmed to
+// `limit` categories. Pure aggregation over an already-shaped ledger; it reads
+// no copy and makes no ranking rule of its own, so a caller with no `/admin`
+// order handy (the Overview loader has no `useCopy`) still gets the right
+// leaders, just against the shipped default rather than a site owner's edit.
+export function awardChipsView(categories, order = DEFAULT_AWARD_ORDER, limit = categories.length) {
+  return rankAwards(categories, order)
+    .slice(0, limit)
+    .map((c) => ({ key: c.key, label: c.label, count: c.count }))
+}
+
 // The stored order is one rank key per line — the shape a registry field can
 // hold and an admin can read in a plain text box even if the reorder UI is
 // unavailable. Blank or missing means "use what shipped": an empty box in the

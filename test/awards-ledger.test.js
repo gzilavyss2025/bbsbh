@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
   DEFAULT_AWARD_ORDER,
+  awardChipsView,
   awardLeague,
   awardsView,
   formatAwardOrder,
@@ -208,4 +209,32 @@ test('the panel can offer a family the shipped order never named', () => {
 
 test('the shipped order names each family once', () => {
   assert.equal(new Set(DEFAULT_AWARD_ORDER).size, DEFAULT_AWARD_ORDER.length)
+})
+
+// Overview's compact chips — "All-Star ×3", "Silver Slugger ×2" — the same
+// rank order the full ledger's tables use, trimmed to a preview's own limit.
+test('award chips follow the same order as the full ledger, trimmed to a limit', () => {
+  const view = awardsView(TROUT)
+  const chips = awardChipsView(view.categories, DEFAULT_AWARD_ORDER, 2)
+  assert.deepEqual(chips, [
+    { key: 'MVP', label: 'AL MVP', count: 3 },
+    { key: 'Rookie of the Year', label: 'AL Rookie of the Year', count: 1 },
+  ])
+})
+
+test('an unset limit returns every category, still ranked', () => {
+  const view = awardsView(TROUT)
+  const chips = awardChipsView(view.categories, DEFAULT_AWARD_ORDER)
+  assert.equal(chips.length, view.totals.categories)
+})
+
+test('a custom order re-leads the chips exactly as it re-leads the tables', () => {
+  const view = awardsView(TROUT)
+  const custom = ['All-Star', ...DEFAULT_AWARD_ORDER]
+  const chips = awardChipsView(view.categories, custom, 1)
+  assert.deepEqual(chips, [{ key: 'All-Star', label: 'AL All-Star', count: 2 }])
+})
+
+test('no awards means no chips', () => {
+  assert.deepEqual(awardChipsView([], DEFAULT_AWARD_ORDER, 3), [])
 })

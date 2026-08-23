@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { rankAwards, parseAwardOrder, parseAwardCap } from '../../api/person/awards.js'
+import { awardChipsView, rankAwards, parseAwardOrder, parseAwardCap } from '../../api/person/awards.js'
 import { useCopy } from '../../copy/copyContext.js'
 import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { teamAbbr, teamFullName, teamLogoUrl } from '../../lib/teams.js'
@@ -29,7 +29,13 @@ import { teamAbbr, teamFullName, teamLogoUrl } from '../../lib/teams.js'
 // award won once is a single row, and a table drawn around a single row says
 // nothing the line does not — so nothing is hidden by the cap, only ranked
 // below it. Renders nothing when the player has no awards at all.
-export function AwardsLedger({ ledger }) {
+//
+// `preview` swaps the whole ledger for compact count chips — "All-Star ×3,
+// Silver Slugger ×2" — the top `limit` families in the SAME site-owner order
+// the full ledger tables use (awardChipsView, api/person/awards.js), so a
+// reorder at /admin moves the same award to the front in both places. The
+// Overview is the one caller; the full ledger stays History's alone.
+export function AwardsLedger({ ledger, preview = false, limit }) {
   const [open, setOpen] = useState(false)
   const { t } = useCopy()
   const wide = useMediaQuery(WIDE_QUERY)
@@ -37,6 +43,20 @@ export function AwardsLedger({ ledger }) {
   if (!ledger?.categories?.length) return null
 
   const order = parseAwardOrder(t('awards.order'))
+
+  if (preview) {
+    const chips = awardChipsView(ledger.categories, order, limit)
+    return (
+      <div className="awards awards--preview">
+        {chips.map((c) => (
+          <span className="awards__chip" key={c.key}>
+            {c.label} ×{c.count}
+          </span>
+        ))}
+      </div>
+    )
+  }
+
   const desktopCap = parseAwardCap(t('awards.capDesktop'), 6)
   // A phone cap above the desktop cap would mean the narrow screen shows MORE
   // tables than the wide one. Clamped rather than rejected: the panel says so,
