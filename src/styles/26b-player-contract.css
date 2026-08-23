@@ -409,6 +409,20 @@
   font-size: var(--fs-caption);
   line-height: var(--lh-snug);
 }
+
+/* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment in
+   01-base.css) — the two blocks of explainer prose on this card, the only
+   places a contract is put in words rather than figures. The #root-scoped
+   selectors (1 id + 1 class) outweigh the global `#root *` uppercase, same
+   pattern as #root .winprob__ledger-desc; a plain `.contractcard__sentence
+   { text-transform: none }` here would lose on specificity and stay shouted.
+   Everything that labels rather than explains — the eyebrow, the regime pill,
+   the runway's year ticks and details, the ticker, the EST. tag — keeps the
+   invariant, which is the split the Team Score modal set. */
+#root .contractcard__sentence,
+#root .contractcard__foot {
+  text-transform: none; /* caps-exempt: natural-case explainer prose, same idiom as .tscoremodal__body p */
+}
 .contractcard__factcaption {
   margin-top: 3px;
   letter-spacing: var(--ls-label);
