@@ -310,14 +310,25 @@
      band between two barely-darker edges reads as a raking highlight — the
      contrast against its own surroundings is the effect, not the brightness.
      --paper-3 is the brightest paper in the set and --ink-0 the darkest ink, so
-     the whole sweep is drawn in the scorebook's own two extremes. */
+     the whole sweep is drawn in the scorebook's own two extremes.
+
+     HALVED, AND WIDENED, on 2026-08-22. The first cut ran the highlight at 92%
+     paper between shoulders at 22%/18% ink, over a 36%-of-box ramp. That read
+     as a hard bar travelling the card rather than light falling across it: the
+     band had a findable edge, and on a card whose backdrop is already a
+     photograph it fought the park instead of lighting it. The stops below cut
+     both inks to roughly half and open the ramp from 36% to 48% of the box, so
+     the band has no edge to find — the same effect, at the strength it was
+     always describing. Do not raise these back toward the old values without
+     looking at a full slate scrolling on a phone: the effect reads much
+     stronger over fifteen cards in motion than it does on one still card. */
   background: linear-gradient(
     172deg,
-    transparent 32%,
-    color-mix(in srgb, var(--ink-0) 22%, transparent) 42%,
-    color-mix(in srgb, var(--paper-3) 92%, transparent) 50%,
-    color-mix(in srgb, var(--ink-0) 18%, transparent) 58%,
-    transparent 68%
+    transparent 26%,
+    color-mix(in srgb, var(--ink-0) 10%, transparent) 40%,
+    color-mix(in srgb, var(--paper-3) 46%, transparent) 50%,
+    color-mix(in srgb, var(--ink-0) 8%, transparent) 60%,
+    transparent 74%
   );
 }
 
