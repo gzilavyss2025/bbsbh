@@ -162,7 +162,12 @@ const BUDGETS = {
   // nothing else — a one-file src/lib/url/ existing only to dodge this number
   // would hide the rule halfway down a directory instead of beside the parse
   // branches and the builders that are its only two callers.
-  'src/lib/route.js': 800, // 744
+  // 800 -> 900: the player hub's tab table, its parse branch and playerTabPath
+  // (the /player counterpart of the team hub's five tabs). They belong beside
+  // TEAM_TAB_ROUTES and teamTabPath, which they are modelled on line for line —
+  // a separate module for one table and one builder would put the two halves of
+  // the same convention in two files and let them drift.
+  'src/lib/route.js': 900, // 814
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 700, // 619 — the prose half moved to transactions/cutline.js, the vocabulary before it
   'src/screens/InningViewer.jsx': 1100, // 1003 — wired in useHeadshotPrefetch (one hook call + its doc comment) so at-bat stepping warms both rosters' headshot CDN URLs up front; the hook's own logic lives in src/hooks/useHeadshotPrefetch.js, not here
@@ -187,10 +192,11 @@ const BUDGETS = {
   // the per-play loop — a coveredRunnerEvents Set plus one call, the sentence
   // building itself lives in the new module, not here.
   'src/api/playbyplay/halfInningFeed.js': 900, // 807
-  // 800 -> 830 for the Career register's MLB-only pill: three lines of filter
-  // state in CareerRegister, the .mastheadpill button in its SectionTitle, and
-  // an `aside` slot on that local SectionTitle. No logic worth its own module.
-  'src/screens/PlayerPage.jsx': 800, // 830 -> 800 — GameLink and the Game log card's toggle rendering moved out to src/components/player/GameLink.jsx and GameLog.jsx
+  // src/screens/PlayerPage.jsx surrendered its entry when /player became a hub
+  // of four tab routes: it is now the Overview tab alone (226 lines), and the
+  // rest of the old page lives in src/screens/player/ — one screen per tab, each
+  // well under the cap. That is the outcome this guard's third assertion exists
+  // to force, so the entry is gone rather than tightened.
   // 700 -> 750 for Focus Mode's matchup header: threading pitchingTeamId and
   // a focusHeader flag into AtBatCard, plus the buildTrailItems import for
   // the at-bat trail. The header itself (AtBatHero.jsx), the trail's
@@ -205,7 +211,8 @@ const BUDGETS = {
   // which is what made them the right thing to lift out; the markup, classes
   // and comments moved verbatim.
   'src/components/playbyplay/PlayByPlay.jsx': 800, // 705 — the at-bat card's third opener: a ball in play makes the base diamond a handle on where it went (components/charts/BallFlight.jsx)
-  'src/api/loadPlayer.js': 800, // 722 — +1 band: fetching prospect-trend and assembling the Prospect Card's view model
+  // src/api/loadPlayer.js surrendered its entry the same way: it is a 20-line
+  // barrel over src/api/player/ now, one loader per tab of the player hub.
   'src/api/tradeDeadline.js': 700, // 629
   'src/components/charts/WinProbChart.jsx': 700, // 612
   'src/App.jsx': 700, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it

@@ -103,7 +103,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | reveal-progress-core.test.js | 15 | src/hooks/revealProgressCore.js, select.js | Reveal-progress state machine |
 | rookies.test.js | 18 | src/api/rookies.js | Rookie pill + the sharded reads (compact status map, per-id record shard) |
 | roster-availability.test.js | 3 | src/api/select.js | The bench/bullpen strike-through's two ceilings (`enteredAsOf`) — the reveal mark AND the half on screen, so a replayed inning shows the bench that half opened with |
-| route.test.js | 36 | src/lib/route.js | Full router surface |
+| route.test.js | 77 | src/lib/route.js | Full router surface, both hubs' tab tables included (the count was stale at 36; `node --test` reports 77) |
 | sac-bunt-double-play.test.js | 4 | src/api/boxscore.js, src/api/scorecard/notation.js, src/api/playbyplay/scorebookCode.js, src/api/scorecardGame.js | sac_bunt_double_play IS an at-bat, unlike sac_fly_double_play — Rule 9.08(c) credits no sacrifice, scored as an ordinary double play (issue #765) |
 | sac-reached-notation.test.js | 3 | src/api/playbyplay.js | Sac-bunt error/FC notation edge cases |
 | scorecard-game.test.js | 9 | src/api/scorecardGame.js | The live scorecard's reveal clamp, P/TP/LOB agreement with derive/linescore, FINAL block + decisions gating, inning-end diagonals, skipped-half X, pinch-runner run on the origin card — pinned on the captured real feed |

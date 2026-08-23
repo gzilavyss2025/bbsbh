@@ -604,6 +604,30 @@
         "api/playbyplay/notificationCards.js"
       ]
     },
+    "player/analytics.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's Analytics tab loader — Statcast percentiles, advanced rates, the pitch/batted-ball mix and the similarity neighbours, all season aggregates over completed games. Same open-surface footing as every other player-page loader (ADR-0034)."
+    },
+    "player/context.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's shared fetch vocabulary — the person, his transaction feed, the current-season date-cut window and the year-by-year tables. Season and career facts on a surface deliberately outside the scoring flow. Its one date rule (every dated fetch is cut off the day BEFORE a `?d=` link's game) is the player page's own as-of contract, not a seal."
+    },
+    "player/core.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's shell loader — bio, the four status banners, the prospect pills and the All-Star badge. Identity and roster status; no linescore, no box score, no play."
+    },
+    "player/history.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's History tab loader — awards, innings by position, the Firsts card, path/team history and the transaction timeline. Career-shaped facts, each honouring the page's own asOf cutoff. The Firsts card links out to box scores, which stay sealed on their own pages; it renders no score itself."
+    },
+    "player/overview.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's Overview tab loader — the fact grid, the contract card, the season tiles with their rank chips and promoted other-level rows, and Milestone Watch. Season aggregates over completed games."
+    },
+    "player/stats.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's Stats tab loader — the game log, the splits and the career register. A game-log row carries this player's own line and a link to that game's (sealed) box score, never the game's score; the register is a career aggregate. Its one score-adjacent element is SplitsVsTeam's last-meeting line, gated against the page's own asOf in the component."
+    },
     "playerHoverCard.js": {
       "class": "spoiler-free",
       "why": "The global name-link hover card (PlayerLink, desktop only) — season stat tiles, same open-surface footing as the player page's own season tiles (person/stats.js). No per-game result."

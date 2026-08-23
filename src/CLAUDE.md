@@ -54,7 +54,7 @@ opens on **current** stats — links out of a game stopped stamping that cutoff 
 (ADR-0034's "The cutoff is opt-in now"); `?d=` still applies when a URL carries
 one, and `components/seal/AsOfBanner.jsx` is the way IN (a date picker on a live
 page), the way to CHANGE it, and the way back to live — see ADR-0034's "The gap
-gets a way in." Same component on the player page and both leader-board pages.
+gets a way in." Same on the player hub (`docs/player-hub.md`) and the leader boards.
 
 ## Routing (`src/lib/route.js`, `src/App.jsx`)
 
