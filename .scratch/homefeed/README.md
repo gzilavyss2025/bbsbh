@@ -50,7 +50,7 @@ football gameday poster is made of, which is where the visual research went.
 | --- | --- |
 | `canvas/build.mjs` | entry point. Slate data, club colours, the type/colour helpers, the Marquee band, the base tile, and `canvas.json`. Run it to regenerate everything. |
 | `canvas/flow.mjs` | the chosen flow: the feed, the opening transition, the poster, and lineups / innings / box score. |
-| `canvas/extras.mjs` | the light-ground comparison, the two revealed states, the edge cases, and the minor-league boards. |
+| `canvas/extras.mjs` | the two revealed states, the edge cases, and the minor-league boards. (The light feed lives in `build.mjs` — one themed builder draws both modes.) |
 | `canvas/render-all.mjs` | renders every artboard to PNG and reports, per board, whether it clips or leaves dead space. |
 | `sheen-ab.mjs`, `sheen-card.mjs` | how the sheen change was checked: two dev servers, same slate, same scrollY, same card index. The band is scroll-driven, so a phase-matched capture is the only honest comparison. |
 | `flow-shots.mjs` | screenshots the current shipping lineup / innings / box screens, for contrast with the redraws. |
@@ -90,9 +90,9 @@ Kept here because each one cost a pass, and each would cost the same pass again:
 
 - **Club colour cannot carry the feed on a near-black ground.** 17 of 30 MLB
   primaries sit under 1.4:1 against `#0A0B0D` — Tigers and Yankees at 1.25:1 —
-  and 17 of 30 are blue or navy, so a real slate is a rack of navy. The light
-  ground comparison in `extras.mjs` exists because of this and the question is
-  still open.
+  and 17 of 30 are blue or navy, so a real slate is a rack of navy. This is why
+  the light mode exists; the review resolved the open question as "both ship"
+  (see the revision notes above).
 - **A seam drawn in a club colour disappears.** 173 of the league's 435
   matchups put two primaries within 1.35:1, and two pairs are byte-identical
   (Tigers/Yankees, Pirates/White Sox). The seam has to be achromatic. White
@@ -104,9 +104,11 @@ Kept here because each one cost a pass, and each would cost the same pass again:
   turns every opaque pixel white, so any mark with a filled ground — Milwaukee's
   ball-in-glove, the Orioles bird, the Astros star — collapses into an
   identical disc. Grayscale keeps the artwork.
-- **Texture has to be a surface, not a motif.** The base's traction nubs went
+- **Texture has to be a surface, not a motif.** The base's texture went
   through crossed lines (read as plaid) and seven-across dots (read as polka
-  dots) before landing at ~24 across.
+  dots) before a drawn nub grid — which the owner review then superseded with
+  the photo-real SVG (a lit lighting model instead of a drawn pattern; see the
+  revision notes above).
 - **MiLB colour data is the untrustworthy half of MiLB identity.** 50 of the
   117 clubs in `src/lib/data/milb-colors.json` have a primary under L 0.02,
   four are literally `#000000`, and 107 of 117 are flagged

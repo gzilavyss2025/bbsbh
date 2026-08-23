@@ -4,8 +4,8 @@
 // one builder with a theme, not two drawings.
 
 export function extraArtboards(k) {
-  const { T, g, SIGNAL, INK, head, tail, disp, mono, ghost, sealGlyph,
-          nickSize, doorRow, gameHeader, revealRail, shot, playDiamond, sectionLabel } = k
+  const { T, g, SIGNAL, INK, head, tail, disp, mono, ghost,
+          nickSize, doorRow, gameHeader, revealRail, shot, playDiamond } = k
 
   const PG = g('ATH', 'HOU')
   const PA = T[PG.a]
@@ -17,14 +17,18 @@ export function extraArtboards(k) {
      its play diamond with the scorer's own notation — PlayDiamond.jsx's
      marks: the hit at the base it earned, who advanced you at the base you
      reached, the fielders' number for an out, a filled diamond for a run. */
+  // The half reconciles: hitters 4-9, two runs on Heim's double, one man
+  // left, six batters — the same figures the slab above them prints.
   const HOW_IT_WENT = [
-    ['1', 'BOLTE', 'singled to left, scored on the double', { scored: true, notes: { first: '1B', home: '2B&#179;' } }],
-    ['2', 'McNEIL', 'flied out to center', { center: 'F8' }],
-    ['3', 'GELOF', 'doubled &#8212; Bolte scored', { scored: true, notes: { second: '2B', home: 'HR&#8308;' } }],
-    ['4', 'WILLIAMS', 'homered &#8212; Gelof scored', { scored: true, notes: { home: 'HR' } }],
+    ['4', 'WILLIAMS', 'singled to left', { scored: true, notes: { first: '1B', home: '2B&#8311;' } }],
+    ['5', 'BUTLER', 'flied out to center', { center: 'F8' }],
+    ['6', 'WHITE', 'singled &#8212; Williams to second', { scored: true, notes: { first: '1B', home: '2B&#8311;' } }],
+    ['7', 'HEIM', 'doubled &#8212; Williams and White scored', { legs: 2, notes: { second: '2B' } }],
+    ['8', 'WALTON', 'flied out to right', { center: 'F9' }],
+    ['9', 'MUNCY', 'grounded out, second to first', { center: '4-3' }],
   ]
   const inningsOpen = head() + `
-<div style="position:relative;width:390px;height:1080px;background:${INK};overflow:hidden;display:flex;flex-direction:column">
+<div style="position:relative;width:390px;height:1310px;background:${INK};overflow:hidden;display:flex;flex-direction:column">
   <div style="position:absolute;left:0;right:0;top:844px;height:0;pointer-events:none;z-index:9">
     <div style="border-top:1px dashed rgba(255,255,255,.5)"></div>
     <span style="position:absolute;right:8px;top:5px;${mono(9, { wt: 700, ls: '0.18em', color: 'rgba(255,255,255,.6)' })}">FOLD &#183; IPHONE 14 PRO</span>
@@ -40,7 +44,7 @@ ${gameHeader(PG.a, PG.h, 'LIVE')}
     <div style="display:flex;align-items:center;gap:12px;padding:18px 0 11px">
       <span style="${mono(10, { wt: 700, ls: '0.22em', color: 'rgba(255,255,255,.74)' })}">RUNS THIS HALF</span>
       <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-      <span style="${mono(10, { ls: '0.12em', color: 'rgba(255,255,255,.5)' })}">OPENED 9:26 PM</span>
+      <span style="${mono(10, { ls: '0.12em', color: 'rgba(255,255,255,.5)' })}">OPENED 7:04 PM</span>
     </div>
 
     <!-- Same 212px the seal held, so the page does not jump when it comes off. -->
@@ -51,7 +55,7 @@ ${gameHeader(PG.a, PG.h, 'LIVE')}
         <div style="${mono(10, { wt: 700, ls: '0.22em', color: 'rgba(255,255,255,.86)' })};margin-top:9px">RUNS</div>
       </div>
       <div style="position:relative;flex:1;min-width:0">
-        ${[['3', 'HITS'], ['0', 'ERRORS'], ['1', 'LEFT ON'], ['4', 'BATTERS']].map(([n, l], i) => `
+        ${[['3', 'HITS'], ['0', 'ERRORS'], ['1', 'LEFT ON'], ['6', 'BATTERS']].map(([n, l], i) => `
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:7px 0;${i ? 'border-top:1px solid rgba(255,255,255,.2)' : ''}">
           <span style="${mono(10, { ls: '0.18em', color: 'rgba(255,255,255,.82)' })}">${l}</span>
           <span style="${mono(15, { wt: 700, ls: '0.02em', color: '#fff' })};font-variant-numeric:tabular-nums">${n}</span>
@@ -76,9 +80,9 @@ ${HOW_IT_WENT.map(([n, who, what, pd]) => `
     <div style="display:flex;align-items:center;gap:12px;padding:18px 0 12px">
       <span style="${mono(10, { wt: 700, ls: '0.22em', color: 'rgba(255,255,255,.74)' })}">YOUR SCOREBOOK</span>
       <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
-      <span style="${mono(10, { ls: '0.12em', color: 'rgba(255,255,255,.6)' })}">4 OF 18 HALVES</span>
+      <span style="${mono(10, { ls: '0.12em', color: 'rgba(255,255,255,.6)' })}">3 OF 18 HALVES</span>
     </div>
-${revealRail(4)}
+${revealRail(3)}
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.16);flex:none">
@@ -93,22 +97,26 @@ ${doorRow('inn', PG.a, PG.h)}
      Tabular mono on a hairline grid, the club colour as the row header, the
      totals in the signal colour — and the linescore, the one place a run
      total belongs. Plus the box page's own faces: the standouts so far. */
+  // Through the top of the 2nd: a 1-2-3 first, then the six-batter second
+  // the innings board opens. Every column sums to its total.
   const BAT = [
-    ['1', 'BOLTE', 'CF', '4', '1', '2', '0', '.266'],
-    ['2', 'McNEIL', '2B', '4', '0', '1', '1', '.263'],
-    ['3', 'GELOF', '3B', '3', '1', '1', '0', '.264'],
-    ['4', 'WILLIAMS', 'LF', '4', '1', '1', '2', '.263'],
-    ['5', 'BUTLER', 'RF', '4', '0', '0', '0', '.214'],
-    ['6', 'WHITE', '1B', '3', '0', '1', '0', '.259'],
-    ['7', 'HEIM', 'C', '3', '0', '0', '0', '.203'],
+    ['1', 'BOLTE', 'CF', '1', '0', '0', '0', '.263'],
+    ['2', 'McNEIL', '2B', '1', '0', '0', '0', '.262'],
+    ['3', 'GELOF', '3B', '1', '0', '0', '0', '.263'],
+    ['4', 'WILLIAMS', 'LF', '1', '1', '1', '0', '.265'],
+    ['5', 'BUTLER', 'RF', '1', '0', '0', '0', '.215'],
+    ['6', 'WHITE', '1B', '1', '1', '1', '0', '.261'],
+    ['7', 'HEIM', 'C', '1', '0', '1', '2', '.207'],
+    ['8', 'WALTON', 'SS', '1', '0', '0', '0', '.284'],
+    ['9', 'MUNCY', 'DH', '1', '0', '0', '0', '.214'],
   ]
   const STARS = [
-    ['h-williams.png', 'WILLIAMS', 'HR &#183; 2 RBI'],
-    ['h-gelof.png', 'GELOF', '2&#8211;4 &#183; 2B'],
-    ['h-brown.png', 'BROWN', '6 K'],
+    ['h-heim.png', 'HEIM', '2B &#183; 2 RBI'],
+    ['h-williams.png', 'WILLIAMS', '1&#8211;1 &#183; R'],
+    ['h-lopez.png', 'LOPEZ', '1 IP &#183; 0 R'],
   ]
   const boxOpen = head() + `
-<div style="position:relative;width:390px;height:1010px;background:${INK};overflow:hidden;display:flex;flex-direction:column">
+<div style="position:relative;width:390px;height:1090px;background:${INK};overflow:hidden;display:flex;flex-direction:column">
   <div style="position:absolute;left:0;right:0;top:844px;height:0;pointer-events:none;z-index:9">
     <div style="border-top:1px dashed rgba(255,255,255,.5)"></div>
     <span style="position:absolute;right:8px;top:5px;${mono(9, { wt: 700, ls: '0.18em', color: 'rgba(255,255,255,.6)' })}">FOLD &#183; IPHONE 14 PRO</span>
@@ -117,14 +125,14 @@ ${gameHeader(PG.a, PG.h, 'LIVE')}
   <div style="flex:1;overflow:hidden">
     <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:18px 20px 12px">
       <span style="${disp(30, { w: 72 })};color:#fff">BOX SCORE</span>
-      <span style="${mono(10, { ls: '0.14em', color: 'rgba(255,255,255,.55)' })};padding-bottom:4px">OPEN &#183; 9:26 PM</span>
+      <span style="${mono(10, { ls: '0.14em', color: 'rgba(255,255,255,.55)' })};padding-bottom:4px">OPEN &#183; 7:04 PM</span>
     </div>
 
     <!-- The linescore, which is the one place a run total belongs. -->
     <div style="display:grid;grid-template-columns:52px repeat(9, minmax(0,1fr)) 26px 26px;gap:1px;background:rgba(255,255,255,.14);margin:0 20px;border:1px solid rgba(255,255,255,.14)">
       ${['', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'R', 'H'].map((c) => `
       <span style="display:grid;place-items:center;height:22px;background:${INK};${mono(10, { wt: 700, ls: '0.04em', color: 'rgba(255,255,255,.62)' })}">${c}</span>`).join('')}
-      ${[[PG.a, PA.p, ['2', '0', '', '', '', '', '', '', ''], '2', '3'], [PG.h, PH.p, ['0', '', '', '', '', '', '', '', ''], '0', '1']].map(([ab, col, cells, r, h]) => `
+      ${[[PG.a, PA.p, ['0', '2', '', '', '', '', '', '', ''], '2', '3'], [PG.h, PH.p, ['0', '', '', '', '', '', '', '', ''], '0', '1']].map(([ab, col, cells, r, h]) => `
       <span style="display:grid;place-items:center;height:26px;background:${col};${disp(14, { w: 76, wt: 800 })};color:#fff">${ab}</span>
       ${cells.map((c) => `<span style="display:grid;place-items:center;height:26px;background:${INK};${mono(11, { wt: 500, ls: '0', color: c ? '#fff' : 'rgba(255,255,255,.3)' })};font-variant-numeric:tabular-nums">${c || '&#183;'}</span>`).join('')}
       <span style="display:grid;place-items:center;height:26px;background:${INK};${mono(11, { wt: 700, ls: '0', color: SIGNAL })};font-variant-numeric:tabular-nums">${r}</span>
@@ -163,7 +171,7 @@ ${BAT.map(([n, who, pos, ab, r, h, rbi, avg]) => `
       <span></span>
       <span style="${disp(17, { w: 74, wt: 800 })};color:${SIGNAL}">TOTALS</span>
       <span></span>
-      ${['25', '2', '6', '3'].map((v) => `<span style="${mono(11, { wt: 700, ls: '0', color: SIGNAL })};text-align:right;font-variant-numeric:tabular-nums">${v}</span>`).join('')}
+      ${['9', '2', '3', '2'].map((v) => `<span style="${mono(11, { wt: 700, ls: '0', color: SIGNAL })};text-align:right;font-variant-numeric:tabular-nums">${v}</span>`).join('')}
       <span></span>
     </div>
 
@@ -175,7 +183,7 @@ ${BAT.map(([n, who, pos, ab, r, h, rbi, avg]) => `
     <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 26px 26px 26px 44px;gap:8px;align-items:center;padding:0 20px 7px">
       ${['', 'IP', 'H', 'R', 'ER', 'ERA'].map((c) => `<span style="${mono(10, { wt: 700, ls: '0.06em', color: 'rgba(255,255,255,.5)' })};text-align:${c === '' ? 'left' : 'right'}">${c}</span>`).join('')}
     </div>
-${[['BROWN', 'HOU', '2.0', '3', '2', '2', '3.58'], ['LOPEZ', 'ATH', '1.0', '1', '0', '0', '4.94']].map(([who, club, ip, h, r, er, era]) => `
+${[['BROWN', 'HOU', '2.0', '3', '2', '2', '2.29'], ['LOPEZ', 'ATH', '1.0', '1', '0', '0', '4.94']].map(([who, club, ip, h, r, er, era]) => `
     <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 26px 26px 26px 44px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid rgba(255,255,255,.075)">
       <span style="display:flex;align-items:baseline;gap:8px;min-width:0">
         <span style="${disp(17, { w: 74, wt: 800 })};color:#fff;white-space:nowrap">${who}</span>
@@ -266,7 +274,7 @@ ${doorRow('box', PG.a, PG.h)}
     <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
   </div>
   <div style="padding:2px 20px 0">
-    ${[['RAYS', T.TB.p], ['GUARDIANS', T.CLE.p], ['DIAMONDBACKS', T.ARI.p], ['RUMBLE PONIES', '#1F3A5F']].map(([nick, col]) => `
+    ${[['RAYS', T.TB.p], ['GUARDIANS', T.CLE.p], ['YARD GOATS', '#002c76'], ['DIAMONDBACKS', T.ARI.p]].map(([nick, col]) => `
     <div style="display:flex;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.075)">
       <span style="width:14px;height:14px;background:${col};flex:none"></span>
       <span style="${disp(nickSize(nick))};color:#fff;white-space:nowrap;overflow:hidden">${nick}</span>
@@ -303,12 +311,14 @@ export function milbArtboards(k) {
     TOL: { city: 'Toledo',      nick: 'Mud Hens',      p: '#002A5C', s: '#E71629', logo: 'mudhens.svg' },
     POR: { city: 'Portland',    nick: 'Sea Dogs',      p: '#e03a3e', s: '#003263', logo: 'seadogs.svg' },
   }
+  // First-pitch order here too — the flat-feed rule is league-agnostic,
+  // ordering included.
   const MG = [
+    { a: 'JAX', h: 'TOL', t: '1:05', park: 'Fifth Third Field', state: 'sealed' },
+    { a: 'RIC', h: 'POR', t: '6:00', park: 'Hadlock Field', state: 'live' },
     { a: 'BNG', h: 'HFD', t: '6:05', park: 'Dunkin’ Park', state: 'live' },
     { a: 'RCT', h: 'MTG', t: '6:35', park: 'Riverwalk Stadium', state: 'live' },
-    { a: 'RIC', h: 'POR', t: '6:00', park: 'Hadlock Field', state: 'live' },
     { a: 'AMA', h: 'ELP', t: '7:05', park: 'Southwest University Park', state: 'pre' },
-    { a: 'JAX', h: 'TOL', t: '6:05', park: 'Fifth Third Field', state: 'sealed' },
   ]
   const SCRIM = { live: null, pre: 'rgba(10,11,13,.16)', sealed: 'rgba(10,11,13,.46)' }
 

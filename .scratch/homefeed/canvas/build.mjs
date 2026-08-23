@@ -80,9 +80,11 @@ const g = (a, h) => GAMES.find((x) => x.a === a && x.h === h)
 // order says nothing you did not already know from the schedule.
 const FEED_ORDER = (() => {
   const pin = GAMES.find((x) => x.pin)
+  // Clock strings with no meridiem: hours 8-12 read as the AM/noon block,
+  // 1-7 as evening — an MLB slate runs 11:35 AM to 10 PM ET.
   const mins = (t) => {
     const [h, m] = t.split(':').map(Number)
-    return ((h % 12) + (h <= 7 ? 12 : 0)) * 60 + m // 12:35 PM .. 7:40 PM
+    return (h >= 8 ? h : h + 12) * 60 + m
   }
   return [pin, ...GAMES.filter((x) => !x.pin).sort((a, b) => mins(a.t) - mins(b.t))]
 })()
@@ -595,7 +597,6 @@ const main = feed('dark')
 const feedLight = feed('light')
 
 /* -- DESKTOP: the same system at 1440, flat, with the wire as the rail ---- */
-const flushRow = (s) => s.replace('padding:0 20px', 'padding:0')
 const WIRE_ROWS = [
   ['MIL', T.MIL.p, 'Brewers reinstate RHP Freddy Peralta from the 15-day injured list', 'IL'],
   ['NYM', T.NYM.p, 'Mets acquire OF Jordan Walker from the Cardinals for two prospects', 'TRADE'],
@@ -637,13 +638,14 @@ const desktop = head() + `
     </div>
   </header>
   <div style="display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:44px;padding:30px 60px 40px">
+    <!-- The SAME flat list at 1440: all fifteen games, one height, pinned
+         then first pitch, wrapped two across. No tiers, no groups. -->
     <section style="min-width:0">
       <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:2px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.16)">
-${FEED_ORDER.slice(0, 6).map((x, i) => marqueeBand(x, 172, i)).join('')}
-      </div>
-      <div style="height:26px"></div>
-      <div style="border-top:1px solid rgba(255,255,255,.12)">
-${FEED_ORDER.slice(6, 12).map((x) => flushRow(rundownRow(x, 64))).join('')}
+${FEED_ORDER.map((x, i) => marqueeBand(x, 172, i)).join('')}
+        <div style="display:grid;place-items:center;height:172px;background:${INK}">
+          <span style="${mono(9, { ls: '0.22em', color: 'rgba(255,255,255,.45)' })}">15 GAMES &#183; SAT 22 AUG</span>
+        </div>
       </div>
     </section>
     <aside style="border-left:1px solid rgba(255,255,255,.12);padding-left:30px;min-width:0">
@@ -656,8 +658,6 @@ ${WIRE_ROWS.map(wireRailRow).join('')}
       <div style="display:flex;align-items:center;justify-content:center;height:44px;margin-top:12px;border:1px solid rgba(255,255,255,.2)">
         <span style="${mono(9, { wt: 700, ls: '0.2em', color: 'rgba(255,255,255,.72)' })}">22 MORE &#8250;</span>
       </div>
-      <div style="height:26px"></div>
-${FEED_ORDER.slice(12).map((x) => flushRow(rundownRow(x, 64))).join('')}
     </aside>
   </div>
 </div>
@@ -701,7 +701,7 @@ ${GAMES.slice(0, 8).map((x) => rundownRow(x)).join('')}
 ${sectionRule('FIRST PITCH TO COME', '03')}
 ${GAMES.slice(8, 11).map((x) => rundownRow(x)).join('')}
 ${sectionRule('EARLIER TODAY', '04')}
-${rundownRow(GAMES[12])}
+${rundownRow(GAMES[11])}
   </div>
 </div>
 ` + tail
@@ -895,10 +895,10 @@ const canvas = {
     { file: 'Lineups.dc.html', title: '4 · Lineups', page: 'page-1', x: 2000, y: 0, w: 390, h: 1360 },
     { file: 'HoverCard.dc.html', title: '4b · Hover card — desktop', page: 'page-1', x: 2500, y: 0, w: 350, h: 430 },
     { file: 'Innings.dc.html', title: '5 · Innings — sealed', page: 'page-1', x: 2500, y: 560, w: 390, h: 844 },
-    { file: 'InningsOpen.dc.html', title: '5b · Innings — opened', page: 'page-1', x: 3000, y: 0, w: 390, h: 1080 },
+    { file: 'InningsOpen.dc.html', title: '5b · Innings — opened', page: 'page-1', x: 3000, y: 0, w: 390, h: 1310 },
     { file: 'BoxScore.dc.html', title: '6 · Box score — sealed', page: 'page-1', x: 3500, y: 0, w: 390, h: 844 },
-    { file: 'BoxOpen.dc.html', title: '6b · Box score — opened', page: 'page-1', x: 4000, y: 0, w: 390, h: 1010 },
-    { file: 'Desktop.dc.html', title: 'The feed at 1440', page: 'page-1', x: 1000, y: 1500, w: 1440, h: 1090 },
+    { file: 'BoxOpen.dc.html', title: '6b · Box score — opened', page: 'page-1', x: 4000, y: 0, w: 390, h: 1090 },
+    { file: 'Desktop.dc.html', title: 'The feed at 1440', page: 'page-1', x: 1000, y: 1530, w: 1440, h: 1540 },
     { file: 'Edges.dc.html', title: 'Edge cases', page: 'page-2', x: 0, y: 0, w: 390, h: 880 },
     { file: 'MiLB.dc.html', title: 'Double-A — where the art is the point', page: 'page-2', x: 500, y: 0, w: 390, h: 790 },
     { file: 'MiLBPoster.dc.html', title: 'Binghamton at Hartford', page: 'page-2', x: 1000, y: 0, w: 390, h: 844 },

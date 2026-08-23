@@ -159,7 +159,7 @@ ${Array.from({ length: 9 }, (_, i) => `
   const OP = g('TB', 'BAL')
   const OA = T[OP.a]
   const OH = T[OP.h]
-  const HERO_TOP = 219
+  const HERO_TOP = 234
   const BAND_H = 118
   const opening = head(`
     @keyframes op-open {
@@ -213,7 +213,7 @@ ${logoStrip()}
   </div>
 
   <div class="op-rest" style="position:absolute;left:0;right:0;top:${HERO_TOP + BAND_H}px;z-index:1">
-${FEED_ORDER.filter((x) => x !== OP).slice(0, 5).map((x, i) => marqueeBand(x, 118, i)).join('')}
+${FEED_ORDER.filter((x) => x !== OP && !x.pin).slice(0, 5).map((x, i) => marqueeBand(x, 118, i)).join('')}
   </div>
 
   <!-- Full-height poster, clipped down to the band. -->
@@ -372,8 +372,8 @@ ${gameHeader(PG.a, PG.h, 'TOP 1ST')}
     ${ghost(PG.a, 'right:-40px;top:-34px;height:200px;opacity:.16')}
     <div style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
       <div>
-        <div style="${mono(8.5, { wt: 700, ls: '0.3em', color: 'rgba(255,255,255,.74)' })};margin-bottom:8px">VISITOR</div>
-        <div style="${disp(46)};color:#fff">${PA.city}</div>
+        <div style="${mono(8.5, { wt: 700, ls: '0.3em', color: 'rgba(255,255,255,.74)' })};margin-bottom:8px">VISITOR &#183; ${PA.city}</div>
+        <div style="${disp(Math.min(nickSize(PA.nick), 44))};color:#fff">${PA.nick}</div>
       </div>
       <span style="${mono(8, { wt: 700, ls: '0.16em', color: 'rgba(255,255,255,.8)' })};border:1px solid rgba(255,255,255,.35);padding:4px 7px 3px;flex:none">KELLY GREEN ALT</span>
     </div>
@@ -476,12 +476,12 @@ ${gameHeader(PG.a, PG.h, 'LIVE')}
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex:none">
-        ${playDiamond(56, { legs: 1 })}
+        ${playDiamond(56, {})}
         <span style="display:flex;gap:5px">
-          <span style="width:7px;height:7px;border-radius:50%;background:${SIGNAL}"></span>
+          <span style="width:7px;height:7px;border-radius:50%;border:1.4px solid rgba(255,255,255,.4)"></span>
           <span style="width:7px;height:7px;border-radius:50%;border:1.4px solid rgba(255,255,255,.4)"></span>
         </span>
-        <span style="${mono(7.5, { ls: '0.18em', color: 'rgba(255,255,255,.62)' })}">1 OUT &#183; 2&#8211;1</span>
+        <span style="${mono(7.5, { ls: '0.18em', color: 'rgba(255,255,255,.62)' })}">0 OUT &#183; 1&#8211;1</span>
       </div>
     </div>
 
@@ -497,8 +497,8 @@ ${[['5', 'BUTLER'], ['6', 'WHITE'], ['7', 'HEIM']].map(([n, last]) => `
       </div>`).join('')}
     </div>
 
-${sectionLabel('YOUR SCOREBOOK', '3 OF 18 HALVES')}
-${revealRail(3)}
+${sectionLabel('YOUR SCOREBOOK', '2 OF 18 HALVES')}
+${revealRail(2)}
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.16);flex:none">
@@ -521,7 +521,7 @@ ${gameHeader(PG.a, PG.h, 'LIVE')}
   <div style="flex:1;overflow:hidden;padding:0 20px">
     <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:20px 0 14px">
       <span style="${disp(34, { w: 72 })};color:#fff">BOX SCORE</span>
-      <span style="${mono(8, { ls: '0.16em', color: 'rgba(255,255,255,.62)' })};padding-bottom:5px">AS OF 9:26 PM</span>
+      <span style="${mono(8, { ls: '0.16em', color: 'rgba(255,255,255,.62)' })};padding-bottom:5px">AS OF 7:04 PM</span>
     </div>
 
 ${sealSlab('TAP TO REVEAL', 'The whole box score, all at once. Once you open it,<br />it stays open &#8212; on every device you own.', 300)}
@@ -546,8 +546,8 @@ ${ON_FIELD.map(([name, num]) => `
       <span style="${mono(15, { wt: 400, ls: '0', color: 'rgba(255,255,255,.66)' })};flex:none">&#8250;</span>
     </div>
 
-${sectionLabel('YOUR SCOREBOOK', 'THROUGH TOP 2ND')}
-${revealRail(3)}
+${sectionLabel('YOUR SCOREBOOK', 'THROUGH BOT 1ST')}
+${revealRail(2)}
   </div>
 
 ${doorRow('box', PG.a, PG.h)}
