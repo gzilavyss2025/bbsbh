@@ -6,6 +6,9 @@ the sheen softening in `src/styles/06a-gamecard-parkart.css`, which is a normal
 commit on this branch and has nothing to do with these files.
 
 The canvas itself is a published Artifact; the files here are what generates it.
+**Picking this up in a new context? Read `HANDOFF.md` first** — it records the
+branch/worktree/PR state, the decisions the owner locked in review, and the
+regenerate/republish loop.
 
 ## Revised after owner review (23 Aug)
 
