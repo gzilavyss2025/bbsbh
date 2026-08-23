@@ -1,0 +1,288 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;500;700&family=Lora:ital,wght@0,400;1,400&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Archivo','Helvetica Neue',Arial,sans-serif; }
+    a { color: #E9DA00; text-decoration: none; }
+    a:hover { color: #ffffff; }
+    * { box-sizing: border-box; }
+    @keyframes tallypulse { 0%,100% { opacity: 1 } 50% { opacity: .28 } }
+    .pulse { animation: tallypulse 1.9s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
+    /* THE BASE. The logo does not sit on a swatch, it sits on a bag.
+       A competition base is moulded rubber over a foam core, and its top is a
+       traction surface: a regular grid of small raised nubs with narrow
+       channels between them. That grid is the thing you actually recognise in
+       a close-up photo, so it is the thing this draws — four layers, no image
+       files.
+
+       1. .base            the fill, the rolled bevel, the stitched seam
+       2. .base-nubs       the moulded grid: a lit edge on each nub, a shadowed
+                           channel around it
+       3. .base-dirt       clay, laid OVER the grid on multiply so it darkens
+                           the channels rather than covering them — which is
+                           where dirt actually goes and why the grid reads
+                           strongest at the corners
+       4. .base-grain      rubber tooth
+
+       No cleat marks. A rake across the top read as damage rather than as
+       texture, and it fought whatever mark was printed over it. */
+    .base {
+      position: relative;
+      border-radius: 2px;
+      background-image:
+        radial-gradient(ellipse 78% 64% at 34% 28%, rgba(255, 255, 255, .95) 0, transparent 68%),
+        linear-gradient(158deg, #FCFAF4 0%, #F7F3EA 58%, #EDE7D9 100%);
+      box-shadow:
+        inset 0 0 0 1.5px rgba(255, 255, 255, .7),
+        inset 0 0 0 3px rgba(146, 114, 74, .3),
+        inset 0 -3px 5px rgba(126, 88, 48, .1);
+    }
+    /* The stitched seam, set in from the rolled edge the way a real bag's is. */
+    .base::after {
+      content: '';
+      position: absolute;
+      inset: 10%;
+      border: 1px solid rgba(126, 88, 48, .18);
+      border-radius: 1px;
+      pointer-events: none;
+    }
+    /* The traction surface: DISCRETE nubs, not a grid of lines.
+       Crossed repeating lines drew plaid — continuous rules read as a weave,
+       and at feed size the channels were a quarter of each cell wide, so the
+       bag came out tartan. Moulded rubber is a field of separate bumps, so
+       each nub is drawn as one: a lit cap, and a shadow offset half a pixel
+       down-right, on a square tile.
+
+       --nub is the pitch, set per tile so a nub stays the same PHYSICAL size
+       whether the bag is 104px on a poster or 44px in a feed; --nubop fades
+       the whole layer as the bag shrinks, because a real base seen small
+       does not grow coarser texture, it loses it. */
+    .base-nubs {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 2px;
+      opacity: var(--nubop, .7);
+      background-image:
+        radial-gradient(circle at 60% 64%, rgba(118, 90, 56, .24) 0 26%, transparent 31%),
+        radial-gradient(circle at 43% 41%, rgba(255, 255, 255, .68) 0 26%, transparent 32%);
+      background-size: var(--nub) var(--nub), var(--nub) var(--nub);
+    }
+    /* Clay, over the grid. The middle of a bag gets stepped clean and stays
+       white, which is also what lets a mark print over it. */
+    .base-dirt {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 2px;
+      mix-blend-mode: multiply;
+      background-image:
+        radial-gradient(circle at 2% 3%, rgba(150, 110, 66, .5) 0, transparent 30%),
+        radial-gradient(circle at 98% 96%, rgba(150, 110, 66, .46) 0, transparent 28%),
+        radial-gradient(circle at 97% 3%, rgba(168, 132, 86, .34) 0, transparent 24%),
+        radial-gradient(circle at 3% 97%, rgba(168, 132, 86, .38) 0, transparent 26%),
+        radial-gradient(ellipse 130% 34% at 50% 108%, rgba(150, 110, 66, .38) 0, transparent 60%);
+    }
+    .base-grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: .16;
+      border-radius: 2px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='3'/></filter><rect width='90' height='90' filter='url(%23b)' opacity='0.5'/></svg>");
+    }
+
+    /* The seal's own surface: the one signal colour, raked. It is the kraft
+       tape of this palette — same job, drawn in the ink the screen is in. */
+    .hatch { position: absolute; inset: 0; pointer-events: none; opacity: .13;
+      background-image: repeating-linear-gradient(-38deg, #E9DA00 0 2px, transparent 2px 11px); }
+  </style>
+</helmet>
+
+<div style="position:relative;width:390px;height:844px;background:#0A0B0D;overflow:hidden;display:flex;flex-direction:column">
+
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 14px;background:#0A0B0D;border-bottom:1px solid rgba(255,255,255,.12)">
+      <span style="display:flex;align-items:center;gap:11px">
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;font-weight:400;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.66)">&#8249;</span>
+        <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:68%;font-variation-settings:'wdth' 68,'wght' 900;font-weight:900;font-size:20px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff">ATH</span>
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.62)">AT</span>
+        <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:68%;font-variation-settings:'wdth' 68,'wght' 900;font-weight:900;font-size:20px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff">HOU</span>
+      </span>
+      <span style="display:flex;align-items:center;gap:6px;flex:none"><span class="pulse" style="width:5px;height:5px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
+    </header>
+  <div style="flex:1;overflow:hidden">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:18px 20px 12px">
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:72%;font-variation-settings:'wdth' 72,'wght' 900;font-weight:900;font-size:30px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff">BOX SCORE</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.55);padding-bottom:4px">OPEN &#183; 9:26 PM</span>
+    </div>
+
+    <!-- The linescore, which is the one place a run total belongs. -->
+    <div style="display:grid;grid-template-columns:52px repeat(9, minmax(0,1fr)) 26px 26px;gap:1px;background:rgba(255,255,255,.14);margin:0 20px;border:1px solid rgba(255,255,255,.14)">
+      
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)"></span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">1</span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">2</span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">3</span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">4</span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">5</span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">6</span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">7</span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">8</span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">9</span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">R</span>
+      <span style="display:grid;place-items:center;height:22px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(255,255,255,.62)">H</span>
+      
+      <span style="display:grid;place-items:center;height:26px;background:#003831;font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:14px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff">ATH</span>
+      <span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;font-variant-numeric:tabular-nums">2</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;font-variant-numeric:tabular-nums">0</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span>
+      <span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00;font-variant-numeric:tabular-nums">2</span>
+      <span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#fff;font-variant-numeric:tabular-nums">3</span>
+      <span style="display:grid;place-items:center;height:26px;background:#002D62;font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:14px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff">HOU</span>
+      <span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;font-variant-numeric:tabular-nums">0</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span><span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.3);font-variant-numeric:tabular-nums">&#183;</span>
+      <span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00;font-variant-numeric:tabular-nums">0</span>
+      <span style="display:grid;place-items:center;height:26px;background:#0A0B0D;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#fff;font-variant-numeric:tabular-nums">1</span>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;padding:20px 20px 9px">
+      <span style="width:16px;height:4px;background:#003831;flex:none"></span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,.74)">It's just Athletics &#183; BATTING</span>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:15px minmax(0,1fr) 26px 24px 24px 24px 24px 42px;gap:8px;align-items:center;padding:0 20px 7px">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:left"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:left"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:left"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:right">AB</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:right">R</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:right">H</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:right">RBI</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:right">AVG</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:15px minmax(0,1fr) 26px 24px 24px 24px 24px 42px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid rgba(255,255,255,.075)">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00">1</span>
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:17px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;overflow:hidden;white-space:nowrap">BOLTE</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.6)">CF</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">4</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">1</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">2</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.72);text-align:right;font-variant-numeric:tabular-nums">.266</span>
+    </div>
+    <div style="display:grid;grid-template-columns:15px minmax(0,1fr) 26px 24px 24px 24px 24px 42px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid rgba(255,255,255,.075)">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00">2</span>
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:17px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;overflow:hidden;white-space:nowrap">McNEIL</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.6)">2B</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">4</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">1</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">1</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.72);text-align:right;font-variant-numeric:tabular-nums">.263</span>
+    </div>
+    <div style="display:grid;grid-template-columns:15px minmax(0,1fr) 26px 24px 24px 24px 24px 42px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid rgba(255,255,255,.075)">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00">3</span>
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:17px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;overflow:hidden;white-space:nowrap">GELOF</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.6)">3B</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">3</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">1</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">1</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.72);text-align:right;font-variant-numeric:tabular-nums">.264</span>
+    </div>
+    <div style="display:grid;grid-template-columns:15px minmax(0,1fr) 26px 24px 24px 24px 24px 42px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid rgba(255,255,255,.075)">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00">4</span>
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:17px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;overflow:hidden;white-space:nowrap">WILLIAMS</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.6)">PH</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">4</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">1</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">1</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">2</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.72);text-align:right;font-variant-numeric:tabular-nums">.263</span>
+    </div>
+    <div style="display:grid;grid-template-columns:15px minmax(0,1fr) 26px 24px 24px 24px 24px 42px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid rgba(255,255,255,.075)">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00">5</span>
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:17px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;overflow:hidden;white-space:nowrap">BUTLER</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.6)">RF</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">4</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.72);text-align:right;font-variant-numeric:tabular-nums">.214</span>
+    </div>
+    <div style="display:grid;grid-template-columns:15px minmax(0,1fr) 26px 24px 24px 24px 24px 42px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid rgba(255,255,255,.075)">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00">6</span>
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:17px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;overflow:hidden;white-space:nowrap">WHITE</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.6)">1B</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">3</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">1</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.72);text-align:right;font-variant-numeric:tabular-nums">.259</span>
+    </div>
+    <div style="display:grid;grid-template-columns:15px minmax(0,1fr) 26px 24px 24px 24px 24px 42px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid rgba(255,255,255,.075)">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00">7</span>
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:17px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;overflow:hidden;white-space:nowrap">HEIM</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.6)">C</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">3</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.72);text-align:right;font-variant-numeric:tabular-nums">.203</span>
+    </div>
+    <div style="display:grid;grid-template-columns:15px minmax(0,1fr) 26px 24px 24px 24px 24px 42px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid #E9DA00">
+      <span></span>
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:17px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#E9DA00">TOTALS</span>
+      <span></span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00;text-align:right;font-variant-numeric:tabular-nums">25</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00;text-align:right;font-variant-numeric:tabular-nums">2</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00;text-align:right;font-variant-numeric:tabular-nums">6</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#E9DA00;text-align:right;font-variant-numeric:tabular-nums">3</span>
+      <span></span>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;padding:20px 20px 9px">
+      <span style="width:16px;height:4px;background:#002D62;flex:none"></span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,.74)">PITCHING</span>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 26px 26px 26px 44px;gap:8px;align-items:center;padding:0 20px 7px">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:left"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:right">IP</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:right">H</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:right">R</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:right">ER</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:right">ERA</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 26px 26px 26px 44px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid rgba(255,255,255,.075)">
+      <span style="display:flex;align-items:baseline;gap:8px;min-width:0">
+        <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:17px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;white-space:nowrap">BROWN</span>
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,.5)">HOU</span>
+      </span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">2.0</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">3</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">2</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">2</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.72);text-align:right;font-variant-numeric:tabular-nums">3.58</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 26px 26px 26px 44px;gap:8px;align-items:center;height:34px;padding:0 20px;border-top:1px solid rgba(255,255,255,.075)">
+      <span style="display:flex;align-items:baseline;gap:8px;min-width:0">
+        <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:17px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;white-space:nowrap">LOPEZ</span>
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,.5)">ATH</span>
+      </span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">1.0</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">1</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:#fff;text-align:right;font-variant-numeric:tabular-nums">0</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.72);text-align:right;font-variant-numeric:tabular-nums">4.94</span>
+    </div>
+
+    <!-- The home club's card, closed. A box score is two of these; the screen
+         opens on the club whose half you were last reading. -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px;margin:20px 20px 0;padding:0 16px;border:1px solid rgba(255,255,255,.2)">
+      <span style="display:flex;align-items:center;gap:10px;min-width:0">
+        <span style="width:16px;height:4px;background:#002D62;flex:none"></span>
+        <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:19px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;white-space:nowrap">Houston Astros</span>
+      </span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;font-weight:400;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.6);flex:none">&#8250;</span>
+    </div>
+  </div>
+
+      <nav style="display:grid;grid-template-columns:repeat(5, minmax(0, 1fr));background:#0A0B0D;border-top:1px solid rgba(255,255,255,.16)">
+        
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:58px;">
+          <span style="width:18px;height:3px;background:#003831"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:15px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.5)">ATH</span>
+          
+        </span>
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:58px;border-left:1px solid rgba(255,255,255,.12);">
+          <span style="width:18px;height:3px;background:#002D62"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:15px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.5)">HOU</span>
+          
+        </span>
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:58px;border-left:1px solid rgba(255,255,255,.12);">
+          <span style="width:18px;height:3px;background:rgba(255,255,255,.16)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:15px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.5)">INNINGS</span>
+          
+        </span>
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:58px;border-left:1px solid rgba(255,255,255,.12);">
+          <span style="width:18px;height:3px;background:rgba(255,255,255,.16)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:15px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff">BOX</span>
+          <span style="position:absolute;left:0;right:0;bottom:0;height:3px;background:#E9DA00"></span>
+        </span>
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:58px;border-left:1px solid rgba(255,255,255,.12);">
+          <span style="width:18px;height:3px;background:rgba(255,255,255,.16)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:15px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.5)">CARD</span>
+          
+        </span>
+      </nav>
+</div>
+</x-dc>
+</body>
+</html>

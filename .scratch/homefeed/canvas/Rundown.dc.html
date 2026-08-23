@@ -1,0 +1,435 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;500;700&family=Lora:ital,wght@0,400;1,400&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Archivo','Helvetica Neue',Arial,sans-serif; }
+    a { color: #E9DA00; text-decoration: none; }
+    a:hover { color: #ffffff; }
+    * { box-sizing: border-box; }
+    @keyframes tallypulse { 0%,100% { opacity: 1 } 50% { opacity: .28 } }
+    .pulse { animation: tallypulse 1.9s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
+    /* THE BASE. The logo does not sit on a swatch, it sits on a bag.
+       A competition base is moulded rubber over a foam core, and its top is a
+       traction surface: a regular grid of small raised nubs with narrow
+       channels between them. That grid is the thing you actually recognise in
+       a close-up photo, so it is the thing this draws — four layers, no image
+       files.
+
+       1. .base            the fill, the rolled bevel, the stitched seam
+       2. .base-nubs       the moulded grid: a lit edge on each nub, a shadowed
+                           channel around it
+       3. .base-dirt       clay, laid OVER the grid on multiply so it darkens
+                           the channels rather than covering them — which is
+                           where dirt actually goes and why the grid reads
+                           strongest at the corners
+       4. .base-grain      rubber tooth
+
+       No cleat marks. A rake across the top read as damage rather than as
+       texture, and it fought whatever mark was printed over it. */
+    .base {
+      position: relative;
+      border-radius: 2px;
+      background-image:
+        radial-gradient(ellipse 78% 64% at 34% 28%, rgba(255, 255, 255, .95) 0, transparent 68%),
+        linear-gradient(158deg, #FCFAF4 0%, #F7F3EA 58%, #EDE7D9 100%);
+      box-shadow:
+        inset 0 0 0 1.5px rgba(255, 255, 255, .7),
+        inset 0 0 0 3px rgba(146, 114, 74, .3),
+        inset 0 -3px 5px rgba(126, 88, 48, .1);
+    }
+    /* The stitched seam, set in from the rolled edge the way a real bag's is. */
+    .base::after {
+      content: '';
+      position: absolute;
+      inset: 10%;
+      border: 1px solid rgba(126, 88, 48, .18);
+      border-radius: 1px;
+      pointer-events: none;
+    }
+    /* The traction surface: DISCRETE nubs, not a grid of lines.
+       Crossed repeating lines drew plaid — continuous rules read as a weave,
+       and at feed size the channels were a quarter of each cell wide, so the
+       bag came out tartan. Moulded rubber is a field of separate bumps, so
+       each nub is drawn as one: a lit cap, and a shadow offset half a pixel
+       down-right, on a square tile.
+
+       --nub is the pitch, set per tile so a nub stays the same PHYSICAL size
+       whether the bag is 104px on a poster or 44px in a feed; --nubop fades
+       the whole layer as the bag shrinks, because a real base seen small
+       does not grow coarser texture, it loses it. */
+    .base-nubs {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 2px;
+      opacity: var(--nubop, .7);
+      background-image:
+        radial-gradient(circle at 60% 64%, rgba(118, 90, 56, .24) 0 26%, transparent 31%),
+        radial-gradient(circle at 43% 41%, rgba(255, 255, 255, .68) 0 26%, transparent 32%);
+      background-size: var(--nub) var(--nub), var(--nub) var(--nub);
+    }
+    /* Clay, over the grid. The middle of a bag gets stepped clean and stays
+       white, which is also what lets a mark print over it. */
+    .base-dirt {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 2px;
+      mix-blend-mode: multiply;
+      background-image:
+        radial-gradient(circle at 2% 3%, rgba(150, 110, 66, .5) 0, transparent 30%),
+        radial-gradient(circle at 98% 96%, rgba(150, 110, 66, .46) 0, transparent 28%),
+        radial-gradient(circle at 97% 3%, rgba(168, 132, 86, .34) 0, transparent 24%),
+        radial-gradient(circle at 3% 97%, rgba(168, 132, 86, .38) 0, transparent 26%),
+        radial-gradient(ellipse 130% 34% at 50% 108%, rgba(150, 110, 66, .38) 0, transparent 60%);
+    }
+    .base-grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: .16;
+      border-radius: 2px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='3'/></filter><rect width='90' height='90' filter='url(%23b)' opacity='0.5'/></svg>");
+    }
+
+    /* The seal's own surface: the one signal colour, raked. It is the kraft
+       tape of this palette — same job, drawn in the ink the screen is in. */
+    .hatch { position: absolute; inset: 0; pointer-events: none; opacity: .13;
+      background-image: repeating-linear-gradient(-38deg, #E9DA00 0 2px, transparent 2px 11px); }
+    .vgrid { position:absolute; inset:0; pointer-events:none;
+      background-image: repeating-linear-gradient(to right, rgba(255,255,255,.05) 0 1px, transparent 1px 78px);
+      background-position: 20px 0; }
+  </style>
+</helmet>
+
+<div style="position:relative;width:390px;min-height:844px;background:#0C0D0F;overflow:hidden">
+  <div class="vgrid"></div>
+  <div style="position:relative">
+
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px 10px;border-bottom:1px solid rgba(255,255,255,.12)">
+    <div style="display:flex;align-items:center;gap:9px">
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:66%;font-variation-settings:'wdth' 66,'wght' 900;font-weight:900;font-size:23px;line-height:0.84;letter-spacing:0.005em;word-spacing:0.09em;text-transform:uppercase;color:#fff">TAL<span style="color:#E9DA00">1</span>Y</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,.62);padding-top:3px">BASEBALL</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><circle cx="7.5" cy="7.5" r="5.2" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/><path d="M11.4 11.4 15 15" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="square"/></svg></span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><rect x="2" y="2.5" width="12" height="13" rx="1" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/><path d="M5.2 2.5v13" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/></svg></span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="square"/></svg></span>
+    </div>
+  </header>
+  <!-- Every one of these was a 21x13 label. WCAG 2.2 AA (2.5.8) wants 24x24;
+       Apple wants 44pt. They are controls, so they get 44. -->
+  <nav style="display:flex;align-items:center;gap:2px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.12)">
+    
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;background:#E9DA00;">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0A0B0D">MLB</span>
+    </span>
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">AAA</span>
+    </span>
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">AA</span>
+    </span>
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">A+</span>
+    </span>
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">A</span>
+    </span>
+  </nav>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 14px;border-bottom:1px solid rgba(255,255,255,.12)">
+    <div style="display:flex;align-items:center;gap:4px">
+      <span style="display:grid;place-items:center;width:44px;height:44px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;font-weight:400;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.66)">&#8249;</span>
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:78%;font-variation-settings:'wdth' 78,'wght' 800;font-weight:800;font-size:19px;line-height:0.84;letter-spacing:0.01em;word-spacing:0.09em;text-transform:uppercase;color:#fff">SAT 22 AUG</span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;font-weight:400;letter-spacing:0;text-transform:uppercase;color:rgba(255,255,255,.66)">&#8250;</span>
+    </div>
+    <!-- This is the ADR-0026 Scores Unlocked switch, not a status label. Drawn
+         as a label it removed the control and kept only the nagging half — the
+         one consented, reversible way out of the seal, turned into a scold. -->
+    <span style="display:flex;align-items:center;gap:7px;min-height:44px;border:1px solid rgba(255,255,255,.28);padding:0 11px">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,.8)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,.8)" stroke-width="1.4"/></svg>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.8)">SEALED</span>
+      <span style="width:26px;height:15px;border:1px solid rgba(255,255,255,.4);position:relative;display:block">
+        <span style="position:absolute;left:1px;top:1px;width:11px;height:11px;background:rgba(255,255,255,.6)"></span>
+      </span>
+    </span>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;padding:9px 20px 8px;background:rgba(255,255,255,.035)">
+    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,.74)">NOW PLAYING</span>
+    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.6)">08</span>
+    <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
+    
+  </div>
+
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">6:05</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">TB</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">BAL</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#092C5C;flex:none"></span>
+          <span style="width:16px;height:3px;background:#DF4601;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Oriole Park at Camden Yards</span>
+          
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="display:flex;align-items:center;gap:5px"><span class="pulse" style="width:5px;height:5px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">6:05</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">LAA</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">TEX</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#003263;flex:none"></span>
+          <span style="width:16px;height:3px;background:#003278;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Globe Life Field</span>
+          
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="display:flex;align-items:center;gap:5px"><span class="pulse" style="width:5px;height:5px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">6:10</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">ATH</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">HOU</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#003831;flex:none"></span>
+          <span style="width:16px;height:3px;background:#002D62;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Daikin Park</span>
+          
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="display:flex;align-items:center;gap:5px"><span class="pulse" style="width:5px;height:5px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">6:10</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">NYM</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">CWS</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#002D72;flex:none"></span>
+          <span style="width:16px;height:3px;background:#27251F;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Rate Field</span>
+          
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="display:flex;align-items:center;gap:5px"><span class="pulse" style="width:5px;height:5px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">6:15</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">DET</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">KC</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#0C2340;flex:none"></span>
+          <span style="width:16px;height:3px;background:#004687;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Kauffman Stadium</span>
+          
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="display:flex;align-items:center;gap:5px"><span class="pulse" style="width:5px;height:5px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">6:15</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">PIT</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">LAD</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#27251F;flex:none"></span>
+          <span style="width:16px;height:3px;background:#005A9C;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Dodger Stadium</span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.74);border:1px solid rgba(255,255,255,.3);padding:1px 3px;flex:none">FOX</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="display:flex;align-items:center;gap:5px"><span class="pulse" style="width:5px;height:5px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">6:15</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">CHC</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">SEA</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#0E3386;flex:none"></span>
+          <span style="width:16px;height:3px;background:#0C2C56;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">T-Mobile Park</span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.74);border:1px solid rgba(255,255,255,.3);padding:1px 3px;flex:none">FOX</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="display:flex;align-items:center;gap:5px"><span class="pulse" style="width:5px;height:5px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">6:15</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">SF</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">BOS</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#FD5A1E;flex:none"></span>
+          <span style="width:16px;height:3px;background:#BD3039;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Fenway Park</span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.74);border:1px solid rgba(255,255,255,.3);padding:1px 3px;flex:none">FOX</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="display:flex;align-items:center;gap:5px"><span class="pulse" style="width:5px;height:5px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span></div>
+    </div>
+
+  <div style="display:flex;align-items:center;gap:10px;padding:9px 20px 8px;background:rgba(255,255,255,.035)">
+    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,.74)">FIRST PITCH TO COME</span>
+    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.6)">03</span>
+    <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
+    
+  </div>
+
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">7:10</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">CIN</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">ARI</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#C6011F;flex:none"></span>
+          <span style="width:16px;height:3px;background:#A71930;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Chase Field</span>
+          
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.66);white-space:nowrap">IN 55M</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">7:10</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">CLE</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">COL</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#00385D;flex:none"></span>
+          <span style="width:16px;height:3px;background:#333366;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Coors Field</span>
+          
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.66);white-space:nowrap">IN 55M</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:1">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">7:40</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">MIN</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">SD</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#002B5C;flex:none"></span>
+          <span style="width:16px;height:3px;background:#2F241D;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Petco Park</span>
+          
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.66);white-space:nowrap">IN 1H 25M</span></div>
+    </div>
+
+  <div style="display:flex;align-items:center;gap:10px;padding:9px 20px 8px;background:rgba(255,255,255,.035)">
+    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,.74)">EARLIER TODAY</span>
+    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.6)">04</span>
+    <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
+    
+  </div>
+
+    <div style="display:grid;grid-template-columns:46px minmax(0,1fr) 68px;gap:14px;align-items:center;height:56px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.075);opacity:0.46">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#fff">1:10</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px">PM CT</div>
+      </div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">ATL</span>
+          <span style="flex:1;border-bottom:2px dotted rgba(255,255,255,.24);transform:translateY(-5px)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:74%;font-variation-settings:'wdth' 74,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;flex:none">MIL</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0">
+          <span style="width:16px;height:3px;background:#CE1141;flex:none"></span>
+          <span style="width:16px;height:3px;background:#12284B;flex:none"></span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">American Family Field</span>
+          
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><span style="display:flex;align-items:center;gap:4px"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="flex:none"><rect x="1.5" y="5" width="9" height="6" rx="1" stroke="rgba(255,255,255,.55)" stroke-width="1.4"/><path d="M3.8 5V3.6a2.2 2.2 0 0 1 4.4 0V5" stroke="rgba(255,255,255,.55)" stroke-width="1.4"/></svg><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,.68)">SEALED</span></span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

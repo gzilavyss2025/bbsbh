@@ -1,0 +1,465 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;500;700&family=Lora:ital,wght@0,400;1,400&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Archivo','Helvetica Neue',Arial,sans-serif; }
+    a { color: #E9DA00; text-decoration: none; }
+    a:hover { color: #ffffff; }
+    * { box-sizing: border-box; }
+    @keyframes tallypulse { 0%,100% { opacity: 1 } 50% { opacity: .28 } }
+    .pulse { animation: tallypulse 1.9s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
+    /* THE BASE. The logo does not sit on a swatch, it sits on a bag.
+       A competition base is moulded rubber over a foam core, and its top is a
+       traction surface: a regular grid of small raised nubs with narrow
+       channels between them. That grid is the thing you actually recognise in
+       a close-up photo, so it is the thing this draws — four layers, no image
+       files.
+
+       1. .base            the fill, the rolled bevel, the stitched seam
+       2. .base-nubs       the moulded grid: a lit edge on each nub, a shadowed
+                           channel around it
+       3. .base-dirt       clay, laid OVER the grid on multiply so it darkens
+                           the channels rather than covering them — which is
+                           where dirt actually goes and why the grid reads
+                           strongest at the corners
+       4. .base-grain      rubber tooth
+
+       No cleat marks. A rake across the top read as damage rather than as
+       texture, and it fought whatever mark was printed over it. */
+    .base {
+      position: relative;
+      border-radius: 2px;
+      background-image:
+        radial-gradient(ellipse 78% 64% at 34% 28%, rgba(255, 255, 255, .95) 0, transparent 68%),
+        linear-gradient(158deg, #FCFAF4 0%, #F7F3EA 58%, #EDE7D9 100%);
+      box-shadow:
+        inset 0 0 0 1.5px rgba(255, 255, 255, .7),
+        inset 0 0 0 3px rgba(146, 114, 74, .3),
+        inset 0 -3px 5px rgba(126, 88, 48, .1);
+    }
+    /* The stitched seam, set in from the rolled edge the way a real bag's is. */
+    .base::after {
+      content: '';
+      position: absolute;
+      inset: 10%;
+      border: 1px solid rgba(126, 88, 48, .18);
+      border-radius: 1px;
+      pointer-events: none;
+    }
+    /* The traction surface: DISCRETE nubs, not a grid of lines.
+       Crossed repeating lines drew plaid — continuous rules read as a weave,
+       and at feed size the channels were a quarter of each cell wide, so the
+       bag came out tartan. Moulded rubber is a field of separate bumps, so
+       each nub is drawn as one: a lit cap, and a shadow offset half a pixel
+       down-right, on a square tile.
+
+       --nub is the pitch, set per tile so a nub stays the same PHYSICAL size
+       whether the bag is 104px on a poster or 44px in a feed; --nubop fades
+       the whole layer as the bag shrinks, because a real base seen small
+       does not grow coarser texture, it loses it. */
+    .base-nubs {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 2px;
+      opacity: var(--nubop, .7);
+      background-image:
+        radial-gradient(circle at 60% 64%, rgba(118, 90, 56, .24) 0 26%, transparent 31%),
+        radial-gradient(circle at 43% 41%, rgba(255, 255, 255, .68) 0 26%, transparent 32%);
+      background-size: var(--nub) var(--nub), var(--nub) var(--nub);
+    }
+    /* Clay, over the grid. The middle of a bag gets stepped clean and stays
+       white, which is also what lets a mark print over it. */
+    .base-dirt {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 2px;
+      mix-blend-mode: multiply;
+      background-image:
+        radial-gradient(circle at 2% 3%, rgba(150, 110, 66, .5) 0, transparent 30%),
+        radial-gradient(circle at 98% 96%, rgba(150, 110, 66, .46) 0, transparent 28%),
+        radial-gradient(circle at 97% 3%, rgba(168, 132, 86, .34) 0, transparent 24%),
+        radial-gradient(circle at 3% 97%, rgba(168, 132, 86, .38) 0, transparent 26%),
+        radial-gradient(ellipse 130% 34% at 50% 108%, rgba(150, 110, 66, .38) 0, transparent 60%);
+    }
+    .base-grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: .16;
+      border-radius: 2px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='3'/></filter><rect width='90' height='90' filter='url(%23b)' opacity='0.5'/></svg>");
+    }
+
+    /* The seal's own surface: the one signal colour, raked. It is the kraft
+       tape of this palette — same job, drawn in the ink the screen is in. */
+    .hatch { position: absolute; inset: 0; pointer-events: none; opacity: .13;
+      background-image: repeating-linear-gradient(-38deg, #E9DA00 0 2px, transparent 2px 11px); }
+
+    /* The hero is ALWAYS full height and full poster layout; the feed state is
+       a clip. Un-clipping is one interpolated inset() — no geometry changes, so
+       nothing reflows. */
+    @keyframes op-open {
+      0%, 12% { clip-path: inset(132px 0 594px 0) }
+      26%, 92% { clip-path: inset(0px 0 0px 0) }
+      92.01%, 100% { clip-path: inset(132px 0 594px 0) }
+    }
+    /* The band's own type and the poster's overlap deliberately: there is never
+       a frame with neither, which is what left a 600px hole in the first cut. */
+    @keyframes op-bandtype {
+      0%, 13% { opacity: 1 }
+      19%, 92% { opacity: 0 }
+      92.01%, 100% { opacity: 1 }
+    }
+    @keyframes op-postertype {
+      0%, 15% { opacity: 0; transform: translateY(10px) }
+      26%, 92% { opacity: 1; transform: translateY(0) }
+      92.01%, 100% { opacity: 0; transform: translateY(10px) }
+    }
+    @keyframes op-chromeout {
+      0%, 12% { opacity: 1 }
+      22%, 92% { opacity: 0 }
+      92.01%, 100% { opacity: 1 }
+    }
+    @keyframes op-press {
+      0%, 8% { transform: scale(1) }
+      11% { transform: scale(0.988) }
+      15%, 100% { transform: scale(1) }
+    }
+    @keyframes op-stage {
+      0%, 86% { opacity: 1 }
+      91%, 95% { opacity: 0 }
+      100% { opacity: 1 }
+    }
+    .stage { animation: op-stage 3.2s linear infinite; }
+    .op-chrome, .op-rest { animation: op-chromeout 3.2s cubic-bezier(.32,.72,0,1) infinite; }
+    .op-hero { animation: op-open 3.2s cubic-bezier(.32,.72,0,1) infinite, op-press 3.2s ease-out infinite; }
+    .op-bandtype { animation: op-bandtype 3.2s linear infinite; }
+    .op-postertype { animation: op-postertype 3.2s cubic-bezier(.32,.72,0,1) infinite; }
+    /* There is no slower version of a screen opening; there is opening or
+       already open. Reduced motion gets the destination, held. */
+    @media (prefers-reduced-motion: reduce) {
+      .stage, .stage * { animation: none !important; }
+      .op-chrome, .op-rest, .op-bandtype { opacity: 0 !important; }
+      .op-hero { clip-path: none !important; }
+      .op-postertype { opacity: 1 !important; transform: none !important; }
+    }
+  </style>
+</helmet>
+
+<div class="stage" style="position:relative;width:390px;height:844px;background:#0A0B0D;overflow:hidden">
+
+  <div class="op-chrome" style="position:absolute;left:0;right:0;top:0;z-index:3">
+
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px 10px;border-bottom:1px solid rgba(255,255,255,.12)">
+    <div style="display:flex;align-items:center;gap:9px">
+      <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:66%;font-variation-settings:'wdth' 66,'wght' 900;font-weight:900;font-size:23px;line-height:0.84;letter-spacing:0.005em;word-spacing:0.09em;text-transform:uppercase;color:#fff">TAL<span style="color:#E9DA00">1</span>Y</span>
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,.62);padding-top:3px">BASEBALL</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><circle cx="7.5" cy="7.5" r="5.2" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/><path d="M11.4 11.4 15 15" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="square"/></svg></span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><rect x="2" y="2.5" width="12" height="13" rx="1" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/><path d="M5.2 2.5v13" stroke="rgba(255,255,255,.82)" stroke-width="1.6"/></svg></span>
+      <span style="display:grid;place-items:center;width:44px;height:44px;margin:0 -8px"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="square"/></svg></span>
+    </div>
+  </header>
+  <!-- Every one of these was a 21x13 label. WCAG 2.2 AA (2.5.8) wants 24x24;
+       Apple wants 44pt. They are controls, so they get 44. -->
+  <nav style="display:flex;align-items:center;gap:2px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.12)">
+    
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;background:#E9DA00;">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0A0B0D">MLB</span>
+    </span>
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">AAA</span>
+    </span>
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">AA</span>
+    </span>
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">A+</span>
+    </span>
+    <span style="display:grid;place-items:center;min-width:46px;height:44px;">
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.6)">A</span>
+    </span>
+  </nav>
+
+  <div style="display:flex;align-items:center;gap:10px;padding:9px 20px 8px;background:rgba(255,255,255,.035)">
+    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,.74)">ON NOW</span>
+    <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.6)">08</span>
+    <span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span>
+    
+    <span style="display:flex;flex:none;border:1px solid rgba(255,255,255,.28)">
+      <span style="display:grid;place-items:center;width:44px;height:32px;background:#E9DA00">
+        <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect width="12" height="4" fill="#0A0B0D"/><rect y="6" width="12" height="4" fill="#0A0B0D"/></svg>
+      </span>
+      <span style="display:grid;place-items:center;width:44px;height:32px">
+        <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect y="0.4" width="12" height="1.5" fill="rgba(255,255,255,.5)"/><rect y="4.2" width="12" height="1.5" fill="rgba(255,255,255,.5)"/><rect y="8" width="12" height="1.5" fill="rgba(255,255,255,.5)"/></svg>
+      </span>
+    </span>
+  </div>
+  </div>
+
+  <div class="op-rest" style="position:absolute;left:0;right:0;top:250px;z-index:1">
+
+    <article style="position:relative;height:118px;overflow:hidden;background:#003278;border-bottom:1px solid rgba(255,255,255,.16)">
+      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#BA0021;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:45%;background:#003263;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <img src="laa.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="tex.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
+          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="laa.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <div style="min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">LAA</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Los Angeles</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <div style="text-align:right;min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">TEX</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Texas</div>
+          </div>
+          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="tex.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        </div>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Globe Life Field</span></span>
+        <span style="display:flex;align-items:center;gap:9px;flex:none">
+          
+          <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
+        </span>
+      </div>
+    </article>
+    <article style="position:relative;height:118px;overflow:hidden;background:#002D62;border-bottom:1px solid rgba(255,255,255,.16)">
+      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#EFB21E;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:45%;background:#003831;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <img src="ath.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="hou.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
+          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="ath.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <div style="min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">ATH</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">It's just</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <div style="text-align:right;min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">HOU</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Houston</div>
+          </div>
+          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="hou.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        </div>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Daikin Park</span></span>
+        <span style="display:flex;align-items:center;gap:9px;flex:none">
+          
+          <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
+        </span>
+      </div>
+    </article>
+    <article style="position:relative;height:118px;overflow:hidden;background:#27251F;border-bottom:1px solid rgba(255,255,255,.16)">
+      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#FF5910;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:45%;background:#002D72;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <img src="nym.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="cws.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
+          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="nym.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <div style="min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">NYM</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">New York</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <div style="text-align:right;min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">CWS</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Chicago</div>
+          </div>
+          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="cws.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        </div>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Rate Field</span></span>
+        <span style="display:flex;align-items:center;gap:9px;flex:none">
+          
+          <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
+        </span>
+      </div>
+    </article>
+    <article style="position:relative;height:118px;overflow:hidden;background:#004687;border-bottom:1px solid rgba(255,255,255,.16)">
+      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#FA4616;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:45%;background:#0C2340;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <img src="det.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="kc.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
+          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="det.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <div style="min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">DET</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Detroit</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <div style="text-align:right;min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">KC</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Kansas City</div>
+          </div>
+          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="kc.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        </div>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Kauffman Stadium</span></span>
+        <span style="display:flex;align-items:center;gap:9px;flex:none">
+          
+          <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
+        </span>
+      </div>
+    </article>
+    <article style="position:relative;height:118px;overflow:hidden;background:#005A9C;border-bottom:1px solid rgba(255,255,255,.16)">
+      <div style="position:absolute;inset:0;width:calc(45% + 6px);background:#FFFFFF;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:calc(45% + 2px);background:#FDB827;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <div style="position:absolute;inset:0;width:45%;background:#27251F;clip-path:polygon(0 0, 100% 0, calc(100% - 38px) 100%, 0 100%)"></div>
+      <img src="pit.svg" alt="" style="position:absolute;left:-30px;top:-18px;height:166px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      <img src="lad.svg" alt="" style="position:absolute;right:-26px;top:-22px;height:172px;opacity:.09;filter:brightness(0) invert(1);pointer-events:none" />
+      
+      <div style="position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(45% - 24px)">
+          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="pit.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+          <div style="min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">PIT</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Pittsburgh</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <div style="text-align:right;min-width:0">
+            <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#FFFFFF">LAD</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Los Angeles</div>
+          </div>
+          <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="lad.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        </div>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:#0A0B0D">
+        <span style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:rgba(255,255,255,.74);overflow:hidden;white-space:nowrap"><span style="overflow:hidden;text-overflow:ellipsis">Dodger Stadium</span></span>
+        <span style="display:flex;align-items:center;gap:9px;flex:none">
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.5);padding:2px 4px 1px">FOX</span>
+          <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
+        </span>
+      </div>
+    </article>
+  </div>
+
+  <!-- Full-height poster, clipped down to the band. The wedge and the diagonal
+       are the same four-point path at two scales, so this ONE element is both
+       states — that is why the band can become the poster at all. -->
+  <div class="op-hero" style="position:absolute;inset:0;background:#DF4601;overflow:hidden;z-index:4;transform-origin:50% 191px">
+    <img src="bal.svg" alt="" style="position:absolute;right:-118px;bottom:-64px;height:420px;opacity:.17;filter:brightness(0) invert(1);pointer-events:none" />
+    <div style="position:absolute;inset:0;background:#FFFFFF;clip-path:polygon(0 0, 100% 0, 100% 27.6%, 0 69.8%)"></div>
+    <div style="position:absolute;inset:0;background:#092C5C;clip-path:polygon(0 0, 100% 0, 100% 26.7%, 0 68.9%)"></div>
+    <img src="tb.svg" alt="" style="position:absolute;left:-92px;top:-52px;height:400px;opacity:.17;filter:brightness(0) invert(1);pointer-events:none" />
+
+    <!-- The band's own type, sitting exactly where the feed had it. -->
+    <div class="op-bandtype" style="position:absolute;left:0;right:0;top:132px;height:118px">
+      <div style="position:absolute;left:18px;top:16px;display:flex;align-items:center;gap:10px">
+        <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="tb.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+        <div>
+          <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:44px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff">TB</div>
+          <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,.86);margin-top:5px">Tampa Bay</div>
+        </div>
+      </div>
+      <div style="position:absolute;right:18px;top:18px;display:flex;align-items:center;gap:10px">
+        <div style="text-align:right">
+          <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:39px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff">BAL</div>
+          <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,.86);margin-top:5px">Baltimore</div>
+        </div>
+        <span class="base" style="--nub:2.6px;--nubop:0.45;display:grid;place-items:center;width:48px;height:48px;padding:8px;flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="bal.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.08)" /></span>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:#0A0B0D">
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.82)">Oriole Park at Camden Yards</span>
+        <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE</span></span>
+      </div>
+    </div>
+
+    <div class="op-postertype">
+      <div style="position:absolute;left:22px;top:86px;display:flex;align-items:flex-start;gap:18px">
+        <span class="base" style="--nub:4.3px;--nubop:0.85;display:grid;place-items:center;width:104px;height:104px;padding:16px;box-shadow:0 3px 0 rgba(10,11,13,.42);flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="tb.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain" /></span>
+        <div style="padding-top:3px">
+          <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,255,255,.78);margin-bottom:9px">VISITOR</div>
+          <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:68%;font-variation-settings:'wdth' 68,'wght' 800;font-weight:800;font-size:25px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.86)">Tampa Bay</div>
+          <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:52px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;margin-top:2px">Rays</div>
+        </div>
+      </div>
+      <div style="position:absolute;left:0;right:0;top:344px;display:flex;justify-content:center">
+        <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:84%;font-variation-settings:'wdth' 84,'wght' 900;font-weight:900;font-size:118px;line-height:0.84;letter-spacing:0;word-spacing:0.09em;text-transform:uppercase;color:transparent;-webkit-text-stroke:2.5px rgba(255,255,255,.55)">@</span>
+      </div>
+      <div style="position:absolute;right:22px;top:434px;display:flex;align-items:flex-start;gap:18px">
+        <div style="text-align:right;padding-top:3px">
+          <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;color:rgba(255,255,255,.78);margin-bottom:9px">HOME</div>
+          <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:68%;font-variation-settings:'wdth' 68,'wght' 800;font-weight:800;font-size:25px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.86)">Baltimore</div>
+          <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:62%;font-variation-settings:'wdth' 62,'wght' 900;font-weight:900;font-size:52px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff;margin-top:2px">Orioles</div>
+        </div>
+        <span class="base" style="--nub:4.3px;--nubop:0.85;display:grid;place-items:center;width:104px;height:104px;padding:16px;box-shadow:0 3px 0 rgba(10,11,13,.42);flex:none"><span class="base-nubs"></span><span class="base-dirt"></span><span class="base-grain"></span><img src="bal.svg" alt="" style="position:relative;width:100%;height:100%;object-fit:contain" /></span>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0">
+        <div style="background:#0A0B0D;padding:14px 20px 13px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div style="min-width:0">
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#fff">6:05 PM CT</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.66);margin-top:4px">CAMDEN YARDS &#183; BALTIMORE</div>
+          </div>
+          <span style="display:flex;align-items:center;gap:6px;flex:none;background:#0A0B0D;padding:4px 7px 3px"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#E9DA00;display:inline-block;flex:none"></span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E9DA00">LIVE NOW</span></span>
+        </div>
+
+      <nav style="display:grid;grid-template-columns:repeat(5, minmax(0, 1fr));background:#0A0B0D;border-top:1px solid rgba(255,255,255,.16)">
+        
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:58px;">
+          <span style="width:18px;height:3px;background:#092C5C"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:15px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.5)">TB</span>
+          
+        </span>
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:58px;border-left:1px solid rgba(255,255,255,.12);">
+          <span style="width:18px;height:3px;background:#DF4601"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:15px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.5)">BAL</span>
+          
+        </span>
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:58px;border-left:1px solid rgba(255,255,255,.12);">
+          <span style="width:18px;height:3px;background:rgba(255,255,255,.16)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:15px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.5)">INNINGS</span>
+          
+        </span>
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:58px;border-left:1px solid rgba(255,255,255,.12);">
+          <span style="width:18px;height:3px;background:rgba(255,255,255,.16)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:15px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.5)">BOX</span>
+          
+        </span>
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:58px;border-left:1px solid rgba(255,255,255,.12);">
+          <span style="width:18px;height:3px;background:rgba(255,255,255,.16)"></span>
+          <span style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:76%;font-variation-settings:'wdth' 76,'wght' 800;font-weight:800;font-size:15px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,.5)">CARD</span>
+          
+        </span>
+      </nav>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
