@@ -651,6 +651,19 @@ export default defineConfig({
             method: 'GET',
           },
           {
+            // The per-batter season spray buckets (one file per `personId %
+            // 100`, ~6 MB across the league, so precaching them would put the
+            // whole set on an install to draw one man's card — the same
+            // rationale as the SPLITS VS TEAM rule above, and they are already
+            // opted out by the inverted globPatterns default). Every ball in
+            // them comes from a game that was Final before the nightly sweep
+            // touched it, so NetworkFirst is spoiler-safe: a fresh copy when
+            // online, the last good one at the park.
+            urlPattern: ({ url }) => url.pathname.startsWith('/data/spray/'),
+            handler: 'NetworkFirst',
+            method: 'GET',
+          },
+          {
             // The append-only Game Notes archive, one file per club (excluded
             // from precache above). NetworkFirst so the fresh daily copy wins
             // online but the lineup-page button still resolves offline from the

@@ -1,0 +1,312 @@
+/* ── Spray map ───────────────────────────────────────────────────────────────
+   The player page's season spray card (components/charts/SprayMap.jsx). It is
+   the hit chart's season-long cousin and it deliberately borrows that card's
+   dress — a manila ground, navy marks, medal amber for a home run, the clay-to-
+   amber ramp for heat — so the same batted ball reads the same wherever the app
+   draws it. It does NOT borrow that card's rules: 69-hit-chart.css namespaces
+   everything to `.hitchart`, and a card on a different page with a different
+   data footing (spoiler-free, no seal anywhere) gets its own partial rather
+   than a second meaning for those selectors.
+
+   ONE COLOUR RULE WORTH STATING. Kraft amber (--seal-*) is the cover over a
+   score you have not opened. It never appears here, on a control or anywhere
+   else, because nothing on this card is sealed — a lit chip is navy. */
+
+.spray {
+  overflow: hidden;
+  margin: 0 0 18px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* ---- Chips ---- */
+
+.spray__chiprow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) 14px 10px;
+}
+
+.spray__chiprow--switches {
+  flex-wrap: wrap;
+  padding-top: 10px;
+}
+
+.spray__chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease,
+    color var(--dur-fast) ease, transform var(--dur-fast) ease;
+}
+
+.spray__chip:active {
+  transform: scale(0.98);
+}
+
+.spray__chip:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.spray__chip--on {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+/* A split too thin to read is still offered — hiding it would leave the reader
+   guessing why one of the three is missing — but it is drawn back so the eye
+   goes to the two that carry a sample. It keeps its count, which is the whole
+   explanation. */
+.spray__chip--thin {
+  color: var(--text-caption);
+  border-style: dashed;
+}
+
+.spray__chip--thin.spray__chip--on {
+  color: var(--text-on-ink);
+  border-style: solid;
+}
+
+.spray__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-num);
+  opacity: 0.85;
+}
+
+.spray__switch {
+  width: 9px;
+  height: 9px;
+  border: var(--bw-hair) solid currentColor;
+  border-radius: 50%;
+}
+
+.spray__chip--on .spray__switch {
+  background: currentColor;
+}
+
+.spray__basis {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+}
+
+/* ---- The drawing ---- */
+
+.spray__plot {
+  padding: 0 14px;
+}
+
+.spray__field {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The nameless field. Every line is quiet on purpose: the ground is a
+   reference the marks sit on, not a subject. No distance label exists anywhere
+   in this drawing — see the component's header for why one would be a lie. */
+.spray__fence {
+  fill: none;
+  stroke: var(--border-rule);
+  stroke-width: 2.4;
+}
+
+.spray__foul {
+  fill: none;
+  stroke: var(--border-rule);
+  stroke-width: 1.6;
+}
+
+.spray__diamond {
+  fill: none;
+  stroke: var(--border-hairline);
+  stroke-width: 1.6;
+}
+
+.spray__mound {
+  fill: var(--border-hairline);
+}
+
+/* ---- The heat ---- */
+
+/* Clay into medal amber, run backwards: the sparsest cells are the palest
+   amber and the busiest are deep clay, so weight reads as heat. Five bands
+   rather than a continuous ramp because the cells are blurred into each other
+   anyway — the smoothing is the filter's job, not the palette's. */
+.spray__cell {
+  stroke: none;
+}
+
+.spray__cell--1 {
+  fill: var(--award-line);
+  opacity: 0.22;
+}
+
+.spray__cell--2 {
+  fill: var(--award-line);
+  opacity: 0.42;
+}
+
+.spray__cell--3 {
+  fill: var(--award-ink);
+  opacity: 0.48;
+}
+
+.spray__cell--4 {
+  fill: var(--clay);
+  opacity: 0.58;
+}
+
+.spray__cell--5 {
+  fill: var(--clay-deep);
+  opacity: 0.7;
+}
+
+/* ---- The marks ---- */
+
+.spray__dot {
+  fill: var(--accent-primary);
+  stroke: none;
+}
+
+/* An extra-base hit is the same ink, bigger, and ringed in paper so a cluster
+   of them in a gap still reads as separate balls. */
+.spray__dot--xbh {
+  stroke: var(--surface-inset);
+  stroke-width: 1.4;
+}
+
+.spray__hr {
+  fill: var(--award-ink);
+  stroke: var(--surface-inset);
+  stroke-width: 1.2;
+}
+
+/* ---- Key ---- */
+
+.spray__key {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 14px 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.spray__keyitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ---- Direction ---- */
+
+.spray__direction {
+  padding: var(--space-3) 14px 0;
+}
+
+/* ONE INK, THREE TINTS. Pull, centre and oppo are three parts of one whole, not
+   three categories — a second hue would invite the reader to compare them to
+   something outside the bar. */
+.spray__dirbar {
+  display: flex;
+  height: 14px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--border-hairline);
+}
+
+.spray__dirseg {
+  min-width: 0;
+  background: var(--accent-primary);
+}
+
+.spray__dirseg--pull {
+  opacity: 1;
+}
+
+.spray__dirseg--center {
+  opacity: 0.62;
+}
+
+.spray__dirseg--oppo {
+  opacity: 0.32;
+}
+
+.spray__dirlabels {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.spray__dirlabel b {
+  font-family: var(--font-mono);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+}
+
+/* "Pull" is a word about the batter, and this sentence is what stops a reader
+   having to work out which side of the field that is tonight. */
+.spray__dircaption {
+  margin: 6px 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+}
+
+/* ---- Facts + foot ---- */
+
+.spray .spray__facts {
+  margin: var(--space-3) 14px 0;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.spray__foot {
+  margin: 10px 0 0;
+  padding: 0 14px var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+}
+
+@media (min-width: 740px) {
+  /* A CEILING ON THE DRAWING, the same one the hit chart learned to want: the
+     plot is a percentage of its card, so on a wide player page the field grew
+     taller than a screen. Capping the plot centres it instead. */
+  .spray__plot {
+    max-width: 520px;
+    margin-inline: auto;
+  }
+}

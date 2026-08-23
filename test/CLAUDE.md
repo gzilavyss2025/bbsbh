@@ -120,6 +120,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | slate-scores.test.js | 13 | src/api/schedule.js, src/lib/slateScoreLine.js | Slate score line normalization |
 | spoiled-days.test.js | 21 | src/lib/spoiledDays.js | Spoiled-days consent persistence (ADR-0026) |
 | spoiler-gates.test.js | 4 | select.js, enteringHalf.js | Caller-gated pre-pitch rule |
+| spray.test.js | 43 | scripts/gen-spray.mjs, src/api/spray.js | The season spray map, both ends of the same stored row: the sweep's per-game fold and season merge, then the reader's split sums, spray-angle/direction math (the switch-hitter majority rule), the home-runs-without-a-landing-point footnote, and the two floors |
 | stamp-ink.test.js | 11 | src/lib/stampInk.js, contrast.js | Logbook stamp ink — the winner's darkest brand colour + its contrast floor (ADR-0036) |
 | stamps.test.js | 39 | src/lib/stamps.js | Logbook stamp rules — the reveal gate, tombstone sync merge, book placement (ADR-0035) |
 | standings.test.js | 15 | src/api/standings.js | Standings shaping/ranks |

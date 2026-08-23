@@ -235,6 +235,17 @@ jobs:
         id: pitch-arsenal
         continue-on-error: true
         run: node scripts/gen-pitch-arsenal.mjs
+      # The batter-side sibling of the step above, off the same two levels and
+      # the same trailing window: where every ball in play landed. It writes a
+      # DIRECTORY (public/data/spray/, one bucket per `personId % 100`) plus its
+      # own ingested-games ledger (scripts/data/spray-ingested.json), and BOTH
+      # are staged below — the ledger is what stops the next run re-sweeping the
+      # season, so committing the buckets without it would make every night a
+      # full backfill.
+      - name: Spray map
+        id: spray
+        continue-on-error: true
+        run: node scripts/gen-spray.mjs
       # The Ballpark card's own attendance file. Stateless like the Gate step
       # below and off the same hydrated schedule feed — it used to fetch a
       # boxscore per game (~1,900 requests, SQLite, an ingested-games table)
@@ -313,7 +324,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes public/data/war.json public/data/milb-alumni scripts/data/milb-alumni-scan.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/savant-matchup.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json public/data/player-contracts public/data/team-contracts public/data/salaries.json public/data/prospect-trend.json public/data/postseason-odds.json public/data/manager-history scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/attendance.json public/data/gate.json public/data/doubleheaders.json public/data/farm-system.json public/data/highlights public/data/team-records scripts/data/team-records.sql public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
+          git add public/data/game-notes public/data/war.json public/data/milb-alumni scripts/data/milb-alumni-scan.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/savant-matchup.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json public/data/player-contracts public/data/team-contracts public/data/salaries.json public/data/prospect-trend.json public/data/postseason-odds.json public/data/manager-history scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/spray scripts/data/spray-ingested.json public/data/attendance.json public/data/gate.json public/data/doubleheaders.json public/data/farm-system.json public/data/highlights public/data/team-records scripts/data/team-records.sql public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race — a concurrent push to main
@@ -359,6 +370,7 @@ jobs:
           steps.comeback-wins.outcome == 'failure' ||
           steps.jerseys.outcome == 'failure' ||
           steps.pitch-arsenal.outcome == 'failure' ||
+          steps.spray.outcome == 'failure' ||
           steps.attendance.outcome == 'failure' ||
           steps.gate.outcome == 'failure' ||
           steps.doubleheaders.outcome == 'failure' ||

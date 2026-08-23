@@ -345,7 +345,13 @@ const BUDGETS = {
   // +1 for 72-club-transactions.css, the club roster-move ledger page. Page-only
   // rules, so folding them into 29-team-transactions.css would put them in the
   // core sheet every other page loads.
-  'src/styles': 97,
+  // +1 for 73-spray-map.css, the player page's season spray card. Its two
+  // alternatives were both worse: 26-player-page.css has no headroom under its
+  // own 1200-line file-size budget, and 69-hit-chart.css — the card this one
+  // borrows its dress from — sits at 811 of 900 and namespaces every rule to
+  // `.hitchart`, so folding a differently-scoped card in there would give those
+  // selectors a second meaning AND need a file-size bump in the same breath.
+  'src/styles': 98,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -406,7 +412,12 @@ const BUDGETS = {
   // new module out of the thing that proves it carries a classification at all.
   // +1 for playerHoverCard.js — the hover card's lean data loader. Flat for
   // the check-spoiler-manifest reason above.
-  'src/api': 101,
+  // +1 for spray.js — the season spray map's bucket reader. Flat for the
+  // check-spoiler-manifest reason above, and it earns its own file rather than
+  // riding in hitchart.js precisely because the two carry OPPOSITE
+  // classifications: one game's batted balls are reveal-only, a season of them
+  // on the player page is not.
+  'src/api': 102,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -474,7 +485,13 @@ const BUDGETS = {
   // 87 -> 89 for check-fixture-freshness.mjs and check-feed-shape-drift.mjs,
   // the e2e mock-fixture guards — flat lint/cron scripts, same shape as
   // every other check-*.mjs already counted here.
-  scripts: 93,
+  //
+  // +1 for gen-spray.mjs — the nightly batted-ball sweep behind the player
+  // page's spray map. A generator RUNS on import, so it cannot live in
+  // scripts/lib/; it stays flat with every other gen-*.mjs, and its two pure
+  // halves are exported from it for the unit suite the way
+  // gen-pitch-arsenal.mjs already exports its own.
+  scripts: 94,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

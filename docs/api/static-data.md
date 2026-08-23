@@ -359,6 +359,36 @@ for each generator; the reader modules:
   `MIN_SIMILARITY_PITCHES` to enter the pool, `MIN_MATCH` below which a pairing
   is dropped — so an unusual arsenal returns a SHORT list or none rather than
   filler. See `.scratch/player-profile-card/scope.md` §4.
+- `spray.js` — one batter's season balls in play and where they landed, from
+  `public/data/spray/{NN}.json` (`gen-spray.mjs`, nightly, buckets on
+  `personId % 100`). Completed-game season aggregates over games that were
+  already DECIDED when the sweep touched them, so spoiler-free with no
+  `SealBox` — same footing as `war.js`/`pitchArsenal.js` (ADR-0034). Worth
+  stating out loud because the same COORDINATES are reveal-only in
+  `hitchart.js`: one game's batted balls ARE that game's result, a season of
+  them is not. The projection they share therefore lives in
+  `src/lib/ballpark/hitProjection.js`, so this open surface never imports the
+  reveal-only module.
+  **Two numbers per split, not one.** `p` holds one fixed-length row per ball
+  the park gave a landing point ( `[coordX, coordY, launchSpeed, result, hand,
+  side, level, pitcherId]` — positional because a season is ~190,000 rows and
+  eight spelled-out keys apiece quadruples the committed bytes); `o` holds the
+  per-pitcher-hand TOTALS, swept independently. They differ by about one ball in
+  two thousand, and home runs are among them — so `hrNote` prints "16 of 17 HR
+  had tracked landing points" rather than letting the card under-report a man's
+  season forever. `sprayView(data, personId)` assembles the card and returns
+  null under `MIN_SPRAY_BIP`; `MIN_SPLIT_BIP` grays a chip too thin to read
+  without hiding it. `directionMix` is the one piece with a rule you cannot
+  guess: pull is a fact about the BATTER, so a switch-hitter's All view has no
+  direction bar at all (two mirrored halves do not sum), while each split keeps
+  its own — decided by a MAJORITY of the sample rather than unanimity, since one
+  turned-around at-bat should not withhold the other 239. The stored
+  `pitcherId` is read by nothing today; it rides so a pitcher-side spray card
+  can share these shards instead of sweeping the season twice. Surface: the
+  player page's Analytics shelf, via `SprayMapSection.jsx` →
+  `charts/SprayMap.jsx`. Out of the PWA precache by the inverted
+  `globPatterns` default, with a `NetworkFirst` runtime rule in
+  `vite.config.js` beside the vs-team-splits and rookies ones.
 - `savantPercentiles.js` — season Statcast percentile ranks, from
   `public/data/savant-percentiles.json` (`gen-savant-percentiles.mjs`, nightly).
   MLB only; completed-game season aggregates, so spoiler-free with no `SealBox`

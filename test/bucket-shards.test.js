@@ -6,7 +6,7 @@ import { rookieShardKey } from '../src/api/rookies.js'
 import { warShardKey } from '../src/api/war.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 
-// Five datasets are now bucketed on `personId % 100`. The bucket is a JOIN: the
+// Six datasets are now bucketed on `personId % 100`. The bucket is a JOIN: the
 // generator files a record under a name the reader recomputes from an id alone,
 // so a record in the wrong bucket is a record that exists and can never be
 // found — and nothing fails loudly when that happens. These tests are that
@@ -32,6 +32,7 @@ for (const [name, pick] of [
   ['manager-history', (shard) => Object.keys(shard.byPersonId ?? {})],
   ['fouls', (shard) => [...Object.keys(shard.batters ?? {}), ...Object.keys(shard.pitchers ?? {})]],
   ['pitch-arsenal', (shard) => Object.keys(shard.pit ?? {})],
+  ['spray', (shard) => Object.keys(shard.bat ?? {})],
 ]) {
   test(`every ${name} record sits in the bucket its reader will ask for`, () => {
     const files = list(name)
@@ -72,6 +73,15 @@ test('a bucket stays small enough to be worth fetching alone', () => {
     ['manager-history', 30],
     ['fouls', 30],
     ['pitch-arsenal', 30],
+    // Four times its neighbours' ceiling, and deliberately: a spray bucket
+    // carries one ROW PER BALL IN PLAY rather than a handful of season totals,
+    // which is ~2,000 rows in the busiest bucket. The eight columns are already
+    // positional integers (see src/api/spray.js's header on why), so the only
+    // remaining trims would be dropping the stored pitcher id — which a
+    // pitcher-side card is meant to read — or losing a decimal off the
+    // coordinates. Measured largest at 122 KB; this ceiling leaves a season's
+    // remaining weeks room without letting the shape quietly double.
+    ['spray', 160],
   ]) {
     const largest = Math.max(...list(name).map((f) => statSync(new URL(f, dir(name))).size))
     assert.ok(largest < ceiling * 1024, `${name}: largest bucket is ${Math.round(largest / 1024)} KB`)

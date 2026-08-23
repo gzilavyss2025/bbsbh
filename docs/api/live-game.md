@@ -271,7 +271,12 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   projects Gameday's coordinate pixels into the ballpark drawing's own space at
   `HIT_COORD_FT_PER_UNIT` (2.51), a constant fitted against the feed's own
   carry distances and pinned by `test/hitchart.test.js` — the pin is the only
-  defence against a feed change silently shifting every dot. `throughHalfIndex`
+  defence against a feed change silently shifting every dot. That projection and
+  its constants now live a tier down in `src/lib/ballpark/hitProjection.js` and
+  are RE-EXPORTED here, so this module's API is unchanged: the player page's
+  season spray map (`src/api/spray.js`) draws on the same geometry from the OPEN
+  side of the spoiler line, and an open surface may not import a reveal-only
+  module — not even for four constants. `throughHalfIndex`
   clamps to `halfIndex <= revealedThrough`, one half tighter than the pre-pitch
   selectors, because a batted ball is the result rather than the staging for one
   (ADR-0051). A park that sends no `hitData` yields an empty array and the card

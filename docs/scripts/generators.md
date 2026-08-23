@@ -303,6 +303,42 @@ don't run these by hand.
   file, so a schema change like this needs an explicit `--since=` backfill
   covering the season to date, same as `gen-pitch-arsenal.mjs` needs for a
   new level.
+- `gen-spray.mjs` → `public/data/spray/{NN}.json` (per-batter buckets on
+  `personId % 100`) — the batter-side sibling of `gen-pitch-arsenal.mjs`: every
+  ball in play this season, with the raw Gameday landing coordinate, the exit
+  velocity, the result class, the pitcher's hand, the side the batter used that
+  time up, the level and the pitcher's id. Read by `src/api/spray.js` for the
+  player page's spray map. Same two levels and the same reason — landing
+  coordinates come from the PARK, and every MLB and AAA park is Hawk-Eye
+  tracked while AA and below carry none (measured: 4,409 of 4,411 balls in play
+  across four sampled windows had a landing point). Same sweep shape too:
+  trailing window (`--days`), `--since`/`--until` backfill, `--sports=` filter,
+  the postponed-replay `officialDate` dedup, bounded concurrency and periodic
+  checkpoints.
+  **Three things about it are its own.** (1) **The source is the FEED, not
+  Baseball Savant.** Savant's `hc_x`/`hc_y` are a different projection with a
+  different origin and scale; this repo has already verified the feed's
+  coordinate space and pinned it in `test/hitchart.test.js`, and running two
+  coordinate spaces in one app has a mirrored spray map as its failure mode.
+  (2) **The committed shards ARE the accumulator** — the one deliberate
+  departure from the SQLite layer its siblings use (ADR-0021). A season is
+  ~190,000 rows, and a `dumpGroup` TEXT dump of one row each is ~17 MB, nine
+  times the largest group on file and duplicating the JSON it would export
+  byte for byte. So each run reads the buckets back, folds the new games in and
+  rewrites them; the ingested-games ledger lives beside the SQL dumps at
+  `scripts/data/spray-ingested.json` and is what stops the next run re-sweeping
+  the season. **Both paths are staged by the nightly commit step** — buckets
+  without the ledger would make every night a full backfill.
+  (3) **The feed is fetched field-pruned**: a `fields=` allowlist cuts each
+  ~800 KB `feed/live` body to ~29 KB, which is what makes a whole-season
+  backfill 51 seconds instead of an hour. A decided game that yields no tracked
+  contact is counted and reported at the end for that reason — a silent zero is
+  how a 30x saving turns into an empty dataset nobody notices.
+  Two filters worth knowing: **decided games only, never today's**
+  (`abstractGameState === 'Final'` AND an officialDate strictly before today),
+  which is the card's whole spoiler footing; and `detailedState === 'Cancelled'`
+  is skipped, because twenty AAA games this season report as Final having never
+  reached the first inning.
 - `gen-attendance.mjs` → `public/data/attendance.json` — per-team, per-season
   HOME-game attendance: games counted, season total, average, high, low, and a
   SELLOUT count. An away game folds in nothing — attendance is a fact about the

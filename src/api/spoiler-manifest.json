@@ -291,7 +291,7 @@
     },
     "hitchart.js": {
       "class": "reveal-only",
-      "why": "The hit chart's batted balls. A dot IS a play outcome — one in the left-field seats is a home run, a cluster on the grass is a rally — so selectBattedBalls runs only inside a SealBox reveal or behind an explicit reveal gate. Its `throughHalfIndex` option is the clamp an inning page passes its own revealedThrough into, so the chart can never run ahead of the scorekeeper. The projection half (hitCoordToSvg and the three constants) reads no feed, but ships in this file so the geometry and its one consumer cannot drift. Both call sites are gated, each in the way its own page already gates everything else: the box score's is inside the single seal that page already lifts over the whole game (ADR-0049), and the inning page's passes its render-time revealedThrough as the clamp, so it can only ever draw halves the reader has committed (ADR-0051). The third importer takes ONE play's ball rather than a walk of the game (selectPlayBattedBall, for the flight card the play-by-play diamond opens) and needs no clamp of its own: computeHalfInningFeed already runs only inside its own half's SealBox reveal, and a ball from that half is the very result the reveal just handed over.",
+      "why": "The hit chart's batted balls. A dot IS a play outcome — one in the left-field seats is a home run, a cluster on the grass is a rally — so selectBattedBalls runs only inside a SealBox reveal or behind an explicit reveal gate. Its `throughHalfIndex` option is the clamp an inning page passes its own revealedThrough into, so the chart can never run ahead of the scorekeeper. The projection half (hitCoordToSvg and the three constants) reads no feed and now lives in lib/ballpark/hitProjection.js, re-exported from here so this module's API is unchanged: the player page's season spray map (spray.js) shares the geometry from the OPEN side of the spoiler line, and an open surface may not import a reveal-only module for four constants. Both call sites are gated, each in the way its own page already gates everything else: the box score's is inside the single seal that page already lifts over the whole game (ADR-0049), and the inning page's passes its render-time revealedThrough as the clamp, so it can only ever draw halves the reader has committed (ADR-0051). The third importer takes ONE play's ball rather than a walk of the game (selectPlayBattedBall, for the flight card the play-by-play diamond opens) and needs no clamp of its own: computeHalfInningFeed already runs only inside its own half's SealBox reveal, and a ball from that half is the very result the reveal just handed over.",
       "importers": [
         "screens/boxscore/revealBoxScore.js",
         "components/inning/HalfInning.jsx",
@@ -767,6 +767,10 @@
     "standings.js": {
       "class": "cutoff-gated",
       "why": "Standings W/L and runs ARE score-revealing, but a standings row is a league-wide aggregate, not one game's line, so it is not sealed. Safety comes entirely from the `date` the CALLER requests."
+    },
+    "spray.js": {
+      "class": "spoiler-free",
+      "why": "Static public/data/spray/{NN}.json — every batter's season balls in play and where they landed, swept by scripts/gen-spray.mjs from games that were already DECIDED (Final, and never today's). Same footing as war.js, fouls.js and pitchArsenal.js: a completed-game season aggregate on an open surface, no SealBox (ADR-0034). Worth stating because the same COORDINATES are reveal-only one file over — hitchart.js plots ONE game's batted balls, where a dot in the left-field seats is tonight's home run. The difference is the sweep, not the mark, which is why the shared projection was moved to lib/ballpark/hitProjection.js: an open surface may not import a reveal-only module, not even for four constants."
     },
     "staticJson.js": {
       "class": "spoiler-free",
