@@ -37,6 +37,9 @@
 .contractcard__salary > span,
 .contractcard__scorebug dt,
 .contractcard__ticker dt,
+.contractcard__factcaption,
+.contractcard__segyear,
+.contractcard__baryear,
 .contractcard__controlhead span {
   display: block;
   color: var(--text-caption);
@@ -144,6 +147,12 @@
   padding: 9px var(--space-4);
   background: color-mix(in srgb, var(--paper-3) 78%, var(--paper-2));
 }
+
+/* An odd last fact spans the pair rather than leaving a filled half-cell
+   beside it — the same reason the player page's Last Team fact goes wide. */
+.contractcard__ticker > div:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
 .contractcard__ticker dd {
   overflow: hidden;
   margin: 3px 0 0;
@@ -224,6 +233,204 @@
   font-style: normal;
   letter-spacing: var(--ls-label);
 }
+/* ---- the optioned caption ------------------------------------------------
+   A 40-man player sent down keeps his major-league deal; the figures here are
+   that deal, so the card says so rather than letting the reader assume the
+   number is what he draws in Nashville. */
+.contractcard__note {
+  margin: var(--space-3) var(--space-4) 0;
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+}
+
+/* ---- the runway ----------------------------------------------------------
+   The pre-arbitration card's lead: every season between this one and the
+   market, in order, with the dot colour saying who sets the salary. It is the
+   old club-control strip promoted from a footnote to the headline, which is
+   why it keeps that strip's node-on-a-rule drawing. */
+.contractcard__runway,
+.contractcard__schedule {
+  padding: var(--space-4);
+}
+.contractcard__runway--lead {
+  padding-top: var(--space-5);
+}
+.contractcard__strip {
+  display: grid;
+  grid-auto-columns: minmax(66px, 1fr);
+  grid-auto-flow: column;
+  overflow-x: auto;
+  margin: var(--space-3) 0 0;
+  padding: 0 0 var(--space-1);
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-rule) transparent;
+}
+.contractcard__seg {
+  --seg-dot: var(--text-caption);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 13px var(--space-2) 0 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.contractcard__seg::before {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  content: '';
+  background: var(--seg-dot);
+  border: var(--bw-hair) solid var(--paper-3);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--seg-dot) 14%, transparent);
+}
+.contractcard__seg--now {
+  --seg-dot: var(--accent-primary);
+}
+.contractcard__seg--arb {
+  --seg-dot: var(--accent-negative);
+}
+.contractcard__seg--option {
+  --seg-dot: var(--seal-cover);
+}
+.contractcard__seg--freeAgency {
+  --seg-dot: var(--accent-positive);
+}
+.contractcard__seg--guaranteed {
+  --seg-dot: var(--accent-primary);
+}
+.contractcard__segyear {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+}
+.contractcard__seg strong {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-compact);
+}
+.contractcard__seg em {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-style: normal;
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+}
+
+/* ---- the salary schedule -------------------------------------------------
+   One bar per season the sheet prices. The dashed zone is deliberately FLAT:
+   an option year has no salary until someone exercises it, so any height there
+   would be a number the card invented. */
+.contractcard__bars {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.contractcard__bar,
+.contractcard__open {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.contractcard__barvalue {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  line-height: var(--lh-solid);
+}
+.contractcard__bar--now .contractcard__barvalue {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.contractcard__barwell {
+  display: flex;
+  align-items: flex-end;
+  height: 72px;
+}
+.contractcard__barfill {
+  width: 100%;
+  min-height: 3px;
+  background: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.contractcard__bar--now .contractcard__barfill {
+  background: var(--accent-primary);
+}
+.contractcard__openzone {
+  height: 26px;
+  margin-top: auto;
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--seal) 12%, transparent) 0 4px,
+    transparent 4px 8px
+  );
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+.contractcard__baryear {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+}
+
+/* ---- the sentence --------------------------------------------------------
+   The one paragraph on the card. Lora, because this is the only place a
+   contract is explained in words rather than figures, and the serif reads at
+   this size under the app's uppercase invariant. */
+.contractcard__sentence {
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-4);
+  color: var(--text-muted);
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+.contractcard__foot {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+}
+.contractcard__factcaption {
+  margin-top: 3px;
+  letter-spacing: var(--ls-label);
+}
+.contractcard__tag {
+  margin-left: var(--space-2);
+  padding: 2px 5px;
+  color: var(--text-caption);
+  background: color-mix(in srgb, var(--seal) 14%, transparent);
+  border: var(--bw-hair) solid color-mix(in srgb, var(--seal) 45%, transparent);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  vertical-align: middle;
+}
+.contractcard__hero--mid .contractcard__salary strong {
+  font-size: var(--fs-hero-md);
+}
+
 @media (prefers-reduced-transparency: reduce) {
   .contractcard__frame {
     background: var(--surface-card);

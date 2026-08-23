@@ -1,7 +1,7 @@
 import { loadPlayerCore } from '../api/player/core.js'
 import { loadPlayerOverview } from '../api/player/overview.js'
 import { fetchPersonStats } from '../api/person-fetch.js'
-import { SPORT_LABEL } from '../lib/teams.js'
+import { SPORT_LABEL, isMlbTeamId } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { GameLink } from '../components/player/GameLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
@@ -97,7 +97,13 @@ export function PlayerPage({ id, asOf, sportId }) {
         )}
       </div>
 
-      <PlayerContractCard contract={data.contract} />
+      {/* A player with a major-league contract whose club is an affiliate is
+          optioned down, not a minor leaguer — the card labels its figures so
+          the deal is not read as what he draws at that level. */}
+      <PlayerContractCard
+        contract={data.contract}
+        optioned={Boolean(data.contract && bio.debut && club && !isMlbTeamId(club.id))}
+      />
 
       {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
 

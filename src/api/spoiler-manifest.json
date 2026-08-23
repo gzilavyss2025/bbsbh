@@ -418,6 +418,10 @@
       "class": "spoiler-free",
       "why": "Static salary, contract and club-control facts. Current-day player identity context with no game result; historical asOf pages deliberately do not fetch it."
     },
+    "person/contract/view.js": {
+      "class": "spoiler-free",
+      "why": "Pure view model over one contract record: which reading the card leads with, the club-control runway, the sentence and the salary schedule. Contract facts only, no game state at all."
+    },
     "person-fetch.js": {
       "class": "spoiler-free",
       "why": "The player page's bio/stats/firsts fetchers. Read by the player page only, never wired into a sealed game surface."
