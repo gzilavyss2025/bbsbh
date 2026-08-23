@@ -271,7 +271,7 @@ export function SprayMap({ view }) {
         <span className="spray__keyitem">
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
             <rect
-              className="spray__hr"
+              className="spray__hr spray__hr--key"
               x="4.4"
               y="4.4"
               width="9.2"

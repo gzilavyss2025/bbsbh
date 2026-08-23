@@ -83,12 +83,19 @@
   border-style: solid;
 }
 
+/* FULL STRENGTH, NO ALPHA. This is 11px text, and it held `opacity: .85` — which
+   on an ordinary chip was harmless (8.5:1) but on a THIN chip, where the label
+   ink is already --text-caption, composited to 3.86:1 against the card. Under
+   the 4.5:1 small text needs, and invisible to check-contrast.mjs, which
+   compares tokens and cannot see an alpha applied on top of one. The count is
+   the whole explanation for why a chip is grayed, so it is the last thing that
+   should be faded. --text-caption at full strength is 5.31:1, asserted there
+   now. */
 .spray__count {
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-num);
-  opacity: 0.85;
 }
 
 .spray__switch {
@@ -149,10 +156,15 @@
 
 /* ---- The heat ---- */
 
-/* Clay into medal amber, run backwards: the sparsest cells are the palest
-   amber and the busiest are deep clay, so weight reads as heat. Five bands
-   rather than a continuous ramp because the cells are blurred into each other
-   anyway — the smoothing is the filter's job, not the palette's. */
+/* Clay into medal amber, run backwards: the sparsest cells are the palest amber
+   and the busiest are deep clay, so weight reads as heat. Five bands rather than
+   a continuous ramp because the cells are blurred into each other anyway — the
+   smoothing is the filter's job, not the palette's.
+   --award-ink IS NOT IN THIS RAMP, and that is the point of the middle two
+   bands being clay. It used to be band 3, which made the heat under a medium
+   cluster the EXACT ink of the home-run diamond drawn on top of it: a mark at
+   1:1 against its own ground. Clay is the mark's neighbour in the palette, not
+   its twin. */
 .spray__cell {
   stroke: none;
 }
@@ -164,12 +176,12 @@
 
 .spray__cell--2 {
   fill: var(--award-line);
-  opacity: 0.42;
+  opacity: 0.38;
 }
 
 .spray__cell--3 {
-  fill: var(--award-ink);
-  opacity: 0.48;
+  fill: var(--clay);
+  opacity: 0.42;
 }
 
 .spray__cell--4 {
@@ -196,10 +208,30 @@
   stroke-width: 1.4;
 }
 
+/* THE PAPER RING IS LOAD-BEARING, not trim, and it is why it is three units
+   wide rather than the hairline it was.
+   The heat underneath is a blurred field, so it renders EVERY luminance between
+   the palest band and the darkest — not just the five. Medal amber cannot hold
+   3:1 against all of that from one side: a fill pale enough for the amber body
+   to read (--award-ink on the palest band, 4.59:1) is far too pale for a paper
+   ring, and a fill dark enough for the ring (paper on the hottest band, 3.91:1)
+   swallows the body. No single boundary colour spans it, and capping the ramp's
+   alpha makes it WORSE, not better — a lighter hottest fill weakens the ring
+   that is carrying the dark end.
+   So the diamond brings its own ground. The ring is an opaque paper band, the
+   mark's actual adjacent colour, and --award-ink on it is 5.75:1 wherever it
+   lands. Same device a map label's halo uses. A navy dot needs none of this: it
+   clears 3:1 against the hottest fill on its own (3.64:1). */
 .spray__hr {
   fill: var(--award-ink);
   stroke: var(--surface-inset);
-  stroke-width: 1.2;
+  stroke-width: 3;
+}
+
+/* The key's swatch sits on plain card at a sixth of the size — the ring there
+   is trim again, and at full width it would eat the diamond. */
+.spray__hr--key {
+  stroke-width: 1;
 }
 
 /* ---- Key ---- */
@@ -229,9 +261,18 @@
   padding: var(--space-3) 14px 0;
 }
 
-/* ONE INK, THREE TINTS. Pull, centre and oppo are three parts of one whole, not
-   three categories — a second hue would invite the reader to compare them to
-   something outside the bar. */
+/* ONE INK FAMILY, THREE REAL TOKENS. Pull, centre and oppo are three parts of
+   one whole, so they stay a monotone ramp — a second hue would invite the reader
+   to compare them to something outside the bar.
+   NOT THREE ALPHAS OF ONE TOKEN, which is what this was. Navy at 1 / .62 / .32
+   put the lightest segment at 1.84:1 against the bar and 2.44:1 against the
+   card, under the 3:1 a chart region has to hold to be perceivable at all — and
+   an alpha is exactly what check-contrast.mjs cannot see. Named tokens instead,
+   each measured against the card: --navy 13.4:1, --graphite 5.31:1,
+   --graphite-soft 3.06:1. (--rule, the obvious third, is 1.64:1 — LIGHTER than
+   the defect being fixed, so the ramp stops at --graphite-soft.) All three, and
+   the hairline between them, are asserted in check-contrast.mjs now, so no
+   retune can quietly walk them back down. */
 .spray__dirbar {
   display: flex;
   height: 14px;
@@ -242,19 +283,25 @@
 
 .spray__dirseg {
   min-width: 0;
-  background: var(--accent-primary);
+}
+
+/* A paper hairline between neighbours. Adjacent segments are only 1.6-2.5:1
+   against EACH OTHER — a monotone ramp cannot be otherwise — so the boundary is
+   carried by paper, which clears 3:1 against all three (14.2 / 5.6 / 3.3). */
+.spray__dirseg + .spray__dirseg {
+  border-left: var(--bw-hair) solid var(--surface-inset);
 }
 
 .spray__dirseg--pull {
-  opacity: 1;
+  background: var(--navy);
 }
 
 .spray__dirseg--center {
-  opacity: 0.62;
+  background: var(--graphite);
 }
 
 .spray__dirseg--oppo {
-  opacity: 0.32;
+  background: var(--graphite-soft);
 }
 
 .spray__dirlabels {
