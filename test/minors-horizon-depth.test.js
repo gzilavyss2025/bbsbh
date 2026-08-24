@@ -4,7 +4,7 @@
 // pinned here rather than only exercised through the async loader.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildDepthChart, promotionWatchFrom } from '../src/screens/team/data/loadMinors.js'
+import { buildDepthChart, promotionWatchFrom, statLineFor } from '../src/screens/team/data/loadMinors.js'
 
 function prospect(overrides) {
   return {
@@ -74,4 +74,38 @@ test('promotionWatchFrom ranks by current standing, not by how far it moved, and
   ]
   const watch = promotionWatchFrom(prospects, 2)
   assert.deepEqual(watch.map((p) => p.playerId), [2, 3])
+})
+
+test('statLineFor builds W-L/ERA/K/WHIP for a pitcher', () => {
+  const stats = statLineFor('RHP', {
+    pitching: { wins: 8, losses: 3, era: 3.451, strikeOuts: 97, whip: 1.182 },
+  })
+  assert.deepEqual(stats, [
+    { k: 'W-L', v: '8-3' },
+    { k: 'ERA', v: '3.45' },
+    { k: 'K', v: '97' },
+    { k: 'WHIP', v: '1.18' },
+  ])
+})
+
+test('statLineFor builds AVG/HR/RBI/OPS for a hitter, with no leading zero on rate stats', () => {
+  const stats = statLineFor('SS', {
+    hitting: { avg: 0.2724, homeRuns: 13, rbi: 80, ops: 0.9615 },
+  })
+  assert.deepEqual(stats, [
+    { k: 'AVG', v: '.272' },
+    { k: 'HR', v: '13' },
+    { k: 'RBI', v: '80' },
+    { k: 'OPS', v: '.962' },
+  ])
+})
+
+test('statLineFor keeps a whole-number OPS at or above 1.000 intact', () => {
+  const stats = statLineFor('OF', { hitting: { avg: 0.31, homeRuns: 5, rbi: 20, ops: 1.021 } })
+  assert.equal(stats.find((s) => s.k === 'OPS').v, '1.021')
+})
+
+test('statLineFor returns null with no pool row, or no line for the player\'s own group', () => {
+  assert.equal(statLineFor('RHP', null), null)
+  assert.equal(statLineFor('RHP', { pitching: null, hitting: { avg: 0.3 } }), null)
 })

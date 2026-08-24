@@ -6,7 +6,7 @@ import {
   fetchRosterIdsForTeams,
   fetchTeamRosterIds,
 } from '../../../api/team.js'
-import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap } from '../../../api/prospects.js'
+import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, isPitcher } from '../../../api/prospects.js'
 import { fetchProspectTrend, prospectTrendById, standingLabel, movementState } from '../../../api/prospectTrend.js'
 import { loadRehabAssignments } from '../../../api/rehab.js'
 import { parentOrgHistory } from '../../../api/milbHistory.js'
@@ -16,6 +16,47 @@ import { SPORT_LABEL } from '../../../lib/teams.js'
 import { seasonOf, affiliateCardsFrom } from './shared.js'
 
 const DASH = '—'
+
+// Same rate-stat formatting prospects.js's own statLineFrom uses (three
+// decimals, no leading zero — an OPS over 1.000 is left alone since the
+// regex only strips a leading zero immediately before the decimal point) —
+// kept as its own copy rather than an import for two formatters, same
+// cross-boundary-constant convention prospects.js's own header describes.
+function rate3(v) {
+  return Number.isFinite(v) ? v.toFixed(3).replace(/^(-?)0(?=\.)/, '$1') : null
+}
+function num2(v) {
+  return Number.isFinite(v) ? v.toFixed(2) : null
+}
+
+// The Horizon card's real season line for one prospect — W-L/ERA/K/WHIP for
+// a pitcher, AVG/HR/RBI/OPS for a hitter — off the same org-wide combined
+// stats pool (combineToPool, statsLevels.js) the unresolved-level fallback
+// below already sums ACROSS every level the player has appeared at this
+// season, so a midseason promotion doesn't fragment his line. `null` when
+// the pool has no row for him at all (released, foreign-league loanee, or
+// simply hasn't debuted at a full-season affiliate this year).
+export function statLineFor(position, statRow) {
+  if (!statRow) return null
+  if (isPitcher(position)) {
+    const t = statRow.pitching
+    if (!t) return null
+    return [
+      { k: 'W-L', v: `${t.wins}-${t.losses}` },
+      { k: 'ERA', v: num2(t.era) },
+      { k: 'K', v: String(t.strikeOuts) },
+      { k: 'WHIP', v: num2(t.whip) },
+    ]
+  }
+  const t = statRow.hitting
+  if (!t) return null
+  return [
+    { k: 'AVG', v: rate3(t.avg) },
+    { k: 'HR', v: String(t.homeRuns) },
+    { k: 'RBI', v: String(t.rbi) },
+    { k: 'OPS', v: rate3(t.ops) },
+  ]
+}
 
 // Position order the Depth Chart's pill row reads in, an infield-out-to-the-
 // mound walk of the diamond rather than the scrape's own alphabetical field
@@ -132,17 +173,16 @@ export async function loadMinors(id, asOf) {
     affiliateById.set(orgId, { id: orgId, sportId: 1, name: isMilb ? team.parentOrgName : team.name })
   }
   const orgProspectRows = orgId ? orgProspectsForTeam(prospectsSnapshot.orgProspects, orgId) : []
-  // Roster membership (above) still misses anyone not on ANY org 40-man roster
-  // right now (released, a stint between assignments, or a foreign-league
-  // loanee). For exactly those, fall back to THIS season's stats across the
-  // org's affiliates + MLB roster: combineToPool already resolves a player's
-  // identity to his highest level reached (lowest sportId), so it can find
-  // the real current level a roster snapshot can't — only fetched when at
-  // least one prospect actually needs it.
-  const unresolvedIds = orgProspectRows
-    .filter((p) => !affiliateByPlayer.has(p.playerId))
-    .map((p) => p.playerId)
-  const statsPoolByPlayer = unresolvedIds.length
+  // This org's combined season stats pool (combineToPool, statsLevels.js) —
+  // two jobs share it. Roster membership (above) still misses anyone not on
+  // ANY org 40-man roster right now (released, a stint between assignments,
+  // a foreign-league loanee); for exactly those, combineToPool's own
+  // highest-level-reached resolution finds the real current level a roster
+  // snapshot can't. The Horizon card's real stat lines (statLineFor above)
+  // need the same pool for every ranked prospect, not only the unresolved
+  // ones, so this is no longer gated to "only when someone's unresolved" —
+  // fetched whenever this org has a ranked prospect pool at all.
+  const statsPoolByPlayer = orgProspectRows.length
     ? new Map(
         (await loadCombinedPoolForTeams([...affiliateById.values()].map((t) => ({ id: t.id })), season)).map(
           (p) => [p.id, p],
@@ -170,9 +210,11 @@ export async function loadMinors(id, asOf) {
     // yet) or short of the qualification floor — those rows just don't carry
     // a trend, rather than a misleading zero.
     const entry = prospectTrendById(trendSnapshot, p.playerId)
-    if (!entry?.qualified) return { ...p, trend: null }
+    const stats = statLineFor(p.position, statsPoolByPlayer.get(p.playerId))
+    if (!entry?.qualified) return { ...p, trend: null, stats }
     return {
       ...p,
+      stats,
       trend: {
         percentile: entry.percentile,
         group: entry.group,
