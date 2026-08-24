@@ -38,6 +38,18 @@ function shortDate(apiDate) {
   })
 }
 
+// levelTenure.js hands back plain numbers (sampleSize/median in PA or outs);
+// the sentence lives here, same split prospectTrend.js's own local
+// movementLabel keeps — the api layer stays pure facts, the component turns
+// them into words.
+function tenureLabel(tenure) {
+  if (!tenure) return null
+  const amount = tenure.unit === 'outs' ? `${outsToIp(tenure.sampleSize)} IP` : `${tenure.sampleSize} PA`
+  const medianAmount = tenure.unit === 'outs' ? `${outsToIp(tenure.median)} IP` : `${tenure.median} PA`
+  if (tenure.pct >= 100) return `${amount} — already past a typical stay here (median ${medianAmount})`
+  return `${amount} — about ${tenure.pct}% of a typical stay here (median ${medianAmount})`
+}
+
 function movementLabel(movement) {
   const state = movementState(movement)
   if (!state) return null
@@ -111,6 +123,7 @@ function EmptyStanding({ level }) {
 }
 
 function EarlyStanding({ view, level }) {
+  const tenure = tenureLabel(view.tenure)
   return (
     <div className="prospectcard__empty">
       <span className="prospectcard__emptylabel">{view.metric}{level ? ` vs ${level}` : ''}</span>
@@ -119,6 +132,7 @@ function EarlyStanding({ view, level }) {
         {sampleSizeLabel(view.metric, view.floor)} needed to join the qualified {level ? `${level} ` : ''}
         {comparisonGroup(view.metric)} population.
       </span>
+      {tenure && <span className="prospectcard__emptynote">{tenure}</span>}
     </div>
   )
 }
@@ -175,6 +189,12 @@ function QualifiedStanding({ view, level }) {
             <dt>Standing band</dt>
             <dd>{view.tierLabel}</dd>
           </div>
+          {view.tenure && (
+            <div className="prospectcard__fact">
+              <dt>Time at level</dt>
+              <dd>{tenureLabel(view.tenure)}</dd>
+            </div>
+          )}
         </dl>
       </div>
 

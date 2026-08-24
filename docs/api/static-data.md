@@ -682,6 +682,18 @@ for each generator; the reader modules:
   same names. Higher is always better: `percentileRank` inverts ERA before the
   UI receives it. A move under five percentile points reads as `Steady` on both
   surfaces because one game can cause a small percentile wobble.
+- `levelTenure.js` — bbsbh's OWN level-tenure benchmark, from
+  `public/data/level-tenure-benchmark.json` (`gen-level-tenure-benchmark.mjs`,
+  hand-run — see the generator catalog and `docs/level-tenure-benchmark.md`).
+  Answers a different question than `prospectTrend.js`: not how well a
+  prospect is hitting/pitching, but how far his current sample sits into a
+  TYPICAL STAY at his level — `tenureFact` compares his current PA/outs
+  (the same count `prospectTrend.js`'s `sampleSize` already carries, so the
+  two never disagree) against the historical cohort's median, expressed as a
+  plain percent ("about 62% of a typical AA stay"). `ProspectCard` renders it
+  as a "Time at level" fact beside the performance standing, in both the
+  qualified and early-sample states — it's most useful in the early state,
+  where it explains WHY the sample is still small rather than just saying so.
 
 - `gamePhotos.js` — the unsealed Game Photos page's (`/photos`) high-res photo
   finder, from the same `/api/v1/game/{gamePk}/content` endpoint `highlights.js`

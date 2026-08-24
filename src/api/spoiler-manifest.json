@@ -680,6 +680,10 @@
       "class": "caller-gated",
       "why": "The pre-half strip shown ABOVE a half's seal — what a broadcast would tell you as the half begins, before any of its results. It OWNS the gate for the checkpoint/tto/inning builders it calls."
     },
+    "levelTenure.js": {
+      "class": "spoiler-free",
+      "why": "Static level-tenure-benchmark reader — how much playing time a typical prospect accumulates at a MiLB level before promotion, from a historical debut cohort. Season aggregate, not game state."
+    },
     "prospectTrend.js": {
       "class": "spoiler-free",
       "why": "Static prospect-trend reader — a level-relative OPS/ERA percentile computed from season stat splits. Season aggregate, not game state."

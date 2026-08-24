@@ -24,6 +24,7 @@ import {
   similarPitchersFor,
 } from '../pitchArsenal.js'
 import { fetchProspectTrend, prospectTrendById, prospectCardView } from '../prospectTrend.js'
+import { fetchLevelTenure, tenureFact } from '../levelTenure.js'
 import {
   advancedHittingView,
   advancedPitchingView,
@@ -41,9 +42,10 @@ export async function loadPlayerAnalytics(id, asOf) {
 
   // Statcast percentile ranks and the league-wide pitch mix are both same-origin
   // static files, session-cached after the first read anywhere in the app.
-  const [savantData, prospectTrend] = await Promise.all([
+  const [savantData, prospectTrend, levelTenure] = await Promise.all([
     fetchSavantPercentiles(),
     fetchProspectTrend(),
+    fetchLevelTenure(),
   ])
 
   const blocks = await Promise.all(
@@ -131,12 +133,16 @@ export async function loadPlayerAnalytics(id, asOf) {
   // PRIMARY group, so an untracked prospect's page isn't silently blank in a
   // DIFFERENT way than before.
   const trendEntry = prospectTrendById(prospectTrend, bio.id)
+  const tenure = trendEntry
+    ? tenureFact(levelTenure, trendEntry.sportId, trendEntry.group, trendEntry.sampleSize)
+    : null
   const prospectCard =
     currentActivitySportId !== 1
       ? prospectCardView(
           trendEntry,
           typeof bio.age === 'number' ? bio.age : null,
           prospectTrend?.levelAverageAge?.[currentActivitySportId] ?? null,
+          tenure,
         )
       : null
 

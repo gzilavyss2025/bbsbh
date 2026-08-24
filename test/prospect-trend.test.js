@@ -275,7 +275,17 @@ test('prospectCardView is state "unqualified" with the real count and floor', ()
     sampleSize: 22,
     floor: 40,
     ageEdge: { years: 2.1, direction: 'younger' },
+    tenure: null,
   })
+})
+
+test('prospectCardView threads a caller-supplied tenure fact through untouched, in both unqualified and qualified states', () => {
+  const tenure = { sampleSize: 22, median: 332, pct: 7, unit: 'pa', n: 318 }
+  const unqualified = { group: 'hitting', qualified: false, sampleSize: 22, populationSize: 84 }
+  assert.deepEqual(prospectCardView(unqualified, 19, 21.1, tenure).tenure, tenure)
+
+  const qualified = { group: 'hitting', sportId: 12, percentile: 93, qualified: true, sampleSize: 150, populationSize: 84 }
+  assert.deepEqual(prospectCardView(qualified, 19, 21.1, tenure).tenure, tenure)
 })
 
 test('prospectCardView is state "qualified" with tier, confidence, and trend all derived', () => {
