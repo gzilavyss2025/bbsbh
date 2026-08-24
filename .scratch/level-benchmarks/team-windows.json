@@ -1,0 +1,586 @@
+{
+  "minN": 8,
+  "byLevel": {
+    "A": [],
+    "High-A": [
+      {
+        "name": "Baltimore Orioles",
+        "n": 10,
+        "p25": 82,
+        "median": 96,
+        "p75": 280
+      },
+      {
+        "name": "Atlanta Braves",
+        "n": 13,
+        "p25": 99,
+        "median": 118,
+        "p75": 308
+      },
+      {
+        "name": "Los Angeles Angels",
+        "n": 11,
+        "p25": 70,
+        "median": 124,
+        "p75": 344
+      },
+      {
+        "name": "Philadelphia Phillies",
+        "n": 8,
+        "p25": 102,
+        "median": 169,
+        "p75": 357
+      },
+      {
+        "name": "Tampa Bay Rays",
+        "n": 18,
+        "p25": 81,
+        "median": 180,
+        "p75": 363
+      },
+      {
+        "name": "Washington Nationals",
+        "n": 12,
+        "p25": 88,
+        "median": 185,
+        "p75": 365
+      },
+      {
+        "name": "Milwaukee Brewers",
+        "n": 13,
+        "p25": 239,
+        "median": 258,
+        "p75": 456
+      },
+      {
+        "name": "Boston Red Sox",
+        "n": 12,
+        "p25": 111,
+        "median": 263,
+        "p75": 320
+      },
+      {
+        "name": "Minnesota Twins",
+        "n": 20,
+        "p25": 168,
+        "median": 279,
+        "p75": 369
+      },
+      {
+        "name": "Arizona Diamondbacks",
+        "n": 12,
+        "p25": 140,
+        "median": 280,
+        "p75": 640
+      },
+      {
+        "name": "Chicago White Sox",
+        "n": 13,
+        "p25": 99,
+        "median": 286,
+        "p75": 370
+      },
+      {
+        "name": "New York Yankees",
+        "n": 14,
+        "p25": 59,
+        "median": 301,
+        "p75": 592
+      },
+      {
+        "name": "Cincinnati Reds",
+        "n": 14,
+        "p25": 133,
+        "median": 307,
+        "p75": 363
+      },
+      {
+        "name": "San Francisco Giants",
+        "n": 8,
+        "p25": 105,
+        "median": 312,
+        "p75": 384
+      },
+      {
+        "name": "Los Angeles Dodgers",
+        "n": 18,
+        "p25": 159,
+        "median": 321,
+        "p75": 361
+      },
+      {
+        "name": "St. Louis Cardinals",
+        "n": 8,
+        "p25": 270,
+        "median": 322,
+        "p75": 385
+      },
+      {
+        "name": "Chicago Cubs",
+        "n": 16,
+        "p25": 262,
+        "median": 323,
+        "p75": 402
+      },
+      {
+        "name": "Pittsburgh Pirates",
+        "n": 12,
+        "p25": 123,
+        "median": 323,
+        "p75": 379
+      },
+      {
+        "name": "Cleveland Indians",
+        "n": 14,
+        "p25": 166,
+        "median": 333,
+        "p75": 538
+      },
+      {
+        "name": "Colorado Rockies",
+        "n": 12,
+        "p25": 167,
+        "median": 362,
+        "p75": 367
+      },
+      {
+        "name": "Houston Astros",
+        "n": 18,
+        "p25": 290,
+        "median": 396,
+        "p75": 669
+      },
+      {
+        "name": "Texas Rangers",
+        "n": 10,
+        "p25": 211,
+        "median": 412,
+        "p75": 489
+      },
+      {
+        "name": "Toronto Blue Jays",
+        "n": 10,
+        "p25": 354,
+        "median": 608,
+        "p75": 710
+      },
+      {
+        "name": "San Diego Padres",
+        "n": 10,
+        "p25": 288,
+        "median": 687,
+        "p75": 763
+      },
+      {
+        "name": "Kansas City Royals",
+        "n": 14,
+        "p25": 380,
+        "median": 690,
+        "p75": 759
+      }
+    ],
+    "AA": [
+      {
+        "name": "Chicago Cubs",
+        "n": 19,
+        "p25": 95,
+        "median": 161,
+        "p75": 718
+      },
+      {
+        "name": "Kansas City Royals",
+        "n": 18,
+        "p25": 115,
+        "median": 211,
+        "p75": 418
+      },
+      {
+        "name": "Los Angeles Angels",
+        "n": 18,
+        "p25": 65,
+        "median": 212,
+        "p75": 386
+      },
+      {
+        "name": "Baltimore Orioles",
+        "n": 16,
+        "p25": 73,
+        "median": 279,
+        "p75": 435
+      },
+      {
+        "name": "Washington Nationals",
+        "n": 9,
+        "p25": 70,
+        "median": 285,
+        "p75": 410
+      },
+      {
+        "name": "Houston Astros",
+        "n": 16,
+        "p25": 93,
+        "median": 312,
+        "p75": 393
+      },
+      {
+        "name": "Atlanta Braves",
+        "n": 18,
+        "p25": 79,
+        "median": 313,
+        "p75": 377
+      },
+      {
+        "name": "San Francisco Giants",
+        "n": 8,
+        "p25": 100,
+        "median": 313,
+        "p75": 352
+      },
+      {
+        "name": "Philadelphia Phillies",
+        "n": 12,
+        "p25": 106,
+        "median": 317,
+        "p75": 390
+      },
+      {
+        "name": "Cincinnati Reds",
+        "n": 14,
+        "p25": 82,
+        "median": 318,
+        "p75": 375
+      },
+      {
+        "name": "Detroit Tigers",
+        "n": 10,
+        "p25": 118,
+        "median": 321,
+        "p75": 410
+      },
+      {
+        "name": "St. Louis Cardinals",
+        "n": 10,
+        "p25": 121,
+        "median": 330,
+        "p75": 484
+      },
+      {
+        "name": "Miami Marlins",
+        "n": 9,
+        "p25": 175,
+        "median": 337,
+        "p75": 359
+      },
+      {
+        "name": "Cleveland Indians",
+        "n": 25,
+        "p25": 124,
+        "median": 337,
+        "p75": 421
+      },
+      {
+        "name": "Pittsburgh Pirates",
+        "n": 17,
+        "p25": 143,
+        "median": 340,
+        "p75": 446
+      },
+      {
+        "name": "New York Mets",
+        "n": 12,
+        "p25": 114,
+        "median": 341,
+        "p75": 505
+      },
+      {
+        "name": "San Diego Padres",
+        "n": 9,
+        "p25": 182,
+        "median": 344,
+        "p75": 454
+      },
+      {
+        "name": "New York Yankees",
+        "n": 16,
+        "p25": 144,
+        "median": 350,
+        "p75": 396
+      },
+      {
+        "name": "Arizona Diamondbacks",
+        "n": 21,
+        "p25": 105,
+        "median": 351,
+        "p75": 427
+      },
+      {
+        "name": "Colorado Rockies",
+        "n": 13,
+        "p25": 336,
+        "median": 360,
+        "p75": 434
+      },
+      {
+        "name": "Toronto Blue Jays",
+        "n": 11,
+        "p25": 199,
+        "median": 363,
+        "p75": 438
+      },
+      {
+        "name": "Texas Rangers",
+        "n": 12,
+        "p25": 93,
+        "median": 366,
+        "p75": 479
+      },
+      {
+        "name": "Boston Red Sox",
+        "n": 14,
+        "p25": 244,
+        "median": 367,
+        "p75": 420
+      },
+      {
+        "name": "Los Angeles Dodgers",
+        "n": 22,
+        "p25": 330,
+        "median": 368,
+        "p75": 655
+      },
+      {
+        "name": "Oakland Athletics",
+        "n": 12,
+        "p25": 113,
+        "median": 388,
+        "p75": 507
+      },
+      {
+        "name": "Minnesota Twins",
+        "n": 16,
+        "p25": 226,
+        "median": 402,
+        "p75": 438
+      },
+      {
+        "name": "Tampa Bay Rays",
+        "n": 19,
+        "p25": 314,
+        "median": 428,
+        "p75": 669
+      },
+      {
+        "name": "Milwaukee Brewers",
+        "n": 14,
+        "p25": 182,
+        "median": 437,
+        "p75": 651
+      },
+      {
+        "name": "Chicago White Sox",
+        "n": 14,
+        "p25": 277,
+        "median": 452,
+        "p75": 685
+      },
+      {
+        "name": "Seattle Mariners",
+        "n": 13,
+        "p25": 283,
+        "median": 454,
+        "p75": 629
+      }
+    ],
+    "AAA": [
+      {
+        "name": "Cincinnati Reds",
+        "n": 15,
+        "p25": 47,
+        "median": 82,
+        "p75": 276
+      },
+      {
+        "name": "New York Yankees",
+        "n": 9,
+        "p25": 45,
+        "median": 107,
+        "p75": 253
+      },
+      {
+        "name": "Colorado Rockies",
+        "n": 11,
+        "p25": 72,
+        "median": 141,
+        "p75": 307
+      },
+      {
+        "name": "Chicago Cubs",
+        "n": 18,
+        "p25": 44,
+        "median": 155,
+        "p75": 403
+      },
+      {
+        "name": "Miami Marlins",
+        "n": 9,
+        "p25": 109,
+        "median": 159,
+        "p75": 295
+      },
+      {
+        "name": "New York Mets",
+        "n": 10,
+        "p25": 38,
+        "median": 167,
+        "p75": 347
+      },
+      {
+        "name": "Chicago White Sox",
+        "n": 11,
+        "p25": 59,
+        "median": 191,
+        "p75": 271
+      },
+      {
+        "name": "Tampa Bay Rays",
+        "n": 14,
+        "p25": 87,
+        "median": 197,
+        "p75": 331
+      },
+      {
+        "name": "Pittsburgh Pirates",
+        "n": 18,
+        "p25": 47,
+        "median": 216,
+        "p75": 395
+      },
+      {
+        "name": "Oakland Athletics",
+        "n": 12,
+        "p25": 126,
+        "median": 238,
+        "p75": 311
+      },
+      {
+        "name": "Baltimore Orioles",
+        "n": 15,
+        "p25": 97,
+        "median": 243,
+        "p75": 325
+      },
+      {
+        "name": "Kansas City Royals",
+        "n": 18,
+        "p25": 57,
+        "median": 254,
+        "p75": 341
+      },
+      {
+        "name": "San Diego Padres",
+        "n": 8,
+        "p25": 52,
+        "median": 254,
+        "p75": 280
+      },
+      {
+        "name": "Atlanta Braves",
+        "n": 16,
+        "p25": 102,
+        "median": 258,
+        "p75": 375
+      },
+      {
+        "name": "Detroit Tigers",
+        "n": 14,
+        "p25": 85,
+        "median": 262,
+        "p75": 376
+      },
+      {
+        "name": "Arizona Diamondbacks",
+        "n": 19,
+        "p25": 122,
+        "median": 265,
+        "p75": 336
+      },
+      {
+        "name": "Cleveland Indians",
+        "n": 23,
+        "p25": 79,
+        "median": 269,
+        "p75": 325
+      },
+      {
+        "name": "Boston Red Sox",
+        "n": 15,
+        "p25": 103,
+        "median": 270,
+        "p75": 367
+      },
+      {
+        "name": "Los Angeles Dodgers",
+        "n": 19,
+        "p25": 190,
+        "median": 284,
+        "p75": 365
+      },
+      {
+        "name": "St. Louis Cardinals",
+        "n": 13,
+        "p25": 246,
+        "median": 287,
+        "p75": 366
+      },
+      {
+        "name": "Los Angeles Angels",
+        "n": 14,
+        "p25": 78,
+        "median": 300,
+        "p75": 393
+      },
+      {
+        "name": "Minnesota Twins",
+        "n": 13,
+        "p25": 33,
+        "median": 308,
+        "p75": 360
+      },
+      {
+        "name": "Houston Astros",
+        "n": 16,
+        "p25": 88,
+        "median": 326,
+        "p75": 466
+      },
+      {
+        "name": "Washington Nationals",
+        "n": 8,
+        "p25": 21,
+        "median": 334,
+        "p75": 480
+      },
+      {
+        "name": "Toronto Blue Jays",
+        "n": 8,
+        "p25": 94,
+        "median": 339,
+        "p75": 449
+      },
+      {
+        "name": "Milwaukee Brewers",
+        "n": 16,
+        "p25": 54,
+        "median": 387,
+        "p75": 544
+      },
+      {
+        "name": "Texas Rangers",
+        "n": 9,
+        "p25": 45,
+        "median": 476,
+        "p75": 533
+      }
+    ]
+  }
+}

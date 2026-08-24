@@ -93,22 +93,35 @@ PR that ships v1 — republish target if the link goes stale: ask for the
   it. A player's very FIRST level's arrival date is still undated (would need
   extended-spring-training reconstruction).
 - **Team-level comparisons and bust framing are both out of scope for v1.**
-  Team duration now rests on a real historical org sweep (not the current-
-  affiliate-file approximation), which makes it more promising than it first
-  looked — a candidate for v2. Busts (players who never graduated) are a
-  different, harder cohort: no clean "end of career" signal for someone
-  released or still active. Unbuilt.
+  Team duration rests on a real historical org sweep (not the current-
+  affiliate-file approximation): season-by-season `parentOrgId` from
+  `/api/v1/teams`, joined to each player's own minor-league team per stint.
+  **Result: not ready for a per-team engine yet.** Org medians spread widely
+  at every level with enough n (AAA: Reds 82d vs. Rangers 476d, n=8–27 per
+  org) — real signal, not noise, per `docs/team-movement-windows.md`. But
+  each org's own p25–p75 window is wide enough on this cohort that **zero of
+  the 25–30 orgs per level sit fully outside the pooled p25–p75 window** —
+  the spread between orgs is smaller than the spread within one org. A
+  reader could not yet tell "the Reds move players fast" from "this Reds
+  player happened to move fast." Needs either a wider cohort (more seasons,
+  at the cost of reaching further from current practice) or a different
+  estimator than a per-org median before it ships as a range. A-level has no
+  org cut at all — see the note above on undated first-level arrivals.
+  Busts (players who never graduated) are a different, harder cohort: no
+  clean "end of career" signal for someone released or still active.
+  Unbuilt.
 
 ## Where the work lives
 
 The pull/analyze/date-resolution scripts (not committed as app code — this
-was a research spike) are in `.scratch/level-benchmarks/` on the
-`claude/level-benchmarks-research` branch: `pull.mjs` (cohort + yearByYear
-sweep → `raw.json`), `analyze.mjs` (reconstruction + ordering validation →
-`findings.json`), `dates.mjs` + `org-and-timing.mjs` (calendar-date
-resolution + historical org mapping → `dates.json`/`org-timing.json`). Reuse
-these before re-pulling from statsapi if this benchmark gets rebuilt or
-widened.
+was a research spike) are in `.scratch/level-benchmarks/`: `pull.mjs`
+(cohort + yearByYear sweep → `raw.json`), `analyze.mjs` (reconstruction +
+ordering validation → `findings.json`), `dates.mjs` + `org-and-timing.mjs`
+(calendar-date resolution + historical org mapping →
+`dates.json`/`org-timing.json`), `team-windows.mjs` (per-org, per-level
+p25/median/p75 movement windows + the overlap check →
+`team-windows.json`, `docs/team-movement-windows.md`). Reuse these before
+re-pulling from statsapi if this benchmark gets rebuilt or widened.
 
 **`txn-cache.json`** (13 seasons of full transaction dumps, ~62MB) is
 **gitignored, not committed** — over GitHub's file-size warning threshold.
