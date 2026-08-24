@@ -345,7 +345,13 @@ const BUDGETS = {
   // +1 for 72-club-transactions.css, the club roster-move ledger page. Page-only
   // rules, so folding them into 29-team-transactions.css would put them in the
   // core sheet every other page loads.
-  'src/styles': 97,
+  // +1 for 26c-mound-card.css, the pitcher's mound card. Component-imported like
+  // its 26a/26b neighbours, so it ships only to a page that renders the card.
+  // The alternative was 26-player-page.css, which is 1145 lines — well past
+  // check-file-size.mjs's 600-line ceiling and on a budget of its own, and that
+  // guard's remedy is to split rather than to grow. Same trade the 21/21a,
+  // 26/26a and 48/48-stamp-strip entries above record.
+  'src/styles': 98,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

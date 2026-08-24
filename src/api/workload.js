@@ -174,3 +174,140 @@ export function workloadVsBaseline(data, personId, asOfDate) {
     vsOwnPct: pct(ownNorm),
   }
 }
+
+// ---------------------------------------------------------------------------
+// THE MOUND CARD's derivations.
+//
+// A hitter plays every day, so his last three lines answer "how is he going".
+// A pitcher works every fifth or sixth day, so his last three lines never say
+// the thing a scorer wants the moment a reliever starts throwing: did he pitch
+// yesterday. These three readers are what the card adds on top of the buckets
+// above, and every one of them DESCRIBES — none names a next start, and none
+// calls a pitcher available. That verdict already exists (availabilityFor), is
+// already shown on the Bullpen Board, and the card reuses it rather than
+// inventing a second opinion.
+// ---------------------------------------------------------------------------
+
+// The day strip's three load bands, taken from the app's OWN tired thresholds
+// (see availabilityFor) rather than invented: 25 is the pitch count that makes
+// "he threw yesterday" a flag, 35 the count that does it over three days. So a
+// cell's colour and the Bullpen Board's verdict can never tell different
+// stories about the same outing.
+export const LOAD_BANDS = { light: 0, moderate: 25, heavy: 35 }
+
+function loadBand(pitches) {
+  if (pitches == null) return 'none'
+  if (pitches >= LOAD_BANDS.heavy) return 'heavy'
+  if (pitches >= LOAD_BANDS.moderate) return 'moderate'
+  return 'light'
+}
+
+// One cell per calendar day over the trailing `days`, oldest first, ending on
+// asOfDate itself. TODAY IS NEVER SPENT: the file holds only completed
+// appearances, and he may still pitch tonight — so the last cell carries no
+// load and is flagged, rather than reading as a day off. Null for a pitcher
+// with no record, which is the whole MiLB story: workload.json is built from
+// the thirty active MLB rosters, so a Triple-A arm has none, and an MLB pitcher
+// optioned down LOSES his mid-season. Callers render that as "not posted yet",
+// never an empty strip (the degrade convention).
+export function dayStripFor(data, personId, asOfDate, days = 14) {
+  const ctx = priorApps(data, personId, asOfDate)
+  if (!ctx) return null
+  const { apps, asOfIdx } = ctx
+  const byIdx = new Map(apps.map((a) => [a.idx, a]))
+  const out = []
+  for (let i = days - 1; i >= 0; i--) {
+    const idx = asOfIdx - i
+    const today = idx === asOfIdx
+    const app = today ? null : byIdx.get(idx)
+    const pitches = app ? (app.p ?? 0) : null
+    out.push({
+      date: new Date(idx * 86400000).toISOString().slice(0, 10),
+      pitches,
+      band: loadBand(pitches),
+      today,
+    })
+  }
+  return out
+}
+
+// Below this many outs per start a "starter" is an opener, not a rotation arm.
+// pitcherRole is games-started share (gs/g >= 0.5), so a dedicated opener —
+// twenty games, fifteen of them started, an inning each — classifies SP. Handing
+// him a rotation turn would be a WRONG card, not a thin one: he goes every third
+// day. Three innings is the line; a piggyback or a bulk arm clears it easily.
+const MIN_OUTS_PER_START = 9
+
+// The longest gap that still reads as a turn. A six-man rotation is 6 days and
+// a skipped turn is ~12; beyond that he is not between starts, he is out.
+const MAX_TURN_DAYS = 14
+
+// A starter's turn: when he last STARTED (not last appeared — a starter who
+// mopped up an extra-inning game did not take a turn), how many days have
+// elapsed, and the range his own recent turns have kept.
+//
+// The range is a RANGE on purpose. A single "every 6th day" number is a
+// prediction wearing a description's clothes, and this pitcher's own gaps run
+// 6, 6, 7, 7, 6. Gaps far off his median — an All-Star break, an IL stint — are
+// dropped from the range rather than widening it into meaninglessness, but stay
+// in `gaps` for any caller that wants the whole record.
+// Null for a non-starter and for an opener.
+export function turnStripFor(data, personId, asOfDate) {
+  const ctx = priorApps(data, personId, asOfDate)
+  if (!ctx) return null
+  const { p, apps, asOfIdx } = ctx
+  if ((p.role ?? 'RP') !== 'SP') return null
+  const season = p.season ?? null
+  if (season?.gs > 0 && season.outs / season.gs < MIN_OUTS_PER_START) return null
+
+  const starts = apps.filter((a) => a.gs === 1)
+  if (starts.length === 0) return null
+  const gaps = starts.slice(0, -1).map((a, i) => a.idx - starts[i + 1].idx)
+
+  const recent = gaps.slice(0, 5)
+  let typicalMin = null
+  let typicalMax = null
+  if (recent.length) {
+    const sorted = [...recent].sort((a, b) => a - b)
+    const median = sorted[sorted.length >> 1]
+    const kept = recent.filter((g) => g <= median * 1.5)
+    typicalMin = Math.min(...kept)
+    typicalMax = Math.max(...kept)
+  }
+  const daysSince = asOfIdx - starts[0].idx
+  return {
+    lastStart: starts[0].d,
+    lastStartPitches: starts[0].p ?? null,
+    daysSince,
+    gaps,
+    typicalMin,
+    typicalMax,
+    // Past this, he is not in a rotation turn — injured, optioned, or shut
+    // down. Callers drop the strip: one cell per elapsed day would draw fifty
+    // of them, and "his last turns came every 7 days" would be describing a
+    // rotation he is no longer in. The elapsed count is the whole story.
+    outOfTurn: daysSince > MAX_TURN_DAYS,
+  }
+}
+
+// The per-outing rates the card's footer prints. `outsPerOuting` is the one that
+// separates a one-inning closer from a multi-inning long man — a distinction the
+// SP/RP role word cannot make, and the reason the card shows this instead of a
+// league-reliever baseline (that pool blends both, so a closer reads deeply
+// negative every day of the season on his job description alone).
+export function moundRateFor(data, personId) {
+  const p = data?.pitchers?.[String(personId)]
+  const s = p?.season
+  if (!s || !(s.g > 0)) return null
+  const outsPerOuting = Math.round((s.outs / s.g) * 10) / 10
+  return {
+    outsPerOuting,
+    multiInning: outsPerOuting > 3,
+    ipPerStart: s.gs > 0 ? outsToIp(Math.round(s.outs / s.gs)) : null,
+    pitchesPerStart: s.gs > 0 ? Math.round(s.pitches / s.gs) : null,
+  }
+}
+
+function outsToIp(outs) {
+  return `${Math.floor(outs / 3)}.${outs % 3}`
+}
