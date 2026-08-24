@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
+import { EDGE, H, W, sx, sy } from '../../lib/zone/zoneGeometry.js'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet, catcher's-eye view) against THIS
@@ -14,19 +15,11 @@ import { ModalPortal } from '../ui/ModalPortal.jsx'
 // At MiLB parks with no tracking pX/pZ are absent; StrikeZone renders nothing
 // (guard with hasPitchLocations before laying out a slot for it).
 
-// Plot geometry, in the same "feet" domain the feed reports. The plate is
-// 17in = 1.417ft wide, so the rulebook zone's vertical edges sit at ±0.708ft;
-// the domain is a touch wider so pitches just off the plate still land inside.
-const W = 190
-const H = 238
-const PAD = 6
-const DOM_X = [-1.55, 1.55]
-const DOM_Z = [0.4, 4.6]
-const EDGE = 0.708 // half plate width, ft
-
-const sx = (px) => PAD + ((px - DOM_X[0]) / (DOM_X[1] - DOM_X[0])) * (W - 2 * PAD)
-// SVG y grows downward, so height flips: the top of the zone maps to a small y.
-const sy = (pz) => PAD + ((DOM_Z[1] - pz) / (DOM_Z[1] - DOM_Z[0])) * (H - 2 * PAD)
+// Plot geometry now lives in lib/zone/zoneGeometry.js, because the season
+// command map bins pitches into the same nine cells this diagram rules off.
+// Two copies of that arithmetic is two strike zones, and only one of them
+// would have been the one on screen — see test/zone-geometry.test.js, which
+// pins the binning against this file's own projection.
 
 // Extra strip added to one side of the diagram for the batter's-box
 // silhouette (see BatterSilhouette below) — added to the viewBox, not carved
