@@ -20,6 +20,7 @@ import { PlayerHighlightsRail } from '../components/player/PlayerHighlightsRail.
 import { ChevronLink } from '../components/ui/ChevronLink.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './player/PlayerHubShell.jsx'
+import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
 import { gameLogDoorLabel } from './player/overviewPreview.js'
 import { DASH, Fact, SectionTitle, StatGrid, debutLabel, isoToday, monthDay, roleWord } from './player/parts.jsx'
 
@@ -218,10 +219,44 @@ export function PlayerPage({ id, asOf, sportId }) {
             {/* Game log preview — the last 3 rows, the exact row rendering
                 the Stats tab's GameLog draws in full, at a `limit` this
                 Overview asks for. The door counts the SEASON, not the 3 rows
-                shown (gameLogDoorLabel, overviewPreview.js). */}
+                shown (gameLogDoorLabel, overviewPreview.js).
+
+                A PITCHER TAKES THE MOUND CARD IN THIS SLOT INSTEAD, and it is
+                a replacement rather than an addition. A hitter plays every day,
+                so his last three lines answer "how is he going" and the preview
+                above is the whole read. A pitcher works every fifth or sixth
+                day, so his last three lines never say the thing a scorer wants
+                the moment a reliever starts throwing: did he pitch yesterday.
+                The mound card carries those same three outings AND that read,
+                so rendering both would print the same three games twice. Same
+                slot, same door, same count of sections as a hitter's — the
+                pitcher's half just answers the question his position asks.
+
+                The card self-fetches its own static file, so this costs the
+                Overview no request; it takes the preview rows it would have
+                drawn anyway.
+
+                TWO DEGRADES, and they are different. workload.json is built
+                from the thirty active MLB rosters, so a pitcher can have a game
+                log and NO workload record — one optioned down mid-season is
+                exactly that — and then the card renders nothing while the
+                counted door still stands, which is the right outcome: the Stats
+                tab still has his log to show. A pitcher with no game log either
+                (a Triple-A arm) never enters this branch at all, and the whole
+                slot including its door is absent, as it already was. Verified
+                against both. */}
             {block.gameLogPreview && (
               <>
-                <GameLog gameLog={block.gameLogPreview} note={gameLogNote} limit={3} />
+                {block.group === 'pitching' ? (
+                  <PitcherWorkloadCard
+                    playerId={bio.id}
+                    asOf={asOf}
+                    role={core.data.heroRole}
+                    gameLog={block.gameLogPreview}
+                  />
+                ) : (
+                  <GameLog gameLog={block.gameLogPreview} note={gameLogNote} limit={3} />
+                )}
                 <PreviewDoor
                   label={gameLogDoorLabel(block.seasonGames)}
                   onClick={() => go('stats')}
