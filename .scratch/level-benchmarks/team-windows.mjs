@@ -17,7 +17,9 @@ const findings = JSON.parse(await readFile(join(here, 'findings.json'), 'utf8'))
 const disputedIds = new Set(findings.validation.disagree.map((d) => d.playerId))
 
 const SPORT_IDS = [11, 12, 13, 14]
-const SEASONS = Array.from({ length: 2023 - 2010 + 1 }, (_, i) => 2010 + i).filter((y) => y !== 2020)
+// 2005 floor: statsapi's own affiliate data is documented unreliable before
+// then (docs/api/static-data.md) — matches pull.mjs's widened DEBUT_YEAR_MIN.
+const SEASONS = Array.from({ length: 2023 - 2005 + 1 }, (_, i) => 2005 + i).filter((y) => y !== 2020)
 
 async function buildHistoricalOrgMap() {
   const map = new Map() // `${teamId}:${season}` -> {orgId, orgName}

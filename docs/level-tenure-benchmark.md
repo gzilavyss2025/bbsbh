@@ -69,6 +69,16 @@ pedigree/timing/org cuts below live in the published write-up (link in the
 PR that ships v1 — republish target if the link goes stale: ask for the
 "Level Tenure Benchmark" artifact).
 
+**This table is a frozen snapshot, independent of `.scratch/level-
+benchmarks/`.** The shipped generator (`scripts/gen-level-tenure-
+benchmark.mjs`) recomputes its own sliding cohort live from statsapi and
+does not read the scratch files at all. Those scratch files (`raw.json`,
+`dates.json`, `findings.json`) now hold a **wider, 2005–2023-debut cohort**
+(3,061 players) from a follow-up widening spike — see
+`docs/team-movement-windows.md` for what changed when the cohort widened.
+The 881-player, 2019–2023 numbers above are not reproducible from today's
+scratch files without reverting `pull.mjs`'s `DEBUT_YEAR_MIN` to 2019.
+
 ## What else was measured, not yet shipped
 
 - **Draft-round and prep/college pedigree** carry real signal (Round 1
@@ -96,35 +106,41 @@ PR that ships v1 — republish target if the link goes stale: ask for the
   Team duration rests on a real historical org sweep (not the current-
   affiliate-file approximation): season-by-season `parentOrgId` from
   `/api/v1/teams`, joined to each player's own minor-league team per stint.
-  **Result: not ready for a per-team engine yet.** Org medians spread widely
-  at every level with enough n (AAA: Reds 82d vs. Rangers 476d, n=8–27 per
-  org) — real signal, not noise, per `docs/team-movement-windows.md`. But
-  each org's own p25–p75 window is wide enough on this cohort that **zero of
-  the 25–30 orgs per level sit fully outside the pooled p25–p75 window** —
-  the spread between orgs is smaller than the spread within one org. A
-  reader could not yet tell "the Reds move players fast" from "this Reds
-  player happened to move fast." Needs either a wider cohort (more seasons,
-  at the cost of reaching further from current practice) or a different
-  estimator than a per-org median before it ships as a range. A-level has no
-  org cut at all — see the note above on undated first-level arrivals.
-  Busts (players who never graduated) are a different, harder cohort: no
-  clean "end of career" signal for someone released or still active.
-  Unbuilt.
+  **Result: not ready for a per-team engine, even with 3.5x the cohort.**
+  Org medians spread widely at every level (AAA fastest-to-slowest ranges
+  from a ~50 to ~350-day median across orgs) — real signal, not noise, per
+  `docs/team-movement-windows.md`. But every org's own p25–p75 window is
+  wide enough that **zero of 30 orgs per level sit fully outside the
+  pooled p25–p75 window**, at both the original 881-player cohort AND the
+  widened 3,061-player one — the spread between orgs is smaller than the
+  spread within one org, and tripling n didn't change that. A reader could
+  not yet tell "this org moves players fast" from "this one player
+  happened to move fast." Needs a different estimator (e.g. an org fixed-
+  effect that controls for pedigree mix) rather than more data before it
+  ships as a range. A-level has no org cut at all — see the note above on
+  undated first-level arrivals. Busts (players who never graduated) are a
+  different, harder cohort: no clean "end of career" signal for someone
+  released or still active. Unbuilt.
 
 ## Where the work lives
 
 The pull/analyze/date-resolution scripts (not committed as app code — this
 was a research spike) are in `.scratch/level-benchmarks/`: `pull.mjs`
-(cohort + yearByYear sweep → `raw.json`), `analyze.mjs` (reconstruction +
-ordering validation → `findings.json`), `dates.mjs` + `org-and-timing.mjs`
-(calendar-date resolution + historical org mapping →
+(cohort + yearByYear sweep → `raw.json`, `DEBUT_YEAR_MIN` currently 2005),
+`analyze.mjs` (reconstruction + ordering validation → `findings.json`, also
+extends `txn-cache.json` for any newly-needed seasons), `dates.mjs` +
+`org-and-timing.mjs` (calendar-date resolution + historical org mapping →
 `dates.json`/`org-timing.json`), `team-windows.mjs` (per-org, per-level
-p25/median/p75 movement windows + the overlap check →
-`team-windows.json`, `docs/team-movement-windows.md`). Reuse these before
-re-pulling from statsapi if this benchmark gets rebuilt or widened.
+p25/median/p75 movement windows + the overlap check → `team-windows.json`,
+`docs/team-movement-windows.md`), `org-gaps.mjs` (cross-checks the org
+sweep against every duration the cohort uses, ranks team ids by cohort
+impact → `org-gaps.json`, for anyone hand-verifying affiliate history).
+Reuse these before re-pulling from statsapi if this benchmark gets
+rebuilt or widened further.
 
-**`txn-cache.json`** (13 seasons of full transaction dumps, ~62MB) is
-**gitignored, not committed** — over GitHub's file-size warning threshold.
-It's still cheap to rebuild: `dates.mjs`/`org-and-timing.mjs` populate it on
-demand, ~13 season-long pulls. If it's missing on a fresh checkout, just
-re-run those scripts; they'll re-fetch and re-cache it locally.
+**`txn-cache.json`** (now 26 seasons of full transaction dumps, 1997–2023,
+~65MB) is **gitignored, not committed** — over GitHub's file-size warning
+threshold. It's still cheap to rebuild: `analyze.mjs`/`dates.mjs` populate
+it on demand, one season-long pull per season the cohort actually touches.
+If it's missing on a fresh checkout, just re-run those scripts; they'll
+re-fetch and re-cache it locally.
