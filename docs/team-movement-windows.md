@@ -443,10 +443,21 @@ ICC = tau^2/(tau^2+sigma^2)   = 1.2%
 ```
 
 Both methods reject the null that org has zero effect — independently, by
-different means, at different p-values but the same conclusion. That
-sharpens the doc's headline in a real way: **org identity is not "no
-signal," it's small, real, aggregate signal that can't be pinned to a
-specific franchise.** The ICC is the number that reconciles this with
+different means, at different p-values but the same conclusion.
+**Transform check** (matching the adversarial review's practice of
+re-running under raw and `sqrt` days, applied to this new omnibus test):
+the cluster-robust omnibus F holds under `log(days)` (p=0.0048) and
+`sqrt(days)` (p=0.027) but is borderline under raw `days` (p=0.069, not
+significant at the conventional 0.05). Not a clean sweep like the earlier
+per-org-effect transform check — `org-omnibus-transform-check.mjs`. Read
+it as: robust under the two transforms actually appropriate for
+right-skewed duration data (raw days has a long right tail that violates
+OLS's homoscedasticity assumption more severely than either), not as
+iron-clad under every possible specification.
+
+With that caveat attached, this sharpens the doc's headline in a real way:
+**org identity is not "no signal," it's small, real, aggregate signal that
+can't be pinned to a specific franchise.** The ICC is the number that reconciles this with
 everything above it: org explains about **1.2%** of the residual
 (post-level/tier/era) variance in log-days-at-level. Real enough for an
 omnibus test with 1,707+ units to detect; nowhere near large enough for a
@@ -512,6 +523,82 @@ current sample sizes can't say which org." Script:
 (regularized incomplete gamma/beta for the chi-square and F p-values)
 against known reference values before running on real data.
 
+## The in-level performance confound: real, strong — and can't be cleanly tested here
+
+The adversarial review's section 5 named this confound but didn't measure
+it: "an org whose players simply hit or pitch better in this cohort would
+look 'fast' for reasons that have nothing to do with how it manages
+promotions." This pass measures it — and finds a real methodological trap
+that limits what the result can say.
+
+**Building the covariate required a real new pull, as flagged.** `raw.json`
+only carries the 3,061-player DEBUT cohort's own stat lines. Percentile-
+ranking a cohort player against *other cohort players* would rank him
+against a survivorship-biased pool — everyone in it reached the majors.
+Checked directly against statsapi: the obvious endpoint
+(`/api/v1/stats?stats=season&group=...`) silently applies a qualification
+floor unless `playerPool=all` is passed — AAA 2015 hitting returns 239
+"qualified" rows by default vs. **1,562** with `playerPool=all` (min PA 0).
+`perf-pull.mjs` reuses `fetchLevelSeasonStats` from `src/api/statsLevels.js`
+(already used by `gen-minors-leaders.mjs`, already passes `playerPool=all`)
+across the 45 (level, season) pairs the fixed cohort's durations actually
+touch — 90 calls, 46,021 hitter-seasons + 43,027 pitcher-seasons. Each
+duration's percentile is OPS-rank (hitters) or ERA-rank, inverted so lower
+ERA scores higher (pitchers) within its own (level, season)'s full
+population — not the cohort's.
+
+**The result, on its own terms:** refit `log(days) ~ level + tier + org +
+perfPctile` against the same row subset as a performance-free baseline
+(apples to apples):
+
+```
+baseline    (level+tier+org):            n=3026  R^2=0.0559  orgs sig (uncorrected): 3 of 30
+augmented   (+ perfPctile):              n=3026  R^2=0.0767  orgs sig (uncorrected): 3 of 30
+perfPctile coefficient: -7.9% days per +10 percentile points (z=-8.21)
+```
+
+Performance is a strong, obvious-in-retrospect predictor — better hitters
+and pitchers move faster, and the coefficient's z=-8.21 is the single
+strongest effect measured anywhere in this spike, dwarfing every org
+coefficient. It picks up more R² on its own (+0.021) than the entire
+29-column org block contributes. But it doesn't explain away org: the same
+3 orgs (Atlanta, Cleveland, Tampa Bay) are significant before and after,
+and their effects get slightly LARGER with performance controlled for
+(mean |shift| 1.8 points, one sign flip out of 30, no org that had been
+significant loses significance). That's the opposite of what "performance
+is a hidden confound explaining org" would predict.
+
+**But that clean-looking result rests on a subsample that isn't neutral,
+and the Washington Nationals are the case that shows it.** Computing a
+percentile needs enough volume to mean something — this run requires
+PA≥20 (hitters) / IP≥10 (pitchers) at the level. That floor drops 252 of
+3,278 durations (7.7%) — and those 252 are not a random slice: their
+median duration is **26 days**, against **288 days** for the kept rows.
+Requiring enough PA/IP to rank a player is, mechanically, requiring enough
+TIME at the level to accumulate it — so the floor disproportionately
+excludes exactly the fastest promotions, the ones a "movement window"
+feature would care about most. Washington shows the effect directly: −30.9%
+and BH-significant in the full, fixed cohort (`org-regression.json`); in
+this performance-eligible subsample (n=85, most of Washington's fastest
+movers dropped for insufficient volume) it's −11.6% and not significant.
+Whether that's "performance genuinely explains Washington's speed" or "the
+floor removed the very stints that made Washington look fast, before
+performance ever entered the model" can't be told apart from this run —
+they're confounded with each other by construction. **Read the 3-orgs-
+survive result above as real for Atlanta/Cleveland/Tampa Bay specifically
+(their significant rows have enough volume to clear the floor either way),
+and read Washington's disappearance from this subsample as inconclusive,
+not as evidence performance explains it.**
+
+A cleaner test would need a percentile computed from partial-season stats
+(matching the exact PA/IP a player actually accumulated during the
+duration, ranked against others' partial-season lines through the same
+point) rather than requiring a full qualifying line — a bigger rebuild than
+this pass, flagged rather than attempted. Scripts: `perf-pull.mjs`
+(the pull), `org-regression-perf.mjs` (baseline-vs-augmented refit and
+coefficient-shift comparison). Output: `perf-pool.json`,
+`org-regression-perf.json`.
+
 ## Where the work lives
 
 `.scratch/level-benchmarks/team-windows.mjs` — reuses `org-and-timing.mjs`'s
@@ -536,9 +623,18 @@ org, the non-independence check behind section 4 of "Adversarial review."
 org × era representation chi-square plus an era-augmented refit, and a
 player-collapsed one-way variance-component ANOVA (tau²/sigma²/ICC) with
 empirical-Bayes shrunk per-org estimates. Output:
-`org-variance-components.json`. `org-era-granularity.mjs` reruns the era
+`org-variance-components.json`. `org-omnibus-transform-check.mjs` reruns
+just the cluster-robust omnibus Wald test on raw and `sqrt` days, output
+`org-omnibus-transform-check.json`. `org-era-granularity.mjs` reruns the era
 check at three-bucket resolution (≤2015 / 2016–2020 / 2021–2023) to test
 the contraction hypothesis directly. Output: `org-era-granularity.json`.
+`perf-pull.mjs` pulls the full (not qualification-floored) hitting/pitching
+population for every (level, season) the fixed cohort touches, reusing
+`src/api/statsLevels.js`'s `fetchLevelSeasonStats` (`playerPool=all`).
+Output: `perf-pool.json` (~7MB, committed — see precedent below).
+`org-regression-perf.mjs` adds an in-level performance percentile covariate
+to the level+tier+org model and compares baseline vs. augmented fits on the
+same row subset. Output: `org-regression-perf.json`.
 All depend on `raw.json`, `dates.json`, `findings.json` already in that
 directory (now built from the widened 2005–2023 pull — `pull.mjs`'s
 `DEBUT_YEAR_MIN` is 2005); `txn-cache.json` is gitignored (~65MB, now spans
