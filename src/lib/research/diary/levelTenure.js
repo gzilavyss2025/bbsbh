@@ -18,15 +18,15 @@ export const levelTenureEntry = {
   question:
     'Your club’s best prospect has been at Double-A since April. Is that a long time, or is that just what Double-A takes?',
   headline:
-    'Nobody had written this down. The public numbers are either career totals across every level at once, or one narrow slice of first-round high-school bats. Nothing covered pitchers at all. So we built it: 881 players, every big-league debut from 2019 through 2023, one line apiece for every rung they climbed.',
+    'Nobody had ever written this down. What is public is either a career total lumped across every level at once, or one narrow slice of first-round high-school bats. Nothing covered pitchers at all. So it got built from scratch: 881 players, every big-league debut from 2019 through 2023, one line apiece for every rung they climbed.',
   sections: [
     {
       id: 'cohort',
       heading: 'Who counts as a prospect who made it',
       prose: [
-        'Everybody who debuted between 2019 and 2023 and then actually stuck — 130 at-bats or 50 innings in the big leagues, career. That line already existed in the app, and reusing it keeps a scoreless September cup of coffee out of the study. A man who got two pinch-hit appearances in a lost year did not graduate, and counting him would make every stay in the minors look shorter than it is.',
-        'The five-year window is a compromise and worth naming as one. Go back to 2015 and you get about 1,600 players, but you are also describing a minor-league system that no longer exists — the 2021 reorganization cut forty affiliates. Start at 2021 and the pandemic stops being a problem, but you are down to about 500 players and the numbers get jumpy. 2019 through 2023 is recent enough to describe how clubs work now and big enough to trust.',
-        'Rookie and complex ball is left out, the same call the Farm Index already makes. Those seasons are short, the leagues re-form every year, and what looks like a pattern in them is usually just a small sample wearing a pattern’s clothes.',
+        'Everybody who debuted between 2019 and 2023 and then actually stuck — 130 at-bats or 50 innings in the majors, career. That line already existed in the app, and reusing it keeps the September cup of coffee out of the study. A man who got two pinch-hit at-bats in a lost year did not graduate, and counting him as one would make every stay in the minors look shorter than it really is.',
+        'The five-year window is a compromise, and it is worth saying so out loud. Reach back to 2015 and you get about 1,600 players — and a minor-league system that no longer exists, since the 2021 reorganization wiped out forty affiliates. Start at 2021 and the pandemic stops being a problem, but you are down to 500 players and the numbers start jumping around. 2019 through 2023 is recent enough to describe how clubs work now and big enough to trust.',
+        'Rookie and complex ball is left out, the same call the Farm Index already makes. Those seasons are short, the leagues re-form every year, and what looks like a pattern down there is usually a small sample wearing a pattern’s clothes.',
       ],
     },
     {
@@ -47,23 +47,24 @@ export const levelTenureEntry = {
         note: 'The middle number is the typical stay. The range in parentheses covers the middle half of players — a quarter finished faster, a quarter took longer. Between 318 and 437 players in each box.',
       },
       proseAfter: [
-        'Double-A is the long stop. A hitter takes the better part of a full season there — more plate appearances than at any other rung — which fits the old scouting saw that Double-A is where you find out whether a prospect can hit. Triple-A is the shortest stay of the four, and the widest: some men pass through in six weeks, some sit there for two years waiting on a roster spot rather than on their own bat.',
+        'Double-A is the long stop, and the numbers say what scouts have always said about it. A hitter takes the better part of a full season there, more plate appearances than at any other rung, because Double-A is where you find out whether a prospect can hit.',
+        'Triple-A is the shortest stay of the four and by some distance the widest. Some men pass through in six weeks. Others sit the better part of two years — and the honest reading of that is that a Triple-A stay is often not about the player at all. It is about whether there is a job open above him.',
       ],
     },
     {
       id: 'ordering',
       heading: 'The messy part, and why the numbers survived it',
       prose: [
-        'To say how long a player stayed somewhere, you first have to know the order he went in. Usually that is obvious. Sometimes it is not: 240 of the 881 — better than one in four — spent at least one season bouncing between two levels more than once. That is mostly forty-man roster churn, a Triple-A man shuttled up and down as emergency depth, and the season record does not say which stint came first.',
-        'The transaction wire settles most of them, and where it does, it backs up the assumption we made about seven times in ten. But the test that matters is the blunt one: throw out all 240 of those players and run the whole thing again. Every level’s typical stay moves by single digits. Whatever is going on underneath, it is not moving the answer.',
+        'Before you can say how long a man stayed somewhere, you have to know the order he went in. Usually that is obvious. Sometimes it is not: 240 of the 881, better than one in four, spent at least one season bouncing between two levels more than once. That is mostly forty-man churn — a Triple-A arm shuttled up and down as emergency depth — and the season record does not say which stint came first.',
+        'The transaction log settles most of them, and where it does it backs the assumption about seven times in ten. But the test that matters is the blunt one: throw all 240 of those players out and run the whole thing again. Every level’s typical stay moves by single digits. Whatever is going on underneath, it is not moving the answer.',
       ],
     },
     {
       id: 'folklore',
       heading: 'Two things everybody says that turn out not to be true',
       points: [
-        'There is no All-Star-break bump. The two weeks after the break promote players at about the same rate as the two weeks before it. Clubs do not save up their call-ups for the second half; it only feels that way because that is when you start paying attention.',
-        'There is no "hold him a full season" rule either. Only 7 to 15 percent of stays land anywhere near a calendar year. If clubs are working to a schedule, it is not that one.',
+        'There is no All-Star-break bump. The two weeks after the break promote players at about the same rate as the two weeks before it. Clubs are not saving up call-ups for the second half. It only feels that way because the second half is when you start paying attention.',
+        'And there is no "give him a full year there" rule either. Only 7 to 15 percent of stays land anywhere near a calendar year. If clubs are working off a schedule, it is not that one.',
       ],
     },
   ],

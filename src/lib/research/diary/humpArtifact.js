@@ -19,7 +19,7 @@ export const humpArtifactEntry = {
       id: 'per-year',
       heading: 'Look at it a year at a time and the hump disappears',
       prose: [
-        'The original finding came from lumping seasons into three buckets and comparing them. Break the same data out by single year instead and there is no bump to explain. Every year from 2011 to 2019 lands in the same narrow band, somewhere around nine or ten months.',
+        'The original finding came from sorting seasons into three buckets and comparing the buckets. Break the same data out one year at a time and there is no bump left to explain. Every year from 2011 through 2019 lands in the same narrow band, somewhere around nine or ten months.',
       ],
       table: {
         caption: 'Typical days at a level, by the year the stay ended',
@@ -40,7 +40,7 @@ export const humpArtifactEntry = {
         note: 'Look at 2009 and 2010 against everything below them. Those two years are the story.',
       },
       proseAfter: [
-        'What the buckets read as a peak in the middle was really the two ends sagging. Nothing rose; the edges fell.',
+        'What the buckets read as a peak in the middle was the two ends sagging. Nothing rose. The edges fell.',
       ],
     },
     {
@@ -73,8 +73,8 @@ export const humpArtifactEntry = {
       id: 'wire-free',
       heading: 'The check that settles it: measure the same thing with a different ruler',
       prose: [
-        'That leftover 6 to 10 percent could still be real. There is one way to find out that none of the three problems above can touch, and it is simple: forget calendars and transaction logs entirely. Just count how many seasons a player spent at a level, and how many plate appearances he took there. Those come straight off his stat line. No transaction record is involved anywhere, so no transaction-record problem can reach them.',
-        'And the logic is airtight. If players in the late 2010s really were spending ten percent longer at a level, they had to be accumulating more seasons and more at-bats while they sat there. There is nowhere else for the time to go.',
+        'That leftover 6 to 10 percent could still be real, and there is one way to find out that none of the three problems above can touch. Forget calendars and transaction logs entirely. Count how many seasons a man spent at a level and how many times he came to the plate there. Both come straight off the back of his baseball card. No transaction record goes anywhere near them, so no transaction-record problem can reach them.',
+        'And the logic is airtight. If prospects in the late 2010s really were sitting ten percent longer, they had to be piling up more seasons and more at-bats while they sat. There is nowhere else for the time to go.',
       ],
       table: {
         caption: 'Same players, measured without the transaction log',
@@ -86,16 +86,16 @@ export const humpArtifactEntry = {
         note: 'Identical for all practical purposes — three thousandths of a season and six plate appearances apart.',
       },
       proseAfter: [
-        'Flat. The late-2010s prospect spent exactly as long at a level as the early-2010s prospect did. That is the technique worth taking away from all of this: when you suspect your ruler, do not argue about the ruler. Go find a different one that cannot share the same fault, and measure the thing again.',
+        'Flat. The late-2010s prospect sat at a level exactly as long as the early-2010s prospect did. That is the lesson worth carrying out of all this: when you suspect your ruler, do not stand around arguing about the ruler. Go find a different one that cannot share the same fault and measure the thing again.',
       ],
     },
     {
       id: 'resolver',
       heading: 'The bug found on the way, and what it cost',
       prose: [
-        'To date a stay, the code walks forward through a player’s transaction history looking for the move that ended it. When a prospect’s early paperwork was thin, it ran off the end of his minor-league record and kept going — into the option and rehab assignments from his major-league years. So it would date a Double-A stay using a shuttle move he made three years later, as an established big leaguer.',
-        'That was 434 of 3,549 stays, better than one in eight, ending after the player had already debuted in the majors. Roster churn was being counted as player development.',
-        'The fix is to cut off the transaction history at the debut before matching anything. Because those bad records all sit at the end of a player’s timeline, the fix can only ever remove rows — it cannot corrupt one that was already right. That was checked rather than assumed: no new rows appeared, no surviving row changed its value, and every removed row did in fact end after the man’s debut.',
+        'To date a stay, the code walks forward through a player’s transaction history looking for the move that ended it. When a prospect’s early paperwork was thin, it ran clean off the end of his minor-league record and kept walking — straight into the options and rehab assignments from his big-league years. So it would close out a Double-A stay using a shuttle trip the man took three years later, as an established major leaguer.',
+        'That was 434 stays out of 3,549 — better than one in eight — ending after the man had already debuted in the majors. Roster churn was being filed as player development.',
+        'The fix is to stop reading a player’s transaction history at his debut. Because the bad records all sit at the tail of a career, the fix can only ever take rows away — it cannot corrupt one that was already right. That was checked rather than assumed: no new rows appeared, not one surviving row changed its value, and every row removed did in fact end after the man’s debut.',
       ],
       table: {
         caption: 'What changed when the bad rows came out',
@@ -103,13 +103,12 @@ export const humpArtifactEntry = {
         rows: [
           ['Stays we could date', '3,278', '3,019'],
           ['How much of the variation the model explains', '4.3%', '7.2%'],
-          ['Unexplained noise', '1.209', '0.696'],
           ['Clubs standing clear of the pack', '0 of 30', '0 of 30'],
           ['Clubs surviving the strictest correction', '0 of 30', '0 of 30'],
         ],
       },
       proseAfter: [
-        'Losing 259 stays nearly doubled how much the model could explain and cut the leftover noise by 42 percent. Those rows were not data. They were static.',
+        'Throwing out 259 stays nearly doubled how much the model could explain. Those rows were not data. They were static.',
       ],
     },
     {
@@ -124,7 +123,7 @@ export const humpArtifactEntry = {
       id: 'tampa-holds',
       heading: 'Tampa Bay comes out of this stronger',
       prose: [
-        'The Rays clear every corrected version of the test — 33 percent, 29 percent and 34 percent slower than the league at their levels, and the only club that does. Cleveland and Milwaukee pass on the full range of years and fall out the moment the era corrections are applied, which is the same wobble that disqualified everyone else.',
+        'The Rays clear every corrected version of the test — 33 percent, 29 percent and 34 percent slower than the league at their levels — and they are the only club that does. Cleveland and Milwaukee pass on the full range of years and fall out the moment the era corrections go on, which is the same wobble that disqualified everybody else.',
       ],
     },
   ],
