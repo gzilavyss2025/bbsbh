@@ -1,0 +1,1549 @@
+{
+  "generatedFrom": "dates.json (startDate/endDate stamped), raw.json, findings.json, txn-cache.json",
+  "universeN": 3115,
+  "a1WireTruncation": {
+    "wireFirstDate": "2009-03-27",
+    "asgBefore2009": 457,
+    "asgFrom2009": 290690,
+    "wireCoverage": [
+      {
+        "season": 1997,
+        "rows": 24,
+        "asg": 3
+      },
+      {
+        "season": 1998,
+        "rows": 33,
+        "asg": 0
+      },
+      {
+        "season": 1999,
+        "rows": 57,
+        "asg": 3
+      },
+      {
+        "season": 2000,
+        "rows": 108,
+        "asg": 10
+      },
+      {
+        "season": 2001,
+        "rows": 90,
+        "asg": 1
+      },
+      {
+        "season": 2002,
+        "rows": 84,
+        "asg": 1
+      },
+      {
+        "season": 2003,
+        "rows": 92,
+        "asg": 8
+      },
+      {
+        "season": 2004,
+        "rows": 108,
+        "asg": 14
+      },
+      {
+        "season": 2005,
+        "rows": 1009,
+        "asg": 89
+      },
+      {
+        "season": 2006,
+        "rows": 727,
+        "asg": 240
+      },
+      {
+        "season": 2007,
+        "rows": 318,
+        "asg": 54
+      },
+      {
+        "season": 2008,
+        "rows": 389,
+        "asg": 34
+      },
+      {
+        "season": 2009,
+        "rows": 24633,
+        "asg": 9941
+      },
+      {
+        "season": 2010,
+        "rows": 31209,
+        "asg": 13381
+      },
+      {
+        "season": 2011,
+        "rows": 29998,
+        "asg": 13731
+      },
+      {
+        "season": 2012,
+        "rows": 32103,
+        "asg": 14741
+      },
+      {
+        "season": 2013,
+        "rows": 32932,
+        "asg": 14740
+      },
+      {
+        "season": 2014,
+        "rows": 35095,
+        "asg": 16827
+      },
+      {
+        "season": 2015,
+        "rows": 37817,
+        "asg": 17478
+      },
+      {
+        "season": 2016,
+        "rows": 40225,
+        "asg": 20641
+      },
+      {
+        "season": 2017,
+        "rows": 40968,
+        "asg": 20773
+      },
+      {
+        "season": 2018,
+        "rows": 43163,
+        "asg": 22134
+      },
+      {
+        "season": 2019,
+        "rows": 51545,
+        "asg": 27284
+      },
+      {
+        "season": 2021,
+        "rows": 65248,
+        "asg": 31140
+      },
+      {
+        "season": 2022,
+        "rows": 75040,
+        "asg": 36829
+      },
+      {
+        "season": 2023,
+        "rows": 73939,
+        "asg": 31050
+      }
+    ],
+    "wireBound": [
+      {
+        "season": 2009,
+        "maxSpanDays": 279,
+        "boundBy": "wire"
+      },
+      {
+        "season": 2010,
+        "maxSpanDays": 644,
+        "boundBy": "wire"
+      },
+      {
+        "season": 2011,
+        "maxSpanDays": 1009,
+        "boundBy": "cap"
+      },
+      {
+        "season": 2012,
+        "maxSpanDays": 1375,
+        "boundBy": "cap"
+      }
+    ],
+    "truncation": [
+      {
+        "season": 2009,
+        "n": 41,
+        "minStart": "2009-03-27",
+        "reachDays": 279
+      },
+      {
+        "season": 2010,
+        "n": 126,
+        "minStart": "2009-03-27",
+        "reachDays": 644
+      },
+      {
+        "season": 2011,
+        "n": 191,
+        "minStart": "2009-05-16",
+        "reachDays": 959
+      },
+      {
+        "season": 2012,
+        "n": 211,
+        "minStart": "2009-04-09",
+        "reachDays": 1362
+      },
+      {
+        "season": 2013,
+        "n": 238,
+        "minStart": "2010-04-05",
+        "reachDays": 1366
+      },
+      {
+        "season": 2014,
+        "n": 265,
+        "minStart": "2010-05-25",
+        "reachDays": 1681
+      }
+    ]
+  },
+  "a2LostSeason": {
+    "window": {
+      "start": "2020-04-09",
+      "end": "2020-09-07"
+    },
+    "affectedDurations": 218,
+    "deletedByCap": 48
+  },
+  "specs": [
+    {
+      "key": "S0-as-published",
+      "note": "exactly what org-era-granularity.mjs modelled: every year, calendar days, 900d cap on calendar days",
+      "n": 3019,
+      "clusters": 1348,
+      "r2": 0.0723,
+      "rawByEra": [
+        {
+          "era": "A: <=2015",
+          "n": 1294,
+          "p25": 78,
+          "median": 264,
+          "p75": 368
+        },
+        {
+          "era": "B: 2016-2020",
+          "n": 1088,
+          "p25": 115,
+          "median": 324,
+          "p75": 406
+        },
+        {
+          "era": "C: 2021-2023",
+          "n": 637,
+          "p25": 82,
+          "median": 262,
+          "p75": 389
+        }
+      ],
+      "eraEffects": [
+        {
+          "era": "A: <=2015",
+          "pct": -15.6
+        },
+        {
+          "era": "B: 2016-2020",
+          "pct": 17.4
+        },
+        {
+          "era": "C: 2021-2023",
+          "pct": 0.9
+        }
+      ],
+      "omnibusWaldF": {
+        "F": 28.535,
+        "dfNum": 2,
+        "dfDenom": 1339,
+        "p": 0
+      },
+      "kruskalWallis": {
+        "H": 39.737,
+        "df": 2,
+        "p": 0
+      },
+      "byYear": [
+        {
+          "season": 2009,
+          "n": 41,
+          "p25": 27,
+          "median": 50,
+          "p75": 77
+        },
+        {
+          "season": 2010,
+          "n": 126,
+          "p25": 70,
+          "median": 126,
+          "p75": 304
+        },
+        {
+          "season": 2011,
+          "n": 191,
+          "p25": 68,
+          "median": 285,
+          "p75": 367
+        },
+        {
+          "season": 2012,
+          "n": 206,
+          "p25": 87,
+          "median": 282,
+          "p75": 367
+        },
+        {
+          "season": 2013,
+          "n": 232,
+          "p25": 101,
+          "median": 282,
+          "p75": 381
+        },
+        {
+          "season": 2014,
+          "n": 259,
+          "p25": 79,
+          "median": 270,
+          "p75": 377
+        },
+        {
+          "season": 2015,
+          "n": 239,
+          "p25": 103,
+          "median": 303,
+          "p75": 374
+        },
+        {
+          "season": 2016,
+          "n": 305,
+          "p25": 91,
+          "median": 286,
+          "p75": 379
+        },
+        {
+          "season": 2017,
+          "n": 238,
+          "p25": 117,
+          "median": 318,
+          "p75": 370
+        },
+        {
+          "season": 2018,
+          "n": 222,
+          "p25": 116,
+          "median": 327,
+          "p75": 424
+        },
+        {
+          "season": 2019,
+          "n": 261,
+          "p25": 107,
+          "median": 302,
+          "p75": 384
+        },
+        {
+          "season": 2020,
+          "n": 62,
+          "p25": 401,
+          "median": 440,
+          "p75": 508
+        },
+        {
+          "season": 2021,
+          "n": 233,
+          "p25": 72,
+          "median": 138,
+          "p75": 683
+        },
+        {
+          "season": 2022,
+          "n": 247,
+          "p25": 93,
+          "median": 261,
+          "p75": 337
+        },
+        {
+          "season": 2023,
+          "n": 157,
+          "p25": 83,
+          "median": 290,
+          "p75": 380
+        }
+      ]
+    },
+    {
+      "key": "S1-drop-truncated-years",
+      "note": "A1 only: drop 2009-2010, whose durations the wire mechanically truncates",
+      "n": 2852,
+      "clusters": 1291,
+      "r2": 0.0694,
+      "rawByEra": [
+        {
+          "era": "A: <=2015",
+          "n": 1127,
+          "p25": 87,
+          "median": 283,
+          "p75": 372
+        },
+        {
+          "era": "B: 2016-2020",
+          "n": 1088,
+          "p25": 115,
+          "median": 324,
+          "p75": 406
+        },
+        {
+          "era": "C: 2021-2023",
+          "n": 637,
+          "p25": 82,
+          "median": 262,
+          "p75": 389
+        }
+      ],
+      "eraEffects": [
+        {
+          "era": "A: <=2015",
+          "pct": -10.7
+        },
+        {
+          "era": "B: 2016-2020",
+          "pct": 14.3
+        },
+        {
+          "era": "C: 2021-2023",
+          "pct": -2
+        }
+      ],
+      "omnibusWaldF": {
+        "F": 15.65,
+        "dfNum": 2,
+        "dfDenom": 1282,
+        "p": 0
+      },
+      "kruskalWallis": {
+        "H": 22.34,
+        "df": 2,
+        "p": 0
+      },
+      "byYear": [
+        {
+          "season": 2011,
+          "n": 191,
+          "p25": 68,
+          "median": 285,
+          "p75": 367
+        },
+        {
+          "season": 2012,
+          "n": 206,
+          "p25": 87,
+          "median": 282,
+          "p75": 367
+        },
+        {
+          "season": 2013,
+          "n": 232,
+          "p25": 101,
+          "median": 282,
+          "p75": 381
+        },
+        {
+          "season": 2014,
+          "n": 259,
+          "p25": 79,
+          "median": 270,
+          "p75": 377
+        },
+        {
+          "season": 2015,
+          "n": 239,
+          "p25": 103,
+          "median": 303,
+          "p75": 374
+        },
+        {
+          "season": 2016,
+          "n": 305,
+          "p25": 91,
+          "median": 286,
+          "p75": 379
+        },
+        {
+          "season": 2017,
+          "n": 238,
+          "p25": 117,
+          "median": 318,
+          "p75": 370
+        },
+        {
+          "season": 2018,
+          "n": 222,
+          "p25": 116,
+          "median": 327,
+          "p75": 424
+        },
+        {
+          "season": 2019,
+          "n": 261,
+          "p25": 107,
+          "median": 302,
+          "p75": 384
+        },
+        {
+          "season": 2020,
+          "n": 62,
+          "p25": 401,
+          "median": 440,
+          "p75": 508
+        },
+        {
+          "season": 2021,
+          "n": 233,
+          "p25": 72,
+          "median": 138,
+          "p75": 683
+        },
+        {
+          "season": 2022,
+          "n": 247,
+          "p25": 93,
+          "median": 261,
+          "p75": 337
+        },
+        {
+          "season": 2023,
+          "n": 157,
+          "p25": 83,
+          "median": 290,
+          "p75": 380
+        }
+      ]
+    },
+    {
+      "key": "S2-drop-covid-rows",
+      "note": "A1 + A2/A3 by exclusion: drop every duration spanning the would-be 2020 season. CAVEAT: this introduces a selection bias of its own -- ANY 2021-ending duration longer than ~8 months necessarily spans the dead window, so this spec keeps only the SHORT 2021 stints. Reported for completeness; S3/S5 are the trustworthy COVID handlings.",
+      "n": 2682,
+      "clusters": 1271,
+      "r2": 0.0729,
+      "rawByEra": [
+        {
+          "era": "A: <=2015",
+          "n": 1127,
+          "p25": 87,
+          "median": 283,
+          "p75": 372
+        },
+        {
+          "era": "B: 2016-2020",
+          "n": 1026,
+          "p25": 108,
+          "median": 311,
+          "p75": 384
+        },
+        {
+          "era": "C: 2021-2023",
+          "n": 529,
+          "p25": 67,
+          "median": 147,
+          "p75": 328
+        }
+      ],
+      "eraEffects": [
+        {
+          "era": "A: <=2015",
+          "pct": -0.9
+        },
+        {
+          "era": "B: 2016-2020",
+          "pct": 20.7
+        },
+        {
+          "era": "C: 2021-2023",
+          "pct": -16.4
+        }
+      ],
+      "omnibusWaldF": {
+        "F": 23.758,
+        "dfNum": 2,
+        "dfDenom": 1262,
+        "p": 0
+      },
+      "kruskalWallis": {
+        "H": 78.005,
+        "df": 2,
+        "p": 0
+      },
+      "byYear": [
+        {
+          "season": 2011,
+          "n": 191,
+          "p25": 68,
+          "median": 285,
+          "p75": 367
+        },
+        {
+          "season": 2012,
+          "n": 206,
+          "p25": 87,
+          "median": 282,
+          "p75": 367
+        },
+        {
+          "season": 2013,
+          "n": 232,
+          "p25": 101,
+          "median": 282,
+          "p75": 381
+        },
+        {
+          "season": 2014,
+          "n": 259,
+          "p25": 79,
+          "median": 270,
+          "p75": 377
+        },
+        {
+          "season": 2015,
+          "n": 239,
+          "p25": 103,
+          "median": 303,
+          "p75": 374
+        },
+        {
+          "season": 2016,
+          "n": 305,
+          "p25": 91,
+          "median": 286,
+          "p75": 379
+        },
+        {
+          "season": 2017,
+          "n": 238,
+          "p25": 117,
+          "median": 318,
+          "p75": 370
+        },
+        {
+          "season": 2018,
+          "n": 222,
+          "p25": 116,
+          "median": 327,
+          "p75": 424
+        },
+        {
+          "season": 2019,
+          "n": 261,
+          "p25": 107,
+          "median": 302,
+          "p75": 384
+        },
+        {
+          "season": 2021,
+          "n": 125,
+          "p25": 39,
+          "median": 75,
+          "p75": 102
+        },
+        {
+          "season": 2022,
+          "n": 247,
+          "p25": 93,
+          "median": 261,
+          "p75": 337
+        },
+        {
+          "season": 2023,
+          "n": 157,
+          "p25": 83,
+          "median": 290,
+          "p75": 380
+        }
+      ]
+    },
+    {
+      "key": "S3-lost-season-adjusted",
+      "note": "A1 + A2/A3 by adjustment: subtract the pro-rated lost 2020 season, then apply the 900d cap to ADJUSTED days (so COVID-spanning rows re-enter instead of being deleted)",
+      "n": 2888,
+      "clusters": 1295,
+      "r2": 0.0647,
+      "rawByEra": [
+        {
+          "era": "A: <=2015",
+          "n": 1127,
+          "p25": 87,
+          "median": 283,
+          "p75": 372
+        },
+        {
+          "era": "B: 2016-2020",
+          "n": 1091,
+          "p25": 107,
+          "median": 300,
+          "p75": 380
+        },
+        {
+          "era": "C: 2021-2023",
+          "n": 670,
+          "p25": 87,
+          "median": 265,
+          "p75": 359
+        }
+      ],
+      "eraEffects": [
+        {
+          "era": "A: <=2015",
+          "pct": -7
+        },
+        {
+          "era": "B: 2016-2020",
+          "pct": 12.1
+        },
+        {
+          "era": "C: 2021-2023",
+          "pct": -4.1
+        }
+      ],
+      "omnibusWaldF": {
+        "F": 10.126,
+        "dfNum": 2,
+        "dfDenom": 1286,
+        "p": 0
+      },
+      "kruskalWallis": {
+        "H": 20.546,
+        "df": 2,
+        "p": 0
+      },
+      "byYear": [
+        {
+          "season": 2011,
+          "n": 191,
+          "p25": 68,
+          "median": 285,
+          "p75": 367
+        },
+        {
+          "season": 2012,
+          "n": 206,
+          "p25": 87,
+          "median": 282,
+          "p75": 367
+        },
+        {
+          "season": 2013,
+          "n": 232,
+          "p25": 101,
+          "median": 282,
+          "p75": 381
+        },
+        {
+          "season": 2014,
+          "n": 259,
+          "p25": 79,
+          "median": 270,
+          "p75": 377
+        },
+        {
+          "season": 2015,
+          "n": 239,
+          "p25": 103,
+          "median": 303,
+          "p75": 374
+        },
+        {
+          "season": 2016,
+          "n": 305,
+          "p25": 91,
+          "median": 286,
+          "p75": 379
+        },
+        {
+          "season": 2017,
+          "n": 238,
+          "p25": 117,
+          "median": 318,
+          "p75": 370
+        },
+        {
+          "season": 2018,
+          "n": 222,
+          "p25": 116,
+          "median": 327,
+          "p75": 424
+        },
+        {
+          "season": 2019,
+          "n": 261,
+          "p25": 107,
+          "median": 302,
+          "p75": 384
+        },
+        {
+          "season": 2020,
+          "n": 65,
+          "p25": 96,
+          "median": 159,
+          "p75": 195
+        },
+        {
+          "season": 2021,
+          "n": 252,
+          "p25": 75,
+          "median": 175,
+          "p75": 363
+        },
+        {
+          "season": 2022,
+          "n": 260,
+          "p25": 104,
+          "median": 268,
+          "p75": 341
+        },
+        {
+          "season": 2023,
+          "n": 158,
+          "p25": 86,
+          "median": 294,
+          "p75": 381
+        }
+      ]
+    },
+    {
+      "key": "S5-drop-disrupted-years",
+      "note": "A1 + A2/A3 with NO adjustment assumption at all: drop end-years 2020 and 2021 outright (the only two years where COVID makes any calendar-day figure a judgement call) and keep every other year on raw calendar days",
+      "n": 2557,
+      "clusters": 1242,
+      "r2": 0.0617,
+      "rawByEra": [
+        {
+          "era": "A: <=2015",
+          "n": 1127,
+          "p25": 87,
+          "median": 283,
+          "p75": 372
+        },
+        {
+          "era": "B: 2016-2020",
+          "n": 1026,
+          "p25": 108,
+          "median": 311,
+          "p75": 384
+        },
+        {
+          "era": "C: 2021-2023",
+          "n": 404,
+          "p25": 92,
+          "median": 269,
+          "p75": 348
+        }
+      ],
+      "eraEffects": [
+        {
+          "era": "A: <=2015",
+          "pct": -10.1
+        },
+        {
+          "era": "B: 2016-2020",
+          "pct": 9.5
+        },
+        {
+          "era": "C: 2021-2023",
+          "pct": 1.6
+        }
+      ],
+      "omnibusWaldF": {
+        "F": 9.385,
+        "dfNum": 2,
+        "dfDenom": 1233,
+        "p": 0.0001
+      },
+      "kruskalWallis": {
+        "H": 20.199,
+        "df": 2,
+        "p": 0
+      },
+      "byYear": [
+        {
+          "season": 2011,
+          "n": 191,
+          "p25": 68,
+          "median": 285,
+          "p75": 367
+        },
+        {
+          "season": 2012,
+          "n": 206,
+          "p25": 87,
+          "median": 282,
+          "p75": 367
+        },
+        {
+          "season": 2013,
+          "n": 232,
+          "p25": 101,
+          "median": 282,
+          "p75": 381
+        },
+        {
+          "season": 2014,
+          "n": 259,
+          "p25": 79,
+          "median": 270,
+          "p75": 377
+        },
+        {
+          "season": 2015,
+          "n": 239,
+          "p25": 103,
+          "median": 303,
+          "p75": 374
+        },
+        {
+          "season": 2016,
+          "n": 305,
+          "p25": 91,
+          "median": 286,
+          "p75": 379
+        },
+        {
+          "season": 2017,
+          "n": 238,
+          "p25": 117,
+          "median": 318,
+          "p75": 370
+        },
+        {
+          "season": 2018,
+          "n": 222,
+          "p25": 116,
+          "median": 327,
+          "p75": 424
+        },
+        {
+          "season": 2019,
+          "n": 261,
+          "p25": 107,
+          "median": 302,
+          "p75": 384
+        },
+        {
+          "season": 2022,
+          "n": 247,
+          "p25": 93,
+          "median": 261,
+          "p75": 337
+        },
+        {
+          "season": 2023,
+          "n": 157,
+          "p25": 83,
+          "median": 290,
+          "p75": 380
+        }
+      ]
+    },
+    {
+      "key": "S4-also-drop-post-debut",
+      "note": "S3 + drop durations resolved from assignments AFTER the player already debuted. Now VACUOUS BY CONSTRUCTION: dates.mjs bounds its transition search at the debut, so no such row is produced any more. Kept as a live assertion -- if this spec ever stops matching S3 exactly, that bound has regressed.",
+      "n": 2888,
+      "clusters": 1295,
+      "r2": 0.0647,
+      "rawByEra": [
+        {
+          "era": "A: <=2015",
+          "n": 1127,
+          "p25": 87,
+          "median": 283,
+          "p75": 372
+        },
+        {
+          "era": "B: 2016-2020",
+          "n": 1091,
+          "p25": 107,
+          "median": 300,
+          "p75": 380
+        },
+        {
+          "era": "C: 2021-2023",
+          "n": 670,
+          "p25": 87,
+          "median": 265,
+          "p75": 359
+        }
+      ],
+      "eraEffects": [
+        {
+          "era": "A: <=2015",
+          "pct": -7
+        },
+        {
+          "era": "B: 2016-2020",
+          "pct": 12.1
+        },
+        {
+          "era": "C: 2021-2023",
+          "pct": -4.1
+        }
+      ],
+      "omnibusWaldF": {
+        "F": 10.126,
+        "dfNum": 2,
+        "dfDenom": 1286,
+        "p": 0
+      },
+      "kruskalWallis": {
+        "H": 20.546,
+        "df": 2,
+        "p": 0
+      },
+      "byYear": [
+        {
+          "season": 2011,
+          "n": 191,
+          "p25": 68,
+          "median": 285,
+          "p75": 367
+        },
+        {
+          "season": 2012,
+          "n": 206,
+          "p25": 87,
+          "median": 282,
+          "p75": 367
+        },
+        {
+          "season": 2013,
+          "n": 232,
+          "p25": 101,
+          "median": 282,
+          "p75": 381
+        },
+        {
+          "season": 2014,
+          "n": 259,
+          "p25": 79,
+          "median": 270,
+          "p75": 377
+        },
+        {
+          "season": 2015,
+          "n": 239,
+          "p25": 103,
+          "median": 303,
+          "p75": 374
+        },
+        {
+          "season": 2016,
+          "n": 305,
+          "p25": 91,
+          "median": 286,
+          "p75": 379
+        },
+        {
+          "season": 2017,
+          "n": 238,
+          "p25": 117,
+          "median": 318,
+          "p75": 370
+        },
+        {
+          "season": 2018,
+          "n": 222,
+          "p25": 116,
+          "median": 327,
+          "p75": 424
+        },
+        {
+          "season": 2019,
+          "n": 261,
+          "p25": 107,
+          "median": 302,
+          "p75": 384
+        },
+        {
+          "season": 2020,
+          "n": 65,
+          "p25": 96,
+          "median": 159,
+          "p75": 195
+        },
+        {
+          "season": 2021,
+          "n": 252,
+          "p25": 75,
+          "median": 175,
+          "p75": 363
+        },
+        {
+          "season": 2022,
+          "n": 260,
+          "p25": 104,
+          "median": 268,
+          "p75": 341
+        },
+        {
+          "season": 2023,
+          "n": 158,
+          "p25": 86,
+          "median": 294,
+          "p75": 381
+        }
+      ]
+    }
+  ],
+  "debutCensoring": {
+    "lagBudgetDays": 730,
+    "byYear": [
+      {
+        "season": 2009,
+        "n": 41,
+        "headroomDays": 5113,
+        "medianLag": 276,
+        "p90Lag": 841
+      },
+      {
+        "season": 2010,
+        "n": 126,
+        "headroomDays": 4748,
+        "medianLag": 288,
+        "p90Lag": 751
+      },
+      {
+        "season": 2011,
+        "n": 191,
+        "headroomDays": 4383,
+        "medianLag": 55,
+        "p90Lag": 770
+      },
+      {
+        "season": 2012,
+        "n": 211,
+        "headroomDays": 4017,
+        "medianLag": 152,
+        "p90Lag": 762
+      },
+      {
+        "season": 2013,
+        "n": 238,
+        "headroomDays": 3652,
+        "medianLag": 154,
+        "p90Lag": 766
+      },
+      {
+        "season": 2014,
+        "n": 265,
+        "headroomDays": 3287,
+        "medianLag": 89,
+        "p90Lag": 830
+      },
+      {
+        "season": 2015,
+        "n": 246,
+        "headroomDays": 2922,
+        "medianLag": 146,
+        "p90Lag": 704
+      },
+      {
+        "season": 2016,
+        "n": 310,
+        "headroomDays": 2556,
+        "medianLag": 99,
+        "p90Lag": 771
+      },
+      {
+        "season": 2017,
+        "n": 241,
+        "headroomDays": 2191,
+        "medianLag": 114,
+        "p90Lag": 741
+      },
+      {
+        "season": 2018,
+        "n": 229,
+        "headroomDays": 1826,
+        "medianLag": 233,
+        "p90Lag": 814
+      },
+      {
+        "season": 2019,
+        "n": 270,
+        "headroomDays": 1461,
+        "medianLag": 68,
+        "p90Lag": 872
+      },
+      {
+        "season": 2020,
+        "n": 69,
+        "headroomDays": 1095,
+        "medianLag": 0,
+        "p90Lag": 0
+      },
+      {
+        "season": 2021,
+        "n": 254,
+        "headroomDays": 730,
+        "medianLag": 138,
+        "p90Lag": 569
+      },
+      {
+        "season": 2022,
+        "n": 264,
+        "headroomDays": 365,
+        "medianLag": 31,
+        "p90Lag": 389
+      },
+      {
+        "season": 2023,
+        "n": 160,
+        "headroomDays": 0,
+        "medianLag": 0,
+        "p90Lag": 89
+      }
+    ],
+    "harmonised": {
+      "n": 2171,
+      "byEra": [
+        {
+          "era": "A: <=2015",
+          "n": 980,
+          "p25": 81,
+          "median": 283,
+          "p75": 372
+        },
+        {
+          "era": "B: 2016-2020",
+          "n": 948,
+          "p25": 100,
+          "median": 298,
+          "p75": 384
+        },
+        {
+          "era": "C: 2021-2023",
+          "n": 243,
+          "p25": 75,
+          "median": 144,
+          "p75": 356
+        }
+      ],
+      "kruskalWallis": {
+        "H": 19.989,
+        "df": 2,
+        "p": 0
+      }
+    }
+  },
+  "wireIndependent": {
+    "pairs": 6194,
+    "byArrivalSeason": [
+      {
+        "firstSeason": 2005,
+        "n": 382,
+        "medianSeasons": 1,
+        "meanSeasons": 1.626,
+        "medianPA": 476,
+        "medianIP": 85.7
+      },
+      {
+        "firstSeason": 2006,
+        "n": 331,
+        "medianSeasons": 1,
+        "meanSeasons": 1.571,
+        "medianPA": 469,
+        "medianIP": 81.3
+      },
+      {
+        "firstSeason": 2007,
+        "n": 348,
+        "medianSeasons": 1,
+        "meanSeasons": 1.532,
+        "medianPA": 441,
+        "medianIP": 81
+      },
+      {
+        "firstSeason": 2008,
+        "n": 324,
+        "medianSeasons": 1,
+        "meanSeasons": 1.481,
+        "medianPA": 417,
+        "medianIP": 77
+      },
+      {
+        "firstSeason": 2009,
+        "n": 352,
+        "medianSeasons": 1,
+        "meanSeasons": 1.563,
+        "medianPA": 462,
+        "medianIP": 72.3
+      },
+      {
+        "firstSeason": 2010,
+        "n": 286,
+        "medianSeasons": 1,
+        "meanSeasons": 1.538,
+        "medianPA": 472,
+        "medianIP": 75.8
+      },
+      {
+        "firstSeason": 2011,
+        "n": 283,
+        "medianSeasons": 1,
+        "meanSeasons": 1.438,
+        "medianPA": 443,
+        "medianIP": 70.7
+      },
+      {
+        "firstSeason": 2012,
+        "n": 302,
+        "medianSeasons": 1,
+        "meanSeasons": 1.487,
+        "medianPA": 474,
+        "medianIP": 72
+      },
+      {
+        "firstSeason": 2013,
+        "n": 333,
+        "medianSeasons": 1,
+        "meanSeasons": 1.505,
+        "medianPA": 422,
+        "medianIP": 83.7
+      },
+      {
+        "firstSeason": 2014,
+        "n": 356,
+        "medianSeasons": 1,
+        "meanSeasons": 1.511,
+        "medianPA": 434,
+        "medianIP": 76
+      },
+      {
+        "firstSeason": 2015,
+        "n": 312,
+        "medianSeasons": 1,
+        "meanSeasons": 1.484,
+        "medianPA": 449,
+        "medianIP": 74.7
+      },
+      {
+        "firstSeason": 2016,
+        "n": 375,
+        "medianSeasons": 1,
+        "meanSeasons": 1.523,
+        "medianPA": 465,
+        "medianIP": 68.5
+      },
+      {
+        "firstSeason": 2017,
+        "n": 293,
+        "medianSeasons": 1,
+        "meanSeasons": 1.491,
+        "medianPA": 417,
+        "medianIP": 75.8
+      },
+      {
+        "firstSeason": 2018,
+        "n": 302,
+        "medianSeasons": 1,
+        "meanSeasons": 1.447,
+        "medianPA": 442,
+        "medianIP": 68
+      },
+      {
+        "firstSeason": 2019,
+        "n": 343,
+        "medianSeasons": 1,
+        "meanSeasons": 1.137,
+        "medianPA": 315,
+        "medianIP": 48.2
+      },
+      {
+        "firstSeason": 2021,
+        "n": 419,
+        "medianSeasons": 1,
+        "meanSeasons": 1.461,
+        "medianPA": 330,
+        "medianIP": 54.3
+      },
+      {
+        "firstSeason": 2022,
+        "n": 243,
+        "medianSeasons": 1,
+        "meanSeasons": 1.325,
+        "medianPA": 330,
+        "medianIP": 56.3
+      },
+      {
+        "firstSeason": 2023,
+        "n": 85,
+        "medianSeasons": 1,
+        "meanSeasons": 1,
+        "medianPA": 174,
+        "medianIP": 33.8
+      }
+    ],
+    "byArrivalEra": [
+      {
+        "era": "A: arrive 2011-2015",
+        "n": 1586,
+        "meanSeasons": 1.487,
+        "medianVolumeHit": 442
+      },
+      {
+        "era": "B: arrive 2016-2018",
+        "n": 970,
+        "meanSeasons": 1.49,
+        "medianVolumeHit": 448
+      }
+    ],
+    "kruskalWallis": {
+      "H": 1.051,
+      "df": 1,
+      "p": 0.3053
+    }
+  },
+  "residualVsWireDensity": {
+    "years": [
+      {
+        "season": 2011,
+        "asgRows": 13731,
+        "medianDays": 285
+      },
+      {
+        "season": 2012,
+        "asgRows": 14741,
+        "medianDays": 282
+      },
+      {
+        "season": 2013,
+        "asgRows": 14740,
+        "medianDays": 282
+      },
+      {
+        "season": 2014,
+        "asgRows": 16827,
+        "medianDays": 270
+      },
+      {
+        "season": 2015,
+        "asgRows": 17478,
+        "medianDays": 303
+      },
+      {
+        "season": 2016,
+        "asgRows": 20641,
+        "medianDays": 286
+      },
+      {
+        "season": 2017,
+        "asgRows": 20773,
+        "medianDays": 318
+      },
+      {
+        "season": 2018,
+        "asgRows": 22134,
+        "medianDays": 327
+      },
+      {
+        "season": 2019,
+        "asgRows": 27284,
+        "medianDays": 302
+      }
+    ],
+    "pearson": 0.592,
+    "spearman": 0.7,
+    "caveat": "wire density is near-monotone in year; consistent with the instrument explanation, not proof of it"
+  },
+  "postDebutContamination": {
+    "n": 0,
+    "pct": 0,
+    "byYear": [
+      {
+        "season": 2009,
+        "n": 41,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2010,
+        "n": 126,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2011,
+        "n": 191,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2012,
+        "n": 211,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2013,
+        "n": 238,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2014,
+        "n": 265,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2015,
+        "n": 246,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2016,
+        "n": 310,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2017,
+        "n": 241,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2018,
+        "n": 229,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2019,
+        "n": 270,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2020,
+        "n": 69,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2021,
+        "n": 254,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2022,
+        "n": 264,
+        "postDebut": 0,
+        "pct": 0
+      },
+      {
+        "season": 2023,
+        "n": 160,
+        "postDebut": 0,
+        "pct": 0
+      }
+    ]
+  }
+}

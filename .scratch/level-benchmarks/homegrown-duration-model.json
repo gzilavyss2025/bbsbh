@@ -1,0 +1,1310 @@
+{
+  "specs": [
+    {
+      "label": "lagged S-1, wire floor 2011 | org FE ON",
+      "orgFE": true,
+      "n": 2852,
+      "p": 40,
+      "r2": 0.08709615095279477,
+      "sigma2": 1.149315922990514,
+      "clusters": {
+        "players": 1291,
+        "orgs": 30,
+        "orgSeasons": 384,
+        "twoWayIntersect": 1449
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.39552937162437984,
+      "shareSD": 0.11884604846561793,
+      "winMean": 0.4979845722300139,
+      "winSD": 0.07635190020693483,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.10588101249481374,
+        "pctPerSD": 11.168959146552337,
+        "se": {
+          "naive": 0.02910607032619109,
+          "byPlayer": 0.028401749798149054,
+          "byOrg": 0.035356251748898254,
+          "byOrgSeason": 0.030068675323349673,
+          "twoWay": 0.03535750859698202
+        },
+        "z": {
+          "naive": 3.6377639203165377,
+          "byPlayer": 3.7279749750388276,
+          "byOrg": 2.994689970158195,
+          "twoWay": 2.994583518360548
+        },
+        "pNaive": 0.0002750843793610791,
+        "pByPlayer": 0.00019308185013588997,
+        "pByOrgClusterT": 0.005572515569159151,
+        "pTwoWayClusterT": 0.005573994949725186,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 9.318002031254679
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": -0.01156998509315995,
+        "pctPerSD": -1.150331020585249,
+        "se": {
+          "naive": 0.022603305728054374,
+          "byPlayer": 0.02366979435314319,
+          "byOrg": 0.025067693248563692,
+          "byOrgSeason": 0.02288364354745063,
+          "twoWay": 0.025019064594121045
+        },
+        "z": {
+          "naive": -0.511871371044622,
+          "byPlayer": -0.48880801077274816,
+          "byOrg": -0.46154965191393815,
+          "twoWay": -0.462446749343245
+        },
+        "pNaive": 0.6087410202823018,
+        "pByPlayer": 0.6249776352538607,
+        "pByOrgClusterT": 0.647847808993516,
+        "pTwoWayClusterT": 0.6472120896388869,
+        "dfOrgClusters": 29,
+        "pctPer10pts": -1.5039263339470033
+      },
+      "orgOmnibus": {
+        "W": 57.13960940783759,
+        "dfNum": 29,
+        "dfDenom": 1251,
+        "F": 1.9703313588909515,
+        "p": 0.0016611007019235278
+      }
+    },
+    {
+      "label": "lagged S-1, wire floor 2011 | org FE OFF",
+      "orgFE": false,
+      "n": 2852,
+      "p": 11,
+      "r2": 0.07062686546515429,
+      "sigma2": 1.158106721418563,
+      "clusters": {
+        "players": 1291,
+        "orgs": 30,
+        "orgSeasons": 384,
+        "twoWayIntersect": 1449
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.39552937162437984,
+      "shareSD": 0.11884604846561793,
+      "winMean": 0.4979845722300139,
+      "winSD": 0.07635190020693483,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.045991226932427694,
+        "pctPerSD": 4.706522494267151,
+        "se": {
+          "naive": 0.02042386304689203,
+          "byPlayer": 0.02037107920612922,
+          "byOrg": 0.025117072559075162,
+          "byOrgSeason": 0.022198158815631232,
+          "twoWay": 0.025147451731781074
+        },
+        "z": {
+          "naive": 2.2518378049654197,
+          "byPlayer": 2.2576725792018872,
+          "byOrg": 1.83107433496705,
+          "twoWay": 1.8288623206423926
+        },
+        "pNaive": 0.024332446864445245,
+        "pByPlayer": 0.023966005509913124,
+        "pByOrgClusterT": 0.07738225607666689,
+        "pTwoWayClusterT": 0.07772194826573146,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 3.9456680516227083
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": 0.009137903430084748,
+        "pctPerSD": 0.9179781531788667,
+        "se": {
+          "naive": 0.020348473790451512,
+          "byPlayer": 0.02135453505863943,
+          "byOrg": 0.02118083947677904,
+          "byOrgSeason": 0.02080379230978528,
+          "twoWay": 0.02121610018237736
+        },
+        "z": {
+          "naive": 0.4490707030014553,
+          "byPlayer": 0.42791394919121944,
+          "byOrg": 0.4314231001137989,
+          "twoWay": 0.4307060841310943
+        },
+        "pNaive": 0.653380705641732,
+        "pByPlayer": 0.6687138441715672,
+        "pByOrgClusterT": 0.6693511189854393,
+        "pTwoWayClusterT": 0.669866487552595,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 1.2040046242032254
+      },
+      "orgOmnibus": null
+    },
+    {
+      "label": "lagged S-1, no year floor | org FE ON",
+      "orgFE": true,
+      "n": 3019,
+      "p": 40,
+      "r2": 0.09312237354916231,
+      "sigma2": 1.171318860323809,
+      "clusters": {
+        "players": 1348,
+        "orgs": 30,
+        "orgSeasons": 431,
+        "twoWayIntersect": 1512
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.3949843087963673,
+      "shareSD": 0.11804077843661308,
+      "winMean": 0.49779728386883026,
+      "winSD": 0.07617440444960508,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.117302128325596,
+        "pctPerSD": 12.445910932243454,
+        "se": {
+          "naive": 0.027910477510546483,
+          "byPlayer": 0.02853331284501552,
+          "byOrg": 0.03422467705175328,
+          "byOrgSeason": 0.031036270310210393,
+          "twoWay": 0.03425353821317551
+        },
+        "z": {
+          "naive": 4.202799048539075,
+          "byPlayer": 4.111058851201272,
+          "byOrg": 3.4274137385786316,
+          "twoWay": 3.424525886802436
+        },
+        "pNaive": 0.000026380018157912133,
+        "pByPlayer": 0.00003940659784307243,
+        "pByOrgClusterT": 0.0018438068840921943,
+        "pTwoWayClusterT": 0.0018577661949157641,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 10.447956440001649
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": -0.004497028618023292,
+        "pctPerSD": -0.44869321252367644,
+        "se": {
+          "naive": 0.02222209209334889,
+          "byPlayer": 0.023302537888942012,
+          "byOrg": 0.027182375349911178,
+          "byOrgSeason": 0.02375461422322784,
+          "twoWay": 0.02710836618374445
+        },
+        "z": {
+          "naive": -0.2023674728343539,
+          "byPlayer": -0.19298449977662357,
+          "byOrg": -0.1654391332668426,
+          "twoWay": -0.16589080240180387
+        },
+        "pNaive": 0.8396295083840002,
+        "pByPlayer": 0.8469711461354397,
+        "pByOrgClusterT": 0.8697462774903362,
+        "pTwoWayClusterT": 0.8693940241444953,
+        "dfOrgClusters": 29,
+        "pctPer10pts": -0.5886203397724055
+      },
+      "orgOmnibus": {
+        "W": 68.67605861622123,
+        "dfNum": 29,
+        "dfDenom": 1308,
+        "F": 2.3681399522834905,
+        "p": 0.00006370946969251091
+      }
+    },
+    {
+      "label": "lagged S-1, no year floor | org FE OFF",
+      "orgFE": false,
+      "n": 3019,
+      "p": 11,
+      "r2": 0.0736974021165866,
+      "sigma2": 1.1848735424953827,
+      "clusters": {
+        "players": 1348,
+        "orgs": 30,
+        "orgSeasons": 431,
+        "twoWayIntersect": 1512
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.3949843087963673,
+      "shareSD": 0.11804077843661308,
+      "winMean": 0.49779728386883026,
+      "winSD": 0.07617440444960508,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.04976163336324458,
+        "pctPerSD": 5.102053828399389,
+        "se": {
+          "naive": 0.02007720472586636,
+          "byPlayer": 0.021114113007883406,
+          "byOrg": 0.02724232006850294,
+          "byOrgSeason": 0.023562864909521117,
+          "twoWay": 0.027296816166438337
+        },
+        "z": {
+          "naive": 2.4785140183949235,
+          "byPlayer": 2.356794876709479,
+          "byOrg": 1.8266297891704917,
+          "twoWay": 1.822983056332662
+        },
+        "pNaive": 0.013193113268778145,
+        "pByPlayer": 0.01843339345480688,
+        "pByOrgClusterT": 0.07806608603096236,
+        "pTwoWayClusterT": 0.07863102582882404,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 4.305750357006155
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": 0.014492894327716593,
+        "pctPerSD": 1.4598425521873848,
+        "se": {
+          "naive": 0.02004406858717127,
+          "byPlayer": 0.021174298349683828,
+          "byOrg": 0.022192449293068916,
+          "byOrgSeason": 0.02192435869756557,
+          "twoWay": 0.022141850573188716
+        },
+        "z": {
+          "naive": 0.7230515234313469,
+          "byPlayer": 0.6844568867583278,
+          "byOrg": 0.6530551962213099,
+          "twoWay": 0.6545475627617979
+        },
+        "pNaive": 0.4696480915138075,
+        "pByPlayer": 0.49368656936167366,
+        "pByOrgClusterT": 0.5188649921842852,
+        "pTwoWayClusterT": 0.5179171162542635,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 1.9208083644584928
+      },
+      "orgOmnibus": null
+    },
+    {
+      "label": "contemporaneous S, wire floor 2011 | org FE ON",
+      "orgFE": true,
+      "n": 2852,
+      "p": 40,
+      "r2": 0.08366720611049805,
+      "sigma2": 1.1536328517781635,
+      "clusters": {
+        "players": 1291,
+        "orgs": 30,
+        "orgSeasons": 384,
+        "twoWayIntersect": 1449
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.39877375825813366,
+      "shareSD": 0.11976576029741637,
+      "winMean": 0.5014789621318388,
+      "winSD": 0.07717483870094011,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.03950288378046948,
+        "pctPerSD": 4.029349885870692,
+        "se": {
+          "naive": 0.02843508397025141,
+          "byPlayer": 0.02888096624581898,
+          "byOrg": 0.030514919235500333,
+          "byOrgSeason": 0.029555380622805043,
+          "twoWay": 0.03061976946070275
+        },
+        "z": {
+          "naive": 1.3892304247034097,
+          "byPlayer": 1.3677826234843582,
+          "byOrg": 1.2945432847324323,
+          "twoWay": 1.2901104246120232
+        },
+        "pNaive": 0.16476280614439798,
+        "pByPlayer": 0.17138024915571481,
+        "pByOrgClusterT": 0.2056912202504445,
+        "pTwoWayClusterT": 0.20720520468673576,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 3.353343767307848
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": -0.02208735994723475,
+        "pctPerSD": -2.1845220231368145,
+        "se": {
+          "naive": 0.023087336932104057,
+          "byPlayer": 0.022478585519120894,
+          "byOrg": 0.024437877894220694,
+          "byOrgSeason": 0.023842442887299087,
+          "twoWay": 0.02422942826512137
+        },
+        "z": {
+          "naive": -0.9566872096244764,
+          "byPlayer": -0.9825956321160263,
+          "byOrg": -0.9038166097252733,
+          "twoWay": -0.9115922879216197
+        },
+        "pNaive": 0.3387251414893895,
+        "pByPlayer": 0.3258065012120661,
+        "pByOrgClusterT": 0.3735397220723977,
+        "pTwoWayClusterT": 0.369499246280396,
+        "dfOrgClusters": 29,
+        "pctPer10pts": -2.821422779473226
+      },
+      "orgOmnibus": {
+        "W": 49.90281431738945,
+        "dfNum": 29,
+        "dfDenom": 1251,
+        "F": 1.7207867005996362,
+        "p": 0.010323407036761954
+      }
+    },
+    {
+      "label": "contemporaneous S, wire floor 2011 | org FE OFF",
+      "orgFE": false,
+      "n": 2852,
+      "p": 11,
+      "r2": 0.0690389460058849,
+      "sigma2": 1.1600854532438287,
+      "clusters": {
+        "players": 1291,
+        "orgs": 30,
+        "orgSeasons": 384,
+        "twoWayIntersect": 1449
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.39877375825813366,
+      "shareSD": 0.11976576029741637,
+      "winMean": 0.5014789621318388,
+      "winSD": 0.07717483870094011,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.015840243699316563,
+        "pctPerSD": 1.5966365412462213,
+        "se": {
+          "naive": 0.020487794977038492,
+          "byPlayer": 0.020441747238925608,
+          "byOrg": 0.023239838695822312,
+          "byOrgSeason": 0.020799517573675725,
+          "twoWay": 0.023259520905455768
+        },
+        "z": {
+          "naive": 0.7731551256281787,
+          "byPlayer": 0.7748967597619657,
+          "byOrg": 0.681598693805223,
+          "twoWay": 0.681021924901345
+        },
+        "pNaive": 0.4394304499295856,
+        "pByPlayer": 0.43840053746182095,
+        "pByOrgClusterT": 0.5009002515338814,
+        "pTwoWayClusterT": 0.5012597958901052,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 1.3313870924930304
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": -0.006245208275981977,
+        "pctPerSD": -0.6225747496059864,
+        "se": {
+          "naive": 0.020377545078539793,
+          "byPlayer": 0.019690375455999966,
+          "byOrg": 0.020846460729915164,
+          "byOrgSeason": 0.021359466281186647,
+          "twoWay": 0.02064147043067836
+        },
+        "z": {
+          "naive": -0.30647500726468735,
+          "byPlayer": -0.31717060398048247,
+          "byOrg": -0.2995812266117651,
+          "twoWay": -0.30255636568895034
+        },
+        "pNaive": 0.7592431436955329,
+        "pByPlayer": 0.7511142917235856,
+        "pByOrgClusterT": 0.7666333343702716,
+        "pTwoWayClusterT": 0.7643875177280811,
+        "dfOrgClusters": 29,
+        "pctPer10pts": -0.8059631092434572
+      },
+      "orgOmnibus": null
+    },
+    {
+      "label": "contemporaneous S, no year floor | org FE ON",
+      "orgFE": true,
+      "n": 3019,
+      "p": 40,
+      "r2": 0.08911879420076085,
+      "sigma2": 1.1764898645065212,
+      "clusters": {
+        "players": 1348,
+        "orgs": 30,
+        "orgSeasons": 431,
+        "twoWayIntersect": 1512
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.3994047029464784,
+      "shareSD": 0.11845216415161874,
+      "winMean": 0.5014670420669113,
+      "winSD": 0.07630471737862432,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.05189108133083102,
+        "pctPerSD": 5.326101647737236,
+        "se": {
+          "naive": 0.02750156842958219,
+          "byPlayer": 0.02813293280285673,
+          "byOrg": 0.030787490251811305,
+          "byOrgSeason": 0.029694867560666898,
+          "twoWay": 0.030843729804905802
+        },
+        "z": {
+          "naive": 1.8868407983238562,
+          "byPlayer": 1.8444959753915808,
+          "byOrg": 1.685459935396265,
+          "twoWay": 1.682386717140077
+        },
+        "pNaive": 0.0591816124105633,
+        "pByPlayer": 0.06511077257354692,
+        "pByOrgClusterT": 0.10263253226156924,
+        "pTwoWayClusterT": 0.10323241369651813,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 4.4781347026376706
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": -0.026125690903415155,
+        "pctPerSD": -2.5787367752843293,
+        "se": {
+          "naive": 0.02254035758217551,
+          "byPlayer": 0.022132161388359134,
+          "byOrg": 0.026186662716860754,
+          "byOrgSeason": 0.02397365299544632,
+          "twoWay": 0.026027602003872163
+        },
+        "z": {
+          "naive": -1.1590628413133455,
+          "byPlayer": -1.180440104560077,
+          "byOrg": -0.9976716462840322,
+          "twoWay": -1.00376864912597
+        },
+        "pNaive": 0.24643068777262989,
+        "pByPlayer": 0.23782534349327156,
+        "pByOrgClusterT": 0.32669091337991496,
+        "pTwoWayClusterT": 0.3237925581400106,
+        "dfOrgClusters": 29,
+        "pctPer10pts": -3.3659122129184427
+      },
+      "orgOmnibus": {
+        "W": 60.99342186423963,
+        "dfNum": 29,
+        "dfDenom": 1308,
+        "F": 2.10322144359447,
+        "p": 0.0005789229175108706
+      }
+    },
+    {
+      "label": "contemporaneous S, no year floor | org FE OFF",
+      "orgFE": false,
+      "n": 3019,
+      "p": 11,
+      "r2": 0.07179696869020469,
+      "sigma2": 1.1873044687297893,
+      "clusters": {
+        "players": 1348,
+        "orgs": 30,
+        "orgSeasons": 431,
+        "twoWayIntersect": 1512
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.3994047029464784,
+      "shareSD": 0.11845216415161874,
+      "winMean": 0.5014670420669113,
+      "winSD": 0.07630471737862432,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.017959327003384803,
+        "pctPerSD": 1.8121565492659641,
+        "se": {
+          "naive": 0.02015455320442808,
+          "byPlayer": 0.020279877034279258,
+          "byOrg": 0.025600487667822882,
+          "byOrgSeason": 0.02133579505389634,
+          "twoWay": 0.025619319435079217
+        },
+        "z": {
+          "naive": 0.8910803837337872,
+          "byPlayer": 0.8855737622584196,
+          "byOrg": 0.7015228473931685,
+          "twoWay": 0.7010071851789326
+        },
+        "pNaive": 0.372885982742827,
+        "pByPlayer": 0.375847186353486,
+        "pByOrgClusterT": 0.48856873865428196,
+        "pTwoWayClusterT": 0.48888570927202357,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 1.5277191868980688
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": -0.00982149962518059,
+        "pctPerSD": -0.9773426210805458,
+        "se": {
+          "naive": 0.02004142566196005,
+          "byPlayer": 0.019423820757197622,
+          "byOrg": 0.02092992899231146,
+          "byOrgSeason": 0.021449517437258845,
+          "twoWay": 0.02074201896780681
+        },
+        "z": {
+          "naive": -0.4900599284123008,
+          "byPlayer": -0.5056420025674491,
+          "byOrg": -0.46925623248834175,
+          "twoWay": -0.4735074073755454
+        },
+        "pNaive": 0.6240915004501619,
+        "pByPlayer": 0.6131079808293749,
+        "pByOrgClusterT": 0.6423954726816947,
+        "pTwoWayClusterT": 0.6393964361513355,
+        "dfOrgClusters": 29,
+        "pctPer10pts": -1.2788936211078128
+      },
+      "orgOmnibus": null
+    },
+    {
+      "label": "trailing 3-year mean, wire floor 2011 | org FE ON",
+      "orgFE": true,
+      "n": 2852,
+      "p": 40,
+      "r2": 0.08426999482598574,
+      "sigma2": 1.1528739606094691,
+      "clusters": {
+        "players": 1291,
+        "orgs": 30,
+        "orgSeasons": 384,
+        "twoWayIntersect": 1449
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.39932780605268803,
+      "shareSD": 0.1066543854917206,
+      "winMean": 0.498792075736325,
+      "winSD": 0.06200045660683748,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.06763806198190309,
+        "pctPerSD": 6.997797268038797,
+        "se": {
+          "naive": 0.03179986113395945,
+          "byPlayer": 0.03094185720214648,
+          "byOrg": 0.035925272337824846,
+          "byOrgSeason": 0.03275115975752137,
+          "twoWay": 0.03580413746704388
+        },
+        "z": {
+          "naive": 2.1269923694626325,
+          "byPlayer": 2.1859729214059893,
+          "byOrg": 1.8827431938682513,
+          "twoWay": 1.8891130122645998
+        },
+        "pNaive": 0.03342059872019565,
+        "pByPlayer": 0.02881748557244479,
+        "pByOrgClusterT": 0.0698023852635845,
+        "pTwoWayClusterT": 0.06891382893750238,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 6.54720973129963
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": -0.010012826054176728,
+        "pctPerSD": -0.9962864602202193,
+        "se": {
+          "naive": 0.025053001178018498,
+          "byPlayer": 0.02481664741109877,
+          "byOrg": 0.02191939538609079,
+          "byOrgSeason": 0.025893267752461625,
+          "twoWay": 0.021948855175746115
+        },
+        "z": {
+          "naive": -0.39966573198272076,
+          "byPlayer": -0.4034721486875251,
+          "byOrg": -0.45680210962983425,
+          "twoWay": -0.4561889890840905
+        },
+        "pNaive": 0.6894028338954816,
+        "pByPlayer": 0.6866010152488857,
+        "pByOrgClusterT": 0.651216600459952,
+        "pTwoWayClusterT": 0.6516522114612537,
+        "dfOrgClusters": 29,
+        "pctPer10pts": -1.6019894878213758
+      },
+      "orgOmnibus": {
+        "W": 50.02652290442124,
+        "dfNum": 29,
+        "dfDenom": 1251,
+        "F": 1.7250525139455601,
+        "p": 0.010022680479151521
+      }
+    },
+    {
+      "label": "trailing 3-year mean, wire floor 2011 | org FE OFF",
+      "orgFE": false,
+      "n": 2852,
+      "p": 11,
+      "r2": 0.06943667529106867,
+      "sigma2": 1.1595898364228123,
+      "clusters": {
+        "players": 1291,
+        "orgs": 30,
+        "orgSeasons": 384,
+        "twoWayIntersect": 1449
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.39932780605268803,
+      "shareSD": 0.1066543854917206,
+      "winMean": 0.498792075736325,
+      "winSD": 0.06200045660683748,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.021632000628237644,
+        "pctPerSD": 2.186766860940992,
+        "se": {
+          "naive": 0.02059630487289128,
+          "byPlayer": 0.019268229793035458,
+          "byOrg": 0.02142168462579901,
+          "byOrgSeason": 0.019677496388699638,
+          "twoWay": 0.02144222002565911
+        },
+        "z": {
+          "naive": 1.0502855129470112,
+          "byPlayer": 1.1226771146385526,
+          "byOrg": 1.0098179020983877,
+          "twoWay": 1.0088507907460809
+        },
+        "pNaive": 0.2935869207010442,
+        "pByPlayer": 0.261574751688336,
+        "pByOrgClusterT": 0.320934374023937,
+        "pTwoWayClusterT": 0.3213901516607067,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 2.0489420070622044
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": 0.014362293683866812,
+        "pctPerSD": 1.4465926966638287,
+        "se": {
+          "naive": 0.02052606989728634,
+          "byPlayer": 0.02036612716993462,
+          "byOrg": 0.018962489523047868,
+          "byOrgSeason": 0.022031352017311323,
+          "twoWay": 0.018968623211573814
+        },
+        "z": {
+          "naive": 0.6997098692412417,
+          "byPlayer": 0.705204949572792,
+          "byOrg": 0.7574054907932964,
+          "twoWay": 0.7571605763724367
+        },
+        "pNaive": 0.48410837394521966,
+        "pByPlayer": 0.4806825631866438,
+        "pByOrgClusterT": 0.454917537818438,
+        "pTwoWayClusterT": 0.4550619637762513,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 2.3435207431863114
+      },
+      "orgOmnibus": null
+    },
+    {
+      "label": "trailing 3-year mean, no year floor | org FE ON",
+      "orgFE": true,
+      "n": 3019,
+      "p": 40,
+      "r2": 0.09142592378645376,
+      "sigma2": 1.1735099868272039,
+      "clusters": {
+        "players": 1348,
+        "orgs": 30,
+        "orgSeasons": 431,
+        "twoWayIntersect": 1512
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.39800681088646156,
+      "shareSD": 0.10680607997788835,
+      "winMean": 0.49876449155349384,
+      "winSD": 0.06149709847350465,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.10392034856013556,
+        "pctPerSD": 10.951207716142864,
+        "se": {
+          "naive": 0.030026918175917704,
+          "byPlayer": 0.030782723602143663,
+          "byOrg": 0.03503855330050457,
+          "byOrgSeason": 0.03392657449974993,
+          "twoWay": 0.03499169607004205
+        },
+        "z": {
+          "naive": 3.4609062425687807,
+          "byPlayer": 3.3759309248678275,
+          "byOrg": 2.965885824933276,
+          "twoWay": 2.969857429949113
+        },
+        "pNaive": 0.0005384545944866481,
+        "pByPlayer": 0.000735770427157334,
+        "pByOrgClusterT": 0.005986692325278487,
+        "pTwoWayClusterT": 0.005927898237224411,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 10.218895120100147
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": -0.007528146965633947,
+        "pctPerSD": -0.7499881440748979,
+        "se": {
+          "naive": 0.024543600176104508,
+          "byPlayer": 0.024589255779366628,
+          "byOrg": 0.020007710793017563,
+          "byOrgSeason": 0.026140419937050387,
+          "twoWay": 0.020135210235631078
+        },
+        "z": {
+          "naive": -0.30672545639670673,
+          "byPlayer": -0.3061559501101687,
+          "byOrg": -0.37626228425198827,
+          "twoWay": -0.3738797299624024
+        },
+        "pNaive": 0.7590524892704376,
+        "pByPlayer": 0.7594860471786209,
+        "pByOrgClusterT": 0.7094607070206171,
+        "pTwoWayClusterT": 0.7112134358498501,
+        "dfOrgClusters": 29,
+        "pctPer10pts": -1.216684496702125
+      },
+      "orgOmnibus": {
+        "W": 63.8992242788685,
+        "dfNum": 29,
+        "dfDenom": 1308,
+        "F": 2.2034215268575346,
+        "p": 0.000255716429458246
+      }
+    },
+    {
+      "label": "trailing 3-year mean, no year floor | org FE OFF",
+      "orgFE": false,
+      "n": 3019,
+      "p": 11,
+      "r2": 0.07293798682465513,
+      "sigma2": 1.1858449432981357,
+      "clusters": {
+        "players": 1348,
+        "orgs": 30,
+        "orgSeasons": 431,
+        "twoWayIntersect": 1512
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.39800681088646156,
+      "shareSD": 0.10680607997788835,
+      "winMean": 0.49876449155349384,
+      "winSD": 0.06149709847350465,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.035967771876762714,
+        "pctPerSD": 3.6622437556904863,
+        "se": {
+          "naive": 0.020225802700357468,
+          "byPlayer": 0.020098282221381953,
+          "byOrg": 0.025642228327959767,
+          "byOrgSeason": 0.022014820201062706,
+          "twoWay": 0.025744807472014058
+        },
+        "z": {
+          "naive": 1.7783112200598608,
+          "byPlayer": 1.7895943285390674,
+          "byOrg": 1.4026773109084354,
+          "twoWay": 1.3970883998981756
+        },
+        "pNaive": 0.07535265846745087,
+        "pByPlayer": 0.07351905025230243,
+        "pByOrgClusterT": 0.171328558850958,
+        "pTwoWayClusterT": 0.17298642453921798,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 3.424921970849848
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": 0.01842202043630564,
+        "pctPerSD": 1.8592752654124745,
+        "se": {
+          "naive": 0.020221346046820687,
+          "byPlayer": 0.020109694854975206,
+          "byOrg": 0.01624925058798053,
+          "byOrgSeason": 0.022306816292462377,
+          "twoWay": 0.016122791009361256
+        },
+        "z": {
+          "naive": 0.9110185045867436,
+          "byPlayer": 0.9160765774498051,
+          "byOrg": 1.1337150803700633,
+          "twoWay": 1.1426074074649608
+        },
+        "pNaive": 0.3622855736431052,
+        "pByPlayer": 0.35962668558486666,
+        "pByOrgClusterT": 0.26619958860975945,
+        "pTwoWayClusterT": 0.26254759448551424,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 3.0409110533677675
+      },
+      "orgOmnibus": null
+    },
+    {
+      "label": "level High-A | lagged S-1, wire floor 2011, org FE ON",
+      "orgFE": true,
+      "n": 881,
+      "p": 38,
+      "r2": 0.06834138722591687,
+      "sigma2": 0.8111520221842935,
+      "clusters": {
+        "players": 881,
+        "orgs": 30,
+        "orgSeasons": 314,
+        "twoWayIntersect": 881
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.3977618643381215,
+      "shareSD": 0.11813259140457875,
+      "winMean": 0.5020102156640186,
+      "winSD": 0.07358514035377149,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.15795808320535212,
+        "pctPerSD": 17.111710420365277,
+        "se": {
+          "naive": 0.04503890862652296,
+          "byPlayer": 0.04251386740251409,
+          "byOrg": 0.048973628697413465,
+          "byOrgSeason": 0.04386183215468892,
+          "twoWay": 0.04897362869741346
+        },
+        "z": {
+          "naive": 3.5071472205330525,
+          "byPlayer": 3.715448460847652,
+          "byOrg": 3.225370212636391,
+          "twoWay": 3.2253702126363915
+        },
+        "pNaive": 0.0004530260526693919,
+        "pByPlayer": 0.0002029024837140181,
+        "pByOrgClusterT": 0.0031099304203324307,
+        "pTwoWayClusterT": 0.0031099304203324307,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 14.306418202440408
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": 0.008983872913444983,
+        "pctPerSD": 0.9024349019639333,
+        "se": {
+          "naive": 0.0344709095106438,
+          "byPlayer": 0.03493558395835075,
+          "byOrg": 0.042340992714941565,
+          "byOrgSeason": 0.034278132403824414,
+          "twoWay": 0.042340992714941565
+        },
+        "z": {
+          "naive": 0.26062187046938745,
+          "byPlayer": 0.25715536697927566,
+          "byOrg": 0.2121790807770715,
+          "twoWay": 0.2121790807770715
+        },
+        "pNaive": 0.7943842407698021,
+        "pByPlayer": 0.7970589535109602,
+        "pByOrgClusterT": 0.8334516122236717,
+        "pTwoWayClusterT": 0.8334516122236717,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 1.2283645789896713
+      },
+      "orgOmnibus": {
+        "W": 49.21337768646953,
+        "dfNum": 29,
+        "dfDenom": 843,
+        "F": 1.697013023671363,
+        "p": 0.01275429358319238
+      }
+    },
+    {
+      "label": "level AA | lagged S-1, wire floor 2011, org FE ON",
+      "orgFE": true,
+      "n": 1037,
+      "p": 38,
+      "r2": 0.06286847703296206,
+      "sigma2": 0.91036578199291,
+      "clusters": {
+        "players": 1037,
+        "orgs": 30,
+        "orgSeasons": 352,
+        "twoWayIntersect": 1037
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.3950658390389425,
+      "shareSD": 0.11779096412584852,
+      "winMean": 0.4973548698167798,
+      "winSD": 0.07686704954400302,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.08061662473454885,
+        "pctPerSD": 8.395525526482949,
+        "se": {
+          "naive": 0.042466917661132385,
+          "byPlayer": 0.041218035615080285,
+          "byOrg": 0.04226206658370946,
+          "byOrgSeason": 0.042463413725205595,
+          "twoWay": 0.04226206658370946
+        },
+        "z": {
+          "naive": 1.898339441016996,
+          "byPlayer": 1.9558580007887119,
+          "byOrg": 1.9075409995597263,
+          "twoWay": 1.9075409995597263
+        },
+        "pNaive": 0.057651250007874744,
+        "pByPlayer": 0.05048174617335777,
+        "pByOrgClusterT": 0.06639808357284524,
+        "pTwoWayClusterT": 0.06639808357284524,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 7.083681728763147
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": 0.04176007417033293,
+        "pctPerSD": 4.264429144209281,
+        "se": {
+          "naive": 0.033432330658351536,
+          "byPlayer": 0.03467868162576421,
+          "byOrg": 0.03854805566311139,
+          "byOrgSeason": 0.036917094482679526,
+          "twoWay": 0.03854805566311138
+        },
+        "z": {
+          "naive": 1.2490925205629086,
+          "byPlayer": 1.2042001659978812,
+          "byOrg": 1.083325045893178,
+          "twoWay": 1.0833250458931782
+        },
+        "pNaive": 0.21163137297818713,
+        "pByPlayer": 0.22851235244515755,
+        "pByOrgClusterT": 0.2875894517833003,
+        "pTwoWayClusterT": 0.2875894517833003,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 5.583050555591562
+      },
+      "orgOmnibus": {
+        "W": 36.83380390132356,
+        "dfNum": 29,
+        "dfDenom": 999,
+        "F": 1.2701311690111574,
+        "p": 0.15520022621983237
+      }
+    },
+    {
+      "label": "level AAA | lagged S-1, wire floor 2011, org FE ON",
+      "orgFE": true,
+      "n": 934,
+      "p": 38,
+      "r2": 0.06227370020214351,
+      "sigma2": 1.7052497560565665,
+      "clusters": {
+        "players": 934,
+        "orgs": 30,
+        "orgSeasons": 343,
+        "twoWayIntersect": 934
+      },
+      "twoWayNonPositive": 0,
+      "shareMean": 0.393938212320627,
+      "shareSD": 0.12063829018774466,
+      "winMean": 0.49488650963597397,
+      "winSD": 0.07815339313616082,
+      "share": {
+        "name": "homegrownShare (per SD)",
+        "betaPerSD": 0.09312683126130586,
+        "pctPerSD": 9.760093655155156,
+        "se": {
+          "naive": 0.06304285596559088,
+          "byPlayer": 0.06185436548602648,
+          "byOrg": 0.06964147013330169,
+          "byOrgSeason": 0.06746460024990297,
+          "twoWay": 0.06964147013330169
+        },
+        "z": {
+          "naive": 1.4771988012747228,
+          "byPlayer": 1.5055821934240703,
+          "byOrg": 1.3372324145807164,
+          "twoWay": 1.3372324145807164
+        },
+        "pNaive": 0.13962242719077134,
+        "pByPlayer": 0.1321745186292862,
+        "pByOrgClusterT": 0.19154173217615622,
+        "pTwoWayClusterT": 0.19154173217615622,
+        "dfOrgClusters": 29,
+        "pctPer10pts": 8.025279749934299
+      },
+      "win": {
+        "name": "winPct (per SD)",
+        "betaPerSD": -0.09957412648143339,
+        "pctPerSD": -9.477715360304995,
+        "se": {
+          "naive": 0.049342343965049204,
+          "byPlayer": 0.049256734776019974,
+          "byOrg": 0.053849449401240326,
+          "byOrgSeason": 0.05370039725463223,
+          "twoWay": 0.053849449401240326
+        },
+        "z": {
+          "naive": -2.0180258674368003,
+          "byPlayer": -2.021533236707964,
+          "byOrg": -1.8491206054771636,
+          "twoWay": -1.8491206054771636
+        },
+        "pNaive": 0.04358843028521742,
+        "pByPlayer": 0.04322445851909107,
+        "pByOrgClusterT": 0.07465820181208749,
+        "pTwoWayClusterT": 0.07465820181208749,
+        "dfOrgClusters": 29,
+        "pctPer10pts": -11.96261018831084
+      },
+      "orgOmnibus": {
+        "W": 43.76274635025743,
+        "dfNum": 29,
+        "dfDenom": 896,
+        "F": 1.5090602189743942,
+        "p": 0.04209376740377065
+      }
+    }
+  ],
+  "preChecks": {
+    "fittedCellVariation": {
+      "n": 384,
+      "groups": 30,
+      "grandMean": 0.39654308952840095,
+      "betweenSD": 0.08515133281329242,
+      "withinSD": 0.08596069119445236,
+      "totalSD": 0.120995826004487,
+      "withinShareOfVariance": 0.5047298854573836
+    }
+  },
+  "robustness": {
+    "incrementalR2": 0.004296143154855936,
+    "r2WithShare": 0.08709615095279477,
+    "r2WithoutShare": 0.08280000779793883,
+    "leaveOneOrgOut": [
+      {
+        "orgId": 117,
+        "orgName": "Houston Astros",
+        "pctPerSD": 9.030826158052996,
+        "pByOrg": 0.02271304793987153
+      },
+      {
+        "orgId": 141,
+        "orgName": "Toronto Blue Jays",
+        "pctPerSD": 9.671648577809023,
+        "pByOrg": 0.01166366494858766
+      },
+      {
+        "orgId": 137,
+        "orgName": "San Francisco Giants",
+        "pctPerSD": 10.311076340749615,
+        "pByOrg": 0.01098748565151084
+      },
+      {
+        "orgId": 144,
+        "orgName": "Atlanta Braves",
+        "pctPerSD": 10.470183687434265,
+        "pByOrg": 0.010921728773964152
+      },
+      {
+        "orgId": 108,
+        "orgName": "Los Angeles Angels",
+        "pctPerSD": 10.57172578829364,
+        "pByOrg": 0.009961781600404616
+      },
+      {
+        "orgId": 145,
+        "orgName": "Chicago White Sox",
+        "pctPerSD": 10.66684170134402,
+        "pByOrg": 0.008200172906165175
+      },
+      {
+        "orgId": 158,
+        "orgName": "Milwaukee Brewers",
+        "pctPerSD": 10.735866548464056,
+        "pByOrg": 0.008378808244302437
+      },
+      {
+        "orgId": 115,
+        "orgName": "Colorado Rockies",
+        "pctPerSD": 10.87238166621638,
+        "pByOrg": 0.008326396468931237
+      },
+      {
+        "orgId": 143,
+        "orgName": "Philadelphia Phillies",
+        "pctPerSD": 10.884642475564267,
+        "pByOrg": 0.008689841032943521
+      },
+      {
+        "orgId": 138,
+        "orgName": "St. Louis Cardinals",
+        "pctPerSD": 10.904815490568453,
+        "pByOrg": 0.0068909905867033635
+      },
+      {
+        "orgId": 118,
+        "orgName": "Kansas City Royals",
+        "pctPerSD": 10.919588502992529,
+        "pByOrg": 0.012553349815937382
+      },
+      {
+        "orgId": 133,
+        "orgName": "Oakland Athletics",
+        "pctPerSD": 10.969926221234626,
+        "pByOrg": 0.005720566685069072
+      },
+      {
+        "orgId": 121,
+        "orgName": "New York Mets",
+        "pctPerSD": 10.997987320915549,
+        "pByOrg": 0.006858545765884637
+      },
+      {
+        "orgId": 136,
+        "orgName": "Seattle Mariners",
+        "pctPerSD": 11.009193655405891,
+        "pByOrg": 0.008601198978440056
+      },
+      {
+        "orgId": 120,
+        "orgName": "Washington Nationals",
+        "pctPerSD": 11.021715316123327,
+        "pByOrg": 0.00769348385031647
+      },
+      {
+        "orgId": 139,
+        "orgName": "Tampa Bay Rays",
+        "pctPerSD": 11.070038328948527,
+        "pByOrg": 0.008626181576632195
+      },
+      {
+        "orgId": 119,
+        "orgName": "Los Angeles Dodgers",
+        "pctPerSD": 11.184403679950261,
+        "pByOrg": 0.00774179447767309
+      },
+      {
+        "orgId": 110,
+        "orgName": "Baltimore Orioles",
+        "pctPerSD": 11.24239472198376,
+        "pByOrg": 0.006617929372581351
+      },
+      {
+        "orgId": 147,
+        "orgName": "New York Yankees",
+        "pctPerSD": 11.449673686050875,
+        "pByOrg": 0.006185528224732986
+      },
+      {
+        "orgId": 112,
+        "orgName": "Chicago Cubs",
+        "pctPerSD": 11.485503477519643,
+        "pByOrg": 0.006256049013367046
+      },
+      {
+        "orgId": 146,
+        "orgName": "Florida Marlins",
+        "pctPerSD": 11.563121429901058,
+        "pByOrg": 0.005395451806929156
+      },
+      {
+        "orgId": 142,
+        "orgName": "Minnesota Twins",
+        "pctPerSD": 11.579040110702543,
+        "pByOrg": 0.003971787078278223
+      },
+      {
+        "orgId": 135,
+        "orgName": "San Diego Padres",
+        "pctPerSD": 11.60783144298112,
+        "pByOrg": 0.004764778576862708
+      },
+      {
+        "orgId": 111,
+        "orgName": "Boston Red Sox",
+        "pctPerSD": 11.688392036326967,
+        "pByOrg": 0.004846692852087664
+      },
+      {
+        "orgId": 113,
+        "orgName": "Cincinnati Reds",
+        "pctPerSD": 11.74927203618854,
+        "pByOrg": 0.003769717845390147
+      },
+      {
+        "orgId": 140,
+        "orgName": "Texas Rangers",
+        "pctPerSD": 11.816373766356957,
+        "pByOrg": 0.004234445288259481
+      },
+      {
+        "orgId": 109,
+        "orgName": "Arizona Diamondbacks",
+        "pctPerSD": 11.842779776989643,
+        "pByOrg": 0.004038713159738414
+      },
+      {
+        "orgId": 116,
+        "orgName": "Detroit Tigers",
+        "pctPerSD": 11.854388083567047,
+        "pByOrg": 0.003292634626137355
+      },
+      {
+        "orgId": 134,
+        "orgName": "Pittsburgh Pirates",
+        "pctPerSD": 12.76873650842223,
+        "pByOrg": 0.0016860924116176598
+      },
+      {
+        "orgId": 114,
+        "orgName": "Cleveland Indians",
+        "pctPerSD": 13.19340902231627,
+        "pByOrg": 0.0008180033528336824
+      }
+    ],
+    "permutation": {
+      "draws": 500,
+      "seed": 20260824,
+      "observedBeta": 0.10588101249481374,
+      "permP": 0.003992015968063872,
+      "moreExtreme": 1,
+      "nullP05": -0.04692967995242391,
+      "nullMedian": 0.002232359873925463,
+      "nullP95": 0.04761466296309769
+    },
+    "seasonFE": {
+      "orgFEOn": {
+        "label": "lagged S-1, floor 2011 | season FE + org FE",
+        "n": 2852,
+        "r2": 0.10481022746933011,
+        "betaPerSD": 0.1152540041085848,
+        "pctPerSD": 12.21584342280222,
+        "seOrg": 0.036416341079593816,
+        "seTwoWay": 0.03644814050785006,
+        "pByOrg": 0.0036291214288693354,
+        "pTwoWay": 0.0036547068390880904
+      },
+      "orgFEOff": {
+        "label": "lagged S-1, floor 2011 | season FE, no org FE",
+        "n": 2852,
+        "r2": 0.08797719363335921,
+        "betaPerSD": 0.05309125932698353,
+        "pctPerSD": 5.452587605003911,
+        "seOrg": 0.02484854377929901,
+        "seTwoWay": 0.024899829901183845,
+        "pByOrg": 0.0411963616691521,
+        "pTwoWay": 0.04158649314052629
+      }
+    }
+  }
+}

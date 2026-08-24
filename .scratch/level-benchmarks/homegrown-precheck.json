@@ -1,0 +1,1541 @@
+{
+  "withinBetweenOrg": {
+    "n": 600,
+    "groups": 30,
+    "grandMean": 0.38831839513560384,
+    "betweenSD": 0.06845613317343698,
+    "withinSD": 0.0998434487812481,
+    "totalSD": 0.1210576574760682,
+    "withinShareOfVariance": 0.6802281746592418
+  },
+  "withinBetweenSeason": {
+    "n": 600,
+    "groups": 20,
+    "grandMean": 0.38831839513560384,
+    "betweenSD": 0.02852191432515803,
+    "withinSD": 0.11764972093813646,
+    "totalSD": 0.12105765747606814,
+    "withinShareOfVariance": 0.9444897976696199
+  },
+  "vsWin": {
+    "label": "homegrownShare vs winPct, same season",
+    "pooled": {
+      "n": 600,
+      "r": 0.07058093553243168,
+      "t": 1.7303041983398086,
+      "df": 598,
+      "p": 0.0840918492092721
+    },
+    "pooledRho": {
+      "n": 600,
+      "rho": 0.0738339150894087,
+      "t": 1.8104790129141943,
+      "df": 598,
+      "p": 0.07072330156651968
+    },
+    "between": {
+      "n": 30,
+      "r": 0.11480174412431565,
+      "t": 0.6115168204205069,
+      "df": 28,
+      "p": 0.5457909550141662
+    },
+    "within": {
+      "n": 600,
+      "r": 0.05610700654286692,
+      "t": 1.3404724378643817,
+      "df": 569,
+      "p": 0.18062675434554942
+    },
+    "orgMeans": [
+      {
+        "orgId": 108,
+        "name": "Los Angeles Angels",
+        "n": 20,
+        "x": 0.4547140728381117,
+        "y": 0.51915
+      },
+      {
+        "orgId": 109,
+        "name": "Arizona Diamondbacks",
+        "n": 20,
+        "x": 0.34756379180357866,
+        "y": 0.4681
+      },
+      {
+        "orgId": 110,
+        "name": "Baltimore Orioles",
+        "n": 20,
+        "x": 0.3604676675978118,
+        "y": 0.45730000000000004
+      },
+      {
+        "orgId": 111,
+        "name": "Boston Red Sox",
+        "n": 20,
+        "x": 0.34611805239684673,
+        "y": 0.5399999999999999
+      },
+      {
+        "orgId": 112,
+        "name": "Chicago Cubs",
+        "n": 20,
+        "x": 0.3352112954571339,
+        "y": 0.5053000000000001
+      },
+      {
+        "orgId": 113,
+        "name": "Cincinnati Reds",
+        "n": 20,
+        "x": 0.40936824722150983,
+        "y": 0.475
+      },
+      {
+        "orgId": 114,
+        "name": "Cleveland Indians",
+        "n": 20,
+        "x": 0.37060705815742223,
+        "y": 0.52215
+      },
+      {
+        "orgId": 115,
+        "name": "Colorado Rockies",
+        "n": 20,
+        "x": 0.5318367447447773,
+        "y": 0.45975
+      },
+      {
+        "orgId": 116,
+        "name": "Detroit Tigers",
+        "n": 20,
+        "x": 0.33524197699537217,
+        "y": 0.47955
+      },
+      {
+        "orgId": 117,
+        "name": "Houston Astros",
+        "n": 20,
+        "x": 0.4489917126123383,
+        "y": 0.51075
+      },
+      {
+        "orgId": 118,
+        "name": "Kansas City Royals",
+        "n": 20,
+        "x": 0.4559058689790983,
+        "y": 0.4346
+      },
+      {
+        "orgId": 119,
+        "name": "Los Angeles Dodgers",
+        "n": 20,
+        "x": 0.41117308184216717,
+        "y": 0.57555
+      },
+      {
+        "orgId": 120,
+        "name": "Washington Nationals",
+        "n": 20,
+        "x": 0.3395491766979156,
+        "y": 0.4787
+      },
+      {
+        "orgId": 121,
+        "name": "New York Mets",
+        "n": 20,
+        "x": 0.44201811825208653,
+        "y": 0.49814999999999987
+      },
+      {
+        "orgId": 133,
+        "name": "Oakland Athletics",
+        "n": 20,
+        "x": 0.26222883564285054,
+        "y": 0.50335
+      },
+      {
+        "orgId": 134,
+        "name": "Pittsburgh Pirates",
+        "n": 20,
+        "x": 0.4088926201215883,
+        "y": 0.4467
+      },
+      {
+        "orgId": 135,
+        "name": "San Diego Padres",
+        "n": 20,
+        "x": 0.25760963671083126,
+        "y": 0.48525
+      },
+      {
+        "orgId": 136,
+        "name": "Seattle Mariners",
+        "n": 20,
+        "x": 0.38543424099054124,
+        "y": 0.4762500000000001
+      },
+      {
+        "orgId": 137,
+        "name": "San Francisco Giants",
+        "n": 20,
+        "x": 0.4368156644449888,
+        "y": 0.5060499999999999
+      },
+      {
+        "orgId": 138,
+        "name": "St. Louis Cardinals",
+        "n": 20,
+        "x": 0.4947142922865934,
+        "y": 0.5494999999999999
+      },
+      {
+        "orgId": 139,
+        "name": "Tampa Bay Rays",
+        "n": 20,
+        "x": 0.36820739796691637,
+        "y": 0.5242
+      },
+      {
+        "orgId": 140,
+        "name": "Texas Rangers",
+        "n": 20,
+        "x": 0.36288093606077754,
+        "y": 0.49659999999999993
+      },
+      {
+        "orgId": 141,
+        "name": "Toronto Blue Jays",
+        "n": 20,
+        "x": 0.3764542508372791,
+        "y": 0.50335
+      },
+      {
+        "orgId": 142,
+        "name": "Minnesota Twins",
+        "n": 20,
+        "x": 0.5034066019617073,
+        "y": 0.5012000000000001
+      },
+      {
+        "orgId": 143,
+        "name": "Philadelphia Phillies",
+        "n": 20,
+        "x": 0.44215063419569695,
+        "y": 0.51075
+      },
+      {
+        "orgId": 144,
+        "name": "Atlanta Braves",
+        "n": 20,
+        "x": 0.44911669465089793,
+        "y": 0.53665
+      },
+      {
+        "orgId": 145,
+        "name": "Chicago White Sox",
+        "n": 20,
+        "x": 0.2695189667676402,
+        "y": 0.48905000000000004
+      },
+      {
+        "orgId": 146,
+        "name": "Miami Marlins",
+        "n": 20,
+        "x": 0.30781166676583144,
+        "y": 0.46235
+      },
+      {
+        "orgId": 147,
+        "name": "New York Yankees",
+        "n": 20,
+        "x": 0.39401930878746616,
+        "y": 0.5747000000000001
+      },
+      {
+        "orgId": 158,
+        "name": "Milwaukee Brewers",
+        "n": 20,
+        "x": 0.34152324028034353,
+        "y": 0.5096
+      }
+    ]
+  },
+  "vsWinLag": {
+    "label": "homegrownShare in S vs winPct in S-1",
+    "pooled": {
+      "n": 570,
+      "r": 0.1476194454748998,
+      "t": 3.5571487084808844,
+      "df": 568,
+      "p": 0.000406204249082101
+    },
+    "pooledRho": {
+      "n": 570,
+      "rho": 0.15536603151568507,
+      "t": 3.748315782199888,
+      "df": 568,
+      "p": 0.00019624177528828886
+    },
+    "between": {
+      "n": 30,
+      "r": 0.13694967382808285,
+      "t": 0.7315623337600363,
+      "df": 28,
+      "p": 0.470514558220799
+    },
+    "within": {
+      "n": 570,
+      "r": 0.15400582069453655,
+      "t": 3.6186270962213536,
+      "df": 539,
+      "p": 0.0003240561543425429
+    },
+    "orgMeans": [
+      {
+        "orgId": 108,
+        "name": "Los Angeles Angels",
+        "n": 19,
+        "x": 0.45571292260410035,
+        "y": 0.5227368421052632
+      },
+      {
+        "orgId": 109,
+        "name": "Arizona Diamondbacks",
+        "n": 19,
+        "x": 0.34214049413563985,
+        "y": 0.46542105263157896
+      },
+      {
+        "orgId": 110,
+        "name": "Baltimore Orioles",
+        "n": 19,
+        "x": 0.3555900923905564,
+        "y": 0.44857894736842113
+      },
+      {
+        "orgId": 111,
+        "name": "Boston Red Sox",
+        "n": 19,
+        "x": 0.3614505302313307,
+        "y": 0.5431052631578946
+      },
+      {
+        "orgId": 112,
+        "name": "Chicago Cubs",
+        "n": 19,
+        "x": 0.3345201170443406,
+        "y": 0.5049473684210527
+      },
+      {
+        "orgId": 113,
+        "name": "Cincinnati Reds",
+        "n": 19,
+        "x": 0.41722783191986795,
+        "y": 0.47336842105263155
+      },
+      {
+        "orgId": 114,
+        "name": "Cleveland Indians",
+        "n": 19,
+        "x": 0.3785926510248971,
+        "y": 0.5249473684210526
+      },
+      {
+        "orgId": 115,
+        "name": "Colorado Rockies",
+        "n": 19,
+        "x": 0.5427969202571695,
+        "y": 0.4647894736842105
+      },
+      {
+        "orgId": 116,
+        "name": "Detroit Tigers",
+        "n": 19,
+        "x": 0.34017706839292144,
+        "y": 0.4794736842105263
+      },
+      {
+        "orgId": 117,
+        "name": "Houston Astros",
+        "n": 19,
+        "x": 0.4497257971785641,
+        "y": 0.5083684210526316
+      },
+      {
+        "orgId": 118,
+        "name": "Kansas City Royals",
+        "n": 19,
+        "x": 0.45975634982309516,
+        "y": 0.43926315789473686
+      },
+      {
+        "orgId": 119,
+        "name": "Los Angeles Dodgers",
+        "n": 19,
+        "x": 0.42218183936211223,
+        "y": 0.5733684210526316
+      },
+      {
+        "orgId": 120,
+        "name": "Washington Nationals",
+        "n": 19,
+        "x": 0.34304377145524884,
+        "y": 0.48084210526315785
+      },
+      {
+        "orgId": 121,
+        "name": "New York Mets",
+        "n": 19,
+        "x": 0.45189562976757414,
+        "y": 0.4999999999999999
+      },
+      {
+        "orgId": 133,
+        "name": "Oakland Athletics",
+        "n": 19,
+        "x": 0.25263625107805615,
+        "y": 0.513578947368421
+      },
+      {
+        "orgId": 134,
+        "name": "Pittsburgh Pirates",
+        "n": 19,
+        "x": 0.41218545355297315,
+        "y": 0.44552631578947366
+      },
+      {
+        "orgId": 135,
+        "name": "San Diego Padres",
+        "n": 19,
+        "x": 0.2573324608232765,
+        "y": 0.4841578947368421
+      },
+      {
+        "orgId": 136,
+        "name": "Seattle Mariners",
+        "n": 19,
+        "x": 0.3819033844202279,
+        "y": 0.4727368421052633
+      },
+      {
+        "orgId": 137,
+        "name": "San Francisco Giants",
+        "n": 19,
+        "x": 0.4480125101669778,
+        "y": 0.507
+      },
+      {
+        "orgId": 138,
+        "name": "St. Louis Cardinals",
+        "n": 19,
+        "x": 0.5088640507468452,
+        "y": 0.5553684210526315
+      },
+      {
+        "orgId": 139,
+        "name": "Tampa Bay Rays",
+        "n": 19,
+        "x": 0.368685555657408,
+        "y": 0.5196315789473683
+      },
+      {
+        "orgId": 140,
+        "name": "Texas Rangers",
+        "n": 19,
+        "x": 0.3634433921536601,
+        "y": 0.4934736842105262
+      },
+      {
+        "orgId": 141,
+        "name": "Toronto Blue Jays",
+        "n": 19,
+        "x": 0.37246746264012576,
+        "y": 0.5009473684210526
+      },
+      {
+        "orgId": 142,
+        "name": "Minnesota Twins",
+        "n": 19,
+        "x": 0.5062080435665584,
+        "y": 0.4993157894736843
+      },
+      {
+        "orgId": 143,
+        "name": "Philadelphia Phillies",
+        "n": 19,
+        "x": 0.4446354628044233,
+        "y": 0.5083684210526316
+      },
+      {
+        "orgId": 144,
+        "name": "Atlanta Braves",
+        "n": 19,
+        "x": 0.451914707647345,
+        "y": 0.5311052631578947
+      },
+      {
+        "orgId": 145,
+        "name": "Chicago White Sox",
+        "n": 19,
+        "x": 0.26750492864161146,
+        "y": 0.49494736842105264
+      },
+      {
+        "orgId": 146,
+        "name": "Miami Marlins",
+        "n": 19,
+        "x": 0.31078361010738664,
+        "y": 0.4593684210526316
+      },
+      {
+        "orgId": 147,
+        "name": "New York Yankees",
+        "n": 19,
+        "x": 0.3984382040753331,
+        "y": 0.5783157894736842
+      },
+      {
+        "orgId": 158,
+        "name": "Milwaukee Brewers",
+        "n": 19,
+        "x": 0.3482705868670206,
+        "y": 0.5065263157894737
+      }
+    ]
+  },
+  "vsAtt": {
+    "label": "homegrownShare vs home attendance, same season",
+    "pooled": {
+      "n": 600,
+      "r": 0.17630897237807533,
+      "t": 4.380080916992747,
+      "df": 598,
+      "p": 0.000014007956970840418
+    },
+    "pooledRho": {
+      "n": 600,
+      "rho": 0.22120351102357375,
+      "t": 5.546724473298258,
+      "df": 598,
+      "p": 4.374523175628827e-8
+    },
+    "between": {
+      "n": 30,
+      "r": 0.36428156965273045,
+      "t": 2.0698163232247326,
+      "df": 28,
+      "p": 0.047808400231063815
+    },
+    "within": {
+      "n": 600,
+      "r": 0.07302711211967407,
+      "t": 1.7466319337739524,
+      "df": 569,
+      "p": 0.08124078775496109
+    },
+    "orgMeans": [
+      {
+        "orgId": 108,
+        "name": "Los Angeles Angels",
+        "n": 20,
+        "x": 0.4547140728381117,
+        "y": 35436.55
+      },
+      {
+        "orgId": 109,
+        "name": "Arizona Diamondbacks",
+        "n": 20,
+        "x": 0.34756379180357866,
+        "y": 24345.55
+      },
+      {
+        "orgId": 110,
+        "name": "Baltimore Orioles",
+        "n": 20,
+        "x": 0.3604676675978118,
+        "y": 23395.05
+      },
+      {
+        "orgId": 111,
+        "name": "Boston Red Sox",
+        "n": 20,
+        "x": 0.34611805239684673,
+        "y": 33473.55
+      },
+      {
+        "orgId": 112,
+        "name": "Chicago Cubs",
+        "n": 20,
+        "x": 0.3352112954571339,
+        "y": 34846.65
+      },
+      {
+        "orgId": 113,
+        "name": "Cincinnati Reds",
+        "n": 20,
+        "x": 0.40936824722150983,
+        "y": 23701.5
+      },
+      {
+        "orgId": 114,
+        "name": "Cleveland Indians",
+        "n": 20,
+        "x": 0.37060705815742223,
+        "y": 20603.45
+      },
+      {
+        "orgId": 115,
+        "name": "Colorado Rockies",
+        "n": 20,
+        "x": 0.5318367447447773,
+        "y": 30495.7
+      },
+      {
+        "orgId": 116,
+        "name": "Detroit Tigers",
+        "n": 20,
+        "x": 0.33524197699537217,
+        "y": 27718.1
+      },
+      {
+        "orgId": 117,
+        "name": "Houston Astros",
+        "n": 20,
+        "x": 0.4489917126123383,
+        "y": 29131.25
+      },
+      {
+        "orgId": 118,
+        "name": "Kansas City Royals",
+        "n": 20,
+        "x": 0.4559058689790983,
+        "y": 20233
+      },
+      {
+        "orgId": 119,
+        "name": "Los Angeles Dodgers",
+        "n": 20,
+        "x": 0.41117308184216717,
+        "y": 42635.25
+      },
+      {
+        "orgId": 120,
+        "name": "Washington Nationals",
+        "n": 20,
+        "x": 0.3395491766979156,
+        "y": 25384.8
+      },
+      {
+        "orgId": 121,
+        "name": "New York Mets",
+        "n": 20,
+        "x": 0.44201811825208653,
+        "y": 31504.35
+      },
+      {
+        "orgId": 133,
+        "name": "Oakland Athletics",
+        "n": 20,
+        "x": 0.26222883564285054,
+        "y": 18570.35
+      },
+      {
+        "orgId": 134,
+        "name": "Pittsburgh Pirates",
+        "n": 20,
+        "x": 0.4088926201215883,
+        "y": 21181.95
+      },
+      {
+        "orgId": 135,
+        "name": "San Diego Padres",
+        "n": 20,
+        "x": 0.25760963671083126,
+        "y": 28647.85
+      },
+      {
+        "orgId": 136,
+        "name": "Seattle Mariners",
+        "n": 20,
+        "x": 0.38543424099054124,
+        "y": 25822.8
+      },
+      {
+        "orgId": 137,
+        "name": "San Francisco Giants",
+        "n": 20,
+        "x": 0.4368156644449888,
+        "y": 35572.7
+      },
+      {
+        "orgId": 138,
+        "name": "St. Louis Cardinals",
+        "n": 20,
+        "x": 0.4947142922865934,
+        "y": 38842.35
+      },
+      {
+        "orgId": 139,
+        "name": "Tampa Bay Rays",
+        "n": 20,
+        "x": 0.36820739796691637,
+        "y": 16243.45
+      },
+      {
+        "orgId": 140,
+        "name": "Texas Rangers",
+        "n": 20,
+        "x": 0.36288093606077754,
+        "y": 29315.4
+      },
+      {
+        "orgId": 141,
+        "name": "Toronto Blue Jays",
+        "n": 20,
+        "x": 0.3764542508372791,
+        "y": 26652.55
+      },
+      {
+        "orgId": 142,
+        "name": "Minnesota Twins",
+        "n": 20,
+        "x": 0.5034066019617073,
+        "y": 26404.7
+      },
+      {
+        "orgId": 143,
+        "name": "Philadelphia Phillies",
+        "n": 20,
+        "x": 0.44215063419569695,
+        "y": 32701.9
+      },
+      {
+        "orgId": 144,
+        "name": "Atlanta Braves",
+        "n": 20,
+        "x": 0.44911669465089793,
+        "y": 29573.05
+      },
+      {
+        "orgId": 145,
+        "name": "Chicago White Sox",
+        "n": 20,
+        "x": 0.2695189667676402,
+        "y": 23706.3
+      },
+      {
+        "orgId": 146,
+        "name": "Miami Marlins",
+        "n": 20,
+        "x": 0.30781166676583144,
+        "y": 16680.55
+      },
+      {
+        "orgId": 147,
+        "name": "New York Yankees",
+        "n": 20,
+        "x": 0.39401930878746616,
+        "y": 41375.95
+      },
+      {
+        "orgId": 158,
+        "name": "Milwaukee Brewers",
+        "n": 20,
+        "x": 0.34152324028034353,
+        "y": 30666.25
+      }
+    ]
+  },
+  "winVsAtt": {
+    "label": "winPct vs home attendance (for scale)",
+    "pooled": {
+      "n": 600,
+      "r": 0.3546471383117362,
+      "t": 9.275457498967157,
+      "df": 598,
+      "p": 3.1924319267174764e-19
+    },
+    "pooledRho": {
+      "n": 600,
+      "rho": 0.4066516036829895,
+      "t": 10.884911993536681,
+      "df": 598,
+      "p": 2.679198710080799e-25
+    },
+    "between": {
+      "n": 30,
+      "r": 0.6632692365127492,
+      "t": 4.689712238547969,
+      "df": 28,
+      "p": 0.00006476522742169867
+    },
+    "within": {
+      "n": 600,
+      "r": 0.2400355052376512,
+      "t": 5.898178443458656,
+      "df": 569,
+      "p": 6.3090246212079746e-9
+    },
+    "orgMeans": [
+      {
+        "orgId": 108,
+        "name": "Los Angeles Angels",
+        "n": 20,
+        "x": 0.51915,
+        "y": 35436.55
+      },
+      {
+        "orgId": 109,
+        "name": "Arizona Diamondbacks",
+        "n": 20,
+        "x": 0.4681,
+        "y": 24345.55
+      },
+      {
+        "orgId": 110,
+        "name": "Baltimore Orioles",
+        "n": 20,
+        "x": 0.45730000000000004,
+        "y": 23395.05
+      },
+      {
+        "orgId": 111,
+        "name": "Boston Red Sox",
+        "n": 20,
+        "x": 0.5399999999999999,
+        "y": 33473.55
+      },
+      {
+        "orgId": 112,
+        "name": "Chicago Cubs",
+        "n": 20,
+        "x": 0.5053000000000001,
+        "y": 34846.65
+      },
+      {
+        "orgId": 113,
+        "name": "Cincinnati Reds",
+        "n": 20,
+        "x": 0.475,
+        "y": 23701.5
+      },
+      {
+        "orgId": 114,
+        "name": "Cleveland Indians",
+        "n": 20,
+        "x": 0.52215,
+        "y": 20603.45
+      },
+      {
+        "orgId": 115,
+        "name": "Colorado Rockies",
+        "n": 20,
+        "x": 0.45975,
+        "y": 30495.7
+      },
+      {
+        "orgId": 116,
+        "name": "Detroit Tigers",
+        "n": 20,
+        "x": 0.47955,
+        "y": 27718.1
+      },
+      {
+        "orgId": 117,
+        "name": "Houston Astros",
+        "n": 20,
+        "x": 0.51075,
+        "y": 29131.25
+      },
+      {
+        "orgId": 118,
+        "name": "Kansas City Royals",
+        "n": 20,
+        "x": 0.4346,
+        "y": 20233
+      },
+      {
+        "orgId": 119,
+        "name": "Los Angeles Dodgers",
+        "n": 20,
+        "x": 0.57555,
+        "y": 42635.25
+      },
+      {
+        "orgId": 120,
+        "name": "Washington Nationals",
+        "n": 20,
+        "x": 0.4787,
+        "y": 25384.8
+      },
+      {
+        "orgId": 121,
+        "name": "New York Mets",
+        "n": 20,
+        "x": 0.49814999999999987,
+        "y": 31504.35
+      },
+      {
+        "orgId": 133,
+        "name": "Oakland Athletics",
+        "n": 20,
+        "x": 0.50335,
+        "y": 18570.35
+      },
+      {
+        "orgId": 134,
+        "name": "Pittsburgh Pirates",
+        "n": 20,
+        "x": 0.4467,
+        "y": 21181.95
+      },
+      {
+        "orgId": 135,
+        "name": "San Diego Padres",
+        "n": 20,
+        "x": 0.48525,
+        "y": 28647.85
+      },
+      {
+        "orgId": 136,
+        "name": "Seattle Mariners",
+        "n": 20,
+        "x": 0.4762500000000001,
+        "y": 25822.8
+      },
+      {
+        "orgId": 137,
+        "name": "San Francisco Giants",
+        "n": 20,
+        "x": 0.5060499999999999,
+        "y": 35572.7
+      },
+      {
+        "orgId": 138,
+        "name": "St. Louis Cardinals",
+        "n": 20,
+        "x": 0.5494999999999999,
+        "y": 38842.35
+      },
+      {
+        "orgId": 139,
+        "name": "Tampa Bay Rays",
+        "n": 20,
+        "x": 0.5242,
+        "y": 16243.45
+      },
+      {
+        "orgId": 140,
+        "name": "Texas Rangers",
+        "n": 20,
+        "x": 0.49659999999999993,
+        "y": 29315.4
+      },
+      {
+        "orgId": 141,
+        "name": "Toronto Blue Jays",
+        "n": 20,
+        "x": 0.50335,
+        "y": 26652.55
+      },
+      {
+        "orgId": 142,
+        "name": "Minnesota Twins",
+        "n": 20,
+        "x": 0.5012000000000001,
+        "y": 26404.7
+      },
+      {
+        "orgId": 143,
+        "name": "Philadelphia Phillies",
+        "n": 20,
+        "x": 0.51075,
+        "y": 32701.9
+      },
+      {
+        "orgId": 144,
+        "name": "Atlanta Braves",
+        "n": 20,
+        "x": 0.53665,
+        "y": 29573.05
+      },
+      {
+        "orgId": 145,
+        "name": "Chicago White Sox",
+        "n": 20,
+        "x": 0.48905000000000004,
+        "y": 23706.3
+      },
+      {
+        "orgId": 146,
+        "name": "Miami Marlins",
+        "n": 20,
+        "x": 0.46235,
+        "y": 16680.55
+      },
+      {
+        "orgId": 147,
+        "name": "New York Yankees",
+        "n": 20,
+        "x": 0.5747000000000001,
+        "y": 41375.95
+      },
+      {
+        "orgId": 158,
+        "name": "Milwaukee Brewers",
+        "n": 20,
+        "x": 0.5096,
+        "y": 30666.25
+      }
+    ]
+  },
+  "pilot": {
+    "rows": [
+      {
+        "orgId": 147,
+        "name": "New York Yankees",
+        "pilotCount": 125,
+        "meanShare": 0.39401930878746616
+      },
+      {
+        "orgId": 119,
+        "name": "Los Angeles Dodgers",
+        "pilotCount": 119,
+        "meanShare": 0.41117308184216717
+      },
+      {
+        "orgId": 109,
+        "name": "Arizona Diamondbacks",
+        "pilotCount": 116,
+        "meanShare": 0.34756379180357866
+      },
+      {
+        "orgId": 114,
+        "name": "Cleveland Indians",
+        "pilotCount": 115,
+        "meanShare": 0.37060705815742223
+      },
+      {
+        "orgId": 118,
+        "name": "Kansas City Royals",
+        "pilotCount": 115,
+        "meanShare": 0.4559058689790983
+      },
+      {
+        "orgId": 138,
+        "name": "St. Louis Cardinals",
+        "pilotCount": 114,
+        "meanShare": 0.4947142922865934
+      },
+      {
+        "orgId": 144,
+        "name": "Atlanta Braves",
+        "pilotCount": 112,
+        "meanShare": 0.44911669465089793
+      },
+      {
+        "orgId": 135,
+        "name": "San Diego Padres",
+        "pilotCount": 112,
+        "meanShare": 0.25760963671083126
+      },
+      {
+        "orgId": 140,
+        "name": "Texas Rangers",
+        "pilotCount": 109,
+        "meanShare": 0.36288093606077754
+      },
+      {
+        "orgId": 141,
+        "name": "Toronto Blue Jays",
+        "pilotCount": 109,
+        "meanShare": 0.3764542508372791
+      },
+      {
+        "orgId": 142,
+        "name": "Minnesota Twins",
+        "pilotCount": 106,
+        "meanShare": 0.5034066019617073
+      },
+      {
+        "orgId": 112,
+        "name": "Chicago Cubs",
+        "pilotCount": 106,
+        "meanShare": 0.3352112954571339
+      },
+      {
+        "orgId": 108,
+        "name": "Los Angeles Angels",
+        "pilotCount": 102,
+        "meanShare": 0.4547140728381117
+      },
+      {
+        "orgId": 115,
+        "name": "Colorado Rockies",
+        "pilotCount": 101,
+        "meanShare": 0.5318367447447773
+      },
+      {
+        "orgId": 117,
+        "name": "Houston Astros",
+        "pilotCount": 101,
+        "meanShare": 0.4489917126123383
+      },
+      {
+        "orgId": 134,
+        "name": "Pittsburgh Pirates",
+        "pilotCount": 100,
+        "meanShare": 0.4088926201215883
+      },
+      {
+        "orgId": 111,
+        "name": "Boston Red Sox",
+        "pilotCount": 100,
+        "meanShare": 0.34611805239684673
+      },
+      {
+        "orgId": 136,
+        "name": "Seattle Mariners",
+        "pilotCount": 98,
+        "meanShare": 0.38543424099054124
+      },
+      {
+        "orgId": 121,
+        "name": "New York Mets",
+        "pilotCount": 97,
+        "meanShare": 0.44201811825208653
+      },
+      {
+        "orgId": 113,
+        "name": "Cincinnati Reds",
+        "pilotCount": 95,
+        "meanShare": 0.40936824722150983
+      },
+      {
+        "orgId": 139,
+        "name": "Tampa Bay Rays",
+        "pilotCount": 94,
+        "meanShare": 0.36820739796691637
+      },
+      {
+        "orgId": 137,
+        "name": "San Francisco Giants",
+        "pilotCount": 94,
+        "meanShare": 0.4368156644449888
+      },
+      {
+        "orgId": 143,
+        "name": "Philadelphia Phillies",
+        "pilotCount": 94,
+        "meanShare": 0.44215063419569695
+      },
+      {
+        "orgId": 116,
+        "name": "Detroit Tigers",
+        "pilotCount": 92,
+        "meanShare": 0.33524197699537217
+      },
+      {
+        "orgId": 146,
+        "name": "Miami Marlins",
+        "pilotCount": 91,
+        "meanShare": 0.30781166676583144
+      },
+      {
+        "orgId": 120,
+        "name": "Washington Nationals",
+        "pilotCount": 86,
+        "meanShare": 0.3395491766979156
+      },
+      {
+        "orgId": 133,
+        "name": "Oakland Athletics",
+        "pilotCount": 83,
+        "meanShare": 0.26222883564285054
+      },
+      {
+        "orgId": 110,
+        "name": "Baltimore Orioles",
+        "pilotCount": 83,
+        "meanShare": 0.3604676675978118
+      },
+      {
+        "orgId": 145,
+        "name": "Chicago White Sox",
+        "pilotCount": 81,
+        "meanShare": 0.2695189667676402
+      },
+      {
+        "orgId": 158,
+        "name": "Milwaukee Brewers",
+        "pilotCount": 79,
+        "meanShare": 0.34152324028034353
+      }
+    ],
+    "pearson": {
+      "n": 30,
+      "r": 0.352912012456161,
+      "t": 1.9958551157668767,
+      "df": 28,
+      "p": 0.0557598335007319
+    },
+    "spearman": {
+      "n": 30,
+      "rho": 0.40472243312152245,
+      "t": 2.3419697204834793,
+      "df": 28,
+      "p": 0.026523594620296628
+    }
+  },
+  "orgTable": [
+    {
+      "orgId": 115,
+      "name": "Colorado Rockies",
+      "n": 20,
+      "x": 0.5318367447447773,
+      "y": 0.45975,
+      "meanWinPct": 0.45975
+    },
+    {
+      "orgId": 142,
+      "name": "Minnesota Twins",
+      "n": 20,
+      "x": 0.5034066019617073,
+      "y": 0.5012000000000001,
+      "meanWinPct": 0.5012000000000001
+    },
+    {
+      "orgId": 138,
+      "name": "St. Louis Cardinals",
+      "n": 20,
+      "x": 0.4947142922865934,
+      "y": 0.5494999999999999,
+      "meanWinPct": 0.5494999999999999
+    },
+    {
+      "orgId": 118,
+      "name": "Kansas City Royals",
+      "n": 20,
+      "x": 0.4559058689790983,
+      "y": 0.4346,
+      "meanWinPct": 0.4346
+    },
+    {
+      "orgId": 108,
+      "name": "Los Angeles Angels",
+      "n": 20,
+      "x": 0.4547140728381117,
+      "y": 0.51915,
+      "meanWinPct": 0.51915
+    },
+    {
+      "orgId": 144,
+      "name": "Atlanta Braves",
+      "n": 20,
+      "x": 0.44911669465089793,
+      "y": 0.53665,
+      "meanWinPct": 0.53665
+    },
+    {
+      "orgId": 117,
+      "name": "Houston Astros",
+      "n": 20,
+      "x": 0.4489917126123383,
+      "y": 0.51075,
+      "meanWinPct": 0.51075
+    },
+    {
+      "orgId": 143,
+      "name": "Philadelphia Phillies",
+      "n": 20,
+      "x": 0.44215063419569695,
+      "y": 0.51075,
+      "meanWinPct": 0.51075
+    },
+    {
+      "orgId": 121,
+      "name": "New York Mets",
+      "n": 20,
+      "x": 0.44201811825208653,
+      "y": 0.49814999999999987,
+      "meanWinPct": 0.49814999999999987
+    },
+    {
+      "orgId": 137,
+      "name": "San Francisco Giants",
+      "n": 20,
+      "x": 0.4368156644449888,
+      "y": 0.5060499999999999,
+      "meanWinPct": 0.5060499999999999
+    },
+    {
+      "orgId": 119,
+      "name": "Los Angeles Dodgers",
+      "n": 20,
+      "x": 0.41117308184216717,
+      "y": 0.57555,
+      "meanWinPct": 0.57555
+    },
+    {
+      "orgId": 113,
+      "name": "Cincinnati Reds",
+      "n": 20,
+      "x": 0.40936824722150983,
+      "y": 0.475,
+      "meanWinPct": 0.475
+    },
+    {
+      "orgId": 134,
+      "name": "Pittsburgh Pirates",
+      "n": 20,
+      "x": 0.4088926201215883,
+      "y": 0.4467,
+      "meanWinPct": 0.4467
+    },
+    {
+      "orgId": 147,
+      "name": "New York Yankees",
+      "n": 20,
+      "x": 0.39401930878746616,
+      "y": 0.5747000000000001,
+      "meanWinPct": 0.5747000000000001
+    },
+    {
+      "orgId": 136,
+      "name": "Seattle Mariners",
+      "n": 20,
+      "x": 0.38543424099054124,
+      "y": 0.4762500000000001,
+      "meanWinPct": 0.4762500000000001
+    },
+    {
+      "orgId": 141,
+      "name": "Toronto Blue Jays",
+      "n": 20,
+      "x": 0.3764542508372791,
+      "y": 0.50335,
+      "meanWinPct": 0.50335
+    },
+    {
+      "orgId": 114,
+      "name": "Cleveland Indians",
+      "n": 20,
+      "x": 0.37060705815742223,
+      "y": 0.52215,
+      "meanWinPct": 0.52215
+    },
+    {
+      "orgId": 139,
+      "name": "Tampa Bay Rays",
+      "n": 20,
+      "x": 0.36820739796691637,
+      "y": 0.5242,
+      "meanWinPct": 0.5242
+    },
+    {
+      "orgId": 140,
+      "name": "Texas Rangers",
+      "n": 20,
+      "x": 0.36288093606077754,
+      "y": 0.49659999999999993,
+      "meanWinPct": 0.49659999999999993
+    },
+    {
+      "orgId": 110,
+      "name": "Baltimore Orioles",
+      "n": 20,
+      "x": 0.3604676675978118,
+      "y": 0.45730000000000004,
+      "meanWinPct": 0.45730000000000004
+    },
+    {
+      "orgId": 109,
+      "name": "Arizona Diamondbacks",
+      "n": 20,
+      "x": 0.34756379180357866,
+      "y": 0.4681,
+      "meanWinPct": 0.4681
+    },
+    {
+      "orgId": 111,
+      "name": "Boston Red Sox",
+      "n": 20,
+      "x": 0.34611805239684673,
+      "y": 0.5399999999999999,
+      "meanWinPct": 0.5399999999999999
+    },
+    {
+      "orgId": 158,
+      "name": "Milwaukee Brewers",
+      "n": 20,
+      "x": 0.34152324028034353,
+      "y": 0.5096,
+      "meanWinPct": 0.5096
+    },
+    {
+      "orgId": 120,
+      "name": "Washington Nationals",
+      "n": 20,
+      "x": 0.3395491766979156,
+      "y": 0.4787,
+      "meanWinPct": 0.4787
+    },
+    {
+      "orgId": 116,
+      "name": "Detroit Tigers",
+      "n": 20,
+      "x": 0.33524197699537217,
+      "y": 0.47955,
+      "meanWinPct": 0.47955
+    },
+    {
+      "orgId": 112,
+      "name": "Chicago Cubs",
+      "n": 20,
+      "x": 0.3352112954571339,
+      "y": 0.5053000000000001,
+      "meanWinPct": 0.5053000000000001
+    },
+    {
+      "orgId": 146,
+      "name": "Miami Marlins",
+      "n": 20,
+      "x": 0.30781166676583144,
+      "y": 0.46235,
+      "meanWinPct": 0.46235
+    },
+    {
+      "orgId": 145,
+      "name": "Chicago White Sox",
+      "n": 20,
+      "x": 0.2695189667676402,
+      "y": 0.48905000000000004,
+      "meanWinPct": 0.48905000000000004
+    },
+    {
+      "orgId": 133,
+      "name": "Oakland Athletics",
+      "n": 20,
+      "x": 0.26222883564285054,
+      "y": 0.50335,
+      "meanWinPct": 0.50335
+    },
+    {
+      "orgId": 135,
+      "name": "San Diego Padres",
+      "n": 20,
+      "x": 0.25760963671083126,
+      "y": 0.48525,
+      "meanWinPct": 0.48525
+    }
+  ],
+  "seasonRows": [
+    {
+      "season": 2004,
+      "mean": 0.3259057850388701,
+      "median": 0.3349610974673008
+    },
+    {
+      "season": 2005,
+      "mean": 0.33953970967561226,
+      "median": 0.34481497104210845
+    },
+    {
+      "season": 2006,
+      "mean": 0.3643990837908743,
+      "median": 0.3702250217363508
+    },
+    {
+      "season": 2007,
+      "mean": 0.39231252060647664,
+      "median": 0.40478419340237237
+    },
+    {
+      "season": 2008,
+      "mean": 0.4079630300864986,
+      "median": 0.43153352392130784
+    },
+    {
+      "season": 2009,
+      "mean": 0.409430231066585,
+      "median": 0.40519191338054594
+    },
+    {
+      "season": 2010,
+      "mean": 0.4221042700489639,
+      "median": 0.411832459657709
+    },
+    {
+      "season": 2011,
+      "mean": 0.4339576720427693,
+      "median": 0.4289224022454887
+    },
+    {
+      "season": 2012,
+      "mean": 0.41466143113285603,
+      "median": 0.41479526241385734
+    },
+    {
+      "season": 2013,
+      "mean": 0.4158181278878975,
+      "median": 0.4064154166908792
+    },
+    {
+      "season": 2014,
+      "mean": 0.4265917323080283,
+      "median": 0.4207223386915494
+    },
+    {
+      "season": 2015,
+      "mean": 0.3881152641777307,
+      "median": 0.39319944554964936
+    },
+    {
+      "season": 2016,
+      "mean": 0.37047309424873637,
+      "median": 0.38709265766142287
+    },
+    {
+      "season": 2017,
+      "mean": 0.39288621207288127,
+      "median": 0.3989124583692999
+    },
+    {
+      "season": 2018,
+      "mean": 0.401755010399806,
+      "median": 0.4150306744701725
+    },
+    {
+      "season": 2019,
+      "mean": 0.3810404279079643,
+      "median": 0.3701889378173057
+    },
+    {
+      "season": 2020,
+      "mean": 0.3854849095918167,
+      "median": 0.35564260348826543
+    },
+    {
+      "season": 2021,
+      "mean": 0.35737462191625563,
+      "median": 0.33927385260758747
+    },
+    {
+      "season": 2022,
+      "mean": 0.3614064462253962,
+      "median": 0.342479343939027
+    },
+    {
+      "season": 2023,
+      "mean": 0.37514832248606145,
+      "median": 0.3750572400219009
+    }
+  ],
+  "trend": {
+    "n": 20,
+    "r": 0.023892119307003672,
+    "t": 0.10139462132095985,
+    "df": 18,
+    "p": 0.9203581372833475
+  }
+}

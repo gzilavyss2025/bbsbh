@@ -455,6 +455,20 @@ right-skewed duration data (raw days has a long right tail that violates
 OLS's homoscedasticity assumption more severely than either), not as
 iron-clad under every possible specification.
 
+**Superseded 2026-08-24 — read this section with "The 2016–2020 hump is an
+instrument artifact" below attached.** Two things move the numbers here.
+A resolver bug (fixed there) was feeding 12.2% post-debut option and rehab
+shuttles into these rows: correcting it moves this section's Wald test to
+F(29,1312)=1.962, p=0.0018 and its ANOVA to F(29,1482)=1.495, p=0.0444,
+with ICC 1.2% → 1.0%. On top of that, both tests were fitted on rows three
+measurement artifacts contaminate. Removing those as well leaves the two
+methods disagreeing — the Wald test still rejects (p=0.019–0.028), the
+ANOVA does not (p=0.13–0.47), and ICC falls to 0.62% or to zero. So the
+aggregate reading below is weaker and more method-dependent than it looks
+here. The per-org conclusion is unaffected and Tampa Bay gets stronger.
+Section 4's claim about which way clustering corrects an interval is
+separately retracted there.
+
 With that caveat attached, this sharpens the doc's headline in a real way:
 **org identity is not "no signal," it's small, real, aggregate signal that
 can't be pinned to a specific franchise.** The ICC is the number that reconciles this with
@@ -505,7 +519,10 @@ Wald test still holds with era3 controlled for (F(29,1492)=1.758,
 p=0.0078) — consistent with the two-bucket result, org isn't absorbing
 this. **What actually happened in 2016–2020 to slow promotions down, and
 why 2021–2023 partially but not fully reverted, is an open question this
-spike doesn't answer** — worth flagging for anyone who picks up the
+spike doesn't answer** — answered 2026-08-24, see "The 2016–2020 hump is an
+instrument artifact" below: mostly nothing happened. The hump is the
+transaction wire's own coverage, the lost 2020 season, and the 900-day cap,
+and a wire-free measure of the same thing is flat (p=0.31) — worth flagging for anyone who picks up the
 "2021 contraction" hypothesis elsewhere in this research (see the PA/IP
 discussion above and in `docs/level-tenure-benchmark.md`): the calendar-day
 data doesn't actually support a simple contraction-sped-things-up story.
@@ -627,6 +644,16 @@ one pattern falls out that no single section above states directly:
 | Naive SE, performance-eligible subsample | Atlanta, Cleveland, **Tampa Bay** |
 | Naive SE, performance-eligible subsample + perf control | Atlanta, Cleveland, **Tampa Bay** |
 
+**Update 2026-08-24:** the seven specifications below were all rerun on
+corrected rows (a resolver bug fixed, then the era artifacts removed two
+different ways), and further specifications added. Tampa Bay is
+BH-significant under every one of them — +33.1% (p=0.0001), +28.5%
+(p=0.0010) and +34.1% (p<0.0001) on the three newest — and it remains the
+only org that is. Cleveland and Milwaukee now clear BH on the full year
+range but drop out once the era corrections are applied, which is the same
+specification-dependence this section describes for everyone else. See
+"The 2016–2020 hump is an instrument artifact" below.
+
 **Tampa Bay Rays is the only organization that comes back significant
 under every specification tried in this spike** — every SE method,
 correction, and cohort restriction attempted. Nationals and
@@ -644,6 +671,374 @@ an actual per-org finding anywhere in this spike — worth a specific,
 qualified callout if this research ever gets picked up again, while
 everything else stays "org matters a little in aggregate, no specific
 team with confidence."
+
+## The 2016–2020 hump is an instrument artifact (2026-08-24)
+
+The omnibus-check section above ends by naming this the biggest open
+question left: "**What actually happened in 2016–2020 to slow promotions
+down, and why 2021–2023 partially but not fully reverted, is an open
+question this spike doesn't answer**," with front-office regimes, rule
+changes and PDL restructuring as the candidate causes to go looking for.
+
+This pass asks the prior question instead. **Is the hump real?** Mostly it
+is not. The same discipline the performance section used when it found the
+PA/IP volume floor was mechanically deleting the fastest promotions applies
+here: check the instrument before theorising about the signal.
+
+### The hump is not a hump — it is two depressed edges
+
+Look at the same data one year at a time instead of in three buckets:
+
+| End year | 2009 | 2010 | 2011 | 2012 | 2013 | 2014 | 2015 | 2016 | 2017 | 2018 | 2019 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Median days | **50** | **126** | 285 | 282 | 282 | 270 | 303 | 286 | 318 | 327 | 302 |
+| n | 41 | 126 | 191 | 206 | 232 | 259 | 239 | 305 | 238 | 222 | 261 |
+
+2011 through 2019 sit in a 270–327 band. There is no step up into 2016. The
+"hump" is bucket A being dragged down by **2009 (34 days) and 2010 (122
+days)** — two years that look nothing like the other nine — and bucket C
+being dragged down by 2021. Three measurement artifacts produce exactly
+that, and each one is measured below rather than asserted.
+
+### A1 — the transaction wire does not exist before 2009
+
+A duration needs BOTH of its endpoints dated off the transaction wire.
+statsapi's wire is effectively empty before 2009: **457 ASG rows across all
+of 1997–2008, against 290,690 from 2009 onward** — 0.16%. The count steps
+from 34 rows in 2008 to 9,941 in 2009.
+
+So a duration ending in 2009 can only reach back to the 2009 season. The
+ceiling that puts on it is arithmetic, not behavioural:
+
+| End year | Longest span the wire permits | Bound by |
+| --- | --- | --- |
+| 2009 | 279 days | **the wire** |
+| 2010 | 644 days | **the wire** |
+| 2011 | 1,009 days | the pipeline's own 900-day cap |
+| 2012 | 1,375 days | the 900-day cap |
+
+2009 and 2010 are the only two years where the instrument, not the cap,
+sets the limit — and both are shortened well below the 900-day cap every
+other year is measured against. That is where this pass's 2011 floor comes
+from: a measured boundary, not a round number. Dropping those two years
+alone moves bucket A's median from **264 to 283 days**.
+
+### A2 and A3 — the lost 2020 season, and the cap that deletes it
+
+No minor-league games were played in 2020. A stint spanning that year
+accrues a full extra year of calendar time with no baseball in it. **218
+durations span the would-be 2020 season.**
+
+The 900-day cap then deletes 48 of those 218 outright, more of them in 2021
+than in any other year. The two effects push opposite ways and both land on
+bucket C: the lost season inflates 2021-ending durations, and the cap
+removes the ones it inflated past 900 days. 2021's median of 138 days is
+what survives that; the same year's full set of durations has a median far
+above it.
+
+The cap is a defensible modelling choice. It is not era-neutral, and
+nothing before this pass had checked whether it was.
+
+### What is left after all three come off
+
+| Specification | A (≤2015) | B (2016–2020) | C (2021–2023) |
+| --- | --- | --- | --- |
+| S0 — every year, calendar days | 264 | 324 | 262 |
+| S1 — drop the wire-truncated years | 283 | 324 | 262 |
+| S3 — S1 + subtract the lost season, cap on adjusted days | 283 | **300** | 265 |
+| S5 — S1 + drop end-years 2020/2021 outright (no adjustment assumed) | 283 | **311** | 269 |
+
+The peak falls from **+23% over bucket A to +6% (S3) or +10% (S5)**. Roughly
+two-thirds to three-quarters of the hump was instrument.
+
+(A sixth spec, S4, used to drop post-debut rows on top of S3. The resolver
+fix described at the end of this section removed those rows at the source,
+so S4 now matches S3 exactly. It is kept in the script as a live assertion:
+if the two ever diverge again, the debut bound has regressed.)
+
+S3 and S5 handle COVID two different ways on purpose — one adjusts, one
+refuses to adjust and drops the two disrupted years entirely — so the
+result does not rest on the adjustment being right. A third spec, S2 (drop
+every duration spanning the lost season, keep the years), is in the output
+but should **not** be read as a clean answer: any 2021-ending duration
+longer than about eight months necessarily spans the dead window, so S2
+keeps only the short 2021 stints and manufactures a bias of its own. It is
+reported because it was run, not because it settles anything.
+
+### The check that actually decides it: measure the same thing without the wire
+
+The residual 6–10% could still be real. There is a way to test it that none
+of A1/A2/A3 can touch — **count seasons at a level and PA/IP at a level
+straight off `yearByYear`, with no transaction wire anywhere in the
+measurement.** If players genuinely spent 10% longer at a level in the
+back half of the 2010s, they had to accumulate more seasons and more plate
+appearances doing it.
+
+| Arrival era | (player, level) pairs | Mean seasons at level | Median PA (hitters) |
+| --- | --- | --- | --- |
+| 2011–2015 | 1,586 | 1.487 | 442 |
+| 2016–2018 | 970 | **1.490** | **448** |
+
+Kruskal-Wallis H(1) = 1.051, **p = 0.31**. Flat. On an instrument the
+artifacts cannot reach, the 2016–2018 arrival cohort spent the same time at
+a level as the 2011–2015 cohort, to three decimal places on seasons and six
+plate appearances on volume.
+
+That window stops at 2018 on both sides, and the boundary is forced rather
+than chosen: this metric counts SEASONS, and 2020 had no season to count,
+so anyone whose stay reached into 2020 is missing a countable season
+mechanically. The 2019 arrivals read 1.137 seasons against a 1.44–1.63 band
+everywhere else — that artifact, showing up exactly where it should, which
+is also a useful sign the metric behaves as expected. The 2023 debut cutoff
+censors recent arrivals on top of it. So this check speaks to the *rise
+into* 2016–2018 and cannot speak to 2019–2020. That is a real gap, stated
+rather than hidden.
+
+One more thing is consistent with the instrument reading, and is reported
+as consistent-with rather than proof. Wire density more than doubled across
+the window (13,731 ASG rows in 2011 to 27,284 in 2019). A missed arrival
+makes the resolver fall through to a later event and understate a duration,
+so thinner early coverage predicts shorter early durations. Across
+2011–2019 the correlation between wire density and median days-at-level is
+Pearson r = 0.59, Spearman rho = 0.70 (n = 9 years). **Wire density is very
+nearly monotone in year, so this cannot separate "denser wire, longer
+measured durations" from any other monotone trend over the same nine
+years.** The wire-free check above is the one that discriminates.
+
+### The knock-on: most of the aggregate org signal does not survive this
+
+The omnibus-check section's headline — "org matters a little in aggregate
+(ICC ≈ 1.2%)" — was fitted on the rows these artifacts contaminate, with era
+as a control on top. Refitting the identical model on corrected rows (all
+figures below are post-resolver-fix, so the S0 row is the honest baseline
+rather than the number the doc published):
+
+| Specification | Cluster-robust omnibus Wald | Player-collapsed ANOVA | ICC |
+| --- | --- | --- | --- |
+| As published, before either fix | F(29,1494)=1.824, p=0.0048 | F(29,1677)=1.685, p=0.0128 | 1.2% |
+| S0 — every year, resolver fixed | F(29,1312)=1.962, p=0.0018 | F(29,1482)=1.468, p=0.0523 | 0.92% |
+| S3 — lost-season adjusted | F(29,1259)=1.633, **p=0.0187** | F(29,1435)=1.304, p=0.1298 | **0.62%** |
+| S5 — disrupted years dropped | F(29,1206)=1.572, **p=0.0279** | F(29,1350)=0.996, p=0.4721 | **0.00%** |
+
+(The ANOVA column differs slightly from `org-variance-components.json`'s own
+figure because that script carries an era term in its no-org fit and this one
+does not — era is removed at the source here instead of modelled around.)
+
+**The two omnibus methods, which agreed before, now split.** The
+cluster-robust Wald test still rejects on corrected rows (p=0.019 and
+p=0.028). The independent player-collapsed ANOVA does not (p=0.13 and
+p=0.47), and the between-org variance component falls from 0.92% to 0.62%
+and then to exactly zero — τ² pinned at the floor because between-org mean
+square drops below within-org.
+
+So the accurate statement is narrower than "the aggregate signal is an
+artifact". It is: **correcting the era artifacts removes a large part of the
+aggregate org signal and leaves what remains method-dependent** — one of two
+defensible omnibus tests still finds it, the other does not, and the effect
+size it implies is at most 0.6% of residual variance. A conclusion that only
+holds under one of two methods is not a conclusion to build on.
+
+An earlier draft of this section said the aggregate signal was "no longer
+significant at 0.05" under both. That was true of the numbers as they stood
+before the resolver fix below (p=0.058 and p=0.095) and is not true after
+it. Corrected here rather than left standing.
+
+The obvious objection is that removing rows weakens any signal. That is
+tested, not argued: 200 seeded random subsamples of the S0 rows, each the
+same size as the corrected set.
+
+| | Random subsamples at the same n | Observed | Percentile |
+| --- | --- | --- | --- |
+| S3, Wald F | median 1.918 [p05 1.719, p95 2.143] | 1.633 | **0th** |
+| S3, τ² | median 0.0066 [0.0034, 0.0091] | 0.0042 | 10.5th |
+| S5, Wald F | median 1.819 [1.544, 2.230] | 1.572 | 7th |
+| S5, τ² | median 0.0065 [0.0016, 0.0116] | 0.0000 | **0th** |
+
+Random row loss at the same n leaves the signal roughly where it was. The
+targeted removal sits at or near the bottom of that distribution on every
+measure. **What the correction takes out is about which rows came out, not
+how many** — even though, after the fix, it no longer takes out all of it.
+τ² is an effect-size estimate rather than a power quantity, which is why it
+was the right thing to watch.
+
+### Tampa Bay goes the other way
+
+| Specification | Tampa Bay | Survives BH q=0.05 |
+| --- | --- | --- |
+| S0 — every year, resolver fixed | +33.1%, p=0.0001 | Rays, Brewers, Guardians |
+| S3 — lost-season adjusted | +28.5%, p=0.0010 | Rays |
+| S5 — disrupted years dropped | +34.1%, p<0.0001 | Rays |
+
+Tampa Bay is BH-significant under every corrected specification, including
+the one that assumes nothing at all about COVID, and it is the only org that
+is. Cleveland and Milwaukee clear BH on the full year range but not once the
+era corrections are applied.
+
+So the doc's summary sentence needs turning around, though less far than the
+pre-fix numbers suggested. It currently reads "org matters a little in
+aggregate, and current sample sizes can't say which org." The accurate
+version is nearer: **the aggregate claim is the weaker of the two, and the
+specific-team one is what survives every specification** — Tampa Bay is a
+persistent outlier across eleven of them now, while the league-wide effect
+underneath it is small enough that two defensible omnibus tests disagree
+about whether it is there.
+
+### What this does not change
+
+**No per-team movement-window feature should ship.** That conclusion is
+untouched, and if anything the ground under it is firmer: the aggregate
+effect this spike had settled on as "real but tiny" now looks smaller still,
+and two orgs standing out against 28 that do not is not a per-team range.
+Nothing here revisits the quantile-overlap result (0 of 30), the R²≈0.04
+finding, the performance confound, or the cohort-selection gap.
+
+Two prior passages should be read with this section attached, though:
+
+- The era-control results in the omnibus-check section stand as arithmetic,
+  but "era predicts days-at-level better than org or tier do" now has a
+  plainer reading — a good part of what that era term was absorbing is
+  measurement coverage, not baseball.
+- The "2021 contraction" correction earlier in this doc was right to reject
+  the contraction story. Its replacement, the hump, does not survive either.
+
+### The resolver bug found on the way — now fixed, and everything rerun
+
+**434 of 3,549 durations (12.2%) ended AFTER the player's MLB debut.**
+`resolveTransitionDates` walks a cursor through a player's wire events,
+matching each level transition in order. When his pre-debut assignments were
+thin on the wire, the cursor ran off the end and kept matching his *later*
+option and rehab shuttles — so a transition that should have gone unresolved
+silently picked up a date from a post-debut shuttle instead. Those rows are
+shuttling, not development, wearing the same label.
+
+`dates.mjs` now drops wire events dated after the debut before matching.
+Post-debut events are a strict date *suffix* of that list, so the fix cannot
+disturb a transition that already resolved correctly. That is verified
+rather than assumed: **0 rows appear that were not there before, 0 surviving
+rows changed value, and all 259 removed rows end after the debut** (AA 184,
+High-A 75, AAA 0 — AAA is untouched because its end date *is* the debut
+date, which never needed the wire). Durations 3,278 → 3,019; the wider
+universe 3,549 → 3,115, exactly the 434 rows. The contamination audit in
+`era-hump.mjs` now reads 0 of 3,115 and is kept as a regression check.
+
+Every downstream script was rerun. What moved, across the whole document:
+
+| Statistic | Before the fix | After |
+| --- | --- | --- |
+| Durations / transitions resolved | 3,278 / 78% | 3,019 / 68% |
+| `log(days) ~ level+tier+org` R² | 0.043 | **0.072** |
+| Residual variance σ² | 1.209 | **0.696** |
+| Orgs fully outside the pooled window | 0 of 30, every level | **0 of 30, every level** |
+| Orgs surviving Bonferroni | 0 of 30 | 0 of 30 |
+| Orgs surviving BH, naive SE | 2 (Nationals, Rays) | **0** |
+| Orgs surviving BH, cluster-robust | 1 (Rays) | **3** (Guardians, Rays, Brewers) |
+| Cluster-robust omnibus Wald | F(29,1494)=1.824, p=0.0048 | **F(29,1312)=1.962, p=0.0018** |
+| Player-collapsed ANOVA | F(29,1677)=1.685, p=0.0128 | **F(29,1482)=1.495, p=0.0444** |
+| ICC | 1.2% | 1.0% |
+| R² band across log/raw/sqrt | 0.042–0.045 | 0.048–0.072 |
+| Performance coefficient | −7.9% per +10 pctile, z=−8.21 | **−8.7%, z=−9.04** |
+| Rows lost to the PA/IP volume floor | 252 | **112** |
+
+Removing the shuttle rows nearly doubles R² and cuts σ² by 42%, which is
+what it should do — those durations were noise with respect to level,
+pedigree and org. The org omnibus gets *stronger*, not weaker. Every
+headline conclusion in this document survives: still 0 of 30 orgs outside
+the pooled window, still 0 surviving Bonferroni, performance still the
+strongest single predictor anywhere in the spike, and still nothing
+shippable.
+
+### And one merged claim the rerun contradicts
+
+The adversarial review's section 4 argued that player-level clustering has a
+known direction — "treating within-player rows as independent understates
+the true variance of an org's coefficient", so the naive SEs are "too
+narrow", with "the direction of the correction it would apply … unambiguous:
+CIs widen, p-values grow." It called this "confirmed direction, not
+assumed", but what was confirmed was the *theory*, not this data.
+
+Measured against the actual cluster-robust refit, **the cluster-robust
+interval is NARROWER than the naive one for 18 of 30 orgs** (width ratio
+0.72 to 1.54, median 0.99). Clustering widens an interval when a player's
+rows carry *positively* correlated residuals; when his stints offset each
+other — fast at one level, slow at the next — the meat matrix shrinks and
+the interval comes in tighter instead. Both happen here, org by org:
+
+| Org | Naive CI width | Cluster-robust | Naive p | CR p |
+| --- | --- | --- | --- | --- |
+| Tampa Bay Rays | 50.8 | **37.9** | 0.0031 | **0.00008** |
+| Milwaukee Brewers | 61.1 | **49.5** | 0.0116 | **0.0019** |
+| Cleveland Guardians | 50.2 | **42.0** | 0.0097 | **0.0020** |
+| Washington Nationals | 35.0 | 54.0 | 0.0139 | 0.106 |
+| Atlanta Braves | 32.8 | 42.8 | 0.0224 | 0.0787 |
+
+That is why the naive-SE and cluster-robust BH lists move in opposite
+directions in the table above. It also means section 4's closing inference —
+that clustering "cuts against, not for, the two BH survivors" — does not
+hold for Tampa Bay, whose case the correction strengthens sharply. **This
+was already true of the pre-fix data** (15 of 30 narrower, median 1.013), so
+it is a correction to the original claim rather than a consequence of the
+resolver fix. The claim was made before the cluster-robust refit existed and
+was never revisited once it did.
+
+## A time-varying org covariate DOES predict speed (2026-08-24)
+
+Split into its own document — `docs/homegrown-dependence.md` — because it adds a
+new measurement rather than re-running this one. Read the two together; the model
+there is fitted on the duration rows built here, after this document's era floor
+and resolver fix.
+
+The question it asks is whether organizations that lean harder on their own
+players at the major-league level promote faster or slower. The answer is
+**slower**: +11.2% days at level per standard deviation of homegrown share,
+lagged one season, identified WITHIN organization over time, org-clustered
+p=0.0056. It holds under full season fixed effects (+12.2%, p=0.0036), stays
+p<0.05 in 30 of 30 leave-one-organization-out refits, and a seeded 500-draw
+within-org permutation test returns p=0.0040 against the clustered t's 0.0056.
+
+**This sharpens a framing here rather than contradicting one.** This document's
+conclusion is that org IDENTITY is not a usable signal for days-at-level — 0 of
+30 organizations outside the pooled window, per-org estimates that flip with the
+standard-error method, ICC around 1%. That stands. What the new work shows is
+that a time-varying org CHARACTERISTIC can predict the same outcome even though
+the org label cannot, and the two are consistent: the new covariate's incremental
+R² is 0.0043, so it takes nothing away from "individual-player noise dominates
+this outcome". A small, real, measurable organizational behaviour and a nearly
+unpredictable per-player outcome are not in conflict.
+
+Three things there are corrections to inputs this document used.
+
+- **The draft-round tier fitted throughout this document is built on a real
+  bug.** `raw.json`'s `ped.draftRound` came from `pull.mjs`'s `fetchPedigree`,
+  which reads `drafts[0]` — and `drafts[0]` can be an EARLIER UNSIGNED draft.
+  **375 of the 3,061 cohort players have a `drafts[0]` that is not their signing
+  draft**, and using `src/api/person/identity.js`'s `draftInfo()` rule instead
+  **moves 284 of them between tiers.** Tier is a control here, not a subject, and
+  no conclusion in this document turns on it — but any rerun should use the
+  corrected tier, which `homegrown-duration-model.mjs` shows how to build from
+  `draft-cache.json`.
+- **`org-variance-components.mjs` prints its numeric self-test instead of
+  asserting it, and one of its stated expectations is wrong.** It checks the
+  chi-square tail at stat=43.773, df=29 against "~0.0400" and produces 0.03856.
+  The implementation is right — `homegrown-stats.mjs` reproduces 0.03856 exactly
+  — the published df=29 five-percent critical is 42.557. Nothing downstream used
+  the printed value, so no result moves. The lesson is the process one: a
+  self-test that prints is a self-test nobody reads.
+- **Player clustering is the wrong axis for an org-season regressor**, and its
+  correction is small: on the new model, clustering by player gives an SE of
+  0.0284 against naive 0.0291, while clustering by ORGANIZATION gives 0.0354.
+  Two-way org-and-player clustering lands on the org-only figure to four decimal
+  places. This is a further instance of the lesson in "And one merged claim the
+  rerun contradicts": measure the direction of an SE correction, never assume it.
+
+Two related questions are answered there and neither disturbs anything here.
+Homegrown dependence does NOT predict winning — 600 organization-seasons, a 95%
+interval of roughly −0.8 to +2.4 wins per 162 per standard deviation, a
+well-powered null. And fast promotion DOES pay off descriptively: one standard
+deviation faster is about +1 WAR over a graduate's first six seasons and about 4
+points less bust risk, most of which survives an in-level performance control.
+That last result is the reverse of this document's arrow and is stated there as a
+description, not a lever — clubs promote the players who are playing well, so the
+causal direction is not identified.
 
 ## Where the work lives
 
@@ -681,6 +1076,27 @@ Output: `perf-pool.json` (~7MB, committed — see precedent below).
 `org-regression-perf.mjs` adds an in-level performance percentile covariate
 to the level+tier+org model and compares baseline vs. augmented fits on the
 same row subset. Output: `org-regression-perf.json`.
+`era-hump.mjs` is the artifact audit of the era result: transaction-wire
+coverage by season and the span ceiling it forces, the lost-2020-season
+overlap and the 900-day cap's interaction with it, five specifications
+peeling those off one at a time, a debut-window censoring check, and the
+wire-independent seasons-at-level / PA-at-level cross-check read straight
+off `yearByYear`. It makes no network calls. Output: `era-hump.json`.
+`era-hump-org-recheck.mjs` refits the org block (cluster-robust omnibus
+Wald, per-org BH, player-collapsed variance components) on those corrected
+row sets and compares against what this doc publishes, with a seeded
+200-draw random-subsampling control that separates "fewer rows" from "the
+right rows removed". It does need the 52-call org sweep. Output:
+`era-hump-org-recheck.json`. `dates.mjs` now also stamps each duration's
+`startDate`, `endDate` and `debutDate`, and keeps the durations its 900-day
+cap drops in a separate `droppedLongDurations` array, so the cap can be
+measured instead of assumed neutral — an additive change that regenerated
+the then-current 3,278 durations with zero mismatches on every shared field.
+It then gained the debut bound described above (wire events dated after the
+player's debut are dropped before transition matching), which took the
+duration count to 3,019; **every number in this document that predates
+2026-08-24 was computed on the unbounded resolver**, and the before/after
+table in that section is the map between the two.
 All depend on `raw.json`, `dates.json`, `findings.json` already in that
 directory (now built from the widened 2005–2023 pull — `pull.mjs`'s
 `DEBUT_YEAR_MIN` is 2005); `txn-cache.json` is gitignored (~65MB, now spans

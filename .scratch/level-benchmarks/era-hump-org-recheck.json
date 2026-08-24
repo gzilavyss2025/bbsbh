@@ -1,0 +1,238 @@
+{
+  "published": {
+    "omnibusF": 1.824,
+    "omnibusP": 0.0048,
+    "anovaF": 1.685,
+    "anovaP": 0.0128,
+    "ICCpct": 1.2
+  },
+  "orgMinN": 20,
+  "subsamplingDraws": 200,
+  "specs": [
+    {
+      "key": "S0-as-published",
+      "note": "the rows org-variance-components.mjs actually used",
+      "n": 3019,
+      "orgs": 30,
+      "droppedOrgsForLowN": 0,
+      "clusters": 1348,
+      "r2": 0.0719,
+      "omnibusWaldF": {
+        "F": 1.962,
+        "dfNum": 29,
+        "dfDenom": 1312,
+        "p": 0.0018
+      },
+      "varianceComponents": {
+        "N": 1512,
+        "q": 30,
+        "F": 1.468,
+        "dfB": 29,
+        "dfW": 1482,
+        "p": 0.0523,
+        "tau2": 0.0066,
+        "sigma2": 0.7115,
+        "ICCpct": 0.92
+      },
+      "sigUncorrected": [
+        {
+          "name": "Tampa Bay Rays",
+          "pct": 33.1,
+          "p": 0.0001
+        },
+        {
+          "name": "Milwaukee Brewers",
+          "pct": 33.8,
+          "p": 0.0019
+        },
+        {
+          "name": "Cleveland Guardians",
+          "pct": 29.1,
+          "p": 0.002
+        }
+      ],
+      "bhSurvivors": [
+        {
+          "name": "Tampa Bay Rays",
+          "pct": 33.1,
+          "p": 0.0001
+        },
+        {
+          "name": "Milwaukee Brewers",
+          "pct": 33.8,
+          "p": 0.0019
+        },
+        {
+          "name": "Cleveland Guardians",
+          "pct": 29.1,
+          "p": 0.002
+        }
+      ],
+      "tampaBay": {
+        "name": "Tampa Bay Rays",
+        "pct": 33.1,
+        "z": 3.947,
+        "p": 0.0001,
+        "bh": true,
+        "sigUncorrected": true
+      }
+    },
+    {
+      "key": "S3-lost-season-adjusted",
+      "note": "drop the wire-truncated years, subtract the lost 2020 season, cap on adjusted days",
+      "n": 2888,
+      "orgs": 30,
+      "droppedOrgsForLowN": 0,
+      "clusters": 1295,
+      "r2": 0.0723,
+      "omnibusWaldF": {
+        "F": 1.633,
+        "dfNum": 29,
+        "dfDenom": 1259,
+        "p": 0.0187
+      },
+      "varianceComponents": {
+        "N": 1465,
+        "q": 30,
+        "F": 1.304,
+        "dfB": 29,
+        "dfW": 1435,
+        "p": 0.1298,
+        "tau2": 0.0042,
+        "sigma2": 0.6733,
+        "ICCpct": 0.62
+      },
+      "sigUncorrected": [
+        {
+          "name": "Tampa Bay Rays",
+          "pct": 28.5,
+          "p": 0.001
+        },
+        {
+          "name": "Cleveland Indians",
+          "pct": 25.1,
+          "p": 0.0049
+        },
+        {
+          "name": "Los Angeles Angels",
+          "pct": -19.5,
+          "p": 0.0131
+        },
+        {
+          "name": "Milwaukee Brewers",
+          "pct": 28.1,
+          "p": 0.0152
+        }
+      ],
+      "bhSurvivors": [
+        {
+          "name": "Tampa Bay Rays",
+          "pct": 28.5,
+          "p": 0.001
+        }
+      ],
+      "tampaBay": {
+        "name": "Tampa Bay Rays",
+        "pct": 28.5,
+        "z": 3.302,
+        "p": 0.001,
+        "bh": true,
+        "sigUncorrected": true
+      },
+      "subsamplingControl": {
+        "draws": 200,
+        "nTarget": 2888,
+        "randomF": {
+          "median": 1.918,
+          "p05": 1.719,
+          "p95": 2.143
+        },
+        "observedF": 1.633,
+        "percentileF": 0,
+        "randomTau2": {
+          "median": 0.0066,
+          "p05": 0.0034,
+          "p95": 0.0091
+        },
+        "observedTau2": 0.0042,
+        "percentileTau2": 10.5
+      }
+    },
+    {
+      "key": "S5-drop-disrupted-years",
+      "note": "drop the wire-truncated years AND end-years 2020/2021 outright -- no COVID adjustment assumed anywhere",
+      "n": 2557,
+      "orgs": 30,
+      "droppedOrgsForLowN": 0,
+      "clusters": 1242,
+      "r2": 0.0687,
+      "omnibusWaldF": {
+        "F": 1.572,
+        "dfNum": 29,
+        "dfDenom": 1206,
+        "p": 0.0279
+      },
+      "varianceComponents": {
+        "N": 1380,
+        "q": 30,
+        "F": 0.996,
+        "dfB": 29,
+        "dfW": 1350,
+        "p": 0.4721,
+        "tau2": 0,
+        "sigma2": 0.6821,
+        "ICCpct": 0
+      },
+      "sigUncorrected": [
+        {
+          "name": "Tampa Bay Rays",
+          "pct": 34.1,
+          "p": 0
+        },
+        {
+          "name": "Cleveland Guardians",
+          "pct": 26.9,
+          "p": 0.0058
+        },
+        {
+          "name": "Milwaukee Brewers",
+          "pct": 34.3,
+          "p": 0.0069
+        }
+      ],
+      "bhSurvivors": [
+        {
+          "name": "Tampa Bay Rays",
+          "pct": 34.1,
+          "p": 0
+        }
+      ],
+      "tampaBay": {
+        "name": "Tampa Bay Rays",
+        "pct": 34.1,
+        "z": 4.144,
+        "p": 0,
+        "bh": true,
+        "sigUncorrected": true
+      },
+      "subsamplingControl": {
+        "draws": 200,
+        "nTarget": 2557,
+        "randomF": {
+          "median": 1.819,
+          "p05": 1.544,
+          "p95": 2.23
+        },
+        "observedF": 1.572,
+        "percentileF": 7,
+        "randomTau2": {
+          "median": 0.0065,
+          "p05": 0.0016,
+          "p95": 0.0116
+        },
+        "observedTau2": 0,
+        "percentileTau2": 0
+      }
+    }
+  ]
+}
