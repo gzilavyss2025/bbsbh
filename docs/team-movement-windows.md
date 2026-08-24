@@ -403,6 +403,89 @@ org's cohort of players who *made it* moved."
   shift the picture in either direction and were out of scope for this
   pass.
 
+## The omnibus check: real signal, still not attributable
+
+The adversarial review above tests 30 individual org coefficients and asks
+"which one survives correction" — a different, stricter question than "does
+org matter at all." A single joint test answers the second question
+directly, and it's the one gap the adversarial review named but didn't
+close (clustering, era). This pass closes it with two independent methods
+and picks up the era check along the way.
+
+**Method 1 — cluster-robust omnibus Wald test.** Same
+level+tier+org model, refit with CR1 standard errors clustered by player
+(the fix the adversarial review's section 4 named but didn't run), then a
+joint Wald F-test on all 29 org coefficients at once instead of one CI at a
+time:
+
+```
+F(29, 1494) = 1.824, p = 0.0048
+```
+
+**Method 2 — player-collapsed variance-component ANOVA**, which sidesteps
+clustering by construction rather than modeling around it: fit
+`log(days) ~ level + tier + era` with NO org term, collapse each player's
+possibly-multiple durations at one org down to a single averaged residual
+(3,278 rows → 1,707 independent org×player pairs), then run classical
+unbalanced one-way ANOVA of those residuals by org:
+
+```
+F(29, 1677) = 1.685, p = 0.0128
+tau^2 (between-org variance)  = 0.0146
+sigma^2 (within-org variance) = 1.2092
+ICC = tau^2/(tau^2+sigma^2)   = 1.2%
+```
+
+Both methods reject the null that org has zero effect — independently, by
+different means, at different p-values but the same conclusion. That
+sharpens the doc's headline in a real way: **org identity is not "no
+signal," it's small, real, aggregate signal that can't be pinned to a
+specific franchise.** The ICC is the number that reconciles this with
+everything above it: org explains about **1.2%** of the residual
+(post-level/tier/era) variance in log-days-at-level. Real enough for an
+omnibus test with 1,707+ units to detect; nowhere near large enough for a
+per-org point estimate to be trustworthy at n=45-160 per org, which is
+exactly the "0-1 of 30 survive individual correction" result above. Both
+things are true at once — a large sample can detect that a small effect
+exists in aggregate while remaining unable to say which specific group
+carries it.
+
+An empirical-Bayes shrinkage estimate — pulling each org's raw effect
+toward the grand mean in proportion to how much of its variance is
+sampling noise (`shrinkage weight = tau^2/(tau^2+sigma^2/n_org)`, order
+~0.34–0.47 here given the tiny tau^2) — is the honest single-number
+estimate per org, if one were ever needed for something lower-stakes than
+a shipped range: Baltimore and Washington shrink to roughly -17% to -12%,
+Milwaukee and Tampa Bay to roughly +12%, everyone else compresses toward
+single digits. Full table in `org-variance-components.json`.
+
+**Era is a real, uneven confound — but doesn't explain away the org
+signal.** Org rows are not evenly spread across the 2005–2023 span: a
+chi-square test of org × era independence rejects cleanly (χ²(29)=85.9,
+p<0.0001) — the Dodgers' rows are 70% Era2 (2016+) against a 56% pooled
+rate, the Rangers' are 61% Era1 against a 44% pooled rate, and three more
+orgs skew similarly. Adding era to the model shifts individual org
+coefficients by a mean of 2.5 points (up to 5.9 for the Dodgers) and
+nearly doubles the model's R² (0.043 → 0.064 — era predicts days-at-level
+better than org or tier do, consistent with the 2021 contraction
+reshaping baseline durations). But the org signal survives era-adjustment:
+cluster-robust significant-uncorrected count is 3 of 30 with era controlled
+for, same as without. Era was a real, previously-unmeasured confound; it
+just isn't the org signal in disguise.
+
+**What this doesn't change:** no per-team movement-window feature should
+ship from this. The practical bar was always "can a reader be told which
+specific org is fast or slow," and that bar is further from being cleared
+than ever — 1 of 30 orgs (Tampa Bay) survives BH correction even under the
+more forgiving, clustering-robust test. What it does change is which
+sentence is accurate to write in a hypothetical future research note: not
+"no evidence org matters," but "org matters a little, in aggregate, and
+current sample sizes can't say which org." Script:
+`.scratch/level-benchmarks/org-variance-components.mjs`. Output:
+`org-variance-components.json`. Self-tests its own numerical primitives
+(regularized incomplete gamma/beta for the chi-square and F p-values)
+against known reference values before running on real data.
+
 ## Where the work lives
 
 `.scratch/level-benchmarks/team-windows.mjs` — reuses `org-and-timing.mjs`'s
@@ -422,7 +505,12 @@ transform.mjs` reruns the same model on raw and `sqrt` days (outputs:
 `org-regression-transform-{log,levels,sqrt}.json`) to check the conclusion
 isn't transform-dependent. `clustering-check.mjs` reports rows-per-player by
 org, the non-independence check behind section 4 of "Adversarial review."
-All depend on `raw.json`, `dates.json`, `findings.json` already in that
+`org-variance-components.mjs` is the omnibus follow-up: cluster-robust
+(player-clustered) SEs and a joint Wald F-test for the whole org block, an
+org × era representation chi-square plus an era-augmented refit, and a
+player-collapsed one-way variance-component ANOVA (tau²/sigma²/ICC) with
+empirical-Bayes shrunk per-org estimates. Output:
+`org-variance-components.json`. All depend on `raw.json`, `dates.json`, `findings.json` already in that
 directory (now built from the widened 2005–2023 pull — `pull.mjs`'s
 `DEBUT_YEAR_MIN` is 2005); `txn-cache.json` is gitignored (~65MB, now spans
 1997–2023) but cheap to rebuild — see `docs/level-tenure-benchmark.md`.
