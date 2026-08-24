@@ -711,10 +711,13 @@ Re-run only to fold in a new season.
   MLB teams' home parks — an older/relocated venue just carries no team match).
   App reads it via `src/api/allStarRosters.js`.
 - `gen-milb-history.mjs` → `public/data/milb-history.json` — per-season parent-org +
-  club-name history for every AAA/AA/A+/A affiliate. Sweeps statsapi's season-scoped
-  team snapshots for 2005+ (where its affiliate data is clean) and merges a small
-  hand-verified seed (`scripts/milb-history-seed.json`) for pre-2005 eras. **Edit the
-  SEED, never the output.** See the generator header for the 2005-floor rationale.
+  club-name history for every AAA/AA/A+/A affiliate, plus Rookie/complex-level clubs
+  (sportId 16) as of issue #856 — investigated and widened rather than left excluded,
+  since real parent-org churn turned out LOWER for Rookie clubs than for full-season
+  affiliates. Sweeps statsapi's season-scoped team snapshots for 2005+ (where its
+  affiliate data is clean) and merges a small hand-verified seed
+  (`scripts/milb-history-seed.json`) for pre-2005 eras. **Edit the SEED, never the
+  output.** See the generator header for the 2005-floor rationale.
 - `gen-postseason-history.mjs` → `public/data/postseason-history.json` — the
   completed bracket (who played, who won, how many games, each team's 1-6
   seed) for every MLB postseason back to 2000 (`EARLIEST_YEAR`), plus the

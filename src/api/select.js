@@ -226,9 +226,11 @@ export function selectLineup(feed, side /* 'away' | 'home' */) {
 
 // The opposing pitcher a given batting side faces = the OTHER team's starter
 // (probable, or derived once logged — see selectTeamMeta), with jersey and
-// handedness. Spoiler-safe.
-export function selectOpposingPitcher(feed, battingSide) {
-  return selectTeamMeta(feed, otherSide(battingSide)).probablePitcher
+// handedness. `opts` forwards to selectTeamMeta — omit it (the safe default)
+// unless the caller has TeamInfo.jsx's "nothing here is score-revealing"
+// guarantee; see selectTeamMeta's own comment.
+export function selectOpposingPitcher(feed, battingSide, opts) {
+  return selectTeamMeta(feed, otherSide(battingSide), opts).probablePitcher
 }
 
 // Fixed display order for the opposing-defense list, independent of batting
@@ -386,24 +388,32 @@ export function enteredAsOf(player, revealedThrough, halfIdx = null) {
 
 // Team-level meta for a side: name, record, manager placeholder (manager is
 // fetched separately), and probable pitcher with handedness.
-export function selectTeamMeta(feed, side) {
+export function selectTeamMeta(feed, side, { includeDerivedStarter = false } = {}) {
   const box = feed?.liveData?.boxscore?.teams?.[side]?.team ?? {}
   const gdTeam = feed?.gameData?.teams?.[side] ?? {}
   const probable = feed?.gameData?.probablePitchers?.[side]
   const players = playerIndex(feed)
 
   // The starter id: the announced probable where a level posts one pregame,
-  // else this side's actual starter once his half's first play is logged
-  // (issue #851 — gameData.probablePitchers is reliably empty for complex-
-  // league games, and the same gap can appear anywhere a starter isn't
-  // formally announced). Home takes the mound in the top of the 1st, away in
-  // the bottom — the same fielding-side arithmetic matchup/forHalf.js's
-  // armFor uses. This page carries no reveal boundary of its own ("Nothing
-  // here is score-revealing", TeamInfo.jsx's own header), so the derivation
-  // runs unclamped (default revealedThrough = Infinity): inning 1's starter
-  // is fixed the instant he is thrown, the same pre-pitch identity fact a
-  // posted probable would already have been.
-  const pitcherId = probable?.id ?? derivedHalfStartingPitcherId(feed, 1, side === 'home' ? 'top' : 'bottom')
+  // else — ONLY when the caller opts in with includeDerivedStarter — this
+  // side's actual starter once his half's first play is logged (issue #851 —
+  // gameData.probablePitchers is reliably empty for complex-league games, and
+  // the same gap can appear anywhere a starter isn't formally announced).
+  // Home takes the mound in the top of the 1st, away in the bottom — the same
+  // fielding-side arithmetic matchup/forHalf.js's armFor uses.
+  //
+  // Defaults OFF because this function is shared far beyond TeamInfo.jsx: the
+  // share-preview poster (gamePreview.js), the printed sheet (sheetModel.js),
+  // and loadScorecard.js's pre-pitch staging view all call it too, each
+  // documented spoiler-free "by construction" on the premise that select.js
+  // never reads live play data ungated. Only TeamInfo.jsx passes
+  // includeDerivedStarter: true — its own header already established "nothing
+  // here is score-revealing" for the announced-probable case, and the derived
+  // case is the same pre-pitch identity fact once his first pitch is thrown.
+  // Every other caller keeps the pre-#851 behavior: blank until announced.
+  const pitcherId =
+    probable?.id ??
+    (includeDerivedStarter ? derivedHalfStartingPitcherId(feed, 1, openingHalfFor(side)) : null)
 
   let pitcher = null
   if (pitcherId != null) {
@@ -652,6 +662,21 @@ export function selectPrePitchChanges(feed, inning, half, revealedThrough = Infi
     }
   }
   return changes
+}
+
+// Which half a side's OWN game-opening start falls in: home takes the mound
+// in the top of the 1st, away in the bottom. The inverse of sideOnMoundFor.
+// Shared so this mapping is written once instead of independently in
+// selectTeamMeta, prehalf-callouts.js, and between-innings.js (issue #851's
+// three probablePitchers-fallback call sites).
+export function openingHalfFor(side) {
+  return side === 'home' ? 'top' : 'bottom'
+}
+
+// Which side is on the mound for a given half: home pitches the top, away
+// the bottom. The inverse of openingHalfFor.
+export function sideOnMoundFor(half) {
+  return half === 'top' ? 'home' : 'away'
 }
 
 // The pitcher id on the mound entering a half, read off its first LOGGED

@@ -28,7 +28,7 @@
 // ledger's read (src/hooks/useCalloutLedger.js) and is optional — without it
 // this card ranks exactly as it always did.
 
-import { halfIndex, derivedHalfStartingPitcherId } from './select.js'
+import { halfIndex, derivedHalfStartingPitcherId, openingHalfFor } from './select.js'
 import { matchupNotesForHalf } from './matchup/forHalf.js'
 import {
   buildStarterTeamRecordNote,
@@ -82,9 +82,9 @@ export function buildBetweenInnings({
   // its own revealedThrough gate, so this note still withholds itself until
   // the game's first half is at or under the reveal mark.
   const away = feed?.gameData?.probablePitchers?.away?.id
-    ?? derivedHalfStartingPitcherId(feed, 1, 'bottom', revealedThrough)
+    ?? derivedHalfStartingPitcherId(feed, 1, openingHalfFor('away'), revealedThrough)
   const home = feed?.gameData?.probablePitchers?.home?.id
-    ?? derivedHalfStartingPitcherId(feed, 1, 'top', revealedThrough)
+    ?? derivedHalfStartingPitcherId(feed, 1, openingHalfFor('home'), revealedThrough)
   if (away != null) pool.push(buildStarterTeamRecordNote(bundle, 'away', away))
   if (home != null) pool.push(buildStarterTeamRecordNote(bundle, 'home', home))
 

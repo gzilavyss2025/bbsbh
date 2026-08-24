@@ -49,7 +49,7 @@
 // (src/hooks/useCalloutLedger.js) and is optional: without it the strip ranks
 // exactly as it always did.
 
-import { halfIndex, derivedHalfStartingPitcherId } from './select.js'
+import { halfIndex, derivedHalfStartingPitcherId, sideOnMoundFor } from './select.js'
 import { matchupNotesForHalf } from './matchup/forHalf.js'
 import {
   cumulativeInnings,
@@ -87,7 +87,7 @@ export function buildPreHalfCallouts({
   // short-handed (api/callout-notes.js's buildBullpenThinNote — spoiler-free
   // completed-appearance data, self-gated to a slate-current game).
   if (inning === 1) {
-    const side = half === 'top' ? 'home' : 'away'
+    const side = sideOnMoundFor(half)
     // The announced probable where a level posts one pregame, else this
     // side's actual starter once his half's first play is logged (issue
     // #851 — same fallback selectTeamMeta uses). Gated the same way

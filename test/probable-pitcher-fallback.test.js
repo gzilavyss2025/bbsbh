@@ -9,13 +9,24 @@
 // (TeamInfo's Starting pitcher card), prehalf-callouts.js's starter-record
 // note, and between-innings.js's starter-record note.
 //
+// selectTeamMeta's fallback is opt-in (`{ includeDerivedStarter: true }`),
+// defaulting OFF: it's shared far beyond TeamInfo.jsx by callers documented
+// spoiler-free "by construction" on the premise that select.js never reads
+// live play data ungated (the share-preview poster, the printed sheet,
+// loadScorecard.js's pre-pitch staging view). Only TeamInfo.jsx's own two
+// call sites opt in.
+//
 // mini-game.js's buildFeed() carries no gameData.probablePitchers at all —
 // the exact shape statsapi returns for an unannounced starter — with a real
 // play logged for every half: home #200 pitches top 1, away #300 pitches
 // bottom 1.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { selectTeamMeta, derivedHalfStartingPitcherId } from '../src/api/select.js'
+import {
+  selectTeamMeta,
+  selectOpposingPitcher,
+  derivedHalfStartingPitcherId,
+} from '../src/api/select.js'
 import { buildPreHalfCallouts } from '../src/api/prehalf-callouts.js'
 import { buildBetweenInnings } from '../src/api/between-innings.js'
 import { buildFeed } from './fixtures/mini-game.js'
@@ -42,31 +53,61 @@ test('derivedHalfStartingPitcherId returns null with no play logged for that hal
 })
 
 // --- selectTeamMeta (TeamInfo's Starting pitcher card) -----------------------
+//
+// The derived fallback is opt-in via `{ includeDerivedStarter: true }` —
+// TeamInfo.jsx passes it because its own header already establishes "nothing
+// here is score-revealing." Every other caller (the share-preview poster,
+// the printed sheet, loadScorecard.js's pre-pitch staging view) omits it and
+// must keep getting a blank starter, same as before this fallback existed —
+// see the "stays null by default" tests below.
 
-test('selectTeamMeta falls back to the derived starter when probablePitchers is empty', () => {
+test('selectTeamMeta falls back to the derived starter when opted in and probablePitchers is empty', () => {
   const feed = buildFeed() // no gameData.probablePitchers
-  const home = selectTeamMeta(feed, 'home').probablePitcher
-  const away = selectTeamMeta(feed, 'away').probablePitcher
+  const home = selectTeamMeta(feed, 'home', { includeDerivedStarter: true }).probablePitcher
+  const away = selectTeamMeta(feed, 'away', { includeDerivedStarter: true }).probablePitcher
   assert.equal(home?.id, 200)
   assert.equal(home?.name, 'Hank Starter')
   assert.equal(away?.id, 300)
   assert.equal(away?.name, 'Walt Whit')
 })
 
-test('selectTeamMeta prefers an announced probable over the derived starter', () => {
+test('selectTeamMeta prefers an announced probable over the derived starter, opted in or not', () => {
   const feed = buildFeed()
   // A last-minute substitution: the announced probable (201) differs from
   // who actually threw the half's first pitch (200) — existing behavior for
   // an announced level must not regress to the derived identity.
   feed.gameData.probablePitchers = { home: { id: 201, fullName: 'Rob Reliever' } }
   assert.equal(selectTeamMeta(feed, 'home').probablePitcher.id, 201)
+  assert.equal(
+    selectTeamMeta(feed, 'home', { includeDerivedStarter: true }).probablePitcher.id,
+    201,
+  )
 })
 
-test('selectTeamMeta stays null pregame — no probable, no play logged yet', () => {
+test('selectTeamMeta stays null pregame — no probable, no play logged yet, opted in or not', () => {
   const feed = buildFeed()
   feed.liveData.plays.allPlays = []
   assert.equal(selectTeamMeta(feed, 'home').probablePitcher, null)
   assert.equal(selectTeamMeta(feed, 'away').probablePitcher, null)
+  assert.equal(
+    selectTeamMeta(feed, 'home', { includeDerivedStarter: true }).probablePitcher,
+    null,
+  )
+})
+
+test('selectTeamMeta stays null by DEFAULT even once a play is logged — the share poster, the printed sheet, and the pre-pitch staging view never opt in, so they must never see the derived starter', () => {
+  const feed = buildFeed() // no probablePitchers, but a real play is logged for both halves
+  assert.equal(selectTeamMeta(feed, 'home').probablePitcher, null)
+  assert.equal(selectTeamMeta(feed, 'away').probablePitcher, null)
+})
+
+test('selectOpposingPitcher mirrors the same opt-in default', () => {
+  const feed = buildFeed()
+  assert.equal(selectOpposingPitcher(feed, 'away'), null) // faces home's starter, not opted in
+  assert.equal(
+    selectOpposingPitcher(feed, 'away', { includeDerivedStarter: true })?.id,
+    200,
+  )
 })
 
 // --- prehalf-callouts.js's starter-record note --------------------------------
