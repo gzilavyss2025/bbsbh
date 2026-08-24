@@ -58,6 +58,22 @@ const BASE = 'https://statsapi.mlb.com'
 // set of pairs), making the window a direct multiplier on the run's cost.
 const WINDOW_DAYS = 1
 const MILB_SPORT_IDS = [11, 12, 13, 14]
+// Rookie level (sportId 16 — ACL/FCL/DSL/VSL) is deliberately absent here, not
+// forgotten. This whole build hangs on `probablePitcher` (see the fetchGames
+// comment below), and that field is reliably empty for Rookie-level games —
+// verified live on THIS endpoint (`/api/v1/schedule?sportId=16&hydrate=team,
+// probablePitcher`), not just assumed from the feed/live gap #850/#851 found:
+// 0 of 7 Scheduled (not-yet-played) ROK games across three different dates
+// (2026-08-24/25/26, spanning the in-season DSL/ACL slate) carried a probable
+// starter on either side, vs. MLB/AAA on the same dates which routinely did.
+// Adding 16 to MATCHUP_SPORT_IDS would make fetchGames() skip every Rookie
+// game it finds — a silent no-op, not a widen. A real fix would mean
+// redesigning this generator to run AFTER a Rookie game, deriving the actual
+// starter from liveData.plays/boxscore.pitchers the way #851 wires into the
+// live UI — i.e. turning this card retrospective instead of predictive for
+// that level. That's a real design change, not attempted here; left as a
+// deliberate exclusion (issue #855) unless a reason to want the retrospective
+// version at Rookie level shows up.
 const MATCHUP_SPORT_IDS = [1, ...MILB_SPORT_IDS]
 const SPORT_LABEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A' }
 
