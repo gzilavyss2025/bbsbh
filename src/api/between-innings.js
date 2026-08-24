@@ -28,7 +28,7 @@
 // ledger's read (src/hooks/useCalloutLedger.js) and is optional — without it
 // this card ranks exactly as it always did.
 
-import { halfIndex } from './select.js'
+import { halfIndex, derivedHalfStartingPitcherId } from './select.js'
 import { matchupNotesForHalf } from './matchup/forHalf.js'
 import {
   buildStarterTeamRecordNote,
@@ -75,8 +75,16 @@ export function buildBetweenInnings({
   const { inning: nInning, half: nHalf } = nextHalfOf(inning, half)
   const pool = [...marginNotes]
 
+  // The announced probable where a level posts one pregame, else each side's
+  // actual starter once his half's first play is logged (issue #851 — same
+  // fallback selectTeamMeta/prehalf-callouts.js use). Away starts the
+  // bottom of the 1st, home the top; derivedHalfStartingPitcherId carries
+  // its own revealedThrough gate, so this note still withholds itself until
+  // the game's first half is at or under the reveal mark.
   const away = feed?.gameData?.probablePitchers?.away?.id
+    ?? derivedHalfStartingPitcherId(feed, 1, 'bottom', revealedThrough)
   const home = feed?.gameData?.probablePitchers?.home?.id
+    ?? derivedHalfStartingPitcherId(feed, 1, 'top', revealedThrough)
   if (away != null) pool.push(buildStarterTeamRecordNote(bundle, 'away', away))
   if (home != null) pool.push(buildStarterTeamRecordNote(bundle, 'home', home))
 
