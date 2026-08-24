@@ -323,7 +323,7 @@ const SPECS = [
   },
   {
     key: 'S4-also-drop-post-debut',
-    note: 'S3 + drop durations resolved from assignments AFTER the player already debuted (option/rehab shuttling, not development)',
+    note: 'S3 + drop durations resolved from assignments AFTER the player already debuted. Now VACUOUS BY CONSTRUCTION: dates.mjs bounds its transition search at the debut, so no such row is produced any more. Kept as a live assertion -- if this spec ever stops matching S3 exactly, that bound has regressed.',
     rows: () => universe.filter((d) => d.adjDays > 0 && d.adjDays < CAP && d.season >= YEAR_FLOOR && !d.postDebut).map((d) => ({ ...d, resp: d.adjDays })),
   },
 ]
@@ -599,12 +599,26 @@ console.log('  instrument explanation, not proof of it. The wire-free check abov
 console.log('  test that actually discriminates, and it shows no rise at all.')
 
 // ============================================================================
-// Post-debut contamination (reported, and its era profile checked)
+// Post-debut contamination -- FIXED at the source, now a regression check.
+//
+// This pass originally found 434 of 3,549 durations (12.2%) ending AFTER the
+// player's MLB debut: resolveTransitionDates' cursor ran off the end of a
+// player's pre-debut assignments and kept matching his later option and
+// rehab shuttles, so shuttling was being counted as development. dates.mjs
+// now drops wire events dated after the debut before matching, which removed
+// exactly those rows and nothing else (259 from allDurations, 175 from the
+// cap-dropped set; zero surviving durations changed value).
+//
+// The count below must therefore read 0. It is kept because a resolver that
+// silently starts producing these again is precisely the kind of regression
+// that would go unnoticed, and because the original 12.2% is worth keeping
+// on the record next to the number that replaced it.
 // ============================================================================
 const postDebutRows = universe.filter((d) => d.postDebut)
-console.log('\n=== Post-debut contamination ===')
+console.log('\n=== Post-debut contamination (expect 0 -- fixed in dates.mjs) ===')
+if (postDebutRows.length) console.log(`  REGRESSION: the debut bound in dates.mjs is not holding.`)
 console.log(`  ${postDebutRows.length} of ${universe.length} durations (${round((postDebutRows.length / universe.length) * 100, 1)}%) end AFTER the player's MLB debut`)
-console.log('  -- resolved from option/rehab assignments, not a development stay.')
+console.log('  -- was 434 of 3,549 (12.2%) before dates.mjs bounded the search at the debut.')
 const postByYear = [...new Set(universe.map((d) => d.season))].sort().map((season) => {
   const all = universe.filter((d) => d.season === season)
   return { season, n: all.length, postDebut: all.filter((d) => d.postDebut).length, pct: round((all.filter((d) => d.postDebut).length / all.length) * 100, 1) }

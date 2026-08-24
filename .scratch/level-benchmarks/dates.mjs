@@ -84,6 +84,18 @@ function playerAsgEvents(player) {
       if (!sportId) continue
       const date = t.effectiveDate || t.date
       if (!date) continue
+      // BOUND THE SEARCH AT THE DEBUT. Without this the cursor in
+      // resolveTransitionDates runs off the end of a player's pre-debut
+      // assignments and keeps matching against his LATER option and rehab
+      // assignments, so a transition that never got dated from the wire
+      // silently picks up a date from a post-debut shuttle instead. That put
+      // 434 of 3,549 durations (12.2%) in the output as "development" stays
+      // when they were nothing of the kind -- some ending years after the
+      // player had already reached the majors. Post-debut events are a strict
+      // date SUFFIX of this list, so dropping them here cannot disturb any
+      // transition that already resolved correctly; it can only leave one
+      // unresolved, which is the honest outcome.
+      if (date > player.debutDate) continue
       events.push({ date, sportId })
     }
   }
