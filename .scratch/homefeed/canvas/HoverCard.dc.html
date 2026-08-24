@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;500;700&family=Lora:ital,wght@0,400;1,400&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Archivo','Helvetica Neue',Arial,sans-serif; }
+    a { color: #E9DA00; text-decoration: none; }
+    a:hover { color: #ffffff; }
+    * { box-sizing: border-box; }
+    @keyframes tallypulse { 0%,100% { opacity: 1 } 50% { opacity: .28 } }
+    .pulse { animation: tallypulse 1.9s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
+    /* THE BASE — a photo of a base (one SVG data URI: lit pebbled rubber,
+       beveled walls, slide scuffs, clay in the corners; the middle stepped
+       clean so the mark prints). See the generator for the drawing. */
+    .base { position: relative; background: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%3E%20%3Cdefs%3E%20%3CradialGradient%20id%3D%22dome%22%20cx%3D%2236%25%22%20cy%3D%2228%25%22%20r%3D%2292%25%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FFFFFF%22%2F%3E%20%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23F8F5EC%22%2F%3E%20%3Cstop%20offset%3D%22.8%22%20stop-color%3D%22%23EDE7D6%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23DCD3BE%22%2F%3E%20%3C%2FradialGradient%3E%20%3ClinearGradient%20id%3D%22wall%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FDFCF8%22%2F%3E%20%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23D9D2C0%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23AFA48D%22%2F%3E%20%3C%2FlinearGradient%3E%20%3Cfilter%20id%3D%22rubber%22%20x%3D%22-5%25%22%20y%3D%22-5%25%22%20width%3D%22110%25%22%20height%3D%22110%25%22%3E%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.5%22%20numOctaves%3D%222%22%20seed%3D%227%22%20result%3D%22n%22%2F%3E%20%3CfeDiffuseLighting%20in%3D%22n%22%20lighting-color%3D%22%23ffffff%22%20surfaceScale%3D%220.9%22%20diffuseConstant%3D%221.08%22%20result%3D%22l%22%3E%20%3CfeDistantLight%20azimuth%3D%22235%22%20elevation%3D%2262%22%2F%3E%20%3C%2FfeDiffuseLighting%3E%20%3CfeComposite%20in%3D%22l%22%20in2%3D%22SourceGraphic%22%20operator%3D%22arithmetic%22%20k1%3D%221%22%20k2%3D%220%22%20k3%3D%220%22%20k4%3D%220%22%2F%3E%20%3C%2Ffilter%3E%20%3Cfilter%20id%3D%22streak%22%20x%3D%22-30%25%22%20y%3D%22-30%25%22%20width%3D%22160%25%22%20height%3D%22160%25%22%3E%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.010%200.14%22%20numOctaves%3D%223%22%20seed%3D%2211%22%20result%3D%22t%22%2F%3E%20%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22t%22%20scale%3D%2216%22%2F%3E%20%3CfeGaussianBlur%20stdDeviation%3D%220.7%22%2F%3E%20%3C%2Ffilter%3E%20%3Cfilter%20id%3D%22blotch%22%20x%3D%22-20%25%22%20y%3D%22-20%25%22%20width%3D%22140%25%22%20height%3D%22140%25%22%3E%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.085%22%20numOctaves%3D%223%22%20seed%3D%224%22%20result%3D%22t%22%2F%3E%20%3CfeColorMatrix%20in%3D%22t%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%201.5%20-0.45%22%20result%3D%22m%22%2F%3E%20%3CfeComposite%20in%3D%22SourceGraphic%22%20in2%3D%22m%22%20operator%3D%22in%22%2F%3E%20%3C%2Ffilter%3E%20%3CradialGradient%20id%3D%22clay%22%20cx%3D%2250%25%22%20cy%3D%2250%25%22%20r%3D%2250%25%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2396713F%22%20stop-opacity%3D%22.8%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2396713F%22%20stop-opacity%3D%220%22%2F%3E%20%3C%2FradialGradient%3E%20%3CclipPath%20id%3D%22top%22%3E%3Crect%20x%3D%229%22%20y%3D%229%22%20width%3D%22142%22%20height%3D%22136%22%20rx%3D%2210%22%2F%3E%3C%2FclipPath%3E%20%3C%2Fdefs%3E%20%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%22152%22%20height%3D%22152%22%20rx%3D%2214%22%20fill%3D%22url(%23wall)%22%2F%3E%20%3Crect%20x%3D%229%22%20y%3D%229%22%20width%3D%22142%22%20height%3D%22136%22%20rx%3D%2210%22%20fill%3D%22url(%23dome)%22%20filter%3D%22url(%23rubber)%22%2F%3E%20%3Crect%20x%3D%2214%22%20y%3D%2214%22%20width%3D%22132%22%20height%3D%22126%22%20rx%3D%227%22%20fill%3D%22none%22%20stroke%3D%22%23FFFFFF%22%20stroke-opacity%3D%22.55%22%20stroke-width%3D%222%22%2F%3E%20%3Crect%20x%3D%2215.5%22%20y%3D%2215.5%22%20width%3D%22132%22%20height%3D%22126%22%20rx%3D%227%22%20fill%3D%22none%22%20stroke%3D%22%23A08D6C%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.6%22%2F%3E%20%3Cg%20clip-path%3D%22url(%23top)%22%3E%20%3Cg%20filter%3D%22url(%23streak)%22%20opacity%3D%22.55%22%3E%20%3Crect%20x%3D%2218%22%20y%3D%2252%22%20width%3D%22118%22%20height%3D%225%22%20fill%3D%22%236E675C%22%20opacity%3D%22.5%22%20transform%3D%22rotate(-14%2080%2080)%22%2F%3E%20%3Crect%20x%3D%2230%22%20y%3D%2272%22%20width%3D%22112%22%20height%3D%223.4%22%20fill%3D%22%237A7368%22%20opacity%3D%22.42%22%20transform%3D%22rotate(-12%2080%2080)%22%2F%3E%20%3Crect%20x%3D%2212%22%20y%3D%2296%22%20width%3D%22104%22%20height%3D%224.2%22%20fill%3D%22%235E574C%22%20opacity%3D%22.38%22%20transform%3D%22rotate(-15%2080%2080)%22%2F%3E%20%3Crect%20x%3D%2244%22%20y%3D%22116%22%20width%3D%2290%22%20height%3D%222.6%22%20fill%3D%22%236E675C%22%20opacity%3D%22.4%22%20transform%3D%22rotate(-11%2080%2080)%22%2F%3E%20%3C%2Fg%3E%20%3Cg%20filter%3D%22url(%23blotch)%22%20style%3D%22mix-blend-mode%3Amultiply%22%3E%20%3Ccircle%20cx%3D%228%22%20cy%3D%228%22%20r%3D%2246%22%20fill%3D%22url(%23clay)%22%2F%3E%20%3Ccircle%20cx%3D%22152%22%20cy%3D%22148%22%20r%3D%2252%22%20fill%3D%22url(%23clay)%22%2F%3E%20%3Ccircle%20cx%3D%22152%22%20cy%3D%2210%22%20r%3D%2232%22%20fill%3D%22url(%23clay)%22%20opacity%3D%22.6%22%2F%3E%20%3Ccircle%20cx%3D%228%22%20cy%3D%22148%22%20r%3D%2242%22%20fill%3D%22url(%23clay)%22%20opacity%3D%22.8%22%2F%3E%20%3Cellipse%20cx%3D%2280%22%20cy%3D%22152%22%20rx%3D%2284%22%20ry%3D%2222%22%20fill%3D%22url(%23clay)%22%20opacity%3D%22.7%22%2F%3E%20%3C%2Fg%3E%20%3C%2Fg%3E%20%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%22152%22%20height%3D%22152%22%20rx%3D%2214%22%20fill%3D%22none%22%20stroke%3D%22%236B5B41%22%20stroke-opacity%3D%22.26%22%20stroke-width%3D%221.4%22%2F%3E%20%3C%2Fsvg%3E") center / 100% 100% no-repeat; }
+
+    /* THE SHEEN — the shipping slate's scroll-driven band of light
+       (06a-gamecard-parkart.css), same soft-light blend and the same softened
+       stops. In the app it rides a view timeline and tracks the thumb; an
+       artboard cannot scroll for you, so here the same band loops slowly,
+       staggered down the slate, to show the effect. */
+    .bandsheen { position: absolute; inset: 0; z-index: 3; overflow: hidden;
+      pointer-events: none; mix-blend-mode: soft-light; }
+    .bandsheen::before { content: ''; position: absolute;
+      left: -30%; right: -30%; top: -50%; bottom: -50%;
+      background: linear-gradient(172deg,
+        transparent 26%, rgba(10,11,13,.10) 40%,
+        rgba(252,250,244,.46) 50%, rgba(10,11,13,.08) 60%, transparent 74%);
+      animation: bandsheen 9s linear infinite; animation-delay: var(--d, 0s); }
+    @keyframes bandsheen {
+      0% { transform: translate3d(0,-34%,0) }
+      52% { transform: translate3d(0,34%,0) }
+      100% { transform: translate3d(0,34%,0) }
+    }
+    @media (prefers-reduced-motion: reduce) { .bandsheen { display: none } }
+
+    /* The seal's own surface: the one signal colour, raked — the kraft tape
+       of this palette. */
+    .hatch { position: absolute; inset: 0; pointer-events: none; opacity: .13;
+      background-image: repeating-linear-gradient(-38deg, #E9DA00 0 2px, transparent 2px 11px); }
+  </style>
+</helmet>
+
+<div style="position:relative;width:350px;height:430px;background:#0A0B0D;overflow:hidden;display:grid;place-items:center">
+  <div style="position:relative;width:300px;background:#12141A;border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 40px rgba(0,0,0,.5)">
+    <span style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#003831"></span>
+    <div style="display:flex;gap:13px;padding:15px 16px 12px 19px">
+      
+    <span style="width:54px;height:72px;flex:none;display:block;overflow:hidden;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14)"><img src="h-bolte.png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 8%;display:block" /></span>
+      <div style="min-width:0;flex:1;padding-top:2px">
+        <div style="font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-stretch:72%;font-variation-settings:'wdth' 72,'wght' 800;font-weight:800;font-size:22px;line-height:0.84;letter-spacing:-0.02em;word-spacing:0.09em;text-transform:uppercase;color:#fff">HENRY BOLTE</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,.64);margin-top:7px">CF &#183; BATS R &#183; #33</div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:5px">IT'S JUST ATHLETICS</div>
+      </div>
+      <img src="ath.svg" alt="" style="width:30px;height:30px;object-fit:contain;flex:none;align-self:flex-start" />
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.12);margin:0 16px 0 19px"></div>
+    <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:1px;background:rgba(255,255,255,.09);border-top:1px solid transparent;margin:12px 16px 15px 19px;border:1px solid rgba(255,255,255,.12)">
+      
+      <span style="display:flex;flex-direction:column;align-items:center;gap:5px;background:#12141A;padding:9px 0 8px">
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0.02em;text-transform:uppercase;color:#fff;font-variant-numeric:tabular-nums">.264</span>
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.5)">AVG</span>
+      </span>
+      <span style="display:flex;flex-direction:column;align-items:center;gap:5px;background:#12141A;padding:9px 0 8px">
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0.02em;text-transform:uppercase;color:#fff;font-variant-numeric:tabular-nums">19</span>
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.5)">HR</span>
+      </span>
+      <span style="display:flex;flex-direction:column;align-items:center;gap:5px;background:#12141A;padding:9px 0 8px">
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0.02em;text-transform:uppercase;color:#fff;font-variant-numeric:tabular-nums">55</span>
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.5)">RBI</span>
+      </span>
+      <span style="display:flex;flex-direction:column;align-items:center;gap:5px;background:#12141A;padding:9px 0 8px">
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0.02em;text-transform:uppercase;color:#fff;font-variant-numeric:tabular-nums">.784</span>
+        <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.5)">OPS</span>
+      </span>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

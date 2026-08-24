@@ -1,0 +1,282 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "The flow"
+    },
+    {
+      "id": "page-2",
+      "name": "Edges & the minors"
+    },
+    {
+      "id": "page-3",
+      "name": "Directions"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "title": "1 · The feed — dark",
+      "page": "page-1",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 2080
+    },
+    {
+      "file": "FeedLight.dc.html",
+      "title": "1L · The feed — light",
+      "page": "page-1",
+      "x": 500,
+      "y": 0,
+      "w": 390,
+      "h": 2135
+    },
+    {
+      "file": "Opening.dc.html",
+      "title": "2 · Opening a game — 440ms, on a loop",
+      "page": "page-1",
+      "x": 1000,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Poster.dc.html",
+      "title": "3 · The game",
+      "page": "page-1",
+      "x": 1500,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Lineups.dc.html",
+      "title": "4 · Lineups",
+      "page": "page-1",
+      "x": 2000,
+      "y": 0,
+      "w": 390,
+      "h": 1360
+    },
+    {
+      "file": "HoverCard.dc.html",
+      "title": "4b · Hover card — desktop",
+      "page": "page-1",
+      "x": 2500,
+      "y": 0,
+      "w": 350,
+      "h": 430
+    },
+    {
+      "file": "Innings.dc.html",
+      "title": "5 · Innings — sealed",
+      "page": "page-1",
+      "x": 2500,
+      "y": 560,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "InningsOpen.dc.html",
+      "title": "5b · Innings — opened",
+      "page": "page-1",
+      "x": 3000,
+      "y": 0,
+      "w": 390,
+      "h": 1310
+    },
+    {
+      "file": "BoxScore.dc.html",
+      "title": "6 · Box score — sealed",
+      "page": "page-1",
+      "x": 3500,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "BoxOpen.dc.html",
+      "title": "6b · Box score — opened",
+      "page": "page-1",
+      "x": 4000,
+      "y": 0,
+      "w": 390,
+      "h": 1090
+    },
+    {
+      "file": "Desktop.dc.html",
+      "title": "The feed at 1440",
+      "page": "page-1",
+      "x": 1000,
+      "y": 1530,
+      "w": 1440,
+      "h": 1540
+    },
+    {
+      "file": "Edges.dc.html",
+      "title": "Edge cases",
+      "page": "page-2",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 880
+    },
+    {
+      "file": "MiLB.dc.html",
+      "title": "Double-A — where the art is the point",
+      "page": "page-2",
+      "x": 500,
+      "y": 0,
+      "w": 390,
+      "h": 790
+    },
+    {
+      "file": "MiLBPoster.dc.html",
+      "title": "Binghamton at Hartford",
+      "page": "page-2",
+      "x": 1000,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Marquee.dc.html",
+      "title": "A · Marquee — chosen",
+      "page": "page-3",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 920
+    },
+    {
+      "file": "Rundown.dc.html",
+      "title": "B · Rundown",
+      "page": "page-3",
+      "x": 500,
+      "y": 0,
+      "w": 390,
+      "h": 940
+    },
+    {
+      "file": "Stub.dc.html",
+      "title": "C · Stub",
+      "page": "page-3",
+      "x": 1000,
+      "y": 0,
+      "w": 390,
+      "h": 880
+    },
+    {
+      "file": "Split.dc.html",
+      "title": "D · Split — chosen",
+      "page": "page-3",
+      "x": 1500,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    }
+  ],
+  "annotations": [
+    {
+      "id": "flow-brief",
+      "page": "page-1",
+      "x": -470,
+      "y": 0,
+      "w": 420,
+      "text": "ONE LIST, BOTH MODES\nThe feed is flat: your club pinned, then first-pitch order. The old \"on now / first pitch to come / earlier today\" grouping was itself a spoiler — it told you which games were still going before you asked. Now every band is the same size, and state lives inside it: LIVE, a time, or SEALED.\n\nLight and dark both ship. The bands are club colour and identical in both; the chrome, seals and tables carry the theme.\n\nBack from the shipping page: the club strip (one tap to a team page, your club centred), the Wire dock resting at the fold, and the networks’ own PNG logos on the rail."
+    },
+    {
+      "id": "flow-band",
+      "page": "page-1",
+      "x": 0,
+      "y": -300,
+      "w": 420,
+      "text": "THE BAND\nAbbreviation over MASCOT — MIL over BREWERS, not over Milwaukee.\n\nTHE SHEEN: the shipping slate’s scroll-driven band of light, same soft-light blend and softened stops as 06a-gamecard-parkart.css. In the app it rides a view timeline and tracks the thumb; here it loops so you can see it. Off under reduced motion.\n\nTHE JERSEY: when tonight’s jersey is known (uniforms feed same-day, jerseys.json ahead), the band wears it — the field takes the jersey tile’s tint and the bag prints that jersey’s art. Boston is drawn in City Connect green as the demo."
+    },
+    {
+      "id": "flow-base",
+      "page": "page-1",
+      "x": 500,
+      "y": -300,
+      "w": 420,
+      "text": "THE BASE, PHOTO-REAL\nRedrawn from reference: an 18-inch Hollywood base is heavy-gauge rubber over a foam core — a white pillow with a rolled bevel and rounded corners. One SVG: pebbled rubber lit through a real lighting model (feTurbulence → feDiffuseLighting), beveled walls, slide scuffs broken by a displacement map, clay ground into the corners. The middle gets stepped clean, which is what lets the mark print. Scaled down it loses texture the way a photo does.\n\nThe feed prints the mark in pencil grayscale; opening the game inks it in."
+    },
+    {
+      "id": "flow-motion",
+      "page": "page-1",
+      "x": 1000,
+      "y": -240,
+      "w": 390,
+      "text": "THE OPENING\n440ms, three beats, clip-path and opacity only. The band’s wedge and the poster’s diagonal are ONE four-point path; opening is that path un-clipping, over the list, not through it."
+    },
+    {
+      "id": "flow-scope",
+      "page": "page-1",
+      "x": 2000,
+      "y": -300,
+      "w": 420,
+      "text": "SCREENS 4–6, WITH THEIR OWN FURNITURE\nRedrawn carrying what the shipping pages already have: the opposing starter’s headshot card, the batting order in its real anatomy (order · name · number · position), the defense diamond with surnames and scorer’s numbers, the play diamonds with their advance notations (1B¹, 2B³, F8), and the desktop hover card. Nothing the real pages hold is proposed dropped."
+    },
+    {
+      "id": "flow-seal",
+      "page": "page-1",
+      "x": 3000,
+      "y": -240,
+      "w": 890,
+      "text": "SEALED, THEN OPENED\nNothing loosens the spoiler rule. The revealed half lands in exactly the 212px the seal held, so opening one does not shove the page down. The box score opens whole and stays open — ADR-0049."
+    },
+    {
+      "id": "edge-note",
+      "page": "page-2",
+      "x": -470,
+      "y": 0,
+      "w": 420,
+      "text": "THE ROWS A REAL SLATE HANDS YOU\nA postponement, a doubleheader, a club with no usable colour, and the long-name fit rule (74/62/52/44 by length).\n\nDown a level, the mark carries the identity: 50 of 117 MiLB clubs have a primary under L 0.02 and 107 of 117 are flagged \"confidence: medium\" — the colour data is the untrustworthy half, the art is not."
+    },
+    {
+      "id": "dir-brief",
+      "page": "page-3",
+      "x": -470,
+      "y": 0,
+      "w": 420,
+      "text": "THE PROBLEM\nTally is the only sports feed with no numbers in it — the spoiler rule forbids scores, records and odds on the slate. What is left is what a college-football gameday poster is made of: two identities, a place, a time, and anticipation.\n\nThese four are the original sketches, kept as drawn."
+    },
+    {
+      "id": "note-a",
+      "page": "page-3",
+      "x": 0,
+      "y": -240,
+      "w": 390,
+      "text": "A · MARQUEE — colour blocking, edge to edge. No card, no gutter, no radius. Chosen, with D."
+    },
+    {
+      "id": "note-b",
+      "page": "page-3",
+      "x": 500,
+      "y": -240,
+      "w": 390,
+      "text": "B · RUNDOWN — the departure board. Not chosen for the phone; survives as the desktop rail."
+    },
+    {
+      "id": "note-c",
+      "page": "page-3",
+      "x": 1000,
+      "y": -240,
+      "w": 390,
+      "text": "C · STUB — a printed artifact. Not chosen here; the strongest candidate for the Game Log’s stamps and shelf."
+    },
+    {
+      "id": "note-d",
+      "page": "page-3",
+      "x": 1500,
+      "y": -240,
+      "w": 390,
+      "text": "D · SPLIT — one game, one poster. Chosen, with A — promoted out of the feed to the screen you land on."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
+}
