@@ -52,13 +52,12 @@ console.log(`org map: ${orgMap.size} (team,season) entries`)
 const playersById = new Map(Object.entries(raw.players).map(([id, p]) => [Number(id), p]))
 const LEVEL_SPORT = { A: 14, 'High-A': 13, AA: 12, AAA: 11 }
 
-// FIX (adversarial review, see docs/team-movement-windows.md "Adversarial
-// review"): originally took the player's FIRST allPromotionDates entry
-// regardless of which duration/level was being resolved, so a player with
-// multiple durations got the SAME season guess for all of them — wrong for
-// any player whose transitions span different years. dates.mjs now stamps
-// each duration with the exact season of the transition that ended it (the
-// same date the duration itself is computed from) — use that directly.
+// FIX (v2): the original picked the player's FIRST allPromotionDates entry
+// regardless of which level/duration was being resolved (.find() filtered
+// only by playerId), so every duration for a multi-transition player reused
+// the same season guess. dates.mjs now stamps each duration with the exact
+// season of the transition that ENDED it (t.date, the same date used to
+// compute the duration itself) — use that directly, no guessing needed.
 function orgForDuration(playerId, level, season) {
   const p = playersById.get(playerId)
   if (!p) return null
@@ -139,8 +138,17 @@ function designRow(r) {
   return row
 }
 
+const TRANSFORM = process.argv[2] || 'log' // log | levels | sqrt
+const transformFn = { log: (d) => Math.log(d), levels: (d) => d, sqrt: (d) => Math.sqrt(d) }[TRANSFORM]
+const inverseFn = {
+  log: (b) => Math.exp(b) - 1, // pct effect vs grand mean
+  levels: (b) => b, // raw-days effect vs grand mean
+  sqrt: (b) => b, // sqrt-days effect vs grand mean (not directly a %; report raw units)
+}[TRANSFORM]
+console.log(`\n>>> transform: ${TRANSFORM}`)
+
 const X = keptRows.map(designRow)
-const y = keptRows.map((r) => r.logDays)
+const y = keptRows.map((r) => transformFn(r.days))
 const p = X[0].length
 const n = X.length
 console.log(`design matrix: ${n} rows x ${p} columns (1 intercept + ${levelCols.length} level + ${tierCols.length} tier + ${orgCols.length} org)`)
@@ -217,20 +225,6 @@ for (let i = 0; i < orgCols.length; i++) for (let j = 0; j < orgCols.length; j++
 orgBeta.set(orgRef, refBeta)
 orgSE.set(orgRef, Math.sqrt(refVar))
 
-// two-tailed normal CDF via Abramowitz-Stegun erf approximation — good to
-// ~1e-7, plenty for a p-value used only to rank/threshold, not publish
-function erf(x) {
-  const sign = x < 0 ? -1 : 1
-  x = Math.abs(x)
-  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, pc = 0.3275911
-  const t = 1 / (1 + pc * x)
-  const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x)
-  return sign * y
-}
-function twoTailedP(z) {
-  return 2 * (1 - 0.5 * (1 + erf(Math.abs(z) / Math.SQRT2)))
-}
-
 const Z95 = 1.96
 const ZBONF = 3.144 // two-tailed z for alpha=0.05/30 (Bonferroni across 30 simultaneous org tests)
 const orgEffects = orgIds
@@ -245,39 +239,27 @@ const orgEffects = orgIds
       orgId: o,
       name: orgNameById.get(o) || String(o),
       n: orgCounts.get(o),
-      pctEffect: Math.round((Math.exp(b) - 1) * 1000) / 10, // % faster(-)/slower(+) than grand mean
-      ciLowPct: Math.round((Math.exp(lo) - 1) * 1000) / 10,
-      ciHighPct: Math.round((Math.exp(hi) - 1) * 1000) / 10,
-      pValue: twoTailedP(b / s),
+      beta: b,
+      se: s,
+      pctEffect: Math.round(inverseFn(b) * 1000) / 10,
+      ciLowPct: Math.round(inverseFn(lo) * 1000) / 10,
+      ciHighPct: Math.round(inverseFn(hi) * 1000) / 10,
       significant: lo > 0 || hi < 0,
       significantBonferroni: loBonf > 0 || hiBonf < 0,
     }
   })
   .sort((a, b) => a.pctEffect - b.pctEffect)
 
-// Benjamini-Hochberg (FDR, q=0.05) — less conservative than Bonferroni:
-// sort by p-value, find the largest rank k where p(k) <= (k/m)*q, flag every
-// org at or below that rank as an FDR discovery
-const BH_Q = 0.05
-const byP = [...orgEffects].sort((a, b) => a.pValue - b.pValue)
-let bhCutoffRank = -1
-byP.forEach((e, i) => {
-  if (e.pValue <= ((i + 1) / byP.length) * BH_Q) bhCutoffRank = i
-})
-byP.forEach((e, i) => { e.significantBH = i <= bhCutoffRank })
-
 console.log(`\n=== org fixed effect on days-at-level, holding level+draft tier constant (n>=${ORG_MIN_N}) ===`)
 console.log('(% faster/slower than the grand mean; * = 95% CI excludes 0 uncorrected, ** = also survives Bonferroni)')
 for (const e of orgEffects) {
-  const flag = e.significantBonferroni ? '**' : e.significant ? '*' : ' '
+  const flag = e.significantBonferroni ? '**' : e.significant ? '*' : ''
   console.log(`${e.name.padEnd(26)} n=${String(e.n).padEnd(4)} ${e.pctEffect >= 0 ? '+' : ''}${e.pctEffect}% [${e.ciLowPct >= 0 ? '+' : ''}${e.ciLowPct}%, ${e.ciHighPct >= 0 ? '+' : ''}${e.ciHighPct}%] ${flag}`)
 }
-const sigCount = orgEffects.filter((e) => e.significant).length
 const sigCountBonf = orgEffects.filter((e) => e.significantBonferroni).length
-const sigCountBH = orgEffects.filter((e) => e.significantBH).length
-console.log(`\norgs with a 95% CI excluding 0 (uncorrected): ${sigCount} of ${orgEffects.length}`)
-console.log(`orgs surviving Bonferroni (alpha=0.05/30): ${sigCountBonf} of ${orgEffects.length}`)
-console.log(`orgs surviving Benjamini-Hochberg FDR (q=0.05): ${sigCountBH} of ${orgEffects.length}${sigCountBH ? ' — ' + byP.filter((e) => e.significantBH).map((e) => e.name).join(', ') : ''}`)
+console.log(`\norgs surviving Bonferroni (alpha=0.05/30): ${sigCountBonf} of ${orgEffects.length}`)
+const sigCount = orgEffects.filter((e) => e.significant).length
+console.log(`\norgs with a 95% CI excluding 0 (statistically distinguishable from the grand mean): ${sigCount} of ${orgEffects.length}`)
 
 // --- also report level and tier effects for context -------------------------
 function namedEffects(cols, ref, startIdx) {
@@ -306,7 +288,7 @@ console.log('\n=== draft-tier effect (context) ===')
 for (const e of tierEffects) console.log(`${e.name.padEnd(16)} ${e.pctEffect >= 0 ? '+' : ''}${e.pctEffect}%`)
 
 await writeFile(
-  join(here, 'org-regression.json'),
+  join(here, 'org-regression-transform-' + TRANSFORM + '.json'),
   JSON.stringify(
     {
       n,
@@ -319,8 +301,6 @@ await writeFile(
       levelEffects,
       tierEffects,
       significantOrgCount: sigCount,
-      significantOrgCountBonferroni: sigCountBonf,
-      significantOrgCountBH: sigCountBH,
       totalOrgCount: orgEffects.length,
     },
     null,
