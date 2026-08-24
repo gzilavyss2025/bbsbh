@@ -76,6 +76,26 @@
       "class": "spoiler-free",
       "why": "Static all-star-rosters.json reader. Shows each game's final plainly, but an All-Star Game is decades-settled exhibition trivia outside the rule's scope (ADR-0019)."
     },
+    "around-the-game/bullpen.js": {
+      "class": "spoiler-free",
+      "why": "Re-runs api/workload.js’s availability rules across all thirty clubs. Inherits that module’s classification unchanged: completed appearances only, as-of date excludes today, so no in-progress line can leak. No SealBox."
+    },
+    "around-the-game/clubs.js": {
+      "class": "spoiler-free",
+      "why": "Club identity (name, abbreviation, division) off the static teams.json, so the report boards can join a bare teamId to a name. Identity data only. No SealBox."
+    },
+    "around-the-game/doubleheaders.js": {
+      "class": "spoiler-free",
+      "why": "Static doubleheaders.json — per-season, per-club records on doubleheader days, folded from one row per completed PAIR. Safe by SCOPE, not by content: /doubleheaders is a standalone report outside the scoring flow (ADR-0034). Note what the file DOES carry — per-pair win counts, and sweep marks — so a 2–0 pair row is both games' results. The previous note here claimed 'the file carries no per-game runs at all, so no individual result can be read back out of it', which is false and would be the wrong reason to lean on if this data ever reached a game surface. Current-season rows only ever cover pairs statsapi has already called Final. No SealBox."
+    },
+    "around-the-game/farmSystem.js": {
+      "class": "spoiler-free",
+      "why": "Static farm-system.json — minor-league affiliate season records and published prospect ranks, aggregates over completed games in another league (ADR-0034: a stat line is not a score). Computes the Farm Index; touches no MLB game. No SealBox."
+    },
+    "around-the-game/gate.js": {
+      "class": "spoiler-free",
+      "why": "Static gate.json — per-club home attendance and game DURATION, both season aggregates over Final games. A crowd count and a clock reading carry no result, same footing as the weather string and the umpire crew the app has always shown live. No SealBox."
+    },
     "attendance.js": {
       "class": "spoiler-free",
       "why": "Static attendance.json — a Final-games season aggregate (total/avg/high/low gate, sellouts, fill rate), same footing as WAR. No SealBox."
@@ -203,6 +223,10 @@
       "class": "spoiler-free",
       "why": "Static comeback-wins.json — a Final-games season aggregate, same footing as WAR. No SealBox."
     },
+    "commandMap.js": {
+      "class": "spoiler-free",
+      "why": "The season command map's shard reader — a count of a pitcher's pitches per zone cell, and what those pitches earned, over games already final. A cell count is not a line and not a running score; same footing as the pitch arsenal it is swept beside, and as WAR. The player page is an open surface (ADR-0034), so no SealBox and no cutoff."
+    },
     "dayHighlights.js": {
       "class": "reveal-only",
       "why": "Ranks a past day's Final games by how memorable they were — the ranking itself narrates outcomes. Only ever called from inside the slate's shared reveal.",
@@ -291,7 +315,7 @@
     },
     "hitchart.js": {
       "class": "reveal-only",
-      "why": "The hit chart's batted balls. A dot IS a play outcome — one in the left-field seats is a home run, a cluster on the grass is a rally — so selectBattedBalls runs only inside a SealBox reveal or behind an explicit reveal gate. Its `throughHalfIndex` option is the clamp an inning page passes its own revealedThrough into, so the chart can never run ahead of the scorekeeper. The projection half (hitCoordToSvg and the three constants) reads no feed, but ships in this file so the geometry and its one consumer cannot drift. Both call sites are gated, each in the way its own page already gates everything else: the box score's is inside the single seal that page already lifts over the whole game (ADR-0049), and the inning page's passes its render-time revealedThrough as the clamp, so it can only ever draw halves the reader has committed (ADR-0051). The third importer takes ONE play's ball rather than a walk of the game (selectPlayBattedBall, for the flight card the play-by-play diamond opens) and needs no clamp of its own: computeHalfInningFeed already runs only inside its own half's SealBox reveal, and a ball from that half is the very result the reveal just handed over.",
+      "why": "The hit chart's batted balls. A dot IS a play outcome — one in the left-field seats is a home run, a cluster on the grass is a rally — so selectBattedBalls runs only inside a SealBox reveal or behind an explicit reveal gate. Its `throughHalfIndex` option is the clamp an inning page passes its own revealedThrough into, so the chart can never run ahead of the scorekeeper. The projection half (hitCoordToSvg and the three constants) reads no feed and now lives in lib/ballpark/hitProjection.js, re-exported from here so this module's API is unchanged: the player page's season spray map (spray.js) shares the geometry from the OPEN side of the spoiler line, and an open surface may not import a reveal-only module for four constants. Both call sites are gated, each in the way its own page already gates everything else: the box score's is inside the single seal that page already lifts over the whole game (ADR-0049), and the inning page's passes its render-time revealedThrough as the clamp, so it can only ever draw halves the reader has committed (ADR-0051). The third importer takes ONE play's ball rather than a walk of the game (selectPlayBattedBall, for the flight card the play-by-play diamond opens) and needs no clamp of its own: computeHalfInningFeed already runs only inside its own half's SealBox reveal, and a ball from that half is the very result the reveal just handed over.",
       "importers": [
         "screens/boxscore/revealBoxScore.js",
         "components/inning/HalfInning.jsx",
@@ -369,6 +393,10 @@
         "screens/LogbookStatsPage.jsx"
       ]
     },
+    "managers.js": {
+      "class": "spoiler-free",
+      "why": "Static manager-history shards — one person's coaching career."
+    },
     "matchup/arsenal.js": {
       "class": "spoiler-free",
       "why": "Family C — a hitter against one specific pitch, from matchup/savant.js's arsenal block alone. Same contract as matchup/notes.js: it is HANDED the two players and their season pitch-type rates and takes no feed at all, so it cannot read a score, an inning, or tonight's line — no reveal gate needed, and it clears Between Innings' stricter allowlist the same way."
@@ -388,10 +416,6 @@
     "matchup/voice.js": {
       "class": "spoiler-free",
       "why": "Shared rendering mechanics (rate formatting, the sentence-shape rotation, the length-aware short-form assembler, the 'just' emphasis rule) for matchup/notes.js and matchup/arsenal.js. Pure string formatting with no data source of its own — it is handed already-computed numbers and clauses."
-    },
-    "managers.js": {
-      "class": "spoiler-free",
-      "why": "Static manager-history shards — one person's coaching career."
     },
     "milbHistory.js": {
       "class": "spoiler-free",
@@ -413,10 +437,6 @@
         "api/dayHighlights.js",
         "api/logbookRetrospective.js"
       ]
-    },
-    "person/contracts.js": {
-      "class": "spoiler-free",
-      "why": "Static salary, contract and club-control facts. Current-day player identity context with no game result; historical asOf pages deliberately do not fetch it."
     },
     "person-fetch.js": {
       "class": "spoiler-free",
@@ -441,6 +461,14 @@
     "person/careerRegister.js": {
       "class": "spoiler-free",
       "why": "The year-by-year career register. Season lines."
+    },
+    "person/contract/view.js": {
+      "class": "spoiler-free",
+      "why": "Pure view model over one contract record: which reading the card leads with, the club-control runway, the sentence and the salary schedule. Contract facts only, no game state at all."
+    },
+    "person/contracts.js": {
+      "class": "spoiler-free",
+      "why": "Static salary, contract and club-control facts. Current-day player identity context with no game result; historical asOf pages deliberately do not fetch it."
     },
     "person/gameLog.js": {
       "class": "cutoff-gated",
@@ -604,6 +632,30 @@
         "api/playbyplay/notificationCards.js"
       ]
     },
+    "player/analytics.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's Analytics tab loader — Statcast percentiles, advanced rates, the pitch/batted-ball mix and the similarity neighbours, all season aggregates over completed games. Same open-surface footing as every other player-page loader (ADR-0034)."
+    },
+    "player/context.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's shared fetch vocabulary — the person, his transaction feed, the current-season date-cut window and the year-by-year tables. Season and career facts on a surface deliberately outside the scoring flow. Its one date rule (every dated fetch is cut off the day BEFORE a `?d=` link's game) is the player page's own as-of contract, not a seal."
+    },
+    "player/core.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's shell loader — bio, the four status banners, the prospect pills and the All-Star badge. Identity and roster status; no linescore, no box score, no play."
+    },
+    "player/history.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's History tab loader — awards, innings by position, the Firsts card, path/team history and the transaction timeline. Career-shaped facts, each honouring the page's own asOf cutoff. The Firsts card links out to box scores, which stay sealed on their own pages; it renders no score itself."
+    },
+    "player/overview.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's Overview tab loader — the fact grid, the contract card, the season tiles with their rank chips and promoted other-level rows, Milestone Watch, and four preview doors into the other tabs (a trimmed game log, a Statcast/prospect teaser, an awards-chip strip). Season aggregates and a cutoff-filtered game log, over completed games."
+    },
+    "player/stats.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's Stats tab loader — the game log, the splits and the career register. A game-log row carries this player's own line and a link to that game's (sealed) box score, never the game's score; the register is a career aggregate. Its one score-adjacent element is SplitsVsTeam's last-meeting line, gated against the page's own asOf in the component."
+    },
     "playerHoverCard.js": {
       "class": "spoiler-free",
       "why": "The global name-link hover card (PlayerLink, desktop only) — season stat tiles, same open-surface footing as the player page's own season tiles (person/stats.js). No per-game result."
@@ -648,37 +700,17 @@
       "class": "spoiler-free",
       "why": "Static rehab.json — league-wide rehab assignments. Roster state, no score."
     },
-    "around-the-game/bullpen.js": {
-      "class": "spoiler-free",
-      "why": "Re-runs api/workload.js’s availability rules across all thirty clubs. Inherits that module’s classification unchanged: completed appearances only, as-of date excludes today, so no in-progress line can leak. No SealBox."
-    },
-    "around-the-game/clubs.js": {
-      "class": "spoiler-free",
-      "why": "Club identity (name, abbreviation, division) off the static teams.json, so the report boards can join a bare teamId to a name. Identity data only. No SealBox."
-    },
-    "around-the-game/doubleheaders.js": {
-      "class": "spoiler-free",
-      "why": "Static doubleheaders.json — per-season, per-club records on doubleheader days, folded from one row per completed PAIR. Safe by SCOPE, not by content: /doubleheaders is a standalone report outside the scoring flow (ADR-0034). Note what the file DOES carry — per-pair win counts, and sweep marks — so a 2–0 pair row is both games' results. The previous note here claimed 'the file carries no per-game runs at all, so no individual result can be read back out of it', which is false and would be the wrong reason to lean on if this data ever reached a game surface. Current-season rows only ever cover pairs statsapi has already called Final. No SealBox."
-    },
-    "around-the-game/farmSystem.js": {
-      "class": "spoiler-free",
-      "why": "Static farm-system.json — minor-league affiliate season records and published prospect ranks, aggregates over completed games in another league (ADR-0034: a stat line is not a score). Computes the Farm Index; touches no MLB game. No SealBox."
-    },
-    "around-the-game/gate.js": {
-      "class": "spoiler-free",
-      "why": "Static gate.json — per-club home attendance and game DURATION, both season aggregates over Final games. A crowd count and a clock reading carry no result, same footing as the weather string and the umpire crew the app has always shown live. No SealBox."
-    },
     "rookies.js": {
       "class": "spoiler-free",
       "why": "Static rookies.json — debut dates and rookie windows."
     },
-    "savantPercentiles.js": {
-      "class": "spoiler-free",
-      "why": "Static savant-percentiles.json — completed-game season percentile ranks, same footing as war.js."
-    },
     "salaries.js": {
       "class": "spoiler-free",
       "why": "Club contract ledgers and the league salary rollup, both static build-time files. Money a club owes, never a game's line — the same season-long identity class as a stat line or a standings row (ADR-0034, and ADR-0052 for this pair specifically). e2e/salaries.spec.js holds it at runtime: neither page may print a score-shaped token, and /salaries never reaches statsapi at all."
+    },
+    "savantPercentiles.js": {
+      "class": "spoiler-free",
+      "why": "Static savant-percentiles.json — completed-game season percentile ranks, same footing as war.js."
     },
     "schedule.js": {
       "class": "spoiler-free",
@@ -736,6 +768,14 @@
       "class": "spoiler-free",
       "why": "The spoiler-FREE selector module, and the contrast case for linescore.js/derive.js. selectLineup reads each player's own battingOrder rather than team.battingOrder, which would sprout PH rows late in a game. Its selectPrePitchChanges is the one caller-gated export here."
     },
+    "situationalRecordRankings.js": {
+      "class": "cutoff-gated",
+      "why": "Calls teamRecordsFor once per club and pivots the result, so it inherits teamRecords.js's footing whole — including the `cutoff = null` default. It computes no value teamRecordsFor does not, which is precisely why it cannot carry a weaker classification than its source."
+    },
+    "spray.js": {
+      "class": "spoiler-free",
+      "why": "Static public/data/spray/{NN}.json — every batter's season balls in play and where they landed, swept by scripts/gen-spray.mjs from games that were already DECIDED (Final, and never today's). Same footing as war.js, fouls.js and pitchArsenal.js: a completed-game season aggregate on an open surface, no SealBox (ADR-0034). Worth stating because the same COORDINATES are reveal-only one file over — hitchart.js plots ONE game's batted balls, where a dot in the left-field seats is tonight's home run. The difference is the sweep, not the mark, which is why the shared projection was moved to lib/ballpark/hitProjection.js: an open surface may not import a reveal-only module, not even for four constants."
+    },
     "standings.js": {
       "class": "cutoff-gated",
       "why": "Standings W/L and runs ARE score-revealing, but a standings row is a league-wide aggregate, not one game's line, so it is not sealed. Safety comes entirely from the `date` the CALLER requests."
@@ -760,10 +800,6 @@
       "class": "spoiler-free",
       "why": "Category descriptors and computeLeaders — ranks any normalized pool. Pool-agnostic and season-aggregate."
     },
-    "situationalRecordRankings.js": {
-      "class": "cutoff-gated",
-      "why": "Calls teamRecordsFor once per club and pivots the result, so it inherits teamRecords.js's footing whole — including the `cutoff = null` default. It computes no value teamRecordsFor does not, which is precisely why it cannot carry a weaker classification than its source."
-    },
     "teamRecords.js": {
       "class": "cutoff-gated",
       "why": "The shard is a row PER GAME carrying `rs`/`ra`/`hi`/`ha`, and `teamRecordsFor(data, { cutoff = null })` defaults the cutoff to null — so a bare link tallies every Final row, tonight's included. Same shape as standings.js, which is correctly cutoff-gated for the same reason: a season aggregate rather than one line, so no SealBox, but the safety lives entirely in the date the CALLER requests. ADR-0034 sanctions what it shows; the old spoiler-free label hid that a date gate exists at all."
@@ -779,6 +815,14 @@
     "teamTransactions.js": {
       "class": "spoiler-free",
       "why": "Roster moves and their dates carry no score — as spoiler-free as rehab.js/rookies.js."
+    },
+    "teams-static.js": {
+      "class": "spoiler-free",
+      "why": "The same-origin static club file. Deliberately NOT statsapi — it is what lets /profile issue zero requests to statsapi.mlb.com (ADR-0039)."
+    },
+    "tradeDeadline.js": {
+      "class": "spoiler-free",
+      "why": "Completed trades and their dates carry no score — as spoiler-free as teamTransactions.js."
     },
     "transactions/clubFeed.js": {
       "class": "spoiler-free",
@@ -799,14 +843,6 @@
     "transactions/vocabulary.js": {
       "class": "spoiler-free",
       "why": "The wire vocabulary half of teamTransactions.js — the typeCode whitelist, the injured-list and non-injured-list predicates, and the org scoping. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."
-    },
-    "teams-static.js": {
-      "class": "spoiler-free",
-      "why": "The same-origin static club file. Deliberately NOT statsapi — it is what lets /profile issue zero requests to statsapi.mlb.com (ADR-0039)."
-    },
-    "tradeDeadline.js": {
-      "class": "spoiler-free",
-      "why": "Completed trades and their dates carry no score — as spoiler-free as teamTransactions.js."
     },
     "umpireFavor.js": {
       "class": "reveal-only",

@@ -26,6 +26,7 @@ import {
   matchupSlug,
   gamePath,
   playerPath,
+  playerTabPath,
   teamPath,
   teamTabPath,
   leadersPath,
@@ -344,6 +345,84 @@ test('a team tab segment is not mistaken for a date-first game route', () => {
     asOf: null,
     sportId: null,
   })
+})
+
+// --------------------------------------------------------------------------
+// playerTabPath / parseRoute — the player hub's three tabs
+// --------------------------------------------------------------------------
+test('playerTabPath builds each tab path and carries the spoiler cutoff through', () => {
+  const CONTRERAS = '/player/661388'
+  assert.equal(playerTabPath(661388, 'overview'), CONTRERAS)
+  assert.equal(playerTabPath(661388, 'stats'), `${CONTRERAS}/stats`)
+  assert.equal(playerTabPath(661388, 'analytics'), `${CONTRERAS}/analytics`)
+  assert.equal(playerTabPath(661388, 'history'), `${CONTRERAS}/history`)
+  // A name only changes the SPELLING of the address, exactly as playerPath does.
+  assert.equal(
+    playerTabPath(661388, 'stats', { name: 'William Contreras' }),
+    '/player/william-contreras-661388/stats',
+  )
+  // The same rule teamTabPath keeps: a dated visit stays dated across a tab
+  // switch, or one visit answers "entering July 5" on one tab and "today" on
+  // the next.
+  assert.equal(
+    playerTabPath(661388, 'analytics', { d: '2026-07-05', s: 11 }),
+    `${CONTRERAS}/analytics?d=2026-07-05&s=11`,
+  )
+  assert.equal(
+    playerTabPath(661388, 'overview', { d: '2026-07-05', s: 11 }),
+    `${CONTRERAS}?d=2026-07-05&s=11`,
+  )
+})
+
+test('parseRoute resolves all three player-hub tab URLs, carrying the cutoff query', () => {
+  for (const [tab, name] of [
+    ['stats', 'player-stats'],
+    ['analytics', 'player-analytics'],
+    ['history', 'player-history'],
+  ]) {
+    assert.deepEqual(
+      parseRoute(`/player/661388/${tab}`),
+      { name, id: '661388', asOf: null, sportId: null },
+      tab,
+    )
+  }
+  assert.deepEqual(parseRoute('/player/661388'), {
+    name: 'player',
+    id: '661388',
+    asOf: null,
+    sportId: null,
+  })
+  assert.deepEqual(parseRoute('/player/william-contreras-661388/stats?d=2026-07-05&s=11'), {
+    name: 'player-stats',
+    id: '661388',
+    asOf: '2026-07-05',
+    sportId: 11,
+  })
+})
+
+test('an unknown player sub-segment falls back to the bare player page', () => {
+  // Every old deep link has to resolve. A third segment this hub does not know
+  // ('/player/661388/splits', a hand-edited address, a tab we later rename)
+  // lands on the Overview rather than on the slate — and never on the generic
+  // 3-segment game branch, which would read it as date='player'.
+  assert.deepEqual(parseRoute('/player/661388/splits'), {
+    name: 'player',
+    id: '661388',
+    asOf: null,
+    sportId: null,
+  })
+  assert.deepEqual(parseRoute('/player/661388/splits?d=2026-07-05'), {
+    name: 'player',
+    id: '661388',
+    asOf: '2026-07-05',
+    sportId: null,
+  })
+})
+
+test('a player tab segment is not mistaken for a date-first game route', () => {
+  // The same ordering trap the team tabs carry: '/player/{id}/stats' is 3
+  // segments, the same shape as '/{date}/{matchup}/{section}'.
+  assert.equal(parseRoute('/player/661388/history').name, 'player-history')
 })
 
 // --------------------------------------------------------------------------

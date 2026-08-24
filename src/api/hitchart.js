@@ -19,8 +19,12 @@
 // down.
 //
 // `hitCoordToSvg` and the three constants are pure geometry — they read no
-// feed and reveal nothing on their own — but they live here rather than in
-// lib/ so the projection and the selectors that feed it stay in one file.
+// feed and reveal nothing on their own — and they now live in
+// `lib/ballpark/hitProjection.js`, because a SECOND card shares them from the
+// far side of the spoiler line: the player page's season spray map is an open
+// surface, and an open surface may not import a reveal-only module for four
+// constants. They are re-exported here so this module's own API, its callers
+// and test/hitchart.test.js are unchanged. See that file's header.
 //
 // MiLB DEGRADES, IT DOESN'T CRASH. Most minor-league parks send no `hitData`
 // at all (docs/data-enrichment.md's MiLB table), so `selectBattedBalls` simply
@@ -28,53 +32,22 @@
 // on top of that, because a park can track a ball's landing spot and still
 // report no exit velocity, launch angle or trajectory.
 
-import { HOME } from '../lib/ballpark/ballparkGeometry.js'
+import {
+  HARD_HIT_MPH,
+  HIT_COORD_ORIGIN,
+  HIT_COORD_FT_PER_UNIT,
+  hitCoordToSvg,
+} from '../lib/ballpark/hitProjection.js'
 import { halfIndex } from './select.js'
 // The batter's own scorebook denotation (1B, F8, 6-3…) — the app's ONE
 // spelling of that notation, shared with the play-by-play feed so a dot's
 // label and the same play's at-bat card can never disagree.
 import { scorebookCode } from './playbyplay/scorebookCode.js'
 
-// Exit velocity at or above which a batted ball is "hard hit" — MLB's own
-// Statcast definition. Exported for the chart's ink, not used here.
-export const HARD_HIT_MPH = 95
-
-// Gameday's hit coordinates are pixels on a fixed, park-agnostic overlay whose
-// origin (home plate) sits here. Verified against the caught-fly-ball sample
-// below: every ball's distance from this point, times the scale, agrees with
-// the feed's own `totalDistance`.
-export const HIT_COORD_ORIGIN = { x: 125.42, y: 198.27 }
-
-// Feet per Gameday coordinate unit. DERIVED EMPIRICALLY, not documented by
-// MLB: for each caught fly ball (trajectory `fly_ball`/`popup`, eventType
-// `field_out`) carrying a `totalDistance`, the ratio
-//   totalDistance / hypot(coordX - 125.42, 198.27 - coordY)
-// clusters tightly. Over 39 such balls across gamePks 823427, 823589 and
-// 824320 the median was 2.509, with a p10–p90 range of 2.478–2.679. The
-// outliers are all short foul popups behind the plate, where the landing
-// coordinate sits almost on top of the origin and a few pixels of jitter
-// swamp the ratio — see test/hitchart.test.js, which pins this constant
-// against that same sample so a feed change that silently shifts every dot
-// fails the suite instead of the chart.
-export const HIT_COORD_FT_PER_UNIT = 2.51
-
-const round1 = (n) => Math.round(n * 10) / 10
-
-// A Gameday hit coordinate → a point in the ballpark diagram's SVG space. The
-// diagram maps FEET 1:1 to SVG units with home plate at HOME, +x toward right
-// field and +y up the screen toward center (SVG y grows down, so center field
-// SUBTRACTS from home's y — the same convention ballparkGeometry.js's own
-// `toSvg` uses). HOME is imported rather than copied so the projection can
-// never drift from the drawing it plots onto.
-//
-// Returns null when either coordinate is missing — a MiLB park that tracked
-// the swing but not where the ball landed.
-export function hitCoordToSvg(coordX, coordY) {
-  if (coordX == null || coordY == null) return null
-  const feetX = (coordX - HIT_COORD_ORIGIN.x) * HIT_COORD_FT_PER_UNIT
-  const feetY = (HIT_COORD_ORIGIN.y - coordY) * HIT_COORD_FT_PER_UNIT
-  return { x: round1(HOME.x + feetX), y: round1(HOME.y - feetY) }
-}
+// The projection and its constants, re-exported from their own module so this
+// file's callers keep one import for "the hit chart's data layer" and the
+// spray map can reach the geometry without reaching this file. See the header.
+export { HARD_HIT_MPH, HIT_COORD_ORIGIN, HIT_COORD_FT_PER_UNIT, hitCoordToSvg }
 
 // eventTypes whose batted ball is a base hit, and the one that is a home run.
 const HIT_EVENT_TYPES = new Set(['single', 'double', 'triple', 'home_run'])

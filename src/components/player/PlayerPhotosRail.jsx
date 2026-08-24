@@ -1,5 +1,6 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
 import { fetchGamePhotos, photosForPlayer, onlyPhotographer } from '../../api/gamePhotos.js'
+import { ChevronLink } from '../ui/ChevronLink.jsx'
 
 // A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
 // copy of this helper for why `scroll-behavior: smooth` has to be bypassed.
@@ -32,9 +33,17 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // title — see that module's header). Renders nothing once exhausted with no
 // photos found, so the section conditionally disappears rather than
 // showing an empty state.
-export function PlayerPhotosRail({ personId, games }) {
+//
+// `limit` — the Overview's one-row preview. Capped growth (the walk-back
+// stops asking for more once it reaches `limit`) rather than a display slice,
+// so a capped view never pays for photos it won't show. "See all" expands IN
+// PLACE (no second route — this card has nowhere else to link to) by lifting
+// the cap, which resumes the normal unlimited walk-back exactly as if no
+// `limit` had been passed.
+export function PlayerPhotosRail({ personId, games, limit }) {
   const trackRef = useRef(null)
   const sentinelRef = useRef(null)
+  const [expanded, setExpanded] = useState(!limit)
   const userScrolledBackRef = useRef(false)
   const pendingGrowRef = useRef(null)
   const consumedRef = useRef(0)
@@ -101,8 +110,8 @@ export function PlayerPhotosRail({ personId, games }) {
   )
 
   useEffect(() => {
-    growPhotos(PHOTO_INITIAL_TARGET)
-  }, [growPhotos])
+    growPhotos(expanded ? PHOTO_INITIAL_TARGET : limit)
+  }, [growPhotos, expanded, limit])
 
   useLayoutEffect(() => {
     const el = trackRef.current
@@ -147,7 +156,7 @@ export function PlayerPhotosRail({ personId, games }) {
   useEffect(() => {
     const el = trackRef.current
     const sentinel = sentinelRef.current
-    if (!el || !sentinel || exhausted || loading) return
+    if (!el || !sentinel || exhausted || loading || !expanded) return
     const io = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return
@@ -159,7 +168,7 @@ export function PlayerPhotosRail({ personId, games }) {
     )
     io.observe(sentinel)
     return () => io.disconnect()
-  }, [exhausted, loading, growPhotos])
+  }, [exhausted, loading, growPhotos, expanded])
 
   const scroll = (dir) => {
     const el = trackRef.current
@@ -168,6 +177,10 @@ export function PlayerPhotosRail({ personId, games }) {
   }
 
   if (exhausted && photos.length === 0 && !loading) return null
+  // Newest photos sit at the end of the array (see growPhotos' prepend and
+  // the scroll-anchors-right convention above) — a capped preview keeps the
+  // newest `limit`, same as the game log's "last N" reads newest first.
+  const visible = !expanded && limit ? photos.slice(-limit) : photos
 
   return (
     <section>
@@ -187,13 +200,13 @@ export function PlayerPhotosRail({ personId, games }) {
           </button>
         )}
         <div className="teamphotos__track" ref={trackRef}>
-          {!exhausted && <div ref={sentinelRef} className="teamphotos__sentinel" aria-hidden="true" />}
+          {!exhausted && expanded && <div ref={sentinelRef} className="teamphotos__sentinel" aria-hidden="true" />}
           {photos.length === 0 && loading && (
             <div className="teamphotos__loading" aria-hidden="true">
               Loading&hellip;
             </div>
           )}
-          {photos.map((photo) => (
+          {visible.map((photo) => (
             <a
               key={photo.id}
               href={photo.original}
@@ -218,6 +231,14 @@ export function PlayerPhotosRail({ personId, games }) {
           </button>
         )}
       </div>
+      {/* Capped and either not yet exhausted (more is likely out there) or
+          exhausted with more than the cap already found (a big batch landed
+          in one game) — either way there's more than this row shows. */}
+      {!expanded && (!exhausted || photos.length > limit) && (
+        <div className="thub-door">
+          <ChevronLink onClick={() => setExpanded(true)}>See all</ChevronLink>
+        </div>
+      )}
     </section>
   )
 }

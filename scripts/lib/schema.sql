@@ -419,6 +419,49 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_ingested_games (
   PRIMARY KEY (game_pk, level)
 );
 
+-- WHERE he put it, as opposed to what he threw. One row per
+-- (pitcher, level, pitch type, batter hand); each counter is a 25-value CSV
+-- over the 5x5 command grid (src/lib/zone/zoneGeometry.js), whose middle nine
+-- cells are the strike zone's own thirds.
+--
+-- CSV RATHER THAN 150 COLUMNS, and rather than a row per cell. A cell-keyed
+-- primary key would multiply the row count by 25 and the committed dump with
+-- it, for a grid every reader wants whole anyway; 150 columns would be the
+-- same data with a worse schema. The arrays are read, added element-wise and
+-- written back, so a resumed sweep accumulates rather than overwrites.
+--
+-- The outcome counters ride along because a density map alone cannot say
+-- whether a location worked: whiffs and called strikes are what a spot earned,
+-- homers what it cost, swings the denominator a whiff rate needs, and first
+-- pitches the one command number a scorer feels every at-bat.
+CREATE TABLE IF NOT EXISTS pitch_command_cells (
+  person_id   INTEGER NOT NULL,
+  level       TEXT NOT NULL,
+  code        TEXT NOT NULL,
+  stand       TEXT NOT NULL,
+  season      INTEGER NOT NULL,
+  cells       TEXT NOT NULL,
+  whiffs      TEXT NOT NULL,
+  called      TEXT NOT NULL,
+  homers      TEXT NOT NULL,
+  swings      TEXT NOT NULL,
+  first_pitch TEXT NOT NULL,
+  PRIMARY KEY (person_id, level, code, stand)
+);
+
+-- The command sweep's OWN idempotency guard, deliberately separate from
+-- pitch_arsenal_ingested_games. The arsenal sweep had already ingested this
+-- season's games before locations were counted, so sharing that table would
+-- have made every one of them look done and the grid would have stayed empty
+-- until next season. Its own table lets the backfill re-walk the year once
+-- while the nightly arsenal pass keeps skipping what it has seen.
+CREATE TABLE IF NOT EXISTS pitch_command_ingested_games (
+  game_pk INTEGER NOT NULL,
+  level   TEXT NOT NULL,
+  date    TEXT NOT NULL,
+  PRIMARY KEY (game_pk, level)
+);
+
 -- One row per (game, club) — the raw per-game FACTS every situational team
 -- record is summed from, at MLB and the four full-season MiLB levels. Written
 -- by gen-team-records.mjs.

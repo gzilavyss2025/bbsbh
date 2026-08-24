@@ -359,6 +359,36 @@ for each generator; the reader modules:
   `MIN_SIMILARITY_PITCHES` to enter the pool, `MIN_MATCH` below which a pairing
   is dropped — so an unusual arsenal returns a SHORT list or none rather than
   filler. See `.scratch/player-profile-card/scope.md` §4.
+- `spray.js` — one batter's season balls in play and where they landed, from
+  `public/data/spray/{NN}.json` (`gen-spray.mjs`, nightly, buckets on
+  `personId % 100`). Completed-game season aggregates over games that were
+  already DECIDED when the sweep touched them, so spoiler-free with no
+  `SealBox` — same footing as `war.js`/`pitchArsenal.js` (ADR-0034). Worth
+  stating out loud because the same COORDINATES are reveal-only in
+  `hitchart.js`: one game's batted balls ARE that game's result, a season of
+  them is not. The projection they share therefore lives in
+  `src/lib/ballpark/hitProjection.js`, so this open surface never imports the
+  reveal-only module.
+  **Two numbers per split, not one.** `p` holds one fixed-length row per ball
+  the park gave a landing point ( `[coordX, coordY, launchSpeed, result, hand,
+  side, level, pitcherId]` — positional because a season is ~190,000 rows and
+  eight spelled-out keys apiece quadruples the committed bytes); `o` holds the
+  per-pitcher-hand TOTALS, swept independently. They differ by about one ball in
+  two thousand, and home runs are among them — so `hrNote` prints "16 of 17 HR
+  had tracked landing points" rather than letting the card under-report a man's
+  season forever. `sprayView(data, personId)` assembles the card and returns
+  null under `MIN_SPRAY_BIP`; `MIN_SPLIT_BIP` grays a chip too thin to read
+  without hiding it. `directionMix` is the one piece with a rule you cannot
+  guess: pull is a fact about the BATTER, so a switch-hitter's All view has no
+  direction bar at all (two mirrored halves do not sum), while each split keeps
+  its own — decided by a MAJORITY of the sample rather than unanimity, since one
+  turned-around at-bat should not withhold the other 239. The stored
+  `pitcherId` is read by nothing today; it rides so a pitcher-side spray card
+  can share these shards instead of sweeping the season twice. Surface: the
+  player page's Analytics shelf, via `SprayMapSection.jsx` →
+  `charts/SprayMap.jsx`. Out of the PWA precache by the inverted
+  `globPatterns` default, with a `NetworkFirst` runtime rule in
+  `vite.config.js` beside the vs-team-splits and rookies ones.
 - `savantPercentiles.js` — season Statcast percentile ranks, from
   `public/data/savant-percentiles.json` (`gen-savant-percentiles.mjs`, nightly).
   MLB only; completed-game season aggregates, so spoiler-free with no `SealBox`
@@ -600,6 +630,21 @@ for each generator; the reader modules:
   the calls behind them are `scripts/lib/contract-pay-rank.mjs`. The card
   attributes both Fever and Cot's and is omitted
   from historical `asOf` player pages, where today's contract would be anachronistic.
+- `person/contract/view.js` — the pure view model the Contract card draws, one
+  record in and one rendering plan out (regime, club-control runway, sentence,
+  ticker facts, salary schedule). It exists because the card LEADS with a
+  different fact for each kind of player — a runway to free agency for a player
+  his club still controls, the dollar figure for a player who signed for one —
+  and each of those readings is a CBA claim that has to hold. Four rules live in
+  its header and in `test/contract-view.test.js`: a declined option under six
+  years of service leads to arbitration and never to the market; the first
+  arbitration year and the free-agency year are read off the `A*`/`FA` out-year
+  codes and never counted from 3.000/6.000 service (which is what makes Super
+  Two correct for free); an `OPT` code alone never says WHO holds the option, so
+  only the free text ("cl opt", "pl opt") may label one; and a pre-arbitration
+  pay rank is dropped, because a rank inside a pool bunched at the league
+  minimum separates nobody. It sits one directory down because `src/api/person/`
+  is at its file budget (ADR-0038).
 - `salaries.js` — the same contract facts, rolled up two ways: one ledger per
   club in `public/data/team-contracts/{teamId}.json` (the Contracts tab at
   `/team/{id}/contracts`) and one league file in `public/data/salaries.json`

@@ -9,16 +9,23 @@ import { GameLink } from './GameLink.jsx'
 // own state, for the same reason CareerRegister is one: PlayerPage can't add a
 // hook past its `if (gate) return gate` loading gate, so per-block toggle state
 // has to live in a child instead.
-export function GameLog({ gameLog, gameLogAlt, altLevel, note }) {
+//
+// `limit` trims the rows this rendering shows — the Overview's own loader
+// already fetches a short (last-3) log, but the prop still exists so a caller
+// with a longer log in hand (none today) can ask for fewer rows without a
+// second fetch. Its own toggle stays gated on `gameLogAlt`, so the Overview's
+// preview (which never fetches an alt level) never grows one.
+export function GameLog({ gameLog, gameLogAlt, altLevel, note, limit }) {
   const [showAlt, setShowAlt] = useState(false)
   const active = showAlt && gameLogAlt ? gameLogAlt : gameLog
   if (!active) return null
+  const rows = limit ? active.rows.slice(0, limit) : active.rows
 
   return (
     <>
       <h3 className="section__title section__title--bar section__title--aside">
         <span>Game log</span>
-        <em>{`last ${active.rows.length} · ${note}`}</em>
+        <em>{`last ${rows.length} · ${note}`}</em>
         {gameLogAlt && (
           <button
             type="button"
@@ -32,7 +39,7 @@ export function GameLog({ gameLog, gameLogAlt, altLevel, note }) {
         )}
       </h3>
       <ul className="gamelog">
-        {active.rows.map((r) => (
+        {rows.map((r) => (
           <li className="gamelog__row" key={r.gamePk ?? r.date}>
             <div className="gamelog__meta">
               <span className="gamelog__date">{r.date}</span>

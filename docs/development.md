@@ -192,6 +192,18 @@ For every user-visible change:
 
 - Run the relevant checks and start the first free reserved server: `npm run dev`,
   then `npm run dev:2` through `dev:5` if another agent owns the earlier port.
+- **Confirm the port's owner before trusting any browser result.** `strictPort`
+  means a taken port makes vite EXIT rather than increment — and the old server
+  still answers 200, so Playwright happily verifies someone else's branch
+  against your expectations. The failure mode reads as "my change does not
+  work", which is the one most likely to trigger a bogus fix. The check:
+
+  ```bash
+  lsof -a -p $(lsof -ti tcp:PORT | head -1) -d cwd -Fn | grep ^n
+  ```
+
+  prints the working directory actually serving that port; it must be YOUR
+  worktree before any verification counts.
 - Verify the exact route that demonstrates the change (with `?nointro`, per above).
   Keep the server running so the maintainer can inspect it after the handoff.
 - End the final message with a clickable example URL, not merely the server root;

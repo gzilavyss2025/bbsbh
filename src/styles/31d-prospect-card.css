@@ -103,6 +103,15 @@
   padding: var(--space-4);
 }
 
+/* The Overview's one-line teaser — the rank pill's own standing line, no
+   scale/trend/facts beneath it. */
+.prospectcard__teaser {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-ui);
+  color: var(--text-body);
+}
+
 .prospectcard__empty p {
   margin-top: var(--space-1);
   font-family: var(--font-display);

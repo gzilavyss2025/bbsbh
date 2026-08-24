@@ -46,9 +46,36 @@ function movementLabel(movement) {
   return `${state.direction === 'up' ? 'Up' : 'Down'} ${state.amount} percentile points${date ? ` since ${date}` : ''}`
 }
 
-export function ProspectCard({ view, level, badge, group }) {
+// The one-line teaser `standingLine` prints under the rank pill on the
+// Overview preview — the same sentence each full-card state already opens
+// with (EmptyStanding/EarlyStanding/QualifiedStanding), pulled out to one
+// string so the teaser and the full card can never say two different things
+// about the same view.
+function standingLine(view, level) {
+  if (view.state === 'qualified') {
+    return `${ordinal(view.percentile)} percentile${level ? ` vs ${level}` : ''} — ${view.metric}`
+  }
+  if (view.state === 'unqualified') {
+    return `Early sample — ${sampleSizeLabel(view.metric, view.sampleSize)}`
+  }
+  return `No qualified comparison${level ? ` at ${level}` : ''} yet`
+}
+
+export function ProspectCard({ view, level, badge, group, preview = false }) {
   if (!view) return null
   const hasBadge = badge?.rank || badge?.orgRank
+
+  if (preview) {
+    return (
+      <section className="prospectcard prospectcard--preview">
+        <header className="prospectcard__head">
+          <h3 className="prospectcard__title">Prospect performance</h3>
+          {hasBadge && <ProspectPill {...badge} />}
+        </header>
+        <p className="prospectcard__teaser">{standingLine(view, level)}</p>
+      </section>
+    )
+  }
 
   return (
     <section className="prospectcard">

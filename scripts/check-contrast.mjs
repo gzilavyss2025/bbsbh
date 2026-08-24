@@ -148,6 +148,51 @@ const PAIRINGS = [
   { fg: 'accent-link', bg: 'surface-card', min: TEXT, note: 'link text on raised card' },
   // Non-text UI: the focus ring must stay visible against the canvas.
   { fg: 'focus-ring', bg: 'bg-canvas', min: UI, note: 'focus ring on app canvas' },
+  // A pinned pairing earns its place here for one of two failure classes this
+  // checker cannot see on its own, since it only ever compares TOKENS: a token
+  // used in a new role nobody asserted before, or an ALPHA laid over an
+  // otherwise-correct pairing, which composites the effective color below the
+  // threshold without moving the token's own hex at all. Real shipped example
+  // of the second: `opacity: .85` on a grayed split chip's count took
+  // --text-caption to 3.86:1 (see "spray thin-chip split count" below).
+  //
+  // ---- The season spray map (73-spray-map.css) ----
+  // Everything below was found by a design review, not by this file, and that
+  // is the reason it is here now: all three defects were ALPHAS applied on top
+  // of a token, and an alpha is precisely what this checker cannot see. Each
+  // composite is precomputed by hand, the same way the color-mix() pairs above
+  // are, and named so a retune of the underlying token fails here first.
+  //
+  // The direction bar's three segments, on the card they sit on. One ink at
+  // three alphas put the lightest at 2.44:1; these are three real tokens.
+  // --graphite-soft is the thinnest margin in this group at 3.06:1 — it is a
+  // LINE token, fine as a chart region at the 3:1 bar and NOT fine as small
+  // text, which is the distinction that put it here rather than in a color rule.
+  { fg: 'navy', bg: 'surface-card', min: UI, note: 'spray direction bar, pull segment' },
+  { fg: 'graphite', bg: 'surface-card', min: UI, note: 'spray direction bar, center segment' },
+  { fg: 'graphite-soft', bg: 'surface-card', min: UI, note: 'spray direction bar, oppo segment' },
+  // Adjacent segments are only 1.6-2.5:1 against each other — unavoidable in a
+  // monotone ramp — so a paper hairline carries every boundary instead.
+  { fg: 'surface-inset', bg: 'navy', min: UI, note: 'spray direction bar hairline, against pull' },
+  { fg: 'surface-inset', bg: 'graphite', min: UI, note: 'spray direction bar hairline, against center' },
+  { fg: 'surface-inset', bg: 'graphite-soft', min: UI, note: 'spray direction bar hairline, against oppo' },
+  // The chip count on a THIN (grayed) split chip. It carried opacity .85 on top
+  // of --text-caption and composited to 3.86:1; at full strength it is 5.31:1.
+  // Held to the text bar, not the UI one — it is an 11px figure.
+  { fg: 'text-caption', bg: 'surface-card', min: TEXT, note: 'spray thin-chip split count' },
+  // The home-run diamond over the heat layer. The heat is a BLURRED field, so it
+  // renders every luminance between its palest and darkest band, and medal amber
+  // cannot hold 3:1 across all of that from one side. Three pairings pin the two
+  // ends and the ring that spans the middle. The two fills are the ramp's
+  // extremes composited over --surface-card by hand: --award-line at .22 and
+  // --clay-deep at .70 (73-spray-map.css's .spray__cell--1 / --5).
+  { fg: 'award-ink', bg: '#F0E2C3', min: UI, note: 'spray HR diamond on the palest heat' },
+  { fg: 'surface-inset', bg: '#AF6E64', min: UI, note: 'spray HR diamond ring on the hottest heat' },
+  // The load-bearing one: the ring is an opaque paper band, so it — not the
+  // heat — is the diamond's adjacent colour wherever the mark lands.
+  { fg: 'award-ink', bg: 'surface-inset', min: UI, note: 'spray HR diamond against its own paper ring' },
+  // A navy dot needs no ring; it clears the hottest fill on its own.
+  { fg: 'navy', bg: '#AF6E64', min: UI, note: 'spray hit dot on the hottest heat' },
   // Trade Deadline's cash-consideration icon frame — the positive/acquired
   // green tint (TradeCard.jsx's ConsiderationRow, tone="cash").
   { fg: 'field-deep', bg: 'field-soft', min: TEXT, note: 'Trade Deadline cash consideration icon' },

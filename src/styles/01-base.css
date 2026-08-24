@@ -86,7 +86,11 @@
        shape badge, team names, and player names above it stay uppercase) —
        and its stats-to-date lines — `.tradecard__statline`
      - the between-innings card's fact line — `.betweeninnings__text` (the
-       name above it, `.betweeninnings__who`, stays uppercase) */
+       name above it, `.betweeninnings__who`, stays uppercase)
+     - the Contract card's regime sentence and its prose foot line —
+       `.contractcard__sentence`, `.contractcard__foot` (the eyebrow, pill,
+       runway labels and ticker all stay uppercase, same shouted-heading/
+       natural-case-body split as the Team Score modal above) */
 #root * {
   text-transform: uppercase;
 }

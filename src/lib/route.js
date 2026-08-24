@@ -31,6 +31,10 @@
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
 //   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }
+//   '/player/{name-id}/{stats|analytics|history}'
+//                                       -> { name: 'player-{tab}', id, asOf, sportId }
+//                                          (the player hub's tabs — an unknown third
+//                                           segment falls back to the bare player page)
 //   '/team/{name-id}'                   -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{name-id}'                 -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
@@ -146,6 +150,23 @@ const TEAM_TAB_ROUTES = {
   numbers: 'team-numbers',
   contracts: 'team-contracts',
   minors: 'team-minors',
+}
+
+// The player hub's tabs, as `third URL segment -> route name` — the same table
+// shape, and for the same reasons, as TEAM_TAB_ROUTES above. Every one is a real
+// address (the URL changes, back/forward work, each tab is shareable), and each
+// loads only its own data (ADR-0034's precedent, applied to /player).
+// The Overview tab is the bare '/player/{id}', so it is deliberately absent.
+//
+// One difference from the team table, and it is the whole compatibility story:
+// an UNKNOWN third segment here resolves to the bare player page rather than
+// falling through. '/player/{id}' has been a live address for the app's whole
+// life, and a link with anything appended to it — a hand-edited URL, a tab
+// renamed later — must still land on the man's page.
+const PLAYER_TAB_ROUTES = {
+  stats: 'player-stats',
+  analytics: 'player-analytics',
+  history: 'player-history',
 }
 
 // --- Addresses that carry a name -------------------------------------------
@@ -508,6 +529,18 @@ export function parseRoute(url) {
     return { name: 'team-transactions', id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
     return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }
+  // The player hub's tabs. Same 3-segment shape as the team tabs above, so it
+  // needs the same placement ahead of the generic game branch below, which would
+  // otherwise read '/player/661388/stats' as date='player'. An unrecognised third
+  // segment answers with the bare player route rather than falling through —
+  // see PLAYER_TAB_ROUTES for why that fallback is part of the contract.
+  if (parts.length === 3 && parts[0] === 'player')
+    return {
+      name: PLAYER_TAB_ROUTES[parts[2]] ?? 'player',
+      id: idFromSlug(parts[1]),
+      asOf,
+      sportId,
+    }
   if (parts.length === 3) {
     const [date, matchup, section] = parts
     return {
@@ -638,6 +671,17 @@ export function linkQuery({ d, s } = {}) {
 // hasn't loaded the name yet builds a working link without it.
 export function playerPath(id, opts = {}) {
   return `/player/${entitySegment(id, opts.name)}${linkQuery(opts)}`
+}
+// Any player-hub tab, by its URL segment ('stats' / 'analytics' / 'history'),
+// plus 'overview' for the bare '/player/{id}' the tabs hang off. The exact
+// counterpart of teamTabPath below, and it goes through linkQuery for the same
+// reason: a player page opened at a dated URL must keep `?d=`/`?s=` across a tab
+// switch, or one visit would answer "entering July 5" on one tab and "today" on
+// the next.
+export function playerTabPath(id, tab, opts = {}) {
+  return tab === 'overview'
+    ? playerPath(id, opts)
+    : `/player/${entitySegment(id, opts.name)}/${tab}${linkQuery(opts)}`
 }
 export function teamPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}${linkQuery(opts)}`

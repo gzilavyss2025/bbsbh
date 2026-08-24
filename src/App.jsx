@@ -145,6 +145,23 @@ const FoulTrackerPage = lazyNamed(
   () => import('./screens/FoulTrackerPage.jsx'),
   'FoulTrackerPage',
 )
+// The player hub's three other tabs. Each is its own route and its own loader —
+// a tab must not pull another tab's data, the same rule the team hub keeps
+// (ADR-0034). Its Overview is PlayerPage.jsx, the bare '/player/{id}', exactly
+// as TeamPage.jsx is the team hub's. Lazily loaded like every other screen, so a
+// visitor who opens one tab never downloads the other three.
+const PlayerStatsTab = lazyNamed(
+  () => import('./screens/player/PlayerStatsTab.jsx'),
+  'PlayerStatsTab',
+)
+const PlayerAnalyticsTab = lazyNamed(
+  () => import('./screens/player/PlayerAnalyticsTab.jsx'),
+  'PlayerAnalyticsTab',
+)
+const PlayerHistoryTab = lazyNamed(
+  () => import('./screens/player/PlayerHistoryTab.jsx'),
+  'PlayerHistoryTab',
+)
 const TeamPage = lazyNamed(() => import('./screens/TeamPage.jsx'), 'TeamPage')
 const TeamLeadersPage = lazyNamed(
   () => import('./screens/TeamLeadersPage.jsx'),
@@ -357,6 +374,12 @@ export default function App() {
     content = <ProfilePage />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'player-stats') {
+    content = <PlayerStatsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'player-analytics') {
+    content = <PlayerAnalyticsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'player-history') {
+    content = <PlayerHistoryTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {
     content = <TeamPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'umpire') {

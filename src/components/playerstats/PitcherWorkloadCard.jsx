@@ -1,76 +1,256 @@
-import { fetchWorkload, workloadFor, workloadVsBaseline } from '../../api/workload.js'
+import '../../styles/26c-mound-card.css'
+import {
+  availabilityFor,
+  dayStripFor,
+  fetchWorkload,
+  moundRateFor,
+  turnStripFor,
+  workloadFor,
+  workloadVsBaseline,
+} from '../../api/workload.js'
 import { useAsync } from '../../hooks/useAsync.js'
 
-// The player page's recent-workload card for pitchers: pitches over his last
-// 1 / 3 / 10 appearances (with the days they span), how that load sits
-// against his own norm and his role's league baseline, and the rest pattern.
-// Data is the nightly gen-workload.mjs precompute — completed appearances
-// only, spoiler-free. Current-day only (hidden under a spoiler `asOf`
-// cutoff), same rule as FoulCard/Milestone Watch. MiLB / unknown → no card.
-export function PitcherWorkloadCard({ playerId, asOf }) {
+// THE MOUND CARD — the pitcher's counterpart to a hitter's Recent form.
+//
+// A hitter plays every day, so his last three lines answer "how is he going".
+// A pitcher works every fifth or sixth day, so his last three lines never say
+// the thing a scorer wants the moment a reliever starts throwing: DID HE PITCH
+// YESTERDAY. So this card carries both halves — what he threw, and where that
+// leaves him — and it shapes itself to the three ways a pitcher is used.
+//
+// ONE CARD, THREE ROLES.
+//   - A STARTER's story is his turn, so he gets days-since-his-last-start
+//     against the gap his own recent turns have kept.
+//   - A RELIEVER's and a CLOSER's story is availability, so they get a
+//     fourteen-day strip, one cell per day, shaded by what he threw.
+// The role word comes from the CALLER (the hub hero's own reading) so the page
+// says one thing about a man; the baseline caption keeps its own SP/RP wording,
+// because that is the pool gen-workload.mjs actually averages.
+//
+// NOTHING HERE PREDICTS. It never names a next start and never calls a pitcher
+// available — a manager decides both. Where a verdict IS wanted, the card shows
+// the one the app already ships: availabilityFor's fresh/limited/down, the same
+// call the Bullpen Board and the callout notes make off this same file. The
+// pitcher's own page was the one surface not showing it.
+//
+// Data is the nightly gen-workload.mjs precompute — completed appearances only,
+// spoiler-free. Current-day only (hidden under a spoiler `asOf`), same rule as
+// FoulCard/Milestone Watch.
+//
+// MLB-ONLY, and this is the sharp edge: workload.json is built from the thirty
+// ACTIVE MLB rosters, so a Triple-A arm has no record — and an MLB pitcher
+// OPTIONED DOWN loses his mid-season. That is rendered as "not posted yet"
+// rather than an empty frame, per the degrade convention.
+const ROLE_WORD = { SP: 'starter', RP: 'reliever', CL: 'closer' }
+
+// Outing rows read best with the opponent and the line beside the pitch count,
+// and the page already holds both — `gameLog` is the same view the Game log
+// renders, joined here by date. Optional: without it the rows still print the
+// date and the pitch count, which is what workload.json alone can say.
+const OUTING_ROWS = 3
+
+export function PitcherWorkloadCard({ playerId, asOf, role = null, gameLog = null }) {
   const skip = !!asOf
-  const { data } = useAsync(
-    () => (skip ? Promise.resolve(null) : fetchWorkload()),
-    [skip],
-  )
+  const { data } = useAsync(() => (skip ? Promise.resolve(null) : fetchWorkload()), [skip])
   if (skip || !data) return null
 
-  // Relative to the day after the file's cutoff, so the newest completed
-  // appearance counts (workloadFor excludes asOfDate itself).
-  const asOfDate = dayAfter(data.asOf)
-  const load = workloadFor(data, playerId, asOfDate)
+  // TWO DATES, deliberately. The buckets read one day PAST the file's cutoff so
+  // an appearance dated on it still counts (workloadFor excludes asOfDate
+  // itself). Every CALENDAR reading — the availability verdict, both strips,
+  // days-since — reads the cutoff itself, because that day is today. Letting
+  // the shifted date reach those made "yesterday" mean today, added a day to
+  // days-since, and slid availabilityFor's three-day window off the end: this
+  // card called a reliever fresh while the Bullpen Board, reading the real game
+  // date off this same file, called him limited. Same file, same man, two
+  // verdicts.
+  const bucketDate = dayAfter(data.asOf)
+  const asOfDate = data.asOf
+  const load = workloadFor(data, playerId, bucketDate)
   if (!load || (load.season?.g ?? 0) === 0) return null
-  const vs = workloadVsBaseline(data, playerId, asOfDate)
 
-  const spans = (b) =>
-    b?.pitches != null && b.apps > 0 ? `${b.pitches} in ${b.days}d` : '—'
+  const fileRole = load.role ?? 'RP'
+  const word = ROLE_WORD[role] ?? ROLE_WORD[fileRole] ?? 'pitcher'
+  const turn = turnStripFor(data, playerId, asOfDate)
+  const rates = moundRateFor(data, playerId)
+  const vs = workloadVsBaseline(data, playerId, bucketDate)
+  const outings = outingRows(data, playerId, asOfDate, gameLog)
 
   return (
-    <div className="loadcard">
+    <div className="moundcard">
       <h3 className="section__title section__title--bar">
-        <span>Recent workload</span>
-        <em>{load.role === 'SP' ? 'starter' : 'reliever'}</em>
+        <span>On the mound</span>
+        <em>{word}</em>
       </h3>
-      <dl className="factgrid">
-        <div className="fact">
-          <dt className="fact__label">Last outing</dt>
-          <dd className="fact__value">
-            {load.last1?.pitches != null ? `${load.last1.pitches} pitches` : '—'}
-          </dd>
-        </div>
-        <div className="fact">
-          <dt className="fact__label">Last 3</dt>
-          <dd className="fact__value">{spans(load.last3)}</dd>
-        </div>
-        <div className="fact">
-          <dt className="fact__label">Last 10</dt>
-          <dd className="fact__value">{spans(load.last10)}</dd>
-        </div>
-        <div className="fact">
-          <dt className="fact__label">Rest pattern</dt>
-          <dd className="fact__value">
-            {load.pitchedYesterday
-              ? load.consecDays >= 2
-                ? `${load.consecDays} straight days`
-                : 'pitched yesterday'
-              : `${load.last7dayApps} of last 7 days`}
-          </dd>
-        </div>
-        {vs?.vsOwnPct != null && (
-          <div className="fact">
-            <dt className="fact__label">Vs. his norm</dt>
-            <dd className="fact__value">{signedPct(vs.vsOwnPct)}</dd>
-          </div>
-        )}
-        {vs?.vsRolePct != null && (
-          <div className="fact">
-            <dt className="fact__label">Vs. league {load.role === 'SP' ? 'starters' : 'relievers'}</dt>
-            <dd className="fact__value">{signedPct(vs.vsRolePct)}</dd>
-          </div>
-        )}
+
+      {turn ? <TurnLead turn={turn} /> : <BullpenLead data={data} playerId={playerId} asOfDate={asOfDate} load={load} />}
+
+      {outings.length > 0 && (
+        <ul className="moundcard__outings">
+          {outings.map((o) => (
+            <li className="moundcard__outing" key={o.date}>
+              <span className="moundcard__when">{o.label}</span>
+              <span className="moundcard__line">{o.line}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {turn
+        ? !turn.outOfTurn && <TurnStrip turn={turn} />
+        : <DayStrip data={data} playerId={playerId} asOfDate={asOfDate} />}
+
+      <dl className="factgrid moundcard__foot">
+        <Fact label={`Last ${load.last10.apps}`} value={`${load.last10.pitches} pitches`} />
+        {vs?.vsOwnPct != null && <Fact label="Vs. his norm" value={signedPct(vs.vsOwnPct)} />}
+        {turn
+          ? rates?.ipPerStart && (
+              <Fact label="Avg per start" value={`${rates.ipPerStart} IP · ${rates.pitchesPerStart} P`} />
+            )
+          : rates && (
+              <Fact
+                label="Outs per outing"
+                value={`${rates.outsPerOuting}${rates.multiInning ? ' · multi-inning' : ''}`}
+              />
+            )}
       </dl>
     </div>
   )
+}
+
+// A starter's lead: when he last took the ball, and how long ago. Not a next
+// start — that is the manager's call and the card does not make it.
+function TurnLead({ turn }) {
+  return (
+    <p className="moundcard__lead">
+      <span className="moundcard__leadbig">{relativeDay(turn.daysSince)}</span>
+      <span className="moundcard__leadsub">
+        Last start {monthDay(turn.lastStart)}
+        {turn.lastStartPitches != null && ` · ${turn.lastStartPitches} P`}
+      </span>
+    </p>
+  )
+}
+
+// A bullpen arm's lead: the app's OWN availability verdict, not a second
+// opinion. Same reasons string the Bullpen Board prints.
+function BullpenLead({ data, playerId, asOfDate, load }) {
+  const avail = availabilityFor(data, playerId, asOfDate)
+  const status = avail?.status ?? 'fresh'
+  return (
+    <p className="moundcard__lead">
+      <span className={`moundcard__avail moundcard__avail--${status}`}>{status}</span>
+      <span className="moundcard__leadsub">
+        {avail?.reasons?.length
+          ? avail.reasons.join(' · ')
+          : load.pitchedYesterday
+            ? `threw yesterday · ${load.last1.pitches} P`
+            : 'no flags'}
+      </span>
+    </p>
+  )
+}
+
+// The days-since strip. Filled cells are days elapsed; the dashed cell is TODAY,
+// the same meaning it carries on the bullpen strip. The trailing band is the
+// range his own recent turns have kept — a range, because a single number would
+// be a prediction wearing a description's clothes.
+function TurnStrip({ turn }) {
+  const cells = Array.from({ length: Math.max(turn.daysSince, 1) }, (_, i) => i + 1)
+  const band = turn.typicalMin != null
+  return (
+    <div className="moundstrip">
+      <p className="moundstrip__head">
+        <span className="moundstrip__label">Days since · dashed is today</span>
+        {band && (
+          <span className="moundstrip__note">
+            his last turns came every {turn.typicalMin}
+            {turn.typicalMax !== turn.typicalMin && `–${turn.typicalMax}`} days
+          </span>
+        )}
+      </p>
+      <div className="moundstrip__row">
+        {cells.map((n) => (
+          <span
+            className={`moundstrip__day moundstrip__day--elapsed${n === turn.daysSince ? ' moundstrip__day--today' : ''}`}
+            key={n}
+          >
+            {n}
+          </span>
+        ))}
+        {band && (
+          <span className="moundstrip__band">
+            {turn.typicalMin}
+            {turn.typicalMax !== turn.typicalMin && `–${turn.typicalMax}`} d
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// The fourteen-day availability strip: one cell per day, shaded by what he
+// threw. The bands are the app's own tired thresholds (LOAD_BANDS), so a cell's
+// shade and the Bullpen Board's verdict can never disagree about one outing.
+function DayStrip({ data, playerId, asOfDate }) {
+  const strip = dayStripFor(data, playerId, asOfDate)
+  if (!strip) return null
+  return (
+    <div className="moundstrip">
+      <p className="moundstrip__head">
+        <span className="moundstrip__label">Last 14 days · dashed is today</span>
+      </p>
+      <div className="moundstrip__row">
+        {strip.map((c) => (
+          <span
+            className={`moundstrip__day moundstrip__day--${c.band}${c.today ? ' moundstrip__day--today' : ''}`}
+            key={c.date}
+            title={c.pitches == null ? monthDay(c.date) : `${monthDay(c.date)} · ${c.pitches} pitches`}
+          >
+            {c.pitches ?? ''}
+          </span>
+        ))}
+      </div>
+      <p className="moundstrip__key">
+        <span className="moundstrip__keyitem moundstrip__keyitem--light">Light</span>
+        <span className="moundstrip__keyitem moundstrip__keyitem--moderate">Moderate</span>
+        <span className="moundstrip__keyitem moundstrip__keyitem--heavy">Heavy</span>
+      </p>
+    </div>
+  )
+}
+
+function Fact({ label, value }) {
+  return (
+    <div className="fact">
+      <dt className="fact__label">{label}</dt>
+      <dd className="fact__value">{value}</dd>
+    </div>
+  )
+}
+
+// His last few outings, joined to the game log by date when the page has it.
+function outingRows(data, playerId, asOfDate, gameLog) {
+  const p = data?.pitchers?.[String(playerId)]
+  const apps = (p?.apps ?? []).filter((a) => a.d < asOfDate).slice(0, OUTING_ROWS)
+  const byDate = new Map((gameLog?.rows ?? []).map((r) => [r.date, r]))
+  return apps.map((a) => {
+    const row = byDate.get(monthDay(a.d))
+    return {
+      date: a.d,
+      label: row ? `${monthDay(a.d)} · ${row.home ? 'vs' : '@'} ${row.opp}` : monthDay(a.d),
+      line: row ? `${row.line} · ${a.p} P` : `${a.p} P`,
+    }
+  })
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+function monthDay(ymd) {
+  const [, m, d] = String(ymd).split('-')
+  return m && d ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : String(ymd)
+}
+
+function relativeDay(n) {
+  return n <= 0 ? 'Today' : n === 1 ? 'Yesterday' : `${n} days ago`
 }
 
 function dayAfter(ymd) {
@@ -79,4 +259,6 @@ function dayAfter(ymd) {
   return new Date(t + 86400000).toISOString().slice(0, 10)
 }
 
-const signedPct = (x) => `${x >= 0 ? '+' : '−'}${Math.abs(Math.round(x))}%`
+function signedPct(n) {
+  return `${n > 0 ? '+' : n < 0 ? '−' : ''}${Math.abs(n)}%`
+}

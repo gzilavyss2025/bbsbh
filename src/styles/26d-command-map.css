@@ -1,0 +1,191 @@
+/* ============================================================
+   COMMAND MAP — components/charts/CommandMap.jsx
+
+   Where a pitcher puts each pitch, over a season, on the in-game strike
+   zone's own frame (src/lib/zone/zoneGeometry.js).
+
+   THE DENSITY IS BINNED CELLS, not a wash: blocks are ground, marks are
+   figure, so four encodings on one phone card do not compete. One clay hue
+   in four steps — a sequential quantity takes one hue and a value ramp, and
+   a second hue would read as a second variable. Capped at .40 so the amber
+   home-run diamond still clears 3:1 on the hottest cell; the pairings are
+   pinned in check-contrast.mjs so a retune fails lint rather than eyes.
+   ============================================================ */
+
+.cmdmap {
+  margin-block-start: var(--sp-4);
+}
+
+/* --- the two control rows --- */
+
+.cmdmap__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-block-end: var(--sp-2);
+}
+
+.cmdmap__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--r-pill);
+  background: var(--surface-inset);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.cmdmap__chip--sm {
+  padding: 5px 8px;
+}
+
+.cmdmap__chip--on {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+/* Under the sample floor. The label stays at --text-caption rather than fading
+   toward the paper: the chip is grey BECAUSE of the number on it, so the number
+   has to stay readable. The border carries the state, not the ink. */
+.cmdmap__chip--thin {
+  background: var(--bg-page);
+  border-style: dashed;
+  color: var(--text-caption);
+}
+
+.cmdmap__chipn {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-reg);
+  color: var(--text-caption);
+}
+.cmdmap__chip--on .cmdmap__chipn {
+  color: var(--text-on-ink);
+}
+
+/* --- the plot --- */
+
+.cmdmap__plot {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  margin-inline: auto;
+}
+
+.cmdmap__cell {
+  fill: var(--clay);
+}
+.cmdmap__cell--b0 { fill: none; }
+.cmdmap__cell--b1 { fill-opacity: 0.1; }
+.cmdmap__cell--b2 { fill-opacity: 0.2; }
+.cmdmap__cell--b3 { fill-opacity: 0.3; }
+.cmdmap__cell--b4 { fill-opacity: 0.4; }
+
+.cmdmap__frame {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 1.6;
+}
+
+/* Ruled ON TOP of the density and in --ink-2, not --rule: at --rule the nine
+   cells measured 1.27:1 over the hottest band and the chart's only spatial
+   reference vanished exactly where the data was densest. */
+.cmdmap__third {
+  stroke: var(--text-muted);
+  stroke-width: 0.8;
+  opacity: 0.75;
+}
+
+.cmdmap__plate {
+  fill: none;
+  stroke: var(--graphite-soft);
+  stroke-width: 1;
+}
+
+/* The marks, in the spray map's own sizes so severity reads the same on both
+   pages: small dot / large dot with a paper ring / amber diamond. */
+.cmdmap__called {
+  fill: var(--accent-primary);
+  opacity: 0.8;
+}
+
+.cmdmap__whiff {
+  fill: var(--accent-primary);
+  stroke: var(--surface-inset);
+  stroke-width: 1;
+}
+
+/* The paper ring is 2.5 wide so the mark carries its OWN ground wherever it
+   lands — on the hottest cell the amber alone measured 3.03:1, over the 3:1
+   graphical bar only because the ramp is capped. A mark whose legibility
+   depends on a ramp cap is one retune from invisible. */
+.cmdmap__homer {
+  fill: var(--award-ink);
+  stroke: var(--surface-inset);
+  stroke-width: 2.5;
+  paint-order: stroke;
+}
+
+/* --- key and facts --- */
+
+.cmdmap__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin: var(--sp-2) 0 0;
+}
+
+.cmdmap__keyitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semi);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-caption);
+}
+
+.cmdmap__keyitem::before {
+  content: '';
+  width: 11px;
+  height: 11px;
+  border-radius: var(--r-round);
+}
+.cmdmap__keyitem--density::before {
+  border-radius: var(--r-xs);
+  background: var(--clay);
+  opacity: 0.35;
+}
+.cmdmap__keyitem--called::before {
+  width: 7px;
+  height: 7px;
+  background: var(--accent-primary);
+  opacity: 0.8;
+}
+.cmdmap__keyitem--whiff::before {
+  background: var(--accent-primary);
+}
+.cmdmap__keyitem--homer::before {
+  border-radius: var(--r-xs);
+  background: var(--award-ink);
+  transform: rotate(45deg);
+  width: 9px;
+  height: 9px;
+}
+
+.cmdmap__facts {
+  margin-block-start: var(--sp-3);
+}
+
+.cmdmap__note {
+  margin-block-start: var(--sp-2);
+}

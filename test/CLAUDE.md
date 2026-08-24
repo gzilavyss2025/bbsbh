@@ -27,6 +27,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | comeback-wins.test.js | 13 | scripts/gen-comeback-wins.mjs, src/api/comebackWins.js | Comeback-wins card |
 | compute-batter-line.test.js | 5 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
 | condensed-day-index.test.js | 14 | scripts/lib/highlights.mjs, src/api/gamePhotos.js | Day-index generation policy: condensed-cut selection (never the recap) + hero-photo pick for the slate's revealed result cards |
+| contract-view.test.js | 21 | src/api/person/contract/view.js | The Contract card's reading of one shard record: which regime leads the card, the arbitration/free-agency years read off the out-year codes (Super Two included), who the terms say holds an option, and the salary schedule's cash-only bars |
 | copy-registry.test.js | 36 | src/copy/registry.js | Admin-editable consent copy (ADR-0025/0026), MLB + MiLB ballpark field derivation |
 | crawl-body.test.js | 18 | api/_lib/crawl.js, api/_lib/cards.js, api/preview.js, scripts/gen-sitemap.mjs | The readable body a rewritten deep link now carries (ADR-0059) — what a player and a club page say, that the layer cannot reach a game and a game route gets no body at all, where the markup sits relative to #root, and the sitemap's club listing |
 | dates.test.js | 10 | src/lib/dates.js | Date window/formatting helpers |
@@ -103,7 +104,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | reveal-progress-core.test.js | 15 | src/hooks/revealProgressCore.js, select.js | Reveal-progress state machine |
 | rookies.test.js | 18 | src/api/rookies.js | Rookie pill + the sharded reads (compact status map, per-id record shard) |
 | roster-availability.test.js | 3 | src/api/select.js | The bench/bullpen strike-through's two ceilings (`enteredAsOf`) — the reveal mark AND the half on screen, so a replayed inning shows the bench that half opened with |
-| route.test.js | 36 | src/lib/route.js | Full router surface |
+| route.test.js | 77 | src/lib/route.js | Full router surface, both hubs' tab tables included (the count was stale at 36; `node --test` reports 77) |
 | sac-bunt-double-play.test.js | 4 | src/api/boxscore.js, src/api/scorecard/notation.js, src/api/playbyplay/scorebookCode.js, src/api/scorecardGame.js | sac_bunt_double_play IS an at-bat, unlike sac_fly_double_play — Rule 9.08(c) credits no sacrifice, scored as an ordinary double play (issue #765) |
 | sac-reached-notation.test.js | 3 | src/api/playbyplay.js | Sac-bunt error/FC notation edge cases |
 | scorecard-game.test.js | 9 | src/api/scorecardGame.js | The live scorecard's reveal clamp, P/TP/LOB agreement with derive/linescore, FINAL block + decisions gating, inning-end diagonals, skipped-half X, pinch-runner run on the origin card — pinned on the captured real feed |
@@ -119,6 +120,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | slate-scores.test.js | 13 | src/api/schedule.js, src/lib/slateScoreLine.js | Slate score line normalization |
 | spoiled-days.test.js | 21 | src/lib/spoiledDays.js | Spoiled-days consent persistence (ADR-0026) |
 | spoiler-gates.test.js | 4 | select.js, enteringHalf.js | Caller-gated pre-pitch rule |
+| spray.test.js | 43 | scripts/gen-spray.mjs, src/api/spray.js | The season spray map, both ends of the same stored row: the sweep's per-game fold and season merge, then the reader's split sums, spray-angle/direction math (the switch-hitter majority rule), the home-runs-without-a-landing-point footnote, and the two floors |
 | stamp-ink.test.js | 11 | src/lib/stampInk.js, contrast.js | Logbook stamp ink — the winner's darkest brand colour + its contrast floor (ADR-0036) |
 | stamps.test.js | 39 | src/lib/stamps.js | Logbook stamp rules — the reveal gate, tombstone sync merge, book placement (ADR-0035) |
 | standings.test.js | 15 | src/api/standings.js | Standings shaping/ranks |

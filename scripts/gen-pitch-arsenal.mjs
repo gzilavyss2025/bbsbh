@@ -41,6 +41,7 @@ import { shardKey100 } from '../src/lib/shardKey.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
+import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, parseCells } from './lib/command-grid.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
@@ -49,6 +50,8 @@ const here = dirname(fileURLToPath(import.meta.url))
 // nothing is written in full.
 const outDir = join(here, '..', 'public', 'data', 'pitch-arsenal')
 const outPools = join(here, '..', 'public', 'data', 'pitch-arsenal-pool')
+// Where he PUT it — one shard bucket per hundred pitcher ids, like the mix.
+const outCommand = join(here, '..', 'public', 'data', 'pitch-command')
 const DEFAULT_DAYS = 3
 const CHECKPOINT_EVERY = 100
 const CONCURRENCY = 8
@@ -204,9 +207,15 @@ const markIngested = (db) =>
 
 // Fetch the feed (the only await), then fold the whole game in as one atomic
 // synchronous transaction — same pattern as gen-fouls.mjs's ingestGame.
-async function ingestGame(db, stmts, gamePk, level, date, season) {
+// `need` says which halves of the sweep this game still owes. Both totals
+// tables ADD, so re-walking a game for the command grid must NOT fold its pitch
+// types in a second time — that would silently double a season of arsenal
+// counts, and nothing downstream would look wrong until a share exceeded 100%.
+async function ingestGame(db, stmts, gamePk, level, date, season, need = { arsenal: true, command: true }) {
   const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
-  const pitchers = aggregateGamePitchTypes(feed)
+  const pitchers = need.arsenal ? aggregateGamePitchTypes(feed) : new Map()
+  // Same feed, one more pass — the command grid costs no extra fetch.
+  const command = need.command ? aggregateGameCommand(feed) : new Map()
   db.exec('BEGIN')
   try {
     for (const [id, p] of pitchers) {
@@ -220,7 +229,19 @@ async function ingestGame(db, stmts, gamePk, level, date, season) {
         )
       }
     }
-    stmts.mark.run(gamePk, level, date)
+    for (const [id, byKey] of command) {
+      for (const [key, b] of byKey) {
+        const [code, stand] = key.split(':')
+        const prior = stmts.commandRead.get(id, level, code, stand)
+        const merged = CELLS.map((f, i) => {
+          const was = parseCells(prior?.[COLS[i]])
+          return Array.from(b[f], (v, j) => v + (was[j] ?? 0)).join(',')
+        })
+        stmts.commandWrite.run(id, level, code, stand, season, ...merged)
+      }
+    }
+    if (need.arsenal) stmts.mark.run(gamePk, level, date)
+    if (need.command) stmts.markCommand.run(gamePk, level, date)
     db.exec('COMMIT')
   } catch (err) {
     db.exec('ROLLBACK')
@@ -371,6 +392,41 @@ export function exportPitchArsenal(db, hands = {}) {
 //     against each other), only arms past MIN_SIMILARITY_PITCHES (an arm below
 //     it is dropped by the ranker anyway, so shipping him is pure weight), and
 //     no `description` — the ranking reads `code`. 692 KB became 149 + 194.
+// The command grid's own shards, keyed like every other per-player dataset.
+// One file per pitcher bucket, each entry: { name, throws, mlb|aaa: { code:
+// { L: {...}, R: {...} } } }, where each hand carries the six 25-value arrays.
+// Zero-only arrays are dropped — a pitch type he never threw to lefties is
+// absent rather than twenty-five zeroes.
+export function exportCommandMap(db) {
+  const seasonRow = db.prepare('SELECT season FROM pitch_command_cells LIMIT 1').get()
+  const rows = db.prepare('SELECT * FROM pitch_command_cells ORDER BY person_id, level, code, stand').all()
+  const pit = {}
+  for (const r of rows) {
+    const entry = pit[r.person_id] ?? (pit[r.person_id] = { mlb: {}, aaa: {} })
+    const byCode = entry[r.level] ?? (entry[r.level] = {})
+    const hand = {}
+    CELLS.forEach((field, i) => {
+      const arr = parseCells(r[COLS[i]])
+      if (arr.some((v) => v > 0)) hand[field] = arr
+    })
+    if (!hand.cells) continue
+    ;(byCode[r.code] ?? (byCode[r.code] = {}))[r.stand] = hand
+  }
+  return { season: seasonRow?.season ?? null, pit }
+}
+
+async function writeCommand(db, hands) {
+  const data = exportCommandMap(db)
+  const buckets = new Map()
+  for (const [id, entry] of Object.entries(data.pit)) {
+    if (!Object.keys(entry.mlb).length && !Object.keys(entry.aaa).length) continue
+    const key = shardKey100(id)
+    if (!buckets.has(key)) buckets.set(key, { season: data.season, pit: {} })
+    buckets.get(key).pit[id] = { throws: hands[id] ?? null, ...entry }
+  }
+  await writeShards(outCommand, [...buckets])
+}
+
 async function writeArsenal(db, hands) {
   const data = exportPitchArsenal(db, hands)
   const buckets = new Map()
@@ -421,6 +477,11 @@ async function main() {
   const stmts = {
     pitchType: upsertPitchType(db),
     mark: markIngested(db),
+    markCommand: markCommandIngested(db),
+    ...(() => {
+      const c = commandStmts(db)
+      return { commandRead: c.read, commandWrite: c.write }
+    })(),
   }
 
   // Resolved once up front and reused by every checkpoint write below.
@@ -438,8 +499,15 @@ async function main() {
     return
   }
 
-  const existing = new Set(
+  // A game is done only when BOTH sweeps have had it. The arsenal pass had
+  // already ingested this season before locations were counted, so keying the
+  // skip on its table alone would leave the command grid empty until next
+  // season — the backfill would find nothing to do.
+  const doneArsenal = new Set(
     db.prepare('SELECT game_pk, level FROM pitch_arsenal_ingested_games').all().map((r) => `${r.game_pk}:${r.level}`),
+  )
+  const doneCommand = new Set(
+    db.prepare('SELECT game_pk, level FROM pitch_command_ingested_games').all().map((r) => `${r.game_pk}:${r.level}`),
   )
 
   // Regular season only, both levels. Same postponed-replay dedup as the other
@@ -454,8 +522,10 @@ async function main() {
       for (const g of d.games ?? []) {
         if (g.status?.abstractGameState !== 'Final') continue
         if (d.date !== g.officialDate) continue
-        if (existing.has(`${g.gamePk}:${level}`)) continue
-        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: g.season ?? Number(g.officialDate.slice(0, 4)) })
+        const key = `${g.gamePk}:${level}`
+        const need = { arsenal: !doneArsenal.has(key), command: !doneCommand.has(key) }
+        if (!need.arsenal && !need.command) continue
+        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: g.season ?? Number(g.officialDate.slice(0, 4)), need })
       }
     }
   }
@@ -464,6 +534,7 @@ async function main() {
   const writeOut = async () => {
     await dumpGroup(db, 'pitch-arsenal')
     await writeArsenal(db, hands)
+    await writeCommand(db, hands)
   }
 
   let done = 0
@@ -473,7 +544,7 @@ async function main() {
       const g = queue.shift()
       if (!g) return
       try {
-        await ingestGame(db, stmts, g.gamePk, g.level, g.date, g.season)
+        await ingestGame(db, stmts, g.gamePk, g.level, g.date, g.season, g.need)
       } catch (err) {
         console.error(`gamePk ${g.gamePk} (${g.level}): ${err.message}`)
       }
