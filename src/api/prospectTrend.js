@@ -157,20 +157,30 @@ export function ageEdgeFact(ageYears, levelAverageAge) {
 }
 
 // The Prospect Card's whole view model, assembled from one player's trend
-// `entry` (prospectTrendById) plus the two facts it can't carry on its own
-// (his real age, and his level's average) — pure, so the component only ever
-// renders what this returns rather than re-deriving any of it inline.
+// `entry` (prospectTrendById) plus the facts it can't carry on its own (his
+// real age and his level's average, and — see docs/level-tenure-benchmark.md —
+// how his current sample compares with a typical STAY at this level, not
+// just how he's performing in it) — pure, so
+// the component only ever renders what this returns rather than re-deriving
+// any of it inline. `tenure` is the caller's own `tenureFact` result
+// (src/api/levelTenure.js) or null; passed through untouched since it's
+// already a plain view object.
 //
 //   'none'        — no trend row at all (entry == null): off the board,
 //                    complex ball, or a fresh promotion the generator hasn't
 //                    caught up to yet. The caller still shows an age-edge fact
 //                    if one exists — partial information beats an all-or-
-//                    nothing blank — but nothing else.
+//                    nothing blank — but nothing else. No tenure fact either:
+//                    it needs entry.sampleSize, the same count the "Building
+//                    sample" line already prints, so the two numbers can never
+//                    disagree.
 //   'unqualified'  — a real row, under the PA/outs floor. Says why, with the
-//                    real count and the real floor, not just "not yet."
+//                    real count and the real floor, not just "not yet." This
+//                    is exactly where a tenure fact earns its place — it
+//                    explains WHY the sample is still small.
 //   'qualified'    — the full card: standing, tier, confidence, movement,
-//                    trend series.
-export function prospectCardView(entry, ageYears, levelAverageAge) {
+//                    trend series, plus tenure.
+export function prospectCardView(entry, ageYears, levelAverageAge, tenure = null) {
   const ageEdge = ageEdgeFact(ageYears, levelAverageAge)
   if (!entry) return { state: 'none', ageEdge }
   if (!entry.qualified) {
@@ -180,6 +190,7 @@ export function prospectCardView(entry, ageYears, levelAverageAge) {
       sampleSize: entry.sampleSize,
       floor: QUALIFICATION_FLOOR[entry.group],
       ageEdge,
+      tenure,
     }
   }
   const tier = levelTier(entry.percentile)
@@ -196,6 +207,7 @@ export function prospectCardView(entry, ageYears, levelAverageAge) {
     populationSize: entry.populationSize,
     movement: entry.movement,
     ageEdge,
+    tenure,
     trend: deriveTrendMarks(entry.history),
   }
 }

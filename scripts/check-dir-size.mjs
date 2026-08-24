@@ -432,11 +432,18 @@ const BUDGETS = {
   // pitchArsenal.js and swept by the same generator. It sits beside the other
   // per-player static readers rather than in a subdirectory of its own, which
   // would separate it from the mix card it is read next to.
-  // 103 -> 104 for logbookMilestones.js — the Game Log retrospective's
+  // +1 for levelTenure.js — the level-tenure-benchmark reader, sibling to
+  // prospectTrend.js and read by the same Prospect Card; splitting it into a
+  // subdirectory would separate it from the exact module it complements.
+  // 104 -> 105 for logbookMilestones.js — the Game Log retrospective's
   // milestone/collection-progress engine (docs/design-inspiration.md §8),
   // sibling to logbookStats.js/logbookRetrospective.js and read only by
-  // LogbookStatsPage.jsx, same shape as the other two.
-  'src/api': 104,
+  // LogbookStatsPage.jsx, same shape as the other two. Landed on `main`
+  // alongside levelTenure.js above (two branches, same directory, each
+  // measured against the pre-merge tree) — re-measured post-merge per this
+  // file's own "rebase and re-measure" rule rather than trusting either
+  // branch's number.
+  'src/api': 105,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -514,7 +521,10 @@ const BUDGETS = {
   // 94 -> 95 for check-searchable-sport-ids.mjs — another flat lint guard,
   // same shape as check-report-pages.mjs and its siblings already here
   // (issue #852).
-  scripts: 95,
+  //
+  // +1 for gen-level-tenure-benchmark.mjs — a generator RUNS on import, so it
+  // cannot live in scripts/lib/; stays flat with every other gen-*.mjs.
+  scripts: 96,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

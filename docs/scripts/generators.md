@@ -673,6 +673,18 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
+- `gen-level-tenure-benchmark.mjs` → `public/data/level-tenure-benchmark.json`
+  — for each full-season MiLB level, how much playing time (PA for hitters,
+  outs for pitchers) a typical prospect accumulates there before promotion.
+  Feeds the Prospect Card's "X% of a typical stay" fact
+  (`src/api/levelTenure.js`). Cohort: every MLB debutant in a sliding 5-year
+  debut window (ending 3 years before today, so `rookieUntil` has had time to
+  resolve) whose career crossed `rookies.json`'s real-graduation threshold.
+  Reconstructs each player's first-ascent level history from `yearByYear`
+  splits (sportIds 11/12/13/14), same tie-break rule and its validation
+  documented in `docs/level-tenure-benchmark.md` — read that before touching
+  the cohort window or the reconstruction rule, not just this entry.
+
 - `gen-war-history.mjs` → `public/data/war-history/{NN}.json` (player-keyed, bucketed
   on `personId % 100` via the reader's `warShardKey`) — season WAR per player for
   COMPLETED seasons (2010+), the multi-year companion to `war.json`. Same source/join. A finished season's WAR is immutable.
