@@ -179,11 +179,20 @@ export function LogbookStatsPage({ bookId = null }) {
     [stamps, facts.data],
   )
 
-  // The ported First Scorebook sections' own two fetches, gated to the
-  // level-filtered gamePks — see the header. Keyed the same way `facts` is,
-  // so a note edit (which rewrites stamp objects) doesn't refetch a whole
-  // book's worth of box scores.
-  const retroGamePks = useMemo(() => levelStamps.map((s) => s.gamePk), [levelStamps])
+  // The ported First Scorebook sections are the expensive part of this page —
+  // a per-game boxscore AND winProbability fetch apiece, plus the aggregation
+  // over all of them (src/api/logbookRetrospective.js). A big book was firing
+  // both fetches for every stamp on load, which is what ground the page to a
+  // halt; they now stay collapsed until asked for. `retroGamePks` is empty
+  // while collapsed, and `fetchStampBoxscores`/`fetchStampMoments` return `{}`
+  // immediately for an empty list (see logbookGameDetail.js), so nothing
+  // fetches — and `computeLogbookRetrospective` has nothing to loop over —
+  // until `showDetail` flips.
+  const [showDetail, setShowDetail] = useState(false)
+  const retroGamePks = useMemo(
+    () => (showDetail ? levelStamps.map((s) => s.gamePk) : []),
+    [levelStamps, showDetail],
+  )
   const retroPkKey = retroGamePks.join(',')
   const boxscores = useAsync((signal) => fetchStampBoxscores(retroGamePks, { signal }), [retroPkKey])
   const moments = useAsync((signal) => fetchStampMoments(retroGamePks, { signal }), [retroPkKey])
@@ -317,15 +326,31 @@ export function LogbookStatsPage({ bookId = null }) {
         </div>
       </section>
 
-      <RetrospectiveSections
-        retro={retro}
-        facts={facts.data}
-        loading={retroLoading}
-        momentClips={momentClips.data}
-        openClip={openClip}
-        onOpenClip={setOpenClip}
-        onCloseClip={() => setOpenClip(null)}
-      />
+      <button
+        type="button"
+        className="logbookstats__toggle"
+        aria-expanded={showDetail}
+        onClick={() => setShowDetail((s) => !s)}
+      >
+        <span>
+          <b>Player stats &amp; moments</b>
+          <small>Best performances, combined leaders, the rotation and bullpen — pulled in on request.</small>
+        </span>
+        <i className="logbookstats__chevron" aria-hidden="true">
+          {showDetail ? '▾' : '▸'}
+        </i>
+      </button>
+      {showDetail && (
+        <RetrospectiveSections
+          retro={retro}
+          facts={facts.data}
+          loading={retroLoading}
+          momentClips={momentClips.data}
+          openClip={openClip}
+          onOpenClip={setOpenClip}
+          onCloseClip={() => setOpenClip(null)}
+        />
+      )}
 
       {(stats.longestWinStreak || stats.longestLossStreak) && (
         <section className="logbookstats__section">
