@@ -58,7 +58,7 @@ export function PlayerStatsTab({ id, asOf, sportId }) {
               header and this card cannot call the same man two different
               things — a closer's hero read CL while his card read reliever. */}
           {block.group === 'pitching' && (
-            <PitcherWorkloadCard playerId={bio.id} asOf={asOf} role={core.data.heroRole} />
+            <PitcherWorkloadCard playerId={bio.id} asOf={asOf} role={core.data.heroRole} gameLog={block.gameLog} />
           )}
 
           {/* The hitter's occupant of the same slot — Recent form, his
