@@ -93,6 +93,10 @@ const OwnerGuards = isClerkEnabled
 
 const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
 const AdminCopyPage = lazyNamed(() => import('./screens/AdminCopy.jsx'), 'AdminCopyPage')
+const ResearchDiaryPage = lazyNamed(
+  () => import('./screens/research/ResearchDiaryPage.jsx'),
+  'ResearchDiaryPage',
+)
 const GameView = lazyNamed(() => import('./screens/GameView.jsx'), 'GameView')
 const LogoSheet = lazyNamed(() => import('./screens/LogoSheet.jsx'), 'LogoSheet')
 const PlayerPage = lazyNamed(() => import('./screens/PlayerPage.jsx'), 'PlayerPage')
@@ -367,6 +371,8 @@ export default function App() {
     content = (
       <AdminCopyPage onBack={() => go('/')} focus={route.focus} returnTo={route.returnTo} />
     )
+  } else if (route.name === 'admin-research') {
+    content = <ResearchDiaryPage />
   } else if (route.name === 'profile') {
     // Deliberately NOT gated on isClerkEnabled or on being signed in: settings
     // are settings, and every one of them works on this device with no account

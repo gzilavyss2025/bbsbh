@@ -1,0 +1,368 @@
+/* The prospect-research diary (/admin/research) — a long-form reading page,
+   which is why it looks less like the rest of the app than anything else here.
+
+   THE ONE REAL DEPARTURE is the caps exemption at the foot of this file. Every
+   other prose surface in this app is a sentence or two inside chrome; this is
+   several thousand words meant to be read end to end, and shouted caps make a
+   real paragraph much harder to scan. Same split the Game Notes blurb and the
+   About page already make: headings and labels stay shouted, body copy does
+   not. Registered in 01-base.css's exception list, as that block requires.
+
+   Measure is capped near 68 characters. A diary nobody can read through is a
+   diary nobody reads. */
+
+.researchdiary__main {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-12);
+}
+
+.researchdiary__notice {
+  padding: var(--space-6) var(--space-4);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+/* ---- Masthead ---- */
+
+.researchdiary__masthead {
+  padding-bottom: var(--space-6);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+
+.researchdiary__eyebrow {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+
+.researchdiary__masttitle {
+  margin: var(--space-1) 0 var(--space-4);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+}
+
+.researchdiary__lede {
+  margin: 0 0 var(--space-3);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+}
+
+/* ---- The standing traps block ---- */
+
+.researchdiary__traps {
+  margin: var(--space-8) 0;
+  padding: var(--space-5);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.researchdiary__trapshead {
+  margin: 0 0 var(--space-2);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-snug);
+}
+
+.researchdiary__traplist {
+  margin: var(--space-4) 0 0;
+}
+
+.researchdiary__trap + .researchdiary__trap {
+  margin-top: var(--space-4);
+}
+
+.researchdiary__traptitle {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-snug);
+}
+
+.researchdiary__trapbody {
+  margin: var(--space-1) 0 0;
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+/* ---- Entries ---- */
+
+.researchdiary__entries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.researchdiary__entry {
+  padding: var(--space-8) 0;
+  border-top: var(--bw-rule) solid var(--border-rule);
+}
+
+.researchdiary__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+
+.researchdiary__source {
+  color: var(--text-muted);
+}
+
+.researchdiary__verdict {
+  padding: 2px var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  letter-spacing: var(--ls-caps);
+}
+
+/* A shipped finding is the only one that gets the field green. The other three
+   states are not failures and must not be dressed as alarms — "we asked and the
+   answer was no" is a result, and a retraction is the system working. */
+.researchdiary__verdict--shipped {
+  border-color: var(--accent-positive);
+  color: var(--accent-positive);
+}
+
+.researchdiary__verdict--corrected {
+  border-color: var(--accent-negative);
+  color: var(--accent-negative);
+}
+
+.researchdiary__title {
+  margin: var(--space-2) 0 var(--space-1);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-title);
+}
+
+.researchdiary__verdictblurb {
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+
+/* The question, set as a pull-quote. It is the reader's own question, and it is
+   what tells them within one line whether the entry is worth their time. */
+.researchdiary__question {
+  margin: var(--space-5) 0 var(--space-4);
+  padding-left: var(--space-4);
+  border-left: var(--bw-heavy) solid var(--accent-primary);
+  color: var(--text-heading);
+  font-family: var(--font-body);
+  font-size: var(--fs-title-sm);
+  font-style: italic;
+  line-height: var(--lh-snug);
+}
+
+.researchdiary__headline {
+  margin: 0 0 var(--space-6);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-field);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-prose);
+}
+
+.researchdiary__section {
+  margin: var(--space-6) 0;
+}
+
+.researchdiary__subhead {
+  margin: 0 0 var(--space-2);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-snug);
+}
+
+.researchdiary__prose {
+  margin: 0 0 var(--space-3);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+}
+
+.researchdiary__points {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-5);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+}
+
+.researchdiary__points li + li {
+  margin-top: var(--space-3);
+}
+
+/* ---- Tables ---- */
+
+.researchdiary__figure {
+  margin: var(--space-5) 0;
+}
+
+.researchdiary__figcap {
+  margin-bottom: var(--space-2);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+
+/* Wide tables scroll inside their own box. The page body must never scroll
+   sideways on a phone. */
+.researchdiary__tablewrap {
+  overflow-x: auto;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+
+.researchdiary__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+
+.researchdiary__table th,
+.researchdiary__table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.researchdiary__table thead th {
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+
+.researchdiary__table tbody th {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+  white-space: normal;
+}
+
+.researchdiary__table tbody td {
+  color: var(--text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.researchdiary__table tbody tr + tr th,
+.researchdiary__table tbody tr + tr td {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.researchdiary__fignote {
+  margin: var(--space-2) 0 0;
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+
+/* ---- Limits, the disclosure, the doc pointer ---- */
+
+.researchdiary__limits {
+  margin: var(--space-6) 0;
+  padding: var(--space-4);
+  border-left: var(--bw-heavy) solid var(--border-rule);
+  background: var(--surface-card);
+}
+
+.researchdiary__limits .researchdiary__points {
+  margin-bottom: 0;
+  font-size: var(--fs-small);
+}
+
+.researchdiary__technical {
+  margin: var(--space-5) 0;
+}
+
+.researchdiary__disclose {
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+
+.researchdiary__disclose:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.researchdiary__techlist {
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-5);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+}
+
+.researchdiary__techlist li + li {
+  margin-top: var(--space-2);
+}
+
+.researchdiary__doc {
+  margin: var(--space-4) 0 0;
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+
+/* ---- The admin row in the footer ---- */
+
+.sitefooter__adminrow {
+  margin-top: var(--space-3);
+}
+
+/* CAPS EXEMPTION — registered in 01-base.css. Body copy only: every heading,
+   label, table header and badge above stays shouted, the same split the Game
+   Notes blurb and the About page make. `#root` prefix is mandatory or this
+   loses to `#root *` and silently does nothing. */
+#root .researchdiary .caps-exempt {
+  text-transform: none; /* caps-exempt: several thousand words of continuous prose — shouted caps make a real paragraph much harder to read than the app's short chrome labels */
+}
