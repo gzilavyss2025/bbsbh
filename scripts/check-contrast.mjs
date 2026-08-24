@@ -148,6 +148,14 @@ const PAIRINGS = [
   { fg: 'accent-link', bg: 'surface-card', min: TEXT, note: 'link text on raised card' },
   // Non-text UI: the focus ring must stay visible against the canvas.
   { fg: 'focus-ring', bg: 'bg-canvas', min: UI, note: 'focus ring on app canvas' },
+  // A pinned pairing earns its place here for one of two failure classes this
+  // checker cannot see on its own, since it only ever compares TOKENS: a token
+  // used in a new role nobody asserted before, or an ALPHA laid over an
+  // otherwise-correct pairing, which composites the effective color below the
+  // threshold without moving the token's own hex at all. Real shipped example
+  // of the second: `opacity: .85` on a grayed split chip's count took
+  // --text-caption to 3.86:1 (see "spray thin-chip split count" below).
+  //
   // ---- The season spray map (73-spray-map.css) ----
   // Everything below was found by a design review, not by this file, and that
   // is the reason it is here now: all three defects were ALPHAS applied on top
