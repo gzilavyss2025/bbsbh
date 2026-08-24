@@ -581,3 +581,8 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* The milestone shelf's own rules live in 48b-logbook-milestones.css —
+   split out rather than grown here because this file was already at its
+   600-line cap (ADR-0038) and the milestone shelf is a self-contained visual
+   family, not an extension of anything above. */

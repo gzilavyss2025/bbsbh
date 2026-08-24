@@ -359,7 +359,10 @@ const BUDGETS = {
   // check-file-size.mjs's 600-line ceiling and on a budget of its own, and that
   // guard's remedy is to split rather than to grow. Same trade the 21/21a,
   // 26/26a and 48/48-stamp-strip entries above record.
-  'src/styles': 100,
+  // 100 -> 101 for 48b-logbook-milestones.css — split out of
+  // 48a-logbook-stats.css the moment that file hit ITS OWN 600-line cap; same
+  // trade as the paragraph above, one file over.
+  'src/styles': 101,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -429,7 +432,11 @@ const BUDGETS = {
   // pitchArsenal.js and swept by the same generator. It sits beside the other
   // per-player static readers rather than in a subdirectory of its own, which
   // would separate it from the mix card it is read next to.
-  'src/api': 103,
+  // 103 -> 104 for logbookMilestones.js — the Game Log retrospective's
+  // milestone/collection-progress engine (docs/design-inspiration.md §8),
+  // sibling to logbookStats.js/logbookRetrospective.js and read only by
+  // LogbookStatsPage.jsx, same shape as the other two.
+  'src/api': 104,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -553,7 +560,9 @@ const BUDGETS = {
   // function, one import of teams.js's realHeadshotUrl) InningViewer calls
   // when at-bat stepping begins, same small-utility-beside-its-caller shape
   // as logoCdn.js/buildInfo.js above. Not a new subsystem.
-  'src/lib': 58,
+  // 58 -> 59 for milestoneCelebrations.js — the milestone shelf's one-shot
+  // completion-animation store, same shape as account/prompts.js beside it.
+  'src/lib': 59,
   // New entry (was under the default 12-file cap): +1 for
   // prospectPercentile.mjs, the pure percentile math gen-prospect-trend.mjs
   // imports — scripts/CLAUDE.md's testable-helper convention (lib/roster.mjs
@@ -647,7 +656,9 @@ const BUDGETS = {
   // 23 -> 24 for useHeadshotPrefetch.js — InningViewer's headshot-CDN warm-up,
   // the same React-wiring-(useEffect/useRef)-over-a-pure-selector shape as
   // usePlayerHoverStats.js beside it.
-  'src/hooks': 24,
+  // 24 -> 25 for useMilestoneCelebration.js — one collection's one-shot
+  // completion-animation state, same shape as usePromptDismiss.js beside it.
+  'src/hooks': 25,
   'src/screens/identity-lab': 15,
   // New entry: +1 for PlayerHoverCard.jsx — a player-identity primitive like
   // Headshot/PlayerLink beside it, not one of this bucket's ten player-PAGE cards.

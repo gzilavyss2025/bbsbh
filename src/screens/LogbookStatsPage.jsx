@@ -1,7 +1,9 @@
 import '../styles/48a-logbook-stats.css'
+import '../styles/48b-logbook-milestones.css'
 import { useMemo, useState } from 'react'
 import { fetchStampGames } from '../api/logbook.js'
 import { computeLogbookStats } from '../api/logbookStats.js'
+import { computeAllMilestones } from '../api/logbookMilestones.js'
 import { fetchStampBoxscores, fetchStampMoments } from '../api/logbookGameDetail.js'
 import { computeLogbookRetrospective } from '../api/logbookRetrospective.js'
 import { fetchHighlights } from '../api/highlights.js'
@@ -19,6 +21,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { dateLabel, SectionHead } from './logbook/statsShared.jsx'
 import { RetrospectiveSections } from './logbook/RetrospectiveSections.jsx'
+import { LogbookMilestones } from './logbook/LogbookMilestones.jsx'
 
 // The Logbook retrospective — what your collection adds up to (ADR-0035, the
 // game-stamps PRD §6, Tier 1).
@@ -166,6 +169,16 @@ export function LogbookStatsPage({ bookId = null }) {
     [levelStamps, facts.data],
   )
 
+  // Milestones read the WHOLE collection (`stamps`), not the level-filtered
+  // view every other section here uses — "every MLB club" is a fact about
+  // your whole book, not about whichever level filter happens to be active.
+  // Spoiler-free by classification (see spoiler-manifest.json): team
+  // identity only, never a score.
+  const milestones = useMemo(
+    () => computeAllMilestones(stamps, facts.data ?? {}),
+    [stamps, facts.data],
+  )
+
   // The ported First Scorebook sections' own two fetches, gated to the
   // level-filtered gamePks — see the header. Keyed the same way `facts` is,
   // so a note edit (which rewrites stamp objects) doesn't refetch a whole
@@ -266,6 +279,8 @@ export function LogbookStatsPage({ bookId = null }) {
           below leave {stats.pending === 1 ? 'it' : 'them'} out.
         </p>
       )}
+
+      <LogbookMilestones milestones={milestones} />
 
       <section className="logbookstats__section">
         <SectionHead
