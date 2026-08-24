@@ -211,7 +211,8 @@ don't run these by hand.
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
 - `gen-team-records.mjs` → `public/data/team-records/{season}/{teamId}.json` (one
   file per club per season, ~24 KB) — the per-game LEDGER every club's
-  situational records are read off, at MLB and the four full-season MiLB levels.
+  situational records are read off, at MLB, the four full-season MiLB levels,
+  and Rookie (sportId 16, the complex leagues).
   Feeds the Numbers tab's Records card (`src/api/teamRecords.js`): W-L when
   scoring first, out-hitting the opponent, leading after 7, facing a left-handed
   starter, on a getaway day, by month, by division, plus the season counts that
@@ -230,7 +231,7 @@ don't run these by hand.
   the idempotency guard, so the nightly cost is the ~65 games that finished,
   never the season. That table is **seven columns plus a `payload_json`**, not
   thirty-one, and the schema comment says why: `dumpGroup` repeats every column
-  NAME on every row, so a five-level season would otherwise have committed
+  NAME on every row, so a six-level season would otherwise have committed
   megabytes of column names.
   **Three calls per game and no more**: the date's schedule (bulk, one per date
   per level, carrying the full linescore), the box score, and a field-pruned
