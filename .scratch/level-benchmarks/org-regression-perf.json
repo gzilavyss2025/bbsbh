@@ -1,0 +1,723 @@
+{
+  "rowsUsed": 3026,
+  "droppedBelowFloor": 252,
+  "droppedNoPool": 0,
+  "baseline": {
+    "n": 3026,
+    "p": 36,
+    "r2": 0.055856553520873264,
+    "dof": 2990,
+    "orgEffects": [
+      {
+        "orgId": 144,
+        "name": "Atlanta Braves",
+        "n": 105,
+        "beta": -0.29977266642543904,
+        "pctEffect": -25.9,
+        "significant": true
+      },
+      {
+        "orgId": 110,
+        "name": "Baltimore Orioles",
+        "n": 92,
+        "beta": -0.20096918187933838,
+        "pctEffect": -18.2,
+        "significant": false
+      },
+      {
+        "orgId": 145,
+        "name": "Chicago White Sox",
+        "n": 85,
+        "beta": -0.1704815095687599,
+        "pctEffect": -15.7,
+        "significant": false
+      },
+      {
+        "orgId": 136,
+        "name": "Seattle Mariners",
+        "n": 84,
+        "beta": -0.15487026277840138,
+        "pctEffect": -14.3,
+        "significant": false
+      },
+      {
+        "orgId": 108,
+        "name": "Los Angeles Angels",
+        "n": 79,
+        "beta": -0.14190933327691077,
+        "pctEffect": -13.2,
+        "significant": false
+      },
+      {
+        "orgId": 120,
+        "name": "Washington Nationals",
+        "n": 85,
+        "beta": -0.12328221988631263,
+        "pctEffect": -11.6,
+        "significant": false
+      },
+      {
+        "orgId": 116,
+        "name": "Detroit Tigers",
+        "n": 82,
+        "beta": -0.11824608027403286,
+        "pctEffect": -11.2,
+        "significant": false
+      },
+      {
+        "orgId": 141,
+        "name": "Toronto Blue Jays",
+        "n": 83,
+        "beta": -0.08477515910685132,
+        "pctEffect": -8.1,
+        "significant": false
+      },
+      {
+        "orgId": 146,
+        "name": "Miami Marlins",
+        "n": 74,
+        "beta": -0.05188530816246427,
+        "pctEffect": -5.1,
+        "significant": false
+      },
+      {
+        "orgId": 142,
+        "name": "Minnesota Twins",
+        "n": 104,
+        "beta": -0.050829402770181914,
+        "pctEffect": -5,
+        "significant": false
+      },
+      {
+        "orgId": 113,
+        "name": "Cincinnati Reds",
+        "n": 83,
+        "beta": -0.042614881610271244,
+        "pctEffect": -4.2,
+        "significant": false
+      },
+      {
+        "orgId": 118,
+        "name": "Kansas City Royals",
+        "n": 124,
+        "beta": -0.029950611691099797,
+        "pctEffect": -3,
+        "significant": false
+      },
+      {
+        "orgId": 140,
+        "name": "Texas Rangers",
+        "n": 108,
+        "beta": -0.016059753669235982,
+        "pctEffect": -1.6,
+        "significant": false
+      },
+      {
+        "orgId": 147,
+        "name": "New York Yankees",
+        "n": 114,
+        "beta": -0.00708120428554615,
+        "pctEffect": -0.7,
+        "significant": false
+      },
+      {
+        "orgId": 135,
+        "name": "San Diego Padres",
+        "n": 94,
+        "beta": 0.007118153346486314,
+        "pctEffect": 0.7,
+        "significant": false
+      },
+      {
+        "orgId": 121,
+        "name": "New York Mets",
+        "n": 93,
+        "beta": 0.01616529863927732,
+        "pctEffect": 1.6,
+        "significant": false
+      },
+      {
+        "orgId": 117,
+        "name": "Houston Astros",
+        "n": 150,
+        "beta": 0.028220242468466973,
+        "pctEffect": 2.9,
+        "significant": false
+      },
+      {
+        "orgId": 138,
+        "name": "St. Louis Cardinals",
+        "n": 97,
+        "beta": 0.033338760998873576,
+        "pctEffect": 3.4,
+        "significant": false
+      },
+      {
+        "orgId": 137,
+        "name": "San Francisco Giants",
+        "n": 78,
+        "beta": 0.044834428352817396,
+        "pctEffect": 4.6,
+        "significant": false
+      },
+      {
+        "orgId": 112,
+        "name": "Chicago Cubs",
+        "n": 112,
+        "beta": 0.05288051558124948,
+        "pctEffect": 5.4,
+        "significant": false
+      },
+      {
+        "orgId": 119,
+        "name": "Los Angeles Dodgers",
+        "n": 105,
+        "beta": 0.07641239244150673,
+        "pctEffect": 7.9,
+        "significant": false
+      },
+      {
+        "orgId": 111,
+        "name": "Boston Red Sox",
+        "n": 117,
+        "beta": 0.08525406711435357,
+        "pctEffect": 8.9,
+        "significant": false
+      },
+      {
+        "orgId": 115,
+        "name": "Colorado Rockies",
+        "n": 109,
+        "beta": 0.08670351269434676,
+        "pctEffect": 9.1,
+        "significant": false
+      },
+      {
+        "orgId": 109,
+        "name": "Arizona Diamondbacks",
+        "n": 126,
+        "beta": 0.09516394805706889,
+        "pctEffect": 10,
+        "significant": false
+      },
+      {
+        "orgId": 143,
+        "name": "Philadelphia Phillies",
+        "n": 93,
+        "beta": 0.09565800596597523,
+        "pctEffect": 10,
+        "significant": false
+      },
+      {
+        "orgId": 133,
+        "name": "Oakland Athletics",
+        "n": 83,
+        "beta": 0.09803650313591009,
+        "pctEffect": 10.3,
+        "significant": false
+      },
+      {
+        "orgId": 134,
+        "name": "Pittsburgh Pirates",
+        "n": 128,
+        "beta": 0.11340762364912173,
+        "pctEffect": 12,
+        "significant": false
+      },
+      {
+        "orgId": 158,
+        "name": "Milwaukee Brewers",
+        "n": 88,
+        "beta": 0.1855819559284948,
+        "pctEffect": 20.4,
+        "significant": false
+      },
+      {
+        "orgId": 114,
+        "name": "Cleveland Guardians",
+        "n": 125,
+        "beta": 0.2058509390260105,
+        "pctEffect": 22.9,
+        "significant": true
+      },
+      {
+        "orgId": 139,
+        "name": "Tampa Bay Rays",
+        "n": 126,
+        "beta": 0.2681012279848863,
+        "pctEffect": 30.7,
+        "significant": true
+      }
+    ],
+    "sigCount": 3,
+    "perfCoef": null
+  },
+  "augmented": {
+    "n": 3026,
+    "p": 37,
+    "r2": 0.07667039992230718,
+    "dof": 2989,
+    "orgEffects": [
+      {
+        "orgId": 144,
+        "name": "Atlanta Braves",
+        "n": 105,
+        "beta": -0.3400517910111418,
+        "pctEffect": -28.8,
+        "significant": true
+      },
+      {
+        "orgId": 110,
+        "name": "Baltimore Orioles",
+        "n": 92,
+        "beta": -0.18806027514909285,
+        "pctEffect": -17.1,
+        "significant": false
+      },
+      {
+        "orgId": 145,
+        "name": "Chicago White Sox",
+        "n": 85,
+        "beta": -0.17849107953436688,
+        "pctEffect": -16.3,
+        "significant": false
+      },
+      {
+        "orgId": 108,
+        "name": "Los Angeles Angels",
+        "n": 79,
+        "beta": -0.16846103296934034,
+        "pctEffect": -15.5,
+        "significant": false
+      },
+      {
+        "orgId": 116,
+        "name": "Detroit Tigers",
+        "n": 82,
+        "beta": -0.16450315018846573,
+        "pctEffect": -15.2,
+        "significant": false
+      },
+      {
+        "orgId": 136,
+        "name": "Seattle Mariners",
+        "n": 84,
+        "beta": -0.14516536988804243,
+        "pctEffect": -13.5,
+        "significant": false
+      },
+      {
+        "orgId": 120,
+        "name": "Washington Nationals",
+        "n": 85,
+        "beta": -0.127397049077889,
+        "pctEffect": -12,
+        "significant": false
+      },
+      {
+        "orgId": 141,
+        "name": "Toronto Blue Jays",
+        "n": 83,
+        "beta": -0.09016520821421192,
+        "pctEffect": -8.6,
+        "significant": false
+      },
+      {
+        "orgId": 118,
+        "name": "Kansas City Royals",
+        "n": 124,
+        "beta": -0.04994104853188275,
+        "pctEffect": -4.9,
+        "significant": false
+      },
+      {
+        "orgId": 146,
+        "name": "Miami Marlins",
+        "n": 74,
+        "beta": -0.04567314864002167,
+        "pctEffect": -4.5,
+        "significant": false
+      },
+      {
+        "orgId": 142,
+        "name": "Minnesota Twins",
+        "n": 104,
+        "beta": -0.03644093536582094,
+        "pctEffect": -3.6,
+        "significant": false
+      },
+      {
+        "orgId": 113,
+        "name": "Cincinnati Reds",
+        "n": 83,
+        "beta": -0.03417727077752902,
+        "pctEffect": -3.4,
+        "significant": false
+      },
+      {
+        "orgId": 140,
+        "name": "Texas Rangers",
+        "n": 108,
+        "beta": -0.03054950870390316,
+        "pctEffect": -3,
+        "significant": false
+      },
+      {
+        "orgId": 147,
+        "name": "New York Yankees",
+        "n": 114,
+        "beta": 0.011251914172684452,
+        "pctEffect": 1.1,
+        "significant": false
+      },
+      {
+        "orgId": 121,
+        "name": "New York Mets",
+        "n": 93,
+        "beta": 0.019201682294974085,
+        "pctEffect": 1.9,
+        "significant": false
+      },
+      {
+        "orgId": 117,
+        "name": "Houston Astros",
+        "n": 150,
+        "beta": 0.035341576217314014,
+        "pctEffect": 3.6,
+        "significant": false
+      },
+      {
+        "orgId": 112,
+        "name": "Chicago Cubs",
+        "n": 112,
+        "beta": 0.037482540919132945,
+        "pctEffect": 3.8,
+        "significant": false
+      },
+      {
+        "orgId": 135,
+        "name": "San Diego Padres",
+        "n": 94,
+        "beta": 0.03979241507241027,
+        "pctEffect": 4.1,
+        "significant": false
+      },
+      {
+        "orgId": 138,
+        "name": "St. Louis Cardinals",
+        "n": 97,
+        "beta": 0.04710958863899706,
+        "pctEffect": 4.8,
+        "significant": false
+      },
+      {
+        "orgId": 109,
+        "name": "Arizona Diamondbacks",
+        "n": 126,
+        "beta": 0.05332642093937667,
+        "pctEffect": 5.5,
+        "significant": false
+      },
+      {
+        "orgId": 137,
+        "name": "San Francisco Giants",
+        "n": 78,
+        "beta": 0.06595841737375308,
+        "pctEffect": 6.8,
+        "significant": false
+      },
+      {
+        "orgId": 143,
+        "name": "Philadelphia Phillies",
+        "n": 93,
+        "beta": 0.08077779095460547,
+        "pctEffect": 8.4,
+        "significant": false
+      },
+      {
+        "orgId": 115,
+        "name": "Colorado Rockies",
+        "n": 109,
+        "beta": 0.09235202028998396,
+        "pctEffect": 9.7,
+        "significant": false
+      },
+      {
+        "orgId": 111,
+        "name": "Boston Red Sox",
+        "n": 117,
+        "beta": 0.09409923621122585,
+        "pctEffect": 9.9,
+        "significant": false
+      },
+      {
+        "orgId": 134,
+        "name": "Pittsburgh Pirates",
+        "n": 128,
+        "beta": 0.11244605511666697,
+        "pctEffect": 11.9,
+        "significant": false
+      },
+      {
+        "orgId": 119,
+        "name": "Los Angeles Dodgers",
+        "n": 105,
+        "beta": 0.11915905958171735,
+        "pctEffect": 12.7,
+        "significant": false
+      },
+      {
+        "orgId": 133,
+        "name": "Oakland Athletics",
+        "n": 83,
+        "beta": 0.12619958993599723,
+        "pctEffect": 13.5,
+        "significant": false
+      },
+      {
+        "orgId": 158,
+        "name": "Milwaukee Brewers",
+        "n": 88,
+        "beta": 0.15431074611150877,
+        "pctEffect": 16.7,
+        "significant": false
+      },
+      {
+        "orgId": 114,
+        "name": "Cleveland Guardians",
+        "n": 125,
+        "beta": 0.22876896439192607,
+        "pctEffect": 25.7,
+        "significant": true
+      },
+      {
+        "orgId": 139,
+        "name": "Tampa Bay Rays",
+        "n": 126,
+        "beta": 0.2814988498294343,
+        "pctEffect": 32.5,
+        "significant": true
+      }
+    ],
+    "sigCount": 3,
+    "perfCoef": {
+      "beta": -0.08254690596993663,
+      "se": 0.01005634232598584,
+      "pctPer10Pctile": -7.9
+    }
+  },
+  "shifts": [
+    {
+      "name": "Los Angeles Dodgers",
+      "base": 7.9,
+      "aug": 12.7,
+      "shift": 4.799999999999999,
+      "signFlip": false
+    },
+    {
+      "name": "Arizona Diamondbacks",
+      "base": 10,
+      "aug": 5.5,
+      "shift": -4.5,
+      "signFlip": false
+    },
+    {
+      "name": "Detroit Tigers",
+      "base": -11.2,
+      "aug": -15.2,
+      "shift": -4,
+      "signFlip": false
+    },
+    {
+      "name": "Milwaukee Brewers",
+      "base": 20.4,
+      "aug": 16.7,
+      "shift": -3.6999999999999993,
+      "signFlip": false
+    },
+    {
+      "name": "San Diego Padres",
+      "base": 0.7,
+      "aug": 4.1,
+      "shift": 3.3999999999999995,
+      "signFlip": false
+    },
+    {
+      "name": "Oakland Athletics",
+      "base": 10.3,
+      "aug": 13.5,
+      "shift": 3.1999999999999993,
+      "signFlip": false
+    },
+    {
+      "name": "Atlanta Braves",
+      "base": -25.9,
+      "aug": -28.8,
+      "shift": -2.900000000000002,
+      "signFlip": false
+    },
+    {
+      "name": "Cleveland Guardians",
+      "base": 22.9,
+      "aug": 25.7,
+      "shift": 2.8000000000000007,
+      "signFlip": false
+    },
+    {
+      "name": "Los Angeles Angels",
+      "base": -13.2,
+      "aug": -15.5,
+      "shift": -2.3000000000000007,
+      "signFlip": false
+    },
+    {
+      "name": "San Francisco Giants",
+      "base": 4.6,
+      "aug": 6.8,
+      "shift": 2.2,
+      "signFlip": false
+    },
+    {
+      "name": "Kansas City Royals",
+      "base": -3,
+      "aug": -4.9,
+      "shift": -1.9000000000000004,
+      "signFlip": false
+    },
+    {
+      "name": "Tampa Bay Rays",
+      "base": 30.7,
+      "aug": 32.5,
+      "shift": 1.8000000000000007,
+      "signFlip": false
+    },
+    {
+      "name": "New York Yankees",
+      "base": -0.7,
+      "aug": 1.1,
+      "shift": 1.8,
+      "signFlip": true
+    },
+    {
+      "name": "Chicago Cubs",
+      "base": 5.4,
+      "aug": 3.8,
+      "shift": -1.6000000000000005,
+      "signFlip": false
+    },
+    {
+      "name": "Philadelphia Phillies",
+      "base": 10,
+      "aug": 8.4,
+      "shift": -1.5999999999999996,
+      "signFlip": false
+    },
+    {
+      "name": "Minnesota Twins",
+      "base": -5,
+      "aug": -3.6,
+      "shift": 1.4,
+      "signFlip": false
+    },
+    {
+      "name": "Texas Rangers",
+      "base": -1.6,
+      "aug": -3,
+      "shift": -1.4,
+      "signFlip": false
+    },
+    {
+      "name": "St. Louis Cardinals",
+      "base": 3.4,
+      "aug": 4.8,
+      "shift": 1.4,
+      "signFlip": false
+    },
+    {
+      "name": "Baltimore Orioles",
+      "base": -18.2,
+      "aug": -17.1,
+      "shift": 1.0999999999999979,
+      "signFlip": false
+    },
+    {
+      "name": "Boston Red Sox",
+      "base": 8.9,
+      "aug": 9.9,
+      "shift": 1,
+      "signFlip": false
+    },
+    {
+      "name": "Seattle Mariners",
+      "base": -14.3,
+      "aug": -13.5,
+      "shift": 0.8000000000000007,
+      "signFlip": false
+    },
+    {
+      "name": "Cincinnati Reds",
+      "base": -4.2,
+      "aug": -3.4,
+      "shift": 0.8000000000000003,
+      "signFlip": false
+    },
+    {
+      "name": "Houston Astros",
+      "base": 2.9,
+      "aug": 3.6,
+      "shift": 0.7000000000000002,
+      "signFlip": false
+    },
+    {
+      "name": "Chicago White Sox",
+      "base": -15.7,
+      "aug": -16.3,
+      "shift": -0.6000000000000014,
+      "signFlip": false
+    },
+    {
+      "name": "Miami Marlins",
+      "base": -5.1,
+      "aug": -4.5,
+      "shift": 0.5999999999999996,
+      "signFlip": false
+    },
+    {
+      "name": "Colorado Rockies",
+      "base": 9.1,
+      "aug": 9.7,
+      "shift": 0.5999999999999996,
+      "signFlip": false
+    },
+    {
+      "name": "Toronto Blue Jays",
+      "base": -8.1,
+      "aug": -8.6,
+      "shift": -0.5,
+      "signFlip": false
+    },
+    {
+      "name": "Washington Nationals",
+      "base": -11.6,
+      "aug": -12,
+      "shift": -0.40000000000000036,
+      "signFlip": false
+    },
+    {
+      "name": "New York Mets",
+      "base": 1.6,
+      "aug": 1.9,
+      "shift": 0.2999999999999998,
+      "signFlip": false
+    },
+    {
+      "name": "Pittsburgh Pirates",
+      "base": 12,
+      "aug": 11.9,
+      "shift": -0.09999999999999964,
+      "signFlip": false
+    }
+  ],
+  "meanAbsShift": 1.8066666666666664,
+  "flips": 1
+}
