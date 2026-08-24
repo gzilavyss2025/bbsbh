@@ -7,6 +7,8 @@ import {
   fetchTeamRosterIds,
 } from '../../../api/team.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap } from '../../../api/prospects.js'
+import { fetchProspectTrend, prospectTrendById, standingLabel, movementState } from '../../../api/prospectTrend.js'
+import { loadRehabAssignments } from '../../../api/rehab.js'
 import { parentOrgHistory } from '../../../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../../../api/careerTimeline.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
@@ -14,6 +16,62 @@ import { SPORT_LABEL } from '../../../lib/teams.js'
 import { seasonOf, affiliateCardsFrom } from './shared.js'
 
 const DASH = '—'
+
+// Position order the Depth Chart's pill row reads in, an infield-out-to-the-
+// mound walk of the diamond rather than the scrape's own alphabetical field
+// order — a reader expects catcher first, pitchers last. Anything the scrape
+// hands back outside this set (there's no such value today, but a future
+// scrape tweak shouldn't crash the tab) sorts after it, alphabetically.
+const POSITION_ORDER = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'OF', 'DH', 'LHP', 'RHP', 'SHP']
+
+// Two parallel rankings per position — never blended into one score (no
+// outlet publishes a formula for merging a scouting grade with a stat line;
+// FanGraphs' own Board keeps them separate, and this mirrors that). Scouting
+// is this org's existing ranked pool (`orgRank`, already resolved above);
+// Performance is the same pool re-sorted by bbsbh's own level-relative
+// percentile (prospectTrend.js) — the two orders are free to disagree, and
+// when they do that IS the finding, not noise to resolve. Positions with no
+// prospect at all in the ranked pool simply don't appear as a pill.
+export function buildDepthChart(prospects) {
+  const byPos = new Map()
+  for (const p of prospects) {
+    if (!p.position) continue
+    if (!byPos.has(p.position)) byPos.set(p.position, [])
+    byPos.get(p.position).push(p)
+  }
+  const positions = [...byPos.keys()].sort((a, b) => {
+    const ai = POSITION_ORDER.indexOf(a)
+    const bi = POSITION_ORDER.indexOf(b)
+    if (ai === -1 && bi === -1) return a.localeCompare(b)
+    if (ai === -1) return 1
+    if (bi === -1) return -1
+    return ai - bi
+  })
+  const byPosition = {}
+  for (const pos of positions) {
+    const rows = byPos.get(pos)
+    byPosition[pos] = {
+      scouting: [...rows].sort((a, b) => a.orgRank - b.orgRank),
+      performance: rows
+        .filter((p) => p.trend)
+        .sort((a, b) => b.trend.percentile - a.trend.percentile),
+    }
+  }
+  return { positions, byPosition }
+}
+
+// The Horizon card's "Promotion watch" list: org prospects whose level-relative
+// standing is both real (qualified past the playing-time floor) and genuinely
+// trending up (movementState's own 5-point floor, not a single good night) —
+// ranked by how good the standing is right now, not by how fast it moved,
+// since a player already near the top of his level reads as closer to a real
+// decision than one who merely gained the most points off a low base.
+export function promotionWatchFrom(prospects, limit = 4) {
+  return prospects
+    .filter((p) => p.trend && p.trend.movement?.direction === 'up')
+    .sort((a, b) => b.trend.percentile - a.trend.percentile)
+    .slice(0, limit)
+}
 
 // The Minors tab's own loader — affiliates, org-wide prospects and (MiLB only)
 // affiliation history. Fetches nothing else: roster, standings, schedule
@@ -33,7 +91,7 @@ export async function loadMinors(id, asOf) {
   // same org-wide leaderboard.
   const orgId = isMilb ? team.parentOrgId ?? null : id
 
-  const [roster, affiliates, complexAffiliates, prospectsSnapshot] = await Promise.all([
+  const [roster, affiliates, complexAffiliates, prospectsSnapshot, trendSnapshot, rehabSnapshot] = await Promise.all([
     // Only needed to seed this org's own roster ids below (MLB clubs only —
     // a MiLB affiliate's org roster comes from fetchTeamRosterIds instead).
     isMilb ? Promise.resolve([]) : fetchTeamRoster(id, season, { sportId }),
@@ -44,6 +102,11 @@ export async function loadMinors(id, asOf) {
     // fetchComplexAffiliates for why they can't just join AFFILIATE_SPORT_IDS.
     orgId ? fetchComplexAffiliates(orgId, season) : Promise.resolve([]),
     fetchTopProspects(),
+    // Both static, same-origin, session-memoized snapshots the Horizon and
+    // Depth Chart cards below share — one fetch each regardless of how many
+    // org prospects join against them.
+    fetchProspectTrend(),
+    loadRehabAssignments(),
   ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
@@ -99,6 +162,24 @@ export async function loadMinors(id, asOf) {
     // Neither roster membership nor this season's stats resolved a real
     // level — never surface the raw ambiguous scraped string (e.g. "ALL (2)").
     return { ...p, affiliateTeamId: null, levelLabel: /^ALL\b/i.test(p.levelRaw) ? DASH : p.levelRaw }
+  }).map((p) => {
+    // Join bbsbh's own level-relative percentile onto each org prospect —
+    // the Horizon and Depth Chart cards' shared "Performance" signal. `null`
+    // for anyone with no current-level line at all (off the board, hurt all
+    // season, or a fresh promotion the nightly generator hasn't caught up to
+    // yet) or short of the qualification floor — those rows just don't carry
+    // a trend, rather than a misleading zero.
+    const entry = prospectTrendById(trendSnapshot, p.playerId)
+    if (!entry?.qualified) return { ...p, trend: null }
+    return {
+      ...p,
+      trend: {
+        percentile: entry.percentile,
+        group: entry.group,
+        standing: standingLabel(entry.percentile, entry.group),
+        movement: movementState(entry.movement),
+      },
+    }
   })
 
   // Affiliation history — the ordered MLB parent orgs this farm club has
@@ -125,13 +206,24 @@ export async function loadMinors(id, asOf) {
   // affiliateCardsFrom's own header.
   const affiliateCards = affiliateCardsFrom(team, isMilb, affiliates, complexAffiliates)
 
+  // Milestones: this org's own rehab-assignment stints, from the same
+  // league-wide snapshot RehabPage reads — a rehabbing player is a real
+  // fact about a game he's about to appear in, not a score, so it stays
+  // spoiler-free like the rest of this tab.
+  const milestones = orgId ? (rehabSnapshot.players ?? []).filter((p) => p.orgId === orgId) : []
+  const horizon = { promotionWatch: promotionWatchFrom(prospects), milestones }
+  const depthChart = buildDepthChart(prospects)
+
   return {
     team,
     season,
     sportId,
     isMilb,
+    orgId,
     affiliateCards,
     prospects,
     affiliationHistory,
+    horizon,
+    depthChart,
   }
 }

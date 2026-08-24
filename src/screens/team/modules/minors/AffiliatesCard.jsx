@@ -1,6 +1,6 @@
-import { SPORT_LABEL } from '../../../lib/teams.js'
-import { TeamLink } from '../../../components/team/TeamLink.jsx'
-import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
+import { SPORT_LABEL } from '../../../../lib/teams.js'
+import { TeamLink } from '../../../../components/team/TeamLink.jsx'
+import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 
 const DASH = '—'
 

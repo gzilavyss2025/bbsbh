@@ -1084,3 +1084,194 @@
   color: var(--text-caption);
 }
 
+/* ============================================================
+   Minors tab — Horizon card + Depth Chart card. Both are built from the
+   same "broadcast lower-third" tile (.horizontile): headshot with a floated
+   position badge (same idiom as .playercard__posbadge/.prospectshowcase__
+   posbadge above), name + team crest, and a boxed stat tile on the trailing
+   edge — the .phcard__tile idiom (72-player-hover-card.css) reused here as
+   .horizontile__statbox rather than a second stat-box pattern. One card
+   language, reused by both modules and by both of a module's own lists
+   (Promotion watch/Milestones; Scouting/Performance) — see the "card anatomy
+   learned once" rule in the design notes for this page.
+   ============================================================ */
+
+.horizoncard__section {
+  margin: var(--space-4) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.horizoncard__section:first-child {
+  margin-top: 0;
+}
+
+.horizoncard__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* The tile itself — headshot, a name+meta column that can shrink, and a
+   fixed-width stat box that never does (a long standing string like "Bottom
+   12% ERA" must not squeeze the name column). */
+.horizontile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.horizontile--compact {
+  padding: var(--space-2);
+  gap: var(--space-2);
+}
+
+.horizontile__shotwrap {
+  position: relative;
+  display: block;
+  flex: none;
+  border-radius: var(--radius-sm);
+}
+.shot.horizontile__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.horizontile--compact .shot.horizontile__shot {
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+}
+.horizontile__posbadge {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  min-width: 16px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-ui);
+  text-align: center;
+}
+
+.horizontile__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.horizontile__name.horizontile__name {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+  line-height: var(--lh-tight);
+}
+.horizontile__meta,
+.horizontile__move {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.horizontile__arrow {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  color: var(--graphite-soft);
+}
+
+/* The stat box — the hover card's own .phcard__tile recipe, reused rather
+   than a second boxed-stat pattern invented for this page. */
+.horizontile__statbox {
+  flex: none;
+  width: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--space-2) 6px;
+  text-align: center;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
+.horizontile__statv {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-small);
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  line-height: var(--lh-tight);
+}
+.horizontile__statk {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  line-height: var(--lh-tight);
+}
+
+/* Horizon card's masthead carries a thin medal-amber rail — the same accent
+   the prospect timeline's award nodes use — so the tab's one forward-looking
+   card reads as distinct from the recap cards around it without a second
+   color vocabulary. */
+.horizoncard > .thub-card__head {
+  border-bottom-color: var(--award-line);
+}
+
+/* Depth Chart's position pills. */
+.depthchart__positions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--space-4);
+}
+.depthpos {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  padding: 5px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-caption);
+}
+.depthpos.is-active {
+  background: var(--ink-0);
+  border-color: var(--ink-0);
+  color: var(--text-on-ink);
+}
+
+.depthchart__columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+}
+@media (min-width: 560px) {
+  .depthchart__columns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
