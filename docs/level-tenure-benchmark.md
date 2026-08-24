@@ -121,6 +121,15 @@ scratch files without reverting `pull.mjs`'s `DEBUT_YEAR_MIN` to 2019.
   undated first-level arrivals. Busts (players who never graduated) are a
   different, harder cohort: no clean "end of career" signal for someone
   released or still active. Unbuilt.
+- **A time-varying org covariate does predict speed, even though the org label
+  doesn't.** `docs/homegrown-dependence.md` measures how much of a club's
+  major-league playing time comes from players it developed, and finds a more
+  homegrown-dependent club promotes about 11% slower the following season —
+  within org, over time, under every check applied. It also answers the reverse
+  question the bust note above leaves open, on a narrower cohort: among players
+  who reached the majors, faster promotion is worth about +1 WAR over the first
+  six seasons and about 4 points less bust risk. Neither result changes anything
+  above, and neither is a per-team feature.
 
 ## Where the work lives
 

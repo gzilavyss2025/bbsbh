@@ -443,6 +443,68 @@ console.log(`  two-sided permutation p = ${permP.toFixed(4)} (${moreExtreme} of 
 console.log(`  for comparison, the org-clustered t gave p = ${primaryFE.share.pByOrgClusterT.toFixed(4)}`)
 out.robustness.permutation = { draws: PERM_DRAWS, seed: PERM_SEED, observedBeta, permP, moreExtreme, nullP05: pct(0.05), nullMedian: pct(0.5), nullP95: pct(0.95) }
 
+// --- full season fixed effects instead of the three era buckets --------------------
+// The sharpest alternative explanation for the headline coefficient is a
+// league-wide time pattern in BOTH series leaking through a coarse control.
+// Homegrown share does drift over the span (up into 2011-2014, down after) and
+// days-at-level has a time pattern of its own that the prior spike spent a whole
+// pass establishing is mostly instrument. Three era buckets cannot absorb that;
+// a full set of transition-year dummies can. With org FE and season FE together,
+// the coefficient is identified from an org's deviation from ITS OWN average
+// relative to the LEAGUE'S deviation that same year, which is the strongest
+// version of the design available here.
+function fitSeasonFE(rows, { orgFE, label }) {
+  const levels = ['A', 'High-A', 'AA', 'AAA'].filter((l) => rows.some((r) => r.level === l))
+  const tiers = TIERS.filter((t) => rows.some((r) => r.tier === t))
+  const seasons = [...new Set(rows.map((r) => r.season))].sort((a, b) => a - b)
+  const orgIds = [...new Set(rows.map((r) => r.orgId))].sort((a, b) => a - b)
+  const levelRef = levels[levels.length - 1]
+  const tierRef = tiers[tiers.length - 1]
+  const seasonRef = seasons[seasons.length - 1]
+  const orgRef = orgIds[orgIds.length - 1]
+  const mean = rows.reduce((s, r) => s + r.share, 0) / rows.length
+  const sd = Math.sqrt(rows.reduce((s, r) => s + (r.share - mean) ** 2, 0) / rows.length)
+  const X = rows.map((r) => {
+    const row = [1, (r.share - mean) / sd, r.winPct]
+    for (const l of levels.filter((x) => x !== levelRef)) row.push(r.level === l ? 1 : r.level === levelRef ? -1 : 0)
+    for (const t of tiers.filter((x) => x !== tierRef)) row.push(r.tier === t ? 1 : r.tier === tierRef ? -1 : 0)
+    for (const s of seasons.filter((x) => x !== seasonRef)) row.push(r.season === s ? 1 : r.season === seasonRef ? -1 : 0)
+    if (orgFE) for (const o of orgIds.filter((x) => x !== orgRef)) row.push(r.orgId === o ? 1 : r.orgId === orgRef ? -1 : 0)
+    return row
+  })
+  const fit = fitOLS(
+    X,
+    rows.map((r) => r.logDays),
+  )
+  const byOrg = clusterCov(
+    X,
+    fit.resid,
+    rows.map((r) => r.orgId),
+    fit.XtXinv,
+  )
+  const twoWay = twoWayClusterCov(
+    X,
+    fit.resid,
+    rows.map((r) => r.orgId),
+    rows.map((r) => r.playerId),
+    fit.XtXinv,
+  )
+  const b = fit.beta[1]
+  const seOrg = Math.sqrt(byOrg.cov[1][1])
+  const seTwo = twoWay.cov[1][1] > 0 ? Math.sqrt(twoWay.cov[1][1]) : null
+  const pct = (Math.exp(b) - 1) * 100
+  console.log(`\n--- ${label} ---`)
+  console.log(`n=${fit.n}, p=${fit.p}, R^2=${fit.r2.toFixed(4)}`)
+  console.log(`  homegrownShare: ${pct >= 0 ? '+' : ''}${pct.toFixed(2)}% days per +1 SD`)
+  console.log(`  SE by org ${seOrg.toFixed(4)} (p=${tTwoSidedP(b / seOrg, byOrg.G - 1).toFixed(4)}) | two-way ${seTwo == null ? 'non-positive' : seTwo.toFixed(4)} (p=${seTwo == null ? 'n/a' : tTwoSidedP(b / seTwo, byOrg.G - 1).toFixed(4)})`)
+  return { label, n: fit.n, r2: fit.r2, betaPerSD: b, pctPerSD: pct, seOrg, seTwoWay: seTwo, pByOrg: tTwoSidedP(b / seOrg, byOrg.G - 1), pTwoWay: seTwo == null ? null : tTwoSidedP(b / seTwo, byOrg.G - 1) }
+}
+console.log('\nfull season fixed effects in place of the three era buckets:')
+out.robustness.seasonFE = {
+  orgFEOn: fitSeasonFE(primaryRows, { orgFE: true, label: 'lagged S-1, floor 2011 | season FE + org FE' }),
+  orgFEOff: fitSeasonFE(primaryRows, { orgFE: false, label: 'lagged S-1, floor 2011 | season FE, no org FE' }),
+}
+
 // --- split by level ---------------------------------------------------------------
 console.log('\nby level (primary spec, org FE):')
 for (const lvl of ['High-A', 'AA', 'AAA']) {

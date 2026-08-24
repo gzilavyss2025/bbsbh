@@ -980,6 +980,66 @@ it is a correction to the original claim rather than a consequence of the
 resolver fix. The claim was made before the cluster-robust refit existed and
 was never revisited once it did.
 
+## A time-varying org covariate DOES predict speed (2026-08-24)
+
+Split into its own document — `docs/homegrown-dependence.md` — because it adds a
+new measurement rather than re-running this one. Read the two together; the model
+there is fitted on the duration rows built here, after this document's era floor
+and resolver fix.
+
+The question it asks is whether organizations that lean harder on their own
+players at the major-league level promote faster or slower. The answer is
+**slower**: +11.2% days at level per standard deviation of homegrown share,
+lagged one season, identified WITHIN organization over time, org-clustered
+p=0.0056. It holds under full season fixed effects (+12.2%, p=0.0036), stays
+p<0.05 in 30 of 30 leave-one-organization-out refits, and a seeded 500-draw
+within-org permutation test returns p=0.0040 against the clustered t's 0.0056.
+
+**This sharpens a framing here rather than contradicting one.** This document's
+conclusion is that org IDENTITY is not a usable signal for days-at-level — 0 of
+30 organizations outside the pooled window, per-org estimates that flip with the
+standard-error method, ICC around 1%. That stands. What the new work shows is
+that a time-varying org CHARACTERISTIC can predict the same outcome even though
+the org label cannot, and the two are consistent: the new covariate's incremental
+R² is 0.0043, so it takes nothing away from "individual-player noise dominates
+this outcome". A small, real, measurable organizational behaviour and a nearly
+unpredictable per-player outcome are not in conflict.
+
+Three things there are corrections to inputs this document used.
+
+- **The draft-round tier fitted throughout this document is built on a real
+  bug.** `raw.json`'s `ped.draftRound` came from `pull.mjs`'s `fetchPedigree`,
+  which reads `drafts[0]` — and `drafts[0]` can be an EARLIER UNSIGNED draft.
+  **375 of the 3,061 cohort players have a `drafts[0]` that is not their signing
+  draft**, and using `src/api/person/identity.js`'s `draftInfo()` rule instead
+  **moves 284 of them between tiers.** Tier is a control here, not a subject, and
+  no conclusion in this document turns on it — but any rerun should use the
+  corrected tier, which `homegrown-duration-model.mjs` shows how to build from
+  `draft-cache.json`.
+- **`org-variance-components.mjs` prints its numeric self-test instead of
+  asserting it, and one of its stated expectations is wrong.** It checks the
+  chi-square tail at stat=43.773, df=29 against "~0.0400" and produces 0.03856.
+  The implementation is right — `homegrown-stats.mjs` reproduces 0.03856 exactly
+  — the published df=29 five-percent critical is 42.557. Nothing downstream used
+  the printed value, so no result moves. The lesson is the process one: a
+  self-test that prints is a self-test nobody reads.
+- **Player clustering is the wrong axis for an org-season regressor**, and its
+  correction is small: on the new model, clustering by player gives an SE of
+  0.0284 against naive 0.0291, while clustering by ORGANIZATION gives 0.0354.
+  Two-way org-and-player clustering lands on the org-only figure to four decimal
+  places. This is a further instance of the lesson in "And one merged claim the
+  rerun contradicts": measure the direction of an SE correction, never assume it.
+
+Two related questions are answered there and neither disturbs anything here.
+Homegrown dependence does NOT predict winning — 600 organization-seasons, a 95%
+interval of roughly −0.8 to +2.4 wins per 162 per standard deviation, a
+well-powered null. And fast promotion DOES pay off descriptively: one standard
+deviation faster is about +1 WAR over a graduate's first six seasons and about 4
+points less bust risk, most of which survives an in-level performance control.
+That last result is the reverse of this document's arrow and is stated there as a
+description, not a lever — clubs promote the players who are playing well, so the
+causal direction is not identified.
+
 ## Where the work lives
 
 `.scratch/level-benchmarks/team-windows.mjs` — reuses `org-and-timing.mjs`'s
