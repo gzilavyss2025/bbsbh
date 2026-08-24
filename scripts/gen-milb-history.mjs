@@ -1,7 +1,27 @@
 // Regenerates public/data/milb-history.json — the per-season parent-org (and
-// club-name) history for every AAA/AA/A+/A affiliate, so a career-timeline stop
-// shows the org a since-reassigned farm club belonged to AT THE TIME, not the
-// one it reports today. See src/api/milbHistory.js for the reader.
+// club-name) history for every full-season (AAA/AA/A+/A) AND Rookie-level
+// (ACL/FCL/DSL) affiliate, so a career-timeline stop shows the org a
+// since-reassigned farm club belonged to AT THE TIME, not the one it reports
+// today. See src/api/milbHistory.js for the reader.
+//
+// ROOKIE LEVEL (sportId 16) WAS EXCLUDED, THEN ADDED BACK (issue #856) — the
+// exclusion read as an unargued scope note ("skip rookie/complex/DSL noise"),
+// so it was investigated rather than trusted: a full 2005-2026 sweep of every
+// sportId-16 club (147 distinct ids) found real parentOrgId reassignment on
+// only 5 of them — Bluefield/Greeneville/Pulaski/Bristol/Burlington, all
+// pre-2021 Appalachian League clubs, now defunct — a lower churn rate than
+// full-season affiliates saw across the SAME 2021 MiLB reorganization (69 of
+// 90 tracked full-season clubs have a real parentHistory). Every currently
+// active ACL/FCL/DSL club is, and long has been, permanently tied to one org
+// (it IS that org's own academy) — statsapi's data there is clean, just
+// usually uneventful, which is a reason this file stays small for that level,
+// not a reason to distrust it. What genuinely churns at this level is each
+// club's own NAME (jersey-color suffixes like "Gold"/"Blue"/1/2 rotate most
+// years, plus the 2021 GCL→FCL/AZL→ACL league renaming) — but `nameHistory` is
+// a separate era list from `parentHistory` (see the merge below) and isn't
+// read by the Minors tab's "Affiliation history" strip
+// (`parentOrgHistory` in src/api/milbHistory.js), so that cosmetic churn
+// changes this file's byte count, never what any screen renders.
 //
 // WHY THIS EXISTS AS A SCRIPT (the file used to be hand-typed): the file's
 // original premise was "there's no live source for what org a farm club was
@@ -52,9 +72,11 @@ const seedPath = join(here, 'milb-history-seed.json')
 const API = 'https://statsapi.mlb.com/api/v1'
 const START_YEAR = 2005 // statsapi's MiLB affiliate data is only clean from here on — see header
 const END_YEAR = new Date().getFullYear()
-// AAA / AA / A+ / A — the full-season affiliate levels (skip rookie/complex/DSL
-// noise per the chosen scope). Matches src/lib/teams.js's sportId map.
-const LEVELS = [11, 12, 13, 14]
+// AAA / AA / A+ / A / Rookie(ACL+FCL+DSL) — every affiliate level. Matches
+// src/lib/teams.js's sportId map. See the header for why Rookie (16) is
+// included despite its high name-churn: real parent-org reassignment there is
+// rare and clean, not noisy.
+const LEVELS = [11, 12, 13, 14, 16]
 
 async function getJson(url, tries = 3) {
   for (let i = 0; i < tries; i++) {
@@ -249,18 +271,21 @@ async function main() {
     coverage: { seasons: [START_YEAR, END_YEAR], sportIds: LEVELS },
     method:
       'Eras from ' + START_YEAR + ' on are derived from statsapi’s own season-scoped snapshot, ' +
-      'GET /api/v1/teams?sportId={11|12|13|14}&season={Y}, which reports each club’s ' +
+      `GET /api/v1/teams?sportId={${LEVELS.join('|')}}&season={Y}, which reports each club’s ` +
       'name/locationName/league and parentOrgId/parentOrgName AS OF THAT SEASON; consecutive seasons ' +
       'with an equal parent (or name) collapse into one [startYear, endYear] era. This is the ground ' +
       'truth the app’s live lookups (src/api/team.js) miss — those only fetch the CURRENT season and ' +
       'would mislabel a past stint. Pre-' + START_YEAR + ' eras come from the hand-verified seed ' +
       '(statsapi’s own affiliate data is unreliable before then; see the generator header).',
     scope:
-      `All 30 MLB orgs’ AAA/AA/A+/A affiliates (sportIds ${LEVELS.join(', ')}), seasons ` +
-      `${START_YEAR}–${END_YEAR} from statsapi plus hand-verified pre-${START_YEAR} eras from the ` +
-      'seed. A club is included only if its parent org OR its own name changed at least once (a club ' +
-      'that never changed either is omitted — the live current-season lookup already resolves it ' +
-      'correctly). Rookie/complex/DSL levels are out of scope; a (teamId, year) with no matching era ' +
+      `All 30 MLB orgs’ full-season AAA/AA/A+/A affiliates plus Rookie-level ACL/FCL/DSL clubs ` +
+      `(sportIds ${LEVELS.join(', ')}), seasons ${START_YEAR}–${END_YEAR} from statsapi plus ` +
+      `hand-verified pre-${START_YEAR} eras from the seed. A club is included only if its parent org ` +
+      'OR its own name changed at least once (a club that never changed either is omitted — the live ' +
+      'current-season lookup already resolves it correctly). Rookie-level clubs rarely change parent ' +
+      'org (they are usually their org’s own academy) but often change their own NAME (jersey-color ' +
+      'suffixes, the 2021 GCL→FCL/AZL→ACL renaming) — that shows up here as `nameHistory` only, which ' +
+      'the Minors tab’s affiliation-history strip does not read. A (teamId, year) with no matching era ' +
       'below falls through to the live lookup, unchanged — safe by construction.',
     caveats: seed.caveats ?? [],
     clubs: sortedClubs,
