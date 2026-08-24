@@ -1,0 +1,4954 @@
+{
+  "levels": {
+    "A": {
+      "hittingPA": {
+        "n": 318,
+        "p10": 100.80000000000001,
+        "p25": 207.25,
+        "median": 332,
+        "p75": 494.5,
+        "p90": 554.9000000000001
+      },
+      "pitchingIP": {
+        "n": 362,
+        "p10": 15.033333333333333,
+        "p25": 30.416666666666664,
+        "median": 58.83333333333333,
+        "p75": 96.83333333333333,
+        "p90": 125.96666666666668
+      },
+      "pitchingBF": {
+        "n": 362,
+        "p10": 59,
+        "p25": 120.75,
+        "median": 244,
+        "p75": 412.25,
+        "p90": 535.6000000000001
+      }
+    },
+    "High-A": {
+      "hittingPA": {
+        "n": 352,
+        "p10": 127.30000000000001,
+        "p25": 227.5,
+        "median": 350,
+        "p75": 473,
+        "p90": 578.0000000000003
+      },
+      "pitchingIP": {
+        "n": 418,
+        "p10": 20.566666666666666,
+        "p25": 35.666666666666664,
+        "median": 59.333333333333336,
+        "p75": 93,
+        "p90": 126.76666666666668
+      },
+      "pitchingBF": {
+        "n": 418,
+        "p10": 83.7,
+        "p25": 141.5,
+        "median": 247,
+        "p75": 392,
+        "p90": 539.9000000000001
+      }
+    },
+    "AA": {
+      "hittingPA": {
+        "n": 366,
+        "p10": 179.5,
+        "p25": 267.25,
+        "median": 410,
+        "p75": 552.75,
+        "p90": 692.5
+      },
+      "pitchingIP": {
+        "n": 437,
+        "p10": 19.933333333333334,
+        "p25": 36.333333333333336,
+        "median": 68.33333333333333,
+        "p75": 105.33333333333333,
+        "p90": 148.06666666666675
+      },
+      "pitchingBF": {
+        "n": 437,
+        "p10": 86.2,
+        "p25": 150,
+        "median": 287,
+        "p75": 449,
+        "p90": 637.8000000000002
+      }
+    },
+    "AAA": {
+      "hittingPA": {
+        "n": 355,
+        "p10": 82.6,
+        "p25": 180,
+        "median": 327,
+        "p75": 529,
+        "p90": 806
+      },
+      "pitchingIP": {
+        "n": 408,
+        "p10": 12,
+        "p25": 26.333333333333332,
+        "median": 54,
+        "p75": 88.83333333333334,
+        "p90": 134.66666666666666
+      },
+      "pitchingBF": {
+        "n": 408,
+        "p10": 52.400000000000006,
+        "p25": 110,
+        "median": 232,
+        "p75": 388.5,
+        "p90": 590.9000000000001
+      }
+    }
+  },
+  "pedigree": {
+    "A": {
+      "Rounds 6-10": {
+        "hittingPA": {
+          "n": 31,
+          "p10": 103,
+          "p25": 162,
+          "median": 293,
+          "p75": 473,
+          "p90": 544
+        },
+        "pitchingIP": {
+          "n": 51,
+          "p10": 13,
+          "p25": 21.333333333333336,
+          "median": 44.333333333333336,
+          "p75": 74.5,
+          "p90": 116
+        }
+      },
+      "No draft record (int'l/other)": {
+        "hittingPA": {
+          "n": 95,
+          "p10": 138.4,
+          "p25": 268.5,
+          "median": 405,
+          "p75": 509,
+          "p90": 568.6
+        },
+        "pitchingIP": {
+          "n": 92,
+          "p10": 28.03333333333333,
+          "p25": 40.58333333333333,
+          "median": 80.33333333333333,
+          "p75": 107.58333333333333,
+          "p90": 135.0666666666667
+        }
+      },
+      "Round 11+": {
+        "hittingPA": {
+          "n": 58,
+          "p10": 142.3,
+          "p25": 220.75,
+          "median": 289,
+          "p75": 460.75,
+          "p90": 558.5
+        },
+        "pitchingIP": {
+          "n": 117,
+          "p10": 14.333333333333334,
+          "p25": 26.333333333333332,
+          "median": 52.666666666666664,
+          "p75": 81.33333333333333,
+          "p90": 112.46666666666667
+        }
+      },
+      "Round 1": {
+        "hittingPA": {
+          "n": 67,
+          "p10": 65.60000000000001,
+          "p25": 113.5,
+          "median": 276,
+          "p75": 499.5,
+          "p90": 554.1999999999999
+        },
+        "pitchingIP": {
+          "n": 32,
+          "p10": 16.066666666666666,
+          "p25": 33.333333333333336,
+          "median": 64.5,
+          "p75": 94.08333333333333,
+          "p90": 108.30000000000001
+        }
+      },
+      "Rounds 2-5": {
+        "hittingPA": {
+          "n": 67,
+          "p10": 127.20000000000002,
+          "p25": 198.5,
+          "median": 329,
+          "p75": 482,
+          "p90": 532.4
+        },
+        "pitchingIP": {
+          "n": 70,
+          "p10": 10.933333333333334,
+          "p25": 30.833333333333336,
+          "median": 68.16666666666667,
+          "p75": 111.91666666666667,
+          "p90": 128.5
+        }
+      }
+    },
+    "High-A": {
+      "Rounds 6-10": {
+        "hittingPA": {
+          "n": 36,
+          "p10": 118.5,
+          "p25": 217.75,
+          "median": 341,
+          "p75": 433.5,
+          "p90": 661.5
+        },
+        "pitchingIP": {
+          "n": 55,
+          "p10": 21.200000000000003,
+          "p25": 32.66666666666667,
+          "median": 60.666666666666664,
+          "p75": 74,
+          "p90": 129
+        }
+      },
+      "No draft record (int'l/other)": {
+        "hittingPA": {
+          "n": 90,
+          "p10": 142.9,
+          "p25": 221.5,
+          "median": 337.5,
+          "p75": 446.25,
+          "p90": 580
+        },
+        "pitchingIP": {
+          "n": 91,
+          "p10": 13,
+          "p25": 27,
+          "median": 56.333333333333336,
+          "p75": 87.83333333333334,
+          "p90": 121
+        }
+      },
+      "Round 11+": {
+        "hittingPA": {
+          "n": 71,
+          "p10": 134,
+          "p25": 264.5,
+          "median": 387,
+          "p75": 501.5,
+          "p90": 617
+        },
+        "pitchingIP": {
+          "n": 138,
+          "p10": 26.8,
+          "p25": 38.75,
+          "median": 57.83333333333333,
+          "p75": 96.08333333333333,
+          "p90": 125.1
+        }
+      },
+      "Round 1": {
+        "hittingPA": {
+          "n": 75,
+          "p10": 124.8,
+          "p25": 222.5,
+          "median": 294,
+          "p75": 442,
+          "p90": 519.6000000000003
+        },
+        "pitchingIP": {
+          "n": 43,
+          "p10": 20.133333333333336,
+          "p25": 43.333333333333336,
+          "median": 63.333333333333336,
+          "p75": 100.16666666666666,
+          "p90": 125.6666666666667
+        }
+      },
+      "Rounds 2-5": {
+        "hittingPA": {
+          "n": 80,
+          "p10": 150.10000000000002,
+          "p25": 279.5,
+          "median": 379,
+          "p75": 488.25,
+          "p90": 556.3000000000001
+        },
+        "pitchingIP": {
+          "n": 91,
+          "p10": 23,
+          "p25": 40,
+          "median": 67,
+          "p75": 98.66666666666666,
+          "p90": 131.66666666666666
+        }
+      }
+    },
+    "AA": {
+      "Rounds 6-10": {
+        "hittingPA": {
+          "n": 37,
+          "p10": 195,
+          "p25": 318,
+          "median": 437,
+          "p75": 609,
+          "p90": 774.9999999999999
+        },
+        "pitchingIP": {
+          "n": 60,
+          "p10": 18.56666666666667,
+          "p25": 31.25,
+          "median": 48.5,
+          "p75": 101.25,
+          "p90": 137.43333333333334
+        }
+      },
+      "No draft record (int'l/other)": {
+        "hittingPA": {
+          "n": 95,
+          "p10": 184.6,
+          "p25": 267,
+          "median": 369,
+          "p75": 542,
+          "p90": 633.8000000000001
+        },
+        "pitchingIP": {
+          "n": 93,
+          "p10": 14.200000000000001,
+          "p25": 29.666666666666668,
+          "median": 54.333333333333336,
+          "p75": 101.66666666666667,
+          "p90": 140.13333333333333
+        }
+      },
+      "Round 11+": {
+        "hittingPA": {
+          "n": 70,
+          "p10": 167.1,
+          "p25": 301.5,
+          "median": 482.5,
+          "p75": 592.25,
+          "p90": 797
+        },
+        "pitchingIP": {
+          "n": 145,
+          "p10": 24.133333333333333,
+          "p25": 36.666666666666664,
+          "median": 65,
+          "p75": 106.66666666666667,
+          "p90": 157.86666666666665
+        }
+      },
+      "Round 1": {
+        "hittingPA": {
+          "n": 84,
+          "p10": 180.3,
+          "p25": 265.75,
+          "median": 360.5,
+          "p75": 520.75,
+          "p90": 614.5000000000001
+        },
+        "pitchingIP": {
+          "n": 42,
+          "p10": 26.46666666666667,
+          "p25": 49.75,
+          "median": 70.83333333333334,
+          "p75": 90.25,
+          "p90": 129.29999999999998
+        }
+      },
+      "Rounds 2-5": {
+        "hittingPA": {
+          "n": 80,
+          "p10": 179.9,
+          "p25": 246.75,
+          "median": 395.5,
+          "p75": 529.5,
+          "p90": 641.8000000000004
+        },
+        "pitchingIP": {
+          "n": 97,
+          "p10": 31.46666666666667,
+          "p25": 56,
+          "median": 84.33333333333333,
+          "p75": 121.66666666666667,
+          "p90": 153.60000000000005
+        }
+      }
+    },
+    "AAA": {
+      "Rounds 6-10": {
+        "hittingPA": {
+          "n": 37,
+          "p10": 101.6,
+          "p25": 229,
+          "median": 398,
+          "p75": 666,
+          "p90": 777.4
+        },
+        "pitchingIP": {
+          "n": 52,
+          "p10": 17.866666666666667,
+          "p25": 32.16666666666667,
+          "median": 62.333333333333336,
+          "p75": 101.41666666666666,
+          "p90": 149.59999999999997
+        }
+      },
+      "No draft record (int'l/other)": {
+        "hittingPA": {
+          "n": 91,
+          "p10": 65,
+          "p25": 183,
+          "median": 306,
+          "p75": 498,
+          "p90": 804
+        },
+        "pitchingIP": {
+          "n": 86,
+          "p10": 8.833333333333332,
+          "p25": 16.75,
+          "median": 36.666666666666664,
+          "p75": 74.83333333333333,
+          "p90": 109.66666666666667
+        }
+      },
+      "Round 11+": {
+        "hittingPA": {
+          "n": 75,
+          "p10": 93.8,
+          "p25": 242,
+          "median": 458,
+          "p75": 691,
+          "p90": 1038.6000000000008
+        },
+        "pitchingIP": {
+          "n": 137,
+          "p10": 17.066666666666666,
+          "p25": 33,
+          "median": 56.666666666666664,
+          "p75": 85.33333333333333,
+          "p90": 121.80000000000001
+        }
+      },
+      "Round 1": {
+        "hittingPA": {
+          "n": 74,
+          "p10": 79.3,
+          "p25": 158,
+          "median": 327.5,
+          "p75": 504.5,
+          "p90": 711
+        },
+        "pitchingIP": {
+          "n": 36,
+          "p10": 13.833333333333334,
+          "p25": 23.916666666666668,
+          "median": 49.5,
+          "p75": 92.75,
+          "p90": 138.5
+        }
+      },
+      "Rounds 2-5": {
+        "hittingPA": {
+          "n": 78,
+          "p10": 106.4,
+          "p25": 151.25,
+          "median": 288.5,
+          "p75": 476.25,
+          "p90": 661.5999999999999
+        },
+        "pitchingIP": {
+          "n": 97,
+          "p10": 12.133333333333335,
+          "p25": 26.666666666666668,
+          "median": 56.666666666666664,
+          "p75": 96.66666666666667,
+          "p90": 156.4
+        }
+      }
+    }
+  },
+  "generatedAt": "2026-08-24T14:07:01.904Z",
+  "cohortSize": 881,
+  "schoolType": {
+    "A": {
+      "Prep (HS)": {
+        "hittingPA": {
+          "n": 96,
+          "p10": 140.5,
+          "p25": 261.5,
+          "median": 402,
+          "p75": 512.25,
+          "p90": 569
+        },
+        "pitchingIP": {
+          "n": 74,
+          "p10": 26.333333333333332,
+          "p25": 57.333333333333336,
+          "median": 78.16666666666666,
+          "p75": 108.41666666666667,
+          "p90": 131.16666666666666
+        }
+      },
+      "College": {
+        "hittingPA": {
+          "n": 124,
+          "p10": 76.10000000000001,
+          "p25": 146.5,
+          "median": 256,
+          "p75": 427.25,
+          "p90": 529.8
+        },
+        "pitchingIP": {
+          "n": 196,
+          "p10": 11.166666666666668,
+          "p25": 23.25,
+          "median": 45.33333333333333,
+          "p75": 75.58333333333333,
+          "p90": 113.16666666666667
+        }
+      }
+    },
+    "High-A": {
+      "Prep (HS)": {
+        "hittingPA": {
+          "n": 99,
+          "p10": 147.4,
+          "p25": 258.5,
+          "median": 396,
+          "p75": 477.5,
+          "p90": 582.2
+        },
+        "pitchingIP": {
+          "n": 81,
+          "p10": 28.333333333333332,
+          "p25": 47,
+          "median": 75.66666666666667,
+          "p75": 109.33333333333333,
+          "p90": 142.33333333333334
+        }
+      },
+      "College": {
+        "hittingPA": {
+          "n": 160,
+          "p10": 123.7,
+          "p25": 222.25,
+          "median": 345,
+          "p75": 479.75,
+          "p90": 543.3999999999999
+        },
+        "pitchingIP": {
+          "n": 246,
+          "p10": 21.833333333333336,
+          "p25": 36.5,
+          "median": 58.333333333333336,
+          "p75": 89.66666666666667,
+          "p90": 123.83333333333334
+        }
+      }
+    },
+    "AA": {
+      "Prep (HS)": {
+        "hittingPA": {
+          "n": 97,
+          "p10": 187.20000000000002,
+          "p25": 312,
+          "median": 413,
+          "p75": 565,
+          "p90": 757.2
+        },
+        "pitchingIP": {
+          "n": 84,
+          "p10": 26.5,
+          "p25": 41.5,
+          "median": 76.33333333333333,
+          "p75": 111.91666666666666,
+          "p90": 165.83333333333334
+        }
+      },
+      "College": {
+        "hittingPA": {
+          "n": 171,
+          "p10": 170,
+          "p25": 245,
+          "median": 419,
+          "p75": 556.5,
+          "p90": 697
+        },
+        "pitchingIP": {
+          "n": 260,
+          "p10": 23.333333333333332,
+          "p25": 37.25,
+          "median": 68.5,
+          "p75": 106,
+          "p90": 149.66666666666666
+        }
+      }
+    },
+    "AAA": {
+      "Prep (HS)": {
+        "hittingPA": {
+          "n": 94,
+          "p10": 114.80000000000001,
+          "p25": 158,
+          "median": 355,
+          "p75": 518,
+          "p90": 805.7
+        },
+        "pitchingIP": {
+          "n": 82,
+          "p10": 8.333333333333332,
+          "p25": 27.75,
+          "median": 46,
+          "p75": 79.16666666666667,
+          "p90": 124.43333333333335
+        }
+      },
+      "College": {
+        "hittingPA": {
+          "n": 167,
+          "p10": 79.6,
+          "p25": 186,
+          "median": 332,
+          "p75": 566,
+          "p90": 803.0000000000002
+        },
+        "pitchingIP": {
+          "n": 239,
+          "p10": 16,
+          "p25": 30.333333333333332,
+          "median": 59.666666666666664,
+          "p75": 96.66666666666666,
+          "p90": 147.1333333333334
+        }
+      }
+    }
+  },
+  "validation": {
+    "checked": 1385,
+    "agree": 714,
+    "unresolved": 378,
+    "disagree": [
+      {
+        "playerId": 518585,
+        "name": "Fernando Cruz",
+        "season": 2015,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 528748,
+        "name": "Humberto Castellanos",
+        "season": 2019,
+        "sportIds": [
+          11,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14,
+          11,
+          13,
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 545343,
+        "name": "Louis Head",
+        "season": 2013,
+        "sportIds": [
+          11,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 545343,
+        "name": "Louis Head",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 547001,
+        "name": "Cody Poteet",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 547184,
+        "name": "Michael Kelly",
+        "season": 2016,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 547184,
+        "name": "Michael Kelly",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 547184,
+        "name": "Michael Kelly",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 592165,
+        "name": "Brandon Brennan",
+        "season": 2016,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 596056,
+        "name": "John Nogowski",
+        "season": 2016,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 598286,
+        "name": "Nick Ramirez",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 602104,
+        "name": "Ramón Urías",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 605353,
+        "name": "Vimael Machín",
+        "season": 2016,
+        "sportIds": [
+          11,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14
+        ]
+      },
+      {
+        "playerId": 605353,
+        "name": "Vimael Machín",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 605447,
+        "name": "Jordan Romano",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 605507,
+        "name": "Zach Thompson",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 606213,
+        "name": "Yermín Mercedes",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 606303,
+        "name": "Joel Payamps",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 606303,
+        "name": "Joel Payamps",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 607179,
+        "name": "Jordan Weems",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 607179,
+        "name": "Jordan Weems",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 607391,
+        "name": "Chris Mazza",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 607391,
+        "name": "Chris Mazza",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 607560,
+        "name": "Ryne Harper",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 607560,
+        "name": "Ryne Harper",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 608335,
+        "name": "Kyle Funkhouser",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 608686,
+        "name": "Jack Mayfield",
+        "season": 2016,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 608686,
+        "name": "Jack Mayfield",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 615698,
+        "name": "Cal Quantrill",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 621074,
+        "name": "Michael Rucker",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 621097,
+        "name": "Jacob Waguespack",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11,
+          12,
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 621097,
+        "name": "Jacob Waguespack",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 621348,
+        "name": "Sam Clay",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 621363,
+        "name": "Colin Poche",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 621383,
+        "name": "Tanner Banks",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 621532,
+        "name": "Anthony Bemboom",
+        "season": 2016,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 621532,
+        "name": "Anthony Bemboom",
+        "season": 2019,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13,
+          11
+        ]
+      },
+      {
+        "playerId": 621532,
+        "name": "Anthony Bemboom",
+        "season": 2013,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 622092,
+        "name": "Kyle Zimmer",
+        "season": 2015,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 622092,
+        "name": "Kyle Zimmer",
+        "season": 2016,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 622251,
+        "name": "Josh Staumont",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 622503,
+        "name": "Nabil Crismatt",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 622503,
+        "name": "Nabil Crismatt",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 622786,
+        "name": "Jesus Tinoco",
+        "season": 2016,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 623168,
+        "name": "Tyler Heineman",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 623437,
+        "name": "Justin Topa",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 623437,
+        "name": "Justin Topa",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 623474,
+        "name": "Jimmy Herget",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 626929,
+        "name": "Lewis Thorpe",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 628708,
+        "name": "Yunior Marte",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 630105,
+        "name": "Jake Cronenworth",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 630105,
+        "name": "Jake Cronenworth",
+        "season": 2016,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 640444,
+        "name": "Wil Crowe",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 640448,
+        "name": "Kyle Finnegan",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 640448,
+        "name": "Kyle Finnegan",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 640448,
+        "name": "Kyle Finnegan",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 640462,
+        "name": "A.J. Puk",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 641394,
+        "name": "Jake Brentz",
+        "season": 2016,
+        "sportIds": [
+          11,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14
+        ]
+      },
+      {
+        "playerId": 641394,
+        "name": "Jake Brentz",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 641394,
+        "name": "Jake Brentz",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 641401,
+        "name": "Connor Brogdon",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 641447,
+        "name": "Daniel Castano",
+        "season": 2018,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 641511,
+        "name": "Jason Delay",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 641511,
+        "name": "Jason Delay",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 641582,
+        "name": "Matt Foster",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 641680,
+        "name": "Jonah Heim",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 641829,
+        "name": "Jason Martin",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 641943,
+        "name": "Joshua Palacios",
+        "season": 2021,
+        "sportIds": [
+          11,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14
+        ]
+      },
+      {
+        "playerId": 642020,
+        "name": "Chuckie Robinson",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 642048,
+        "name": "Tayler Saucedo",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 642100,
+        "name": "Gabe Speier",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 642121,
+        "name": "Cole Sulser",
+        "season": 2016,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          11,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 642121,
+        "name": "Cole Sulser",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 642121,
+        "name": "Cole Sulser",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 642121,
+        "name": "Cole Sulser",
+        "season": 2014,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 642130,
+        "name": "Blake Taylor",
+        "season": 2018,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13,
+          11,
+          13,
+          11
+        ]
+      },
+      {
+        "playerId": 642207,
+        "name": "Devin Williams",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 642215,
+        "name": "Weston Wilson",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 642233,
+        "name": "Eric Yardley",
+        "season": 2016,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 642233,
+        "name": "Eric Yardley",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 642233,
+        "name": "Eric Yardley",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 642233,
+        "name": "Eric Yardley",
+        "season": 2014,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 642350,
+        "name": "Jose Siri",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 642731,
+        "name": "Thairo Estrada",
+        "season": 2018,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          11
+        ]
+      },
+      {
+        "playerId": 642758,
+        "name": "Domingo Acevedo",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 643361,
+        "name": "Kevin Herget",
+        "season": 2016,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 643361,
+        "name": "Kevin Herget",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 643361,
+        "name": "Kevin Herget",
+        "season": 2015,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 643377,
+        "name": "Griffin Jax",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 643436,
+        "name": "Ryan McBroom",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 643436,
+        "name": "Ryan McBroom",
+        "season": 2016,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 643524,
+        "name": "Frank Schwindel",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 643615,
+        "name": "T.J. Zeuch",
+        "season": 2019,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          11
+        ]
+      },
+      {
+        "playerId": 645801,
+        "name": "Mike Ford",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 650333,
+        "name": "Luis Arraez",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 650559,
+        "name": "Bryan De La Cruz",
+        "season": 2017,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 650633,
+        "name": "Michael King",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 650671,
+        "name": "José Quijada",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 650960,
+        "name": "Daniel Duarte",
+        "season": 2019,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 655316,
+        "name": "Andruw Monasterio",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 656212,
+        "name": "Charlie Barnes",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 656232,
+        "name": "Brandon Bielak",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 656271,
+        "name": "Brock Burke",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 656413,
+        "name": "Stuart Fairchild",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 656464,
+        "name": "Kevin Ginkel",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 656514,
+        "name": "Adam Haseley",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 656557,
+        "name": "Tanner Houck",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 656578,
+        "name": "Andre Jackson",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14
+        ]
+      },
+      {
+        "playerId": 656605,
+        "name": "Mitch Keller",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          11
+        ]
+      },
+      {
+        "playerId": 656641,
+        "name": "Jacob Latz",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 656657,
+        "name": "Zach Logue",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 656716,
+        "name": "Zach McKinstry",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13,
+          12,
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 656730,
+        "name": "Trevor Megill",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          11
+        ]
+      },
+      {
+        "playerId": 656730,
+        "name": "Trevor Megill",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 656793,
+        "name": "Nick Nelson",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 656818,
+        "name": "Connor Overton",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13,
+          11,
+          12,
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 656896,
+        "name": "Emmanuel Rivera",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 656970,
+        "name": "Devin Smeltzer",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 657024,
+        "name": "Erik Swanson",
+        "season": 2015,
+        "sportIds": [
+          11,
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 657044,
+        "name": "Ryan Thompson",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 657093,
+        "name": "Spenser Watkins",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13,
+          11,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 657093,
+        "name": "Spenser Watkins",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11,
+          12,
+          13,
+          11
+        ]
+      },
+      {
+        "playerId": 657093,
+        "name": "Spenser Watkins",
+        "season": 2016,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 657093,
+        "name": "Spenser Watkins",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 657108,
+        "name": "Evan White",
+        "season": 2018,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 657193,
+        "name": "Eddy Alvarez",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          11
+        ]
+      },
+      {
+        "playerId": 657265,
+        "name": "Peter Strzelecki",
+        "season": 2019,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 657277,
+        "name": "Logan Webb",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          11
+        ]
+      },
+      {
+        "playerId": 657424,
+        "name": "Matt Gage",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          14,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 657508,
+        "name": "Mike Baumann",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 657514,
+        "name": "Brennan Bernardino",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 657585,
+        "name": "Reed Garrett",
+        "season": 2016,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 657585,
+        "name": "Reed Garrett",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 660634,
+        "name": "Yonny Hernández",
+        "season": 2018,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 660644,
+        "name": "Vidal Bruján",
+        "season": 2018,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 662253,
+        "name": "Andrés Muñoz",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 663368,
+        "name": "Blake Perkins",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 663546,
+        "name": "Sean Hjelle",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 663550,
+        "name": "Trey Cabbage",
+        "season": 2021,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 663554,
+        "name": "Casey Mize",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 663611,
+        "name": "Nick Madrigal",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 663611,
+        "name": "Nick Madrigal",
+        "season": 2018,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 663698,
+        "name": "Joey Bart",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 663704,
+        "name": "James McArthur",
+        "season": 2021,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 663765,
+        "name": "Jake Woodford",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 663776,
+        "name": "Patrick Sandoval",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 663878,
+        "name": "Nate Pearson",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 663898,
+        "name": "Brendan Rodgers",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 663941,
+        "name": "Tristan Beck",
+        "season": 2021,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 664045,
+        "name": "Thomas Eshelman",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 664054,
+        "name": "Cody Stashak",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 664059,
+        "name": "Sam Haggerty",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 664123,
+        "name": "Scott Effross",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 664141,
+        "name": "JT Brubaker",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 664299,
+        "name": "Cristian Javier",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 664314,
+        "name": "Estevan Florial",
+        "season": 2016,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 664350,
+        "name": "Sixto Sánchez",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 664776,
+        "name": "Jake Cousins",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 664849,
+        "name": "Danny Young",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 664854,
+        "name": "Ryan Helsley",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 664874,
+        "name": "Seby Zavala",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 664875,
+        "name": "Justin Lawrence",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 664901,
+        "name": "Danny Mendick",
+        "season": 2016,
+        "sportIds": [
+          11,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14,
+          13,
+          11,
+          13,
+          11,
+          13,
+          11,
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 664948,
+        "name": "Anthony Misiewicz",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 664948,
+        "name": "Anthony Misiewicz",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 665001,
+        "name": "Trevor Kelley",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 665019,
+        "name": "Kody Clemens",
+        "season": 2021,
+        "sportIds": [
+          11,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          11,
+          14
+        ]
+      },
+      {
+        "playerId": 665120,
+        "name": "Jared Walsh",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 665152,
+        "name": "Dean Kremer",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 665489,
+        "name": "Vladimir Guerrero Jr.",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 665620,
+        "name": "Deivi García",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 665621,
+        "name": "Rony García",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 665625,
+        "name": "Elvis Peguero",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 665665,
+        "name": "Reiver Sanmartin",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 665795,
+        "name": "Edward Cabrera",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 665861,
+        "name": "Sebastián Rivero",
+        "season": 2019,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13,
+          11
+        ]
+      },
+      {
+        "playerId": 665877,
+        "name": "José Fermín",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 666018,
+        "name": "Jonathan Aranda",
+        "season": 2019,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          11
+        ]
+      },
+      {
+        "playerId": 666023,
+        "name": "Freddy Fermin",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 666023,
+        "name": "Freddy Fermin",
+        "season": 2019,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 666120,
+        "name": "Ian Anderson",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 666142,
+        "name": "Cole Ragans",
+        "season": 2021,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 666182,
+        "name": "Bo Bichette",
+        "season": 2019,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          11
+        ]
+      },
+      {
+        "playerId": 666200,
+        "name": "Jesús Luzardo",
+        "season": 2019,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 666214,
+        "name": "Joey Wentz",
+        "season": 2022,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 666277,
+        "name": "George Soriano",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 666277,
+        "name": "George Soriano",
+        "season": 2021,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 666464,
+        "name": "Jerar Encarnacion",
+        "season": 2021,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 667297,
+        "name": "Tommy Nance",
+        "season": 2016,
+        "sportIds": [
+          11,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 667472,
+        "name": "Dane Myers",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 667472,
+        "name": "Dane Myers",
+        "season": 2021,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          13,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 668227,
+        "name": "Randy Arozarena",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 668227,
+        "name": "Randy Arozarena",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 668665,
+        "name": "Stephen Nogosek",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 668676,
+        "name": "Zach Plesac",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 668678,
+        "name": "Zac Gallen",
+        "season": 2017,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 668800,
+        "name": "Andrew Knizner",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 668843,
+        "name": "Conner Capel",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 668843,
+        "name": "Conner Capel",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 668939,
+        "name": "Adley Rutschman",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 668941,
+        "name": "JoJo Romero",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 668942,
+        "name": "Josh Rojas",
+        "season": 2017,
+        "sportIds": [
+          11,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          11,
+          14
+        ]
+      },
+      {
+        "playerId": 669022,
+        "name": "MacKenzie Gore",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 669145,
+        "name": "Bruce Zimmermann",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 669212,
+        "name": "Eli Morgan",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 669222,
+        "name": "Nick Senzel",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 669242,
+        "name": "Tommy Edman",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 669276,
+        "name": "Dylan Lee",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 669289,
+        "name": "Santiago Espinal",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 669369,
+        "name": "Bryce Johnson",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 669395,
+        "name": "Dylan Coleman",
+        "season": 2019,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 669459,
+        "name": "Kyle Nelson",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 669674,
+        "name": "Sam Long",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          14
+        ]
+      },
+      {
+        "playerId": 669701,
+        "name": "Josh Smith",
+        "season": 2021,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 669711,
+        "name": "Greg Weissert",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12,
+          13,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 669743,
+        "name": "Alex Call",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 669854,
+        "name": "Ronel Blanco",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 669912,
+        "name": "Kirby Snead",
+        "season": 2016,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 669920,
+        "name": "Jason Alexander",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 669947,
+        "name": "Jesse Scholtens",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 670032,
+        "name": "Nicky Lopez",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 670046,
+        "name": "Kenny Rosenberg",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 670059,
+        "name": "Colin Holderman",
+        "season": 2021,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          11
+        ]
+      },
+      {
+        "playerId": 670097,
+        "name": "Zack Short",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 670156,
+        "name": "Miles Mastrobuoni",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 670351,
+        "name": "Jose Rojas",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 670766,
+        "name": "Darren McCaughan",
+        "season": 2018,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13,
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 670770,
+        "name": "TJ Friedl",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 670990,
+        "name": "Yohan Ramírez",
+        "season": 2017,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 671131,
+        "name": "Jackson Rutledge",
+        "season": 2021,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 671218,
+        "name": "Heliot Ramos",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 671221,
+        "name": "Drew Waters",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 672275,
+        "name": "Patrick Bailey",
+        "season": 2021,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 672391,
+        "name": "Kaleb Ort",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11,
+          12,
+          11,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 672391,
+        "name": "Kaleb Ort",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 672582,
+        "name": "Angel Zerpa",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 673357,
+        "name": "Luis Robert Jr.",
+        "season": 2018,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 674944,
+        "name": "Sean Guenther",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 674944,
+        "name": "Sean Guenther",
+        "season": 2018,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 675961,
+        "name": "Alika Williams",
+        "season": 2021,
+        "sportIds": [
+          11,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 675961,
+        "name": "Alika Williams",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 676083,
+        "name": "Janson Junk",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13,
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 676092,
+        "name": "Collin Snider",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 676254,
+        "name": "Ryan Walker",
+        "season": 2021,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 676391,
+        "name": "Ernie Clement",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 676391,
+        "name": "Ernie Clement",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 676477,
+        "name": "Garrett Whitlock",
+        "season": 2018,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          13,
+          12,
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 676534,
+        "name": "Calvin Faucher",
+        "season": 2018,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 676596,
+        "name": "Josh Fleming",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 676604,
+        "name": "Tyler Zuber",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 676609,
+        "name": "José Caballero",
+        "season": 2021,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 676684,
+        "name": "Will Vest",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          11,
+          12,
+          13,
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 676684,
+        "name": "Will Vest",
+        "season": 2018,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 676755,
+        "name": "Isaac Mattson",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 676760,
+        "name": "Ron Marinaccio",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 676801,
+        "name": "Chas McCormick",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 676801,
+        "name": "Chas McCormick",
+        "season": 2017,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 676946,
+        "name": "Matthew Batten",
+        "season": 2018,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 676946,
+        "name": "Matthew Batten",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 677161,
+        "name": "Zack Kelly",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          12,
+          13,
+          12,
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 677161,
+        "name": "Zack Kelly",
+        "season": 2018,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 677595,
+        "name": "Ronny Mauricio",
+        "season": 2021,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 677976,
+        "name": "Randy Dobnak",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 678061,
+        "name": "Ray Kerr",
+        "season": 2019,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 678226,
+        "name": "Daysbel Hernández",
+        "season": 2021,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          14,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 678226,
+        "name": "Daysbel Hernández",
+        "season": 2018,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13
+        ]
+      },
+      {
+        "playerId": 678394,
+        "name": "Brayan Bello",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 678545,
+        "name": "Osleivis Basabe",
+        "season": 2021,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 678554,
+        "name": "Curtis Mead",
+        "season": 2021,
+        "sportIds": [
+          11,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 679631,
+        "name": "Terrin Vavra",
+        "season": 2021,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          13
+        ]
+      },
+      {
+        "playerId": 680570,
+        "name": "Grayson Rodriguez",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 680704,
+        "name": "Nick Sandlin",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 680739,
+        "name": "Josh Winder",
+        "season": 2022,
+        "sportIds": [
+          11,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14
+        ]
+      },
+      {
+        "playerId": 680779,
+        "name": "Henry Davis",
+        "season": 2022,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 681146,
+        "name": "Jonah Bride",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          11,
+          14
+        ]
+      },
+      {
+        "playerId": 681146,
+        "name": "Jonah Bride",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 681481,
+        "name": "Kerry Carpenter",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 681517,
+        "name": "Kyle Leahy",
+        "season": 2019,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 681892,
+        "name": "Kody Funderburk",
+        "season": 2019,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 682171,
+        "name": "Penn Murfee",
+        "season": 2019,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          11,
+          13,
+          12,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 682243,
+        "name": "Bryce Miller",
+        "season": 2022,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 682990,
+        "name": "Quinn Priester",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          13,
+          11
+        ]
+      },
+      {
+        "playerId": 686452,
+        "name": "Drew Millas",
+        "season": 2022,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          12,
+          14,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 686527,
+        "name": "Dominic Canzone",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 686730,
+        "name": "Carson Spiers",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 686747,
+        "name": "Joe La Sorsa",
+        "season": 2021,
+        "sportIds": [
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          13,
+          14
+        ]
+      },
+      {
+        "playerId": 689172,
+        "name": "Brett Wisely",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          12,
+          11
+        ]
+      },
+      {
+        "playerId": 689690,
+        "name": "Alek Jacob",
+        "season": 2022,
+        "sportIds": [
+          11,
+          12,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          12,
+          11,
+          12
+        ]
+      },
+      {
+        "playerId": 691587,
+        "name": "Eury Pérez",
+        "season": 2022,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14
+        ]
+      },
+      {
+        "playerId": 691783,
+        "name": "Jordan Lawlar",
+        "season": 2022,
+        "sportIds": [
+          12,
+          13,
+          14
+        ],
+        "txnSportIdOrder": [
+          14,
+          13,
+          14,
+          13,
+          12
+        ]
+      },
+      {
+        "playerId": 693304,
+        "name": "Nick Gonzales",
+        "season": 2022,
+        "sportIds": [
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          14,
+          12
+        ]
+      },
+      {
+        "playerId": 695243,
+        "name": "Mason Miller",
+        "season": 2022,
+        "sportIds": [
+          11,
+          13
+        ],
+        "txnSportIdOrder": [
+          13,
+          11,
+          13
+        ]
+      },
+      {
+        "playerId": 695243,
+        "name": "Mason Miller",
+        "season": 2023,
+        "sportIds": [
+          11,
+          12,
+          14
+        ],
+        "txnSportIdOrder": [
+          12,
+          11,
+          14,
+          11
+        ]
+      }
+    ]
+  }
+}
