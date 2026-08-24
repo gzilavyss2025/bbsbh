@@ -183,7 +183,12 @@ const BUDGETS = {
   // auto-drop-once-fully-revealed check needs the SAME structural, isFinal-
   // gated reasoning selectSkippedBottomHalf right above it already has, so it
   // belongs beside that function rather than in a new file duplicating it.
-  'src/api/select.js': 900, // 819
+  // 900 -> 1000: derivedHalfStartingPitcherId — the shared derivation behind
+  // selectHalfStartingPitcher, split out so selectTeamMeta and the two
+  // starter-record note builders (prehalf-callouts.js, between-innings.js)
+  // can fall back to it when gameData.probablePitchers is empty (issue
+  // #851) without a second copy of the reveal-gated play walk.
+  'src/api/select.js': 1000, // 912
   // computeHalfInningFeed's own state machinery (pinch-runner aliasing,
   // per-batter trip tracking, the visible-step gate) is tightly coupled and
   // deliberately not decomposed further when playbyplay.js was split

@@ -224,8 +224,9 @@ export function selectLineup(feed, side /* 'away' | 'home' */) {
   })
 }
 
-// The opposing pitcher a given batting side faces = the OTHER team's probable
-// starter, with jersey and handedness. Spoiler-safe.
+// The opposing pitcher a given batting side faces = the OTHER team's starter
+// (probable, or derived once logged — see selectTeamMeta), with jersey and
+// handedness. Spoiler-safe.
 export function selectOpposingPitcher(feed, battingSide) {
   return selectTeamMeta(feed, otherSide(battingSide)).probablePitcher
 }
@@ -391,13 +392,26 @@ export function selectTeamMeta(feed, side) {
   const probable = feed?.gameData?.probablePitchers?.[side]
   const players = playerIndex(feed)
 
+  // The starter id: the announced probable where a level posts one pregame,
+  // else this side's actual starter once his half's first play is logged
+  // (issue #851 — gameData.probablePitchers is reliably empty for complex-
+  // league games, and the same gap can appear anywhere a starter isn't
+  // formally announced). Home takes the mound in the top of the 1st, away in
+  // the bottom — the same fielding-side arithmetic matchup/forHalf.js's
+  // armFor uses. This page carries no reveal boundary of its own ("Nothing
+  // here is score-revealing", TeamInfo.jsx's own header), so the derivation
+  // runs unclamped (default revealedThrough = Infinity): inning 1's starter
+  // is fixed the instant he is thrown, the same pre-pitch identity fact a
+  // posted probable would already have been.
+  const pitcherId = probable?.id ?? derivedHalfStartingPitcherId(feed, 1, side === 'home' ? 'top' : 'bottom')
+
   let pitcher = null
-  if (probable?.id) {
-    const p = players[`ID${probable.id}`] ?? {}
+  if (pitcherId != null) {
+    const p = players[`ID${pitcherId}`] ?? {}
     pitcher = {
-      id: probable.id,
-      name: probable.fullName ?? p.fullName ?? 'TBD',
-      nameLastFirst: lastFirst(p.fullName ? p : probable),
+      id: pitcherId,
+      name: probable?.fullName ?? p.fullName ?? 'TBD',
+      nameLastFirst: lastFirst(p.fullName ? p : (probable ?? p)),
       jersey: p.primaryNumber ?? '',
       hand: p.pitchHand?.code ?? '', // 'L' | 'R'
     }
@@ -640,22 +654,34 @@ export function selectPrePitchChanges(feed, inning, half, revealedThrough = Infi
   return changes
 }
 
+// The pitcher id on the mound entering a half, read off its first LOGGED
+// play's own matchup.pitcher — the shared derivation behind
+// selectHalfStartingPitcher below AND every fallback for an empty
+// gameData.probablePitchers (issue #851: reliably empty for complex-league
+// games, but the same gap can appear at any level whenever a starter isn't
+// formally announced pregame). Exported separately so a caller that only
+// needs the ID for a lookup (a season-record note, not a rendered card)
+// doesn't have to build the full person shape just to discard it. Same
+// revealedThrough self-gate as selectPrePitchChanges — a half further out
+// than the user's next reveal must not say who's pitching: whether the
+// starter has been pulled yet, or who relieved him, is exactly the kind of
+// game-flow spoiler the reveal boundary exists to withhold.
+export function derivedHalfStartingPitcherId(feed, inning, half, revealedThrough = Infinity) {
+  if (halfIndex(inning, half) > revealedThrough + 1) return null
+  const play = (feed?.liveData?.plays?.allPlays ?? []).find(
+    (p) => p?.about?.inning === inning && p?.about?.halfInning === half,
+  )
+  return play?.matchup?.pitcher?.id ?? null
+}
+
 // The pitcher on the mound entering a half — its first play's own
 // matchup.pitcher, the same identity a pre-pitch "now pitching" card already
 // names when an actual change is announced (selectPrePitchChanges above).
 // This covers the far more common case where the same pitcher continues from
 // the half before, so a persistent "Now Pitching" card (see HalfInning.jsx)
-// always has an entering identity to show, not just on a change. Same
-// revealedThrough self-gate as selectPrePitchChanges — a half further out
-// than the user's next reveal must not say who's pitching: whether the
-// starter has been pulled yet is exactly the kind of game-flow spoiler the
-// reveal boundary exists to withhold.
+// always has an entering identity to show, not just on a change.
 export function selectHalfStartingPitcher(feed, inning, half, revealedThrough = Infinity) {
-  if (halfIndex(inning, half) > revealedThrough + 1) return null
-  const play = (feed?.liveData?.plays?.allPlays ?? []).find(
-    (p) => p?.about?.inning === inning && p?.about?.halfInning === half,
-  )
-  const pitcherId = play?.matchup?.pitcher?.id
+  const pitcherId = derivedHalfStartingPitcherId(feed, inning, half, revealedThrough)
   if (pitcherId == null) return null
   const players = playerIndex(feed)
   const person = players[`ID${pitcherId}`] ?? {}
