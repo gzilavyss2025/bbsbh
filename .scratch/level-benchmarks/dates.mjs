@@ -154,7 +154,7 @@ for (const p of playersArr) {
     // meaningful when the previous transition is also dated (2nd level on)
     if (i > 0 && transitions[i - 1].date) {
       const days = daysBetween(transitions[i - 1].date, t.date)
-      if (days > 0 && days < 900) allDurations.push({ level: LEVEL_NAME[t.fromSportId], days, playerId: p.id })
+      if (days > 0 && days < 900) allDurations.push({ level: LEVEL_NAME[t.fromSportId], days, playerId: p.id, season: Number(t.date.slice(0, 4)) })
     }
   }
 }

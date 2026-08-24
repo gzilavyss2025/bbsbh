@@ -48,7 +48,13 @@ medians moved the other way, especially at AAA (250d → 171d) — treat that
 shift with more suspicion than the PA/IP one: only 78% of transitions
 resolved a date this run (transaction-wire coverage thins for older
 seasons), so the drop may partly be a measurement artifact rather than a
-real behavior change.
+real behavior change. **This "2021 contraction" explanation was never
+tested directly against calendar-day data and, once it was (see "The
+omnibus check" below), didn't hold up** — the within-cohort time trend is
+a hump peaking in 2016–2020, not a step change at the contraction. That
+doesn't resolve the PA/IP-volume question above, which is a different
+metric and a different (v1-vs-widened cohort) comparison — flagging so the
+two don't get conflated.
 
 Per-org rankings also reshuffled with more data. The v1 fastest AAA org
 (Reds, 82d median, n=15) is no longer the fastest; the widened run's
@@ -112,6 +118,13 @@ fit: n=3278, p=36 (intercept + 2 level + 4 tier + 29 org), R^2=0.044
 orgs with a 95% CI excluding 0 (uncorrected):        6 of 30
 orgs with a 95% CI excluding 0 (Bonferroni-corrected): 1 of 30
 ```
+
+**Numbers below corrected 2026-08-24** — an adversarial pass found a real bug
+in how this run resolved org (see "Adversarial review" at the end of this
+doc): R² is unaffected (0.043), but the "1 of 30" Bonferroni survivor
+(Nationals) does not survive once the bug is fixed. Read the two paragraphs
+below as they stood before that fix; the corrected picture is in the review
+section.
 
 Two results, and they agree:
 
@@ -216,6 +229,422 @@ wiring this research pipeline (`team-windows.mjs`, `org-and-timing.mjs`)
 to prefer the seed over the raw sweep is unbuilt, not yet needed since
 today's window has zero measured gaps.
 
+## Adversarial review
+
+A follow-up pass tried to break the "org identity isn't a usable signal"
+conclusion rather than confirm it — read `org-regression.mjs` line by line
+for bugs, tried other response transforms, tried a less conservative
+multiple-comparison correction, checked the independence assumption, and
+named the confounds the model leaves out. One real bug turned up. It doesn't
+overturn the conclusion — if anything it makes the null cleaner — but it
+does retract the one positive claim the regression pass made.
+
+### 1. A real bug: every duration for a multi-transition player got the same season
+
+`orgForDuration` needs a season to look up which team (and therefore which
+org) a player belonged to. The original code got that season from:
+
+```js
+const seasonGuess = Number((dates.allPromotionDates.find((pp) => pp.playerId === d.playerId)?.date || '2020').slice(0, 4))
+```
+
+`.find()` filters only by `playerId` — not by level, not by which duration
+is being resolved. It always returns the player's FIRST promotion-date
+entry, regardless of which of his (often several) durations is being
+processed. 1,818 of 2,402 players in `dates.json` have more than one
+promotion-date entry, and 1,140 of 1,530 have more than one duration — so
+most rows in the regression got a season guess belonging to a *different*
+level transition than the one being priced. For a player who spent, say,
+2013 at AA and 2016 at AAA, the AAA row's org lookup used the 2013 season
+guess — close enough to land on the same org only by luck.
+
+The fix: `dates.mjs` already computes the exact date each duration ended
+(the same date `days` is computed from) — it just wasn't being carried
+through. One-line addition, stamping each `allDurations` entry with
+`season: Number(t.date.slice(0, 4))`, then using that directly instead of
+guessing. Rerunning with the fix:
+
+| | Buggy (as published) | Fixed |
+| --- | --- | --- |
+| R² | 0.044 | 0.043 |
+| Orgs significant, uncorrected (95% CI) | 6 of 30 | 4 of 30 |
+| Orgs surviving Bonferroni | **1 of 30** (Nationals) | **0 of 30** |
+
+R² barely moves — misattributing org is noise added to a categorical label,
+and noise in a group label attenuates (biases toward zero) that group's
+estimated effect, so a bug like this should make org look *less* different
+from the pack than the truth, not more. That's the direction it moved: the
+one org that had cleared the strictest bar no longer does. The bug made the
+paper's single positive claim, not its null conclusion, and fixing it
+removes that claim rather than adding one back. Everything below uses the
+fixed org attribution.
+
+The rest of the regression code — the effect-coding algebra (reference
+category recovered as `-sum(others)`, its variance from the full covariance
+submatrix, not just the diagonal), the Gauss-Jordan inversion, and the
+`ORG_MIN_N`/`keptRows` filter — checked out. All 30 orgs cleared the n≥20
+floor both before and after the fix (`droppedOrgsForLowN: 0`), so that
+filter isn't quietly picking which orgs get evaluated. Reimplementing the
+whole pipeline independently (a second script, own season-resolution logic,
+same OLS solver) landed on R²=0.043 — matching the fixed run to the
+percent, which is the cross-check that the OLS/effect-coding math itself is
+right; the bug was in data assembly, not in the regression.
+
+### 2. Response transform: doesn't matter
+
+`log(days)` was the modeled response. Refit with raw days (`levels`) and
+`sqrt(days)`:
+
+| Transform | R² | Uncorrected significant | Bonferroni survivors |
+| --- | --- | --- | --- |
+| `log(days)` | 0.043 | 4 of 30 | 0 of 30 |
+| raw days | 0.042 | 3 of 30 | 0 of 30 |
+| `sqrt(days)` | 0.045 | 5 of 30 | 0 of 30 |
+
+R² sits in a tight 0.042–0.045 band and zero orgs clear Bonferroni under any
+of the three. The conclusion isn't an artifact of the log transform.
+(`org-regression-transform.mjs`, `org-regression-transform-{log,levels,sqrt}.json`.)
+
+### 3. Bonferroni vs. Benjamini-Hochberg: this is where it gets closer than "0 of 30" suggests
+
+Bonferroni (α=0.05/30) controls the chance of ANY false positive across 30
+tests — strict. Benjamini-Hochberg controls the expected FALSE DISCOVERY
+RATE instead — more forgiving by design. Re-ranking the fixed run's 30
+p-values and applying BH at q=0.05:
+
+**2 of 30 orgs survive BH: Tampa Bay Rays (+39.1%, p=0.0018) and Washington
+Nationals (−30.9%, p=0.0028).**
+
+That's a real difference the correction choice makes — not "0 of 30" but
+not "6 of 30" either. It's still weak evidence on its own: at a 5% false
+discovery rate among 30 simultaneous tests, roughly 1–2 survivors are the
+expected floor even if org has zero true effect, so 2 survivors is
+consistent with either "the Rays and Nationals are real outliers" or "this
+is exactly what chance alone produces at this q." Section 4 below is why
+this evidence should be read as still on the weak side.
+
+### 4. Non-independence: SEs are probably still too small, and that cuts against the two BH survivors
+
+OLS assumes every row is an independent observation. It isn't: a player who
+passes through High-A, AA, and AAA contributes up to three rows to his
+org's "n," not three independent players. Checked directly: 3,278 rows
+resolve to 1,707 distinct (org, player) pairs — a 1.92 rows-per-player
+ratio overall. The two BH survivors are typical, not outliers on this axis:
+Tampa Bay's n=134 rows come from 60 distinct players (ratio 2.23, the
+*highest* of any org); Washington's n=96 come from 53 (ratio 1.81).
+(`clustering-check.mjs`.)
+
+Classical measurement-error and clustering theory both point the same way
+here: treating within-player rows as independent understates the true
+variance of an org's coefficient, so the naive SEs used above are
+anti-conservative (too narrow) — confirmed direction, not assumed. A
+cluster-robust or player-random-effects refit was not run (a materially
+bigger lift than the checks above), but the direction of the correction it
+would apply is unambiguous: CIs widen, p-values grow. Applied to section 3,
+that cuts against, not for, the two BH survivors — Tampa Bay's effective n
+is closer to 60 than 134. This doesn't resolve whether the Rays/Nationals
+effect is real; it says the BH result above is more likely to shrink than
+grow under a correctly-clustered SE, which is the direction that favors the
+null this spike has been building toward.
+
+A smaller, separate residual: 59 of 3,278 durations (1.8%) have more than
+one team row at the same level in the same season — a plausible mid-season
+trade the nearest-season match doesn't disambiguate by date-within-season.
+Too small to move R² or the significance counts; not fixed.
+
+### 5. Confounds not in the model — plausible, not measured here
+
+The model controls for level and draft-round tier only. Two omissions could
+plausibly matter and neither is quantified in this spike:
+
+- **In-level performance.** An org whose players simply hit or pitch better
+  in this cohort would look "fast" for reasons that have nothing to do with
+  how it manages promotion decisions — the confound this regression exists
+  to rule out for draft pedigree, unaddressed for performance.
+- **Era.** The fixed cohort's resolved durations span transition-year 2009
+  through 2023 (2020 thin, no MiLB season) — 15 seasons that include the
+  2021 contraction (roughly 160 full-season affiliates down to 120), which
+  could shift baseline durations for reasons unrelated to any org's own
+  practice. Whether orgs are evenly represented across that span, or
+  whether some orgs' cohort rows cluster in different eras than others',
+  isn't checked. If they don't, part of an org's fitted effect could be
+  absorbing an era shift rather than an org tendency.
+
+Position group (hitters vs. pitchers) was considered and set aside as lower
+priority — the level effect above is large and directionally consistent
+with the raw medians in `docs/level-tenure-benchmark.md`, which already
+splits by hitter/pitcher and finds the same broad pattern, so it's less
+likely to be silently distorting the org term specifically.
+
+### 6. Cohort selection: the debut requirement is a real, unaddressed gap
+
+This entire spike — the widened one and the regression — is built on
+players who **reached the majors**. An org that promotes aggressively but
+also releases failed prospects at a high rate wouldn't show up as "fast" in
+this cohort at all: the failures never debut, so they never enter the data.
+Org speed and org failure rate are entangled here in a way this spike
+cannot separate — doing so would need a cohort of drafted-but-never-debuted
+players with their own level/date history, a materially different pull
+than anything built so far. Flagged, not measured: no claim in this
+document should be read as "how fast an org promotes," only "how fast an
+org's cohort of players who *made it* moved."
+
+### What this changes
+
+- **The R²=0.044 / "barely any of the variance is explained" reading holds
+  up.** Every check above left it in a 0.042–0.045 band. Individual-player
+  noise, not org or pedigree, remains the dominant source of variation.
+- **The single Bonferroni survivor (Nationals) was a bug, not a finding.**
+  Retracted above.
+- **The honest post-review headline is "2 of 30 orgs (Rays, Nationals)
+  survive a less conservative correction, and even that is likely
+  optimistic once player-level clustering is accounted for" — not "0 of
+  30" and not "1 of 30."** That's a real softening of the null, but not a
+  reversal of it: the practical conclusion for a shipped feature is
+  unchanged — org identity is not a reliable basis for a per-team movement
+  window, with at most two organizations as arguable, unconfirmed
+  exceptions worth someone's judgment call, not a shippable range.
+- **Confound completeness (performance, era) and cohort selection
+  (debut-only survivorship) remain open, unquantified risks** that could
+  shift the picture in either direction and were out of scope for this
+  pass.
+
+## The omnibus check: real signal, still not attributable
+
+The adversarial review above tests 30 individual org coefficients and asks
+"which one survives correction" — a different, stricter question than "does
+org matter at all." A single joint test answers the second question
+directly, and it's the one gap the adversarial review named but didn't
+close (clustering, era). This pass closes it with two independent methods
+and picks up the era check along the way.
+
+**Method 1 — cluster-robust omnibus Wald test.** Same
+level+tier+org model, refit with CR1 standard errors clustered by player
+(the fix the adversarial review's section 4 named but didn't run), then a
+joint Wald F-test on all 29 org coefficients at once instead of one CI at a
+time:
+
+```
+F(29, 1494) = 1.824, p = 0.0048
+```
+
+**Method 2 — player-collapsed variance-component ANOVA**, which sidesteps
+clustering by construction rather than modeling around it: fit
+`log(days) ~ level + tier + era` with NO org term, collapse each player's
+possibly-multiple durations at one org down to a single averaged residual
+(3,278 rows → 1,707 independent org×player pairs), then run classical
+unbalanced one-way ANOVA of those residuals by org:
+
+```
+F(29, 1677) = 1.685, p = 0.0128
+tau^2 (between-org variance)  = 0.0146
+sigma^2 (within-org variance) = 1.2092
+ICC = tau^2/(tau^2+sigma^2)   = 1.2%
+```
+
+Both methods reject the null that org has zero effect — independently, by
+different means, at different p-values but the same conclusion.
+**Transform check** (matching the adversarial review's practice of
+re-running under raw and `sqrt` days, applied to this new omnibus test):
+the cluster-robust omnibus F holds under `log(days)` (p=0.0048) and
+`sqrt(days)` (p=0.027) but is borderline under raw `days` (p=0.069, not
+significant at the conventional 0.05). Not a clean sweep like the earlier
+per-org-effect transform check — `org-omnibus-transform-check.mjs`. Read
+it as: robust under the two transforms actually appropriate for
+right-skewed duration data (raw days has a long right tail that violates
+OLS's homoscedasticity assumption more severely than either), not as
+iron-clad under every possible specification.
+
+With that caveat attached, this sharpens the doc's headline in a real way:
+**org identity is not "no signal," it's small, real, aggregate signal that
+can't be pinned to a specific franchise.** The ICC is the number that reconciles this with
+everything above it: org explains about **1.2%** of the residual
+(post-level/tier/era) variance in log-days-at-level. Real enough for an
+omnibus test with 1,707+ units to detect; nowhere near large enough for a
+per-org point estimate to be trustworthy at n=45-160 per org, which is
+exactly the "0-1 of 30 survive individual correction" result above. Both
+things are true at once — a large sample can detect that a small effect
+exists in aggregate while remaining unable to say which specific group
+carries it.
+
+An empirical-Bayes shrinkage estimate — pulling each org's raw effect
+toward the grand mean in proportion to how much of its variance is
+sampling noise (`shrinkage weight = tau^2/(tau^2+sigma^2/n_org)`, order
+~0.34–0.47 here given the tiny tau^2) — is the honest single-number
+estimate per org, if one were ever needed for something lower-stakes than
+a shipped range: Baltimore and Washington shrink to roughly -17% to -12%,
+Milwaukee and Tampa Bay to roughly +12%, everyone else compresses toward
+single digits. Full table in `org-variance-components.json`.
+
+**Era is a real, uneven confound — but doesn't explain away the org
+signal.** Org rows are not evenly spread across the 2005–2023 span: a
+chi-square test of org × era independence rejects cleanly (χ²(29)=85.9,
+p<0.0001) — the Dodgers' rows are 70% Era2 (2016+) against a 56% pooled
+rate, the Rangers' are 61% Era1 against a 44% pooled rate, and three more
+orgs skew similarly. Adding era to the model shifts individual org
+coefficients by a mean of 2.5 points (up to 5.9 for the Dodgers) and
+nearly doubles the model's R² (0.043 → 0.064) — era predicts days-at-level
+better than org or tier do. But the org signal survives era-adjustment:
+cluster-robust significant-uncorrected count is 3 of 30 with era controlled
+for, same as without. Era was a real, previously-unmeasured confound; it
+just isn't the org signal in disguise.
+
+**Correction: it isn't the 2021 contraction, and it isn't monotonic.** The
+binary Era1/Era2 split above doesn't distinguish "days-at-level trending
+down over time" from "a sharp, dated shift in 2021" — two different
+mechanisms this spike had speculated about elsewhere without testing (see
+below). A three-bucket split (`org-era-granularity.mjs`: ≤2015 / 2016–2020
+/ 2021–2023, isolating the contraction as its own bucket) shows neither:
+raw median days-at-level runs **257d → 324d → 265d** across the three
+buckets (n=1,448/1,164/666) — a hump, peaking in 2016–2020, not a
+monotonic trend and not a step change at the 2021 contraction. The
+model-adjusted era effect (holding level/tier/org fixed) shows the same
+shape: −21%, +20%, +5.5% vs. the grand mean. The org × era3 signal is even
+stronger at this resolution (χ²(58)=159.1, p<0.0001) and the org omnibus
+Wald test still holds with era3 controlled for (F(29,1492)=1.758,
+p=0.0078) — consistent with the two-bucket result, org isn't absorbing
+this. **What actually happened in 2016–2020 to slow promotions down, and
+why 2021–2023 partially but not fully reverted, is an open question this
+spike doesn't answer** — worth flagging for anyone who picks up the
+"2021 contraction" hypothesis elsewhere in this research (see the PA/IP
+discussion above and in `docs/level-tenure-benchmark.md`): the calendar-day
+data doesn't actually support a simple contraction-sped-things-up story.
+
+**What this doesn't change:** no per-team movement-window feature should
+ship from this. The practical bar was always "can a reader be told which
+specific org is fast or slow," and that bar is further from being cleared
+than ever — 1 of 30 orgs (Tampa Bay) survives BH correction even under the
+more forgiving, clustering-robust test. What it does change is which
+sentence is accurate to write in a hypothetical future research note: not
+"no evidence org matters," but "org matters a little, in aggregate, and
+current sample sizes can't say which org." Script:
+`.scratch/level-benchmarks/org-variance-components.mjs`. Output:
+`org-variance-components.json`. Self-tests its own numerical primitives
+(regularized incomplete gamma/beta for the chi-square and F p-values)
+against known reference values before running on real data.
+
+## The in-level performance confound: real, strong — and can't be cleanly tested here
+
+The adversarial review's section 5 named this confound but didn't measure
+it: "an org whose players simply hit or pitch better in this cohort would
+look 'fast' for reasons that have nothing to do with how it manages
+promotions." This pass measures it — and finds a real methodological trap
+that limits what the result can say.
+
+**Building the covariate required a real new pull, as flagged.** `raw.json`
+only carries the 3,061-player DEBUT cohort's own stat lines. Percentile-
+ranking a cohort player against *other cohort players* would rank him
+against a survivorship-biased pool — everyone in it reached the majors.
+Checked directly against statsapi: the obvious endpoint
+(`/api/v1/stats?stats=season&group=...`) silently applies a qualification
+floor unless `playerPool=all` is passed — AAA 2015 hitting returns 239
+"qualified" rows by default vs. **1,562** with `playerPool=all` (min PA 0).
+`perf-pull.mjs` reuses `fetchLevelSeasonStats` from `src/api/statsLevels.js`
+(already used by `gen-minors-leaders.mjs`, already passes `playerPool=all`)
+across the 45 (level, season) pairs the fixed cohort's durations actually
+touch — 90 calls, 46,021 hitter-seasons + 43,027 pitcher-seasons. Each
+duration's percentile is OPS-rank (hitters) or ERA-rank, inverted so lower
+ERA scores higher (pitchers) within its own (level, season)'s full
+population — not the cohort's.
+
+**The result, on its own terms:** refit `log(days) ~ level + tier + org +
+perfPctile` against the same row subset as a performance-free baseline
+(apples to apples):
+
+```
+baseline    (level+tier+org):            n=3026  R^2=0.0559  orgs sig (uncorrected): 3 of 30
+augmented   (+ perfPctile):              n=3026  R^2=0.0767  orgs sig (uncorrected): 3 of 30
+perfPctile coefficient: -7.9% days per +10 percentile points (z=-8.21)
+```
+
+Performance is a strong, obvious-in-retrospect predictor — better hitters
+and pitchers move faster, and the coefficient's z=-8.21 is the single
+strongest effect measured anywhere in this spike, dwarfing every org
+coefficient. It picks up more R² on its own (+0.021) than the entire
+29-column org block contributes. But it doesn't explain away org: the same
+3 orgs (Atlanta, Cleveland, Tampa Bay) are significant before and after,
+and their effects get slightly LARGER with performance controlled for
+(mean |shift| 1.8 points, one sign flip out of 30, no org that had been
+significant loses significance). That's the opposite of what "performance
+is a hidden confound explaining org" would predict.
+
+**But that clean-looking result rests on a subsample that isn't neutral,
+and the Washington Nationals are the case that shows it.** Computing a
+percentile needs enough volume to mean something — this run requires
+PA≥20 (hitters) / IP≥10 (pitchers) at the level. That floor drops 252 of
+3,278 durations (7.7%) — and those 252 are not a random slice: their
+median duration is **26 days**, against **288 days** for the kept rows.
+Requiring enough PA/IP to rank a player is, mechanically, requiring enough
+TIME at the level to accumulate it — so the floor disproportionately
+excludes exactly the fastest promotions, the ones a "movement window"
+feature would care about most. Washington shows the effect directly: −30.9%
+and BH-significant in the full, fixed cohort (`org-regression.json`); in
+this performance-eligible subsample (n=85, most of Washington's fastest
+movers dropped for insufficient volume) it's −11.6% and not significant.
+Whether that's "performance genuinely explains Washington's speed" or "the
+floor removed the very stints that made Washington look fast, before
+performance ever entered the model" can't be told apart from this run —
+they're confounded with each other by construction. **Read the 3-orgs-
+survive result above as real for Atlanta/Cleveland/Tampa Bay specifically
+(their significant rows have enough volume to clear the floor either way),
+and read Washington's disappearance from this subsample as inconclusive,
+not as evidence performance explains it.**
+
+A cleaner test would need a percentile computed from partial-season stats
+(matching the exact PA/IP a player actually accumulated during the
+duration, ranked against others' partial-season lines through the same
+point) rather than requiring a full qualifying line — a bigger rebuild than
+this pass, flagged rather than attempted. Scripts: `perf-pull.mjs`
+(the pull), `org-regression-perf.mjs` (baseline-vs-augmented refit and
+coefficient-shift comparison). Output: `perf-pool.json`,
+`org-regression-perf.json`.
+
+**Adversarial cross-read note:** this section's SE is naive OLS, not the
+cluster-robust SE the omnibus-check section above establishes as the more
+trustworthy one — kept naive deliberately so the baseline-vs-augmented
+*comparison* stays apples-to-apples (the question here is whether adding
+performance shifts things, not whether the absolute significance count is
+trustworthy on its own). Don't read this section's "3 of 30" as the same 3
+orgs as the omnibus-check section's "3 of 30" — they aren't. Naming both
+side by side without that flag would read as two analyses agreeing when
+they're actually about different orgs entirely, which the table below
+makes clear.
+
+## The one thing that's robust: Tampa Bay
+
+Pulling together every specification run across this whole spike — naive
+vs. cluster-robust SE, with vs. without era control, with vs. without
+performance control, full cohort vs. the performance-eligible subsample —
+one pattern falls out that no single section above states directly:
+
+| Specification | Significant orgs (uncorrected) |
+| --- | --- |
+| Naive SE, full cohort | Nationals, Baltimore, Milwaukee, **Tampa Bay** |
+| Naive SE, full cohort, BH-corrected | Nationals, **Tampa Bay** |
+| Cluster-robust SE, full cohort | Baltimore, Milwaukee, **Tampa Bay** |
+| Cluster-robust SE, full cohort, BH-corrected | **Tampa Bay** |
+| Cluster-robust SE, era-controlled | Baltimore, Milwaukee, **Tampa Bay** |
+| Naive SE, performance-eligible subsample | Atlanta, Cleveland, **Tampa Bay** |
+| Naive SE, performance-eligible subsample + perf control | Atlanta, Cleveland, **Tampa Bay** |
+
+**Tampa Bay Rays is the only organization that comes back significant
+under every specification tried in this spike** — every SE method,
+correction, and cohort restriction attempted. Nationals and
+Baltimore/Milwaukee are each significant under exactly one methodological
+family (naive-SE or cluster-robust, respectively) and disappear under the
+other. Atlanta and Cleveland appear only in the volume-restricted
+performance subsample and nowhere in the full cohort. That instability is
+itself the finding: which 3 orgs look "significant" depends heavily on
+which defensible methodological choice gets made, which is exactly what
+"individual-org attribution is unreliable" (the headline conclusion above)
+predicts. Tampa Bay surviving all seven specifications, including the
+strictest (BH-corrected, cluster-robust) and the most different in kind
+(a completely disjoint subsample under naive SE), is the closest thing to
+an actual per-org finding anywhere in this spike — worth a specific,
+qualified callout if this research ever gets picked up again, while
+everything else stays "org matters a little in aggregate, no specific
+team with confidence."
+
 ## Where the work lives
 
 `.scratch/level-benchmarks/team-windows.mjs` — reuses `org-and-timing.mjs`'s
@@ -226,8 +655,33 @@ cohort actually uses and ranks team ids by cohort impact. Output:
 `org-gaps.json`. `org-regression.mjs` is the confound-controlled follow-up:
 fits `log(days) ~ level + draftTier + org` by OLS (effect-coded, own
 normal-equations solver — no external stats dependency) and reports each
-org's fixed effect with a 95% CI. Output: `org-regression.json`. All depend
-on `raw.json`, `dates.json`, `findings.json` already in that directory (now
-built from the widened 2005–2023 pull — `pull.mjs`'s `DEBUT_YEAR_MIN` is
-2005); `txn-cache.json` is gitignored (~65MB, now spans 1997–2023) but
-cheap to rebuild — see `docs/level-tenure-benchmark.md`.
+org's fixed effect with a 95% CI, plus Bonferroni and Benjamini-Hochberg
+flags. Output: `org-regression.json`. `dates.mjs` now stamps each
+`allDurations` entry with the exact `season` its transition resolved to
+(the adversarial-review fix above); `org-regression.mjs` reads that field
+directly instead of re-deriving a season guess. `org-regression-
+transform.mjs` reruns the same model on raw and `sqrt` days (outputs:
+`org-regression-transform-{log,levels,sqrt}.json`) to check the conclusion
+isn't transform-dependent. `clustering-check.mjs` reports rows-per-player by
+org, the non-independence check behind section 4 of "Adversarial review."
+`org-variance-components.mjs` is the omnibus follow-up: cluster-robust
+(player-clustered) SEs and a joint Wald F-test for the whole org block, an
+org × era representation chi-square plus an era-augmented refit, and a
+player-collapsed one-way variance-component ANOVA (tau²/sigma²/ICC) with
+empirical-Bayes shrunk per-org estimates. Output:
+`org-variance-components.json`. `org-omnibus-transform-check.mjs` reruns
+just the cluster-robust omnibus Wald test on raw and `sqrt` days, output
+`org-omnibus-transform-check.json`. `org-era-granularity.mjs` reruns the era
+check at three-bucket resolution (≤2015 / 2016–2020 / 2021–2023) to test
+the contraction hypothesis directly. Output: `org-era-granularity.json`.
+`perf-pull.mjs` pulls the full (not qualification-floored) hitting/pitching
+population for every (level, season) the fixed cohort touches, reusing
+`src/api/statsLevels.js`'s `fetchLevelSeasonStats` (`playerPool=all`).
+Output: `perf-pool.json` (~7MB, committed — see precedent below).
+`org-regression-perf.mjs` adds an in-level performance percentile covariate
+to the level+tier+org model and compares baseline vs. augmented fits on the
+same row subset. Output: `org-regression-perf.json`.
+All depend on `raw.json`, `dates.json`, `findings.json` already in that
+directory (now built from the widened 2005–2023 pull — `pull.mjs`'s
+`DEBUT_YEAR_MIN` is 2005); `txn-cache.json` is gitignored (~65MB, now spans
+1997–2023) but cheap to rebuild — see `docs/level-tenure-benchmark.md`.
