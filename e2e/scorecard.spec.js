@@ -58,6 +58,12 @@ test('sealed game: the sheet renders staged but inkless — nothing score-shaped
   expect(types.join('')).toBe('')
   const ptl = await page.locator('.sc-sheet__totals .sc-sheet__totcell').allTextContents()
   expect(ptl.join('')).toBe('')
+  // The TOTALS plate is PREPRINTED — it is on the blank sheet too — but nothing
+  // is totalled under it before the first batter. A scorer does not write 0 AB
+  // under a column nobody has batted in.
+  await expect(page.locator('.sc-sheet__totplate')).toBeVisible()
+  const sums = await page.locator('.sc-sheet__totfigs > span').allTextContents()
+  expect(sums.join('')).toBe('')
   // The decisions are the loudest spoiler: the winner's name must not exist.
   await expect(page.locator('body')).not.toContainText('Gasser')
   // Scoreboard cells all blank.
@@ -77,6 +83,10 @@ test('partial reveal (through top 3): exactly that much ink, and no more', async
   // FINAL block still blank; winner still unnamed.
   await expect(page.locator('.sc-final td.sc-scoreboard__rhe').first()).toHaveText('')
   await expect(page.locator('body')).not.toContainText('Gasser')
+  // The totals are blank only while the sheet is: three revealed innings have
+  // been batted, so the plate carries real figures now.
+  const sums = await page.locator('.sc-sheet__totfigs > span').allTextContents()
+  expect(sums.join('')).not.toBe('')
   // Bottom sheet: the home club has only innings 1–2 revealed — switch and
   // count its P/TP/LOB columns.
   await page.getByRole('button', { name: 'Bottom', exact: true }).click()

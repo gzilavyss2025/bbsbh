@@ -547,3 +547,14 @@ top edge: `.sc-sheet__sum`'s `vertical-align: top` is the GRID's rule, for
 figures that sit beside a rail of stacked names, and there are none in the foot
 row — so the totals sat a few pixels above the P/WH/FO trio beside them. Bottom
 -aligned, and the plate grows upward off the line they share.
+
+The plate itself is PREPRINTED — it is on the blank sheet too — but nothing is
+totalled under it before the first batter. The four sums are honest at zero
+(nothing revealed really is nothing charged), and they still read as a finished
+line under a kraft bar, which is not what a blank sheet should say. The foot row
+asks whether any box carries a plate appearance and leaves the figures blank
+until one does, the same blank the P/WH/FO cells keep for an unrevealed half.
+Asked of the CARDS, never of the sums: a revealed half can legitimately total
+zero of all four, and that zero is a reading the reader earned. The judgement
+lives in `ScorecardSheet`, not in the grid builder — when a box is left blank to
+write on is a property of the printed sheet, not of the game.

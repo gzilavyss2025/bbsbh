@@ -134,6 +134,23 @@ export function ScorecardSheet({
         inning: n,
       }))
 
+  // HAS ANYTHING BEEN SCORED ON THIS SHEET? The four sums are honest at zero —
+  // nothing revealed really is nothing charged — but a scorer does not write
+  // 0 AB under a column before the first batter has come up, and the TOTALS
+  // plate over them made four zeros on a blank sheet read as a finished line.
+  // So the foot row leaves them blank until a box carries a plate appearance,
+  // which is the same blank the P/WH/FO cells keep for an unrevealed half.
+  //
+  // Asked of the CARDS, not of the sums: a revealed half can legitimately total
+  // zero of all four (three up, three down on non-at-bat events), and that zero
+  // is a reading the reader earned. One card is the whole condition.
+  //
+  // The judgement lives here rather than in the grid builder on purpose. When a
+  // box is left blank to write on is a property of the printed sheet, not of
+  // the game — api/scorecardGame.js's job is to say what is revealed, and it
+  // already does.
+  const inked = (grid?.slots ?? []).some((slot) => Object.keys(slot.cells).length > 0)
+
   // The zoom floor — the zoom at which the WHOLE sheet fits the pane — is
   // measured, not calculated: the table's own laid-out width divided by the
   // zoom it was laid out at, which is a constant no matter which zoom is
@@ -413,10 +430,10 @@ export function ScorecardSheet({
               <td className="sc-sheet__totalscell" colSpan={SUMMARY.length}>
                 <span className="sc-sheet__totplate">Totals</span>
                 <span className="sc-sheet__totfigs">
-                  <span>{grid ? grid.totals.ab : ''}</span>
-                  <span>{grid ? grid.totals.h : ''}</span>
-                  <span>{grid ? grid.totals.r : ''}</span>
-                  <span>{grid ? grid.totals.rbi : ''}</span>
+                  <span>{inked ? grid.totals.ab : ''}</span>
+                  <span>{inked ? grid.totals.h : ''}</span>
+                  <span>{inked ? grid.totals.r : ''}</span>
+                  <span>{inked ? grid.totals.rbi : ''}</span>
                 </span>
               </td>
             </tr>
