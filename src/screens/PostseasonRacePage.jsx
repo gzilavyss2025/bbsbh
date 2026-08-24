@@ -7,6 +7,7 @@ import { shapeWildCard } from '../api/standings.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
+import { useRouteLink } from '../lib/nav.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
@@ -360,6 +361,7 @@ function LeagueBlock({ lg, wide }) {
 export function PostseasonRacePage() {
   useDocumentTitle('Postseason Race')
   const wide = useMediaQuery(WIDE_QUERY)
+  const linkProps = useRouteLink()
 
   const today = useMemo(() => baseballToday(), [])
   const season = Number(today.slice(0, 4))
@@ -377,6 +379,9 @@ export function PostseasonRacePage() {
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Postseason Race</h1>
+        <a className="topbar__action chevron-link" {...linkProps('/standings')}>
+          Standings ›
+        </a>
       </header>
 
       <p className="psrace__asof">Entering today · through {labelDate(yesterday)}</p>

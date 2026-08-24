@@ -12,7 +12,10 @@
 /* .chevron-link — the shared "See all ›" text-button primitive (see
    ChevronLink.jsx), composed by TeamLeadersLedger's header action, TeamPage's
    PreviewDoor, and NumbersTab's "Org leaders ›". One padding/hit-target model
-   for all three, so a tweak here reaches every placement. */
+   for all three, so a tweak here reaches every placement. Also worn directly
+   by a real `<a>` (Standings ↔ Postseason Race's topbar cross-link, via
+   useRouteLink) rather than the ChevronLink button component — `text-decoration:
+   none` only matters there, since a `<button>` never underlines to begin with. */
 .chevron-link {
   border: none;
   background: none;
@@ -24,6 +27,7 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   color: var(--accent-link);
+  text-decoration: none;
 }
 .chevron-link:focus-visible {
   outline: 2px solid var(--focus-ring);

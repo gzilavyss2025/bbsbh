@@ -12,6 +12,7 @@ import {
   DASH,
 } from '../api/standings.js'
 import { favoriteAccentColor } from '../lib/teams.js'
+import { useRouteLink } from '../lib/nav.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
@@ -151,6 +152,7 @@ function buildJumps(today) {
 export function StandingsPage() {
   useDocumentTitle('Standings')
 
+  const linkProps = useRouteLink()
   const { favoriteTeamId } = useFavoriteTeam()
 
   const today = useMemo(() => baseballToday(), [])
@@ -285,6 +287,9 @@ export function StandingsPage() {
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Standings</h1>
+        <a className="topbar__action chevron-link" {...linkProps('/postseason-race')}>
+          Postseason Race ›
+        </a>
       </header>
 
       <div className="standings-ctrl">
