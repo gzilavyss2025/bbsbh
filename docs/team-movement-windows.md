@@ -599,6 +599,52 @@ this pass, flagged rather than attempted. Scripts: `perf-pull.mjs`
 coefficient-shift comparison). Output: `perf-pool.json`,
 `org-regression-perf.json`.
 
+**Adversarial cross-read note:** this section's SE is naive OLS, not the
+cluster-robust SE the omnibus-check section above establishes as the more
+trustworthy one — kept naive deliberately so the baseline-vs-augmented
+*comparison* stays apples-to-apples (the question here is whether adding
+performance shifts things, not whether the absolute significance count is
+trustworthy on its own). Don't read this section's "3 of 30" as the same 3
+orgs as the omnibus-check section's "3 of 30" — they aren't. Naming both
+side by side without that flag would read as two analyses agreeing when
+they're actually about different orgs entirely, which the table below
+makes clear.
+
+## The one thing that's robust: Tampa Bay
+
+Pulling together every specification run across this whole spike — naive
+vs. cluster-robust SE, with vs. without era control, with vs. without
+performance control, full cohort vs. the performance-eligible subsample —
+one pattern falls out that no single section above states directly:
+
+| Specification | Significant orgs (uncorrected) |
+| --- | --- |
+| Naive SE, full cohort | Nationals, Baltimore, Milwaukee, **Tampa Bay** |
+| Naive SE, full cohort, BH-corrected | Nationals, **Tampa Bay** |
+| Cluster-robust SE, full cohort | Baltimore, Milwaukee, **Tampa Bay** |
+| Cluster-robust SE, full cohort, BH-corrected | **Tampa Bay** |
+| Cluster-robust SE, era-controlled | Baltimore, Milwaukee, **Tampa Bay** |
+| Naive SE, performance-eligible subsample | Atlanta, Cleveland, **Tampa Bay** |
+| Naive SE, performance-eligible subsample + perf control | Atlanta, Cleveland, **Tampa Bay** |
+
+**Tampa Bay Rays is the only organization that comes back significant
+under every specification tried in this spike** — every SE method,
+correction, and cohort restriction attempted. Nationals and
+Baltimore/Milwaukee are each significant under exactly one methodological
+family (naive-SE or cluster-robust, respectively) and disappear under the
+other. Atlanta and Cleveland appear only in the volume-restricted
+performance subsample and nowhere in the full cohort. That instability is
+itself the finding: which 3 orgs look "significant" depends heavily on
+which defensible methodological choice gets made, which is exactly what
+"individual-org attribution is unreliable" (the headline conclusion above)
+predicts. Tampa Bay surviving all seven specifications, including the
+strictest (BH-corrected, cluster-robust) and the most different in kind
+(a completely disjoint subsample under naive SE), is the closest thing to
+an actual per-org finding anywhere in this spike — worth a specific,
+qualified callout if this research ever gets picked up again, while
+everything else stays "org matters a little in aggregate, no specific
+team with confidence."
+
 ## Where the work lives
 
 `.scratch/level-benchmarks/team-windows.mjs` — reuses `org-and-timing.mjs`'s
