@@ -1,7 +1,8 @@
 // Regenerates public/data/team-records/{season}/{teamId}.json — the per-game
-// ledger every club's SITUATIONAL RECORDS are read off, at MLB and the four
-// full-season MiLB levels. Surfaced as the "Records" table under Team Leaders
-// on the Numbers tab (src/api/teamRecords.js).
+// ledger every club's SITUATIONAL RECORDS are read off, at MLB, the four
+// full-season MiLB levels, and Rookie (sportId 16, the complex leagues).
+// Surfaced as the "Records" table under Team Leaders on the Numbers tab
+// (src/api/teamRecords.js).
 //
 // The records themselves — scoring first, out-hitting the opponent, leading
 // after 7, vs. a left-handed starter, by month, in a getaway day, before and
@@ -88,7 +89,13 @@ const outDir = join(here, '..', 'public', 'data', 'team-records')
 const teamsFile = join(here, '..', 'public', 'data', 'teams.json')
 
 const DEFAULT_DAYS = 3
-const SPORT_IDS = [1, 11, 12, 13, 14]
+// MLB + the four full-season MiLB levels + Rookie (sportId 16, complex leagues
+// like the ACL/FCL/DSL). Nothing here depends on `probablePitcher` or assumes a
+// 9-inning game — `starterLine` reads the boxscore's actual `pitchers[0]`, and
+// every inning-count derivation in `lib/team-records.mjs` keys off the
+// linescore's own length, so a short complex-league game degrades the same way
+// a rain-shortened MLB game already does (see `leadStateAfter`'s header).
+const SPORT_IDS = [1, 11, 12, 13, 14, 16]
 const CONCURRENCY = 6
 const CHECKPOINT_EVERY = 300
 
