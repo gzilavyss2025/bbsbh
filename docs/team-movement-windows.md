@@ -3,8 +3,10 @@
 Follow-up to `docs/level-tenure-benchmark.md`, which flagged team-level
 comparisons as measured but unshipped. This spike asks the concrete
 question: **can we turn "days at level, by org" into a per-team estimated
-movement range?** Short answer: not yet — and a second pass with 3.5x the
-data confirmed that, rather than overturning it.
+movement range?** Short answer: not yet. A second pass with 3.5x the data
+confirmed that rather than overturning it, and a third pass — a
+confound-controlled regression instead of raw per-org quantiles — confirmed
+it again, more rigorously (see "The regression check" below).
 
 ## Method
 
@@ -84,19 +86,95 @@ first, cheapest thing to try before concluding org-level windows are
 unbuildable rather than just unbuilt — it's now been tried, and the
 conclusion held.
 
+## The regression check: same answer, more rigorous
+
+The obvious objection to the quantile-overlap check above: a per-org median
+conflates real organizational tendency with pedigree mix (an org that
+happens to have more prep-pick position players in this cohort will look
+"slow" for reasons that have nothing to do with how it manages promotions).
+A regression that holds level and draft pedigree constant and estimates an
+org fixed effect is the right tool to isolate the two — so that's the
+third run, not just a bigger version of the first two.
+
+**Model**: `log(days-at-level) ~ level + draftTier + org`, all three factors
+sum-to-zero (effect) coded, fit by ordinary least squares (normal equations,
+solved directly — no external stats library). Effect coding makes each org's
+coefficient its estimated deviation from the *grand mean* days-at-level,
+holding level and draft tier fixed, with its own standard error from the
+fitted coefficient covariance matrix — which is the direct test for "does
+this org actually differ," rather than the ad hoc "do the quantile windows
+touch" check used above. Same cohort as the widened run: 3,278 durations
+(A-level durations are absent from the source data — see below — so this
+covers High-A/AA/AAA only), all 30 orgs clear a n≥20-per-org floor.
+
+```
+fit: n=3278, p=36 (intercept + 2 level + 4 tier + 29 org), R^2=0.044
+orgs with a 95% CI excluding 0 (uncorrected):        6 of 30
+orgs with a 95% CI excluding 0 (Bonferroni-corrected): 1 of 30
+```
+
+Two results, and they agree:
+
+1. **R² = 0.044.** Level, draft tier, and org together explain 4.4% of the
+   variance in log-days-at-level. Even the "right" model, with the
+   confounds explicitly controlled for, barely explains the outcome at
+   all — the dominant source of variation in how long a player spends at
+   a level is neither org nor pedigree, it's individual-player noise the
+   model has no feature for (performance, injury, the 40-man/option
+   clock, roster need at the level above).
+2. **1 of 30 orgs survive multiple-comparison correction.** Testing 30
+   organizations at once and calling a plain 95% CI "significant" is
+   exactly the setup where ~1–2 false positives are expected by chance
+   alone — which is what the uncorrected pass shows (6 of 30, all with
+   CIs that still cross zero by a wide margin once corrected). Applying a
+   Bonferroni correction (α = 0.05/30) leaves exactly one: the
+   **Washington Nationals**, −32.7% vs. the grand mean (CI narrows to
+   roughly [−45%, −16%] even after correction). One survivor out of 30
+   simultaneous tests is itself within the range chance alone would
+   produce — this is not strong evidence for a single standout org, it is
+   confirmation that the pack has none.
+
+The quantile-overlap check and the regression fixed effect are different
+methods, built to fail in different ways, and they land on the same
+conclusion: **org identity is not a usable signal for days-at-level, even
+after controlling for the pedigree-mix confound.** That's a stronger
+result than "we didn't find it" — it's "a more sensitive test didn't find
+it either." Script: `.scratch/level-benchmarks/org-regression.mjs`. Output:
+`org-regression.json`. Reused `team-windows.mjs`'s historical org sweep,
+`dates.mjs`'s draft-tier bucketing, and the same disputed-player exclusion
+list.
+
+Level and tier came along for the ride and are directionally sane, though
+they aren't the question this asks: AAA is −25.6% vs. the grand mean
+(consistent with the raw AAA-vs-AA-vs-High-A medians above — the highest
+level moves fastest), and Round 11+/undrafted players move faster
+(−7.7%/−2.1%) than mid-round picks (+2.8% to +4.2%) — plausible if a lower
+pedigree tier gets less rope before either a promotion or a release forces
+the next transition.
+
 ## What would change this now
 
-- **A different estimator**, not more data. A per-org median/IQR is the
-  simplest cut and it's the one that failed the overlap check twice now. A
-  regression that holds pedigree and level constant and estimates an org
-  fixed-effect (rather than comparing raw per-org quantiles) could isolate
-  org signal from the pedigree-mix confound — a team with more prep-pick
-  position players will look "slow" here for reasons that have nothing to
-  do with how it manages promotions.
+The regression above was the candidate named here as of the last pass —
+tried, and it returned the same null, more rigorously. What's left:
+
 - **Accept a coarser output.** A three-bucket fast/typical/slow label
   (org median only, window collapsed to the global one) would be honest
   about what the data supports, at the cost of being a much smaller
-  feature than "estimated movement range."
+  feature than "estimated movement range." Given R²=0.044, even a
+  three-bucket label should be treated skeptically — the org term barely
+  moves the outcome at all once level and pedigree are accounted for.
+- **A richer feature set**, if this is worth another pass: the current
+  model's low R² says the missing variance is elsewhere. Performance
+  in-level (OPS/ERA percentile within level-season) or roster mechanics
+  (option years remaining, 40-man status) are plausible candidates, but
+  each is a materially bigger pull than what this spike has built so far,
+  and drifts from "does org predict movement" toward "what predicts
+  movement" — a different, larger question.
+- **Ship the pedigree-tier split on its own**, independent of org. It was
+  measured but never shipped even for the v1 level-only numbers (see
+  `docs/level-tenure-benchmark.md`) and the effect above (Round 11+ movers
+  faster than mid-round picks) is a real, usable signal completely apart
+  from the org question this spike was chasing.
 
 ## How far back the raw data actually goes
 
@@ -145,8 +223,11 @@ historical org sweep, extends it to all four levels, computes p25/p75 (not
 just median), and runs the overlap check. Output: `team-windows.json`.
 `org-gaps.mjs` cross-checks the org sweep against every duration the
 cohort actually uses and ranks team ids by cohort impact. Output:
-`org-gaps.json`. Both depend on `raw.json`, `dates.json`, `findings.json`
-already in that directory (now built from the widened 2005–2023 pull —
-`pull.mjs`'s `DEBUT_YEAR_MIN` is 2005); `txn-cache.json` is gitignored
-(~65MB, now spans 1997–2023) but cheap to rebuild — see
-`docs/level-tenure-benchmark.md`.
+`org-gaps.json`. `org-regression.mjs` is the confound-controlled follow-up:
+fits `log(days) ~ level + draftTier + org` by OLS (effect-coded, own
+normal-equations solver — no external stats dependency) and reports each
+org's fixed effect with a 95% CI. Output: `org-regression.json`. All depend
+on `raw.json`, `dates.json`, `findings.json` already in that directory (now
+built from the widened 2005–2023 pull — `pull.mjs`'s `DEBUT_YEAR_MIN` is
+2005); `txn-cache.json` is gitignored (~65MB, now spans 1997–2023) but
+cheap to rebuild — see `docs/level-tenure-benchmark.md`.
