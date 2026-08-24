@@ -386,6 +386,10 @@
         "screens/LogbookStatsPage.jsx"
       ]
     },
+    "logbookMilestones.js": {
+      "class": "spoiler-free",
+      "why": "The Game Log retrospective's milestone/collection-progress shelf. Reads only team identity (which club, which club was home) off a stamped game's already-resolved facts, never a score or a result — same footing as ClubsSeen.jsx's grid. Docs: docs/design-inspiration.md §8."
+    },
     "logbookStats.js": {
       "class": "reveal-only",
       "why": "The Game Log retrospective. Pure, but it handles scores, so ADR-0001 applies; with no seal to sit inside, the discipline is the INPUT — only ever the user's own stamps.",

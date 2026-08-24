@@ -261,6 +261,18 @@
   }
 }
 
+/* ---- the "Player stats & moments" disclosure: collapsed so a big book
+   doesn't fire a boxscore + winProbability fetch per stamp until asked ---- */
+.logbookstats__toggle {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  width: 100%; margin-bottom: var(--space-6); padding: var(--space-3); text-align: left;
+  border: var(--bw-hair) solid var(--border-rule); border-radius: var(--radius-sm); background: var(--surface-card);
+}
+.logbookstats__toggle span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.logbookstats__toggle b { font: var(--w-semibold) var(--fs-small) var(--font-display); color: var(--text-heading); }
+.logbookstats__toggle small { font-size: var(--fs-caption); line-height: var(--lh-snug); color: var(--text-muted); }
+.logbookstats__chevron { flex: none; font-style: normal; font-size: var(--fs-h2); color: var(--text-caption); }
+
 /* ---- the level filter (All / MLB / AAA / AA / A+ / A), page-wide ---- */
 /* Same visual family as .logbook__seasons (the collection page's season
    toggle) rather than the shared .levelnav (slate, logo sheet) — this page's
@@ -581,3 +593,8 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* The milestone shelf's own rules live in 48b-logbook-milestones.css —
+   split out rather than grown here because this file was already at its
+   600-line cap (ADR-0038) and the milestone shelf is a self-contained visual
+   family, not an extension of anything above. */

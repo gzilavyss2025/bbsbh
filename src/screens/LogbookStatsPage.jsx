@@ -1,7 +1,9 @@
 import '../styles/48a-logbook-stats.css'
+import '../styles/48b-logbook-milestones.css'
 import { useMemo, useState } from 'react'
 import { fetchStampGames } from '../api/logbook.js'
 import { computeLogbookStats } from '../api/logbookStats.js'
+import { computeAllMilestones } from '../api/logbookMilestones.js'
 import { fetchStampBoxscores, fetchStampMoments } from '../api/logbookGameDetail.js'
 import { computeLogbookRetrospective } from '../api/logbookRetrospective.js'
 import { fetchHighlights } from '../api/highlights.js'
@@ -19,6 +21,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { dateLabel, SectionHead } from './logbook/statsShared.jsx'
 import { RetrospectiveSections } from './logbook/RetrospectiveSections.jsx'
+import { LogbookMilestones } from './logbook/LogbookMilestones.jsx'
 
 // The Logbook retrospective — what your collection adds up to (ADR-0035, the
 // game-stamps PRD §6, Tier 1).
@@ -166,11 +169,30 @@ export function LogbookStatsPage({ bookId = null }) {
     [levelStamps, facts.data],
   )
 
-  // The ported First Scorebook sections' own two fetches, gated to the
-  // level-filtered gamePks — see the header. Keyed the same way `facts` is,
-  // so a note edit (which rewrites stamp objects) doesn't refetch a whole
-  // book's worth of box scores.
-  const retroGamePks = useMemo(() => levelStamps.map((s) => s.gamePk), [levelStamps])
+  // Milestones read the WHOLE collection (`stamps`), not the level-filtered
+  // view every other section here uses — "every MLB club" is a fact about
+  // your whole book, not about whichever level filter happens to be active.
+  // Spoiler-free by classification (see spoiler-manifest.json): team
+  // identity only, never a score.
+  const milestones = useMemo(
+    () => computeAllMilestones(stamps, facts.data ?? {}),
+    [stamps, facts.data],
+  )
+
+  // The ported First Scorebook sections are the expensive part of this page —
+  // a per-game boxscore AND winProbability fetch apiece, plus the aggregation
+  // over all of them (src/api/logbookRetrospective.js). A big book was firing
+  // both fetches for every stamp on load, which is what ground the page to a
+  // halt; they now stay collapsed until asked for. `retroGamePks` is empty
+  // while collapsed, and `fetchStampBoxscores`/`fetchStampMoments` return `{}`
+  // immediately for an empty list (see logbookGameDetail.js), so nothing
+  // fetches — and `computeLogbookRetrospective` has nothing to loop over —
+  // until `showDetail` flips.
+  const [showDetail, setShowDetail] = useState(false)
+  const retroGamePks = useMemo(
+    () => (showDetail ? levelStamps.map((s) => s.gamePk) : []),
+    [levelStamps, showDetail],
+  )
   const retroPkKey = retroGamePks.join(',')
   const boxscores = useAsync((signal) => fetchStampBoxscores(retroGamePks, { signal }), [retroPkKey])
   const moments = useAsync((signal) => fetchStampMoments(retroGamePks, { signal }), [retroPkKey])
@@ -267,6 +289,8 @@ export function LogbookStatsPage({ bookId = null }) {
         </p>
       )}
 
+      <LogbookMilestones milestones={milestones} />
+
       <section className="logbookstats__section">
         <SectionHead
           eyebrow="The shape of the book"
@@ -302,15 +326,31 @@ export function LogbookStatsPage({ bookId = null }) {
         </div>
       </section>
 
-      <RetrospectiveSections
-        retro={retro}
-        facts={facts.data}
-        loading={retroLoading}
-        momentClips={momentClips.data}
-        openClip={openClip}
-        onOpenClip={setOpenClip}
-        onCloseClip={() => setOpenClip(null)}
-      />
+      <button
+        type="button"
+        className="logbookstats__toggle"
+        aria-expanded={showDetail}
+        onClick={() => setShowDetail((s) => !s)}
+      >
+        <span>
+          <b>Player stats &amp; moments</b>
+          <small>Best performances, combined leaders, the rotation and bullpen — pulled in on request.</small>
+        </span>
+        <i className="logbookstats__chevron" aria-hidden="true">
+          {showDetail ? '▾' : '▸'}
+        </i>
+      </button>
+      {showDetail && (
+        <RetrospectiveSections
+          retro={retro}
+          facts={facts.data}
+          loading={retroLoading}
+          momentClips={momentClips.data}
+          openClip={openClip}
+          onOpenClip={setOpenClip}
+          onCloseClip={() => setOpenClip(null)}
+        />
+      )}
 
       {(stats.longestWinStreak || stats.longestLossStreak) && (
         <section className="logbookstats__section">

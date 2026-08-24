@@ -141,6 +141,8 @@
                               components/logbook/GameStamp.jsx,
                               screens/logbook/NewBookPage.jsx
      48a-logbook-stats        screens/LogbookStatsPage.jsx
+     48b-logbook-milestones   screens/LogbookStatsPage.jsx (via
+                              screens/logbook/LogbookMilestones.jsx)
      49-passport-book         screens/LogbookPage.jsx,
                               components/passport/PassportBook.jsx,
                               components/passport/BookCoverPicker.jsx

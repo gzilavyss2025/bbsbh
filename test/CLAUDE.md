@@ -59,6 +59,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | leg-advance-codes.test.js | 2 | src/api/playbyplay.js | ADVANCE_CODES (catcher-interference labeling) |
 | lib-helpers.test.js | 14 | format.js, dates.js, statTiers.js, runExpectancy.js | General lib grab-bag |
 | live-edge.test.js | 17 | liveEdge.js, select.js, revealProgressCore.js, scoresUnlocked.js | Follow-live-edge + reveal/unlock mechanism |
+| logbook-milestones.test.js | 11 | src/api/logbookMilestones.js | Game Log retrospective milestone/collection-progress engine — generic slot-fill mechanics + the real clubs/parks registry entries (docs/design-inspiration.md §8) |
 | logbook-stats.test.js | 27 | src/api/logbookStats.js | Logbook retrospective Tier 1 — records, streaks, aggregates (ADR-0035) |
 | logo-mono.test.js | 25 | logoMono.js | Mono logo editor (ADR-0031) |
 | logo-recolor.test.js | 9 | logoMono.js, logoRecolor.js | Logo recolor editor (shares shape numbering w/ logo-mono by design) |
@@ -71,6 +72,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | milb-color-chain.test.js | 11 | brandColors.js, teams.js, milbColors.js | Affiliate→parent-org→neutral color fallback |
 | milb-history-rookie.test.js | 5 | scripts/gen-milb-history.mjs, src/api/milbHistory.js | Rookie level (sportId 16) in the affiliation-history file (issue #856) — coverage includes 16, real parentHistory eras pinned (Greeneville Astros→Reds), cosmetic name churn never leaks into parentHistory, and the reader surfaces it exactly like any other level |
 | milb-team-wiring.test.js | 7 | milbColors.js | MiLB tile/logoVariant wiring |
+| milestone-celebrations.test.js | 10 | src/lib/milestoneCelebrations.js | Game Log milestone shelf's one-shot completion-animation store — same shape as prompts.js |
 | mono-logo-art.test.js | 4 | scripts/lib/mono-logo-art.mjs | The nightly generator's mono-ink override merge — degrades to the file alone on any fetch failure, an id for another store, or a malformed value (ADR-0054) |
 | mound-visit-charging.test.js | 7 | src/api/playbyplay.js | Mound-visit pip row |
 | mid-at-bat-batter-change.test.js | 5 | src/api/playbyplay.js (halfInningFeed, shared) | A batter replaced mid-count still owns the strikeout (Rule 9.15(b)) — the card, its name/headshot and its trimmed description follow the CREDITED batter, not `matchup.batter` |
