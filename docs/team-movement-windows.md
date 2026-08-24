@@ -48,7 +48,13 @@ medians moved the other way, especially at AAA (250d → 171d) — treat that
 shift with more suspicion than the PA/IP one: only 78% of transitions
 resolved a date this run (transaction-wire coverage thins for older
 seasons), so the drop may partly be a measurement artifact rather than a
-real behavior change.
+real behavior change. **This "2021 contraction" explanation was never
+tested directly against calendar-day data and, once it was (see "The
+omnibus check" below), didn't hold up** — the within-cohort time trend is
+a hump peaking in 2016–2020, not a step change at the contraction. That
+doesn't resolve the PA/IP-volume question above, which is a different
+metric and a different (v1-vs-widened cohort) comparison — flagging so the
+two don't get conflated.
 
 Per-org rankings also reshuffled with more data. The v1 fastest AAA org
 (Reds, 82d median, n=15) is no longer the fastest; the widened run's
@@ -466,12 +472,32 @@ p<0.0001) — the Dodgers' rows are 70% Era2 (2016+) against a 56% pooled
 rate, the Rangers' are 61% Era1 against a 44% pooled rate, and three more
 orgs skew similarly. Adding era to the model shifts individual org
 coefficients by a mean of 2.5 points (up to 5.9 for the Dodgers) and
-nearly doubles the model's R² (0.043 → 0.064 — era predicts days-at-level
-better than org or tier do, consistent with the 2021 contraction
-reshaping baseline durations). But the org signal survives era-adjustment:
+nearly doubles the model's R² (0.043 → 0.064) — era predicts days-at-level
+better than org or tier do. But the org signal survives era-adjustment:
 cluster-robust significant-uncorrected count is 3 of 30 with era controlled
 for, same as without. Era was a real, previously-unmeasured confound; it
 just isn't the org signal in disguise.
+
+**Correction: it isn't the 2021 contraction, and it isn't monotonic.** The
+binary Era1/Era2 split above doesn't distinguish "days-at-level trending
+down over time" from "a sharp, dated shift in 2021" — two different
+mechanisms this spike had speculated about elsewhere without testing (see
+below). A three-bucket split (`org-era-granularity.mjs`: ≤2015 / 2016–2020
+/ 2021–2023, isolating the contraction as its own bucket) shows neither:
+raw median days-at-level runs **257d → 324d → 265d** across the three
+buckets (n=1,448/1,164/666) — a hump, peaking in 2016–2020, not a
+monotonic trend and not a step change at the 2021 contraction. The
+model-adjusted era effect (holding level/tier/org fixed) shows the same
+shape: −21%, +20%, +5.5% vs. the grand mean. The org × era3 signal is even
+stronger at this resolution (χ²(58)=159.1, p<0.0001) and the org omnibus
+Wald test still holds with era3 controlled for (F(29,1492)=1.758,
+p=0.0078) — consistent with the two-bucket result, org isn't absorbing
+this. **What actually happened in 2016–2020 to slow promotions down, and
+why 2021–2023 partially but not fully reverted, is an open question this
+spike doesn't answer** — worth flagging for anyone who picks up the
+"2021 contraction" hypothesis elsewhere in this research (see the PA/IP
+discussion above and in `docs/level-tenure-benchmark.md`): the calendar-day
+data doesn't actually support a simple contraction-sped-things-up story.
 
 **What this doesn't change:** no per-team movement-window feature should
 ship from this. The practical bar was always "can a reader be told which
@@ -510,7 +536,10 @@ org, the non-independence check behind section 4 of "Adversarial review."
 org × era representation chi-square plus an era-augmented refit, and a
 player-collapsed one-way variance-component ANOVA (tau²/sigma²/ICC) with
 empirical-Bayes shrunk per-org estimates. Output:
-`org-variance-components.json`. All depend on `raw.json`, `dates.json`, `findings.json` already in that
+`org-variance-components.json`. `org-era-granularity.mjs` reruns the era
+check at three-bucket resolution (≤2015 / 2016–2020 / 2021–2023) to test
+the contraction hypothesis directly. Output: `org-era-granularity.json`.
+All depend on `raw.json`, `dates.json`, `findings.json` already in that
 directory (now built from the widened 2005–2023 pull — `pull.mjs`'s
 `DEBUT_YEAR_MIN` is 2005); `txn-cache.json` is gitignored (~65MB, now spans
 1997–2023) but cheap to rebuild — see `docs/level-tenure-benchmark.md`.
