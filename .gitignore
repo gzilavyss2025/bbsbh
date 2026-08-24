@@ -41,3 +41,9 @@ pnpm-debug.log*
 # the callout audit's report + run logs (an analysis artifact for tuning the
 # rubric, not app data — see scripts/audit-callouts.mjs)
 .scratch/callout-audit/
+
+# cached full-season transaction-wire dumps from the level-tenure benchmark
+# research (62MB, over GitHub's file-size warning threshold) — re-fetch via
+# .scratch/level-benchmarks/dates.mjs or org-and-timing.mjs if needed, ~13
+# cheap season-long pulls, see docs/level-tenure-benchmark.md
+.scratch/level-benchmarks/txn-cache.json

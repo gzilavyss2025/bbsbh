@@ -107,5 +107,11 @@ was a research spike) are in `.scratch/level-benchmarks/` on the
 sweep → `raw.json`), `analyze.mjs` (reconstruction + ordering validation →
 `findings.json`), `dates.mjs` + `org-and-timing.mjs` (calendar-date
 resolution + historical org mapping → `dates.json`/`org-timing.json`). Reuse
-these — and their cached `txn-cache.json` (13 seasons of transaction dumps) —
-before re-pulling from statsapi if this benchmark gets rebuilt or widened.
+these before re-pulling from statsapi if this benchmark gets rebuilt or
+widened.
+
+**`txn-cache.json`** (13 seasons of full transaction dumps, ~62MB) is
+**gitignored, not committed** — over GitHub's file-size warning threshold.
+It's still cheap to rebuild: `dates.mjs`/`org-and-timing.mjs` populate it on
+demand, ~13 season-long pulls. If it's missing on a fresh checkout, just
+re-run those scripts; they'll re-fetch and re-cache it locally.
