@@ -126,7 +126,8 @@ function daysBetween(a, b) {
 }
 
 // --- run over the clean cohort ----------------------------------------------
-const allDurations = [] // { level, days, playerId }
+const allDurations = [] // { level, days, playerId, season, startDate, endDate, debutDate }
+const droppedLongDurations = [] // same shape, days >= 900 (excluded from allDurations)
 const allPromotionDates = [] // { toLevel, date, draftTier }
 let resolved = 0, total = 0
 
@@ -154,7 +155,14 @@ for (const p of playersArr) {
     // meaningful when the previous transition is also dated (2nd level on)
     if (i > 0 && transitions[i - 1].date) {
       const days = daysBetween(transitions[i - 1].date, t.date)
-      if (days > 0 && days < 900) allDurations.push({ level: LEVEL_NAME[t.fromSportId], days, playerId: p.id, season: Number(t.date.slice(0, 4)) })
+      // startDate/endDate stamped for the era-hump artifact checks (see
+      // era-hump.mjs): they let a duration be tested for overlap with the
+      // cancelled 2020 MiLB season, which `days` alone cannot express.
+      const stamp = { level: LEVEL_NAME[t.fromSportId], days, playerId: p.id, season: Number(t.date.slice(0, 4)), startDate: transitions[i - 1].date, endDate: t.date, debutDate: p.debutDate }
+      if (days > 0 && days < 900) allDurations.push(stamp)
+      // the 900-day cap is a filter with its own era profile — keep what it
+      // drops so era-hump.mjs can measure that rather than assume it is neutral
+      else if (days > 0) droppedLongDurations.push(stamp)
     }
   }
 }
@@ -192,5 +200,5 @@ for (const level of ['High-A', 'AA', 'AAA']) {
   console.log(`${level}: ${nearYear}/${days.length} (${days.length ? (nearYear / days.length * 100).toFixed(0) : 0}%) land within 350-380 days`)
 }
 
-await writeFile(join(here, 'dates.json'), JSON.stringify({ allDurations, allPromotionDates, byLevel }, null, 2))
+await writeFile(join(here, 'dates.json'), JSON.stringify({ allDurations, droppedLongDurations, allPromotionDates, byLevel }, null, 2))
 console.log('\nwrote dates.json')
