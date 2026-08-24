@@ -9,7 +9,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
-  EDGE, GRID, commandCell, inZone, normalizePitch, onEdge, sx, sy,
+  EDGE, GRID, commandCell, inHeart, inZone, isChase, normalizePitch, sx, sy,
 } from '../src/lib/zone/zoneGeometry.js'
 
 const TOP = 3.4
@@ -81,9 +81,14 @@ test('a pitch with no tracking is not a pitch at coordinate zero', () => {
   assert.equal(normalizePitch(0, 2.5, 1.6, 3.4), null)
 })
 
-test('edge and heart are different questions', () => {
-  // Two pitchers can share a zone rate and live in completely different places.
-  assert.equal(onEdge(cellFor(0, 2.5)), false)        // heart of the zone
-  assert.equal(onEdge(cellFor(EDGE * 0.9, 2.5)), true) // on the black
-  assert.equal(inZone(cellFor(EDGE * 0.9, 2.5)), true) // and still a strike
+test('the heart is ONE cell, and it is not the whole zone', () => {
+  // The reading this replaced was "on the edge", which on a three-by-three zone
+  // means every cell except the middle — it measured 94% against real data and
+  // would have measured about that for every pitcher alive. A rate that is
+  // really a constant is worse than no rate.
+  assert.equal(inHeart(cellFor(0, 2.5)), true)          // middle-middle
+  assert.equal(inHeart(cellFor(EDGE * 0.9, 2.5)), false) // on the black
+  assert.equal(inZone(cellFor(EDGE * 0.9, 2.5)), true)   // and still a strike
+  assert.equal(isChase(cellFor(EDGE * 1.5, 2.5)), true)  // off the plate
+  assert.equal(isChase(cellFor(0, 2.5)), false)
 })

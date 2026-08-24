@@ -83,12 +83,22 @@ export function inZone(cell) {
   return Boolean(cell) && cell.col > 0 && cell.col < GRID - 1 && cell.row > 0 && cell.row < GRID - 1
 }
 
-// The EDGE ring: the outermost band of the zone itself plus the chase ring
-// against it — where command actually lives. Kept as its own reading rather
-// than "in zone or not", because a pitcher who lives on the black and one who
-// lives middle-middle can share a zone rate exactly.
-export function onEdge(cell) {
+// THE HEART — the one cell in the middle of the zone, where a mistake gets hit.
+//
+// This started life as an "edge" reading and the live data killed it: on a
+// three-by-three zone, "on the edge" means every cell except the middle one, so
+// it measured 94% for the first pitcher it ran against and would have measured
+// about that for everyone. A 5x5 grid is too coarse to carry a shadow-zone
+// rate honestly, so it reports the thing this resolution CAN say — how often he
+// leaves it middle-middle — and leaves the edge rate to a finer grid or to
+// Savant, rather than shipping a number that is really a constant.
+export function inHeart(cell) {
   if (!cell) return false
   const mid = (GRID - 1) / 2
-  return Math.abs(cell.col - mid) >= 1 || Math.abs(cell.row - mid) >= 1
+  return cell.col === mid && cell.row === mid
+}
+
+// Outside the rulebook zone entirely — the chase ring.
+export function isChase(cell) {
+  return Boolean(cell) && !inZone(cell)
 }

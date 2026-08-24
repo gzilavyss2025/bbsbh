@@ -8,7 +8,7 @@
 // counted on the wrong side, a home run charged to the wrong pitch.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { aggregateGameCommand } from '../scripts/gen-pitch-arsenal.mjs'
+import { aggregateGameCommand } from '../scripts/lib/command-grid.mjs'
 import { WHIFF_CODES, FOUL_CODES } from '../src/api/playbyplay/pitchInfo.js'
 import { commandCell, normalizePitch } from '../src/lib/zone/zoneGeometry.js'
 

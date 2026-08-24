@@ -31,6 +31,7 @@ import {
   buildBlock,
   pitcherRole,
 } from '../person.js'
+import { fetchCommandFor } from '../commandMap.js'
 import { currentSeasonFor, playerContext } from './context.js'
 
 export async function loadPlayerAnalytics(id, asOf) {
@@ -109,6 +110,9 @@ export async function loadPlayerAnalytics(id, asOf) {
       // of his ~12 KB shard feeds both; null for a hitter, and null for any arm
       // under the century floor.
       const arsenalShard = group === 'pitching' ? await fetchPitchArsenalFor(id) : null
+      // WHERE he puts it — the same sweep's other half, its own shard. Fetched
+      // only for a pitching block, like the arsenal beside it.
+      block.command = group === 'pitching' ? await fetchCommandFor(id) : null
       block.heat = arsenalShard ? heatView(arsenalShard, id, tileSportId === 1) : null
       block.arsenalTto = arsenalShard ? arsenalTtoView(arsenalShard, id, tileSportId === 1) : null
       block.advanced =

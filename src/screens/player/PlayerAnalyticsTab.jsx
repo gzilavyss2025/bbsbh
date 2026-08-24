@@ -6,6 +6,7 @@ import { StatcastPercentiles } from '../../components/charts/StatcastPercentiles
 import { AdvancedStatsCard } from '../../components/player/AdvancedStatsCard.jsx'
 import { ProspectCard } from '../../components/playerstats/ProspectCard.jsx'
 import { PitchMix } from '../../components/charts/PitchMix.jsx'
+import { CommandMap } from '../../components/charts/CommandMap.jsx'
 import { BattedBallMix } from '../../components/charts/BattedBallMix.jsx'
 import { SimilarPitchers } from '../../components/playercard/SimilarPitchers.jsx'
 import { SimilarHitters } from '../../components/playercard/SimilarHitters.jsx'
@@ -101,6 +102,21 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
             <>
               <SectionTitle title="Pitches" note="share of pitches · avg velo" />
               <PitchMix arsenal={block.arsenal} heat={block.heat} tto={block.arsenalTto} />
+            </>
+          )}
+
+          {/* Directly under the arsenal it completes: that card says WHAT he
+              throws and HOW HARD, this says WHERE HE PUTS IT. Below Triple-A
+              there is no pitch tracking, so there is no grid and the card
+              renders nothing rather than an empty zone. */}
+          {block.command && (
+            <>
+              <SectionTitle title="Command" note="where each pitch goes" />
+              <CommandMap
+                entry={block.command}
+                level={block.tileSportId === 1 ? 'mlb' : 'aaa'}
+                throws={block.command.throws}
+              />
             </>
           )}
 

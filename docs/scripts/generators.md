@@ -35,6 +35,14 @@ don't run these by hand.
   extra request, and `.scratch/lineup-strength/` records why the WAR total
   can't be decomposed after the fact. The template for the build-time-fetch
   pattern; see `docs/data-enrichment.md` §5. App reads it via `src/api/war.js`.
+
+> **A PR that adds a generator ships the generator's committed output alongside
+> it.** The surface it feeds has to work on the first deploy; the nightly cron
+> keeps that data fresh, it never creates it. Run the backfill locally, commit
+> the result with the code, and report the sweep's runtime and the output's size
+> in the PR body so the committed data is reviewable rather than just present. A
+> generator merged with an empty surface waiting for its first cron is a feature
+> that ships broken and looks finished.
 - `gen-milb-alumni.mjs` → `public/data/milb-alumni/{teamId}.json` — for each of the
   ~120 current farm clubs, the six big-league players who came through it, ranked
   by career WAR ("Made The Show", the last card on a MiLB team's Overview).

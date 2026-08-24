@@ -78,7 +78,7 @@ export const GROUPS = {
   // own group, same as jerseys above.
   'pitch-arsenal': {
     file: join(dataDir, 'pitch-arsenal.sql'),
-    tables: ['pitch_arsenal_totals', 'pitch_arsenal_ingested_games'],
+    tables: ['pitch_arsenal_totals', 'pitch_arsenal_ingested_games', 'pitch_command_cells', 'pitch_command_ingested_games'],
   },
   // Both tables are written by the one nightly gen-team-records.mjs — its own
   // group, same as jerseys/pitch-arsenal above. The largest group by row count

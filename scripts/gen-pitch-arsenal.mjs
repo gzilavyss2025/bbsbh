@@ -40,15 +40,8 @@ import { writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
-import { GRID, commandCell, normalizePitch } from '../src/lib/zone/zoneGeometry.js'
-import { FOUL_CODES, WHIFF_CODES } from '../src/api/playbyplay/pitchInfo.js'
-// pitchInfo.js keeps the called-strike and in-play sets module-private; the
-// command sweep needs both, and a second copy of MLB's own code table is
-// exactly the drift that file's header warns about — so they are named here
-// once, beside the two it does export, and pinned by test/command-aggregate.test.js.
-const CALLED_STRIKE_COMMAND_CODES = new Set(['C', 'K', 'A', 'AB', 'AC'])
-const INPLAY_COMMAND_CODES = new Set(['D', 'X', 'E', 'J', 'Y', 'Z'])
 import { parseArgs, dateRange } from './lib/args.mjs'
+import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, parseCells } from './lib/command-grid.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
@@ -57,6 +50,8 @@ const here = dirname(fileURLToPath(import.meta.url))
 // nothing is written in full.
 const outDir = join(here, '..', 'public', 'data', 'pitch-arsenal')
 const outPools = join(here, '..', 'public', 'data', 'pitch-arsenal-pool')
+// Where he PUT it — one shard bucket per hundred pitcher ids, like the mix.
+const outCommand = join(here, '..', 'public', 'data', 'pitch-command')
 const DEFAULT_DAYS = 3
 const CHECKPOINT_EVERY = 100
 const CONCURRENCY = 8
@@ -173,94 +168,6 @@ export function aggregateGamePitchTypes(feed) {
   return pitchers
 }
 
-// ---------------------------------------------------------------------------
-// COMMAND — where he put it, as opposed to what he threw.
-//
-// The arsenal card above says WHAT a pitcher throws and HOW HARD. Nothing on
-// his page says WHERE HE PUTS IT, which is the same shape of hole a hitter's
-// spray map fills: "by handedness" says who he beat, nothing says where the
-// ball went.
-//
-// THIS COSTS NO NEW NETWORK WORK. The sweep already walks every pitch of every
-// MLB and AAA feed for the mix; this reads four more fields off the same
-// playEvents it is already holding. A season's worth of locations for one
-// pitcher is a few hundred integers, because it is BINNED rather than stored
-// per pitch — 25 cells x pitch type x batter hand, with the outcomes that make
-// a location mean something counted in the same cell.
-//
-// Pure, like aggregateGamePitchTypes beside it, so a synthetic fixture drives
-// the counting rules. Shape: Map personId -> Map `${code}:${stand}` ->
-// { cells: Int (25), whiffs: Int (25), calledStrikes: Int (25), homers: Int (25),
-//   swings: Int (25), firstPitch: Int (25) }.
-//
-// WHY THE OUTCOMES RIDE ALONG. A density map alone cannot say whether a
-// location worked. Whiffs and called strikes are what a spot EARNED; a home
-// run allowed is what it cost, plotted where he threw it rather than where it
-// landed. Swings are the denominator whiff rate needs, and first pitches are
-// the one command number a scorer feels every at-bat.
-export function aggregateGameCommand(feed) {
-  const plays = feed?.liveData?.plays?.allPlays ?? []
-  const out = new Map()
-  const zeros = () => new Int32Array(GRID * GRID)
-  const getBucket = (pitcherId, code, stand) => {
-    let byKey = out.get(pitcherId)
-    if (!byKey) {
-      byKey = new Map()
-      out.set(pitcherId, byKey)
-    }
-    const key = `${code}:${stand}`
-    let b = byKey.get(key)
-    if (!b) {
-      b = { cells: zeros(), whiffs: zeros(), calledStrikes: zeros(), homers: zeros(), swings: zeros(), firstPitch: zeros() }
-      byKey.set(key, b)
-    }
-    return b
-  }
-
-  for (const play of plays) {
-    const pitcherId = play.matchup?.pitcher?.id ?? null
-    if (pitcherId == null) continue
-    // The batter's hand decides which half of a pitcher's plan this pitch
-    // belongs to, and a switch-hitter's side changes per at-bat — so it is read
-    // off the MATCHUP, never off the batter's own listed bats.
-    const stand = play.matchup?.batSide?.code
-    if (stand !== 'L' && stand !== 'R') continue
-    // A home run is charged to the pitch that gave it up, so it is read off the
-    // play's result and attached to the LAST pitch of the at-bat.
-    const isHomer = play.result?.eventType === 'home_run'
-    const pitchEvents = (play.playEvents ?? []).filter((e) => e.isPitch)
-
-    pitchEvents.forEach((e, i) => {
-      const code = e.details?.type?.code
-      if (!code) return
-      const c = e.pitchData?.coordinates
-      const cell = commandCell(
-        normalizePitch(c?.pX, c?.pZ, e.pitchData?.strikeZoneTop, e.pitchData?.strikeZoneBottom),
-      )
-      // No tracking, no cell. Below Triple-A there are no coordinates at all,
-      // and a pitch with no location is not a pitch down the middle.
-      if (!cell) return
-      const b = getBucket(pitcherId, code, stand)
-      const at = cell.index
-      b.cells[at] += 1
-      if (i === 0) b.firstPitch[at] += 1
-
-      const callCode = e.details?.call?.code
-      if (WHIFF_CODES.has(callCode)) {
-        b.whiffs[at] += 1
-        b.swings[at] += 1
-      } else if (FOUL_CODES.has(callCode) || INPLAY_COMMAND_CODES.has(callCode)) {
-        b.swings[at] += 1
-      } else if (CALLED_STRIKE_COMMAND_CODES.has(callCode)) {
-        b.calledStrikes[at] += 1
-      }
-      if (isHomer && i === pitchEvents.length - 1) b.homers[at] += 1
-    })
-  }
-
-  return out
-}
-
 // --- SQLite upserts ----------------------------------------------------------
 const upsertPitchType = (db) =>
   db.prepare(
@@ -300,9 +207,15 @@ const markIngested = (db) =>
 
 // Fetch the feed (the only await), then fold the whole game in as one atomic
 // synchronous transaction — same pattern as gen-fouls.mjs's ingestGame.
-async function ingestGame(db, stmts, gamePk, level, date, season) {
+// `need` says which halves of the sweep this game still owes. Both totals
+// tables ADD, so re-walking a game for the command grid must NOT fold its pitch
+// types in a second time — that would silently double a season of arsenal
+// counts, and nothing downstream would look wrong until a share exceeded 100%.
+async function ingestGame(db, stmts, gamePk, level, date, season, need = { arsenal: true, command: true }) {
   const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
-  const pitchers = aggregateGamePitchTypes(feed)
+  const pitchers = need.arsenal ? aggregateGamePitchTypes(feed) : new Map()
+  // Same feed, one more pass — the command grid costs no extra fetch.
+  const command = need.command ? aggregateGameCommand(feed) : new Map()
   db.exec('BEGIN')
   try {
     for (const [id, p] of pitchers) {
@@ -316,7 +229,19 @@ async function ingestGame(db, stmts, gamePk, level, date, season) {
         )
       }
     }
-    stmts.mark.run(gamePk, level, date)
+    for (const [id, byKey] of command) {
+      for (const [key, b] of byKey) {
+        const [code, stand] = key.split(':')
+        const prior = stmts.commandRead.get(id, level, code, stand)
+        const merged = CELLS.map((f, i) => {
+          const was = parseCells(prior?.[COLS[i]])
+          return Array.from(b[f], (v, j) => v + (was[j] ?? 0)).join(',')
+        })
+        stmts.commandWrite.run(id, level, code, stand, season, ...merged)
+      }
+    }
+    if (need.arsenal) stmts.mark.run(gamePk, level, date)
+    if (need.command) stmts.markCommand.run(gamePk, level, date)
     db.exec('COMMIT')
   } catch (err) {
     db.exec('ROLLBACK')
@@ -467,6 +392,41 @@ export function exportPitchArsenal(db, hands = {}) {
 //     against each other), only arms past MIN_SIMILARITY_PITCHES (an arm below
 //     it is dropped by the ranker anyway, so shipping him is pure weight), and
 //     no `description` — the ranking reads `code`. 692 KB became 149 + 194.
+// The command grid's own shards, keyed like every other per-player dataset.
+// One file per pitcher bucket, each entry: { name, throws, mlb|aaa: { code:
+// { L: {...}, R: {...} } } }, where each hand carries the six 25-value arrays.
+// Zero-only arrays are dropped — a pitch type he never threw to lefties is
+// absent rather than twenty-five zeroes.
+export function exportCommandMap(db) {
+  const seasonRow = db.prepare('SELECT season FROM pitch_command_cells LIMIT 1').get()
+  const rows = db.prepare('SELECT * FROM pitch_command_cells ORDER BY person_id, level, code, stand').all()
+  const pit = {}
+  for (const r of rows) {
+    const entry = pit[r.person_id] ?? (pit[r.person_id] = { mlb: {}, aaa: {} })
+    const byCode = entry[r.level] ?? (entry[r.level] = {})
+    const hand = {}
+    CELLS.forEach((field, i) => {
+      const arr = parseCells(r[COLS[i]])
+      if (arr.some((v) => v > 0)) hand[field] = arr
+    })
+    if (!hand.cells) continue
+    ;(byCode[r.code] ?? (byCode[r.code] = {}))[r.stand] = hand
+  }
+  return { season: seasonRow?.season ?? null, pit }
+}
+
+async function writeCommand(db, hands) {
+  const data = exportCommandMap(db)
+  const buckets = new Map()
+  for (const [id, entry] of Object.entries(data.pit)) {
+    if (!Object.keys(entry.mlb).length && !Object.keys(entry.aaa).length) continue
+    const key = shardKey100(id)
+    if (!buckets.has(key)) buckets.set(key, { season: data.season, pit: {} })
+    buckets.get(key).pit[id] = { throws: hands[id] ?? null, ...entry }
+  }
+  await writeShards(outCommand, [...buckets])
+}
+
 async function writeArsenal(db, hands) {
   const data = exportPitchArsenal(db, hands)
   const buckets = new Map()
@@ -517,6 +477,11 @@ async function main() {
   const stmts = {
     pitchType: upsertPitchType(db),
     mark: markIngested(db),
+    markCommand: markCommandIngested(db),
+    ...(() => {
+      const c = commandStmts(db)
+      return { commandRead: c.read, commandWrite: c.write }
+    })(),
   }
 
   // Resolved once up front and reused by every checkpoint write below.
@@ -534,8 +499,15 @@ async function main() {
     return
   }
 
-  const existing = new Set(
+  // A game is done only when BOTH sweeps have had it. The arsenal pass had
+  // already ingested this season before locations were counted, so keying the
+  // skip on its table alone would leave the command grid empty until next
+  // season — the backfill would find nothing to do.
+  const doneArsenal = new Set(
     db.prepare('SELECT game_pk, level FROM pitch_arsenal_ingested_games').all().map((r) => `${r.game_pk}:${r.level}`),
+  )
+  const doneCommand = new Set(
+    db.prepare('SELECT game_pk, level FROM pitch_command_ingested_games').all().map((r) => `${r.game_pk}:${r.level}`),
   )
 
   // Regular season only, both levels. Same postponed-replay dedup as the other
@@ -550,8 +522,10 @@ async function main() {
       for (const g of d.games ?? []) {
         if (g.status?.abstractGameState !== 'Final') continue
         if (d.date !== g.officialDate) continue
-        if (existing.has(`${g.gamePk}:${level}`)) continue
-        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: g.season ?? Number(g.officialDate.slice(0, 4)) })
+        const key = `${g.gamePk}:${level}`
+        const need = { arsenal: !doneArsenal.has(key), command: !doneCommand.has(key) }
+        if (!need.arsenal && !need.command) continue
+        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: g.season ?? Number(g.officialDate.slice(0, 4)), need })
       }
     }
   }
@@ -560,6 +534,7 @@ async function main() {
   const writeOut = async () => {
     await dumpGroup(db, 'pitch-arsenal')
     await writeArsenal(db, hands)
+    await writeCommand(db, hands)
   }
 
   let done = 0
@@ -569,7 +544,7 @@ async function main() {
       const g = queue.shift()
       if (!g) return
       try {
-        await ingestGame(db, stmts, g.gamePk, g.level, g.date, g.season)
+        await ingestGame(db, stmts, g.gamePk, g.level, g.date, g.season, g.need)
       } catch (err) {
         console.error(`gamePk ${g.gamePk} (${g.level}): ${err.message}`)
       }

@@ -351,13 +351,15 @@ const BUDGETS = {
   // borrows its dress from — sits at 811 of 900 and namespaces every rule to
   // `.hitchart`, so folding a differently-scoped card in there would give those
   // selectors a second meaning AND need a file-size bump in the same breath.
+  // +1 for 26d-command-map.css, the season command map. Component-imported
+  // like 26a/26b/26c, so it ships only to the Analytics tab that renders it.
   // +1 for 26c-mound-card.css, the pitcher's mound card. Component-imported like
   // its 26a/26b neighbours, so it ships only to a page that renders the card.
   // The alternative was 26-player-page.css, which is 1145 lines — well past
   // check-file-size.mjs's 600-line ceiling and on a budget of its own, and that
   // guard's remedy is to split rather than to grow. Same trade the 21/21a,
   // 26/26a and 48/48-stamp-strip entries above record.
-  'src/styles': 99,
+  'src/styles': 100,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -423,7 +425,11 @@ const BUDGETS = {
   // riding in hitchart.js precisely because the two carry OPPOSITE
   // classifications: one game's batted balls are reveal-only, a season of them
   // on the player page is not.
-  'src/api': 102,
+  // +1 for commandMap.js — the season command map's shard reader, sibling to
+  // pitchArsenal.js and swept by the same generator. It sits beside the other
+  // per-player static readers rather than in a subdirectory of its own, which
+  // would separate it from the mix card it is read next to.
+  'src/api': 103,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -591,7 +597,12 @@ const BUDGETS = {
   // pages print has to live beside it to be testable at all
   // (test/salaries.test.js). Both landed the same day, each independently
   // bumping the budget from the pre-stack count of 20.
-  'scripts/lib': 23,
+  // +1 for command-grid.mjs — the pitch-location sweep's counting and storage,
+  // split OUT of gen-pitch-arsenal.mjs because that file hit check-file-size's
+  // 600-line ceiling when the grid arrived, and that guard's remedy is to split
+  // rather than to widen. It sits here beside the other sweep helpers the
+  // generators share.
+  'scripts/lib': 24,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
