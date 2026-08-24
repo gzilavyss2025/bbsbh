@@ -84,6 +84,13 @@ export const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000
 // (The PRD sketched a `'mlb' | 'aaa' | …` string vocabulary. That was wrong —
 // it would have invented a second name for a thing that already has one, and
 // the two would drift. Deliberate departure, recorded in the PRD.)
+//
+// One of four copies of this exact value (the others: SEARCHABLE_SPORT_IDS in
+// src/lib/teams.js, scripts/gen-teams.mjs, api/_lib/cards.js).
+// scripts/check-searchable-sport-ids.mjs fails `npm run lint` if this one
+// drifts from src/lib/teams.js's, and test/preferences.test.js's "LEVEL_SPORT_IDS
+// has not drifted from teams.js LEVELS" repeats the check against LEVELS
+// specifically (issue #852).
 export const LEVEL_SPORT_IDS = Object.freeze([1, 11, 12, 13, 14])
 
 // How much motion the user wants, on top of the OS `prefers-reduced-motion`

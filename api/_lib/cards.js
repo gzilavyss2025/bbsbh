@@ -34,6 +34,12 @@ import { clean, entitySegment, idFromSlug, matchupSlug, niceDate, teamAbbr, urlD
 import { fetchWithTimeout } from './http.js'
 
 const MLB = 'https://statsapi.mlb.com'
+// Every level resolveGame() searches across when matching a shared link's
+// matchup slug. Hand-copied from SEARCHABLE_SPORT_IDS in src/lib/teams.js —
+// this edge function is bundled separately from browser-facing src/, and a
+// plain module pulling from it isn't worth the added coupling for one array
+// literal. One of four copies; scripts/check-searchable-sport-ids.mjs fails
+// `npm run lint` if this one drifts from src/lib/teams.js's (issue #852).
 const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 
 // sportId → level abbreviation, mirrored from src/lib/teams.js SPORT_LABEL. Used
