@@ -331,6 +331,30 @@ test('fetchComplexAffiliates is [] with no teamId/season, and keeps only ROK-lev
   }
 })
 
+// An org can field more than one Rookie/complex club at once (ACL/FCL + DSL,
+// sometimes two DSL clubs) — this is the shape fetchAffiliates can't handle
+// and the whole reason this fetcher exists separately (issue #850).
+test('fetchComplexAffiliates returns every current Rookie-level club, not just one', async () => {
+  const { restore } = stubFetch({
+    'https://statsapi.mlb.com/api/v1/teams/affiliates?teamIds=147&season=2026': {
+      json: {
+        teams: [
+          { id: 147, sport: { id: 1 } },
+          { id: 3705, name: 'FCL Yankees', sport: { id: 16 }, locationName: 'Tampa' },
+          { id: 3706, name: 'DSL Yankees1', sport: { id: 16 } },
+          { id: 3707, name: 'DSL Yankees2', sport: { id: 16 } },
+        ],
+      },
+    },
+  })
+  try {
+    const rok = await fetchComplexAffiliates(147, 2026)
+    assert.deepEqual(rok.map((a) => a.id), [3705, 3706, 3707])
+  } finally {
+    restore()
+  }
+})
+
 test('fetchComplexAffiliates degrades to [] on failure', async () => {
   const { restore } = stubFetch({
     'https://statsapi.mlb.com/api/v1/teams/affiliates?teamIds=999&season=2026': { fail: true },

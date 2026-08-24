@@ -16,7 +16,9 @@
 // The sportId list below must stay in sync with SEARCHABLE_SPORT_IDS in
 // src/lib/teams.js (inlined here rather than imported — that module lives in
 // browser-facing src/, and a plain Node script pulling from it isn't worth
-// the added coupling for one array literal).
+// the added coupling for one array literal). One of four copies of this exact
+// value; scripts/check-searchable-sport-ids.mjs fails `npm run lint` if this
+// one drifts from src/lib/teams.js's (issue #852).
 // Run by hand: node scripts/gen-teams.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'

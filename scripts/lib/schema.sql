@@ -463,8 +463,8 @@ CREATE TABLE IF NOT EXISTS pitch_command_ingested_games (
 );
 
 -- One row per (game, club) — the raw per-game FACTS every situational team
--- record is summed from, at MLB and the four full-season MiLB levels. Written
--- by gen-team-records.mjs.
+-- record is summed from, at MLB, the four full-season MiLB levels, and Rookie
+-- (sportId 16, the complex leagues). Written by gen-team-records.mjs.
 --
 -- FACTS, NOT FLAGS, and the distinction is the whole design (the module header
 -- in scripts/lib/team-records.mjs has the argument). Nothing here is a "this
@@ -476,7 +476,7 @@ CREATE TABLE IF NOT EXISTS pitch_command_ingested_games (
 -- SEVEN COLUMNS PLUS A PAYLOAD, not thirty-one, and the reason is the dump
 -- format rather than the data. scripts/lib/db.js writes plain INSERT
 -- statements that repeat every column NAME on every row; at thirty-one columns
--- that is ~370 bytes of column names per row, so a five-level season would
+-- that is ~370 bytes of column names per row, so a six-level season would
 -- have committed more than seven megabytes of the word "opp_starter_hand".
 -- The columns kept out here are the ones a query ever narrows on (the
 -- per-season export, the idempotency join); every remaining fact rides in

@@ -69,6 +69,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | matchup-arsenal.test.js | 26 | src/api/matchup/arsenal.js, src/api/matchup/savant.js (arsenal readers) | Matchup callouts Family C — a hitter against one pitch type: the four whiff quadrants (one dropped), the pitch-usage/thrown/PA gates living in the generator not the builder, BA as color only past the PA floor, and the shared voice.js mechanics reused rather than reimplemented |
 | matchup-callouts.test.js | 24 | src/api/matchup/notes.js, src/api/matchup/savant.js, src/api/matchup/forHalf.js | Matchup callouts Families A/B — a hitter vs. the arm he faces on a chase/whiff/hard-contact or pull/ground-ball axis, the shape rotation and length-aware short form, and the due-up/starting-pitcher resolution for one half |
 | milb-color-chain.test.js | 11 | brandColors.js, teams.js, milbColors.js | Affiliate→parent-org→neutral color fallback |
+| milb-history-rookie.test.js | 5 | scripts/gen-milb-history.mjs, src/api/milbHistory.js | Rookie level (sportId 16) in the affiliation-history file (issue #856) — coverage includes 16, real parentHistory eras pinned (Greeneville Astros→Reds), cosmetic name churn never leaks into parentHistory, and the reader surfaces it exactly like any other level |
 | milb-team-wiring.test.js | 7 | milbColors.js | MiLB tile/logoVariant wiring |
 | mono-logo-art.test.js | 4 | scripts/lib/mono-logo-art.mjs | The nightly generator's mono-ink override merge — degrades to the file alone on any fetch failure, an id for another store, or a malformed value (ADR-0054) |
 | mound-visit-charging.test.js | 7 | src/api/playbyplay.js | Mound-visit pip row |
@@ -95,6 +96,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | pregame-avg.test.js | 3 | src/api/boxscore.js | preGameAvg |
 | print-sheet.test.js | 14 | src/screens/sheet/sheetModel.js | Tonight's printable scorecard: the pre-pitch model + its MiLB blank-line degradations, and the spoiler boundary — screens/sheet/ imports only select.js, and the printed at-bat grid stays EMPTY (docs/print-sheet.md) |
 | preview-resolver.test.js | 6 | src/copy/previewResolver.js, registry.js | Consent-modal copy slot resolution |
+| probable-pitcher-fallback.test.js | 10 | src/api/select.js, prehalf-callouts.js, between-innings.js | Fall back to the half's derived starter (its first logged play's pitcher) when gameData.probablePitchers is empty — TeamInfo's Starting pitcher card and both starter-record notes, each still respecting its own reveal gate (issue #851) |
 | prospect-trend.test.js | 14 | src/api/prospectTrend.js | vs. Level percentile label + levelTier 5-dot bucketing |
 | prospects.test.js | 20 | src/api/prospects.js | Top-100/org-prospect selectors + resolveCurrentLevels' live-roster resolution and MLB/MiLB "Line" split, incl. the "ALL (n)" fallback fix |
 | record-ranks.test.js | 10 | src/api/callout-notes/rank.js, checkpoints.js, heldNotes.js | League ranks on the W-L record families — tie/floor math, the no-"#" display rule, a legacy bundle reading byte-identical, and a folded sentence staying bare |
@@ -127,6 +129,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | stats-levels.test.js | 5 | src/api/statsLevels.js | sumHitting/sumPitching recomputed rates + combineToPool's raw split passthrough |
 | statsapi.test.js | 4 | src/api/statsapi.js | Shared getJson fetch wrapper |
 | steal-throwing-error-note.test.js | 3 | src/api/playbyplay.js (halfInningFeed, runnerNotes) | A steal/WP/balk that breaks on a plate appearance's last pitch carries no playEvent of its own — recovered from runners[] into its own leading card, with a same-play throwing-error leg folded in |
+| team-affiliate-cards.test.js | 6 | src/screens/team/data/shared.js (affiliateCardsFrom) | Minors tab's Affiliates section card list: full-season levels then Rookie/complex clubs (all of them, not just one), parent MLB card leading a MiLB affiliate's own page (issue #850) |
 | team-franchise-name.test.js | 3 | src/api/select.js (selectTeamMeta) | franchiseName vs locationName bug fix |
 | team-score.test.js | 19 | scripts/gen-team-score.mjs, src/api/teamScore.js, seasonGradeFormula.js, teamScoreFormula.js | Quality/Current Form readers, strength-of-schedule adjustment, per-game park adjustment |
 | team-transactions.test.js | 31 | src/api/teamTransactions.js | Team transactions dedupe/story grouping |
