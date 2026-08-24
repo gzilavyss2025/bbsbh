@@ -1,0 +1,651 @@
+<title>Farm Digest</title>
+<style>
+  :root{
+    --paper:#ffffff;
+    --paper-alt:#f3f3f3;
+    --paper-tag:#e9e9e9;
+    --ink:#111111;
+    --ink-soft:#555555;
+    --ink-faint:#8a8a8a;
+    --line:#111111;
+    --line-soft:#bbbbbb;
+    --line-hair:#dddddd;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Consolas, monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1400px;margin:0 auto;padding:40px 24px 96px;}
+
+  /* ---------- intro ---------- */
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  h1{
+    font-size:30px;
+    margin:0 0 14px;
+    text-wrap:balance;
+    letter-spacing:-0.01em;
+  }
+  .intro p{
+    max-width:64ch;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  .intro p:last-child{margin-bottom:0;}
+
+  /* ---------- component key ---------- */
+  .key{
+    margin-top:36px;
+    border:1px solid var(--line);
+    padding:20px 22px 24px;
+    background:var(--paper);
+  }
+  .key h2{
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    margin:0 0 16px;
+    font-family:var(--mono);
+  }
+  .key-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+    gap:20px 28px;
+  }
+  .key-item{border-top:1px solid var(--line-hair);padding-top:10px;}
+  .key-item .label{
+    font-family:var(--mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .key-item .note{font-size:12.5px;color:var(--ink-soft);margin-top:6px;}
+
+  .sample-card{border:1px solid var(--line);padding:8px 10px;font-size:12px;}
+  .sample-card .t1{display:flex;justify-content:space-between;font-weight:700;}
+  .sample-card .t2{color:var(--ink-soft);margin-top:4px;}
+
+  .weight-demo .headline-demo{font-weight:800;font-size:16px;border:1px solid var(--line);padding:8px 10px;margin-bottom:6px;}
+  .weight-demo .routine-demo{font-weight:400;font-size:12.5px;color:var(--ink-soft);padding:2px 2px;}
+
+  .tag{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.03em;
+    padding:2px 6px;
+    border:1px solid var(--ink);
+    margin-right:6px;
+  }
+  .tag.watch{border-width:2px;font-weight:700;}
+  .tag.down{background:var(--ink);color:var(--paper);font-weight:700;}
+
+  .spark{display:inline-block;vertical-align:middle;border:1px dashed var(--line-soft);padding:1px 3px;}
+
+  .trend-demo{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12.5px;}
+  .border-demo{display:flex;gap:10px;}
+  .border-demo .solid{border:1px solid var(--line);padding:10px;font-size:11px;flex:1;text-align:center;}
+  .border-demo .dashed{border:1px dashed var(--line-soft);padding:10px;font-size:11px;flex:1;text-align:center;color:var(--ink-faint);}
+
+  /* ---------- concepts row ---------- */
+  .concepts{
+    display:flex;
+    gap:28px;
+    margin-top:44px;
+    overflow-x:auto;
+    padding-bottom:12px;
+  }
+  .concept{flex:0 0 auto;width:390px;}
+  .concept-head{margin-bottom:10px;}
+  .concept-head .k{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);}
+  .concept-head h2{font-size:18px;margin:2px 0 6px;}
+  .concept-head p{font-size:12.5px;color:var(--ink-soft);margin:0;max-width:60ch;}
+
+  .frame{
+    border:2px solid var(--line);
+    background:var(--paper);
+  }
+  .frame-chrome{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.05em;
+    text-align:center;
+    padding:5px 0;
+    border-bottom:1px solid var(--line);
+    color:var(--ink-soft);
+  }
+  .frame-body{padding:14px;}
+
+  .annot{
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--ink-faint);
+    font-style:italic;
+    margin:5px 2px 0;
+  }
+
+  /* header bar inside frame */
+  .app-header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--line);padding-bottom:8px;margin-bottom:12px;}
+  .app-header .name{font-weight:800;font-size:15px;letter-spacing:.02em;}
+  .app-header .date{font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
+  .fresh{font-family:var(--mono);font-size:10px;color:var(--ink-faint);text-align:right;margin:-8px 0 14px;}
+
+  /* KPI band */
+  .kpi-band{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);margin-bottom:6px;}
+  .kpi{padding:9px 6px;border-right:1px solid var(--line-hair);text-align:center;}
+  .kpi:last-child{border-right:none;}
+  .kpi .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);}
+  .kpi .v{font-family:var(--mono);font-weight:800;font-size:17px;font-variant-numeric:tabular-nums;margin-top:2px;}
+  .kpi .d{font-family:var(--mono);font-size:10px;margin-top:2px;}
+
+  /* headline block */
+  .headline-block{border:1px solid var(--line);padding:12px;margin:14px 0;}
+  .headline-block .k{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--ink-soft);}
+  .headline-block .h{font-weight:800;font-size:16.5px;line-height:1.3;margin:5px 0 4px;text-wrap:balance;}
+  .headline-block .sub{font-size:12px;color:var(--ink-soft);}
+
+  /* trending strip */
+  .section-label{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 8px;border-bottom:1px solid var(--line-hair);padding-bottom:4px;}
+  .trend-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .trend-col-h{font-family:var(--mono);font-size:10px;font-weight:700;margin-bottom:6px;}
+  .trend-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0;border-top:1px solid var(--line-hair);}
+  .trend-row:first-of-type{border-top:none;}
+  .trend-row .name{font-weight:600;}
+  .trend-row .stat{color:var(--ink-soft);font-size:11px;}
+  .trend-row .metric{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;}
+  .see-more{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-top:8px;}
+
+  /* affiliate card */
+  .aff-card{border:1px solid var(--line);padding:10px 12px;margin-bottom:8px;}
+  .aff-top{display:flex;justify-content:space-between;align-items:baseline;}
+  .aff-top .lvl{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;color:var(--ink-soft);text-transform:uppercase;}
+  .aff-top .club{font-weight:700;font-size:13.5px;}
+  .aff-top .score{font-family:var(--mono);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;}
+  .aff-ctx{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .aff-lines{margin-top:6px;font-size:12px;}
+  .aff-lines div{margin-top:3px;}
+  .notable{margin-top:6px;font-size:11.5px;padding-top:6px;border-top:1px dashed var(--line-soft);}
+  .notable .k{font-family:var(--mono);font-size:9.5px;color:var(--ink-soft);margin-right:4px;}
+  .aff-more{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);margin-top:8px;}
+  .box-placeholder{border:1px dashed var(--line-soft);padding:16px;text-align:center;color:var(--ink-faint);font-family:var(--mono);font-size:10.5px;margin-top:8px;}
+  .aff-card.collapsed{opacity:.9;}
+
+  /* bullpen table */
+  table.bp{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px;}
+  table.bp th{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;text-align:left;color:var(--ink-soft);border-bottom:1px solid var(--line);padding:4px 4px 6px;}
+  table.bp td{padding:6px 4px;border-bottom:1px solid var(--line-hair);vertical-align:middle;}
+  table.bp td.num{font-family:var(--mono);text-align:center;font-variant-numeric:tabular-nums;}
+
+  /* transactions */
+  .txn-row{border-top:1px solid var(--line-hair);padding:7px 0;}
+  .txn-row:first-child{border-top:none;}
+  .txn-h{font-weight:700;font-size:12px;}
+  .txn-d{font-size:11px;color:var(--ink-soft);margin-top:1px;}
+
+  /* farm index footer */
+  .index-card{border:1px solid var(--line);padding:12px;margin-top:16px;}
+  .index-top{display:flex;justify-content:space-between;font-size:12px;font-weight:700;}
+  .bar-row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;}
+  .bar-row .bl{width:56px;font-family:var(--mono);color:var(--ink-soft);}
+  .bar-track{flex:1;height:8px;border:1px solid var(--line);background:var(--paper);}
+  .bar-fill{height:100%;background:var(--ink);}
+  .bar-row .bv{width:28px;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;}
+  .index-rank{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);margin-top:10px;}
+
+  /* concept B — tabs */
+  .top-bug{display:flex;border:1px solid var(--line);margin-bottom:10px;}
+  .top-bug .cell{flex:1;text-align:center;padding:6px 2px;border-right:1px solid var(--line-hair);}
+  .top-bug .cell:last-child{border-right:none;}
+  .top-bug .cell .lvl{font-family:var(--mono);font-size:8.5px;color:var(--ink-soft);}
+  .top-bug .cell .sc{font-family:var(--mono);font-weight:800;font-size:12.5px;font-variant-numeric:tabular-nums;}
+
+  .tab-bar{display:flex;overflow-x:auto;border-bottom:2px solid var(--line);margin-bottom:10px;}
+  .tab{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;padding:7px 10px;white-space:nowrap;border-right:1px solid var(--line-hair);color:var(--ink-soft);}
+  .tab.active{background:var(--ink);color:var(--paper);font-weight:700;}
+
+  .list-row{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line-hair);padding:8px 2px;font-size:12px;}
+  .list-row:first-child{border-top:none;}
+  .list-row .left .lvl{font-family:var(--mono);font-size:9px;color:var(--ink-soft);display:block;}
+  .list-row .left .h{font-weight:600;}
+  .list-row .right{font-family:var(--mono);font-weight:800;font-variant-numeric:tabular-nums;}
+
+  .other-tabs{margin-top:16px;border:1px dashed var(--line-soft);padding:10px 12px;font-size:11px;color:var(--ink-soft);}
+  .other-tabs .k{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px;color:var(--ink);}
+  .other-tabs div.row{margin-top:3px;}
+  .other-tabs b{color:var(--ink);}
+
+  /* who-to-know / leaders / depth-chart / stuff / story additions */
+  .who-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+  .who-card{flex:0 0 auto;width:132px;border:1px solid var(--line);padding:8px;}
+  .who-rank{font-family:var(--mono);font-size:9px;color:var(--ink-soft);}
+  .who-name{font-weight:700;font-size:12.5px;margin-top:4px;}
+  .who-meta{font-size:10.5px;color:var(--ink-soft);margin-top:2px;}
+
+  .lead-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-top:1px solid var(--line-hair);}
+  .lead-row:first-of-type{border-top:none;}
+  .lead-row .v{font-family:var(--mono);font-weight:700;}
+
+  .stat-note{font-size:10.5px;color:var(--ink-soft);font-family:var(--mono);margin-top:2px;}
+
+  .story-block{border:1px dashed var(--line-soft);padding:8px 10px;margin-top:8px;}
+  .story-k{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);}
+  .story-q{font-size:11.5px;font-style:italic;color:var(--ink-soft);margin-top:4px;}
+  .story-link{font-family:var(--mono);font-size:10px;margin-top:5px;color:var(--ink-soft);}
+
+  .teaser-card{border:1px solid var(--line);padding:10px 12px;margin-top:16px;}
+  .teaser-top{display:flex;justify-content:space-between;font-size:12px;font-weight:700;}
+  .teaser-top .teaser-link{font-family:var(--mono);font-weight:400;font-size:10.5px;color:var(--ink-soft);}
+  .teaser-row{display:flex;font-size:11px;margin-top:6px;color:var(--ink-soft);}
+  .teaser-row .pos{font-family:var(--mono);font-weight:700;color:var(--ink);width:34px;flex:0 0 auto;}
+
+  .depth-meta{font-size:10px;color:var(--ink-soft);margin:2px 0 8px;padding-left:14px;}
+
+  footer.note{
+    max-width:70ch;
+    margin:56px auto 0;
+    font-size:12px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line-hair);
+    padding-top:16px;
+  }
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Wireframe concepts — layout only, no visual design</p>
+  <h1>Farm Digest</h1>
+  <div class="intro">
+    <p>Two structural concepts for a "what happened today across the system" page, plus the small notation system used throughout. Boxes stand in for real content; every number and name below is illustrative, not a real published stat line. Grayscale and system fonts throughout on purpose — this is about where things sit and how big they are, not what they look like.</p>
+    <p>All three concepts carry the same underlying content (scores, top performers, key moments, pitching outliers, ABS challenges, trending prospects, a "who to know" primer, org-wide leaders, transactions, game stories, AAA bullpen health, the positional depth chart, and system-wide Farm Index) — Concepts A and B differ only in how the DAILY content is arranged; Concept C is reference content pulled onto its own page rather than the daily scroll.</p>
+  </div>
+
+  <div class="key">
+    <h2>Notation used below</h2>
+    <div class="key-grid">
+      <div class="key-item">
+        <div class="label">Card anatomy</div>
+        <div class="sample-card">
+          <div class="t1"><span>TITLE — top left</span><span>VALUE — top right</span></div>
+          <div class="t2">supporting line(s) below, same order every card</div>
+        </div>
+        <div class="note">Learned once, reused for every affiliate/prospect card so a reader's eye doesn't re-parse the layout each time.</div>
+      </div>
+
+      <div class="key-item">
+        <div class="label">Weight = importance</div>
+        <div class="weight-demo">
+          <div class="headline-demo">Bold, large, its own box → the headline</div>
+          <div class="routine-demo">Regular weight, grouped with others → supporting detail</div>
+        </div>
+        <div class="note">No color to lean on, so hierarchy is position + size + isolation instead.</div>
+      </div>
+
+      <div class="key-item">
+        <div class="label">Trend, without color</div>
+        <div class="trend-demo">
+          <span>&#9650; +.038 OPS</span>
+          <span class="spark"><svg width="46" height="16" viewBox="0 0 46 16"><polyline points="0,12 8,10 16,13 24,7 32,8 40,2 46,4" fill="none" stroke="#111" stroke-width="1.5"/></svg></span>
+        </div>
+        <div class="trend-demo" style="margin-top:6px;">
+          <span>&#9660; &minus;.061 OPS</span>
+          <span class="spark"><svg width="46" height="16" viewBox="0 0 46 16"><polyline points="0,3 8,5 16,4 24,9 32,11 40,14 46,15" fill="none" stroke="#111" stroke-width="1.5"/></svg></span>
+        </div>
+        <div class="note">Arrow + signed delta + sparkline together, sign always printed explicitly.</div>
+      </div>
+
+      <div class="key-item">
+        <div class="label">Availability tags</div>
+        <div><span class="tag">AVAILABLE</span><span class="tag watch">WATCH</span><span class="tag down">DOWN</span></div>
+        <div class="note">Severity by border weight and fill, not hue — outline, heavier outline, inverted fill.</div>
+      </div>
+
+      <div class="key-item">
+        <div class="label">Border convention</div>
+        <div class="border-demo">
+          <div class="solid">solid border<br>= real content block</div>
+          <div class="dashed">dashed border<br>= chart / image placeholder</div>
+        </div>
+        <div class="note">Standard wireframe shorthand, carried through every frame below.</div>
+      </div>
+
+      <div class="key-item">
+        <div class="label">Freshness marker</div>
+        <div class="sample-card" style="border-style:dashed;color:var(--ink-faint);">as of 11:47 PM CT</div>
+        <div class="note">Small, low-weight, always present — this is a nightly-cron-plus-live-overlay data model, so the reader should always know how current the page is.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="concepts">
+
+    <!-- ===================== CONCEPT A ===================== -->
+    <div class="concept">
+      <div class="concept-head">
+        <div class="k">Concept A</div>
+        <h2>Digest Scroll</h2>
+        <p>One continuous scroll, top to bottom by importance — a KPI band, then the single biggest story, then trending, then each affiliate in proximity-to-majors order, then the slower-moving context (bullpen health, moves, Farm Index) at the bottom. Best for a reader who scrolls once and is done.</p>
+      </div>
+      <div class="frame">
+        <div class="frame-chrome">PHONE VIEWPORT — 390PX</div>
+        <div class="frame-body">
+
+          <div class="app-header">
+            <span class="name">FARM DIGEST</span>
+            <span class="date">TUE AUG 25</span>
+          </div>
+          <div class="fresh">as of 11:47 PM CT — 4 of 4 affiliates final</div>
+
+          <div class="kpi-band">
+            <div class="kpi"><div class="l">System</div><div class="v">3&ndash;1</div><div class="d">tonight</div></div>
+            <div class="kpi"><div class="l">Farm Idx</div><div class="v">71.4</div><div class="d">&#9650; +1.2</div></div>
+            <div class="kpi"><div class="l">Top OPS</div><div class="v">.412</div><div class="d">D. Castellano</div></div>
+            <div class="kpi"><div class="l">Challenges</div><div class="v">5&ndash;2</div><div class="d">system-wide</div></div>
+          </div>
+          <div class="annot">&rarr; &le;5 metrics before it requires a tap, per dashboard KPI-band convention</div>
+
+          <div class="section-label">Who to know</div>
+          <div class="who-strip">
+            <div class="who-card">
+              <div class="who-rank">TOP 100 #14</div>
+              <div class="who-name">J. Alvarez</div>
+              <div class="who-meta">SS &middot; AA &middot; age 20</div>
+            </div>
+            <div class="who-card">
+              <div class="who-rank">TOP 100 #41</div>
+              <div class="who-name">R. Okafor</div>
+              <div class="who-meta">RHP &middot; AAA &middot; age 23</div>
+            </div>
+            <div class="who-card">
+              <div class="who-rank">ORG #3</div>
+              <div class="who-name">D. Castellano</div>
+              <div class="who-meta">C &middot; AAA &middot; age 22</div>
+            </div>
+          </div>
+          <div class="see-more">&rarr; full primer (9 more)</div>
+          <div class="annot">&rarr; orientation for a first-time reader, ahead of tonight's story — every card links to the player page</div>
+
+          <div class="headline-block">
+            <div class="k">HEADLINE</div>
+            <div class="h">R. Ortiz strikes out 11 over six, Nashville wins 7&ndash;3</div>
+            <div class="sub">Season high; his third straight start with 8+ Ks. Full line below.</div>
+          </div>
+          <div class="annot">&rarr; one visual hook, one quick-hit line — the whip-around-segment lesson, not a paragraph</div>
+
+          <div class="section-label">Trending</div>
+          <div class="trend-cols">
+            <div>
+              <div class="trend-col-h">&#9650; UP</div>
+              <div class="trend-row"><span class="name">D. Castellano</span><span class="metric">+.038 <span class="spark"><svg width="30" height="12" viewBox="0 0 30 12"><polyline points="0,10 6,8 12,9 18,5 24,6 30,2" fill="none" stroke="#111" stroke-width="1.3"/></svg></span></span></div>
+              <div class="trend-row"><span class="name">K. Boyer</span><span class="metric">+.022 <span class="spark"><svg width="30" height="12" viewBox="0 0 30 12"><polyline points="0,9 6,7 12,8 18,4 24,5 30,3" fill="none" stroke="#111" stroke-width="1.3"/></svg></span></span></div>
+            </div>
+            <div>
+              <div class="trend-col-h">&#9660; DOWN</div>
+              <div class="trend-row"><span class="name">T. Wells</span><span class="metric">&minus;.051 <span class="spark"><svg width="30" height="12" viewBox="0 0 30 12"><polyline points="0,2 6,4 12,3 18,7 24,8 30,10" fill="none" stroke="#111" stroke-width="1.3"/></svg></span></span></div>
+              <div class="trend-row"><span class="name">A. Reyes</span><span class="metric">&minus;.033 <span class="spark"><svg width="30" height="12" viewBox="0 0 30 12"><polyline points="0,3 6,3 12,5 18,6 24,8 30,9" fill="none" stroke="#111" stroke-width="1.3"/></svg></span></span></div>
+            </div>
+          </div>
+          <div class="see-more">&rarr; full trend board (12 more)</div>
+
+          <div class="section-label">Org leaders &mdash; season, levels combined</div>
+          <div class="trend-cols">
+            <div>
+              <div class="trend-col-h">BATTING</div>
+              <div class="lead-row"><span>1&nbsp; D. Castellano</span><span class="v">.961 OPS</span></div>
+              <div class="lead-row"><span>2&nbsp; J. Alvarez</span><span class="v">.887 OPS</span></div>
+              <div class="lead-row"><span>3&nbsp; K. Diallo</span><span class="v">.851 OPS</span></div>
+            </div>
+            <div>
+              <div class="trend-col-h">PITCHING</div>
+              <div class="lead-row"><span>1&nbsp; R. Okafor</span><span class="v">2.61 ERA</span></div>
+              <div class="lead-row"><span>2&nbsp; R. Ortiz</span><span class="v">10.9 K/9</span></div>
+              <div class="lead-row"><span>3&nbsp; M. Farrow</span><span class="v">1.04 WHIP</span></div>
+            </div>
+          </div>
+          <div class="annot">&rarr; a promoted player's stats are SUMMED across levels first, so a midseason call-up isn't split into two smaller, unranked lines</div>
+
+          <div class="section-label">Affiliates</div>
+
+          <div class="aff-card">
+            <div class="aff-top">
+              <div><div class="lvl">AAA</div><div class="club">Nashville Sounds</div></div>
+              <div class="score">7&ndash;3 W</div>
+            </div>
+            <div class="aff-ctx">vs. Durham &middot; 3rd straight win</div>
+            <div class="aff-lines">
+              <div>R. Ortiz: 6.0 IP, 11 K, 2 ER</div>
+              <div class="stat-note">Fastball 97.1 mph avg &middot; 74th percentile velo vs. current MLB arms</div>
+              <div>D. Castellano: 3&ndash;4, HR, 3 RBI</div>
+            </div>
+            <div class="notable"><span class="k">NOTABLE</span>Catcher won all 3 ABS challenges tonight</div>
+            <div class="story-block">
+              <div class="story-k">GAME STORY &middot; via MiLB.com</div>
+              <div class="story-q">&ldquo;Ortiz was untouchable for six, and Castellano's third-inning blast put it away early.&rdquo;</div>
+              <div class="story-link">&rarr; Read full recap</div>
+            </div>
+            <div class="box-placeholder">FULL BOX SCORE / LINE SCORE</div>
+            <div class="aff-more">&rarr; Show full recap</div>
+          </div>
+          <div class="annot">&rarr; AAA shown expanded; AA / High-A / Single-A below use the identical anatomy, collapsed</div>
+          <div class="annot">&rarr; stuff-percentile needs no new data (AAA pitch-tracking is already ingested) &mdash; the game story is a server-side scrape of MiLB.com, same pattern as the existing Top-100 prospect scrape, not a live API</div>
+
+          <div class="aff-card collapsed">
+            <div class="aff-top">
+              <div><div class="lvl">AA</div><div class="club">Biloxi Shuckers</div></div>
+              <div class="score">2&ndash;5 L</div>
+            </div>
+            <div class="aff-ctx">at Montgomery</div>
+            <div class="notable"><span class="k">NOTABLE</span>3 errors in the 6th, all unearned runs scored</div>
+            <div class="aff-more">&rarr; Show full recap</div>
+          </div>
+
+          <div class="aff-card collapsed">
+            <div class="aff-top">
+              <div><div class="lvl">HIGH-A</div><div class="club">Wisconsin Timber Rattlers</div></div>
+              <div class="score">4&ndash;1 W</div>
+            </div>
+            <div class="aff-ctx">vs. Beloit</div>
+            <div class="aff-more">&rarr; Show full recap</div>
+          </div>
+
+          <div class="aff-card collapsed">
+            <div class="aff-top">
+              <div><div class="lvl">SINGLE-A</div><div class="club">Carolina Mudcats</div></div>
+              <div class="score">3&ndash;8 L</div>
+            </div>
+            <div class="aff-ctx">at Down East</div>
+            <div class="aff-more">&rarr; Show full recap</div>
+          </div>
+
+          <div class="section-label">AAA Bullpen Health</div>
+          <table class="bp">
+            <tr><th>Pitcher</th><th>Last&nbsp;4d</th><th>Rest</th><th>Status</th></tr>
+            <tr><td>M. Farrow</td><td class="num">3</td><td class="num">0d</td><td><span class="tag down">DOWN</span></td></tr>
+            <tr><td>J. Halvorsen</td><td class="num">2</td><td class="num">1d</td><td><span class="tag watch">WATCH</span></td></tr>
+            <tr><td>C. Nkemdi</td><td class="num">1</td><td class="num">2d</td><td><span class="tag">AVAILABLE</span></td></tr>
+            <tr><td>P. Suzuki</td><td class="num">0</td><td class="num">4d</td><td><span class="tag">AVAILABLE</span></td></tr>
+          </table>
+          <div class="annot">&rarr; same tags/thresholds as the app's existing MLB bullpen-watch note, extended to AAA</div>
+
+          <div class="section-label">Moves</div>
+          <div class="txn-row">
+            <div class="txn-h">RECALLED &mdash; J. Halvorsen, RHP</div>
+            <div class="txn-d">Nashville &rarr; Milwaukee</div>
+          </div>
+          <div class="txn-row">
+            <div class="txn-h">OPTIONED &mdash; A. Reyes, INF</div>
+            <div class="txn-d">Milwaukee &rarr; Nashville</div>
+          </div>
+          <div class="txn-row">
+            <div class="txn-h">PLACED ON 7-DAY IL &mdash; K. Boyer, C</div>
+            <div class="txn-d">Biloxi &middot; retroactive to Aug 22</div>
+          </div>
+          <div class="see-more">&rarr; 4 more today</div>
+
+          <div class="teaser-card">
+            <div class="teaser-top"><span>ORG DEPTH CHART</span><span class="teaser-link">&rarr; by position</span></div>
+            <div class="teaser-row"><span class="pos">SS</span><span>Scouting: J. Alvarez &middot; Performing: R. Beckham</span></div>
+            <div class="teaser-row"><span class="pos">RHP</span><span>Scouting: R. Okafor &middot; Performing: M. Farrow</span></div>
+          </div>
+          <div class="annot">&rarr; reference content, not daily &mdash; its own page, Concept C</div>
+
+          <div class="index-card">
+            <div class="index-top"><span>Farm Index</span><span>71.4</span></div>
+            <div class="bar-row"><div class="bl">Talent</div><div class="bar-track"><div class="bar-fill" style="width:78%;"></div></div><div class="bv">78</div></div>
+            <div class="bar-row"><div class="bl">Winning</div><div class="bar-track"><div class="bar-fill" style="width:61%;"></div></div><div class="bv">61</div></div>
+            <div class="bar-row"><div class="bl">Youth</div><div class="bar-track"><div class="bar-fill" style="width:70%;"></div></div><div class="bv">70</div></div>
+            <div class="index-rank">7th of 30 systems &middot; slow-moving context, placed last on purpose</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== CONCEPT B ===================== -->
+    <div class="concept">
+      <div class="concept-head">
+        <div class="k">Concept B</div>
+        <h2>Command Center</h2>
+        <p>A persistent score bug up top, then tabs instead of scroll. Best for a reader who checks in nightly and wants to jump straight to one thing (bullpen health, tonight's moves) without paging past four affiliate recaps first.</p>
+      </div>
+      <div class="frame">
+        <div class="frame-chrome">PHONE VIEWPORT — 390PX</div>
+        <div class="frame-body">
+
+          <div class="app-header">
+            <span class="name">FARM DIGEST</span>
+            <span class="date">TUE AUG 25</span>
+          </div>
+
+          <div class="top-bug">
+            <div class="cell"><div class="lvl">AAA</div><div class="sc">7&ndash;3</div></div>
+            <div class="cell"><div class="lvl">AA</div><div class="sc">2&ndash;5</div></div>
+            <div class="cell"><div class="lvl">A+</div><div class="sc">4&ndash;1</div></div>
+            <div class="cell"><div class="lvl">A</div><div class="sc">3&ndash;8</div></div>
+          </div>
+          <div class="annot">&rarr; always-visible score bug, tap a cell to jump straight to that affiliate's tab</div>
+
+          <div class="tab-bar">
+            <div class="tab active">ALL</div>
+            <div class="tab">AAA</div>
+            <div class="tab">AA</div>
+            <div class="tab">A+</div>
+            <div class="tab">A</div>
+            <div class="tab">TRENDING</div>
+            <div class="tab">BULLPEN</div>
+            <div class="tab">MOVES</div>
+            <div class="tab">WHO TO KNOW</div>
+            <div class="tab">LEADERS</div>
+            <div class="tab">DEPTH</div>
+          </div>
+
+          <div class="headline-block">
+            <div class="k">HEADLINE</div>
+            <div class="h">R. Ortiz strikes out 11 over six, Nashville wins 7&ndash;3</div>
+            <div class="sub">Season high; his third straight start with 8+ Ks.</div>
+          </div>
+
+          <div class="section-label">ALL &mdash; one line per affiliate</div>
+          <div class="list-row">
+            <div class="left"><span class="lvl">AAA &middot; NASHVILLE</span><span class="h">R. Ortiz: 11 K, D. Castellano: HR <span class="tag" style="margin-left:4px;">RECAP</span></span></div>
+            <div class="right">7&ndash;3 W</div>
+          </div>
+          <div class="list-row">
+            <div class="left"><span class="lvl">AA &middot; BILOXI</span><span class="h">3 errors in the 6th</span></div>
+            <div class="right">2&ndash;5 L</div>
+          </div>
+          <div class="list-row">
+            <div class="left"><span class="lvl">HIGH-A &middot; WISCONSIN</span><span class="h">Quiet win, no standout line</span></div>
+            <div class="right">4&ndash;1 W</div>
+          </div>
+          <div class="list-row">
+            <div class="left"><span class="lvl">SINGLE-A &middot; CAROLINA</span><span class="h">Bullpen allowed 5 in the 8th</span></div>
+            <div class="right">3&ndash;8 L</div>
+          </div>
+          <div class="annot">&rarr; denser than Concept A's cards — tapping a row opens that affiliate's full tab, tapping the tab does the same</div>
+
+          <div class="other-tabs">
+            <span class="k">What the other tabs hold</span>
+            <div class="row"><b>TRENDING</b> &mdash; same up/down board as Concept A, full-width instead of split into two columns</div>
+            <div class="row"><b>BULLPEN</b> &mdash; the AAA availability table, plus a second table once AA workload data exists</div>
+            <div class="row"><b>MOVES</b> &mdash; today's transactions, two-line flipper rows (headline + detail), newest first</div>
+            <div class="row"><b>WHO TO KNOW</b> &mdash; the org primer, same cards as Concept A's strip, full list instead of 3</div>
+            <div class="row"><b>LEADERS</b> &mdash; org batting/pitching leaderboards, levels combined</div>
+            <div class="row"><b>DEPTH</b> &mdash; Concept C's position-by-position page, opened in place instead of a separate route</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== CONCEPT C ===================== -->
+    <div class="concept">
+      <div class="concept-head">
+        <div class="k">Concept C</div>
+        <h2>Depth Chart</h2>
+        <p>A reference page, not a daily one &mdash; organizational strength by position. Scouting rank and current performance are kept as two separate lists on purpose: FanGraphs' own Board does the same, and no outlet has a published formula for blending a scouting grade with a stat line into one number. Reached from the teaser on either digest concept.</p>
+      </div>
+      <div class="frame">
+        <div class="frame-chrome">PHONE VIEWPORT — 390PX</div>
+        <div class="frame-body">
+
+          <div class="app-header">
+            <span class="name">DEPTH CHART</span>
+            <span class="date">BREWERS SYSTEM</span>
+          </div>
+
+          <div class="tab-bar">
+            <div class="tab">C</div>
+            <div class="tab">1B</div>
+            <div class="tab">2B</div>
+            <div class="tab">3B</div>
+            <div class="tab active">SS</div>
+            <div class="tab">LF</div>
+            <div class="tab">CF</div>
+            <div class="tab">RF</div>
+            <div class="tab">SP</div>
+            <div class="tab">RP</div>
+          </div>
+          <div class="annot">&rarr; one tab per position, horizontally scrollable &mdash; SS shown selected</div>
+
+          <div class="section-label">Scouting &mdash; potential</div>
+          <div class="lead-row"><span>1&nbsp; J. Alvarez <span class="tag">TOP 100 #14</span></span></div>
+          <div class="depth-meta">AA &middot; age 20 &middot; drafted 2024, 1st rd</div>
+          <div class="lead-row"><span>2&nbsp; M. Ferris <span class="tag">ORG #3</span></span></div>
+          <div class="depth-meta">A+ &middot; age 19</div>
+          <div class="lead-row"><span>3&nbsp; R. Beckham <span class="tag">ORG #9</span></span></div>
+          <div class="depth-meta">AAA &middot; age 24</div>
+          <div class="see-more">&rarr; +11 more on the SS depth chart, unranked</div>
+          <div class="annot">&rarr; a player outside the ranked pool isn't scored zero-ish, he's just not on this list &mdash; the same rule the Farm Index already uses</div>
+
+          <div class="section-label">Performance &mdash; this season</div>
+          <div class="trend-row"><span class="name">R. Beckham</span><span class="stat">AAA</span><span class="metric">.861 OPS &middot; 92nd pctile &#9650;</span></div>
+          <div class="trend-row"><span class="name">J. Alvarez</span><span class="stat">AA</span><span class="metric">.782 OPS &middot; 81st pctile &#9650;</span></div>
+          <div class="trend-row"><span class="name">K. Diallo</span><span class="stat">A+</span><span class="metric">.734 OPS &middot; 68th pctile &#9660;</span></div>
+          <div class="annot">&rarr; percentile is against the player's OWN level, not one flat league number &mdash; a .734 at High-A and a .734 at Triple-A aren't the same performance</div>
+          <div class="annot">&rarr; the two lists can disagree &mdash; a high scouting rank next to a middling performance rank (or the reverse) is the actual finding here, not noise to resolve</div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="note">
+    All three concepts carry annotations (small italic monospace lines) marking which convention a block is borrowing from — a KPI band ceiling of ~5 metrics, hierarchy by size/position/isolation rather than color, arrow+delta+sparkline together for trend, a two-line headline-plus-detail row for the moves ticker, progressive disclosure ("Show N more") reused from this app's own existing pattern, and Concept C's split scouting/performance lists borrowed directly from FanGraphs' Board rather than inventing a blended score nobody else publishes. Two blocks — the game story and the pitcher stuff-percentile line — are shown here to establish where they'd sit, not because either is a guaranteed day-one build: the recap needs a new off-device scrape, and the percentile needs no new data (this app already ingests AAA pitch-tracking) but does need its own comparison logic. Nothing here is a final layout — the point is to compare the bets before any of it gets designed.
+  </footer>
+</div>
