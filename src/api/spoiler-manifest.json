@@ -728,6 +728,10 @@
       "class": "cutoff-gated",
       "why": "Every row it returns carries `won`, `runs` and `oppRuns` — one game's line. It adds no fetch of its own and inherits schedule.js's `resultsCutoff`, which is exactly what makes it cutoff-gated rather than spoiler-free: the safety is the DATE the caller asks for, never a property of these rows. Its own header already said so ('gated by fetchTeamSchedule's own resultsCutoff') while the class here claimed the rows were safe at render top-level on any surface. They are not — a caller that renders decided games on a scoring surface prints last night's finals, and nothing here would have objected."
     },
+    "scorecard/alignment.js": {
+      "class": "caller-gated",
+      "why": "The #22 sheet's defense diamond — the fielding club's alignment at the reveal frontier, plus halfIndex's inverse. Split off scorecardGame.js at the file cap. It adds no gate of its own: it asks api/defense.js's `defenseEntering` for the half at `through + 1` and hands it the same `through` as the reveal mark, so enteringHalf.js's safeToShowEntering is what decides. Substitution TIMING is the spoiler-adjacent part (ADR-0003/0010) and a null coming back is a real answer, not an error — the sheet keeps the pre-pitch nine. Call it with a `through` you have not earned and it tells the reader who came off the field, and when."
+    },
     "scorecard/decisions.js": {
       "class": "caller-gated",
       "why": "The #22 sheet's WP/LP/SV lines — each pitcher of record with his season figure in parentheses. Split off scorecardGame.js at the file cap. Which pitcher won is as score-revealing as the score, so this is safe only for the half its caller has already decided: it takes scorecardScoreboard's own `done` (Final AND every played half at or under `through`, the same flag the FINAL block waits on) and returns nothing but empty strings until that is true. It decides nothing itself; call it with a truthy `done` you have not earned and it will tell the reader who won."

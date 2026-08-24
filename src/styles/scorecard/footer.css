@@ -32,7 +32,8 @@
    own, the two team rows keep a scoreboard's proportions instead of stretching
    a 26% name column across the whole page. */
 .sc-footer__scoreboard {
-  max-width: 520px;
+  flex: 1.3 1 340px;
+  max-width: 560px;
 }
 /* The defense diamond used to be pinned to 160px here, which is narrower
    than the graphic was drawn for: eight surnames, each on its own writing
@@ -144,16 +145,121 @@
   gap: var(--space-3);
   margin-top: var(--space-3);
 }
+/* The FINAL grid and the three decision lines read ACROSS, side by side, the
+   way the #22 prints them — the block is one band under the innings, not two
+   stacked ones. Both bases are small enough that the pair still fits the
+   scoreboard column at its narrowest; the wrap above is the phone's fallback,
+   where side-by-side would squeeze the R/H/E/LOB boxes below writing size. */
 .sc-final {
   flex: 1 1 180px;
+  /* A flex item's default `min-width: auto` is its MIN-CONTENT width, and a
+     table's min-content is every column's own — so the grid refused to go under
+     about 350px and shouldered the decisions onto a line of their own however
+     much room the basis asked for. Zero lets it take the share it was given. */
+  min-width: 0;
   width: auto;
 }
 .sc-final .sc-scoreboard__team {
   width: 34%;
 }
+/* FINAL and its four column letters float ABOVE the boxes rather than sitting
+   in ruled cells of their own — the printed sheet captions the block, it does
+   not add a row to it. Only the two clubs' rows are boxes you write in. */
+.sc-final thead th {
+  border: 0;
+  height: auto;
+  padding-bottom: 2px;
+}
+/* The FINAL caption reads with the letters beside it, not as a club name. */
+.sc-final thead .sc-scoreboard__team {
+  text-align: left;
+  letter-spacing: var(--ls-caps);
+}
 .sc-decisions {
-  flex: 1 1 140px;
+  flex: 1 1 130px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  /* The three lines are the #22's own writing block, so they get the print
+     sheet's air between them rather than sitting on top of each other. */
+  gap: var(--space-3);
+  /* Hung level with the FINAL grid's own first row of boxes, not with its
+     column letters — the two blocks are read across, the way the sheet prints
+     them side by side. */
+  padding-top: var(--space-2);
+}
+/* ONE LINE PER DECISION: the label, then the name on the rule beside it. */
+.sc-decision {
+  display: flex;
+  align-items: baseline;
   gap: var(--space-2);
+}
+.sc-decision__label {
+  flex: 0 0 auto;
+  min-width: 20px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* The rule the name is written on. It runs to the end of the block whether or
+   not there is a name yet, so an unrevealed game shows three lines to write on
+   — the sheet's own way of saying you haven't got there. */
+.sc-decision__line {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 16px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+/* The name and its figure, read as one run. A flex row so the name can take the
+   truncation and the figure cannot; the space between them is a character in
+   the figure itself (see DecisionLine), never a gap — a gap is invisible to
+   anything reading the line as text. */
+.sc-decision__value {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+}
+/* Set like the pitcher table's own names above it (.pitchers__pname) — body
+   face, semibold, heading ink — so the man who won it is written the same way
+   as the man on the line above. */
+.sc-decision__name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+/* His figure — the record the decision moved, or the save count. Mono, because
+   it is a number, and quieter than the name, because the name is the subject. */
+.sc-decision__fig {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+}
+
+/* THE DEFENSE DIAMOND'S SUBSTITUTIONS, in the scorer's second pencil. The
+   diamond itself draws the stack everywhere it is used (see DefenseDiamond);
+   here on the sheet the crossed-out starter takes the SEAM-RED strike the
+   replacement's own name and inning tag are already written in, so one change
+   reads as one mark in one colour. Elsewhere — the innings viewer, the box
+   score — the graphite strike stays.
+   The `.plink` half is not optional: a <button> will not take an ancestor's
+   line-through, and .plink zeroes text-decoration outright, so a rule that
+   names only the wrapper crosses out the tag and leaves the name standing.
+   scripts/check-strike-links.mjs is the guard. */
+.sc-footer__defense .defdiamond__name--out,
+.sc-footer__defense .defdiamond__name--out .plink {
+  text-decoration: line-through;
+  text-decoration-color: var(--accent-negative);
 }

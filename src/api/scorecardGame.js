@@ -43,14 +43,16 @@ import { computeHalfInningFeed, battingSlot, pitchLadder, nextStepBoundary } fro
 import { revealInning, revealTotals } from './linescore.js'
 import { computeDerivedByInning, revealDerived } from './derive.js'
 import { computePitcherLines } from './pitchers.js'
+import { halfAt, scorecardDefense } from './scorecard/alignment.js'
 import { NON_AB_EVENTS, classifyOut, scorecardCenterCode } from './scorecard/notation.js'
 import { battingChangeMarks, pitchingChangeMarks } from './scorecard/handover.js'
 import { decisionLines } from './scorecard/decisions.js'
 import { finalOutClock } from './scorecard/finalout.js'
 
-// The sheet's pure notation rules live a file away (scorecard/notation.js) and
-// are re-exported here, so a caller still reaches them through this module.
-export { scorecardCenterCode }
+// The sheet's pure notation rules live a file away (scorecard/notation.js), and
+// so does the defense diamond's own builder (scorecard/alignment.js). Both are
+// re-exported here, so a caller still reaches them through this module.
+export { scorecardCenterCode, scorecardDefense }
 
 // Half-index of the game's last recorded play — the frontier every "did this
 // half actually END?" question below is answered against. -1 with no plays.
@@ -59,14 +61,6 @@ function lastPlayedHalfIndex(feed) {
   const last = plays[plays.length - 1]
   if (!last?.about?.inning || !last?.about?.halfInning) return -1
   return halfIndex(last.about.inning, last.about.halfInning)
-}
-
-// halfIndex's inverse: the (inning, half, batting side-of-sheet) a half-index
-// names. Structural, same footing as halfIndex itself.
-function halfAt(idx) {
-  const inning = Math.floor(idx / 2) + 1
-  const half = idx % 2 === 1 ? 'bottom' : 'top'
-  return { inning, half, side: half === 'top' ? 'top' : 'bottom' }
 }
 
 // The sheet's own reveal step — the state the live scorecard's face-down
@@ -589,8 +583,13 @@ export function scorecardPitchers(feed, side /* 'top' | 'bottom' */, { through =
 export function scorecardFull(loaded, side, { through = -1, step = null } = {}) {
   const view = scorecardView(loaded, side)
   if (!view) return null
+  // The live alignment REPLACES the staging nine when the gate lets it through;
+  // a null (the half is further out than the reader has reached) leaves the
+  // pre-pitch nine in place, which is the same shape with no changes drawn.
+  const defense = scorecardDefense(loaded.feed, side, { through })
   return {
     ...view,
+    defense: defense?.length ? defense : view.defense,
     // Only the GRID takes the step: the scoreboard and the pitcher table are
     // whole-half readings on this sheet and ink on commit, mid-step never.
     grid: scorecardPlays(loaded.feed, side, { through, step }),

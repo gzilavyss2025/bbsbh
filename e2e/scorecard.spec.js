@@ -58,6 +58,12 @@ test('sealed game: the sheet renders staged but inkless — nothing score-shaped
   expect(types.join('')).toBe('')
   const ptl = await page.locator('.sc-sheet__totals .sc-sheet__totcell').allTextContents()
   expect(ptl.join('')).toBe('')
+  // The TOTALS plate is PREPRINTED — it is on the blank sheet too — but nothing
+  // is totalled under it before the first batter. A scorer does not write 0 AB
+  // under a column nobody has batted in.
+  await expect(page.locator('.sc-sheet__totplate')).toBeVisible()
+  const sums = await page.locator('.sc-sheet__totfigs > span').allTextContents()
+  expect(sums.join('')).toBe('')
   // The decisions are the loudest spoiler: the winner's name must not exist.
   await expect(page.locator('body')).not.toContainText('Gasser')
   // Scoreboard cells all blank.
@@ -77,6 +83,10 @@ test('partial reveal (through top 3): exactly that much ink, and no more', async
   // FINAL block still blank; winner still unnamed.
   await expect(page.locator('.sc-final td.sc-scoreboard__rhe').first()).toHaveText('')
   await expect(page.locator('body')).not.toContainText('Gasser')
+  // The totals are blank only while the sheet is: three revealed innings have
+  // been batted, so the plate carries real figures now.
+  const sums = await page.locator('.sc-sheet__totfigs > span').allTextContents()
+  expect(sums.join('')).not.toBe('')
   // Bottom sheet: the home club has only innings 1–2 revealed — switch and
   // count its P/TP/LOB columns.
   await page.getByRole('button', { name: 'Bottom', exact: true }).click()
@@ -85,8 +95,10 @@ test('partial reveal (through top 3): exactly that much ink, and no more', async
 
 test('full reveal: the completed sheet, its totals, decisions, marks and PR case', async ({ page }) => {
   await openWithMark(page, FULL)
-  // The away grid's summary foot: AB 38, H 11, R 10, RBI 10 (pinned).
-  await expect(page.locator('.sc-sheet__totbar')).toHaveText(['38', '11', '10', '10'])
+  // The away grid's summary foot: AB 38, H 11, R 10, RBI 10 (pinned), under the
+  // kraft TOTALS bar that captions them.
+  await expect(page.locator('.sc-sheet__totfigs > span')).toHaveText(['38', '11', '10', '10'])
+  await expect(page.locator('.sc-sheet__totplate')).toHaveText('Totals')
   // FINAL: MIL 10, STL 2, with LOB 8/4; decisions named.
   await expect(page.locator('.sc-final tbody tr').first()).toContainText('10')
   // SURNAME AND FIGURE, the way a box score writes a pitcher of record: the
@@ -459,4 +471,89 @@ test('the sheet plays: flip box, frontier seal, one PA per tap, commit inks the 
   // slash on its last box.
   await expect(page.locator('.sc-ab__flip')).toContainText(/top 4/i)
   expect(await page.locator('.sc-ab--halfend').count()).toBe(3)
+})
+
+test('the results block: one line per decision, and a defense that shows who came out', async ({
+  page,
+}) => {
+  await openWithMark(page, FULL)
+
+  // WP/LP/SV READ ACROSS. The label and the name share a line — the label sits
+  // to the LEFT of the rule the name is written on, not stacked above it — and
+  // the figure follows the name with a real space between them.
+  const wp = page.locator('.sc-decision').first()
+  await expect(wp.locator('.sc-decision__label')).toHaveText('WP')
+  await expect(wp).toContainText('Gasser (2-3)')
+  const across = await wp.evaluate((el) => {
+    const label = el.querySelector('.sc-decision__label').getBoundingClientRect()
+    const line = el.querySelector('.sc-decision__line').getBoundingClientRect()
+    return { beside: line.left >= label.right - 1, sameLine: Math.abs(line.bottom - label.bottom) < 12 }
+  })
+  expect(across.beside).toBe(true)
+  expect(across.sameLine).toBe(true)
+
+  // THE FINAL GRID AND THE DECISIONS ARE ONE BAND, side by side, the way the
+  // printed sheet lays them out — not the decisions wrapped underneath.
+  const band = await page.locator('.sc-finalblock').evaluate((el) => {
+    const grid = el.querySelector('.sc-final').getBoundingClientRect()
+    const decisions = el.querySelector('.sc-decisions').getBoundingClientRect()
+    return decisions.left >= grid.right - 1
+  })
+  expect(band).toBe(true)
+
+  // THE DEFENSE DIAMOND RECORDS THE CHANGES. On a fully revealed game the
+  // Cardinals' 1B turned over twice: Burleson, then Jordan in the 8th, then
+  // Pagés in the 9th. The two men who came off are struck through; the standing
+  // man is not, and each entrant carries the inning he took the field.
+  const struck = page.locator('.sc-footer__defense .defdiamond__name--out')
+  expect(await struck.count()).toBeGreaterThan(0)
+  await expect(page.locator('.sc-footer__defense')).toContainText('(8th)')
+  // The strike is drawn in the scorer's second pencil here — seam red, the same
+  // ink the replacement's own name and inning tag are written in.
+  const strikeInk = await struck.first().evaluate((el) => {
+    const seam = getComputedStyle(document.documentElement)
+      .getPropertyValue('--accent-negative')
+      .trim()
+    const probe = document.createElement('span')
+    probe.style.color = seam
+    document.body.append(probe)
+    const resolved = getComputedStyle(probe).color
+    probe.remove()
+    return { got: getComputedStyle(el).textDecorationColor, want: resolved }
+  })
+  expect(strikeInk.got).toBe(strikeInk.want)
+})
+
+test('a sealed sheet keeps the defensive changes sealed too', async ({ page }) => {
+  // Substitution TIMING is spoiler-adjacent (ADR-0003/0010) — a flurry of
+  // pre-half replacements telegraphs a sealed blowout — so a sheet nobody has
+  // opened shows the alignment it showed before first pitch: no strike-throughs,
+  // no inning tags, nine standing fielders.
+  await openWithMark(page, null)
+  await expect(page.locator('.sc-footer__defense .defdiamond__name')).not.toHaveCount(0)
+  await expect(page.locator('.sc-footer__defense .defdiamond__name--out')).toHaveCount(0)
+  await expect(page.locator('.sc-footer__defense .defdiamond__enter')).toHaveCount(0)
+})
+
+test("a substitute's line is written like the starter's", async ({ page }) => {
+  await openWithMark(page, FULL)
+  // Slot 5 (Bauers, then Mitchell) is the pinned two-man row. Both names start
+  // at the same left edge, in the same size, weight and ink — one man's line
+  // under another's, not a heading and its footnote.
+  const rail = page.locator('.sc-sheet__row--slot').nth(4).locator('.sc-sheet__name')
+  await expect(rail.locator('.sc-sheet__line')).toHaveCount(2)
+  const lines = await rail.evaluate((cell) => {
+    const [a, b] = [...cell.querySelectorAll('.sc-sheet__who')]
+    const box = (el) => el.getBoundingClientRect()
+    const type = (el) => {
+      const cs = getComputedStyle(el)
+      return `${cs.fontSize}|${cs.fontWeight}|${cs.color}`
+    }
+    return {
+      sameLeft: Math.abs(box(a).left - box(b).left) <= 1,
+      sameType: type(a) === type(b),
+    }
+  })
+  expect(lines.sameLeft).toBe(true)
+  expect(lines.sameType).toBe(true)
 })

@@ -192,20 +192,43 @@ function ClockField({ label, time = '', stacked = false }) {
   )
 }
 
-// A pitcher of record, written the way a box score writes him: the name, then
-// his figure in parentheses. No name means the game hasn't been revealed to
-// its end (or nobody earned the save), and the field stays a blank line to
-// write on — never an empty pair of brackets.
+// A pitcher of record, written the way the #22 prints the line and a box score
+// writes the man: the label, then his surname and his figure in parentheses,
+// ALL ON ONE LINE. It is a `Field` no longer — that stacks its caption OVER the
+// rule, which gave three decisions six lines and left each name floating a row
+// away from the label that names it. WP/LP/SV are two characters wide; the rule
+// beside them has room for the name, so the name goes beside them.
+//
+// The surname is set the way the pitcher table above sets its names
+// (.pitchers__pname — body face, semibold, the sheet's own heading ink), so the
+// three decisions read as the same kind of writing as the arms they name.
+//
 // The name is the LINK and the figure is not: a hover card belongs on the man,
-// not on his record. A line with no name is a blank line to write on, and never
-// an empty pair of brackets.
-function decision(id, name, note) {
-  if (!name) return ''
+// not on his record. No name means the game hasn't been revealed to its end (or
+// nobody earned the save), and the line stays blank to write on — never an
+// empty pair of brackets, and never a stray figure with nobody attached.
+function DecisionLine({ label, id, name, note }) {
   return (
-    <>
-      <PlayerLink id={id}>{name}</PlayerLink>
-      {note ? ` (${note})` : ''}
-    </>
+    <div className="sc-decision">
+      <span className="sc-decision__label">{label}</span>
+      <span className="sc-decision__line">
+        {name ? (
+          <span className="sc-decision__value">
+            <PlayerLink id={id} className="sc-decision__name">
+              {name}
+            </PlayerLink>
+            {/* A NON-BREAKING space, not a plain one and not a flex gap: the
+                space between the name and the figure has to be a CHARACTER, so
+                the line reads "GASSER (2-3)" when it is copied, read aloud, or
+                asserted on — and non-breaking so the pair never splits over a
+                line. A plain leading space was what shipped, and browsers drop
+                leading whitespace on a flex item, which is why the sheet read
+                "GASSER(2-3)". */}
+            {note ? <span className="sc-decision__fig">{`\u00a0(${note})`}</span> : null}
+          </span>
+        ) : null}
+      </span>
+    </div>
   )
 }
 
@@ -491,17 +514,23 @@ function FinalBlock({ board }) {
           his own boxscore seasonStats and include tonight, so the line reads
           the way it will read in the morning paper. */}
       <div className="sc-decisions">
-        <Field
+        <DecisionLine
           label="WP"
-          value={decision(board?.decisions?.wpId, board?.decisions?.wp, board?.decisions?.wpNote)}
+          id={board?.decisions?.wpId}
+          name={board?.decisions?.wp}
+          note={board?.decisions?.wpNote}
         />
-        <Field
+        <DecisionLine
           label="LP"
-          value={decision(board?.decisions?.lpId, board?.decisions?.lp, board?.decisions?.lpNote)}
+          id={board?.decisions?.lpId}
+          name={board?.decisions?.lp}
+          note={board?.decisions?.lpNote}
         />
-        <Field
+        <DecisionLine
           label="SV"
-          value={decision(board?.decisions?.svId, board?.decisions?.sv, board?.decisions?.svNote)}
+          id={board?.decisions?.svId}
+          name={board?.decisions?.sv}
+          note={board?.decisions?.svNote}
         />
       </div>
     </div>
