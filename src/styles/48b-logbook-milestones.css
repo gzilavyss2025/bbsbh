@@ -1,0 +1,133 @@
+/* ============================================================ logbook milestones
+   screens/logbook/LogbookMilestones.jsx — the Game Log retrospective's
+   completion-set shelf (docs/design-inspiration.md §8). Split out of
+   48a-logbook-stats.css (ADR-0038's file-size cap): that file was already at
+   its 600-line ceiling, and this is a self-contained visual family (a card
+   grid + one keyframe) rather than an extension of any rule already there.
+   ============================================================ */
+
+/* The ONE place in the Game Log allowed to say "N of 30" and to mark
+   something complete — deliberately not the passport book, where
+   docs/game-log.md's "not a checklist" rule stays exactly as it was (see
+   48-logbook.css's .clubsseen header). Even here the completion beat is
+   physical, not verbal: a single one-time pulse
+   (.logbookmilestone--justcompleted below), never a word of praise. */
+.logbookmilestones {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.logbookmilestone {
+  position: relative;
+  padding: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+/* A completed collection keeps one quiet, permanent mark of it — the same
+   kraft-tape amber a stamp seals with, as a ring rather than a rosette. No
+   badge glyph, no "complete" label; the ring alone is the whole statement. */
+.logbookmilestone.is-complete {
+  border-color: var(--seal-cover);
+}
+
+.logbookmilestone__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.logbookmilestone__head h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+
+.logbookmilestone__count {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-caption);
+}
+
+.logbookmilestone.is-complete .logbookmilestone__count {
+  color: var(--seal-cover-ink);
+}
+
+.logbookmilestone__lede {
+  margin: var(--space-1) 0 0;
+  max-width: 46ch;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+
+/* Same fade convention as .clubsseen__club — a slot not yet filled recedes
+   rather than reading as an absence to fix. No name under each mark: the
+   count above already says how many, and thirty labels here would crowd a
+   phone width the clubs-seen grid avoids by running wider first. */
+.logbookmilestone__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 480px) {
+  .logbookmilestone__grid {
+    grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+  }
+}
+
+.logbookmilestone__slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.34;
+}
+
+.logbookmilestone__slot.is-filled {
+  opacity: 1;
+}
+
+/* The one celebratory beat, played once and never again
+   (useMilestoneCelebration). A quiet ring-pulse in the seal's own amber plus
+   the faintest settle of the card itself — answering the passport stamp's
+   own passport-stamp-land moment (49-passport-book.css) rather than
+   inventing a second vocabulary for "something finished." Transform/
+   box-shadow/opacity only, so nothing here forces a layout pass mid-animation. */
+@keyframes logbookmilestone-complete {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--seal-cover) 55%, transparent);
+    transform: scale(1);
+  }
+
+  40% {
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--seal-cover) 0%, transparent);
+    transform: scale(1.012);
+    animation-timing-function: var(--ease-out);
+  }
+
+  to {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--seal-cover) 0%, transparent);
+    transform: scale(1);
+  }
+}
+
+.logbookmilestone--justcompleted {
+  animation: logbookmilestone-complete calc(var(--dur-slow) * 2) var(--ease-press);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logbookmilestone--justcompleted {
+    animation: none;
+  }
+}
