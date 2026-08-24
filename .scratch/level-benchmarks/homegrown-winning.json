@@ -1,0 +1,468 @@
+{
+  "specs": [
+    {
+      "label": "contemporaneous S | pooled, no FE",
+      "orgFE": false,
+      "seasonFE": false,
+      "n": 600,
+      "r2": 0.004981668460631861,
+      "betaPerSD": 0.005263984573775868,
+      "winPctPointsPerSD": 5.263984573775868,
+      "winsPer162PerSD": 0.8527655009516907,
+      "shareSD": 0.12105765747606813,
+      "se": {
+        "naive": 0.0030422307122797087,
+        "byOrg": 0.004597062966590479,
+        "twoWay": 0.004296970335493452
+      },
+      "p": {
+        "naive": 0.0840918492092721,
+        "byOrg": 0.26154042127353105,
+        "twoWay": 0.23552886279308372
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 20
+      }
+    },
+    {
+      "label": "contemporaneous S | season FE",
+      "orgFE": false,
+      "seasonFE": true,
+      "n": 600,
+      "r2": 0.0052629289454715344,
+      "betaPerSD": 0.005567044293009297,
+      "winPctPointsPerSD": 5.567044293009297,
+      "winsPer162PerSD": 0.9018611754675061,
+      "shareSD": 0.12105765747606813,
+      "se": {
+        "naive": 0.003180851773139128,
+        "byOrg": 0.005174557347542509,
+        "twoWay": 0.00489692851188366
+      },
+      "p": {
+        "naive": 0.08061795956682241,
+        "byOrg": 0.2908640456344297,
+        "twoWay": 0.2697387261408727
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 20
+      }
+    },
+    {
+      "label": "contemporaneous S | org FE + season FE (within-org)",
+      "orgFE": true,
+      "seasonFE": true,
+      "n": 600,
+      "r2": 0.20615018374240845,
+      "betaPerSD": 0.0049210449008845565,
+      "winPctPointsPerSD": 4.9210449008845565,
+      "winsPer162PerSD": 0.7972092739432981,
+      "shareSD": 0.12105765747606813,
+      "se": {
+        "naive": 0.0035848668267608277,
+        "byOrg": 0.005525136717733411,
+        "twoWay": 0.005146005027126991
+      },
+      "p": {
+        "naive": 0.17039657032094935,
+        "byOrg": 0.3804390286843077,
+        "twoWay": 0.35093885360503685
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 20
+      }
+    },
+    {
+      "label": "lagged S-1 | pooled, no FE",
+      "orgFE": false,
+      "seasonFE": false,
+      "n": 570,
+      "r2": 0.004899720058539336,
+      "betaPerSD": 0.005192206393921142,
+      "winPctPointsPerSD": 5.192206393921142,
+      "winsPer162PerSD": 0.8411374358152249,
+      "shareSD": 0.12080750967006883,
+      "se": {
+        "naive": 0.003104742382146776,
+        "byOrg": 0.004721873791035884,
+        "twoWay": 0.004343676755677481
+      },
+      "p": {
+        "naive": 0.09500662674976934,
+        "byOrg": 0.28054814942436535,
+        "twoWay": 0.24746259085368771
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 19
+      }
+    },
+    {
+      "label": "lagged S-1 | season FE",
+      "orgFE": false,
+      "seasonFE": true,
+      "n": 570,
+      "r2": 0.005191802949536473,
+      "betaPerSD": 0.005506652784480076,
+      "winPctPointsPerSD": 5.506652784480076,
+      "winsPer162PerSD": 0.8920777510857724,
+      "shareSD": 0.12080750967006883,
+      "se": {
+        "naive": 0.003250369913248832,
+        "byOrg": 0.005262970914954069,
+        "twoWay": 0.004893102379407356
+      },
+      "p": {
+        "naive": 0.09080065697478634,
+        "byOrg": 0.3040649691768059,
+        "twoWay": 0.2752060015783645
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 19
+      }
+    },
+    {
+      "label": "lagged S-1 | org FE + season FE (within-org)",
+      "orgFE": true,
+      "seasonFE": true,
+      "n": 570,
+      "r2": 0.19550584212777,
+      "betaPerSD": 0.004996113788095907,
+      "winPctPointsPerSD": 4.996113788095907,
+      "winsPer162PerSD": 0.8093704336715369,
+      "shareSD": 0.12080750967006883,
+      "se": {
+        "naive": 0.003689666520259165,
+        "byOrg": 0.005613927467895889,
+        "twoWay": 0.0052741325867250435
+      },
+      "p": {
+        "naive": 0.1762970053620836,
+        "byOrg": 0.38081645426029254,
+        "twoWay": 0.3560377972021589
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 19
+      }
+    },
+    {
+      "label": "trailing 3-year mean | pooled, no FE",
+      "orgFE": false,
+      "seasonFE": false,
+      "n": 510,
+      "r2": 0.001219706975135515,
+      "betaPerSD": 0.002631235660994059,
+      "winPctPointsPerSD": 2.631235660994059,
+      "winsPer162PerSD": 0.42626017708103753,
+      "shareSD": 0.1084233743085607,
+      "se": {
+        "naive": 0.0033406818609246205,
+        "byOrg": 0.005475344323009279,
+        "twoWay": 0.005007609226068828
+      },
+      "p": {
+        "naive": 0.431277976022582,
+        "byOrg": 0.6344342464365438,
+        "twoWay": 0.6064781141370674
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 17
+      }
+    },
+    {
+      "label": "trailing 3-year mean | season FE",
+      "orgFE": false,
+      "seasonFE": true,
+      "n": 510,
+      "r2": 0.0012674853469076819,
+      "betaPerSD": 0.0027398747982024844,
+      "winPctPointsPerSD": 2.7398747982024845,
+      "winsPer162PerSD": 0.44385971730880247,
+      "shareSD": 0.1084233743085607,
+      "se": {
+        "naive": 0.0034679310796848096,
+        "byOrg": 0.005747345634772873,
+        "twoWay": 0.0052661700369503765
+      },
+      "p": {
+        "naive": 0.42987314788954056,
+        "byOrg": 0.6371341602261955,
+        "twoWay": 0.6099939197513307
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 17
+      }
+    },
+    {
+      "label": "trailing 3-year mean | org FE + season FE (within-org)",
+      "orgFE": true,
+      "seasonFE": true,
+      "n": 510,
+      "r2": 0.19558973306401217,
+      "betaPerSD": -0.0017899604543826911,
+      "winPctPointsPerSD": -1.7899604543826912,
+      "winsPer162PerSD": -0.28997359360999597,
+      "shareSD": 0.1084233743085607,
+      "se": {
+        "naive": 0.004286119538812148,
+        "byOrg": 0.006978940972004241,
+        "twoWay": 0.006615085431376214
+      },
+      "p": {
+        "naive": 0.6764200634902665,
+        "byOrg": 0.7993908481421225,
+        "twoWay": 0.7901676640256996
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 17
+      }
+    },
+    {
+      "label": "homegrownShareHit | org FE + season FE",
+      "orgFE": true,
+      "seasonFE": true,
+      "n": 600,
+      "r2": 0.2071573153412929,
+      "betaPerSD": 0.005822969697272002,
+      "winPctPointsPerSD": 5.822969697272002,
+      "winsPer162PerSD": 0.9433210909580644,
+      "shareSD": 0.15713614626377864,
+      "se": {
+        "naive": 0.0036214152444549517,
+        "byOrg": 0.006168519183259717,
+        "twoWay": 0.0058694239194201775
+      },
+      "p": {
+        "naive": 0.10842512742204502,
+        "byOrg": 0.3529777136540685,
+        "twoWay": 0.33362316289311156
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 20
+      }
+    },
+    {
+      "label": "homegrownSharePit | org FE + season FE",
+      "orgFE": true,
+      "seasonFE": true,
+      "n": 600,
+      "r2": 0.2037017747777119,
+      "betaPerSD": 0.0014271706898158912,
+      "winPctPointsPerSD": 1.4271706898158911,
+      "winsPer162PerSD": 0.23120165175017438,
+      "shareSD": 0.15108909126611816,
+      "se": {
+        "naive": 0.003296083194898218,
+        "byOrg": 0.004801328091263587,
+        "twoWay": 0.004438859653389693
+      },
+      "p": {
+        "naive": 0.6651918611355431,
+        "byOrg": 0.7683983217976689,
+        "twoWay": 0.7513284738725772
+      },
+      "clusters": {
+        "orgs": 30,
+        "seasons": 20
+      }
+    }
+  ],
+  "betweenOrg": {
+    "n": 30,
+    "r": 0.11480174412431565,
+    "t": 0.6115168204205069,
+    "df": 28,
+    "p": 0.5457909550141662
+  },
+  "orgTable": [
+    {
+      "orgId": 115,
+      "name": "Colorado Rockies",
+      "share": 0.5318367447447773,
+      "winPct": 0.45975
+    },
+    {
+      "orgId": 142,
+      "name": "Minnesota Twins",
+      "share": 0.5034066019617073,
+      "winPct": 0.5012000000000001
+    },
+    {
+      "orgId": 138,
+      "name": "St. Louis Cardinals",
+      "share": 0.4947142922865934,
+      "winPct": 0.5494999999999999
+    },
+    {
+      "orgId": 118,
+      "name": "Kansas City Royals",
+      "share": 0.4559058689790983,
+      "winPct": 0.4346
+    },
+    {
+      "orgId": 108,
+      "name": "Los Angeles Angels",
+      "share": 0.4547140728381117,
+      "winPct": 0.51915
+    },
+    {
+      "orgId": 144,
+      "name": "Atlanta Braves",
+      "share": 0.44911669465089793,
+      "winPct": 0.53665
+    },
+    {
+      "orgId": 117,
+      "name": "Houston Astros",
+      "share": 0.4489917126123383,
+      "winPct": 0.51075
+    },
+    {
+      "orgId": 143,
+      "name": "Philadelphia Phillies",
+      "share": 0.44215063419569695,
+      "winPct": 0.51075
+    },
+    {
+      "orgId": 121,
+      "name": "New York Mets",
+      "share": 0.44201811825208653,
+      "winPct": 0.49814999999999987
+    },
+    {
+      "orgId": 137,
+      "name": "San Francisco Giants",
+      "share": 0.4368156644449888,
+      "winPct": 0.5060499999999999
+    },
+    {
+      "orgId": 119,
+      "name": "Los Angeles Dodgers",
+      "share": 0.41117308184216717,
+      "winPct": 0.57555
+    },
+    {
+      "orgId": 113,
+      "name": "Cincinnati Reds",
+      "share": 0.40936824722150983,
+      "winPct": 0.475
+    },
+    {
+      "orgId": 134,
+      "name": "Pittsburgh Pirates",
+      "share": 0.4088926201215883,
+      "winPct": 0.4467
+    },
+    {
+      "orgId": 147,
+      "name": "New York Yankees",
+      "share": 0.39401930878746616,
+      "winPct": 0.5747000000000001
+    },
+    {
+      "orgId": 136,
+      "name": "Seattle Mariners",
+      "share": 0.38543424099054124,
+      "winPct": 0.4762500000000001
+    },
+    {
+      "orgId": 141,
+      "name": "Toronto Blue Jays",
+      "share": 0.3764542508372791,
+      "winPct": 0.50335
+    },
+    {
+      "orgId": 114,
+      "name": "Cleveland Indians",
+      "share": 0.37060705815742223,
+      "winPct": 0.52215
+    },
+    {
+      "orgId": 139,
+      "name": "Tampa Bay Rays",
+      "share": 0.36820739796691637,
+      "winPct": 0.5242
+    },
+    {
+      "orgId": 140,
+      "name": "Texas Rangers",
+      "share": 0.36288093606077754,
+      "winPct": 0.49659999999999993
+    },
+    {
+      "orgId": 110,
+      "name": "Baltimore Orioles",
+      "share": 0.3604676675978118,
+      "winPct": 0.45730000000000004
+    },
+    {
+      "orgId": 109,
+      "name": "Arizona Diamondbacks",
+      "share": 0.34756379180357866,
+      "winPct": 0.4681
+    },
+    {
+      "orgId": 111,
+      "name": "Boston Red Sox",
+      "share": 0.34611805239684673,
+      "winPct": 0.5399999999999999
+    },
+    {
+      "orgId": 158,
+      "name": "Milwaukee Brewers",
+      "share": 0.34152324028034353,
+      "winPct": 0.5096
+    },
+    {
+      "orgId": 120,
+      "name": "Washington Nationals",
+      "share": 0.3395491766979156,
+      "winPct": 0.4787
+    },
+    {
+      "orgId": 116,
+      "name": "Detroit Tigers",
+      "share": 0.33524197699537217,
+      "winPct": 0.47955
+    },
+    {
+      "orgId": 112,
+      "name": "Chicago Cubs",
+      "share": 0.3352112954571339,
+      "winPct": 0.5053000000000001
+    },
+    {
+      "orgId": 146,
+      "name": "Miami Marlins",
+      "share": 0.30781166676583144,
+      "winPct": 0.46235
+    },
+    {
+      "orgId": 145,
+      "name": "Chicago White Sox",
+      "share": 0.2695189667676402,
+      "winPct": 0.48905000000000004
+    },
+    {
+      "orgId": 133,
+      "name": "Oakland Athletics",
+      "share": 0.26222883564285054,
+      "winPct": 0.50335
+    },
+    {
+      "orgId": 135,
+      "name": "San Diego Padres",
+      "share": 0.25760963671083126,
+      "winPct": 0.48525
+    }
+  ]
+}
