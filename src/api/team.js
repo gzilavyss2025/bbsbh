@@ -212,8 +212,12 @@ export async function fetchRosterEntriesForTeams(teamIds, rosterType = 'active')
 // page's affiliates section needs no per-team follow-up fetch. Filtered to
 // the four full-season farm levels (AAA/AA/A+/A, sportIds 11/12/13/14) — the
 // endpoint also returns complex-league/DSL/alternate-site/"Prospects" entries
-// that aren't proper affiliate clubs the rest of the app tracks (see
-// MILB_LEVELS). Sorted highest level first. Degrades to [].
+// (sportId 16, see fetchComplexAffiliates below) that don't fit this
+// function's one-club-per-level shape, since an org can field more than one
+// at once (ACL + DSL). They aren't dropped from the app: loadMinors.js merges
+// fetchComplexAffiliates's own result in after this one, so the Minors tab's
+// card list still shows every current affiliate. Sorted highest level first.
+// Degrades to [].
 const AFFILIATE_SPORT_IDS = [11, 12, 13, 14]
 let cachedAffiliates = null
 async function fetchStaticAffiliates() {
@@ -254,14 +258,23 @@ export async function fetchAffiliates(teamId, season) {
 }
 
 // An org's complex/rookie-level clubs (ACL/FCL/DSL/VSL — sportId 16, see
-// SPORT_IDS.ROK), deliberately kept OUT of fetchAffiliates above: they aren't
-// "an affiliate" the rest of the app tracks (no slate level, no logo sheet
-// entry, and gen-affiliates.mjs's static snapshot excludes them entirely — see
-// AFFILIATE_SPORT_IDS), and an org can field several at once (ACL + DSL),
-// unlike the one-club-per-level shape everywhere else. Used ONLY by
-// TeamPage's Top Prospects table to resolve a ROK-level prospect's real
-// affiliate for the table's logo — never rendered as its own affiliate card.
-// Always a live call (no static file backs this). Degrades to [].
+// SPORT_IDS.ROK), fetched separately from fetchAffiliates above because an
+// org can field several at once (ACL + DSL, sometimes two DSL clubs), unlike
+// the one-club-per-level shape everywhere else — and because
+// gen-affiliates.mjs's weekly static snapshot doesn't carry them, so this is
+// always a live call. Two callers: TeamPage's Top Prospects table joins this
+// in (alongside fetchAffiliates) to resolve a ROK-level prospect's real
+// affiliate for the table's logo, and loadMinors.js appends this result onto
+// fetchAffiliates' own for the Minors tab's Affiliates section, so a club's
+// current Rookie-level clubs render as real affiliate cards too — no code
+// difference between the two uses, just where the caller puts the result.
+// Deliberately NOT hydrated with venue(location) the way fetchAffiliates is:
+// that would make this call's URL byte-for-byte identical to fetchAffiliates'
+// own for the same org (both callers above fire them together), doubling a
+// live request that already can't use the static-file fast path. A Rookie
+// card's location line degrades to absent instead — the same
+// MiLB-degrades-gracefully fallback AffiliatesCard already uses for a city it
+// never got. Degrades to [].
 export async function fetchComplexAffiliates(teamId, season) {
   if (!teamId || !season) return []
   try {

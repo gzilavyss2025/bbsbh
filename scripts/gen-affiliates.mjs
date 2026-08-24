@@ -26,8 +26,13 @@ const season = new Date().getFullYear()
 
 // Same four full-season farm levels fetchAffiliates() (src/api/team.js)
 // filters to — the endpoint also returns complex-league/DSL/alternate-site/
-// "Prospects" entries that aren't proper affiliate clubs the rest of the app
-// tracks.
+// "Prospects" entries (sportId 16) that don't fit this snapshot's
+// one-club-per-org-per-level shape, since an org can field more than one at
+// once (ACL + DSL). They're not excluded from the app: src/api/team.js's
+// fetchComplexAffiliates fetches them live instead (an org's complex/rookie
+// clubs change too rarely to justify a second static file, and the Minors
+// tab's affiliates card list merges the two together), so this snapshot
+// stays scoped to the levels that DO fit one club per org.
 const AFFILIATE_SPORT_IDS = [11, 12, 13, 14]
 
 async function fetchOrgIds() {

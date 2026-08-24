@@ -127,6 +127,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | stats-levels.test.js | 5 | src/api/statsLevels.js | sumHitting/sumPitching recomputed rates + combineToPool's raw split passthrough |
 | statsapi.test.js | 4 | src/api/statsapi.js | Shared getJson fetch wrapper |
 | steal-throwing-error-note.test.js | 3 | src/api/playbyplay.js (halfInningFeed, runnerNotes) | A steal/WP/balk that breaks on a plate appearance's last pitch carries no playEvent of its own — recovered from runners[] into its own leading card, with a same-play throwing-error leg folded in |
+| team-affiliate-cards.test.js | 6 | src/screens/team/data/shared.js (affiliateCardsFrom) | Minors tab's Affiliates section card list: full-season levels then Rookie/complex clubs (all of them, not just one), parent MLB card leading a MiLB affiliate's own page (issue #850) |
 | team-franchise-name.test.js | 3 | src/api/select.js (selectTeamMeta) | franchiseName vs locationName bug fix |
 | team-score.test.js | 19 | scripts/gen-team-score.mjs, src/api/teamScore.js, seasonGradeFormula.js, teamScoreFormula.js | Quality/Current Form readers, strength-of-schedule adjustment, per-game park adjustment |
 | team-transactions.test.js | 31 | src/api/teamTransactions.js | Team transactions dedupe/story grouping |
