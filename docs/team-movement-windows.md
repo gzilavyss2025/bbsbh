@@ -805,7 +805,7 @@ nearly monotone in year, so this cannot separate "denser wire, longer
 measured durations" from any other monotone trend over the same nine
 years.** The wire-free check above is the one that discriminates.
 
-### The knock-on: the aggregate org signal does not survive this
+### The knock-on: most of the aggregate org signal does not survive this
 
 The omnibus-check section's headline — "org matters a little in aggregate
 (ICC ≈ 1.2%)" — was fitted on the rows these artifacts contaminate, with era
