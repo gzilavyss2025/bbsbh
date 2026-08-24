@@ -1,8 +1,21 @@
+import { lazy, Suspense } from 'react'
 import { useRouteLink } from '../../lib/nav.js'
 import { isGuidePath } from '../../lib/reportPages.js'
+import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
 import { BuildStamp } from '../ui/BuildStamp.jsx'
 import { DirectoryHeading } from './DirectoryHeading.jsx'
+
+// AdminFooterLink.jsx imports @clerk/clerk-react at its top, so it is only
+// dynamically imported — and only then does that SDK reach a device — when a
+// deploy actually configures Clerk. Same arrangement SiteMenu uses for
+// AdminMenuLink, for the same reason. It renders null for everyone who is not
+// a signed-in admin, so mounting it unconditionally below is safe.
+const AdminFooterLink = isClerkEnabled
+  ? lazy(() =>
+      import('../account/AdminFooterLink.jsx').then((m) => ({ default: m.AdminFooterLink })),
+    )
+  : null
 
 // The two blocks the slate's SiteFooter and every report page's ReportFooter
 // both end with. They were duplicated line-for-line in those two files, which
@@ -83,6 +96,15 @@ export function FooterLegal() {
         © {YEAR}
         <BuildStamp />
       </p>
+      {/* The owner's own row, invisible to everyone else. It sits here rather
+          than in the directory above because it is not one of the site's
+          pages — see AdminFooterLink for why it is not in the shared page
+          registry that feeds that directory. */}
+      {AdminFooterLink && (
+        <Suspense fallback={null}>
+          <AdminFooterLink />
+        </Suspense>
+      )}
     </div>
   )
 }

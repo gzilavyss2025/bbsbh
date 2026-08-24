@@ -29,6 +29,7 @@
 //   '/bullpen-availability' '/doubleheaders' -> single-segment report pages (REPORT_ROUTES, reportPages.js)
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
+//   '/admin/research'                   -> { name: 'admin-research' }  (research diary, Clerk-admin gated)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
 //   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }
 //   '/player/{name-id}/{stats|analytics|history}'
@@ -311,6 +312,13 @@ export function parseRoute(url) {
   // production visit renders the (locked) panel rather than falling through to
   // the generic game route.
   if (parts.length === 1 && parts[0] === 'admin') return { name: 'admin' }
+  // The prospect-research diary. Under /admin because that is what it is —
+  // owner-only, unlisted in the shared page registry — and a second segment
+  // there rather than a top-level word so the address itself says who it is
+  // for. Parsed unconditionally for the same reason as the line above: a stray
+  // visit should render the locked page, not fall through to a game route.
+  if (parts.length === 2 && parts[0] === 'admin' && parts[1] === 'research')
+    return { name: 'admin-research' }
   // The guides at /learn are NOT React routes — they are standalone documents
   // rendered by api/page.js, because the crawlers this app wants to reach do not
   // execute JavaScript (see src/copy/landing/render.js). The SPA only ever sees

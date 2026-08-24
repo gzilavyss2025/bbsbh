@@ -1,0 +1,83 @@
+// Diary entry — the level-tenure benchmark. The first of the four prospect
+// spikes, and the only one that shipped a feature.
+//
+// The numbers here are a FROZEN SNAPSHOT of what the research said the day it
+// landed, not a live read of public/data/level-tenure-benchmark.json. That is
+// deliberate. The shipped generator recomputes its own sliding five-year cohort
+// from statsapi, so a live read would quietly rewrite history every time the
+// nightly data refreshed, and a diary whose past entries move is not a diary.
+// When the generator's numbers drift far enough to matter, that is a NEW entry,
+// not an edit to this one.
+export const levelTenureEntry = {
+  id: 'level-tenure-benchmark',
+  date: '2026-08-24',
+  source: 'PR #880',
+  doc: 'docs/level-tenure-benchmark.md',
+  title: 'How long is a normal stay in the minors?',
+  verdict: 'shipped',
+  question:
+    'Your club’s best prospect has been at Double-A since April. Is that a long time, or is that just what Double-A takes?',
+  headline:
+    'Nobody had written this down. The public numbers are either career totals across every level at once, or one narrow slice of first-round high-school bats. Nothing covered pitchers at all. So we built it: 881 players, every big-league debut from 2019 through 2023, one line apiece for every rung they climbed.',
+  sections: [
+    {
+      id: 'cohort',
+      heading: 'Who counts as a prospect who made it',
+      prose: [
+        'Everybody who debuted between 2019 and 2023 and then actually stuck — 130 at-bats or 50 innings in the big leagues, career. That line already existed in the app, and reusing it keeps a scoreless September cup of coffee out of the study. A man who got two pinch-hit appearances in a lost year did not graduate, and counting him would make every stay in the minors look shorter than it is.',
+        'The five-year window is a compromise and worth naming as one. Go back to 2015 and you get about 1,600 players, but you are also describing a minor-league system that no longer exists — the 2021 reorganization cut forty affiliates. Start at 2021 and the pandemic stops being a problem, but you are down to about 500 players and the numbers get jumpy. 2019 through 2023 is recent enough to describe how clubs work now and big enough to trust.',
+        'Rookie and complex ball is left out, the same call the Farm Index already makes. Those seasons are short, the leagues re-form every year, and what looks like a pattern in them is usually just a small sample wearing a pattern’s clothes.',
+      ],
+    },
+    {
+      id: 'numbers',
+      heading: 'What a normal stay looks like',
+      prose: [
+        'This is playing time at a level before the player moved up — the first time through only. Coming back down later on an option or a rehab stint does not get added on.',
+      ],
+      table: {
+        caption: 'A typical stay, and the normal range around it',
+        columns: ['Level', 'Hitters — plate appearances', 'Pitchers — innings'],
+        rows: [
+          ['Single-A', '332  (207 to 495)', '58.8  (30.4 to 96.8)'],
+          ['High-A', '350  (228 to 473)', '59.3  (35.7 to 93.0)'],
+          ['Double-A', '410  (267 to 553)', '68.3  (36.3 to 105.3)'],
+          ['Triple-A', '327  (180 to 529)', '54.0  (26.3 to 88.8)'],
+        ],
+        note: 'The middle number is the typical stay. The range in parentheses covers the middle half of players — a quarter finished faster, a quarter took longer. Between 318 and 437 players in each box.',
+      },
+      proseAfter: [
+        'Double-A is the long stop. A hitter takes the better part of a full season there — more plate appearances than at any other rung — which fits the old scouting saw that Double-A is where you find out whether a prospect can hit. Triple-A is the shortest stay of the four, and the widest: some men pass through in six weeks, some sit there for two years waiting on a roster spot rather than on their own bat.',
+      ],
+    },
+    {
+      id: 'ordering',
+      heading: 'The messy part, and why the numbers survived it',
+      prose: [
+        'To say how long a player stayed somewhere, you first have to know the order he went in. Usually that is obvious. Sometimes it is not: 240 of the 881 — better than one in four — spent at least one season bouncing between two levels more than once. That is mostly forty-man roster churn, a Triple-A man shuttled up and down as emergency depth, and the season record does not say which stint came first.',
+        'The transaction wire settles most of them, and where it does, it backs up the assumption we made about seven times in ten. But the test that matters is the blunt one: throw out all 240 of those players and run the whole thing again. Every level’s typical stay moves by single digits. Whatever is going on underneath, it is not moving the answer.',
+      ],
+    },
+    {
+      id: 'folklore',
+      heading: 'Two things everybody says that turn out not to be true',
+      points: [
+        'There is no All-Star-break bump. The two weeks after the break promote players at about the same rate as the two weeks before it. Clubs do not save up their call-ups for the second half; it only feels that way because that is when you start paying attention.',
+        'There is no "hold him a full season" rule either. Only 7 to 15 percent of stays land anywhere near a calendar year. If clubs are working to a schedule, it is not that one.',
+      ],
+    },
+  ],
+  caveats: [
+    'The first level a player reaches has no arrival date anywhere in the feed. He simply appears in a box score one day in April. Dating it would mean reconstructing extended spring training, which no public source covers.',
+    'Draft position matters — first-round bats need fewer reps at every level, high-school picks need far more low-minors time than college bats — but it did not ship. A quarter of the cohort has no draft record at all, because they signed as international free agents, and that group currently gets lumped in with a handful of veterans who came over from Japan. Two very different populations in one box.',
+    'There is no historical top-100 prospect list to build pedigree from. This app started keeping its own weekly snapshot on 2026-07-07, which is no use for players drafted in 2013. Keep that snapshot running anyway. In a few years it is an archive nothing else can replace.',
+  ],
+  open: [
+    'Busts — the players who never made it — are a harder study and an unbuilt one. There is no clean signal for when a career ended. A man released at 25 and a man still grinding at 25 look identical in the data.',
+  ],
+  technical: [
+    'Cohort: 881 players, MLB debuts 2019–2023, filtered on the existing 130 AB / 50 IP rookie threshold. Levels are sportIds 11–14; sportId 16 excluded.',
+    'Per-level accumulation reconstructed from yearByYear hitting/pitching splits, sorted chronologically, same-season ties broken by ascending level rank. 240 of 881 players have at least one ambiguous season (63% involve Triple-A); the wire confirms the ascending assumption in 71% of resolvable cases; dropping all 240 moves every level median by single digits.',
+    'Shipped as scripts/gen-level-tenure-benchmark.mjs → public/data/level-tenure-benchmark.json → src/api/levelTenure.js, surfaced on the prospect card.',
+  ],
+}
