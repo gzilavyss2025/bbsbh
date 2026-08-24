@@ -11,7 +11,7 @@ import { parentOrgHistory } from '../../../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../../../api/careerTimeline.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { SPORT_LABEL } from '../../../lib/teams.js'
-import { seasonOf } from './shared.js'
+import { seasonOf, affiliateCardsFrom } from './shared.js'
 
 const DASH = '—'
 
@@ -119,14 +119,11 @@ export async function loadMinors(id, asOf) {
       )
     : []
 
-  // On a MiLB affiliate page, lead the Affiliates section with a card for the
-  // parent MLB club (which fetchAffiliates deliberately omits from the farm
-  // tree). Location is unavailable from the static team record, so the card
-  // degrades to just the mark + name.
-  const affiliateCards =
-    isMilb && team.parentOrgId
-      ? [{ id: team.parentOrgId, sportId: 1, name: team.parentOrgName, city: '', state: '' }, ...affiliates]
-      : affiliates
+  // The Affiliates section's rendered card list: full-season farm levels,
+  // then the org's current Rookie/complex clubs, then (on a MiLB affiliate's
+  // own page) the parent MLB club leading the whole thing — see
+  // affiliateCardsFrom's own header.
+  const affiliateCards = affiliateCardsFrom(team, isMilb, affiliates, complexAffiliates)
 
   return {
     team,
