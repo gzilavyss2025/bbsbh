@@ -26,6 +26,7 @@ import {
   scorecardScoreboard,
   scorecardPitchers,
   scorecardStep,
+  scorecardDefense,
 } from '../src/api/scorecardGame.js'
 import { revealInning, revealTotals } from '../src/api/linescore.js'
 import { computeDerivedByInning, revealDerived } from '../src/api/derive.js'
@@ -705,6 +706,83 @@ test('a bat-around frontier widens its inning by the column its card needs', () 
 // the Scorecard Lab "passes through: Infinity explicitly" — it did not, it rode
 // the default, which is precisely why a permissive default could not be trusted
 // to stay unused. A forgotten option must now draw a blank card, not a spoiler.
+// Every fielder standing at a spot, flattened to "POS:Last(inning)" so a whole
+// diamond is one readable list. A starter has no inning; a man who was later
+// replaced is starred.
+function alignment(defense) {
+  return (defense ?? []).flatMap((spot) =>
+    spot.entries.map(
+      (e) => `${spot.position}:${e.last}${e.inning == null ? '' : `(${e.inning})`}${e.replaced ? '*' : ''}`,
+    ),
+  )
+}
+
+test('the defense diamond crosses fielders out only as far as the reveal reaches', () => {
+  // Nothing revealed: the starting nine, no strike-throughs, no inning tags.
+  // Substitution TIMING is the spoiler-adjacent part (ADR-0003/0010) — a flurry
+  // of pre-half replacements telegraphs a sealed blowout — so a sheet nobody has
+  // opened shows the alignment it showed before first pitch.
+  const cold = scorecardDefense(FEED, 'top', { through: -1 })
+  assert.equal(cold.length, 9)
+  assert.ok(cold.every((spot) => spot.entries.length === 1))
+  assert.ok(cold.every((spot) => spot.entries[0].inning == null))
+  assert.ok(cold.every((spot) => !spot.entries[0].replaced))
+
+  // This club made its first defensive changes before the top of the 8th, so
+  // they belong to the half at index halfIndex(8, 'top') = 14 and appear for a
+  // reader who has revealed through 13 — the half before, which is the furthest
+  // out safeToShowEntering answers for. One half earlier they do not exist.
+  const before = alignment(scorecardDefense(FEED, 'top', { through: halfIndex(7, 'top') }))
+  assert.deepEqual(before.filter((line) => /\(\d+\)/.test(line)), [])
+
+  const eighth = alignment(scorecardDefense(FEED, 'top', { through: halfIndex(7, 'bottom') }))
+  assert.deepEqual(eighth.filter((line) => /\(\d+\)/.test(line)).sort(), [
+    '1B:Jordan(8)',
+    '3B:Fermín(8)',
+    'C:Crooks(8)',
+    'LF:Velázquez(8)',
+  ])
+  // Nobody who came on in the 8th is crossed out yet — each is the standing man
+  // at his spot. The STARTERS he replaced are, which is the pair of marks the
+  // diamond draws: the new name above, the old one struck through below.
+  assert.ok(!eighth.some((line) => /\(\d+\)\*$/.test(line)))
+  assert.ok(eighth.some((line) => line.endsWith('*')))
+
+  // A spot can turn over twice. By the 9th, Jordan has moved off 1B and the man
+  // he replaced there is struck through under him, with Pagés written above —
+  // the stack the diamond draws top-down (see DefenseDiamond).
+  const ninth = alignment(scorecardDefense(FEED, 'top', { through: halfIndex(8, 'bottom') }))
+  assert.deepEqual(
+    ninth.filter((line) => line.startsWith('1B:')),
+    ['1B:Burleson*', '1B:Jordan(8)*', '1B:Pagés(9)'],
+  )
+
+  // THE CLAMP, said as one rule: nothing on the diamond can have happened later
+  // than the half the reader is due to turn over next.
+  for (const through of [-1, 3, 8, 13, 15, 17]) {
+    for (const spot of scorecardDefense(FEED, 'top', { through }) ?? []) {
+      for (const e of spot.entries) {
+        if (e.inning == null) continue
+        assert.ok(
+          halfIndex(e.inning, 'top') <= through + 1,
+          `${spot.position}:${e.last} entered in the ${e.inning}th, past a clamp of ${through}`,
+        )
+      }
+    }
+  }
+})
+
+test('the diamond belongs to the club in the FIELD, not the one batting', () => {
+  // 'top' is the visitors batting, so the diamond is the HOME club's — the same
+  // side the pitcher table beside it lists. Read them off the same fixture: the
+  // two sheets must name two different nines.
+  const away = alignment(scorecardDefense(FEED, 'top', { through: Infinity }))
+  const home = alignment(scorecardDefense(FEED, 'bottom', { through: Infinity }))
+  assert.notDeepEqual(away, home)
+  const names = (lines) => new Set(lines.map((l) => l.split(':')[1].replace(/[(*].*$/, '')))
+  assert.equal([...names(away)].some((n) => names(home).has(n)), false)
+})
+
 test('a caller that forgets `through` gets nothing revealed, not everything', () => {
   const grid = scorecardPlays(FEED, 'top')
   assert.equal(placedCards(grid).length, 0, 'no at-bat may ink without a stated clamp')

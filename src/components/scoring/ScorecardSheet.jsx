@@ -244,7 +244,17 @@ export function ScorecardSheet({
                         key={line.key}
                         className={`sc-sheet__line ${li > 0 ? 'sc-sheet__line--sub' : ''}`}
                       >
-                        {li === 0 && <span className="sc-sheet__slotnum">{slot}</span>}
+                        {/* The batting-order number leads the STARTER's line
+                            and no other, the way the paper sheet preprints it.
+                            A substitute's line still gets the empty box, so his
+                            name begins at the same margin as the man he
+                            replaced — the alternative (no box at all) hung every
+                            sub a number's width out into the rail's left edge,
+                            which reads as a different column, not a second line
+                            of the same one. */}
+                        <span className="sc-sheet__slotnum" aria-hidden={li > 0}>
+                          {li === 0 ? slot : ''}
+                        </span>
                         {/* The name is the link, so the truncation the rail
                             depends on stays on the element that IS the name —
                             PlayerLink passes the class straight through to the
@@ -386,10 +396,29 @@ export function ScorecardSheet({
                   </td>
                 )
               })}
-              <td className="sc-sheet__sum sc-sheet__totbar">{grid ? grid.totals.ab : ''}</td>
-              <td className="sc-sheet__sum sc-sheet__totbar">{grid ? grid.totals.h : ''}</td>
-              <td className="sc-sheet__sum sc-sheet__totbar">{grid ? grid.totals.r : ''}</td>
-              <td className="sc-sheet__sum sc-sheet__totbar">{grid ? grid.totals.rbi : ''}</td>
+              {/* THE TOTALS PLATE — the #22's kraft bar, and the four sums
+                  under it. One cell across all four summary columns rather
+                  than four cells each painted amber: the bar is a HEADING for
+                  the figures ("these four are the game's totals"), and a
+                  heading that is only a background colour says nothing. The
+                  figures sit in a four-track grid inside the spanned cell, so
+                  they still land under AB / H / R / RBI exactly — the columns
+                  are equal width, so equal tracks are the same tracks.
+
+                  The old four-cell version never painted at all: `.sc-sheet__
+                  totals td` (one class + one element) out-ranks a bare
+                  `.sc-sheet__totbar`, so the amber lost to the foot row's own
+                  paper background on specificity and the bar has been invisible
+                  since it was written. */}
+              <td className="sc-sheet__totalscell" colSpan={SUMMARY.length}>
+                <span className="sc-sheet__totplate">Totals</span>
+                <span className="sc-sheet__totfigs">
+                  <span>{grid ? grid.totals.ab : ''}</span>
+                  <span>{grid ? grid.totals.h : ''}</span>
+                  <span>{grid ? grid.totals.r : ''}</span>
+                  <span>{grid ? grid.totals.rbi : ''}</span>
+                </span>
+              </td>
             </tr>
           </tfoot>
         </table>

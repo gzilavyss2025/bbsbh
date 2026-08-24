@@ -63,7 +63,14 @@
 }
 .sc-sheet__scroll {
   overflow: auto;
-  --sc-order-h: calc(9 * var(--sc-cell-h) + 64px);
+  /* Nine cells, plus the inning header, the foot row and the pane's own
+     hairline borders — which come off clientHeight but not off scrollHeight,
+     so they have to be in here or the sheet overflows its bound by exactly
+     their width. The allowance is deliberately loose: the foot row's height is
+     type-driven (the TOTALS plate sits over the sums), and a max-height with
+     slack costs nothing, while one that is a pixel short puts the 8 and 9
+     hitters behind a scroll. e2e/scorecard.spec.js pins the invariant. */
+  --sc-order-h: calc(9 * var(--sc-cell-h) + 80px);
   max-height: max(calc(100vh - 120px), var(--sc-order-h));
   max-height: max(calc(100dvh - 120px), var(--sc-order-h));
   -webkit-overflow-scrolling: touch;
@@ -203,14 +210,18 @@
   color: var(--text-caption);
 }
 /* A substitute's line beneath the slot's starter — the way a scorer adds a
-   line under the man he lifted, not a new row of the grid. Inset and set in
-   the lighter caption ink so the starter still reads as the slot's head. His
-   position and uniform number repeat on his own line: he is a different player
-   at a possibly different spot, and the sheet says so. */
+   line under the man he lifted, not a new row of the grid. His position and
+   uniform number repeat on his own line: he is a different player at a possibly
+   different spot, and the sheet says so.
+   NO INSET, NO QUIETER INK. He was written smaller, greyer and a few pixels in
+   from the starter above him, which made the rail read as an outline — a head
+   and its footnotes — when the two are the same thing: a man who batted in this
+   slot. A scorer's second line starts at the same margin as the first, in the
+   same pencil. What tells them apart is already on the sheet: only the starter's
+   line carries the batting-order number. Same for his position and his figures
+   below, which used to fade with him. */
 .sc-sheet__line--sub {
-  padding-left: var(--space-3);
-  font-weight: var(--w-regular);
-  color: var(--text-caption);
+  padding-left: 0;
 }
 /* The Pos and AB/H/R/RBI cells stack in step with the rail's lines, so every
    man's position and his own line of figures sit on HIS line, not the slot's.
@@ -219,10 +230,6 @@
 .sc-sheet__sumline {
   display: block;
   line-height: var(--sc-line-h);
-}
-.sc-sheet__posline ~ .sc-sheet__posline,
-.sc-sheet__sumline ~ .sc-sheet__sumline {
-  color: var(--text-caption);
 }
 
 /* The corner cells sit at both sticky intersections, so they outrank both. */
@@ -274,6 +281,19 @@
   height: 26px;
   background: var(--bg-page);
   border-top: var(--bw-rule) solid var(--rule-grid);
+  /* EVERY FIGURE ON THIS ROW SITS ON ONE LINE. The row's own cells were
+     centred while the four summary cells still carried .sc-sheet__sum's
+     `vertical-align: top` + `padding-top` — those are the GRID's rule, where
+     a slot's figures hang off the row's top edge beside the rail's stacked
+     names. There are no stacked names down here, so the totals simply sat a
+     few pixels above the P/WH/FO trio beside them. Bottom-aligned instead:
+     the plate can then grow upward off the same line the figures rest on. */
+  vertical-align: bottom;
+  padding-bottom: 3px;
+}
+.sc-sheet__totals .sc-sheet__sum {
+  vertical-align: bottom;
+  padding-top: 0;
 }
 .sc-sheet__totals .sc-sheet__name {
   z-index: 3;
@@ -326,13 +346,39 @@
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-/* The TOTALS bar: the four summary sums on the sheet's kraft-amber plate. */
-.sc-sheet__totbar {
-  background: var(--seal-cover);
+/* THE TOTALS PLATE — the kraft bar the #22 prints over its totals columns,
+   and the four sums beneath it. One cell spanning AB/H/R/RBI (see
+   ScorecardSheet): the bar is the heading, the figures are the reading.
+   Zero padding on the cell so the plate runs the full width of the four
+   columns, edge to edge, the way the printed bar does. */
+.sc-sheet__totalscell {
+  padding: 0;
+  vertical-align: bottom;
+  background: var(--bg-page);
+}
+.sc-sheet__totplate {
+  display: block;
+  padding: 2px 0 1px;
+  background: var(--book-board-kraft);
+  color: var(--book-board-foil);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-ui);
+  text-align: center;
+}
+/* Four equal tracks under the plate — the summary columns are equal width, so
+   equal tracks land each sum under its own header letter. */
+.sc-sheet__totfigs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  justify-items: center;
+  padding: 2px 0 3px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-num);
-  text-align: center;
-  color: var(--text-on-seal);
+  color: var(--text-heading);
 }

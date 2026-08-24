@@ -482,3 +482,68 @@ lets it sit beside its own line instead of pushing the block wider.
 `src/styles/scorecard/` gained `footer.css` at the file cap: page.css now holds
 the header band, the zoom control and the editor, and the footer trio is its
 own partial.
+
+## Amendment (2026-08-24): the results half of the sheet
+
+Five changes to what the sheet shows once a game has been played, all of them
+about the same thing: the footer stopped reading like a data table and went
+back to reading like the printed #22.
+
+**The defense diamond is live now.** It drew the STARTING nine and nothing else
+— on a finished game it still showed the man who came out in the 8th standing
+at his spot, which is simply wrong on a scorecard, the one surface whose whole
+job is to record who was where. It takes `defenseEntering` instead, so a
+replaced fielder is crossed out and his replacement is penciled on the writing
+line above him with the inning he took the field, stacking again each time a
+spot turns over. The diamond already drew all of that (`DefenseDiamond`); it
+had never been handed the data.
+
+The builder is `api/scorecard/alignment.js`, **caller-gated**, and it adds no
+gate of its own — that is the point. Substitution TIMING is spoiler-adjacent
+(ADR-0003/0010): a flurry of pre-half replacements telegraphs a still-sealed
+blowout. So it asks `api/defense.js` for the alignment entering the half at
+`through + 1` — the reader's own next one, which is exactly the boundary
+`enteringHalf.js`'s `safeToShowEntering` draws — and hands it the same
+`through` as the reveal mark. `defenseEntering` enforces the boundary itself
+rather than trusting the caller, so a null coming back is a real answer and the
+sheet keeps the pre-pitch nine. `halfIndex`'s inverse moved into that module
+with it; `scorecardGame.js` imports it back, and was at the file cap.
+
+On the sheet, the crossed-out starter takes the SEAM-RED strike his replacement
+is already written in, so one change reads as one mark in one colour. Elsewhere
+— the innings viewer, the box score — the graphite strike stays.
+
+**A substitute's line is written like the starter's.** It was inset, lighter and
+a weight down, which made the rail read as a head and its footnotes when the two
+lines are the same thing: a man who batted in this slot. Same margin (his line
+keeps the batting-order number's empty box, so the names align), same pencil,
+same ink for his figures. What tells them apart is already there — only the
+starter's line carries the number.
+
+**WP/LP/SV read across, not down.** Each was a `Field`, which stacks its caption
+over the rule; three decisions cost six lines and left every name floating a row
+from the label naming it. They are two-character labels with a rule beside them,
+so the name goes beside them, set like the pitcher table's own names above.
+The figure's leading space had been eaten by `.sc-field__line`'s `display:
+flex` — a text node between flex items — which is why the line read
+`GASSER(2-3)`; it is a gap now.
+
+**FINAL and the decisions are one band.** They sit side by side, the way the
+sheet prints them, rather than the grid wrapping the decisions underneath: both
+flex bases came down and both took `min-width: 0`, since a table's default
+`min-width: auto` is its min-content width and no basis can talk it below that.
+FINAL and its four column letters float above the boxes rather than sitting in
+ruled cells of their own — the printed sheet captions the block, it does not add
+a row to it.
+
+**The TOTALS plate.** The four summary sums were meant to sit on a kraft-amber
+bar and never did: `.sc-sheet__totals td` out-ranks a bare `.sc-sheet__totbar`,
+so the amber lost on specificity and had been invisible since it was written.
+It is a heading now rather than a background colour — one cell across all four
+summary columns carrying the kraft bar with TOTALS on it, the figures in a
+four-track grid beneath, which lands them under AB/H/R/RBI exactly because the
+columns are equal width. The same row also stopped hanging its figures off the
+top edge: `.sc-sheet__sum`'s `vertical-align: top` is the GRID's rule, for
+figures that sit beside a rail of stacked names, and there are none in the foot
+row — so the totals sat a few pixels above the P/WH/FO trio beside them. Bottom
+-aligned, and the plate grows upward off the line they share.
