@@ -21,7 +21,12 @@ const rookiesPath = join(here, '..', '..', 'public', 'data', 'rookies.json')
 const outPath = join(here, 'raw.json')
 
 const MILB_SPORT_IDS = [11, 12, 13, 14]
-const DEBUT_YEAR_MIN = 2019
+// Widened per the wider-cohort spike (docs/team-movement-windows.md): 2005 is
+// the floor because statsapi's own AFFILIATE data is documented unreliable
+// before then (docs/api/static-data.md), which the team-org join depends on.
+// Player yearByYear stats and the AAA/AA/High-A/A sportId structure are both
+// stable well before 2005, so 2005 is an org-data floor, not a stats floor.
+const DEBUT_YEAR_MIN = 2005
 const DEBUT_YEAR_MAX = 2023
 
 async function loadCohort() {
