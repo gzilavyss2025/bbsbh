@@ -367,6 +367,27 @@ export function lineupDefenseFrom(preferredLineup, injuredIds) {
 }
 
 // ---------------------------------------------------------------------------
+// Affiliates section (Minors tab)
+// ---------------------------------------------------------------------------
+
+// The Minors tab's affiliate card list. `affiliates` is the four full-season
+// farm levels (AAA/AA/A+/A, already sorted highest level first by
+// fetchAffiliates); `complexAffiliates` is the org's current Rookie/complex
+// clubs (ACL/FCL/DSL, sometimes more than one at once — fetchComplexAffiliates
+// in api/team.js), appended AFTER Single-A so the rendered order keeps
+// stepping down the ladder. On a MiLB affiliate's own page, lead with a card
+// for the parent MLB club (which the affiliate fetchers deliberately omit
+// from the farm tree) — location is unavailable from the static team record,
+// so that card degrades to just the mark + name.
+export function affiliateCardsFrom(team, isMilb, affiliates, complexAffiliates) {
+  const parentCard =
+    isMilb && team.parentOrgId
+      ? [{ id: team.parentOrgId, sportId: 1, name: team.parentOrgName, city: '', state: '' }]
+      : []
+  return [...parentCard, ...affiliates, ...complexAffiliates]
+}
+
+// ---------------------------------------------------------------------------
 // Empty-tab detection (issue 08)
 // ---------------------------------------------------------------------------
 

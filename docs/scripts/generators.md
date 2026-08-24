@@ -211,7 +211,8 @@ don't run these by hand.
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
 - `gen-team-records.mjs` → `public/data/team-records/{season}/{teamId}.json` (one
   file per club per season, ~24 KB) — the per-game LEDGER every club's
-  situational records are read off, at MLB and the four full-season MiLB levels.
+  situational records are read off, at MLB, the four full-season MiLB levels,
+  and Rookie (sportId 16, the complex leagues).
   Feeds the Numbers tab's Records card (`src/api/teamRecords.js`): W-L when
   scoring first, out-hitting the opponent, leading after 7, facing a left-handed
   starter, on a getaway day, by month, by division, plus the season counts that
@@ -230,7 +231,7 @@ don't run these by hand.
   the idempotency guard, so the nightly cost is the ~65 games that finished,
   never the season. That table is **seven columns plus a `payload_json`**, not
   thirty-one, and the schema comment says why: `dumpGroup` repeats every column
-  NAME on every row, so a five-level season would otherwise have committed
+  NAME on every row, so a six-level season would otherwise have committed
   megabytes of column names.
   **Three calls per game and no more**: the date's schedule (bulk, one per date
   per level, carrying the full linescore), the box score, and a field-pruned
@@ -710,10 +711,13 @@ Re-run only to fold in a new season.
   MLB teams' home parks — an older/relocated venue just carries no team match).
   App reads it via `src/api/allStarRosters.js`.
 - `gen-milb-history.mjs` → `public/data/milb-history.json` — per-season parent-org +
-  club-name history for every AAA/AA/A+/A affiliate. Sweeps statsapi's season-scoped
-  team snapshots for 2005+ (where its affiliate data is clean) and merges a small
-  hand-verified seed (`scripts/milb-history-seed.json`) for pre-2005 eras. **Edit the
-  SEED, never the output.** See the generator header for the 2005-floor rationale.
+  club-name history for every AAA/AA/A+/A affiliate, plus Rookie/complex-level clubs
+  (sportId 16) as of issue #856 — investigated and widened rather than left excluded,
+  since real parent-org churn turned out LOWER for Rookie clubs than for full-season
+  affiliates. Sweeps statsapi's season-scoped team snapshots for 2005+ (where its
+  affiliate data is clean) and merges a small hand-verified seed
+  (`scripts/milb-history-seed.json`) for pre-2005 eras. **Edit the SEED, never the
+  output.** See the generator header for the 2005-floor rationale.
 - `gen-postseason-history.mjs` → `public/data/postseason-history.json` — the
   completed bracket (who played, who won, how many games, each team's 1-6
   seed) for every MLB postseason back to 2000 (`EARLIEST_YEAR`), plus the

@@ -92,7 +92,13 @@ export const SPORT_IDS = {
   ROK: 16,
 }
 
-// Every level we search across when the user types a team name.
+// Every level we search across when the user types a team name. Three other
+// files hand-copy this exact value rather than importing it (each is bundled
+// separately from browser-facing src/ — see their own headers for why):
+// scripts/gen-teams.mjs, api/_lib/cards.js, and src/lib/account/preferences.js's
+// LEVEL_SPORT_IDS. scripts/check-searchable-sport-ids.mjs fails `npm run lint`
+// if any of the four drifts from this one — update this array first, then the
+// other three (issue #852).
 export const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 
 // A team's slug-safe abbreviation, derived from a schedule/roster payload's

@@ -503,7 +503,11 @@ const BUDGETS = {
   // scripts/lib/; it stays flat with every other gen-*.mjs, and its two pure
   // halves are exported from it for the unit suite the way
   // gen-pitch-arsenal.mjs already exports its own.
-  scripts: 94,
+  //
+  // 94 -> 95 for check-searchable-sport-ids.mjs — another flat lint guard,
+  // same shape as check-report-pages.mjs and its siblings already here
+  // (issue #852).
+  scripts: 95,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

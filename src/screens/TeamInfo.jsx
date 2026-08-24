@@ -348,7 +348,7 @@ function startingIdsFor(feed) {
   const ids = new Set()
   for (const side of ['away', 'home']) {
     for (const p of selectLineup(feed, side)) ids.add(p.id)
-    const pitcher = selectTeamMeta(feed, side).probablePitcher
+    const pitcher = selectTeamMeta(feed, side, { includeDerivedStarter: true }).probablePitcher
     if (pitcher?.id) ids.add(pitcher.id)
   }
   return ids
@@ -424,7 +424,10 @@ function TeamSections({
   const orgTeamId = teamIdentity?.parentOrgId ?? meta.id
   const oppOrgTeamId = oppTeamIdentity?.parentOrgId ?? oppMeta.id
   const season = feed?.gameData?.game?.season
-  const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
+  const oppPitcher = useMemo(
+    () => selectOpposingPitcher(feed, side, { includeDerivedStarter: true }),
+    [feed, side],
+  )
   // The opposing starter's season pitch-type mix (see api/pitchArsenal.js) —
   // MLB + AAA only; a lower-level starter's lookup just resolves to null. Fetched
   // HERE by his id, not handed down from useGameData: this is the only card that
