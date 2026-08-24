@@ -22,8 +22,8 @@ export const movementWindowsEntry = {
       id: 'widening',
       heading: 'First we tripled the sample, because that was the cheap thing to try',
       prose: [
-        'Before declaring something unbuildable it is worth checking whether it is only unbuilt. So the study went from 881 players to 3,061, reaching back to debuts in 2005. That is as far back as the affiliate records can be trusted — statsapi’s own team-to-organization history gets unreliable before then, and attributing a stint to the wrong club is worse than not attributing it at all.',
-        'More players changed the numbers, which is itself worth knowing.',
+        'Before you call something unbuildable it is worth making sure it is not merely unbuilt. So the study went from 881 players to 3,061, back to debuts in 2005. That is as far as the affiliate records reach — the league’s own record of which farm club belonged to which organization gets shaky before then, and hanging a stint on the wrong club is worse than hanging it on nobody.',
+        'Tripling the sample moved the numbers, which is worth knowing on its own.',
       ],
       table: {
         caption: 'What tripling the sample changed',
@@ -43,7 +43,7 @@ export const movementWindowsEntry = {
       id: 'zero-of-thirty',
       heading: 'The answer: nobody stands apart. Not one club, at any level',
       prose: [
-        'Here is the test, and it is the whole argument. Take the middle half of every club’s stays — cut off the fastest quarter and the slowest quarter, keep what is left. Then ask whether that band sits clear of the band you get from pooling all thirty clubs together. If it does, that club really is different and you can say so on a page.',
+        'Here is the test, and it is the whole argument. Take the middle half of a club’s stays — throw out its fastest quarter and its slowest quarter, keep what is left. Now ask whether that band sits clear of the band you get from all thirty clubs thrown in together. If it does, that club really is different, and you can print it.',
         'Zero of thirty clubs clear it. At Single-A, High-A, Double-A and Triple-A. At 881 players and again at 3,061.',
         'Toronto makes the point better than any statistic. Their Triple-A men have moved up in as little as 35 days and taken as long as 348 — a tenfold spread, inside one organization, and that spread is wider than the entire gap between the fastest club’s typical stay and the slowest club’s. Print "the Blue Jays typically move a Triple-A player in 53 days" and a reader will take it as a fact about the Blue Jays. It is not. It is a fact about whichever twenty-one players happened to land in the sample.',
       ],
@@ -52,14 +52,14 @@ export const movementWindowsEntry = {
       id: 'ranks-moved',
       heading: 'And the rankings did not hold still',
       prose: [
-        'In the first pass the Reds were the fastest club at Triple-A, at 82 days. Add the older players and they are not the fastest anymore — the Blue Jays are, at 53 days, with the Nationals right behind at 55. A club’s rank moving that far when you add data is not a precision problem you fix with more data. It is a sign the ranking was never measuring what it looked like it was measuring.',
+        'In the first pass the Reds were the fastest club at Triple-A, at 82 days. Add the older players and they are not the fastest at all — the Blue Jays are, at 53 days, with the Nationals a step behind at 55. When a leaderboard reshuffles that hard just because you fed it more players, the problem is not that it needs sharpening. The problem is that it was never a leaderboard.',
       ],
     },
     {
       id: 'tampa',
       heading: 'One club does survive everything: Tampa Bay',
       prose: [
-        'Because thirty separate comparisons will hand you a few false positives no matter what, the same question was asked seven different ways — different sample, different corrections, different controls. Most clubs that show up "significant" show up under one method and vanish under the next.',
+        'Ask the same question of thirty clubs and two or three will look special on luck alone — that is arithmetic, not baseball. So the question was put seven different ways, changing the sample, the corrections and the controls each time. Most clubs that stand out under one method vanish under the next.',
       ],
       table: {
         caption: 'Which clubs looked different, and under which method',
@@ -75,14 +75,14 @@ export const movementWindowsEntry = {
         ],
       },
       proseAfter: [
-        'Read down the right-hand column. Which clubs look slow depends almost entirely on which reasonable choice you make about how to count — and that instability is the finding, not a nuisance around the edge of it. The Rays are in all seven rows, including the strictest and the one built on a completely different set of players. That is the closest thing to a real club-level result anywhere in this work, and it is still a footnote rather than a feature.',
+        'Read down the right-hand column. Which clubs look slow depends almost entirely on which perfectly defensible choice you make about how to count them — and that wobble is the finding, not a nuisance around the edge of it. The Rays are in all seven rows, including the strictest one and the one built on an entirely different set of players. That is the closest thing to a real club-level result anywhere in this work, and it is still a footnote rather than a feature.',
       ],
     },
     {
       id: 'performance',
       heading: 'What actually decides when a man gets promoted',
       prose: [
-        'How he is playing. It is far and away the strongest thing in the study — well ahead of the level, ahead of where he was drafted, ahead of which club owns him. That is not a shocking result, but it is the reason the club effect is so small. Thirty front offices are all watching the same thing and mostly reacting to it the same way.',
+        'How he is playing. Nothing else in the study comes close — not the level, not where he was drafted, not whose farm system he is in. That is not a surprising answer, and it is exactly why the club effect is so faint. Thirty front offices are all watching the same box score and mostly doing the same thing about it.',
       ],
     },
   ],
