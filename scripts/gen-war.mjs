@@ -4,6 +4,15 @@
 // Strength value model, which needs a bat and a glove SEPARATELY rather than
 // the WAR total that bundles them.
 //
+// The `pa` (hitter plate appearances) map this file used to carry is GONE:
+// it rode along on the FanGraphs VALUE view, and `stats=sabermetrics`
+// publishes no plate-appearance field. Nothing read it — it was kept for a
+// Lineup Strength runtime fallback that was removed with the grade itself
+// (`.scratch/lineup-strength/README.md`, whose model.md §1 asked that these
+// maps not be pruned casually). If that model ever comes back, PA is a plain
+// `stats=season&group=hitting` pull away; it is not unobtainable, just not
+// free on this request the way it was on the old one.
+//
 // Pulled from statsapi.mlb.com's own `stats=sabermetrics` stat type — an
 // undocumented but public, first-party endpoint (verified 2026-08-25) that
 // carries MLB Advanced Media's OWN sabermetrics calculation: `war`, `wRcPlus`,
@@ -24,6 +33,18 @@
 // third-party endpoint to go stale), and it needs `playerPool=ALL` — the
 // default pool is "QUALIFIED" only (~140 players), which silently drops
 // everyone below a playing-time minimum.
+//
+// COVERAGE, measured rather than assumed: even at `playerPool=ALL` this
+// source returns no row for roughly 13% of the player-seasons the FanGraphs
+// pull carried (counted across 4 of the 100 war-history shards, 2010-2025).
+// Every single one of those was FanGraphs WAR EXACTLY 0.0 — a September
+// cameo, a position player mopping up an inning. No non-zero value is lost
+// anywhere, and the values that do match track to |delta| <= 0.1. What this
+// costs is a register cell reading "—" instead of "0.0" for those seasons,
+// which is the honest rendering of a number this source does not publish.
+// Note the shape of that check: a matched-set correlation CANNOT see a
+// dropped row, so re-measure by diffing shards player-season by
+// player-season, split by value, if this source is ever swapped again.
 //
 // This runs nightly via .github/workflows/update-nightly-data.yml, NOT at request
 // time: the live app only ever fetches this small same-origin static file

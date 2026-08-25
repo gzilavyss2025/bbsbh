@@ -3,8 +3,18 @@
 Research spike, 2026-08-25. Third factor spike under
 `docs/team-success-research.md`. Joins three datasets already in this repo —
 none newly pulled — none of them built for this program: spike #1's team
-roster cache, the FanGraphs-sourced season WAR history built for the player
-page, and the All-Star roster archive.
+roster cache, the season WAR history built for the player page, and the
+All-Star roster archive.
+
+> **Provenance of the WAR used here.** Every number below was computed
+> against the FanGraphs-sourced `war-history/` shards, which were the
+> repository's WAR source when this spike ran. Those shards were replaced in
+> the same deployment by MLB's own `stats=sabermetrics` calculation, so the
+> figures here will NOT reproduce exactly off the current data. The two
+> sources correlate at 0.998 with a mean absolute difference of ~0.04 WAR,
+> far below anything that would move a rho of -0.19 to -0.23 — but the
+> coverage note below no longer describes the current file, and a re-run is
+> the honest way to carry these numbers forward.
 
 **The question.** Is a team's on-field value concentrated in one or two
 standout players, or spread across the roster? Does that concentration (or
@@ -107,10 +117,20 @@ war-history.
 
 **WAR coverage was complete: 32,292 of 32,292 player-roster-slot references,
 100%.** Every player in the roster cache for 2010-2025 had a matching
-season-WAR entry — a cleaner join than the homegrown spike's 99.1%, likely
-because FanGraphs' leaderboard pull (`gen-war-history.mjs`) has no minimum
-playing-time cutoff. Zero team-seasons had to be dropped for lacking any
-positive-WAR player.
+season-WAR entry — a cleaner join than the homegrown spike's 99.1%, because
+the FanGraphs leaderboard pull this ran on had no minimum playing-time
+cutoff. Zero team-seasons had to be dropped for lacking any positive-WAR
+player.
+
+That last sentence is the one thing the source change (see the provenance
+note above) genuinely undermines. MLB's `stats=sabermetrics` returns no row
+at all for roughly 13% of the player-seasons the FanGraphs pull carried,
+even at `playerPool=ALL` — every one of them a player whose FanGraphs WAR
+was exactly 0.0. A re-run would therefore NOT report 100% coverage. It
+should not move a single finding: these measures are computed over players
+with POSITIVE WAR only, so a 0.0 contributes nothing to a share or an index
+either way. But the coverage figure itself must be re-measured, not carried
+over.
 
 ## The result
 
@@ -234,7 +254,7 @@ count as independent confirmation.
   stint-by-stint value.
 - **No payroll control**, same standing gap as every other spike in this
   program.
-- **This spike only used FanGraphs' season-total WAR, not a postseason-actual
+- **This spike only used season-total WAR, not a postseason-actual
   reweighting** the way the homegrown and roster-age spikes both ran as a
   follow-up check. That check is a natural next step here too (see below).
 
@@ -250,9 +270,10 @@ count as independent confirmation.
   cut and comparatively little on the pitching or division-winner cuts.
   Whether these are three independent signals or the same underlying
   "well-run organization" trait showing up three ways is still open.
-- **Extending `war-history`'s own pull back before 2010**, if the cost of
-  the additional FanGraphs sweep is judged worth it — this is the tightest
-  season-window constraint of any spike so far.
+- **Extending `war-history`'s own pull back before 2010** — now cheaper than
+  it looked when this spike ran, since MLB's `stats=sabermetrics` serves
+  history back to 1990 for free. This is the tightest season-window
+  constraint of any spike so far.
 - **A payroll control**, if a historical source is ever found.
 
 ## Where the work lives
