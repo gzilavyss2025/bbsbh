@@ -5,7 +5,9 @@ import { fetchStaticTeams } from '../../api/teams-static.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useMilestoneCelebration } from '../../hooks/useMilestoneCelebration.js'
 import { celebrationId } from '../../lib/milestoneCelebrations.js'
-import { ballparkPhotoThumb, ballparkStampArt } from '../../lib/ballpark/ballparkArt.js'
+import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
+import { ballparkStampArt, fieldIds, resolvePhoto, venueKey } from '../../lib/ballpark/ballparkArt.js'
+import { useCopy } from '../../copy/copyContext.js'
 import { LEVELS } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 
@@ -165,16 +167,27 @@ function StampPane({ milestone, sportId, counts }) {
 //
 // The two collections differ only in what the PRINT is. A ballpark's print is
 // the park's own art (the commemorative illustration where the series has
-// reached that park, otherwise its photograph — lib/ballpark/ballparkArt.js),
-// with the club's knockout mark sitting where a stamp's denomination sits. A
-// club's print IS the club's mark, so it carries no second roundel.
+// reached that park, otherwise its photograph — the SAME resolvePhoto the
+// team hub's Ballpark card and the slate's backdrop use, so a park the owner
+// re-shot from that card's gear (a Vercel Blob upload, ADR-0044) shows up
+// here too, with no second upload), with the club's knockout mark sitting
+// where a stamp's denomination sits. A club's print IS the club's mark, so it
+// carries no second roundel.
 //
-// A park with no bundled art — every minor-league park today, and any MLB one
-// whose photo is missing — keeps the graphite placeholder rather than a
-// broken image, the same degrade this app makes everywhere it reads park art.
+// A park with no bundled art and no admin override — every minor-league park
+// today, and any MLB one whose photo is missing — keeps the graphite
+// placeholder rather than a broken image, the same degrade this app makes
+// everywhere it reads park art.
 function PostageStamp({ slot, park }) {
-  const art = park && slot.venueName
-    ? (ballparkStampArt(slot.venueName) ?? ballparkPhotoThumb(slot.venueName))
+  const { t } = useCopy()
+  // The park's CANONICAL name, so a renamed venue (Minute Maid/Daikin,
+  // Guaranteed Rate/Rate) keys the same admin fields and the same stamp
+  // illustration as every other reader of park art — see parkBackdrop.js's
+  // header for why this fallback (raw feed name for an uncatalogued park) is
+  // the right one.
+  const name = park && slot.venueName ? ballparkFor(slot.venueName)?.name || slot.venueName : ''
+  const art = name
+    ? (ballparkStampArt(name) ?? resolvePhotoThumb(name, t))
     : null
   const caption = park ? slot.venueName || slot.label : slot.label
 
@@ -185,7 +198,13 @@ function PostageStamp({ slot, park }) {
           {park ? (
             <>
               {art ? (
-                <img src={art.src} alt="" className="postagestamp__photo" loading="lazy" />
+                <img
+                  src={art.src}
+                  alt=""
+                  className="postagestamp__photo"
+                  loading="lazy"
+                  style={art.focus ? { objectPosition: art.focus } : undefined}
+                />
               ) : (
                 <div className="postagestamp__photo postagestamp__photo--empty" aria-hidden="true" />
               )}
@@ -213,4 +232,17 @@ function PostageStamp({ slot, park }) {
       <span className="sr-only">{slot.filled ? 'in your book' : 'not in your book yet'}</span>
     </li>
   )
+}
+
+// The photo half of `resolvePhoto` (src/lib/ballpark/ballparkArt.js), read
+// through the copy store the same way parkBackdrop.js does — the admin's own
+// upload for this park if one was saved, else the bundled photo, else null.
+// Returns the small thumbnail companion where one exists (a bundled park's
+// generated WebP) and the full-size src otherwise (an admin override has no
+// build step to make a thumbnail in), which is exactly what `thumbSrc`
+// already encodes — no separate lookup needed here.
+function resolvePhotoThumb(name, t) {
+  const ids = fieldIds(venueKey(name))
+  const photo = resolvePhoto(name, { photo: t(ids.photo), focus: t(ids.focus) })
+  return photo ? { src: photo.thumbSrc, focus: photo.focus } : null
 }
