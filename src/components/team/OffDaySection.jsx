@@ -3,7 +3,7 @@ import { BreakableLocation } from '../ui/BreakableLocation.jsx'
 import { useNav } from '../../lib/nav.js'
 import { teamPath } from '../../lib/route.js'
 import { splitName } from '../../lib/teamSplits.js'
-import { teamClubNameShort, favoriteAccentColor, offDayTreatmentFor, treatmentTile } from '../../lib/teams.js'
+import { teamClubNameShort, favoriteAccentColor, teamPrimaryColor, offDayTreatmentFor, treatmentTile } from '../../lib/teams.js'
 
 // The clubs NOT playing on the slate's date, shown below the games as small
 // gameday-styled cards — same framed, overscaled logo tile the slate matchup
@@ -56,7 +56,18 @@ function OffDayCard({ team, pinned, onOpen }) {
   // other club — including all of MiLB — falls back to the split mascot.
   const shortMascot = teamClubNameShort(id) || mascot
   const accent = pinned ? favoriteAccentColor(id) : null
-  const cardStyle = accent ? { '--pin-accent': accent } : undefined
+  // The club's own primary, for the pointer-only hover state (the frame, the
+  // rule under the mascot). teamPrimaryColor covers MiLB too, through
+  // brandColors' affiliate-then-parent chain, and returns null for an
+  // unaffiliated id — the CSS then falls back to --field, so every tile still
+  // answers the pointer even where no brand pair is known. Separate from
+  // --pin-accent above: that one is the favorite highlight, always on, and a
+  // club is not its own favorite just because you hovered it.
+  const hoverAccent = teamPrimaryColor(id)
+  const cardStyle =
+    accent || hoverAccent
+      ? { '--pin-accent': accent || undefined, '--offday-accent': hoverAccent || undefined }
+      : undefined
   // Main by default — an off-day team isn't wearing any jersey today — but a
   // club can curate a different one for its off-day tile (offDayTreatmentFor,
   // teams.js), through the same resolver GameCard's TeamMark and GameView's

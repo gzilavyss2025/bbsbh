@@ -362,7 +362,11 @@ const BUDGETS = {
   // 100 -> 101 for 48b-logbook-milestones.css — split out of
   // 48a-logbook-stats.css the moment that file hit ITS OWN 600-line cap; same
   // trade as the paragraph above, one file over.
-  'src/styles': 101,
+  // 101 -> 102 for 06b-offday-cards.css — the off-day club tiles, split out of
+  // 06-loader-and-cards.css when their pointer states pushed that file past its
+  // own budget. It has to stay a flat sibling in the ordered @import chain: it
+  // borrows .gamecard__logobox's tile recipe and must cascade right after it.
+  'src/styles': 102,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
