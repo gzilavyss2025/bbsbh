@@ -381,6 +381,18 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   person_id       INTEGER NOT NULL,
   level           TEXT NOT NULL,
   code            TEXT NOT NULL,
+  -- Which side the BATTER stood on: 'L', 'R', or '?' when the feed named no
+  -- side. In the KEY rather than in columns, unlike the times-through split
+  -- below, because the two cross: a look has to be counted a side at a time,
+  -- and spelling that out in columns would have meant nine more of them per
+  -- side. Read off the matchup, never off the batter's listed bats, so a
+  -- switch-hitter lands on the side he actually took (same rule as
+  -- pitch_command_cells, which has held a `stand` this way all along).
+  --
+  -- '?' is CARRIED, not dropped: summing every side has to give back exactly
+  -- the season a card rendered before the split existed, and a MiLB feed with
+  -- no batSide would otherwise quietly shrink it.
+  stand           TEXT NOT NULL,
   season          INTEGER NOT NULL,
   name            TEXT NOT NULL,
   team_id         INTEGER,
@@ -406,7 +418,7 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   tto3_pitches      INTEGER NOT NULL DEFAULT 0,
   tto3_velocity_sum REAL    NOT NULL DEFAULT 0,
   tto3_velocity_n   INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (person_id, level, code)
+  PRIMARY KEY (person_id, level, code, stand)
 );
 
 -- Idempotency guard, one row per (gamePk, level) — a gamePk only ever belongs

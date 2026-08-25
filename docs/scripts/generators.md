@@ -290,7 +290,13 @@ don't run these by hand.
   `--sports=1,11` restricts the sweep, its real use being `--since=…
   --sports=11` to backfill AAA alone into a file that already has MLB).
   SQLite-backed (`pitch-arsenal` group, ADR-0021); `pitch_arsenal_ingested_games`
-  is the idempotency guard, keyed `(game_pk, level)`. Each pitcher also carries
+  is the idempotency guard, keyed `(game_pk, level)`. `pitch_arsenal_totals` is
+  keyed `(person_id, level, code, stand)` — one row per side the BATTER stood
+  on, `'L'`/`'R'`, or `'?'` when the feed named none. The side is in the KEY,
+  unlike the times-through split's nine columns, because the two cross: a look
+  has to be counted a side at a time. `'?'` is carried rather than dropped so
+  every side summed gives back exactly the season the card rendered before the
+  split existed, and the export folds the sides back into one pitch (`vs`). Each pitcher also carries
   `throws`, the hard filter behind the player page's "Pitches like" card — but it
   is resolved at EXPORT time from one bulk
   `/sports/{id}/players?fields=people,id,pitchHand,code` call per level (~50 KB),

@@ -48,7 +48,7 @@ import { RadarPill } from '../components/badges/RadarPill.jsx'
 import { milestoneTextFor } from '../api/callouts.js'
 import { radarEntryFor } from '../api/feverRadar.js'
 import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.js'
-import { arsenalTtoView, fetchPitchArsenalFor, pitchArsenalFor } from '../api/pitchArsenal.js'
+import { arsenalSidesView, arsenalTtoView, fetchPitchArsenalFor, pitchArsenalFor } from '../api/pitchArsenal.js'
 import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard, useBullpenReveal, BullpenToggle } from '../components/teamstats/BullpenBoard.jsx'
@@ -459,6 +459,14 @@ function TeamSections({
     () => arsenalTtoView(arsenalShard, oppPitcher?.id, isMlb),
     [arsenalShard, oppPitcher?.id, isMlb],
   )
+  // And again by the side the BATTER stood on, off the same shard — the card's
+  // other filter, which crosses with the one above. Null for an arm the file
+  // carries no side split for, or with a side under the qualifier floor, and
+  // the card then renders the look filter alone.
+  const oppArsenalSides = useMemo(
+    () => arsenalSidesView(arsenalShard, oppPitcher?.id, isMlb),
+    [arsenalShard, oppPitcher?.id, isMlb],
+  )
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
   // The bullpen this side's lineup is about to face, not its own — it nests
   // under the opposing starter card (see BullpenBoard's own header), so it
@@ -548,6 +556,7 @@ function TeamSections({
         isMlb={isMlb}
         arsenal={oppArsenal}
         arsenalTto={oppArsenalTto}
+        arsenalSides={oppArsenalSides}
         bullpenToggle={
           <BullpenToggle
             hasArms={oppBullpenArms.length > 0}
@@ -751,6 +760,7 @@ function OpposingStarterCard({
   isMlb,
   arsenal,
   arsenalTto,
+  arsenalSides,
   bullpenToggle,
 }) {
   return (
@@ -842,6 +852,7 @@ function OpposingStarterCard({
             <PitchArsenalMix
               arsenal={arsenal}
               tto={arsenalTto}
+              sides={arsenalSides}
               className="startercard__arsenal"
             />
           )}

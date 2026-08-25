@@ -72,7 +72,14 @@ test('a bucket stays small enough to be worth fetching alone', () => {
   for (const [name, ceiling] of [
     ['manager-history', 30],
     ['fouls', 30],
-    ['pitch-arsenal', 30],
+    // 30 -> 45 for the batter-side split: every pitch type now carries a `vs`
+    // row per side, each with its own look pairs, which is close to twice the
+    // bytes a type used to weigh. Already encoded as positional pairs rather
+    // than objects (see exportPitchArsenal's ttoPairs on why), so the only
+    // remaining trims would drop a side or drop the looks inside one — which
+    // is the feature. Measured largest at 33 KB; this leaves the season's
+    // remaining weeks room without letting the shape quietly double again.
+    ['pitch-arsenal', 45],
     // Four times its neighbours' ceiling, and deliberately: a spray bucket
     // carries one ROW PER BALL IN PLAY rather than a handful of season totals,
     // which is ~2,000 rows in the busiest bucket. The eight columns are already

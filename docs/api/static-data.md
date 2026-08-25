@@ -335,10 +335,17 @@ for each generator; the reader modules:
   became 12 KB for the mix bar and 149/194 KB for the pool. Completed-game aggregates → spoiler-free, no
   SealBox (same footing as `fouls.js`); MLB + AAA (`mlb`/`aaa` keys — AA and
   below carry no Hawk-Eye pitch tracking, so `pitchArsenalFor` just resolves
-  to null there). `pitchArsenalFor(data, personId, isMlb)` picks the level
+  to null there). `pitchArsenalFor(data, personId, isMlb, stand)` picks the level
   matching the game being staged, sorts most-thrown first, and gates on
   `MIN_ARSENAL_PITCHES` so a two-pitch cameo doesn't render a misleadingly
-  confident-looking mix. `pitchFamily(code)` groups codes into
+  confident-looking mix. The same season is split TWO ways, and the two CROSS:
+  `arsenalTtoView` by how many times he had already faced that batter in the
+  game, and `stand` (`'L'`/`'R'`, null for both) by the side the BATTER stood
+  on — so "the third time through, to lefties" is one answer rather than two
+  filters that cancel. Each split is its own denominator, which is the whole
+  point of it. `arsenalSidesView` hands a card both sides already shaped like
+  the unfiltered rows, and returns null when either side sits under the floor:
+  one side is no split, the same rule a single look follows. `pitchFamily(code)` groups codes into
   fastball/breaking/offspeed/other for `PitchArsenalMix.jsx`'s bar coloring
   (`tokens/colors.css`'s `--arsenal-*`). Surface: the opposing-starter card's
   wide-layout pitch-mix bar (`TeamInfo.jsx`'s `OpposingStarterCard`), filling

@@ -53,6 +53,38 @@
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
+/* TWO controls on the filter row when the file carries a side split: the side
+   of the plate ruled to the LEFT edge, the look filter keeping the right edge
+   it already had. Flex rather than the grid above because the row now has a
+   gap in the middle rather than a column there, and because a narrow phone has
+   to be allowed to wrap the look filter under the side one instead of
+   squeezing seven cells onto one line. */
+.pitchslab__filter--split {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pitchslab__filter--split .pitchslab__tabs--side {
+  margin-right: auto;
+}
+
+/* The look strip loses the grid's 1fr and would otherwise shrink to its type;
+   this keeps its four cells the size a thumb expects. */
+.pitchslab__filter--split .pitchslab__tabs:not(.pitchslab__tabs--side) {
+  min-width: 168px;
+}
+
+/* Two strips and a caption miss a phone's filter row by a pixel — measured, at
+   402px: 101 + 63 + 168 and two 8px gaps against 348 of content. The caption is
+   the part that goes, because it is the only one of the three a reader can do
+   without: the group keeps saying "times facing a batter in a game" to a screen
+   reader, and the strip beside it is already spelled LHB/RHB. It comes back at
+   the wide breakpoint below, where the row has the room for it. */
+.pitchslab__filter--split .pitchslab__filterlabel {
+  display: none;
+}
+
 .pitchslab__filterlabel {
   color: var(--text-caption);
   font-family: var(--font-display);
@@ -293,6 +325,11 @@
     padding-inline: 18px;
   }
 
+  /* Room again, so the caption comes back — see its display: none above. */
+  .pitchslab__filter--split .pitchslab__filterlabel {
+    display: block;
+  }
+
   .pitchslab__row {
     grid-template-columns: 236px minmax(0, 1fr) 132px;
     gap: 20px;
@@ -426,8 +463,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Three items on a phone-width row once the side strip joins the title and
+     the look strip. Neither strip shrinks (flex: none below), so wrapping is
+     what keeps the card from running off its own edge. */
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin-bottom: 6px;
+}
+
+/* The side-of-the-plate strip sits at the LEFT of the head row, beside the
+   title, with the look strip still ruled to the right edge — two controls that
+   read as one row and never as one control. */
+.arsenal__tabs--side {
+  margin-right: auto;
 }
 
 /* A pencil-ruled segmented control rather than the slab's filled tabs: this

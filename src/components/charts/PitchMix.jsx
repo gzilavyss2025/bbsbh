@@ -9,6 +9,11 @@ const DASH = '—'
 // reason to know.
 const LOOK_LABEL = { 1: '1st', 2: '2nd', 3: '3rd+' }
 
+// The side of the plate the BATTER stood on. Left-hand and right-hand BATTER,
+// never the pitcher's own hand, which is a fact about the man whose page this
+// is rather than about the half of his plan being read.
+const SIDE_LABEL = { L: 'LHB', R: 'RHB' }
+
 // The player page's "Pitches" body: a compact scorebook card carrying one row
 // per pitch — the pitch by name, its family spelled out, a usage meter, its
 // share, and the average velocity — over a band naming his 100 mph work when
@@ -16,7 +21,12 @@ const LOOK_LABEL = { 1: '1st', 2: '2nd', 3: '3rd+' }
 // `arsenal` is person.js's arsenalView output (already sorted most-thrown
 // first); `heat` is pitchArsenal.js's heatView, null for any arm under the
 // century floor; `tto` is its arsenalTtoView, null for any arm the nightly
-// file carries no times-through split for, in which case no filter renders.
+// file carries no times-through split for, in which case no filter renders;
+// `sides` is its arsenalSidesView, the same season split by the side the
+// BATTER stood on, each side carrying its own rows AND its own look split so
+// the two filters cross — what he throws the third time through to lefties.
+// Null for any arm with a side under the qualifier floor, in which case only
+// the look filter renders.
 //
 // THE FAMILY IS A WORD NOW, NOT A CHIP. Colour still agrees with it — the
 // meter and the word take the family's ink — but colour no longer CARRIES it.
@@ -26,37 +36,64 @@ const LOOK_LABEL = { 1: '1st', 2: '2nd', 3: '3rd+' }
 // restyled: BattedBallMix.jsx reuses them verbatim for the hitter's "Batted
 // balls" card, and this redesign was asked for on the pitcher's card only.
 // See src/styles/69-pitch-arsenal.css.
-export function PitchMix({ arsenal, heat, tto }) {
+export function PitchMix({ arsenal, heat, tto, sides }) {
   // `null` is the season, a number is that look. Held here rather than lifted:
   // nothing else on the page reacts to it, and it deliberately does NOT
   // persist — a reader who comes back to a pitcher wants the season first.
   const [look, setLook] = useState(null)
+  // Same rule for the side of the plate: `null` is both, and it does not persist.
+  const [side, setSide] = useState(null)
   if (!arsenal?.length) return null
 
+  // Both strips read whichever side is selected: a side carries its own rows
+  // and its own looks, so picking one narrows the card and the look filter
+  // together rather than putting two answers on one row.
+  const sideSeason = side ? sides?.[side]?.rows ?? null : null
   // A look the file no longer carries can't be selected, so the tabs are the
   // looks that exist, never a fixed three. A reliever with only first looks
   // gets no filter at all (arsenalTtoView returns null), and a swingman who
   // has been through twice gets two tabs beside All.
-  const looks = tto ?? []
+  const looks = (side ? sides?.[side]?.tto : tto) ?? []
   const selected = look == null ? null : looks.find((l) => l.look === look) ?? null
+
+  // A look one side never reached can't stay selected when you cross to it —
+  // the tab would sit lit over that side's whole season, which reads as a bug
+  // rather than as an absence. Fall back to the season for that side instead.
+  const chooseSide = (next) => {
+    setSide(next)
+    const crossing = (next ? sides?.[next]?.tto : tto) ?? []
+    if (look != null && !crossing.some((l) => l.look === look)) setLook(null)
+  }
 
   // Pitch NAMES come from the live feed's view either way. The nightly file
   // spells the same pitch differently ("Four-Seam Fastball" vs "Four-seam
   // FB"), and a name that changes when you tap a tab reads as a different
   // pitch rather than the same one on a different look.
   const nameByCode = new Map(arsenal.map((p) => [p.code, p.name]))
+  // A side's season comes from the nightly file rather than from the live
+  // feed's own arsenal view, so it is reshaped into the row this card reads —
+  // the same shape arsenalTtoView's look rows already arrive in.
+  const sideRows = sideSeason?.map((p) => ({
+    code: p.code,
+    name: nameByCode.get(p.code) ?? p.description ?? p.code,
+    count: p.pitches,
+    usage: p.pct / 100,
+    velo: p.avgVelo,
+  }))
   const rows = selected
     ? selected.rows.map((r) => ({ ...r, name: nameByCode.get(r.code) ?? r.name }))
-    : arsenal
+    : sideRows ?? arsenal
 
   // The season's pitch count, footed from the rows themselves. Every row has
   // to carry a count for the total to be honest, so one missing count drops
   // the line rather than under-reporting the season.
   const total = selected
     ? selected.total
-    : arsenal.every((p) => p.count != null)
-      ? arsenal.reduce((n, p) => n + p.count, 0)
-      : null
+    : sideRows
+      ? sideRows.reduce((n, p) => n + p.count, 0)
+      : arsenal.every((p) => p.count != null)
+        ? arsenal.reduce((n, p) => n + p.count, 0)
+        : null
   return (
     <div className="pitchslab">
       <div className="pitchslab__head">
@@ -65,20 +102,41 @@ export function PitchMix({ arsenal, heat, tto }) {
           <span className="pitchslab__total">{total.toLocaleString()} pitches</span>
         )}
       </div>
-      {looks.length > 0 && (
-        <div className="pitchslab__filter">
-          <span className="pitchslab__filterlabel">Batter look</span>
-          <div className="pitchslab__tabs" role="group" aria-label="Times facing a batter in a game">
-            <LookTab label="All" active={look == null} onSelect={() => setLook(null)} />
-            {looks.map((l) => (
-              <LookTab
-                key={l.look}
-                label={LOOK_LABEL[l.look]}
-                active={look === l.look}
-                onSelect={() => setLook(l.look)}
-              />
-            ))}
-          </div>
+      {(looks.length > 0 || sides) && (
+        <div className={`pitchslab__filter${sides ? ' pitchslab__filter--split' : ''}`}>
+          {sides && (
+            <div
+              className="pitchslab__tabs pitchslab__tabs--side"
+              role="group"
+              aria-label="Side the batter hits from"
+            >
+              <LookTab label="All" active={side == null} onSelect={() => chooseSide(null)} />
+              {['L', 'R'].map((s) => (
+                <LookTab
+                  key={s}
+                  label={SIDE_LABEL[s]}
+                  active={side === s}
+                  onSelect={() => chooseSide(s)}
+                />
+              ))}
+            </div>
+          )}
+          {looks.length > 0 && (
+            <>
+              <span className="pitchslab__filterlabel">Batter look</span>
+              <div className="pitchslab__tabs" role="group" aria-label="Times facing a batter in a game">
+                <LookTab label="All" active={look == null} onSelect={() => setLook(null)} />
+                {looks.map((l) => (
+                  <LookTab
+                    key={l.look}
+                    label={LOOK_LABEL[l.look]}
+                    active={look === l.look}
+                    onSelect={() => setLook(l.look)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
       <ul className="pitchslab__list">

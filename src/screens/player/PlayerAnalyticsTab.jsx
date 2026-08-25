@@ -101,7 +101,12 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
           {block.arsenal && (
             <>
               <SectionTitle title="Pitches" note="share of pitches · avg velo" />
-              <PitchMix arsenal={block.arsenal} heat={block.heat} tto={block.arsenalTto} />
+              <PitchMix
+                arsenal={block.arsenal}
+                heat={block.heat}
+                tto={block.arsenalTto}
+                sides={block.arsenalSides}
+              />
             </>
           )}
 

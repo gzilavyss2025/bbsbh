@@ -32,6 +32,11 @@ const SHIFT_PATH = {
 // as the group's aria-label.
 const LOOK_LABEL = { 1: '1st look', 2: '2nd', 3: '3rd+' }
 
+// The side of the plate the BATTER stood on, in the scorer's own shorthand.
+// Left-hand and right-hand BATTER, never the pitcher's own hand — which is a
+// fact about the man on the card, not about the half of his plan being read.
+const SIDE_LABEL = { L: 'LHB', R: 'RHB' }
+
 // The opposing starter's season pitch-type mix — one row per pitch, his
 // share of pitches thrown as a percentage, with his average velocity for
 // that pitch trailing it. `arsenal` is api/pitchArsenal.js's
@@ -45,16 +50,37 @@ const LOOK_LABEL = { 1: '1st look', 2: '2nd', 3: '3rd+' }
 // the nightly file carries no split for and for anyone with only one
 // qualifying look, in which case no filter renders and the card is the
 // season, exactly as before.
-export function PitchArsenalMix({ arsenal, tto, className = '' }) {
+//
+// `sides` is arsenalSidesView: the same season again, split by the side the
+// BATTER stood on, each side carrying its own rows and its own look split so
+// the two filters CROSS — what he threw the third time through to lefties.
+// Null for an arm the file carries no side split for and for anyone with a
+// side under the qualifier floor, in which case that strip doesn't render.
+export function PitchArsenalMix({ arsenal, tto, sides, className = '' }) {
   // `null` is the season, a number is that look. Held here, not lifted, and
   // deliberately not persisted: a scorer opening the next game's lineup wants
   // the season first, same rule the player page's card follows.
   const [look, setLook] = useState(null)
+  // Same rule for the side: `null` is both sides, and it does not persist.
+  const [side, setSide] = useState(null)
   if (!arsenal || arsenal.length === 0) return null
 
+  // Both strips read whichever side is selected. A side carries its own rows
+  // and its own looks, so picking one narrows the card and the look filter
+  // together rather than putting two answers on one row.
+  const seasonRows = (side ? sides?.[side]?.rows : arsenal) ?? arsenal
   // The tabs are the looks the file actually carries, never a fixed three.
-  const looks = tto ?? []
+  const looks = (side ? sides?.[side]?.tto : tto) ?? []
   const selected = look == null ? null : looks.find((l) => l.look === look) ?? null
+
+  // A look one side never reached can't stay selected when you cross to it —
+  // the tab would sit lit over the season's rows, which reads as a bug rather
+  // than as an absence. Fall back to the season for that side instead.
+  const chooseSide = (next) => {
+    setSide(next)
+    const crossing = (next ? sides?.[next]?.tto : tto) ?? []
+    if (look != null && !crossing.some((l) => l.look === look)) setLook(null)
+  }
 
   // Pitch NAMES come from the season rows either way. The split carries the
   // same spelling today, but a name that changes when you tap a tab would
@@ -70,9 +96,9 @@ export function PitchArsenalMix({ arsenal, tto, className = '' }) {
         // never on the season, which has nothing to be a change FROM.
         delta: r.delta,
       }))
-    : arsenal.map((t) => ({
+    : seasonRows.map((t) => ({
         code: t.code,
-        name: t.description || t.code,
+        name: nameByCode.get(t.code) ?? t.description ?? t.code,
         pct: t.pct,
         avgVelo: t.avgVelo,
         delta: null,
@@ -82,6 +108,19 @@ export function PitchArsenalMix({ arsenal, tto, className = '' }) {
     <div className={`arsenal ${className}`.trim()}>
       <div className="arsenal__head">
         <h4 className="arsenal__title">Pitch mix</h4>
+        {sides && (
+          <div className="arsenal__tabs arsenal__tabs--side" role="group" aria-label="Side the batter hits from">
+            <LookTab label="All" active={side == null} onSelect={() => chooseSide(null)} />
+            {['L', 'R'].map((s) => (
+              <LookTab
+                key={s}
+                label={SIDE_LABEL[s]}
+                active={side === s}
+                onSelect={() => chooseSide(s)}
+              />
+            ))}
+          </div>
+        )}
         {looks.length > 0 && (
           <div className="arsenal__tabs" role="group" aria-label="Times facing a batter in a game">
             <LookTab label="All" active={look == null} onSelect={() => setLook(null)} />
