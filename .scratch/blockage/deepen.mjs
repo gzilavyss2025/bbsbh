@@ -144,16 +144,29 @@ const depthMean = mean(hitters.map((r) => r.jobDepth))
 const jobAgeMean = mean(hitters.map((r) => r.jobAge).filter((v) => v != null))
 const winMean = mean(hitters.map((r) => r.orgWinPct).filter((v) => v != null))
 
+// useLag must describe the job a season EARLIER in full - depth/age/win pct
+// used to stay concurrent regardless of the flag (same bug as model.mjs's
+// jobCols(), fixed there first; see its comment for what a live check found).
 function design(r, useLag) {
   const c = [1, r.rateZ, (r.ageAtStay ?? ageMean) - ageMean]
   for (const t of TIERS) c.push(r.tier === t ? 1 : 0)
   c.push(r.era === 'e2' ? 1 : 0, r.era === 'e3' ? 1 : 0)
+  if (!useLag) {
+    c.push(
+      r.jobQZ,
+      r.controlLeft / 6,
+      r.jobDepth - depthMean,
+      (r.jobAge ?? jobAgeMean) - jobAgeMean,
+      (r.orgWinPct ?? winMean) - winMean,
+    )
+    return c
+  }
   c.push(
-    useLag ? r.jobLagQZ : r.jobQZ,
-    (useLag ? (r.jobLagControlLeft ?? r.controlLeft) : r.controlLeft) / 6,
-    r.jobDepth - depthMean,
-    (r.jobAge ?? jobAgeMean) - jobAgeMean,
-    (r.orgWinPct ?? winMean) - winMean,
+    r.jobLagQZ,
+    (r.jobLagControlLeft ?? r.controlLeft) / 6,
+    (r.jobLagDepth ?? r.jobDepth) - depthMean,
+    (r.jobLagAge ?? r.jobAge ?? jobAgeMean) - jobAgeMean,
+    (r.orgWinPctLag ?? r.orgWinPct ?? winMean) - winMean,
   )
   return c
 }

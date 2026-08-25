@@ -705,6 +705,12 @@ const BUDGETS = {
   // GameLog.jsx needs, promoted out of PlayerPage.jsx so the two other
   // PlayerPage call sites and this one share one definition instead of three).
   'src/components/player': 15,
+  // New entry: +1 for blockageCorrected.js — the diary's first `corrected`
+  // entry that sits ABOVE the entry it corrects rather than replacing it
+  // (the diary is append-only, see docs/agents/research-diary.md's second
+  // rule), same shape as humpArtifact.js/movementWindows.js already prove out
+  // in team-movement-windows.md's history.
+  'src/lib/research/diary': 13,
 }
 
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git'])
