@@ -5,11 +5,11 @@ import { fetchStaticTeams } from '../../api/teams-static.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useMilestoneCelebration } from '../../hooks/useMilestoneCelebration.js'
 import { celebrationId } from '../../lib/milestoneCelebrations.js'
-import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
-import { ballparkStampArt, fieldIds, resolvePhoto, venueKey } from '../../lib/ballpark/ballparkArt.js'
+import { resolveStampArt } from '../../lib/ballpark/stampPrint.js'
 import { useCopy } from '../../copy/copyContext.js'
 import { LEVELS } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { StampDetailModal } from './StampDetailModal.jsx'
 
 // THE STAMP SHEET — the clubs and the ballparks in your book, drawn as two
 // panes of postage stamps on a dark album board, at whichever level you ask
@@ -62,6 +62,12 @@ const DEFAULT_SPORT_ID = LEVELS[0].sportId
 
 export function StampSheet({ stamps = [], factsByPk = {}, counts = false }) {
   const [sportId, setSportId] = useState(DEFAULT_SPORT_ID)
+  // Which one stamp's detail is open, if any — one state for both panes, so
+  // opening a club's detail can never leave a park's open behind it (and vice
+  // versa). Not the `counts` checklist rule: this is per-slot history you
+  // asked to see, not an ambient total, so it renders the same on the book
+  // page and the retrospective — see StampDetailModal.jsx's header.
+  const [openSlot, setOpenSlot] = useState(null)
 
   // Every level's clubs, and the one per-club fact the parks pane needs (its
   // home venue's NAME, which is how bundled park art is keyed). The same
@@ -109,9 +115,18 @@ export function StampSheet({ stamps = [], factsByPk = {}, counts = false }) {
               milestone={milestone}
               sportId={sportId}
               counts={counts}
+              onOpen={(slot) => setOpenSlot({ milestoneId: milestone.id, slot })}
             />
           ))}
         </div>
+      )}
+
+      {openSlot && (
+        <StampDetailModal
+          kind={openSlot.milestoneId === 'parks' ? 'park' : 'club'}
+          slot={openSlot.slot}
+          onClose={() => setOpenSlot(null)}
+        />
       )}
     </div>
   )
@@ -119,7 +134,7 @@ export function StampSheet({ stamps = [], factsByPk = {}, counts = false }) {
 
 // One collection — the clubs, or the ballparks — as a pane of stamps on the
 // album board.
-function StampPane({ milestone, sportId, counts }) {
+function StampPane({ milestone, sportId, counts, onOpen }) {
   // One id per collection PER LEVEL, so finishing AAA plays its own beat and
   // does not re-use the MLB one (lib/milestoneCelebrations.js).
   const [celebrated, celebrate] = useMilestoneCelebration(celebrationId(milestone.id, sportId))
@@ -155,7 +170,7 @@ function StampPane({ milestone, sportId, counts }) {
       </header>
       <ul className="stamppane__grid">
         {milestone.slots.map((slot) => (
-          <PostageStamp key={slot.id} slot={slot} park={isParks} />
+          <PostageStamp key={slot.id} slot={slot} park={isParks} onOpen={onOpen} />
         ))}
       </ul>
     </article>
@@ -178,71 +193,65 @@ function StampPane({ milestone, sportId, counts }) {
 // today, and any MLB one whose photo is missing — keeps the graphite
 // placeholder rather than a broken image, the same degrade this app makes
 // everywhere it reads park art.
-function PostageStamp({ slot, park }) {
+function PostageStamp({ slot, park, onOpen }) {
   const { t } = useCopy()
-  // The park's CANONICAL name, so a renamed venue (Minute Maid/Daikin,
-  // Guaranteed Rate/Rate) keys the same admin fields and the same stamp
-  // illustration as every other reader of park art — see parkBackdrop.js's
-  // header for why this fallback (raw feed name for an uncatalogued park) is
-  // the right one.
-  const name = park && slot.venueName ? ballparkFor(slot.venueName)?.name || slot.venueName : ''
-  const art = name
-    ? (ballparkStampArt(name) ?? resolvePhotoThumb(name, t))
-    : null
-  const caption = park ? slot.venueName || slot.label : slot.label
+  const { art, caption } = resolveStampArt(slot, park, t)
 
+  const print = (
+    <div className="postagestamp__frame">
+      <div className="postagestamp__print">
+        {park ? (
+          <>
+            {art ? (
+              <img
+                src={art.src}
+                alt=""
+                className="postagestamp__photo"
+                loading="lazy"
+                style={art.focus ? { objectPosition: art.focus } : undefined}
+              />
+            ) : (
+              <div className="postagestamp__photo postagestamp__photo--empty" aria-hidden="true" />
+            )}
+            <span className="postagestamp__mark" aria-hidden="true">
+              <TeamLogo teamId={slot.id} name={slot.label} size={16} variant="mono" />
+            </span>
+          </>
+        ) : (
+          <span className="postagestamp__club" aria-hidden="true">
+            {/* Deliberately larger than the print box can be, and clamped
+                down to it in CSS (max-width/max-height beat this inline
+                size, which `size` writes as a literal width/height). That
+                is what makes the mark fill its paper at every slot width
+                instead of sitting small in the wide ones — a fixed px size
+                can only be right for one column count, and this grid has
+                three. */}
+            <TeamLogo teamId={slot.id} name={slot.label} size={140} />
+          </span>
+        )}
+      </div>
+    </div>
+  )
+
+  // A filled slot is a button — tapping it opens StampDetailModal's bigger
+  // read of the same print, plus when you first stamped it, how many times,
+  // and the most recent. An unfilled one has nothing to open, so it stays a
+  // plain, inert div; the caption and sr-only state line are identical either
+  // way, only the wrapping element and its handler change.
+  const Wrapper = slot.filled ? 'button' : 'div'
   return (
     <li className={`postagestamp${slot.filled ? ' is-filled' : ''}`}>
-      <div className="postagestamp__frame">
-        <div className="postagestamp__print">
-          {park ? (
-            <>
-              {art ? (
-                <img
-                  src={art.src}
-                  alt=""
-                  className="postagestamp__photo"
-                  loading="lazy"
-                  style={art.focus ? { objectPosition: art.focus } : undefined}
-                />
-              ) : (
-                <div className="postagestamp__photo postagestamp__photo--empty" aria-hidden="true" />
-              )}
-              <span className="postagestamp__mark" aria-hidden="true">
-                <TeamLogo teamId={slot.id} name={slot.label} size={16} variant="mono" />
-              </span>
-            </>
-          ) : (
-            <span className="postagestamp__club" aria-hidden="true">
-              {/* Deliberately larger than the print box can be, and clamped
-                  down to it in CSS (max-width/max-height beat this inline
-                  size, which `size` writes as a literal width/height). That
-                  is what makes the mark fill its paper at every slot width
-                  instead of sitting small in the wide ones — a fixed px size
-                  can only be right for one column count, and this grid has
-                  three. */}
-              <TeamLogo teamId={slot.id} name={slot.label} size={140} />
-            </span>
-          )}
-        </div>
-      </div>
-      {/* The caption names the slot for everyone; the sr-only line adds the
-          state, because colour and fade are the whole visual signal for it. */}
-      <span className="postagestamp__caption">{caption}</span>
-      <span className="sr-only">{slot.filled ? 'in your book' : 'not in your book yet'}</span>
+      <Wrapper
+        type={slot.filled ? 'button' : undefined}
+        className="postagestamp__hit"
+        onClick={slot.filled ? () => onOpen(slot) : undefined}
+      >
+        {print}
+        {/* The caption names the slot for everyone; the sr-only line adds the
+            state, because colour and fade are the whole visual signal for it. */}
+        <span className="postagestamp__caption">{caption}</span>
+        <span className="sr-only">{slot.filled ? 'in your book — view details' : 'not in your book yet'}</span>
+      </Wrapper>
     </li>
   )
-}
-
-// The photo half of `resolvePhoto` (src/lib/ballpark/ballparkArt.js), read
-// through the copy store the same way parkBackdrop.js does — the admin's own
-// upload for this park if one was saved, else the bundled photo, else null.
-// Returns the small thumbnail companion where one exists (a bundled park's
-// generated WebP) and the full-size src otherwise (an admin override has no
-// build step to make a thumbnail in), which is exactly what `thumbSrc`
-// already encodes — no separate lookup needed here.
-function resolvePhotoThumb(name, t) {
-  const ids = fieldIds(venueKey(name))
-  const photo = resolvePhoto(name, { photo: t(ids.photo), focus: t(ids.focus) })
-  return photo ? { src: photo.thumbSrc, focus: photo.focus } : null
 }

@@ -62,6 +62,39 @@ test('computeMilestoneProgress: the FIRST stamp to fill a slot is credited, not 
   assert.equal(slotA.date, '2026-04-01')
 })
 
+test('computeMilestoneProgress: a slot filled once carries stampCount 1 and matching lastDate', () => {
+  const stamps = [stamp(1, '2026-04-01')]
+  const facts = { 1: { who: 'a', date: '2026-04-01' } }
+  const result = computeMilestoneProgress(THREE_SLOT_COLLECTION, stamps, facts)
+  const slotA = result.slots.find((s) => s.id === 'a')
+  assert.equal(slotA.stampCount, 1)
+  assert.equal(slotA.lastDate, '2026-04-01')
+})
+
+test('computeMilestoneProgress: an unfilled slot carries stampCount 0 and no lastDate', () => {
+  const result = computeMilestoneProgress(THREE_SLOT_COLLECTION, [], {})
+  const slotA = result.slots.find((s) => s.id === 'a')
+  assert.equal(slotA.stampCount, 0)
+  assert.equal(slotA.lastDate, null)
+})
+
+test('computeMilestoneProgress: repeat fills count every one, and track the true first/last regardless of stamp order', () => {
+  // Deliberately out of date order — the middle date arrives first, so a
+  // naive "first stamp in the array" reading would get both ends wrong.
+  const stamps = [stamp(2, '2026-05-01'), stamp(1, '2026-04-01'), stamp(3, '2026-06-01')]
+  const facts = {
+    1: { who: 'a', date: '2026-04-01' },
+    2: { who: 'a', date: '2026-05-01' },
+    3: { who: 'a', date: '2026-06-01' },
+  }
+  const result = computeMilestoneProgress(THREE_SLOT_COLLECTION, stamps, facts)
+  const slotA = result.slots.find((s) => s.id === 'a')
+  assert.equal(slotA.stampCount, 3)
+  assert.equal(slotA.gamePk, 1)
+  assert.equal(slotA.date, '2026-04-01')
+  assert.equal(slotA.lastDate, '2026-06-01')
+})
+
 test('computeMilestoneProgress: complete once every slot is filled', () => {
   const stamps = [stamp(1, '2026-04-01'), stamp(2, '2026-04-02'), stamp(3, '2026-04-03')]
   const facts = {

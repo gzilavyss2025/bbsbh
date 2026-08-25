@@ -366,7 +366,12 @@ const BUDGETS = {
   // 06-loader-and-cards.css when their pointer states pushed that file past its
   // own budget. It has to stay a flat sibling in the ordered @import chain: it
   // borrows .gamecard__logobox's tile recipe and must cascade right after it.
-  'src/styles': 102,
+  // 102 -> 103 for 48d-stamp-detail.css — the Game Log stamp sheet's tap-to-open
+  // detail modal, split out of 48c-stamp-sheet.css the moment that file hit ITS
+  // OWN 600-line cap; same trade as the two paragraphs above, one file over.
+  // Component-imported (StampDetailModal.jsx), not part of index.css's core
+  // cascade, so ordering relative to its sibling doesn't matter here.
+  'src/styles': 103,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

@@ -139,6 +139,13 @@ export function isMilestoneCollectionId(id) {
 // collection, or one book) and `factsByPk` is the same `api/logbook.js`
 // result the page already fetched — no new data source. `roster` is the
 // level's slot list (`rosterFor`); omitted, it means MLB.
+//
+// Each filled slot keeps its FIRST fill (`gamePk`/`date`, unchanged meaning —
+// every existing reader of those two fields still gets the original game),
+// plus the full history behind it: `stampCount` (how many of the user's
+// stamps fill this one slot) and `lastDate` (the most recent). That history
+// feeds the stamp detail modal (components/logbook/StampDetailModal.jsx) —
+// nothing here decides whether it's SHOWN, only what's true.
 export function computeMilestoneProgress(collection, stamps, factsByPk, roster) {
   const slots = collection.slots(roster)
   const filledBy = new Map()
@@ -146,17 +153,32 @@ export function computeMilestoneProgress(collection, stamps, factsByPk, roster) 
     const fact = factsByPk?.[stamp.gamePk]
     if (!fact) continue
     for (const id of collection.fillsFor(fact)) {
-      // First stamp to fill a slot is the one credited — later repeats of
-      // the same club/park don't move the date.
-      if (!filledBy.has(id)) filledBy.set(id, { gamePk: stamp.gamePk, date: fact.date })
+      const entry = filledBy.get(id)
+      if (!entry) {
+        filledBy.set(id, { gamePk: stamp.gamePk, date: fact.date, stampCount: 1, lastDate: fact.date })
+        continue
+      }
+      entry.stampCount += 1
+      // Dates sort lexicographically (YYYY-MM-DD, api/logbook.js), so a plain
+      // string compare finds the earliest/latest without parsing either one.
+      if (fact.date < entry.date) {
+        entry.gamePk = stamp.gamePk
+        entry.date = fact.date
+      }
+      if (fact.date > entry.lastDate) entry.lastDate = fact.date
     }
   }
-  const filledSlots = slots.map((slot) => ({
-    ...slot,
-    filled: filledBy.has(slot.id),
-    gamePk: filledBy.get(slot.id)?.gamePk ?? null,
-    date: filledBy.get(slot.id)?.date ?? null,
-  }))
+  const filledSlots = slots.map((slot) => {
+    const entry = filledBy.get(slot.id)
+    return {
+      ...slot,
+      filled: entry != null,
+      gamePk: entry?.gamePk ?? null,
+      date: entry?.date ?? null,
+      stampCount: entry?.stampCount ?? 0,
+      lastDate: entry?.lastDate ?? null,
+    }
+  })
   // Counted off the SLOTS, not off `filledBy`. A stamp fills club ids that
   // belong to some other level's roster — every minor-league stamp does,
   // against the MLB roster — and crediting those would report "34 of 30" the
