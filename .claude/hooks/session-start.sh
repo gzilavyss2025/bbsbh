@@ -4,6 +4,81 @@ set -euo pipefail
 
 cd "${CLAUDE_PROJECT_DIR:-.}"
 
+# --- Stale git lock guard ----------------------------------------------
+# git takes an exclusive lock (index.lock, HEAD.lock, config.lock) for the
+# duration of any operation that writes the index or a ref, and removes it on
+# exit. A process killed mid-write — a closed terminal, a crashed session, a
+# hook interrupted by Ctrl+C — leaves the lock behind, and from then on EVERY
+# git command in that checkout fails with "Unable to create '…/index.lock':
+# File exists". There is no other symptom: git looks broken, not locked.
+#
+# This bit a session on 2026-08-25. A lock left at 08:33 the previous morning
+# blocked the whole primary checkout for a full day, including the
+# fast-forward guard below — which is why this block runs FIRST.
+#
+# Staleness is decided by AGE, not by "is any git running". Several agent
+# sessions work this repo at once, so some git process is nearly always alive;
+# gating on that would mean the guard almost never fires. Age is the honest
+# signal — nothing here holds a lock for minutes (the slowest observed, a
+# 4,744-file `git worktree add`, is seconds). A live git process only buys a
+# longer grace period, it doesn't veto the sweep.
+git_is_running() {
+  if command -v pgrep >/dev/null 2>&1 && pgrep -x git >/dev/null 2>&1; then
+    return 0
+  fi
+  if command -v tasklist >/dev/null 2>&1 &&
+     tasklist 2>/dev/null | grep -qiE '^git\.exe'; then
+    return 0
+  fi
+  return 1
+}
+
+# Seconds a lock must go untouched before it counts as abandoned.
+if git_is_running; then
+  lock_stale_after=600   # something is live; leave a wide margin
+else
+  lock_stale_after=60    # no git at all — a lock here is orphaned by definition
+fi
+
+# Resolve gitdirs through git itself, not by assuming ".git" is a directory:
+# in a linked worktree it's a FILE pointing at .git/worktrees/<name>, and a
+# lock there breaks that worktree only, just as invisibly.
+git_common_dir="$(git rev-parse --git-common-dir 2>/dev/null || echo .git)"
+git_own_dir="$(git rev-parse --git-dir 2>/dev/null || echo .git)"
+
+lock_dirs="$git_common_dir"
+if [ "$git_own_dir" != "$git_common_dir" ]; then
+  lock_dirs="$lock_dirs $git_own_dir"
+fi
+# From the primary checkout, sweep every linked worktree's gitdir too, so one
+# session's crash doesn't leave another worktree wedged until someone opens it.
+if [ -d "$git_common_dir/worktrees" ]; then
+  for wt in "$git_common_dir"/worktrees/*/; do
+    if [ -d "$wt" ] && [ "${wt%/}" != "$git_own_dir" ]; then
+      lock_dirs="$lock_dirs ${wt%/}"
+    fi
+  done
+fi
+
+for d in $lock_dirs; do
+  for name in index.lock HEAD.lock config.lock; do
+    lock="$d/$name"
+    [ -f "$lock" ] || continue
+    # -newermt with a relative time: empty output means "older than that".
+    if [ -n "$(find "$lock" -newermt "-$lock_stale_after seconds" 2>/dev/null)" ]; then
+      continue
+    fi
+    if rm -f "$lock" 2>/dev/null; then
+      echo "bbsbh: cleared a stale git lock ($lock) left behind by an" \
+        "interrupted git process — it was blocking every git command in" \
+        "that checkout"
+    else
+      echo "bbsbh: WARNING — found a stale git lock ($lock) but could not" \
+        "remove it. Delete that file by hand; git will keep failing until you do."
+    fi
+  done
+done
+
 # --- Stale primary-checkout guard --------------------------------------
 # A primary checkout (real .git dir, not a worktree) whose local `main` falls
 # behind origin/main silently loses whatever that gap contains — including
