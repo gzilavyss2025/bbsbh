@@ -53,6 +53,16 @@ pnpm-debug.log*
 # cheap season-long pulls, see docs/level-tenure-benchmark.md
 .scratch/level-benchmarks/txn-cache.json
 
+# cached MLB and Triple-A season splits from the blockage research (7MB
+# together) and the row sets derived from them — every one is rebuilt by
+# `node pull-mlb.mjs && node pull-milb-field.mjs && node build.mjs`, and both
+# pulls resume, see docs/price-the-blockage.md
+.scratch/blockage/mlb-cache.json
+.scratch/blockage/milb-field-cache.json
+.scratch/blockage/stays.json
+.scratch/blockage/rows.json
+.scratch/blockage/hitters.json
+
 # a stray output directory a script creates when its destination path resolves
 # to undefined (e.g. `--out $UNSET_VAR`). Never app content; one such file was
 # committed by accident once. Ignored so the next mistake stays local.
