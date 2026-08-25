@@ -4,6 +4,7 @@
 import { getJson } from './statsapi.js'
 import { SPORT_LABEL, MILB_LEVELS, teamAbbr } from '../lib/teams.js'
 import { applyJsonPatch } from '../lib/jsonPatch.js'
+import { num, outsToIp } from './person/shared.js'
 
 // `options.fields` (array or comma-string) opts a caller into a pruned
 // response — see PAST_GAME_FEED_FIELDS below for the one such caller. Omitted
@@ -418,4 +419,62 @@ export async function fetchPitcherLastGame(personId, season, cutoffDate) {
     }
   }
   return null
+}
+
+// ---------------------------------------------------------------------------
+// The starter's summed line against TONIGHT'S OPPONENT, THIS SEASON — every
+// regular-season start he's made against that one club so far this year,
+// folded into one line (games, IP, H, ER, K, BB), sitting under his last-outing
+// row. `games` carries each contributing start's date/home flag (not just a
+// count) so a caller can format a single meeting exactly like
+// fetchPitcherLastGame's line — the common case, one start against a given
+// opponent in a season — and fall back to a summary only when there's more
+// than one. Unlike fetchPitcherLastGame this never fans out across sportIds: a
+// specific opponent team id belongs to one level, so a single gameLog call at
+// tonight's own sportId already covers every start against them this season.
+// Same cutoffDate discipline as fetchPitcherLastGame — a start on or after the
+// game being staged must never fold in. Innings pitched are summed in OUTS
+// (see outsToIp) so multi-game IP totals add correctly ("6.1" + "6.1" = "12.2",
+// not "12.2" from naive decimal addition, which would read as 12 innings and 2
+// tenths). Returns null when he hasn't faced this opponent yet this season.
+// ---------------------------------------------------------------------------
+
+function ipToOuts(ip) {
+  const [whole, frac = '0'] = String(ip ?? '0').split('.')
+  return num(whole) * 3 + num(frac[0])
+}
+
+export async function fetchPitcherSeasonVsOpponent(personId, season, opponentTeamId, cutoffDate, sportId = 1) {
+  if (!personId || !season || !opponentTeamId) return null
+  const splits = await fetchGameLogSplits(personId, season, sportId)
+  const eligible = splits.filter(
+    (s) =>
+      s.gameType === 'R' &&
+      s.opponent?.id === opponentTeamId &&
+      s.date &&
+      (!cutoffDate || s.date < cutoffDate),
+  )
+  if (eligible.length === 0) return null
+
+  let outs = 0
+  let hits = 0
+  let earnedRuns = 0
+  let strikeOuts = 0
+  let baseOnBalls = 0
+  for (const s of eligible) {
+    const st = s.stat ?? {}
+    outs += ipToOuts(st.inningsPitched)
+    hits += num(st.hits)
+    earnedRuns += num(st.earnedRuns)
+    strikeOuts += num(st.strikeOuts)
+    baseOnBalls += num(st.baseOnBalls)
+  }
+  return {
+    games: eligible.map((s) => ({ date: s.date, home: Boolean(s.isHome) })),
+    inningsPitched: outsToIp(outs),
+    hits,
+    earnedRuns,
+    strikeOuts,
+    baseOnBalls,
+  }
 }
