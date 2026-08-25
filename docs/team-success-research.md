@@ -115,6 +115,7 @@ phase, spike by spike, not part of standing up the framework itself.
 | Age of team | PA-weighted batter age, IP-weighted pitcher age, season-average | Built from statsapi's own per-team-stint `stat.age`, PA/IP-weighted | **Done** — `docs/team-success-roster-age.md`. Real, modest, likely-partly-circular effect (older teams go deeper, especially pitching staffs; age doesn't separate division winners from wild cards). Biggest open follow-up: a pre-trade-deadline age cut, to separate a genuine age effect from contending teams simply renting veterans |
 | **Prior postseason experience** (commissioned directly, not in the original ask) | share of a club's regular-season playing time (PA/IP) given to players who had appeared in a postseason game in a STRICTLY EARLIER season, on any club; plus a late-rounds-only variant | Built from the postseason game list 1969-2025 (`gameType=F,D,L,W`) + boxscores, reusing spike #2's `postseason-boxscore-cache.json` and spike #1's `roster-age-cache.json` for the weights — no new regular-season pull | **Done** — `docs/team-success-postseason-experience.md`. A large, robust effect on REACHING the postseason (rho +0.35 batting / +0.37 pitching; ~20pp more experienced playing time than clubs that missed), and a clean, well-powered NULL on advancing once a club is in (rho -0.02 / +0.02 across 234 postseason clubs). Roughly half the qualifying effect is prior-year continuity, but a within-club test still leaves +0.18/+0.21. Pitching edges batting on raw numbers; the two are indistinguishable under controls. Open follow-up: a player-level version, and the joint model four spikes have now asked for |
 
+| **What is different about the games themselves** (commissioned directly, not in the original ask) | paired same-player, same-season comparisons of October vs. regular season: pitches per plate appearance, matchup-held offence, pitch mix and velocity, starter workload; plus better-club win rate over every series | Built from statsapi's `gameType=R` vs `gameType=P` splits (team, player and pitchArsenal endpoints) + the committed `postseason-history.json` bracket | **Done** — `docs/team-success-october-texture.md`. At-bats are marginally longer (+0.037 pitches/PA); pitchers throw 0.52 mph harder and narrow their mix (+1.46pp on their best pitch, small-sample corrected); starters go a full inning less than their own regular season and the gap is GROWING by era. Two nulls that matter more than the findings: October hitting falls only 14 points of OPS short once BOTH ends of the matchup are held (the one-sided version says 88, and is wrong), with the strikeout surge entirely explained by opposition quality; and the quicker hook does not predict how far a club goes once postseason volume is controlled. The better regular-season club has won just 52.1% of 213 series — the direct explanation for why spikes #1-#4 all found nulls on advancing |
 Nothing here is ranked by importance yet — that ranking is itself a question
 a first pass over several factors should answer, not an assumption to bake
 into the plan.
@@ -197,22 +198,32 @@ land or a factor turns out to need more groundwork than expected:
    not bind for player-level postseason history), and the first
    partial-correlation tooling here that takes more than one control at a time
    (`analyze-postseason-experience.mjs`).
-5. **The joint model** — promoted to the front of the queue, because four
+5. ~~**October texture**~~ — done, `docs/team-success-october-texture.md`.
+   Commissioned directly and out of order, like spike #4. The first spike here
+   that does not use the outcome ladder as its main outcome variable: it
+   compares the same men in the same year to themselves. It leaves the program
+   two reusable warnings — a one-sided "his own regular-season rates" baseline
+   measures OPPOSITION QUALITY, not a month effect, and any statistic that is a
+   MAXIMUM (best-pitch share, longest streak, top-N concentration) is biased
+   upward in a small postseason sample and needs a shrunken-baseline control.
+   It also re-confirmed the postseason-volume confound from spike #1's
+   follow-up on a completely different measure.
+6. **The joint model** — promoted to the front of the queue, because four
    spikes have now independently found something on the "made the postseason"
    cut and little or nothing on the "advanced once there" cut: roster age,
    homegrown share, star diversity and postseason experience. Whether those are
    four signals or one underlying "this is a good, established club" trait is
    now the highest-value open question in the program, and it needs no new data
    pull — all four panels are built and on disk.
-6. **Trades / acquisition** — two partially-overlapping sources
+7. **Trades / acquisition** — two partially-overlapping sources
    (`trade-deadline/`, `team-transactions/`) need reconciling into one
    team-season "value acquired in-season" number first.
-7. **Injuries** — needs a new IL-stint sweep off the transactions endpoint;
+8. **Injuries** — needs a new IL-stint sweep off the transactions endpoint;
    heavier lift than the above.
-8. **Situational rosters / roster construction** — richest data
+9. **Situational rosters / roster construction** — richest data
    (`team-records/`) but the least obvious single number to regress; likely
    needs its own sub-framework before a spike can run.
-9. **Payroll (adjusted)** — blocked until a historical payroll source is
+10. **Payroll (adjusted)** — blocked until a historical payroll source is
    found; revisit if/when one turns up rather than approximating with
    current-season salary data pretending to be historical.
 
@@ -222,5 +233,9 @@ Worktree `bbsbh-contender-diary`, branch `claude/contender-diary-framework`.
 Pipeline scripts (not app code, same convention as `.scratch/level-benchmarks/`)
 in `.scratch/team-success/` — `build-outcome-ladder.mjs` and its output
 `outcome-ladder.json` today; each future spike adds its own script and cached
-pull there. The diary itself: `src/lib/research/contenderDiary/`,
+pull there. **Not every cached pull belongs in git**: spike #5's raw cache
+(70 MB) and assembled panel (51 MB) are deliberately left uncommitted because
+they rebuild in about two minutes, unlike the small caches from spikes #1-#4
+that other scripts read directly. Commit the distilled findings file, not the
+sweep, whenever the sweep runs to tens of megabytes. The diary itself: `src/lib/research/contenderDiary/`,
 rendered at `/admin/contenders` by `src/screens/contenders/ContenderDiaryPage.jsx`.

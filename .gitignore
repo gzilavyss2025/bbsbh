@@ -71,3 +71,10 @@ pnpm-debug.log*
 # to undefined (e.g. `--out $UNSET_VAR`). Never app content; one such file was
 # committed by accident once. Ignored so the next mistake stays local.
 undefined/
+
+# team-success spike #5: the raw statsapi sweep (70 MB) and the assembled panel
+# (51 MB) rebuild from scratch in about two minutes via
+# .scratch/team-success/build-october-texture.mjs. Only the distilled
+# october-texture-findings.json is worth committing.
+.scratch/team-success/october-texture-cache.json
+.scratch/team-success/october-texture.json
