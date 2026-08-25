@@ -63,6 +63,10 @@ pnpm-debug.log*
 .scratch/blockage/rows.json
 .scratch/blockage/hitters.json
 
+# cached full-season transaction-wire dump (2008-2024, 52MB) backing the exit-
+# reason join (join-txn.mjs) - rebuild via `node pull-txn.mjs`, resumable
+.scratch/blockage/txn-season-cache.json
+
 # a stray output directory a script creates when its destination path resolves
 # to undefined (e.g. `--out $UNSET_VAR`). Never app content; one such file was
 # committed by accident once. Ignored so the next mistake stays local.

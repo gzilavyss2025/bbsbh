@@ -13,11 +13,18 @@
 //   - a scarcity cut, which is the falsification test - blockage that bites
 //     the same at catcher and in the bullpen is not blockage
 import { readFileSync, writeFileSync } from 'node:fs'
-import { ols, logistic, fTest, median, quantile, mean, zscoreBy } from './lib.mjs'
+import { ols, logistic, multinomial, fTest, median, quantile, mean, zscoreBy } from './lib.mjs'
 
+const BENCH = 'C:/Users/gzilavy/bbsbh/.scratch/level-benchmarks'
 const stays = JSON.parse(readFileSync('stays.json', 'utf8'))
 const bio = JSON.parse(readFileSync('incumbent-bio.json', 'utf8'))
 const mlb = JSON.parse(readFileSync('mlb-cache.json', 'utf8'))
+const standings = JSON.parse(readFileSync(`${BENCH}/standings-cache.json`, 'utf8'))
+// Who actually ended the stay, and why: read off the transaction wire
+// (join-txn.mjs), not inferred from the level change alone. See exits.json's
+// own header comment in join-txn.mjs for how "merit / injury / rosterRule /
+// demoted / traded / settledEarlier / unresolved" are drawn from typeCode.
+const exits = JSON.parse(readFileSync('exits.json', 'utf8'))
 
 const out = {}
 const say = (...a) => console.log(...a)
@@ -121,11 +128,15 @@ for (const s of stays) {
   const svc = serviceYears(s.job.id, s.season)
   if (svc == null) continue
   const svcStrict = serviceYearsStrict(s.job.id, s.season)
-  const rate = s.group === 'hitting' ? s.ownOps : (s.ownEra > 0 ? -s.ownEra : null)
-  if (rate == null || !Number.isFinite(rate)) continue
   const vol = s.group === 'hitting' ? s.ownPa : s.ownIp
   if (!vol) continue
+  // A pitcher with a cumulative 0.00 ERA at the level (a real, if rare,
+  // outcome for a short dominant stint) must not be treated as "no rate" -
+  // `ownEra > 0` used to gate this and silently dropped every one of them.
+  const rate = s.group === 'hitting' ? s.ownOps : -s.ownEra
+  if (rate == null || !Number.isFinite(rate)) continue
   const act = activeDays(s.startDate, s.endDate)
+  const exit = exits[`${s.playerId}:${s.season}:${s.endDate}`] || null
   rows.push({
     ...s,
     rate,
@@ -146,8 +157,17 @@ for (const s of stays) {
         ? null
         : Math.max(0, 6 - serviceYears(s.jobLag.id, s.season - 1)))
       : null,
+    // The other job-above-him variables besides quality/control also need a
+    // real lag, not just a relabeled current-season value - see jobCols().
+    jobLagDepth: s.jobLag ? s.jobLag.depth : null,
+    jobLagAge: s.jobLag ? s.jobLag.age : null,
+    orgWinPctLag: standings[`${s.orgId}:${s.season - 1}`] ? standings[`${s.orgId}:${s.season - 1}`].winPct : null,
+    jobTenureLag: s.jobLag && s.jobLag.id != null ? orgTenure(s.jobLag.id, s.orgId, s.season - 1) : null,
     tier: draftTier(s.draftRound),
     era: s.season <= 2013 ? 'e1' : s.season <= 2018 ? 'e2' : 'e3',
+    exitReason: exit ? exit.exitReason : 'unresolved',
+    prospectEvent: exit ? exit.prospectEvent : 'unmatched',
+    incumbentEvent: exit ? exit.incumbentEvent : 'none',
   })
 }
 
@@ -232,16 +252,29 @@ function baseNames(pooled) {
   if (pooled) n.push('is pitcher')
   return n
 }
+// useLag=true must describe the job as it stood a season EARLIER, in full -
+// quality and control were already doing this; depth/age/org win pct/tenure
+// were silently reading the current season regardless of the flag, so a
+// "lagged" fit was still half-leaking concurrent information. Every term
+// here now switches together.
 function jobCols(r, useLag) {
-  const q = useLag ? r.jobLagQZ : r.jobQZ
-  const ctrl = useLag ? (r.jobLagControlLeft ?? r.controlLeft) : r.controlLeft
+  if (!useLag) {
+    return [
+      r.jobQZ,
+      r.controlLeft / 6,
+      r.jobDepth - depthMean,
+      (r.jobAge ?? jobAgeMean) - jobAgeMean,
+      (r.orgWinPct ?? winMean) - winMean,
+      r.jobTenure,
+    ]
+  }
   return [
-    q,
-    ctrl / 6,
-    r.jobDepth - depthMean,
-    (r.jobAge ?? jobAgeMean) - jobAgeMean,
-    (r.orgWinPct ?? winMean) - winMean,
-    r.jobTenure,
+    r.jobLagQZ,
+    (r.jobLagControlLeft ?? r.controlLeft) / 6,
+    (r.jobLagDepth ?? r.jobDepth) - depthMean,
+    (r.jobLagAge ?? r.jobAge ?? jobAgeMean) - jobAgeMean,
+    (r.orgWinPctLag ?? r.orgWinPct ?? winMean) - winMean,
+    r.jobTenureLag ?? r.jobTenure,
   ]
 }
 const JOB_NAMES = [
@@ -330,6 +363,98 @@ function fitLogit(subset, yFn, label, pooled = true) {
 out.competing = []
 out.competing.push(fitLogit(traded, (r) => r.changedOrg, 'left the org before he debuted'))
 out.competing.push(fitLogit(moved, (r) => r.changedPos, 'changed position by the time he debuted', false))
+
+// ---- why did the stay actually end? (join-txn.mjs, read off the wire) ----
+say('\n\n========== WHY THE STAY ENDED: THE TRANSACTION WIRE, NOT JUST THE LEVEL CHANGE ==========')
+const reasonCounts = {}
+for (const r of rows) reasonCounts[r.exitReason] = (reasonCounts[r.exitReason] || 0) + 1
+say('exit reason composition:')
+for (const [k, v] of Object.entries(reasonCounts).sort((a, b) => b[1] - a[1])) {
+  say(`  ${k.padEnd(16)} n=${String(v).padStart(4)}  (${(100 * v / rows.length).toFixed(1)}%)`)
+}
+out.exitReasons = reasonCounts
+
+// The decisive test: does "the job above him" still fail to predict waiting
+// once the confounded exits (injury forced it, September/DFA opened a spot,
+// he was already rostered months earlier) are taken out, rather than pooled
+// in with the ordinary case as if every promotion were the same kind of event?
+say('\n--- refit "the job above him" restricted to a clean merit promotion ---')
+const meritOnly = rows.filter((r) => r.exitReason === 'merit')
+out.meritOnlyModel = fitPair(meritOnly, `merit-only promotions (n=${meritOnly.length} of ${rows.length})`)
+
+say('\n--- refit the full sample with exit reason as an explicit control ---')
+// Collapse the rare tail (demoted/traded/left/settledEarlier/unresolved -
+// none clears 3% of the sample on its own) into one "other" dummy so this
+// doesn't add more parameters than the confound is worth resolving.
+const REASON_DUMMIES = ['injury', 'rosterRule', 'other']
+function reasonDummy(r) {
+  if (r.exitReason === 'injury') return 'injury'
+  if (r.exitReason === 'rosterRule') return 'rosterRule'
+  if (r.exitReason === 'merit') return null
+  return 'other'
+}
+{
+  const y = rows.map((r) => Math.log(r.activeDays))
+  const names = [...baseNames(true), ...JOB_NAMES, ...REASON_DUMMIES.map((d) => `exit: ${d}`)]
+  const X = rows.map((r) => {
+    const rd = reasonDummy(r)
+    return [...baseCols(r, true), ...jobCols(r, false), ...REASON_DUMMIES.map((d) => (rd === d ? 1 : 0))]
+  })
+  const m = ols(X, y, names)
+  say(`  n=${rows.length}, R2=${m.r2.toFixed(4)} (adj ${m.adjR2.toFixed(4)})`)
+  for (const t of m.terms) {
+    if (!JOB_NAMES.includes(t.name) && !t.name.startsWith('exit: ')) continue
+    const star = t.p < 0.01 ? '**' : t.p < 0.05 ? '*' : '  '
+    say(`    ${t.name.padEnd(32)} b=${t.beta.toFixed(4).padStart(8)}  z=${t.z.toFixed(2).padStart(6)}  p=${t.p.toFixed(4)} ${star}`)
+  }
+  out.withExitControls = {
+    n: rows.length,
+    r2: m.r2,
+    adjR2: m.adjR2,
+    jobTerms: m.terms.filter((t) => JOB_NAMES.includes(t.name)),
+    exitTerms: m.terms.filter((t) => t.name.startsWith('exit: ')),
+  }
+}
+
+// ---- one competing-risk outcome, not three separate ones ------------------
+// Hitters only (changedPos does not exist for pitchers): stayed at Triple-A
+// and made it up the same way he came in (reference), left the org before he
+// debuted, or moved to a new position before he debuted. A player can be
+// both traded AND repositioned; traded is coded first because it is the more
+// legible, harder-edged event and because that is the same precedence the
+// separate binary fits above already imply by fitting it as its own outcome.
+say('\n\n========== ONE OUTCOME, THREE FATES: A JOINT MODEL INSTEAD OF THREE SEPARATE ONES ==========')
+const compRows = rows.filter((r) => r.group === 'hitting' && r.changedOrg != null && r.changedPos != null)
+const CLASS_NAMES = ['stayed', 'traded', 'positionChanged']
+const compY = compRows.map((r) => (r.changedOrg ? 1 : r.changedPos ? 2 : 0))
+const compCounts = [0, 0, 0]
+compY.forEach((c) => { compCounts[c] += 1 })
+say(`n=${compRows.length}  stayed=${compCounts[0]}  traded=${compCounts[1]}  positionChanged=${compCounts[2]}`)
+if (compRows.length >= 80 && compCounts.every((c) => c >= 15)) {
+  const compX = compRows.map((r) => [...baseCols(r, false), ...jobCols(r, false)])
+  const compNames = [...baseNames(false), ...JOB_NAMES]
+  const mm = multinomial(compX, compY, 3, CLASS_NAMES, compNames)
+  say(`McFadden=${mm.mcFadden.toFixed(4)}`)
+  out.jointCompeting = { n: compRows.length, counts: compCounts, mcFadden: mm.mcFadden, classes: [] }
+  for (const cls of mm.classes) {
+    say(`\n--- vs "stayed": ${cls.className} ---`)
+    for (const t of cls.terms) {
+      if (!JOB_NAMES.includes(t.name)) continue
+      const star = t.p < 0.01 ? '**' : t.p < 0.05 ? '*' : '  '
+      say(`    ${t.name.padEnd(32)} OR=${t.oddsRatio.toFixed(3).padStart(7)}  z=${t.z.toFixed(2).padStart(6)}  p=${t.p.toFixed(4)} ${star}`)
+    }
+    out.jointCompeting.classes.push({ className: cls.className, terms: cls.terms.filter((t) => JOB_NAMES.includes(t.name)) })
+  }
+  // Same "traded" question, same hitters-only subset, fit as an independent
+  // binary logistic - the direct comparison the separate-fits approach above
+  // was actually running, so the joint fit's "did anything change" claim has
+  // something matched to compare against.
+  say('\n--- for comparison: "traded", hitters only, fit independently (not jointly) ---')
+  const tradedHittersOnly = fitLogit(compRows, (r) => r.changedOrg, 'traded, hitters only, independent fit', false)
+  out.jointCompeting.independentTradedComparison = tradedHittersOnly
+} else {
+  say('too few cases in one class to fit a joint model')
+}
 
 // ---- selection: the men this cohort cannot see ---------------------------
 say('\n\n========== WHO IS MISSING ==========')
