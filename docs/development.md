@@ -63,6 +63,18 @@ Then classify the task:
   removal costs a few seconds each, so a large backlog is slow enough to exceed
   a command timeout mid-sweep.
 
+  A crashed or interrupted git process leaves its lock file (`index.lock`,
+  `HEAD.lock`, `config.lock`) behind, and every later git command in that
+  checkout then fails with `Unable to create '…/index.lock': File exists`.
+  Nothing else about the checkout looks wrong, so it reads as "git is broken"
+  rather than "git is locked" — one such lock silently wedged the primary
+  checkout for a full day in 2026-08. `session-start.sh` clears abandoned locks
+  before anything else runs, in the common gitdir and in every linked
+  worktree's, and reports each one it removed. Staleness is decided by age
+  (60s normally, 600s while some git process is alive) rather than by process
+  detection, because several sessions work this repo at once and a live `git`
+  somewhere is the normal state, not a sign that this lock is in use.
+
 ## Starting a day
 
 The maintainer's routine is a fresh session and the `/start-day` skill, before
