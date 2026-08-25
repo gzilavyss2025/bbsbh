@@ -528,7 +528,12 @@ const BUDGETS = {
   //
   // +1 for gen-level-tenure-benchmark.mjs — a generator RUNS on import, so it
   // cannot live in scripts/lib/; stays flat with every other gen-*.mjs.
-  scripts: 96,
+  // +1 for scan-game-notes-insights.mjs — the MANUAL Game Notes curation scan
+  // (issue #774). Not a generator and not on any cron, but it sits flat with
+  // them for the same reason: it runs on import (a CLI with a dispatch at the
+  // bottom), so scripts/lib/ is not open to it. Its pure half DID go to
+  // scripts/lib/game-notes-corroboration.mjs.
+  scripts: 97,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -629,7 +634,11 @@ const BUDGETS = {
   // 600-line ceiling when the grid arrived, and that guard's remedy is to split
   // rather than to widen. It sits here beside the other sweep helpers the
   // generators share.
-  'scripts/lib': 24,
+  // +1 for game-notes-corroboration.mjs — the vocabulary, validation and
+  // staleness window the Game Notes curation signal shares between the manual
+  // scan, gen-callouts.mjs and its unit test (issue #774). Pure, importable,
+  // and shared by three callers: exactly what this directory is for.
+  'scripts/lib': 25,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

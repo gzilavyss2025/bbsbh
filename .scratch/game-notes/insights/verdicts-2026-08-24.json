@@ -1,0 +1,35 @@
+{
+  "scannedThrough": "2026-08-23",
+  "note": "Hand classification of the 2026-08-23 dossier (extract all --days=1, 30 clubs / 276 blurbs). Each entry names the club whose notes were read AND the club the player plays for. Only blurbs that write about a fact the dossier's `computed` join table already held for that player earn a signal; the result-tier rows are kept here so `apply` reports the refusal rather than hiding it.",
+  "entries": [
+    { "teamId": 158, "personId": 656730, "player": "Trevor Megill", "signals": ["scorelessStreak"], "tier": "standing", "date": "2026-08-23",
+      "quote": "It's Trevor Time! — Trevor Megill is unscored upon in his last 11 games (11ip, 2h, 1bb, 8k). We compute an 11-outing scoreless streak for him: the same number, arrived at independently." },
+    { "teamId": 158, "personId": 661388, "player": "William Contreras", "signals": ["onBase"], "tier": "standing", "date": "2026-08-23",
+      "quote": "Don't Mess with Bill — in his last 6 games he is batting .458 with a .500 OBP. We compute an 8-game on-base streak." },
+    { "teamId": 109, "personId": 694374, "player": "Tim Tawa", "signals": ["onBase"], "tier": "standing", "date": "2026-08-23",
+      "quote": "TAWA'S TREND — has reached base safely in a career-high 8 straight games. We compute a 9-game on-base streak." },
+    { "teamId": 109, "personId": 672515, "player": "Gabriel Moreno", "signals": ["onBase"], "tier": "standing", "date": "2026-08-23",
+      "quote": "MORENO'S HOME STREAK / MORENO'S HITTING STREAK — a career-best 31-game home on-base streak and a 15-game hitting streak. We compute a 17-game on-base streak." },
+    { "teamId": 112, "personId": 691718, "player": "Pete Crow-Armstrong", "signals": ["leader"], "tier": "standing", "date": "2026-08-23",
+      "quote": "HOMERS MAKE US HAPPY — Crow-Armstrong's 32 homers are seventh among all major leaguers. We have him as the club's home-run leader (33)." },
+    { "teamId": 113, "personId": 701398, "player": "Sal Stewart", "signals": ["leader"], "tier": "standing", "date": "2026-08-23",
+      "quote": "SALUTATIONS — Sal Stewart leads the Reds with 27 HR, 97 RBI, 130 hits, 24 doubles. We have him as the club's leader in home runs (27) and doubles (24)." },
+    { "teamId": 117, "personId": 670541, "player": "Yordan Alvarez", "signals": ["leader"], "tier": "standing", "date": "2026-08-23",
+      "quote": "MVP-CALIBER — first in the AL in HR (36); GOOD INTENTIONS — 25 intentional walks, most in the majors. We have him as the club's leader in home runs (36) and walks (91)." },
+    { "teamId": 119, "personId": 660271, "player": "Shohei Ohtani", "signals": ["onBase"], "tier": "standing", "date": "2026-08-23",
+      "quote": "SHO ME SIX! — two walks yesterday, extending his on-base streak to 10 games. We compute an 11-game on-base streak. Tiered standing, not result: the blurb's subject is the streak, and the line it quotes carries no score." },
+    { "teamId": 143, "personId": 656941, "player": "Kyle Schwarber", "signals": ["leader"], "tier": "timeless", "date": "2026-08-23",
+      "quote": "THE RACE TO 400 — needs 11 more to reach 400 career home runs; 225 since joining the Phillies in 2022. We have him as the club's home-run leader (39)." },
+    { "teamId": 146, "personId": 681715, "player": "Heriberto Hernández", "signals": ["leader", "homerRec"], "tier": "standing", "date": "2026-08-23",
+      "quote": "BERT ALERT — owns a team-leading 19 home runs and the Marlins are 15-2 in games he homers in. Both numbers match what we compute exactly: club HR leader (19), homer record 15-2." },
+
+    { "teamId": 108, "personId": 687263, "player": "Zach Neto", "signals": ["leader"], "tier": "result", "date": "2026-08-23",
+      "quote": "ZACH ATTACK — Thursday at Houston he went 5-for-6 with a HR and seven RBI. REFUSED: the blurb IS one game's line, and that game may be one the reader has not scored yet." },
+    { "teamId": 113, "personId": 668709, "player": "JJ Bleday", "signals": ["leader"], "tier": "result", "date": "2026-08-23",
+      "quote": "BLEDAY HITS FOR THE CYCLE — in last night's 11-5 win at AZ. REFUSED: it prints the final score." },
+    { "teamId": 109, "personId": 571448, "player": "Nolan Arenado", "signals": ["homerRec"], "tier": "result", "date": "2026-08-23",
+      "quote": "LAST GAME — the D-backs lost 11-5 vs. Reds last night. REFUSED: a recap, score and all." },
+    { "teamId": 147, "personId": 665862, "player": "Jazz Chisholm Jr.", "signals": ["leader"], "tier": "result", "date": "2026-08-23",
+      "quote": "YESTERDAY'S NEWS — the Yankees fell to the Blue Jays, 4-3. REFUSED: a recap, score and all." }
+  ]
+}

@@ -1,4 +1,17 @@
 > **2026-08-18**: decided — curation-signal-only, filed as gzilavyss2025/bbsbh#774.
+> **2026-08-24**: SHIPPED, as the curation-signal-only option and nothing more.
+> `scripts/scan-game-notes-insights.mjs` (manual, no API key, no workflow) +
+> `scripts/lib/game-notes-corroboration.mjs` + a bounded +6 on the matching
+> callout's worthiness score. Two departures from the recommendation below, both
+> deliberate: the classifier is the AGENT RUNNING THE SCAN, not a nightly Haiku
+> job (the pass is occasional, so a metered key bought nothing), and the join
+> table — what gen-callouts already computed for that club — is handed to the
+> classifier up front, which is what stops it inventing a corroboration for a
+> fact we never computed. Rule and rubric: `docs/callouts.md`, "The
+> corroboration nudge". Finding 3 below (feed the raw text to the reader, don't
+> trust the parse) held up in practice: the Padres still parse to zero blurbs,
+> the Brewers parse clean, and the scan reports the difference instead of
+> failing quietly.
 
 # Game Notes → Insights: exploration + findings (deferred)
 

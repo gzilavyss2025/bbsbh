@@ -137,7 +137,16 @@ const BUDGETS = {
   // +9 lines to attach gen-pitch-arsenal.mjs's century-pitch sweep
   // (scripts/lib/century-club.mjs) onto starterRecords per pitcher/level. The
   // query/row-shaping itself already lives in that lib module, not here.
-  'scripts/gen-callouts.mjs': 1600, // 1507
+  // 1600 -> 1700 for the Game Notes curation signal (issue #774): 23 lines to
+  // read the hand-scanned corroboration file and attach a `corroborated` map
+  // per bundle. Same shape as the century-club bump above — the rule, the
+  // vocabulary and the staleness window all live in
+  // scripts/lib/game-notes-corroboration.mjs, which is also what the manual
+  // scan and the unit test import; what lands here is the read and the join,
+  // and the comment explaining why a spoiler-adjacent source is safe to read
+  // at all. The file had been sitting 4 lines under its cap, so there was no
+  // absorbing this one.
+  'scripts/gen-callouts.mjs': 1700, // 1619
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
   // GameView is the game's ROUTER — one screen per section, each lazily
   // imported, plus the chrome every section shares — so a feature that adds a

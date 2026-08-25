@@ -999,6 +999,16 @@ export function whatsBrewingLayout(teamId) {
   return CONFIG[teamId]?.layout ?? null
 }
 
+// Which PDF page a club's narrative blurbs sit on (1 for most; a few clubs run
+// the narrative on page 2). Same reason as whatsBrewingLayout above: CONFIG
+// stays private, but an out-of-browser caller that drives extractForTeam
+// itself — the Node harness in docs/whats-brewing.md, and
+// scripts/scan-game-notes-insights.mjs — has to know which page to hand it, and
+// hard-coding a page list beside CONFIG is how the two drift apart.
+export function whatsBrewingPage(teamId) {
+  return CONFIG[teamId]?.page ?? (CONFIG[teamId] ? 1 : null)
+}
+
 // ---------------------------------------------------------------------------
 // 'column' layout (Brewers): blurbs stacked in a narrow left column; a short,
 // fully-emphasized line is a title, the ordinary lines beneath it its body.

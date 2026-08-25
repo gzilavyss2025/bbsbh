@@ -86,6 +86,12 @@
 //      playLog is the script's heaviest per-person response, and the pre-half
 //      "order turns over a 3rd time" card only ever concerns the starter.
 //
+//  11. Game Notes corroboration — not a family and not a note: a personId ->
+//      [callout kind] map of which families above a club's OWN press notes
+//      also wrote about, from the manual scan in
+//      scripts/scan-game-notes-insights.mjs. It only nudges that note's
+//      worthiness score (issue #774); nothing from the notes is rendered.
+//
 // MiLB (sportIds 11–14) gets a TRIMMED family set: leaders, streaks, homer
 // records, situational splits, birthdays (flag only), starter/reliever
 // records, TTO splits, and the full teamRecords sweep — but NOT career-based
@@ -148,6 +154,7 @@ import {
 import { rankAllLevels } from '../src/api/callout-notes/rank.js'
 import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
 import { tallyStarterRecord, starterCgShutoutCount } from './lib/pitcher-starts.mjs'
+import { corroboratedFor, loadCorroborationFile } from './lib/game-notes-corroboration.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'callouts')
@@ -248,6 +255,15 @@ async function loadFoulData() {
   return { foulSpoilerBoard: board, foulRatePerPitch }
 }
 const { foulSpoilerBoard, foulRatePerPitch } = await loadFoulData()
+
+// The Game Notes curation signal (issue #774), read once from disk like
+// fouls.json above and joined per club at the SLATE date. The whole rule —
+// where the file comes from (a MANUAL scan), why a recap-tier blurb never
+// reaches it, and the staleness window — is in the lib beside these two
+// imports. No file ⇒ no `corroborated` key, i.e. every date before a scan ran.
+const notesPath = join(here, '..', 'public', 'data', 'game-notes-corroboration.json')
+const corroborationFile = await loadCorroborationFile(notesPath)
+const corroboratedByTeam = (teamId) => corroboratedFor(corroborationFile, teamId, targetApi)
 
 // Century-club pitch data, read ONCE (see scripts/lib/century-club.mjs for
 // the shape/why) and joined into starterRecords below by pitchLevel+id.
@@ -1526,6 +1542,10 @@ for (const g of games) {
     }
   }
 
+  // Both clubs' corroborated players in ONE personId -> [kind] map: a personId
+  // belongs to exactly one of them, and the note builders look their own up.
+  const corroborated = { ...corroboratedByTeam(awayId), ...corroboratedByTeam(homeId) }
+
   outGames[g.gamePk] = {
     // The shard's own name and date, so a file can be checked against where it
     // was filed — a bundle under the wrong gamePk is a note on the wrong game.
@@ -1564,6 +1584,9 @@ for (const g of games) {
       away: teamRecordFor(awayId),
       home: teamRecordFor(homeId),
     },
+    // Absent when neither club has a live entry, so the key only ever appears
+    // where it means something.
+    ...(Object.keys(corroborated).length ? { corroborated } : {}),
   }
 }
 

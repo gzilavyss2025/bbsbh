@@ -44,6 +44,8 @@ export {
   foldedRecordText,
   gameResult,
   magnitudeOf,
+  corroborationBonus,
+  CORROBORATION_BONUS,
   rankNotes,
 } from './callout-notes/shared.js'
 

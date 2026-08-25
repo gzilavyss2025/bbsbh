@@ -13,7 +13,7 @@ import {
   runnerLastName,
 } from '../playbyplay.js'
 import { personNameParts, dayWord } from '../select.js'
-import { ordinal, isNum, clampScore, skewBonus, magnitudeOf, SCORE_BASE, foldedRecordText, gameResult } from './shared.js'
+import { ordinal, isNum, clampScore, skewBonus, magnitudeOf, corroborationBonus, SCORE_BASE, foldedRecordText, gameResult } from './shared.js'
 import { computeCalloutProgress } from './progress.js'
 import { buildCallouts } from './liveAtBat.js'
 import { VS_TEAM_ROLLUP_MAX } from './vsTeamNote.js'
@@ -262,7 +262,11 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
           ordered[i] = {
             ...n,
             text: `Was caught stealing in the ${ordinal(caughtInning)}, ending a run of ${run + (game?.beforeCaught ?? 0)} straight steals`,
-            score: clampScore(SCORE_BASE.onBaseEnded + magnitudeOf(run - 4, 10)),
+            score: clampScore(
+              SCORE_BASE.onBaseEnded +
+                magnitudeOf(run - 4, 10) +
+                corroborationBonus(bundle, 'onBaseEnded', n.personId),
+            ),
           }
         } else if (game?.n > 0) {
           const stole =
@@ -324,7 +328,9 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
         side: battingSide,
         kind: 'onBaseEnded',
         dedupeKey: `onbase-${id}`,
-        score: clampScore(SCORE_BASE.onBaseEnded + magnitudeOf(s.onBase - 8, 15)),
+        score: clampScore(
+          SCORE_BASE.onBaseEnded + magnitudeOf(s.onBase - 8, 15) + corroborationBonus(bundle, 'onBaseEnded', id),
+        ),
       })
     }
 

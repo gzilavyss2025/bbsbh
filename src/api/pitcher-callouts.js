@@ -39,7 +39,7 @@ import { CENTURY_CLUB_MIN, CENTURY_MPH, pitchFamily } from './pitchArsenal.js'
 // bonus has to mean the same thing here as it does there, or a Margin Note and
 // a pre-half note cannot be merged into one ranked list (ReferencePanel.jsx)
 // without the merge quietly favouring whichever surface capped its bonus higher.
-import { magnitudeOf } from './callout-notes.js'
+import { magnitudeOf, corroborationBonus } from './callout-notes.js'
 
 // Worthiness bases for this family, same 0–100 scale and clamp/skew idiom as
 // callout-notes.js's SCORE_BASE (kept local rather than imported — this
@@ -107,6 +107,11 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
   const notes = []
   const team = teamName || 'His team'
   const word = dayWordFor(bundle?.dayNight)
+  // The corroboration nudge rides on `push`, so it reaches every family here
+  // uniformly and joins on the same (personId, kind) pair the play-card notes
+  // do. Only the kinds the scan's closed vocabulary can name are ever in the
+  // bundle's map, so this is not a back door into scoring the rest (see
+  // scripts/lib/game-notes-corroboration.mjs's CORROBORATION_SIGNALS).
   const push = (kind, text, scoreBonus = 0) =>
     notes.push({
       text,
@@ -114,7 +119,7 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
       side,
       kind,
       dedupeKey: `${kind}-${row.id}`,
-      score: clampScore(SCORE_BASE[kind] + scoreBonus),
+      score: clampScore(SCORE_BASE[kind] + scoreBonus + corroborationBonus(bundle, kind, row.id)),
     })
 
   // Consecutive-days work, from the workload precompute (completed
