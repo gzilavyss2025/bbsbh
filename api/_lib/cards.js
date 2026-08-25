@@ -321,7 +321,7 @@ const GENERIC = {
   umpires: { eyebrow: 'UMPIRE RANKINGS', title: 'Umpire Rankings', sub: "Every home-plate umpire's season strike-zone accuracy." },
   awards: { eyebrow: 'AWARDS HISTORY', title: 'Awards History', sub: 'MVP, Cy Young, Rookie of the Year, and more — five seasons back.' },
   'postseason-history': { eyebrow: 'POSTSEASON HISTORY', title: 'Postseason History', sub: 'Every bracket back to 2000, series by series.' },
-  'postseason-leaders': { eyebrow: 'POSTSEASON LEADERS', title: 'Postseason Leaders', sub: 'Career playoff batting and pitching leaders since 2000.' },
+  'postseason-leaders': { eyebrow: 'POSTSEASON LEADERS', title: 'Postseason Leaders', sub: 'Career postseason batting and pitching leaders since 2000.' },
   'trade-deadline': { eyebrow: 'TRADE DEADLINE', title: 'Trade Deadline', sub: "This year's deadline moves, tracked as they happen." },
   'all-star-rosters': { eyebrow: 'ALL-STAR GAME', title: 'All-Star Rosters', sub: 'Every All-Star roster, year over year back to 1933.' },
   'all-star-legacy': { eyebrow: 'ALL-STAR LEGACY', title: 'All-Star Legacy', sub: 'Career All-Star selections and honors, franchise by franchise.' },

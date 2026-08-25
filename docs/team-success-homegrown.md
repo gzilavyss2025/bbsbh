@@ -16,7 +16,7 @@ wild card?
 **The answers, in order of how much weight they carry.**
 
 1. **No, not on the main question.** Homegrown share does not clearly
-   predict how far a playoff team goes. The correlation against the outcome
+   predict how far a postseason team goes. The correlation against the outcome
    ladder is small and does not clear conventional statistical significance
    (permutation p=0.07 to 0.23, depending on the cut), even though it points
    the same direction in every one of 19 leave-one-season-out refits. Read
@@ -24,7 +24,7 @@ wild card?
    effect.
 2. **But it separates division winners from wild-card teams — and this is
    the mirror image of what the roster-age spike found.** Among the 178
-   team-seasons that made the playoffs, division winners ran about **5
+   team-seasons that made the postseason, division winners ran about **5
    percentage points more homegrown** than wild-card teams, on both the
    hitting and pitching side, and both differences clear conventional
    significance (p=0.04). The age spike found the *opposite* pattern — age
@@ -32,7 +32,7 @@ wild card?
    vs. wild card. Homegrown share does the reverse: nothing about "made it"
    or "how far," something about "how you got there."
 3. **Checking who actually played in October changes nothing.** Reweighting
-   each playoff team's homegrown share by real postseason playing time,
+   each postseason team's homegrown share by real postseason playing time,
    instead of full-season role, moves the number by less than a percentage
    point and does not turn the null into a finding.
 4. **This extends, rather than contradicts, the earlier finding that
@@ -40,7 +40,7 @@ wild card?
    (`docs/homegrown-dependence.md`). That spike found dependence roughly
    irrelevant to winning games; this one finds it roughly irrelevant to
    winning *rounds* too, with one exception — it still says something about
-   which KIND of playoff team you were.
+   which KIND of postseason team you were.
 
 ## What "homegrown" means here
 
@@ -100,7 +100,7 @@ sign flip is well inside what a small, noisy group can produce on its own,
 not a separate finding.
 
 **Division winners vs. wild-card teams, restricted to the 178 clubs that
-already made the playoffs:**
+already made the postseason:**
 
 | | Division winners (n=114) | Wild card (n=64) | diff | permutation p |
 | --- | --- | --- | --- | --- |
@@ -115,14 +115,14 @@ the tournament.
 
 ## Does checking real October playing time change any of this?
 
-Reweighting each of the 178 playoff teams' homegrown share by who actually
+Reweighting each of the 178 postseason teams' homegrown share by who actually
 batted or pitched in their postseason games, instead of by full-season role
 — the same check the roster-age spike ran, using the same reusable
 postseason-usage primitive (`docs/team-success-postseason-usage.md`) and its
 required volume-share control:
 
 ```
-178 playoff team-seasons, 2004-2023 excluding 2020
+178 postseason team-seasons, 2004-2023 excluding 2020
 first-pro-org resolved for 1,850/1,867 distinct players referenced (99.1%),
   covering 4,455/4,486 PA/IP-weighted playing-time references (99.3%)
 
@@ -147,7 +147,7 @@ real one.
 The wonDivision comparison above was not rerun at postseason-actual
 resolution, since it is defined the same way in both cases and the
 full-season version already has the larger, more reliable sample (234
-playoff teams vs. this check's 178, once further restricted to players this
+postseason teams vs. this check's 178, once further restricted to players this
 measure can resolve).
 
 ## What this does not settle

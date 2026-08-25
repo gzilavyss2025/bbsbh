@@ -26,7 +26,7 @@ sneak in on a wild card?
 
 1. **On the hitting side, a spread-out lineup is a real, sizable edge — for
    getting IN, more than for going deep once you're there.** Teams that made
-   the playoffs had a meaningfully SMALLER share of their hitting value
+   the postseason had a meaningfully SMALLER share of their hitting value
    riding on their single best hitter than teams that didn't (21.6% vs.
    24.8%), and the correlation against the full 0-5 outcome ladder is one of
    the strongest this program has found (rho≈−0.19 to −0.23, effectively
@@ -41,7 +41,7 @@ sneak in on a wild card?
    bigger effect.
 3. **Concentration does not separate division winners from wild-card
    teams**, on either side of the ball. Among the 154 clubs that already
-   made the playoffs, a division winner's hitting value was spread out about
+   made the postseason, a division winner's hitting value was spread out about
    as much as a wild-card team's. This matches the roster-age spike's
    pattern (a real "making it" signal, no "how you got there" signal) — the
    mirror image of what the homegrown spike found.
@@ -181,11 +181,11 @@ and it mostly holds up (weaker but still real for two of three measures)
 through the LCS+ cut. By the World Series cut, with only 15 champions in the
 sample, nothing can be told apart from noise — the same thin-top-rungs
 problem every spike in this program runs into. On the pitching side, only
-the concentration index clears the bar for "made the playoffs at all," and
+the concentration index clears the bar for "made the postseason at all," and
 even that is a small effect.
 
 **Division winners vs. wild-card teams, restricted to the 154 clubs that
-already made the playoffs:**
+already made the postseason:**
 
 | | Hitting (division winners vs. wild card) | Pitching (division winners vs. wild card) |
 | --- | --- | --- |
@@ -209,7 +209,7 @@ excluding 2020, n=450) was counted per team.
 ```
 allStarCount: Spearman rho=0.5568 vs the 0-5 ladder, permutation p=0.0000,
   same sign in 15/15 leave-one-season-out refits
-wonDivision (among 154 playoff teams): 3.98 All-Stars vs. 3.70 — not a
+wonDivision (among 154 postseason teams): 3.98 All-Stars vs. 3.70 — not a
   reliable difference (permutation p=0.34)
 ```
 
@@ -266,7 +266,7 @@ count as independent confirmation.
   concentrated group than the full-season roster, the same follow-up both
   earlier spikes ran.
 - **A joint model with roster age and homegrown share** — three spikes into
-  this program, all three found something on the hitting/making-the-playoffs
+  this program, all three found something on the hitting/making-the-postseason
   cut and comparatively little on the pitching or division-winner cuts.
   Whether these are three independent signals or the same underlying
   "well-run organization" trait showing up three ways is still open.

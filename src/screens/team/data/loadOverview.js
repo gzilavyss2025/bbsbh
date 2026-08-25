@@ -142,7 +142,7 @@ export async function loadOverview(id, asOf) {
     ? []
     : standingsRows
         .map((s) => ({ ...s, ...postseasonOddsFor(postseasonOddsData, s.id, season, scoreCutoff) }))
-        .filter((r) => r.playoffPct != null)
+        .filter((r) => r.postseasonPct != null)
 
   const injuredIds = injuredIdsFrom(ilRoster)
 

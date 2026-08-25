@@ -86,7 +86,7 @@ export const finalFourEntry = {
       id: 'falsification',
       heading: 'The test that could have killed it',
       prose: [
-        'If raising players really helps build an October team, it ought to show up in simply making the playoffs — the part a club has some control over — and not only in the deep run, which is two rounds of a coin flip stacked on top. Had it predicted the deep run alone, the honest reading would be that eighty club-seasons found a pattern in noise.',
+        'If raising players really helps build an October team, it ought to show up in simply making the postseason — the part a club has some control over — and not only in the deep run, which is two rounds of a coin flip stacked on top. Had it predicted the deep run alone, the honest reading would be that eighty club-seasons found a pattern in noise.',
         'It shows up in both. Graduate count predicts a postseason berth on its own about as strongly as it predicts a Championship Series.',
         'Which points at the modest version of this finding, and the modest version is the true one. Nothing here says producing players wins pennants. It says producing a lot of major leaguers is a symptom of a well-run organization, and well-run organizations reach the final four. That is a smaller claim than a club’s public-relations department would write, and it is the one the data will carry.',
       ],

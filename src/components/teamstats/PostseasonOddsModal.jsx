@@ -62,7 +62,7 @@ export function PostseasonOddsModal({ divisionName, rows, onClose }) {
             <thead>
               <tr>
                 <th className="team lft">Team</th>
-                <th>Playoffs</th>
+                <th>Postseason</th>
                 <th>Division</th>
                 <th>Bye</th>
                 <th>Proj. W</th>
@@ -79,7 +79,7 @@ export function PostseasonOddsModal({ divisionName, rows, onClose }) {
                     <TeamLogo teamId={r.id} name={r.name} size={18} />
                     {r.name}
                   </td>
-                  <td>{pct(r.playoffPct)}</td>
+                  <td>{pct(r.postseasonPct)}</td>
                   <td>{pct(r.divisionPct)}</td>
                   <td>{pct(r.byePct)}</td>
                   <td>{r.projectedWins ?? '—'}</td>

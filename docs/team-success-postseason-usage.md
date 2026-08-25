@@ -17,7 +17,7 @@ future factor spike in this program can reuse, not just this one.**
    number by essentially nothing — 0.09 years on the batting side, −0.01 on
    the pitching side. If the original finding were mostly deadline additions
    who never got into a game, this number would have moved a lot. It didn't.
-2. **Restricted to just the 250 team-seasons that made the playoffs**,
+2. **Restricted to just the 250 team-seasons that made the postseason**,
    postseason-actual PITCHING age still predicts how far a team goes
    (rho=0.173, permutation p=0.0070). Batting age does not (rho=0.088,
    p=0.169) — consistent with spike #1's own finding that the pitching side
@@ -49,7 +49,7 @@ mismatch        = postseasonShare − regularShare
 ```
 
 A large positive mismatch is exactly the case a trade-deadline arm suddenly
-anchoring a playoff rotation would produce, but it also catches a September
+anchoring a postseason rotation would produce, but it also catches a September
 call-up who breaks out, an injured regular returning just in time, or a
 bench player who gets hot — the measure doesn't know or care WHY a player's
 role changed, only that it did.
@@ -132,7 +132,7 @@ not less far.
   its own case-level check before trusting an aggregate number.
 - **Statistical power on the "postseason-actual age" checks is naturally
   thinner** than spike #1's full 750-team-season sample — this one only has
-  the 250 team-seasons that made the playoffs at all, since a postseason-actual
+  the 250 team-seasons that made the postseason at all, since a postseason-actual
   measure has nothing to compute for a team that didn't play in October.
 
 ## Where the work lives

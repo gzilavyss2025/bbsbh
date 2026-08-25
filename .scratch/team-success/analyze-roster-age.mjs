@@ -34,7 +34,7 @@ function buildRows({ includeShortSeason }) {
         year: season.year,
         teamId: Number(teamId),
         ladder: outcome.ladder,
-        madePlayoffs: outcome.madePlayoffs,
+        madePostseason: outcome.madePostseason,
         wonDivision: outcome.wonDivision,
         battingAgeRelative: age.battingAgeRelative,
         pitchingAgeRelative: age.pitchingAgeRelative,
@@ -199,10 +199,10 @@ function report(rows, label) {
     }
   }
 
-  console.log('\nDivision winners vs. everyone else who made the playoffs:')
-  const playoffRows = rows.filter((r) => r.madePlayoffs)
+  console.log('\nDivision winners vs. everyone else who made the postseason:')
+  const postseasonRows = rows.filter((r) => r.madePostseason)
   for (const key of ['battingAgeRelative', 'pitchingAgeRelative']) {
-    const flagged = playoffRows.map((r) => ({ ...r, __flag: r.wonDivision }))
+    const flagged = postseasonRows.map((r) => ({ ...r, __flag: r.wonDivision }))
     const { inGroup, outGroup, n } = meanDiff(flagged, key, '__flag')
     const diff = inGroup - outGroup
     const p = permutationTestMeanDiff(flagged, key, '__flag', diff)

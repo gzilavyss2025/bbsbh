@@ -197,4 +197,4 @@ Two of those nested files carry the architecture detail, loaded when you work th
   worthiness) is `docs/callouts.md`; the tense rule is ADR-0014. They come from the
   nightly `gen-callouts.mjs` precompute — extend it, do not build a parallel path.
   See `docs/scripts/generators.md` + `docs/api/`.
-- **Writing style** — ASD-STE100 governs chat replies, authored docs, and commit/PR text here, always on. See `docs/agents/writing-style.md`.
+- **Writing style** — ASD-STE100 governs chat replies, authored docs, and commit/PR text here, always on; the house word list (say "postseason", never "playoffs") is enforced by `check-word-choice`. See `docs/agents/writing-style.md`. <!-- word-choice-exempt: states the rule -->

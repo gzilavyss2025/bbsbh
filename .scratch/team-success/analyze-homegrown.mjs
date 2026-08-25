@@ -14,7 +14,7 @@
 // are already baked into the share fields (a share IS relative — 0 to 1 on
 // the same scale every year, unlike a raw age in years), a permutation test,
 // leave-one-season-out, band comparisons, and a division-winner-vs-wild-card
-// split restricted to playoff teams.
+// split restricted to postseason teams.
 //
 // STRETCH: a "postseason-actual homegrown share" — of the PA/IP a team's
 // players actually got IN OCTOBER, what share came from homegrown players —
@@ -218,7 +218,7 @@ function buildRows({ includeShortSeason }) {
       year: p.season,
       teamId: p.orgId,
       ladder: outcome.ladder,
-      madePlayoffs: outcome.madePlayoffs,
+      madePostseason: outcome.madePostseason,
       wonDivision: outcome.wonDivision,
       homegrownShare: p.homegrownShare,
       homegrownShareHit: p.homegrownShareHit,
@@ -264,10 +264,10 @@ function report(rows, label) {
     }
   }
 
-  console.log('\nDivision winners vs. everyone else who made the playoffs:')
-  const playoffRows = rows.filter((r) => r.madePlayoffs)
+  console.log('\nDivision winners vs. everyone else who made the postseason:')
+  const postseasonRows = rows.filter((r) => r.madePostseason)
   for (const key of ['homegrownShareHit', 'homegrownSharePit']) {
-    const flagged = playoffRows.map((r) => ({ ...r, __flag: r.wonDivision }))
+    const flagged = postseasonRows.map((r) => ({ ...r, __flag: r.wonDivision }))
     const { inGroup, outGroup, n } = meanDiff(flagged, key, '__flag')
     const diff = inGroup - outGroup
     const p = permutationTestMeanDiff(flagged, key, '__flag', diff)
@@ -324,7 +324,7 @@ for (const p of homegrownData.panel) {
   const ladderSeason = ladderBySeason.get(p.season)
   if (!ladderSeason || ladderSeason.shortSeason) continue
   const outcome = ladderSeason.teams[p.orgId]
-  if (!outcome || !outcome.madePlayoffs) continue
+  if (!outcome || !outcome.madePostseason) continue
   const psSeason = postseasonBySeason.get(p.season)
   const psTeam = psSeason?.teams?.[p.orgId]
   if (!psTeam) continue
@@ -368,7 +368,7 @@ for (const p of homegrownData.panel) {
 console.log(
   `\nResolved first-pro-org for ${resolveHits}/${resolveAttempts} distinct postseason players referenced ` +
     `(${totalPlayerRefs - unresolvedPlayerRefs}/${totalPlayerRefs} PA/IP-weighted playing-time references), ` +
-    `n=${postseasonRows.length} playoff team-seasons (2004-2023 excluding 2020, playoff teams only)`,
+    `n=${postseasonRows.length} postseason team-seasons (2004-2023 excluding 2020, postseason teams only)`,
 )
 
 for (const [key, controlKey] of [

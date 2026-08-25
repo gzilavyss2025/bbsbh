@@ -15,7 +15,7 @@ split on the other side, documenting each READER of the files below.
 and a generator listed under no cron must say what runs it instead.** That is
 not tidiness. Two generators here were written for the nightly batch, said so
 in their own headers, and were never added to the workflow — one of them served
-a twenty-three-day-old playoff-odds snapshot to the Team hub the whole time,
+a twenty-three-day-old postseason-odds snapshot to the Team hub the whole time,
 with nothing on screen to say so. A date-keyed file rots quietly. This catalog
 is where that becomes visible.
 
@@ -556,7 +556,7 @@ don't run these by hand.
   `src/api/gamehighlights.js`. Full write-up: `.scratch/highlights-cascade/`.
 
 - `gen-postseason-odds.mjs` → `public/data/postseason-odds.json` — date-keyed
-  MLB postseason odds (playoff / division / bye probability + projected wins),
+  MLB postseason odds (overall / division / bye probability + projected wins),
   from a 5,000-run Monte Carlo of the rest of each season. Team strength comes
   from `team-score.json`, not a separate projection system, so the odds stay in
   lockstep with the Team Score badge beside them — which is why this step **must
