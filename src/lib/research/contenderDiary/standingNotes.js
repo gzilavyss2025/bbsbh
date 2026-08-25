@@ -44,4 +44,9 @@ export const TRAPS = [
     title: 'There is no historical payroll anywhere in this repo',
     body: 'The salary and contract files here are a current-season snapshot, not a time series — the prospect-research diary hit the identical wall. The most obvious alternative explanation for almost any team-success finding — that it is really about money — cannot be tested with what is on hand until a historical payroll source is found. Say so rather than substituting today’s payroll for a team from 2007.',
   },
+  {
+    id: 'reused-panels-have-their-own-season-window',
+    title: 'A dataset built for a different research program may not cover this program’s full window',
+    body: 'The homegrown-dependence classifier (docs/homegrown-dependence.md) was built for the prospect-development diary, on its own season floor and ceiling — 2004-2023, not this program’s 2000-2025. Joining a reused panel like that against the outcome ladder silently drops whatever seasons sit outside its window; the join does not error, it just produces a smaller n than the ladder’s own 780 team-seasons. Any future spike that reuses a dataset built for a different program needs to check that dataset’s own season range before trusting the joined sample size, and say the smaller n out loud rather than let a reader assume full coverage.',
+  },
 ]

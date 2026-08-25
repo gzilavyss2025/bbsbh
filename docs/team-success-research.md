@@ -111,7 +111,7 @@ phase, spike by spike, not part of standing up the framework itself.
 | Payroll (adjusted) | Opening Day payroll ÷ that year's league-average payroll | **Gap.** `salaries.json`/`team-contracts/` are a CURRENT snapshot (Contracts tab), not a historical time series. statsapi carries no historical salary data. This factor needs an external source (e.g. a public payroll archive) before it can be built at all — flag this honestly rather than fake a proxy. | Blocked on a data source |
 | Injuries | team-season "WAR lost to IL time," weighted by the hurt player's value | `rehab.json` is a current snapshot only; historical IL stints would come from the `transactions` endpoint's status-change entries, joined to `war-history` for the lost player's value. Buildable, not built. | Not started |
 | Diversity of star players | count of All-Stars/top-WAR players per roster; how concentrated team WAR was in its top 1-2 players vs. spread across 8+ | `all-star-rosters.json` (back to 1933), `awards-history.json`, `war-history/` | Not started |
-| Where their best players played (homegrown vs. acquired) | parent-org-at-first-pro-season classification, reused directly from the prospect research line | The homegrown-dependence spike (`docs/homegrown-dependence.md`) already built and validated this exact classifier — reuse its method and cached data, don't rebuild it. That spike's own finding was that homegrown DEPENDENCE doesn't predict a team's regular-season win total; this program asks the postseason-ladder question instead, which is a different outcome variable over the same classifier | Not started, but has a head start |
+| Where their best players played (homegrown vs. acquired) | parent-org-at-first-pro-season classification, reused directly from the prospect research line | The homegrown-dependence spike (`docs/homegrown-dependence.md`) already built and validated this exact classifier — reuse its method and cached data, don't rebuild it. That spike's own finding was that homegrown DEPENDENCE doesn't predict a team's regular-season win total; this program asks the postseason-ladder question instead, which is a different outcome variable over the same classifier | **Done** — `docs/team-success-homegrown.md`. Does not predict postseason depth (weak, not significant), but DOES separate division winners from wild-card teams among playoff clubs (+5pp both sides of the ball, p<0.05) — the mirror image of the age spike's null on that same cut. Open follow-up: a joint model with roster age |
 | Age of team | PA-weighted batter age, IP-weighted pitcher age, season-average | Built from statsapi's own per-team-stint `stat.age`, PA/IP-weighted | **Done** — `docs/team-success-roster-age.md`. Real, modest, likely-partly-circular effect (older teams go deeper, especially pitching staffs; age doesn't separate division winners from wild cards). Biggest open follow-up: a pre-trade-deadline age cut, to separate a genuine age effect from contending teams simply renting veterans |
 
 Nothing here is ranked by importance yet — that ranking is itself a question
@@ -175,9 +175,12 @@ land or a factor turns out to need more groundwork than expected:
    candidate for the NEXT spike, ahead of the rest of this list, precisely
    because it would tell a real age effect apart from teams simply renting
    veterans once they're already winning.
-2. **Where their best players played** (homegrown/acquired split against the
-   ladder) — reuses the existing classifier almost as-is; mostly a new
-   regression against a different outcome variable, not new data work.
+2. ~~**Where their best players played**~~ — done, `docs/team-success-homegrown.md`.
+   Reused the existing classifier as-is; a null on postseason depth, but a
+   real, if secondary, division-winner-vs-wild-card split (opposite pattern
+   from the age spike). Best open follow-up: a joint model with roster age,
+   to see whether either factor still carries weight once the other is
+   controlled for.
 3. **Diversity of star players** (WAR concentration) — data already sitting
    in `war-history/`/`all-star-rosters.json`, just needs the per-team-season
    aggregation built.
