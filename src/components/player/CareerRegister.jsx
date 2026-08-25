@@ -47,8 +47,7 @@ export function CareerRegister({ register }) {
                   <TeamLogo
                     teamId={row.pillTeamId}
                     name={row.team}
-                    size={11}
-                    crop
+                    size={16}
                     className="reg-pill__logo"
                   />
                 )}
