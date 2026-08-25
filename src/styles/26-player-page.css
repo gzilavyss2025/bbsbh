@@ -990,7 +990,7 @@
 /* The level tag riding each MiLB row's team. MLB rows carry none — ink IS the
    majors by default, so tagging every one would just be dead repetition. */
 .reg-pill {
-  margin-left: 5px;
+  margin: -3px 0 -3px 5px;
   padding: 2px 4px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
