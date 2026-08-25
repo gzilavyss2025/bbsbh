@@ -32,6 +32,7 @@
 //
 // ADDING AN ENTRY: docs/agents/research-diary.md. The hook at
 // .claude/hooks/research-diary-reminder.mjs is what remembers to ask.
+import { blockageEntry } from './blockage.js'
 import { frontOfficeEntry } from './frontOffice.js'
 import { finalFourEntry } from './finalFour.js'
 import { debutMonthEntry } from './debutMonth.js'
@@ -73,6 +74,7 @@ export const VERDICTS = {
 // Newest first. This order is the diary's spine — append at the TOP, and do
 // not reorder what is already here.
 export const RESEARCH_DIARY = [
+  blockageEntry,
   frontOfficeEntry,
   finalFourEntry,
   debutMonthEntry,

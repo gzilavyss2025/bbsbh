@@ -1,0 +1,276 @@
+{
+  "waitingWithPos": {
+    "n": 427,
+    "baseR2": 0.15841736038041287,
+    "fullR2": 0.16863861216725906,
+    "deltaR2": 0.010221251786846186,
+    "F": 1.0007800550110157,
+    "terms": [
+      {
+        "name": "incumbent quality (z)",
+        "beta": -0.06785165437650682,
+        "se": 0.05262464890015351,
+        "z": -1.2893512031832082,
+        "p": 0.19727615423663325
+      },
+      {
+        "name": "incumbent control yrs left / 6",
+        "beta": 0.1555854558521728,
+        "se": 0.2167113517177508,
+        "z": 0.7179386525852619,
+        "p": 0.4727949749191773
+      },
+      {
+        "name": "incumbent depth at job",
+        "beta": -0.049632672035008395,
+        "se": 0.04984232482559946,
+        "z": -0.9957936795419425,
+        "p": 0.3193504184277749
+      },
+      {
+        "name": "incumbent age",
+        "beta": -0.004724032395248678,
+        "se": 0.02186835495185344,
+        "z": -0.21602138824110753,
+        "p": 0.8289711480793156
+      },
+      {
+        "name": "parent club win pct",
+        "beta": -0.12693102887484703,
+        "se": 0.613168981098081,
+        "z": -0.20700823555610268,
+        "p": 0.8360034866728534
+      }
+    ]
+  },
+  "waitByOutcome": {
+    "movedDownMedian": 129,
+    "stayedMedian": 104
+  },
+  "blockedExamples": [
+    {
+      "name": "Mike Tauchman",
+      "season": 2017,
+      "orgId": 115,
+      "aaaPos": "CF",
+      "debutPos": "COF",
+      "activeDays": 268,
+      "movedDown": 1
+    },
+    {
+      "name": "Billy Hamilton",
+      "season": 2013,
+      "orgId": 113,
+      "aaaPos": "CF",
+      "debutPos": "CF",
+      "activeDays": 155,
+      "movedDown": 0
+    },
+    {
+      "name": "Greg Bird",
+      "season": 2015,
+      "orgId": 147,
+      "aaaPos": "1B",
+      "debutPos": "1B",
+      "activeDays": 40,
+      "movedDown": 0
+    },
+    {
+      "name": "Joshua Fuentes",
+      "season": 2019,
+      "orgId": 115,
+      "aaaPos": "3B",
+      "debutPos": "1B",
+      "activeDays": 188,
+      "movedDown": 1
+    },
+    {
+      "name": "Ryan Rua",
+      "season": 2014,
+      "orgId": 140,
+      "aaaPos": "3B",
+      "debutPos": "COF",
+      "activeDays": 65,
+      "movedDown": 1
+    },
+    {
+      "name": "Ben Paulsen",
+      "season": 2014,
+      "orgId": 115,
+      "aaaPos": "1B",
+      "debutPos": "1B",
+      "activeDays": 232,
+      "movedDown": 0
+    },
+    {
+      "name": "Michael Toglia",
+      "season": 2022,
+      "orgId": 115,
+      "aaaPos": "1B",
+      "debutPos": "COF",
+      "activeDays": 21,
+      "movedDown": 0
+    },
+    {
+      "name": "Austin Riley",
+      "season": 2019,
+      "orgId": 144,
+      "aaaPos": "3B",
+      "debutPos": "COF",
+      "activeDays": 191,
+      "movedDown": 1
+    },
+    {
+      "name": "Bradley Zimmer",
+      "season": 2017,
+      "orgId": 114,
+      "aaaPos": "CF",
+      "debutPos": "CF",
+      "activeDays": 113,
+      "movedDown": 0
+    },
+    {
+      "name": "Evan Gattis",
+      "season": 2013,
+      "orgId": 144,
+      "aaaPos": "DH",
+      "debutPos": "COF",
+      "activeDays": 2,
+      "movedDown": 0
+    },
+    {
+      "name": "Michael Busch",
+      "season": 2023,
+      "orgId": 119,
+      "aaaPos": "3B",
+      "debutPos": "3B",
+      "activeDays": 161,
+      "movedDown": 0
+    },
+    {
+      "name": "Jose F Miranda",
+      "season": 2022,
+      "orgId": 142,
+      "aaaPos": "3B",
+      "debutPos": "1B",
+      "activeDays": 126,
+      "movedDown": 1
+    },
+    {
+      "name": "Oscar Taveras",
+      "season": 2014,
+      "orgId": 138,
+      "aaaPos": "COF",
+      "debutPos": "COF",
+      "activeDays": 243,
+      "movedDown": 0
+    },
+    {
+      "name": "MJ Melendez",
+      "season": 2022,
+      "orgId": 118,
+      "aaaPos": "C",
+      "debutPos": "C",
+      "activeDays": 85,
+      "movedDown": 0
+    }
+  ],
+  "openExamples": [
+    {
+      "name": "Rey Fuentes",
+      "season": 2013,
+      "orgId": 135,
+      "aaaPos": "CF",
+      "debutPos": "CF",
+      "activeDays": 16,
+      "movedDown": 0
+    },
+    {
+      "name": "Garrett Mitchell",
+      "season": 2022,
+      "orgId": 158,
+      "aaaPos": "CF",
+      "debutPos": "CF",
+      "activeDays": 25,
+      "movedDown": 0
+    },
+    {
+      "name": "Pat Valaika",
+      "season": 2016,
+      "orgId": 115,
+      "aaaPos": "SS",
+      "debutPos": "2B",
+      "activeDays": 30,
+      "movedDown": 1
+    },
+    {
+      "name": "Brenton Doyle",
+      "season": 2023,
+      "orgId": 115,
+      "aaaPos": "COF",
+      "debutPos": "CF",
+      "activeDays": 34,
+      "movedDown": 0
+    },
+    {
+      "name": "Teoscar Hernández",
+      "season": 2016,
+      "orgId": 117,
+      "aaaPos": "COF",
+      "debutPos": "COF",
+      "activeDays": 43,
+      "movedDown": 0
+    },
+    {
+      "name": "Franmil Reyes",
+      "season": 2018,
+      "orgId": 135,
+      "aaaPos": "COF",
+      "debutPos": "COF",
+      "activeDays": 43,
+      "movedDown": 0
+    },
+    {
+      "name": "Matt Adams",
+      "season": 2012,
+      "orgId": 138,
+      "aaaPos": "1B",
+      "debutPos": "1B",
+      "activeDays": 48,
+      "movedDown": 0
+    },
+    {
+      "name": "Nate Eaton",
+      "season": 2022,
+      "orgId": 118,
+      "aaaPos": "COF",
+      "debutPos": "COF",
+      "activeDays": 48,
+      "movedDown": 0
+    },
+    {
+      "name": "Everson Pereira",
+      "season": 2023,
+      "orgId": 147,
+      "aaaPos": "COF",
+      "debutPos": "COF",
+      "activeDays": 49,
+      "movedDown": 0
+    },
+    {
+      "name": "Josh Naylor",
+      "season": 2019,
+      "orgId": 135,
+      "aaaPos": "COF",
+      "debutPos": "COF",
+      "activeDays": 53,
+      "movedDown": 0
+    }
+  ],
+  "prevalence": {
+    "settled": 134,
+    "veteranHeld": 171,
+    "both": 50,
+    "n": 427
+  }
+}
