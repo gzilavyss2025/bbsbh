@@ -122,15 +122,6 @@
   color: var(--seal-cover);
 }
 
-.stamppane__lede {
-  margin: var(--space-1) 0 0;
-  max-width: 46ch;
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-  color: var(--album-foil-soft);
-}
-
 /* ---- the pane of stamps ----
    A flat, unrotated grid, which is how a real pane of stamps is printed — so
    no per-slot tilt. Three across on a phone keeps every caption on one or two
@@ -230,13 +221,42 @@
 }
 
 /* A CLUB's print is the club's own mark, centred on the paper — so it carries
-   no second roundel the way a park's photograph does. */
+   no second roundel the way a park's photograph does.
+
+   THE MARK IS SIZED BY THIS BOX, NOT BY ITS `size` PROP. TeamLogo writes
+   `size` as an inline width/height, which no stylesheet width can outrank —
+   but max-width/max-height are different properties and clamp it regardless
+   of the cascade. So the component asks for a mark far larger than any slot
+   (StampSheet.jsx) and these two lines cut it back to the paper, which is
+   what lets one rule fill the mark properly at three columns on a phone and
+   at whatever `auto-fill` lands on above it. `object-fit: contain` is already
+   on `.teamlogo` (07-team-logo-and-buttons.css), so a wide mark letterboxes
+   rather than stretching.
+
+   The padding is the white margin the mark sits IN: percentage padding
+   resolves against the print's width on all four sides, so the breathing room
+   scales with the slot instead of collapsing on a phone. Wide enough that the
+   mark never touches the perforated frame, tight enough that the stamp reads
+   as a printed mark rather than a mark parked on a card. */
 .postagestamp__club {
+  /* ABSOLUTE, and that is load-bearing rather than tidy. `size` reaches the
+     mark as an inline height, and a grid item tall enough pushes the frame
+     past the 5:4 `aspect-ratio` it is drawn to — asking for a 140px mark
+     turned every stamp portrait. Taken out of the sizing flow, the mark
+     cannot argue with the frame, and `inset: 0` hands it a definite box for
+     the percentages below to resolve against. */
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-2);
+  padding: 10%;
   background: var(--surface-inset);
+}
+
+.postagestamp__club .teamlogo {
+  max-width: 100%;
+  max-height: 100%;
 }
 
 /* The knockout mark, sitting where a stamp's face value sits — a small

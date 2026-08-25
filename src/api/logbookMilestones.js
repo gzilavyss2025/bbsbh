@@ -112,7 +112,6 @@ export const MILESTONE_COLLECTIONS = [
   {
     id: 'clubs',
     title: 'Every club',
-    lede: 'Stamp a game against every club at this level — either dugout counts.',
     slots: (roster) => roster ?? league(),
     // Both sides fill a slot: you sat with whichever club you logged, home
     // or away. (Mirrors ClubsSeen.jsx's own `seen` set.)
@@ -121,7 +120,6 @@ export const MILESTONE_COLLECTIONS = [
   {
     id: 'parks',
     title: 'Every ballpark',
-    lede: 'Stamp a game AT each park — the home club is the park.',
     slots: (roster) => roster ?? league(),
     // Only the HOME club's slot: that's whose park the game was played at.
     // No two clubs at a level share a home park, so a level's own club list
@@ -167,7 +165,6 @@ export function computeMilestoneProgress(collection, stamps, factsByPk, roster) 
   return {
     id: collection.id,
     title: collection.title,
-    lede: collection.lede,
     total: slots.length,
     count,
     complete: slots.length > 0 && count >= slots.length,

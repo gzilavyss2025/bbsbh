@@ -17,7 +17,6 @@ import {
 const THREE_SLOT_COLLECTION = {
   id: 'trio',
   title: 'Trio',
-  lede: 'test fixture',
   slots: () => [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
   fillsFor: (fact) => [fact.who].filter(Boolean),
 }

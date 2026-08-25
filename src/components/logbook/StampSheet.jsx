@@ -151,7 +151,6 @@ function StampPane({ milestone, sportId, counts }) {
           </span>
         )}
       </header>
-      <p className="stamppane__lede">{milestone.lede}</p>
       <ul className="stamppane__grid">
         {milestone.slots.map((slot) => (
           <PostageStamp key={slot.id} slot={slot} park={isParks} />
@@ -196,7 +195,14 @@ function PostageStamp({ slot, park }) {
             </>
           ) : (
             <span className="postagestamp__club" aria-hidden="true">
-              <TeamLogo teamId={slot.id} name={slot.label} size={40} />
+              {/* Deliberately larger than the print box can be, and clamped
+                  down to it in CSS (max-width/max-height beat this inline
+                  size, which `size` writes as a literal width/height). That
+                  is what makes the mark fill its paper at every slot width
+                  instead of sitting small in the wide ones — a fixed px size
+                  can only be right for one column count, and this grid has
+                  three. */}
+              <TeamLogo teamId={slot.id} name={slot.label} size={140} />
             </span>
           )}
         </div>
