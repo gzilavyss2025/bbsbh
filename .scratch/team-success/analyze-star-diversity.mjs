@@ -44,7 +44,7 @@
 // Follows analyze-homegrown.mjs's pattern: Spearman correlation against the
 // ladder, within-season permutation test, leave-one-season-out, band
 // comparisons, and a division-winner-vs-wild-card split restricted to
-// playoff teams. STRETCH: All-Star count as a second, independent measure of
+// postseason teams. STRETCH: All-Star count as a second, independent measure of
 // "how many recognized stars," not concentration — simpler check, single
 // correlation + leave-one-season-out, no full band suite.
 //
@@ -262,7 +262,7 @@ function buildGroupRows(group, { includeShortSeason }) {
       year,
       teamId,
       ladder: outcome.ladder,
-      madePlayoffs: outcome.madePlayoffs,
+      madePostseason: outcome.madePostseason,
       wonDivision: outcome.wonDivision,
       totalPositiveWar: totalPos,
       nPositivePlayers: positive.length,
@@ -310,10 +310,10 @@ function report(rows, label) {
     }
   }
 
-  console.log('\nDivision winners vs. wild-card teams, restricted to playoff teams:')
-  const playoffRows = rows.filter((r) => r.madePlayoffs)
+  console.log('\nDivision winners vs. wild-card teams, restricted to postseason teams:')
+  const postseasonRows = rows.filter((r) => r.madePostseason)
   for (const key of ['top1Share', 'top2Share', 'hhi']) {
-    const flagged = playoffRows.map((r) => ({ ...r, __flag: r.wonDivision }))
+    const flagged = postseasonRows.map((r) => ({ ...r, __flag: r.wonDivision }))
     const { inGroup, outGroup, n } = meanDiff(flagged, key, '__flag')
     const diff = inGroup - outGroup
     const p = permutationTestMeanDiff(flagged, key, '__flag', diff)
@@ -377,7 +377,7 @@ for (const season of ladderData.seasons) {
       year: season.year,
       teamId: Number(teamId),
       ladder: outcome.ladder,
-      madePlayoffs: outcome.madePlayoffs,
+      madePostseason: outcome.madePostseason,
       wonDivision: outcome.wonDivision,
       allStarCount: counts.get(Number(teamId)) ?? 0,
     })
@@ -396,15 +396,15 @@ console.log(`n=${asRows.length} team-seasons, ${MIN_SEASON}-${MAX_SEASON} exclud
     `allStarCount: Spearman rho=${rho.toFixed(4)} vs ladder, permutation p=${p.toFixed(4)}, ` +
       `same-sign in ${sameSign}/${loso.length} leave-one-season-out refits`,
   )
-  const playoffRows = asRows.filter((r) => r.madePlayoffs)
+  const postseasonRows = asRows.filter((r) => r.madePostseason)
   const { inGroup, outGroup, n } = meanDiff(
-    playoffRows.map((r) => ({ ...r, __flag: r.wonDivision })),
+    postseasonRows.map((r) => ({ ...r, __flag: r.wonDivision })),
     'allStarCount',
     '__flag',
   )
   const diff = inGroup - outGroup
   const pDiv = permutationTestMeanDiff(
-    playoffRows.map((r) => ({ ...r, __flag: r.wonDivision })),
+    postseasonRows.map((r) => ({ ...r, __flag: r.wonDivision })),
     'allStarCount',
     '__flag',
     diff,

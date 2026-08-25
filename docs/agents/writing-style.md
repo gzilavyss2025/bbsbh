@@ -34,3 +34,50 @@ Read a passage once for meaning, then check it against the rule table in
 ambiguity, tense, voice, sentence length, dropped words, oversized noun
 clusters. Rewrite what fails. Do not force changes onto text that already
 complies.
+
+## The house word list
+
+Some words have one approved form here, whatever the surrounding style. The
+list is short on purpose, and `scripts/check-word-choice.mjs` enforces it in
+`npm run lint`, so a wrong form fails the build instead of waiting for a
+reviewer to see it.
+
+| Say | Never say |
+| --- | --- |
+| postseason | playoffs, playoff | <!-- word-choice-exempt: states the rule -->
+
+**Postseason, not playoffs.** <!-- word-choice-exempt: states the rule -->
+Baseball's October is the postseason. MLB calls
+it that, a scorebook calls it that, and this app calls it that on every
+surface: page copy, callout text, doc prose, code comments, and the identifier
+names that carry the value (`postseasonPct`, `madePostseason`,
+`classifyPostseason`). The rule covers identifiers as well as prose for a
+reason — a codebase that stores `playoffPct` <!-- word-choice-exempt: states the rule -->
+and renders "Postseason" teaches
+the next reader that the two are separate things, and the guard would have to
+choose a side anyway.
+
+### Scope of the guard
+
+It reads `src/`, `api/`, `scripts/`, `docs/`, `.claude/`, and the root
+`*.md` files — the text this app authors. It does **not** read `*.json`,
+because data files carry values captured from somebody else's system.
+`.scratch/prospect-traits/awards.json` holds real award titles such as
+"MiLB.com Double-A Best Playoff Performer" <!-- word-choice-exempt: real award title -->
+renaming those would break the
+join against statsapi and misname an actual award.
+
+### The one exemption
+
+A proper noun you do not own — or a line that states this rule — may keep
+its own spelling. FanGraphs ships a
+product called "Playoff Odds" <!-- word-choice-exempt: third-party product -->
+and calling it "Postseason Odds" would make it
+unfindable. Mark that line `word-choice-exempt` and say why. Use it only for a
+name somebody else controls — never to keep your own prose as it was.
+
+### Adding a word
+
+Add a row to `RULES` in `scripts/check-word-choice.mjs` and a row to the table
+above, in the same commit. Fix every existing use first, or the guard fails
+the build for everyone.

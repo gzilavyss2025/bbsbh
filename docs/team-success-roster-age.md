@@ -20,7 +20,7 @@ qualified?
    side: World Series winners' pitching staffs run **1.3 years older** than
    league average, against a league-wide gap of essentially zero.
 3. **Age stops mattering once a team is already in the tournament.** Among
-   playoff teams, division winners and wild-card teams have statistically
+   postseason teams, division winners and wild-card teams have statistically
    indistinguishable ages (p=0.31 batting, p=0.49 pitching). Whatever age
    buys, it buys on the way IN, not once you're there.
 4. **This is very likely partly circular, and the write-up says so before
@@ -100,13 +100,13 @@ years):
 | Reached the LCS or better (n=100) vs. did not (n=650) | +0.62 vs. −0.10 (diff +0.72, p<0.0002) | +0.86 vs. −0.13 (diff +0.99, p<0.0002) |
 | Won the World Series (n=25) vs. everyone else (n=725) | +0.68 vs. −0.03 (diff +0.71, p=0.0058) | +1.26 vs. −0.05 (diff +1.31, p<0.0002) |
 
-The gap on the pitching side roughly **triples** from "made the playoffs at
+The gap on the pitching side roughly **triples** from "made the postseason at
 all" to "won it all" (+0.83yr → +1.31yr); the batting-side gap barely moves
 past the first cut. Whatever this effect is measuring, it looks more like a
 pitching-staff story than a lineup story.
 
 **Division winners vs. wild-card teams, restricted to the 234 clubs that
-already made the playoffs:**
+already made the postseason:**
 
 | | Division winners (n=150) | Wild card (n=84) | diff | permutation p |
 | --- | --- | --- | --- | --- |
@@ -150,10 +150,10 @@ separate "won the division" from "snuck in on a wild card."
 
 ## Follow-up done: does who actually played in October confirm this?
 
-**Yes.** `docs/team-success-postseason-usage.md` reweights each playoff
+**Yes.** `docs/team-success-postseason-usage.md` reweights each postseason
 team's age by ACTUAL postseason playing time instead of full-season role.
 The result barely moves (0.09yr batting, −0.01yr pitching), and pitching age
-still predicts postseason depth within the playoff field alone (p=0.0070) —
+still predicts postseason depth within the postseason field alone (p=0.0070) —
 the age effect above is not primarily a trade-deadline-rental artifact. Read
 that document for the full check, including a mechanical trap it caught
 before it could ship as a wrong-signed finding.

@@ -52,7 +52,7 @@ for (const s of post.seasons) {
 }
 // A club "made the final four" if it PLAYED in a Championship Series.
 const finalFour = new Set([...reached.entries()].filter(([, v]) => v >= 3).map(([k]) => k))
-const madePlayoffs = new Set([...reached.keys()])
+const madePostseason = new Set([...reached.keys()])
 
 // --- per-club-season farm measures --------------------------------------------
 // Graduates are attributed to the DEVELOPING org — the club a man spent his
@@ -120,12 +120,12 @@ for (const row of panel.panel) {
     pipelineWar,
     promotionSpeed: speeds.length >= 3 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null,
     finalFour: finalFour.has(key) ? 1 : 0,
-    playoffs: madePlayoffs.has(key) ? 1 : 0,
+    postseason: madePostseason.has(key) ? 1 : 0,
   })
 }
 console.log(`study window: ${study.length} club-seasons, ${Math.min(...study.map((r) => r.season))}-${Math.max(...study.map((r) => r.season))}`)
 console.log(`  reached a Championship Series: ${study.filter((r) => r.finalFour).length}`)
-console.log(`  reached the postseason at all:  ${study.filter((r) => r.playoffs).length}`)
+console.log(`  reached the postseason at all:  ${study.filter((r) => r.postseason).length}`)
 
 // --- the plain comparison ------------------------------------------------------
 // Compared WITHIN SEASON, by turning each measure into its rank among the
@@ -353,7 +353,7 @@ const perGrad = tryModel(['warPerGrad'], 'final four ~ WAR per graduate + winnin
 const perGradNoWin = tryModel(['warPerGrad'], 'final four ~ WAR per graduate, NO winning control', { withWinPct: false })
 
 // --- the falsification test ----------------------------------------------------
-// A Championship Series appearance is a playoff berth plus two rounds of a
+// A Championship Series appearance is a postseason berth plus two rounds of a
 // coin flip. If graduate count really helps a club build an October team, it
 // should show up in the berth — the part a club controls — at least as
 // strongly. If it predicts ONLY the deep run, the more likely explanation is
@@ -383,8 +383,8 @@ function tryOutcome(outcomeKey, terms, label, withWinPct) {
   return { n: usable.length, terms: out }
 }
 const falsify = {
-  berthNoWin: tryOutcome('playoffs', ['pipelineGrads'], 'made the postseason ~ graduates', false),
-  berthWin: tryOutcome('playoffs', ['pipelineGrads'], 'made the postseason ~ graduates + winning', true),
+  berthNoWin: tryOutcome('postseason', ['pipelineGrads'], 'made the postseason ~ graduates', false),
+  berthWin: tryOutcome('postseason', ['pipelineGrads'], 'made the postseason ~ graduates + winning', true),
   ffNoWin: tryOutcome('finalFour', ['pipelineGrads'], 'final four ~ graduates', false),
   ffWin: tryOutcome('finalFour', ['pipelineGrads'], 'final four ~ graduates + winning', true),
 }

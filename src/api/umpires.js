@@ -469,7 +469,7 @@ export async function loadUmpire(id) {
   const accuracyAAA = accuracyFor(rec, rows, 'AAA')
   // Postseason plate work is aggregated separately and NEVER ranked (a
   // different-stakes, small sample): its zone map is drawn against the MLB
-  // regular-season baseline for reference. Null unless he has scored playoff
+  // regular-season baseline for reference. Null unless he has scored postseason
   // plate games. The All-Star Game feeds no aggregate, so it isn't here — only
   // its per-game figure shows, via the game log.
   const seasonPost = rec?.seasonPost

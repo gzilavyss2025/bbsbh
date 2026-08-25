@@ -597,7 +597,7 @@ for each generator; the reader modules:
   module header: ~99 KB over the wire per level, which is why this is a page a
   reader opts into rather than a card. Spoiler-free, same footing as
   `teamRecords.js`.
-- `postseasonOdds.js` — MLB postseason odds (playoff / division / bye
+- `postseasonOdds.js` — MLB postseason odds (overall / division / bye
   probability + projected wins) from `public/data/postseason-odds.json`, the
   Team hub's odds pill. DATE-KEYED, exactly like `seasonScore.js` and
   `teamScore.js`: `postseasonOddsFor(data, teamId, season, cutoff)` picks the

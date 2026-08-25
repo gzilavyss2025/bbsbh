@@ -1,5 +1,5 @@
 // Regenerates public/data/postseason-odds.json — MLB's date-keyed postseason
-// odds (playoff / division-winner / bye probability + projected wins),
+// odds (overall / division-winner / bye probability + projected wins),
 // via a Monte Carlo simulation of the rest of each season. Team strength comes
 // from team-score.json (60% actual wins / 40% Pythagorean, already computed by
 // gen-team-score.mjs) rather than a separate projection system, so the odds
@@ -96,7 +96,7 @@ function buildLeagueStructure(standings) {
 // Wild Card round). Ties are broken by a random shuffle before comparing
 // wins — an approximation of real tiebreaker games/rules, acceptable for
 // odds that are already an average over thousands of simulated seasons.
-export function classifyPlayoffs(wins, structure) {
+export function classifyPostseason(wins, structure) {
   const result = {}
   for (const [leagueId, divisionIds] of structure.leagueDivisions) {
     const winners = []
@@ -110,9 +110,9 @@ export function classifyPlayoffs(wins, structure) {
     const wildcards = wildCardField.slice(0, 3)
     const seededWinners = shuffle(winners).sort((a, b) => wins[b] - wins[a])
     const byeSeeds = new Set(seededWinners.slice(0, 2))
-    for (const id of winners) result[id] = { playoffs: true, divisionWinner: true, bye: byeSeeds.has(id) }
-    for (const id of wildcards) result[id] = { playoffs: true, divisionWinner: false, bye: false }
-    for (const id of wildCardField) if (!result[id]) result[id] = { playoffs: false, divisionWinner: false, bye: false }
+    for (const id of winners) result[id] = { postseason: true, divisionWinner: true, bye: byeSeeds.has(id) }
+    for (const id of wildcards) result[id] = { postseason: true, divisionWinner: false, bye: false }
+    for (const id of wildCardField) if (!result[id]) result[id] = { postseason: false, divisionWinner: false, bye: false }
   }
   return result
 }
@@ -121,7 +121,7 @@ export function simulateOdds({ standings, remaining, strength, sims }) {
   const structure = buildLeagueStructure(standings)
   const teamIds = Object.keys(standings).map(Number)
   const tally = {}
-  for (const id of teamIds) tally[id] = { playoffs: 0, divisionWinner: 0, bye: 0, winsSum: 0 }
+  for (const id of teamIds) tally[id] = { postseason: 0, divisionWinner: 0, bye: 0, winsSum: 0 }
 
   for (let i = 0; i < sims; i++) {
     const wins = {}
@@ -131,10 +131,10 @@ export function simulateOdds({ standings, remaining, strength, sims }) {
       if (Math.random() < p) wins[g.homeId]++
       else wins[g.awayId]++
     }
-    const classified = classifyPlayoffs(wins, structure)
+    const classified = classifyPostseason(wins, structure)
     for (const id of teamIds) {
       tally[id].winsSum += wins[id]
-      if (classified[id]?.playoffs) tally[id].playoffs++
+      if (classified[id]?.postseason) tally[id].postseason++
       if (classified[id]?.divisionWinner) tally[id].divisionWinner++
       if (classified[id]?.bye) tally[id].bye++
     }
@@ -144,7 +144,7 @@ export function simulateOdds({ standings, remaining, strength, sims }) {
   for (const id of teamIds) {
     snapshots[id] = {
       sims,
-      playoffPct: round2((100 * tally[id].playoffs) / sims),
+      postseasonPct: round2((100 * tally[id].postseason) / sims),
       divisionPct: round2((100 * tally[id].divisionWinner) / sims),
       byePct: round2((100 * tally[id].bye) / sims),
       projectedWins: round1(tally[id].winsSum / sims),

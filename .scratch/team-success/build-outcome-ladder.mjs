@@ -15,8 +15,8 @@
 // exactly 3 divisions per league in this window, so "seed <= 3" is a safe,
 // format-independent stand-in for the standings' own `divisionChamp` flag —
 // no separate standings pull needed. A team NOT in the file for a season
-// missed the playoffs outright, and no division winner has ever missed the
-// playoffs (division champion has guaranteed a berth since divisional play
+// missed the postseason outright, and no division winner has ever missed the
+// postseason (division champion has guaranteed a berth since divisional play
 // began), so "not in the bracket" and "did not win the division" always
 // agree — the ladder needs no separate "missed but somehow won the
 // division" case.
@@ -95,7 +95,7 @@ function buildSeasonEntry(season) {
     const entry = byTeam.get(teamId)
     if (!entry) {
       teams[teamId] = {
-        madePlayoffs: false,
+        madePostseason: false,
         seed: null,
         wonDivision: false,
         furthestRound: null,
@@ -118,7 +118,7 @@ function buildSeasonEntry(season) {
     if (wonWS) ladder = 5
 
     teams[teamId] = {
-      madePlayoffs: true,
+      madePostseason: true,
       seed: entry.seed,
       wonDivision: entry.seed <= 3,
       furthestRound,

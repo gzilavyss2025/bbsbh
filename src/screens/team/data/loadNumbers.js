@@ -77,7 +77,7 @@ export async function loadNumbers(id, asOf) {
     sportId === 1
       ? standingsRows
           .map((s) => ({ ...s, ...postseasonOddsFor(postseasonOddsData, s.id, season, scoreCutoff) }))
-          .filter((r) => r.playoffPct != null)
+          .filter((r) => r.postseasonPct != null)
       : []
 
   const batting = league.hitting.length

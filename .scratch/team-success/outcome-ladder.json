@@ -17,98 +17,98 @@
       "championTeamId": 147,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -116,7 +116,7 @@
           "ladder": 4
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -124,21 +124,21 @@
           "ladder": 1
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -146,7 +146,7 @@
           "ladder": 3
         },
         "137": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -154,7 +154,7 @@
           "ladder": 1
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -162,42 +162,42 @@
           "ladder": 3
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -205,7 +205,7 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -213,14 +213,14 @@
           "ladder": 1
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -228,7 +228,7 @@
           "ladder": 5
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -243,14 +243,14 @@
       "championTeamId": 109,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -258,35 +258,35 @@
           "ladder": 5
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -294,21 +294,21 @@
           "ladder": 1
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -316,35 +316,35 @@
           "ladder": 1
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -352,21 +352,21 @@
           "ladder": 1
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -374,14 +374,14 @@
           "ladder": 3
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -389,42 +389,42 @@
           "ladder": 1
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -432,21 +432,21 @@
           "ladder": 3
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -454,7 +454,7 @@
           "ladder": 4
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -469,7 +469,7 @@
       "championTeamId": 108,
       "teams": {
         "108": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -477,7 +477,7 @@
           "ladder": 5
         },
         "109": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -485,91 +485,91 @@
           "ladder": 1
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -577,28 +577,28 @@
           "ladder": 1
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -606,7 +606,7 @@
           "ladder": 4
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -614,28 +614,28 @@
           "ladder": 3
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -643,14 +643,14 @@
           "ladder": 3
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -658,21 +658,21 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -680,7 +680,7 @@
           "ladder": 1
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -695,28 +695,28 @@
       "championTeamId": 146,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -724,7 +724,7 @@
           "ladder": 3
         },
         "112": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -732,70 +732,70 @@
           "ladder": 3
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -803,28 +803,28 @@
           "ladder": 1
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -832,35 +832,35 @@
           "ladder": 1
         },
         "138": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -868,14 +868,14 @@
           "ladder": 1
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -883,14 +883,14 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -898,7 +898,7 @@
           "ladder": 5
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -906,7 +906,7 @@
           "ladder": 4
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -921,7 +921,7 @@
       "championTeamId": 111,
       "teams": {
         "108": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -929,21 +929,21 @@
           "ladder": 1
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -951,42 +951,42 @@
           "ladder": 5
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -994,14 +994,14 @@
           "ladder": 3
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1009,56 +1009,56 @@
           "ladder": 1
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -1066,28 +1066,28 @@
           "ladder": 4
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1095,14 +1095,14 @@
           "ladder": 1
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1110,21 +1110,21 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -1132,7 +1132,7 @@
           "ladder": 3
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -1147,7 +1147,7 @@
       "championTeamId": 145,
       "teams": {
         "108": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -1155,21 +1155,21 @@
           "ladder": 3
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -1177,42 +1177,42 @@
           "ladder": 1
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -1220,49 +1220,49 @@
           "ladder": 4
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1270,21 +1270,21 @@
           "ladder": 1
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -1292,42 +1292,42 @@
           "ladder": 3
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1335,7 +1335,7 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -1343,14 +1343,14 @@
           "ladder": 5
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1358,7 +1358,7 @@
           "ladder": 1
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -1373,63 +1373,63 @@
       "championTeamId": 138,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -1437,21 +1437,21 @@
           "ladder": 4
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -1459,14 +1459,14 @@
           "ladder": 1
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -1474,7 +1474,7 @@
           "ladder": 3
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -1482,14 +1482,14 @@
           "ladder": 3
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1497,21 +1497,21 @@
           "ladder": 1
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -1519,28 +1519,28 @@
           "ladder": 5
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1548,35 +1548,35 @@
           "ladder": 1
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1584,7 +1584,7 @@
           "ladder": 1
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -1599,7 +1599,7 @@
       "championTeamId": 111,
       "teams": {
         "108": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1607,7 +1607,7 @@
           "ladder": 1
         },
         "109": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -1615,14 +1615,14 @@
           "ladder": 3
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -1630,7 +1630,7 @@
           "ladder": 5
         },
         "112": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1638,14 +1638,14 @@
           "ladder": 1
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -1653,7 +1653,7 @@
           "ladder": 3
         },
         "115": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -1661,119 +1661,119 @@
           "ladder": 4
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1781,28 +1781,28 @@
           "ladder": 1
         },
         "144": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -1810,7 +1810,7 @@
           "ladder": 1
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -1825,7 +1825,7 @@
       "championTeamId": 143,
       "teams": {
         "108": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1833,21 +1833,21 @@
           "ladder": 1
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -1855,7 +1855,7 @@
           "ladder": 3
         },
         "112": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -1863,49 +1863,49 @@
           "ladder": 1
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -1913,63 +1913,63 @@
           "ladder": 3
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "139": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -1977,28 +1977,28 @@
           "ladder": 4
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -2006,14 +2006,14 @@
           "ladder": 5
         },
         "144": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "145": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -2021,21 +2021,21 @@
           "ladder": 1
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "158": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2051,7 +2051,7 @@
       "championTeamId": 147,
       "teams": {
         "108": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -2059,21 +2059,21 @@
           "ladder": 3
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -2081,28 +2081,28 @@
           "ladder": 1
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2110,28 +2110,28 @@
           "ladder": 1
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -2139,56 +2139,56 @@
           "ladder": 3
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -2196,28 +2196,28 @@
           "ladder": 1
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2225,7 +2225,7 @@
           "ladder": 1
         },
         "143": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -2233,28 +2233,28 @@
           "ladder": 4
         },
         "144": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -2262,7 +2262,7 @@
           "ladder": 5
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -2277,42 +2277,42 @@
       "championTeamId": 137,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2320,91 +2320,91 @@
           "ladder": 1
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -2412,14 +2412,14 @@
           "ladder": 5
         },
         "138": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "139": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2427,7 +2427,7 @@
           "ladder": 1
         },
         "140": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -2435,14 +2435,14 @@
           "ladder": 4
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2450,7 +2450,7 @@
           "ladder": 1
         },
         "143": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -2458,7 +2458,7 @@
           "ladder": 3
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -2466,21 +2466,21 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -2488,7 +2488,7 @@
           "ladder": 3
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -2503,14 +2503,14 @@
       "championTeamId": 138,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2518,49 +2518,49 @@
           "ladder": 1
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -2568,77 +2568,77 @@
           "ladder": 3
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -2646,7 +2646,7 @@
           "ladder": 5
         },
         "139": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -2654,7 +2654,7 @@
           "ladder": 1
         },
         "140": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -2662,21 +2662,21 @@
           "ladder": 4
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2684,28 +2684,28 @@
           "ladder": 1
         },
         "144": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2713,7 +2713,7 @@
           "ladder": 1
         },
         "158": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -2729,21 +2729,21 @@
       "championTeamId": 137,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "division",
@@ -2751,21 +2751,21 @@
           "ladder": 2
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2773,21 +2773,21 @@
           "ladder": 1
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -2795,28 +2795,28 @@
           "ladder": 4
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "120": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2824,14 +2824,14 @@
           "ladder": 1
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -2839,28 +2839,28 @@
           "ladder": 1
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -2868,7 +2868,7 @@
           "ladder": 5
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -2876,14 +2876,14 @@
           "ladder": 3
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -2891,28 +2891,28 @@
           "ladder": 1
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "wildcard",
@@ -2920,21 +2920,21 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -2942,7 +2942,7 @@
           "ladder": 3
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -2957,28 +2957,28 @@
       "championTeamId": 111,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -2986,14 +2986,14 @@
           "ladder": 5
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -3001,7 +3001,7 @@
           "ladder": 1
         },
         "114": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -3009,14 +3009,14 @@
           "ladder": 1
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -3024,21 +3024,21 @@
           "ladder": 3
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -3046,21 +3046,21 @@
           "ladder": 3
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3068,7 +3068,7 @@
           "ladder": 1
         },
         "134": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -3076,28 +3076,28 @@
           "ladder": 2
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -3105,7 +3105,7 @@
           "ladder": 4
         },
         "139": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "division",
@@ -3113,35 +3113,35 @@
           "ladder": 2
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3149,28 +3149,28 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -3185,7 +3185,7 @@
       "championTeamId": 137,
       "teams": {
         "108": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3193,14 +3193,14 @@
           "ladder": 1
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -3208,42 +3208,42 @@
           "ladder": 3
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3251,14 +3251,14 @@
           "ladder": 1
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -3266,7 +3266,7 @@
           "ladder": 4
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3274,7 +3274,7 @@
           "ladder": 1
         },
         "120": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3282,14 +3282,14 @@
           "ladder": 1
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -3297,7 +3297,7 @@
           "ladder": 1
         },
         "134": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -3305,21 +3305,21 @@
           "ladder": 1
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -3327,7 +3327,7 @@
           "ladder": 5
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -3335,70 +3335,70 @@
           "ladder": 3
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -3413,35 +3413,35 @@
       "championTeamId": 118,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -3449,35 +3449,35 @@
           "ladder": 3
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "division",
@@ -3485,7 +3485,7 @@
           "ladder": 2
         },
         "118": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -3493,7 +3493,7 @@
           "ladder": 5
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3501,14 +3501,14 @@
           "ladder": 1
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -3516,14 +3516,14 @@
           "ladder": 4
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -3531,28 +3531,28 @@
           "ladder": 1
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3560,14 +3560,14 @@
           "ladder": 1
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3575,7 +3575,7 @@
           "ladder": 1
         },
         "141": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -3583,42 +3583,42 @@
           "ladder": 3
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -3626,7 +3626,7 @@
           "ladder": 1
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -3641,21 +3641,21 @@
       "championTeamId": 112,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -3663,7 +3663,7 @@
           "ladder": 1
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3671,7 +3671,7 @@
           "ladder": 1
         },
         "112": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -3679,14 +3679,14 @@
           "ladder": 5
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -3694,35 +3694,35 @@
           "ladder": 4
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -3730,7 +3730,7 @@
           "ladder": 3
         },
         "120": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3738,7 +3738,7 @@
           "ladder": 1
         },
         "121": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -3746,35 +3746,35 @@
           "ladder": 1
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "division",
@@ -3782,21 +3782,21 @@
           "ladder": 2
         },
         "138": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3804,7 +3804,7 @@
           "ladder": 1
         },
         "141": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -3812,49 +3812,49 @@
           "ladder": 3
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -3869,14 +3869,14 @@
       "championTeamId": 117,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -3884,14 +3884,14 @@
           "ladder": 2
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3899,7 +3899,7 @@
           "ladder": 1
         },
         "112": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -3907,14 +3907,14 @@
           "ladder": 3
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3922,7 +3922,7 @@
           "ladder": 1
         },
         "115": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -3930,14 +3930,14 @@
           "ladder": 1
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -3945,14 +3945,14 @@
           "ladder": 5
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -3960,7 +3960,7 @@
           "ladder": 4
         },
         "120": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -3968,77 +3968,77 @@
           "ladder": 1
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4046,35 +4046,35 @@
           "ladder": 1
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -4082,7 +4082,7 @@
           "ladder": 3
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -4097,28 +4097,28 @@
       "championTeamId": 111,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -4126,7 +4126,7 @@
           "ladder": 5
         },
         "112": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4134,14 +4134,14 @@
           "ladder": 1
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -4149,7 +4149,7 @@
           "ladder": 1
         },
         "115": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "division",
@@ -4157,14 +4157,14 @@
           "ladder": 2
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -4172,14 +4172,14 @@
           "ladder": 3
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -4187,21 +4187,21 @@
           "ladder": 4
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4209,77 +4209,77 @@
           "ladder": 1
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -4287,21 +4287,21 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -4309,7 +4309,7 @@
           "ladder": 2
         },
         "158": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -4325,70 +4325,70 @@
       "championTeamId": 120,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -4396,14 +4396,14 @@
           "ladder": 4
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -4411,7 +4411,7 @@
           "ladder": 1
         },
         "120": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -4419,14 +4419,14 @@
           "ladder": 5
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4434,35 +4434,35 @@
           "ladder": 1
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -4470,7 +4470,7 @@
           "ladder": 3
         },
         "139": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "division",
@@ -4478,21 +4478,21 @@
           "ladder": 2
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -4500,14 +4500,14 @@
           "ladder": 1
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -4515,21 +4515,21 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -4537,7 +4537,7 @@
           "ladder": 3
         },
         "158": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4553,35 +4553,35 @@
       "championTeamId": 119,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "wildcard",
@@ -4589,7 +4589,7 @@
           "ladder": 1
         },
         "113": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 6,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4597,7 +4597,7 @@
           "ladder": 1
         },
         "114": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4605,21 +4605,21 @@
           "ladder": 1
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 8,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -4627,14 +4627,14 @@
           "ladder": 3
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -4642,21 +4642,21 @@
           "ladder": 5
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -4664,14 +4664,14 @@
           "ladder": 2
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -4679,21 +4679,21 @@
           "ladder": 2
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4701,7 +4701,7 @@
           "ladder": 1
         },
         "139": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -4709,14 +4709,14 @@
           "ladder": 4
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 7,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4724,7 +4724,7 @@
           "ladder": 1
         },
         "142": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "wildcard",
@@ -4732,14 +4732,14 @@
           "ladder": 1
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -4747,7 +4747,7 @@
           "ladder": 3
         },
         "145": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 6,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4755,7 +4755,7 @@
           "ladder": 1
         },
         "146": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 7,
           "wonDivision": false,
           "furthestRound": "division",
@@ -4763,7 +4763,7 @@
           "ladder": 2
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "division",
@@ -4771,7 +4771,7 @@
           "ladder": 2
         },
         "158": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 8,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4787,28 +4787,28 @@
       "championTeamId": 144,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -4816,42 +4816,42 @@
           "ladder": 3
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -4859,14 +4859,14 @@
           "ladder": 4
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -4874,49 +4874,49 @@
           "ladder": 3
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -4924,7 +4924,7 @@
           "ladder": 1
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4932,7 +4932,7 @@
           "ladder": 1
         },
         "139": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -4940,35 +4940,35 @@
           "ladder": 1
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -4976,7 +4976,7 @@
           "ladder": 5
         },
         "145": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -4984,14 +4984,14 @@
           "ladder": 1
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -4999,7 +4999,7 @@
           "ladder": 1
         },
         "158": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -5015,49 +5015,49 @@
       "championTeamId": 117,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -5065,21 +5065,21 @@
           "ladder": 2
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -5087,14 +5087,14 @@
           "ladder": 5
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -5102,14 +5102,14 @@
           "ladder": 1
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5117,21 +5117,21 @@
           "ladder": 1
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -5139,7 +5139,7 @@
           "ladder": 3
         },
         "136": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "division",
@@ -5147,14 +5147,14 @@
           "ladder": 2
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "wildcard",
@@ -5162,7 +5162,7 @@
           "ladder": 1
         },
         "139": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 6,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5170,14 +5170,14 @@
           "ladder": 1
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5185,14 +5185,14 @@
           "ladder": 1
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 6,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -5200,7 +5200,7 @@
           "ladder": 4
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -5208,21 +5208,21 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -5230,7 +5230,7 @@
           "ladder": 3
         },
         "158": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
@@ -5245,14 +5245,14 @@
       "championTeamId": 140,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 6,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -5260,7 +5260,7 @@
           "ladder": 4
         },
         "110": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -5268,49 +5268,49 @@
           "ladder": 1
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -5318,14 +5318,14 @@
           "ladder": 3
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -5333,63 +5333,63 @@
           "ladder": 1
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "139": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5397,7 +5397,7 @@
           "ladder": 1
         },
         "140": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "worldseries",
@@ -5405,7 +5405,7 @@
           "ladder": 5
         },
         "141": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 6,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5413,7 +5413,7 @@
           "ladder": 1
         },
         "142": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "division",
@@ -5421,7 +5421,7 @@
           "ladder": 2
         },
         "143": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -5429,7 +5429,7 @@
           "ladder": 3
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "division",
@@ -5437,14 +5437,14 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5452,14 +5452,14 @@
           "ladder": 1
         },
         "147": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "158": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "wildcard",
@@ -5475,21 +5475,21 @@
       "championTeamId": 119,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5497,28 +5497,28 @@
           "ladder": 1
         },
         "111": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "112": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "113": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "114": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -5526,14 +5526,14 @@
           "ladder": 3
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 6,
           "wonDivision": false,
           "furthestRound": "division",
@@ -5541,7 +5541,7 @@
           "ladder": 2
         },
         "117": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "wildcard",
@@ -5549,7 +5549,7 @@
           "ladder": 1
         },
         "118": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "division",
@@ -5557,7 +5557,7 @@
           "ladder": 2
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -5565,14 +5565,14 @@
           "ladder": 5
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 6,
           "wonDivision": false,
           "furthestRound": "lcs",
@@ -5580,21 +5580,21 @@
           "ladder": 3
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -5602,56 +5602,56 @@
           "ladder": 2
         },
         "136": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -5659,7 +5659,7 @@
           "ladder": 1
         },
         "144": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5667,21 +5667,21 @@
           "ladder": 1
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -5689,7 +5689,7 @@
           "ladder": 4
         },
         "158": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "wildcard",
@@ -5705,28 +5705,28 @@
       "championTeamId": 119,
       "teams": {
         "108": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "109": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "110": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "111": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5734,7 +5734,7 @@
           "ladder": 1
         },
         "112": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -5742,7 +5742,7 @@
           "ladder": 2
         },
         "113": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 6,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5750,7 +5750,7 @@
           "ladder": 1
         },
         "114": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "wildcard",
@@ -5758,14 +5758,14 @@
           "ladder": 1
         },
         "115": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "116": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 6,
           "wonDivision": false,
           "furthestRound": "division",
@@ -5773,21 +5773,21 @@
           "ladder": 2
         },
         "117": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "118": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "119": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 3,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -5795,35 +5795,35 @@
           "ladder": 5
         },
         "120": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "121": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "133": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "134": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "135": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 5,
           "wonDivision": false,
           "furthestRound": "wildcard",
@@ -5831,7 +5831,7 @@
           "ladder": 1
         },
         "136": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "lcs",
@@ -5839,35 +5839,35 @@
           "ladder": 3
         },
         "137": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "138": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "139": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "140": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "141": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "worldseries",
@@ -5875,14 +5875,14 @@
           "ladder": 4
         },
         "142": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "143": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 2,
           "wonDivision": true,
           "furthestRound": "division",
@@ -5890,28 +5890,28 @@
           "ladder": 1
         },
         "144": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "145": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "146": {
-          "madePlayoffs": false,
+          "madePostseason": false,
           "seed": null,
           "wonDivision": false,
           "furthestRound": null,
           "ladder": 0
         },
         "147": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 4,
           "wonDivision": false,
           "furthestRound": "division",
@@ -5919,7 +5919,7 @@
           "ladder": 2
         },
         "158": {
-          "madePlayoffs": true,
+          "madePostseason": true,
           "seed": 1,
           "wonDivision": true,
           "furthestRound": "lcs",

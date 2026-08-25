@@ -10,11 +10,11 @@
 // September call-up, or a bench player who got hot — would produce.
 //
 // From that, three things:
-//   1. A "postseason-actual age" per playoff team — age weighted by who
+//   1. A "postseason-actual age" per postseason team — age weighted by who
 //      ACTUALLY played in October, not by full-season role — compared
 //      against that same team's regular-season age.
 //   2. Whether postseason-actual age still predicts how far a team went,
-//      among the playoff teams (the only population it's defined for).
+//      among the postseason teams (the only population it's defined for).
 //   3. The biggest mismatch outliers league-wide, for their own sake — this
 //      is the general-purpose primitive the framework doc can point future
 //      spikes (trades, situational rosters) at, not just this one.
@@ -159,7 +159,7 @@ for (const season of ladderData.seasons) {
   if (!psSeason || !raSeason) continue
 
   for (const [teamId, outcome] of Object.entries(season.teams)) {
-    if (!outcome.madePlayoffs) continue
+    if (!outcome.madePostseason) continue
     const psTeam = psSeason.teams[teamId]
     if (!psTeam) continue
 
@@ -229,7 +229,7 @@ for (const season of ladderData.seasons) {
       postseasonPitchingAge,
       // Relative to the REGULAR-SEASON league average that year (larger,
       // more stable sample than trying to build a postseason-only league
-      // average from a couple hundred playoff plate appearances).
+      // average from a couple hundred postseason plate appearances).
       postseasonBattingAgeRel: postseasonBattingAge != null ? postseasonBattingAge - raSeason.leagueBattingAge : null,
       postseasonPitchingAgeRel:
         postseasonPitchingAge != null ? postseasonPitchingAge - raSeason.leaguePitchingAge : null,
@@ -237,7 +237,7 @@ for (const season of ladderData.seasons) {
   }
 }
 
-console.log(`\n=== Postseason-actual age vs. regular-season age, ${teamPostseasonAge.length} playoff team-seasons ===`)
+console.log(`\n=== Postseason-actual age vs. regular-season age, ${teamPostseasonAge.length} postseason team-seasons ===`)
 const deltas = teamPostseasonAge
   .filter((t) => t.postseasonBattingAge != null && t.postseasonPitchingAge != null)
   .map((t) => ({
@@ -254,7 +254,7 @@ console.log(
     `team's full-season roster — i.e. spike #1's age effect is not just deadline rentals who never got in a game.)`,
 )
 
-console.log('\n=== Does postseason-actual age still predict how far a team went? (playoff teams only) ===')
+console.log('\n=== Does postseason-actual age still predict how far a team went? (postseason teams only) ===')
 for (const key of ['postseasonBattingAgeRel', 'postseasonPitchingAgeRel']) {
   const rows = teamPostseasonAge.filter((t) => t[key] != null)
   const rho = spearman(

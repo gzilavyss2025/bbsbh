@@ -2,7 +2,7 @@
 
 The MLB-only Vs. expectation score (stored internally as Season Surprise) answers one question: **how far above or below
 its preseason expectation has a team actually performed through this date?** It
-is not a playoff forecast, a power ranking, or a measure of how sustainable the
+is not a postseason forecast, a power ranking, or a measure of how sustainable the
 record is. It is a visible driver of Season Grade and opens its own breakdown on
 the Team Page. See `docs/season-grade.md` for the composite.
 

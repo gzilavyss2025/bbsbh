@@ -10,7 +10,7 @@ export const starDiversityEntry = {
   question:
     'Is a team\'s on-field value concentrated in one or two standout players, or spread across the roster? Does that concentration predict how far a team goes in the postseason, and does it separate the teams that win their division outright from the ones that sneak in on a wild card?',
   headline:
-    'On the hitting side, yes, and it is one of the strongest signals this program has found: teams that made the playoffs had noticeably LESS of their hitting value riding on one or two players than teams that missed it, and the correlation against the full ladder holds up in every one of 15 leave-one-season-out refits. On the pitching side, the same measures barely move the needle. Neither side separates division winners from wild-card teams — the effect, where it exists, buys a team its ticket in, not how far it goes once it\'s there. A louder, shakier stretch number (All-Star count) points the same direction but is likely circular and shouldn\'t be leaned on.',
+    'On the hitting side, yes, and it is one of the strongest signals this program has found: teams that made the postseason had noticeably LESS of their hitting value riding on one or two players than teams that missed it, and the correlation against the full ladder holds up in every one of 15 leave-one-season-out refits. On the pitching side, the same measures barely move the needle. Neither side separates division winners from wild-card teams — the effect, where it exists, buys a team its ticket in, not how far it goes once it\'s there. A louder, shakier stretch number (All-Star count) points the same direction but is likely circular and shouldn\'t be leaned on.',
   sections: [
     {
       id: 'the-hitting-signal',
@@ -36,7 +36,7 @@ export const starDiversityEntry = {
       id: 'the-pitching-null',
       heading: 'Pitching: the same idea, a much weaker signal',
       prose: [
-        'Run the identical three measures on pitching WAR instead of hitting WAR, and the correlation against the full ladder drops to rho=−0.04 to −0.07 — small, and not distinguishable from chance at conventional standards (permutation p=0.19 to 0.39). Only the concentration index clears the bar for "made the playoffs at all," and even that is a small difference (0.138 vs. 0.131).',
+        'Run the identical three measures on pitching WAR instead of hitting WAR, and the correlation against the full ladder drops to rho=−0.04 to −0.07 — small, and not distinguishable from chance at conventional standards (permutation p=0.19 to 0.39). Only the concentration index clears the bar for "made the postseason at all," and even that is a small difference (0.138 vs. 0.131).',
         'This is the same hitting/pitching split every spike in this program has run — but it lands the OPPOSITE way from the roster-age spike, where pitching carried the bigger effect and hitting the smaller one.',
       ],
     },
@@ -44,7 +44,7 @@ export const starDiversityEntry = {
       id: 'division-winners',
       heading: 'Does not separate division winners from wild-card teams',
       prose: [
-        'Restricted to the 154 clubs that already made the playoffs, division winners and wild-card teams had statistically indistinguishable concentration on both sides of the ball. Whatever a spread-out lineup buys, it buys on the way IN — matching the roster-age spike\'s pattern, and the opposite of the homegrown spike, which found nothing about "made it" but did separate division winners from wild-card teams.',
+        'Restricted to the 154 clubs that already made the postseason, division winners and wild-card teams had statistically indistinguishable concentration on both sides of the ball. Whatever a spread-out lineup buys, it buys on the way IN — matching the roster-age spike\'s pattern, and the opposite of the homegrown spike, which found nothing about "made it" but did separate division winners from wild-card teams.',
       ],
     },
     {
@@ -65,15 +65,15 @@ export const starDiversityEntry = {
   ],
   open: [
     'A postseason-actual reweighting — whether the players who actually took the field in October were a more or less concentrated group than the full-season roster, the same follow-up the homegrown and roster-age spikes both ran.',
-    'A joint model with roster age and homegrown share — three spikes in, all three found something on the hitting/making-the-playoffs cut and little on the pitching or division-winner cuts. Whether that is three separate signals or one underlying trait is still open.',
+    'A joint model with roster age and homegrown share — three spikes in, all three found something on the hitting/making-the-postseason cut and little on the pitching or division-winner cuts. Whether that is three separate signals or one underlying trait is still open.',
     'Extending war-history\'s own pull back before 2010, closing this spike\'s season-window gap with the rest of the program.',
   ],
   technical: [
     'top1Share/top2Share/hhi: computed over each team-season\'s players with POSITIVE credited WAR only, split hitting vs. pitching. hhi is a Herfindahl-style index (sum of each positive-WAR player\'s share of team positive WAR, squared). Credited WAR comes from public/data/war-history (season totals, personId-keyed — the FanGraphs-sourced shards this repo carried as its WAR source when the spike ran, replaced in the same deployment by the MLB stats=sabermetrics calculation; the two correlate at 0.998, so no finding here moves, but the figures will not reproduce exactly off the current file) joined against roster-age-cache.json (spike #1\'s teamId-filtered roster/playing-time cache); a player who split a season between two teams has his war-history WAR prorated by playing-time share at each stop, since war-history carries no team attribution at all (new trap, standingNotes.js: traded-player-war-has-no-team-split).',
     '450 team-seasons (2010-2025, 2020 excluded; 480 with 2020 included, no meaningful change). WAR coverage: 32,292/32,292 player-roster-slot references resolved (100%) — no team-season excluded for lacking a positive-WAR player.',
     'Spearman rho vs. the 0-5 ladder — hitting: top1Share -0.1907, top2Share -0.2260, hhi -0.2241 (all permutation p=0.0000, 5,000 within-season shuffles, same sign in 15/15 leave-one-season-out refits). Pitching: top1Share -0.0548 (p=0.2518), top2Share -0.0433 (p=0.3904), hhi -0.0680 (p=0.1888), same sign in 15/15 leave-one-season-out refits despite not clearing p<0.05.',
-    'Band-difference permutation p-values (hitting): made playoffs vs. not, p=0.0000 (all three measures); LCS+ vs. not, p=0.0870 (top1Share, not significant) / 0.0194 (top2Share) / 0.0208 (hhi); WS winner vs. not, p=0.54/0.30/0.39 (n=15, null). Pitching: made playoffs vs. not, p=0.0746 (top1Share) / 0.1868 (top2Share) / 0.0260 (hhi); LCS+ and WS cuts all null.',
-    'Division winner vs. wild card among the 154 playoff teams: all six comparisons (three measures x two sides of the ball) null, p=0.19-0.98.',
+    'Band-difference permutation p-values (hitting): made postseason vs. not, p=0.0000 (all three measures); LCS+ vs. not, p=0.0870 (top1Share, not significant) / 0.0194 (top2Share) / 0.0208 (hhi); WS winner vs. not, p=0.54/0.30/0.39 (n=15, null). Pitching: made postseason vs. not, p=0.0746 (top1Share) / 0.1868 (top2Share) / 0.0260 (hhi); LCS+ and WS cuts all null.',
+    'Division winner vs. wild card among the 154 postseason teams: all six comparisons (three measures x two sides of the ball) null, p=0.19-0.98.',
     'STRETCH — All-Star count (starters + bullpen + substitutes, both leagues, per team-season): Spearman rho=0.5568 vs. the ladder (permutation p=0.0000, same sign in 15/15 leave-one-season-out refits). wonDivision comparison null (3.98 vs. 3.70, p=0.3354). Reference check, hitting top1Share vs. All-Star count on the same team-seasons: rho=-0.0859 (not a hypothesis test).',
     'Including the pandemic-shortened, 16-team 2020 field (n=480) changes every figure above by well under a point, no sign flips; pitching hhi moves closest to significance (p=0.0612 vs. 0.1888 excluding 2020) but still does not clear the conventional bar.',
   ],

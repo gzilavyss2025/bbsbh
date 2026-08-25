@@ -46,7 +46,7 @@ dot-strip/frequency displays (a probability rendered as countable dots, not
 an abstract percentage) all argue for showing disagreement rather than
 averaging it away.
 
-- **Playoff-odds trajectory** as a cone that narrows as games remaining
+- **Postseason-odds trajectory** as a cone that narrows as games remaining
   shrink, instead of a single point estimate.
 - **Overlay competing projection systems** (Pythagorean W-L vs. actual vs.
   BaseRuns) as separate lines rather than one blended odds percentage — tight

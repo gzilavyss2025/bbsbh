@@ -538,7 +538,12 @@ const BUDGETS = {
   // them for the same reason: it runs on import (a CLI with a dispatch at the
   // bottom), so scripts/lib/ is not open to it. Its pure half DID go to
   // scripts/lib/game-notes-corroboration.mjs.
-  scripts: 97,
+  //
+  // +1 for check-word-choice.mjs — another flat lint guard, same shape as
+  // check-caps.mjs and check-typography.mjs already here. It enforces the
+  // house word list ("postseason", never the other word) across src/, api/,
+  // scripts/ and docs/.
+  scripts: 98,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

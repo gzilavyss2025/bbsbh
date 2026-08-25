@@ -29,8 +29,8 @@ export const rosterAgeEntry = {
         ],
       },
       proseAfter: [
-        'The pitching gap roughly triples between "made the playoffs at all" and "won it all." The hitting gap barely grows past the first cut. Whichever way this cuts, it looks more like a story about pitching staffs than about lineups.',
-        'And among teams that already made the playoffs, age tells you nothing about who won their division and who came in as a wild card — division winners and wild-card teams are statistically indistinguishable in age, on both sides of the ball. Age looks like it buys a team its ticket in, not what it does once it’s there.',
+        'The pitching gap roughly triples between "made the postseason at all" and "won it all." The hitting gap barely grows past the first cut. Whichever way this cuts, it looks more like a story about pitching staffs than about lineups.',
+        'And among teams that already made the postseason, age tells you nothing about who won their division and who came in as a wild card — division winners and wild-card teams are statistically indistinguishable in age, on both sides of the ball. Age looks like it buys a team its ticket in, not what it does once it’s there.',
       ],
     },
     {
@@ -56,8 +56,8 @@ export const rosterAgeEntry = {
   technical: [
     'battingAge/pitchingAge: PA-weighted / IP-weighted mean of statsapi\'s per-team-stint `stat.age`, one row per player per team per season (teamId-filtered pull — the unfiltered version of this endpoint collapses a traded player to his final team\'s season total, verified live against a 2023 case). *Relative fields subtract that season\'s own PA/IP-weighted league mean.',
     '750 team-seasons (2000-2025, 2020 excluded). Spearman rho vs. the 0-5 ladder: 0.205 (batting), 0.282 (pitching), 0.289 (combined) — permutation p<0.0002 for all three (5,000 within-season shuffles), same sign in 25/25 leave-one-season-out refits.',
-    'Band-difference permutation p-values (within-season shuffle, 5,000 draws): made playoffs vs. not, p<0.0002 both sides; LCS+ vs. not, p<0.0002 both sides; WS winner vs. not, p=0.0058 (batting) / p<0.0002 (pitching).',
-    'Division winner vs. wild card among the 234 playoff teams: p=0.31 (batting), p=0.49 (pitching) — null.',
+    'Band-difference permutation p-values (within-season shuffle, 5,000 draws): made postseason vs. not, p<0.0002 both sides; LCS+ vs. not, p<0.0002 both sides; WS winner vs. not, p=0.0058 (batting) / p<0.0002 (pitching).',
+    'Division winner vs. wild card among the 234 postseason teams: p=0.31 (batting), p=0.49 (pitching) — null.',
     'Including the pandemic-shortened, 16-team 2020 field changes every figure above by 0.01-0.05, no sign flips (sensitivity check in the same script run).',
   ],
 }

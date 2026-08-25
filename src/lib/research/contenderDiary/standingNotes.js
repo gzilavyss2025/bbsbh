@@ -17,7 +17,7 @@ export const TRAPS = [
   {
     id: 'three-bracket-shapes',
     title: 'The bracket itself changed shape three times in this window',
-    body: 'Straight to the Division Series with one wild card per league (2000-2011), a single win-or-go-home Wild Card game with two per league (2012-2019, 2021), and the current three-per-league Wild Card round (2022+). More playoff spots by itself makes rungs 1-2 easier to reach in the later years — any factor that happens to trend over time will look like it predicts success unless the era is held fixed in the model.',
+    body: 'Straight to the Division Series with one wild card per league (2000-2011), a single win-or-go-home Wild Card game with two per league (2012-2019, 2021), and the current three-per-league Wild Card round (2022+). More postseason spots by itself makes rungs 1-2 easier to reach in the later years — any factor that happens to trend over time will look like it predicts success unless the era is held fixed in the model.',
   },
   {
     id: 'rung-2-empty-pre-2012',
