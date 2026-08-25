@@ -32,6 +32,7 @@
 //
 // ADDING AN ENTRY: docs/agents/research-diary.md. The hook at
 // .claude/hooks/research-diary-reminder.mjs is what remembers to ask.
+import { frontOfficeEntry } from './frontOffice.js'
 import { finalFourEntry } from './finalFour.js'
 import { debutMonthEntry } from './debutMonth.js'
 import { bodyAndArmEntry } from './bodyAndArm.js'
@@ -59,6 +60,10 @@ export const VERDICTS = {
     label: 'Not shippable',
     blurb: 'Asked and answered. The answer was no, and that is worth keeping.',
   },
+  agenda: {
+    label: 'Asks for more',
+    blurb: 'No new numbers in this one. It reads the others and says what to measure next.',
+  },
   corrected: {
     label: 'Takes something back',
     blurb: 'This entry overturns part of an earlier one. Read it before them.',
@@ -68,6 +73,7 @@ export const VERDICTS = {
 // Newest first. This order is the diary's spine — append at the TOP, and do
 // not reorder what is already here.
 export const RESEARCH_DIARY = [
+  frontOfficeEntry,
   finalFourEntry,
   debutMonthEntry,
   bodyAndArmEntry,
