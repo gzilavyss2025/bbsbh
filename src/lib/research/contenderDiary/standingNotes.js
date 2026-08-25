@@ -30,6 +30,11 @@ export const TRAPS = [
     body: 'Eight teams per league made it instead of the usual five or six, off a season a third the normal length. It is flagged `shortSeason: true` in the ladder data rather than dropped, but any factor measured as a rate over a season, or any comparison that assumes a normal-size field, needs to either exclude it or treat it as its own era.',
   },
   {
+    id: 'traded-player-collapses-to-last-team',
+    title: 'The team-season stats endpoint, called without a team filter, lies about traded players',
+    body: 'Ask statsapi for a whole season\'s hitting or pitching stats with no team filter, and a player traded mid-season shows up ONCE, credited entirely to his LAST team, with his combined season total — Lucas Giolito\'s 2023 (White Sox to Angels to Guardians) reads as a Guardian with his full 184⅓ innings. Filtering the identical call by `teamId` fixes it: the same query scoped to Chicago returns his actual White Sox stint, 121 innings. Any factor spike that sweeps a team\'s roster for a season needs the teamId-filtered call, never the league-wide one, or it will silently hand a player\'s whole year to whichever club happened to employ him last.',
+  },
+  {
     id: 'no-historical-payroll',
     title: 'There is no historical payroll anywhere in this repo',
     body: 'The salary and contract files here are a current-season snapshot, not a time series — the prospect-research diary hit the identical wall. The most obvious alternative explanation for almost any team-success finding — that it is really about money — cannot be tested with what is on hand until a historical payroll source is found. Say so rather than substituting today’s payroll for a team from 2007.',
