@@ -52,3 +52,8 @@ pnpm-debug.log*
 # .scratch/level-benchmarks/dates.mjs or org-and-timing.mjs if needed, ~13
 # cheap season-long pulls, see docs/level-tenure-benchmark.md
 .scratch/level-benchmarks/txn-cache.json
+
+# a stray output directory a script creates when its destination path resolves
+# to undefined (e.g. `--out $UNSET_VAR`). Never app content; one such file was
+# committed by accident once. Ignored so the next mistake stays local.
+undefined/
