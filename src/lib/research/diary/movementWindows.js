@@ -16,13 +16,13 @@ export const movementWindowsEntry = {
   question:
     'The benchmark says a typical Double-A stay is about eleven months. Could we say something sharper — "the Rays move a Double-A man in eight to eleven months, the Rockies take longer"?',
   headline:
-    'No, and not for the reason you would guess. Clubs really do differ. But the difference between two clubs is smaller than the difference between two players inside the same club, so any per-club number we printed would read as precise and be worthless.',
+    'No, and not for the reason you would guess. Clubs really do differ. But two players inside the same club differ from each other more than any two clubs differ, so a number printed next to your club\'s name would look exact and mean nothing.',
   sections: [
     {
       id: 'widening',
       heading: 'First we tripled the sample, because that was the cheap thing to try',
       prose: [
-        'Before you call something unbuildable it is worth making sure it is not merely unbuilt. So the study went from 881 players to 3,061, back to debuts in 2005. That is as far as the affiliate records reach — the league’s own record of which farm club belonged to which organization gets shaky before then, and hanging a stint on the wrong club is worse than hanging it on nobody.',
+        'Before you call something unbuildable it is worth making sure it is not merely unbuilt. So the study went from 881 players to 3,061, back to men who debuted in 2005. That is as far as the affiliate records reach. Before then, the league\'s own record of which farm club belonged to which organization gets shaky, and hanging a stint on the wrong club is worse than hanging it on nobody.',
         'Tripling the sample moved the numbers, which is worth knowing on its own.',
       ],
       table: {
@@ -43,9 +43,9 @@ export const movementWindowsEntry = {
       id: 'zero-of-thirty',
       heading: 'The answer: nobody stands apart. Not one club, at any level',
       prose: [
-        'Here is the test, and it is the whole argument. Take the middle half of a club’s stays — throw out its fastest quarter and its slowest quarter, keep what is left. Now ask whether that band sits clear of the band you get from all thirty clubs thrown in together. If it does, that club really is different, and you can print it.',
-        'Zero of thirty clubs clear it. At Single-A, High-A, Double-A and Triple-A. At 881 players and again at 3,061.',
-        'Toronto makes the point better than any statistic. Their Triple-A men have moved up in as little as 35 days and taken as long as 348 — a tenfold spread, inside one organization, and that spread is wider than the entire gap between the fastest club’s typical stay and the slowest club’s. Print "the Blue Jays typically move a Triple-A player in 53 days" and a reader will take it as a fact about the Blue Jays. It is not. It is a fact about whichever twenty-one players happened to land in the sample.',
+        'Here is the test, and it is the whole argument. Take one club\'s stays and throw out its fastest quarter and its slowest quarter. What is left is the middle half. Do the same with all thirty clubs poured into one pile. Now ask whether the club\'s band sits clear of the big pile\'s band. If it does, that club really is different, and you can print it.',
+        'Zero of thirty clubs clear it. Not at Single-A, not at High-A, not at Double-A, not at Triple-A. Not at 881 players, and not again at 3,061.',
+        'Toronto makes the point better than any number can. Their Triple-A men have moved up in as little as 35 days and taken as long as 348 — ten times the wait, inside one organization. That spread is wider than the whole gap between the fastest club\'s typical stay and the slowest club\'s. Print "the Blue Jays typically move a Triple-A player in 53 days" and a reader will take it as a fact about the Blue Jays. It is not. It is a fact about whichever twenty-one players happened to land in the sample.',
       ],
     },
     {
@@ -59,7 +59,7 @@ export const movementWindowsEntry = {
       id: 'tampa',
       heading: 'One club does survive everything: Tampa Bay',
       prose: [
-        'Ask the same question of thirty clubs and two or three will look special on luck alone — that is arithmetic, not baseball. So the question was put seven different ways, changing the sample, the corrections and the controls each time. Most clubs that stand out under one method vanish under the next.',
+        'Ask the same question of thirty clubs and two or three will look special on luck alone. That is arithmetic, not baseball. So the question was put seven different ways, changing the players, the corrections and the controls each time. Most clubs that stand out under one method vanish under the next.',
       ],
       table: {
         caption: 'Which clubs looked different, and under which method',
@@ -82,13 +82,13 @@ export const movementWindowsEntry = {
       id: 'performance',
       heading: 'What actually decides when a man gets promoted',
       prose: [
-        'How he is playing. Nothing else in the study comes close — not the level, not where he was drafted, not whose farm system he is in. That is not a surprising answer, and it is exactly why the club effect is so faint. Thirty front offices are all watching the same box score and mostly doing the same thing about it.',
+        'How he is playing. Nothing else in the study comes close — not the level, not where he was drafted, not whose farm system he is in. That is not a surprising answer, and it is exactly why the club effect is so faint. Thirty front offices are all reading the same box score and mostly doing the same thing about it.',
       ],
     },
   ],
   caveats: [
-    'A real bug turned up during the review: every stay by a player who changed levels more than once was being stamped with the same season. Fixed, and the whole study rerun.',
-    'Everybody in this study reached the majors. The players a club buried in Double-A for four years and released are invisible here, and they are exactly the players a "slow organization" story would be about.',
+    'A real bug turned up during the review: every stay by a player who changed levels more than once was being stamped with the same season. It was fixed, and the whole study was run again.',
+    'Everybody in this study reached the majors. The players a club buried in Double-A for four years and then released are invisible here, and they are exactly the players a "slow organization" story would be about.',
     'Payroll is not in this anywhere, because no historical payroll data exists in this repo at all. The salary and contract files are current-season snapshots looking forward, not a record of what clubs used to spend.',
   ],
   open: [
@@ -99,5 +99,9 @@ export const movementWindowsEntry = {
     'Overlap test: per org/level p25–p75 against pooled p25–p75, n≥8 per cell. 0 of 30 at every level in both cohorts.',
     'Omnibus at the time: cluster-robust Wald F=1.824 (p=0.0048), player-collapsed ANOVA F=1.685 (p=0.0128), ICC ≈ 1.2%. Both figures are revised by the later entry.',
     'Tampa Bay is BH-significant under naive and cluster-robust SEs, with and without era and performance controls, and on the disjoint performance-eligible subsample.',
+    'Cohort widening: 881 (debuts 2019–23) → 3,061 (debuts 2005–23). 2005 is the attribution floor — affiliate→parent mapping is unreliable before it. Median level stays run 15–20% longer in the wider cohort, and rankable cells go from 25–27 of 30 to 30 of 30.',
+    'Toronto Triple-A: observed 35–348 days over n=21 stays, a within-org spread wider than the full fastest-to-slowest range of club medians.',
+    'Rank instability across cohorts: the fastest Triple-A club moves from Cincinnati (82 days, 2019–23) to Toronto (53 days) with Washington second (55 days) in 2005–23.',
+    'The seven specifications in the table, in order: naive SEs, all stays; naive + Benjamini-Hochberg; player-clustered SEs; clustered + BH; clustered + BH + era control; the disjoint performance-eligible subsample; that subsample plus a performance control.',
   ],
 }

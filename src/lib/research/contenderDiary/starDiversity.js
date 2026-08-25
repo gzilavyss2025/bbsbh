@@ -8,15 +8,15 @@ export const starDiversityEntry = {
   title: 'A spread-out lineup gets you into October — a spread-out rotation barely matters',
   verdict: 'holds',
   question:
-    'Is a team\'s on-field value concentrated in one or two standout players, or spread across the roster? Does that concentration predict how far a team goes in the postseason, and does it separate the teams that win their division outright from the ones that sneak in on a wild card?',
+    'Is a club\'s value piled onto one or two standout players, or shared out across the roster? Does that tell you how far the club goes in October, and does it tell apart the teams that win their division outright from the ones that sneak in on a wild card?',
   headline:
-    'On the hitting side, yes, and it is one of the strongest signals this program has found: teams that made the postseason had noticeably LESS of their hitting value riding on one or two players than teams that missed it, and the correlation against the full ladder holds up in every one of 15 leave-one-season-out refits. On the pitching side, the same measures barely move the needle. Neither side separates division winners from wild-card teams — the effect, where it exists, buys a team its ticket in, not how far it goes once it\'s there. A louder, shakier stretch number (All-Star count) points the same direction but is likely circular and shouldn\'t be leaned on.',
+    'On the hitting side, yes, and it is one of the strongest things this program has turned up. The clubs that reached October leaned noticeably less on one or two bats than the clubs that stayed home, and the pattern holds every single time a season is dropped out and the whole thing is run again — 15 tries, 15 times. Do the same work on the pitching staff and it barely registers. Neither side tells a division winner from a wild card. Whatever a spread-out lineup buys you, it buys the ticket in, not the ride once you are there. One louder number, a club\'s count of All-Stars, points the same way, but it is close to circular and should not be leaned on.',
   sections: [
     {
       id: 'the-hitting-signal',
       heading: 'Hitting: a real, sizable effect — mostly about getting in',
       prose: [
-        'Every measure below looks at how much of a team\'s POSITIVE hitting WAR came from its single best hitter, its top two, or a concentration index across everyone with positive value. A typical team gets its hitting value from about 15 players in a season; these measures ask how evenly that value was actually spread among them.',
+        'Picture a club\'s season as a pie made of every bit of value its hitters produced. Some clubs cut that pie into one enormous slice and a lot of crumbs. Others cut fifteen roughly even pieces — and about fifteen hitters is what a typical club\'s value actually comes from. The three measures below all ask the same thing in different ways: how big was the biggest slice, how big were the top two together, and how even was the whole pie.',
       ],
       table: {
         caption: 'Share of hitting value from the top player or top two, by how far a team went',
@@ -24,48 +24,48 @@ export const starDiversityEntry = {
         rows: [
           ['Missed the postseason (296 teams)', '24.8%', '42.2%'],
           ['Made the postseason (154 teams)', '21.6% (a real difference)', '37.6% (a real difference)'],
-          ['Reached the LCS or better (60 teams)', '22.3% (not reliably different)', '38.2% (a real, smaller difference)'],
+          ['Reached the League Championship Series or better (60 teams)', '22.3% (not reliably different)', '38.2% (a real, smaller difference)'],
           ['Won the World Series (15 teams)', '22.6% (too few champions to tell)', '38.4% (too few champions to tell)'],
         ],
       },
       proseAfter: [
-        'The gap is biggest at the "made it or didn\'t" line and gets harder to see the deeper a team goes — by the World Series, with only 15 champions in the sample, nothing can be told apart from noise. That is this program\'s usual thin-top-rungs problem, not a sign the effect fades away.',
+        'The gap is widest at the line between making it and missing it, and it gets harder to see the deeper a club goes. By the World Series there are only 15 champions in the whole sample, and nothing there can be told apart from noise. That is this program\'s usual problem with the thin top rungs of the ladder. It is not a sign the effect fades away.',
       ],
     },
     {
       id: 'the-pitching-null',
       heading: 'Pitching: the same idea, a much weaker signal',
       prose: [
-        'Run the identical three measures on pitching WAR instead of hitting WAR, and the correlation against the full ladder drops to rho=−0.04 to −0.07 — small, and not distinguishable from chance at conventional standards (permutation p=0.19 to 0.39). Only the concentration index clears the bar for "made the postseason at all," and even that is a small difference (0.138 vs. 0.131).',
-        'This is the same hitting/pitching split every spike in this program has run — but it lands the OPPOSITE way from the roster-age spike, where pitching carried the bigger effect and hitting the smaller one.',
+        'Now run the identical three measures on the pitching staff instead. The tilt against the ladder all but disappears — still leaning the same direction, but so faintly that plain chance could produce it. Only the evenness measure clears the bar for "made it or did not," and even that is a hair of a gap: 0.138 for the clubs that stayed home against 0.131 for the clubs that got in.',
+        'Every spike in this program splits hitting from pitching. This one lands the OPPOSITE way from the roster-age spike, where the pitching staff carried the big effect and the lineup carried the small one.',
       ],
     },
     {
       id: 'division-winners',
       heading: 'Does not separate division winners from wild-card teams',
       prose: [
-        'Restricted to the 154 clubs that already made the postseason, division winners and wild-card teams had statistically indistinguishable concentration on both sides of the ball. Whatever a spread-out lineup buys, it buys on the way IN — matching the roster-age spike\'s pattern, and the opposite of the homegrown spike, which found nothing about "made it" but did separate division winners from wild-card teams.',
+        'Keep only the 154 clubs that reached October. Division winners and wild-card clubs spread their value around to the same degree, near enough that nothing tells them apart, on both sides of the ball. Whatever a spread-out lineup buys, it buys on the way IN. That matches the roster-age spike, and it is the opposite of the homegrown spike, which found nothing about getting in but did separate division winners from wild cards.',
       ],
     },
     {
       id: 'all-star-stretch',
       heading: 'A louder number worth reading with suspicion',
       prose: [
-        'A team\'s count of All-Star selections correlates with the ladder far more strongly (rho=0.56) than any concentration measure above — but All-Star selection happens mid-season, driven heavily by how well a player and his team are doing that same year, so a winning team racking up All-Star nods is close to expected by construction, not independent evidence. It should be read as a rough sanity check, not a second confirmation: teams with more All-Stars did have very slightly less concentrated hitting value (rho=−0.09), the same direction as the main finding, but far too weak on its own to lean on.',
+        'One number in this spike shouts louder than anything above: how many All-Stars a club had. It lines up with the ladder far more tightly than any of the pie measures. But think about when All-Stars get picked. They are chosen in July, largely on how well the player and his club are doing that very season. A winning club piling up All-Star nods is close to baked in. So read it as a rough sanity check, not a second witness. Clubs with more All-Stars did spread their hitting value around very slightly more, the same direction as the main finding, but far too faintly to lean on.',
       ],
     },
   ],
   caveats: [
-    'Nothing here is causal. A spread-out lineup could reflect a genuinely deep, well-built roster — or it could just mean the team never had a true star, and its "diversity" is the absence of a standout rather than a strength. This spike cannot tell those two stories apart.',
-    'The pitching null is a real non-effect at this sample size (450 team-seasons), not proof of an exact zero — the p-values (0.19-0.39) are close enough to the usual bar that a larger sample could plausibly tip one across it.',
-    'war-history only covers 2010-2025, six years short of even the homegrown spike\'s 2004 floor and sixteen short of the ladder\'s own 2000-2025 window — the narrowest sample of any spike in this program so far. Same kind of reused-dataset window gap as the homegrown spike hit, catalogued once in standingNotes.js rather than re-explained per spike.',
+    'Nothing here says one thing caused the other. A spread-out lineup could mean a genuinely deep, well-built roster. Or it could just mean the club never had a true star at all, and its "diversity" is an absence rather than a strength. This spike cannot tell those two stories apart.',
+    'The pitching result is a real nothing at this sample size (450 team-seasons), not proof of an exact zero. The pitching measures missed the usual bar by close enough that a bigger pile of teams could plausibly tip one of them across it.',
+    'war-history only covers 2010-2025 — six years short of even the homegrown spike\'s 2004 floor, and sixteen short of the ladder\'s own 2000-2025 window. It is the narrowest sample of any spike in this program so far. Same kind of borrowed-dataset window gap the homegrown spike hit, written down once in standingNotes.js rather than re-explained every time.',
     'The World Series cut (15 champions, 2010-2025) is this program\'s thinnest slice yet — six fewer champions than the roster-age spike had, nine fewer than the homegrown spike. Nothing at that cut can be told apart from noise.',
-    'A traded player\'s season WAR was split between his teams by playing-time share, since war-history carries no team-specific number at all — a reasonable estimate, not a measured fact, and it assumes he performed at roughly the same rate at both stops.',
-    'No payroll control exists anywhere in this program yet, same gap as every other spike.',
+    'A traded player\'s season value was split between his two clubs by how much he played for each, because war-history carries no team-by-team number at all. That is a reasonable estimate, not a measured fact, and it assumes he was the same player at both stops.',
+    'There is no way to account for payroll anywhere in this program yet, the same gap every other spike has.',
   ],
   open: [
-    'A postseason-actual reweighting — whether the players who actually took the field in October were a more or less concentrated group than the full-season roster, the same follow-up the homegrown and roster-age spikes both ran.',
-    'A joint model with roster age and homegrown share — three spikes in, all three found something on the hitting/making-the-postseason cut and little on the pitching or division-winner cuts. Whether that is three separate signals or one underlying trait is still open.',
+    'A postseason-actual reweighting — whether the men who actually took the field in October were a more or less top-heavy group than the full-season roster, the same follow-up the homegrown and roster-age spikes both ran.',
+    'A joint look at roster age and homegrown share alongside this one. Three spikes in, all three found something on the hitting side and on the getting-in cut, and little on the pitching or division-winner cuts. Whether that is three separate signals or one underlying trait wearing three hats is still open.',
     'Extending war-history\'s own pull back before 2010, closing this spike\'s season-window gap with the rest of the program.',
   ],
   technical: [
@@ -76,5 +76,7 @@ export const starDiversityEntry = {
     'Division winner vs. wild card among the 154 postseason teams: all six comparisons (three measures x two sides of the ball) null, p=0.19-0.98.',
     'STRETCH — All-Star count (starters + bullpen + substitutes, both leagues, per team-season): Spearman rho=0.5568 vs. the ladder (permutation p=0.0000, same sign in 15/15 leave-one-season-out refits). wonDivision comparison null (3.98 vs. 3.70, p=0.3354). Reference check, hitting top1Share vs. All-Star count on the same team-seasons: rho=-0.0859 (not a hypothesis test).',
     'Including the pandemic-shortened, 16-team 2020 field (n=480) changes every figure above by well under a point, no sign flips; pitching hhi moves closest to significance (p=0.0612 vs. 0.1888 excluding 2020) but still does not clear the conventional bar.',
+    'Prose-to-formal map for this entry: the pitching section\'s "all but disappears" is the pitching rho range of -0.04 to -0.07 (p=0.19 to 0.39); its "hair of a gap" is the pitching hhi band means, 0.138 (missed the postseason) vs. 0.131 (made it), the only pitching band comparison to clear 0.05 (p=0.0260). The All-Star section\'s "shouts louder" is rho=0.5568 against a best-in-spike hitting concentration rho of -0.2260, and its "very slightly more spread out" is the reference check at rho=-0.0859. The hitting section\'s "about fifteen hitters" is the typical count of positive-WAR hitters per team-season, the denominator all three concentration measures are computed over.',
+    'Circularity of the All-Star stretch number, stated formally: All-Star selection occurs mid-season and is driven in part by team standing and by playing time already accumulated, so All-Star count is not independent of the outcome it is being compared against. It is reported as a face-validity check on the concentration measures, not as confirmatory evidence.',
   ],
 }

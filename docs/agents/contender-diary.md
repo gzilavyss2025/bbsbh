@@ -49,6 +49,47 @@ what the program intends to measure, and what it found blocked outright
 spike has run. It still needs `caveats`: the first one always says nothing
 below it has been measured yet.
 
+## The voice: write it like a baseball book
+
+Standing instruction from the repo owner (2026-08-25), and it applies to
+**both** diaries, every entry from here on.
+
+An entry reads the way David Halberstam or Michael Lewis would write it for a
+baseball book — for a reader who loves baseball, reads at a middle-school to
+high-school level, and has never taken a statistics class. The test: someone
+should be able to read the entry out loud to a twelve-year-old and have it
+land.
+
+- **Lead with the story, not the method.** Open on a team a reader can
+  picture, not on a sample size.
+- **No statistics vocabulary in the reader-facing fields.** Everything formal
+  lives in the entry's `technical` list, which the page folds behind a
+  disclosure. That list is where the real numbers belong, and it should be
+  thorough — the voice rule moves the jargon, it does not delete it.
+- **If an idea cannot be avoided, teach it with a picture.** Not "the effect
+  did not survive controlling for prior-year finish" but "once you set aside
+  the simple fact that good teams tend to stay good, most of the edge went
+  away."
+- **Real names, real years.** Concrete beats general, and it is what makes an
+  entry memorable.
+- **Say out loud what is thin.** "Only twenty-five teams have won a World
+  Series in the years we looked at, so we cannot really tell them apart."
+
+Two pieces of machinery hold this up, so nobody has to remember it:
+
+- **`.claude/hooks/diary-voice.mjs`** — a PreToolUse hook that hands a session
+  the full voice the moment it writes an entry file in either diary. It
+  advises; it cannot judge prose that does not exist yet.
+- **`scripts/check-diary-voice.mjs`** — the half that enforces. Runs in
+  `npm run lint` and FAILS on a list of statistics terms found anywhere in an
+  entry outside its `technical` array. Deliberately a word list rather than a
+  readability model, so a contributor can predict it.
+
+Entries written before this instruction are **grandfathered** in that guard,
+by explicit path. That is not a judgment about their prose — it is the
+append-only rule (rule 2 above) doing its job. Do not widen the grandfather
+list: a failing entry is a NEW entry, and the fix is to write it in voice.
+
 ## Adding an entry
 
 Files live in `src/lib/research/contenderDiary/`:

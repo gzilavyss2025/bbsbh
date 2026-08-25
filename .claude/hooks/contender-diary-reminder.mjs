@@ -12,7 +12,10 @@ import { readFileSync } from 'node:fs'
 // a new factor spike adds its own script/doc — a path not listed here is a
 // path nobody gets reminded about.
 const WATCHED = [
-  'docs/team-success-research.md',
+  // A prefix, not a filename — every spike write-up in this program is
+  // `docs/team-success-*.md`, and listing them one by one meant each new
+  // spike had to remember to widen this (spike #4 caught that).
+  'docs/team-success-',
   '.scratch/team-success/',
 ]
 

@@ -25,18 +25,19 @@ export const bodyAndArmEntry = {
       id: 'the-shape',
       heading: 'The question was about the tails, so the tails are what got tested',
       prose: [
-        '"Above or below the average" is a different question from "does bigger help". It asks whether being unusual in either direction costs a man time — a club slower to trust the 5-foot-8 second baseman, and slower to sort out the 6-foot-7 arm. That shape is a U, and the usual way of asking cannot see a U. So every measure here was run three ways: does bigger move faster, does the middle move fastest, and does being unusual either way cost time.',
-        'Size is measured against the average for the man’s own position, not the league. A 6-foot-4 pitcher is ordinary; a 6-foot-4 second baseman is not. Skip that step and you are not measuring size, you are measuring position.',
+        'Two men get on the same bus. One is a 5-foot-8 second baseman. The other is a 6-foot-7 pitcher who has not quite grown into his body. The question we were handed is whether either of them waits longer than the ordinary-looking players sitting between them — and that is a different question from "does bigger help." Being unusual in EITHER direction might cost a man time.',
+        'That shape is a U, and the usual way of asking the question cannot see a U. It only looks for a straight line, so a slow group at each end and a fast group in the middle averages out to nothing. So every measure here was run three ways: does bigger move faster, does the middle move fastest, and does being unusual in either direction cost time.',
+        'Size is measured against the average for a man’s own position, not against the whole league. A 6-foot-4 pitcher is ordinary. A 6-foot-4 second baseman is not. Skip that step and you are not measuring size any more, you are measuring position.',
       ],
       table: {
         caption: 'Seasons from the first professional season to the debut, by weight',
-        columns: ['How far from the average for his position', 'Players', 'Seasons in the minors'],
+        columns: ['How his weight compares with others at his position', 'Players', 'Seasons in the minors'],
         rows: [
-          ['More than 1.5 below', '176', '4.43'],
-          ['0.5 to 1.5 below', '674', '4.28'],
-          ['Within half a step of average', '1,346', '4.02'],
-          ['0.5 to 1.5 above', '610', '4.20'],
-          ['More than 1.5 above', '217', '4.37'],
+          ['Much lighter than average', '176', '4.43'],
+          ['Somewhat lighter', '674', '4.28'],
+          ['About average', '1,346', '4.02'],
+          ['Somewhat heavier', '610', '4.20'],
+          ['Much heavier than average', '217', '4.37'],
         ],
         note: 'Both ends slower, the middle fastest. The identical table built on HEIGHT is flat — 4.18, 4.23, 4.17, 4.08, 4.20 — so this is mass, not stature.',
       },
@@ -45,7 +46,7 @@ export const bodyAndArmEntry = {
       id: 'pitchers-only',
       heading: 'And it belongs entirely to the pitchers',
       prose: [
-        'Split the same test by position group and there is no ambiguity about where the U lives.',
+        'Split the same test by position group and there is no argument about where the U lives.',
       ],
       table: {
         caption: 'The extra time an unusual weight costs, by who is being measured',
@@ -60,16 +61,16 @@ export const bodyAndArmEntry = {
         ],
       },
       proseAfter: [
-        'Pitchers in five groups, lightest to heaviest: 4.28 seasons, 3.86, 3.96, 4.11, 4.43. Around 205 pounds is the fast lane. Either side of it is the slow one.',
-        'One thing here should worry a reader, and it is not the arithmetic. The whole effect sits in the last six years. Split the twenty seasons in three and only 2018 through 2023 carries it clearly. The two earlier stretches lean the same way and could both be chance. So either something changed in how clubs handle an unusual body, or a third of the data found a pattern the other two thirds do not have.',
+        'Line the pitchers up in five groups, lightest to heaviest, and the time they spend in the minors runs 4.28 seasons, 3.86, 3.96, 4.11, 4.43. Around 205 pounds is the fast lane. Either side of it is the slow one.',
+        'One thing here should worry a reader, and it is not the arithmetic. The whole effect sits in the last six years. Split the twenty seasons into three stretches and only 2018 through 2023 carries it clearly. The two earlier stretches lean the same way, and either one could be chance on its own. So either something changed in how clubs handle an unusual body, or a third of the data found a pattern the other two thirds do not have. We cannot tell you which.',
       ],
     },
     {
       id: 'velocity',
       heading: 'Velocity buys innings, not summers',
       prose: [
-        'One thing has to come first. There is no pitch tracking below Triple-A and there never has been — Double-A and everything under it hold no record of what anybody threw. Nobody can measure what a prospect’s fastball was doing at Double-A in 2014, and nobody ever will.',
-        'What can be measured is what he threw once he got to the majors. That is a reading taken after the event it is meant to explain, which is why this half of the entry describes a pattern and never claims a cause. With that said, the pattern is one of the cleanest in all of this work.',
+        'One thing has to come first, and it is a wall, not a caveat. There is no pitch tracking below Triple-A and there never has been. Double-A and everything under it hold no record of what anybody threw. Nobody can tell you what a prospect’s fastball was doing at Double-A in 2014, and nobody ever will.',
+        'What we CAN measure is what he threw once he got to the majors. That is a reading taken after the thing it is meant to explain, which is why this half of the entry describes a pattern and never claims a cause. Said out loud: the fastball we are measuring came later than the promotions we are trying to explain. With that on the table, the pattern is one of the cleanest in all of this work.',
       ],
       table: {
         caption: 'Pitchers by fastball, softest to hardest, against their time in the minors',
@@ -84,8 +85,8 @@ export const bodyAndArmEntry = {
         note: 'Velocities are compared within each season, because the league fastball went from 91.0 in 2008 to 94.2 in 2024 and an uncorrected number would mostly be measuring the calendar.',
       },
       proseAfter: [
-        'Innings fall by a third down that table. Debut age falls by a year and a half. But the number of SUMMERS a man spends in the minors barely moves at all, and the hardest throwers actually spend a few more.',
-        'The reason is in the third column. They sign younger. Nearly half of the hardest-throwing tenth turned professional at nineteen or under, and 44 percent never went through a draft at all — they were sixteen-year-olds in the Dominican Republic. Same number of summers, far fewer innings, and they arrive a year ahead of everybody else.',
+        'Innings fall by a third as you go down that table. Debut age falls by a year and a half. But the number of SUMMERS a man spends in the minors barely moves at all, and the hardest throwers actually spend a few more.',
+        'The reason is sitting in the third column. They sign younger. Nearly half of the hardest-throwing tenth turned professional at nineteen or under, and 44 percent never went through a draft at all — they were sixteen-year-olds in the Dominican Republic. Same number of summers, far fewer innings, and they arrive a year ahead of everybody else.',
         'Which is the more useful way to put it. Hard throwers do not get fewer summers. They get less work inside them.',
       ],
     },
@@ -94,22 +95,22 @@ export const bodyAndArmEntry = {
       heading: 'The left-hander’s advantage is real and it is invisible until you correct for something',
       prose: [
         'Left-handers are 27 percent of the pitchers here. Line them up against right-handers and they reach the majors at the same pace. No difference worth the name.',
-        'But they throw 1.7 miles an hour slower, and that is an enormous gap — about two thirds of the entire spread between pitchers. So the plain comparison is rigged. It sets men who throw 91.7 against men who throw 93.4, finds they arrive together, and calls it a tie. After the table above, that is already the answer. Something is carrying the left-hander.',
-        'Hold velocity and role steady and the something shows up: a quarter of a season sooner, for the same stuff. It is the oldest cliché in scouting and it is sitting in the data. A club will wait on a left-hander it would have given up on if he threw with the other arm.',
+        'But they throw 1.7 miles an hour slower, and that is an enormous gap — about two thirds of the entire spread between the game’s hardest and softest throwers. So the plain comparison is rigged from the start. It puts men who throw 91.7 against men who throw 93.4, finds they arrive at the same time, and calls it a tie. After the table above, that IS the answer. Something is carrying the left-hander.',
+        'Hold velocity and role steady — compare a lefty to a righty with the same fastball, doing the same job — and the something shows up. A quarter of a season sooner, for the same stuff. It is the oldest cliché in scouting and it is sitting right there in the data. A club will wait on a left-hander it would have given up on if he threw with the other arm.',
       ],
     },
     {
       id: 'mix',
       heading: 'Pitch mix: nothing',
       prose: [
-        'How many pitches a man throws, how much he leans on the breaking ball, how much on the changeup — none of it survives once you know whether he starts or relieves. Repertoire looks like it matters on its own. Then it turns out that starters throw four pitches and relievers throw two, and that was the whole finding.',
-        'The one result worth keeping from this half is a negative, and it cost real work. The weight U-shape above is not about stuff. Put velocity into that model and the U does not move a hair. Whatever makes a club slower with an unusually built pitcher, it is not that he throws softer.',
+        'How many pitches a man throws, how much he leans on the breaking ball, how much on the changeup — none of it means anything once you know whether he starts or relieves. Repertoire looks like it matters on its own. Then it turns out that starters throw four pitches and relievers throw two, and that was the whole finding.',
+        'The one result worth keeping from this half is a negative, and it cost real work. The weight U above is not about stuff. Put velocity into that same model and the U does not move a hair. Whatever makes a club slower with an unusually built pitcher, it is not that he throws softer.',
       ],
     },
   ],
   caveats: [
     'The weight is a CURRENT listing, not a measurement taken while the man was a prospect. For anyone who retired ten years ago it is his last listed number, and listed weights are rounded, stale, and sometimes flattering. Height barely moves after eighteen; weight does. This is the largest single problem with the finding and it cannot be fixed from inside this data.',
-    'The pitcher U-shape is carried by the most recent third of the window. That is either a change in the sport or a coincidence, and this study cannot tell which.',
+    'The pitcher U is carried by the most recent third of the window. That is either a change in the sport or a coincidence, and this study cannot tell which.',
     'Velocity and pitch mix are measured in the major leagues, AFTER the promotions being explained. A pitcher who added two miles an hour on a big-league strength programme, or lost them to an elbow, is recorded at the wrong number.',
     'Everybody here reached the majors. The unusually small pitcher who never got a look is not in this data, and a club’s reluctance to promote him would show up as him being absent rather than as him being slow.',
   ],
@@ -123,5 +124,10 @@ export const bodyAndArmEntry = {
     'Velocity: primary fastball average speed from /api/v1/people/{id}/stats?stats=pitchArsenal in the rookie season, standardized within season (SD ≈ 2.55 mph). −12.9% of minor-league innings per SD (p<0.0001); −0.40 years of debut age per SD (p<0.0001); seasons-to-debut −0.14 with role controlled (p=0.004).',
     'Handedness: 443 L / 1,223 R. Median fastball 91.7 vs 93.4. Lefty term −0.108 seasons alone (p=0.29), −0.224 (p=0.042) with velocity, mix and role in the model.',
     'Mix: repertoire, breaking share and offspeed share all fail with role controlled (p=0.54, 0.80, 0.11). |zWeight| moves 0.162 → 0.161 when velocity is added on the identical subset.',
+    'Band definitions for the by-weight table, which the prose gives in words: bands are within-position-group z-scores of listed weight. "Much lighter" is z < −1.5 (n=176) and "much heavier" z > +1.5 (n=217); "somewhat" is 0.5 < |z| ≤ 1.5 (n=674 low, n=610 high); "about average" is |z| ≤ 0.5 (n=1,346).',
+    'Pitcher weight quintiles, lightest to heaviest, seasons to debut: 4.28 / 3.86 / 3.96 / 4.11 / 4.43. The fitted minimum of the quadratic sits near 205 lb.',
+    'The handedness velocity gap restated against the spread: 1.7 mph on a within-season SD of ≈2.55 mph is ≈0.67 SD, which is the "about two thirds of the entire spread" in the prose. Left-handers are 443 of 1,666 pitchers with a readable arsenal, i.e. 26.6%.',
+    'Velocity decile table read as deltas: minor-league innings 318 → 200 (−118, ≈ −37%) and debut age 25.4 → 23.9 (−1.5 years) from the softest tenth to the hardest, while seasons-to-debut is flat-to-slightly-positive, which is why the entry separates calendar time from workload.',
+    'Fastball era drift used to justify within-season standardization: league average primary fastball 91.0 mph in 2008, 94.2 mph in 2024.',
   ],
 }

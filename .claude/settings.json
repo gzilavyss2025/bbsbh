@@ -21,6 +21,10 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-primary-checkout-edit.mjs\""
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/diary-voice.mjs\""
           }
         ]
       },

@@ -22,15 +22,16 @@ export const debutMonthEntry = {
       id: 'pedigree',
       heading: 'Where "top prospect" came from, since no list goes back far enough',
       prose: [
-        'There is no historical top-100 list anywhere in this app. Our own prospect snapshot started in July of this year, which is no help to a man drafted in 2013. What does reach back is the trophy cabinet. The league keeps a dated record of every award a player ever won, down to the Midwest League mid-season all-star team.',
-        'So pedigree here is what a man had won before he debuted, in four levels. The national player-of-the-year awards at the top. Then the Futures Game and the Baseball America all-star teams. Then a league’s own all-star squad. Then the organization all-star team a club names each year. Weekly awards were thrown out: a player of the week is a hot fortnight, and there are twenty-six of them a season in every league.',
+        'To ask whether the best prospects come up on a schedule, you first have to know who the best prospects were. And there is no historical top-100 list anywhere in this app. Our own prospect snapshot started in July of this year, which is no help at all to a man drafted in 2013.',
+        'What does reach back is the trophy cabinet. The league keeps a dated record of every award a player ever won, right down to the Midwest League mid-season all-star team. So pedigree here means what a man had already won before he debuted, sorted into four levels. The national player-of-the-year awards sit at the top. Then the Futures Game and the Baseball America all-star teams. Then a league’s own all-star squad. Then the organization all-star team a club names each year.',
+        'Weekly awards were thrown out. A player of the week is a hot fortnight, and every league hands out twenty-six of them a season.',
       ],
     },
     {
       id: 'the-shape',
       heading: 'What the season actually looks like',
       prose: [
-        'Before any of the pedigree question, the plain answer to "what month do players debut" is worth having on its own, because it is not what most people would guess.',
+        'Before we get to pedigree at all, the plain answer to "what month do players debut" is worth having on its own, because it is not what most people would guess.',
       ],
       table: {
         caption: 'Debut month, all 3,060 players',
@@ -46,16 +47,16 @@ export const debutMonthEntry = {
       id: 'the-finding',
       heading: 'The finding, as it first appeared',
       prose: [
-        'Sorted by what a man had won, an interesting picture came up. The players with no minor-league honors at all were front-loaded: they took the April jobs and were scarce in late summer. The decorated ones ran the other way, thin in April and thick in August and September.',
-        'It came with a tidy story, too. The unheralded man is organizational depth who breaks camp because somebody got hurt. The celebrated prospect is still at Triple-A in April, turns up in August, and the club buys itself an extra year of control on the way through. That story is plausible enough that it very nearly got written down.',
+        'Sort the players by what they had won, and an interesting picture comes up. The men with no minor-league honors at all were front-loaded: they took the April jobs and were scarce in late summer. The decorated ones ran the other way — thin in April, thick in August and September.',
+        'It came with a tidy story, too. The unheralded man is organizational depth who breaks camp because somebody got hurt in March. The celebrated prospect is still at Triple-A in April, turns up in August, and the club buys itself an extra year of control on the way through. That story is plausible enough that it very nearly got written down.',
       ],
     },
     {
       id: 'the-kill',
       heading: 'And the reason it is not true',
       prose: [
-        'Half of these honors are won partway through a season, on a date. The Futures Game is played in the middle of July. A player picked for it in 2019 was a minor leaguer in the middle of July 2019, so he could not possibly have debuted that April. The award forbids the very month the finding said he was avoiding.',
-        'The fix is blunt and it is complete. Throw away every honor won in the same season as the debut, and re-sort everyone on what he had won in EARLIER years only. Now the trophy was in the cabinet before the season started, and nothing about it says a word about which month he comes up.',
+        'Half of these honors are won partway through a season, on a date. The Futures Game is played in the middle of July. A player picked for it in 2019 was, by definition, a minor leaguer in the middle of July 2019 — so he could not possibly have debuted that April. The award forbids the very month the finding said he was avoiding. The trophy was not describing the player. It was describing where he was standing when they handed it to him.',
+        'The fix is blunt and it is complete. Throw away every honor won in the same season as the debut, and sort everybody again on what he had won in EARLIER years only. Now the trophy was already in the cabinet before the season started, and it says nothing whatsoever about which month he comes up.',
       ],
       table: {
         caption: 'The same comparison, before and after the fix',
@@ -76,7 +77,7 @@ export const debutMonthEntry = {
         'April, week by week: 226 debuts, then 144, then 90, then 153. An Opening Day rush, a fortnight of quiet, then a small bump over the last nine days. That bump is the only thing anywhere in this data that looks like service-time management, and it is far too thin to lean on.',
         'September, week by week: 297, then 137, then 88, then 58. That is a door opening on the first of the month, not a gradual thing.',
         'The September share of all debuts fell from about a fifth of them in 2005 through 2019 to a sixth in 2021 through 2023, which is what you would expect after roster expansion shrank from forty men to twenty-eight. But 2019 — the last forty-man September — was itself the lowest year in the whole run, so the rule change does not read cleanly off the numbers and is not claimed to.',
-        'And working backwards from the sharpest marker in the cabinet: the median gap from a man’s last Futures Game to his major-league debut is 323 days. Only a third arrive inside three months. Four in ten come up the FOLLOWING season, and better than a quarter take two more years. The Futures Game is not a waiting room.',
+        'And working backwards from the sharpest marker in the cabinet: the middle gap from a man’s last Futures Game to his major-league debut is 323 days. Only a third arrive inside three months. Four in ten come up the FOLLOWING season, and better than a quarter take two more years. The Futures Game is not a waiting room.',
       ],
     },
   ],
@@ -95,5 +96,9 @@ export const debutMonthEntry = {
     'Artifact-free spec (honors from strictly earlier SEASONS): X²=25.4, df=20, p=0.188. Two-proportion tests decorated vs undecorated: Mar/Apr p=0.40, Aug/Sep/Oct p=0.08, first half p=0.36.',
     'Futures Game: 590 selections in the cohort; median 323 days to debut; 32% within 90 days, 41% the next season, 27% two or more seasons later.',
     'September share of debuts: 19.6% across 2005–2019, 16.6% across 2021–2023. 2019 alone was 12.0%.',
+    'The two "in 100" figures in the before/after table are the chi-square p-values above, rounded: 0.018 (≈2 in 100) for the original spec, 0.188 (≈19 in 100) for the artifact-free one. The prose gives them as odds because the entry is written for readers without the vocabulary.',
+    'Monthly counts behind the percentage row, n=3,060: April 613 debuts (20.0%) and September 580 (19.0%) are the two humps; October holds the residual 0.3% and is omitted from the table.',
+    'Intra-month concentration: April weeks 226 / 144 / 90 / 153; September weeks 297 / 137 / 88 / 58. Five of eight April debuts fall in the first fortnight; better than three quarters of September debuts fall in the first fifteen days.',
+    'The 323-day Futures Game figure is a median, not a mean; the distribution is right-skewed by the 27% who take two or more further seasons, so the mean would overstate the typical wait.',
   ],
 }

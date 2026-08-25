@@ -13,6 +13,7 @@
 //
 // ADDING AN ENTRY: docs/agents/contender-diary.md. The hook at
 // .claude/hooks/contender-diary-reminder.mjs is what remembers to ask.
+import { postseasonExperienceEntry } from './postseasonExperience.js'
 import { starDiversityEntry } from './starDiversity.js'
 import { homegrownEntry } from './homegrown.js'
 import { postseasonUsageEntry } from './postseasonUsage.js'
@@ -49,4 +50,4 @@ export const VERDICTS = {
 
 // Newest first. This order is the diary's spine — append at the TOP, and do
 // not reorder what is already here.
-export const RESEARCH_DIARY = [starDiversityEntry, homegrownEntry, postseasonUsageEntry, rosterAgeEntry, frameworkEntry]
+export const RESEARCH_DIARY = [postseasonExperienceEntry, starDiversityEntry, homegrownEntry, postseasonUsageEntry, rosterAgeEntry, frameworkEntry]
