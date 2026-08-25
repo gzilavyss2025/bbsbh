@@ -6,6 +6,7 @@ import {
   fetchManager,
   fetchPitcherSeasonLine,
   fetchPitcherLastGame,
+  fetchPitcherSeasonVsOpponent,
   fetchWinProbability,
 } from '../api/game.js'
 import { fetchHighlights } from '../api/highlights.js'
@@ -232,24 +233,33 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   // the feed object — see useAsyncOnFeed.
   const weather = useAsyncOnFeed(feed, generateScorebookWeather, [game.gamePk])
 
-  // Each probable starter's season line (ERA/W-L/K) plus his most recent
+  // Each probable starter's season line (ERA/W-L/K), his most recent
   // appearance (see fetchPitcherLastGame — MLB or MiLB, whichever came last),
-  // penciled next to the opposing-pitcher card while staging. Season
-  // aggregates + a past outing's already-final box line, never this game's.
+  // and his summed line against TONIGHT'S OPPONENT so far this season (see
+  // fetchPitcherSeasonVsOpponent) — penciled next to the opposing-pitcher card
+  // while staging. Season aggregates + past outings' already-final box lines,
+  // never this game's.
   const starterLines = useAsyncOnFeed(
     feed,
     async (f) => {
       const season = f.gameData?.game?.season
       const officialDate = f.gameData?.datetime?.officialDate
       const probables = f.gameData?.probablePitchers ?? {}
-      const [awaySeason, homeSeason, awayLast, homeLast] = await Promise.all([
+      const [awaySeason, homeSeason, awayLast, homeLast, awayVsOpp, homeVsOpp] = await Promise.all([
         fetchPitcherSeasonLine(probables.away?.id, season, game.sportId),
         fetchPitcherSeasonLine(probables.home?.id, season, game.sportId),
         fetchPitcherLastGame(probables.away?.id, season, officialDate),
         fetchPitcherLastGame(probables.home?.id, season, officialDate),
+        // The away starter's opponent is the home club, and vice versa.
+        fetchPitcherSeasonVsOpponent(probables.away?.id, season, game.home.id, officialDate, game.sportId),
+        fetchPitcherSeasonVsOpponent(probables.home?.id, season, game.away.id, officialDate, game.sportId),
       ])
-      const withLast = (line, lastGame) => (line || lastGame ? { ...(line ?? {}), lastGame } : null)
-      return { away: withLast(awaySeason, awayLast), home: withLast(homeSeason, homeLast) }
+      const withLast = (line, lastGame, vsOpponent) =>
+        line || lastGame || vsOpponent ? { ...(line ?? {}), lastGame, vsOpponent } : null
+      return {
+        away: withLast(awaySeason, awayLast, awayVsOpp),
+        home: withLast(homeSeason, homeLast, homeVsOpp),
+      }
     },
     [game.gamePk],
   )

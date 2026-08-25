@@ -156,7 +156,9 @@ const BUDGETS = {
   // src/components/chrome (at ITS own MAX_FILES) to save this one 45, which
   // trades a real limit for a nominal one.
   'src/screens/GameView.jsx': 620, // 609
-  'src/screens/TeamInfo.jsx': 1300, // 1299
+  // 1300 -> 1360: the starting-pitcher card's season-vs-opponent and
+  // career-vs-opponent rows (see OpposingStarterCard).
+  'src/screens/TeamInfo.jsx': 1360, // 1353
   'src/screens/BoxScore.jsx': 1300, // 1203 — the hit chart's 3-line mount; the card itself is screens/boxscore/HitChartCard.jsx
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
   // 1200 -> 1225 for the runtime logo-override hooks (ADR-0050's logo

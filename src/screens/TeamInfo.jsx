@@ -53,7 +53,7 @@ import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard, useBullpenReveal, BullpenToggle } from '../components/teamstats/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
-import { SPORT_LABEL } from '../lib/teams.js'
+import { SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
@@ -90,6 +90,7 @@ export function TeamInfo({
   scorebookWeather,
   scorebookWeatherLoading,
   oppPitcherLine,
+  vsTeam,
   prospectsData,
   rookiesData,
   feverRadarData,
@@ -229,6 +230,7 @@ export function TeamInfo({
         ownMasthead={ownMasthead}
         oppMasthead={oppMasthead}
         oppPitcherLine={oppPitcherLine}
+        vsTeam={vsTeam}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         feverRadarData={feverRadarData}
@@ -393,6 +395,7 @@ function TeamSections({
   ownMasthead,
   oppMasthead,
   oppPitcherLine,
+  vsTeam,
   prospectsData,
   rookiesData,
   feverRadarData,
@@ -428,6 +431,18 @@ function TeamSections({
     () => selectOpposingPitcher(feed, side, { includeDerivedStarter: true }),
     [feed, side],
   )
+  // The opposing starter's whole career line against THIS side's club (see
+  // api/vsTeamSplits.js) — MLB only, same as the file itself (the generator
+  // sweeps only the 30 MLB active rosters). `vsTeam` already holds both this
+  // matchup's clubs' shards (fetched once in useGameData), so no extra
+  // request here — just a lookup, keyed by the pitcher's OWN club (oppMeta.id)
+  // then by the club he's facing tonight (meta.id). Null on a first career
+  // meeting, which is what hides the card's conditional row.
+  const oppPitcherCareerVsOpp = useMemo(
+    () => (isMlb ? vsTeam?.players?.[oppPitcher?.id]?.vs?.[String(meta.id)]?.car ?? null : null),
+    [isMlb, vsTeam, oppPitcher?.id, meta.id],
+  )
+  const vsOpponentAbbr = teamAbbr({ id: meta.id, teamName: meta.teamName, name: meta.name })
   // The opposing starter's season pitch-type mix (see api/pitchArsenal.js) —
   // MLB + AAA only; a lower-level starter's lookup just resolves to null. Fetched
   // HERE by his id, not handed down from useGameData: this is the only card that
@@ -520,6 +535,8 @@ function TeamSections({
       <OpposingStarterCard
         pitcher={oppPitcher}
         pitcherLine={oppPitcherLine}
+        careerVsOpp={oppPitcherCareerVsOpp}
+        vsOpponentAbbr={vsOpponentAbbr}
         teamId={oppMeta.id}
         teamName={oppMeta.teamName}
         orgTeamId={oppOrgTeamId}
@@ -721,6 +738,8 @@ function TeamSections({
 function OpposingStarterCard({
   pitcher,
   pitcherLine,
+  careerVsOpp,
+  vsOpponentAbbr,
   teamId,
   teamName,
   orgTeamId,
@@ -799,6 +818,22 @@ function OpposingStarterCard({
             {pitcherLine?.lastGame && (
               <span className="startercard__last">{lastGameLine(pitcherLine.lastGame)}</span>
             )}
+            {/* His summed line against TONIGHT'S opponent so far this season
+                (see fetchPitcherSeasonVsOpponent) — every past start against
+                this club folded into one line, staging-safe the same way. */}
+            {pitcherLine?.vsOpponent && (
+              <span className="startercard__seasonvs">
+                {seasonVsOpponentLine(pitcherLine.vsOpponent, vsOpponentAbbr)}
+              </span>
+            )}
+            {/* His whole regular-season career against this club (see
+                api/vsTeamSplits.js) — omitted entirely on a first career
+                meeting, which is what the null careerVsOpp means. */}
+            {careerVsOpp && (
+              <span className="startercard__careervs">
+                {careerVsOpponentLine(careerVsOpp, vsOpponentAbbr)}
+              </span>
+            )}
           </div>
           {/* Fills the wide layout's open right half (see .startercard__arsenal
               in index.css) — hidden below the wide breakpoint, where there's
@@ -833,6 +868,36 @@ function lastGameLine(g) {
     .filter(Boolean)
     .join(', ')
   return `${[md, where].filter(Boolean).join(' ')}: ${stat}`
+}
+
+// "8/18 @ MIL: 6.0 IP, 3 H, 0 ER, 2 K, 1 BB" — his ONE start against tonight's
+// opponent so far this season (see fetchPitcherSeasonVsOpponent), formatted
+// exactly like lastGameLine since that's what it is: a single past outing.
+// The common case there's more than one, "3 GS vs MIL this year: ..." — no
+// single date to lead with, so it reads like the season-line row instead.
+function seasonVsOpponentLine(v, oppAbbr) {
+  const stat = [
+    v.inningsPitched && `${v.inningsPitched} IP`,
+    `${v.hits} H`,
+    `${v.earnedRuns} ER`,
+    `${v.strikeOuts} K`,
+    `${v.baseOnBalls} BB`,
+  ]
+    .filter(Boolean)
+    .join(', ')
+  if (v.games.length === 1) {
+    const g = v.games[0]
+    return `${monthDay(g.date)} ${g.home ? 'vs' : '@'} ${oppAbbr}: ${stat}`
+  }
+  return `${v.games.length} GS vs ${oppAbbr} this year: ${stat}`
+}
+
+// "Career vs MIL: 5 GS, 32.1 IP, 3.20 ERA, 28 K, 10 BB" — his whole regular-
+// season history against tonight's opponent (see api/vsTeamSplits.js), never
+// shown on a first career meeting (the card omits the row entirely instead).
+function careerVsOpponentLine(car, oppAbbr) {
+  const gs = car.g === 1 ? '1 GS' : `${car.g} GS`
+  return `Career vs ${oppAbbr}: ${gs}, ${car.ip} IP, ${car.era} ERA, ${car.k} K, ${car.bb} BB`
 }
 
 // Show only the first handful up front — a heavy shared history (two rosters

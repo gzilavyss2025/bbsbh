@@ -238,10 +238,14 @@
 }
 
 /* The starter's season line, then — same treatment, its own dashed divider —
-   his most recent appearance, so the card reads as a stack of dated facts
-   (badges, season-to-date, last time out) rather than one lump. */
+   his most recent appearance, his summed line against tonight's opponent this
+   season, and (conditionally) his whole career against them, so the card
+   reads as a stack of dated facts (badges, season-to-date, last time out,
+   this year vs this club, career vs this club) rather than one lump. */
 .startercard__stats,
-.startercard__last {
+.startercard__last,
+.startercard__seasonvs,
+.startercard__careervs {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
