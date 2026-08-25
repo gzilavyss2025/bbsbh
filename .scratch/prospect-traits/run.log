@@ -1,0 +1,587 @@
+############ q1-rookie-traits ############
+cohort 2010-2023, rookie season within 2 yrs of debut: 2059
+  with a gradeable rate line (>=150 PA / 40 IP): 1673
+  with a season WAR: 2059
+
+above-average by rate: 813/1673
+above-average by WAR>=2: 233/2059
+the two definitions agree on 1039/1673 (62%)
+
+=== ABOVE AVERAGE BY RATE — hitting (above n=345, below n=439) ===
+trait                                     above    below      d        p       q
+AA+AAA OPS (or ERA)                        0.83     0.78   0.57  <0.0001 <0.0001
+Peer percentile at last level              0.78     0.64   0.54  <0.0001 <0.0001
+Weight (lb)                              215.00   202.50   0.49  <0.0001 <0.0001
+Height (in)                               73.00    72.00   0.35  <0.0001 <0.0001
+Seasons from first pro season to debut     4.00     4.00  -0.15   0.0350  0.0981
+AA+AAA walk rate                           0.09     0.09   0.14   0.1013  0.2364
+AA+AAA strikeout rate                      0.19     0.18   0.07   0.1916  0.3832
+Full-season levels used                    4.00     4.00  -0.08   0.2274  0.3980
+Reached Triple-A before debuting           1.00     1.00  -0.06   0.3657  0.5689
+Total MiLB PA (or IP)                   1469.00  1453.00  -0.05   0.4924  0.6894
+Total dated days at level                671.00   704.00  -0.03   0.6222  0.7257
+Age in draft year                         21.00    21.00  -0.02   0.6288  0.7257
+Age at MLB debut                          24.08    24.08  -0.02   0.6739  0.7257
+Triple-A PA (or IP)                      301.00   319.00   0.03   0.8602  0.8602
+
+=== ABOVE AVERAGE BY WAR>=2 — hitting (above n=142, below n=810) ===
+trait                                     above    below      d        p       q
+AA+AAA OPS (or ERA)                        0.83     0.80   0.48  <0.0001 <0.0001
+Total MiLB PA (or IP)                   1224.00  1519.50  -0.43  <0.0001 <0.0001
+Peer percentile at last level              0.82     0.68   0.46  <0.0001 <0.0001
+Seasons from first pro season to debut     3.00     4.00  -0.41  <0.0001 <0.0001
+Age at MLB debut                          23.79    24.27  -0.33   0.0003  0.0008
+Triple-A PA (or IP)                      250.00   336.50  -0.24   0.0044  0.0103
+AA+AAA walk rate                           0.10     0.09   0.31   0.0057  0.0114
+Full-season levels used                    4.00     4.00  -0.23   0.0179  0.0313
+AA+AAA strikeout rate                      0.19     0.19   0.19   0.0357  0.0556
+Age in draft year                         21.00    21.00  -0.17   0.0880  0.1232
+Height (in)                               73.00    72.00   0.15   0.1065  0.1355
+Total dated days at level                586.00   705.50  -0.13   0.2064  0.2408
+Weight (lb)                              210.00   206.00   0.11   0.3519  0.3790
+Reached Triple-A before debuting           1.00     1.00  -0.07   0.4405  0.4405
+
+=== ABOVE AVERAGE BY RATE — pitching (above n=453, below n=412) ===
+trait                                     above    below      d        p       q
+Total MiLB PA (or IP)                    241.17   301.00  -0.39  <0.0001 <0.0001
+Triple-A PA (or IP)                       42.17    62.50  -0.24  <0.0001  0.0002
+Peer percentile at last level              0.71     0.62   0.29  <0.0001  0.0002
+AA+AAA OPS (or ERA)                        3.47     3.71  -0.31  <0.0001  0.0002
+Reached Triple-A before debuting           1.00     1.00  -0.21   0.0016  0.0040
+Full-season levels used                    4.00     4.00  -0.25   0.0017  0.0040
+AA+AAA strikeout rate                      0.24     0.23   0.24   0.0032  0.0064
+Age in draft year                         21.00    21.00   0.13   0.0938  0.1641
+Total dated days at level                484.00   526.00  -0.08   0.1740  0.2707
+AA+AAA walk rate                           0.08     0.08   0.08   0.2253  0.3154
+Seasons from first pro season to debut     4.00     4.00  -0.04   0.4481  0.4933
+Age at MLB debut                          24.71    24.64   0.08   0.4529  0.4933
+Weight (lb)                              215.00   215.00   0.04   0.4581  0.4933
+Height (in)                               75.00    75.00  -0.03   0.9126  0.9126
+
+=== ABOVE AVERAGE BY WAR>=2 — pitching (above n=81, below n=1002) ===
+trait                                     above    below      d        p       q
+Seasons from first pro season to debut     3.00     4.00  -0.57  <0.0001 <0.0001
+Age at MLB debut                          24.03    24.85  -0.40  <0.0001  0.0001
+AA+AAA OPS (or ERA)                        3.34     3.63  -0.40   0.0037  0.0171
+Reached Triple-A before debuting           1.00     1.00  -0.31   0.0060  0.0209
+AA+AAA walk rate                           0.08     0.08  -0.33   0.0093  0.0238
+Full-season levels used                    3.50     4.00  -0.42   0.0102  0.0238
+Triple-A PA (or IP)                       39.17    50.67  -0.16   0.0474  0.0844
+Peer percentile at last level              0.74     0.66   0.26   0.0482  0.0844
+AA+AAA strikeout rate                      0.24     0.23   0.24   0.1382  0.1980
+Total MiLB PA (or IP)                    240.83   269.33  -0.17   0.1432  0.1980
+Age in draft year                         21.00    21.00  -0.17   0.1556  0.1980
+Total dated days at level                512.00   513.00  -0.18   0.3224  0.3762
+Height (in)                               75.00    75.00   0.07   0.3752  0.4040
+Weight (lb)                              215.00   215.00   0.06   0.9756  0.9756
+
+REGRESSION on rookie rate — hitting: n=681, R2=0.152
+  seasonsToDebut       -0.498 ±  0.696   t= -0.72  p=0.4743
+  ageAtDebut           -0.160 ±  0.569   t= -0.28  p=0.7791
+  volume                0.943 ±  0.818   t=  1.15  p=0.2491
+  aaaVolume             0.490 ±  0.656   t=  0.75  p=0.4553
+  upperRate             3.526 ±  0.816   t=  4.32  p=<0.0001
+  kRate                 0.389 ±  0.526   t=  0.74  p=0.4592
+  bbRate                0.074 ±  0.557   t=  0.13  p=0.8939
+  lastPeer              2.065 ±  0.747   t=  2.76  p=0.0059
+
+REGRESSION on rookie WAR — hitting: n=832, R2=0.065
+  seasonsToDebut       -0.046 ±  0.058   t= -0.80  p=0.4265
+  ageAtDebut           -0.103 ±  0.050   t= -2.07  p=0.0384
+  volume               -0.057 ±  0.068   t= -0.84  p=0.3989
+  aaaVolume             0.021 ±  0.057   t=  0.37  p=0.7123
+  upperRate             0.165 ±  0.072   t=  2.30  p=0.0216
+  kRate                -0.006 ±  0.046   t= -0.13  p=0.8953
+  bbRate                0.073 ±  0.048   t=  1.52  p=0.1298
+  lastPeer              0.058 ±  0.066   t=  0.89  p=0.3734
+
+REGRESSION on rookie rate — pitching: n=667, R2=0.063
+  seasonsToDebut        0.582 ±  1.734   t=  0.34  p=0.7373
+  ageAtDebut            4.395 ±  1.733   t=  2.54  p=0.0115
+  volume               -3.366 ±  1.971   t= -1.71  p=0.0882
+  aaaVolume            -1.825 ±  1.798   t= -1.02  p=0.3104
+  upperRate             1.617 ±  2.074   t=  0.78  p=0.4358
+  kRate                 3.327 ±  1.809   t=  1.84  p=0.0664
+  bbRate                1.828 ±  1.501   t=  1.22  p=0.2237
+  lastPeer              3.786 ±  1.855   t=  2.04  p=0.0417
+
+REGRESSION on rookie WAR — pitching: n=827, R2=0.074
+  seasonsToDebut       -0.019 ±  0.036   t= -0.54  p=0.5922
+  ageAtDebut           -0.142 ±  0.036   t= -3.91  p=0.0001
+  volume                0.008 ±  0.041   t=  0.20  p=0.8401
+  aaaVolume             0.066 ±  0.037   t=  1.75  p=0.0806
+  upperRate            -0.013 ±  0.043   t= -0.30  p=0.7627
+  kRate                 0.129 ±  0.037   t=  3.43  p=0.0006
+  bbRate               -0.057 ±  0.032   t= -1.78  p=0.0752
+  lastPeer              0.048 ±  0.039   t=  1.23  p=0.2200
+
+=== rookie season by age at debut ===
+-- hitting
+   21 or younger  n=  92  median rate   102  share above avg  54%  median WAR   1.0
+   22             n= 123  median rate    99  share above avg  41%  median WAR   0.8
+   23             n= 169  median rate    96  share above avg  40%  median WAR   0.6
+   24             n= 181  median rate    97  share above avg  41%  median WAR   0.7
+   25             n= 108  median rate    95  share above avg  42%  median WAR   0.5
+   26 or older    n= 120  median rate   100  share above avg  51%  median WAR   0.7
+-- pitching
+   21 or younger  n=  59  median rate   111  share above avg  64%  median WAR   1.1
+   22             n=  97  median rate    98  share above avg  49%  median WAR   0.8
+   23             n= 138  median rate    99  share above avg  49%  median WAR   0.7
+   24             n= 201  median rate   100  share above avg  49%  median WAR   0.6
+   25             n= 179  median rate   101  share above avg  51%  median WAR   0.5
+   26 or older    n= 206  median rate   106  share above avg  58%  median WAR   0.4
+
+wrote q1-rookie-traits.json
+############ q1b-confounds ############
+=== PITCHERS: is the age paradox really role? ===
+starters vs relievers in the rate set: 430 / 450
+  starter   n= 462  median debut age 24.09
+  reliever  n= 636  median debut age 25.25
+
+rookie RATE ~ age (no role control): n=865, R2=0.005
+  ageAtDebut              1.559 ±  1.448  p=0.2821
+  seasonsToDebut         -0.415 ±  1.447  p=0.7741
+
+rookie RATE ~ age + role: n=865, R2=0.128
+  ageAtDebut             -1.881 ±  1.393  p=0.1773
+  seasonsToDebut         -2.053 ±  1.364  p=0.1326
+  startShare            -13.304 ±  1.211  p=<0.0001
+
+rookie WAR ~ age (no role control): n=1083, R2=0.041
+  ageAtDebut             -0.136 ±  0.029  p=<0.0001
+  seasonsToDebut         -0.050 ±  0.029  p=0.0833
+
+rookie WAR ~ age + role: n=1083, R2=0.112
+  ageAtDebut             -0.075 ±  0.029  p=0.0091
+  seasonsToDebut         -0.016 ±  0.028  p=0.5736
+  startShare              0.243 ±  0.026  p=<0.0001
+
+rookie season by role and debut age:
+-- starters
+   22 or younger  n= 108  median ERA+   97  median WAR   0.8
+   23-24          n= 191  median ERA+   95  median WAR   0.7
+   25-26          n= 104  median ERA+   93  median WAR   0.6
+   27 or older    n=  27  median ERA+   98  median WAR   0.5
+-- relievers
+   22 or younger  n=  48  median ERA+  128  median WAR   0.6
+   23-24          n= 148  median ERA+  108  median WAR   0.2
+   25-26          n= 169  median ERA+  113  median WAR   0.2
+   27 or older    n=  85  median ERA+  111  median WAR   0.2
+
+
+=== HITTERS: is size really position? ===
+position groups in the rate set: {"CORNER":420,"MID":278,"C":95}
+  C       n=  95  median weight  220  median height  72  median OPS+   94
+  MID     n= 278  median weight  195  median height  72  median OPS+   93
+  CORNER  n= 420  median weight  215  median height  73  median OPS+  102
+
+rookie RATE ~ size (no position control): n=793, R2=0.084
+  heightIn                0.078 ±  0.590  p=0.8949
+  weightLb                3.674 ±  0.590  p=<0.0001
+
+rookie RATE ~ size + position group: n=793, R2=0.135
+  heightIn               -0.441 ±  0.583  p=0.4492
+  weightLb                3.494 ±  0.633  p=<0.0001
+  pos=CORNER              9.194 ±  1.496  p=<0.0001
+  pos=MID                 4.479 ±  1.659  p=0.0071
+
+rookie WAR ~ size + position group: n=961, R2=0.012
+  heightIn                0.027 ±  0.053  p=0.6122
+  weightLb                0.111 ±  0.057  p=0.0522
+  pos=CORNER              0.182 ±  0.130  p=0.1622
+  pos=MID                 0.372 ±  0.146  p=0.0110
+
+rookie OPS+ by weight tercile, WITHIN position group:
+  C       light 200lb → OPS+ 92   middle 220lb → OPS+ 94   heavy 235lb → OPS+ 94
+  MID     light 180lb → OPS+ 91   middle 195lb → OPS+ 93   heavy 210lb → OPS+ 97
+  CORNER  light 195lb → OPS+ 98   middle 215lb → OPS+ 103   heavy 230lb → OPS+ 105
+
+wrote q1b-confounds.json
+############ q2-size ############
+cohort with size + a wire-free clock: 3023 of 3060
+
+=== the population ===
+  P       n=1667  height 75.0" (sd 2.1)   weight 215lb (sd 21.3)
+  C       n= 203  height 72.0" (sd 2.0)   weight 216lb (sd 17.0)
+  MID     n= 460  height 72.0" (sd 2.2)   weight 195lb (sd 16.1)
+  CORNER  n= 693  height 73.0" (sd 2.2)   weight 215lb (sd 19.7)
+
+=== outcome 1: seasons from first professional season to MLB debut ===
+(wire-free. Positive = the trait ADDS time in the minors.)
+  zHeight linear                                 n=3023  zHeight 0.069±0.033 p=0.034
+  zHeight quadratic                              n=3023  zHeight 0.071±0.033 p=0.030   zHeight² -0.022±0.022 p=0.319
+  zHeight deviation                              n=3023  |zHeight| -0.048±0.053 p=0.364
+  zWeight linear                                 n=3023  zWeight 0.014±0.032 p=0.653
+  zWeight quadratic                              n=3023  zWeight -0.008±0.033 p=0.800   zWeight² 0.069±0.020 p=0.001
+  zWeight deviation                              n=3023  |zWeight| 0.174±0.051 p=0.001
+  zBmi linear                                    n=3023  zBmi -0.036±0.033 p=0.274
+  zBmi quadratic                                 n=3023  zBmi -0.060±0.033 p=0.070   zBmi² 0.068±0.019 p=0.000
+  zBmi deviation                                 n=3023  |zBmi| 0.149±0.051 p=0.003
+
+=== outcome 2: total minor-league playing time before the debut ===
+(wire-free. log scale, so a coefficient is roughly a percentage.)
+  zHeight linear                                 n=3020  zHeight 0.027±0.012 p=0.019
+  zHeight quadratic                              n=3020  zHeight 0.028±0.012 p=0.014   zHeight² -0.017±0.008 p=0.027
+  zHeight deviation                              n=3020  |zHeight| -0.046±0.019 p=0.016
+  zWeight linear                                 n=3020  zWeight -0.004±0.011 p=0.718
+  zWeight quadratic                              n=3020  zWeight -0.004±0.012 p=0.734   zWeight² -0.000±0.007 p=0.950
+  zWeight deviation                              n=3020  |zWeight| 0.010±0.018 p=0.576
+  zBmi linear                                    n=3020  zBmi -0.024±0.012 p=0.036
+  zBmi quadratic                                 n=3020  zBmi -0.021±0.012 p=0.076   zBmi² -0.009±0.007 p=0.182
+  zBmi deviation                                 n=3020  |zBmi| -0.029±0.018 p=0.105
+
+=== outcome 3: wire-dated days at a level (3019 stays, 1348 players) ===
+  zHeight linear                                 n=3019  zHeight 0.027±0.018 p=0.138
+  zHeight quadratic                              n=3019  zHeight 0.027±0.018 p=0.137   zHeight² 0.003±0.012 p=0.766
+  zHeight deviation                              n=3019  |zHeight| -0.006±0.030 p=0.853
+  zWeight linear                                 n=3019  zWeight -0.012±0.019 p=0.536
+  zWeight quadratic                              n=3019  zWeight -0.009±0.020 p=0.657   zWeight² -0.011±0.012 p=0.354
+  zWeight deviation                              n=3019  |zWeight| -0.012±0.031 p=0.700
+  zBmi linear                                    n=3019  zBmi -0.034±0.019 p=0.081
+  zBmi quadratic                                 n=3019  zBmi -0.034±0.020 p=0.085   zBmi² 0.002±0.010 p=0.870
+  zBmi deviation                                 n=3019  |zBmi| 0.006±0.029 p=0.842
+
+=== the same question without a model: size terciles within position ===
+-- by height
+   P       small 72" → 4.0 seasons  middle 75" → 4.0 seasons  large 76" → 4.0 seasons
+   C       small 70" → 5.0 seasons  middle 72" → 4.0 seasons  large 74" → 4.0 seasons
+   MID     small 70" → 4.0 seasons  middle 72" → 4.0 seasons  large 74" → 4.0 seasons
+   CORNER  small 71" → 4.0 seasons  middle 73" → 4.0 seasons  large 75" → 4.0 seasons
+-- by weight
+   P       small 195lb → 4.0 seasons  middle 215lb → 4.0 seasons  large 235lb → 4.0 seasons
+   C       small 200lb → 5.0 seasons  middle 216lb → 4.0 seasons  large 233lb → 4.0 seasons
+   MID     small 180lb → 4.0 seasons  middle 195lb → 4.0 seasons  large 210lb → 4.0 seasons
+   CORNER  small 195lb → 4.0 seasons  middle 215lb → 4.0 seasons  large 230lb → 4.0 seasons
+
+=== the tails: the most unusual tenth in each direction ===
+  P       shortest 10% (n=108) 4.0 seasons   middle (n=1424) 4.0   tallest 10% (n=135) 4.0
+  C       shortest 10% (n= 18) 4.0 seasons   middle (n= 159) 4.0   tallest 10% (n= 26) 4.0
+  MID     shortest 10% (n= 66) 4.0 seasons   middle (n= 344) 4.0   tallest 10% (n= 50) 4.0
+  CORNER  shortest 10% (n= 84) 4.0 seasons   middle (n= 515) 4.0   tallest 10% (n= 94) 4.0
+
+wrote q2-size.json
+############ q2b-size-robustness ############
+=== seasons to debut, by weight quintile within position group ===
+(means, not medians — the outcome is an integer and a median cannot resolve a fifth of a season)
+  P       190lb 4.28  |  205lb 3.86  |  215lb 3.96  |  225lb 4.11  |  240lb 4.43   (n=333/333/334/333/334)
+  C       195lb 5.05  |  207lb 4.68  |  216lb 4.45  |  225lb 4.27  |  238lb 4.34   (n=40/41/40/41/41)
+  MID     175lb 4.64  |  188lb 4.12  |  195lb 4.00  |  205lb 4.13  |  216lb 4.07   (n=92/92/92/92/92)
+  CORNER  190lb 4.36  |  205lb 4.27  |  215lb 3.99  |  220lb 3.97  |  239lb 4.03   (n=138/139/138/139/139)
+
+=== pooled, in standard deviations from the position average ===
+  weight below −1.5 SD  n= 176  mean seasons to debut 4.43
+  weight −1.5 to −0.5   n= 674  mean seasons to debut 4.28
+  weight −0.5 to +0.5   n=1346  mean seasons to debut 4.02
+  weight +0.5 to +1.5   n= 610  mean seasons to debut 4.20
+  weight above +1.5 SD  n= 217  mean seasons to debut 4.37
+
+  height below −1.5 SD  n= 188  mean seasons to debut 4.18
+  height −1.5 to −0.5   n= 695  mean seasons to debut 4.23
+  height −0.5 to +0.5   n=1220  mean seasons to debut 4.17
+  height +0.5 to +1.5   n= 723  mean seasons to debut 4.08
+  height above +1.5 SD  n= 197  mean seasons to debut 4.20
+
+=== leave one position group out ===
+(the |weight| term, seasons to debut. If one group carries it, dropping that group kills it.)
+  drop nothing  n=3023  |zWeight| 0.174 ± 0.051  p=0.0007
+  drop P        n=1356  |zWeight| 0.085 ± 0.073  p=0.2426
+  drop C        n=2820  |zWeight| 0.179 ± 0.053  p=0.0007
+  drop MID      n=2563  |zWeight| 0.186 ± 0.056  p=0.0009
+  drop CORNER   n=2330  |zWeight| 0.211 ± 0.059  p=0.0004
+
+=== one position group at a time ===
+  P       n=1667  |zWeight| 0.257 ± 0.071  p=0.0003
+  C       n= 203  |zWeight| 0.108 ± 0.183  p=0.5565
+  MID     n= 460  |zWeight| 0.113 ± 0.128  p=0.3791
+  CORNER  n= 693  |zWeight| 0.071 ± 0.102  p=0.4897
+
+=== by debut era ===
+  2005-2011  n=1024  |zWeight| 0.115 ± 0.088  p=0.1934
+  2012-2017  n= 966  |zWeight| 0.076 ± 0.094  p=0.4210
+  2018-2023  n=1033  |zWeight| 0.308 ± 0.085  p=0.0003
+
+=== height, linear, one group at a time (seasons to debut) ===
+  P       n=1667  zHeight 0.104 ± 0.046  p=0.0231
+  C       n= 203  zHeight -0.108 ± 0.116  p=0.3505
+  MID     n= 460  zHeight 0.040 ± 0.081  p=0.6252
+  CORNER  n= 693  zHeight 0.044 ± 0.067  p=0.5126
+
+the most unusual tenth by weight (n=548) take 4.39 seasons; everyone else (n=2475) take 4.12. Gap 0.27 seasons.
+
+wrote q2b-size-robustness.json
+############ q3-pitchers ############
+pitchers: 1667
+  with a rookie-season arsenal (>=200 tracked pitches): 1519
+  with a standardized fastball velocity: 1457
+
+=== HANDEDNESS ===
+left 443, right 1223 (26.6% left-handed)
+  Seasons to debut           L    4.00 (mean 3.98)   R    4.00 (mean 4.18)   p=0.0465
+  Total MiLB innings         L  287.00 (mean 304.98)   R  274.33 (mean 294.52)   p=0.2083
+  Age at debut               L   24.51 (mean 24.61)   R   24.65 (mean 24.77)   p=0.1669
+  Start share, rookie year   L    0.19 (mean 0.41)   R    0.07 (mean 0.36)   p=0.0290
+  Fastball velocity (z)      L   -0.40 (mean -0.46)   R    0.19 (mean 0.16)   p=<1e-4
+  Rookie ERA+                L   97.79 (mean 104.32)   R  100.11 (mean 110.24)   p=0.0907
+  Rookie WAR                 L    0.30 (mean 0.55)   R    0.30 (mean 0.53)   p=0.6570
+  reached AAA                L 87.8%   R 85.8%
+  skipped High-A             L 10.8%   R 10.3%
+  relievers at debut         L 58.2%   R 62.6%
+
+=== handedness, modelled (positive = MORE time in the minors) ===
+  seasons ~ lefty                          n=1667  lefty -0.108±0.101 p=0.286
+  seasons ~ lefty + role                   n=1667  lefty -0.079±0.100 p=0.429  startShare -0.353±0.046 p=<1e-4
+  log(MiLB IP) ~ lefty                     n=1666  lefty 0.032±0.038 p=0.389
+  log(MiLB IP) ~ lefty + role              n=1666  lefty 0.019±0.037 p=0.598  startShare 0.158±0.017 p=<1e-4
+
+=== velocity (measured in the rookie season — see the header) ===
+  seasons ~ velocity                       n=1457  zVelo -0.048±0.048 p=0.319
+  seasons ~ velocity + role                n=1457  zVelo -0.140±0.049 p=0.004  startShare -0.398±0.050 p=<1e-4
+  log(MiLB IP) ~ velocity                  n=1456  zVelo -0.129±0.018 p=<1e-4
+  age at debut ~ velocity                  n=1457  zVelo -0.397±0.050 p=<1e-4
+
+=== mix ===
+  seasons ~ mix                            n=1519  repertoire -0.082±0.049 p=0.094  breakingShare 0.037±0.056 p=0.508  offspeedShare 0.054±0.057 p=0.339
+  seasons ~ mix + role                     n=1519  repertoire 0.031±0.050 p=0.537  breakingShare 0.014±0.055 p=0.798  offspeedShare 0.088±0.056 p=0.114  startShare -0.387±0.051 p=<1e-4
+  seasons ~ everything                     n=1457  lefty -0.224±0.110 p=0.042  zVelo -0.159±0.052 p=0.002  repertoire -0.018±0.052 p=0.733  breakingShare -0.002±0.056 p=0.975  offspeedShare 0.065±0.058 p=0.265  startShare -0.407±0.052 p=<1e-4
+
+=== velocity, in plain buckets ===
+  bottom 10%   n= 142  median FB 87.9  mean seasons to debut 4.22  median MiLB IP 318  median debut age 25.4
+  10-30%       n= 264  median FB 90.5  mean seasons to debut 4.27  median MiLB IP 343  median debut age 25.0
+  middle 40%   n= 633  median FB 93.0  mean seasons to debut 4.11  median MiLB IP 277  median debut age 24.7
+  70-90%       n= 287  median FB 94.9  mean seasons to debut 4.01  median MiLB IP 230  median debut age 24.2
+  top 10%      n= 131  median FB 97.1  mean seasons to debut 4.41  median MiLB IP 200  median debut age 23.9
+
+=== repertoire size, in plain buckets ===
+  2 pitches at 10%+   n= 387  mean seasons 4.20  mean start share 0.18  median rookie WAR 0.3
+  3 pitches at 10%+   n= 667  mean seasons 4.17  mean start share 0.35  median rookie WAR 0.4
+  4 pitches at 10%+   n= 381  mean seasons 4.07  mean start share 0.57  median rookie WAR 0.4
+  5 pitches at 10%+   n=  65  mean seasons 4.05  mean start share 0.56  median rookie WAR 0.3
+
+=== does velocity explain the Q2 weight U-shape? ===
+  seasons ~ |weight| (no velocity)         n=1667  |zWeight| 0.162±0.045 p=0.000  zWeight 0.104±0.045 p=0.021
+  seasons ~ |weight| + velocity            n=1457  |zWeight| 0.161±0.048 p=0.001  zWeight 0.081±0.049 p=0.094  zVelo -0.073±0.049 p=0.140
+  seasons ~ |weight|, velocity subset only n=1457  |zWeight| 0.159±0.048 p=0.001  zWeight 0.067±0.048 p=0.158
+
+wrote q3-pitchers.json
+############ q4-debut-month ############
+=== how the award shelf was tiered ===
+  tier A: 12 award types, 99 pre-debut wins
+    MILBGG(38) FUTMVP(14) BAPOY(12) USAMLPOY(9) MILBHR(7) TOPSPINK(5) PIPELINEPOY(5) PIPELINEHOY(4) …
+  tier B: 116 award types, 2452 pre-debut wins
+    FUTURES(694) AFLRS(450) AFLPSAS(205) BAMILAS(135) BAHAXXAS(122) BALAXXAS(98) BAAAXAS(97) BASSAS(62) …
+  tier C: 45 award types, 3994 pre-debut wins
+    SLMSAS(363) FSLMSAS(339) TLMSAS(324) ELMSAS(321) MWLMSAS(303) SALMSAS(257) CALMSAS(197) CARMSAS(177) …
+  tier D: 1 award types, 1386 pre-debut wins
+    MILBORGAS(1386)
+  ignored (weekly awards): 3159
+  UNTIERED: 42 types, 149 wins — CSAS(13) AFLSPORT(10) WBCTT(9) DWLROY(8) MEXMSAS(8) BAMMILBSCOFF(7) SLBHUS(6) FSLMVPI(6) BAMMILBSCBRK(6) BAMMILBSCSP(6) SLBUTL(5) SOUAVGTITLE(5)
+
+top tier reached before the debut: {"B":1153,"C":995,"none":716,"A":75,"D":121}
+
+=== when everybody debuts ===
+  the whole cohort         n=3060  Mar  1.9%  Apr 20.0%  May 15.6%  Jun 14.8%  Jul 12.4%  Aug 16.0%  Sep 19.0%  Oct  0.3%
+
+=== by award tier ===
+  tier A (national POY)    n=  75  Mar  2.7%  Apr 24.0%  May 14.7%  Jun 14.7%  Jul 14.7%  Aug 10.7%  Sep 18.7%  Oct  0.0%
+  tier B (national honor)  n=1153  Mar  1.5%  Apr 17.1%  May 15.1%  Jun 14.6%  Jul 12.9%  Aug 18.3%  Sep 20.3%  Oct  0.3%
+  tier C (league all-star) n= 995  Mar  1.6%  Apr 20.5%  May 15.0%  Jun 14.4%  Jul 13.5%  Aug 16.2%  Sep 18.6%  Oct  0.3%
+  tier D (org all-star)    n= 121  Mar  0.8%  Apr 23.1%  May 13.2%  Jun 16.5%  Jul 14.0%  Aug 16.5%  Sep 15.7%  Oct  0.0%
+  tier none (no honors)    n= 716  Mar  3.1%  Apr 23.2%  May 17.7%  Jun 15.4%  Jul  9.6%  Aug 12.6%  Sep 17.9%  Oct  0.6%
+
+  chi-square across tiers: X²=35.4, df=20, p=0.0181
+
+=== April vs September, by tier ===
+  tier A     n=  75   Mar/Apr 26.7%   Sep/Oct 18.7%   ratio 1.43
+  tier B     n=1153   Mar/Apr 18.6%   Sep/Oct 20.6%   ratio 0.90
+  tier C     n= 995   Mar/Apr 22.1%   Sep/Oct 18.9%   ratio 1.17
+  tier D     n= 121   Mar/Apr 24.0%   Sep/Oct 15.7%   ratio 1.53
+  tier none  n= 716   Mar/Apr 26.3%   Sep/Oct 18.4%   ratio 1.42
+
+=== the same table, 2015-2023 debuts only (award coverage is denser late) ===
+  tier A                   n=  46  Mar  4.3%  Apr 21.7%  May 15.2%  Jun 13.0%  Jul 15.2%  Aug 10.9%  Sep 19.6%  Oct  0.0%
+  tier B                   n= 596  Mar  2.0%  Apr 15.9%  May 14.1%  Jun 14.1%  Jul 14.8%  Aug 21.0%  Sep 17.6%  Oct  0.5%
+  tier C                   n= 481  Mar  2.9%  Apr 21.8%  May 13.3%  Jun 15.6%  Jul 12.9%  Aug 18.9%  Sep 13.9%  Oct  0.6%
+  tier D                   n= 101  Mar  1.0%  Apr 21.8%  May 14.9%  Jun 16.8%  Jul 13.9%  Aug 15.8%  Sep 15.8%  Oct  0.0%
+  tier none                n= 336  Mar  3.3%  Apr 20.2%  May 17.3%  Jun 16.1%  Jul  8.9%  Aug 15.5%  Sep 17.6%  Oct  1.2%
+
+=== the same cut, hitters only (relievers win almost nothing) ===
+  tier A                   n=  64  Mar  3.1%  Apr 21.9%  May 17.2%  Jun 15.6%  Jul 12.5%  Aug 12.5%  Sep 17.2%  Oct  0.0%
+  tier B                   n= 668  Mar  1.3%  Apr 16.9%  May 16.3%  Jun 12.3%  Jul 12.7%  Aug 19.3%  Sep 20.7%  Oct  0.4%
+  tier C                   n= 421  Mar  2.1%  Apr 19.2%  May 14.5%  Jun 12.8%  Jul 12.4%  Aug 15.0%  Sep 24.0%  Oct  0.0%
+  tier D                   n=  60  Mar  0.0%  Apr 16.7%  May 10.0%  Jun 20.0%  Jul 16.7%  Aug 18.3%  Sep 18.3%  Oct  0.0%
+  tier none                n= 157  Mar  6.4%  Apr 22.9%  May 17.8%  Jun 15.3%  Jul  8.3%  Aug  8.3%  Sep 21.0%  Oct  0.0%
+
+=== from the last minor-league honor to the call ===
+  tier A  n=  75  median gap  194 days (6.4 months)   honor and debut in the same season: 21%
+  tier B  n=1153  median gap  222 days (7.3 months)   honor and debut in the same season: 26%
+  tier C  n= 995  median gap  344 days (11.3 months)   honor and debut in the same season: 19%
+  tier D  n= 121  median gap  269 days (8.8 months)   honor and debut in the same season: 0%
+
+=== Futures Game selections (590 of the cohort) ===
+  median gap from a man's LAST Futures Game to his debut: 323 days (10.6 months)
+    same season, within 90 days    187 (32%)
+    next season                    243 (41%)
+    two or more seasons later      160 (27%)
+  debut month of a Futures Game player:
+                           n= 590  Mar  1.2%  Apr 16.1%  May 12.5%  Jun 11.2%  Jul 13.2%  Aug 22.0%  Sep 23.4%  Oct  0.3%
+
+=== within April and June, which half of the month? ===
+  April      n= 613  1st-15th 62.5%   16th-end 37.5%
+  May        n= 477  1st-15th 45.1%   16th-end 54.9%
+  June       n= 452  1st-15th 51.1%   16th-end 48.9%
+  July       n= 380  1st-15th 40.0%   16th-end 60.0%
+  September  n= 580  1st-15th 76.4%   16th-end 23.6%
+
+wrote q4-debut-month.json
+############ q4b-month-checks ############
+=== the finding, on the ORIGINAL rule (any honor before the debut date) ===
+  tier A                       n=  75  Mar  2.7%  Apr 24.0%  May 14.7%  Jun 14.7%  Jul 14.7%  Aug 10.7%  Sep 18.7%  Oct  0.0%
+  tier B                       n=1153  Mar  1.5%  Apr 17.1%  May 15.1%  Jun 14.6%  Jul 12.9%  Aug 18.3%  Sep 20.3%  Oct  0.3%
+  tier C                       n= 995  Mar  1.6%  Apr 20.5%  May 15.0%  Jun 14.4%  Jul 13.5%  Aug 16.2%  Sep 18.6%  Oct  0.3%
+  tier D                       n= 121  Mar  0.8%  Apr 23.1%  May 13.2%  Jun 16.5%  Jul 14.0%  Aug 16.5%  Sep 15.7%  Oct  0.0%
+  tier none                    n= 716  Mar  3.1%  Apr 23.2%  May 17.7%  Jun 15.4%  Jul  9.6%  Aug 12.6%  Sep 17.9%  Oct  0.6%
+
+=== the same, on PRIOR SEASONS ONLY (the artifact cannot reach this) ===
+  tier A                       n=  69  Mar  2.9%  Apr 26.1%  May 15.9%  Jun 15.9%  Jul 15.9%  Aug  8.7%  Sep 14.5%  Oct  0.0%
+  tier B                       n=1073  Mar  1.6%  Apr 18.4%  May 16.2%  Jun 15.7%  Jul 12.7%  Aug 17.3%  Sep 17.9%  Oct  0.3%
+  tier C                       n= 928  Mar  1.7%  Apr 22.0%  May 16.1%  Jun 14.9%  Jul 12.9%  Aug 15.3%  Sep 16.8%  Oct  0.3%
+  tier D                       n= 137  Mar  0.7%  Apr 20.4%  May 11.7%  Jun 15.3%  Jul 13.1%  Aug 17.5%  Sep 21.2%  Oct  0.0%
+  tier none                    n= 853  Mar  2.6%  Apr 19.5%  May 14.9%  Jun 13.4%  Jul 11.1%  Aug 15.5%  Sep 22.6%  Oct  0.5%
+
+  chi-square, prior-season tiers: X²=25.4, df=20, p=0.1880
+
+=== decorated (tier A/B on prior seasons, n=1142) vs undecorated (n=853) ===
+  debuts in Mar/Apr                    decorated 20.5%   undecorated 22.0%   p=0.4018
+  debuts in Aug/Sep/Oct                decorated 34.8%   undecorated 38.6%   p=0.0804
+  debuts in the first half (Mar-Jun)   decorated 52.4%   undecorated 50.3%   p=0.3598
+
+=== Futures Game in an EARLIER season (n=444) ===
+                               n= 444  Mar  1.6%  Apr 21.4%  May 16.7%  Jun 14.9%  Jul 11.5%  Aug 18.0%  Sep 15.8%  Oct  0.2%
+
+=== April, week by week ===
+  Apr 1-7    all  226   of them decorated  80 (35%)
+  Apr 8-14   all  144   of them decorated  41 (28%)
+  Apr 15-21  all   90   of them decorated  37 (41%)
+  Apr 22-30  all  153   of them decorated  57 (37%)
+
+=== September, week by week ===
+  Sep 1-7     297
+  Sep 8-14    137
+  Sep 15-21    88
+  Sep 22-30    58
+
+=== September share of all debuts, by year ===
+  2005  n= 151  Sep  19.9%   Mar/Apr  14.6%
+  2006  n= 151  Sep  21.9%   Mar/Apr  24.5%
+  2007  n= 131  Sep  27.5%   Mar/Apr  23.7%
+  2008  n= 154  Sep  23.4%   Mar/Apr  29.2%
+  2009  n= 141  Sep  19.9%   Mar/Apr  22.7%
+  2010  n= 144  Sep  24.3%   Mar/Apr  23.6%
+  2011  n= 167  Sep  25.7%   Mar/Apr  18.0%
+  2012  n= 140  Sep  16.4%   Mar/Apr  22.1%
+  2013  n= 158  Sep  19.0%   Mar/Apr  24.1%
+  2014  n= 163  Sep  18.4%   Mar/Apr  19.0%
+  2015  n= 162  Sep  18.5%   Mar/Apr  22.8%
+  2016  n= 184  Sep  17.9%   Mar/Apr  21.7%
+  2017  n= 171  Sep  18.1%   Mar/Apr  19.9%
+  2018  n= 162  Sep  14.2%   Mar/Apr  25.3%
+  2019  n= 192  Sep  12.0%   Mar/Apr  24.0%
+  2020  n= 140  Sep  25.0%   Mar/Apr   0.0%
+  2021  n= 163  Sep  18.4%   Mar/Apr  27.0%
+  2022  n= 201  Sep  15.9%   Mar/Apr  25.9%
+  2023  n= 185  Sep  15.7%   Mar/Apr  24.9%
+
+  September share, 2005-2019: 19.6%   2021-2023: 16.6%
+
+wrote q4b-month-checks.json
+############ q5-final-four ############
+study window: 600 club-seasons, 2004-2023
+  reached a Championship Series: 80
+  reached the postseason at all:  194
+
+=== the final four against everybody else ===
+(within-season percentile, 0 = lowest of the thirty, 1 = highest. 0.50 is what chance looks like.)
+  Homegrown share of the roster        final four 0.542   everyone else 0.494   p=0.1732
+  Own graduates debuting that year     final four 0.513   everyone else 0.498   p=0.6816
+  Own graduates, trailing 5 years      final four 0.599   everyone else 0.485   p=0.0013
+  Their rookie WAR, trailing 5 years   final four 0.549   everyone else 0.492   p=0.1130
+  Promotion speed (− = faster)         final four 0.448   everyone else 0.508   p=0.0879
+  Winning percentage                   final four 0.853   everyone else 0.446   p=<0.0001
+
+=== the same, in raw units ===
+  Homegrown share of the roster        final four    0.410   everyone else    0.378
+  Own graduates debuting that year     final four    5.000   everyone else    5.000
+  Own graduates, trailing 5 years      final four   26.000   everyone else   23.000
+  Their rookie WAR, trailing 5 years   final four   11.700   everyone else    9.950
+  Promotion speed (− = faster)         final four   -0.006   everyone else    0.019
+  Winning percentage                   final four    0.585   everyone else    0.488
+
+=== reaching a Championship Series, modelled (odds ratio per SD, season fixed effects) ===
+  final four ~ homegrown share                   n=600  homegrownShare OR 1.21 p=0.118
+  final four ~ homegrown share + winning         n=600  homegrownShare OR 1.13 p=0.425  winPct OR 9.55 p=<1e-4
+  final four ~ pipeline                          n=600  pipelineGrads OR 2.08 p=0.004  pipelineWar OR 1.16 p=0.510
+  final four ~ pipeline + winning                n=600  pipelineGrads OR 2.96 p=0.001  pipelineWar OR 0.42 p=0.003  winPct OR 11.29 p=<1e-4
+  final four ~ promotion speed                   n=561  promotionSpeed OR 0.89 p=0.338
+  final four ~ promotion speed + winning         n=561  promotionSpeed OR 0.89 p=0.422  winPct OR 8.79 p=<1e-4
+  final four ~ everything + winning              n=600  homegrownShare OR 1.15 p=0.388  pipelineGrads OR 2.83 p=0.001  pipelineWar OR 0.39 p=0.002  winPct OR 11.45 p=<1e-4
+
+=== how each farm measure relates to winning percentage ===
+  Homegrown share of the roster        r=  0.071  p=0.0841  (n=600)
+  Own graduates debuting that year     r=  0.071  p=0.0817  (n=600)
+  Own graduates, trailing 5 years      r=  0.081  p=0.0480  (n=600)
+  Their rookie WAR, trailing 5 years   r=  0.194  p=<1e-4  (n=600)
+  Promotion speed (− = faster)         r= -0.009  p=0.8253  (n=561)
+
+=== clubs by final-four appearances in the window ===
+  HOU   final four  9/20   homegrown 44.9%   graduates/5yr  22.5   their rookie WAR  11.5
+  LAD   final four  8/20   homegrown 41.1%   graduates/5yr  26.4   their rookie WAR  13.7
+  STL   final four  8/20   homegrown 49.5%   graduates/5yr  26.1   their rookie WAR  18.4
+  NYY   final four  7/20   homegrown 39.4%   graduates/5yr  27.1   their rookie WAR  13.7
+  BOS   final four  6/20   homegrown 34.6%   graduates/5yr  23.4   their rookie WAR   9.8
+  PHI   final four  5/20   homegrown 44.2%   graduates/5yr  21.2   their rookie WAR   8.4
+  DET   final four  4/20   homegrown 33.5%   graduates/5yr  20.6   their rookie WAR   5.2
+  CHC   final four  3/20   homegrown 33.5%   graduates/5yr  22.9   their rookie WAR  10.6
+  SF    final four  3/20   homegrown 43.7%   graduates/5yr  20.4   their rookie WAR   9.5
+  TEX   final four  3/20   homegrown 36.3%   graduates/5yr  24.6   their rookie WAR  10.9
+  LAA   final four  2/20   homegrown 45.5%   graduates/5yr  22.4   their rookie WAR  10.7
+  AZ    final four  2/20   homegrown 34.8%   graduates/5yr  25.3   their rookie WAR   7.4
+  CLE   final four  2/20   homegrown 37.1%   graduates/5yr  23.4   their rookie WAR  11.8
+  KC    final four  2/20   homegrown 45.6%   graduates/5yr  24.6   their rookie WAR   8.7
+  NYM   final four  2/20   homegrown 44.2%   graduates/5yr  22.3   their rookie WAR  11.0
+  TB    final four  2/20   homegrown 36.8%   graduates/5yr  20.6   their rookie WAR  12.9
+  TOR   final four  2/20   homegrown 37.6%   graduates/5yr  24.9   their rookie WAR  11.2
+  ATL   final four  2/20   homegrown 44.9%   graduates/5yr  24.8   their rookie WAR  13.3
+  MIL   final four  2/20   homegrown 34.2%   graduates/5yr  17.0   their rookie WAR  10.2
+  BAL   final four  1/20   homegrown 36.0%   graduates/5yr  18.4   their rookie WAR  11.6
+  COL   final four  1/20   homegrown 53.2%   graduates/5yr  22.9   their rookie WAR   8.4
+  WSH   final four  1/20   homegrown 34.0%   graduates/5yr  19.6   their rookie WAR  10.6
+  ATH   final four  1/20   homegrown 26.2%   graduates/5yr  17.9   their rookie WAR   8.6
+  SD    final four  1/20   homegrown 25.8%   graduates/5yr  25.2   their rookie WAR  12.4
+  CWS   final four  1/20   homegrown 27.0%   graduates/5yr  17.6   their rookie WAR   7.9
+  CIN   final four  0/20   homegrown 40.9%   graduates/5yr  19.9   their rookie WAR  11.6
+  PIT   final four  0/20   homegrown 40.9%   graduates/5yr  21.1   their rookie WAR   6.6
+  SEA   final four  0/20   homegrown 38.5%   graduates/5yr  21.9   their rookie WAR   8.9
+  MIN   final four  0/20   homegrown 50.3%   graduates/5yr  22.3   their rookie WAR  11.0
+  MIA   final four  0/20   homegrown 30.8%   graduates/5yr  20.1   their rookie WAR  11.9
+
+  across the 30 clubs: final-four count vs homegrown share r=0.241 (p=0.200), vs graduates r=0.481 (p=0.007), vs their rookie WAR r=0.401 (p=0.028)
+
+=== collinearity: graduates vs their rookie WAR, r=0.705 (n=600) ===
+  each entered ALONE, with winning controlled:
+  final four ~ graduates + winning               n=600  pipelineGrads OR 1.86 p=0.024  winPct OR 9.43 p=<1e-4
+  final four ~ their rookie WAR + winning        n=600  pipelineWar OR 0.67 p=0.124  winPct OR 10.44 p=<1e-4
+  final four ~ WAR per graduate + winning        n=554  warPerGrad OR 0.42 p=0.001  winPct OR 10.69 p=<1e-4
+  final four ~ WAR per graduate, NO winning control n=554  warPerGrad OR 1.09 p=0.699
+
+=== falsification: does the same measure predict merely REACHING the postseason? ===
+  made the postseason ~ graduates                      n=600  pipelineGrads OR 1.67 p=0.002
+  made the postseason ~ graduates + winning            n=600  pipelineGrads OR 1.30 p=0.482  winPct OR 8446.10 p=<1e-4
+  final four ~ graduates                               n=600  pipelineGrads OR 2.25 p=0.000
+  final four ~ graduates + winning                     n=600  pipelineGrads OR 1.86 p=0.024  winPct OR 9.43 p=<1e-4
+
+=== leave one club out (the graduates term, winning controlled) ===
+  odds ratio range across the 30 refits: 1.41 to 2.28
+  significant at p<0.05 in 27 of 30
+  weakest: drop HOU → OR 1.41, p=0.230; drop STL → OR 1.61, p=0.090; drop ATH → OR 1.72, p=0.052
+
+wrote q5-final-four.json

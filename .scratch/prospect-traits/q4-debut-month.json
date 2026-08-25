@@ -1,0 +1,312 @@
+{
+ "tierCounts": {
+  "B": 1153,
+  "C": 995,
+  "none": 716,
+  "A": 75,
+  "D": 121
+ },
+ "untiered": [
+  [
+   "CSAS",
+   13
+  ],
+  [
+   "AFLSPORT",
+   10
+  ],
+  [
+   "WBCTT",
+   9
+  ],
+  [
+   "DWLROY",
+   8
+  ],
+  [
+   "MEXMSAS",
+   8
+  ],
+  [
+   "BAMMILBSCOFF",
+   7
+  ],
+  [
+   "SLBHUS",
+   6
+  ],
+  [
+   "FSLMVPI",
+   6
+  ],
+  [
+   "BAMMILBSCBRK",
+   6
+  ],
+  [
+   "BAMMILBSCSP",
+   6
+  ],
+  [
+   "SLBUTL",
+   5
+  ],
+  [
+   "SOUAVGTITLE",
+   5
+  ],
+  [
+   "BAMMILBFCBRK",
+   5
+  ],
+  [
+   "NORPITCHOM",
+   5
+  ],
+  [
+   "BAMMILBFCOFF",
+   4
+  ],
+  [
+   "BAMMILBFCSP",
+   4
+  ],
+  [
+   "SALPITCHOM",
+   4
+  ],
+  [
+   "MEXROY",
+   3
+  ],
+  [
+   "DWLMVP",
+   3
+  ],
+  [
+   "ILMVPI",
+   2
+  ],
+  [
+   "SOUERATITLE",
+   2
+  ],
+  [
+   "BAMMILBSCRP",
+   2
+  ],
+  [
+   "AFLHOY",
+   2
+  ],
+  [
+   "MIDPITCHOM",
+   2
+  ],
+  [
+   "SLPROSPECT",
+   2
+  ],
+  [
+   "CARPITCHOM",
+   2
+  ],
+  [
+   "TLPROSPECT",
+   2
+  ],
+  [
+   "FSLPROSPECT",
+   2
+  ],
+  [
+   "VWLRLOY",
+   1
+  ],
+  [
+   "CARMOY",
+   1
+  ],
+  [
+   "BAMMISGP",
+   1
+  ],
+  [
+   "WBCMVP",
+   1
+  ],
+  [
+   "CSMVP",
+   1
+  ],
+  [
+   "BAMMILBFCRP",
+   1
+  ],
+  [
+   "BAMHOMER",
+   1
+  ],
+  [
+   "WSCHAMP",
+   1
+  ],
+  [
+   "WBCMVPB",
+   1
+  ],
+  [
+   "AFLBOY",
+   1
+  ],
+  [
+   "ELPROSPECT",
+   1
+  ],
+  [
+   "INTPROSPECT",
+   1
+  ]
+ ],
+ "allMonths": [
+  58,
+  613,
+  477,
+  452,
+  380,
+  490,
+  580,
+  10
+ ],
+ "tierMonths": {
+  "A": [
+   2,
+   18,
+   11,
+   11,
+   11,
+   8,
+   14,
+   0
+  ],
+  "B": [
+   17,
+   197,
+   174,
+   168,
+   149,
+   211,
+   234,
+   3
+  ],
+  "C": [
+   16,
+   204,
+   149,
+   143,
+   134,
+   161,
+   185,
+   3
+  ],
+  "D": [
+   1,
+   28,
+   16,
+   20,
+   17,
+   20,
+   19,
+   0
+  ],
+  "none": [
+   22,
+   166,
+   127,
+   110,
+   69,
+   90,
+   128,
+   4
+  ]
+ },
+ "chiSquare": {
+  "chi": 35.395319715763655,
+  "df": 20,
+  "p": 0.01809711059591368,
+  "keys": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "none"
+  ]
+ },
+ "aprSepRows": [
+  {
+   "tier": "A",
+   "n": 75,
+   "aprShare": 0.26666666666666666,
+   "sepShare": 0.18666666666666668
+  },
+  {
+   "tier": "B",
+   "n": 1153,
+   "aprShare": 0.18560277536860365,
+   "sepShare": 0.20555073720728534
+  },
+  {
+   "tier": "C",
+   "n": 995,
+   "aprShare": 0.22110552763819097,
+   "sepShare": 0.18894472361809045
+  },
+  {
+   "tier": "D",
+   "n": 121,
+   "aprShare": 0.2396694214876033,
+   "sepShare": 0.15702479338842976
+  },
+  {
+   "tier": "none",
+   "n": 716,
+   "aprShare": 0.26256983240223464,
+   "sepShare": 0.18435754189944134
+  }
+ ],
+ "lagRows": [
+  {
+   "tier": "A",
+   "n": 75,
+   "medianLagDays": 194,
+   "sameSeasonShare": 0.21333333333333335
+  },
+  {
+   "tier": "B",
+   "n": 1153,
+   "medianLagDays": 222,
+   "sameSeasonShare": 0.2610581092801388
+  },
+  {
+   "tier": "C",
+   "n": 995,
+   "medianLagDays": 344,
+   "sameSeasonShare": 0.19497487437185929
+  },
+  {
+   "tier": "D",
+   "n": 121,
+   "medianLagDays": 269,
+   "sameSeasonShare": 0
+  }
+ ],
+ "futures": {
+  "n": 590,
+  "medianLagDays": 323,
+  "within": {
+   "same season, within 90 days": 187,
+   "next season": 243,
+   "two or more seasons later": 160
+  }
+ }
+}

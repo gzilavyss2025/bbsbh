@@ -24,7 +24,7 @@ import {
 // underlying numbers: the translation IS the work here.
 //
 // WHY IT IS ADMIN-ONLY. Not because any of it is sensitive — it is baseball
-// research and three of the four entries are already public in docs/. It is
+// research and every entry's method is already public in docs/. It is
 // that this is a working notebook with retractions in it, and a retraction on
 // a public page reads as a correction notice rather than as the ordinary way
 // research moves. Same client-side Clerk role check the copy editor makes; it
@@ -44,6 +44,19 @@ function Shell({ children }) {
       <ReportFooter />
     </div>
   )
+}
+
+// The traps heading counts them, and the count was hardcoded once and went
+// stale the first time the list grew. Spelled out rather than a numeral,
+// because this page writes numbers as words in prose, and derived rather than
+// typed, because a number typed next to a list it describes is a number that
+// will be wrong again.
+const COUNT_WORDS = [
+  'No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+  'Ten', 'Eleven', 'Twelve',
+]
+function countWord(n) {
+  return COUNT_WORDS[n] ?? String(n)
 }
 
 function Notice({ children }) {
@@ -204,7 +217,7 @@ function Diary() {
       </header>
 
       <section className="researchdiary__traps">
-        <h2 className="researchdiary__trapshead">Five things that will fool you</h2>
+        <h2 className="researchdiary__trapshead">{countWord(TRAPS.length)} things that will fool you</h2>
         <p className="researchdiary__prose caps-exempt">
           Each of these cost real work to find, and each one will bite the next person who reads a
           number out of this data without knowing about it.

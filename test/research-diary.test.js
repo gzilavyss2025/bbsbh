@@ -84,3 +84,16 @@ test('the standing front matter is present', () => {
     assert.ok(trap.title?.length && trap.body?.length, `${trap.id}: incomplete trap`)
   }
 })
+
+test('the traps heading counts the traps it is standing over', () => {
+  // The heading used to say "Five things that will fool you" as a literal, and
+  // it went stale the first time the list grew to eight. The page now derives
+  // the word, and this pins the word list wide enough to keep deriving it —
+  // a count that runs off the end of COUNT_WORDS silently falls back to a
+  // numeral, which is not this page's voice.
+  assert.ok(TRAPS.length >= 1, 'there must be traps to count')
+  assert.ok(
+    TRAPS.length <= 12,
+    `TRAPS is ${TRAPS.length}; widen COUNT_WORDS in ResearchDiaryPage.jsx before adding more`,
+  )
+})
