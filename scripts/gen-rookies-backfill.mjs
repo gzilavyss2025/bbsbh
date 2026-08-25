@@ -27,18 +27,14 @@
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { levelSeasonStat } from '../src/api/person.js'
-import { ipToOuts } from '../src/api/rehab-policy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { writeRookieShards } from './lib/rookie-shards.mjs'
+import { findCrossingSeason, crossingDateFromGameLog } from './lib/rookie-crossing.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'rookies.json')
-const ROOKIE_AB_LIMIT = 130
-const ROOKIE_IP_OUTS_LIMIT = 150 // 50 IP == 150 outs
-const LIMIT = { hitting: ROOKIE_AB_LIMIT, pitching: ROOKIE_IP_OUTS_LIMIT }
 
 // Run an async mapper across items with a small concurrency cap (be polite to
 // statsapi). Mirrors gen-milestones.mjs's helper.
@@ -60,40 +56,6 @@ function groupsFor(position) {
   return [abbr === 'P' ? 'pitching' : 'hitting']
 }
 
-function statValue(group, agg) {
-  if (!agg) return 0
-  return group === 'pitching' ? ipToOuts(agg.inningsPitched) : Number(agg.atBats) || 0
-}
-
-// Walk one group's career, season by season, to find the season cumulative
-// AB/outs first crosses the limit. Returns { crossingSeason, priorTotal }
-// (priorTotal = cumulative total ENTERING the crossing season) or null if his
-// whole career never crosses.
-//
-// Uses levelSeasonStat (not a raw aggregateSplits over the season's rows) —
-// yearByYear can include a synthetic team-less row summing a same-season
-// trade's per-team rows, and aggregateSplits doesn't recognize it as a
-// duplicate, so summing every row double-counts the season. See
-// gen-rookies.mjs's findCrossingSeason for the verified case this caused
-// (Mauricio Dubón stuck permanently open from his mid-2019 trade).
-function findCrossingSeason(yearSplits, group) {
-  const bySeason = new Map()
-  for (const s of yearSplits) {
-    const yr = Number(s.season)
-    if (!Number.isFinite(yr)) continue
-    if (!bySeason.has(yr)) bySeason.set(yr, [])
-    bySeason.get(yr).push(s)
-  }
-  const seasons = [...bySeason.keys()].sort((a, b) => a - b)
-  let running = 0
-  for (const yr of seasons) {
-    const value = statValue(group, levelSeasonStat(bySeason.get(yr), group))
-    if (running + value >= LIMIT[group]) return { crossingSeason: yr, priorTotal: running }
-    running += value
-  }
-  return null
-}
-
 // Pin the exact date within the crossing season by walking that one season's
 // game log ascending, running-summing from priorTotal — same technique
 // gen-rehab.mjs uses (fetchGameLogDates) to compare a career log against a
@@ -103,12 +65,7 @@ async function findCrossingDate(personId, group, season, priorTotal) {
     `/api/v1/people/${personId}/stats?stats=gameLog&group=${group}&season=${season}`,
   )
   const games = (data.stats?.[0]?.splits ?? []).slice().sort((a, b) => (a.date < b.date ? -1 : 1))
-  let running = priorTotal
-  for (const g of games) {
-    running += group === 'pitching' ? ipToOuts(g.stat?.inningsPitched) : Number(g.stat?.atBats) || 0
-    if (running >= LIMIT[group]) return g.date
-  }
-  return null
+  return crossingDateFromGameLog(games, group, priorTotal)
 }
 
 // One player's full rookie record: debut date + the date (if any) he crossed

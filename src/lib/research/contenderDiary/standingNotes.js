@@ -49,4 +49,9 @@ export const TRAPS = [
     title: 'A dataset built for a different research program may not cover this program’s full window',
     body: 'The homegrown-dependence classifier (docs/homegrown-dependence.md) was built for the prospect-development diary, on its own season floor and ceiling — 2004-2023, not this program’s 2000-2025. Joining a reused panel like that against the outcome ladder silently drops whatever seasons sit outside its window; the join does not error, it just produces a smaller n than the ladder’s own 780 team-seasons. Any future spike that reuses a dataset built for a different program needs to check that dataset’s own season range before trusting the joined sample size, and say the smaller n out loud rather than let a reader assume full coverage.',
   },
+  {
+    id: 'traded-player-war-has-no-team-split',
+    title: 'A player traded mid-season has ONE combined-season WAR number, not two team-specific ones',
+    body: 'public/data/war-history (src/api/war.js) carries no team attribution at all — a player traded mid-season gets a single WAR figure for his WHOLE season, wherever he ended up. The roster cache built for the age spike (roster-age-cache.json) correctly splits a traded player\'s playing time between his two teams (verified against Troy Tulowitzki\'s 2015 Rockies-to-Blue-Jays trade: 351 plate appearances at Colorado, 183 at Toronto, matching his real stint split). Join those two datasets naively — crediting his full combined-season WAR to BOTH teams — and a traded star\'s value gets double-counted, inflating both rosters\' apparent star power. The fix used in docs/team-success-star-diversity.md: prorate his season WAR by playing-time share at each team (his weight there ÷ his total weight across every team that season), so the pieces sum back to his real total. Any future spike joining war-history against a team-level roster needs the same proration, or a traded player will silently count twice.',
+  },
 ]

@@ -296,6 +296,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeatherLoading={weather.loading}
           // The away side FACES the home starter.
           oppPitcherLine={starterLines.data?.home}
+          vsTeam={vsTeamSplitsData}
           prospectsData={prospectsData}
           rookiesData={rookiesData}
           feverRadarData={feverRadarData}
@@ -327,6 +328,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           oppPitcherLine={starterLines.data?.away}
+          vsTeam={vsTeamSplitsData}
           prospectsData={prospectsData}
           rookiesData={rookiesData}
           feverRadarData={feverRadarData}

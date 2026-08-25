@@ -131,7 +131,11 @@ const BUDGETS = {
   // explanation in a file where every other branch is explained would be the
   // thing a later reader deletes.
   'src/lib/route.js': 620, // 614
-  'scripts/check-dir-size.mjs': 800, // 703 — five genuine, documented budget bumps for the hover card (#834)
+  // 800 -> 850: two documented budget bumps in one integration — scripts/lib
+  // for rookie-crossing.mjs, and src/lib/research/diary for the diary's first
+  // `corrected` entry. Banded, not fitted: this file's own budgets grow a
+  // comment block at a time, so a little headroom is the point.
+  'scripts/check-dir-size.mjs': 850, // 807
   'src/api/whatsBrewing.js': 1600, // 1581
   // 1500 -> 1600 for the veloVariety/centuryClub/veloPeak join (docs/callouts.md):
   // +9 lines to attach gen-pitch-arsenal.mjs's century-pitch sweep
@@ -156,7 +160,11 @@ const BUDGETS = {
   // src/components/chrome (at ITS own MAX_FILES) to save this one 45, which
   // trades a real limit for a nominal one.
   'src/screens/GameView.jsx': 620, // 609
-  'src/screens/TeamInfo.jsx': 1300, // 1299
+  // 1300 -> 1360: the starting-pitcher card's season-vs-opponent and
+  // career-vs-opponent rows (see OpposingStarterCard). 1360 -> 1400 for the
+  // pitch-mix card's batter-side split — one more arsenalSidesView memo beside
+  // the times-through one it crosses with, and the prop that carries it down.
+  'src/screens/TeamInfo.jsx': 1400, // 1369
   'src/screens/BoxScore.jsx': 1300, // 1203 — the hit chart's 3-line mount; the card itself is screens/boxscore/HitChartCard.jsx
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
   // 1200 -> 1225 for the runtime logo-override hooks (ADR-0050's logo
@@ -178,6 +186,12 @@ const BUDGETS = {
   // the same convention in two files and let them drift.
   'src/lib/route.js': 900, // 814
   'scripts/gen-fouls.mjs': 1000, // 996
+  // The sweep gained a batter-side dimension: the side is read off the matchup,
+  // it keys the type buckets, and the export folds the sides back into the one
+  // pitch a card reads (emptyBucket/foldRow/ttoPairs). Splitting the file would
+  // put the counting rules and the shape they are exported in on either side of
+  // a module boundary, which is the one pair that has to be read together.
+  'scripts/gen-pitch-arsenal.mjs': 700, // 652
   'src/api/teamTransactions.js': 700, // 619 — the prose half moved to transactions/cutline.js, the vocabulary before it
   'src/screens/InningViewer.jsx': 1100, // 1003 — wired in useHeadshotPrefetch (one hook call + its doc comment) so at-bat stepping warms both rosters' headshot CDN URLs up front; the hook's own logic lives in src/hooks/useHeadshotPrefetch.js, not here
   'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js

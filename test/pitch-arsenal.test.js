@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { aggregateGamePitchTypes, centuryRankMap } from '../scripts/gen-pitch-arsenal.mjs'
-import { pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
+import { aggregateGamePitchTypes, centuryRankMap, exportPitchArsenal } from '../scripts/gen-pitch-arsenal.mjs'
+import { pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, arsenalSidesView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
 
 // --- helpers to build a tiny synthetic feed ----------------------------------
 const pitch = (typeCode, description, startSpeed) => ({
@@ -10,11 +10,14 @@ const pitch = (typeCode, description, startSpeed) => ({
   pitchData: startSpeed == null ? undefined : { startSpeed },
 })
 
-const play = ({ half = 'top', pitcher, batter, events }) => ({
+// `stand` is the side the BATTER stood on, which a real feed always names —
+// null builds the MiLB case where it doesn't, and the sweep buckets under '?'.
+const play = ({ half = 'top', pitcher, batter, stand = 'R', events }) => ({
   about: { halfInning: half },
   matchup: {
     pitcher: { id: pitcher, fullName: `Pitcher ${pitcher}` },
     ...(batter == null ? {} : { batter: { id: batter } }),
+    ...(stand == null ? {} : { batSide: { code: stand } }),
   },
   playEvents: events,
 })
@@ -41,11 +44,11 @@ test('aggregateGamePitchTypes tallies pitches and velocity per pitcher/pitch typ
   const p = agg.get(200)
   assert.equal(p.name, 'Pitcher 200')
   assert.equal(p.teamId, 2, 'the pitcher fields for the team batting is NOT on — home fields during the top half')
-  const ff = p.types.get('FF')
+  const ff = p.types.get('FF:R')
   assert.equal(ff.pitches, 2)
   assert.equal(ff.velocitySum, 192)
   assert.equal(ff.velocityN, 2)
-  const sl = p.types.get('SL')
+  const sl = p.types.get('SL:R')
   assert.equal(sl.pitches, 1)
   assert.equal(sl.description, 'Slider')
 })
@@ -64,10 +67,10 @@ test('aggregateGamePitchTypes tallies century_pitches and tracks max_velo per ty
     ]),
   )
   const p = agg.get(200)
-  const sl = p.types.get('SL')
+  const sl = p.types.get('SL:R')
   assert.equal(sl.centuryPitches, 1)
   assert.equal(sl.maxVelo, CENTURY_MPH + 1)
-  const ff = p.types.get('FF')
+  const ff = p.types.get('FF:R')
   assert.equal(ff.centuryPitches, 0)
   assert.equal(ff.maxVelo, CENTURY_MPH - 3, 'maxVelo tracks the fastest pitch regardless of the century floor')
 })
@@ -76,7 +79,7 @@ test('aggregateGamePitchTypes tolerates a pitch with no recorded velocity', () =
   const agg = aggregateGamePitchTypes(
     feedWith([play({ pitcher: 200, events: [pitch('CH', 'Changeup', undefined)] })]),
   )
-  const t = agg.get(200).types.get('CH')
+  const t = agg.get(200).types.get('CH:R')
   assert.equal(t.pitches, 1)
   assert.equal(t.velocityN, 0, 'no speed on file means it never joins the average')
 })
@@ -88,7 +91,7 @@ test('aggregateGamePitchTypes skips non-pitch playEvents and plays with no pitch
       { about: { halfInning: 'top' }, matchup: {}, playEvents: [pitch('FF', 'Four-Seam Fastball', 95)] },
     ]),
   )
-  assert.equal(agg.get(200).types.get('FF').pitches, 1)
+  assert.equal(agg.get(200).types.get('FF:R').pitches, 1)
   assert.equal(agg.size, 1, 'the pitcher-less play never creates a bogus entry')
 })
 
@@ -206,7 +209,7 @@ test('aggregateGamePitchTypes buckets pitches by how many times that batter has 
       play({ pitcher: 200, batter: 10, events: [pitch('FF', 'Four-Seam Fastball', 92)] }),
     ]),
   )
-  const t = agg.get(200).types.get('FF')
+  const t = agg.get(200).types.get('FF:R')
   assert.equal(t.pitches, 5)
   assert.deepEqual(t.tto.map((b) => b.pitches), [2, 1, 2], 'two firsts (one each batter), one second, two thirds')
   assert.equal(t.tto[0].velocitySum, 95 + 96)
@@ -221,9 +224,9 @@ test('aggregateGamePitchTypes counts a look per PITCHER, so a reliever starts fr
       play({ pitcher: 201, batter: 10, events: [pitch('SL', 'Slider', 85)] }),
     ]),
   )
-  assert.deepEqual(agg.get(200).types.get('FF').tto.map((b) => b.pitches), [1, 1, 0])
+  assert.deepEqual(agg.get(200).types.get('FF:R').tto.map((b) => b.pitches), [1, 1, 0])
   assert.deepEqual(
-    agg.get(201).types.get('SL').tto.map((b) => b.pitches),
+    agg.get(201).types.get('SL:R').tto.map((b) => b.pitches),
     [1, 0, 0],
     'the arm that just came in is seeing this hitter for the FIRST time',
   )
@@ -233,7 +236,7 @@ test('aggregateGamePitchTypes still counts a pitch whose play carries no batter,
   const agg = aggregateGamePitchTypes(
     feedWith([play({ pitcher: 200, events: [pitch('FF', 'Four-Seam Fastball', 95)] })]),
   )
-  const t = agg.get(200).types.get('FF')
+  const t = agg.get(200).types.get('FF:R')
   assert.equal(t.pitches, 1, 'the season total still has it')
   assert.deepEqual(t.tto.map((b) => b.pitches), [0, 0, 0], 'but it joins no look')
 })
@@ -358,4 +361,170 @@ test('centuryRankMap reports the COHORT size, not the league size', () => {
 
 test('centuryRankMap handles an empty cohort', () => {
   assert.equal(centuryRankMap([]).size, 0)
+})
+
+// --- the batter-side split ----------------------------------------------------
+
+test('aggregateGamePitchTypes buckets pitches by the side the BATTER stood on', () => {
+  const agg = aggregateGamePitchTypes(
+    feedWith([
+      play({ pitcher: 200, batter: 1, stand: 'L', events: [pitch('FF', 'Four-Seam Fastball', 95)] }),
+      play({
+        pitcher: 200, batter: 2, stand: 'R',
+        events: [pitch('FF', 'Four-Seam Fastball', 97), pitch('SL', 'Slider', 84)],
+      }),
+    ]),
+  )
+  const types = agg.get(200).types
+  assert.equal(types.get('FF:L').pitches, 1)
+  assert.equal(types.get('FF:R').pitches, 1)
+  assert.equal(types.get('SL:R').pitches, 1)
+  assert.equal(types.get('SL:L'), undefined, 'a pitch he never threw to that side has no bucket at all')
+})
+
+test('aggregateGamePitchTypes crosses the side with the look, so a bucket is one side on one look', () => {
+  const agg = aggregateGamePitchTypes(
+    feedWith([
+      // A lefty and a righty the first time through, then the same lefty again.
+      play({ pitcher: 200, batter: 1, stand: 'L', events: [pitch('FF', 'FF', 95)] }),
+      play({ pitcher: 200, batter: 2, stand: 'R', events: [pitch('FF', 'FF', 95)] }),
+      play({ pitcher: 200, batter: 1, stand: 'L', events: [pitch('FF', 'FF', 94), pitch('FF', 'FF', 93)] }),
+    ]),
+  )
+  assert.deepEqual(agg.get(200).types.get('FF:L').tto.map((b) => b.pitches), [1, 2, 0])
+  assert.deepEqual(agg.get(200).types.get('FF:R').tto.map((b) => b.pitches), [1, 0, 0])
+})
+
+test('aggregateGamePitchTypes buckets a play whose feed names no side under ?, and still counts it', () => {
+  const agg = aggregateGamePitchTypes(
+    feedWith([play({ pitcher: 200, batter: 1, stand: null, events: [pitch('FF', 'FF', 95)] })]),
+  )
+  const t = agg.get(200).types.get('FF:?')
+  assert.equal(t.pitches, 1, 'a MiLB feed with no batSide still has its pitches counted')
+  assert.deepEqual(t.tto.map((b) => b.pitches), [1, 0, 0], 'and it still joins a look')
+})
+
+// exportPitchArsenal only ever asks the db for rows, so a stub standing in for
+// one keeps this a test of the FOLDING — sides back into the one pitch a card
+// reads — rather than a test of SQLite.
+const totalsRow = (over) => ({
+  person_id: 100, level: 'mlb', code: 'FF', stand: 'R', season: 2026,
+  name: 'Arm', team_id: 1, description: 'Four-Seam Fastball',
+  pitches: 0, velocity_sum: 0, velocity_n: 0, century_pitches: 0, max_velo: null,
+  tto1_pitches: 0, tto1_velocity_sum: 0, tto1_velocity_n: 0,
+  tto2_pitches: 0, tto2_velocity_sum: 0, tto2_velocity_n: 0,
+  tto3_pitches: 0, tto3_velocity_sum: 0, tto3_velocity_n: 0,
+  ...over,
+})
+
+const stubDb = (rows) => ({
+  prepare(sql) {
+    if (sql.includes('pitch_arsenal_ingested_games')) {
+      return { all: () => [{ game_pk: 1, level: 'mlb', date: '2026-04-01' }] }
+    }
+    if (sql.includes('SELECT season')) return { get: () => ({ season: 2026 }) }
+    return { all: () => rows }
+  },
+})
+
+test('exportPitchArsenal folds every side back into one pitch, and keeps L and R in vs', () => {
+  const out = exportPitchArsenal(
+    stubDb([
+      totalsRow({
+        stand: 'L', pitches: 40, velocity_sum: 3760, velocity_n: 40,
+        tto1_pitches: 25, tto1_velocity_sum: 2350, tto1_velocity_n: 25,
+      }),
+      totalsRow({
+        stand: 'R', pitches: 60, velocity_sum: 5700, velocity_n: 60,
+        tto1_pitches: 35, tto1_velocity_sum: 3325, tto1_velocity_n: 35,
+      }),
+      totalsRow({ stand: '?', pitches: 5, velocity_sum: 470, velocity_n: 5 }),
+    ]),
+  )
+  const [ff] = out.pit[100].mlb
+  assert.equal(ff.pitches, 105, 'every side summed, the no-side rows included')
+  assert.equal(ff.avgVelo, 94.6, 'one average over every side, not one side of it')
+  assert.deepEqual(ff.vs.L, [40, 94, [[25, 94]]])
+  assert.deepEqual(ff.vs.R, [60, 95, [[35, 95]]])
+  assert.equal(ff.vs['?'], undefined, 'a side the reader cannot name is never offered as one')
+})
+
+test('exportPitchArsenal omits vs for a pitch swept before sides were counted', () => {
+  const out = exportPitchArsenal(
+    stubDb([totalsRow({ stand: '?', pitches: 30, velocity_sum: 2820, velocity_n: 30 })]),
+  )
+  const [ff] = out.pit[100].mlb
+  assert.equal(ff.pitches, 30, 'the season is still whole')
+  assert.equal(ff.vs, undefined, 'absent is unknown — the card hides the filter rather than drawing half of one')
+})
+
+test('exportPitchArsenal sorts most-thrown first off every side, not off whichever side sorted first', () => {
+  const out = exportPitchArsenal(
+    stubDb([
+      totalsRow({ code: 'FF', stand: 'L', pitches: 10 }),
+      totalsRow({ code: 'FF', stand: 'R', pitches: 10 }),
+      totalsRow({ code: 'SL', stand: 'R', pitches: 15 }),
+    ]),
+  )
+  assert.deepEqual(out.pit[100].mlb.map((t) => t.code), ['FF', 'SL'], '20 across two sides beats 15 on one')
+})
+
+// The reader's side of the split. `vs` is [pitches, avgVelo] and, when that
+// side reached past a first look, its own [pitches, avgVelo] look pairs.
+const sideRow = (code, pitches, vs) => ({
+  code, description: code, pitches, avgVelo: 95, century: 0, maxVelo: 99, vs,
+})
+
+test('pitchArsenalFor gives a side its OWN denominator', () => {
+  const data = dataWith(100, [
+    sideRow('FF', 100, { L: [20, 94], R: [80, 95] }),
+    sideRow('SL', 60, { L: [40, 85], R: [20, 86] }),
+  ])
+  const vsLeft = pitchArsenalFor(data, 100, true, 'L')
+  assert.deepEqual(vsLeft.map((t) => t.code), ['SL', 'FF'], 'to lefties he is a slider pitcher, and the order says so')
+  assert.equal(vsLeft[0].pct, 66.7, '40 of the 60 he threw to lefties, not 40 of 160')
+  assert.equal(vsLeft[0].avgVelo, 85, 'the velocity belongs to that side, not to the season')
+  assert.equal(pitchArsenalFor(data, 100, true)[0].code, 'FF', 'unfiltered, the season is unchanged')
+})
+
+test('pitchArsenalFor drops a pitch a side never saw, and returns null under the floor', () => {
+  const data = dataWith(100, [
+    sideRow('FF', 100, { L: [30, 94], R: [70, 95] }),
+    sideRow('SL', 20, { R: [20, 86] }),
+  ])
+  assert.deepEqual(pitchArsenalFor(data, 100, true, 'L').map((t) => t.code), ['FF'])
+
+  const thin = dataWith(100, [sideRow('FF', 100, { L: [MIN_ARSENAL_PITCHES - 1, 94], R: [90, 95] })])
+  assert.equal(pitchArsenalFor(thin, 100, true, 'L'), null, 'a handful of pitches is not a plan')
+  assert.equal(pitchArsenalFor(dataWith(100, [sideRow('FF', 100, {})]), 100, true, 'L'), null)
+})
+
+test('arsenalTtoView crosses the side with the look', () => {
+  const data = dataWith(100, [
+    sideRow('FF', 200, { L: [80, 94, [[50, 94], [30, 93]]], R: [120, 95, [[70, 95], [50, 96]]] }),
+    sideRow('SL', 100, { L: [60, 85, [[20, 85], [40, 84]]], R: [40, 86, [[20, 86], [20, 86]]] }),
+  ])
+  const looks = arsenalTtoView(data, 100, true, 'L')
+  assert.deepEqual(looks.map((l) => l.look), [1, 2])
+  assert.equal(looks[0].total, 70, 'the first look at a LEFTY, not at anyone')
+  assert.equal(looks[1].rows[0].code, 'SL', 'second time through a lefty he leans on the slider')
+  assert.equal(Math.round(looks[1].rows[0].usage * 1000) / 10, 57.1, '40 of the 70 he threw lefties on that look')
+})
+
+test('arsenalSidesView hands each side the shape the unfiltered card already reads', () => {
+  const data = dataWith(100, [
+    sideRow('FF', 200, { L: [80, 94, [[50, 94], [30, 93]]], R: [120, 95, [[70, 95], [50, 96]]] }),
+  ])
+  const sides = arsenalSidesView(data, 100, true)
+  assert.deepEqual(sides.counts, { L: 80, R: 120 })
+  assert.equal(sides.L.rows[0].pct, 100)
+  assert.deepEqual(sides.L.tto.map((l) => l.look), [1, 2])
+})
+
+test('arsenalSidesView returns null when either side is no split', () => {
+  const noSplit = dataWith(100, [sideRow('FF', 200, undefined)])
+  assert.equal(arsenalSidesView(noSplit, 100, true), null, 'a file swept before sides were counted offers no filter')
+
+  const lopsided = dataWith(100, [sideRow('FF', 200, { L: [MIN_ARSENAL_PITCHES - 1, 94], R: [190, 95] })])
+  assert.equal(arsenalSidesView(lopsided, 100, true), null, 'one side is no split, same rule the look filter follows')
 })

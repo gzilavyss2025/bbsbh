@@ -37,9 +37,15 @@ export async function loadCenturyClub() {
   const db = await openDb()
   const rows = db
     .prepare(
-      `SELECT person_id, level, code, description, century_pitches, max_velo
+      // GROUPED, because pitch_arsenal_totals now holds one row per SIDE the
+      // batter stood on. A pitch type is one entry here however many sides he
+      // threw it to, so the counts sum and the hardest reading is the hardest
+      // of them — ungrouped, a four-seam would have shown up twice.
+      `SELECT person_id, level, code, MIN(description) AS description,
+              SUM(century_pitches) AS century_pitches, MAX(max_velo) AS max_velo
        FROM pitch_arsenal_totals
-       WHERE century_pitches > 0`,
+       GROUP BY person_id, level, code
+       HAVING SUM(century_pitches) > 0`,
     )
     .all()
   return centuryClubFromRows(rows)

@@ -52,4 +52,9 @@ export const TRAPS = [
     title: 'There is no historical payroll anywhere in this repo',
     body: 'The salary and contract files are current-season snapshots looking forward; attendance is this season only. So the most obvious alternative explanation for almost any club-level finding here — that it is really about money — cannot be tested with what is on hand. Every entry carrying that gap says so.',
   },
+  {
+    id: 'zero-reads-as-missing',
+    title: 'A perfect zero can look exactly like missing data',
+    body: 'A rate stat gated on "greater than zero" to catch missing lines also catches a real 0.00 ERA — a short, dominant stint, not an empty one — and silently drops the man who earned it. It happened here to twenty-three of a study\'s best short outings, all quietly read as though they had never been recorded. The fix is a null check, not a floor: ask whether the value exists, never whether it is positive.',
+  },
 ]

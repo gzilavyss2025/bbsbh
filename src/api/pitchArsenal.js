@@ -95,15 +95,70 @@ export const CENTURY_CLUB_MIN = 5
 // Null when the file hasn't loaded, he isn't in it (no MLB/AAA innings logged
 // this season), or his sample is below the qualifier floor (e.g. a September
 // call-up with three pitches on file) — the card simply doesn't render.
-export function pitchArsenalFor(data, personId, isMlb) {
+//
+// `stand` picks the side the BATTER stood on — 'L' or 'R', or null for every
+// side, which is what every caller asked for before the split existed. A side
+// is its OWN denominator, the same rule the times-through split follows: a
+// slider thrown a third of the time to lefties is the fact, and dividing by
+// the whole season would bury it.
+export function pitchArsenalFor(data, personId, isMlb, stand = null) {
   const entry = data?.pit?.[personId]
-  const types = isMlb ? entry?.mlb : entry?.aaa
-  if (!types || types.length === 0) return null
+  const all = isMlb ? entry?.mlb : entry?.aaa
+  if (!all || all.length === 0) return null
+  const types = stand ? all.map((t) => sideRow(t, stand)).filter(Boolean) : all
+  if (types.length === 0) return null
   const total = types.reduce((sum, t) => sum + t.pitches, 0)
   if (total < MIN_ARSENAL_PITCHES) return null
   return types
     .map((t) => ({ ...t, pct: Math.round((t.pitches / total) * 1000) / 10 }))
     .sort((a, b) => b.pitches - a.pitches)
+}
+
+// One pitch type as ONE side of the plate saw it, unpacked from the `vs` pair
+// the generator writes: [pitches, avgVelo] and, when that side reached past a
+// first look, its own times-through pairs. Null for a side he never threw this
+// pitch to, and null for a file written before sides were counted.
+//
+// `century` and `maxVelo` are deliberately dropped rather than carried over:
+// both are season facts about the pitch, not about the side, and a heat band
+// reading a side's row would quote the whole year's hardest pitch as though he
+// had thrown it to lefties.
+function sideRow(type, stand) {
+  const v = type.vs?.[stand]
+  if (!v) return null
+  return {
+    code: type.code,
+    description: type.description,
+    pitches: v[0],
+    avgVelo: v[1],
+    tto: v[2],
+  }
+}
+
+// The two sides of the plate, each shaped exactly like what the unfiltered
+// card already reads — `rows` from pitchArsenalFor, `tto` from arsenalTtoView
+// — so a component swaps one for the other and changes nothing else.
+//
+// Null when the file carries no side split at all (a row swept before sides
+// were counted), and null when EITHER side sits under the qualifier floor: one
+// side is no split, the same rule arsenalTtoView follows for a single look. A
+// reliever who has faced four lefties all year gets no side filter rather than
+// a tab that draws a plan out of four pitches.
+export function arsenalSidesView(data, personId, isMlb) {
+  const entry = data?.pit?.[personId]
+  const all = isMlb ? entry?.mlb : entry?.aaa
+  if (!all || all.length === 0) return null
+  const counts = { L: 0, R: 0 }
+  for (const t of all) {
+    counts.L += t.vs?.L?.[0] ?? 0
+    counts.R += t.vs?.R?.[0] ?? 0
+  }
+  if (counts.L < MIN_ARSENAL_PITCHES || counts.R < MIN_ARSENAL_PITCHES) return null
+  return {
+    counts,
+    L: { rows: pitchArsenalFor(data, personId, isMlb, 'L'), tto: arsenalTtoView(data, personId, isMlb, 'L') },
+    R: { rows: pitchArsenalFor(data, personId, isMlb, 'R'), tto: arsenalTtoView(data, personId, isMlb, 'R') },
+  }
 }
 
 // The "heat" band at the foot of the player page's Pitches card: how many
@@ -174,10 +229,17 @@ export function heatView(data, personId, isMlb) {
 // "up from zero" would be the loudest arrow on the card for the rarest pitch
 // on it. Compared against the previous QUALIFYING look (the array's own
 // neighbour), so a dropped middle look doesn't silently pair 1st with 3rd.
-export function arsenalTtoView(data, personId, isMlb) {
+//
+// `stand` narrows the whole split to one side of the plate — the two cross, so
+// "third time through, to lefties" is a real answer rather than two filters
+// that cancel. Null is every side, which is what every caller asked for before
+// the split existed.
+export function arsenalTtoView(data, personId, isMlb, stand = null) {
   const entry = data?.pit?.[personId]
-  const types = isMlb ? entry?.mlb : entry?.aaa
-  if (!types || types.length === 0) return null
+  const all = isMlb ? entry?.mlb : entry?.aaa
+  if (!all || all.length === 0) return null
+  const types = stand ? all.map((t) => sideRow(t, stand)).filter(Boolean) : all
+  if (types.length === 0) return null
   if (!types.some((t) => t.tto)) return null
   const looks = []
   for (let i = 0; i < 3; i += 1) {

@@ -43,7 +43,7 @@ export async function loadPlayerOverview(id, asOf) {
     bio, txns, groups, primaryGroup, season, cutoff, endDate, debutYear, currentActivitySportId, liveSportId,
   } = ctx
 
-  // WAR (FanGraphs, MLB-only), Statcast percentiles and the prospect-trend
+  // WAR (MLB calc, MLB-only), Statcast percentiles and the prospect-trend
   // snapshot all ride here — same-origin static files, session-cached, so
   // each is free after the first player page anywhere in the app. Statcast is
   // fetched only for a player CURRENTLY active at the majors (the source has

@@ -1,23 +1,54 @@
 // Regenerates public/data/war.json — current-season WAR per player, keyed by
-// MLB Stats API personId, plus parallel `pa` (hitter plate appearances), `wrc`
-// (wRC+, offense only) and `fld` (season fielding runs) maps on the same keys.
-// The last three feed the Lineup Strength value model, which needs a bat and a
-// glove SEPARATELY rather than the WAR total that bundles them. Pulled from
-// FanGraphs' internal leaderboard API,
-// which is undocumented but CORS-open (verified 2026-07-07: returns
-// access-control-allow-origin: *) and, conveniently, already tags each row
-// with `xMLBAMID` — the SAME id as statsapi's personId, so no name-matching
-// is needed to join it against a roster.
+// MLB Stats API personId, plus parallel `wrc` (wRC+, offense only) and `fld`
+// (season fielding runs) maps on the same keys. The last two feed the Lineup
+// Strength value model, which needs a bat and a glove SEPARATELY rather than
+// the WAR total that bundles them.
+//
+// The `pa` (hitter plate appearances) map this file used to carry is GONE:
+// it rode along on the FanGraphs VALUE view, and `stats=sabermetrics`
+// publishes no plate-appearance field. Nothing read it — it was kept for a
+// Lineup Strength runtime fallback that was removed with the grade itself
+// (`.scratch/lineup-strength/README.md`, whose model.md §1 asked that these
+// maps not be pruned casually). If that model ever comes back, PA is a plain
+// `stats=season&group=hitting` pull away; it is not unobtainable, just not
+// free on this request the way it was on the old one.
+//
+// Pulled from statsapi.mlb.com's own `stats=sabermetrics` stat type — an
+// undocumented but public, first-party endpoint (verified 2026-08-25) that
+// carries MLB Advanced Media's OWN sabermetrics calculation: `war`, `wRcPlus`,
+// `fielding`, `baseRunning`, `positional`, `replacement`, and (pitching) a
+// FIP-based `war` alongside a separate RA9-based `ra9War`. It is NOT a mirror
+// of FanGraphs' fWAR or Baseball-Reference's bWAR — it's MLB's own number,
+// same methodology family (identical component names — wOBA-derived linear
+// weights, the standard Tango/wRAA/UBR framework both sites also use), but not
+// numerically identical to either. A live full-league diff against the prior
+// FanGraphs-scraped file (2026 season, 711 batters + 821 pitchers matched)
+// found correlation 0.998 and mean absolute difference ~0.04 WAR both ways —
+// close enough that the two numbers move together, not close enough to call
+// this "fWAR". Label it "WAR (MLB calc)" in the UI, never "FanGraphs" or
+// "fWAR" — see docs/api/static-data.md.
+//
+// This replaces the earlier FanGraphs leaderboard scrape: same statsapi.mlb.com
+// domain the rest of the app already depends on (no separate CORS-open
+// third-party endpoint to go stale), and it needs `playerPool=ALL` — the
+// default pool is "QUALIFIED" only (~140 players), which silently drops
+// everyone below a playing-time minimum.
+//
+// COVERAGE, measured rather than assumed: even at `playerPool=ALL` this
+// source returns no row for roughly 13% of the player-seasons the FanGraphs
+// pull carried (counted across 4 of the 100 war-history shards, 2010-2025).
+// Every single one of those was FanGraphs WAR EXACTLY 0.0 — a September
+// cameo, a position player mopping up an inning. No non-zero value is lost
+// anywhere, and the values that do match track to |delta| <= 0.1. What this
+// costs is a register cell reading "—" instead of "0.0" for those seasons,
+// which is the honest rendering of a number this source does not publish.
+// Note the shape of that check: a matched-set correlation CANNOT see a
+// dropped row, so re-measure by diffing shards player-season by
+// player-season, split by value, if this source is ever swapped again.
 //
 // This runs nightly via .github/workflows/update-nightly-data.yml, NOT at request
 // time: the live app only ever fetches this small same-origin static file
-// (src/api/war.js), never FanGraphs directly. That keeps a page load fast
-// (this pulls the whole league's leaderboard, ~1MB+ raw JSON, trimmed here to
-// a couple hundred KB) and keeps the app from depending on an unofficial
-// third-party endpoint's uptime/shape at runtime — if FanGraphs changes
-// something, this job fails in CI and the last-known-good file just keeps
-// serving, rather than every visitor's team page breaking. See
-// docs/data-enrichment.md for the full research trail and reasoning.
+// (src/api/war.js), never statsapi.mlb.com's whole-league leaderboard directly.
 // Run by hand: node scripts/gen-war.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -27,66 +58,48 @@ const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'war.json')
 const season = new Date().getFullYear()
 
-// `type=6` is FanGraphs' VALUE view. It carries the same `WAR`/`PA` the old
-// `type=8` (Dashboard) view did, and additionally breaks WAR into its components
-// — `Batting`, `BaseRunning`, `Fielding`, `Positional`, `Replacement` — alongside
-// `wRC+`. The since-removed Lineup Strength grade needed the components rather
-// than the WAR total: WAR bundles a player's bat with his glove AND with a
-// positional adjustment that is prorated by his actual playing time, so any
-// attempt to reconstruct one component from the total is wrong by however much
-// of the season he has played. Same single request either way, so the extra
-// fields stayed when the grade went — `.scratch/lineup-strength/README.md`
-// records what that reconstruction cost us, and §1 of its `model.md` is
-// required reading before pruning them.
-async function fetchLeaderboard(stats) {
+async function fetchSabermetrics(group) {
   const url =
-    `https://www.fangraphs.com/api/leaders/major-league/data` +
-    `?age=&pos=all&stats=${stats}&lg=all&season=${season}&season1=${season}` +
-    `&startdate=&enddate=&qual=0&type=6&pageitems=3000&pagenum=1`
-  const res = await fetch(url, { headers: { Origin: 'https://bbsbh.vercel.app' } })
-  if (!res.ok) throw new Error(`FanGraphs ${stats} leaderboard: HTTP ${res.status}`)
+    `https://statsapi.mlb.com/api/v1/stats?stats=sabermetrics&group=${group}` +
+    `&season=${season}&sportId=1&limit=3000&playerPool=ALL`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`statsapi sabermetrics ${group} leaderboard: HTTP ${res.status}`)
   const json = await res.json()
-  const war = {}
-  const pa = {}
-  const wrc = {}
-  const fld = {}
-  const num = (v) => {
-    const n = Number(v)
-    return Number.isFinite(n) ? n : null
-  }
-  for (const row of json.data ?? []) {
-    const id = row.xMLBAMID
-    if (!id) continue
-    const w = num(row.WAR)
-    if (w != null) war[id] = Math.round(w * 10) / 10
-    // Plate appearances travel alongside WAR so a downstream consumer can apply
-    // a PA regression to a rate stat (the removed Lineup Strength grade's
-    // runtime fallback did exactly that). Batters only; a pitcher's rate
-    // denominator is IP, which this metric never needs.
-    const p = num(row.PA)
-    if (p != null) pa[id] = p
-    // wRC+ (park- and league-adjusted OFFENSE only, 100 = league average) and
-    // Fielding (season fielding runs above average, framing already folded in
-    // for catchers — the components sum to WAR, so CFraming is NOT additive on
-    // top). These were the Lineup Strength value input and are unread today;
-    // see the header note above before dropping them.
-    const r = num(row['wRC+'])
-    if (r != null) wrc[id] = Math.round(r * 10) / 10
-    const f = num(row.Fielding)
-    if (f != null) fld[id] = Math.round(f * 10) / 10
-  }
-  return { war, pa, wrc, fld }
+  return json.stats?.[0]?.splits ?? []
 }
 
-const [batLb, pitLb] = await Promise.all([fetchLeaderboard('bat'), fetchLeaderboard('pit')])
-const bat = batLb.war
-const pit = pitLb.war
-const pa = batLb.pa // hitter PA only (see fetchLeaderboard note)
-const wrc = batLb.wrc
-const fld = batLb.fld
+const num = (v) => {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+}
 
-await writeJsonAtomic(out, { season, generatedAt: new Date().toISOString(), bat, pit, pa, wrc, fld })
+const bat = {}
+const wrc = {}
+const fld = {}
+for (const split of await fetchSabermetrics('hitting')) {
+  const id = split.player?.id
+  if (!id) continue
+  const w = num(split.stat?.war)
+  if (w != null) bat[id] = Math.round(w * 10) / 10
+  const r = num(split.stat?.wRcPlus)
+  if (r != null) wrc[id] = Math.round(r * 10) / 10
+  const f = num(split.stat?.fielding)
+  if (f != null) fld[id] = Math.round(f * 10) / 10
+}
+
+// Pitcher WAR uses the FIP-based `war` field, not the RA9-based `ra9War` —
+// matches the philosophy (and, per the header comment above, closely matches
+// the numbers) of the FanGraphs fWAR this replaced.
+const pit = {}
+for (const split of await fetchSabermetrics('pitching')) {
+  const id = split.player?.id
+  if (!id) continue
+  const w = num(split.stat?.war)
+  if (w != null) pit[id] = Math.round(w * 10) / 10
+}
+
+await writeJsonAtomic(out, { season, generatedAt: new Date().toISOString(), bat, pit, wrc, fld })
 console.log(
   `wrote ${out} (${Object.keys(bat).length} batters, ${Object.keys(pit).length} pitchers, ` +
-    `${Object.keys(pa).length} PA, ${Object.keys(wrc).length} wRC+, ${Object.keys(fld).length} Fld)`,
+    `${Object.keys(wrc).length} wRC+, ${Object.keys(fld).length} Fld)`,
 )

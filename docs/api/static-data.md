@@ -39,13 +39,16 @@ for each generator; the reader modules:
   mounts a page's cards on one tick. A failure memoizes the `fallback` too, so a
   missing file is not re-fetched on every render of the session. `jerseys.js` had
   a private copy of this fix; it now uses the shared one.
-- `war.js` — season WAR per player, from `public/data/war.json`. FanGraphs'
-  leaderboard API is CORS-open but bulk-only (~1MB) and unofficial, so
-  `scripts/gen-war.mjs` trims it to `{personId: war}` on a nightly cron. Keyed by
-  MLB Stats API `personId` (FanGraphs' `xMLBAMID` is that same id, so no
-  name-matching). This is the **template** for the pattern (bulk/unofficial →
-  nightly script → static JSON → same-origin read; see `docs/data-enrichment.md`
-  §5). A companion `public/data/war-history/{NN}.json` (hand-run by
+- `war.js` — season WAR per player, from `public/data/war.json`.
+  `statsapi.mlb.com`'s `stats=sabermetrics` stat type is first-party but
+  undocumented and bulk-only, so `scripts/gen-war.mjs` trims it to
+  `{personId: war}` on a nightly cron. It's MLB's own calculation, not
+  FanGraphs' fWAR or Baseball-Reference's bWAR — label it "WAR (MLB calc)" in
+  the UI, never either of those (see `gen-war.mjs`'s header for the diff
+  against fWAR). Keyed by MLB Stats API `personId` directly, no name-matching
+  or id-translation needed. This is the **template** for the pattern
+  (bulk/unofficial → nightly script → static JSON → same-origin read; see
+  `docs/data-enrichment.md` §5). A companion `public/data/war-history/{NN}.json` (hand-run by
   `gen-war-history.mjs` — completed-season WAR is immutable) covers past seasons,
   keyed by PLAYER and bucketed on `personId % 100` (`warShardKey`, shared with the
   generator), the same shape as the rookie records and for the same reason: a
@@ -332,10 +335,17 @@ for each generator; the reader modules:
   became 12 KB for the mix bar and 149/194 KB for the pool. Completed-game aggregates → spoiler-free, no
   SealBox (same footing as `fouls.js`); MLB + AAA (`mlb`/`aaa` keys — AA and
   below carry no Hawk-Eye pitch tracking, so `pitchArsenalFor` just resolves
-  to null there). `pitchArsenalFor(data, personId, isMlb)` picks the level
+  to null there). `pitchArsenalFor(data, personId, isMlb, stand)` picks the level
   matching the game being staged, sorts most-thrown first, and gates on
   `MIN_ARSENAL_PITCHES` so a two-pitch cameo doesn't render a misleadingly
-  confident-looking mix. `pitchFamily(code)` groups codes into
+  confident-looking mix. The same season is split TWO ways, and the two CROSS:
+  `arsenalTtoView` by how many times he had already faced that batter in the
+  game, and `stand` (`'L'`/`'R'`, null for both) by the side the BATTER stood
+  on — so "the third time through, to lefties" is one answer rather than two
+  filters that cancel. Each split is its own denominator, which is the whole
+  point of it. `arsenalSidesView` hands a card both sides already shaped like
+  the unfiltered rows, and returns null when either side sits under the floor:
+  one side is no split, the same rule a single look follows. `pitchFamily(code)` groups codes into
   fastball/breaking/offspeed/other for `PitchArsenalMix.jsx`'s bar coloring
   (`tokens/colors.css`'s `--arsenal-*`). Surface: the opposing-starter card's
   wide-layout pitch-mix bar (`TeamInfo.jsx`'s `OpposingStarterCard`), filling

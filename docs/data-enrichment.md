@@ -63,7 +63,11 @@ All three endpoint families returned `access-control-allow-origin: *`, `access-c
 
 Some sources are (a) CORS-open but (b) only queryable as a big bulk leaderboard, not a per-player lookup, and/or (c) unofficial enough that you don't want the live app's every page load hard-depending on them. FanGraphs' leaderboard API (§4) is exactly this shape: fine to hit from a script, bad to hit from a browser on every team-page visit (~1MB combined payload, undocumented endpoint that could break or start blocking at any time).
 
-The fix, first used for season WAR (`scripts/gen-war.mjs`):
+The fix, first used for season WAR (`scripts/gen-war.mjs`; that generator has
+since moved off FanGraphs onto `statsapi.mlb.com`'s own first-party
+`stats=sabermetrics` type — still bulk-only and undocumented, so the same
+nightly-job shape still applies, just no longer a third-party source; see that
+script's own header):
 
 1. A small Node script under `scripts/` fetches the bulk source, trims it to just the fields the app needs, and writes a static JSON file under `public/data/`.
 2. A GitHub Actions workflow (`.github/workflows/update-nightly-data.yml`) runs that script on a nightly `schedule:` cron, and — if the output changed — commits and pushes the updated file straight to `main`. That push triggers Vercel's normal auto-deploy, so the site picks up fresh data the next morning with **no server, no cron infra, no Vercel Functions** — consistent with this app's "no backend" architecture (build-time automation, not a runtime dependency).

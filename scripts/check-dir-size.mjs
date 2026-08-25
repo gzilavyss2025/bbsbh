@@ -643,7 +643,15 @@ const BUDGETS = {
   // staleness window the Game Notes curation signal shares between the manual
   // scan, gen-callouts.mjs and its unit test (issue #774). Pure, importable,
   // and shared by three callers: exactly what this directory is for.
-  'scripts/lib': 25,
+  // +1 for rookie-crossing.mjs — the rookie-limit crossing-detection walk,
+  // pulled out of what used to be two independent copies in gen-rookies.mjs
+  // and gen-rookies-backfill.mjs so the fix for a real bug (Negro League
+  // seasons, now sport.id=1 since MLB's 2020 reclassification, wrongly
+  // counting toward an AL/NL rookie limit) can't drift between them, and so
+  // it's unit-testable at all — a generator file RUNS on import, so this pure
+  // half moved here the same way command-grid.mjs and
+  // game-notes-corroboration.mjs did.
+  'scripts/lib': 26,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
@@ -697,6 +705,12 @@ const BUDGETS = {
   // GameLog.jsx needs, promoted out of PlayerPage.jsx so the two other
   // PlayerPage call sites and this one share one definition instead of three).
   'src/components/player': 15,
+  // New entry: +1 for blockageCorrected.js — the diary's first `corrected`
+  // entry that sits ABOVE the entry it corrects rather than replacing it
+  // (the diary is append-only, see docs/agents/research-diary.md's second
+  // rule), same shape as humpArtifact.js/movementWindows.js already prove out
+  // in team-movement-windows.md's history.
+  'src/lib/research/diary': 13,
 }
 
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git'])

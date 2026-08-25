@@ -17,6 +17,7 @@ import {
   similarHittersFor,
 } from '../savantPercentiles.js'
 import {
+  arsenalSidesView,
   arsenalTtoView,
   fetchPitchArsenalFor,
   fetchPitchArsenalPool,
@@ -117,6 +118,9 @@ export async function loadPlayerAnalytics(id, asOf) {
       block.command = group === 'pitching' ? await fetchCommandFor(id) : null
       block.heat = arsenalShard ? heatView(arsenalShard, id, tileSportId === 1) : null
       block.arsenalTto = arsenalShard ? arsenalTtoView(arsenalShard, id, tileSportId === 1) : null
+      // The same shard's other split — what he throws to each side of the
+      // plate, each side carrying its own look split so the two filters cross.
+      block.arsenalSides = arsenalShard ? arsenalSidesView(arsenalShard, id, tileSportId === 1) : null
       block.advanced =
         group === 'pitching' ? advancedPitchingView(advancedBundle) : advancedHittingView(advancedBundle)
       // The batted-ball profile shares the Advanced card's seasonAdvanced

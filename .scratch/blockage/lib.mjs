@@ -156,6 +156,95 @@ export function logistic(X, y, names, maxIter = 60) {
   }
 }
 
+// Multinomial logit via Fisher scoring, generalizing logistic() above to K
+// classes. y is an integer class index 0..K-1; class 0 is the reference and
+// carries no coefficients (same convention as a dummy-coded factor). Needed
+// for the competing-risk read: "waited / traded / changed position" is one
+// outcome with three fates, not three independent binary questions, and a
+// joint fit lets one fate's predictors soak up variance the others would
+// otherwise wrongly credit to themselves.
+export function multinomial(X, y, K, classNames, featureNames, maxIter = 100) {
+  const n = X.length
+  const p = X[0].length
+  const nParams = (K - 1) * p
+  let beta = new Array(nParams).fill(0)
+
+  function probsFor(row, b) {
+    const exps = new Array(K - 1)
+    for (let k = 0; k < K - 1; k += 1) {
+      let s = 0
+      for (let j = 0; j < p; j += 1) s += row[j] * b[k * p + j]
+      exps[k] = Math.exp(Math.max(-30, Math.min(30, s)))
+    }
+    const denom = 1 + exps.reduce((a, v) => a + v, 0)
+    const probs = new Array(K)
+    probs[0] = 1 / denom
+    for (let k = 0; k < K - 1; k += 1) probs[k + 1] = exps[k] / denom
+    return probs
+  }
+
+  let H = null
+  for (let it = 0; it < maxIter; it += 1) {
+    const grad = new Array(nParams).fill(0)
+    H = Array.from({ length: nParams }, () => new Array(nParams).fill(0))
+    for (let i = 0; i < n; i += 1) {
+      const row = X[i]
+      const probs = probsFor(row, beta)
+      for (let k = 0; k < K - 1; k += 1) {
+        const yk = y[i] === k + 1 ? 1 : 0
+        const resid = yk - probs[k + 1]
+        for (let j = 0; j < p; j += 1) grad[k * p + j] += row[j] * resid
+      }
+      for (let k = 0; k < K - 1; k += 1) {
+        for (let l = 0; l < K - 1; l += 1) {
+          const w = probs[k + 1] * ((k === l ? 1 : 0) - probs[l + 1])
+          if (w === 0) continue
+          for (let a = 0; a < p; a += 1) {
+            const xa = row[a]
+            if (xa === 0) continue
+            const wxa = w * xa
+            for (let b = 0; b < p; b += 1) H[k * p + a][l * p + b] += wxa * row[b]
+          }
+        }
+      }
+    }
+    const Hinv = invert(H)
+    const step = Hinv.map((r) => r.reduce((s, v, i) => s + v * grad[i], 0))
+    let maxStep = 0
+    for (let i = 0; i < nParams; i += 1) {
+      beta[i] += step[i]
+      maxStep = Math.max(maxStep, Math.abs(step[i]))
+    }
+    if (maxStep < 1e-8) break
+  }
+
+  const Hinv = invert(H)
+  let ll = 0
+  const counts = new Array(K).fill(0)
+  for (let i = 0; i < n; i += 1) {
+    const probs = probsFor(X[i], beta)
+    ll += Math.log(Math.max(probs[y[i]], 1e-12))
+    counts[y[i]] += 1
+  }
+  let ll0 = 0
+  for (let i = 0; i < n; i += 1) ll0 += Math.log(Math.max(counts[y[i]] / n, 1e-12))
+
+  const classes = []
+  for (let k = 0; k < K - 1; k += 1) {
+    classes.push({
+      className: classNames[k + 1],
+      terms: (featureNames || []).map((nm, j) => {
+        const idx = k * p + j
+        const b = beta[idx]
+        const se = Math.sqrt(Math.abs(Hinv[idx][idx]))
+        const z = b / se
+        return { name: nm, beta: b, se, z, p: twoTailedP(z), oddsRatio: Math.exp(b) }
+      }),
+    })
+  }
+  return { n, p, K, ll, ll0, mcFadden: 1 - ll / ll0, counts, classes }
+}
+
 export function median(arr) {
   if (!arr.length) return null
   const s = arr.slice().sort((a, b) => a - b)

@@ -10,7 +10,7 @@
 export const blockageEntry = {
   id: 'price-the-blockage',
   date: '2026-08-25',
-  source: 'PR #902',
+  source: 'PR #904',
   doc: 'docs/price-the-blockage.md',
   title: 'What the man ahead of you actually costs you',
   verdict: 'holds',
