@@ -46,6 +46,19 @@
      while a board carries paper foil and has to hold AA against it. */
   --kraft-board: #6B4A22;
 
+  /* ---- Stamp album board (the Game Log's stamp sheet) ---- the one DARK
+     surface in a paper-and-ink app, and it earns the exception: a postage
+     stamp's perforated edge is cut in cream paper, and cream-on-manila has no
+     edge at all. On a dark board the scallop is the first thing you see, which
+     is the whole point of drawing a collection as stamps. Deep navy rather
+     than black — the same ink family as --ink-0, one step lighter so the
+     album's printed rules (--album-board-line) stay visible on it. Both foils
+     are asserted against the board in check-contrast.mjs. */
+  --album-board:      #1F2C39;
+  --album-board-line: #2A3846;
+  --album-foil:       var(--paper-2);
+  --album-foil-soft:  #A9A292;
+
   /* ---- Highlight / marker ---- */
   --marker:   #E9C33F;   /* highlighter yellow — "watch" flag */
 
