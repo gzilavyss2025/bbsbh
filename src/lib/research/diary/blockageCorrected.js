@@ -9,7 +9,7 @@
 export const blockageCorrectedEntry = {
   id: 'blockage-corrected',
   date: '2026-08-25',
-  source: 'PR #906',
+  source: 'PR #908',
   doc: 'docs/price-the-blockage.md',
   title: 'What the missing ninety-eight stays were hiding',
   verdict: 'corrected',
