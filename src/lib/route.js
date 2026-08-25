@@ -30,6 +30,7 @@
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/admin/research'                   -> { name: 'admin-research' }  (research diary, Clerk-admin gated)
+//   '/admin/contenders'                 -> { name: 'admin-contenders' }  (Contender Diary, Clerk-admin gated)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
 //   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }
 //   '/player/{name-id}/{stats|analytics|history}'
@@ -319,6 +320,11 @@ export function parseRoute(url) {
   // visit should render the locked page, not fall through to a game route.
   if (parts.length === 2 && parts[0] === 'admin' && parts[1] === 'research')
     return { name: 'admin-research' }
+  // The Contender Diary — same reasoning as the line above, a sibling
+  // research program asking what separates deep postseason runs rather than
+  // how a prospect develops (docs/agents/contender-diary.md).
+  if (parts.length === 2 && parts[0] === 'admin' && parts[1] === 'contenders')
+    return { name: 'admin-contenders' }
   // The guides at /learn are NOT React routes — they are standalone documents
   // rendered by api/page.js, because the crawlers this app wants to reach do not
   // execute JavaScript (see src/copy/landing/render.js). The SPA only ever sees

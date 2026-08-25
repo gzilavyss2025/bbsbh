@@ -1,0 +1,5932 @@
+{
+  "generatedAt": "2026-08-25T14:43:31.785Z",
+  "source": "public/data/postseason-history.json",
+  "ladderKey": {
+    "0": "missed the postseason",
+    "1": "made the postseason, lost its first series",
+    "2": "won at least one round, did not reach the LCS",
+    "3": "reached the LCS, lost it",
+    "4": "reached the World Series, lost it",
+    "5": "won the World Series"
+  },
+  "seasons": [
+    {
+      "year": 2000,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 147,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "137": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2001,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 109,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2002,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 108,
+      "teams": {
+        "108": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "109": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2003,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 146,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "112": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "138": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2004,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 111,
+      "teams": {
+        "108": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2005,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 145,
+      "teams": {
+        "108": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2006,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 138,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2007,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 111,
+      "teams": {
+        "108": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "109": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "112": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "115": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "144": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2008,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 143,
+      "teams": {
+        "108": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "112": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "139": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "144": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "145": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "158": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        }
+      }
+    },
+    {
+      "year": 2009,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 147,
+      "teams": {
+        "108": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "143": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "144": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2010,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 137,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "138": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "139": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "140": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "143": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2011,
+      "era": "pre-wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 138,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "139": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "140": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "144": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "158": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        }
+      }
+    },
+    {
+      "year": 2012,
+      "era": "wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 137,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "120": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2013,
+      "era": "wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 111,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "114": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "134": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "139": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2014,
+      "era": "wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 137,
+      "teams": {
+        "108": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "120": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "134": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2015,
+      "era": "wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 118,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "118": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "141": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2016,
+      "era": "wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 112,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "112": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "120": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "121": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "138": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "141": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2017,
+      "era": "wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 117,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "112": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "115": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "120": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2018,
+      "era": "wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 111,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "112": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "115": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "158": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        }
+      }
+    },
+    {
+      "year": 2019,
+      "era": "wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 120,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "120": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "139": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "158": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        }
+      }
+    },
+    {
+      "year": 2020,
+      "era": "pandemic-expanded",
+      "shortSeason": true,
+      "championTeamId": 119,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "113": {
+          "madePlayoffs": true,
+          "seed": 6,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "114": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 8,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "139": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": true,
+          "seed": 7,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "142": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "145": {
+          "madePlayoffs": true,
+          "seed": 6,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "146": {
+          "madePlayoffs": true,
+          "seed": 7,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "158": {
+          "madePlayoffs": true,
+          "seed": 8,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        }
+      }
+    },
+    {
+      "year": 2021,
+      "era": "wildcard-game",
+      "shortSeason": false,
+      "championTeamId": 144,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "139": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "145": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "158": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        }
+      }
+    },
+    {
+      "year": 2022,
+      "era": "expanded-3wc",
+      "shortSeason": false,
+      "championTeamId": 117,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "136": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "139": {
+          "madePlayoffs": true,
+          "seed": 6,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": true,
+          "seed": 6,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "158": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        }
+      }
+    },
+    {
+      "year": 2023,
+      "era": "expanded-3wc",
+      "shortSeason": false,
+      "championTeamId": 140,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": true,
+          "seed": 6,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "110": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "139": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "140": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "141": {
+          "madePlayoffs": true,
+          "seed": 6,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "142": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "143": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "147": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "158": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        }
+      }
+    },
+    {
+      "year": 2024,
+      "era": "expanded-3wc",
+      "shortSeason": false,
+      "championTeamId": 119,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "111": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "112": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "113": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "114": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": true,
+          "seed": 6,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "117": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "118": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": true,
+          "seed": 6,
+          "wonDivision": false,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "136": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "144": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "158": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        }
+      }
+    },
+    {
+      "year": 2025,
+      "era": "expanded-3wc",
+      "shortSeason": false,
+      "championTeamId": 119,
+      "teams": {
+        "108": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "109": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "110": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "111": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "112": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "113": {
+          "madePlayoffs": true,
+          "seed": 6,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "114": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "115": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "116": {
+          "madePlayoffs": true,
+          "seed": 6,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "117": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "118": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "119": {
+          "madePlayoffs": true,
+          "seed": 3,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 5
+        },
+        "120": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "121": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "133": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "134": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "135": {
+          "madePlayoffs": true,
+          "seed": 5,
+          "wonDivision": false,
+          "furthestRound": "wildcard",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "136": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        },
+        "137": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "138": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "139": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "140": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "141": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "worldseries",
+          "wonAnyRound": true,
+          "ladder": 4
+        },
+        "142": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "143": {
+          "madePlayoffs": true,
+          "seed": 2,
+          "wonDivision": true,
+          "furthestRound": "division",
+          "wonAnyRound": false,
+          "ladder": 1
+        },
+        "144": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "145": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "146": {
+          "madePlayoffs": false,
+          "seed": null,
+          "wonDivision": false,
+          "furthestRound": null,
+          "ladder": 0
+        },
+        "147": {
+          "madePlayoffs": true,
+          "seed": 4,
+          "wonDivision": false,
+          "furthestRound": "division",
+          "wonAnyRound": true,
+          "ladder": 2
+        },
+        "158": {
+          "madePlayoffs": true,
+          "seed": 1,
+          "wonDivision": true,
+          "furthestRound": "lcs",
+          "wonAnyRound": true,
+          "ladder": 3
+        }
+      }
+    }
+  ]
+}
