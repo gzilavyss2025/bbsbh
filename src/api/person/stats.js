@@ -113,7 +113,7 @@ function tile(k, v, tone) {
   return { k, v: v === undefined || v === null || v === '' ? DASH : String(v), tone }
 }
 
-// WAR (season, FanGraphs) for the tile — MLB-only, so it's null on a MiLB tile
+// WAR (season, MLB calc — see src/api/war.js) for the tile — MLB-only, so it's null on a MiLB tile
 // and renders as a dash. A number formats to one decimal ("4.2", "-0.3").
 function warTile(war) {
   return tile('WAR', war == null ? null : war.toFixed(1))

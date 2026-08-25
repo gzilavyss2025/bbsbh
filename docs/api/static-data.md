@@ -39,13 +39,16 @@ for each generator; the reader modules:
   mounts a page's cards on one tick. A failure memoizes the `fallback` too, so a
   missing file is not re-fetched on every render of the session. `jerseys.js` had
   a private copy of this fix; it now uses the shared one.
-- `war.js` — season WAR per player, from `public/data/war.json`. FanGraphs'
-  leaderboard API is CORS-open but bulk-only (~1MB) and unofficial, so
-  `scripts/gen-war.mjs` trims it to `{personId: war}` on a nightly cron. Keyed by
-  MLB Stats API `personId` (FanGraphs' `xMLBAMID` is that same id, so no
-  name-matching). This is the **template** for the pattern (bulk/unofficial →
-  nightly script → static JSON → same-origin read; see `docs/data-enrichment.md`
-  §5). A companion `public/data/war-history/{NN}.json` (hand-run by
+- `war.js` — season WAR per player, from `public/data/war.json`.
+  `statsapi.mlb.com`'s `stats=sabermetrics` stat type is first-party but
+  undocumented and bulk-only, so `scripts/gen-war.mjs` trims it to
+  `{personId: war}` on a nightly cron. It's MLB's own calculation, not
+  FanGraphs' fWAR or Baseball-Reference's bWAR — label it "WAR (MLB calc)" in
+  the UI, never either of those (see `gen-war.mjs`'s header for the diff
+  against fWAR). Keyed by MLB Stats API `personId` directly, no name-matching
+  or id-translation needed. This is the **template** for the pattern
+  (bulk/unofficial → nightly script → static JSON → same-origin read; see
+  `docs/data-enrichment.md` §5). A companion `public/data/war-history/{NN}.json` (hand-run by
   `gen-war-history.mjs` — completed-season WAR is immutable) covers past seasons,
   keyed by PLAYER and bucketed on `personId % 100` (`warShardKey`, shared with the
   generator), the same shape as the rookie records and for the same reason: a

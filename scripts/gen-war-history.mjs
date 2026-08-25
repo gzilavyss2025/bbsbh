@@ -2,18 +2,20 @@
 // (completed) seasons, keyed by MLB Stats API personId, exactly like the nightly
 // public/data/war.json but spanning many years instead of just the live one.
 //
-// Split from gen-war.mjs on purpose: a completed season's WAR is IMMUTABLE
-// (FanGraphs won't restate 2024's numbers), so this is a HAND-RUN regenerate
-// (like gen-milb-history.mjs), NOT a cron — re-run it once a year to fold in the
-// season that just ended. The live app reads BOTH files (src/api/war.js): the
-// current, still-moving season from war.json (nightly cron), every completed
-// season from this file. The player page's career-register WAR column and the
-// season tile's WAR draw from the union.
+// Split from gen-war.mjs on purpose: a completed season's WAR is IMMUTABLE, so
+// this is a HAND-RUN regenerate (like gen-milb-history.mjs), NOT a cron —
+// re-run it once a year to fold in the season that just ended. The live app
+// reads BOTH files (src/api/war.js): the current, still-moving season from
+// war.json (nightly cron), every completed season from this file. The player
+// page's career-register WAR column and the season tile's WAR draw from the
+// union.
 //
-// Same source + join as gen-war.mjs: FanGraphs' CORS-open leaderboard API, whose
-// rows carry `xMLBAMID` (== statsapi personId), so no name-matching. WAR is
-// MLB-only here — FanGraphs publishes no reliable minor-league WAR — so MiLB
-// rows/tiles fall back to a dash, consistent with the rest of the app.
+// Same source as gen-war.mjs: statsapi.mlb.com's `stats=sabermetrics` type —
+// MLB's own calculation, not FanGraphs' fWAR or Baseball-Reference's bWAR (see
+// that file's header). Rows carry `player.id`, the same id as statsapi
+// personId, so no name-matching. WAR is MLB-only here — sportId 1 only, no
+// minor-league sabermetrics exist — so MiLB rows/tiles fall back to a dash,
+// consistent with the rest of the app.
 //
 // START_SEASON is the earliest year pulled. Bumping it further back is just a
 // bigger file (each season is ~2,200 players across bat+pit); 2010 covers the
@@ -33,18 +35,17 @@ const START_SEASON = 2010
 // a season ends its WAR is still moving, so stop at the year before the current.
 const LAST_SEASON = new Date().getFullYear() - 1
 
-async function fetchLeaderboard(stats, season) {
+async function fetchLeaderboard(group, season) {
   const url =
-    `https://www.fangraphs.com/api/leaders/major-league/data` +
-    `?age=&pos=all&stats=${stats}&lg=all&season=${season}&season1=${season}` +
-    `&startdate=&enddate=&qual=0&type=8&pageitems=3000&pagenum=1`
-  const res = await fetch(url, { headers: { Origin: 'https://bbsbh.vercel.app' } })
-  if (!res.ok) throw new Error(`FanGraphs ${stats} ${season} leaderboard: HTTP ${res.status}`)
+    `https://statsapi.mlb.com/api/v1/stats?stats=sabermetrics&group=${group}` +
+    `&season=${season}&sportId=1&limit=3000&playerPool=ALL`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`statsapi sabermetrics ${group} ${season} leaderboard: HTTP ${res.status}`)
   const json = await res.json()
   const map = {}
-  for (const row of json.data ?? []) {
-    const id = row.xMLBAMID
-    const war = Number(row.WAR)
+  for (const split of json.stats?.[0]?.splits ?? []) {
+    const id = split.player?.id
+    const war = Number(split.stat?.war)
     if (id && Number.isFinite(war)) map[id] = Math.round(war * 10) / 10
   }
   return map
@@ -55,8 +56,8 @@ const pit = {}
 const seasons = []
 for (let season = START_SEASON; season <= LAST_SEASON; season++) {
   const [b, p] = await Promise.all([
-    fetchLeaderboard('bat', season),
-    fetchLeaderboard('pit', season),
+    fetchLeaderboard('hitting', season),
+    fetchLeaderboard('pitching', season),
   ])
   bat[season] = b
   pit[season] = p

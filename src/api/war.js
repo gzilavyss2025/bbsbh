@@ -1,21 +1,22 @@
 import { shardKey100 } from '../lib/shardKey.js'
 import { staticJson } from './staticJson.js'
 
-// Season WAR, read from a static same-origin file (public/data/war.json)
-// rather than fetched live from FanGraphs. That file is regenerated nightly
-// by scripts/gen-war.mjs (see .github/workflows/update-nightly-data.yml) — this module
-// just reads it. Keyed by MLB Stats API personId (FanGraphs' xMLBAMID is the
-// same id), so callers can index straight off a roster entry's person.id. Also
-// carries parallel `pa` (hitter plate appearances), `wrc` (wRC+) and `fld`
-// (season fielding runs) maps, which nothing reads today — they were the Lineup
-// Strength grade's inputs and were kept when it was removed because they ride
-// along on the one FanGraphs request WAR itself needs
+// Season WAR — MLB Advanced Media's own `stats=sabermetrics` calculation, NOT
+// FanGraphs' fWAR or Baseball-Reference's bWAR (see scripts/gen-war.mjs's header
+// for how close it tracks fWAR and why it isn't labeled as one). Read from a
+// static same-origin file (public/data/war.json), regenerated nightly by
+// scripts/gen-war.mjs (see .github/workflows/update-nightly-data.yml) — this
+// module just reads it. Keyed by MLB Stats API personId, so callers can index
+// straight off a roster entry's person.id. Also carries parallel `wrc` (wRC+)
+// and `fld` (season fielding runs) maps, which nothing reads today — they were
+// the Lineup Strength grade's inputs and were kept when it was removed because
+// they ride along on the one request WAR itself needs
 // (`.scratch/lineup-strength/README.md`).
 // Degrades to empty maps before the file exists or on any fetch failure — a
 // missing WAR badge, not a broken page. Cached in-memory for the session
 // since the file only changes once a day.
 export const fetchWarData = staticJson('/data/war.json', {
-  fallback: { season: null, bat: {}, pit: {}, pa: {} },
+  fallback: { season: null, bat: {}, pit: {} },
 })
 
 // Season WAR for COMPLETED seasons — the multi-year companion to war.json above,

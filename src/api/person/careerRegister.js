@@ -258,7 +258,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     .reduce((sum, s) => sum + num(s.stat?.saves), 0)
   const showSaves = role === 'CL' || careerSaves >= 20
 
-  // Season WAR (FanGraphs) is MLB-only and lives outside the stat line, so it's
+  // Season WAR (MLB calc, see src/api/war.js) is MLB-only and lives outside the stat line, so it's
   // appended as a trailing column rather than folded into yearByYearCells. Only
   // worth a column when the player has an MLB row to carry a value — a pure
   // prospect's all-MiLB register would otherwise gain a dead all-dashes column.

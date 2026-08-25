@@ -25,7 +25,7 @@ export function RosterList({ rows, season, showProspect }) {
           {r.war !== undefined && (
             <span
               className={`rankchip${r.war == null ? '' : r.war >= 3 ? ' rankchip--good' : r.war < 0 ? ' rankchip--bad' : ''}`}
-              title="Season WAR (FanGraphs)"
+              title="Season WAR (MLB calc)"
             >
               {r.war == null ? DASH : r.war.toFixed(1)}
             </span>

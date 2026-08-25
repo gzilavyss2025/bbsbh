@@ -24,17 +24,20 @@ is where that becomes visible.
 Precomputed because they're too heavy (COST) to build on a page load. Normally you
 don't run these by hand.
 
-- `gen-war.mjs` → `public/data/war.json` — season WAR per player, from FanGraphs'
-  bulk leaderboard API (~1MB, unofficial), plus parallel `pa` (hitter plate
-  appearances), `wrc` (wRC+) and `fld` (season fielding runs) maps on the same
-  keys. Reads the `type=6` **Value** view, which carries WAR's components
-  alongside the total at no extra request; `Fielding` there already includes
-  catcher framing (the components sum to WAR, so `CFraming` is NOT additive on
-  top). The three extra maps were the removed Lineup Strength grade's inputs
-  (it needed a bat and a glove SEPARATELY) and are unread today; they cost no
-  extra request, and `.scratch/lineup-strength/` records why the WAR total
-  can't be decomposed after the fact. The template for the build-time-fetch
-  pattern; see `docs/data-enrichment.md` §5. App reads it via `src/api/war.js`.
+- `gen-war.mjs` → `public/data/war.json` — season WAR per player, from
+  `statsapi.mlb.com`'s own `stats=sabermetrics` stat type (undocumented but
+  first-party, same domain the rest of the app depends on; needs
+  `playerPool=ALL` or it silently drops everyone below the qualified-only
+  threshold), plus parallel `wrc` (wRC+) and `fld` (season fielding runs) maps
+  on the same keys. This is MLB Advanced Media's OWN calculation — not a mirror
+  of FanGraphs' fWAR or Baseball-Reference's bWAR, though a full-league diff
+  against the prior FanGraphs-scraped file found correlation 0.998 and mean
+  absolute difference ~0.04 WAR. Label it "WAR (MLB calc)" in the UI. The two
+  extra maps were the removed Lineup Strength grade's inputs (it needed a bat
+  and a glove SEPARATELY) and are unread today; they cost no extra request, and
+  `.scratch/lineup-strength/` records why the WAR total can't be decomposed
+  after the fact. The template for the build-time-fetch pattern; see
+  `docs/data-enrichment.md` §5. App reads it via `src/api/war.js`.
 
 > **A PR that adds a generator ships the generator's committed output alongside
 > it.** The surface it feeds has to work on the first deploy; the nightly cron
@@ -48,7 +51,7 @@ don't run these by hand.
   by career WAR ("Made The Show", the last card on a MiLB team's Overview).
   **Runs directly after `gen-war.mjs` and depends on it**: the ranking is summed
   from `war.json` + the committed `war-history/` shards, so this generator makes
-  no WAR request of its own and a FanGraphs outage can't break it (it does mean
+  no WAR request of its own and a statsapi outage can't break it (it does mean
   career WAR is 2010-on, understating a pre-2010 debut). Stints come from the
   PLAYER side — `/people/{id}/stats?stats=yearByYear&sportId={11,12,13,14,16}`,
   one call per sport because a comma list silently returns zero stat groups — and
@@ -687,7 +690,8 @@ Re-run only to fold in a new season.
 
 - `gen-war-history.mjs` → `public/data/war-history/{NN}.json` (player-keyed, bucketed
   on `personId % 100` via the reader's `warShardKey`) — season WAR per player for
-  COMPLETED seasons (2010+), the multi-year companion to `war.json`. Same source/join. A finished season's WAR is immutable.
+  COMPLETED seasons (2010+), the multi-year companion to `war.json`. Same source
+  (statsapi sabermetrics) and join. A finished season's WAR is immutable.
 - `gen-awards-history.mjs` → `public/data/awards-history.json` — who won each major
   MLB award (MVP, Cy Young, Rookie of the Year, Silver Slugger, Gold Glove, Platinum
   Glove, Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente, All-MLB
