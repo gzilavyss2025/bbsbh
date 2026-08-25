@@ -19,7 +19,7 @@ export const postseasonUsageEntry = {
       id: 'the-check',
       heading: 'Does the age effect survive using real October playing time?',
       prose: [
-        'For every club that reached October, its age was worked out again from scratch. This time it counted only the players who actually batted or pitched in that club\'s postseason games, and it weighted each man by how much he played THERE instead of by his regular-season workload.',
+        'Picture the veteran a contender rents in July. He is thirty-six, he has a ring, and he makes the roster older the day he signs. Then October comes and he sits. Every club that reached October had its age worked out a second time to deal with exactly that man. This pass counted only the players who actually batted or pitched in that club\'s postseason games. It weighted each one by how much he played THERE rather than by his summer workload.',
       ],
       table: {
         caption: 'Postseason-actual age vs. the original regular-season age',
@@ -55,7 +55,7 @@ export const postseasonUsageEntry = {
   ],
   caveats: [
     'The fixed result — leaning on surprise contributors is a mild plus, once you hold games played steady — is real but modest. It is nowhere near the biggest thing in this program.',
-    'Every single outlier this measure turned up, in both directions, was a pitcher. Not one was a hitter. So this is much better evidence about how pitching staffs get reshuffled for October than about hitters, or about how clubs get players generally.',
+    'Every single extreme case this measure turned up, in both directions, was a pitcher. Not one was a hitter. So this is much better evidence about how pitching staffs get reshuffled for October than about hitters, or about how clubs get players generally.',
     'The measure cannot tell a trade-deadline rental, a regular coming back off the injured list, and a September call-up apart. All three look identical to it. Any specific claim about one of those needs the actual case checked by name, not just the aggregate number.',
     'Both checks here cover only the 250 team-seasons that reached October. There is nothing to measure for a club that never got there.',
   ],

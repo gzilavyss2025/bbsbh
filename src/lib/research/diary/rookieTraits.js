@@ -75,7 +75,7 @@ export const rookieTraitsEntry = {
       ],
       table: {
         caption: 'Rookie pitchers, by role',
-        columns: ['', 'Median debut age', 'Rate against the league', 'Value'],
+        columns: ['', 'Typical debut age', 'Rate against the league', 'Value'],
         rows: [
           ['Starters', '24.1', '93 to 98', '0.5 to 0.8 wins'],
           ['Relievers', '25.3', '108 to 128', '0.2 wins'],

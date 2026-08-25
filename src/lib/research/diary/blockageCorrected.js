@@ -41,9 +41,9 @@ export const blockageCorrectedEntry = {
           ['Does the job above him predict how long he waits — five of six ways of asking', 'No, on all six', 'No, on five of six — see below for the sixth'],
           ['Hitters who arrive at a different position', '36.1%', '33.6%'],
           ['Hitters who arrive further down the ladder', '25.1%', '23.4%'],
-          ['Position result, controlling for position', 'holds', 'holds, essentially unchanged'],
+          ['Position result, once you set position aside', 'holds', 'holds, essentially unchanged'],
           ['A real blockage — one owner, past his control window', '11.7% of stays', '12.4% of stays'],
-          ['Cost of the move (WAR over 6 seasons)', '−2.08, not significant', '−2.26, not significant'],
+          ['Cost of the move (WAR over 6 seasons)', '−2.08, too small to trust', '−2.26, too small to trust'],
         ],
         note: 'The position-change result also passed a new, tougher check this pass added — see "the strongest check yet," below.',
       },
@@ -118,7 +118,7 @@ export const blockageCorrectedEntry = {
   open: [
     'What is actually behind the backdated crowded-job waiting-time pattern, since it is real but does not fit this study\'s own theory. It looks like a pitching-staff-construction question, not a blockage one.',
     'Do merit promotions, roster-rule promotions and injury-driven promotions differ on any of the OTHER blockage measures — position change, the WAR cost of a move — the way they have now been checked against waiting?',
-    'The "settled earlier" group — 27 stays where the roster decision predates the debut this cohort is built around — is small but its own honest finding, not investigated further here.',
+    'The "settled earlier" group — 27 stays where the roster decision predates the debut this group of stays is built around — is small but its own honest finding, not investigated further here.',
   ],
   technical: [
     'Bug 1: model.mjs gated a pitcher\'s rate on ownEra > 0, dropping any 0.00 ERA cumulative line as null. 23 stays. Bug 2: incumbent-bio.json lagged incumbent-ids.json by 68 personIds, all of whom returned a valid mlbDebutDate on a live re-fetch. 75 stays. Bug 3: jobCols(r, useLag) only ever switched jobQZ and controlLeft on the lag flag; jobDepth, jobAge, orgWinPct and jobTenure read the concurrent season regardless. Fixed in model.mjs, deepen.mjs and confound.mjs identically.',

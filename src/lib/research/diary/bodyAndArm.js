@@ -19,7 +19,7 @@ export const bodyAndArmEntry = {
   question:
     'Does a player’s size change how long he sits in the minors — being unusually big, or unusually small? And for pitchers, does throwing left-handed, throwing hard, or throwing five different pitches get you there sooner?',
   headline:
-    'For hitters, size does nothing. For pitchers it does, and not in a straight line — the unusually light and the unusually heavy both wait longer than the men in the middle, about a third of a season for the outliers. Velocity does not buy calendar time. It buys innings: the hardest throwers need a hundred fewer of them to convince a club. And pitch mix, once you know whether a man starts or relieves, is worth nothing at all.',
+    'For hitters, size does nothing. For pitchers it does, and not in a straight line — the unusually light and the unusually heavy both wait longer than the men in the middle, about a third of a season for the men at the extremes. Velocity does not buy calendar time. It buys innings: the hardest throwers need a hundred fewer of them to convince a club. And pitch mix, once you know whether a man starts or relieves, is worth nothing at all.',
   sections: [
     {
       id: 'the-shape',
