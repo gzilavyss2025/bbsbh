@@ -1,12 +1,17 @@
 # The prospect-research diary
 
 An admin-only page at `/admin/research`, linked from the footer, holding
-everything the minor-league development research has found. Four entries at
+everything the minor-league development research has found. Eight entries at
 the time of writing, one per spike, newest first.
 
-It exists because that research produced four long technical documents in
-`docs/` and no way for the person who commissioned it to read the answers.
-The documents keep the method. The diary keeps the findings, in English.
+It exists because that research produced long technical documents in `docs/`
+and no way for the person who commissioned it to read the answers. The
+documents keep the method. The diary keeps the findings, in English.
+
+The first four entries ask about **clubs** — how long a stay at a level takes,
+whether some organizations move men faster, whether leaning on your own players
+costs you. The four newest ask about the **player**: his size, his arm, the
+awards he had already won, and what he did in his rookie season.
 
 ## The two rules
 
@@ -47,9 +52,9 @@ Files live in `src/lib/research/diary/`. One file per entry, plus:
   that apply to every entry. Add a trap here when a new one costs someone a day.
 
 Every entry needs a non-empty `caveats` list. If a finding has nothing wrong
-with it, the entry is not finished — go and find what is wrong with it. In
-three of the four entries here, the missing thing is the most likely reason the
-finding is wrong.
+with it, the entry is not finished — go and find what is wrong with it. In most
+of the entries here, the missing thing is the most likely reason the finding is
+wrong.
 
 ## The hook
 
@@ -57,10 +62,10 @@ finding is wrong.
 the research data or its write-ups:
 
 - `docs/level-tenure-benchmark.md`, `docs/team-movement-windows.md`,
-  `docs/homegrown-dependence.md`
+  `docs/homegrown-dependence.md`, `docs/prospect-traits.md`
 - `scripts/gen-level-tenure-benchmark.mjs`,
   `public/data/level-tenure-benchmark.json`, `src/api/levelTenure.js`
-- anything under `.scratch/level-benchmarks/`
+- anything under `.scratch/level-benchmarks/` or `.scratch/prospect-traits/`
 
 It is advisory: it writes one line to stderr, always exits 0, and stays quiet
 when the same call already touched `src/lib/research/diary`. It reminds rather
