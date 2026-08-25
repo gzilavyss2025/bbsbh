@@ -543,7 +543,11 @@ const BUDGETS = {
   // check-caps.mjs and check-typography.mjs already here. It enforces the
   // house word list ("postseason", never the other word) across src/, api/,
   // scripts/ and docs/.
-  scripts: 98,
+  // +1 for check-diary-voice.mjs — the plain-language guard for both research
+  // diaries (standing instruction, 2026-08-25). A flat lint guard exactly like
+  // check-caps.mjs and check-typography.mjs beside it, and it runs on import,
+  // so scripts/lib/ is not open to it either.
+  scripts: 99,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

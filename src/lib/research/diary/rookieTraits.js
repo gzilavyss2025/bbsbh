@@ -14,9 +14,9 @@ export const rookieTraitsEntry = {
   title: 'What a good rookie season looks like from the minors',
   verdict: 'holds',
   question:
-    'A kid comes up and has a real year. Look back at his time in the minors — is there anything there you could have seen coming?',
+    'A kid comes up in June and has a real year. Look back at his time in the minors — is there anything there you could have seen coming?',
   headline:
-    'Some. But first you have to say what a good rookie season is, and the two obvious answers turn out to be different questions. Ask who hit well and the answer is the big men. Ask who was worth something and the answer is the fast movers. They are not the same players. They agree about three times in five.',
+    'Some. But first you have to say what a good rookie season is, and the two obvious answers turn out to be two different questions. Ask who hit well and the answer is the big men. Ask who was worth something and the answer is the fast movers. They are not the same players. They agree about three times in five.',
   sections: [
     {
       id: 'two-definitions',
@@ -39,9 +39,9 @@ export const rookieTraitsEntry = {
       id: 'rate-answer',
       heading: 'Ask who hit well, and the answer is the size of the man',
       prose: [
-        'Two things separate the hitters who beat the league as rookies from the ones who did not, and neither is a surprise. How well they had hit at Double-A and Triple-A. How they had ranked against everybody else at their last stop. That is the sport working as advertised.',
+        'Two things separate the hitters who beat the league as rookies from the ones who did not, and neither is a surprise. How well they had hit at Double-A and Triple-A. And how they had ranked against everybody else at their last stop. That is the sport working as advertised.',
         'The third thing is weight, and it is nearly as big as the first two. The men who hit are heavier — 215 pounds against 202. Height rides along and then falls away entirely once weight is accounted for. This is mass, not stature.',
-        'The obvious objection is that it is really about position. A first baseman at a hundred and five is a poor first baseman; a shortstop at a hundred and five is a good one. So the whole thing was run again inside each position group, where a heavy shortstop is only measured against other shortstops.',
+        'The obvious objection is that it is really about position, since the heavy men are the men at the corners. Hitting five percent better than the league is a poor year for a first baseman and a fine one for a shortstop. So the whole thing was run again inside each position group, where a heavy shortstop is only measured against other shortstops.',
       ],
       table: {
         caption: 'Rookie-year hitting, by weight, within position group',
@@ -82,19 +82,19 @@ export const rookieTraitsEntry = {
         ],
       },
       proseAfter: [
-        'Relievers come up later, throw fifty innings, post a handsome earned-run average and are worth almost nothing. Put role into the model and the age effect disappears completely, while role carries thirteen points of rate and a quarter of a win.',
+        'Relievers come up later, throw fifty innings, post a handsome earned-run average and are worth almost nothing. Put the man\'s role into the picture and the age effect disappears completely, while role carries thirteen points of rate and a quarter of a win.',
         'There was never an age paradox. There was a question nobody had asked about what kind of pitcher we were talking about.',
       ],
     },
   ],
   caveats: [
     'Everybody in this study reached the majors and stuck. So nothing here can say a trait MAKES a good rookie — the heavy corner outfielders who never got out of Double-A are not in the data, and they are exactly who a claim like that would need. What can be said is narrower and it is what is said above: among men who all made it, these are the histories that separate the good rookie years from the poor ones.',
-    'The rate measures are crude. They compare a man to the raw league line with no adjustment for his ballpark, which flatters a hitter in Denver and punishes one in San Diego. A park correction would move individual players around; it is unlikely to move a pattern this size, but it was not done.',
+    'The rate measures are crude. They hold a man up against the raw league line with no adjustment for his ballpark, which flatters a hitter in Denver and punishes one in San Diego. A park correction would move individual players around; it is unlikely to move a pattern this size, but it was not done.',
     'Weight is whatever the league currently lists a player at, not what he weighed in the minors. For a man who retired in 2014 it is his last listed number. That is the wrong ruler read at the wrong time, and nothing inside this data can repair it.',
-    'A quarter of these players have no draft record at all because they signed as teenagers out of Latin America. They are currently lumped with a handful of veterans who came over from Japan — two very different populations in one box, the same gap the level-tenure work flagged and nobody has closed.',
+    'A quarter of these players have no draft record at all because they signed as teenagers out of Latin America. They currently sit in the same box as a handful of veterans who came over from Japan — two very different groups in one box, the same gap the level-tenure work flagged and nobody has closed.',
   ],
   open: [
-    'The size finding is the one worth pushing on, because there is a cheap version of the missing half: minor leaguers who never graduated still have listed heights and weights. Comparing the heavy men who made it against the heavy men who did not would say whether size is a real edge or just what a club looks for when it decides who gets the at-bats.',
+    'The size finding is the one worth pushing on, because there is a cheap version of the missing half: minor leaguers who never graduated still have listed heights and weights. Line the heavy men who made it up against the heavy men who did not, and you would learn whether size is a real edge or just what a club looks for when it decides who gets the at-bats.',
   ],
   technical: [
     'Cohort: MLB debuts 2010–2023 past the 130 AB / 50 IP threshold, rookie season within two years of the debut — 2,059 players; 1,673 with ≥150 PA or ≥40 IP in the rookie season. Rookie season = the season containing rookieUntil.',
@@ -102,5 +102,9 @@ export const rookieTraitsEntry = {
     'Trait separation: Mann-Whitney U with tie correction, Benjamini-Hochberg across 14 traits per comparison. Hitters by rate: AA+AAA OPS d=0.57, last-level peer percentile d=0.54, weight d=0.49, height d=0.35 (all q<0.0001).',
     'Weight survives position control: +3.49 points of rate per SD (p<0.0001) with position-group dummies; height −0.44 (p=0.45). On WAR the same term is +0.111 (p=0.052).',
     'Pitcher role: start share carries −13.3 rate points per SD (p<0.0001) and +0.243 WAR per SD (p<0.0001); the age term on rate moves from +1.56 to −1.88 and is not significant either way.',
+    'Definition agreement: the 1,673 rookie seasons cross-classified on rate index >100 against season WAR ≥2.0 agree in 62% of cases (206 + 833). Of 233 two-win rookie seasons, 206 also cleared the rate bar; of 813 rate-clearing seasons, only 206 reached two wins.',
+    'Fast-mover gap on the WAR bar: about one fewer minor-league season, ~300 fewer minor-league PA, ~8 months younger at debut, and less Triple-A service. Weight on this bar is 210 vs 206 lb and does not separate.',
+    'The position-group table reports, per weight tercile within the group, the tercile\'s typical listed weight against its typical rate index (100 = league average).',
+    'Pitcher roles: median debut age 24.1 (starters) vs 25.3 (relievers); rate index 93–98 vs 108–128; WAR 0.5–0.8 vs 0.2.',
   ],
 }

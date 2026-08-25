@@ -11,15 +11,15 @@ export const postseasonUsageEntry = {
   title: 'The age effect survives checking who actually played — and a trap that would have shipped a backwards finding',
   verdict: 'holds',
   question:
-    'Spike #1 found that older rosters go deeper in October, but a team’s age there counted every player on its full-season roster — including a trade-deadline rental who might never have gotten into a postseason game. Does the finding survive weighting a team’s age by who ACTUALLY played once October started?',
+    'Spike #1 found that older rosters go deeper in October. But it counted every player who wore the uniform all season — including the veteran a club rented in July who then sat on the bench all October. Does the finding hold up if a team\'s age is weighted by who ACTUALLY played once the postseason started?',
   headline:
-    'Yes. Reweighting by real postseason playing time instead of regular-season role moves a team’s age by less than a tenth of a year, and pitching age still predicts postseason depth among the teams that made it. Along the way, a second, much more strikingly-worded result — "leaning on surprise contributors costs you games" — turned out to be almost entirely a measurement artifact, and reversed sign once corrected.',
+    'Yes. Counting only the men who actually took the field in October moves a team\'s age by less than a tenth of a year, and pitching age still lines up with how far a club goes. Along the way, a second result with a much louder headline — "leaning on surprise contributors costs you games" — turned out to be almost all measuring stick and almost no baseball. Fixed properly, it points the other way.',
   sections: [
     {
       id: 'the-check',
       heading: 'Does the age effect survive using real October playing time?',
       prose: [
-        'For every team that made the postseason, its age was recomputed using only the players who actually pitched or batted in that team’s postseason games, weighted by how much they played THERE instead of during the regular season.',
+        'For every club that reached October, its age was worked out again from scratch. This time it counted only the players who actually batted or pitched in that club\'s postseason games, and it weighted each man by how much he played THERE instead of by his regular-season workload.',
       ],
       table: {
         caption: 'Postseason-actual age vs. the original regular-season age',
@@ -30,43 +30,46 @@ export const postseasonUsageEntry = {
         ],
       },
       proseAfter: [
-        'If the original finding were mostly padded by veterans who never got into a postseason game, this number would have moved a lot. It did not. And restricted to just the 250 team-seasons that made the postseason, pitching age measured this way still predicts how far a team goes (a real, checked result); batting age does not — the same split spike #1 already found.',
+        'If the first finding had been propped up by veterans who never got off the bench in October, this number would have swung hard. It barely moved. And looking only at the 250 team-seasons that reached the postseason, pitching age measured this new way still tracks how far a club goes, and it is a checked result, not a hunch. Batting age still does not. That is the same hitting-versus-pitching split spike #1 already found.',
       ],
     },
     {
       id: 'the-trap',
       heading: 'A result that looked bigger than it was',
       prose: [
-        'A natural next question: do teams that lean heavily on a player whose October role greatly exceeded his regular-season role do worse, because they were forced into it by injuries or a thin roster? The first pass said yes, clearly — and it was almost entirely a trick of the measuring stick.',
-        'A team that loses in three games has a much smaller, lumpier sample of postseason innings to spread around than a team that plays twenty. That alone — nothing about who the players actually were — makes any single player’s SHARE of a short October look bigger. Once that is accounted for, the relationship flips: for a given amount of October playing time, leaning on a player who stepped into a bigger role than his regular season predicted is a MILD POSITIVE sign, not a red flag.',
+        'Here is the natural next question. Some clubs get to October and end up leaning on a man who barely pitched all year — the long reliever pressed into a start, the September call-up handed the eighth inning. Does being forced into that hurt you? The first pass said yes, loudly. The first pass was almost entirely a trick of the measuring stick.',
+        'Picture two clubs. One gets swept in three games. The other plays twenty. The swept club has a tiny pile of innings to hand out, so ANY one pitcher\'s slice of it looks huge — not because of who he is, but because the pie is small. Once you compare clubs that played a similar amount of October baseball, the whole thing turns over. For a given amount of October play, leaning on a man who stepped into a bigger role than his regular season predicted is a MILD GOOD sign, not a warning light.',
       ],
       table: {
-        caption: 'Before and after correcting for how many games a team actually played',
+        caption: 'Before and after allowing for how many games a team actually played',
         columns: ['Version', 'Result'],
         rows: [
-          ['Before correcting for games played', 'Looked bad: teams relying on "surprise" contributors went less far'],
-          ['After correcting for games played', 'Mildly good: the same teams, for a given amount of October play, tended to go slightly FURTHER'],
+          ['Before allowing for games played', 'Looked bad: teams relying on "surprise" contributors went less far'],
+          ['After allowing for games played', 'Mildly good: the same teams, for a given amount of October play, tended to go slightly FURTHER'],
         ],
       },
       proseAfter: [
-        'This matters beyond this one number: any future measure of "share of a team\'s postseason activity" needs the same correction, because how many games a team played IS almost exactly how far it went. Skipping that check would have shipped the wrong-signed version.',
+        'This lesson is bigger than this one number. Any future measure built on "what share of a team\'s October did this player handle" needs the same fix, because how many games a club played IS very nearly the same thing as how far it went. Skip that step and you ship the backwards version.',
       ],
     },
   ],
   caveats: [
-    'The corrected result (leaning on surprise contributors is a mild positive, once games played is held constant) is real but modest — not close to the biggest thing in this program.',
-    'Every single outlier this measure surfaced, in both directions, was a pitcher — none were hitters. This is much better evidence about how pitching staffs get reorganized for October than about hitters or about acquisition strategy generally.',
-    'The measure cannot tell a trade-deadline rental, an injury-return regular, and a September call-up apart — they look identical to it. A specific claim about any one of those needs the actual case checked by name, not just the aggregate number.',
-    'Both checks here only cover the 250 team-seasons that made the postseason — there is nothing to measure for a team that never got to October.',
+    'The fixed result — leaning on surprise contributors is a mild plus, once you hold games played steady — is real but modest. It is nowhere near the biggest thing in this program.',
+    'Every single outlier this measure turned up, in both directions, was a pitcher. Not one was a hitter. So this is much better evidence about how pitching staffs get reshuffled for October than about hitters, or about how clubs get players generally.',
+    'The measure cannot tell a trade-deadline rental, a regular coming back off the injured list, and a September call-up apart. All three look identical to it. Any specific claim about one of those needs the actual case checked by name, not just the aggregate number.',
+    'Both checks here cover only the 250 team-seasons that reached October. There is nothing to measure for a club that never got there.',
   ],
   open: [
-    'Whether this same "playing-time-share needs a volume control" trap applies to any other factor spike in this program that touches postseason activity, not just this one.',
-    'Whether the specific cases behind the biggest mismatches (a real trade-deadline story vs. an injury return vs. a rookie call-up) cluster differently against how far a team went.',
+    'Whether this same "a share of October needs a games-played fix" trap applies to any other factor spike in this program that touches postseason activity, not just this one.',
+    'Whether the specific cases behind the biggest role jumps (a real trade-deadline story vs. a man returning from injury vs. a rookie call-up) sort differently against how far a team went.',
   ],
   technical: [
     'Postseason-actual age: PA/IP-weighted mean of each player\'s REGULAR-SEASON age (statsapi\'s boxscore endpoint carries no age field), weighted by his POSTSEASON PA/IP for that team instead of his regular-season PA/IP. n=250 postseason team-seasons.',
     'Spearman rho vs. the 0-5 ladder, restricted to postseason teams: postseasonBattingAgeRel 0.0882 (permutation p=0.1692, within-season shuffle, 5,000 draws), postseasonPitchingAgeRel 0.1731 (p=0.0070).',
     'Mismatch = postseasonShare − regularShare per player-team-season (share of team total PA for hitters, IP for pitchers). surpriseReliance = sum of positive mismatches per team-season.',
     'surpriseReliance vs. ladder: raw Spearman rho=−0.4257 (permutation p<0.0002). Confound check: surpriseReliance vs. total postseason IP, rho=−0.5478 (total postseason IP itself correlates with the ladder at rho=0.91, by construction). Partial Spearman correlation controlling for total postseason IP (rank-residualized, permutation test on the residualized statistic, within-season shuffle): rho=+0.2201, p=0.0006.',
+    'Prose-to-formal map for this entry: "allowing for how many games a team actually played" is the rank-residualized partial Spearman controlling for total postseason IP; "the pie is small" is the mechanical inflation of any one player\'s share when the denominator (team postseason IP/PA) is small — and that denominator is itself the quantity carrying the outcome signal (rho=0.91 with the ladder). The sign reversal between the raw and controlled statistics (−0.4257 to +0.2201, both clearing the conventional threshold) is the entire reason this entry exists.',
+    'Reusable rule this spike establishes: any team-level statistic whose denominator is postseason volume is confounded with the outcome ladder by construction, and must be reported with the volume control alongside the raw version rather than instead of it.',
+    'The two age deltas quoted in the table (hitters +0.09 years, pitchers −0.01 years) are mean differences between the postseason-actual and regular-season relative-age fields over the same n=250 postseason team-seasons — small enough on both sides that the deadline-rental dilution story spike #1 flagged cannot account for the original association.',
   ],
 }

@@ -60,6 +60,26 @@ every disagreement with an entry below it is a disagreement with an emphasis
 and not with a number. Do not reach for this verdict to avoid doing the work.
 If a claim in it can be tested, it belongs in a spike, not here.
 
+## The voice: write it like a baseball book
+
+Standing instruction from the repo owner (2026-08-25), applying to **both**
+research diaries. An entry reads the way David Halberstam or Michael Lewis
+would write it for a baseball book — plain language, middle-school to
+high-school reading level, no statistics vocabulary in the reader-facing
+fields. Everything formal moves into the entry's `technical` list, which the
+page folds behind a disclosure; the rule relocates the jargon, it does not
+delete it. If an idea cannot be avoided, teach it with a picture and a real
+team, not a definition.
+
+`.claude/hooks/diary-voice.mjs` hands a session the full voice at the moment
+it writes an entry; `scripts/check-diary-voice.mjs` runs in `npm run lint` and
+fails on statistics terms outside `technical`. Entries predating the
+instruction are grandfathered by path, because both diaries are append-only —
+that is the rule working, not an exemption to widen.
+
+The full statement of the voice, with examples, lives once in
+`docs/agents/contender-diary.md` rather than being duplicated here.
+
 ## Adding an entry
 
 Files live in `src/lib/research/diary/`. One file per entry, plus:

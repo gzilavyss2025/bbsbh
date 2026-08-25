@@ -113,6 +113,7 @@ phase, spike by spike, not part of standing up the framework itself.
 | Diversity of star players | count of All-Stars/top-WAR players per roster; how concentrated team WAR was in its top 1-2 players vs. spread across 8+ | `all-star-rosters.json` (back to 1933), `awards-history.json`, `war-history/` | **Done** — `docs/team-success-star-diversity.md`. A spread-out lineup is a real, sizable edge for MAKING the postseason (this program's strongest correlation to date on the hitting side); pitching concentration barely matters. Neither side separates division winners from wild-card teams. Ran on 2010-2025, which was `war-history`'s own floor at the time; that floor is now **1901**, so a refit on the full ladder window (about 750 team-seasons, up from 450) is the cheapest re-test. Biggest open follow-up: a joint model with roster age and homegrown share |
 | Where their best players played (homegrown vs. acquired) | parent-org-at-first-pro-season classification, reused directly from the prospect research line | The homegrown-dependence spike (`docs/homegrown-dependence.md`) already built and validated this exact classifier — reuse its method and cached data, don't rebuild it. That spike's own finding was that homegrown DEPENDENCE doesn't predict a team's regular-season win total; this program asks the postseason-ladder question instead, which is a different outcome variable over the same classifier | **Done** — `docs/team-success-homegrown.md`. Does not predict postseason depth (weak, not significant), but DOES separate division winners from wild-card teams among postseason clubs (+5pp both sides of the ball, p<0.05) — the mirror image of the age spike's null on that same cut. Open follow-up: a joint model with roster age |
 | Age of team | PA-weighted batter age, IP-weighted pitcher age, season-average | Built from statsapi's own per-team-stint `stat.age`, PA/IP-weighted | **Done** — `docs/team-success-roster-age.md`. Real, modest, likely-partly-circular effect (older teams go deeper, especially pitching staffs; age doesn't separate division winners from wild cards). Biggest open follow-up: a pre-trade-deadline age cut, to separate a genuine age effect from contending teams simply renting veterans |
+| **Prior postseason experience** (commissioned directly, not in the original ask) | share of a club's regular-season playing time (PA/IP) given to players who had appeared in a postseason game in a STRICTLY EARLIER season, on any club; plus a late-rounds-only variant | Built from the postseason game list 1969-2025 (`gameType=F,D,L,W`) + boxscores, reusing spike #2's `postseason-boxscore-cache.json` and spike #1's `roster-age-cache.json` for the weights — no new regular-season pull | **Done** — `docs/team-success-postseason-experience.md`. A large, robust effect on REACHING the postseason (rho +0.35 batting / +0.37 pitching; ~20pp more experienced playing time than clubs that missed), and a clean, well-powered NULL on advancing once a club is in (rho -0.02 / +0.02 across 234 postseason clubs). Roughly half the qualifying effect is prior-year continuity, but a within-club test still leaves +0.18/+0.21. Pitching edges batting on raw numbers; the two are indistinguishable under controls. Open follow-up: a player-level version, and the joint model four spikes have now asked for |
 
 Nothing here is ranked by importance yet — that ranking is itself a question
 a first pass over several factors should answer, not an assumption to bake
@@ -187,15 +188,31 @@ land or a factor turns out to need more groundwork than expected:
    the wonDivision split both came back null. Best open follow-up: a joint
    model with roster age and homegrown share, now that three spikes have all
    found something on the same hitting/making-the-postseason cut.
-4. **Trades / acquisition** — two partially-overlapping sources
+4. ~~**Prior postseason experience**~~ — done,
+   `docs/team-success-postseason-experience.md`. Jumped the queue; commissioned
+   directly rather than drawn from this list, and added to the factor catalog
+   by the spike itself. A large effect on REACHING October and a clean null on
+   advancing once there. It also left the program two reusable assets: a
+   postseason participation ledger back to **1969** (the app's 2000 floor does
+   not bind for player-level postseason history), and the first
+   partial-correlation tooling here that takes more than one control at a time
+   (`analyze-postseason-experience.mjs`).
+5. **The joint model** — promoted to the front of the queue, because four
+   spikes have now independently found something on the "made the postseason"
+   cut and little or nothing on the "advanced once there" cut: roster age,
+   homegrown share, star diversity and postseason experience. Whether those are
+   four signals or one underlying "this is a good, established club" trait is
+   now the highest-value open question in the program, and it needs no new data
+   pull — all four panels are built and on disk.
+6. **Trades / acquisition** — two partially-overlapping sources
    (`trade-deadline/`, `team-transactions/`) need reconciling into one
    team-season "value acquired in-season" number first.
-5. **Injuries** — needs a new IL-stint sweep off the transactions endpoint;
+7. **Injuries** — needs a new IL-stint sweep off the transactions endpoint;
    heavier lift than the above.
-6. **Situational rosters / roster construction** — richest data
+8. **Situational rosters / roster construction** — richest data
    (`team-records/`) but the least obvious single number to regress; likely
    needs its own sub-framework before a spike can run.
-7. **Payroll (adjusted)** — blocked until a historical payroll source is
+9. **Payroll (adjusted)** — blocked until a historical payroll source is
    found; revisit if/when one turns up rather than approximating with
    current-season salary data pretending to be historical.
 
