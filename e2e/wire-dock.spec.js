@@ -306,12 +306,22 @@ test('the dock is a dock, not a modal', async ({ page }) => {
   await expect(page).toHaveURL(/\/player\//)
 })
 
-test('a browsed-to past day and a Triple-A slate get no dock', async ({ page }) => {
+test('a browsed-to past day keeps the dock, narrowed to that one day', async ({ page }) => {
+  // Mirrors wire-rail.spec.js's equivalent case: the dock used to disappear
+  // off today's slate entirely; it stays now, but singleDay trims the ledger
+  // to the date on screen instead of a rolling window that would run past it.
   const [y, m, d] = ANCHOR_DATE.split('-')
   await openSlate(page, `/${m}${d}${y}`)
   await expect(page.locator('.gamecard').first()).toBeVisible()
-  await expect(page.locator('.wiredock')).toHaveCount(0)
+  const dock = page.locator('.wiredock')
+  await expect(dock).toBeVisible()
+  await dock.locator('.wiredock__latest').click()
+  await expect(page.locator('.wiredock__note')).not.toContainText(/Last \d+ days/i)
+  await expect(page.locator('.wiredock__list .wire__date')).toHaveCount(1)
+})
 
+test('a Triple-A slate carrying no MLB-scoped stories gets no dock', async ({ page }) => {
+  await openSlate(page)
   await page.goto('/aaa')
   await expect(page.locator('.datenav')).toBeVisible()
   await expect(page.locator('.wiredock')).toHaveCount(0)

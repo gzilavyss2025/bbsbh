@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { fetchLeagueMoves, windowDaysFor } from '../../api/transactions/leagueFeed.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { MoveItems, flattenDays, takeStories } from './MoveRow.jsx'
+import { MoveItems, dateline, flattenDays, takeStories } from './MoveRow.jsx'
 
 // THE WIRE RAIL — the wide surface's presentation of the league's roster moves
 // (issue #772). Spoiler-free: a roster move and its date carry no score, so
@@ -135,10 +135,10 @@ function useFitToColumn(listRef, fitTo, ready) {
 // again, which in season is the rare case. Reporting is deliberately held until
 // the fetch settles for exactly that reason — an eager "nothing yet" would
 // cause the very jump the arrangement exists to avoid.
-export function WireRail({ endDate, sportId, onPresence, fitTo }) {
+export function WireRail({ endDate, sportId, onPresence, fitTo, singleDay = false }) {
   const { data, loading } = useAsync(
-    (signal) => fetchLeagueMoves(endDate, sportId, { signal }),
-    [endDate, sportId],
+    (signal) => fetchLeagueMoves(endDate, sportId, { signal, singleDay }),
+    [endDate, sportId, singleDay],
   )
   const [expanded, setExpanded] = useState(false)
   const listRef = useRef(null)
@@ -171,7 +171,11 @@ export function WireRail({ endDate, sportId, onPresence, fitTo }) {
     // this region has not read the datelines yet.
     <aside
       className="wirerail"
-      aria-label={`Transactions around the league, last ${windowDaysFor(sportId)} days`}
+      aria-label={
+        singleDay
+          ? `Transactions around the league, ${dateline(endDate)}`
+          : `Transactions around the league, last ${windowDaysFor(sportId)} days`
+      }
     >
       <div className="wirerail__head">
         {/* Mixed case here on purpose: the CSS applies the app's ALL-CAPS

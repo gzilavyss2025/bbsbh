@@ -3,7 +3,7 @@ import { fetchLeagueMoves, windowDaysFor } from '../../api/transactions/leagueFe
 import { useAsync } from '../../hooks/useAsync.js'
 import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
-import { MoveItems, cutlineText, flattenDays } from './MoveRow.jsx'
+import { MoveItems, cutlineText, dateline, flattenDays } from './MoveRow.jsx'
 import {
   SHEET_FRACTION,
   detentOffsets,
@@ -110,10 +110,10 @@ function liveOffset(el, fallback) {
 
 // ---------------------------------------------------------------------------
 
-export function WireDock({ endDate, sportId, onPresence }) {
+export function WireDock({ endDate, sportId, onPresence, singleDay = false }) {
   const { data } = useAsync(
-    (signal) => fetchLeagueMoves(endDate, sportId, { signal }),
-    [endDate, sportId],
+    (signal) => fetchLeagueMoves(endDate, sportId, { signal, singleDay }),
+    [endDate, sportId, singleDay],
   )
 
   const rootRef = useRef(null)
@@ -449,7 +449,9 @@ export function WireDock({ endDate, sportId, onPresence }) {
               aria-hidden={index === RAIL ? 'true' : undefined}
             >
               <h2 className="wiredock__title">Transactions</h2>
-              <span className="wiredock__note">Last {windowDaysFor(sportId)} days · {total}</span>
+              <span className="wiredock__note">
+                {singleDay ? dateline(endDate) : `Last ${windowDaysFor(sportId)} days`} · {total}
+              </span>
               <button
                 type="button"
                 className="wiredock__close"

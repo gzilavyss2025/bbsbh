@@ -120,7 +120,14 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // Every level gets the wire, not just MLB (issue #772's own scope grew to
   // cover it) — a level's own thirty clubs own their stories directly rather
   // than rolling up to an MLB parent; see leagueFeed.js's `scopeFor`.
-  const showWire = isToday
+  //
+  // The wire follows the reader when they page back, rather than vanishing —
+  // a rolling "last 3 days" window is a claim about NOW, which is wrong on a
+  // browsed-to past day, but a single day's own moves are still that day's
+  // moves regardless of when they're read. `singleDay` (passed to WireRail/
+  // WireDock below) is what keeps the claim honest: off today it narrows the
+  // feed to exactly the paged date, never a window running past it.
+  const showWire = true
   // The dock renders nothing on a quiet window, and only IT knows that (the
   // answer arrives with the fetch). It reports back so the slate pads its floor
   // for a rail that actually exists — see .screen--wiredock in
@@ -893,16 +900,22 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
           </div>
         </div>
 
-        {/* The league's roster moves from the last three days, live off the wire
-            (issue #772). TODAY's MLB slate only — a rolling window is a claim
-            about now, so on a browsed-to past day it would read as a bug rather
-            than as news. Renders null while loading, on failure, and on a quiet
-            window, and reports
-            which back so the shell can give the reserved width up. WIDE ONLY:
-            the phone's copy of this feed is the dock at the foot of this
-            screen. See WireRail.jsx. */}
+        {/* The league's roster moves, live off the wire (issue #772). On
+            today's slate a rolling three-day window; paged back to a past
+            day, `singleDay` narrows it to that day's own moves — a window
+            running past the date on screen would read as a bug, not news.
+            Renders null while loading, on failure, and on a quiet window, and
+            reports which back so the shell can give the reserved width up.
+            WIDE ONLY: the phone's copy of this feed is the dock at the foot
+            of this screen. See WireRail.jsx. */}
         {showWire && wide && (
-          <WireRail endDate={dateStr} sportId={sportId} onPresence={setRailPresent} fitTo={gamesColRef} />
+          <WireRail
+            endDate={dateStr}
+            sportId={sportId}
+            onPresence={setRailPresent}
+            fitTo={gamesColRef}
+            singleDay={!isToday}
+          />
         )}
       </div>
 
@@ -950,7 +963,14 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
           which keeps the slate's own content ahead of it for a screen reader.
           It publishes --wire-rail-h and reports whether it rendered at all;
           `docked` above turns that into the screen's bottom padding. */}
-      {showWire && !wide && <WireDock endDate={dateStr} sportId={sportId} onPresence={setDockPresent} />}
+      {showWire && !wide && (
+        <WireDock
+          endDate={dateStr}
+          sportId={sportId}
+          onPresence={setDockPresent}
+          singleDay={!isToday}
+        />
+      )}
     </div>
   )
 }

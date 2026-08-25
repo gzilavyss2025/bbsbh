@@ -173,6 +173,24 @@ test('feedWindow crosses a month boundary without drifting', () => {
   assert.equal(w.fetchStart, '2026-08-28')
 })
 
+test('singleDay narrows what is KEPT, not what is fetched', () => {
+  // A slate paged back to a past day asks for that day alone — not a rolling
+  // window that would run past the date on screen — but the fetch still has
+  // to reach back far enough to catch a story filed early and backdated in.
+  const w = feedWindow('2026-08-20', SPORT_IDS.MLB, { singleDay: true })
+  assert.equal(w.endDate, '2026-08-20')
+  assert.equal(w.windowStart, '2026-08-20')
+  assert.equal(w.fetchStart, '2026-08-16')
+})
+
+test('singleDay keeps only that day even for a level with a wider window', () => {
+  const w = feedWindow('2026-08-20', SPORT_IDS.AA, { singleDay: true })
+  assert.equal(w.windowStart, '2026-08-20')
+  // fetchStart is unaffected — it comes from the level's own fetchDays, which
+  // singleDay does not touch.
+  assert.equal(w.fetchStart, feedWindow('2026-08-20', SPORT_IDS.AA).fetchStart)
+})
+
 // ---------------------------------------------------------------------------
 // Per-level windows — AA/A+/A read fewer storyworthy rows per club than MLB
 // or AAA (backtested in .scratch/milb-wire/backtest.md), so they widen past

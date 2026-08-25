@@ -383,14 +383,22 @@ test('a quiet 48 hours gives the reserved width back', async ({ page }) => {
   expect((await readSlate(page)).columns).toBe(2)
 })
 
-test('a browsed-to past day does not claim the last 48 hours', async ({ page }) => {
+test('a browsed-to past day keeps the rail, narrowed to that one day', async ({ page }) => {
+  // The wire used to disappear entirely off today's slate — a rolling "last
+  // 3 days" is a claim about NOW, which is wrong on a page for a past date.
+  // It stays now, but `singleDay` narrows the window to exactly the date on
+  // screen rather than a window that would run past it.
   await page.setViewportSize({ width: TWO_COL_W, height: 900 })
   const [y, m, d] = ANCHOR_DATE.split('-')
   await openSlate(page, `/${m}${d}${y}`)
   await expect(page.locator('.gamecard').first()).toBeVisible()
-  await expect(page.locator('.wirerail')).toHaveCount(0)
-  await expect(page.locator('.wiredock')).toHaveCount(0)
-  expect((await readSlate(page)).shellW).toBe(SHELL_PLAIN)
+  const rail = page.locator('.wirerail')
+  await expect(rail).toBeVisible()
+  await expect(rail).not.toHaveAttribute('aria-label', /last \d+ days/i)
+  // Exactly one dateline in the list — the fixture's other WINDOW_DAYS-1 days
+  // of rows are still in the response, and must be trimmed rather than shown.
+  await expect(page.locator('.wirerail__list .wire__date')).toHaveCount(1)
+  expect((await readSlate(page)).shellW).toBe(SHELL_RAILED)
 })
 
 test('a Triple-A slate does not show a major-league wire', async ({ page }) => {

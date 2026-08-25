@@ -111,11 +111,18 @@ function shiftApiDate(apiDate, n) {
 // (always an MLB org's own page) and the existing tests keep reading the 3/5
 // day window with no second argument. Exported so the trim and the request
 // can be tested without a network.
-export function feedWindow(endDate, sportId = SPORT_IDS.MLB) {
+//
+// `singleDay` narrows the KEPT window to `endDate` alone — the slate paged
+// back to a past day, where "the last 3 days" would run past days the reader
+// never asked about. The fetch still reaches back the full `fetchDays`: a
+// story whose effective date is `endDate` can still be FILED a day or two
+// earlier (see THE WINDOW IS NOT THE FETCH above), and that trim applies the
+// same whether one day is being kept or three.
+export function feedWindow(endDate, sportId = SPORT_IDS.MLB, { singleDay = false } = {}) {
   const { windowDays, fetchDays } = windowConfigFor(sportId)
   return {
     endDate,
-    windowStart: shiftApiDate(endDate, -(windowDays - 1)),
+    windowStart: singleDay ? endDate : shiftApiDate(endDate, -(windowDays - 1)),
     fetchStart: shiftApiDate(endDate, -(fetchDays - 1)),
   }
 }
@@ -215,8 +222,8 @@ async function scopeFor(sportId) {
 // organizational filler on the MLB-org-scoped wire, and the wrong one at a
 // MiLB level, where an undebuted signee IS the level's actual roster and
 // suppressing him would silence nearly every SFA/SGN/IFA row.
-export async function fetchLeagueMoves(endDate, sportId = SPORT_IDS.MLB, { signal } = {}) {
-  const window = feedWindow(endDate, sportId)
+export async function fetchLeagueMoves(endDate, sportId = SPORT_IDS.MLB, { signal, singleDay = false } = {}) {
+  const window = feedWindow(endDate, sportId, { singleDay })
   const [rows, scope] = await Promise.all([
     getJson(
       `/api/v1/transactions?startDate=${window.fetchStart}&endDate=${window.endDate}`,
