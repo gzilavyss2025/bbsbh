@@ -148,12 +148,22 @@ separate "won the division" from "snuck in on a wild card."
   1-inning outing barely moves a ~1,400-inning team total — but they were not
   filtered out explicitly.
 
+## Follow-up done: does who actually played in October confirm this?
+
+**Yes.** `docs/team-success-postseason-usage.md` reweights each playoff
+team's age by ACTUAL postseason playing time instead of full-season role.
+The result barely moves (0.09yr batting, −0.01yr pitching), and pitching age
+still predicts postseason depth within the playoff field alone (p=0.0070) —
+the age effect above is not primarily a trade-deadline-rental artifact. Read
+that document for the full check, including a mechanical trap it caught
+before it could ship as a wrong-signed finding.
+
 ## What would move this next
 
-- **A pre-deadline age cut** (age as of roughly June 30, before most trade
-  activity) — this is the one check that would tell "older rosters win" apart
-  from "winning rosters get rented veterans." The highest-value follow-up on
-  this whole spike.
+- ~~A pre-deadline age cut~~ — largely superseded by the postseason-usage
+  follow-up above, which answers the same underlying worry more directly (did
+  the players who count toward this measure actually play, rather than merely
+  guessing at a date before which they probably hadn't been added yet).
 - **A payroll control**, if a historical source is ever found.
 - Splitting pitching age further — starters vs. relievers — since "the
   pitching-age gap triples toward the World Series" is exactly the kind of

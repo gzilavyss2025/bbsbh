@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T15:00:32.449Z",
+  "generatedAt": "2026-08-25T15:14:49.436Z",
   "source": "statsapi /api/v1/stats?stats=season&group={hitting,pitching}&teamId=...&playerPool=all, per team per season",
   "method": "battingAge = PA-weighted mean of statsapi's per-player-per-team-stint age; pitchingAge = IP-weighted (fractional innings converted from baseball notation). *Relative fields are each team's age minus that SEASON's own league-wide weighted average.",
   "seasons": [

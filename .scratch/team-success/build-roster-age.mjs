@@ -33,7 +33,9 @@
 // Run: node .scratch/team-success/build-roster-age.mjs
 // Writes: .scratch/team-success/roster-age.json
 // Caches raw pulls in: .scratch/team-success/roster-age-cache.json (so a
-// rerun after an interruption re-fetches nothing already on disk)
+// rerun after an interruption re-fetches nothing already on disk) — this
+// cache is itself a real, committed data source for analyze-usage-mismatch.mjs
+// (per-player regular-season PA/IP), not just a rerun optimization.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -80,12 +82,18 @@ function parseInnings(ip) {
   return wholeNum + fracNum
 }
 
-// The cache stores only what this spike ever reads (age + the one playing-
-// time field per group) rather than statsapi's full ~40-field stat block —
-// the full splits for all 1,560 calls run to 62 MB, most of it stat columns
-// this script never looks at, against under 1 MB slimmed.
+// The cache stores only what this spike ever reads (age, the one playing-
+// time field per group, and the player identity) rather than statsapi's full
+// ~40-field stat block — the full splits for all 1,560 calls run to 62 MB,
+// most of it stat columns nothing here looks at, against ~1 MB slimmed.
+// personId/name are kept (not just the team-level aggregate) so a later
+// spike can join this same per-player regular-season role against a
+// different playing-time measure — e.g. postseason usage,
+// analyze-usage-mismatch.mjs — without re-pulling statsapi.
 function slimSplit(split, group) {
   return {
+    personId: split.player?.id ?? null,
+    name: split.player?.fullName ?? null,
     age: split.stat?.age ?? null,
     weight: group === 'hitting' ? split.stat?.plateAppearances : parseInnings(split.stat?.inningsPitched),
   }

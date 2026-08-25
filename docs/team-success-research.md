@@ -145,6 +145,20 @@ reference examples) rather than inventing a new one:
   refit, and a permutation test where the sample supports one. The
   homegrown-dependence spike's own scripts (`.scratch/level-benchmarks/homegrown-*.mjs`)
   are a working template for both.
+- **Any measure expressed as a SHARE of a team's postseason activity needs a
+  playing-time control.** Total postseason games/innings correlates with the
+  ladder at rho≈0.91 by construction (win more rounds, play more games), so a
+  raw correlation against the ladder will pick that relationship up before it
+  measures anything real — caught spike #1's own follow-up reporting a
+  wrong-signed result (`docs/team-success-postseason-usage.md`). Use a
+  partial correlation (or equivalent regression control) against total
+  postseason volume instead.
+- **A reusable primitive exists for "did a player's October role match his
+  regular-season role"** — `docs/team-success-postseason-usage.md`'s mismatch
+  measure (postseason share of playing time minus regular-season share),
+  built once against `public/data/postseason-history.json` + per-game
+  boxscores. Any factor spike that touches trades, acquisitions, or
+  situational roster use can join against it rather than re-deriving it.
 - **State statistical significance in win-shares-of-doubt terms in the
   entry text**, formal numbers folded behind the `technical` disclosure — the
   two rules in `docs/agents/contender-diary.md` govern voice; this document

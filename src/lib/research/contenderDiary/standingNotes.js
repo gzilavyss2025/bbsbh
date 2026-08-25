@@ -35,6 +35,11 @@ export const TRAPS = [
     body: 'Ask statsapi for a whole season\'s hitting or pitching stats with no team filter, and a player traded mid-season shows up ONCE, credited entirely to his LAST team, with his combined season total — Lucas Giolito\'s 2023 (White Sox to Angels to Guardians) reads as a Guardian with his full 184⅓ innings. Filtering the identical call by `teamId` fixes it: the same query scoped to Chicago returns his actual White Sox stint, 121 innings. Any factor spike that sweeps a team\'s roster for a season needs the teamId-filtered call, never the league-wide one, or it will silently hand a player\'s whole year to whichever club happened to employ him last.',
   },
   {
+    id: 'postseason-share-needs-a-volume-control',
+    title: 'A "share of postseason activity" is secretly a measure of how far a team went',
+    body: 'How many games a team played in October correlates with the outcome ladder at rho=0.91 — of course it does, winning more rounds IS playing more games. So anything expressed as a SHARE of a team\'s postseason playing time carries that same relationship built in before it measures anything else, and a raw correlation against the ladder will pick that up. One draft finding here looked like "leaning on surprise contributors costs you games" (rho=−0.43) and, once corrected for how many innings a team actually played, turned out to run the OTHER way (partial rho=+0.22). Any future measure built on postseason shares needs the same control, or it will report the mechanical version of itself.',
+  },
+  {
     id: 'no-historical-payroll',
     title: 'There is no historical payroll anywhere in this repo',
     body: 'The salary and contract files here are a current-season snapshot, not a time series — the prospect-research diary hit the identical wall. The most obvious alternative explanation for almost any team-success finding — that it is really about money — cannot be tested with what is on hand until a historical payroll source is found. Say so rather than substituting today’s payroll for a team from 2007.',
