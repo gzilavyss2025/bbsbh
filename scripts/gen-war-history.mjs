@@ -17,10 +17,23 @@
 // minor-league sabermetrics exist — so MiLB rows/tiles fall back to a dash,
 // consistent with the rest of the app.
 //
-// START_SEASON is the earliest year pulled. Bumping it further back is just a
-// bigger file (each season is ~2,200 players across bat+pit); 2010 covers the
-// bulk of any current player's MLB career, and pre-START seasons on a veteran's
-// register simply show a dash in the WAR column (graceful, same as MiLB).
+// START_SEASON is the earliest year pulled, and it is the whole modern era:
+// sabermetrics serves WAR back to 1901, with no gaps and no null rows. That the
+// old years are CALIBRATED, not merely present, was checked by summing every
+// player's WAR in a season and comparing it to the scale WAR is defined on
+// (1000 WAR per 30-team, 162-game league): 1920 gave 506.7 against an expected
+// 507 for 16 teams at 154 games, 1969 gave 800.8 against 800 for 24 teams, the
+// 1994 strike gave 657.6 against 657 for 28 teams at 114 games, and 2020 gave
+// 373.3 against 370 for 60 games. Replacement level tracks team count and
+// schedule length in every era, so a 1923 WAR means what a 2023 WAR means.
+// Individual values land too — Ruth's 1923 comes back 15.0, Bonds's 2001 12.5.
+//
+// The cost of the long window is one number: a player page fetches ONE shard,
+// which grows from about 4 KB to about 18 KB (1.8 MB across all 100). The
+// sharding is what makes the depth affordable — see src/api/war.js.
+// Before this window went back, a pre-2010 row on a veteran's register showed a
+// dash in the WAR column; now the register is filled for every MLB season a
+// player ever had.
 // Run by hand: node scripts/gen-war-history.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -30,7 +43,7 @@ import { warShardKey } from '../src/api/war.js'
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'war-history')
 
-const START_SEASON = 2010
+const START_SEASON = 1901
 // Only COMPLETED seasons belong here; the live season is war.json's job. Before
 // a season ends its WAR is still moving, so stop at the year before the current.
 const LAST_SEASON = new Date().getFullYear() - 1

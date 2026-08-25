@@ -52,7 +52,10 @@ for each generator; the reader modules:
   `gen-war-history.mjs` — completed-season WAR is immutable) covers past seasons,
   keyed by PLAYER and bucketed on `personId % 100` (`warShardKey`, shared with the
   generator), the same shape as the rookie records and for the same reason: a
-  player page wants one career, not 416 KB of league-seasons.
+  player page wants one career, not 2.1 MB of league-seasons. That sharding is
+  what lets the window run all the way back to 1901: the whole set grew about
+  five times, but the ONE shard a player page fetches only went from about 4 KB
+  to about 18 KB.
   `fetchWarHistory(personId)` + `warByYearFor(personId, group, current, history)`
   union the two into a player's `{season: war}` map (live season from war.json wins its own
   year), which `loadPlayer.js` threads into the player page. MLB-only at source,
@@ -270,7 +273,7 @@ for each generator; the reader modules:
   1962) and `venues[season]` (a name always, plus a best-effort host-team id
   the generator resolves against the CURRENT 30 teams' home parks — an older
   or relocated venue falls back to name-only). Kept OUT of the PWA precache
-  (~650 KB) and fetched at runtime, like `war-history.json`.
+  (~650 KB) and fetched at runtime, like the `war-history/` shards.
 - `milbHistory.js` — historical MiLB affiliate/franchise data, from
   `public/data/milb-history.json`. Script-generated (`gen-milb-history.mjs`) but
   **not on a cron** — affiliate history is near-immutable, so it's a hand-run

@@ -270,10 +270,14 @@ count as independent confirmation.
   cut and comparatively little on the pitching or division-winner cuts.
   Whether these are three independent signals or the same underlying
   "well-run organization" trait showing up three ways is still open.
-- **Extending `war-history`'s own pull back before 2010** — now cheaper than
-  it looked when this spike ran, since MLB's `stats=sabermetrics` serves
-  history back to 1990 for free. This is the tightest season-window
-  constraint of any spike so far.
+- ~~**Extending `war-history`'s own pull back before 2010**~~ — **done.**
+  `gen-war-history.mjs` now pulls 1901-2025, so this is no longer the tightest
+  season-window constraint in the program; the outcome ladder's own 2000 floor
+  is. The numbers above were computed on 2010-2025 and are left as they were
+  run — a refit on the full 2000-2025 ladder window would raise this spike from
+  450 team-seasons to about 750, and is the cheapest way to re-test the finding.
+  The deeper WAR was checked as calibrated, not merely present: league-wide WAR
+  sums track team count and schedule length in every era.
 - **A payroll control**, if a historical source is ever found.
 
 ## Where the work lives
