@@ -56,8 +56,7 @@ export { foulCountsFromCodes, buildCallouts, SCORING_FIRST_MIN_GAMES } from './c
 export {
   cumulativeInnings,
   buildLeadReversalNote,
-  buildLeadingAfterNote,
-  buildTiedAfterNote,
+  buildAfterInningNote,
   buildScorelessThroughNote,
   buildBothScorelessNote,
   gameWeekday,

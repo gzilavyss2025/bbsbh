@@ -31,6 +31,42 @@ capped the same way the pre-half strip is. The lineup pages' milestone pill
 worthiness scoring — it's a single fact per player, not a ranked list, so it
 has no need for one.
 
+
+## Voice
+
+The rules every note here follows. They came out of two editorial passes over
+the whole catalog and they are house rules, not preferences — a note that
+breaks one is a bug in the writing.
+
+- **No verdict labels.** Not "Laboring:", not "Heavy recent workload:", not
+  "Bullpen watch:". Naming the conclusion and then supplying the evidence
+  takes the one job this reader came for: he is keeping score by hand
+  precisely so he can draw his own conclusions. State the evidence and stop.
+  If a fact needs a label to seem interesting, it is not interesting.
+- **The season is the default and goes unsaid.** "this season" / "this year"
+  earn their words only when the note contrasts the season with something —
+  a career line, a previous start, tonight. A count keeps its frame ("that's
+  No. 16 this season"); a rate does not ("Hitting .312 with RISP").
+- **Whole numbers.** A tenth of a percentage point is a precision the
+  underlying tagging does not have and a reader with a pencil cannot act on.
+  The one exception is a single pitch's velocity, which a ballpark scoreboard
+  also shows to a decimal. A decimal that is zero ("down 2.0 mph") announces
+  that a machine wrote the sentence.
+- **Handedness is "righties" / "lefties"**, and never mixes with the long
+  form in one sentence.
+- **Never report back a number the reader counted himself.** He has tonight's
+  strikeouts boxed in pencil. Tonight's figure may appear only as the hinge
+  into something he cannot know — a season total, a streak, a comparison.
+- **Do not name the subject in the text.** Every surface that renders these
+  already groups by person and draws a headshot with the name above the
+  bullets (MarginNotes.jsx, BoxScore.jsx's InsightNoteCard). Naming him again
+  in the sentence prints his name twice on one card.
+- **Never show a number without the number it should be.** The reliever
+  workload note is the model: "71 pitches across 3 appearances in the last 5
+  days — the average reliever threw 42."
+- **If you cannot name the number, cut the note.** "in the last several days"
+  was a stat note refusing to name its own window.
+
 ## Worthiness
 
 Every note carries `score` (0–100) = family base + magnitude bonus, clamped —
@@ -704,8 +740,7 @@ velocity-season note that applies to any pitcher, starter or reliever:
   than to a RIGHT-handed one, joined from the `stand` that
   `gen-pitch-arsenal.mjs` sweeps into `starterRecords[id].sideSplit` by
   `gen-callouts.mjs` (`scripts/lib/arsenal-side.mjs`). The headline case:
-  "Bryce Elder throws his sinker 51.4% of the time to right-handed batters
-  and 14.7% to lefties." Carries `lPitches`/`rPitches` (the sample each
+  "Throws his sinker 51% of the time to righties, 15% to lefties." Carries `lPitches`/`rPitches` (the sample each
   side), a `types` list biggest-gap-first, an optional `primary` (the pitch
   he goes to most each side, only when the two DIFFER), and an optional
   `breadth` (how many types he shows each side). Gates, all in that module:

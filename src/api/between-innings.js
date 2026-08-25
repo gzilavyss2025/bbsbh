@@ -47,7 +47,7 @@ import {
 export const CARD_MAX = 5
 
 export const BETWEEN_INNINGS_ALLOWED_KINDS = new Set([
-  'starterRec', 'dayOfWeek', 'bullpenThin', 'inningRunDiff',
+  'starterRec', 'dayOfWeek', 'bullpenThin', 'inningRunDiff', 'afterInning',
   'foulVolume', 'pitchPace', 'tto', 'ttoPitches',
   'laboring', 'veloVariety', 'veloDecay', 'penFatigue', 'workload', 'backToBack',
   'leverage', 'centuryClub', 'sideSplit', 'tenK', 'scorelessStreak', 'sixIp', 'homeAway',

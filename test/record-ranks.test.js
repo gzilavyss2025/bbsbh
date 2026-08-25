@@ -7,7 +7,7 @@ import {
   withRank,
   RANK_MIN_FIELD,
 } from '../src/api/callout-notes/rank.js'
-import { buildLeadingAfterNote, buildTiedAfterNote, weekdayFromDate } from '../src/api/callout-notes/checkpoints.js'
+import { buildAfterInningNote, weekdayFromDate } from '../src/api/callout-notes/checkpoints.js'
 import { buildDayOfWeekNotes } from '../src/api/callout-notes/heldNotes.js'
 import { rankWorthPrinting } from '../src/api/callout-notes/rank.js'
 
@@ -83,32 +83,52 @@ test('withRank never drops the sentence it decorates', () => {
   assert.equal(withRank('x', {}, 'home', 'leadAfter', 7), 'x')
 })
 
-test('a bundle written before ranks shipped reads exactly as it did', () => {
+// The three-branch card needs ALL THREE records; a bundle written before
+// trailAfterFull shipped has a hole in it, so it gets no card rather than a
+// card that silently omits a branch.
+test('a bundle missing the behind record builds no card at all', () => {
   const legacy = {
     sportId: 1,
     home: { name: 'Brewers' },
-    away: { name: 'Cubs' },
-    teamRecords: { home: { leadAfterFull: { 7: { w: 12, l: 3 } } }, away: { tiedAfterFull: { 7: { w: 9, l: 13 } } } },
+    teamRecords: { home: { leadAfterFull: { 7: { w: 12, l: 3 } }, tiedAfterFull: { 7: { w: 9, l: 13 } } } },
+  }
+  assert.equal(buildAfterInningNote(legacy, 'home', 7), null)
+})
+
+test('all three branches read on one card', () => {
+  const full = {
+    sportId: 1,
+    home: { name: 'Brewers' },
+    teamRecords: {
+      home: {
+        leadAfterFull: { 7: { w: 12, l: 3 } },
+        tiedAfterFull: { 7: { w: 9, l: 13 } },
+        trailAfterFull: { 7: { w: 4, l: 21 } },
+      },
+    },
   }
   assert.equal(
-    buildLeadingAfterNote(legacy, 'home', 7).text,
-    'The Brewers are 12-3 this season when leading after the 7th',
-  )
-  assert.equal(
-    buildTiedAfterNote(legacy, 'away', 7).text,
-    'The Cubs are 9-13 this season when tied after the 7th',
+    buildAfterInningNote(full, 'home', 7).text,
+    'After the 7th, the Brewers are 12-3 ahead, 9-13 tied, 4-21 behind',
   )
 })
 
-test('a ranked bundle appends the clause without touching the record', () => {
+test('the league rank rides on the branch it ranks, not the whole card', () => {
   const ranked = {
     sportId: 1,
     home: { name: 'Brewers' },
-    teamRecords: { home: { leadAfterFull: { 7: { w: 12, l: 3 } }, ranks: { leadAfter: { 7: { r: 2, of: 30 } } } } },
+    teamRecords: {
+      home: {
+        leadAfterFull: { 7: { w: 12, l: 3 } },
+        tiedAfterFull: { 7: { w: 9, l: 13 } },
+        trailAfterFull: { 7: { w: 4, l: 21 } },
+        ranks: { leadAfter: { 7: { r: 2, of: 30 } } },
+      },
+    },
   }
   assert.equal(
-    buildLeadingAfterNote(ranked, 'home', 7).text,
-    'The Brewers are 12-3 this season when leading after the 7th — 2nd of 30 in the majors',
+    buildAfterInningNote(ranked, 'home', 7).text,
+    'After the 7th, the Brewers are 12-3 ahead (2nd of 30 in the majors), 9-13 tied, 4-21 behind',
   )
 })
 

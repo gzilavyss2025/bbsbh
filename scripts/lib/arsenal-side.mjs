@@ -104,10 +104,25 @@ export function arsenalSideFromRows(rows) {
         ? { l: tl.code, lDescription: tl.description, r: tr.code, rDescription: tr.description }
         : null
 
-    const shown = (side, tot) => [...e.types.values()].filter((t) => share(t[side], tot) >= BREADTH_SHOWN).length
-    const bl = shown('L', e.L)
-    const br = shown('R', e.R)
-    const breadth = Math.abs(bl - br) >= BREADTH_GAP ? { l: bl, r: br } : null
+    const shownTypes = (side, tot) => [...e.types.values()].filter((t) => share(t[side], tot) >= BREADTH_SHOWN)
+    const sl = shownTypes('L', e.L)
+    const sr = shownTypes('R', e.R)
+    const bl = sl.length
+    const br = sr.length
+    // WHICH pitches disappear is the note; the count alone is trivia ("six and
+    // four" is a table, "the sweeper and the curve stay in the bag against
+    // righties" is a scouting report). Named most-thrown first on the side
+    // that still sees them, so the note leads with the pitch that matters.
+    const missing = (fewer, more, side, tot) => {
+      const keep = new Set(fewer.map((t) => t.code))
+      return more
+        .filter((t) => !keep.has(t.code))
+        .sort((a, b) => b[side] - a[side])
+        .map((t) => t.description)
+    }
+    const dropped = bl > br ? missing(sr, sl, 'L', e.L) : missing(sl, sr, 'R', e.R)
+    const breadth =
+      Math.abs(bl - br) >= BREADTH_GAP ? { l: bl, r: br, ...(dropped.length ? { dropped } : {}) } : null
 
     if (types.length === 0 && !breadth) continue
     out.set(key, {

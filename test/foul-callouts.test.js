@@ -227,8 +227,8 @@ test('bullpenThin fires when two relievers are down', () => {
   })
   const note = buildBullpenThinNote(BUNDLE, 'home', workload, '2026-07-19')
   assert.ok(note, 'expected a bullpenThin note')
-  assert.match(note.text, /2 Home Club relievers/)
-  assert.match(note.text, /Arm One, Arm Two/)
+  assert.match(note.text, /^Arm One and Arm Two are likely down for the Home Club/)
+  assert.ok(!note.text.includes('Bullpen watch'), 'the verdict label is gone')
   assert.equal(note.score, 40)
 })
 
