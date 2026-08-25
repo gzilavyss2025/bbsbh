@@ -1,0 +1,245 @@
+/* ============================================================ stamp detail
+   components/logbook/StampDetailModal.jsx — a bigger read of one filled
+   slot: its print under a soft, slowly drifting spotlight, its name, and
+   your own history with it (first stamped, how many times, most recent).
+
+   Split out of 48c-stamp-sheet.css, which owned this alongside the grid it
+   opens from, once the combined file passed the 600-line guard
+   (scripts/check-file-size.mjs, ADR-0038). This file reads `var(--perf)` —
+   the perforated-paper mask — declared once on `.stampsheet` in that file;
+   this component always renders as its descendant (StampSheet.jsx mounts
+   the modal inline, not via a portal), so the inheritance holds.
+   ============================================================ */
+
+.stampdetail {
+  display: flex;
+  flex-direction: column;
+}
+
+.stampdetail__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stampdetail__head .sheet__title {
+  margin: 0;
+}
+
+.stampdetail__close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+.stampdetail__close:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+/* The case: the same dark album board the panes sit on, so a stamp pulled out
+   for a closer look reads as lifted off the same board rather than dropped
+   onto a new surface. */
+.stampdetail__case {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin-top: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+  border: var(--bw-hair) solid var(--album-board-line);
+  border-radius: var(--radius-lg);
+  background-color: var(--album-board);
+  background-image:
+    repeating-linear-gradient(45deg, var(--album-board-line) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(-45deg, var(--album-board-line) 0 1px, transparent 1px 8px);
+  overflow: hidden;
+}
+
+/* The "museum lighting": a soft diagonal glare, wider than the case itself,
+   drifting slowly side to side and back — like glass tilting under a fixed
+   gallery light, not the stamp moving. `background-position` (not
+   `transform`) is what keeps it reading as light crossing the surface rather
+   than the print shifting; same technique the loading shimmer in
+   72-player-hover-card.css uses for its sweep, here far slower and layered
+   with `screen` so it only ever brightens. `z-index: 2` (above the frame's
+   1) so the glare crosses OVER the print instead of painting behind it —
+   without it this pseudo-element still animates but is never visible. */
+.stampdetail__case::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: -25%;
+  background: linear-gradient(
+    100deg,
+    transparent 34%,
+    color-mix(in srgb, white 24%, transparent) 48%,
+    color-mix(in srgb, white 38%, transparent) 50%,
+    color-mix(in srgb, white 24%, transparent) 52%,
+    transparent 66%
+  );
+  background-size: 260% 100%;
+  background-position: 20% 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: stampdetail-sheen 6s ease-in-out infinite alternate;
+}
+
+@keyframes stampdetail-sheen {
+  from {
+    background-position: 10% 0;
+  }
+
+  to {
+    background-position: 90% 0;
+  }
+}
+
+/* The perforated cream frame around the enlarged print — the same mask,
+   scaled up, that the small grid stamp draws (`.postagestamp__frame`,
+   48c-stamp-sheet.css); this is what makes "under museum lighting" a bigger
+   read OF a stamp rather than a plain photo card. `filter: drop-shadow`
+   rather than `box-shadow` on purpose: a masked element's box-shadow is
+   clipped to the mask's own scalloped silhouette in most engines (a jagged,
+   broken-looking shadow), where `drop-shadow` is computed from the rendered
+   (already masked) alpha shape and casts a shadow that follows the scallop
+   cleanly. */
+.stampdetail__frame {
+  position: relative;
+  z-index: 1;
+  width: min(72vw, 300px);
+  aspect-ratio: 5 / 4;
+  display: grid;
+  padding: 6.5%;
+  background: var(--paper-3);
+  -webkit-mask-image: var(--perf);
+  mask-image: var(--perf);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.4));
+}
+
+.stampdetail__print {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+}
+
+.stampdetail__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--surface-inset);
+}
+
+.stampdetail__photo--empty {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--border-rule) 0,
+    var(--border-rule) 1px,
+    transparent 1px,
+    transparent 6px
+  );
+}
+
+.stampdetail__mark {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--paper-3);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.4);
+}
+
+.stampdetail__mark img {
+  filter: brightness(0);
+}
+
+/* Club print: same technique as `.postagestamp__club` (48c-stamp-sheet.css)
+   — ABSOLUTE and inset:0, not a flow/flex child sized by `width/height:
+   100%`. That is load-bearing, not tidy: `.stampdetail__print` is a
+   `display: grid` box whose own size comes from its parent frame
+   stretching it, and a plain in-flow child can end up sized by its OWN
+   content (TeamLogo's 260px request) before that stretch resolves — which
+   is exactly what let a tall mark (a portrait wordmark, unlike a wide one)
+   render past the frame's height and spill, uncropped, onto the board
+   behind it. `inset: 0` instead hands the mark a hard, unambiguous box up
+   front, so `max-width`/`max-height: 100%` on `.teamlogo` has something
+   definite to clamp against. */
+.stampdetail__club {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10%;
+  background: var(--surface-inset);
+}
+
+.stampdetail__club .teamlogo {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Your own history with this club/park — plain facts, no bar, no praise
+   (docs/game-log.md §3.3). A ruled list rather than a sentence, so a repeat
+   visit can scan it without re-reading prose. */
+.stampdetail__facts {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+}
+
+.stampdetail__fact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.stampdetail__fact:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.stampdetail__fact dt {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.stampdetail__fact dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body);
+  text-align: right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stampdetail__case::after {
+    animation: none;
+    background-position: 50% 0;
+  }
+}

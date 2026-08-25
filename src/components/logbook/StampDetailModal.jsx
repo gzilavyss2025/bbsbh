@@ -1,3 +1,4 @@
+import '../../styles/48d-stamp-detail.css'
 import { useEffect, useRef } from 'react'
 import { resolveStampArt } from '../../lib/ballpark/stampPrint.js'
 import { useCopy } from '../../copy/copyContext.js'
@@ -61,28 +62,34 @@ export function StampDetailModal({ kind, slot, onClose }) {
         </div>
 
         <div className="stampdetail__case">
-          <div className="stampdetail__print">
-            {park ? (
-              <>
-                {art ? (
-                  <img
-                    src={art.src}
-                    alt=""
-                    className="stampdetail__photo"
-                    style={art.focus ? { objectPosition: art.focus } : undefined}
-                  />
-                ) : (
-                  <div className="stampdetail__photo stampdetail__photo--empty" aria-hidden="true" />
-                )}
-                <span className="stampdetail__mark" aria-hidden="true">
-                  <TeamLogo teamId={slot.id} name={slot.label} size={44} variant="mono" />
+          {/* The perforated cream frame around the print — same mask
+              (--perf, 48c-stamp-sheet.css) the small grid stamp uses, just
+              bigger, so the enlarged read still reads as a STAMP rather than
+              a plain photo card. */}
+          <div className="stampdetail__frame">
+            <div className="stampdetail__print">
+              {park ? (
+                <>
+                  {art ? (
+                    <img
+                      src={art.src}
+                      alt=""
+                      className="stampdetail__photo"
+                      style={art.focus ? { objectPosition: art.focus } : undefined}
+                    />
+                  ) : (
+                    <div className="stampdetail__photo stampdetail__photo--empty" aria-hidden="true" />
+                  )}
+                  <span className="stampdetail__mark" aria-hidden="true">
+                    <TeamLogo teamId={slot.id} name={slot.label} size={44} variant="mono" />
+                  </span>
+                </>
+              ) : (
+                <span className="stampdetail__club" aria-hidden="true">
+                  <TeamLogo teamId={slot.id} name={slot.label} size={260} />
                 </span>
-              </>
-            ) : (
-              <span className="stampdetail__club" aria-hidden="true">
-                <TeamLogo teamId={slot.id} name={slot.label} size={260} />
-              </span>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
