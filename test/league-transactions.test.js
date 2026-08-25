@@ -306,8 +306,8 @@ test('at the AAA level the same day is owned by Salt Lake Bees, and names the An
   // them, a real gain) as 'out'/Down and Klassen (recalled AWAY from them, a
   // real loss) as 'in'/Up — exactly backwards.
   assert.deepEqual(stories[0].rail.map((r) => [r.role, r.banner, r.surname]), [
-    ['in', 'Up', 'Farris'],
-    ['out', 'Down', 'Klassen'],
+    ['in', 'In', 'Farris'],
+    ['out', 'Out', 'Klassen'],
   ])
   // Before the fix this read "Optioned LHP Mitch Farris to Salt Lake Bees;
   // recalled RHP George Klassen from Salt Lake Bees." — the Angels, the only

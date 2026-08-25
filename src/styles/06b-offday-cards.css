@@ -1,0 +1,252 @@
+/* THE OFF-DAY CARDS — the clubs not playing on the slate's date.
+   ---------------------------------------------------------------------------
+   Shown below the games (above the Day Recap on a past day). Each club gets a
+   compact card that reuses the slate matchup card's framed, overscaled logo
+   tile treatment (.gamecard__logobox in 06-loader-and-cards.css), scaled down,
+   over a two-line location/mascot name. Markup and the per-club inline vars
+   are in components/team/OffDaySection.jsx.
+
+   Sits immediately after the slate-card partials because it borrows their
+   tile recipe and must read as the same object family; it is its own file
+   rather than sixty more lines at the end of 06-loader-and-cards.css because
+   that file is at its size budget (check-file-size.mjs, ADR-0038).
+   =========================================================================== */
+
+.offday {
+  margin-top: 18px;
+}
+.offday__banner {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.offday__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* Wide enough that an ordinary 9-10 letter mascot (CARDINALS, ROCKHOUNDS)
+     fits on one line — a truly long one (DIAMONDBACKS) still wraps, which
+     .offdaycard__name already handles cleanly (see overflow-wrap below). */
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-2);
+}
+.offdaycard {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.offdaycard__logobox {
+  position: relative;
+  width: 100%;
+  max-width: 64px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  /* --tint (mainTreatmentTint, teams.js) fills with that club's curated
+     Main-tile background, same recipe as .gamecard__logobox — an off-day
+     team always shows its Main mark, never a jersey-swap variant. */
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+/* Pinstripe background, same recipe as .gamecard__logobox's own pinstripe
+   variant — --pinstripe-color picks the line color per team. */
+.offdaycard__logobox.offdaycard__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+/* Same diagonal gloss sheen as .gamecard__logobox::after, so an off-day tile
+   reads as the identical glossy badge as a slate card's. */
+.offdaycard__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+.offdaycard__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  /* Bleed to the frame like the slate tiles; the box clips the overflow.
+     --scale (mainTreatmentScale) shrinks a dense/large mark so it doesn't
+     read as "the whole tile is this color" against its own new fill. */
+  transform: scale(var(--scale, 1.32));
+}
+.offdaycard__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: var(--fs-hero-sm);
+}
+.offdaycard__name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  line-height: var(--lh-title);
+  min-width: 0;
+  /* A long single-word mascot (DIAMONDBACKS) must wrap within the narrow card
+     rather than overflow its border. */
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.offdaycard__loc {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.offdaycard__mascot {
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+/* Favorite team's off-day card — same per-club accent tint as .gamecard--pinned. */
+.offdaycard--pinned {
+  border-color: color-mix(in srgb, var(--pin-accent, var(--field)) 45%, var(--border-rule));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
+    var(--surface-card) 70%
+  );
+}
+.offdaycard__pin {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: var(--fs-caption);
+  color: var(--pin-accent, var(--field));
+}
+
+/* Hover — the one tile on the slate with nothing to reveal answers with its
+   club instead. A pointer over an off-day card lifts it the same 2px the
+   Logbook shelf lifts a book by on the way to picking it up
+   (58-logbook-shelf.css), takes the frame to that club's own primary, and
+   draws a rule under the mascot the way a pencil underlines a name. The badge
+   presses forward inside its frame: the scale sits on the BOX, not the mark,
+   so it composes with the mark's own --scale (a curated shrink for a dense
+   logo) instead of overwriting it. --offday-accent is set per card in
+   OffDaySection.jsx (teamPrimaryColor); an unaffiliated MiLB id has no known
+   pair and falls back to --field, so every tile still responds. */
+.offdaycard {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+.offdaycard__logobox {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+/* The pencil rule, drawn from the middle out. Absolute over the mascot's own
+   box so it never adds height and never nudges the two-line name — a card in
+   a grid row must not change size under the pointer while its neighbors hold
+   still. */
+.offdaycard__mascot {
+  position: relative;
+}
+.offdaycard__mascot::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: var(--bw-rule);
+  /* A trace of ink under the club's own color, so a pale primary (a cream or
+     gold MiLB mark) still draws a rule you can see against manila paper. A
+     navy or a red is unchanged at this ratio. */
+  background: color-mix(in srgb, var(--offday-accent, var(--field)) 88%, var(--ink-0));
+  border-radius: 1px;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform var(--dur-fast) var(--ease-out);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .offdaycard:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--offday-accent, var(--field)) 55%, var(--border-rule));
+    box-shadow: var(--shadow-raised);
+  }
+  .offdaycard:hover .offdaycard__logobox {
+    transform: scale(1.04);
+  }
+  .offdaycard:hover .offdaycard__mascot::after {
+    transform: scaleX(1);
+  }
+}
+
+/* The keyboard path to the same state, on top of the shared focus ring — a
+   tab through the off-day grid should show the club the same way the pointer
+   does, not just a ring around a tile that otherwise sits flat. */
+.offdaycard:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-color: color-mix(in srgb, var(--offday-accent, var(--field)) 55%, var(--border-rule));
+}
+.offdaycard:focus-visible .offdaycard__mascot::after {
+  transform: scaleX(1);
+}
+
+/* Press wins over the hover lift: the card goes back down onto the page. */
+.offdaycard:active {
+  transform: translateY(0) scale(0.985);
+  box-shadow: var(--shadow-card);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offdaycard,
+  .offdaycard__logobox,
+  .offdaycard__mascot::after {
+    transition: none;
+  }
+  .offdaycard:hover,
+  .offdaycard:active {
+    transform: none;
+  }
+  .offdaycard:hover .offdaycard__logobox {
+    transform: none;
+  }
+  /* The rule still arrives, it just does not draw itself. */
+  .offdaycard:hover .offdaycard__mascot::after,
+  .offdaycard:focus-visible .offdaycard__mascot::after {
+    transform: scaleX(1);
+  }
+}

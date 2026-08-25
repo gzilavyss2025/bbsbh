@@ -480,20 +480,20 @@ function bannerFor(storyType, role, row) {
   if (storyType === 'trade') return role === 'in' ? 'In' : 'Out'
   if (storyType === 'signing') return 'In'
   if (storyType === 'suspension') return 'Out'
-  if (storyType === 'injured-list') return role === 'out' ? ilBanner(row) : 'Up'
+  if (storyType === 'injured-list') return role === 'out' ? ilBanner(row) : 'In'
   if (role === 'transfer') return ilBanner(row)
   // A non-IL list gets its own banner for the same reason the injured list
-  // gets `IL-15` rather than "Down": it says WHY the player is off the active
+  // gets `IL-15` rather than "Out": it says WHY the player is off the active
   // roster, and none of these three is a demotion to the minors. The matching
-  // activation keeps the plain "Up" an IL return already reads.
+  // activation keeps the plain "In" an IL return already reads.
   if (isNonIlListPlacement(row)) return nonIlList(row).banner
   // A waiver claim crosses ORGS (see TWO_CLUB_CODES), and an ACQ-family row
   // comes from outside affiliated ball altogether, so both read In/Out like a
-  // trade — never the Up/Down of a move on this club's own ladder.
+  // trade — same as any move on this club's own ladder does now.
   if (row.typeCode === 'CLW' || OUTSIDE_ARRIVAL_CODES.has(row.typeCode)) {
     return role === 'in' ? 'In' : 'Out'
   }
-  return role === 'in' ? 'Up' : 'Down'
+  return role === 'in' ? 'In' : 'Out'
 }
 
 function railSlot(row, role, banner, ctx) {
@@ -520,7 +520,7 @@ function buildRail(draft, ctx) {
     // One photo, not two: every row in these three is about one player (see
     // cutlineSamePlayer), and the leading row is the one the story is really
     // about. An IL activation paired with an option leads with the option and
-    // reads "Down"; a waiver claim paired with one leads with the claim and
+    // reads "Out"; a waiver claim paired with one leads with the claim and
     // reads "In".
     const { row, role } = draft.rows[0]
     // ...except that a story ending in a release or a free-agency election

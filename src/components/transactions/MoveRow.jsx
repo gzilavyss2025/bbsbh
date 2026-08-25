@@ -180,7 +180,7 @@ function Face({ slot }) {
 // a reader wants before reading the sentence, and it survives in one chip.
 //
 // Only the FIRST banner rides along. A shuffle's second slot loses its chip and
-// keeps its type label — "Roster shuffle" beside one Up chip reads correctly,
+// keeps its type label — "Roster shuffle" beside one In chip reads correctly,
 // and two chips plus a mark plus an abbreviation plus a label do not fit 288px
 // without wrapping the kicker onto a second line.
 // `TeamLink`'s `tab` for the club chip. `transactions` is the club's own

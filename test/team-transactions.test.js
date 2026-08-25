@@ -435,7 +435,7 @@ test('Jul 12: trade+clear, same-player double-move, solo option, transfer with i
 
   const doubleMove = stories[1]
   assert.deepEqual(doubleMove.rail[0], {
-    role: 'out', banner: 'Down', playerId: 689441, name: 'Coleman Crow',
+    role: 'out', banner: 'Out', playerId: 689441, name: 'Coleman Crow',
     surname: 'Crow', pos: 'RHP', tintTeamId: 158, isMlb: false,
   })
   assert.equal(
@@ -448,7 +448,7 @@ test('Jul 12: trade+clear, same-player double-move, solo option, transfer with i
 
   const soloOption = stories[2]
   assert.deepEqual(soloOption.rail[0], {
-    role: 'out', banner: 'Down', playerId: 668831, name: 'Garrett Stallings',
+    role: 'out', banner: 'Out', playerId: 668831, name: 'Garrett Stallings',
     surname: 'Stallings', pos: 'RHP', tintTeamId: 158, isMlb: false,
   })
 
@@ -492,7 +492,7 @@ test('Jul 7: injured-list+replacement, 3-player shuffle, transfer with its own p
 
   const il = stories[0]
   assert.deepEqual(il.rail.map((r) => [r.role, r.banner, r.surname]), [
-    ['in', 'Up', 'Jones'],
+    ['in', 'In', 'Jones'],
     ['out', 'IL-10', 'Hamilton'],
   ])
 
@@ -502,9 +502,9 @@ test('Jul 7: injured-list+replacement, 3-player shuffle, transfer with its own p
   // response array. This fixture is verbatim from the real pull, and the real
   // pull did not return that day in id order — see groupIntoStories.
   assert.deepEqual(shuffle.rail.map((r) => [r.role, r.banner, r.surname]), [
-    ['in', 'Up', 'Lara'],
-    ['in', 'Up', 'Gasser'],
-    ['out', 'Down', 'Perkins'],
+    ['in', 'In', 'Lara'],
+    ['in', 'In', 'Gasser'],
+    ['out', 'Out', 'Perkins'],
   ])
   // Two different affiliates in one story (Gasser from ACL Brewers, Lara from
   // and Perkins to Nashville Sounds) — every mention gets its own team link.
@@ -556,9 +556,9 @@ test('Jul 10: a same-day DFA + option + signing cluster into one shuffle', () =>
   // Arrivals first, then departures in filing order — Rom (926754) before
   // McGee (926755), which is NOT the order this fixture's array holds them in.
   assert.deepEqual(stories[0].rail.map((r) => [r.role, r.banner, r.surname]), [
-    ['in', 'Up', 'Wilson'],
-    ['out', 'Down', 'Rom'],
-    ['out', 'Down', 'McGee'],
+    ['in', 'In', 'Wilson'],
+    ['out', 'Out', 'Rom'],
+    ['out', 'Out', 'McGee'],
   ])
   assert.equal(
     stories[0].cutline.map((s) => s.text).join(''),
@@ -671,7 +671,7 @@ test('Jul 15: a trade leg immediately optioned the same day still joins the trad
 
   const optionStory = stories[1]
   assert.deepEqual(optionStory.rail, [{
-    role: 'out', banner: 'Down', playerId: 700502, name: 'Colton Gordon',
+    role: 'out', banner: 'Out', playerId: 700502, name: 'Colton Gordon',
     surname: 'Gordon', pos: 'LHP', tintTeamId: 158, isMlb: false,
   }])
 })
@@ -687,10 +687,8 @@ test('Aug 11: a waiver claim reads as a DEPARTURE on the club that lost the play
   assert.equal(stories.length, 1)
   assert.equal(stories[0].type, 'shuffle')
   assert.deepEqual(stories[0].rail.map((r) => [r.role, r.banner, r.surname]), [
-    ['in', 'Up', 'Wilson'],
-    ['out', 'Down', 'Richardson'],
-    // "Out", not "Down": a claim crosses ORGS, so it is never a rung on this
-    // club's own ladder the way an option or an outright is.
+    ['in', 'In', 'Wilson'],
+    ['out', 'Out', 'Richardson'],
     ['out', 'Out', 'Rom'],
   ])
   assert.equal(
@@ -1158,8 +1156,6 @@ test('an independent-league acquisition is a story, and reads as an arrival from
   assert.equal(days.length, 1)
   const [story] = days[0].stories
   assert.equal(story.type, 'roster-move')
-  // "In", not "Up": he arrives from outside the organisation entirely, so this
-  // is never a rung on the club's own ladder — the same reasoning as a claim.
   assert.deepEqual(story.rail.map((r) => [r.role, r.banner, r.surname]), [['in', 'In', 'Darden']])
   assert.equal(
     story.cutline.map((s) => s.text).join(''),
@@ -1193,7 +1189,7 @@ test('the paternity, bereavement and restricted lists are stories in both direct
   assert.deepEqual(days.map((d) => d.date), ['2026-06-26', '2026-06-23'])
 
   const [activation] = days[0].stories
-  assert.deepEqual(activation.rail.map((r) => [r.role, r.banner, r.surname]), [['in', 'Up', 'Sánchez']])
+  assert.deepEqual(activation.rail.map((r) => [r.role, r.banner, r.surname]), [['in', 'In', 'Sánchez']])
   assert.equal(
     activation.cutline.map((s) => s.text).join(''),
     'Activated C Ali Sánchez from the paternity list.',
@@ -1201,7 +1197,7 @@ test('the paternity, bereavement and restricted lists are stories in both direct
 
   const [placement] = days[1].stories
   // A dedicated banner, for the same reason the injured list gets `IL-15`
-  // rather than "Down": it says WHY he is off the roster, and this is not a
+  // rather than "Out": it says WHY he is off the roster, and this is not a
   // demotion to the minors.
   assert.deepEqual(placement.rail.map((r) => [r.role, r.banner, r.surname]), [['out', 'PAT', 'Sánchez']])
   assert.equal(
@@ -1440,7 +1436,6 @@ test('a player designated AND released the same day is ONE story, and named once
   // that got him there and trails, with his own label stripped out of it so
   // the sentence names him once.
   assert.equal(textOf(departure), 'Released RHP Lance McCullers Jr.; designated for assignment.')
-  // "Out", not "Down": he has left the organisation, not been sent down.
   assert.deepEqual(departure.rail.map((r) => [r.role, r.banner, r.surname]), [['out', 'Out', 'McCullers Jr.']])
   assert.equal(textOf(recall), 'Recalled RHP Garrett Stallings from Nashville Sounds.')
 })
@@ -1466,7 +1461,6 @@ test('a same-day waiver claim and option leads with the CLAIM, not the option', 
     textOf(stories[0]),
     'Claimed RF Rudy Martin Jr. off waivers from Baltimore Orioles; optioned to Buffalo Bisons.',
   )
-  // "In", not "Down": the club gained him. A claim crosses orgs.
   assert.deepEqual(stories[0].rail.map((r) => [r.role, r.banner, r.surname]), [['in', 'In', 'Martin Jr.']])
   assert.equal(stories[0].cutline.find((s) => s.text === 'Baltimore Orioles')?.teamId, 110)
 })
