@@ -34,15 +34,23 @@ export function AdminFooterLink() {
   if (user?.publicMetadata?.role !== 'admin') return null
 
   return (
-    <p className="sitefooter__adminrow">
-      <a className="dirlink" {...linkProps('/admin/research')}>
-        Research diary
-        {/* The same visible tag the guide rows and the menu's admin row wear —
-            "this row is not an ordinary page" — rather than a second mechanism
-            for the same job. Text, never a title= tooltip, which does not exist
-            on the phone this app is built for. */}
-        <span className="dirtag">Admin</span>
-      </a>
-    </p>
+    <>
+      <p className="sitefooter__adminrow">
+        <a className="dirlink" {...linkProps('/admin/research')}>
+          Research diary
+          {/* The same visible tag the guide rows and the menu's admin row wear —
+              "this row is not an ordinary page" — rather than a second mechanism
+              for the same job. Text, never a title= tooltip, which does not exist
+              on the phone this app is built for. */}
+          <span className="dirtag">Admin</span>
+        </a>
+      </p>
+      <p className="sitefooter__adminrow">
+        <a className="dirlink" {...linkProps('/admin/contenders')}>
+          Contender diary
+          <span className="dirtag">Admin</span>
+        </a>
+      </p>
+    </>
   )
 }

@@ -97,6 +97,10 @@ const ResearchDiaryPage = lazyNamed(
   () => import('./screens/research/ResearchDiaryPage.jsx'),
   'ResearchDiaryPage',
 )
+const ContenderDiaryPage = lazyNamed(
+  () => import('./screens/contenders/ContenderDiaryPage.jsx'),
+  'ContenderDiaryPage',
+)
 const GameView = lazyNamed(() => import('./screens/GameView.jsx'), 'GameView')
 const LogoSheet = lazyNamed(() => import('./screens/LogoSheet.jsx'), 'LogoSheet')
 const PlayerPage = lazyNamed(() => import('./screens/PlayerPage.jsx'), 'PlayerPage')
@@ -373,6 +377,8 @@ export default function App() {
     )
   } else if (route.name === 'admin-research') {
     content = <ResearchDiaryPage />
+  } else if (route.name === 'admin-contenders') {
+    content = <ContenderDiaryPage />
   } else if (route.name === 'profile') {
     // Deliberately NOT gated on isClerkEnabled or on being signed in: settings
     // are settings, and every one of them works on this device with no account
