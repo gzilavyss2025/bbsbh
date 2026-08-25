@@ -11,7 +11,7 @@ import { ordinal, isNum, clampScore, skewBonus, SCORE_BASE, parseRecord } from '
 // The league-rank clause each record note below appends when the club's mark
 // sits near either end of its level. Purely additive: no rank, today's
 // sentence (see rank.js).
-import { withRank } from './rank.js'
+import { withRank, rankOf, rankClause } from './rank.js'
 
 // Cumulative runs each side has scored through each inning, stopping at the
 // first inning whose bottom half never completed (a walk-off, or a
@@ -130,60 +130,61 @@ export function buildLeadReversalNote(feed, bundle) {
   return null
 }
 
-// "The Brewers are 17-2 this season when leading after the 8th" — the
-// entering-tense companion to buildLeadHeldNote below, built for the pre-half
-// strip once the reader has revealed through inning N and is looking at the
-// top of N+1. WHO leads tonight is the caller's job (prehalf-callouts.js,
-// which owns the revealedThrough gate that makes reading tonight's score
-// safe); this builder just phrases the season record for the side it's told.
-export function buildLeadingAfterNote(bundle, side, inning) {
-  const rec = bundle?.teamRecords?.[side]?.leadAfterFull?.[inning]
+
+// "After the 7th this season, the Brewers are 18-2 ahead, 12-9 tied, 5-14
+// behind" — all three branches of one checkpoint on ONE card, replacing the
+// pair of single-branch notes below for the pre-half strip.
+//
+// Two reasons it is better, and the second is the one that matters:
+//
+//   1. It reads like a person wrote it. A dozen "the Brewers are W-L when X"
+//      lines is a template, not a house shape; three branches in one sentence
+//      is a different object and carries three times the information.
+//   2. Its SELECTION discloses nothing. The single-branch notes have to read
+//      tonight's score to decide which one to build — safe today only because
+//      prehalf-callouts.js will not call them until the inning is revealed.
+//      This one is built the same way whatever the score is, so the score is
+//      never consulted and there is nothing for that gate to protect. The gate
+//      stays (it is defence in depth, and ADR-0002's re-seal contract still
+//      wants the strip caller-gated); it simply is not load-bearing here.
+//
+// Needs all three records present — a club with, say, no qualifying tied
+// sample gets nothing rather than a card with a hole in it.
+export function buildAfterInningNote(bundle, side, inning) {
+  const recs = bundle?.teamRecords?.[side]
+  const ahead = recs?.leadAfterFull?.[inning]
+  const tied = recs?.tiedAfterFull?.[inning]
+  const behind = recs?.trailAfterFull?.[inning]
   const teamName = bundle?.[side]?.name
-  if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) return null
+  const ok = (r) => r && isNum(r.w) && isNum(r.l)
+  if (!ok(ahead) || !ok(tied) || !ok(behind) || !teamName) return null
+  // The league rank rides in PARENTHESES on the branch it actually ranks.
+  // withRank's trailing "— 2nd of 30 in the majors" clause would read as a
+  // rank of the whole card here, and only the ahead branch is ranked; the
+  // parenthetical attaches to the number in front of it and cannot drift.
+  // Without this the leadAfter ranks the generator ships would go unread —
+  // retiring the two single-branch notes took their only consumer.
+  const aheadRank = rankClause(rankOf(bundle, side, 'leadAfter', inning), bundle?.sportId)
+  const rankPart = aheadRank ? ` (${aheadRank})` : ''
   return {
-    text: withRank(
-      `The ${teamName} are ${rec.w}-${rec.l} this season when leading after the ${ordinal(inning)}`,
-      bundle, side, 'leadAfter', inning,
-    ),
+    text:
+      `After the ${ordinal(inning)}, the ${teamName} are ${ahead.w}-${ahead.l} ahead${rankPart}, ` +
+      `${tied.w}-${tied.l} tied, ${behind.w}-${behind.l} behind`,
     personId: null,
     side,
-    kind: 'leadAfterLive',
-    dedupeKey: `leadAfterLive-${side}-${inning}`,
-    score: clampScore(SCORE_BASE.leadHeld + skewBonus(rec.w, rec.l)),
+    kind: 'afterInning',
+    dedupeKey: `afterInning-${side}-${inning}`,
+    score: clampScore(SCORE_BASE.leadHeld + skewBonus(ahead.w, ahead.l)),
   }
 }
 
-// "The Brewers are 12-9 this season when tied after the 7th" — the tied-game
-// sibling of buildLeadingAfterNote, for the pre-half strip once the reader has
-// revealed through inning N and both clubs sat level. Unlike the leading-after
-// note there's no single leader to phrase, so the caller fires this for BOTH
-// clubs; each carries its own record. Same caller-gate: prehalf-callouts.js
-// only invokes it once inning N is revealed, since knowing the game was tied
-// there restates already-seen material. The bundle only carries keys 6–8
-// (TIED_CHECKPOINTS), so any other inning returns null.
-export function buildTiedAfterNote(bundle, side, inning) {
-  const rec = bundle?.teamRecords?.[side]?.tiedAfterFull?.[inning]
-  const teamName = bundle?.[side]?.name
-  if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) return null
-  return {
-    text: withRank(
-      `The ${teamName} are ${rec.w}-${rec.l} this season when tied after the ${ordinal(inning)}`,
-      bundle, side, 'tiedAfter', inning,
-    ),
-    personId: null,
-    side,
-    kind: 'tiedAfterLive',
-    dedupeKey: `tiedAfterLive-${side}-${inning}`,
-    score: clampScore(SCORE_BASE.tiedAfter + skewBonus(rec.w, rec.l)),
-  }
-}
 
 // --- scoreless-through / day-of-week ------------------------------------------
 // "The Brewers are 2-15 when scoreless through 6 innings" — a club still shut
 // out entering the next half, and its season record when that happens (see
 // gen-callouts.mjs's scorelessThroughFull). Numbers-only in the bundle, so the
 // box-score sibling below can fold tonight in; here it stays entering-tense.
-// CALLER-GATED like buildTiedAfterNote: knowing a club is scoreless through N
+// CALLER-GATED like buildAfterInningNote: knowing a club is scoreless through N
 // restates tonight's already-revealed score, so prehalf-callouts.js only fires
 // it once inning N is revealed. A run drought skews hard toward losing, so it
 // only earns a card once the record is genuinely one-sided — SCORELESS_LOPSIDED

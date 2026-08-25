@@ -25,7 +25,7 @@ test('buildPitcherNotes omits the starts-record note for a pitcher appearing in 
 test('buildPitcherNotes keeps the starts-record note for the actual starter', () => {
   const row = { id: 'starter1', ip: '5.0' }
   const notes = buildPitcherNotes(row, 'away', 'Miami Marlins', bundle, {}, true)
-  assert.ok(notes.some((n) => n.text === 'Miami Marlins are 4-5 in his road starts this year'))
+  assert.ok(notes.some((n) => n.text === 'Miami Marlins are 4-5 in his road starts'))
 })
 
 test('buildPitcherNotes defaults isStarter to false when the caller omits it', () => {

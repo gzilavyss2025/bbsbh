@@ -93,7 +93,14 @@ export async function fetchCallouts(urlDate, gamePks) {
 //       tto?:{1,2,3} (each {pa,ab,h,avg,ops,ppa} — opponents' line + pitches
 //       per PA the 1st/2nd/3rd+ time through the order; probable starters only),
 //       pitchPace?:{n,avg,starts} (avg pitches through the first n innings of
-//       his starts; probable starters only, same playLog as tto) } } — one
+//       his starts; probable starters only, same playLog as tto),
+//       centuryClub?:{count,types,seasonMaxVelo} (his season CENTURY_MPH+
+//       pitches, joined from gen-pitch-arsenal.mjs's sweep — no fetch),
+//       sideSplit?:{lPitches,rPitches,types?,primary?,breadth?} (how his pitch
+//       mix reads to a LEFT-handed batter vs a RIGHT-handed one, from the same
+//       sweep's `stand`; types is biggest-gap-first, each
+//       {code,description,l,lShare,r,rShare,gap,only?} — see
+//       scripts/lib/arsenal-side.mjs for the show floors) } } — one
 //       entry per ROSTERED pitcher on either club, not just the day's probable
 //       starters; teamStarts is the CLUB's W-L in his starts (numbers, so
 //       tonight's result can fold in),

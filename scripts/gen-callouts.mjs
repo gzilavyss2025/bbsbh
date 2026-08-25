@@ -50,7 +50,13 @@
 //      straight day), and a leverage split — opponents' AVG/OPS with his club
 //      ahead / behind / tied (the API's own sah/sbh/sti sitCodes; the closest
 //      the public data gets to "entering with the lead") — one extra
-//      statSplits fetch per RELIEVER only.
+//      statSplits fetch per RELIEVER only. He also carries `sideSplit` — how
+//      differently his pitch mix reads to a LEFT-handed batter than to a
+//      RIGHT-handed one (Bryce Elder: 51.4% sinkers to righties, 14.7% to
+//      lefties), read off the `stand` gen-pitch-arsenal.mjs now sweeps. No
+//      fetch at all: it comes from the same on-disk SQLite table centuryClub
+//      does, joined by pitchLevel+id. See scripts/lib/arsenal-side.mjs for the
+//      show floors and why they sit where they do.
 //   6. Hitter situational splits — season RISP and vs-L/vs-R rate lines, from
 //      the API's own statSplits sitCodes (a second per-hitter fetch alongside
 //      the game-log sweep — see hitterEnrich).
@@ -129,6 +135,7 @@ import { fileURLToPath } from 'node:url'
 import { getJson } from '../src/api/statsapi.js'
 import { writeShards } from './lib/io.js'
 import { loadCenturyClub } from './lib/century-club.mjs'
+import { loadArsenalSide } from './lib/arsenal-side.mjs'
 import {
   computeLeaders,
   HITTING_CATEGORIES,
@@ -268,6 +275,11 @@ const corroboratedByTeam = (teamId) => corroboratedFor(corroborationFile, teamId
 // Century-club pitch data, read ONCE (see scripts/lib/century-club.mjs for
 // the shape/why) and joined into starterRecords below by pitchLevel+id.
 const centuryClubByKey = await loadCenturyClub()
+
+// Batter-side pitch-mix splits, read the same way from the same table and
+// joined into the same starterRecords entry (docs/callouts.md's sideSplit
+// family). Keyed pitchLevel+id like centuryClub above.
+const arsenalSideByKey = await loadArsenalSide()
 
 // Pitcher strikeouts (not a hit category, so separate from HIT_CATEGORY_KEYS).
 const PIT_KEYS = ['so_p']
@@ -535,6 +547,13 @@ async function scoringRecord(teamId, sportId) {
   for (const n of LEAD_CHECKPOINTS) leadTally[n] = { w: 0, l: 0 }
   const tiedTally = {} // inning num -> { w, l } (tied after that inning)
   for (const n of TIED_CHECKPOINTS) tiedTally[n] = { w: 0, l: 0 }
+  // The third branch of the same checkpoint: BEHIND after that inning. Same
+  // innings as tied/lead so ONE card can state all three ("after the 7th the
+  // Brewers are 18-2 ahead, 12-9 tied, 5-14 behind"). That three-branch card
+  // fires whatever tonight's state is, so unlike the single-branch notes its
+  // being SELECTED discloses nothing about the score.
+  const trailTally = {} // inning num -> { w, l } (behind after that inning)
+  for (const n of TIED_CHECKPOINTS) trailTally[n] = { w: 0, l: 0 }
   const raTally = {} // inning num -> { w, l } (allowed RUNS_ALLOWED_THRESHOLD+ by that inning)
   for (const n of RUNS_ALLOWED_CHECKPOINTS) raTally[n] = { w: 0, l: 0 }
   const rsTally = {} // run bucket -> { w, l } (scored bucket+ runs, final)
@@ -600,6 +619,8 @@ async function scoringRecord(teamId, sportId) {
         if (bucket && meRuns > oppRuns) won ? bucket.w++ : bucket.l++
         const tiedBucket = tiedTally[inn.num]
         if (tiedBucket && meRuns === oppRuns) won ? tiedBucket.w++ : tiedBucket.l++
+        const trailBucket = trailTally[inn.num]
+        if (trailBucket && meRuns < oppRuns) won ? trailBucket.w++ : trailBucket.l++
         const raBucket = raTally[inn.num]
         if (raBucket && oppRuns >= RUNS_ALLOWED_THRESHOLD) won ? raBucket.w++ : raBucket.l++
         // Scoreless-through checkpoints: this club still at 0 through the
@@ -651,6 +672,13 @@ async function scoringRecord(teamId, sportId) {
     const { w, l } = tiedTally[n]
     if (w + l < TIED_MIN_GAMES) continue
     tiedAfterFull[n] = { w, l }
+  }
+
+  const trailAfterFull = {}
+  for (const n of TIED_CHECKPOINTS) {
+    const { w, l } = trailTally[n]
+    if (w + l < TIED_MIN_GAMES) continue
+    trailAfterFull[n] = { w, l }
   }
 
   const inningRuns = {}
@@ -706,6 +734,7 @@ async function scoringRecord(teamId, sportId) {
     leadAfter,
     leadAfterFull,
     tiedAfterFull,
+    trailAfterFull,
     inningRuns,
     runsScored,
     runsAllowedByInning,
@@ -1499,6 +1528,8 @@ for (const g of games) {
     if (paced?.pitchPace) entry.pitchPace = paced.pitchPace
     const cc = pitchLevel ? centuryClubByKey.get(`${pitchLevel}:${id}`) : null
     if (cc) entry.centuryClub = cc
+    const side = pitchLevel ? arsenalSideByKey.get(`${pitchLevel}:${id}`) : null
+    if (side) entry.sideSplit = side
     if (Object.keys(entry).length > 0) starterRecords[id] = entry
     if (e.milestone) milestones[id] = e.milestone
   }

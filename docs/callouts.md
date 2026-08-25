@@ -31,6 +31,42 @@ capped the same way the pre-half strip is. The lineup pages' milestone pill
 worthiness scoring — it's a single fact per player, not a ranked list, so it
 has no need for one.
 
+
+## Voice
+
+The rules every note here follows. They came out of two editorial passes over
+the whole catalog and they are house rules, not preferences — a note that
+breaks one is a bug in the writing.
+
+- **No verdict labels.** Not "Laboring:", not "Heavy recent workload:", not
+  "Bullpen watch:". Naming the conclusion and then supplying the evidence
+  takes the one job this reader came for: he is keeping score by hand
+  precisely so he can draw his own conclusions. State the evidence and stop.
+  If a fact needs a label to seem interesting, it is not interesting.
+- **The season is the default and goes unsaid.** "this season" / "this year"
+  earn their words only when the note contrasts the season with something —
+  a career line, a previous start, tonight. A count keeps its frame ("that's
+  No. 16 this season"); a rate does not ("Hitting .312 with RISP").
+- **Whole numbers.** A tenth of a percentage point is a precision the
+  underlying tagging does not have and a reader with a pencil cannot act on.
+  The one exception is a single pitch's velocity, which a ballpark scoreboard
+  also shows to a decimal. A decimal that is zero ("down 2.0 mph") announces
+  that a machine wrote the sentence.
+- **Handedness is "righties" / "lefties"**, and never mixes with the long
+  form in one sentence.
+- **Never report back a number the reader counted himself.** He has tonight's
+  strikeouts boxed in pencil. Tonight's figure may appear only as the hinge
+  into something he cannot know — a season total, a streak, a comparison.
+- **Do not name the subject in the text.** Every surface that renders these
+  already groups by person and draws a headshot with the name above the
+  bullets (MarginNotes.jsx, BoxScore.jsx's InsightNoteCard). Naming him again
+  in the sentence prints his name twice on one card.
+- **Never show a number without the number it should be.** The reliever
+  workload note is the model: "71 pitches across 3 appearances in the last 5
+  days — the average reliever threw 42."
+- **If you cannot name the number, cut the note.** "in the last several days"
+  was a stat note refusing to name its own window.
+
 ## Worthiness
 
 Every note carries `score` (0–100) = family base + magnitude bonus, clamped —
@@ -144,6 +180,7 @@ same precedent the pre-half strip sets):
 | workload | 38 | — |
 | backToBack | 36 | — |
 | leverage | 34 | a .210 AVG gap |
+| sideSplit | 35 | a 35-point usage gap between the two batter sides |
 | centuryClub | 34 | 150 pitches, + 10 flat if a non-fastball type qualifies |
 | tenK | 33 | — |
 | scorelessStreak | 32 | a 16-outing streak |
@@ -698,6 +735,27 @@ velocity-season note that applies to any pitcher, starter or reliever:
   genuinely rare case: "Has thrown 52 pitches at 100+ mph this season —
   including 9 sliders, extraordinarily rare for a breaking or offspeed
   pitch — topping out at 103.4 mph" vs. the plain fastball-only phrasing.
+  Not starter-only — any pitcher on file qualifies.
+- **sideSplit** — how differently his pitch mix reads to a LEFT-handed batter
+  than to a RIGHT-handed one, joined from the `stand` that
+  `gen-pitch-arsenal.mjs` sweeps into `starterRecords[id].sideSplit` by
+  `gen-callouts.mjs` (`scripts/lib/arsenal-side.mjs`). The headline case:
+  "Throws his sinker 51% of the time to righties, 15% to lefties." Carries `lPitches`/`rPitches` (the sample each
+  side), a `types` list biggest-gap-first, an optional `primary` (the pitch
+  he goes to most each side, only when the two DIFFER), and an optional
+  `breadth` (how many types he shows each side). Gates, all in that module:
+  `MIN_SIDE` 150 pitches per side, `MIN_TYPE_PITCHES` 25 on the busier side
+  of a type, and either a `GAP_FLOOR` of 25 percentage points or the
+  one-side-only case (`ONLY_HIGH` 8 / `ONLY_LOW` 1.5), which gets its own
+  `only: 'L' | 'R'` flag because a pitch he never shows one side is a story
+  at any gap: "He has not thrown a left-handed batter a cutter all season."
+  The floor is set where it is because the MEDIAN qualified pitcher's biggest
+  side gap is already 19 points — anything lower fires for half the league.
+  `primary` alone is NOT a note: ~47% of pitchers swap their go-to by side,
+  so it rides along with a note that already has a reason to fire.
+  Velocity by side was deliberately NOT written: the median side-to-side gap
+  is 0.6 mph and is a pitch-MIX artifact (more sinkers to one side moves the
+  average), not a pitcher throwing harder at anyone.
   Not starter-only — any pitcher on file qualifies.
 
 The in-game health signals join the same ranked list (`healthNotes` in

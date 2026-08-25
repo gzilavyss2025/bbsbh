@@ -175,6 +175,11 @@ export function buildStarterPitchPaceNote(feed, bundle, inning, half) {
 // over three days). Backward-looking completed appearances only, so it's
 // spoiler-free; gated to a slate-current game (the workload file describes
 // "now") the same way TeamInfo's bullpen board is.
+// "A and B" / "A, B and C" — a read-aloud list, since these are names a
+// reader scans rather than a machine-joined array.
+const andList = (xs) =>
+  xs.length <= 1 ? (xs[0] ?? '') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`
+
 const BULLPEN_THIN_MIN_DOWN = 2
 const WORKLOAD_FRESH_DAYS = 3
 
@@ -194,7 +199,12 @@ export function buildBullpenThinNote(bundle, side, workload, gameDate) {
   }
   if (down.length < BULLPEN_THIN_MIN_DOWN) return null
   return {
-    text: `Bullpen watch: ${down.length} ${team} relievers are likely down after heavy recent work — ${down.join(', ')}`,
+    // No "Bullpen watch:" label, and the names lead. The count was doing
+    // nothing the list did not already do, and naming the verdict before the
+    // evidence is the habit this voice does not have. "likely" stays — it is
+    // honest uncertainty about an inference, not a hedge standing in for a
+    // number we hold.
+    text: `${andList(down)} are likely down for the ${team} after heavy recent work`,
     personId: null,
     side,
     kind: 'bullpenThin',

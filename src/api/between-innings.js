@@ -47,10 +47,10 @@ import {
 export const CARD_MAX = 5
 
 export const BETWEEN_INNINGS_ALLOWED_KINDS = new Set([
-  'starterRec', 'dayOfWeek', 'bullpenThin', 'inningRunDiff',
+  'starterRec', 'dayOfWeek', 'bullpenThin', 'inningRunDiff', 'afterInning',
   'foulVolume', 'pitchPace', 'tto', 'ttoPitches',
   'laboring', 'veloVariety', 'veloDecay', 'penFatigue', 'workload', 'backToBack',
-  'leverage', 'centuryClub', 'tenK', 'scorelessStreak', 'sixIp', 'homeAway',
+  'leverage', 'centuryClub', 'sideSplit', 'tenK', 'scorelessStreak', 'sixIp', 'homeAway',
   'cgShutout', 'recentAppearances',
   // The matchup families (api/matchup/notes.js, api/matchup/arsenal.js) —
   // season Statcast rates for a due-up hitter against the arm he will face.

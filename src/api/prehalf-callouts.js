@@ -54,8 +54,7 @@ import { matchupNotesForHalf } from './matchup/forHalf.js'
 import {
   cumulativeInnings,
   buildStarterTeamRecordNote,
-  buildLeadingAfterNote,
-  buildTiedAfterNote,
+  buildAfterInningNote,
   buildScorelessThroughNote,
   buildBothScorelessNote,
   buildDayOfWeekNote,
@@ -123,17 +122,15 @@ export function buildPreHalfCallouts({
   // since knowing who leads / that it's tied / that a side is scoreless
   // restates tonight's already-seen score.
   if (half === 'top' && inning >= 2 && halfIndex(inning - 1, 'bottom') <= revealedThrough) {
-    const row = cumulativeInnings(feed).find((r) => r.inning === inning - 1)
-    if (row && row.cumAway !== row.cumHome) {
-      const side = row.cumAway > row.cumHome ? 'away' : 'home'
-      const note = buildLeadingAfterNote(bundle, side, inning - 1)
+    // One three-branch card per club (ahead / tied / behind after this
+    // checkpoint) instead of picking a branch off tonight's score. Nothing
+    // here reads the linescore any more, so the note that gets built is the
+    // same one whatever is happening in the game — see buildAfterInningNote.
+    for (const side of ['away', 'home']) {
+      const note = buildAfterInningNote(bundle, side, inning - 1)
       if (note) notes.push(note)
-    } else if (row) {
-      for (const side of ['away', 'home']) {
-        const note = buildTiedAfterNote(bundle, side, inning - 1)
-        if (note) notes.push(note)
-      }
     }
+    const row = cumulativeInnings(feed).find((r) => r.inning === inning - 1)
     if (row) {
       const both0 = row.cumAway === 0 && row.cumHome === 0
       if (both0) {

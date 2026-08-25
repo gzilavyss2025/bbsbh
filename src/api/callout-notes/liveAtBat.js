@@ -345,7 +345,7 @@ export function buildCallouts(
     firstRispPA && entry.atBatIndex != null && firstRispPA.get(entry.batterId) === entry.atBatIndex
   if (isFirstRispPA && sit?.risp) {
     notes.push({
-      text: `Hitting ${sit.risp.avg} with RISP this season`,
+      text: `Hitting ${sit.risp.avg} with RISP`,
       personId: entry.batterId,
       side: battingSide,
       kind: 'risp',
@@ -375,7 +375,7 @@ export function buildCallouts(
     if (platoon) {
       const arm = entry.pitcher.hand === 'L' ? 'lefties' : 'righties'
       notes.push({
-        text: `Hitting ${platoon.avg} (${platoon.ops} OPS) against ${arm} this year`,
+        text: `Hitting ${platoon.avg} (${platoon.ops} OPS) against ${arm}`,
         personId: entry.batterId,
         side: battingSide,
         kind: 'platoon',
@@ -391,7 +391,7 @@ export function buildCallouts(
     if (spoiler) {
       const rankWord = spoiler.rank === 1 ? "MLB's top pitch-spoiler" : `MLB's No. ${spoiler.rank} pitch-spoiler`
       notes.push({
-        text: `${rankWord} — ${spoiler.perGame} foul balls a game this season`,
+        text: `${rankWord} — ${spoiler.perGame} foul balls a game`,
         personId: entry.batterId,
         side: battingSide,
         kind: 'foulSpoiler',

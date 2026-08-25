@@ -58,6 +58,7 @@ const SCORE_BASE = {
   backToBack: 36, // ERA split pitching on no rest
   leverage: 34, // opponents' AVG with his club ahead vs trailing/tied
   centuryClub: 34, // season count of CENTURY_MPH+ pitches — a season-aggregate fact, same tier as tenK
+  sideSplit: 35, // how his mix changes by batter side — a season aggregate, but one that says what is COMING
   tenK: 33,
   scorelessStreak: 32,
   sixIp: 28,
@@ -140,16 +141,16 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
 
   if (isStarter && rec.homeAway) {
     const wl = rec.homeAway[side]
-    if (wl) push('homeAway', `${team} are ${wl} in his ${side === 'home' ? 'home' : 'road'} starts this year`)
+    if (wl) push('homeAway', `${team} are ${wl} in his ${side === 'home' ? 'home' : 'road'} starts`)
   }
   if (rec.cgShutout > 0) {
-    push(
-      'cgShutout',
-      `${rec.cgShutout} complete game${rec.cgShutout === 1 ? '' : 's'}/shutout${rec.cgShutout === 1 ? '' : 's'} this season`,
-    )
+    // "complete games/shutouts" claimed to count two things; the number is
+    // completeGames alone (starterCgShutoutCount, pitcher-starts.mjs — a
+    // shutout is a subset, never additional). Say the one thing it counts.
+    push('cgShutout', `${rec.cgShutout} complete game${rec.cgShutout === 1 ? '' : 's'}`)
   }
   if (rec.scorelessStreak > 1) {
-    push('scorelessStreak', `Riding a ${rec.scorelessStreak}-outing scoreless streak entering ${word}`, magnitudeOf(rec.scorelessStreak - 1, 15))
+    push('scorelessStreak', `Has not allowed a run in his last ${rec.scorelessStreak} outings entering ${word}`, magnitudeOf(rec.scorelessStreak - 1, 15))
   }
 
   // Bullpen workload — a reliever who's been ridden hard lately, measured in
@@ -165,11 +166,16 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
   ) {
     push(
       'workload',
-      `Heavy recent workload: ${rec.recentPitches} pitches across ${rec.recentAppearances} appearances in the last ${bullpen.windowDays} days — the average reliever threw ${bullpen.avgPitches}`,
+      `${rec.recentPitches} pitches across ${rec.recentAppearances} appearances in the last ${bullpen.windowDays} days — the average reliever threw ${bullpen.avgPitches}`,
     )
-  } else if (rec.recentAppearances > 1) {
+  } else if (rec.recentAppearances > 1 && bullpen?.windowDays > 0) {
     // Counting tonight's outing — the row only exists once he's pitched.
-    push('recentAppearances', `This is his ${ordinal(rec.recentAppearances + 1)} appearance in the last several days`)
+    // "the last several days" was a stat note refusing to name its own window
+    // while `windowDays` sat right here; without it the note does not fire.
+    push(
+      'recentAppearances',
+      `His ${ordinal(rec.recentAppearances + 1)} appearance in the last ${bullpen.windowDays} days`,
+    )
   }
 
   // Back-to-back days — he pitched on the slate's eve, so tonight's outing is
@@ -225,6 +231,55 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
       : `Has thrown ${cc.count} pitches at ${CENTURY_MPH}+ mph this season${peak}`
     push('centuryClub', text, magnitudeOf(cc.count / 10, 15) + (offSpeed.length ? 10 : 0))
   }
+
+  // Batter-side pitch mix — how differently his arsenal reads to a lefty than
+  // to a righty, from gen-callouts.mjs's join against the `stand` that
+  // gen-pitch-arsenal.mjs sweeps (scripts/lib/arsenal-side.mjs holds the show
+  // floors). A season aggregate like centuryClub above, but a forward-looking
+  // one: it says what is likely COMING to the batter in the box, which is why
+  // it scores a shade higher.
+  //
+  // Wording rules this family follows, and the reasons (docs/callouts.md's
+  // voice section): shares round to WHOLE percents — a tenth of a point is a
+  // precision the pitch-tagging does not have and a reader with a pencil
+  // cannot use; "righties"/"lefties" is the house register for handedness and
+  // never mixes with the long form in the same sentence; and there is no
+  // "this season" stamp, since the season is the default and only earns words
+  // when the note contrasts it with something. The `only` case keeps "all
+  // season" precisely BECAUSE it is contrastive — the span is the fact.
+  const split = rec.sideSplit
+  const topType = split?.types?.[0]
+  const whole = (n) => Math.round(n)
+  if (topType) {
+    const heavy = topType.lShare > topType.rShare
+    const heavySide = heavy ? 'lefties' : 'righties'
+    const lightSide = heavy ? 'righties' : 'lefties'
+    const hi = whole(heavy ? topType.lShare : topType.rShare)
+    const lo = whole(heavy ? topType.rShare : topType.lShare)
+    const pitch = topType.description.toLowerCase()
+    const singular = lightSide.replace(/ies$/, 'y')
+    const text =
+      topType.only && lo === 0
+        ? `Has not thrown a ${singular} a single ${pitch} all season — it is ${hi}% of what he throws ${heavySide}`
+        : topType.only
+          ? `Has barely shown a ${singular} his ${pitch} all season — ${hi}% of his pitches to ${heavySide}, ${lo}% to ${lightSide}`
+          : `Throws his ${pitch} ${hi}% of the time to ${heavySide}, ${lo}% to ${lightSide}`
+    push('sideSplit', text, magnitudeOf(topType.gap - 20, 15))
+  } else if (split?.breadth) {
+    // WHICH pitches disappear is the note; the bare count is a table. The
+    // generator names them (arsenal-side.mjs), most-thrown first.
+    const b = split.breadth
+    const fewer = b.l > b.r ? 'righties' : 'lefties'
+    const named = b.dropped?.slice(0, 2).map((d) => d.toLowerCase())
+    const tail = named?.length
+      ? ` — no ${named.join(' or ')} against ${fewer}`
+      : ''
+    push(
+      'sideSplit',
+      `Shows ${b.l} pitches to lefties and ${b.r} to righties${tail}`,
+      magnitudeOf(Math.abs(b.l - b.r) - 2, 8),
+    )
+  }
   return notes
 }
 
@@ -241,7 +296,12 @@ function healthNotes(id, side, health) {
       // row's own reveal-clamped innings pitched (see laboringFor,
       // pitcherHealth.js), so this reads correctly for any start time and
       // updates on its own as more of his outing is revealed.
-      text: `Laboring: ${labor.pitchesPerInning.toFixed(1)} pitches per inning through ${labor.ip} IP — his season norm is ${labor.baseline.toFixed(1)}.`,
+      // No "Laboring:" label any more. Naming the verdict and THEN supplying
+      // the evidence takes the one job this reader came for — he is keeping
+      // score by hand precisely to draw his own conclusions. The numbers say
+      // "laboring" on their own; round them, because a tenth of a pitch per
+      // inning is not a thing anyone can act on.
+      text: `${Math.round(labor.pitchesPerInning)} pitches an inning through ${labor.ip} IP, against a season figure of ${Math.round(labor.baseline)}`,
       personId: id,
       side,
       kind: 'laboring',
@@ -252,7 +312,10 @@ function healthNotes(id, side, health) {
   const velo = health?.velo?.[id]
   if (velo?.flagged) {
     notes.push({
-      text: `Fastball down ${velo.drop.toFixed(1)} mph from his early innings (${velo.anchor.toFixed(1)} → ${velo.current.toFixed(1)}).`,
+      // Whole mph. "Down 2.0 mph" announces that a machine wrote the
+      // sentence; the arrow is kept because it is the one piece of typography
+      // here a scorer would actually scratch in a margin.
+      text: `Fastball down ${Math.round(velo.drop)} mph from his early innings (${Math.round(velo.anchor)} → ${Math.round(velo.current)})`,
       personId: id,
       side,
       kind: 'veloDecay',

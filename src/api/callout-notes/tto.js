@@ -18,7 +18,7 @@ import { otherSide, ordinal, isNum, clampScore, magnitudeOf, SCORE_BASE } from '
 // starterRecords[pid].tto (probable starters only — see gen-callouts.mjs);
 // without one the card still fires as the plain trip fact.
 //
-// CALLER-GATED like buildLeadingAfterNote: it reads plate appearances from
+// CALLER-GATED like buildAfterInningNote: it reads plate appearances from
 // this side's PREVIOUS halves to count who has faced the pitcher how often, so
 // the caller (prehalf-callouts.js) must not invoke it until those halves are
 // revealed. It also reads the STAGED half's own pre-pitch changes AND its
