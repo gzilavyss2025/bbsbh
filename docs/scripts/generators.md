@@ -824,6 +824,26 @@ Re-run only to fold in a new season.
   --date/--limit/--concurrency` scope the sweep. Writes `.scratch/callout-audit/`
   (gitignored), never `public/data/`. Read alongside `docs/callouts.md`.
 
+- `scan-game-notes-insights.mjs` — NOT a generator and NOT on a cron: the
+  MANUALLY-TRIGGERED Game Notes curation scan (issue #774), with a reading job
+  in the middle that only an agent can do. `extract <teamId|all> [--days=N]`
+  pulls each club's recent Game Notes PDFs (URLs from the committed
+  `public/data/game-notes/{teamId}.json`), runs them through the SHIPPED parser
+  (`extractForTeam`, `src/api/whatsBrewing.js`), and writes a dossier to
+  `.scratch/game-notes/insights/` — the raw blurbs, the club's roster, and the
+  per-person facts `gen-callouts.mjs` already computed, which is the join table
+  the classification works against. An agent then reads the dossier and tiers
+  every blurb (timeless / standing / result) plus the signals it corroborates;
+  `apply <verdicts.json>` validates that and writes
+  `public/data/game-notes-corroboration.json`. `result`-tier rows are REFUSED,
+  not ignored — a recap is the score of a game the reader has not watched.
+  `gen-callouts.mjs` then reads the committed file and attaches a
+  `corroborated` map per bundle, worth a bounded +6 on the matching note's
+  worthiness score and nothing else. Vocabulary, staleness window and per-club
+  cap: `scripts/lib/game-notes-corroboration.mjs`. Rule and rationale:
+  `docs/callouts.md` ("The corroboration nudge") and
+  `.scratch/game-notes/INSIGHTS-EXPLORATION.md`.
+
 - `gen-mono-logos.mjs` → `public/data/logos/mono/{teamId}.svg` — a ONE-COLOR knockout
   version of every club's mlbstatic mark, worn by the navy section mastheads (Batting
   order / Starting pitcher / Defense / Due up next) on the lineup, innings, and box

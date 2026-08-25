@@ -6,7 +6,7 @@
 
 import { FOUL_CODES, FOUL_ENDS_AB_CODES, pitchDotCategory } from '../playbyplay.js'
 import { dayWordFor } from '../select.js'
-import { HIT_TRIGGERS, STRIKEOUT_EVENTS, SB_EVENTS, otherSide, isNum, clampScore, skewBonus, magnitudeOf, SCORE_BASE, parseRecord } from './shared.js'
+import { HIT_TRIGGERS, STRIKEOUT_EVENTS, SB_EVENTS, otherSide, isNum, clampScore, skewBonus, magnitudeOf, corroborationBonus, SCORE_BASE, parseRecord } from './shared.js'
 import { buildVsTeamNote } from './vsTeamNote.js'
 // The league-rank clause the scoring-first cards append (rank.js). Additive —
 // no rank in the bundle leaves the sentence exactly as it reads today.
@@ -120,7 +120,11 @@ export function buildCallouts(
         inGame,
         total,
         dedupeKey: `leader-${trig.cat}-${entry.batterId}`,
-        score: clampScore(SCORE_BASE.leader + magnitudeOf((total ?? entering ?? 0) / 4, 15)),
+        score: clampScore(
+          SCORE_BASE.leader +
+            magnitudeOf((total ?? entering ?? 0) / 4, 15) +
+            corroborationBonus(bundle, 'leader', entry.batterId),
+        ),
       })
     }
   }
@@ -195,7 +199,9 @@ export function buildCallouts(
         side: battingSide,
         kind: 'homerRec',
         dedupeKey: `homerRec-${entry.batterId}`,
-        score: clampScore(SCORE_BASE.homerRec + skewBonus(rec.w, rec.l)),
+        score: clampScore(
+          SCORE_BASE.homerRec + skewBonus(rec.w, rec.l) + corroborationBonus(bundle, 'homerRec', entry.batterId),
+        ),
         rec: { w: rec.w, l: rec.l },
       })
     }
@@ -222,7 +228,11 @@ export function buildCallouts(
         inGame,
         total,
         dedupeKey: `leaderK-${entry.pitcher.id}`,
-        score: clampScore(SCORE_BASE.leader + magnitudeOf((total ?? entering ?? 0) / 12, 15)),
+        score: clampScore(
+          SCORE_BASE.leader +
+            magnitudeOf((total ?? entering ?? 0) / 12, 15) +
+            corroborationBonus(bundle, 'leader', entry.pitcher.id),
+        ),
       })
     }
   }
@@ -274,7 +284,11 @@ export function buildCallouts(
         inGame: sbSnap?.n ?? 0,
         total,
         dedupeKey: `leaderSb-${bn.runnerId}`,
-        score: clampScore(SCORE_BASE.leader + magnitudeOf((total ?? entering ?? 0) / 4, 15)),
+        score: clampScore(
+          SCORE_BASE.leader +
+            magnitudeOf((total ?? entering ?? 0) / 4, 15) +
+            corroborationBonus(bundle, 'leader', bn.runnerId),
+        ),
       })
     }
     const run = streaks[bn.runnerId]?.stolenBase
@@ -286,7 +300,11 @@ export function buildCallouts(
         kind: 'sbStreak',
         run, // the entering streak, for the roll-up's narrative rewrite
         dedupeKey: `sbstreak-${bn.runnerId}`,
-        score: clampScore(SCORE_BASE.sbStreak + magnitudeOf(run + sbSnap.n - 4, 10)),
+        score: clampScore(
+          SCORE_BASE.sbStreak +
+            magnitudeOf(run + sbSnap.n - 4, 10) +
+            corroborationBonus(bundle, 'sbStreak', bn.runnerId),
+        ),
       })
     }
   }
@@ -305,7 +323,11 @@ export function buildCallouts(
       streak: s.onBase + 1,
       start: s.onBaseStart ?? null, // when the run began, for the roll-up's prose
       dedupeKey: `onbase-${entry.batterId}`,
-      score: clampScore(SCORE_BASE.onBaseExtended + magnitudeOf(s.onBase + 1 - 8, 15)),
+      score: clampScore(
+        SCORE_BASE.onBaseExtended +
+          magnitudeOf(s.onBase + 1 - 8, 15) +
+          corroborationBonus(bundle, 'onBaseExtended', entry.batterId),
+      ),
     })
   }
 
@@ -342,7 +364,11 @@ export function buildCallouts(
         side: battingSide,
         kind: 'onBaseRiding',
         dedupeKey: `onbase-${entry.batterId}`,
-        score: clampScore(SCORE_BASE.onBaseRiding + magnitudeOf(s.onBase - 8, 15)),
+        score: clampScore(
+          SCORE_BASE.onBaseRiding +
+            magnitudeOf(s.onBase - 8, 15) +
+            corroborationBonus(bundle, 'onBaseRiding', entry.batterId),
+        ),
       })
     }
     const platoon = entry.pitcher?.hand === 'L' ? sit?.vl : entry.pitcher?.hand === 'R' ? sit?.vr : null

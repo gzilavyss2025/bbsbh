@@ -1,0 +1,132 @@
+{
+  "generatedAt": "2026-08-25T02:13:42.490Z",
+  "scannedThrough": "2026-08-23",
+  "source": "club game notes (team PR), classified by hand — see scripts/scan-game-notes-insights.mjs",
+  "teams": {
+    "109": [
+      {
+        "personId": 672515,
+        "kinds": [
+          "onBaseRiding",
+          "onBaseExtended",
+          "onBaseEnded"
+        ],
+        "tier": "standing",
+        "date": "2026-08-23",
+        "player": "Gabriel Moreno",
+        "quote": "MORENO'S HOME STREAK / MORENO'S HITTING STREAK — a career-best 31-game home on-base streak and a 15-game hitting streak. We compute a 17-game on-base streak."
+      },
+      {
+        "personId": 694374,
+        "kinds": [
+          "onBaseRiding",
+          "onBaseExtended",
+          "onBaseEnded"
+        ],
+        "tier": "standing",
+        "date": "2026-08-23",
+        "player": "Tim Tawa",
+        "quote": "TAWA'S TREND — has reached base safely in a career-high 8 straight games. We compute a 9-game on-base streak."
+      }
+    ],
+    "112": [
+      {
+        "personId": 691718,
+        "kinds": [
+          "leader"
+        ],
+        "tier": "standing",
+        "date": "2026-08-23",
+        "player": "Pete Crow-Armstrong",
+        "quote": "HOMERS MAKE US HAPPY — Crow-Armstrong's 32 homers are seventh among all major leaguers. We have him as the club's home-run leader (33)."
+      }
+    ],
+    "113": [
+      {
+        "personId": 701398,
+        "kinds": [
+          "leader"
+        ],
+        "tier": "standing",
+        "date": "2026-08-23",
+        "player": "Sal Stewart",
+        "quote": "SALUTATIONS — Sal Stewart leads the Reds with 27 HR, 97 RBI, 130 hits, 24 doubles. We have him as the club's leader in home runs (27) and doubles (24)."
+      }
+    ],
+    "117": [
+      {
+        "personId": 670541,
+        "kinds": [
+          "leader"
+        ],
+        "tier": "standing",
+        "date": "2026-08-23",
+        "player": "Yordan Alvarez",
+        "quote": "MVP-CALIBER — first in the AL in HR (36); GOOD INTENTIONS — 25 intentional walks, most in the majors. We have him as the club's leader in home runs (36) and walks (91)."
+      }
+    ],
+    "119": [
+      {
+        "personId": 660271,
+        "kinds": [
+          "onBaseRiding",
+          "onBaseExtended",
+          "onBaseEnded"
+        ],
+        "tier": "standing",
+        "date": "2026-08-23",
+        "player": "Shohei Ohtani",
+        "quote": "SHO ME SIX! — two walks yesterday, extending his on-base streak to 10 games. We compute an 11-game on-base streak. Tiered standing, not result: the blurb's subject is the streak, and the line it quotes carries no score."
+      }
+    ],
+    "143": [
+      {
+        "personId": 656941,
+        "kinds": [
+          "leader"
+        ],
+        "tier": "timeless",
+        "date": "2026-08-23",
+        "player": "Kyle Schwarber",
+        "quote": "THE RACE TO 400 — needs 11 more to reach 400 career home runs; 225 since joining the Phillies in 2022. We have him as the club's home-run leader (39)."
+      }
+    ],
+    "146": [
+      {
+        "personId": 681715,
+        "kinds": [
+          "leader",
+          "homerRec"
+        ],
+        "tier": "standing",
+        "date": "2026-08-23",
+        "player": "Heriberto Hernández",
+        "quote": "BERT ALERT — owns a team-leading 19 home runs and the Marlins are 15-2 in games he homers in. Both numbers match what we compute exactly: club HR leader (19), homer record 15-2."
+      }
+    ],
+    "158": [
+      {
+        "personId": 656730,
+        "kinds": [
+          "scorelessStreak"
+        ],
+        "tier": "standing",
+        "date": "2026-08-23",
+        "player": "Trevor Megill",
+        "quote": "It's Trevor Time! — Trevor Megill is unscored upon in his last 11 games (11ip, 2h, 1bb, 8k). We compute an 11-outing scoreless streak for him: the same number, arrived at independently."
+      },
+      {
+        "personId": 661388,
+        "kinds": [
+          "onBaseRiding",
+          "onBaseExtended",
+          "onBaseEnded"
+        ],
+        "tier": "standing",
+        "date": "2026-08-23",
+        "player": "William Contreras",
+        "quote": "Don't Mess with Bill — in his last 6 games he is batting .458 with a .500 OBP. We compute an 8-game on-base streak."
+      }
+    ]
+  }
+}

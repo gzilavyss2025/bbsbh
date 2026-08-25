@@ -170,6 +170,29 @@ export function magnitudeOf(raw, full) {
 // perfectly lopsided record earns the whole magnitude and a .500 one earns none.
 export const skewBonus = (w, l) => magnitudeOf(skew(w, l), 0.5)
 
+// --- corroboration: the club's own notes as a curation signal -----------------
+// A club's PR staff writes its own pre-game Game Notes PDF. When those notes
+// independently write about a fact we ALSO compute — this hitter leads the club
+// in walks, that one is riding an on-base streak — the club has told us the
+// fact is worth a reader's attention, and that is evidence no stat line carries.
+// So a corroborated note gets a NUDGE, deliberately smaller than any magnitude
+// bonus (issue #774): it breaks a tie and can lift an instance past a neighbour
+// in the table, but it can never carry a family over one a tier above it. The
+// signal decides WHICH of several true facts leads, never whether a fact is
+// true, and nothing from the notes is ever rendered.
+//
+// `bundle.corroborated` is `{ personId: [kind] }`, written by gen-callouts.mjs
+// from public/data/game-notes-corroboration.json — itself the product of a
+// manual, hand-classified scan (scripts/scan-game-notes-insights.mjs), where
+// every recap-tier blurb is refused before it can reach this file. Absent on
+// every bundle generated before that scan ran, which is exactly a zero bonus.
+export const CORROBORATION_BONUS = 6
+export function corroborationBonus(bundle, kind, personId) {
+  if (personId == null || !kind) return 0
+  const kinds = bundle?.corroborated?.[personId]
+  return Array.isArray(kinds) && kinds.includes(kind) ? CORROBORATION_BONUS : 0
+}
+
 // --- repetition: decay, diversity, and the once-per-game families -------------
 // Every callout surface rebuilds from scratch on every half, so the same
 // high-base note used to win the same sort again and again: a reader who sat

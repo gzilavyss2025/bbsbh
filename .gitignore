@@ -33,6 +33,11 @@ pnpm-debug.log*
 
 # fetched Game Notes PDFs (large, re-fetch fresh per session — see .scratch/game-notes/README.md)
 .scratch/game-notes/pdfs/
+# …and the curation scan's extracted dossiers (issue #774): re-run
+# `scan-game-notes-insights.mjs extract` to rebuild one. The hand
+# classification beside them (verdicts-*.json) IS committed — it is the
+# provenance for public/data/game-notes-corroboration.json.
+.scratch/game-notes/insights/dossier-*.json
 
 # the mono-logo contact sheet (a --sheet artifact for eyeballing a regeneration,
 # not app content — see scripts/gen-mono-logos.mjs)

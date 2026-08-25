@@ -96,6 +96,41 @@ saturation is worth changed. The column below names that saturation point, so
 | risp / platoon | 25 | — |
 | tto (plain trip fact) | 20 | — |
 
+### The corroboration nudge — a club's own notes as a curation signal
+
+One thing besides the base and the magnitude bonus can move a score, and it is
+worth exactly **`CORROBORATION_BONUS` (6)**: a club's own pre-game Game Notes
+PDF writing about the same fact bbsbh computed. The reasoning (issue #774, from
+the exploration in `.scratch/game-notes/INSIGHTS-EXPLORATION.md`) is that a PR
+staff choosing to write up a hitter's on-base streak is evidence about
+*worthiness* that no stat line carries — so it decides which of several TRUE
+facts leads, and nothing else. It never writes a note, never changes a word of
+one, and never adds a surface.
+
+Deliberately smaller than any magnitude range: a nudge can break a tie and lift
+an instance past a neighbour in the table above, but can never carry a family
+over one a tier above it.
+
+- **Where it joins.** `bundle.corroborated` is `{ personId: [kind] }`, written
+  by `gen-callouts.mjs`. `corroborationBonus(bundle, kind, personId)`
+  (`callout-notes/shared.js`) takes it, joining on BOTH the person and the
+  family. Five families can be corroborated today, and every one of them is
+  keyed by person in a bundle: `leader`, the three on-base-streak tenses
+  (`onBaseRiding` / `onBaseExtended` / `onBaseEnded`), `sbStreak`, `homerRec`,
+  and Margin Notes' `scorelessStreak`.
+- **Where it comes from.** A **manual** scan, not a cron:
+  `scripts/scan-game-notes-insights.mjs extract` pulls the clubs' PDFs through
+  the shipped parser and writes a dossier (blurbs + roster + the facts we
+  already computed); an agent reads and classifies it; `… apply` validates that
+  classification into `public/data/game-notes-corroboration.json`. The closed
+  vocabulary, the staleness window (7 days) and the per-club cap (12) live in
+  `scripts/lib/game-notes-corroboration.mjs`.
+- **The spoiler rule applies in full.** Club notes are stuffed with recaps
+  ("dropped Game 1, 5-3"). Those are `result` tier and are REFUSED at scan
+  time — not ignored, refused — because a recap is the score of a game the
+  reader has not watched. Only `timeless` and `standing` blurbs may reach a
+  score, and even then nothing from the notes is rendered.
+
 Margin Notes' own family bases (`src/api/pitcher-callouts.js`'s local
 `SCORE_BASE` — self-contained rather than imported from `callout-notes.js`,
 same precedent the pre-half strip sets):

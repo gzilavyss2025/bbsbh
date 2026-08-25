@@ -116,6 +116,13 @@ export async function fetchCallouts(urlDate, gamePks) {
 //       rank at its OWN level for each W-L family above, kept only where a
 //       note would actually print it (top/bottom 3 of a field of 8+); see
 //       callout-notes/rank.js}, home:{…} } }
+//     corroborated?:{ [playerId]: [calloutKind] } — which of this bundle's own
+//       per-person families the player's CLUB independently wrote about in its
+//       pre-game Game Notes PDF (issue #774). Not a note and never rendered: it
+//       only nudges the matching note's worthiness score (corroborationBonus,
+//       callout-notes/shared.js), and it is absent unless the manual scan
+//       (scripts/scan-game-notes-insights.mjs) found a live entry for a club in
+//       this game.
 //
 // Fields newer than a given date's committed file simply aren't there (the
 // nightly cron regenerates future dates only) — every consumer null-guards, so
