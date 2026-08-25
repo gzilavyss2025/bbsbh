@@ -991,7 +991,7 @@
    majors by default, so tagging every one would just be dead repetition. */
 .reg-pill {
   margin-left: 5px;
-  padding: 1px 4px;
+  padding: 2px 4px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   display: inline-flex;
