@@ -131,7 +131,7 @@ const BUDGETS = {
   // explanation in a file where every other branch is explained would be the
   // thing a later reader deletes.
   'src/lib/route.js': 620, // 614
-  'scripts/check-dir-size.mjs': 800, // 703 — five genuine, documented budget bumps for the hover card (#834)
+  'scripts/check-dir-size.mjs': 900, // 800 -> 801: scripts/lib's budget bumped for rookie-crossing.mjs
   'src/api/whatsBrewing.js': 1600, // 1581
   // 1500 -> 1600 for the veloVariety/centuryClub/veloPeak join (docs/callouts.md):
   // +9 lines to attach gen-pitch-arsenal.mjs's century-pitch sweep
