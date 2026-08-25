@@ -1,8 +1,9 @@
 # The prospect-research diary
 
 An admin-only page at `/admin/research`, linked from the footer, holding
-everything the minor-league development research has found. Eight entries at
-the time of writing, one per spike, newest first.
+everything the minor-league development research has found. Nine entries at
+the time of writing, newest first — eight of them one per spike, plus one
+reading of the whole stack.
 
 It exists because that research produced long technical documents in `docs/`
 and no way for the person who commissioned it to read the answers. The
@@ -10,8 +11,11 @@ documents keep the method. The diary keeps the findings, in English.
 
 The first four entries ask about **clubs** — how long a stay at a level takes,
 whether some organizations move men faster, whether leaning on your own players
-costs you. The four newest ask about the **player**: his size, his arm, the
-awards he had already won, and what he did in his rookie season.
+costs you. The next four ask about the **player**: his size, his arm, the
+awards he had already won, and what he did in his rookie season. The newest
+asks nothing new. It reads the other eight from the commissioning side, says
+which of them changes a decision, and hands back the questions it wants
+measured next.
 
 ## The two rules
 
@@ -41,6 +45,20 @@ usually the most useful thing in it.
 
 Fixing a typo or a broken figure in an old entry is fine. Changing what it
 concluded is not.
+
+## An entry that measures nothing
+
+The `agenda` verdict — "Asks for more" — is for the entry that reads the others
+instead of adding a number. It exists because the meeting where somebody says
+what a stack of studies is worth is the half of research that normally
+evaporates, and dating it makes it a record of what was believed on a day, the
+same as any finding.
+
+It buys no relief from the two rules. Such an entry still carries `caveats`,
+and the first of them always says the same thing: nothing here was measured, so
+every disagreement with an entry below it is a disagreement with an emphasis
+and not with a number. Do not reach for this verdict to avoid doing the work.
+If a claim in it can be tested, it belongs in a spike, not here.
 
 ## Adding an entry
 
