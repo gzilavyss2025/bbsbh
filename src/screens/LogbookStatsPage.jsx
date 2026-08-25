@@ -1,9 +1,7 @@
 import '../styles/48a-logbook-stats.css'
-import '../styles/48b-logbook-milestones.css'
 import { useMemo, useState } from 'react'
 import { fetchStampGames } from '../api/logbook.js'
 import { computeLogbookStats } from '../api/logbookStats.js'
-import { computeAllMilestones } from '../api/logbookMilestones.js'
 import { fetchStampBoxscores, fetchStampMoments } from '../api/logbookGameDetail.js'
 import { computeLogbookRetrospective } from '../api/logbookRetrospective.js'
 import { fetchHighlights } from '../api/highlights.js'
@@ -169,16 +167,6 @@ export function LogbookStatsPage({ bookId = null }) {
     [levelStamps, facts.data],
   )
 
-  // Milestones read the WHOLE collection (`stamps`), not the level-filtered
-  // view every other section here uses — "every MLB club" is a fact about
-  // your whole book, not about whichever level filter happens to be active.
-  // Spoiler-free by classification (see spoiler-manifest.json): team
-  // identity only, never a score.
-  const milestones = useMemo(
-    () => computeAllMilestones(stamps, facts.data ?? {}),
-    [stamps, facts.data],
-  )
-
   // The ported First Scorebook sections are the expensive part of this page —
   // a per-game boxscore AND winProbability fetch apiece, plus the aggregation
   // over all of them (src/api/logbookRetrospective.js). A big book was firing
@@ -289,7 +277,15 @@ export function LogbookStatsPage({ bookId = null }) {
         </p>
       )}
 
-      <LogbookMilestones milestones={milestones} />
+      {/* The milestone shelf reads the WHOLE collection (`stamps`), not the
+          level-filtered view every other section here uses — which clubs and
+          parks are in your book is a fact about the book, not about whichever
+          page-wide filter happens to be active. It carries its OWN level
+          toggle (MLB/AAA/AA/A+/A) because that one picks which league's
+          roster the slots are, a different question from the filter above.
+          Spoiler-free by classification (see spoiler-manifest.json): team
+          identity only, never a score. */}
+      <LogbookMilestones stamps={stamps} factsByPk={facts.data ?? {}} />
 
       <section className="logbookstats__section">
         <SectionHead

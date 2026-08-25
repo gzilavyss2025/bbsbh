@@ -7,6 +7,7 @@ import {
   computeAllMilestones,
   computeMilestoneProgress,
   isMilestoneCollectionId,
+  rosterFor,
 } from '../src/api/logbookMilestones.js'
 
 // --------------------------------------------------------------------------
@@ -16,7 +17,6 @@ import {
 const THREE_SLOT_COLLECTION = {
   id: 'trio',
   title: 'Trio',
-  lede: 'test fixture',
   slots: () => [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
   fillsFor: (fact) => [fact.who].filter(Boolean),
 }
@@ -130,4 +130,79 @@ test('isMilestoneCollectionId', () => {
   assert.equal(isMilestoneCollectionId('parks'), true)
   assert.equal(isMilestoneCollectionId('nope'), false)
   assert.equal(isMilestoneCollectionId(undefined), false)
+})
+
+// --------------------------------------------------------------------------
+// The roster — a level's own slot list, off the weekly static team snapshot
+// (api/teams-static.js). What makes the two collections describe MLB, AAA,
+// AA, A+ and A rather than only the 30 MLB clubs.
+// --------------------------------------------------------------------------
+const SNAPSHOT = {
+  bySportId: {
+    // sportId keys are STRINGS in the real file — assert against that shape,
+    // not a friendlier one.
+    '11': [
+      { id: 512, teamName: 'Mud Hens', name: 'Toledo Mud Hens', venueName: 'Fifth Third Field' },
+      { id: 226, teamName: 'Aviators', name: 'Las Vegas Aviators', venueName: 'Las Vegas Ballpark' },
+    ],
+  },
+}
+
+test('rosterFor: shapes a minor level off the snapshot, alphabetical by label', () => {
+  const roster = rosterFor(SNAPSHOT, 11)
+  assert.deepEqual(roster.map((r) => r.label), ['Aviators', 'Mud Hens'])
+  assert.equal(roster.find((r) => r.id === 512).venueName, 'Fifth Third Field')
+})
+
+test('rosterFor: MLB prefers the short club name the app already uses', () => {
+  const roster = rosterFor({ bySportId: { '1': [{ id: 158, teamName: 'Nope', venueName: 'American Family Field' }] } }, 1)
+  assert.deepEqual(roster, [{ id: 158, label: 'Brewers', venueName: 'American Family Field' }])
+})
+
+test('rosterFor: no snapshot falls back to the 30 MLB clubs for sportId 1', () => {
+  assert.equal(rosterFor(undefined, 1).length, 30)
+  assert.equal(rosterFor({ bySportId: {} }, 1).length, 30)
+})
+
+test('rosterFor: no snapshot means an EMPTY minor level, never the MLB list', () => {
+  assert.deepEqual(rosterFor(undefined, 11), [])
+  assert.deepEqual(rosterFor({ bySportId: {} }, 14), [])
+})
+
+test('a roster narrows the slots, and its venue names ride along onto them', () => {
+  const parks = MILESTONE_COLLECTIONS.find((c) => c.id === 'parks')
+  const roster = rosterFor(SNAPSHOT, 11)
+  const stamps = [stamp(1, '2026-04-01')]
+  const factsByPk = { 1: fact(1, { away: 226, home: 512 }) }
+  const result = computeMilestoneProgress(parks, stamps, factsByPk, roster)
+  assert.equal(result.total, 2)
+  assert.equal(result.count, 1)
+  const toledo = result.slots.find((s) => s.id === 512)
+  assert.equal(toledo.filled, true)
+  assert.equal(toledo.venueName, 'Fifth Third Field')
+})
+
+// The regression this pins: `count` used to be the number of ids any stamp
+// filled, which is not the same thing as the number of SLOTS filled. A stamp
+// at a level other than the one on screen fills ids that are in no slot here,
+// and counting those reported "31 of 30" off a single Mud Hens game.
+test('count and complete ignore ids that are not slots at this level', () => {
+  const clubs = MILESTONE_COLLECTIONS.find((c) => c.id === 'clubs')
+  const roster = rosterFor(SNAPSHOT, 11)
+  const stamps = [stamp(1, '2026-04-01'), stamp(2, '2026-04-02')]
+  const factsByPk = {
+    1: fact(1, { away: 226, home: 512 }), // both AAA — both are slots
+    2: fact(2, { away: 138, home: 158 }), // both MLB — neither is a slot here
+  }
+  const result = computeMilestoneProgress(clubs, stamps, factsByPk, roster)
+  assert.equal(result.total, 2)
+  assert.equal(result.count, 2)
+  assert.equal(result.complete, true)
+})
+
+test('computeAllMilestones: passes the roster through to every collection', () => {
+  const roster = rosterFor(SNAPSHOT, 11)
+  for (const result of computeAllMilestones([], {}, roster)) {
+    assert.equal(result.total, 2)
+  }
 })

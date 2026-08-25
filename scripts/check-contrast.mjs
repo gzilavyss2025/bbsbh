@@ -103,6 +103,14 @@ const PAIRINGS = [
   { fg: 'book-board-foil', bg: 'book-board-kraft', min: TEXT, note: 'book cover foil on the kraft board' },
   { fg: 'book-board-foil', bg: 'book-board-red', min: TEXT, note: 'book cover foil on the red board' },
   { fg: 'book-board-foil', bg: 'book-board-blue', min: TEXT, note: 'book cover foil on the blue board' },
+  // The Game Log's stamp sheet prints its panes on a dark album board
+  // (48c-stamp-sheet.css) — the one dark surface in the app, so every ink that
+  // lands on it is asserted here rather than eyeballed. Both foils carry real
+  // text (a pane's title and count, every stamp's caption). The seal amber is
+  // the completed-set ring, a non-text affordance, held to the 3:1 bar.
+  { fg: 'album-foil', bg: 'album-board', min: TEXT, note: 'stamp sheet pane title on the album board' },
+  { fg: 'album-foil-soft', bg: 'album-board', min: TEXT, note: 'stamp caption on the album board' },
+  { fg: 'seal-cover', bg: 'album-board', min: UI, note: 'completed-set ring on the album board' },
   // Core semantic text roles on their intended surfaces.
   { fg: 'text-body', bg: 'bg-canvas', min: TEXT, note: 'body text on app canvas' },
   { fg: 'text-heading', bg: 'surface-card', min: TEXT, note: 'heading on raised card' },

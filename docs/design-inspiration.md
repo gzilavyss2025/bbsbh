@@ -156,6 +156,13 @@ here as the worked example of "research → decision → build":
   registry, one generic progress function, one generic display; adding a new
   collection later is a config entry, not new plumbing.
   See `src/api/logbookMilestones.js`.
+- **Where it landed, and what moved since.** The slots are now a LEVEL's roster
+  rather than the 30 MLB clubs — MLB/AAA/AA/A+/A, off the weekly team snapshot,
+  toggled on the sheet itself. And the art outgrew the retrospective: the open
+  book's page draws the identical panes (`components/logbook/StampSheet.jsx`,
+  via `ClubsSeen.jsx`) with the COUNTS SWITCHED OFF, which is what lets the
+  book keep `docs/game-log.md` §1's "not a checklist" rule while sharing the
+  stamps. The counting register stays on `/logbook/stats` alone.
 - **v1 scope, deliberately narrow.** Team and ballpark collections only — both
   computable from facts the Logbook already resolves per stamp (no new
   fetch). The event-based ones (cycle, no-hitter, immaculate inning, the

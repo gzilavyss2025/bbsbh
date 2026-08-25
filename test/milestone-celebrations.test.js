@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   MILESTONE_IDS,
+  celebrationId,
   hasCelebratedMilestone,
   isMilestoneId,
   markMilestoneCelebrated,
@@ -67,6 +68,44 @@ test('serializeMilestoneCelebrations round-trips through parse', () => {
   assert.deepEqual(parseMilestoneCelebrations(raw), map)
 })
 
-test('MILESTONE_IDS is the closed set clubs+parks', () => {
-  assert.deepEqual([...MILESTONE_IDS].sort(), ['clubs', 'parks'])
+test('MILESTONE_IDS is the closed set: clubs+parks at each of the five levels', () => {
+  assert.deepEqual(
+    [...MILESTONE_IDS].sort(),
+    [
+      'clubs',
+      'clubs@11',
+      'clubs@12',
+      'clubs@13',
+      'clubs@14',
+      'parks',
+      'parks@11',
+      'parks@12',
+      'parks@13',
+      'parks@14',
+    ],
+  )
+})
+
+// The compatibility rule, and the reason it is a rule: 'clubs' and 'parks'
+// are already written into real users' localStorage under this key. Renaming
+// MLB's two ids to 'clubs@1'/'parks@1' would un-celebrate a finished MLB
+// shelf and replay its one-time animation on the next visit.
+test('celebrationId: MLB keeps the bare id, every other level is suffixed', () => {
+  assert.equal(celebrationId('clubs', 1), 'clubs')
+  assert.equal(celebrationId('parks'), 'parks')
+  assert.equal(celebrationId('clubs', 11), 'clubs@11')
+  assert.equal(celebrationId('parks', 14), 'parks@14')
+})
+
+test('a level celebrated does not celebrate the same collection elsewhere', () => {
+  const map = markMilestoneCelebrated({}, celebrationId('clubs', 11), 1)
+  assert.equal(hasCelebratedMilestone(map, 'clubs@11'), true)
+  assert.equal(hasCelebratedMilestone(map, 'clubs'), false)
+  assert.equal(hasCelebratedMilestone(map, 'parks@11'), false)
+})
+
+test('an id at an unknown level is refused, same as an unknown collection', () => {
+  assert.equal(isMilestoneId('clubs@1'), false)
+  assert.equal(isMilestoneId('clubs@16'), false)
+  assert.equal(isMilestoneId('nope@11'), false)
 })

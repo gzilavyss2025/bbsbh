@@ -19,7 +19,29 @@ export const MILESTONE_CELEBRATIONS_KEY = 'bbsbh:milestoneCelebrations'
 // src/api/logbookMilestones.js's MILESTONE_COLLECTIONS ids. A collection
 // dropped from that registry stops being writable here (scrub below), so a
 // stale id left over from a removed collection can't linger forever.
-export const MILESTONE_IDS = Object.freeze(['clubs', 'parks'])
+//
+// ONE ID PER COLLECTION *PER LEVEL*, because a collection is now a level's
+// roster rather than a constant (rosterFor in that module): finishing the
+// AAA clubs and finishing the MLB clubs are two different completions and
+// each is owed its own single beat. `celebrationId` below builds the name.
+//
+// MLB KEEPS THE BARE ID — 'clubs', not 'clubs@1'. Those two strings are
+// already written into real users' localStorage under this key, and a rename
+// would silently un-celebrate a completed MLB shelf and replay its animation
+// on the next visit. The suffix exists only for the four levels that had no
+// id before.
+const COLLECTION_IDS = ['clubs', 'parks']
+const LEVEL_SPORT_IDS = [1, 11, 12, 13, 14]
+
+// The storage id for one collection at one level. sportId 1 is deliberately
+// the unsuffixed name — see above.
+export function celebrationId(collectionId, sportId = 1) {
+  return sportId === 1 ? collectionId : `${collectionId}@${sportId}`
+}
+
+export const MILESTONE_IDS = Object.freeze(
+  COLLECTION_IDS.flatMap((id) => LEVEL_SPORT_IDS.map((sportId) => celebrationId(id, sportId))),
+)
 
 export function isMilestoneId(id) {
   return typeof id === 'string' && MILESTONE_IDS.includes(id)
