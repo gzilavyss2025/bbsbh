@@ -51,8 +51,10 @@ don't run these by hand.
   by career WAR ("Made The Show", the last card on a MiLB team's Overview).
   **Runs directly after `gen-war.mjs` and depends on it**: the ranking is summed
   from `war.json` + the committed `war-history/` shards, so this generator makes
-  no WAR request of its own and a statsapi outage can't break it (it does mean
-  career WAR is 2010-on, understating a pre-2010 debut). Stints come from the
+  no WAR request of its own and a statsapi outage can't break it. That career sum
+  reached back only to 2010 until `gen-war-history.mjs` took its window to 1901,
+  which understated every pre-2010 debut; the next nightly run corrects the
+  ranking on its own. Stints come from the
   PLAYER side — `/people/{id}/stats?stats=yearByYear&sportId={11,12,13,14,16}`,
   one call per sport because a comma list silently returns zero stat groups — and
   are filtered to current affiliates via `affiliates.json`.
@@ -696,8 +698,14 @@ Re-run only to fold in a new season.
 
 - `gen-war-history.mjs` → `public/data/war-history/{NN}.json` (player-keyed, bucketed
   on `personId % 100` via the reader's `warShardKey`) — season WAR per player for
-  COMPLETED seasons (2010+), the multi-year companion to `war.json`. Same source
+  COMPLETED seasons (**1901+**), the multi-year companion to `war.json`. Same source
   (statsapi sabermetrics) and join. A finished season's WAR is immutable.
+  The window went back from 2010 to 1901 once the source was shown to be
+  CALIBRATED that far, not merely populated: sum every player's WAR in a season
+  and it tracks team count and schedule length in each era (1969 = 800.8 against
+  800 expected for 24 teams; the 1994 strike = 657.6 against 657 for 28 teams at
+  114 games; 2020 = 373.3 against 370 for 60 games). A player page fetches one
+  shard, which the deeper window grows from about 4 KB to about 18 KB.
 - `gen-awards-history.mjs` → `public/data/awards-history.json` — who won each major
   MLB award (MVP, Cy Young, Rookie of the Year, Silver Slugger, Gold Glove, Platinum
   Glove, Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente, All-MLB
