@@ -13,9 +13,13 @@ worktree, or a forgotten dev server.
 **Audience note: the maintainer is not a technical user.** Report outcomes in
 plain language, make the routine calls without asking, and end with a short list
 of what actually needs him. Don't present technical options or trade-offs — pick
-the sensible default and say what you did. Anything genuinely destructive or
-outward-facing (deleting worktrees, pushing, merging, deploying) still needs his
-explicit yes.
+the sensible default and say what you did. This includes clearing worktrees the
+`stale` heuristic clears (merged or upstream-deleted, and clean) and killing dev
+servers the `merged`/`orphaned` heuristic clears — do both automatically, no
+confirmation, as part of the routine. Anything outside that bar — an
+`active`/`fresh`/uncommitted-changes worktree, an `active (unmerged work)` dev
+server, or anything outward-facing (pushing, merging, deploying) — still needs
+his explicit yes.
 
 ## Steps
 
@@ -28,11 +32,24 @@ Run these in order, in the primary checkout (the repo root, not a task worktree)
    changes, don't touch it — report that instead, and say what the files are.
    `session-start.sh` also attempts this; doing it here is harmless and covers
    the case where the session started before a merge landed.
-3. **Worktrees.** Run `node scripts/worktrees.mjs`. Report the counts, not the
-   full table. If any are stale, don't remove them here — say how many and offer
-   `/clean-worktrees`, which asks before deleting anything.
-4. **Dev servers.** Run `node scripts/dev-servers.mjs`. Same treatment: report
-   stale ones and offer `/clean-dev-servers`. Never kill anything from here.
+3. **Worktrees.** Run `node scripts/worktrees.mjs`. For every entry it marks
+   stale (merged into `origin/main`, or upstream deleted, **and** clean — the
+   same bar `/clean-worktrees` uses), remove it now, no confirmation:
+   `git worktree remove <path>`, then `git branch -d <branch>` (fall back to
+   `-D` only for the upstream-deleted case, where the commits are in `main`
+   under a squash merge and `-d` can't prove it). Finish with
+   `git worktree prune`. Leave everything else alone — `active (unmerged
+   work)`, `active (never pushed)`, `merged, but has uncommitted changes`, and
+   `fresh (no commits yet)` are not safe to touch automatically; report those
+   counts instead (offer `/clean-worktrees` if the user wants to review them
+   by hand). Report how many worktrees were removed.
+4. **Dev servers.** Run `node scripts/dev-servers.mjs`. For every entry marked
+   `merged into origin/<branch>` or `orphaned (worktree deleted)`, kill it now,
+   no confirmation — macOS/Linux: `kill -TERM <pid>`, then `kill -9 <pid>` only
+   if it's still alive a couple seconds later; Windows: `taskkill /PID <pid>
+   /F`. Leave `active (unmerged work)` entries running — report them instead.
+   Re-run `node scripts/dev-servers.mjs` afterward to confirm the killed ones
+   are gone, and report how many were killed.
 5. **Open PRs.** `gh pr list --state open`. For each, note whether checks are
    passing and whether it's waiting on him (needs review/merge) or on an agent
    (in progress, changes requested). This is the part he most needs.
