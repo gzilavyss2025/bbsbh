@@ -10,7 +10,7 @@ export const rosterAgeEntry = {
   question:
     'Set against the rest of the league that same year, does a team with an older roster go further in the postseason? And does age tell the division winners apart from the clubs that sneak in on a wild card?',
   headline:
-    'Yes, and this one is not a fluke. The teams that go deep skew older than the rest of the league, and the gap is widest on the pitching staff — by the time you get to World Series winners it is roughly three times what it was at the door. But age stops mattering the moment a club is already in the tournament. And here is the thing to be careful about: a team that is already winning in July is exactly the team that goes out and rents a proven veteran at the trade deadline. That makes the roster older BECAUSE the team was good, not the other way around.',
+    'Yes, and this one is not a fluke. The teams that go deep run older than the rest of the league, and the gap is widest on the pitching staff — by the time you get to World Series winners it is roughly three times what it was at the door. But age stops mattering the moment a club is already in the tournament. And here is the thing to be careful about: a team that is already winning in July is exactly the team that goes out and rents a proven veteran at the trade deadline. That makes the roster older BECAUSE the team was good, not the other way around.',
   sections: [
     {
       id: 'the-numbers',

@@ -57,7 +57,7 @@ export const starDiversityEntry = {
   ],
   caveats: [
     'Nothing here says one thing caused the other. A spread-out lineup could mean a genuinely deep, well-built roster. Or it could just mean the club never had a true star at all, and its "diversity" is an absence rather than a strength. This spike cannot tell those two stories apart.',
-    'The pitching result is a real nothing at this sample size (450 team-seasons), not proof of an exact zero. The pitching measures missed the usual bar by close enough that a bigger pile of teams could plausibly tip one of them across it.',
+    'The pitching result is a real nothing across the 450 club seasons we had, not proof of an exact zero. The pitching measures missed the usual bar closely enough that a bigger pile of teams could plausibly tip one of them across it.',
     'war-history only covers 2010-2025 — six years short of even the homegrown spike\'s 2004 floor, and sixteen short of the ladder\'s own 2000-2025 window. It is the narrowest sample of any spike in this program so far. Same kind of borrowed-dataset window gap the homegrown spike hit, written down once in standingNotes.js rather than re-explained every time.',
     'The World Series cut (15 champions, 2010-2025) is this program\'s thinnest slice yet — six fewer champions than the roster-age spike had, nine fewer than the homegrown spike. Nothing at that cut can be told apart from noise.',
     'A traded player\'s season value was split between his two clubs by how much he played for each, because war-history carries no team-by-team number at all. That is a reasonable estimate, not a measured fact, and it assumes he was the same player at both stops.',

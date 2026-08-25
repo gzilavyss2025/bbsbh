@@ -34,7 +34,7 @@ export const debutMonthEntry = {
         'Before we get to pedigree at all, the plain answer to "what month do players debut" is worth having on its own, because it is not what most people would guess.',
       ],
       table: {
-        caption: 'Debut month, all 3,060 players',
+        caption: 'When a big-league career starts',
         columns: ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
         rows: [['1.9%', '20.0%', '15.6%', '14.8%', '12.4%', '16.0%', '19.0%']],
         note: 'Two humps and a trough. April and September are the busy months; July is the quietest. The last three tenths of a percent debut in October and are left off the table.',

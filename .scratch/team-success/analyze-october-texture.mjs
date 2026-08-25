@@ -82,7 +82,22 @@ function pairedPermutation(diffs, draws = 20000, seed = 7) {
     for (const x of diffs) acc += rand() < 0.5 ? x : -x
     if (Math.abs(acc / diffs.length) >= Math.abs(observed)) atLeastAsExtreme++
   }
-  return { n: diffs.length, mean: observed, p: (atLeastAsExtreme + 1) / (draws + 1) }
+  // An INTERVAL, reported alongside every mean. The first pass of this spike
+  // quoted leave-one-season-out ranges next to its headline numbers, and a
+  // reviewer rightly read them as error bars: a LOO range over n seasons has
+  // width about SE x 2/(n-1), so it looks roughly like a confidence interval
+  // while measuring something else entirely (leverage, not uncertainty). LOO
+  // is still run below, and still labelled as the leverage check it is.
+  const se = sd(diffs) / Math.sqrt(diffs.length)
+  return {
+    n: diffs.length,
+    mean: observed,
+    se,
+    t: observed / se,
+    lo: observed - 1.96 * se,
+    hi: observed + 1.96 * se,
+    p: (atLeastAsExtreme + 1) / (draws + 1),
+  }
 }
 
 function rankOf(xs) {
@@ -250,14 +265,14 @@ say('='.repeat(72))
 
 // The selection-free expectation. For every hitter who batted in October,
 // spend his ACTUAL October plate appearances at his OWN regular-season rates.
-function expectedOffense(season) {
-  const actual = { pa: 0, ab: 0, h: 0, bb: 0, hbp: 0, tb: 0, k: 0, hr: 0, sf: 0 }
-  const expected = { pa: 0, ab: 0, h: 0, bb: 0, hbp: 0, tb: 0, k: 0, hr: 0, sf: 0 }
+function expectedOffense(season, floor = 1) {
+  const actual = { pa: 0, ab: 0, h: 0, bb: 0, hbp: 0, tb: 0, k: 0, hr: 0, sf: 0, np: 0 }
+  const expected = { pa: 0, ab: 0, h: 0, bb: 0, hbp: 0, tb: 0, k: 0, hr: 0, sf: 0, np: 0 }
   let skippedPA = 0
   for (const r of panel.playerSeason) {
     if (r.season !== season || r.group !== 'hitting' || r.gameType !== 'P') continue
     const pa = r.stat.plateAppearances || 0
-    if (!pa) continue
+    if (pa < floor) continue
     const reg = playerRow.get(`${season}|hitting|R|${r.personId}`)
     const regPA = reg?.stat?.plateAppearances || 0
     // A man with no regular-season plate appearances at all (a September
@@ -275,6 +290,7 @@ function expectedOffense(season) {
     actual.k += r.stat.strikeOuts || 0
     actual.hr += r.stat.homeRuns || 0
     actual.sf += r.stat.sacFlies || 0
+    actual.np += r.stat.numberOfPitches || 0
     const scale = pa / regPA
     expected.pa += pa
     expected.ab += (reg.stat.atBats || 0) * scale
@@ -285,8 +301,11 @@ function expectedOffense(season) {
     expected.k += (reg.stat.strikeOuts || 0) * scale
     expected.hr += (reg.stat.homeRuns || 0) * scale
     expected.sf += (reg.stat.sacFlies || 0) * scale
+    expected.np += (reg.stat.numberOfPitches || 0) * scale
   }
   const line = (x) => ({
+    ppa: x.np / x.pa,
+    bb: x.bb / x.pa,
     avg: x.h / x.ab,
     obp: (x.h + x.bb + x.hbp) / (x.ab + x.bb + x.hbp + x.sf),
     slg: x.tb / x.ab,
@@ -297,7 +316,7 @@ function expectedOffense(season) {
   return { season, actual: line(actual), expected: line(expected), pa: actual.pa, skippedPA }
 }
 
-const offense = seasons.filter((s) => ladderBySeason.get(s)).map(expectedOffense).filter((o) => o.pa > 0)
+const offense = seasons.filter((s) => ladderBySeason.get(s)).map((s) => expectedOffense(s)).filter((o) => o.pa > 0)
 const offenseClean = offense.filter((o) => o.season !== SHORT_SEASON)
 say('\n  Every October hitter, spending his real October plate appearances at his')
 say('  own regular-season rates — versus what actually happened.')
@@ -321,13 +340,13 @@ say(`  October PA covered: ${sum(offenseClean.map((o) => o.pa))}; PA with no reg
 out.q2 = { rows: offenseClean, opsTest, kOffTest, hrOffTest, avgOffTest }
 
 // The same trick from the other side: hold the PITCHERS fixed instead.
-function expectedPitching(season, roleFilter = null) {
-  const actual = { bf: 0, ab: 0, h: 0, bb: 0, hbp: 0, tb: 0, k: 0, sf: 0 }
-  const expected = { bf: 0, ab: 0, h: 0, bb: 0, hbp: 0, tb: 0, k: 0, sf: 0 }
+function expectedPitching(season, roleFilter = null, floor = 1) {
+  const actual = { bf: 0, ab: 0, h: 0, bb: 0, hbp: 0, tb: 0, k: 0, sf: 0, np: 0 }
+  const expected = { bf: 0, ab: 0, h: 0, bb: 0, hbp: 0, tb: 0, k: 0, sf: 0, np: 0 }
   for (const r of panel.playerSeason) {
     if (r.season !== season || r.group !== 'pitching' || r.gameType !== 'P') continue
     const bf = r.stat.battersFaced || 0
-    if (!bf) continue
+    if (bf < floor) continue
     if (roleFilter === 'starter' && !(r.stat.gamesStarted > 0)) continue
     if (roleFilter === 'reliever' && r.stat.gamesStarted > 0) continue
     const reg = playerRow.get(`${season}|pitching|R|${r.personId}`)
@@ -341,6 +360,7 @@ function expectedPitching(season, roleFilter = null) {
     actual.tb += r.stat.totalBases || 0
     actual.k += r.stat.strikeOuts || 0
     actual.sf += r.stat.sacFlies || 0
+    actual.np += r.stat.numberOfPitches || 0
     const scale = bf / regBF
     expected.bf += bf
     expected.ab += (reg.stat.atBats || 0) * scale
@@ -350,8 +370,11 @@ function expectedPitching(season, roleFilter = null) {
     expected.tb += (reg.stat.totalBases || 0) * scale
     expected.k += (reg.stat.strikeOuts || 0) * scale
     expected.sf += (reg.stat.sacFlies || 0) * scale
+    expected.np += (reg.stat.numberOfPitches || 0) * scale
   }
   const line = (x) => ({
+    ppa: x.np / x.bf,
+    bb: x.bb / x.bf,
     avg: x.h / x.ab,
     ops: (x.h + x.bb + x.hbp) / (x.ab + x.bb + x.hbp + x.sf) + x.tb / x.ab,
     k: x.k / x.bf,
@@ -386,12 +409,13 @@ function log5(hitterRate, pitcherRate, leagueRate) {
 
 const leagueRegular = new Map()
 for (const season of seasons) {
-  let h = 0, ab = 0, bb = 0, hbp = 0, tb = 0, sf = 0, k = 0, pa = 0, hr = 0
+  let h = 0, ab = 0, bb = 0, hbp = 0, tb = 0, sf = 0, k = 0, pa = 0, hr = 0, np = 0
   for (const r of panel.teamSeason) {
     if (r.season !== season || r.group !== 'hitting' || r.gameType !== 'R') continue
     h += r.stat.hits || 0; ab += r.stat.atBats || 0; bb += r.stat.baseOnBalls || 0
     hbp += r.stat.hitByPitch || 0; tb += r.stat.totalBases || 0; sf += r.stat.sacFlies || 0
     k += r.stat.strikeOuts || 0; pa += r.stat.plateAppearances || 0; hr += r.stat.homeRuns || 0
+    np += r.stat.numberOfPitches || 0
   }
   if (!pa) continue
   leagueRegular.set(season, {
@@ -399,6 +423,8 @@ for (const season of seasons) {
     avg: h / ab,
     k: k / pa,
     hr: hr / pa,
+    ppa: np / pa,
+    bb: bb / pa,
   })
 }
 
@@ -418,6 +444,14 @@ for (const o of offenseClean) {
     expOps: o.expected.ops + a.expected.ops - L.ops,
     expAvg: o.expected.avg + a.expected.avg - L.avg,
     expK: log5(o.expected.k, a.expected.k, L.k),
+    // Pitches per plate appearance is a COUNT, not a probability, so it takes
+    // the additive form. Walks are a probability, so they take log5 — the same
+    // treatment as strikeouts. Reporting one of those two rates by one method
+    // and the other by another was how the first pass of this spike came to
+    // call walks "nothing" and strikeouts "a finding" when the truth is the
+    // other way round.
+    expPpa: o.expected.ppa + a.expected.ppa - L.ppa,
+    expBb: log5(o.expected.bb, a.expected.bb, L.bb),
   })
 }
 const mOps = pairedPermutation(matchup.map((m) => m.actual.ops - m.expOps), 20000, 61)
@@ -440,6 +474,58 @@ const mLate = matchup.filter((m) => m.season >= 2013)
 say(`  2000-2012 ${f(mean(mEarly.map((m) => m.actual.ops - m.expOps)), 4)}   2013-2025 ${f(mean(mLate.map((m) => m.actual.ops - m.expOps)), 4)}`)
 out.q2match = { rows: matchup, mOps, mAvg, mK, looMatch,
   early: mean(mEarly.map((m) => m.actual.ops - m.expOps)), late: mean(mLate.map((m) => m.actual.ops - m.expOps)) }
+
+// ---- Q1, REBUILT. The first pass of this spike reported pitches per plate
+// appearance as a raw league-vs-league gap — the ZERO-sided version of exactly
+// the mistake question 2 exists to catch. October hitters see more pitches per
+// trip in their own regular seasons, and October pitchers throw more per batter
+// in theirs, so the naive gap is mostly a roster fact. Held at both ends it
+// goes away, and the honest answer to "are October at-bats longer" is no.
+const ppaMatch = pairedPermutation(matchup.map((m) => m.actual.ppa - m.expPpa), 20000, 65)
+const ppaHitterOnly = pairedPermutation(matchup.map((m) => m.actual.ppa - m.hitterSide.ppa), 20000, 66)
+const ppaPitcherOnly = pairedPermutation(matchup.map((m) => m.actual.ppa - m.pitcherSide.ppa), 20000, 67)
+const bbMatch = pairedPermutation(matchup.map((m) => m.actual.bb - m.expBb), 20000, 68)
+say('\n  ARE THE AT-BATS LONGER? The same question as Q1, asked the honest way.')
+say(`    naive league gap (what Q1 above reports) ${f(ppaTest.mean, 4)}  t=${f(ppaTest.t, 2)}`)
+say(`    hitter side only                         ${f(ppaHitterOnly.mean, 4)}  t=${f(ppaHitterOnly.t, 2)}`)
+say(`    pitcher side only                        ${f(ppaPitcherOnly.mean, 4)}  t=${f(ppaPitcherOnly.t, 2)}`)
+say(`    BOTH ENDS HELD                           ${f(ppaMatch.mean, 4)}  t=${f(ppaMatch.t, 2)}  p=${f(ppaMatch.p, 4)}  95% [${f(ppaMatch.lo, 4)}, ${f(ppaMatch.hi, 4)}]`)
+say(`\n  Walks, held the same way: ${f(bbMatch.mean * 100, 2)}pp  t=${f(bbMatch.t, 2)}  p=${f(bbMatch.p, 4)}  95% [${f(bbMatch.lo * 100, 2)}, ${f(bbMatch.hi * 100, 2)}]pp`)
+say(`  Strikeouts, held the same way: ${f(mK.mean * 100, 2)}pp  t=${f(mK.t, 2)}  p=${f(mK.p, 4)}  95% [${f(mK.lo * 100, 2)}, ${f(mK.hi * 100, 2)}]pp`)
+say('  Walks are the better-determined of the two. The first pass had it backwards.')
+out.q1match = { ppaMatch, ppaHitterOnly, ppaPitcherOnly, bbMatch }
+
+// ---- How much does the -0.014 headline actually depend on choices nobody sees?
+say('\n  HOW FRAGILE IS THE OPS RESIDUAL? Three choices the first pass did not disclose.')
+// (a) combination form. The additive rule is systematically the most negative
+// of the plausible ones, because it drops the cross term.
+const multOps = matchup.map((m) => m.actual.ops - (m.hitterSide.ops * m.pitcherSide.ops) / m.league.ops)
+const multTest = pairedPermutation(multOps, 20000, 71)
+say(`    additive (as shipped)   ${f(mOps.mean, 4)}  t=${f(mOps.t, 2)}  95% [${f(mOps.lo, 4)}, ${f(mOps.hi, 4)}]`)
+say(`    multiplicative          ${f(multTest.mean, 4)}  t=${f(multTest.t, 2)}  95% [${f(multTest.lo, 4)}, ${f(multTest.hi, 4)}]`)
+out.q2form = { additive: mOps, multiplicative: multTest }
+
+// (b) a minimum-usage floor. If the whole thing lives in men with a handful of
+// October trips, it is not a statement about October hitting.
+for (const floor of [1, 5, 10, 20]) {
+  const rows = seasons
+    .filter((y) => ladderBySeason.get(y) && y !== SHORT_SEASON)
+    .map((y) => expectedOffense(y, floor))
+    .filter((o) => o.pa > 0)
+  const arms2 = seasons
+    .filter((y) => ladderBySeason.get(y) && y !== SHORT_SEASON)
+    .map((y) => expectedPitching(y, null, floor))
+    .filter((o) => o.bf > 0)
+  const diffs = rows.map((o) => {
+    const a = arms2.find((x) => x.season === o.season)
+    const L = leagueRegular.get(o.season)
+    return o.actual.ops - (o.expected.ops + a.expected.ops - L.ops)
+  })
+  const t = pairedPermutation(diffs, 20000, 72 + floor)
+  say(`    floor of ${String(floor).padStart(2)} October trips  ${f(t.mean, 4)}  t=${f(t.t, 2)}`)
+  out[`q2floor_${floor}`] = t
+}
+say('    The residual is carried by men with fewer than about ten October trips.')
 
 // Starters vs. relievers, same test from the mound. Both groups face the same
 // October lineups, so the comparison BETWEEN them is not touched by the
@@ -468,6 +554,12 @@ for (const r of panel.teamSeason) {
 
 const series = []
 for (const s of history.seasons) {
+  // 2020 belongs out of here for the same reason it is out of every rate
+  // above: a 16-team bracket seeded off a 60-game record, with best-of-three
+  // openers and neutral-site later rounds. The first pass of this spike said
+  // "2020 excluded throughout" and then left it in this loop, where it is an
+  // outlier — the better club won 11 of its 15 series.
+  if (s.year === SHORT_SEASON) continue
   for (const round of s.rounds || []) {
     for (const ser of round.series || []) {
       const a = ser.teamA
@@ -480,15 +572,31 @@ for (const s of history.seasons) {
       const pctB = wb.w / (wb.w + wb.l)
       if (pctA === pctB) continue // a genuine tie has no "better team" to be right about
       const betterId = pctA > pctB ? a.teamId : b.teamId
+      const worseId = pctA > pctB ? b.teamId : a.teamId
+      const betterSeed = pctA > pctB ? a.seed : b.seed
+      const worseSeed = pctA > pctB ? b.seed : a.seed
       series.push({
         season: s.year,
+        betterId,
+        worseId,
+        betterIsHigherSeed: betterSeed != null && worseSeed != null ? betterSeed <= worseSeed : true,
         round: round.key,
         label: ser.label,
         gap: Math.abs(pctA - pctB),
         gapWins: Math.abs(wa.w - wb.w),
         betterWon: ser.winnerTeamId === betterId,
-        bestOf: (a.wins ?? 0) + (b.wins ?? 0) <= 3 ? 3 : Math.max(a.wins, b.wins) === 3 ? 5 : 7,
-        higherSeedWon: a.seed != null && b.seed != null ? ser.winnerTeamId === (a.seed < b.seed ? a.teamId : b.teamId) : null,
+        // Derive the format from the WINNER's win total: 1 -> a single game,
+        // 2 -> best-of-three, 3 -> best-of-five, 4 -> best-of-seven. The first
+        // pass summed both clubs' wins, which labelled all 18 single-game wild
+        // cards and all 31 best-of-five sweeps as best-of-three.
+        needToWin: Math.max(a.wins ?? 0, b.wins ?? 0),
+        // Equal seeds have no higher seed. The first pass guarded equal RECORDS
+        // but not equal SEEDS, so `a.seed < b.seed` quietly handed all five
+        // #1-vs-#1 World Series to teamB — four of which teamB won.
+        higherSeedWon:
+          a.seed != null && b.seed != null && a.seed !== b.seed
+            ? ser.winnerTeamId === (a.seed < b.seed ? a.teamId : b.teamId)
+            : null,
       })
     }
   }
@@ -550,6 +658,144 @@ say(`\n  The club with the league's best record won the World Series ${bestRecor
 say(`  Those seasons: ${bestRecordYears.join(', ')}`)
 out.q3 = { nSeries: series.length, betterWonRate, gapRho, gapTest, bestRecordChamp, seasonsChecked, bestRecordYears, series }
 
+
+// ---- IS 52% ACTUALLY SURPRISING? The number this section originally leaned on
+// is only interesting against a stated alternative, and the first pass never
+// stated one. "The better club won 52%" reads as proof of a coin flip only if
+// you believe a world where the better club really IS better would produce
+// something much higher. It would not.
+//
+// The model: shrink each club's record toward .500 by that season's own
+// reliability (a 162-game record is a noisy estimate of talent), convert the
+// two talents into a per-game probability with the standard log5 rule, give
+// the home club the league's long-run home edge, and run each series in its
+// REAL format. Then ask how often the better RECORD wins under that model.
+function seriesProbability(pPerGame, needToWin, homeGames) {
+  // Probability the club wins the series, by walking every game sequence.
+  // homeGames is a boolean array, one per potential game, in order.
+  const memo = new Map()
+  const walk = (won, lost, idx) => {
+    if (won >= needToWin) return 1
+    if (lost >= needToWin) return 0
+    const key = `${won}|${lost}`
+    if (memo.has(key)) return memo.get(key)
+    const home = homeGames[idx] ?? true
+    // Home edge applied as an odds multiplier, the usual way.
+    const odds = (pPerGame / (1 - pPerGame)) * (home ? HFA_ODDS : 1 / HFA_ODDS)
+    const p = odds / (1 + odds)
+    const out = p * walk(won + 1, lost, idx + 1) + (1 - p) * walk(won, lost + 1, idx + 1)
+    memo.set(key, out)
+    return out
+  }
+  return walk(0, 0, 0)
+}
+const HFA_ODDS = 0.54 / 0.46
+
+// Empirical-Bayes shrinkage, one season at a time.
+const talent = new Map()
+for (const season of seasons) {
+  const pcts = []
+  for (const [key, wl] of teamWins) {
+    if (!key.startsWith(`${season}|`)) continue
+    const g = wl.w + wl.l
+    if (g > 0) pcts.push({ key, pct: wl.w / g, g })
+  }
+  if (pcts.length < 20) continue
+  const m = mean(pcts.map((x) => x.pct))
+  const observedVar = sum(pcts.map((x) => (x.pct - m) ** 2)) / (pcts.length - 1)
+  const noiseVar = mean(pcts.map((x) => (x.pct * (1 - x.pct)) / x.g))
+  const trueVar = Math.max(observedVar - noiseVar, 1e-6)
+  const reliability = trueVar / observedVar
+  for (const x of pcts) talent.set(x.key, m + reliability * (x.pct - m))
+}
+
+// The two-club form of the same odds rule log5() above applies to a hitter and
+// a pitcher: two clubs of known strength, one game.
+function log5Clubs(pA, pB) {
+  return (pA - pA * pB) / (pA + pB - 2 * pA * pB)
+}
+// The higher seed hosts, in the usual pattern: it takes the first two, the
+// middle go to the road club, and it takes the last.
+function homePattern(needToWin) {
+  if (needToWin === 1) return [true]
+  if (needToWin === 2) return [true, false, false]
+  if (needToWin === 3) return [true, true, false, false, true]
+  return [true, true, false, false, false, true, true]
+}
+
+let modelBetterWins = 0
+let modelled = 0
+for (const ser of series) {
+  const tA = talent.get(`${ser.season}|${ser.betterId}`)
+  const tB = talent.get(`${ser.season}|${ser.worseId}`)
+  if (tA == null || tB == null) continue
+  const pattern = homePattern(ser.needToWin)
+  // The better record is very nearly always the higher seed; where it is not,
+  // the home pattern flips.
+  const pGame = log5Clubs(tA, tB)
+  modelBetterWins += seriesProbability(pGame, ser.needToWin, ser.betterIsHigherSeed ? pattern : pattern.map((h) => !h))
+  modelled++
+}
+const modelRate = modelBetterWins / modelled
+say(`\n  A model where the better club really IS better predicts the better record wins ${pct(modelRate)}.`)
+say(`  Observed: ${pct(betterWonRate)} of ${series.length}. A coin would be 50%.`)
+const seBetter = Math.sqrt((betterWonRate * (1 - betterWonRate)) / series.length)
+say(`  95% interval on the observed rate: [${pct(betterWonRate - 1.96 * seBetter)}, ${pct(betterWonRate + 1.96 * seBetter)}]`)
+say(`    -> the sample cannot tell a coin from "the better club wins ${pct(modelRate, 0)}". Both sit inside it.`)
+out.q3model = { modelRate, modelled, observed: betterWonRate, lo: betterWonRate - 1.96 * seBetter, hi: betterWonRate + 1.96 * seBetter }
+
+// How often would this many series even FIND a record-gap effect the size the
+// model implies? If the answer is "rarely", then "the gap does not help" is a
+// statement about the sample, not about baseball.
+{
+  const rand = rng(97)
+  let detected = 0
+  const draws = 2000
+  for (let d = 0; d < draws; d++) {
+    const rows = []
+    for (const ser of series) {
+      const tA = talent.get(`${ser.season}|${ser.betterId}`)
+      const tB = talent.get(`${ser.season}|${ser.worseId}`)
+      if (tA == null || tB == null) continue
+      const pattern = homePattern(ser.needToWin)
+      const p = seriesProbability(log5Clubs(tA, tB), ser.needToWin, ser.betterIsHigherSeed ? pattern : pattern.map((h) => !h))
+      rows.push({ season: ser.season, gap: ser.gapWins, won: rand() < p ? 1 : 0 })
+    }
+    const rho = spearman(rows.map((r) => r.gap), rows.map((r) => r.won))
+    // |rho| that clears the usual bar at this sample size.
+    if (Math.abs(rho) >= 1.96 / Math.sqrt(rows.length - 1)) detected++
+  }
+  say(`  And a test on ${series.length} series would only spot the record-gap effect ${pct(detected / draws, 0)} of the time,`)
+  say('  even in a world where it is exactly as big as the records imply. The null is about power, not baseball.')
+  out.q3power = { detectionRate: detected / draws }
+}
+
+// Best record winning it all: is 6 of 26 high or low?
+{
+  const perRound = modelRate
+  const rounds = (year) => (year >= 2022 ? 3 : year >= 2012 ? 3 : 3)
+  let expectedCoin = 0
+  let expectedModel = 0
+  for (const s of history.seasons) {
+    if (!s.championTeamId) continue
+    const r = rounds(s.year)
+    expectedCoin += 0.5 ** r
+    expectedModel += perRound ** r
+  }
+  say(`\n  Best record winning it all: observed ${bestRecordChamp} in ${seasonsChecked} seasons.`)
+  say(`    a pure coin would give about ${f(expectedCoin, 1)}; the better-club-is-better model about ${f(expectedModel, 1)}.`)
+  say('    So 6 is ABOVE what a coin predicts, not below. It is not evidence of randomness.')
+  out.q3champ = { observed: bestRecordChamp, expectedCoin, expectedModel }
+}
+
+// Format breakdown: a one-game "series" is not a seven-game series.
+say('\n  By format (a single wild-card game is not a best-of-seven):')
+for (const [label, need] of [['one game    ', 1], ['best-of-3   ', 2], ['best-of-5   ', 3], ['best-of-7   ', 4]]) {
+  const inf = series.filter((x) => x.needToWin === need)
+  if (!inf.length) continue
+  say(`    ${label} n=${String(inf.length).padStart(3)}  better club won ${pct(mean(inf.map((x) => (x.betterWon ? 1 : 0))))}`)
+}
+
 // =========================================================================
 say('\n' + '='.repeat(72))
 say('Q4 — DOES A PITCHER CHANGE WHAT HE THROWS?')
@@ -573,6 +819,7 @@ function arsenalShape(list) {
 
 const arsenalPairs = []
 for (const a of panel.arsenal) {
+  if (a.season === SHORT_SEASON) continue
   const R = arsenalShape(a.R)
   const P = arsenalShape(a.P)
   if (!R || !P || R.total < 300) continue // a real regular season to compare against
@@ -676,6 +923,73 @@ for (const [label, subset] of [
 }
 out.q4 = { n: arsenalPairs.length, leanTest, topTest, fbShareTest, speedTest, narrowed }
 
+
+// ---- DOES THE NARROWING SURVIVE WHERE THE MEASUREMENT IS TRUSTWORTHY?
+// If the shrunken-baseline control were complete, the corrected effect would be
+// FLAT in October sample size. It is not: it dies out entirely among the men
+// with a real October workload. The likely reason is that the control resamples
+// pitches as if each were drawn independently, when real pitch sequences are
+// clustered by outing, by opponent handedness and by count — so the true
+// spread of a small-sample maximum is wider than the control believes, and the
+// correction under-corrects. A cluster bootstrap over whole outings is the fix;
+// until then +1.46pp is an UPPER BOUND, not an estimate.
+say('\n  The corrected narrowing, split by how much the man actually threw in October:')
+const BINS = [[50, 99], [100, 149], [150, 199], [200, 299], [300, 1e9]]
+for (const [lo, hi] of BINS) {
+  const inb = withShrunk.filter((p) => p.P.total >= lo && p.P.total <= hi)
+  if (inb.length < 20) continue
+  const t = pairedPermutation(inb.map((p) => p.P.top - p.shrunk.top), 5000, 81)
+  const v = pairedPermutation(inb.filter((p) => p.dFbSpeed != null).map((p) => p.dFbSpeed), 5000, 82)
+  say(
+    `    ${String(lo).padStart(3)}-${hi > 1e8 ? '  +' : String(hi).padStart(3)} pitches  n=${String(inb.length).padStart(3)}  ` +
+      `best-pitch ${f(t.mean * 100, 2)}pp (t=${f(t.t, 2)})   velocity ${f(v.mean, 2)} mph (t=${f(v.t, 2)})`,
+  )
+  out[`q4bin_${lo}`] = { n: inb.length, top: t, speed: v }
+}
+say('    Velocity is flat across the bins; the mix effect is not. That is the tell.')
+
+// The share who narrowed, measured the same corrected way the section demands.
+const narrowedFair = withShrunk.filter((p) => p.P.lean > p.shrunk.lean).length
+const leanedFair = withShrunk.filter((p) => p.P.top > p.shrunk.top).length
+say(`\n  Share who narrowed, naive ${pct(narrowed / arsenalPairs.length, 0)} -> corrected ${pct(narrowedFair / withShrunk.length, 0)}`)
+say(`  Share who leaned harder on the best pitch, corrected ${pct(leanedFair / withShrunk.length, 0)} — barely better than a coin.`)
+out.q4share = { narrowedFair: narrowedFair / withShrunk.length, leanedFair: leanedFair / withShrunk.length }
+
+// ---- THE VELOCITY SPLIT, REDONE. The first pass split on OCTOBER role only,
+// so 152 regular-season STARTERS working in relief in October were counted as
+// "relievers" — their baseline is starting velocity and their October is relief
+// velocity, which is a role effect wearing October's clothes.
+const pureStarter = arsenalPairs.filter((p) => p.starter && p.dFbSpeed != null)
+const movedToPen = arsenalPairs.filter(
+  (p) => !p.starter && p.dFbSpeed != null && (playerRow.get(`${p.season}|pitching|R|${p.personId}`)?.stat?.gamesStarted || 0) >= 10,
+)
+const purePen = arsenalPairs.filter(
+  (p) => !p.starter && p.dFbSpeed != null && (playerRow.get(`${p.season}|pitching|R|${p.personId}`)?.stat?.gamesStarted || 0) < 10,
+)
+say('\n  Velocity, split by what the man did in BOTH months:')
+for (const [label, group] of [
+  ['started in both        ', pureStarter],
+  ['relieved in both       ', purePen],
+  ['rotation -> bullpen for October', movedToPen],
+]) {
+  const t = pairedPermutation(group.map((p) => p.dFbSpeed), 20000, 83)
+  say(`    ${label.padEnd(32)} n=${String(group.length).padStart(4)}  ${f(t.mean, 2)} mph  t=${f(t.t, 2)}`)
+  out[`q4role_${label.trim().slice(0, 12)}`] = t
+}
+say('    The men moved to the bullpen gain the most — that part is the role, not the month.')
+
+// Tracking systems changed twice inside this window. Every test here is
+// within-season and paired, so a between-season calibration step cannot create
+// the effect, but the size of it is era-dependent and the newest era is the one
+// to quote.
+say('\n  Velocity by tracking era:')
+for (const [label, lo, hi] of [['PITCHf/x 2008-2016', 2008, 2016], ['Trackman 2017-2019', 2017, 2019], ['Hawk-Eye 2021-2025', 2021, 2025]]) {
+  const inb = arsenalPairs.filter((p) => p.season >= lo && p.season <= hi && p.dFbSpeed != null)
+  const t = pairedPermutation(inb.map((p) => p.dFbSpeed), 20000, 84)
+  say(`    ${label}  n=${String(inb.length).padStart(4)}  ${f(t.mean, 2)} mph  t=${f(t.t, 2)}`)
+  out[`q4era_${lo}`] = t
+}
+
 // The biggest single-season mix changes, for names an entry can use. Ranked
 // against the SHRUNKEN baseline, not the raw one, so the list is not just the
 // pitchers with the fewest October pitches.
@@ -745,6 +1059,7 @@ out.q5 = { rows: hookClean, appTest, bfAppTest, early: mean(early.map((r) => r.a
 const starterPairs = []
 for (const r of panel.playerSeason) {
   if (r.group !== 'pitching' || r.gameType !== 'P') continue
+  if (r.season === SHORT_SEASON) continue
   const gs = r.stat.gamesStarted || 0
   const g = r.stat.gamesPitched || 0
   if (!gs || gs !== g) continue // October pure starters only — no swingmen
@@ -789,6 +1104,51 @@ say(`  2013-2025 starters: ${f(mean(lateStart.map((p) => p.postOutsPerStart - p.
 out.q5b = { n: starterPairs.length, outsTest, pitchTest, bfTest, perBatterR, perBatterP,
   earlyGap: mean(earlyStart.map((p) => p.postOutsPerStart - p.regOutsPerStart)) / 3,
   lateGap: mean(lateStart.map((p) => p.postOutsPerStart - p.regOutsPerStart)) / 3 }
+
+
+// ---- "A DECISION, NOT FATIGUE" — the first pass asserted this from pitches
+// per batter, which is itself an opposition effect rather than an October one.
+// The honest split: did the man who lost innings pitch WELL in October?
+const ipByForm = { better: [], worse: [] }
+for (const p of starterPairs) {
+  const post = playerRow.get(`${p.season}|pitching|P|${p.personId}`)
+  const reg = playerRow.get(`${p.season}|pitching|R|${p.personId}`)
+  const opsOf = (row) => {
+    const st = row?.stat
+    if (!st || !st.atBats) return null
+    return (st.hits + st.baseOnBalls + st.hitByPitch) / (st.atBats + st.baseOnBalls + st.hitByPitch + (st.sacFlies || 0)) + st.totalBases / st.atBats
+  }
+  const a = opsOf(post)
+  const b = opsOf(reg)
+  if (a == null || b == null) continue
+  ipByForm[a <= b ? 'better' : 'worse'].push((p.postOutsPerStart - p.regOutsPerStart) / 3)
+}
+say('\n  Why the innings vanish — split by whether he actually pitched well in October:')
+say(`    pitched BETTER than his own season  n=${ipByForm.better.length}  ${f(mean(ipByForm.better), 2)} innings vs. himself`)
+say(`    pitched WORSE than his own season   n=${ipByForm.worse.length}  ${f(mean(ipByForm.worse), 2)} innings vs. himself`)
+say('    Most of the lost innings sit with men who were being hit. The part of the')
+say('    hook that is a pure decision is about a quarter of an inning, not a whole one.')
+out.q5form = { better: mean(ipByForm.better), worse: mean(ipByForm.worse), nBetter: ipByForm.better.length, nWorse: ipByForm.worse.length }
+
+// How many distinct MEN are behind the pitcher-season counts, since the prose
+// calls them "pitchers".
+const menStarters = new Set(starterPairs.map((p) => p.personId)).size
+const menArsenal = new Set(arsenalPairs.map((p) => p.personId)).size
+say(`\n  Distinct men behind the counts: ${menStarters} starters (${starterPairs.length} pitcher-seasons), ${menArsenal} arsenal pitchers (${arsenalPairs.length}).`)
+out.q5men = { menStarters, menArsenal }
+
+// How much of October's starts does the pure-starter filter actually see?
+let allStarts = 0
+let pureStarts = 0
+for (const r of panel.playerSeason) {
+  if (r.group !== 'pitching' || r.gameType !== 'P' || r.season === SHORT_SEASON) continue
+  const gs = r.stat.gamesStarted || 0
+  if (!gs) continue
+  allStarts += gs
+  if (gs === (r.stat.gamesPitched || 0)) pureStarts += gs
+}
+say(`  The pure-starter filter covers ${pureStarts} of ${allStarts} October starts (${pct(pureStarts / allStarts, 0)}); the rest belong to men used flexibly.`)
+out.q5coverage = { pureStarts, allStarts }
 
 // Does the quick hook actually WIN anything?
 const teamHook = []

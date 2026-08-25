@@ -109,201 +109,216 @@ Velocity is a mean, not a maximum, and is not subject to this bias.
 
 ## Findings
 
-### 1. At-bats are longer, by a little
+> **Read the method note above first.** Two findings from this spike's first
+> pass are retracted below rather than reported: "October at-bats are longer"
+> and "the October strikeout surge is entirely the opposition." Both fell to
+> this spike's own matchup rule.
 
-League pitches per plate appearance, 3.827 regular season → 3.865 October.
-Mean paired gap **+0.0373** (p=0.0031, n=25 seasons; longer in 17 of 25;
-leave-one-season-out range [+0.0341, +0.0417]). Including 2020 changes it to
-+0.0375 (p=0.0019).
+### 1. At-bats are NOT longer — the first pass got this wrong
 
-That is one extra pitch roughly every 27 plate appearances — about 1.4 extra
-pitches per team per game. Real, small, and not the thing a viewer is
-noticing.
+| Pitches per plate appearance | mean gap | t |
+| --- | --- | --- |
+| Naive league-vs-league (**what the first pass reported**) | +0.0373 | +3.44 |
+| Hitter-side expectation only | +0.0210 | +2.70 |
+| Pitcher-side expectation only | +0.0073 | +0.62 |
+| **Both ends of the matchup held** | **−0.0090** | **−1.05** |
 
-Strikeouts per plate appearance are **+2.04pp** in October (p<0.0001). Walks
-are **+0.25pp** (p=0.1163) — nothing.
+95% [−0.0259, +0.0078], p=0.3033, n=25 seasons.
 
-### 2. The bats do go quiet, but most of it is who is pitching
+The naive gap is the **zero-sided** version of exactly the error finding 2
+exists to catch. October hitters already see more pitches per trip in their own
+regular seasons, and October pitchers already throw more per batter in theirs.
+Hold both and the effect is gone. **The extra pitch per plate appearance is a
+roster fact, not an October fact.**
+
+### 2. Walks, not strikeouts, are October's plate-discipline story
+
+Both rates by the same log5 method. The first pass used log5 for strikeouts and
+the naive gap for walks, which inverted the conclusion.
+
+| Per plate appearance, matchup held | mean | t | 95% |
+| --- | --- | --- | --- |
+| **Walks** | **+0.492pp** | **+3.54** | [+0.22, +0.76] |
+| Strikeouts | +0.398pp | +1.65 | [−0.08, +0.87] |
+
+The raw uncontrolled October strikeout gap is +2.04pp, so the matchup accounts
+for roughly four-fifths of it — but the interval leaves anywhere from about
+half to all. **"Entirely the opposition" is not supported and is not claimed.**
+
+### 3. The hitting dip is small, and its sign is not settled
 
 | Test | Mean gap | p |
 | --- | --- | --- |
-| Hitters vs. own regular season (one-sided, **do not quote**) | −0.0882 OPS | <0.0001 |
-| Pitchers vs. own regular season (one-sided, **do not quote**) | +0.0366 OPS allowed | 0.0005 |
-| **Both ends of the matchup held** | **−0.0141 OPS** | **0.0413** |
-| Both ends held, batting average | −0.0082 | 0.0019 |
-| Both ends held, strikeout rate | +0.40pp | **0.1111** |
+| Hitters vs. own regular season (one-sided, **never quote**) | −0.0882 OPS | <0.0001 |
+| Pitchers vs. own regular season (one-sided, **never quote**) | +0.0366 OPS allowed | 0.0005 |
+| Both ends held, additive | −0.0141 | 0.0413 |
+| Both ends held, multiplicative | **−0.0089** | **0.1863** |
 
-Leave-one-season-out on the both-sides OPS gap: [−0.0178, −0.0116]. Below the
-line in 16 of 25 seasons. Stable across eras (2000-2012 −0.0138, 2013-2025
-−0.0145).
+**Three undisclosed choices move it by more than its own size**:
 
-Two things fall out of this that a reader would not guess:
-
-- **The October strikeout surge is entirely the opposition.** Once both ends
-  are held, it is +0.40pp and indistinguishable from zero. October hitters
-  strike out more because the men on the mound are better, not because of the
-  month.
-- **The residual is small.** 14 points of OPS is the difference between a
-  .700 and a .714 hitter.
-
-Splitting the October arms by role (both groups face the same lineups, so the
-comparison *between* them is clean even though each number alone carries the
-opposition problem): **starters +0.0361** OPS allowed vs. their own season
-(p=0.0007), **relievers +0.0390** (p=0.0001). Nearly identical. The popular
-"October is decided by bullpens" story does not show up here as a difference
-in how the two groups perform relative to themselves.
-
-### 3. A postseason series is close to a coin flip
-
-213 series (2000-2025) between clubs with different regular-season records.
-
-| Cut | Better club won |
-| --- | --- |
-| All 213 series | **52.1%** |
-| Higher seed (n=213) | 52.6% |
-| 1-3 games better (n=64) | 48.4% |
-| 4-7 games better (n=87) | 52.9% |
-| 8-12 games better (n=39) | 61.5% |
-| 13+ games better (n=21) | 47.6% |
-| Wild Card round (n=37) | 48.6% |
-| Division Series (n=101) | 50.5% |
-| Championship Series (n=50) | 58.0% |
-| World Series (n=25) | 52.0% |
-
-Size of the record gap vs. whether the better club won: Spearman rho=0.0497,
-permutation p=0.4241 (within-season shuffle). **Being much better does not
-measurably help.**
-
-The club with the best record in the majors won the World Series **6 times in
-26 seasons** (2007, 2009, 2016, 2018, 2020, 2024).
-
-This is the cleanest possible restatement of the null that spikes #1-#4 kept
-finding on "advancing once you are in." Those spikes could not separate the
-deep runs from the early exits on any roster trait. This one says why: there
-is very little there to separate.
-
-### 4. Pitchers throw harder and narrower
-
-1,164 pitcher-seasons with a full arsenal on both sides, 2008-2025.
-
-| Measure | October vs. own regular season | p |
+| Minimum October usage | residual | t |
 | --- | --- | --- |
-| Fastball velocity | **+0.52 mph** | <0.0001 |
-| Best-pitch share, naive | +1.94pp | <0.0001 |
-| **Best-pitch share, small-sample corrected** | **+1.46pp** | **<0.0001** |
-| Squared-share concentration, corrected | +0.0195 | <0.0001 |
-| Pitch types used ≥10% of the time, corrected | −0.138 | <0.0001 |
-| Fastball share of all pitches | +0.02pp | **0.9286** |
+| ≥1 PA/BF (as shipped) | −0.0141 | −2.14 |
+| ≥5 | −0.0111 | −1.60 |
+| ≥10 | −0.0057 | −0.81 |
+| ≥20 | **+0.0081** | **+1.07** |
 
-Starters +0.52 mph, relievers +0.51 mph — the velocity jump is not a
-composition effect from more relief innings; it is the same men throwing
-harder. Starters +1.83pp best-pitch share, relievers +2.04pp (naive figures).
+The residual is carried entirely by participants with fewer than ten October
+trips. And the realized-PA weighting is **endogenous**: clubs whose October
+went well batted more, so the sample over-weights the good Octobers, and
+weighting clubs equally makes the dip larger. **Report this as "the famous
+collapse is mostly the opposition, and what is left is between a small dip and
+nothing" — not as a number.**
 
-**Pitchers do not throw more fastballs in October. They throw fewer different
-things.** The fastball share is flat to four decimal places while the mix
-concentrates — the change is dropping a fourth and fifth pitch, not reaching
-for the heater.
+Role split (each group against its own regular season; the *between*-group
+comparison is clean): starters +0.0361 (p=0.0007), relievers +0.0390
+(p=0.0001). Neither departs from its own form more than the other.
 
-Biggest real single-October leans (200+ October pitches, ranked against the
-shrunken baseline): Sean Manaea 2024 (31% → 55%), Johnny Cueto 2015 (30% →
-51%), Yordano Ventura 2015 (33% → 54%), David Peterson 2024 (31% → 49%),
-Lance McCullers Jr. 2022 (25% → 43%).
+### 4. Pitchers throw harder; the mix narrows only in short outings
 
-### 5. The hook is much quicker — and it does not win anything
+Velocity **+0.516 mph** (t=16.16, n=1,074 pitcher-seasons from 589 men), a
+*mean* and so not subject to the maximum bias.
 
-League pitchers used per club per game: regular season → October, **+0.514**
-(p<0.0001, more in 24 of 25 seasons, LOO [0.491, 0.545]). Batters faced per
-appearance: **−1.05** (p<0.0001).
+| Role, measured across BOTH months | n | velocity |
+| --- | --- | --- |
+| Started in both | 537 | +0.53 |
+| Relieved in both | 455 | +0.41 |
+| Rotation → bullpen for October | 82 | **+1.02** |
 
-Same pitcher, same year — 655 pitcher-seasons who started in October and
-started all year:
+The first pass split on **October role only**, so 82 regular-season starters
+working October relief were counted as "relievers" — a role effect wearing
+October's clothes. By tracking era: PITCHf/x 2008-2016 +0.64, Trackman
+2017-2019 +0.43, Hawk-Eye 2021-2025 **+0.39**. Quote the newest.
+
+**The mix narrowing does not survive where the measurement is trustworthy:**
+
+| October pitches | n | corrected best-pitch share | t |
+| --- | --- | --- | --- |
+| 50-99 | 497 | +2.07pp | 5.13 |
+| 100-149 | 200 | +1.92pp | 3.34 |
+| 150-199 | 129 | +1.01pp | 1.51 |
+| 200-299 | 138 | +0.68pp | 1.18 |
+| **300+** | 108 | **+0.32pp** | **0.47** |
+
+A complete correction would be flat in sample size. Velocity *is* flat across
+the same bins (0.53/0.44/0.47/0.59/0.58), so this is specific to the mix
+statistics. The multinomial control treats pitches as independent when real
+sequences cluster by outing, handedness and count, so it **under-corrects**.
+The pooled +1.56pp is an **upper bound**; the fix is a cluster bootstrap over
+whole outings.
+
+Corrected shares: 61% narrowed the mix, 56% leaned harder on the best pitch —
+barely a coin. Fastball share +0.13pp (p=0.5884, 95% [−0.36, +0.62]): they do
+not reach for the heater.
+
+### 5. The quick hook is real, growing, and mostly not a decision
+
+League: pitcher appearances per club-game **+0.514** (t=8.26, 24 of 25
+seasons); batters faced per appearance −1.05.
+
+Paired starters (n=627 pitcher-seasons from **326 men**, 2020 excluded):
 
 | | Regular season | October | Gap |
 | --- | --- | --- | --- |
-| Innings per start | 6.11 | 5.08 | **−1.04** (p<0.0001) |
-| Pitches per start | 96.3 | 83.9 | −12.4 (p<0.0001) |
-| Batters per start | — | — | −3.40 (p<0.0001) |
-| Pitches per batter faced | 3.82 | 3.85 | +0.03 |
+| Innings per start (**decimal**, not ⅓ notation) | 6.13 | 5.09 | −1.04 |
+| Pitches per start | 96.6 | 84.0 | −12.56 |
 
-That last row is the tell: **each batter costs the starter more pitches, and
-he still throws twelve fewer, because he faces three and a half fewer men.**
-The shorter outing is a decision, not fatigue.
+Era: **−0.85 IP** (2000-2012) → **−1.24 IP** (2013-2025). That trend is the
+strongest evidence here that October managing genuinely changed.
 
-And it is growing. Extra pitchers per game in October: **+0.37** in 2000-2012,
-**+0.67** in 2013-2025. Starter innings lost against his own season: **−0.85**
-(2000-2012, n=321) → **−1.21** (2013-2025, n=334). Managers manage October
-differently than they did, and more differently every era.
+**But "a decision, not fatigue" is retracted.** Splitting by October form:
 
-**Does it work?** Among the 233 clubs that reached October:
+| | n | innings lost vs. his own season |
+| --- | --- | --- |
+| Pitched at or better than his own season | 259 | **−0.24** |
+| Pitched worse | 368 | **−1.61** |
 
-| | Raw rho vs. ladder | p | Holding October volume fixed | p |
-| --- | --- | --- | --- | --- |
-| Starter innings per start | +0.2812 | <0.0001 | **+0.0097** | 0.8699 |
-| Pitchers used per game | −0.2382 | <0.0001 | **+0.0300** | 0.8156 |
+Most of the lost innings belong to a starter being hit, not to a manager with a
+plan. The pure managerial component is about a quarter of an inning. The first
+pass's tell (pitches per batter 3.82 → 3.85) is itself an opposition effect.
 
-This is the trap from `docs/team-success-postseason-usage.md` firing again,
-exactly as the framework predicted it would. Raw, it looks like a strong
-finding in both directions — long starts go deep, quick hooks go home. Both
-collapse to nothing once you hold fixed how much October baseball the club
-actually played. A club that plays twenty games got there by winning, and
-winning teams get more innings out of the starters they let finish.
+Filter coverage: 1,395 of 1,772 October starts (79%). The excluded starts
+belong disproportionately to flexibly-used staffs — the treatment itself.
 
-**Quick hooks are a real, growing, measurable change in how October is
-managed, and there is no evidence in 233 team-seasons that it wins or loses a
-single series.**
+**Does it win anything?**
 
-### 6. Does the quick hook explain the quiet bats?
+| | Raw rho | Partial rho (October volume held) | 95% |
+| --- | --- | --- | --- |
+| Starter innings per start | +0.2812 | +0.0097 | [−0.12, +0.14] |
+| Pitchers used per game | −0.2382 | +0.0300 | [−0.10, +0.16] |
 
-Across 25 seasons, the size of a season's hook gap vs. the size of its offense
-residual: rho=+0.158 — the wrong sign for the mechanism, and far too thin a
-sample (n=25 seasons) to mean anything either way. Listed as an open question,
-not a finding.
+The point estimate is zero, but n=233 only rules out |rho| above about 0.13.
+Say "no effect large enough for 233 club-seasons to see," not "no effect."
+
+### 6. October is close to a coin — but say what "close" means
+
+198 series (2020 excluded), better record won **50.5%**, 95% [43.5%, 57.5%].
+
+**A fair-opponent model is the comparison the first pass was missing.**
+Empirical-Bayes shrink each club's record by that season's reliability, log5
+between the two talents, a 0.54/0.46 home odds multiplier, each series walked
+in its real format. That world — where the better club genuinely *is* better —
+predicts **56.4%**.
+
+**The sample cannot tell 50% from 56.4%.** Both sit inside the interval. The
+honest statement is "October is close enough to a coin that a quarter century
+cannot see the difference," not "there is very little there."
+
+| Format | n | Better club won |
+| --- | --- | --- |
+| One game | 13 | 53.8% |
+| Best-of-3 | 16 | 37.5% |
+| Best-of-5 | 97 | 49.5% |
+| Best-of-7 | 72 | 54.2% |
+
+Record-gap Spearman rho=0.0361 (p=0.5772). **This null is about power**:
+simulating the fair-opponent world 2,000 times, a test on 198 series clears the
+conventional bar only **15.7%** of the time even when the effect is exactly as
+big as the records imply.
+
+**"Best record won it all 6 of 26" is evidence FOR the better team, not
+against.** That club must win three rounds. A pure coin predicts 3.25
+champions; the fair-opponent model predicts 4.67. Six is above both. (It is
+also the maximum of 30 noisy records, so it carries the same upward bias
+finding 4 corrects for.)
+
+Two code bugs found in review and fixed: equal-seed series silently awarded to
+`teamB` (five #1-vs-#1 World Series, four won by teamB; higher-seed rate 52.6%
+→ 50.5%), and a `bestOf` derivation that labelled all 18 single-game wild cards
+and all 31 best-of-five sweeps as best-of-three.
 
 ## Caveats
 
-- **The both-sides expectation is an approximation.** The additive form for
-  OPS is the standard rough matchup combination, not a fitted model; the log5
-  form for strikeout rate is exact for a probability but assumes independence
-  between the hitter's and the pitcher's rates. A properly fitted matchup
-  model would move the −0.014 somewhat. Its sign and rough size are the
-  claim; its third decimal is not.
-- **Park and weather are not controlled at all.** October is played in twelve
-  clubs' parks, in colder weather, at night. Any of those could account for
-  some or all of a 14-point OPS residual. This spike cannot tell them apart
-  from "October pressure," and nothing here should be read as evidence for the
-  pressure story specifically.
-- **The regular-season baseline is the whole season, not September.** A tired
-  player in October is being compared against his own April. Fatigue is inside
-  the residual, not controlled out of it.
-- **The strikeout null is a null, not a zero.** +0.40pp with p=0.11 over 25
-  seasons means this spike cannot detect a difference, not that one is
-  impossible. A player-level version would have far more power.
-- **The arsenal panel starts in 2008**, so it covers 18 of the window's 26
-  seasons and cannot speak to the 2000s at all.
-- **The coin-flip finding uses regular-season record as "the better team."**
-  Record is itself noisy and partly reflects schedule. A better strength
-  estimate (run differential, or a projection) would raise the better club's
-  win rate somewhat — the point stands directionally, but 52.1% is a floor
-  reading, not a precise one.
-- **2020 is excluded throughout** and reported alongside where it matters.
-- **The role split in finding 2 compares each group to itself.** It does not
-  say relievers and starters are equally good in October — they are not — only
-  that neither group departs from its own regular-season form more than the
-  other.
+- **The matchup combination is an approximation.** Additive for OPS, log5 for
+  rates. The additive form is systematically the most negative of the plausible
+  choices because it drops the cross term. Sign and rough size only.
+- **Park and weather are not controlled at all**, nor is fatigue (the baseline
+  is the whole season, April included). Nothing here supports the pressure
+  story specifically.
+- **The realized-PA weighting is endogenous** (finding 3). Direction of the
+  bias is known — toward zero — its size is not.
+- **The velocity gap is measured against a whole-season baseline**, and league
+  velocity ramps from April to midsummer, so some of +0.5 mph is the calendar.
+  A September-only baseline is the fix. Cold pushes the other way.
+- **The arsenal panel starts in 2008** and covers 18 of 26 seasons.
+- **"Better team" means better record**, which is noisy and partly schedule.
+- **2020 is excluded everywhere**, including — unlike the first pass — the
+  series, arsenal and paired-starter panels.
+- Counts described as "pitchers" are **pitcher-seasons**: 1,074 from 589 men,
+  627 from 326 men. Re-running the headline tests clustering by pitcher leaves
+  both at p<0.0001.
+- Leave-one-season-out ranges are a **leverage check, not an interval** — a LOO
+  range has width about SE×2/(n−1). Every interval quoted here is a proper one.
 
 ## What this leaves open
 
-- A player-level version of finding 2. The season-level test has 25 data
-  points; a hitter-level one would have tens of thousands and could separate
-  "who declines" from "everyone declines a little."
-- Third-time-through-the-order. The mechanism behind both the quick hook and
-  any real offense residual is most likely how often a hitter meets a fresh
-  arm, and that needs play-by-play, not season splits.
-- Whether the velocity jump is adrenaline, shorter outings, or colder-weather
-  measurement drift. Splitting +0.52 mph by outing length would start on it.
-- Whether the quick hook's null holds at the SERIES level rather than the
-  team-season level, where a single bad hook decision is not averaged away.
-- Whether the 58.0% better-club win rate in the Championship Series (n=50) is
-  real or the noise you expect from fifty coin flips. It is the only round
-  that looks different, and n=50 is exactly the sample size where that means
-  nothing.
+- A player-level version of finding 3 — 25 seasons is 25 data points.
+- Third-time-through-the-order, which needs play-by-play and is the likeliest
+  mechanism behind both the hook and any real hitting residual.
+- A cluster bootstrap over whole outings for the arsenal panel. If the
+  narrowing does not survive it above 300 October pitches, finding 4's mix half
+  should be retracted.
+- Velocity split by outing length, against a September baseline.
+- Whether the hook null holds at the SERIES level rather than the club-season.
+- Whether the walk result is the real plate-discipline story, one hitter at a
+  time.

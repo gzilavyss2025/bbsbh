@@ -115,7 +115,7 @@ phase, spike by spike, not part of standing up the framework itself.
 | Age of team | PA-weighted batter age, IP-weighted pitcher age, season-average | Built from statsapi's own per-team-stint `stat.age`, PA/IP-weighted | **Done** — `docs/team-success-roster-age.md`. Real, modest, likely-partly-circular effect (older teams go deeper, especially pitching staffs; age doesn't separate division winners from wild cards). Biggest open follow-up: a pre-trade-deadline age cut, to separate a genuine age effect from contending teams simply renting veterans |
 | **Prior postseason experience** (commissioned directly, not in the original ask) | share of a club's regular-season playing time (PA/IP) given to players who had appeared in a postseason game in a STRICTLY EARLIER season, on any club; plus a late-rounds-only variant | Built from the postseason game list 1969-2025 (`gameType=F,D,L,W`) + boxscores, reusing spike #2's `postseason-boxscore-cache.json` and spike #1's `roster-age-cache.json` for the weights — no new regular-season pull | **Done** — `docs/team-success-postseason-experience.md`. A large, robust effect on REACHING the postseason (rho +0.35 batting / +0.37 pitching; ~20pp more experienced playing time than clubs that missed), and a clean, well-powered NULL on advancing once a club is in (rho -0.02 / +0.02 across 234 postseason clubs). Roughly half the qualifying effect is prior-year continuity, but a within-club test still leaves +0.18/+0.21. Pitching edges batting on raw numbers; the two are indistinguishable under controls. Open follow-up: a player-level version, and the joint model four spikes have now asked for |
 
-| **What is different about the games themselves** (commissioned directly, not in the original ask) | paired same-player, same-season comparisons of October vs. regular season: pitches per plate appearance, matchup-held offence, pitch mix and velocity, starter workload; plus better-club win rate over every series | Built from statsapi's `gameType=R` vs `gameType=P` splits (team, player and pitchArsenal endpoints) + the committed `postseason-history.json` bracket | **Done** — `docs/team-success-october-texture.md`. At-bats are marginally longer (+0.037 pitches/PA); pitchers throw 0.52 mph harder and narrow their mix (+1.46pp on their best pitch, small-sample corrected); starters go a full inning less than their own regular season and the gap is GROWING by era. Two nulls that matter more than the findings: October hitting falls only 14 points of OPS short once BOTH ends of the matchup are held (the one-sided version says 88, and is wrong), with the strikeout surge entirely explained by opposition quality; and the quicker hook does not predict how far a club goes once postseason volume is controlled. The better regular-season club has won just 52.1% of 213 series — the direct explanation for why spikes #1-#4 all found nulls on advancing |
+| **What is different about the games themselves** (commissioned directly, not in the original ask) | paired same-player, same-season comparisons of October vs. regular season, with BOTH ends of the matchup held: plate discipline, offence, pitch mix and velocity, starter workload; plus better-club win rate over every series against a fair-opponent model | Built from statsapi's `gameType=R` vs `gameType=P` splits (team, player and pitchArsenal endpoints) + the committed `postseason-history.json` bracket | **Done** — `docs/team-success-october-texture.md`. What survives: pitchers throw 0.52 mph harder (0.39 in the newest tracking era), starters go a full inning less than their own regular season and the gap GROWS by era (−0.85 → −1.24 IP), and October hitters walk more (+0.49pp). What does NOT: at-bats are not longer once both ends are held (−0.009, t=−1.05 — the naive +0.037 is a roster fact), the strikeout surge is not settled, the hitting dip's sign flips under a usage floor, and the mix narrowing vanishes above 300 October pitches. Two nulls that matter: the quicker hook does not predict how far a club goes once postseason volume is held, and the better club has won 50.5% of 198 series — against 56.4% from a fair-opponent model, which 198 series cannot tell apart |
 Nothing here is ranked by importance yet — that ranking is itself a question
 a first pass over several factors should answer, not an assumption to bake
 into the plan.
@@ -202,10 +202,21 @@ land or a factor turns out to need more groundwork than expected:
    Commissioned directly and out of order, like spike #4. The first spike here
    that does not use the outcome ladder as its main outcome variable: it
    compares the same men in the same year to themselves. It leaves the program
-   two reusable warnings — a one-sided "his own regular-season rates" baseline
-   measures OPPOSITION QUALITY, not a month effect, and any statistic that is a
-   MAXIMUM (best-pitch share, longest streak, top-N concentration) is biased
-   upward in a small postseason sample and needs a shrunken-baseline control.
+   **four** reusable warnings, three of them learned the hard way when an
+   adversarial review killed two of its own first-pass findings:
+   (a) a one-sided "his own regular-season rates" baseline measures OPPOSITION
+   QUALITY, not a month effect — and so does a raw league-vs-league gap, which
+   is the same error with neither side held;
+   (b) any statistic that is a MAXIMUM is biased upward in a small postseason
+   sample, and a multinomial resample UNDER-corrects it when the underlying
+   events cluster (pitches within an outing), so check whether the corrected
+   effect is flat in sample size before believing it;
+   (c) a null needs a stated alternative and a power figure, or it is a
+   statement about the sample rather than about baseball — this spike's
+   "October is a coin" only became honest once a fair-opponent model put a
+   number (56.4%) on the alternative;
+   (d) report an interval, never a leave-one-out range, which has width about
+   SE x 2/(n−1) and reads like one.
    It also re-confirmed the postseason-volume confound from spike #1's
    follow-up on a completely different measure.
 6. **The joint model** — promoted to the front of the queue, because four

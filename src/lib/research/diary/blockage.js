@@ -111,7 +111,7 @@ export const blockageEntry = {
     'Triple-A stays before 2009 do not exist in this data at all, because the transaction wire that supplies the arrival dates does not cover them. Nothing here describes the 2000s.',
   ],
   open: [
-    'Whether being moved down the ladder actually hurt these men, or whether clubs moved the ones who were never going to stay at the harder position. Answering it needs the defensive grades this app does not carry, and probably needs the busts the cohort cannot see.',
+    'Whether being moved down the ladder actually hurt these men, or whether clubs moved the ones who were never going to stay at the harder position. Answering it needs the defensive grades this app does not carry, and probably needs the busts this group of players cannot see.',
     'Why contending clubs move prospects off their position so much more often. The obvious story is that a good club has good players everywhere and something has to give, but the effect holds up even after you account for how well the man ahead of him is playing, so the obvious story is not the whole story.',
     'What the same study says about pitchers. There is no defensive ladder for an arm, so the position outcome does not exist for them, and the waiting answer for pitchers is the same no as for everybody else. If blockage has a currency for pitchers, it is not one of the two this study can see.',
   ],

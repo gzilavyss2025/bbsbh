@@ -81,14 +81,29 @@ Two pieces of machinery hold this up, so nobody has to remember it:
   the full voice the moment it writes an entry file in either diary. It
   advises; it cannot judge prose that does not exist yet.
 - **`scripts/check-diary-voice.mjs`** — the half that enforces. Runs in
-  `npm run lint` and FAILS on a list of statistics terms found anywhere in an
-  entry outside its `technical` array. Deliberately a word list rather than a
-  readability model, so a contributor can predict it.
+  `npm run lint`. It IMPORTS each entry module rather than scanning its text,
+  so it knows which reader-facing field a hit landed in, and it checks two
+  kinds of thing:
+  - **Words**, with no exceptions anywhere: statistics vocabulary, analyst
+    notation (`n=`, `p<`, `pp`, `±`) in a paragraph, a table caption written as
+    a methods line, and a first paragraph that opens on the method rather than
+    on a person. Deliberately word lists and small regexes rather than a
+    readability model, so a contributor can predict it.
+  - **Shape**, on a RATCHET: longest sentence, shouted words, quoted decimals
+    and reader-facing word count. A new entry must meet the target; an entry
+    written before the rules carries a budget in that file which may only
+    shrink, and must give it up entirely once it reaches the target. Same
+    mechanism and same reasoning as `check-file-size.mjs`.
 
-Entries written before this instruction are **grandfathered** in that guard,
-by explicit path. That is not a judgment about their prose — it is the
-append-only rule (rule 2 above) doing its job. Do not widen the grandfather
-list: a failing entry is a NEW entry, and the fix is to write it in voice.
+**A memo is a shape, not a word** — that is why the second half exists. The
+first version of this guard was a word list alone, and entries kept reading
+like research memos while passing it clean.
+
+**A budget is not a grandfather list.** The word rules apply to every entry
+without exception; a budget only records how far a pre-existing entry sits from
+a shape target, and that number may only go down. When an entry is reworded
+into compliance, that is a WORDING pass — it preserves every verdict, number
+and conclusion, so the append-only rule (rule 2 above) is untouched.
 
 ## Adding an entry
 
