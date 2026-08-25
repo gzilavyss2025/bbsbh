@@ -651,7 +651,13 @@ const BUDGETS = {
   // it's unit-testable at all — a generator file RUNS on import, so this pure
   // half moved here the same way command-grid.mjs and
   // game-notes-corroboration.mjs did.
-  'scripts/lib': 26,
+  // +1 for arsenal-side.mjs — the batter-side pitch-mix split behind
+  // gen-callouts.mjs's sideSplit join (docs/callouts.md), against the `stand`
+  // gen-pitch-arsenal.mjs now sweeps. Pulled out for exactly the reasons
+  // century-club.mjs above was, and it reads the SAME table: the show floors
+  // and row shaping are unit-testable without a live DB, and gen-callouts.mjs
+  // stays under its own line budget (ADR-0038).
+  'scripts/lib': 27,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

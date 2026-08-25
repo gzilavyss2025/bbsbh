@@ -50,7 +50,13 @@
 //      straight day), and a leverage split — opponents' AVG/OPS with his club
 //      ahead / behind / tied (the API's own sah/sbh/sti sitCodes; the closest
 //      the public data gets to "entering with the lead") — one extra
-//      statSplits fetch per RELIEVER only.
+//      statSplits fetch per RELIEVER only. He also carries `sideSplit` — how
+//      differently his pitch mix reads to a LEFT-handed batter than to a
+//      RIGHT-handed one (Bryce Elder: 51.4% sinkers to righties, 14.7% to
+//      lefties), read off the `stand` gen-pitch-arsenal.mjs now sweeps. No
+//      fetch at all: it comes from the same on-disk SQLite table centuryClub
+//      does, joined by pitchLevel+id. See scripts/lib/arsenal-side.mjs for the
+//      show floors and why they sit where they do.
 //   6. Hitter situational splits — season RISP and vs-L/vs-R rate lines, from
 //      the API's own statSplits sitCodes (a second per-hitter fetch alongside
 //      the game-log sweep — see hitterEnrich).
@@ -129,6 +135,7 @@ import { fileURLToPath } from 'node:url'
 import { getJson } from '../src/api/statsapi.js'
 import { writeShards } from './lib/io.js'
 import { loadCenturyClub } from './lib/century-club.mjs'
+import { loadArsenalSide } from './lib/arsenal-side.mjs'
 import {
   computeLeaders,
   HITTING_CATEGORIES,
@@ -268,6 +275,11 @@ const corroboratedByTeam = (teamId) => corroboratedFor(corroborationFile, teamId
 // Century-club pitch data, read ONCE (see scripts/lib/century-club.mjs for
 // the shape/why) and joined into starterRecords below by pitchLevel+id.
 const centuryClubByKey = await loadCenturyClub()
+
+// Batter-side pitch-mix splits, read the same way from the same table and
+// joined into the same starterRecords entry (docs/callouts.md's sideSplit
+// family). Keyed pitchLevel+id like centuryClub above.
+const arsenalSideByKey = await loadArsenalSide()
 
 // Pitcher strikeouts (not a hit category, so separate from HIT_CATEGORY_KEYS).
 const PIT_KEYS = ['so_p']
@@ -1499,6 +1511,8 @@ for (const g of games) {
     if (paced?.pitchPace) entry.pitchPace = paced.pitchPace
     const cc = pitchLevel ? centuryClubByKey.get(`${pitchLevel}:${id}`) : null
     if (cc) entry.centuryClub = cc
+    const side = pitchLevel ? arsenalSideByKey.get(`${pitchLevel}:${id}`) : null
+    if (side) entry.sideSplit = side
     if (Object.keys(entry).length > 0) starterRecords[id] = entry
     if (e.milestone) milestones[id] = e.milestone
   }

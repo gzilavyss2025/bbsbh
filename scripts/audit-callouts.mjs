@@ -95,7 +95,7 @@ const KNOWN_KINDS = [
   'foulVolume', 'pitchPace', 'bullpenThin', 'leadReversal', 'leadHeld', 'tiedAfter',
   'runsScored', 'runsAllowed', 'comeback', 'oneRun', 'extraInnings',
   'laboring', 'veloVariety', 'veloDecay', 'penFatigue', 'workload', 'backToBack',
-  'leverage', 'centuryClub', 'tenK', 'scorelessStreak', 'sixIp', 'homeAway',
+  'leverage', 'centuryClub', 'sideSplit', 'tenK', 'scorelessStreak', 'sixIp', 'homeAway',
   'cgShutout', 'recentAppearances',
 ]
 
@@ -155,6 +155,7 @@ const DATA_GATES = {
   backToBack: (b) => starterHas(b, 'backToBack') || starterHas(b, 'pitchedYesterday'),
   leverage: (b) => starterHas(b, 'leverage'),
   centuryClub: (b) => starterHas(b, 'centuryClub'),
+  sideSplit: (b) => starterHas(b, 'sideSplit'),
   tenK: (b) => starterHas(b, 'tenK'),
   scorelessStreak: (b) => starterHas(b, 'scorelessStreak'),
   sixIp: (b) => starterHas(b, 'sixIp'),

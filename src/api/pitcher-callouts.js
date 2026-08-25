@@ -58,6 +58,7 @@ const SCORE_BASE = {
   backToBack: 36, // ERA split pitching on no rest
   leverage: 34, // opponents' AVG with his club ahead vs trailing/tied
   centuryClub: 34, // season count of CENTURY_MPH+ pitches — a season-aggregate fact, same tier as tenK
+  sideSplit: 35, // how his mix changes by batter side — a season aggregate, but one that says what is COMING
   tenK: 33,
   scorelessStreak: 32,
   sixIp: 28,
@@ -224,6 +225,40 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
       ? `Has thrown ${cc.count} pitches at ${CENTURY_MPH}+ mph this season — including ${offSpeed[0].count} ${offSpeed[0].description.toLowerCase()}${offSpeed[0].count === 1 ? '' : 's'}, extraordinarily rare for a breaking or offspeed pitch${peak}`
       : `Has thrown ${cc.count} pitches at ${CENTURY_MPH}+ mph this season${peak}`
     push('centuryClub', text, magnitudeOf(cc.count / 10, 15) + (offSpeed.length ? 10 : 0))
+  }
+
+  // Batter-side pitch mix — how differently his arsenal reads to a lefty than
+  // to a righty, from gen-callouts.mjs's join against the `stand` that
+  // gen-pitch-arsenal.mjs sweeps (scripts/lib/arsenal-side.mjs holds the show
+  // floors). A season aggregate like centuryClub above, but a forward-looking
+  // one: it says what is likely COMING to the batter in the box, which is why
+  // it scores a shade higher. The `only` case — a pitch he essentially never
+  // shows one side — gets its own wording, since "0.6%" reads as a rounding
+  // artifact where "has not thrown one all season" reads as the fact it is.
+  const split = rec.sideSplit
+  const topType = split?.types?.[0]
+  if (topType) {
+    const heavy = topType.lShare > topType.rShare
+    const heavySide = heavy ? 'left-handed batters' : 'right-handed batters'
+    const lightSide = heavy ? 'righties' : 'lefties'
+    const hi = heavy ? topType.lShare : topType.rShare
+    const lo = heavy ? topType.rShare : topType.lShare
+    const pitch = topType.description.toLowerCase()
+    const singular = lightSide.replace(/ies$/, 'y')
+    const text =
+      topType.only && lo === 0
+        ? `Has not thrown a ${singular} a single ${pitch} all season — but it is ${hi}% of what he throws ${heavySide}`
+        : topType.only
+          ? `Has barely shown a ${singular} his ${pitch} all season — ${hi}% of his pitches to ${heavySide}, ${lo}% to ${lightSide}`
+          : `Throws his ${pitch} ${hi}% of the time to ${heavySide}, ${lo}% to ${lightSide}`
+    push('sideSplit', text, magnitudeOf(topType.gap - 20, 15))
+  } else if (split?.breadth) {
+    const b = split.breadth
+    push(
+      'sideSplit',
+      `Shows ${b.l} different pitches to left-handed batters this season and ${b.r} to right-handers`,
+      magnitudeOf(Math.abs(b.l - b.r) - 2, 8),
+    )
   }
   return notes
 }

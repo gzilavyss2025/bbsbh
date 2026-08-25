@@ -226,7 +226,7 @@ export const ONCE_PER_GAME_KINDS = new Set([
   'starterRec', 'dayOfWeek', 'bullpenThin', 'inningRunDiff',
   // Margin Notes' season aggregates (pitcher-callouts.js's buildPitcherNotes)
   'homeAway', 'cgShutout', 'scorelessStreak', 'workload', 'backToBack',
-  'penFatigue', 'leverage', 'centuryClub', 'recentAppearances',
+  'penFatigue', 'leverage', 'centuryClub', 'sideSplit', 'recentAppearances',
 ])
 
 // "The club is W-L when X" — one sentence shape, eleven families. A strip that
