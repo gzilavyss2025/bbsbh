@@ -165,20 +165,47 @@
   filter: none;
 }
 
-/* The perforated-edge "paper": a cream frame around the photo, its border
+/* The perforated "paper": a cream MARGIN around the photo, its outer edge
    punched with a ring of round holes via an SVG luminance mask (white =
-   frame, black = hole) baked into a data URI — cheaper and far more precise
-   than trying to fake a scalloped edge out of CSS gradients, and shared
-   byte-for-byte across all 30 slots since the geometry never varies. */
+   paper, black = hole) baked into a data URI — cheaper and far more precise
+   than faking a scalloped edge out of CSS gradients, and shared byte-for-byte
+   across all 30 slots since the geometry never varies.
+
+   Two numbers do the work and they are COUPLED. The mask's viewBox is 100x80,
+   the same 5:4 as the frame, so `mask-size: 100% 100%` scales it uniformly
+   and the holes stay round at any slot width. And the margin must stay WIDER
+   than a hole's radius (3 viewBox units, ~3.3px at the 110px a slot gets in
+   the 3-up phone grid) or the perforation bites into the photograph instead
+   of the paper around it. Widening one without the other is the bug.
+
+   Gauge is 13 across by 11 down, close to the real USPS "Legendary Playing
+   Fields" pane (2001). The 6-across first cut read as scalloping rather than
+   perforation once the margin got wide enough to see. */
 .ballparkstamp__frame {
-  position: relative;
+  /* declared once, consumed twice — the prefixed property is still required
+     on WebKit, and this data URI is ~1.9KB */
+  --perf: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 80'%3E%3Cdefs%3E%3Cmask id='p'%3E%3Crect width='100' height='80' fill='white'/%3E%3Cg fill='black'%3E%3Ccircle cx='0' cy='0' r='3'/%3E%3Ccircle cx='0' cy='80' r='3'/%3E%3Ccircle cx='8.3' cy='0' r='3'/%3E%3Ccircle cx='8.3' cy='80' r='3'/%3E%3Ccircle cx='16.7' cy='0' r='3'/%3E%3Ccircle cx='16.7' cy='80' r='3'/%3E%3Ccircle cx='25' cy='0' r='3'/%3E%3Ccircle cx='25' cy='80' r='3'/%3E%3Ccircle cx='33.3' cy='0' r='3'/%3E%3Ccircle cx='33.3' cy='80' r='3'/%3E%3Ccircle cx='41.7' cy='0' r='3'/%3E%3Ccircle cx='41.7' cy='80' r='3'/%3E%3Ccircle cx='50' cy='0' r='3'/%3E%3Ccircle cx='50' cy='80' r='3'/%3E%3Ccircle cx='58.3' cy='0' r='3'/%3E%3Ccircle cx='58.3' cy='80' r='3'/%3E%3Ccircle cx='66.7' cy='0' r='3'/%3E%3Ccircle cx='66.7' cy='80' r='3'/%3E%3Ccircle cx='75' cy='0' r='3'/%3E%3Ccircle cx='75' cy='80' r='3'/%3E%3Ccircle cx='83.3' cy='0' r='3'/%3E%3Ccircle cx='83.3' cy='80' r='3'/%3E%3Ccircle cx='91.7' cy='0' r='3'/%3E%3Ccircle cx='91.7' cy='80' r='3'/%3E%3Ccircle cx='100' cy='0' r='3'/%3E%3Ccircle cx='100' cy='80' r='3'/%3E%3Ccircle cx='0' cy='8' r='3'/%3E%3Ccircle cx='100' cy='8' r='3'/%3E%3Ccircle cx='0' cy='16' r='3'/%3E%3Ccircle cx='100' cy='16' r='3'/%3E%3Ccircle cx='0' cy='24' r='3'/%3E%3Ccircle cx='100' cy='24' r='3'/%3E%3Ccircle cx='0' cy='32' r='3'/%3E%3Ccircle cx='100' cy='32' r='3'/%3E%3Ccircle cx='0' cy='40' r='3'/%3E%3Ccircle cx='100' cy='40' r='3'/%3E%3Ccircle cx='0' cy='48' r='3'/%3E%3Ccircle cx='100' cy='48' r='3'/%3E%3Ccircle cx='0' cy='56' r='3'/%3E%3Ccircle cx='100' cy='56' r='3'/%3E%3Ccircle cx='0' cy='64' r='3'/%3E%3Ccircle cx='100' cy='64' r='3'/%3E%3Ccircle cx='0' cy='72' r='3'/%3E%3Ccircle cx='100' cy='72' r='3'/%3E%3C/g%3E%3C/mask%3E%3C/defs%3E%3Crect width='100' height='80' fill='white' mask='url(%23p)'/%3E%3C/svg%3E");
+  display: grid;
   aspect-ratio: 5 / 4;
-  padding: 5px;
+  padding: 6.5%;
   background: var(--paper-3);
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 80'%3E%3Cdefs%3E%3Cmask id='p'%3E%3Crect width='100' height='80' fill='white'/%3E%3Cg fill='black'%3E%3Ccircle cx='0' cy='0' r='4.2'/%3E%3Ccircle cx='20' cy='0' r='4.2'/%3E%3Ccircle cx='40' cy='0' r='4.2'/%3E%3Ccircle cx='60' cy='0' r='4.2'/%3E%3Ccircle cx='80' cy='0' r='4.2'/%3E%3Ccircle cx='100' cy='0' r='4.2'/%3E%3Ccircle cx='0' cy='80' r='4.2'/%3E%3Ccircle cx='20' cy='80' r='4.2'/%3E%3Ccircle cx='40' cy='80' r='4.2'/%3E%3Ccircle cx='60' cy='80' r='4.2'/%3E%3Ccircle cx='80' cy='80' r='4.2'/%3E%3Ccircle cx='100' cy='80' r='4.2'/%3E%3Ccircle cx='0' cy='20' r='4.2'/%3E%3Ccircle cx='0' cy='40' r='4.2'/%3E%3Ccircle cx='0' cy='60' r='4.2'/%3E%3Ccircle cx='100' cy='20' r='4.2'/%3E%3Ccircle cx='100' cy='40' r='4.2'/%3E%3Ccircle cx='100' cy='60' r='4.2'/%3E%3C/g%3E%3C/mask%3E%3C/defs%3E%3Crect width='100' height='80' fill='white' mask='url(%23p)'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 80'%3E%3Cdefs%3E%3Cmask id='p'%3E%3Crect width='100' height='80' fill='white'/%3E%3Cg fill='black'%3E%3Ccircle cx='0' cy='0' r='4.2'/%3E%3Ccircle cx='20' cy='0' r='4.2'/%3E%3Ccircle cx='40' cy='0' r='4.2'/%3E%3Ccircle cx='60' cy='0' r='4.2'/%3E%3Ccircle cx='80' cy='0' r='4.2'/%3E%3Ccircle cx='100' cy='0' r='4.2'/%3E%3Ccircle cx='0' cy='80' r='4.2'/%3E%3Ccircle cx='20' cy='80' r='4.2'/%3E%3Ccircle cx='40' cy='80' r='4.2'/%3E%3Ccircle cx='60' cy='80' r='4.2'/%3E%3Ccircle cx='80' cy='80' r='4.2'/%3E%3Ccircle cx='100' cy='80' r='4.2'/%3E%3Ccircle cx='0' cy='20' r='4.2'/%3E%3Ccircle cx='0' cy='40' r='4.2'/%3E%3Ccircle cx='0' cy='60' r='4.2'/%3E%3Ccircle cx='100' cy='20' r='4.2'/%3E%3Ccircle cx='100' cy='40' r='4.2'/%3E%3Ccircle cx='100' cy='60' r='4.2'/%3E%3C/g%3E%3C/mask%3E%3C/defs%3E%3Crect width='100' height='80' fill='white' mask='url(%23p)'/%3E%3C/svg%3E");
+  -webkit-mask-image: var(--perf);
+  mask-image: var(--perf);
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
+}
+
+/* The printed area inside the margin. Exists so the denomination badge can
+   position against the PHOTO rather than against the paper: an absolutely
+   positioned element resolves against its containing block's PADDING box,
+   which here includes the cream margin. Without this wrapper the badge would
+   have to restate the frame's 6.5%-of-WIDTH padding as 8.125%-of-HEIGHT to
+   land in the same place, and that conversion silently rots the day the
+   aspect ratio changes. One wrapper is cheaper than that coupling. */
+.ballparkstamp__print {
+  position: relative;
+  display: grid;
+  overflow: hidden;
 }
 
 .ballparkstamp__photo {
@@ -205,8 +232,8 @@
    fill (src/CLAUDE.md's "already-flat silhouette is the one safe case"). */
 .ballparkstamp__mark {
   position: absolute;
-  top: calc(5px + var(--space-1));
-  right: calc(5px + var(--space-1));
+  top: var(--space-1);
+  right: var(--space-1);
   display: flex;
   align-items: center;
   justify-content: center;

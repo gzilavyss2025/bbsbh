@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { fetchStaticTeams } from '../../api/teams-static.js'
-import { ballparkPhotoThumb } from '../../lib/ballpark/ballparkArt.js'
+import { ballparkPhotoThumb, ballparkStampArt } from '../../lib/ballpark/ballparkArt.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useMilestoneCelebration } from '../../hooks/useMilestoneCelebration.js'
 import { SectionHead } from './statsShared.jsx'
@@ -110,18 +110,24 @@ function MilestoneCard({ milestone, venueNameById }) {
 // slot does — never a broken image, same graceful-degrade posture as
 // everywhere else this app reads park art.
 function BallparkStampSlot({ slot, venueName }) {
-  const photo = venueName ? ballparkPhotoThumb(venueName) : null
+  // The commemorative illustration WINS over the photograph when the series
+  // has reached this park (STAMP_KEYS in ballparkArt.js), which is what lets
+  // the 30 land in batches: an unlisted park quietly keeps its photo, so the
+  // shelf never shows a gap while the set is being filled in.
+  const photo = venueName ? (ballparkStampArt(venueName) ?? ballparkPhotoThumb(venueName)) : null
   return (
     <li className={`ballparkstamp${slot.filled ? ' is-filled' : ''}`}>
       <div className="ballparkstamp__frame">
-        {photo ? (
-          <img src={photo.src} alt="" className="ballparkstamp__photo" loading="lazy" />
-        ) : (
-          <div className="ballparkstamp__photo ballparkstamp__photo--empty" aria-hidden="true" />
-        )}
-        <span className="ballparkstamp__mark" aria-hidden="true">
-          <TeamLogo teamId={slot.id} name={slot.label} size={16} variant="mono" />
-        </span>
+        <div className="ballparkstamp__print">
+          {photo ? (
+            <img src={photo.src} alt="" className="ballparkstamp__photo" loading="lazy" />
+          ) : (
+            <div className="ballparkstamp__photo ballparkstamp__photo--empty" aria-hidden="true" />
+          )}
+          <span className="ballparkstamp__mark" aria-hidden="true">
+            <TeamLogo teamId={slot.id} name={slot.label} size={16} variant="mono" />
+          </span>
+        </div>
       </div>
       <span className="sr-only">
         {slot.label} — {slot.filled ? 'stamped' : 'not yet stamped'}

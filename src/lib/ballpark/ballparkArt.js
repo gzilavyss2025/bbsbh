@@ -115,6 +115,15 @@ export const CREDITS = {
 // Empty by design — see the LOGOS note in the header before adding one.
 export const LOGO_KEYS = {}
 
+// Parks whose commemorative STAMP illustration is on file, with the extension
+// it is stored as. Same manifest shape as LOGO_KEYS above and for the same
+// reason: the browser cannot stat public/, so a committed file needs a listed
+// key before anything will ask for it. That is what lets the series land in
+// BATCHES — every park not listed here keeps rendering its photograph, so a
+// half-finished set is 8 stamps and 22 photos rather than 22 broken images.
+// Add a key in the SAME commit as its file, exactly as LOGO_KEYS requires.
+export const STAMP_KEYS = {}
+
 // The bundled photo for a park, or null when we have no art for it. Returns the
 // URL and the credit together because the caller may never render one without
 // the other (CC BY / CC BY-SA attribution).
@@ -143,6 +152,17 @@ export function ballparkPhotoThumb(parkName) {
   const key = venueKey(parkName)
   if (!CREDITS[key]) return null
   return { src: `/ballparks/thumb/${key}.webp` }
+}
+
+// The commemorative stamp illustration for a park, or null when the series has
+// not reached it yet. Deliberately does NOT fall back to the photograph — the
+// caller decides that, because the two are not interchangeable everywhere: the
+// milestone shelf wants either, while a surface that needs a real photograph
+// must not be handed an illustration of one.
+export function ballparkStampArt(parkName) {
+  const key = venueKey(parkName)
+  const ext = STAMP_KEYS[key]
+  return ext ? { src: `/ballparks/stamp/${key}.${ext}` } : null
 }
 
 // One line of attribution, worded so it satisfies CC BY / CC BY-SA without
