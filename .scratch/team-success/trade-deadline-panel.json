@@ -1,0 +1,7408 @@
+{
+  "generatedAt": "2026-08-26T19:30:16.866Z",
+  "source": [
+    "public/data/trade-deadline/{2021..2025}.json",
+    "public/data/war-history/*.json",
+    ".scratch/team-success/outcome-ladder.json"
+  ],
+  "n": 150,
+  "panel": [
+    {
+      "year": 2021,
+      "teamId": 147,
+      "teamName": "New York Yankees",
+      "net": 8.2,
+      "received": 9.4,
+      "sent": 1.2000000000000002,
+      "playersReceived": 5,
+      "playersSent": 12,
+      "receivedMissing": 0,
+      "sentMissing": 6,
+      "tradeCount": 5,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 112,
+      "teamName": "Chicago Cubs",
+      "net": -15.100000000000001,
+      "received": 1.7,
+      "sent": 16.8,
+      "playersReceived": 12,
+      "playersSent": 9,
+      "receivedMissing": 9,
+      "sentMissing": 0,
+      "tradeCount": 8,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 135,
+      "teamName": "San Diego Padres",
+      "net": 4.9,
+      "received": 4.7,
+      "sent": -0.2,
+      "playersReceived": 3,
+      "playersSent": 6,
+      "receivedMissing": 0,
+      "sentMissing": 4,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 133,
+      "teamName": "Athletics",
+      "net": 11.5,
+      "received": 11,
+      "sent": -0.5,
+      "playersReceived": 5,
+      "playersSent": 6,
+      "receivedMissing": 0,
+      "sentMissing": 4,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 120,
+      "teamName": "Washington Nationals",
+      "net": -17.7,
+      "received": 2.5,
+      "sent": 20.2,
+      "playersReceived": 13,
+      "playersSent": 9,
+      "receivedMissing": 7,
+      "sentMissing": 0,
+      "tradeCount": 9,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 111,
+      "teamName": "Boston Red Sox",
+      "net": 2.8000000000000003,
+      "received": 2.9000000000000004,
+      "sent": 0.1,
+      "playersReceived": 4,
+      "playersSent": 3,
+      "receivedMissing": 1,
+      "sentMissing": 2,
+      "tradeCount": 4,
+      "ladder": 3,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 142,
+      "teamName": "Minnesota Twins",
+      "net": -5.5,
+      "received": 0.8999999999999999,
+      "sent": 6.4,
+      "playersReceived": 8,
+      "playersSent": 5,
+      "receivedMissing": 6,
+      "sentMissing": 1,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 138,
+      "teamName": "St. Louis Cardinals",
+      "net": -0.29999999999999993,
+      "received": 0.20000000000000007,
+      "sent": 0.5,
+      "playersReceived": 3,
+      "playersSent": 4,
+      "receivedMissing": 0,
+      "sentMissing": 1,
+      "tradeCount": 4,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 144,
+      "teamName": "Atlanta Braves",
+      "net": 4.8999999999999995,
+      "received": 4.199999999999999,
+      "sent": -0.7,
+      "playersReceived": 6,
+      "playersSent": 8,
+      "receivedMissing": 0,
+      "sentMissing": 5,
+      "tradeCount": 7,
+      "ladder": 5,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 146,
+      "teamName": "Miami Marlins",
+      "net": -8.9,
+      "received": -0.8,
+      "sent": 8.1,
+      "playersReceived": 6,
+      "playersSent": 5,
+      "receivedMissing": 0,
+      "sentMissing": 1,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 114,
+      "teamName": "Cleveland Guardians",
+      "net": -0.5,
+      "received": 3,
+      "sent": 3.5,
+      "playersReceived": 5,
+      "playersSent": 6,
+      "receivedMissing": 3,
+      "sentMissing": 1,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 117,
+      "teamName": "Houston Astros",
+      "net": -2,
+      "received": 2.5,
+      "sent": 4.5,
+      "playersReceived": 5,
+      "playersSent": 5,
+      "receivedMissing": 1,
+      "sentMissing": 0,
+      "tradeCount": 3,
+      "ladder": 4,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 158,
+      "teamName": "Milwaukee Brewers",
+      "net": 1.8000000000000003,
+      "received": 2.2,
+      "sent": 0.4,
+      "playersReceived": 6,
+      "playersSent": 7,
+      "receivedMissing": 1,
+      "sentMissing": 5,
+      "tradeCount": 6,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 116,
+      "teamName": "Detroit Tigers",
+      "net": 0.1,
+      "received": 0,
+      "sent": -0.1,
+      "playersReceived": 1,
+      "playersSent": 1,
+      "receivedMissing": 1,
+      "sentMissing": 0,
+      "tradeCount": 1,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 143,
+      "teamName": "Philadelphia Phillies",
+      "net": 3.5999999999999996,
+      "received": 4.1,
+      "sent": 0.5,
+      "playersReceived": 5,
+      "playersSent": 6,
+      "receivedMissing": 1,
+      "sentMissing": 5,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "teamName": "Pittsburgh Pirates",
+      "net": -7.3,
+      "received": -0.09999999999999998,
+      "sent": 7.2,
+      "playersReceived": 14,
+      "playersSent": 7,
+      "receivedMissing": 8,
+      "sentMissing": 2,
+      "tradeCount": 9,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 141,
+      "teamName": "Toronto Blue Jays",
+      "net": 4.8,
+      "received": 4.3,
+      "sent": -0.49999999999999994,
+      "playersReceived": 6,
+      "playersSent": 6,
+      "receivedMissing": 2,
+      "sentMissing": 2,
+      "tradeCount": 7,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 119,
+      "teamName": "Los Angeles Dodgers",
+      "net": 13.1,
+      "received": 13.5,
+      "sent": 0.4,
+      "playersReceived": 4,
+      "playersSent": 6,
+      "receivedMissing": 0,
+      "sentMissing": 4,
+      "tradeCount": 4,
+      "ladder": 3,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 140,
+      "teamName": "Texas Rangers",
+      "net": -7,
+      "received": 1.1,
+      "sent": 8.1,
+      "playersReceived": 7,
+      "playersSent": 6,
+      "receivedMissing": 5,
+      "sentMissing": 1,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 137,
+      "teamName": "San Francisco Giants",
+      "net": 4.1000000000000005,
+      "received": 3.9000000000000004,
+      "sent": -0.2,
+      "playersReceived": 3,
+      "playersSent": 6,
+      "receivedMissing": 1,
+      "sentMissing": 3,
+      "tradeCount": 3,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 108,
+      "teamName": "Los Angeles Angels",
+      "net": -2.7,
+      "received": -0.30000000000000004,
+      "sent": 2.4000000000000004,
+      "playersReceived": 5,
+      "playersSent": 3,
+      "receivedMissing": 1,
+      "sentMissing": 0,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 139,
+      "teamName": "Tampa Bay Rays",
+      "net": 0.5999999999999996,
+      "received": 2.5999999999999996,
+      "sent": 2,
+      "playersReceived": 10,
+      "playersSent": 7,
+      "receivedMissing": 4,
+      "sentMissing": 3,
+      "tradeCount": 7,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 110,
+      "teamName": "Baltimore Orioles",
+      "net": -0.6,
+      "received": 0.1,
+      "sent": 0.7,
+      "playersReceived": 3,
+      "playersSent": 2,
+      "receivedMissing": 2,
+      "sentMissing": 0,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 118,
+      "teamName": "Kansas City Royals",
+      "net": -2.8,
+      "received": 0.4,
+      "sent": 3.1999999999999997,
+      "playersReceived": 2,
+      "playersSent": 4,
+      "receivedMissing": 1,
+      "sentMissing": 0,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 121,
+      "teamName": "New York Mets",
+      "net": 6.5,
+      "received": 6.7,
+      "sent": 0.2,
+      "playersReceived": 6,
+      "playersSent": 5,
+      "receivedMissing": 1,
+      "sentMissing": 3,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 109,
+      "teamName": "Arizona Diamondbacks",
+      "net": -2.5,
+      "received": 0,
+      "sent": 2.5,
+      "playersReceived": 3,
+      "playersSent": 4,
+      "receivedMissing": 3,
+      "sentMissing": 0,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 145,
+      "teamName": "Chicago White Sox",
+      "net": 3.3000000000000007,
+      "received": 5.300000000000001,
+      "sent": 2,
+      "playersReceived": 5,
+      "playersSent": 4,
+      "receivedMissing": 2,
+      "sentMissing": 2,
+      "tradeCount": 5,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 136,
+      "teamName": "Seattle Mariners",
+      "net": 1.6999999999999993,
+      "received": 3.4999999999999996,
+      "sent": 1.8000000000000003,
+      "playersReceived": 4,
+      "playersSent": 7,
+      "receivedMissing": 0,
+      "sentMissing": 4,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 113,
+      "teamName": "Cincinnati Reds",
+      "net": 1.2,
+      "received": 0.8999999999999999,
+      "sent": -0.3,
+      "playersReceived": 3,
+      "playersSent": 5,
+      "receivedMissing": 0,
+      "sentMissing": 3,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2021,
+      "teamId": 115,
+      "teamName": "Colorado Rockies",
+      "net": -0.2,
+      "received": 0,
+      "sent": 0.2,
+      "playersReceived": 3,
+      "playersSent": 1,
+      "receivedMissing": 2,
+      "sentMissing": 0,
+      "tradeCount": 2,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "wildcard-game"
+    },
+    {
+      "year": 2022,
+      "teamId": 143,
+      "teamName": "Philadelphia Phillies",
+      "net": 6.3,
+      "received": 5.6,
+      "sent": -0.7,
+      "playersReceived": 4,
+      "playersSent": 6,
+      "receivedMissing": 0,
+      "sentMissing": 3,
+      "tradeCount": 5,
+      "ladder": 4,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 134,
+      "teamName": "Pittsburgh Pirates",
+      "net": -5.2,
+      "received": 0.7,
+      "sent": 5.9,
+      "playersReceived": 6,
+      "playersSent": 4,
+      "receivedMissing": 2,
+      "sentMissing": 0,
+      "tradeCount": 6,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 138,
+      "teamName": "St. Louis Cardinals",
+      "net": 5.2,
+      "received": 7.2,
+      "sent": 1.9999999999999998,
+      "playersReceived": 5,
+      "playersSent": 6,
+      "receivedMissing": 0,
+      "sentMissing": 2,
+      "tradeCount": 5,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 119,
+      "teamName": "Los Angeles Dodgers",
+      "net": -0.8999999999999999,
+      "received": 1.6,
+      "sent": 2.5,
+      "playersReceived": 5,
+      "playersSent": 6,
+      "receivedMissing": 3,
+      "sentMissing": 2,
+      "tradeCount": 5,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 141,
+      "teamName": "Toronto Blue Jays",
+      "net": 4.6,
+      "received": 4.3,
+      "sent": -0.30000000000000004,
+      "playersReceived": 6,
+      "playersSent": 8,
+      "receivedMissing": 1,
+      "sentMissing": 5,
+      "tradeCount": 6,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 113,
+      "teamName": "Cincinnati Reds",
+      "net": -11.3,
+      "received": -1.5,
+      "sent": 9.8,
+      "playersReceived": 11,
+      "playersSent": 6,
+      "receivedMissing": 9,
+      "sentMissing": 0,
+      "tradeCount": 6,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 135,
+      "teamName": "San Diego Padres",
+      "net": 9.100000000000001,
+      "received": 9.700000000000001,
+      "sent": 0.6000000000000001,
+      "playersReceived": 6,
+      "playersSent": 16,
+      "receivedMissing": 1,
+      "sentMissing": 7,
+      "tradeCount": 6,
+      "ladder": 3,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 139,
+      "teamName": "Tampa Bay Rays",
+      "net": 5.9,
+      "received": 5.6000000000000005,
+      "sent": -0.30000000000000004,
+      "playersReceived": 5,
+      "playersSent": 9,
+      "receivedMissing": 1,
+      "sentMissing": 6,
+      "tradeCount": 8,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 137,
+      "teamName": "San Francisco Giants",
+      "net": 1.2000000000000002,
+      "received": 1.1,
+      "sent": -0.09999999999999998,
+      "playersReceived": 12,
+      "playersSent": 6,
+      "receivedMissing": 7,
+      "sentMissing": 2,
+      "tradeCount": 8,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 147,
+      "teamName": "New York Yankees",
+      "net": 2.1000000000000005,
+      "received": 6.4,
+      "sent": 4.3,
+      "playersReceived": 7,
+      "playersSent": 10,
+      "receivedMissing": 1,
+      "sentMissing": 5,
+      "tradeCount": 6,
+      "ladder": 3,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 136,
+      "teamName": "Seattle Mariners",
+      "net": 4.3,
+      "received": 4.3,
+      "sent": 0,
+      "playersReceived": 4,
+      "playersSent": 7,
+      "receivedMissing": 0,
+      "sentMissing": 6,
+      "tradeCount": 4,
+      "ladder": 2,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 118,
+      "teamName": "Kansas City Royals",
+      "net": -4,
+      "received": 0.4,
+      "sent": 4.4,
+      "playersReceived": 12,
+      "playersSent": 5,
+      "receivedMissing": 7,
+      "sentMissing": 0,
+      "tradeCount": 7,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 108,
+      "teamName": "Los Angeles Angels",
+      "net": -4.6,
+      "received": -0.10000000000000009,
+      "sent": 4.5,
+      "playersReceived": 5,
+      "playersSent": 4,
+      "receivedMissing": 1,
+      "sentMissing": 0,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 112,
+      "teamName": "Chicago Cubs",
+      "net": -2.3000000000000003,
+      "received": 1.5,
+      "sent": 3.8000000000000003,
+      "playersReceived": 5,
+      "playersSent": 5,
+      "receivedMissing": 2,
+      "sentMissing": 0,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 120,
+      "teamName": "Washington Nationals",
+      "net": -4.300000000000001,
+      "received": 0.9,
+      "sent": 5.200000000000001,
+      "playersReceived": 7,
+      "playersSent": 4,
+      "receivedMissing": 4,
+      "sentMissing": 1,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 117,
+      "teamName": "Houston Astros",
+      "net": -0.2999999999999998,
+      "received": 2.7,
+      "sent": 3,
+      "playersReceived": 4,
+      "playersSent": 5,
+      "receivedMissing": 1,
+      "sentMissing": 3,
+      "tradeCount": 4,
+      "ladder": 5,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 144,
+      "teamName": "Atlanta Braves",
+      "net": 0.1000000000000002,
+      "received": 0.7000000000000002,
+      "sent": 0.6,
+      "playersReceived": 6,
+      "playersSent": 8,
+      "receivedMissing": 1,
+      "sentMissing": 4,
+      "tradeCount": 7,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 142,
+      "teamName": "Minnesota Twins",
+      "net": 4.1,
+      "received": 3.5999999999999996,
+      "sent": -0.5,
+      "playersReceived": 4,
+      "playersSent": 9,
+      "receivedMissing": 0,
+      "sentMissing": 6,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 110,
+      "teamName": "Baltimore Orioles",
+      "net": -2.3,
+      "received": -0.4,
+      "sent": 1.9,
+      "playersReceived": 7,
+      "playersSent": 3,
+      "receivedMissing": 5,
+      "sentMissing": 0,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 146,
+      "teamName": "Miami Marlins",
+      "net": -1.9000000000000001,
+      "received": -0.1,
+      "sent": 1.8,
+      "playersReceived": 1,
+      "playersSent": 2,
+      "receivedMissing": 0,
+      "sentMissing": 0,
+      "tradeCount": 1,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 116,
+      "teamName": "Detroit Tigers",
+      "net": -0.7,
+      "received": 0,
+      "sent": 0.7,
+      "playersReceived": 4,
+      "playersSent": 2,
+      "receivedMissing": 3,
+      "sentMissing": 0,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 158,
+      "teamName": "Milwaukee Brewers",
+      "net": -0.3999999999999999,
+      "received": 1,
+      "sent": 1.4,
+      "playersReceived": 7,
+      "playersSent": 5,
+      "receivedMissing": 3,
+      "sentMissing": 2,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 140,
+      "teamName": "Texas Rangers",
+      "net": 0.5,
+      "received": 0.6,
+      "sent": 0.1,
+      "playersReceived": 2,
+      "playersSent": 1,
+      "receivedMissing": 1,
+      "sentMissing": 0,
+      "tradeCount": 1,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 121,
+      "teamName": "New York Mets",
+      "net": -0.20000000000000018,
+      "received": 0.8999999999999999,
+      "sent": 1.1,
+      "playersReceived": 6,
+      "playersSent": 8,
+      "receivedMissing": 0,
+      "sentMissing": 5,
+      "tradeCount": 5,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 111,
+      "teamName": "Boston Red Sox",
+      "net": 1.2999999999999998,
+      "received": 2.5999999999999996,
+      "sent": 1.2999999999999998,
+      "playersReceived": 8,
+      "playersSent": 3,
+      "receivedMissing": 4,
+      "sentMissing": 1,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 114,
+      "teamName": "Cleveland Guardians",
+      "net": -0.1,
+      "received": -0.1,
+      "sent": 0,
+      "playersReceived": 1,
+      "playersSent": 4,
+      "receivedMissing": 0,
+      "sentMissing": 1,
+      "tradeCount": 4,
+      "ladder": 2,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 133,
+      "teamName": "Athletics",
+      "net": -3.2,
+      "received": 0.7000000000000001,
+      "sent": 3.9000000000000004,
+      "playersReceived": 7,
+      "playersSent": 4,
+      "receivedMissing": 4,
+      "sentMissing": 0,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 145,
+      "teamName": "Chicago White Sox",
+      "net": -2,
+      "received": -0.6,
+      "sent": 1.4,
+      "playersReceived": 1,
+      "playersSent": 1,
+      "receivedMissing": 0,
+      "sentMissing": 0,
+      "tradeCount": 1,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 109,
+      "teamName": "Arizona Diamondbacks",
+      "net": -1.0000000000000002,
+      "received": 1.2,
+      "sent": 2.2,
+      "playersReceived": 2,
+      "playersSent": 3,
+      "receivedMissing": 1,
+      "sentMissing": 1,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2022,
+      "teamId": 115,
+      "teamName": "Colorado Rockies",
+      "net": 0,
+      "received": 0,
+      "sent": 0,
+      "playersReceived": 0,
+      "playersSent": 0,
+      "receivedMissing": 0,
+      "sentMissing": 0,
+      "tradeCount": 0,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 109,
+      "teamName": "Arizona Diamondbacks",
+      "net": 2.1,
+      "received": 3.2,
+      "sent": 1.1,
+      "playersReceived": 5,
+      "playersSent": 7,
+      "receivedMissing": 1,
+      "sentMissing": 4,
+      "tradeCount": 6,
+      "ladder": 4,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 158,
+      "teamName": "Milwaukee Brewers",
+      "net": 3.4000000000000004,
+      "received": 3.7,
+      "sent": 0.3,
+      "playersReceived": 5,
+      "playersSent": 6,
+      "receivedMissing": 2,
+      "sentMissing": 3,
+      "tradeCount": 6,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 144,
+      "teamName": "Atlanta Braves",
+      "net": 2.0999999999999996,
+      "received": 2.1999999999999997,
+      "sent": 0.1,
+      "playersReceived": 4,
+      "playersSent": 4,
+      "receivedMissing": 0,
+      "sentMissing": 2,
+      "tradeCount": 4,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 115,
+      "teamName": "Colorado Rockies",
+      "net": -1.2,
+      "received": 0.30000000000000004,
+      "sent": 1.5,
+      "playersReceived": 6,
+      "playersSent": 5,
+      "receivedMissing": 4,
+      "sentMissing": 1,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 117,
+      "teamName": "Houston Astros",
+      "net": 4.2,
+      "received": 3.3,
+      "sent": -0.9,
+      "playersReceived": 2,
+      "playersSent": 3,
+      "receivedMissing": 0,
+      "sentMissing": 2,
+      "tradeCount": 2,
+      "ladder": 3,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 121,
+      "teamName": "New York Mets",
+      "net": -9.2,
+      "received": 0.4,
+      "sent": 9.6,
+      "playersReceived": 10,
+      "playersSent": 6,
+      "receivedMissing": 8,
+      "sentMissing": 0,
+      "tradeCount": 7,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 146,
+      "teamName": "Miami Marlins",
+      "net": 2.4000000000000004,
+      "received": 2.8000000000000003,
+      "sent": 0.4,
+      "playersReceived": 5,
+      "playersSent": 8,
+      "receivedMissing": 0,
+      "sentMissing": 5,
+      "tradeCount": 5,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 135,
+      "teamName": "San Diego Padres",
+      "net": 1.5999999999999999,
+      "received": 1.4999999999999998,
+      "sent": -0.1,
+      "playersReceived": 6,
+      "playersSent": 7,
+      "receivedMissing": 1,
+      "sentMissing": 4,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 143,
+      "teamName": "Philadelphia Phillies",
+      "net": 0.6,
+      "received": 1,
+      "sent": 0.4,
+      "playersReceived": 2,
+      "playersSent": 2,
+      "receivedMissing": 0,
+      "sentMissing": 1,
+      "tradeCount": 2,
+      "ladder": 3,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 134,
+      "teamName": "Pittsburgh Pirates",
+      "net": -1.6,
+      "received": 0.5,
+      "sent": 2.1,
+      "playersReceived": 5,
+      "playersSent": 5,
+      "receivedMissing": 2,
+      "sentMissing": 0,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 141,
+      "teamName": "Toronto Blue Jays",
+      "net": 1.8,
+      "received": 1.8,
+      "sent": 0,
+      "playersReceived": 4,
+      "playersSent": 5,
+      "receivedMissing": 0,
+      "sentMissing": 4,
+      "tradeCount": 4,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 138,
+      "teamName": "St. Louis Cardinals",
+      "net": -8.7,
+      "received": 0.19999999999999998,
+      "sent": 8.899999999999999,
+      "playersReceived": 10,
+      "playersSent": 6,
+      "receivedMissing": 8,
+      "sentMissing": 0,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 108,
+      "teamName": "Los Angeles Angels",
+      "net": 0.9999999999999999,
+      "received": 1.0999999999999999,
+      "sent": 0.1,
+      "playersReceived": 5,
+      "playersSent": 6,
+      "receivedMissing": 0,
+      "sentMissing": 5,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 139,
+      "teamName": "Tampa Bay Rays",
+      "net": 2.7,
+      "received": 2.6,
+      "sent": -0.1,
+      "playersReceived": 4,
+      "playersSent": 5,
+      "receivedMissing": 3,
+      "sentMissing": 3,
+      "tradeCount": 5,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 119,
+      "teamName": "Los Angeles Dodgers",
+      "net": 1.5,
+      "received": 1.5,
+      "sent": 0,
+      "playersReceived": 7,
+      "playersSent": 12,
+      "receivedMissing": 1,
+      "sentMissing": 6,
+      "tradeCount": 9,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 116,
+      "teamName": "Detroit Tigers",
+      "net": -1.7,
+      "received": 0,
+      "sent": 1.7,
+      "playersReceived": 2,
+      "playersSent": 1,
+      "receivedMissing": 2,
+      "sentMissing": 0,
+      "tradeCount": 2,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 118,
+      "teamName": "Kansas City Royals",
+      "net": -2.2,
+      "received": 0.8,
+      "sent": 3,
+      "playersReceived": 7,
+      "playersSent": 5,
+      "receivedMissing": 4,
+      "sentMissing": 0,
+      "tradeCount": 6,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 145,
+      "teamName": "Chicago White Sox",
+      "net": -6.4,
+      "received": -1.2,
+      "sent": 5.2,
+      "playersReceived": 10,
+      "playersSent": 7,
+      "receivedMissing": 6,
+      "sentMissing": 0,
+      "tradeCount": 7,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 110,
+      "teamName": "Baltimore Orioles",
+      "net": 2,
+      "received": 2,
+      "sent": 0,
+      "playersReceived": 3,
+      "playersSent": 6,
+      "receivedMissing": 1,
+      "sentMissing": 2,
+      "tradeCount": 4,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 147,
+      "teamName": "New York Yankees",
+      "net": 0,
+      "received": 0,
+      "sent": 0,
+      "playersReceived": 2,
+      "playersSent": 1,
+      "receivedMissing": 0,
+      "sentMissing": 1,
+      "tradeCount": 2,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 114,
+      "teamName": "Cleveland Guardians",
+      "net": -5,
+      "received": -1.6,
+      "sent": 3.4,
+      "playersReceived": 5,
+      "playersSent": 3,
+      "receivedMissing": 2,
+      "sentMissing": 0,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 136,
+      "teamName": "Seattle Mariners",
+      "net": 1,
+      "received": 0.7000000000000001,
+      "sent": -0.29999999999999993,
+      "playersReceived": 5,
+      "playersSent": 7,
+      "receivedMissing": 1,
+      "sentMissing": 3,
+      "tradeCount": 6,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 112,
+      "teamName": "Chicago Cubs",
+      "net": 2.4000000000000004,
+      "received": 3.2,
+      "sent": 0.8,
+      "playersReceived": 4,
+      "playersSent": 5,
+      "receivedMissing": 2,
+      "sentMissing": 4,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 140,
+      "teamName": "Texas Rangers",
+      "net": 8.500000000000002,
+      "received": 8.600000000000001,
+      "sent": 0.09999999999999998,
+      "playersReceived": 5,
+      "playersSent": 6,
+      "receivedMissing": 1,
+      "sentMissing": 3,
+      "tradeCount": 6,
+      "ladder": 5,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 111,
+      "teamName": "Boston Red Sox",
+      "net": 1.4000000000000001,
+      "received": 0.30000000000000004,
+      "sent": -1.1,
+      "playersReceived": 4,
+      "playersSent": 3,
+      "receivedMissing": 1,
+      "sentMissing": 2,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 133,
+      "teamName": "Athletics",
+      "net": -1.1,
+      "received": 0.4,
+      "sent": 1.5,
+      "playersReceived": 3,
+      "playersSent": 3,
+      "receivedMissing": 1,
+      "sentMissing": 0,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 137,
+      "teamName": "San Francisco Giants",
+      "net": -1.2000000000000002,
+      "received": -1.1,
+      "sent": 0.1,
+      "playersReceived": 4,
+      "playersSent": 1,
+      "receivedMissing": 2,
+      "sentMissing": 0,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 120,
+      "teamName": "Washington Nationals",
+      "net": -3.2,
+      "received": 0,
+      "sent": 3.2,
+      "playersReceived": 2,
+      "playersSent": 1,
+      "receivedMissing": 2,
+      "sentMissing": 0,
+      "tradeCount": 1,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 113,
+      "teamName": "Cincinnati Reds",
+      "net": 0.7000000000000001,
+      "received": 1.1,
+      "sent": 0.4,
+      "playersReceived": 1,
+      "playersSent": 1,
+      "receivedMissing": 0,
+      "sentMissing": 0,
+      "tradeCount": 1,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2023,
+      "teamId": 142,
+      "teamName": "Minnesota Twins",
+      "net": 2.1,
+      "received": 1.2,
+      "sent": -0.9,
+      "playersReceived": 1,
+      "playersSent": 1,
+      "receivedMissing": 0,
+      "sentMissing": 0,
+      "tradeCount": 1,
+      "ladder": 2,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 113,
+      "teamName": "Cincinnati Reds",
+      "net": -1.7000000000000002,
+      "received": -0.8,
+      "sent": 0.9,
+      "playersReceived": 6,
+      "playersSent": 6,
+      "receivedMissing": 1,
+      "sentMissing": 1,
+      "tradeCount": 6,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 110,
+      "teamName": "Baltimore Orioles",
+      "net": 3.3,
+      "received": 3.0999999999999996,
+      "sent": -0.19999999999999996,
+      "playersReceived": 10,
+      "playersSent": 10,
+      "receivedMissing": 1,
+      "sentMissing": 5,
+      "tradeCount": 8,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "teamName": "Miami Marlins",
+      "net": -9.299999999999999,
+      "received": -1.2,
+      "sent": 8.1,
+      "playersReceived": 15,
+      "playersSent": 9,
+      "receivedMissing": 11,
+      "sentMissing": 0,
+      "tradeCount": 8,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 136,
+      "teamName": "Seattle Mariners",
+      "net": 4.5,
+      "received": 3.4,
+      "sent": -1.1,
+      "playersReceived": 6,
+      "playersSent": 9,
+      "receivedMissing": 2,
+      "sentMissing": 5,
+      "tradeCount": 7,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 134,
+      "teamName": "Pittsburgh Pirates",
+      "net": 0.8999999999999998,
+      "received": 1.7999999999999998,
+      "sent": 0.9,
+      "playersReceived": 7,
+      "playersSent": 9,
+      "receivedMissing": 1,
+      "sentMissing": 6,
+      "tradeCount": 8,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 135,
+      "teamName": "San Diego Padres",
+      "net": 5.6,
+      "received": 4,
+      "sent": -1.6,
+      "playersReceived": 5,
+      "playersSent": 10,
+      "receivedMissing": 0,
+      "sentMissing": 7,
+      "tradeCount": 4,
+      "ladder": 2,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 141,
+      "teamName": "Toronto Blue Jays",
+      "net": -7.799999999999999,
+      "received": 0.5,
+      "sent": 8.299999999999999,
+      "playersReceived": 14,
+      "playersSent": 8,
+      "receivedMissing": 9,
+      "sentMissing": 0,
+      "tradeCount": 8,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 121,
+      "teamName": "New York Mets",
+      "net": 2.4,
+      "received": 2.5,
+      "sent": 0.1,
+      "playersReceived": 9,
+      "playersSent": 9,
+      "receivedMissing": 3,
+      "sentMissing": 6,
+      "tradeCount": 11,
+      "ladder": 3,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 133,
+      "teamName": "Athletics",
+      "net": -2.2,
+      "received": 0,
+      "sent": 2.2,
+      "playersReceived": 4,
+      "playersSent": 2,
+      "receivedMissing": 3,
+      "sentMissing": 0,
+      "tradeCount": 2,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 114,
+      "teamName": "Cleveland Guardians",
+      "net": 1.5999999999999999,
+      "received": 1.5999999999999999,
+      "sent": 0,
+      "playersReceived": 3,
+      "playersSent": 4,
+      "receivedMissing": 0,
+      "sentMissing": 3,
+      "tradeCount": 3,
+      "ladder": 3,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 137,
+      "teamName": "San Francisco Giants",
+      "net": -0.3999999999999999,
+      "received": 0.20000000000000007,
+      "sent": 0.6,
+      "playersReceived": 6,
+      "playersSent": 7,
+      "receivedMissing": 2,
+      "sentMissing": 1,
+      "tradeCount": 7,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 117,
+      "teamName": "Houston Astros",
+      "net": 3.5,
+      "received": 3.9,
+      "sent": 0.4,
+      "playersReceived": 2,
+      "playersSent": 4,
+      "receivedMissing": 0,
+      "sentMissing": 1,
+      "tradeCount": 2,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 147,
+      "teamName": "New York Yankees",
+      "net": 3.999999999999999,
+      "received": 4.199999999999999,
+      "sent": 0.19999999999999998,
+      "playersReceived": 5,
+      "playersSent": 7,
+      "receivedMissing": 2,
+      "sentMissing": 4,
+      "tradeCount": 4,
+      "ladder": 4,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 145,
+      "teamName": "Chicago White Sox",
+      "net": -6.7,
+      "received": -1,
+      "sent": 5.7,
+      "playersReceived": 6,
+      "playersSent": 6,
+      "receivedMissing": 5,
+      "sentMissing": 0,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 143,
+      "teamName": "Philadelphia Phillies",
+      "net": 2,
+      "received": 2.3000000000000003,
+      "sent": 0.30000000000000004,
+      "playersReceived": 5,
+      "playersSent": 6,
+      "receivedMissing": 1,
+      "sentMissing": 2,
+      "tradeCount": 4,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 142,
+      "teamName": "Minnesota Twins",
+      "net": 0.1,
+      "received": 0.1,
+      "sent": 0,
+      "playersReceived": 2,
+      "playersSent": 1,
+      "receivedMissing": 1,
+      "sentMissing": 1,
+      "tradeCount": 2,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "teamName": "Tampa Bay Rays",
+      "net": -12.899999999999999,
+      "received": -1.7,
+      "sent": 11.2,
+      "playersReceived": 16,
+      "playersSent": 9,
+      "receivedMissing": 12,
+      "sentMissing": 0,
+      "tradeCount": 10,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 138,
+      "teamName": "St. Louis Cardinals",
+      "net": 4.3,
+      "received": 3.9999999999999996,
+      "sent": -0.30000000000000004,
+      "playersReceived": 3,
+      "playersSent": 3,
+      "receivedMissing": 0,
+      "sentMissing": 1,
+      "tradeCount": 2,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 111,
+      "teamName": "Boston Red Sox",
+      "net": 1.1999999999999997,
+      "received": 1.2999999999999998,
+      "sent": 0.1,
+      "playersReceived": 6,
+      "playersSent": 11,
+      "receivedMissing": 0,
+      "sentMissing": 8,
+      "tradeCount": 6,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 158,
+      "teamName": "Milwaukee Brewers",
+      "net": 2.5,
+      "received": 3,
+      "sent": 0.5,
+      "playersReceived": 4,
+      "playersSent": 6,
+      "receivedMissing": 0,
+      "sentMissing": 3,
+      "tradeCount": 4,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 108,
+      "teamName": "Los Angeles Angels",
+      "net": -1.7000000000000002,
+      "received": -0.30000000000000004,
+      "sent": 1.4000000000000001,
+      "playersReceived": 7,
+      "playersSent": 2,
+      "receivedMissing": 3,
+      "sentMissing": 0,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 118,
+      "teamName": "Kansas City Royals",
+      "net": 4.2,
+      "received": 4.9,
+      "sent": 0.7,
+      "playersReceived": 4,
+      "playersSent": 8,
+      "receivedMissing": 0,
+      "sentMissing": 4,
+      "tradeCount": 6,
+      "ladder": 2,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 109,
+      "teamName": "Arizona Diamondbacks",
+      "net": 2.1,
+      "received": 2.2,
+      "sent": 0.1,
+      "playersReceived": 3,
+      "playersSent": 3,
+      "receivedMissing": 0,
+      "sentMissing": 2,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 120,
+      "teamName": "Washington Nationals",
+      "net": -3.9999999999999996,
+      "received": 0.1,
+      "sent": 4.1,
+      "playersReceived": 6,
+      "playersSent": 4,
+      "receivedMissing": 4,
+      "sentMissing": 0,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 112,
+      "teamName": "Chicago Cubs",
+      "net": 3.5999999999999996,
+      "received": 4,
+      "sent": 0.40000000000000013,
+      "playersReceived": 6,
+      "playersSent": 6,
+      "receivedMissing": 2,
+      "sentMissing": 3,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 119,
+      "teamName": "Los Angeles Dodgers",
+      "net": 4.8,
+      "received": 5,
+      "sent": 0.20000000000000007,
+      "playersReceived": 7,
+      "playersSent": 10,
+      "receivedMissing": 2,
+      "sentMissing": 5,
+      "tradeCount": 7,
+      "ladder": 5,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 116,
+      "teamName": "Detroit Tigers",
+      "net": -5.8,
+      "received": 0.4,
+      "sent": 6.2,
+      "playersReceived": 9,
+      "playersSent": 5,
+      "receivedMissing": 7,
+      "sentMissing": 0,
+      "tradeCount": 6,
+      "ladder": 2,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 140,
+      "teamName": "Texas Rangers",
+      "net": 1.8000000000000003,
+      "received": 2.2,
+      "sent": 0.39999999999999997,
+      "playersReceived": 3,
+      "playersSent": 6,
+      "receivedMissing": 0,
+      "sentMissing": 4,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 144,
+      "teamName": "Atlanta Braves",
+      "net": 1.2,
+      "received": 1,
+      "sent": -0.2,
+      "playersReceived": 2,
+      "playersSent": 2,
+      "receivedMissing": 0,
+      "sentMissing": 1,
+      "tradeCount": 1,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2024,
+      "teamId": 115,
+      "teamName": "Colorado Rockies",
+      "net": -1.0999999999999999,
+      "received": 0.3,
+      "sent": 1.4,
+      "playersReceived": 3,
+      "playersSent": 2,
+      "receivedMissing": 1,
+      "sentMissing": 0,
+      "tradeCount": 2,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 139,
+      "teamName": "Tampa Bay Rays",
+      "net": -1.3000000000000007,
+      "received": 4.699999999999999,
+      "sent": 6,
+      "playersReceived": 11,
+      "playersSent": 12,
+      "receivedMissing": 2,
+      "sentMissing": 5,
+      "tradeCount": 11,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 119,
+      "teamName": "Los Angeles Dodgers",
+      "net": 1.6,
+      "received": 0.9,
+      "sent": -0.7,
+      "playersReceived": 7,
+      "playersSent": 7,
+      "receivedMissing": 3,
+      "sentMissing": 2,
+      "tradeCount": 6,
+      "ladder": 5,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 134,
+      "teamName": "Pittsburgh Pirates",
+      "net": -5.6,
+      "received": 0,
+      "sent": 5.6,
+      "playersReceived": 10,
+      "playersSent": 6,
+      "receivedMissing": 6,
+      "sentMissing": 0,
+      "tradeCount": 6,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 112,
+      "teamName": "Chicago Cubs",
+      "net": 2.6,
+      "received": 2.6,
+      "sent": 0,
+      "playersReceived": 4,
+      "playersSent": 6,
+      "receivedMissing": 0,
+      "sentMissing": 6,
+      "tradeCount": 4,
+      "ladder": 2,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "teamName": "San Diego Padres",
+      "net": 5.499999999999999,
+      "received": 8.299999999999999,
+      "sent": 2.8,
+      "playersReceived": 8,
+      "playersSent": 14,
+      "receivedMissing": 1,
+      "sentMissing": 10,
+      "tradeCount": 5,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 133,
+      "teamName": "Athletics",
+      "net": -3.8000000000000003,
+      "received": -0.2,
+      "sent": 3.6,
+      "playersReceived": 5,
+      "playersSent": 3,
+      "receivedMissing": 4,
+      "sentMissing": 0,
+      "tradeCount": 2,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 145,
+      "teamName": "Chicago White Sox",
+      "net": -3.3,
+      "received": -0.9,
+      "sent": 2.4,
+      "playersReceived": 6,
+      "playersSent": 3,
+      "receivedMissing": 3,
+      "sentMissing": 0,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 120,
+      "teamName": "Washington Nationals",
+      "net": -4.5,
+      "received": 0.1,
+      "sent": 4.6,
+      "playersReceived": 10,
+      "playersSent": 6,
+      "receivedMissing": 8,
+      "sentMissing": 0,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "teamName": "Baltimore Orioles",
+      "net": -10.000000000000002,
+      "received": 1.6,
+      "sent": 11.600000000000001,
+      "playersReceived": 17,
+      "playersSent": 9,
+      "receivedMissing": 15,
+      "sentMissing": 0,
+      "tradeCount": 10,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 116,
+      "teamName": "Detroit Tigers",
+      "net": 1.2999999999999996,
+      "received": 1.9999999999999996,
+      "sent": 0.7,
+      "playersReceived": 8,
+      "playersSent": 8,
+      "receivedMissing": 1,
+      "sentMissing": 6,
+      "tradeCount": 9,
+      "ladder": 2,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 144,
+      "teamName": "Atlanta Braves",
+      "net": 0.4999999999999999,
+      "received": 0.3999999999999999,
+      "sent": -0.1,
+      "playersReceived": 5,
+      "playersSent": 5,
+      "receivedMissing": 1,
+      "sentMissing": 1,
+      "tradeCount": 7,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 117,
+      "teamName": "Houston Astros",
+      "net": 3.9000000000000004,
+      "received": 4.7,
+      "sent": 0.8,
+      "playersReceived": 3,
+      "playersSent": 5,
+      "receivedMissing": 0,
+      "sentMissing": 4,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 142,
+      "teamName": "Minnesota Twins",
+      "net": -13.6,
+      "received": 0.6000000000000003,
+      "sent": 14.2,
+      "playersReceived": 14,
+      "playersSent": 11,
+      "receivedMissing": 9,
+      "sentMissing": 0,
+      "tradeCount": 10,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 114,
+      "teamName": "Cleveland Guardians",
+      "net": -0.3,
+      "received": 0,
+      "sent": 0.3,
+      "playersReceived": 1,
+      "playersSent": 2,
+      "receivedMissing": 1,
+      "sentMissing": 0,
+      "tradeCount": 2,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 141,
+      "teamName": "Toronto Blue Jays",
+      "net": 4.5,
+      "received": 3.3,
+      "sent": -1.2000000000000002,
+      "playersReceived": 5,
+      "playersSent": 6,
+      "receivedMissing": 1,
+      "sentMissing": 3,
+      "tradeCount": 5,
+      "ladder": 4,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 109,
+      "teamName": "Arizona Diamondbacks",
+      "net": -11.2,
+      "received": -1,
+      "sent": 10.2,
+      "playersReceived": 9,
+      "playersSent": 6,
+      "receivedMissing": 5,
+      "sentMissing": 1,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 158,
+      "teamName": "Milwaukee Brewers",
+      "net": 3.2,
+      "received": 2.3000000000000003,
+      "sent": -0.9,
+      "playersReceived": 6,
+      "playersSent": 3,
+      "receivedMissing": 2,
+      "sentMissing": 2,
+      "tradeCount": 5,
+      "ladder": 3,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 140,
+      "teamName": "Texas Rangers",
+      "net": 5.3999999999999995,
+      "received": 5.1,
+      "sent": -0.30000000000000004,
+      "playersReceived": 4,
+      "playersSent": 8,
+      "receivedMissing": 0,
+      "sentMissing": 6,
+      "tradeCount": 5,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 138,
+      "teamName": "St. Louis Cardinals",
+      "net": -2.6,
+      "received": 0,
+      "sent": 2.6,
+      "playersReceived": 6,
+      "playersSent": 4,
+      "receivedMissing": 6,
+      "sentMissing": 0,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 111,
+      "teamName": "Boston Red Sox",
+      "net": 2.1,
+      "received": 1.9000000000000001,
+      "sent": -0.2,
+      "playersReceived": 2,
+      "playersSent": 4,
+      "receivedMissing": 0,
+      "sentMissing": 3,
+      "tradeCount": 3,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 137,
+      "teamName": "San Francisco Giants",
+      "net": -3.9000000000000004,
+      "received": 0.30000000000000004,
+      "sent": 4.2,
+      "playersReceived": 8,
+      "playersSent": 3,
+      "receivedMissing": 5,
+      "sentMissing": 0,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 118,
+      "teamName": "Kansas City Royals",
+      "net": 5.2,
+      "received": 5.8,
+      "sent": 0.6,
+      "playersReceived": 8,
+      "playersSent": 6,
+      "receivedMissing": 2,
+      "sentMissing": 2,
+      "tradeCount": 7,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "teamName": "New York Yankees",
+      "net": 7.599999999999999,
+      "received": 7.299999999999999,
+      "sent": -0.2999999999999998,
+      "playersReceived": 8,
+      "playersSent": 18,
+      "receivedMissing": 1,
+      "sentMissing": 12,
+      "tradeCount": 10,
+      "ladder": 2,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 115,
+      "teamName": "Colorado Rockies",
+      "net": -3.3,
+      "received": 0,
+      "sent": 3.3,
+      "playersReceived": 5,
+      "playersSent": 3,
+      "receivedMissing": 5,
+      "sentMissing": 0,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 113,
+      "teamName": "Cincinnati Reds",
+      "net": 3.8,
+      "received": 4,
+      "sent": 0.2,
+      "playersReceived": 3,
+      "playersSent": 5,
+      "receivedMissing": 0,
+      "sentMissing": 3,
+      "tradeCount": 3,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 136,
+      "teamName": "Seattle Mariners",
+      "net": 8.5,
+      "received": 7.699999999999999,
+      "sent": -0.8,
+      "playersReceived": 3,
+      "playersSent": 7,
+      "receivedMissing": 0,
+      "sentMissing": 4,
+      "tradeCount": 4,
+      "ladder": 3,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 146,
+      "teamName": "Miami Marlins",
+      "net": -1.2,
+      "received": 0.8,
+      "sent": 2,
+      "playersReceived": 5,
+      "playersSent": 2,
+      "receivedMissing": 3,
+      "sentMissing": 0,
+      "tradeCount": 3,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 143,
+      "teamName": "Philadelphia Phillies",
+      "net": 5.400000000000001,
+      "received": 5.500000000000001,
+      "sent": 0.1,
+      "playersReceived": 4,
+      "playersSent": 6,
+      "receivedMissing": 1,
+      "sentMissing": 5,
+      "tradeCount": 5,
+      "ladder": 1,
+      "madePostseason": true,
+      "wonDivision": true,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 108,
+      "teamName": "Los Angeles Angels",
+      "net": 0.29999999999999993,
+      "received": 0.19999999999999996,
+      "sent": -0.1,
+      "playersReceived": 3,
+      "playersSent": 3,
+      "receivedMissing": 0,
+      "sentMissing": 2,
+      "tradeCount": 2,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    },
+    {
+      "year": 2025,
+      "teamId": 121,
+      "teamName": "New York Mets",
+      "net": 3.2,
+      "received": 3.5,
+      "sent": 0.30000000000000004,
+      "playersReceived": 4,
+      "playersSent": 11,
+      "receivedMissing": 0,
+      "sentMissing": 8,
+      "tradeCount": 4,
+      "ladder": 0,
+      "madePostseason": false,
+      "wonDivision": false,
+      "era": "expanded-3wc"
+    }
+  ],
+  "findings": {
+    "spearmanNetVsLadder": 0.5587602950750028,
+    "permutationP": 0,
+    "permutationReps": 5000,
+    "leaveOneYearOut": [
+      {
+        "heldOut": 2021,
+        "rho": 0.6080704170790865
+      },
+      {
+        "heldOut": 2022,
+        "rho": 0.5411014230750568
+      },
+      {
+        "heldOut": 2023,
+        "rho": 0.5263927198294591
+      },
+      {
+        "heldOut": 2024,
+        "rho": 0.5767979050757062
+      },
+      {
+        "heldOut": 2025,
+        "rho": 0.5460786417683278
+      }
+    ],
+    "leaveOneClubOutSameSignCount": 30,
+    "leaveOneClubOutTotal": 30,
+    "spearmanNetVsMadePostseason": 0.5632470158933286,
+    "spearmanNetVsLcsOrBetter": 0.34037942021672685,
+    "spearmanNetVsWonDivisionAmongPostseason": -0.21746035230465136,
+    "logisticMadePostseason": [
+      {
+        "name": "intercept",
+        "beta": -0.6893591888927924,
+        "se": 0.23643488952150016,
+        "z": -2.9156407088984455,
+        "p": 0.0035497251631579907,
+        "oddsRatio": 0.5018975875875401
+      },
+      {
+        "name": "netWarAcquired_z",
+        "beta": 1.8641515410317915,
+        "se": 0.3523431470577533,
+        "z": 5.290727396285174,
+        "p": 1.2208282251791047e-7,
+        "oddsRatio": 6.450460612391533
+      },
+      {
+        "name": "era2021",
+        "beta": -0.6406126188487437,
+        "se": 0.5452034735548235,
+        "z": -1.1749973173718715,
+        "p": 0.23999591158369515,
+        "oddsRatio": 0.5269694936919896
+      }
+    ],
+    "logisticWonDivision": [
+      {
+        "name": "intercept",
+        "beta": -0.016420346653393997,
+        "se": 0.29459762303300774,
+        "z": -0.05573821840223811,
+        "p": 0.9555502151887296,
+        "oddsRatio": 0.9837137323609777
+      },
+      {
+        "name": "netWarAcquired_z",
+        "beta": -0.46522479175638914,
+        "se": 0.28998066363673086,
+        "z": -1.604330391971214,
+        "p": 0.10864124192828228,
+        "oddsRatio": 0.6279939214651588
+      },
+      {
+        "name": "era2021",
+        "beta": 0.5251164573581614,
+        "se": 0.7420956546305233,
+        "z": 0.7076128987975382,
+        "p": 0.4791855419440372,
+        "oddsRatio": 1.6906557262143678
+      }
+    ],
+    "orderedLogit": {
+      "wellIdentified": true,
+      "terms": [
+        {
+          "name": "netWarAcquired_z",
+          "beta": 1.6695364808416713,
+          "se": 0.2766403243166911,
+          "z": 6.035043824379075,
+          "p": 1.5950265552788778e-9,
+          "oddsRatio": 5.3097060762064086
+        },
+        {
+          "name": "era2021",
+          "beta": -0.7362039464497981,
+          "se": 0.49880865435317545,
+          "z": -1.4759245655119244,
+          "p": 0.13996421681947258,
+          "oddsRatio": 0.47892850745895743
+        }
+      ],
+      "rungCounts": [
+        92,
+        29,
+        9,
+        10,
+        5,
+        5
+      ]
+    },
+    "missingWarPlayerCount": 674,
+    "confoundCheck": {
+      "n": 90,
+      "years": [
+        2021,
+        2022,
+        2023
+      ],
+      "spearmanNetVsLadder": 0.5637619092758275,
+      "spearmanNetVsFinalWinPct": 0.6636332560698049,
+      "spearmanFinalWinPctVsLadder": 0.7672380492106474,
+      "partialSpearmanNetVsLadderControllingWinPct": 0.11379723825387328,
+      "partialPermutationP": 0.2826
+    }
+  },
+  "missingWarPlayers": [
+    {
+      "year": 2021,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Kevin Alcántara",
+      "playerId": 682634
+    },
+    {
+      "year": 2021,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Alexander Vizcaíno",
+      "playerId": 669805
+    },
+    {
+      "year": 2021,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Kevin Alcántara",
+      "playerId": 682634
+    },
+    {
+      "year": 2021,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Alexander Vizcaíno",
+      "playerId": 669805
+    },
+    {
+      "year": 2021,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Anderson Espinoza",
+      "playerId": 659262
+    },
+    {
+      "year": 2021,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Anderson Espinoza",
+      "playerId": 659262
+    },
+    {
+      "year": 2021,
+      "teamId": 133,
+      "dir": "sent",
+      "name": "Seth Shuman",
+      "playerId": 670234
+    },
+    {
+      "year": 2021,
+      "teamId": 133,
+      "dir": "sent",
+      "name": "Richard Guasch",
+      "playerId": 683014
+    },
+    {
+      "year": 2021,
+      "teamId": 133,
+      "dir": "sent",
+      "name": "Drew Millas",
+      "playerId": 686452
+    },
+    {
+      "year": 2021,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Seth Shuman",
+      "playerId": 670234
+    },
+    {
+      "year": 2021,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Richard Guasch",
+      "playerId": 683014
+    },
+    {
+      "year": 2021,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Drew Millas",
+      "playerId": 686452
+    },
+    {
+      "year": 2021,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Alex Scherff",
+      "playerId": 669085
+    },
+    {
+      "year": 2021,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Alex Scherff",
+      "playerId": 669085
+    },
+    {
+      "year": 2021,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Evan Sisk",
+      "playerId": 681895
+    },
+    {
+      "year": 2021,
+      "teamId": 138,
+      "dir": "sent",
+      "name": "Evan Sisk",
+      "playerId": 681895
+    },
+    {
+      "year": 2021,
+      "teamId": 114,
+      "dir": "sent",
+      "name": "Yainer Diaz",
+      "playerId": 673237
+    },
+    {
+      "year": 2021,
+      "teamId": 117,
+      "dir": "received",
+      "name": "Yainer Diaz",
+      "playerId": 673237
+    },
+    {
+      "year": 2021,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Reese Olson",
+      "playerId": 681857
+    },
+    {
+      "year": 2021,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Reese Olson",
+      "playerId": 681857
+    },
+    {
+      "year": 2021,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Abrahan Gutierrez",
+      "playerId": 670868
+    },
+    {
+      "year": 2021,
+      "teamId": 143,
+      "dir": "received",
+      "name": "Braeden Ogle",
+      "playerId": 669180
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "dir": "sent",
+      "name": "Braeden Ogle",
+      "playerId": 669180
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Abrahan Gutierrez",
+      "playerId": 670868
+    },
+    {
+      "year": 2021,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Simeon Woods Richardson",
+      "playerId": 680573
+    },
+    {
+      "year": 2021,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Austin Martin",
+      "playerId": 668885
+    },
+    {
+      "year": 2021,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Simeon Woods Richardson",
+      "playerId": 680573
+    },
+    {
+      "year": 2021,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Austin Martin",
+      "playerId": 668885
+    },
+    {
+      "year": 2021,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Donovan Casey",
+      "playerId": 661541
+    },
+    {
+      "year": 2021,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Gerardo Carrillo",
+      "playerId": 672629
+    },
+    {
+      "year": 2021,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Donovan Casey",
+      "playerId": 661541
+    },
+    {
+      "year": 2021,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Gerardo Carrillo",
+      "playerId": 672629
+    },
+    {
+      "year": 2021,
+      "teamId": 140,
+      "dir": "received",
+      "name": "Kevin Gowdy",
+      "playerId": 666151
+    },
+    {
+      "year": 2021,
+      "teamId": 140,
+      "dir": "received",
+      "name": "Josh Gessner",
+      "playerId": 678622
+    },
+    {
+      "year": 2021,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Kevin Gowdy",
+      "playerId": 666151
+    },
+    {
+      "year": 2021,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Josh Gessner",
+      "playerId": 678622
+    },
+    {
+      "year": 2021,
+      "teamId": 137,
+      "dir": "sent",
+      "name": "Ivan Armstrong",
+      "playerId": 678371
+    },
+    {
+      "year": 2021,
+      "teamId": 108,
+      "dir": "received",
+      "name": "Ivan Armstrong",
+      "playerId": 678371
+    },
+    {
+      "year": 2021,
+      "teamId": 114,
+      "dir": "received",
+      "name": "Peyton Battenfield",
+      "playerId": 685410
+    },
+    {
+      "year": 2021,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Peyton Battenfield",
+      "playerId": 685410
+    },
+    {
+      "year": 2021,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Tyler Burch",
+      "playerId": 688889
+    },
+    {
+      "year": 2021,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Tyler Burch",
+      "playerId": 688889
+    },
+    {
+      "year": 2021,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Alexander Canario",
+      "playerId": 672744
+    },
+    {
+      "year": 2021,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Caleb Kilian",
+      "playerId": 668873
+    },
+    {
+      "year": 2021,
+      "teamId": 137,
+      "dir": "sent",
+      "name": "Alexander Canario",
+      "playerId": 672744
+    },
+    {
+      "year": 2021,
+      "teamId": 137,
+      "dir": "sent",
+      "name": "Caleb Kilian",
+      "playerId": 668873
+    },
+    {
+      "year": 2021,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Kasey Kalich",
+      "playerId": 685008
+    },
+    {
+      "year": 2021,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Kasey Kalich",
+      "playerId": 685008
+    },
+    {
+      "year": 2021,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Pete Crow-Armstrong",
+      "playerId": 691718
+    },
+    {
+      "year": 2021,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Pete Crow-Armstrong",
+      "playerId": 691718
+    },
+    {
+      "year": 2021,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Ricky DeVito",
+      "playerId": 683740
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Ricky DeVito",
+      "playerId": 683740
+    },
+    {
+      "year": 2021,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Jordy Barley",
+      "playerId": 672357
+    },
+    {
+      "year": 2021,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Jordy Barley",
+      "playerId": 672357
+    },
+    {
+      "year": 2021,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Austin Shenton",
+      "playerId": 668853
+    },
+    {
+      "year": 2021,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Austin Shenton",
+      "playerId": 668853
+    },
+    {
+      "year": 2021,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Josh Smith",
+      "playerId": 669701
+    },
+    {
+      "year": 2021,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Trevor Hauver",
+      "playerId": 669386
+    },
+    {
+      "year": 2021,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Ezequiel Duran",
+      "playerId": 677649
+    },
+    {
+      "year": 2021,
+      "teamId": 140,
+      "dir": "received",
+      "name": "Josh Smith",
+      "playerId": 669701
+    },
+    {
+      "year": 2021,
+      "teamId": 140,
+      "dir": "received",
+      "name": "Trevor Hauver",
+      "playerId": 669386
+    },
+    {
+      "year": 2021,
+      "teamId": 140,
+      "dir": "received",
+      "name": "Ezequiel Duran",
+      "playerId": 677649
+    },
+    {
+      "year": 2021,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Bailey Horn",
+      "playerId": 690544
+    },
+    {
+      "year": 2021,
+      "teamId": 145,
+      "dir": "sent",
+      "name": "Bailey Horn",
+      "playerId": 690544
+    },
+    {
+      "year": 2021,
+      "teamId": 145,
+      "dir": "sent",
+      "name": "Konnor Pilkington",
+      "playerId": 663455
+    },
+    {
+      "year": 2021,
+      "teamId": 114,
+      "dir": "received",
+      "name": "Konnor Pilkington",
+      "playerId": 663455
+    },
+    {
+      "year": 2021,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Aldo Ramirez",
+      "playerId": 680048
+    },
+    {
+      "year": 2021,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Aldo Ramirez",
+      "playerId": 680048
+    },
+    {
+      "year": 2021,
+      "teamId": 113,
+      "dir": "sent",
+      "name": "Noah Davis",
+      "playerId": 663562
+    },
+    {
+      "year": 2021,
+      "teamId": 113,
+      "dir": "sent",
+      "name": "Case Williams",
+      "playerId": 695406
+    },
+    {
+      "year": 2021,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Noah Davis",
+      "playerId": 663562
+    },
+    {
+      "year": 2021,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Case Williams",
+      "playerId": 695406
+    },
+    {
+      "year": 2021,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Joaquin Tejada",
+      "playerId": 692047
+    },
+    {
+      "year": 2021,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Carter Bins",
+      "playerId": 670190
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Joaquin Tejada",
+      "playerId": 692047
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Carter Bins",
+      "playerId": 670190
+    },
+    {
+      "year": 2021,
+      "teamId": 109,
+      "dir": "received",
+      "name": "Cooper Hummel",
+      "playerId": 669450
+    },
+    {
+      "year": 2021,
+      "teamId": 109,
+      "dir": "received",
+      "name": "Alberto Ciprian",
+      "playerId": 691607
+    },
+    {
+      "year": 2021,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Cooper Hummel",
+      "playerId": 669450
+    },
+    {
+      "year": 2021,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Alberto Ciprian",
+      "playerId": 691607
+    },
+    {
+      "year": 2021,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Diego Castillo",
+      "playerId": 660636
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Diego Castillo",
+      "playerId": 660636
+    },
+    {
+      "year": 2021,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Daniel Palencia",
+      "playerId": 694037
+    },
+    {
+      "year": 2021,
+      "teamId": 133,
+      "dir": "sent",
+      "name": "Daniel Palencia",
+      "playerId": 694037
+    },
+    {
+      "year": 2021,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Michell Miliano",
+      "playerId": 672353
+    },
+    {
+      "year": 2021,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Jack Suwinski",
+      "playerId": 669261
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Michell Miliano",
+      "playerId": 672353
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Jack Suwinski",
+      "playerId": 669261
+    },
+    {
+      "year": 2021,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Matthew Dyer",
+      "playerId": 686546
+    },
+    {
+      "year": 2021,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Matthew Dyer",
+      "playerId": 686546
+    },
+    {
+      "year": 2021,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Drew Strotman",
+      "playerId": 675977
+    },
+    {
+      "year": 2021,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Calvin Faucher",
+      "playerId": 676534
+    },
+    {
+      "year": 2021,
+      "teamId": 142,
+      "dir": "sent",
+      "name": "Calvin Faucher",
+      "playerId": 676534
+    },
+    {
+      "year": 2021,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Drew Strotman",
+      "playerId": 675977
+    },
+    {
+      "year": 2021,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Carlos Rincon",
+      "playerId": 665779
+    },
+    {
+      "year": 2021,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Carlos Rincon",
+      "playerId": 665779
+    },
+    {
+      "year": 2021,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Victor Santos",
+      "playerId": 673257
+    },
+    {
+      "year": 2021,
+      "teamId": 111,
+      "dir": "received",
+      "name": "Victor Santos",
+      "playerId": 673257
+    },
+    {
+      "year": 2021,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Mason Berne",
+      "playerId": 676048
+    },
+    {
+      "year": 2021,
+      "teamId": 109,
+      "dir": "received",
+      "name": "Mason Berne",
+      "playerId": 676048
+    },
+    {
+      "year": 2021,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Bryce Ball",
+      "playerId": 668787
+    },
+    {
+      "year": 2021,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Bryce Ball",
+      "playerId": 668787
+    },
+    {
+      "year": 2021,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Deivy Grullón",
+      "playerId": 620453
+    },
+    {
+      "year": 2021,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Deivy Grullón",
+      "playerId": 620453
+    },
+    {
+      "year": 2021,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Tyler Neslony",
+      "playerId": 664104
+    },
+    {
+      "year": 2021,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Tyler Neslony",
+      "playerId": 664104
+    },
+    {
+      "year": 2021,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Hugo Beltran",
+      "playerId": 678286
+    },
+    {
+      "year": 2021,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Hugo Beltran",
+      "playerId": 678286
+    },
+    {
+      "year": 2021,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Damon Casetta-Stubbs",
+      "playerId": 677316
+    },
+    {
+      "year": 2021,
+      "teamId": 114,
+      "dir": "received",
+      "name": "Damon Casetta-Stubbs",
+      "playerId": 677316
+    },
+    {
+      "year": 2021,
+      "teamId": 113,
+      "dir": "sent",
+      "name": "Darlin Guzman",
+      "playerId": 680921
+    },
+    {
+      "year": 2021,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Darlin Guzman",
+      "playerId": 680921
+    },
+    {
+      "year": 2021,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Joe Kuzia",
+      "playerId": 641772
+    },
+    {
+      "year": 2021,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Joe Kuzia",
+      "playerId": 641772
+    },
+    {
+      "year": 2021,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Bowden Francis",
+      "playerId": 670102
+    },
+    {
+      "year": 2021,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Bowden Francis",
+      "playerId": 670102
+    },
+    {
+      "year": 2021,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Nathan Kirby",
+      "playerId": 621403
+    },
+    {
+      "year": 2021,
+      "teamId": 158,
+      "dir": "received",
+      "name": "Kevin Kramer",
+      "playerId": 596012
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "dir": "sent",
+      "name": "Kevin Kramer",
+      "playerId": 596012
+    },
+    {
+      "year": 2021,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Nathan Kirby",
+      "playerId": 621403
+    },
+    {
+      "year": 2021,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Justin Sterner",
+      "playerId": 686993
+    },
+    {
+      "year": 2021,
+      "teamId": 146,
+      "dir": "sent",
+      "name": "Justin Sterner",
+      "playerId": 686993
+    },
+    {
+      "year": 2021,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Will Toffey",
+      "playerId": 657780
+    },
+    {
+      "year": 2021,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Will Toffey",
+      "playerId": 657780
+    },
+    {
+      "year": 2022,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Drew Maggi",
+      "playerId": 543482
+    },
+    {
+      "year": 2022,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Drew Maggi",
+      "playerId": 543482
+    },
+    {
+      "year": 2022,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Malcom Nuñez",
+      "playerId": 682650
+    },
+    {
+      "year": 2022,
+      "teamId": 138,
+      "dir": "sent",
+      "name": "Malcom Nuñez",
+      "playerId": 682650
+    },
+    {
+      "year": 2022,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Alex De Jesus",
+      "playerId": 682942
+    },
+    {
+      "year": 2022,
+      "teamId": 119,
+      "dir": "received",
+      "name": "Moises Brito",
+      "playerId": 804975
+    },
+    {
+      "year": 2022,
+      "teamId": 119,
+      "dir": "received",
+      "name": "Nick Frasso",
+      "playerId": 693308
+    },
+    {
+      "year": 2022,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Moises Brito",
+      "playerId": 804975
+    },
+    {
+      "year": 2022,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Nick Frasso",
+      "playerId": 693308
+    },
+    {
+      "year": 2022,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Alex De Jesus",
+      "playerId": 682942
+    },
+    {
+      "year": 2022,
+      "teamId": 113,
+      "dir": "received",
+      "name": "Victor Acosta",
+      "playerId": 694193
+    },
+    {
+      "year": 2022,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Victor Acosta",
+      "playerId": 694193
+    },
+    {
+      "year": 2022,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Jeremy Walker",
+      "playerId": 668683
+    },
+    {
+      "year": 2022,
+      "teamId": 137,
+      "dir": "sent",
+      "name": "Jeremy Walker",
+      "playerId": 668683
+    },
+    {
+      "year": 2022,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Andy Thomas",
+      "playerId": 673990
+    },
+    {
+      "year": 2022,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Michael Stryffeler",
+      "playerId": 691068
+    },
+    {
+      "year": 2022,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Andy Thomas",
+      "playerId": 673990
+    },
+    {
+      "year": 2022,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Michael Stryffeler",
+      "playerId": 691068
+    },
+    {
+      "year": 2022,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Samad Taylor",
+      "playerId": 669392
+    },
+    {
+      "year": 2022,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Samad Taylor",
+      "playerId": 669392
+    },
+    {
+      "year": 2022,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Jadiel Sanchez",
+      "playerId": 689909
+    },
+    {
+      "year": 2022,
+      "teamId": 108,
+      "dir": "received",
+      "name": "Jadiel Sanchez",
+      "playerId": 689909
+    },
+    {
+      "year": 2022,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Ben Brown",
+      "playerId": 676962
+    },
+    {
+      "year": 2022,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Ben Brown",
+      "playerId": 676962
+    },
+    {
+      "year": 2022,
+      "teamId": 147,
+      "dir": "received",
+      "name": "Clayton Beeter",
+      "playerId": 690925
+    },
+    {
+      "year": 2022,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Clayton Beeter",
+      "playerId": 690925
+    },
+    {
+      "year": 2022,
+      "teamId": 120,
+      "dir": "received",
+      "name": "James Wood",
+      "playerId": 695578
+    },
+    {
+      "year": 2022,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Robert Hassell III",
+      "playerId": 690987
+    },
+    {
+      "year": 2022,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Jarlin Susana",
+      "playerId": 703186
+    },
+    {
+      "year": 2022,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "James Wood",
+      "playerId": 695578
+    },
+    {
+      "year": 2022,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Robert Hassell III",
+      "playerId": 690987
+    },
+    {
+      "year": 2022,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Jarlin Susana",
+      "playerId": 703186
+    },
+    {
+      "year": 2022,
+      "teamId": 142,
+      "dir": "sent",
+      "name": "Christian Encarnacion-Strand",
+      "playerId": 687952
+    },
+    {
+      "year": 2022,
+      "teamId": 142,
+      "dir": "sent",
+      "name": "Steve Hajjar",
+      "playerId": 680727
+    },
+    {
+      "year": 2022,
+      "teamId": 113,
+      "dir": "received",
+      "name": "Christian Encarnacion-Strand",
+      "playerId": 687952
+    },
+    {
+      "year": 2022,
+      "teamId": 113,
+      "dir": "received",
+      "name": "Steve Hajjar",
+      "playerId": 680727
+    },
+    {
+      "year": 2022,
+      "teamId": 142,
+      "dir": "sent",
+      "name": "Cade Povich",
+      "playerId": 700249
+    },
+    {
+      "year": 2022,
+      "teamId": 142,
+      "dir": "sent",
+      "name": "Juan Rojas",
+      "playerId": 700357
+    },
+    {
+      "year": 2022,
+      "teamId": 142,
+      "dir": "sent",
+      "name": "Juan Nuñez",
+      "playerId": 693725
+    },
+    {
+      "year": 2022,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Cade Povich",
+      "playerId": 700249
+    },
+    {
+      "year": 2022,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Juan Rojas",
+      "playerId": 700357
+    },
+    {
+      "year": 2022,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Juan Nuñez",
+      "playerId": 693725
+    },
+    {
+      "year": 2022,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Kris Anglin",
+      "playerId": 695258
+    },
+    {
+      "year": 2022,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Kris Anglin",
+      "playerId": 695258
+    },
+    {
+      "year": 2022,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Antoine Kelly",
+      "playerId": 681520
+    },
+    {
+      "year": 2022,
+      "teamId": 140,
+      "dir": "received",
+      "name": "Antoine Kelly",
+      "playerId": 681520
+    },
+    {
+      "year": 2022,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Carson Seymour",
+      "playerId": 693313
+    },
+    {
+      "year": 2022,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Nick Zwack",
+      "playerId": 686873
+    },
+    {
+      "year": 2022,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Carson Seymour",
+      "playerId": 693313
+    },
+    {
+      "year": 2022,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Nick Zwack",
+      "playerId": 686873
+    },
+    {
+      "year": 2022,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Max Ferguson",
+      "playerId": 681132
+    },
+    {
+      "year": 2022,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Corey Rosier",
+      "playerId": 681468
+    },
+    {
+      "year": 2022,
+      "teamId": 135,
+      "dir": "received",
+      "name": "Jay Groome",
+      "playerId": 666130
+    },
+    {
+      "year": 2022,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Jay Groome",
+      "playerId": 666130
+    },
+    {
+      "year": 2022,
+      "teamId": 111,
+      "dir": "received",
+      "name": "Max Ferguson",
+      "playerId": 681132
+    },
+    {
+      "year": 2022,
+      "teamId": 111,
+      "dir": "received",
+      "name": "Corey Rosier",
+      "playerId": 681468
+    },
+    {
+      "year": 2022,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Tristan Peters",
+      "playerId": 671976
+    },
+    {
+      "year": 2022,
+      "teamId": 158,
+      "dir": "received",
+      "name": "Trevor Rosenthal",
+      "playerId": 572096
+    },
+    {
+      "year": 2022,
+      "teamId": 137,
+      "dir": "sent",
+      "name": "Trevor Rosenthal",
+      "playerId": 572096
+    },
+    {
+      "year": 2022,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Tristan Peters",
+      "playerId": 671976
+    },
+    {
+      "year": 2022,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Carlos Guarate",
+      "playerId": 678672
+    },
+    {
+      "year": 2022,
+      "teamId": 138,
+      "dir": "sent",
+      "name": "Carlos Guarate",
+      "playerId": 678672
+    },
+    {
+      "year": 2022,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Sawyer Gipson-Long",
+      "playerId": 687830
+    },
+    {
+      "year": 2022,
+      "teamId": 142,
+      "dir": "sent",
+      "name": "Sawyer Gipson-Long",
+      "playerId": 687830
+    },
+    {
+      "year": 2022,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Saul Gonzalez",
+      "playerId": 682015
+    },
+    {
+      "year": 2022,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Saul Gonzalez",
+      "playerId": 682015
+    },
+    {
+      "year": 2022,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "German Tapia",
+      "playerId": 700272
+    },
+    {
+      "year": 2022,
+      "teamId": 119,
+      "dir": "received",
+      "name": "German Tapia",
+      "playerId": 700272
+    },
+    {
+      "year": 2022,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Seth Johnson",
+      "playerId": 686751
+    },
+    {
+      "year": 2022,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Seth Johnson",
+      "playerId": 686751
+    },
+    {
+      "year": 2022,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Luis Medina",
+      "playerId": 665622
+    },
+    {
+      "year": 2022,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Cooper Bowman",
+      "playerId": 688682
+    },
+    {
+      "year": 2022,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Luis Medina",
+      "playerId": 665622
+    },
+    {
+      "year": 2022,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Cooper Bowman",
+      "playerId": 688682
+    },
+    {
+      "year": 2022,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Robert Gasser",
+      "playerId": 688107
+    },
+    {
+      "year": 2022,
+      "teamId": 158,
+      "dir": "received",
+      "name": "Robert Gasser",
+      "playerId": 688107
+    },
+    {
+      "year": 2022,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Trey Harris",
+      "playerId": 674677
+    },
+    {
+      "year": 2022,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Trey Harris",
+      "playerId": 674677
+    },
+    {
+      "year": 2022,
+      "teamId": 111,
+      "dir": "received",
+      "name": "Wilyer Abreu",
+      "playerId": 677800
+    },
+    {
+      "year": 2022,
+      "teamId": 111,
+      "dir": "received",
+      "name": "Enmanuel Valdez",
+      "playerId": 665839
+    },
+    {
+      "year": 2022,
+      "teamId": 117,
+      "dir": "sent",
+      "name": "Wilyer Abreu",
+      "playerId": 677800
+    },
+    {
+      "year": 2022,
+      "teamId": 117,
+      "dir": "sent",
+      "name": "Enmanuel Valdez",
+      "playerId": 665839
+    },
+    {
+      "year": 2022,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Chayce McDermott",
+      "playerId": 694646
+    },
+    {
+      "year": 2022,
+      "teamId": 117,
+      "dir": "sent",
+      "name": "Chayce McDermott",
+      "playerId": 694646
+    },
+    {
+      "year": 2022,
+      "teamId": 117,
+      "dir": "received",
+      "name": "Jayden Murray",
+      "playerId": 681151
+    },
+    {
+      "year": 2022,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Jayden Murray",
+      "playerId": 681151
+    },
+    {
+      "year": 2022,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Andrew Moore",
+      "playerId": 681097
+    },
+    {
+      "year": 2022,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Noelvi Marte",
+      "playerId": 682622
+    },
+    {
+      "year": 2022,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Edwin Arroyo",
+      "playerId": 695490
+    },
+    {
+      "year": 2022,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Levi Stoudt",
+      "playerId": 686651
+    },
+    {
+      "year": 2022,
+      "teamId": 113,
+      "dir": "received",
+      "name": "Andrew Moore",
+      "playerId": 681097
+    },
+    {
+      "year": 2022,
+      "teamId": 113,
+      "dir": "received",
+      "name": "Noelvi Marte",
+      "playerId": 682622
+    },
+    {
+      "year": 2022,
+      "teamId": 113,
+      "dir": "received",
+      "name": "Edwin Arroyo",
+      "playerId": 695490
+    },
+    {
+      "year": 2022,
+      "teamId": 113,
+      "dir": "received",
+      "name": "Levi Stoudt",
+      "playerId": 686651
+    },
+    {
+      "year": 2022,
+      "teamId": 109,
+      "dir": "received",
+      "name": "Christian Cerda",
+      "playerId": 692416
+    },
+    {
+      "year": 2022,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Christian Cerda",
+      "playerId": 692416
+    },
+    {
+      "year": 2022,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Héctor Rodríguez",
+      "playerId": 699302
+    },
+    {
+      "year": 2022,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Jose Acuna",
+      "playerId": 691641
+    },
+    {
+      "year": 2022,
+      "teamId": 113,
+      "dir": "received",
+      "name": "Héctor Rodríguez",
+      "playerId": 699302
+    },
+    {
+      "year": 2022,
+      "teamId": 113,
+      "dir": "received",
+      "name": "Jose Acuna",
+      "playerId": 691641
+    },
+    {
+      "year": 2022,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Chandler Champlain",
+      "playerId": 669441
+    },
+    {
+      "year": 2022,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Beck Way",
+      "playerId": 694360
+    },
+    {
+      "year": 2022,
+      "teamId": 118,
+      "dir": "received",
+      "name": "T.J. Sikkema",
+      "playerId": 674674
+    },
+    {
+      "year": 2022,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Chandler Champlain",
+      "playerId": 669441
+    },
+    {
+      "year": 2022,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Beck Way",
+      "playerId": 694360
+    },
+    {
+      "year": 2022,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "T.J. Sikkema",
+      "playerId": 674674
+    },
+    {
+      "year": 2022,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Ben Bowden",
+      "playerId": 641386
+    },
+    {
+      "year": 2022,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Ben Bowden",
+      "playerId": 641386
+    },
+    {
+      "year": 2022,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Jonatan Bernal",
+      "playerId": 685763
+    },
+    {
+      "year": 2022,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Jonatan Bernal",
+      "playerId": 685763
+    },
+    {
+      "year": 2022,
+      "teamId": 120,
+      "dir": "sent",
+      "name": "Matt Lipka",
+      "playerId": 547181
+    },
+    {
+      "year": 2022,
+      "teamId": 158,
+      "dir": "received",
+      "name": "Matt Lipka",
+      "playerId": 547181
+    },
+    {
+      "year": 2022,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "CJ Alexander",
+      "playerId": 680769
+    },
+    {
+      "year": 2022,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Andrew Hoffmann",
+      "playerId": 694851
+    },
+    {
+      "year": 2022,
+      "teamId": 118,
+      "dir": "received",
+      "name": "CJ Alexander",
+      "playerId": 680769
+    },
+    {
+      "year": 2022,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Andrew Hoffmann",
+      "playerId": 694851
+    },
+    {
+      "year": 2022,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Christian Fernandez",
+      "playerId": 668595
+    },
+    {
+      "year": 2022,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Christian Fernandez",
+      "playerId": 668595
+    },
+    {
+      "year": 2022,
+      "teamId": 114,
+      "dir": "sent",
+      "name": "Tobias Myers",
+      "playerId": 668964
+    },
+    {
+      "year": 2022,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Tobias Myers",
+      "playerId": 668964
+    },
+    {
+      "year": 2022,
+      "teamId": 109,
+      "dir": "sent",
+      "name": "Jesús Liranzo",
+      "playerId": 622338
+    },
+    {
+      "year": 2022,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Jesús Liranzo",
+      "playerId": 622338
+    },
+    {
+      "year": 2022,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Leonel Callez",
+      "playerId": 683644
+    },
+    {
+      "year": 2022,
+      "teamId": 144,
+      "dir": "received",
+      "name": "Leonel Callez",
+      "playerId": 683644
+    },
+    {
+      "year": 2023,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Alec Barger",
+      "playerId": 681897
+    },
+    {
+      "year": 2023,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Alec Barger",
+      "playerId": 681897
+    },
+    {
+      "year": 2023,
+      "teamId": 117,
+      "dir": "sent",
+      "name": "Drew Gilbert",
+      "playerId": 687551
+    },
+    {
+      "year": 2023,
+      "teamId": 117,
+      "dir": "sent",
+      "name": "Ryan Clifford",
+      "playerId": 691775
+    },
+    {
+      "year": 2023,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Drew Gilbert",
+      "playerId": 687551
+    },
+    {
+      "year": 2023,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Ryan Clifford",
+      "playerId": 691775
+    },
+    {
+      "year": 2023,
+      "teamId": 146,
+      "dir": "sent",
+      "name": "Sean Reynolds",
+      "playerId": 669308
+    },
+    {
+      "year": 2023,
+      "teamId": 135,
+      "dir": "received",
+      "name": "Sean Reynolds",
+      "playerId": 669308
+    },
+    {
+      "year": 2023,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Matt Svanson",
+      "playerId": 694335
+    },
+    {
+      "year": 2023,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Matt Svanson",
+      "playerId": 694335
+    },
+    {
+      "year": 2023,
+      "teamId": 108,
+      "dir": "sent",
+      "name": "Jeremiah Jackson",
+      "playerId": 669236
+    },
+    {
+      "year": 2023,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Jeremiah Jackson",
+      "playerId": 669236
+    },
+    {
+      "year": 2023,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Evan McKendry",
+      "playerId": 679928
+    },
+    {
+      "year": 2023,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Alex Jackson",
+      "playerId": 656577
+    },
+    {
+      "year": 2023,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Alex Jackson",
+      "playerId": 656577
+    },
+    {
+      "year": 2023,
+      "teamId": 158,
+      "dir": "received",
+      "name": "Evan McKendry",
+      "playerId": 679928
+    },
+    {
+      "year": 2023,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Eddys Leonard",
+      "playerId": 678760
+    },
+    {
+      "year": 2023,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Eddys Leonard",
+      "playerId": 678760
+    },
+    {
+      "year": 2023,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Devin Mann",
+      "playerId": 669471
+    },
+    {
+      "year": 2023,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Derlin Figueroa",
+      "playerId": 700283
+    },
+    {
+      "year": 2023,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Devin Mann",
+      "playerId": 669471
+    },
+    {
+      "year": 2023,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Derlin Figueroa",
+      "playerId": 700283
+    },
+    {
+      "year": 2023,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Zack Showalter",
+      "playerId": 701374
+    },
+    {
+      "year": 2023,
+      "teamId": 138,
+      "dir": "received",
+      "name": "César Prieto",
+      "playerId": 693409
+    },
+    {
+      "year": 2023,
+      "teamId": 110,
+      "dir": "sent",
+      "name": "Zack Showalter",
+      "playerId": 701374
+    },
+    {
+      "year": 2023,
+      "teamId": 110,
+      "dir": "sent",
+      "name": "César Prieto",
+      "playerId": 693409
+    },
+    {
+      "year": 2023,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Hao-Yu Lee",
+      "playerId": 701678
+    },
+    {
+      "year": 2023,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Hao-Yu Lee",
+      "playerId": 701678
+    },
+    {
+      "year": 2023,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Juan Carela",
+      "playerId": 683636
+    },
+    {
+      "year": 2023,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Juan Carela",
+      "playerId": 683636
+    },
+    {
+      "year": 2023,
+      "teamId": 146,
+      "dir": "sent",
+      "name": "Kahlil Watson",
+      "playerId": 696135
+    },
+    {
+      "year": 2023,
+      "teamId": 114,
+      "dir": "received",
+      "name": "Kahlil Watson",
+      "playerId": 696135
+    },
+    {
+      "year": 2023,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Logan Rinehart",
+      "playerId": 686827
+    },
+    {
+      "year": 2023,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Logan Rinehart",
+      "playerId": 686827
+    },
+    {
+      "year": 2023,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Jake Eder",
+      "playerId": 671109
+    },
+    {
+      "year": 2023,
+      "teamId": 146,
+      "dir": "sent",
+      "name": "Jake Eder",
+      "playerId": 671109
+    },
+    {
+      "year": 2023,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Manuel Rodríguez",
+      "playerId": 655889
+    },
+    {
+      "year": 2023,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Adrian Sampson",
+      "playerId": 592716
+    },
+    {
+      "year": 2023,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Josh Roberson",
+      "playerId": 675963
+    },
+    {
+      "year": 2023,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Josh Roberson",
+      "playerId": 675963
+    },
+    {
+      "year": 2023,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Manuel Rodríguez",
+      "playerId": 655889
+    },
+    {
+      "year": 2023,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Adrian Sampson",
+      "playerId": 592716
+    },
+    {
+      "year": 2023,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Jeremy Rodriguez",
+      "playerId": 807007
+    },
+    {
+      "year": 2023,
+      "teamId": 109,
+      "dir": "sent",
+      "name": "Jeremy Rodriguez",
+      "playerId": 807007
+    },
+    {
+      "year": 2023,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Henry Williams",
+      "playerId": 689275
+    },
+    {
+      "year": 2023,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Jesus Rios",
+      "playerId": 694947
+    },
+    {
+      "year": 2023,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Henry Williams",
+      "playerId": 689275
+    },
+    {
+      "year": 2023,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Jesus Rios",
+      "playerId": 694947
+    },
+    {
+      "year": 2023,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Estuar Suero",
+      "playerId": 800209
+    },
+    {
+      "year": 2023,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Estuar Suero",
+      "playerId": 800209
+    },
+    {
+      "year": 2023,
+      "teamId": 158,
+      "dir": "received",
+      "name": "Bradley Blalock",
+      "playerId": 687134
+    },
+    {
+      "year": 2023,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Bradley Blalock",
+      "playerId": 687134
+    },
+    {
+      "year": 2023,
+      "teamId": 109,
+      "dir": "sent",
+      "name": "Ryan Bliss",
+      "playerId": 669208
+    },
+    {
+      "year": 2023,
+      "teamId": 136,
+      "dir": "received",
+      "name": "Ryan Bliss",
+      "playerId": 669208
+    },
+    {
+      "year": 2023,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Chad Patrick",
+      "playerId": 694477
+    },
+    {
+      "year": 2023,
+      "teamId": 109,
+      "dir": "sent",
+      "name": "Chad Patrick",
+      "playerId": 694477
+    },
+    {
+      "year": 2023,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Kyle Manzardo",
+      "playerId": 700932
+    },
+    {
+      "year": 2023,
+      "teamId": 114,
+      "dir": "received",
+      "name": "Kyle Manzardo",
+      "playerId": 700932
+    },
+    {
+      "year": 2023,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Justin Jarvis",
+      "playerId": 680691
+    },
+    {
+      "year": 2023,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Justin Jarvis",
+      "playerId": 680691
+    },
+    {
+      "year": 2023,
+      "teamId": 120,
+      "dir": "received",
+      "name": "DJ Herz",
+      "playerId": 687792
+    },
+    {
+      "year": 2023,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Kevin Made",
+      "playerId": 691183
+    },
+    {
+      "year": 2023,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "DJ Herz",
+      "playerId": 687792
+    },
+    {
+      "year": 2023,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Kevin Made",
+      "playerId": 691183
+    },
+    {
+      "year": 2023,
+      "teamId": 108,
+      "dir": "sent",
+      "name": "Jake Madden",
+      "playerId": 802409
+    },
+    {
+      "year": 2023,
+      "teamId": 108,
+      "dir": "sent",
+      "name": "Mason Albright",
+      "playerId": 695476
+    },
+    {
+      "year": 2023,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Jake Madden",
+      "playerId": 802409
+    },
+    {
+      "year": 2023,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Mason Albright",
+      "playerId": 695476
+    },
+    {
+      "year": 2023,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Tekoah Roby",
+      "playerId": 694358
+    },
+    {
+      "year": 2023,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Thomas Saggese",
+      "playerId": 695336
+    },
+    {
+      "year": 2023,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Tekoah Roby",
+      "playerId": 694358
+    },
+    {
+      "year": 2023,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Thomas Saggese",
+      "playerId": 695336
+    },
+    {
+      "year": 2023,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Sem Robberse",
+      "playerId": 691828
+    },
+    {
+      "year": 2023,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Adam Kloffenstein",
+      "playerId": 680572
+    },
+    {
+      "year": 2023,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Sem Robberse",
+      "playerId": 691828
+    },
+    {
+      "year": 2023,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Adam Kloffenstein",
+      "playerId": 680572
+    },
+    {
+      "year": 2023,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Luisangel Acuña",
+      "playerId": 682668
+    },
+    {
+      "year": 2023,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Luisangel Acuña",
+      "playerId": 682668
+    },
+    {
+      "year": 2023,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Marco Vargas",
+      "playerId": 804614
+    },
+    {
+      "year": 2023,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Ronald Hernandez",
+      "playerId": 698933
+    },
+    {
+      "year": 2023,
+      "teamId": 146,
+      "dir": "sent",
+      "name": "Marco Vargas",
+      "playerId": 804614
+    },
+    {
+      "year": 2023,
+      "teamId": 146,
+      "dir": "sent",
+      "name": "Ronald Hernandez",
+      "playerId": 698933
+    },
+    {
+      "year": 2023,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Nick Nastrini",
+      "playerId": 680897
+    },
+    {
+      "year": 2023,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Jordan Leasure",
+      "playerId": 673929
+    },
+    {
+      "year": 2023,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Nick Nastrini",
+      "playerId": 680897
+    },
+    {
+      "year": 2023,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Jordan Leasure",
+      "playerId": 673929
+    },
+    {
+      "year": 2023,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Kevin Plawecki",
+      "playerId": 608700
+    },
+    {
+      "year": 2023,
+      "teamId": 140,
+      "dir": "received",
+      "name": "Kevin Plawecki",
+      "playerId": 608700
+    },
+    {
+      "year": 2023,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Jhonny Severino",
+      "playerId": 703177
+    },
+    {
+      "year": 2023,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Jhonny Severino",
+      "playerId": 703177
+    },
+    {
+      "year": 2023,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Marques Johnson",
+      "playerId": 688730
+    },
+    {
+      "year": 2023,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Marques Johnson",
+      "playerId": 688730
+    },
+    {
+      "year": 2023,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Edgar Quero",
+      "playerId": 700337
+    },
+    {
+      "year": 2023,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Ky Bush",
+      "playerId": 681066
+    },
+    {
+      "year": 2023,
+      "teamId": 108,
+      "dir": "sent",
+      "name": "Edgar Quero",
+      "playerId": 700337
+    },
+    {
+      "year": 2023,
+      "teamId": 108,
+      "dir": "sent",
+      "name": "Ky Bush",
+      "playerId": 681066
+    },
+    {
+      "year": 2023,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Justin Hagenman",
+      "playerId": 663795
+    },
+    {
+      "year": 2023,
+      "teamId": 111,
+      "dir": "received",
+      "name": "Justin Hagenman",
+      "playerId": 663795
+    },
+    {
+      "year": 2023,
+      "teamId": 115,
+      "dir": "sent",
+      "name": "Francisco Ortiz",
+      "playerId": 674383
+    },
+    {
+      "year": 2023,
+      "teamId": 109,
+      "dir": "received",
+      "name": "Francisco Ortiz",
+      "playerId": 674383
+    },
+    {
+      "year": 2023,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Tanner Gordon",
+      "playerId": 685299
+    },
+    {
+      "year": 2023,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Tanner Gordon",
+      "playerId": 685299
+    },
+    {
+      "year": 2023,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Sammy Hernandez",
+      "playerId": 803679
+    },
+    {
+      "year": 2023,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Sammy Hernandez",
+      "playerId": 803679
+    },
+    {
+      "year": 2023,
+      "teamId": 109,
+      "dir": "sent",
+      "name": "P.J. Higgins",
+      "playerId": 664731
+    },
+    {
+      "year": 2023,
+      "teamId": 112,
+      "dir": "received",
+      "name": "P.J. Higgins",
+      "playerId": 664731
+    },
+    {
+      "year": 2023,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Jack Larsen",
+      "playerId": 677223
+    },
+    {
+      "year": 2023,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Jack Larsen",
+      "playerId": 677223
+    },
+    {
+      "year": 2023,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Pat Valaika",
+      "playerId": 642162
+    },
+    {
+      "year": 2023,
+      "teamId": 119,
+      "dir": "received",
+      "name": "Pat Valaika",
+      "playerId": 642162
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Will Schomberg",
+      "playerId": 801696
+    },
+    {
+      "year": 2024,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Will Schomberg",
+      "playerId": 801696
+    },
+    {
+      "year": 2024,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Ronaldys Jimenez",
+      "playerId": 815858
+    },
+    {
+      "year": 2024,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Ronaldys Jimenez",
+      "playerId": 815858
+    },
+    {
+      "year": 2024,
+      "teamId": 134,
+      "dir": "sent",
+      "name": "Charles McAdoo",
+      "playerId": 807727
+    },
+    {
+      "year": 2024,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Charles McAdoo",
+      "playerId": 807727
+    },
+    {
+      "year": 2024,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Kade Morris",
+      "playerId": 695034
+    },
+    {
+      "year": 2024,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Kade Morris",
+      "playerId": 695034
+    },
+    {
+      "year": 2024,
+      "teamId": 114,
+      "dir": "sent",
+      "name": "Jacob Bresnahan",
+      "playerId": 815298
+    },
+    {
+      "year": 2024,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Jacob Bresnahan",
+      "playerId": 815298
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Wilfredo Lara",
+      "playerId": 702906
+    },
+    {
+      "year": 2024,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Wilfredo Lara",
+      "playerId": 702906
+    },
+    {
+      "year": 2024,
+      "teamId": 117,
+      "dir": "sent",
+      "name": "Kelly Austin",
+      "playerId": 675502
+    },
+    {
+      "year": 2024,
+      "teamId": 147,
+      "dir": "received",
+      "name": "Kelly Austin",
+      "playerId": 675502
+    },
+    {
+      "year": 2024,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Patrick Reilly",
+      "playerId": 694345
+    },
+    {
+      "year": 2024,
+      "teamId": 134,
+      "dir": "sent",
+      "name": "Patrick Reilly",
+      "playerId": 694345
+    },
+    {
+      "year": 2024,
+      "teamId": 145,
+      "dir": "received",
+      "name": "William Bergolla Jr.",
+      "playerId": 703151
+    },
+    {
+      "year": 2024,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "William Bergolla Jr.",
+      "playerId": 703151
+    },
+    {
+      "year": 2024,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Trey McGough",
+      "playerId": 690736
+    },
+    {
+      "year": 2024,
+      "teamId": 110,
+      "dir": "sent",
+      "name": "Trey McGough",
+      "playerId": 690736
+    },
+    {
+      "year": 2024,
+      "teamId": 142,
+      "dir": "sent",
+      "name": "Jay Harry",
+      "playerId": 803385
+    },
+    {
+      "year": 2024,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Jay Harry",
+      "playerId": 803385
+    },
+    {
+      "year": 2024,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Ovis Portes",
+      "playerId": 802086
+    },
+    {
+      "year": 2024,
+      "teamId": 113,
+      "dir": "received",
+      "name": "Ovis Portes",
+      "playerId": 802086
+    },
+    {
+      "year": 2024,
+      "teamId": 134,
+      "dir": "sent",
+      "name": "Nicolas Carreno",
+      "playerId": 807993
+    },
+    {
+      "year": 2024,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Nicolas Carreno",
+      "playerId": 807993
+    },
+    {
+      "year": 2024,
+      "teamId": 108,
+      "dir": "received",
+      "name": "Yeferson Vargas",
+      "playerId": 814279
+    },
+    {
+      "year": 2024,
+      "teamId": 108,
+      "dir": "received",
+      "name": "Matthew Lugo",
+      "playerId": 683090
+    },
+    {
+      "year": 2024,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Yeferson Vargas",
+      "playerId": 814279
+    },
+    {
+      "year": 2024,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Matthew Lugo",
+      "playerId": 683090
+    },
+    {
+      "year": 2024,
+      "teamId": 118,
+      "dir": "sent",
+      "name": "Mason Barnett",
+      "playerId": 686930
+    },
+    {
+      "year": 2024,
+      "teamId": 118,
+      "dir": "sent",
+      "name": "Jared Dickey",
+      "playerId": 801406
+    },
+    {
+      "year": 2024,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Mason Barnett",
+      "playerId": 686930
+    },
+    {
+      "year": 2024,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Jared Dickey",
+      "playerId": 801406
+    },
+    {
+      "year": 2024,
+      "teamId": 134,
+      "dir": "sent",
+      "name": "Jun-Seok Shim",
+      "playerId": 807149
+    },
+    {
+      "year": 2024,
+      "teamId": 134,
+      "dir": "sent",
+      "name": "Garret Forrester",
+      "playerId": 807720
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Jun-Seok Shim",
+      "playerId": 807149
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Garret Forrester",
+      "playerId": 807720
+    },
+    {
+      "year": 2024,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Ben Cowles",
+      "playerId": 701496
+    },
+    {
+      "year": 2024,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Ben Cowles",
+      "playerId": 701496
+    },
+    {
+      "year": 2024,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Thomas Balboni Jr.",
+      "playerId": 693647
+    },
+    {
+      "year": 2024,
+      "teamId": 147,
+      "dir": "received",
+      "name": "Thomas Balboni Jr.",
+      "playerId": 693647
+    },
+    {
+      "year": 2024,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Paul Gervase",
+      "playerId": 801434
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Paul Gervase",
+      "playerId": 801434
+    },
+    {
+      "year": 2024,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Thayron Liranzo",
+      "playerId": 699073
+    },
+    {
+      "year": 2024,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Thayron Liranzo",
+      "playerId": 699073
+    },
+    {
+      "year": 2024,
+      "teamId": 110,
+      "dir": "sent",
+      "name": "Moisés Chace",
+      "playerId": 691330
+    },
+    {
+      "year": 2024,
+      "teamId": 143,
+      "dir": "received",
+      "name": "Moisés Chace",
+      "playerId": 691330
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Robby Snelling",
+      "playerId": 702281
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Jay Beshears",
+      "playerId": 810891
+    },
+    {
+      "year": 2024,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Robby Snelling",
+      "playerId": 702281
+    },
+    {
+      "year": 2024,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Jay Beshears",
+      "playerId": 810891
+    },
+    {
+      "year": 2024,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Joseph Montalvo",
+      "playerId": 702477
+    },
+    {
+      "year": 2024,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Chase Lee",
+      "playerId": 695445
+    },
+    {
+      "year": 2024,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Joseph Montalvo",
+      "playerId": 702477
+    },
+    {
+      "year": 2024,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Chase Lee",
+      "playerId": 695445
+    },
+    {
+      "year": 2024,
+      "teamId": 137,
+      "dir": "sent",
+      "name": "Eric Silva",
+      "playerId": 696150
+    },
+    {
+      "year": 2024,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Eric Silva",
+      "playerId": 696150
+    },
+    {
+      "year": 2024,
+      "teamId": 118,
+      "dir": "sent",
+      "name": "Jarold Rosado",
+      "playerId": 695316
+    },
+    {
+      "year": 2024,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Jarold Rosado",
+      "playerId": 695316
+    },
+    {
+      "year": 2024,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "RJ Schreck",
+      "playerId": 702302
+    },
+    {
+      "year": 2024,
+      "teamId": 141,
+      "dir": "received",
+      "name": "RJ Schreck",
+      "playerId": 702302
+    },
+    {
+      "year": 2024,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Sabin Ceballos",
+      "playerId": 694754
+    },
+    {
+      "year": 2024,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Sabin Ceballos",
+      "playerId": 694754
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Michael Flynn",
+      "playerId": 663901
+    },
+    {
+      "year": 2024,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Michael Flynn",
+      "playerId": 663901
+    },
+    {
+      "year": 2024,
+      "teamId": 136,
+      "dir": "received",
+      "name": "Andruw Salcedo",
+      "playerId": 691402
+    },
+    {
+      "year": 2024,
+      "teamId": 113,
+      "dir": "sent",
+      "name": "Andruw Salcedo",
+      "playerId": 691402
+    },
+    {
+      "year": 2024,
+      "teamId": 138,
+      "dir": "sent",
+      "name": "Oliver Gonzalez",
+      "playerId": 823860
+    },
+    {
+      "year": 2024,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Alexander Albertus",
+      "playerId": 800316
+    },
+    {
+      "year": 2024,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Jeral Perez",
+      "playerId": 800419
+    },
+    {
+      "year": 2024,
+      "teamId": 119,
+      "dir": "received",
+      "name": "Oliver Gonzalez",
+      "playerId": 823860
+    },
+    {
+      "year": 2024,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Alexander Albertus",
+      "playerId": 800316
+    },
+    {
+      "year": 2024,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Jeral Perez",
+      "playerId": 800419
+    },
+    {
+      "year": 2024,
+      "teamId": 114,
+      "dir": "sent",
+      "name": "Rafael Ramirez Jr.",
+      "playerId": 800201
+    },
+    {
+      "year": 2024,
+      "teamId": 114,
+      "dir": "sent",
+      "name": "Alex Clemmey",
+      "playerId": 806046
+    },
+    {
+      "year": 2024,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Rafael Ramirez Jr.",
+      "playerId": 800201
+    },
+    {
+      "year": 2024,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Alex Clemmey",
+      "playerId": 806046
+    },
+    {
+      "year": 2024,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Liam Hicks",
+      "playerId": 689414
+    },
+    {
+      "year": 2024,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Tyler Owens",
+      "playerId": 687074
+    },
+    {
+      "year": 2024,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Liam Hicks",
+      "playerId": 689414
+    },
+    {
+      "year": 2024,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Tyler Owens",
+      "playerId": 687074
+    },
+    {
+      "year": 2024,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "J.D. Gonzalez",
+      "playerId": 806083
+    },
+    {
+      "year": 2024,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Dylan Lesko",
+      "playerId": 702266
+    },
+    {
+      "year": 2024,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Homer Bush Jr.",
+      "playerId": 683344
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "J.D. Gonzalez",
+      "playerId": 806083
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Dylan Lesko",
+      "playerId": 702266
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Homer Bush Jr.",
+      "playerId": 683344
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Ty Johnson",
+      "playerId": 694494
+    },
+    {
+      "year": 2024,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Ty Johnson",
+      "playerId": 694494
+    },
+    {
+      "year": 2024,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Tyler Stuart",
+      "playerId": 701603
+    },
+    {
+      "year": 2024,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Tyler Stuart",
+      "playerId": 701603
+    },
+    {
+      "year": 2024,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Yujanyer Herrera",
+      "playerId": 692632
+    },
+    {
+      "year": 2024,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Yujanyer Herrera",
+      "playerId": 692632
+    },
+    {
+      "year": 2024,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Eddinson Paulino",
+      "playerId": 682796
+    },
+    {
+      "year": 2024,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Cutter Coffey",
+      "playerId": 702690
+    },
+    {
+      "year": 2024,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Gilberto Batista",
+      "playerId": 807625
+    },
+    {
+      "year": 2024,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Eddinson Paulino",
+      "playerId": 682796
+    },
+    {
+      "year": 2024,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Cutter Coffey",
+      "playerId": 702690
+    },
+    {
+      "year": 2024,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Gilberto Batista",
+      "playerId": 807625
+    },
+    {
+      "year": 2024,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "George Klassen",
+      "playerId": 691946
+    },
+    {
+      "year": 2024,
+      "teamId": 108,
+      "dir": "received",
+      "name": "George Klassen",
+      "playerId": 691946
+    },
+    {
+      "year": 2024,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Agustín Ramírez",
+      "playerId": 682663
+    },
+    {
+      "year": 2024,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Abrahan Ramirez",
+      "playerId": 800254
+    },
+    {
+      "year": 2024,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Jared Serna",
+      "playerId": 691858
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Agustín Ramírez",
+      "playerId": 682663
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Abrahan Ramirez",
+      "playerId": 800254
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Jared Serna",
+      "playerId": 691858
+    },
+    {
+      "year": 2024,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Josh Rivera",
+      "playerId": 687069
+    },
+    {
+      "year": 2024,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Yohendrick Piñango",
+      "playerId": 682818
+    },
+    {
+      "year": 2024,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Josh Rivera",
+      "playerId": 687069
+    },
+    {
+      "year": 2024,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Yohendrick Piñango",
+      "playerId": 682818
+    },
+    {
+      "year": 2024,
+      "teamId": 110,
+      "dir": "sent",
+      "name": "Matthew Etzel",
+      "playerId": 803033
+    },
+    {
+      "year": 2024,
+      "teamId": 110,
+      "dir": "sent",
+      "name": "Jackson Baumeister",
+      "playerId": 691765
+    },
+    {
+      "year": 2024,
+      "teamId": 110,
+      "dir": "sent",
+      "name": "Mac Horvath",
+      "playerId": 690991
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Matthew Etzel",
+      "playerId": 803033
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Jackson Baumeister",
+      "playerId": 691765
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Mac Horvath",
+      "playerId": 690991
+    },
+    {
+      "year": 2024,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Aidan Smith",
+      "playerId": 806223
+    },
+    {
+      "year": 2024,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Brody Hopkins",
+      "playerId": 811315
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Aidan Smith",
+      "playerId": 806223
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Brody Hopkins",
+      "playerId": 811315
+    },
+    {
+      "year": 2024,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Moises Bolivar",
+      "playerId": 821240
+    },
+    {
+      "year": 2024,
+      "teamId": 119,
+      "dir": "received",
+      "name": "Moises Bolivar",
+      "playerId": 821240
+    },
+    {
+      "year": 2024,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Jacob Sharp",
+      "playerId": 814435
+    },
+    {
+      "year": 2024,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Jacob Sharp",
+      "playerId": 814435
+    },
+    {
+      "year": 2024,
+      "teamId": 136,
+      "dir": "received",
+      "name": "Rhylan Thomas",
+      "playerId": 689041
+    },
+    {
+      "year": 2024,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Rhylan Thomas",
+      "playerId": 689041
+    },
+    {
+      "year": 2024,
+      "teamId": 134,
+      "dir": "sent",
+      "name": "Gilberto Celestino",
+      "playerId": 665482
+    },
+    {
+      "year": 2024,
+      "teamId": 112,
+      "dir": "received",
+      "name": "Gilberto Celestino",
+      "playerId": 665482
+    },
+    {
+      "year": 2024,
+      "teamId": 109,
+      "dir": "sent",
+      "name": "Andrew Pintar",
+      "playerId": 801464
+    },
+    {
+      "year": 2024,
+      "teamId": 109,
+      "dir": "sent",
+      "name": "Deyvison De Los Santos",
+      "playerId": 691277
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Andrew Pintar",
+      "playerId": 801464
+    },
+    {
+      "year": 2024,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Deyvison De Los Santos",
+      "playerId": 691277
+    },
+    {
+      "year": 2024,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "TJ Shook",
+      "playerId": 669298
+    },
+    {
+      "year": 2024,
+      "teamId": 121,
+      "dir": "received",
+      "name": "TJ Shook",
+      "playerId": 669298
+    },
+    {
+      "year": 2024,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Rylan Bannon",
+      "playerId": 676625
+    },
+    {
+      "year": 2024,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Rylan Bannon",
+      "playerId": 676625
+    },
+    {
+      "year": 2024,
+      "teamId": 118,
+      "dir": "sent",
+      "name": "Cayden Wallace",
+      "playerId": 691024
+    },
+    {
+      "year": 2024,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Cayden Wallace",
+      "playerId": 691024
+    },
+    {
+      "year": 2024,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Matt Gage",
+      "playerId": 657424
+    },
+    {
+      "year": 2024,
+      "teamId": 121,
+      "dir": "received",
+      "name": "Matt Gage",
+      "playerId": 657424
+    },
+    {
+      "year": 2024,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "CJ Weins",
+      "playerId": 694291
+    },
+    {
+      "year": 2024,
+      "teamId": 116,
+      "dir": "received",
+      "name": "CJ Weins",
+      "playerId": 694291
+    },
+    {
+      "year": 2024,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Gregory Barrios",
+      "playerId": 699126
+    },
+    {
+      "year": 2024,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Gregory Barrios",
+      "playerId": 699126
+    },
+    {
+      "year": 2025,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Adam Serwinowski",
+      "playerId": 703445
+    },
+    {
+      "year": 2025,
+      "teamId": 119,
+      "dir": "received",
+      "name": "Adam Serwinowski",
+      "playerId": 703445
+    },
+    {
+      "year": 2025,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Ivan Brethowr",
+      "playerId": 814442
+    },
+    {
+      "year": 2025,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Ivan Brethowr",
+      "playerId": 814442
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Leo De Vries",
+      "playerId": 815888
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Henry Baez",
+      "playerId": 692013
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Braden Nett",
+      "playerId": 804556
+    },
+    {
+      "year": 2025,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Leo De Vries",
+      "playerId": 815888
+    },
+    {
+      "year": 2025,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Henry Baez",
+      "playerId": 692013
+    },
+    {
+      "year": 2025,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Braden Nett",
+      "playerId": 804556
+    },
+    {
+      "year": 2025,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Duncan Davitt",
+      "playerId": 701474
+    },
+    {
+      "year": 2025,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Ben Peoples",
+      "playerId": 687239
+    },
+    {
+      "year": 2025,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Duncan Davitt",
+      "playerId": 701474
+    },
+    {
+      "year": 2025,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Ben Peoples",
+      "playerId": 687239
+    },
+    {
+      "year": 2025,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Christian Franklin",
+      "playerId": 681047
+    },
+    {
+      "year": 2025,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Ronny Cruz",
+      "playerId": 826723
+    },
+    {
+      "year": 2025,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Christian Franklin",
+      "playerId": 681047
+    },
+    {
+      "year": 2025,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Ronny Cruz",
+      "playerId": 826723
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Tyson Neighbors",
+      "playerId": 695695
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Cobb Hightower",
+      "playerId": 826932
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Boston Bateman",
+      "playerId": 815348
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Tanner Smith",
+      "playerId": 823801
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Victor Figueroa",
+      "playerId": 809372
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Brandon Butterworth",
+      "playerId": 822578
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Tyson Neighbors",
+      "playerId": 695695
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Cobb Hightower",
+      "playerId": 826932
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Boston Bateman",
+      "playerId": 815348
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Tanner Smith",
+      "playerId": 823801
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Victor Figueroa",
+      "playerId": 809372
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Brandon Butterworth",
+      "playerId": 822578
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Wilfri De La Cruz",
+      "playerId": 829043
+    },
+    {
+      "year": 2025,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Wilfri De La Cruz",
+      "playerId": 829043
+    },
+    {
+      "year": 2025,
+      "teamId": 116,
+      "dir": "sent",
+      "name": "Jim Jarvis",
+      "playerId": 805347
+    },
+    {
+      "year": 2025,
+      "teamId": 144,
+      "dir": "received",
+      "name": "Jim Jarvis",
+      "playerId": 805347
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Twine Palmer",
+      "playerId": 828520
+    },
+    {
+      "year": 2025,
+      "teamId": 117,
+      "dir": "sent",
+      "name": "Twine Palmer",
+      "playerId": 828520
+    },
+    {
+      "year": 2025,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Ryan Gallagher",
+      "playerId": 801594
+    },
+    {
+      "year": 2025,
+      "teamId": 112,
+      "dir": "sent",
+      "name": "Sam Armstrong",
+      "playerId": 814098
+    },
+    {
+      "year": 2025,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Ryan Gallagher",
+      "playerId": 801594
+    },
+    {
+      "year": 2025,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Sam Armstrong",
+      "playerId": 814098
+    },
+    {
+      "year": 2025,
+      "teamId": 114,
+      "dir": "received",
+      "name": "Khal Stephen",
+      "playerId": 701590
+    },
+    {
+      "year": 2025,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Khal Stephen",
+      "playerId": 701590
+    },
+    {
+      "year": 2025,
+      "teamId": 109,
+      "dir": "sent",
+      "name": "Jordan Montgomery",
+      "playerId": 656756
+    },
+    {
+      "year": 2025,
+      "teamId": 158,
+      "dir": "received",
+      "name": "Jordan Montgomery",
+      "playerId": 656756
+    },
+    {
+      "year": 2025,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Blaze Jordan",
+      "playerId": 691458
+    },
+    {
+      "year": 2025,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Blaze Jordan",
+      "playerId": 691458
+    },
+    {
+      "year": 2025,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Yunior Marte",
+      "playerId": 805074
+    },
+    {
+      "year": 2025,
+      "teamId": 118,
+      "dir": "sent",
+      "name": "Yunior Marte",
+      "playerId": 805074
+    },
+    {
+      "year": 2025,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "Zach Ehrhard",
+      "playerId": 701394
+    },
+    {
+      "year": 2025,
+      "teamId": 111,
+      "dir": "sent",
+      "name": "James Tibbs III",
+      "playerId": 696486
+    },
+    {
+      "year": 2025,
+      "teamId": 119,
+      "dir": "received",
+      "name": "Zach Ehrhard",
+      "playerId": 701394
+    },
+    {
+      "year": 2025,
+      "teamId": 119,
+      "dir": "received",
+      "name": "James Tibbs III",
+      "playerId": 696486
+    },
+    {
+      "year": 2025,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Sean Paul Liñan",
+      "playerId": 800344
+    },
+    {
+      "year": 2025,
+      "teamId": 119,
+      "dir": "sent",
+      "name": "Eriq Swan",
+      "playerId": 811291
+    },
+    {
+      "year": 2025,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Sean Paul Liñan",
+      "playerId": 800344
+    },
+    {
+      "year": 2025,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Eriq Swan",
+      "playerId": 811291
+    },
+    {
+      "year": 2025,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Edgleen Perez",
+      "playerId": 814297
+    },
+    {
+      "year": 2025,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Brian Sanchez",
+      "playerId": 809331
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Edgleen Perez",
+      "playerId": 814297
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Brian Sanchez",
+      "playerId": 809331
+    },
+    {
+      "year": 2025,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Kendry Rojas",
+      "playerId": 696070
+    },
+    {
+      "year": 2025,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Kendry Rojas",
+      "playerId": 696070
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Ben Shields",
+      "playerId": 815456
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Roc Riggio",
+      "playerId": 691792
+    },
+    {
+      "year": 2025,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Ben Shields",
+      "playerId": 815456
+    },
+    {
+      "year": 2025,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Roc Riggio",
+      "playerId": 691792
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Jesus Rodriguez",
+      "playerId": 683679
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Trystan Vrieling",
+      "playerId": 801639
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Carlos De La Rosa",
+      "playerId": 822215
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Parks Harber",
+      "playerId": 692238
+    },
+    {
+      "year": 2025,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Jesus Rodriguez",
+      "playerId": 683679
+    },
+    {
+      "year": 2025,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Trystan Vrieling",
+      "playerId": 801639
+    },
+    {
+      "year": 2025,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Carlos De La Rosa",
+      "playerId": 822215
+    },
+    {
+      "year": 2025,
+      "teamId": 137,
+      "dir": "received",
+      "name": "Parks Harber",
+      "playerId": 692238
+    },
+    {
+      "year": 2025,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Garrett Horn",
+      "playerId": 701718
+    },
+    {
+      "year": 2025,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Garrett Horn",
+      "playerId": 701718
+    },
+    {
+      "year": 2025,
+      "teamId": 133,
+      "dir": "received",
+      "name": "Kenya Huggins",
+      "playerId": 695761
+    },
+    {
+      "year": 2025,
+      "teamId": 113,
+      "dir": "sent",
+      "name": "Kenya Huggins",
+      "playerId": 695761
+    },
+    {
+      "year": 2025,
+      "teamId": 109,
+      "dir": "received",
+      "name": "Hunter Cranton",
+      "playerId": 675450
+    },
+    {
+      "year": 2025,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Hunter Cranton",
+      "playerId": 675450
+    },
+    {
+      "year": 2025,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Kohl Drake",
+      "playerId": 684442
+    },
+    {
+      "year": 2025,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "David Hagaman",
+      "playerId": 701908
+    },
+    {
+      "year": 2025,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Mitch Bratt",
+      "playerId": 683352
+    },
+    {
+      "year": 2025,
+      "teamId": 109,
+      "dir": "received",
+      "name": "Kohl Drake",
+      "playerId": 684442
+    },
+    {
+      "year": 2025,
+      "teamId": 109,
+      "dir": "received",
+      "name": "David Hagaman",
+      "playerId": 701908
+    },
+    {
+      "year": 2025,
+      "teamId": 109,
+      "dir": "received",
+      "name": "Mitch Bratt",
+      "playerId": 683352
+    },
+    {
+      "year": 2025,
+      "teamId": 117,
+      "dir": "sent",
+      "name": "Esmil Valencia",
+      "playerId": 806982
+    },
+    {
+      "year": 2025,
+      "teamId": 117,
+      "dir": "sent",
+      "name": "Chase Jaworsky",
+      "playerId": 814172
+    },
+    {
+      "year": 2025,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Esmil Valencia",
+      "playerId": 806982
+    },
+    {
+      "year": 2025,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Chase Jaworsky",
+      "playerId": 814172
+    },
+    {
+      "year": 2025,
+      "teamId": 116,
+      "dir": "sent",
+      "name": "Micah Ashman",
+      "playerId": 809840
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Micah Ashman",
+      "playerId": 809840
+    },
+    {
+      "year": 2025,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Mason Molina",
+      "playerId": 695766
+    },
+    {
+      "year": 2025,
+      "teamId": 140,
+      "dir": "sent",
+      "name": "Skylar Hales",
+      "playerId": 813766
+    },
+    {
+      "year": 2025,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Mason Molina",
+      "playerId": 695766
+    },
+    {
+      "year": 2025,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Skylar Hales",
+      "playerId": 813766
+    },
+    {
+      "year": 2025,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Josueth Quinonez",
+      "playerId": 815017
+    },
+    {
+      "year": 2025,
+      "teamId": 143,
+      "dir": "received",
+      "name": "Matt Manning",
+      "playerId": 666159
+    },
+    {
+      "year": 2025,
+      "teamId": 116,
+      "dir": "sent",
+      "name": "Matt Manning",
+      "playerId": 666159
+    },
+    {
+      "year": 2025,
+      "teamId": 116,
+      "dir": "received",
+      "name": "Josueth Quinonez",
+      "playerId": 815017
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "received",
+      "name": "Wilberson De Pena",
+      "playerId": 821648
+    },
+    {
+      "year": 2025,
+      "teamId": 108,
+      "dir": "sent",
+      "name": "Wilberson De Pena",
+      "playerId": 821648
+    },
+    {
+      "year": 2025,
+      "teamId": 120,
+      "dir": "received",
+      "name": "R.J. Sales",
+      "playerId": 701680
+    },
+    {
+      "year": 2025,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Josh Randall",
+      "playerId": 695620
+    },
+    {
+      "year": 2025,
+      "teamId": 116,
+      "dir": "sent",
+      "name": "R.J. Sales",
+      "playerId": 701680
+    },
+    {
+      "year": 2025,
+      "teamId": 116,
+      "dir": "sent",
+      "name": "Josh Randall",
+      "playerId": 695620
+    },
+    {
+      "year": 2025,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Geremy Villoria",
+      "playerId": 827409
+    },
+    {
+      "year": 2025,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Hendry Mendez",
+      "playerId": 694230
+    },
+    {
+      "year": 2025,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Geremy Villoria",
+      "playerId": 827409
+    },
+    {
+      "year": 2025,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Hendry Mendez",
+      "playerId": 694230
+    },
+    {
+      "year": 2025,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Callan Moss",
+      "playerId": 801978
+    },
+    {
+      "year": 2025,
+      "teamId": 118,
+      "dir": "sent",
+      "name": "Callan Moss",
+      "playerId": 801978
+    },
+    {
+      "year": 2025,
+      "teamId": 117,
+      "dir": "sent",
+      "name": "Matt Mikulski",
+      "playerId": 694392
+    },
+    {
+      "year": 2025,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Matt Mikulski",
+      "playerId": 694392
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "sent",
+      "name": "Brandon Valenzuela",
+      "playerId": 678218
+    },
+    {
+      "year": 2025,
+      "teamId": 141,
+      "dir": "received",
+      "name": "Brandon Valenzuela",
+      "playerId": 678218
+    },
+    {
+      "year": 2025,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Chandler Marsh",
+      "playerId": 694285
+    },
+    {
+      "year": 2025,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Anthony Nunez",
+      "playerId": 689296
+    },
+    {
+      "year": 2025,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Raimon Gomez",
+      "playerId": 703148
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Chandler Marsh",
+      "playerId": 694285
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Anthony Nunez",
+      "playerId": 689296
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Raimon Gomez",
+      "playerId": 703148
+    },
+    {
+      "year": 2025,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Jorge Quintana",
+      "playerId": 815894
+    },
+    {
+      "year": 2025,
+      "teamId": 135,
+      "dir": "received",
+      "name": "Jorge Quintana",
+      "playerId": 815894
+    },
+    {
+      "year": 2025,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Frank Elissalt",
+      "playerId": 692284
+    },
+    {
+      "year": 2025,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Nate Dohm",
+      "playerId": 702296
+    },
+    {
+      "year": 2025,
+      "teamId": 138,
+      "dir": "received",
+      "name": "Jesús  Báez",
+      "playerId": 800305
+    },
+    {
+      "year": 2025,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Frank Elissalt",
+      "playerId": 692284
+    },
+    {
+      "year": 2025,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Nate Dohm",
+      "playerId": 702296
+    },
+    {
+      "year": 2025,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Jesús  Báez",
+      "playerId": 800305
+    },
+    {
+      "year": 2025,
+      "teamId": 113,
+      "dir": "sent",
+      "name": "Sammy Stafura",
+      "playerId": 806230
+    },
+    {
+      "year": 2025,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Sammy Stafura",
+      "playerId": 806230
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Gage Ziehl",
+      "playerId": 695721
+    },
+    {
+      "year": 2025,
+      "teamId": 145,
+      "dir": "received",
+      "name": "Gage Ziehl",
+      "playerId": 695721
+    },
+    {
+      "year": 2025,
+      "teamId": 144,
+      "dir": "sent",
+      "name": "Austin Smith",
+      "playerId": 694518
+    },
+    {
+      "year": 2025,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Austin Smith",
+      "playerId": 694518
+    },
+    {
+      "year": 2025,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Sam Brown",
+      "playerId": 694848
+    },
+    {
+      "year": 2025,
+      "teamId": 108,
+      "dir": "sent",
+      "name": "Sam Brown",
+      "playerId": 694848
+    },
+    {
+      "year": 2025,
+      "teamId": 113,
+      "dir": "sent",
+      "name": "Adam Serwinowski",
+      "playerId": 703445
+    },
+    {
+      "year": 2025,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Adam Serwinowski",
+      "playerId": 703445
+    },
+    {
+      "year": 2025,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Eduardo Tait",
+      "playerId": 806953
+    },
+    {
+      "year": 2025,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Eduardo Tait",
+      "playerId": 806953
+    },
+    {
+      "year": 2025,
+      "teamId": 134,
+      "dir": "received",
+      "name": "Jeter Martinez",
+      "playerId": 807002
+    },
+    {
+      "year": 2025,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Jeter Martinez",
+      "playerId": 807002
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Juaron Watts-Brown",
+      "playerId": 695033
+    },
+    {
+      "year": 2025,
+      "teamId": 141,
+      "dir": "sent",
+      "name": "Juaron Watts-Brown",
+      "playerId": 695033
+    },
+    {
+      "year": 2025,
+      "teamId": 146,
+      "dir": "received",
+      "name": "Matthew Etzel",
+      "playerId": 803033
+    },
+    {
+      "year": 2025,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Matthew Etzel",
+      "playerId": 803033
+    },
+    {
+      "year": 2025,
+      "teamId": 158,
+      "dir": "sent",
+      "name": "Jadher Areinamo",
+      "playerId": 699130
+    },
+    {
+      "year": 2025,
+      "teamId": 139,
+      "dir": "received",
+      "name": "Jadher Areinamo",
+      "playerId": 699130
+    },
+    {
+      "year": 2025,
+      "teamId": 142,
+      "dir": "received",
+      "name": "Enrique Jimenez",
+      "playerId": 806992
+    },
+    {
+      "year": 2025,
+      "teamId": 116,
+      "dir": "sent",
+      "name": "Enrique Jimenez",
+      "playerId": 806992
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Browm Martinez",
+      "playerId": 821129
+    },
+    {
+      "year": 2025,
+      "teamId": 120,
+      "dir": "received",
+      "name": "Browm Martinez",
+      "playerId": 821129
+    },
+    {
+      "year": 2025,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Ashton Izzi",
+      "playerId": 802416
+    },
+    {
+      "year": 2025,
+      "teamId": 109,
+      "dir": "received",
+      "name": "Ashton Izzi",
+      "playerId": 802416
+    },
+    {
+      "year": 2025,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Wellington Aracena",
+      "playerId": 800286
+    },
+    {
+      "year": 2025,
+      "teamId": 121,
+      "dir": "sent",
+      "name": "Cameron Foster",
+      "playerId": 671382
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Wellington Aracena",
+      "playerId": 800286
+    },
+    {
+      "year": 2025,
+      "teamId": 110,
+      "dir": "received",
+      "name": "Cameron Foster",
+      "playerId": 671382
+    },
+    {
+      "year": 2025,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Josh Grosz",
+      "playerId": 701056
+    },
+    {
+      "year": 2025,
+      "teamId": 115,
+      "dir": "received",
+      "name": "Griffin Herring",
+      "playerId": 702622
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Josh Grosz",
+      "playerId": 701056
+    },
+    {
+      "year": 2025,
+      "teamId": 147,
+      "dir": "sent",
+      "name": "Griffin Herring",
+      "playerId": 702622
+    },
+    {
+      "year": 2025,
+      "teamId": 139,
+      "dir": "sent",
+      "name": "Joey Krehbiel",
+      "playerId": 607216
+    },
+    {
+      "year": 2025,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Joey Krehbiel",
+      "playerId": 607216
+    },
+    {
+      "year": 2025,
+      "teamId": 136,
+      "dir": "sent",
+      "name": "Julio E. Rodriguez",
+      "playerId": 667372
+    },
+    {
+      "year": 2025,
+      "teamId": 118,
+      "dir": "received",
+      "name": "Julio E. Rodriguez",
+      "playerId": 667372
+    },
+    {
+      "year": 2025,
+      "teamId": 143,
+      "dir": "sent",
+      "name": "Andrick Nava",
+      "playerId": 682774
+    },
+    {
+      "year": 2025,
+      "teamId": 158,
+      "dir": "received",
+      "name": "Andrick Nava",
+      "playerId": 682774
+    }
+  ]
+}

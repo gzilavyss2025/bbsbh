@@ -742,6 +742,13 @@ const BUDGETS = {
   // rule), same shape as humpArtifact.js/movementWindows.js already prove out
   // in team-movement-windows.md's history.
   'src/lib/research/diary': 13,
+  // New entry: same one-file-per-finding shape as its sibling diary above,
+  // and the same reason that one carries a budget — a research diary is
+  // append-only (docs/agents/contender-diary.md), so this count only grows.
+  // 12 -> 14 for a five-spike batch landing in one synthesis pass:
+  // tradeDeadlineValue.js, rosterAgeDeadlineCut.js, starDiversityAwards.js,
+  // organizationTenure.js, exitReasonMix.js.
+  'src/lib/research/contenderDiary': 14,
 }
 
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git'])
