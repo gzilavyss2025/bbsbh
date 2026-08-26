@@ -4,14 +4,21 @@
    same metrics and hierarchy when it is offline. These are SUBSTITUTES:
    no original brand font files were provided with the project.
 
-   Each of the four system roles below ships as ONE static weight, chosen
-   after a side-by-side type-system audit (see the "Type Ledger" review).
-   Because only one weight is registered per family, every rule that asks
-   for --w-regular/--w-semibold/--w-bold alongside one of these fonts
-   renders at that same single weight — there is no lighter/heavier face
-   for the browser to fall back to within a role. That is a deliberate
-   trade for a simpler, more consistent voice per role, not an oversight.
-   ============================================================ */
+   Barlow Condensed and JetBrains Mono ship ONE static weight each, chosen
+   after a side-by-side type-system audit (see the "Type Ledger" review):
+   every rule that asks either family for --w-regular/--w-semibold renders
+   at that family's single registered weight (700), a deliberate trade for
+   a simpler voice, not an oversight — neither role ever needs a SECOND
+   weight to emphasize a run against its own kind sitting right beside it.
+
+   Source Sans 3 and Lora ship TWO: their regular weight for running prose,
+   plus the weight several components ask for to bold a name or a number
+   inline inside that same prose (a wire-dock/transactions player name, a
+   box score's Play of the Game score) — a bold run beside regular text of
+   the SAME family with no real bold face to draw from renders however each
+   browser/OS decides to fake or clamp it, which is inconsistent by
+   definition. Registering the real face is what makes --w-bold/--w-semibold
+   trustworthy there; skip it only for a role nothing else sits beside. */
 
 @font-face {
   font-family: "Barlow Condensed";
@@ -30,6 +37,22 @@
 }
 
 @font-face {
+  font-family: "Source Sans 3";
+  src: url("@fontsource/source-sans-3/files/source-sans-3-latin-600-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("@fontsource/source-sans-3/files/source-sans-3-latin-700-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "JetBrains Mono";
   src: url("@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2") format("woff2");
   font-style: normal;
@@ -42,6 +65,14 @@
   src: url("@fontsource/lora/files/lora-latin-400-normal.woff2") format("woff2");
   font-style: normal;
   font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lora";
+  src: url("@fontsource/lora/files/lora-latin-700-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
   font-display: swap;
 }
 

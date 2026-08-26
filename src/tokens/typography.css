@@ -1,7 +1,7 @@
 /* ============================================================
    TYPOGRAPHY — Scorekeeper
    Four roles, one family each (see tokens/fonts.css for the @font-face
-   rules and why each ships as a single static weight):
+   rules and which ship a second, real bold weight):
    - Barlow Condensed → athletic stat/section headers (uppercase, tracked)
    - Source Sans 3     → UI + body
    - JetBrains Mono    → numbers, the ledger/scorebook figures
