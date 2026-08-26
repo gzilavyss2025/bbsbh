@@ -78,3 +78,9 @@ undefined/
 # october-texture-findings.json is worth committing.
 .scratch/team-success/october-texture-cache.json
 .scratch/team-success/october-texture.json
+
+# research DuckDB catalog: rebuilds in under a second from the JSON panels
+# via `node scripts/research-db.mjs`. It stores view definitions only, no
+# copied data, so there is nothing here worth committing.
+.scratch/research.duckdb
+.scratch/research.duckdb.wal
