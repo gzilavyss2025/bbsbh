@@ -79,31 +79,50 @@ for d in $lock_dirs; do
   done
 done
 
-# --- Stale primary-checkout guard --------------------------------------
-# A primary checkout (real .git dir, not a worktree) whose local `main` falls
-# behind origin/main silently loses whatever that gap contains — including
-# hooks/settings registered in newer commits, since .claude/settings.json
-# itself only updates on pull. That exact failure mode bit a session: PR #278
-# added the worktree auto-install hook, but a stale primary never picked it
-# up, so new worktrees kept hitting the missing-npm-install friction the hook
-# was built to prevent (see
+# --- Stay in sync with origin/main (any checkout, any branch) ----------
+# A checkout whose `main` falls behind origin/main silently loses whatever
+# that gap contains — including hooks/settings registered in newer commits,
+# since .claude/settings.json itself only updates on pull. That exact failure
+# mode bit a session: PR #278 added the worktree auto-install hook, but a
+# stale primary never picked it up, so new worktrees kept hitting the
+# missing-npm-install friction the hook was built to prevent (see
 # .scratch/dev-environment/issues/01-clerk-missing-from-primary-node-modules.md).
-# Catch the drift here, at session start, instead of mid-task.
-if [ -d .git ] && [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)" = "main" ]; then
+#
+# CLAUDE.md puts nearly every session on a task branch, not `main` — a guard
+# that only fired for a primary checkout literally on `main` almost never ran
+# in practice. Widened here to any checkout on any branch: worktree, primary,
+# or a remote/web session's task branch alike.
+#
+# `git merge --ff-only` is the safety net. It advances the branch only when
+# doing so loses nothing — HEAD's whole history already sits inside
+# origin/main's. A task branch that carries commits of its own simply fails
+# the fast-forward and falls through to a report instead: never a real merge,
+# never touched automatically, since only that branch's own agent knows
+# whether pulling main in mid-task is welcome.
+current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+if [ -n "$current_branch" ] && [ "$current_branch" != "HEAD" ]; then
   git fetch origin main --quiet 2>/dev/null || true
   behind="$(git rev-list --count HEAD..origin/main 2>/dev/null || echo 0)"
   if [ "${behind:-0}" -gt 0 ] 2>/dev/null; then
     if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
-      echo "bbsbh: primary checkout was $behind commit(s) behind origin/main — fast-forwarding…"
       if git merge --ff-only origin/main --quiet 2>/dev/null; then
-        echo "bbsbh: main is now up to date"
+        if [ "$current_branch" = "main" ]; then
+          echo "bbsbh: primary checkout was $behind commit(s) behind origin/main — fast-forwarded, now up to date"
+        else
+          echo "bbsbh: '$current_branch' was $behind commit(s) behind origin/main — fast-forwarded to match"
+        fi
+      elif [ "$current_branch" = "main" ]; then
+        echo "bbsbh: WARNING — origin/main is $behind commit(s) ahead but the fast-forward failed;" \
+          "run 'git pull --ff-only origin main' manually"
       else
-        echo "bbsbh: WARNING — fast-forward failed; run 'git pull --ff-only origin main' manually"
+        echo "bbsbh: '$current_branch' is $behind commit(s) behind origin/main and carries commits" \
+          "of its own, so it was not auto-merged. Merge origin/main in yourself when convenient" \
+          "(git fetch origin main && git merge origin/main)."
       fi
     else
-      echo "bbsbh: WARNING — primary checkout's main is $behind commit(s) behind origin/main," \
-        "but the working tree has uncommitted changes, so it was not auto-updated." \
-        "Resolve them, then run 'git pull --ff-only origin main'."
+      echo "bbsbh: WARNING — '$current_branch' is $behind commit(s) behind origin/main, but the" \
+        "working tree has uncommitted changes, so it was not auto-updated. Resolve them, then" \
+        "pull main in yourself (fast-forward if possible, merge otherwise)."
     fi
   fi
 fi

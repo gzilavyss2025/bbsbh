@@ -2,8 +2,8 @@
 // PostToolUse (Bash) hook: whenever Claude Code runs `gh pr merge`, fast-forward
 // the PRIMARY checkout so it doesn't go stale until the next SessionStart.
 // session-start.sh already does this same check at the start of every session
-// (see its "Stale primary-checkout guard"); this hook covers the gap where a
-// merge lands mid-session — exactly what happened merging PR #803.
+// (see its "Stay in sync with origin/main" guard); this hook covers the gap
+// where a merge lands mid-session — exactly what happened merging PR #803.
 //
 // Deliberately targets the primary checkout by fixed path, not $CLAUDE_PROJECT_DIR
 // — `gh pr merge` can run from any worktree's session, but there is only one
