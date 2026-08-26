@@ -552,7 +552,11 @@ const BUDGETS = {
   // entry point with a dispatch at the bottom, not a helper another script
   // imports, so scripts/lib/ is not open to it; stays flat with every other
   // top-level script here.
-  scripts: 100,
+  // +2 for gen-contracts-season-players.mjs and gen-contracts-identity.mjs —
+  // the historical-contract identity-resolution pipeline (ADR-0066). Each
+  // runs on import (fetches statsapi / writes the resolved crosswalk), same
+  // shape as every other gen-*.mjs already flat here.
+  scripts: 102,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -671,7 +675,14 @@ const BUDGETS = {
   // century-club.mjs above was, and it reads the SAME table: the show floors
   // and row shaping are unit-testable without a live DB, and gen-callouts.mjs
   // stays under its own line budget (ADR-0038).
-  'scripts/lib': 27,
+  // +3 for retrosheet-teams.mjs, contract-identity-match.mjs, and csv.mjs —
+  // the pure, unit-tested pieces of the contract-identity pipeline
+  // (ADR-0066): a flat club-code crosswalk, the name/position/service-time
+  // scoring, and the CSV reader for scripts/data/contracts/*.csv. All three
+  // are imported by scripts/gen-contracts-identity.mjs and tested without a
+  // live statsapi call, exactly the testable-helper convention this
+  // directory exists for.
+  'scripts/lib': 30,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

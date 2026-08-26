@@ -141,6 +141,17 @@ const PANEL_PATHS = [
   'public/data/all-star-rosters.json',
   'public/data/awards-history.json',
   '.scratch/game-notes/insights/verdicts-*.json', // filename carries a date stamp
+  // Historical contract identity crosswalk (scripts/gen-contracts-identity.mjs):
+  // one row per source-CSV row, keyed on real MLB id like every panel above.
+  // A row with no confident id has mlbId = null, confidence != 'exact'/'fuzzy'
+  // -- see docs/adr/0066-a-contract-row-with-no-confident-id-stays-unresolved.md.
+  'public/data/contracts-history/identity/extensions.json',
+  'public/data/contracts-history/identity/arbitration.json',
+  'public/data/contracts-history/identity/free_agency.json',
+  'public/data/contracts-history/identity/salaries.json',
+  // The season-players candidate pool itself (scripts/gen-contracts-season-players.mjs)
+  // -- sharded one file per season, same glob pattern as war-history above.
+  'public/data/contracts-history/season-players/*.json',
 ];
 
 function viewNameFor(relPath) {
