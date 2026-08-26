@@ -1,0 +1,1000 @@
+player,position,age,mls,type,club,years,guarantee,first_year,final_year,option,aav,agent,club_owner,gm,signed_date
+"Abreu, Bobby",lf,36,12.165,ext,LAA,2,19000000,2010,2011,,9500000,Legacy Agency,Arturo Moreno,Tony Reagins,2009-11-05
+"Abreu, Bobby",lf,28,4.165,ext,PHI,5,64000000,2003,2007,c,12800000,Peter Greenberg,Bill Giles,Ed Wade,2002-02-18
+"Abreu, Bobby",lf,26,2.165,ext,PHI,3,14250000,2000,2002,,4750000,Peter Greenberg,Bill Giles,Ed Wade,2000-01-18
+"Abreu, Jose",1b,33,6,ext,CHA,3,50000000,2020,2022,,16666667,ISE,Jerry Reinsdorf,Rick Hahn,2019-11-22
+"Acuna, Ronald",lf,21,0.159,ext,ATL,8,100000000,2019,2026,c (2),12500000,Peter Greenberg,Liberty Media,Alex Anthopoulos,2019-04-03
+"Affeldt, Jeremy",lhp,31,8,ext,SFN,2,9500000,2010,2011,,4750000,Moye Sports,Bill Neukom,Brian Sabean,2010-03-26
+"Aguilar, Jesús",1b,32,5.082,ext,MIA,1,7500000,2022,2022,m,7500000,MVP Sports,Bruce Sherman,Kim Ng,2022-04-05
+"Ahmed, Nick",ss,30,5.054,ext,ARI,4,32500000,2020,2023,,8125000,Meister Sports,Ken Kendrick,Mike Hazen,2020-02-10
+"Albies, Ozzie",2b,22,1.062,ext,ATL,6,35000000,2019,2025,c (2),5833333,SportsMeter,Liberty Media,Alex Anthopoulos,2019-04-11
+"Alcantara, Sandy",rhp-s,26,3.1,ext,MIA,5,56000000,2022,2026,c,11200000,CAA,Bruce Sherman,Kim Ng,2021-11-29
+"Altuve, Jose",2b,34,12.072,ext,HOU,5,125000000,2025,2029,,25000000,Boras Corp.,Jim Crane,Dana Brown,2024-02-06
+"Altuve, Jose",2b,28,6.072,ext,HOU,7,163500000,2018,2024,,23357143,Boras Corp.,Jim Crane,Jeff Luhnow,2018-03-19
+"Altuve, Jose",2b,24,2.072,ext,HOU,4,12500000,2014,2017,c (2),3125000,Octagon,Jim Crane,Jeff Luhnow,2013-07-13
+"Alvarado, Jose",lhp,28,5.082,ext,PHI,3,22000000,2023,2025,c,7333333,OL Baseball,John Middleton,Dave Dombrowski,2023-02-17
+"Alvarez, Pedro",3b,22,0,ext,PIT,4,6355000,2009,2012,c (2),1588750,Boras Corp.,Bob Nutting,Neal Huntington,2008-09-24
+"Alvarez, Yordan",lf-dh,25,2.113,ext,HOU,6,115000000,2023,2028,,19166667,MVP Sports,Jim Crane,James Click,2022-06-03
+"Amarista, Alexi",2b,26,3.053,ext,SDN,2,2500000,2015,2016,,1250000,Martin Arburua,Ron Fowler,A.J. Preller,2015-01-16
+"Anderson, Brett",lhp-s,22,1,ext,OAK,4,12500000,2010,2013,c (2),3125000,GSE,Lewis Wolff,Billy Beane,2010-04-16
+"Anderson, Chase",rhp-s,30,3.146,ext,MIL,2,11750000,2018,2019,c,5875000,Hub Sports,Mark Attanasio,David Stearns,2017-10-26
+"Anderson, Garret",lf,32,10.049,ext,ANA,4,48000000,2005,2008,c,12000000,Chris Arnold,Arturo Moreno,Bill Stoneman,2004-04-13
+"Anderson, Garret",lf,28,6.049,ext,ANA,4,20000000,2001,2004,,5000000,Chris Arnold,Disney Co.,Bill Stoneman,2000-04-16
+"Anderson, Tim",ss,24,0.115,ext,CHA,6,25000000,2017,2022,c (2),4166667,Reynolds Sports,Jerry Reinsdorf,Rick Hahn,2017-03-21
+"Andrus, Elvis",ss,24,4,ext,TEX,8,120000000,2015,2022,v,15000000,Boras Corp.,RDavis / BSimpson,Jon Daniels,2013-04-01
+"Andrus, Elvis",ss,23,3,ext,TEX,3,14400000,2012,2014,,4800000,Boras Corp.,RDavis / BSimpson,Jon Daniels,2012-02-07
+"Anthony, Roman",rf,21,0.058,ext,BOS,8,130000000,2026,2033,c,16250000,Frontline,John Henry,Craig Breslow,2025-08-06
+"Archer, Chris",rhp-s,25,0.156,ext,TBA,6,25500000,2014,2019,c (2),4250000,Relativity,Stuart Sternberg,Andrew Friedman,2014-04-02
+"Arcia, Orlando",ss,28,5.114,ext,ATL,3,7000000,2023,2025,,2333333,World Sports,Liberty Media,Alex Anthopoulos,2023-03-30
+"Arenado, Nolan",3b,28,5.155,ext,COL,8,260000000,2019,2026,,32500000,Wasserman,Monfort brothers,Jeff Bridich,2019-02-26
+"Arenado, Nolan",3b,26,3.155,ext,COL,2,29500000,2017,2018,,14750000,Wasserman,Monfort brothers,Jeff Bridich,2017-01-13
+"Arias, Joaquin",ss,29,4.071,ext,SFN,2,2600000,2014,2015,,1300000,Beverly Hills Sports,Charles Johnson,Brian Sabean,2014-01-23
+"Arredondo, Jose",rhp,28,2.168,ext,CIN,2,2000000,2012,2013,,1000000,Greg Maroni,Bob Castellini,Walt Jocketty,2012-01-27
+"Arroyo, Bronson",rhp-s,34,8.15,ext,CIN,3,35000000,2011,2013,,11666667,Lagardere,Bob Castellini,Walt Jocketty,2010-12-03
+"Arroyo, Bronson",rhp-s,30,5.15,ext,CIN,2,25000000,2007,2008,c,12500000,Lagardere,Bob Castellini,Wayne Krivsky,2007-02-01
+"Arroyo, Bronson",rhp-s,29,3.15,ext,BOS,3,11250000,2006,2008,,3750000,Gaylord Sports,John Henry,Theo Epstein,2006-01-19
+"Ashby, Andy",rhp-s,25,1.046,ext,MIL,5,20500000,2023,2027,c (2),4100000,Turner Gary,Mark Attanasio,David Stearns,2022-07-23
+"Atchison, Scott",rhp,39,5.168,ext,CLE,1,1000000,2015,2015,c,1000000,Rich Thompson,Paul Dolan,"Mark Shapiro, Chris Antonetti",2014-08-19
+"Aybar, Erick",ss,28,5.086,ext,LAA,4,35000000,2012,2015,,8750000,SFX,Arturo Moreno,Jerry Dipoto,2012-04-18
+"Aybar, Willy",1b-3b,26,2.153,ext,TBA,2,2600000,2009,2010,c,1300000,Magnus Sports,Stuart Sternberg,Andrew Friedman,2009-02-18
+"Bader, Harrison",cf,28,4.03,ext,STL,2,10400000,2022,2023,,5200000,Vayner Sports,Bill DeWitt Jr.,JMozeliak / MGirsch,2022-04-02
+"Bagwell, Jeff",1b,34,11,ext,HOU,5,85000000,2002,2006,c,17000000,Barry Axelrod,Drayton McLane,Gerry Hunsicker,2000-12-20
+"Bailey, Homer",rhp-s,28,5.017,ext,CIN,6,105000000,2014,2019,m,17500000,Hendricks Sports,Bob Castellini,Walt Jocketty,2014-02-19
+"Baker, Scott",rhp-s,27,2.128,ext,MIN,4,15250000,2009,2012,,3812500,Octagon,Jim Pohlad,Bill Smith,2009-03-07
+"Baldelli, Rocco",cf,24,3,ext,TBA,3,9000000,2006,2008,c (3),3000000,self-represented,Stuart Sternberg,Andrew Friedman,2005-11-10
+"Bard, Daniel",rhp,38,6.103,ext,COL,2,19000000,2023,2024,,9500000,ISE,Monfort brothers,Bill Schmidt,2022-07-30
+"Barnes, Austin",c,33,6.098,ext,LAN,2,7000000,2023,2024,,3500000,ACES,Mark Walters,Andrew Friedman,2022-07-03
+"Barnes, Austin",c,31,4.098,ext,LAN,2,4300000,2021,2022,,2150000,ACES,Mark Walterss,Andrew Friedman,2021-02-14
+"Barnes, Matt",rhp,32,6.11,ext,BOS,2,18750000,2022,2023,c,9375000,ISE,John Henry,Chaim Bloom,2021-07-11
+"Barnhart, Tucker",c,27,3.075,ext,CIN,4,16000000,2018,2021,c,4000000,Ballengee,Bob Castellini,Dick Williams,2017-09-22
+"Barrett, Michael",c,28,5.152,ext,CHN,3,12000000,2005,2007,,4000000,Career Sports & Ent,Tribune Company,Jim Hendry,2005-01-19
+"Bartlett, Jason",ss,31,5.086,ext,SDN,2,11000000,2011,2012,c,5500000,Landis Baseball,John Moores,Jed Hoyer,2011-01-10
+"Basallo, Samuel",c,21,0.005,ext,BAL,6,67000000,2026,2033,c,8375000,CAA,David Rubenstein,Mike Elias,2025-08-22
+"Bassitt, Chris",rhp-s,33,5.13,ext,NYN,1,8800000,2022,2022,m,8800000,Meister Sports,Steve Cohen,Billy Eppler,2022-05-21
+"Batista, Miguel",rhp,31,4.045,ext,ARI,2,5800000,2002,2003,,2900000,Martin Arburua,Jerry Colangelo,Joe Garagiola Jr.,2002-01-30
+"Bautista, Felix",rhp,29,2,ext,BAL,2,2000000,2024,2025,,1000000,JNP Group,John Angelos,Mike Elias,2023-09-29
+"Bautista, Jose",3b,30,5.165,ext,TOR,5,65000000,2011,2015,c,13000000,Bean Stringfellow,Edward Rogers,Alex Anthopoulos,2011-02-17
+"Bay, Jason",lf,27,2.08,ext,PIT,4,18250000,2006,2009,,4562500,Joe Urbon,Kevin McClatchy,Dave Littlefield,2005-11-01
+"Baz, Shane",rhp-s,27,3.158,ext,BAL,5,68000000,2026,2030,,13600000,Cornerstone Baseball,David Rubenstein,Mike Elias,2026-03-27
+"Beckett, Josh",rhp-s,30,8.03,ext,BOS,4,68000000,2010,2013,,17000000,Moye Sports,John Henry,Theo Epstein,2010-04-04
+"Beckett, Josh",rhp-s,27,5.03,ext,BOS,3,30000000,2007,2009,c,10000000,Michael Moye,John Henry,Theo Epstein,2006-07-18
+"Belisle, Matt",rhp,32,6.019,ext,COL,2,8125000,2012,2013,m,4062500,CAA,Monfort brothers,Dan O'Dowd,2012-02-03
+"Belisle, Matt",rhp,31,5.019,ext,COL,2,6125000,2011,2012,,3062500,CAA,Monfort brothers,Dan O'Dowd,2011-02-19
+"Belliard, Ron",2b,33,8.162,ext,WAS,2,3500000,2008,2009,,1750000,Dominic Torres,Ted Lerner,Mike Rizzo,2007-07-23
+"Bello, Brayan",rhp-s,25,1.082,ext,BOS,6,55000000,2024,2029,c,9166667,ISE,John Henry,Craig Breslow,2024-03-07
+"Belt, Brandon",1b,28,4.128,ext,SFN,5,72800000,2017,2021,,14560000,Excel,Charles Johnson,Brian Sabean,2016-04-09
+"Beltre, Adrian",3b,37,17.096,ext,TEX,2,36000000,2016,2017,,18000000,Boras Corp.,RDavis / BSimpson,Jon Daniels,2016-04-16
+"Benoit, Joaquin",rhp,30,5.054,ext,TEX,2,6000000,2008,2009,,3000000,CSMG,Tom Hicks,Jon Daniels,2007-10-31
+"Berkman, Lance",1b-dh,36,12.052,ext,STL,1,12000000,2012,2012,,12000000,Moye Sports,Bill DeWitt Jr.,John Mozeliak,2011-09-22
+"Berkman, Lance",1b-dh,29,5.052,ext,HOU,6,85000000,2005,2010,c,14166667,Michael Moye,Drayton McLane,Tim Purpura,2005-03-01
+"Berkman, Lance",lf,26,2.052,ext,HOU,3,10500000,2002,2004,,3500000,Michael Moye,Drayton McLane,Gerry Hunsicker,2002-01-01
+"Berríos, Jose",rhp-s,28,5.044,ext,TOR,7,131000000,2022,2028,,18714286,Wasserman,Edward Rogers,Ross Atkins,2021-11-16
+"Berroa, Angel",ss,26,1.047,ext,KCA,4,11000000,2005,2008,c,2750000,Paul Kinzer,David Glass,Allard Baird,2004-05-07
+"Betancourt, Rafael",rhp,37,8.079,ext,COL,2,8500000,2012,2013,m,4250000,Octagon,Monfort brothers,Dan O'Dowd,2012-01-25
+"Betancourt, Rafael",rhp,36,7.079,ext,COL,1,4000000,2011,2011,c,4000000,Octagon,Monfort brothers,Dan O'Dowd,2011-01-31
+"Betancourt, Rafael",rhp,35,6.079,ext,COL,2,7550000,2010,2011,,3775000,Octagon,Monfort brothers,Dan O'Dowd,2010-01-19
+"Betancourt, Rafael",rhp,33,4.079,ext,CLE,2,5400000,2008,2009,c,2700000,CSMG,Paul Dolan,Mark Shapiro,2008-01-23
+"Betancourt, Yuniesky",ss,25,1.067,ext,SEA,4,13750000,2008,2011,c,3437500,Jaime Torres,Nintendo America,Bill Bavasi,2007-04-06
+"Betts, Mookie",2b-of,28,6.07,ext,LAN,12,365000000,2021,2032,,30416667,VC Sports,Mark Walters,Andrew Friedman,2020-07-22
+"Bibee, Tanner",rhp-s,26,2,ext,CLE,5,48000000,2025,2029,c,9600000,,Paul Dolan,CAntonetti / MChernoff,2025-03-22
+"Bichette, Bo",ss,25,3.063,ext,TOR,3,33600000,2023,2025,,11200000,Vayner Sports,Edward Rogers,Ross Atkins,2023-02-09
+"Biggio, Craig",2b,40,17.099,ext,HOU,1,4000000,2006,2006,,4000000,Barry Praver,Drayton McLane,Tim Purpura,2005-09-01
+"Biggio, Craig",cf,37,14.099,ext,HOU,1,4000000,2004,2004,c,4000000,Barry Praver,Drayton McLane,Gerry Hunsicker,2003-01-30
+"Biggio, Craig",2b,34,11.099,ext,HOU,3,28000000,2001,2003,,9333333,Barry Axelrod,Drayton McLane,Gerry Hunsicker,1999-12-10
+"Billingsley, Chad",rhp-s,26,4.11,ext,LAN,3,35000000,2011,2013,c,11666667,Dave Stewart,Frank McCourt,Ned Colletti,2011-03-29
+"Blackburn, Nick",rhp-s,28,2.028,ext,MIN,4,14000000,2010,2013,c,3500000,L. Warner Cos.,Jim Pohlad,Bill Smith,2010-03-07
+"Blackmon, Charlie",rf-dh,38,11.102,ext,COL,1,13000000,2024,2024,,13000000,ACES,Monfort brothers,Bill Schmidt,2023-09-29
+"Blackmon, Charlie",cf,31,5.102,ext,COL,6,108000000,2018,2023,,18000000,ACES,Monfort brothers,Jeff Bridich,2018-04-04
+"Blake, Casey",3b,31,2.138,ext,CLE,2,5400000,2005,2006,c,2700000,Jim McDowell,Lawrence Dolan,Mark Shapiro,2005-01-21
+"Blanco, Gregor",cf,31,4.164,ext,SFN,2,7500000,2015,2016,,3750000,Octagon,Charles Johnson,Brian Sabean,2015-01-18
+"Blanco, Henry",c,29,2.136,ext,MIL,2,2225000,2001,2002,,1112500,Steve Schneider,Wendy Selig-Prieb,Dean Taylor,2001-01-30
+"Blanton, Joe",rhp-s,29,5.016,ext,PHI,3,24000000,2010,2012,,8000000,CAA,Bill Giles,"Ruben Amaro, Jr.",2010-01-21
+"Bleier, Richard",lhp,35,5.074,ext,MIA,2,6000000,2022,2023,c,3000000,Vision Sports,Bruce Sherman,Kim Ng,2022-03-21
+"Bloomquist, Willie",2b,29,4.029,ext,SEA,2,1875000,2007,2008,,937500,Boras Corp.,Nintendo America,Bill Bavasi,2006-11-27
+"Blum, Geoff",3b,37,10.056,ext,HOU,1,1500000,2010,2010,m,1500000,Wasserman,Drayton McLane,Ed Wade,2009-10-30
+"Bogaerts, Xander",ss,26,5.042,ext,BOS,6,120000000,2020,2025,v,20000000,Boras Corp.,John Henry,Dave Dombrowski,2019-04-01
+"Bonderman, Jeremy",rhp-s,24,4,ext,DET,4,38000000,2007,2010,,9500000,Greg Genske,Mike Ilitch,Dave Dombrowski,2006-12-19
+"Bote, David",2b,26,0.1,ext,CHN,4,15000000,2019,2022,c (2),3750000,Magnus Sports,Tom Ricketts,Theo Epstein,2019-04-03
+"Bradish, Kyle",rhp-s,29,4.104,ext,BAL,5,90000000,2027,2031,,18000000,All Bases Covered,David Rubenstein,Mike Elias,2026-07-18
+"Brantley, Michael",lf,27,3.131,ext,CLE,4,25000000,2014,2017,c,6250000,Legacy Agency,Paul Dolan,Chris Antonetti,2014-02-13
+"Braun, Ryan",lf,27,3.129,ext,MIL,5,105000000,2016,2020,m,21000000,CAA,Mark Attanasio,Doug Melvin,2011-04-21
+"Braun, Ryan",3b-lf,24,0.129,ext,MIL,8,45000000,2008,2015,,5625000,CAA,Mark Attanasio,Doug Melvin,2008-05-15
+"Bregman, Alex",3b,25,2.07,ext,HOU,5,100000000,2020,2024,,20000000,Tidal Sports,Jim Crane,Jeff Luhnow,2019-03-22
+"Broxton, Jonathan",rhp,26,4.02,ext,LAN,2,11000000,2010,2011,,5500000,Jet Sports,Frank McCourt,Ned Colletti,2010-01-22
+"Bruce, Jay",1b-rf,24,2.125,ext,CIN,6,51000000,2011,2016,,8500000,Sosnick-Cobbe,Bob Castellini,Walt Jocketty,2010-12-09
+"Buchholz, Clay",rhp-s,26,2.059,ext,BOS,4,29945000,2012,2015,c (2),7486250,ISE,John Henry,Theo Epstein,2011-04-10
+"Buehrle, Mark",lhp-s,29,7.078,ext,CHA,4,56000000,2008,2011,,14000000,CAA,Jerry Reinsdorf,Ken Williams,2007-07-08
+"Buehrle, Mark",lhp-s,25,3.078,ext,CHA,3,18000000,2004,2006,c,6000000,"IMG (Casey Close, Jeff Berry)",Jerry Reinsdorf,Ken Williams,2003-12-11
+"Bumgarner, Madison",lhp-s,22,1.127,ext,SFN,5,35000000,2012,2016,c (2),7000000,ISE,Charles Johnson,Brian Sabean,2012-04-17
+"Bummer, Aaron",lhp,31,6.15,ext,ATL,2,13000000,2025,2026,,6500000,O'Connell Sports,Atl Braves Holdings,Alex Anthopoulos,2024-11-02
+"Bummer, Aaron",lhp,26,1.15,ext,CHA,5,16000000,2020,2024,c (2),3200000,O'Connell Sports,Jerry Reinsdorf,Ken Williams / Rick Hahn,2020-02-22
+"Burnett, Sean",lhp,28,4.085,ext,WAS,2,3950000,2011,2012,,1975000,Munsey Sports,Ted Lerner,Mike Rizzo,2010-12-23
+"Burnitz, Jeromy",rf,29,3.064,ext,MIL,4,14500000,1998,2001,,3625000,Howard Simon,Bud Selig,Sal Bando,1998-03-28
+"Burns, Chase",rhp-s,23,1.039,ext,CIN,7,105000000,2027,2033,,15000000,Vayner Sports,Bob Castellini,NKrall / BMeador,2026-07-16
+"Burrell, Pat",lf,26,2.131,ext,PHI,6,50000000,2003,2008,,8333333,Jeff Moorad,Bill Giles,Ed Wade,2003-02-03
+"Burton, Jared",rhp,32,5.014,ext,MIN,2,5500000,2013,2014,c,2750000,Pro Agents,Jim Pohlad,Terry Ryan,2012-12-06
+"Butler, Billy",1b-dh,25,3.102,ext,KCA,4,30000000,2011,2014,c,7500000,GSE,David Glass,Dayton Moore,2011-01-22
+"Butler, Lawrence",rf,24,1.032,ext,ATH,7,65500000,2025,2031,c,9357143,CAA,John Fisher,David Forst,2025-03-06
+"Buxton, Byron",cf,28,5.16,ext,MIN,7,100000000,2022,2028,,14285714,Jet Sports,Jim Pohlad,Derek Falvey,2021-11-28
+"Byrdak, Tim",lhp,38,6.15,ext,NYN,1,1000000,2012,2012,,1000000,Only Baseball,Fred Wilpon,Sandy Alderson,2011-09-18
+"Byrnes, Eric",lf,32,7.075,ext,ARI,3,30000000,2008,2010,,10000000,Mike Sasson,Ken Kendrick,Josh Byrnes,2007-08-07
+"Cabrera, Asdrubal",ss,27,5.027,ext,CLE,2,16500000,2013,2014,,8250000,Octagon,Paul Dolan,Chris Antonetti,2012-04-04
+"Cabrera, Miguel",1b-dh,31,10.101,ext,DET,8,248000000,2016,2023,c (2),31000000,ISE,Mike Ilitch,Dave Dombrowski,2014-03-28
+"Cabrera, Miguel",1b,25,4.101,ext,DET,8,152300000,2008,2015,,19037500,ISE,Mike Ilitch,Dave Dombrowski,2008-03-24
+"Cahill, Trevor",rhp-s,23,2,ext,OAK,5,30500000,2011,2015,c (2),6100000,Boggs & Assoc.,Lewis Wolff,Billy Beane,2011-04-11
+"Cain, Lorenzo",cf,30,4.074,ext,KCA,2,17500000,2016,2017,,8750000,All Bases Covered,David Glass,Dayton Moore,2016-01-15
+"Cain, Matt",rhp-s,27,6.038,ext,SFN,6,127500000,2012,2017,c,21250000,CAA,Charles Johnson,Brian Sabean,2012-04-02
+"Cain, Matt",rhp-s,25,4.038,ext,SFN,3,27250000,2010,2012,,9083333,"Len Hardison, Kyle Rote Jr",Bill Neukom,Brian Sabean,2010-03-28
+"Cain, Matt",rhp-s,22,1.038,ext,SFN,4,9000000,2007,2010,,2250000,Sexton Landrum,Peter McGowan,Brian Sabean,2007-03-01
+"Calhoun, Kole",rf,29,3.13,ext,LAA,3,26000000,2017,2019,c,8666667,PSI Sports,Arturo Moreno,Billy Eppler,2017-01-18
+"Cameron, Mike",cf,28,4.036,ext,SEA,3,15500000,2001,2003,,5166667,Mike Nicotera,Nintendo America,Pat Gillick,2001-01-17
+"Campbell, Kristian",2b,23,0.006,ext,BOS,8,60000000,2025,2032,c (2),7500000,,John Henry,Craig Breslow,2025-04-02
+"Cano, Robinson",2b,25,2.153,ext,NYA,4,30000000,2008,2011,c (2),7500000,TWC Sports,Hal Steinbrenner,Brian Cashman,2008-02-01
+"Cano, Yennier",rhp,32,4.021,ext,BAL,2,7500000,2027,2028,c,3750000,PRIME,David Rubenstein,Mike Elias,2026-07-31
+"Capps, Matt",rhp,24,2.017,ext,PIT,2,3000000,2008,2009,,1500000,Wasserman,Bob Nutting,Neal Huntington,2008-04-03
+"Carpenter, Chris",rhp-s,37,13.08,ext,STL,2,21000000,2012,2013,,10500000,Professional Sports,Bill DeWitt Jr.,John Mozeliak,2011-09-12
+"Carpenter, Chris",rhp-s,31,9.08,ext,STL,5,63500000,2007,2011,c,12700000,Bob LaMonte,Bill DeWitt Jr.,Walt Jocketty,2006-12-05
+"Carpenter, Chris",rhp-s,29,7.08,ext,STL,2,13000000,2006,2007,c,6500000,Bob LaMonte,Bill DeWitt Jr.,Walt Jocketty,2005-04-15
+"Carpenter, Chris",rhp-s,24,1.08,ext,TOR,3,3550000,1999,2001,,1183333,Bob LaMonte,Interbrew SA,Gord Ash,1999-03-15
+"Carpenter, Matt",3b-1b,33,7.012,ext,STL,2,39000000,2020,2021,c,19500000,SSG,Bill DeWitt Jr.,John Mozeliak,2019-04-10
+"Carpenter, Matt",lf-3b,28,2.012,ext,STL,6,52000000,2014,2019,c,8666667,SSG,Bill DeWitt Jr.,John Mozeliak,2014-03-08
+"Carrasco, Carlos",rhp-s,32,7.147,ext,CLE,4,47000000,2019,2022,,11750000,ACES,Paul Dolan,Chris Antonetti,2018-12-16
+"Carrasco, Carlos",rhp-s,28,3.147,ext,CLE,4,22000000,2015,2018,c (2),5500000,ACES,Paul Dolan,"Mark Shapiro, Chris Antonetti",2015-04-07
+"Carroll, Corbin",lf,21,0.038,ext,ARI,8,111000000,2023,2030,c,13875000,CAA,Ken Kendrick,Mike Hazen,2023-03-11
+"Carroll, Jamey",2b,33,4.02,ext,COL,2,4000000,2007,2008,c,2000000,MSM Sports,Monfort brothers,Dan O'Dowd,2007-01-01
+"Casilla, Santiago",rhp,32,5.148,ext,SFN,3,15000000,2013,2015,c,5000000,Legacy Agency,Charles Johnson,Brian Sabean,2012-12-17
+"Castillo, Luis",rhp-s,30,5.101,ext,SEA,5,108000000,2023,2027,v,21600000,Republik,John Stanton,Jerry Dipoto,2022-09-24
+"Castillo, Luis",2b,28,6.055,ext,FLA,3,16000000,2004,2006,,5333333,ACES,Jeffrey Loria,Larry Beinfest,2003-12-03
+"Castro, Starlin",ss,23,2.15,ext,CHN,7,60000000,2013,2019,c,8571429,Wasserman,Tom Ricketts,Theo Epstein,2012-08-28
+"Cervelli, Francisco",c,31,6.146,ext,PIT,3,31000000,2017,2019,,10333333,Beverly Hills Sports,Bob Nutting,Neal Huntington,2016-05-17
+"Chapman, Aroldis",lhp,37,14.009,ext,BOS,1,13300000,2026,2026,m v,13300000,Wasserman,John Henry,Craig Breslow,2025-08-31
+"Chapman, Aroldis",lhp,32,9.009,ext,NYA,3,48000000,2020,2022,,16000000,Magnus Sports,Hal Steinbrenner,Brian Cashman,2019-11-03
+"Chapman, Matt",3b,32,7.109,ext,SFN,6,151000000,2025,2030,,25166667,Boras Corp.,Greg Johnson,F Zaidi / P Putila,2024-09-05
+"Chatwood, Tyler",rhp-s,25,3.039,ext,COL,2,2000000,2015,2016,,1000000,Robert Garber,Monfort brothers,Jeff Bridich,2015-01-14
+"Chavez, Endy",cf-lf,30,5.065,ext,NYN,2,3850000,2008,2009,,1925000,Chris Leible,Fred Wilpon,Omar Minaya,2008-01-22
+"Chavez, Eric",3b,26,5.02,ext,OAK,6,66000000,2005,2010,c,11000000,Dave Stewart,SSchott/KHofmann,Billy Beane,2004-03-19
+"Chavez, Eric",3b,23,1.02,ext,OAK,4,11750000,2001,2004,c,2937500,Dave Stewart,SSchott / KHofmann,Billy Beane,2000-06-23
+"Chirinos, Robinson",c,33,4.103,ext,TEX,2,4300000,2017,2018,,2150000,MDR Sports,RDavis BSimpson,Jon Daniels,2017-03-21
+"Choate, Randy",lhp,30,3.046,ext,ARI,2,1300000,2005,2006,,650000,ACES,Ken Kendrick,Josh Byrnes,2005-01-17
+"Chourio, Jackson",lf,20,0,ext,MIL,8,82000000,2024,2031,c (2),10250000,Beverly Hills Sports,Mark Attanasio,Matt Arnold,2023-12-03
+"Clark, Tony",1b,34,9.144,ext,ARI,2,2000000,2006,2007,,1000000,John Boggs,Jeff Moorad,Joe Garagiola Jr.,2005-08-06
+"Clase, Emmanuel",rhp,24,1.059,ext,CLE,5,20000000,2022,2026,c (2),4000000,Nova Sports,Paul Dolan,Chris Antonetti,2022-04-03
+"Clevinger, Mike",rhp-s,30,4.013,ext,SDN,2,11500000,2021,2022,,5750000,ACES,Peter Seidler,A.J. Preller,2020-11-16
+"Collmenter, Josh",rhp,28,3,ext,ARI,2,2425000,2014,2015,c (2),1212500,Sparta Group,Ken Kendrick,Kevin Towers,2014-01-15
+"Colon, Bartolo",rhp-s,26,1.112,ext,CLE,4,9250000,1999,2002,c,2312500,Mitch Frankel,Dick Jacobs,John Hart,1999-03-25
+"Contreras, Jose",rhp-s,34,2.152,ext,CHA,3,29000000,2006,2008,,9666667,Jaime Torres,Jerry Reinsdorf,Ken Williams,2006-04-01
+"Contreras, William",c,28,4.112,ext,MIL,1,9400000,2026,2026,c,9400000,Octagon,Mark Attanasio,Matt Arnold,2026-02-12
+"Contreras, William",c,27,3.112,ext,MIL,1,6100000,2025,2025,c,6100000,Octagon,Mark Attanasio,Matt Arnold,2025-01-31
+Cook Aaron,rhp-s,27,3.02,ext,COL,2,4550000,2006,2007,m,2275000,Pro Star,Monfort brothers,Dan O'Dowd,2006-01-13
+"Cook, Aaron",rhp-s,29,5.02,ext,COL,3,30000000,2008,2010,m,10000000,Pro Star,Monfort brothers,Dan O'Dowd,2007-12-11
+"Cordero, Francisco",rhp-s,30,6.046,ext,TEX,2,8000000,2005,2006,c,4000000,Bean Stringfellow,Jon Daniels,Tom Hicks,2004-07-29
+"Corpas, Manuel",rhp,25,1.076,ext,COL,4,8025000,2008,2011,c (2),2006250,O'Connell Sports,Monfort brothers,Dan O'Dowd,2008-02-28
+"Counsell, Craig",2b,31,4.056,ext,ARI,3,7250000,2002,2004,,2416667,Barry Meister,Jerry Colangelo,Joe Garagiola Jr.,2002-01-09
+"Craig, Allen",lf,28,2.077,ext,STL,5,31000000,2013,2017,c,6200000,ACES,Bill DeWitt Jr.,John Mozeliak,2013-03-08
+"Crain, Jesse",rhp,25,2.064,ext,MIN,3,3250000,2007,2009,,1083333,ISE,Carl Pohlad,Terry Ryan,2007-02-01
+"Crawford, Brandon",ss,35,9.094,ext,SFN,2,32000000,2022,2023,,16000000,Wasserman,Greg Johnson,Farhan Zaidi,2021-08-13
+"Crawford, Brandon",ss,29,3.094,ext,SFN,6,75000000,2016,2021,,12500000,Wasserman,Charles Johnson,Brian Sabean,2015-11-17
+"Crawford, Carl",lf,23,2.072,ext,TBA,4,15250000,2005,2008,c (2),3812500,Brian Peters,Vince Namoli,Chuck LaMar,2005-04-01
+"Crawford, JP",ss,27,3.163,ext,SEA,5,51000000,2022,2026,,10200000,Wasserman,Wasserman,Jerry Dipoto,2022-04-08
+"Crisp, Coco",cf,34,10.158,ext,OAK,2,22750000,2015,2016,c,11375000,Steve Comte,Lewis Wolff,Billy Beane,2014-02-07
+"Crisp, Coco",cf,26,2.158,ext,BOS,3,15500000,2007,2009,c,5166667,Steve Comte,John Henry,Theo Epstein,2006-04-13
+Crochet. Garrett,lhp-s,26,4.028,ext,BOS,6,170000000,2026,2031,,28333333,CAA,John Henry,Craig Breslow,2025-03-31
+"Cron, CJ",1b,32,7.097,ext,COL,2,14500000,2022,2023,,7250000,Moye Sports,Monfort brothers,Bill Schmidt,2021-10-05
+"Cronenworth, Jake",2b-1b,29,3,ext,SDN,7,80000000,2024,2030,,11428571,CAA,Peter Seidler,A.J. Preller,2023-04-01
+"Crosby, Bobby",ss,25,1.029,ext,OAK,5,12750000,2005,2009,,2550000,TWC Sports,Lewis Wolff,Billy Beane,2005-04-22
+"Crow-Armstrong, Pete",cf,24,1.17,ext,CHN,6,115000000,2027,2032,,19166667,CAA,Tom Ricketts,Jed Hoyer,2026-03-25
+"Cruz Jr., Jose",cf-rf,27,3.063,ext,TOR,2,6300000,2001,2002,,3150000,Hendricks Sports,Interbrew SA,Gord Ash,2001-01-18
+"Cruz, Nelson",rf,31,4.082,ext,TEX,2,16000000,2012,2013,,8000000,ACES,RDavis / BSimpson,Jon Daniels,2012-02-09
+"Cuddyer, Michael",rf,29,4.157,ext,MIN,3,24000000,2008,2010,c,8000000,CAA,Carl Pohlad,Bill Smith,2008-01-25
+"Cueto, Johnny",rhp-s,25,3,ext,CIN,4,27000000,2011,2014,,6750000,Dominic Torres,Bob Castellini,Walt Jocketty,2011-01-20
+"D'Arnaud, Travis",c,35,10.044,ext,ATL,1,8000000,2024,2024,c,8000000,Wasserman,Braves Holdings,Alex Anthopoulos,2023-07-18
+"D'Arnaud, Travis",c,34,9.044,ext,ATL,2,16000000,2022,2023,c,8000000,Wasserman,Liberty Media,Alex Anthopoulos,2021-08-20
+"Danks, John",lhp-s,27,5,ext,CHA,5,65000000,2012,2016,,13000000,CAA,Jerry Reinsdorf,Ken Williams,2011-12-23
+"Darvish, Yu",rhp-s,36,11,ext,SDN,6,108000000,2023,2028,,18000000,Wasserman,Peter Seidler,A.J. Preller,2023-02-09
+"Davis, Doug",rhp,31,5.138,ext,ARI,3,22000000,2007,2009,,7333333,Pro Edge,Ken Kendrick,Josh Byrnes,2007-01-01
+"Davis, Doug",rhp-s,29,3.138,ext,MIL,2,5000000,2005,2006,,2500000,Steve Canter,Wendy Selig-Prieb,Doug Melvin,2004-07-01
+"Davis, Khris",1b,31,5.104,ext,OAK,2,33500000,2019,2020,,16750000,Octagon,John Fisher,Billy Beane / David Forst,2019-04-18
+"Davis, Rajai",cf,30,3.167,ext,TOR,2,5750000,2011,2012,c,2875000,ACES,Edward Rogers,Alex Anthopoulos,2011-01-18
+"Davis, Wade",rhp,25,1.032,ext,TBA,4,12600000,2011,2014,c (3),3150000,Jet Sports,Stuart Sternberg,Andrew Friedman,2011-03-31
+"De La Rosa, Jorge",lhp-s,34,10.015,ext,COL,2,25000000,2015,2016,,12500000,TWC Sports,Monfort brothers,Dan O'Dowd,2014-09-03
+"deGrom, Jacob",rhp-s,31,4.139,ext,NYN,5,137500000,2019,2023,c,27500000,CAA,Fred Wilpon,Brodie Van Wagenen,2019-03-27
+"DeJesus, David",lf,34,9.146,ext,TBA,2,10500000,2014,2015,c,5250000,ACES,Stuart Sternberg,Andrew Friedman,2013-11-06
+"DeJesus, David",cf,26,1.146,ext,KCA,5,13500000,2006,2010,c,2700000,ACES,David Glass,Allard Baird,2006-03-01
+"DeJong, Paul",ss,24,0.127,ext,STL,6,26000000,2018,2023,c (2),4333333,CL Rocks,Bill DeWitt Jr.,John Mozeliak,2018-03-05
+"Dempster, Ryan",rhp,29,7.063,ext,CHN,3,15500000,2006,2008,,5166667,Craig Landis,Tribune Company,Jim Hendry,2005-10-01
+"Denorfia, Chris",rf-lf,34,5.041,ext,SDN,2,4250000,2013,2014,,2125000,Pro Star,Ron Fowler,Josh Byrnes,2012-09-05
+"Desmond, Ian",2b,28,4.027,ext,WAS,2,17500000,2014,2015,,8750000,Doug Rogalski,Ted Lerner,Mike Rizzo,2014-01-17
+"Dessens, Elmer",rhp,32,4.095,ext,ARI,2,7300000,2003,2004,c,3650000,Oscar Suarez,Jerry Colangelo,Joe Garagiola Jr.,2003-01-07
+"Devers, Rafael",3b,26,5.07,ext,BOS,10,314000000,2024,2033,,31400000,Rep 1,John Henry,Chaim Bloom,2023-01-11
+"Diaz, Elias",c,30,4.087,ext,COL,3,15000000,2022,2024,,5000000,MAS+,Monfort brothers,Bill Schmidt,2021-11-18
+"Diaz, Yandy",1b,33,6.122,ext,TBA,1,12000000,2026,2026,c,12000000,ACES,Stuart Sternberg,Erik Neander,2025-03-15
+"Diaz, Yandy",1b,31,4.122,ext,TBA,3,24000000,2023,2025,c,8000000,ACES,Stuart Sternberg,Erik Neander,2023-01-31
+"Dickey, RA",rhp-s,38,7.007,ext,TOR,2,25000000,2014,2015,c,12500000,Bo McKinnis,Edward Rogers,Alex Anthopoulos,2012-12-17
+"Dickey, RA",rhp-s,36,5.007,ext,NYN,2,7800000,2011,2012,c,3900000,Bo McKinnis,Fred Wilpon,Sandy Alderson,2011-01-31
+"Dobbs, Greg",1b,35,8.027,ext,MIA,1,1700000,2014,2014,,1700000,Beverly Hills Sports,Jeffrey Loria,Larry Beinfest,2013-09-26
+"Dobbs, Greg",1b,30,3.035,ext,PHI,2,2500000,2009,2010,,1250000,Beverly Hills Sports,Bill Giles,"Ruben Amaro, Jr.",2009-01-16
+"Dobnak, Randy",rhp,26,1.036,ext,MIN,5,9250000,2021,2025,c (3),1850000,Gaeta Sports,Jim Pohlad,Derek Falvey,2021-03-28
+"Dominguez, Seranthony",rhp,28,4.131,ext,PHI,2,7000000,2023,2024,c,3500000,Epitome Sports,John Middleton,Dave Dombrowski,2023-02-16
+"Donaldson, Josh",3b,30,3.158,ext,TOR,2,28650000,2016,2017,,14325000,MVP Sports,Edward Rogers,Mark Shapiro,2016-02-09
+"Doolittle, Sean",lhp,27,1.122,ext,OAK,5,10500000,2014,2018,c (2),2100000,Jason Cook,Lewis Wolff,Billy Beane,2014-04-21
+"Doumit, Ryan",c,31,6.12,ext,MIN,2,7000000,2013,2014,,3500000,Apex,Jim Pohlad,Terry Ryan,2012-06-29
+"Doumit, Ryan",c,28,3.12,ext,PIT,3,11500000,2009,2011,c (2),3833333,Paul Cobbe,Bob Nutting,Neal Huntington,2008-12-22
+"Dozier, Brian",2b,28,2.1,ext,MIN,4,20000000,2015,2018,,5000000,All Bases Covered,Jim Pohlad,Terry Ryan,2015-03-24
+"Dozier, Hunter",3b-rf,29,3.06,ext,KCA,4,25000000,2021,2024,c,6250000,Warner Cos.,John Sherman,Dayton Moore,2021-03-01
+"Drese, Ryan",rhp,29,2.087,ext,TEX,2,2500000,2005,2006,c,1250000,Craig Landis,Tom Hicks,John Hart,2005-03-03
+"Drew, Stephen",ss,28,4.079,ext,ARI,2,13750000,2011,2012,m,6875000,Boras Corp.,Ken Kendrick,Kevin Towers,2011-01-18
+"Duffy, Danny",lhp-s,28,5.085,ext,KCA,5,65000000,2017,2021,,13000000,ACES,David Glass,Dayton Moore,2017-01-16
+"Dunn, Adam",1b-dh,26,4.074,ext,CIN,2,18500000,2006,2007,c,9250000,Brian Peters,Bob Castellini,Wayne Krivsky,2006-02-14
+"Dunn, Michael",lhp,30,4.079,ext,MIA,2,5800000,2015,2016,,2900000,O'Connell Sports,Jeffrey Loria,Michael Hill,2015-02-08
+"Dye, Jermaine",rf,34,11.084,ext,CHA,2,11000000,2008,2009,m,5500000,Bobby Bry,Jerry Reinsdorf,Ken Williams,2007-08-18
+"Dye, Jermaine",rf,28,5.084,ext,OAK,3,32000000,2002,2004,c,10666667,Bobby Bry,SSchott / Khofmann,Billy Beane,2002-01-16
+"Dye, Jermaine",rf,26,4.084,ext,KCA,2,6100000,2000,2001,c,3050000,Bobby Bry,Greater KC Foundation,Herk Robinson,1999-10-15
+"Dykstra, Lenny",cf,31,10.15,ext,PHI,4,24900000,1995,1998,c,6225000,Alan Meersand,Lee Thomas,Bill Giles,1993-12-23
+"Eaton, Adam",cf,26,2.03,ext,CHA,5,23500000,2015,2019,c (2),4700000,Diamond Sports,Jerry Reinsdorf,Rick Hahn,2015-03-20
+"Eckstein, David",2b,35,9,ext,SDN,1,1000000,2010,2010,,1000000,,John Moores,Kevin Towers,2009-08-22
+"Edman, Tommy",2b-cf,30,5.114,ext,LAN,5,74000000,2025,2029,c,14800000,Weisz Sports,Mark Walters,AFriedman / BGomes,2024-11-29
+"Edman, Tommy",ss-of,29,4.114,ext,STL,2,16500000,2024,2025,,8250000,Jonathan Weisz,Bill DeWitt Jr.,JMozeliak/MGirsh,2024-01-22
+"Edmonds, Jim",cf,29,6.027,ext,STL,6,57000000,2001,2006,c,9500000,Paul Cohen,Bill DeWitt Jr.,Walt Jocketty,2000-05-12
+"Edmonds, Jim",cf,25,2.027,ext,LAA,4,9500000,1996,1999,c,2375000,Paul Cohen,Gene Autry,Bill Bavasi,1996-01-01
+"Ellis, Mark",2b,32,6.136,ext,OAK,2,11000000,2009,2010,c,5500000,TWC Sports,Lewis Wolff,Billy Beane,2008-10-20
+"Ellis, Mark",2b,29,3.136,ext,OAK,2,6000000,2006,2007,c,3000000,TWC Sports,Lewis Wolff,Billy Beane,2006-01-27
+"Emerson, Colt",ss,20,0,ext,SEA,8,95000000,2026,2033,c,11875000,ACES,John Stanton,J Dipoto / J Hollander,
+"Encarnacion, Edwin",1b-dh,31,8.085,ext,TOR,3,29000000,2013,2015,c,9666667,Wasserman,Edward Rogers,Alex Anthopoulos,2012-07-12
+"Encarnacion, Edwin",1b-dh,26,3.085,ext,CIN,2,7600000,2009,2010,,3800000,Rep 1,Bob Castellini,Walt Jocketty,2009-02-17
+"Encarnacion, Juan",rf,28,5.098,ext,LAN,2,8000000,2004,2005,,4000000,Michael Moline,Robert Daly / Fox,Dan Evans,2003-12-16
+"Enns, Dietrich",lhp,35,0.162,ext,BAL,1,2625000,2026,2026,c,2625000,Beverly Hills SC,David Rubenstein,Mike Elias,2025-11-02
+"Erstad, Darin",1b-of,35,12.077,est,HOU,1,1750000,2009,2009,,1750000,Greg Genske,Drayton McLane,Ed Wade,2008-08-29
+"Erstad, Darin",lf-1b,29,6.077,ext,ANA,4,32000000,2003,2006,,8000000,Jeff Moorad,Disney Co.,Bill Stoneman,2002-08-02
+"Erstad, Darin",cf-1b,24,1.077,ext,ANA,4,7250000,1998,2001,,1812500,Greg Genske,Gene Autry,Bill Bavasi,1998-02-26
+"Escobar, Alcides",ss,25,2.082,ext,KCA,4,10500000,2012,2015,c (2),2625000,Wasserman,David Glass,Dayton Moore,2012-03-15
+"Escobar, Eduardo",3b,30,6.128,ext,ARI,3,21000000,2019,2021,,7000000,DJ Rengifo,Ken Kendrick,Mike Hazen,2018-10-22
+"Escobar, Kelvim",rhp-s,30,8.04,ext,LAA,3,28500000,2006,2008,,9500000,Legacy Agency,Arturo Moreno,Bill Stoneman,2006-05-01
+"Escobar, Yunel",3b,31,6.121,ext,TBA,2,13000000,2014,2015,,6500000,Wasserman,Stuart Sternberg,Andrew Friedman,2014-04-05
+"Escobar, Yunel",3b,28,3.121,ext,TOR,2,10000000,2012,2013,c (2),5000000,Wasserman,Edward Rogers,Alex Anthopoulos,2011-06-19
+"Estrada, Marco",rhp-s,34,8.035,ext,TOR,1,13000000,2018,2018,,13000000,TWC Sports,Edward Rogers,Mark Shapiro,2017-09-20
+"Ethier, Andre",lf,30,5.153,ext,LAN,5,85000000,2012,2016,,17000000,CAA,Mark Walters,Ned Colletti,2012-06-12
+"Ethier, Andre",lf,28,3.153,ext,LAN,2,15250000,2010,2011,,7625000,CAA,Frank McCourt,Ned Colletti,2010-01-19
+"Eyre, Scott",lhp,32,4.088,ext,SFN,2,2450000,2004,2005,,1225000,Alan Nero,Peter McGowan,Brian Sabean,2003-12-20
+"Fairbanks, Pete",rhp,29,3.057,ext,TBA,3,12000000,2023,2025,c,4000000,Republik,Stuart Sternberg,Erik Neander,2023-01-27
+"Feldman, Scott",rhp-s,27,3.091,ext,TEX,2,11500000,2011,2012,c,5750000,Pro Prospects,Tom Hicks,Jon Daniels,2010-04-02
+"Feliz, Pedro",3b,30,4.031,ext,SFN,2,6100000,2005,2006,,3050000,Mike Arias,Peter McGowan,Brian Sabean,2005-01-18
+"Fielder, Cecil",1b,29,4.165,ext,DET,5,36000000,1993,1997,,7200000,Bob Gilhooly,Mike Ilitch,Jerry Walker,1993-01-08
+"Fielder, Prince",1b-dh,25,3.068,ext,MIL,2,18000000,2009,2010,,9000000,Boras Corp.,Mark Attanasio,Doug Melvin,2009-01-23
+"Figgins, Chone",2b-3b,28,2.145,ext,LAA,3,10500000,2006,2008,,3500000,ACES,Arturo Moreno,Bill Stoneman,2006-01-14
+"Fletcher, David",ss,26,1.111,ext,LAA,5,26000000,2021,2025,c (2),5200000,Ballengee,Arturo Moreno,Perry Minasian,2021-04-21
+"Flores, Randy",lhp,31,2.13,ext,STL,2,1800000,2007,2008,,900000,Boras Corp.,Bill DeWitt Jr.,Walt Jocketty,2007-01-13
+"Flores, Wilmer",2b-3b,31,9.003,ext,SFN,3,16500000,2023,2025,,5500000,Rimas Sports,Greg Johnson,Farhan Zaidi,2022-09-13
+"Flowers, Tyler",c,33,7.148,ext,ATL,1,6000000,2019,2019,c,6000000,O'Connell Sports,Liberty Media,Alex Anthopoulos,2018-08-28
+"Floyd, Gavin",rhp-s,26,2.045,ext,CHA,4,15500000,2009,2012,c,3875000,Shapiro Robinson,Jerry Reinsdorf,Ken Williams,2009-03-22
+"Forsythe, Logan",2b,29,4.113,ext,TBA,2,10250000,2016,2017,c,5125000,PSI Sports,Stuart Sternberg,Matthew Silverman,2016-01-15
+"Fossum, Casey",lhp-s,28,4.041,ext,TBA,2,4550000,2006,2007,c,2275000,McKinnis Sports,Stuart Sternberg,Andrew Friedman,2006-01-23
+"Foulke, Keith",rhp,29,4.094,ext,CHA,2,10000000,2002,2003,,5000000,Dan Horwits,Jerry Reinsdorf,Ken Williams,2001-12-15
+"Fowler, Dexter",rf,27,3.168,ext,COL,2,11600000,2013,2014,,5800000,Excel,Monfort brothers,Dan O'Dowd,2013-02-11
+"Francis, Jeff",lhp-s,26,2.04,ext,COL,4,13250000,2007,2010,c,3312500,Jim Lindell,Monfort brothers,Dan O'Dowd,2006-11-21
+"Franco, Wander",ss,22,0.104,ext,TBA,11,182000000,2022,2032,c,16545455,Manny Paula,Stuart Sternberg,Erik Neander,2021-11-23
+"Francoeur, Jeff",rf,28,6.088,ext,KCA,2,13500000,2012,2013,,6750000,Career Sports,David Glass,Dayton Moore,2011-08-18
+"Franklin, Ryan",rhp,37,9.022,ext,STL,2,6500000,2010,2011,,3250000,Jay Franklin,Bill DeWitt Jr.,John Mozeliak,2009-09-01
+"Franklin, Ryan",rhp,35,7.022,ext,STL,2,5000000,2008,2009,,2500000,Jay Franklin,Bill DeWitt Jr.,Walt Jocketty,2007-07-05
+"Frazier, Todd",3b,29,3.071,ext,CIN,2,12000000,2015,2016,,6000000,CAA,Bob Castellini,Walt Jocketty,2015-02-08
+"Freel, Ryan",2b-of,31,3.14,ext,CIN,2,7000000,2008,2009,,3500000,Octagon,Bob Castellini,Wayne Krivsky,2007-04-17
+"Freeland, Kyle",lhp-s,29,4.144,ext,COL,5,64500000,2022,2026,v,12900000,MSM Sports,Monfort brothers,Bill Schmidt,2022-04-19
+"Freeman, Freddie",1b,24,3.033,ext,ATL,8,125000000,2014,2021,,15625000,Excel,Liberty Media,Frank Wren,2014-02-04
+"Freese, David",3b,34,7.028,ext,PIT,2,11000000,2017,2018,c,5500000,CAA,Bob Nutting,Neal Huntington,2016-08-22
+"Fuentes, Brian",lhp,30,3.125,ext,COL,2,5500000,2006,2007,,2750000,Rick Thurman,Jerry McMorris,Dan O'Dowd,2005-12-01
+"Fullmer, Brad",1b,26,2.155,ext,TOR,2,6500000,2001,2002,,3250000,,Interbrew SA,Gord Ash,2001-01-18
+"Gagne, Eric",rhp,29,4.119,ext,LAN,2,19000000,2005,2006,c,9500000,Boras Corp.,Frank McCourt,Paul DePodesta,2005-01-18
+"Gallardo, Yovani",rhp-s,24,2.108,ext,MIL,5,30100000,2010,2014,c,6020000,Octagon,Mark Attanasio,Doug Melvin,2010-04-08
+"Gallegos, Giovanny",rhp,31,4.085,ext,STL,2,11000000,2023,2024,c,5500000,Prestige Sports,Bill DeWitt Jr.,John Mozeliak,2022-10-02
+"Garcia, Adolis",rf,31,3.095,ext,TEX,2,14000000,2024,2025,,7000000,Octagon,RDavis/BSimpson,Chris Young,2024-02-08
+"Garcia, Freddy",rhp-s,28,6,ext,CHA,3,27000000,2005,2007,,9000000,Peter Greenberg,Jerry Reinsdorf,Ken Williams,2004-07-06
+"Garcia, Jaime",lhp-s,25,3.047,ext,STL,4,27000000,2012,2015,c (2),6750000,MDR Sports,Bill DeWitt Jr.,John Mozeliak,2011-07-13
+"Garcia, Leury",cf-2b,29,5.025,ext,CHA,1,3500000,2020,2020,c,3500000,MDR Sports,Jerry Reinsdorf,Ken Williams / Rick Hahn,2020-02-22
+"Garcia, Maikel",3b,26,2.168,ext,KCA,5,57500000,2026,2030,c,11500000,Wasserman,John Sherman,J.J. Picollo,2025-12-12
+"Garciaparra, Nomar",ss,24,1.03,ext,BOS,5,23250000,1998,2002,c (2),4650000,Arn Tellum,Yawkey Trust,Dan Duquette,1998-03-10
+"Gardner, Brett",lf,30,5.072,ext,NYA,4,52000000,2014,2017,,13000000,Pro Star,Hal Steinbrenner,Brian Cashman,2014-02-23
+"Garland, Jon",rhp-s,26,5.071,ext,CHA,3,29000000,2006,2008,,9666667,Craig Landis,Jerry Reinsdorf,Ken Williams,2005-12-28
+"Giambi, Jason",1b,28,3.095,ext,OAK,3,9300000,1999,2001,,3100000,"Joel Wolfe, Arn Tellem",SSchott / KHofmann,Billy Beane,1998-12-01
+"Gibbons, Jay",rf,29,5,ext,BAL,4,21100000,2006,2009,,5275000,ACES,Peter Angelos,Mike Flanagan,2006-01-24
+"Giles, Brian",rf,29,4.096,ext,PIT,5,45000000,2001,2005,,9000000,Joe Bick,Kevin McClatchy,Cam Bonifay,2000-05-19
+"Giménez, Andrés",2b,24,2.106,ext,CLE,7,106500000,2023,2029,c,15214286,Rep 1,Paul Dolan,Chris Antonetti,2023-03-29
+"Glasnow, Tyler",rhp-s,30,6.158,ext,LAN,5,137000000,2024,2028,,27400000,Wasserman,Mark Walters,AFriedman / BGomes,2023-12-16
+"Glasnow, Tyler",rhp-s,29,5.158,ext,TBA,2,30350000,2023,2024,,15175000,Wasserman,Stuart Sternberg,Erik Neander,2022-08-26
+"Glaus, Troy",3b,25,3.06,ext,ANA,4,22000000,2001,2004,,5500000,Mike Nicotera,Disney Co.,Bill Stoneman,2001-03-06
+"Glavine, Tom",lhp-s,31,9.052,ext,ATL,4,34000000,1998,2001,c,8500000,Gregg Clifton,Time Warner,John Schuerholz,1997-05-21
+"Glavine, Tom",lhp-s,27,4.052,ext,ATL,4,20500000,1993,1996,c,5125000,Bob Wolff,Ted Turner,John Schuerholz,1992-12-17
+"Gload, Ross",1b-of,32,4.055,ext,KCA,2,3000000,2008,2009,c,1500000,ACES,David Glass,Dayton Moore,2008-01-18
+"Goldschmidt, Paul",1b,31,7.059,ext,STL,5,130000000,2020,2024,,26000000,Excel,Bill DeWitt Jr.,John Mozeliak,2019-03-23
+"Goldschmidt, Paul",1b,25,1.059,ext,ARI,5,32000000,2014,2018,c,6400000,ISE,Ken Kendrick,Kevin Towers,2013-03-29
+"Gomes, Yan",c,26,1.083,ext,CLE,6,23000000,2014,2019,c,3833333,Players Edge,Paul Dolan,Chris Antonetti,2014-03-29
+"Gomez, Carlos",cf,28,6.141,ext,MIL,3,24000000,2014,2016,,8000000,Boras Corp.,Mark Attanasio,Doug Melvin,2013-03-13
+"Gomez, Chris",ss,35,12.041,ext,BAL,1,850000,2006,2006,,850000,Alan Meersand,Dan Duquette / Mike Flanagan,Peter Angelos,2005-09-01
+"Gonsolin, Tony",rhp-s,29,2.152,ext,LAN,2,7000000,2023,2024,,3500000,Beverly Hills Sports,Mark Walters,Andrew Friedman,2023-01-31
+"Gonzales, Marco",lhp-s,29,3.102,ext,SEA,4,30000000,2021,2024,c,7500000,CAA,John Stanton,Jerry Dipoto,2020-02-03
+"Gonzales, Marco",lhp-s,27,1.102,ext,SEA,2,1900000,2019,2020,,950000,CAA,John Stanton,Jerry Dipoto,2018-11-01
+"Gonzalez, Adrian",1b,29,5.108,ext,BOS,7,154000000,2012,2018,,22000000,Boggs & Assoc.,John Henry,Theo Epstein,2011-04-15
+"Gonzalez, Adrian",1b,25,3.108,ext,SDN,4,9500000,2007,2010,c,2375000,Boggs & Assoc.,John Moores,Kevin Towers,2007-04-01
+"Gonzalez, Alex",ss,27,5.034,ext,FLA,2,6000000,2004,2005,,3000000,Eric Goldschmidt,Jeffrey Loria,Larry Beinfest,2003-12-15
+"Gonzalez, Carlos",cf,25,2.059,ext,COL,7,80000000,2011,2017,,11428571,Boras Corp.,Monfort brothers,Dan O'Dowd,2011-01-10
+"Gonzalez, Gio",lhp-s,26,2.162,ext,WAS,5,42000000,2012,2016,c (2),8400000,ACES,Ted Lerner,Mike Rizzo,2012-01-16
+"Gonzalez, Juan",rf,24,3.001,ext,TEX,5,30700000,1994,1998,c (2),6140000,Bronner & Gilhooley,"GW Bush, E Rose",Tom Grieve,1994-02-04
+"Gonzalez, Luis",lf,35,12.032,ext,ARI,3,30000000,2003,2005,,10000000,Greg Genske,Jerry Colangelo,Joe Garagiola Jr.,2002-03-19
+"Gonzalez, Luis",lf,32,9.032,ext,ARI,3,12500000,2000,2002,c,4166667,Greg Genske,Jerry Colangelo,Joe Garagiola Jr.,1999-08-09
+"Gordon, Alex",lf,28,4.092,ext,KCA,4,37500000,2012,2015,p,9375000,Excel,David Glass,Dayton Moore,2012-03-31
+"Gordon, Dee",2b,28,3.154,ext,MIA,5,50000000,2016,2020,c,10000000,Beverly Hills Sports,Jeffrey Loria,Michael Hill,2016-01-14
+"Granderson, Curtis",cf,27,2.077,ext,DET,5,30000000,2008,2012,c,6000000,Pro Prospects,Mike Ilitch,Dave Dombrowski,2008-02-04
+"Gray, Sonny",rhp-s,29,5.061,ext,CIN,3,30500000,2020,2022,c,10166667,McKinnis Sports,Bob Castellini,Dick Williams,2019-01-21
+"Green, Shawn",rf,27,5.063,ext,LAN,6,84000000,2000,2005,,14000000,Jeff Moorad,Bob Daly / Fox,Kevin Malone,1999-11-08
+"Greene, Hunter",rhp-s,23,1,ext,CIN,6,53000000,2023,2028,c,8833333,CAA,Bob Castellini,Nick Krall,2023-04-18
+"Greinke, Zack",rhp-s,25,4.057,ext,KCA,4,38000000,2009,2012,,9500000,John Courtright,David Glass,Dayton Moore,2009-01-26
+"Grichuk, Randal",rf-lf,27,4.033,ext,TOR,5,52000000,2019,2023,,10400000,Excel,Edward Rogers,Mark Shapiro,2019-04-02
+"Grieve, Ben",rf-lf,24,2.026,ext,OAK,4,13000000,2000,2003,,3250000,Hendricks Sports,SSchott / Khofmann,Billy Beane,2000-03-03
+"Griffey Jr., Ken",cf,30,11,ext,CIN,9,116500000,2000,2008,c,12944444,Brian Goldberg,Carl Lindner,Jim Bowden,2000-02-10
+"Griffin, Konnor",ss,19,0.005,ext,PIT,9,140000000,2026,2034,,15555555,Excel,Bob Nutting,Ben Cherington,
+"Grudzielanek, Mark",2b,37,11.129,ext,KCA,1,4000000,2007,2007,p,4000000,ACES,David Glass,Dayton Moore,2006-08-17
+"Grudzielanek, Mark",2b,30,4.129,ext,LAN,4,18000000,2000,2003,c,4500000,ACES,Fox / Robert Daly,Kevin Malone,2000-01-18
+"Guerrero Jr., Vladimir",1b,26,5.157,ext,TOR,14,500000000,2026,2039,,35714286,PRIME,Edward Rogers,"Mark Shapiro, Ross Atkins",2025-04-07
+"Guerrero, Vladimir",rf,24,1.16,ext,MON,5,28000000,1999,2003,,5600000,"SFX (Cuza, Bentz)",Jeffrey Loria,Jim Beattie,1998-09-02
+"Guillen, Carlos",3b,31,8,ext,DET,4,48000000,2008,2011,,12000000,Peter Greenberg,Mike Ilitch,Dave Dombrowski,2007-03-01
+"Guillen, Carlos",ss,28,5,ext,DET,3,14000000,2005,2007,,4666667,Peter Greenberg,Mike Ilitch,Dave Dombrowski,2004-06-01
+"Gurriel, Yulieski",1b,37,4.043,ext,HOU,1,7000000,2021,2021,club,7000000,Magnus Sports,Jim Crane,James Click,2020-09-29
+"Gutierrez, Franklin",cf,27,3.08,ext,SEA,4,20500000,2010,2013,c,5125000,Wil Polidor,Nintendo America,Jack Zduriencik,2010-01-08
+"Guyer, Brandon",lf,31,4.066,ext,CLE,2,5000000,2017,2018,c,2500000,ACES,Paul Dolan,Chris Antonetti,2017-01-18
+"Guzman, Cristian",ss,31,10,ext,WAS,2,16000000,2009,2010,,8000000,Stanley King,Ted Lerner,Jim Bowden,2008-07-22
+"Guzman, Cristian",ss,23,2,ext,MIN,4,9000000,2001,2004,c,2250000,Stan King,Carl Pohlad,Terry Ryan,2000-12-01
+"Gwynn Jr., Tony",lf,29,4.044,ext,LAN,2,2000000,2012,2013,,1000000,Tommy Tanzer,Frank McCourt,Ned Colletti,2011-12-12
+"Gyorko, Jedd",2b,25,1,ext,SDN,6,35510900,2014,2019,c,5918483,ACES,Ron Fowler,Josh Byrnes,2014-04-14
+"Hafner, Travis",1b,31,6.009,ext,CLE,4,57000000,2009,2012,c,14250000,Greg Genske,Lawrence Dolan,Mark Shapiro,2007-07-11
+"Hafner, Travis",1b,27,2.009,ext,CLE,3,7000000,2005,2007,c,2333333,Sosnick Cobbe,Lawrence Dolan,Mark Shapiro,2005-04-13
+"Hall, Bill",3b,27,3.099,ext,MIL,4,24000000,2007,2010,c,6000000,Lagardere,Mark Attanasio,Doug Melvin,2007-02-01
+"Halladay, Roy",rhp-s,33,10.047,ext,PHI,3,60000000,2011,2013,c,20000000,CAA,Bill Giles,"Ruben Amaro, Jr.",2009-12-16
+"Halladay, Roy",rhp-s,29,6.047,ext,TOR,3,40000000,2008,2010,,13333333,Greg Landry,Edward Rogers,J.P. Ricciardi,2006-03-16
+"Halladay, Roy",rhp-s,27,4.047,ext,TOR,4,42000000,2004,2007,,10500000,Greg Landry,Edward Rogers,J.P. Ricciardi,2004-01-22
+"Halladay, Roy",rhp-s,23,0.047,ext,TOR,3,3700000,2000,2002,,1233333,Greg Landry,Interbrew SA,Gord Ash,2000-02-28
+"Hamels, Cole",lhp-s,29,6.143,ext,PHI,6,144000000,2013,2018,c,24000000,Boggs & Assoc.,Bill Giles,"Ruben Amaro, Jr.",2012-07-25
+"Hamels, Cole",lhp-s,25,2.143,ext,PHI,3,20500000,2009,2011,,6833333,Boggs & Assoc.,Bill Giles,"Ruben Amaro, Jr.",2009-01-18
+"Hamilton, Josh",cf,30,4,ext,TEX,2,24000000,2011,2012,,12000000,Moye Sports,RDavis / BSimpson,Jon Daniels,2011-02-10
+"Hand, Brad",lhp,28,4.092,ext,SDN,3,19750000,2018,2020,c,6583333,Matt Colleran,Ron Fowler,A.J. Preller,2018-01-13
+"Hanigan, Ryan",c,33,5.077,ext,TBA,3,10750000,2014,2016,,3583333,O'Connell Sports,Stuart Sternberg,Andrew Friedman,2013-12-03
+"Hanigan, Ryan",c,30,2.077,ext,CIN,3,4000000,2011,2013,,1333333,O'Connell Sports,Phil Castellini,Walt Jocketty,2011-03-13
+"Happ, Ian",lf,29,6.036,ext,CHN,3,61000000,2023,2025,,20333333,WME,Tom Ricketts,Jed Hoyer,2023-04-12
+"Happ, JA",lhp-s,30,4.047,ext,TOR,1,5400000,2014,2014,c,5400000,Jay Fee Sports,Edward Rogers,Alex Anthopoulos,2013-03-27
+"Harang, Aaron",rhp,29,5.061,ext,CIN,4,36500000,2007,2010,c,9125000,ACES,Bob Castellini,Wayne Krivsky,2007-02-01
+"Harden, Rich",rhp-s,23,1.074,ext,OAK,4,9000000,2005,2008,c,2250000,Bob Garber,SSchott/KHofmann,Billy Beane,2005-04-03
+"Hardy, JJ",ss,32,9.164,ext,BAL,3,40000000,2015,2017,c,13333333,Lagardere,Peter Angelos,Dan Duquette,2014-10-09
+"Hardy, JJ",ss,29,6.164,ext,BAL,3,22500000,2012,2014,,7500000,Landis Baseball,Peter Angelos,Andy MacPhail,2011-07-16
+"Haren, Dan",rhp-s,28,4.154,ext,ARI,4,44750000,2009,2012,c,11187500,CAA,Ken Kendrick,Josh Byrnes,2008-08-05
+"Haren, Dan",rhp-s,25,2.154,ext,OAK,4,12650000,2006,2009,c,3162500,CAA,Lewis Wolff,Billy Beane,2005-09-27
+"Harper, Bryce",rf,25,5.159,ext,WAS,1,21625000,2018,2018,,21625000,Boras Corp.,Ted Lerner,Mike Rizzo,2017-05-13
+"Harper, Bryce",rf,22,2.159,ext,WAS,2,7500000,2015,2016,,3750000,Boras Corp.,Ted Lerner,Mike Rizzo,2014-12-15
+"Harris II, Michael",cf,22,0.131,ext,ATL,8,72000000,2023,2030,c (2),9000000,,Liberty Media,Alex Anthopoulos,2022-08-16
+"Harris, Brendan",2b,29,3.112,ext,MIN,2,3200000,2010,2011,,1600000,Beverly Hills Sports,Jim Pohlad,Bill Smith,2010-01-19
+"Harris, Will",rhp,32,3.102,ext,HOU,2,5000000,2017,2018,c,2500000,Gavin Kahn,Jim Crane,Jeff Luhnow,2017-02-03
+"Harris, Willie",2b,31,5.14,ext,WAS,2,3000000,2009,2010,,1500000,Gersh Sports,Ted Lerner,Jim Bowden,2008-12-12
+"Harrison, Josh",2b-lf,27,3.033,ext,PIT,4,27300000,2015,2018,c (2),6825000,MSM Sports,Bob Nutting,Neal Huntington,2015-04-08
+"Harrison, Matt",lhp-s,27,4.083,ext,TEX,5,55000000,2013,2017,,11000000,ACES,RDavis / BSimpson,Jon Daniels,2013-01-17
+"Hart, Corey",1b-of,29,5.038,ext,MIL,3,26500000,2011,2013,,8833333,CAA,Mark Attanasio,Doug Melvin,2010-08-01
+"Hatteberg, Scott",c-1b,37,10.07,ext,CIN,1,1650000,2007,2007,c,1650000,Joe Urbon,Bob Castellini,Wayne Krivsky,2006-07-25
+"Hatteberg, Scott",c-1b,34,7.07,ext,CIN,2,5000000,2004,2005,c,2500000,Joe Urbon,SSchott/KHofmann,Billy Beane,2003-07-29
+"Hawpe, Brad",rf,29,3.058,ext,COL,3,17425000,2008,2010,c,5808333,Beverly Hills Sports,Monfort brothers,Dan O'Dowd,2008-03-04
+"Hayes, Ke'Bryan",3b,25,1.075,ext,PIT,8,70000000,2022,2029,c,8750000,Ballengee,Bob Nutting,Ben Cherington,2022-04-08
+"Hedges, Austin",c,33,9.166,ext,CLE,1,4000000,2026,2026,,4000000,Boras Corp.,Paul Dolan,CAntonetti / MChernoff,2025-10-14
+"Helms, Wes",3b-1b,35,11.018,ext,FLA,1,1000000,2011,2011,,1000000,Career Sports,Jeffrey Loria,Larry Beinfest,2010-08-18
+"Helms, Wes",3b-1b,33,9.018,ext,FLA,2,1900000,2009,2010,,950000,Career Sports,Jeffrey Loria,Larry Beinfest,2008-10-03
+"Helms, Wes",3b-1b,28,4.018,ext,MIL,2,4500000,2004,2005,,2250000,Career Sports,Wendy Selig-Prieb,Doug Melvin,2003-12-20
+"Helton, Todd",1b,36,12.059,ext,COL,2,9900000,2012,2013,,4950000,Moye Sports,Monfort brothers,Dan O'Dowd,2010-03-11
+"Helton, Todd",1b,27,3.059,ext,COL,9,141500000,2003,2011,,15722222,Moye Sports,Jerry McMorris,Dan O'Dowd,2001-03-29
+"Helton, Todd",1b,25,1.059,ext,COL,4,12000000,1999,2002,,3000000,Moye Sports,Jerry McMorris,Bob Gebhard,1999-03-02
+"Hendricks, Kyle",rhp-s,30,5.081,ext,CHN,4,55500000,2020,2023,c,13875000,Wasserman,Tom Ricketts,Theo Epstein,2019-03-26
+"Hermanson, Dustin",rhp,27,3.132,ext,MON,3,15000000,2000,2002,c,5000000,Casey Close,Jeffrey Loria,Jim Beattie,2000-01-18
+"Hernandez, David",rhp,27,2.105,ext,ARI,2,3500000,2012,2013,,1750000,Jason Hoffman,Ken Kendrick,Kevin Towers,2012-06-24
+"Hernandez, Enrique",ss-cf,31,8.054,ext,BOS,1,10000000,2023,2023,,10000000,Wasserman,John Henry,Chaim Bloom,2022-09-05
+"Hernández, Félix",rhp-s,27,7.06,ext,SEA,7,175000000,2013,2019,,25000000,Octagon,Nintendo America,Jack Zduriencik,2013-02-07
+"Hernández, Félix",rhp-s,24,4.06,ext,SEA,5,78000000,2010,2014,,15600000,Octagon,Nintendo America,Jack Zduriencik,2010-01-19
+"Hernandez, Livan",rhp-s,36,13.097,ext,WAS,1,1000000,2011,2011,,1000000,Magnus Sports,Ted Lerner,Mike Rizzo,2010-08-29
+"Hernandez, Livan",rhp-s,29,6.097,ext,WAS,3,21000000,2004,2006,,7000000,Magnus Sports,MLB,Omar Minaya,2004-04-13
+"Hernandez, Ramon",c,34,10.099,ext,CIN,1,3000000,2010,2010,v,3000000,Eric Goldschmidt,Bob Castellini,Walt Jocketty,2009-11-29
+"Hernandez, Ramon",c,26,2.099,ext,OAK,4,9500000,2002,2005,,2375000,Eric Goldschmidt,SSchott / Khofmann,Billy Beane,2002-03-08
+"Hernandez, Roberto",rhp-s,27,1.169,ext,CLE,4,15000000,2008,2011,c (3),3750000,CSMG,Paul Dolan,Mark Shapiro,2008-04-10
+"Herrera, Kelvin",rhp,25,2.157,ext,KCA,2,4150000,2015,2016,,2075000,Beverly Hills Sports,David Glass,Dayton Moore,2015-02-12
+"Herrera, Odubel",cf,25,2,ext,PHI,5,30500000,2017,2021,c (2),6100000,Victor Tranquillo,John Middleton,Matt Klentak,2016-12-15
+"Hicks, Aaron",cf,29,5.041,ext,NYA,7,70000000,2019,2025,c,10000000,CAA,Hal Steinbrenner,Brian Cashman,2019-02-25
+"Hill, Aaron",2b,31,7.136,ext,ARI,3,35000000,2014,2016,,11666667,Legacy Agency,Ken Kendrick,Kevin Towers,2013-02-08
+"Hill, Aaron",2b,26,2.136,ext,TOR,4,12000000,2008,2011,c (3),3000000,Beverly Hills Sports,Edward Rogers,J.P. Ricciardi,2008-04-04
+"Hinske, Eric",3b,25,1,ext,TOR,5,14750000,2003,2007,,2950000,Icon Sports,Edward Rogers,J.P. Ricciardi,2003-03-15
+"Hoerner, Nico",2b,29,6.014,ext,CHN,6,141000000,2027,2032,,23500000,Apex,Tom Ricketts,Jed Hoyer,2026-03-29
+"Hoerner, Nico",2b,28,5.014,ext,CHN,3,35000000,2024,2026,,11666666,Apex,Tom Ricketts,Jed Hoyer,2023-03-27
+"Hoffman, Trevor",rhp,42,17,ext,MIL,1,8000000,2010,2010,,8000000,Beverly Hills Sports,Mark Attanasio,Doug Melvin,2009-10-05
+"Hoffman, Trevor",rhp,31,6,ext,SDN,4,32000000,1999,2002,c,8000000,Beverly Hills SC,John Moores,Kevin Towers,1999-03-08
+"Hoffman, Trevor",rhp,29,4,ext,SDN,3,8400000,1997,1999,,2800000,Rick Thurman,John Moores,Kevin Towers,1996-08-16
+"Holland, Derek",lhp-s,25,2.12,ext,TEX,5,28500000,2012,2016,c (2),5700000,Martini Sports,RDavis / BSimpson,Jon Daniels,2012-03-20
+"Hosmer, Eric",1b,25,2.146,ext,KCA,2,13900000,2015,2016,,6950000,Boras Corp.,David Glass,Dayton Moore,2015-02-18
+"Howard, Ryan",1b,30,4.145,ext,PHI,5,125000000,2012,2016,c,25000000,CAA,Bill Giles,"Ruben Amaro, Jr.",2010-04-26
+"Howard, Ryan",1b,29,3.145,ext,PHI,3,54000000,2009,2011,,18000000,Casey Close,Bill Giles,"Ruben Amaro, Jr.",2009-02-08
+"Howry, Bob",rhp,28,3.079,ext,CHA,2,3200000,2002,2003,c,1600000,Craig Landis,Jerry Reinsdorf,Ken Williams,2001-07-27
+"Hudson, Daniel",rhp,36,12.106,ext,LAN,1,7000000,2023,2023,c,7000000,Wasserman,Mark Walters,Andrew Friedman,2022-09-22
+"Hudson, Tim",rhp-s,34,10.119,ext,ATL,3,28000000,2010,2012,c,9333333,TWC Sports,Liberty Media,Frank Wren,2009-11-12
+"Hudson, Tim",rhp-s,29,5.119,ext,ATL,4,47000000,2006,2009,m,11750000,TWC Sports,Time Warner,John Schuerholz,2005-03-01
+"Hudson, Tim",rhp-s,25,1.119,ext,OAK,4,9100000,2001,2004,c,2275000,Paul Cohen,SSchott / KHofmann,Billy Beane,2000-08-16
+"Huff, Aubrey",1b,27,3.003,ext,TBA,3,14500000,2004,2006,,4833333,ACES,Vince Naimoli,Chuck LaMar,2004-01-08
+"Hughes, Phil",rhp-s,29,7.113,ext,MIN,5,58000000,2015,2019,,11600000,CAA,Jim Pohlad,Terry Ryan,2014-12-22
+"Hundley, Nick",c,28,3.088,ext,SDN,3,9000000,2012,2014,c,3000000,Athletes First,John Moores,Josh Byrnes,2012-03-20
+"Hunter, Torii",cf,27,3.135,ext,MIN,4,32000000,2003,2006,c,8000000,Reynolds Sports,Carl Pohlad,Terry Ryan,2003-01-17
+"Iannetta, Chris",c,30,6.013,ext,LAA,3,15550000,2013,2015,,5183333,Octagon,Arturo Moreno,Jerry Dipoto,2012-10-05
+"Iannetta, Chris",c,27,3.029,ext,COL,3,8350000,2010,2012,c,2783333,Octagon,Monfort brothers,Dan O'Dowd,2010-01-05
+"Ibanez, Raul",lf-dh,34,8.02,ext,SEA,2,11000000,2006,2007,,5500000,ACES,Nintendo America,Bill Bavasi,2006-02-28
+"Iglesias, Raisel",rhp-c,29,3.154,ext,CIN,3,24125000,2019,2021,,8041667,Magnus Sports,Bob Castellini,Dick Williams,2018-11-22
+"Inciarte, Ender",cf,26,2.157,ext,ATL,5,30525000,2017,2021,c,6105000,Octagon,Liberty Media,John Hart,2016-12-23
+"India, Jonathan",2b,27,3,ext,CIN,2,8800000,2024,2025,,4400000,Boras Corp.,Bob Castellini,NKrall / BMeador,2024-02-09
+"Infante, Omar",2b,30,8.12,ext,FLA,2,8000000,2012,2013,,4000000,Octagon,Jeffrey Loria,Larry Beinfest,2011-09-27
+"Infante, Omar",2b,27,5.12,ext,ATL,2,4325000,2009,2010,c,2162500,CSMG,Liberty Media,Frank Wren,2009-01-12
+"Inge, Brandon",3b,34,9.109,ext,DET,2,11500000,2011,2012,c,5750000,ACES,Mike Ilitch,Dave Dombrowski,2010-10-21
+"Inge, Brandon",3b,30,5.109,ext,DET,4,24000000,2007,2010,,6000000,ACES,Mike Ilitch,Dave Dombrowski,2006-12-08
+"Isringhausen, Jason",rhp,32,9.031,ext,STL,3,25750000,2005,2007,c,8583333,Beverly Hills SC,Bill DeWitt Jr.,Walt Jocketty,2005-02-26
+"Iwakuma, Hisashi",rhp-s,32,1,ext,SEA,2,14000000,2013,2014,c,7000000,Apex,Nintendo America,Jack Zduriencik,2012-11-03
+"Izturis, Cesar",ss,25,3.074,ext,LAN,3,9900000,2005,2007,c,3300000,Peter Greenberg,Frank McCourt,Paul DePodesta,2005-01-17
+"Izturis, Maicer",2b,29,5.038,ext,LAA,3,10000000,2010,2012,,3333333,Legacy Agency,Arturo Moreno,Tony Reagins,2010-01-25
+"Janssen, Casey",rhp,30,5.063,ext,TOR,2,5900000,2012,2013,c,2950000,Jim McDowell,Edward Rogers,Alex Anthopoulos,2012-02-13
+"Javier, Cristian",rhp-s,26,3,ext,HOU,5,64000000,2023,2027,,12800000,MVP Sports,Jim Crane,Dana Brown,2023-02-10
+"Jay, Jon",cf,30,4.134,ext,STL,2,10975000,2015,2016,,5487500,CAA,Bill DeWitt Jr.,John Mozeliak,2015-02-09
+"Jeter, Derek",ss,40,18.043,ext,NYA,1,14000000,2014,2014,,14000000,Casey Close,Hal Steinbrenner,Brian Cashman,2013-11-01
+"Jeter, Derek",ss,27,5.027,ext,NYA,10,189000000,2001,2010,,18900000,IMG,George Steinbrenner,Brian Cashman,2001-02-09
+"Jiménez, Eloy",rf,22,0,ext,CHA,6,43000000,2019,2024,c (2),7166667,Klutch Sports,Jerry Reinsdorf,Ken Williams / Rick Hahn,2019-03-22
+"Jimenez, Ubaldo",rhp-s,25,1.087,ext,COL,4,10000000,2009,2012,c (2),2500000,ISE,Monfort brothers,Dan O'Dowd,2009-01-27
+"Johjima, Kenji",c,32,2,ext,SEA,3,24000000,2009,2011,,8000000,Alan Nero,Nintendo America,Bill Bavasi,2008-04-25
+"Johnson, Chris",3b,30,4.144,ext,ATL,3,23500000,2015,2017,c,7833333,Excel,Liberty Media,Frank Wren,2014-05-01
+"Johnson, Jim",rhp,34,8.161,ext,ATL,2,10000000,2017,2018,,5000000,Moye Sports,Liberty Media,John Hart,2016-10-02
+"Johnson, Josh",rhp,26,4.026,ext,FLA,4,39000000,2010,2013,,9750000,Sosnick-Cobbe,Jeffrey Loria,Larry Beinfest,2010-01-21
+"Johnson, Nick",1b,27,5.041,ext,WAS,3,16500000,2007,2009,c,5500000,Rex Gary,MLB,Jim Bowden,2006-03-01
+"Johnson, Pierce",rhp,33,4.137,ext,ATL,2,14250000,2024,2025,c,7125000,Boggs & Assoc.,Braves Holdings,Alex Anthopoulos,2023-10-25
+"Johnson, Randy",lhp-s,43,18.02,ext,ARI,2,26000000,2007,2008,,13000000,"Alan Nero, Barry Meister",Ken Kendrick,Josh Byrnes,2007-01-07
+"Johnson, Randy",lhp-s,41,16.02,ext,NYA,2,32000000,2006,2007,,16000000,"Alan Nero, Barry Meister",George Steinbrenner,Brian Cashman,2005-01-07
+"Johnson, Randy",lhp-s,39,14.02,ext,ARI,2,33000000,2004,2005,,16500000,Alan Nero,Jerry Colangelo,Joe Garagiola Jr.,2003-03-26
+"Jones, Adam",cf,26,4.139,ext,BAL,6,85500000,2013,2018,,14250000,CAA,Peter Angelos,Dan Duquette,2012-05-26
+"Jones, Andruw",cf,25,5.047,ext,ATL,6,75000000,2002,2007,,12500000,Boras Corp.,Time Warner,John Schuerholz,2001-11-14
+"Jones, Chipper",3b,37,15.024,ext,ATL,3,42000000,2010,2012,c,14000000,Jet Sports,Liberty Media,Frank Wren,2009-03-31
+"Jones, Chipper",3b,34,12.024,ext,ATL,3,37000000,2006,2008,c,12333333,Jet Sports,Time Warner,John Schuerholz,2005-12-02
+"Jones, Chipper",3b,29,8.024,ext,ATL,6,90000000,2001,2006,c (2),15000000,Jet Sports,Time Warner,John Schuerholz,2000-08-17
+"Jones, Chipper",3b,24,2.024,ext,ATL,4,8250000,1996,1999,c,2062500,Jet Sports,Ted Turner,John Schuerholz,1996-02-16
+"Jones, Nate",rhp,30,4,ext,CHA,3,8000000,2016,2018,c (3),2666667,Joe Speed,Jerry Reinsdorf,"Ken Williams, Rick Hahn",2015-12-18
+"Kapler, Gabe",rf-cf,34,9.025,ext,TBA,1,1054000,2010,2010,,1054000,TWC Sports,Stuart Sternberg,Andrew Friedman,2009-10-27
+"Kapler, Gabe",rf-cf,25,2.009,ext,TEX,3,5600000,2001,2003,,1866667,Paul Cohen,Tom Hicks,Doug Melvin,2001-02-09
+"Karros, Eric",1b,32,8.036,ext,LAN,3,24000000,2001,2003,c,8000000,Jeff Moorad,Fox / Robert Daly,Kevin Malone,2000-02-18
+"Kazmir, Scott",lhp-s,24,3.042,ext,TBA,3,28500000,2009,2011,c,9500000,Legacy Agency,Stuart Sternberg,Andrew Friedman,2008-05-14
+"Kearns, Austin",rf,27,4.145,ext,WAS,3,17500000,2007,2009,,5833333,Hendricks Sports,Ted Lerner,Jim Bowden,2007-01-01
+"Keith, Colt",2b,22,0,ext,DET,6,28642500,2024,2029,c (3),5728400,Munger English,Chris Ilitch,SHarris / JGreenberg,2024-01-28
+"Keller, Mitch",rhp-s,28,4.026,ext,PIT,5,77000000,2024,2028,,15400000,Tidal Sports,Bob Nutting,Ben Cherington,2024-02-22
+"Kelly, Merrill",rhp-s,32,3,ext,ARI,2,18000000,2023,2024,c,9000000,Apex,Ken Kendrick,Mike Hazen,2022-04-01
+"Kemp, Matt",rf,27,5.049,ext,LAN,8,160000000,2012,2019,,20000000,Sports Partners,Frank McCourt,Ned Colletti,2011-11-14
+"Kemp, Matt",cf,25,3.049,ext,LAN,2,10950000,2010,2011,,5475000,Dave Stewart,Frank McCourt,Ned Colletti,2010-01-15
+"Kendall, Jason",c,27,5,ext,PIT,6,60000000,2002,2007,,10000000,Dan Lozano,Kevin McClatchy,Cam Bonifay,2000-11-16
+"Kendrick, Howie",2b-3b,28,5.091,ext,LAA,4,33500000,2012,2015,,8375000,Reynolds Sports,Arturo Moreno,Jerry Dipoto,2012-01-06
+"Kendrick, Kyle",rhp-s,27,3.159,ext,PHI,2,7500000,2012,2013,,3750000,ISE,Bill Giles,"Ruben Amaro, Jr.",2012-02-18
+"Kennedy, Adam",2b,28,4.045,ext,ANA,3,8850000,2004,2006,,2950000,Paul Cohen,Arturo Moreno,Bill Stoneman,2003-12-18
+"Kent, Jeff",2b,38,14,ext,LAN,1,11500000,2007,2007,c,11500000,Jeffrey Klein,Frank McCourt,Ned Colletti,2006-03-28
+"Kepler, Max",lf,26,2.152,ext,MIN,5,35000000,2019,2023,c,7000000,Apex,Jim Pohlad,Derek Falvey,2019-02-14
+"Kershaw, Clayton",lhp-s,31,10.015,ext,LAN,3,93000000,2019,2021,,31000000,Excel,Mark Walters,Andrew Friedman,2018-11-02
+"Kershaw, Clayton",lhp-s,26,5.105,ext,LAN,7,215000000,2014,2020,,30714286,Excel,Mark Walters,Ned Colletti,2014-01-17
+"Kershaw, Clayton",lhp-s,24,3.105,ext,LAN,2,19000000,2012,2013,,9500000,Hendricks Sports,Frank McCourt,Ned Colletti,2012-02-07
+"Kiermaier, Kevin",cf,27,2.131,ext,TBA,6,53500000,2017,2022,c,8916667,Reynolds Sports,Stuart Sternberg,Erik Neander,2017-03-20
+"Kimbrel, Craig",rhp,26,3.066,ext,ATL,4,42000000,2014,2017,c,10500000,SportsMeter,Liberty Media,Frank Wren,2014-02-16
+"King, Michael",rhp-s,30,5.004,ext,SDN,1,7750000,2025,2025,m,7750000,Excel,Seidler family,A.J. Preller,2025-01-31
+"Kingery, Scott",2b,24,0,ext,PHI,6,24000000,2018,2023,c (3),4000000,PSI Sports,John Middleton,Matt Klentak,2018-03-26
+"Kinley, Tyler",rhp,32,4.014,ext,COL,3,6250000,2023,2025,c,2083333,Paragon Sports,Monfort brothers,Bill Schmidt,2022-11-18
+"Kinsler, Ian",2b,30,6,ext,TEX,5,75000000,2013,2017,c,15000000,BBI Sports,RDavis / BSimpson,Jon Daniels,2012-04-10
+"Kinsler, Ian",2b,26,2,ext,TEX,5,22000000,2008,2012,c,4400000,Jay Franklin,Tom Hicks,Jon Daniels,2008-02-19
+"Kipnis, Jason",2b,27,2.069,ext,CLE,6,52500000,2014,2019,c,8750000,Beverly Hills Sports,Paul Dolan,Chris Antonetti,2014-04-04
+"Kirk, Alejandro",c,26,4.047,ext,TOR,5,58000000,2026,2030,,11600000,Vayner Sports,Edward Rogers,MShapiro/RAtkins,2025-03-22
+"Klesko, Ryan",1b,31,8.001,ext,SDN,3,26500000,2004,2006,,8833333,Joe Sambito,John Moores,Kevin Towers,2002-06-20
+"Klesko, Ryan",1b,29,6.078,ext,SDN,3,18750000,2002,2004,,6250000,Hendricks Sports,John Moores,Kevin Towers,2000-05-27
+"Kluber, Corey",rhp-s,29,2.074,ext,CLE,5,38500000,2015,2019,c (2),7700000,Wasserman,Paul Dolan,"Mark Shapiro, Chris Antonetti",2015-04-05
+"Konerko, Paul",1b,27,4.141,ext,CHA,3,23000000,2003,2005,,7666667,Craig Landis,Jerry Reinsdorf,Ken Williams,2002-11-15
+"Konerko, Paul",1b,25,2.141,ext,CHA,2,6100000,2001,2002,,3050000,Craig Landis,Jerry Reinsdorf,Ken Williams,2000-03-08
+"Koskie, Corey",3b,28,3.02,ext,MIN,3,6200000,2001,2003,c,2066667,SFX,Carl Pohlad,Terry Ryan,2001-03-15
+"Kotsay, Mark",cf,37,15.018,ext,SDN,1,1250000,2013,2013,,1250000,Greg Genske,John Moores,Josh Byrnes,2012-08-12
+"Kotsay, Mark",cf,31,7.018,ext,OAK,2,15000000,2007,2008,,7500000,Greg Genske,Lewis Wolff,Billy Beane,2005-07-01
+"Kotsay, Mark",cf,28,6.018,ext,SDN,3,16000000,2004,2006,,5333333,Greg Genske,John Moores,Kevin Towers,2002-07-02
+"Kotsay, Mark",cf,26,4.018,ext,SDN,2,7500000,2002,2003,,3750000,Jeff Moorad,John Moores,Kevin Towers,2002-01-10
+"Lackey, John",rhp-s,27,3.095,ext,LAA,3,17010000,2006,2008,c,5670000,Hillard Sports,Arturo Moreno,Bill Stoneman,2006-04-03
+"Lagares, Juan",cf,26,1.16,ext,NYN,4,23553696,2015,2018,,5888424,ACES,Fred Wilpon,Sandy Alderson,2015-04-02
+"Lankford, Ray",cf,31,7.001,ext,STL,5,34000000,1998,2002,c,6800000,Jeff Moorad,Bill Dewitt Jr.,Walt Jocketty,1998-04-15
+"Lankford, Ray",cf,29,5.001,ext,STL,3,12000000,1996,1998,c,4000000,Jeff Moorad,Bill Dewitt Jr.,Walt Jocketty,1996-01-01
+"Lara, Luis",cf,21,0,ext,MIL,7,31000000,2026,2032,c (3),4428571,,Mark Attanasio,Matt Arnold,2026-06-09
+"LaRue, Jason",c,32,5.15,ext,CIN,2,9100000,2006,2007,,4550000,,Bob Castellini,Dan O'Brien Jr.,2005-12-20
+"Lawrence, Brian",rhp,27,2,ext,SDN,4,8100000,2003,2006,c,2025000,Page Odle,John Moores,Kevin Towers,2003-03-08
+"League, Brandon",rhp,30,6.145,ext,LAN,3,22500000,2013,2015,v,7500000,ACES,Mark Walters,Ned Colletti,2012-10-30
+"LeBlanc, Wade",lhp,33,4.131,ext,SEA,1,2750000,2019,2019,c,2750000,Icon Sports,John Stanton,Jerry Dipoto,2018-07-03
+"Leclerc, Jose",rhp,25,2.038,ext,TEX,4,14750000,2019,2022,c (2),3687500,Munger English,RDavis / BSimpson,Jon Daniels,2019-03-06
+"LeCure, Sam",rhp,30,3.072,ext,CIN,2,3050000,2014,2015,,1525000,Beverly Hills Sports,Bob Castellini,Walt Jocketty,2014-01-17
+"Lee, Carlos",lf,28,4.15,ext,CHA,2,15000000,2004,2005,c,7500000,Adam Katz,Jerry Reinsdorf,Ken Williams,2003-12-19
+"Lee, Carlos",lf,26,2.15,ext,CHA,2,6900000,2002,2003,,3450000,Adam Katz,Jerry Reinsdorf,Ken Williams,2002-01-16
+"Lee, Cliff",lhp-s,27,2.1,ext,CLE,4,15000000,2006,2009,c,3750000,Darek Braunecker,Paul Dolan,Mark Shapiro,2006-08-01
+"Lee, Derrek",1b,30,7.125,ext,CHN,5,65000000,2006,2010,,13000000,Casey Close,Tribune Company,Jim Hendry,2006-04-10
+"Lee, Derrek",1b,28,5.125,ext,CHN,3,22500000,2004,2006,,7500000,Casey Close,Tribune Company,Jim Hendry,2004-02-28
+"LeMahieu, DJ",2b,27,3.128,ext,COL,2,7800000,2016,2017,,3900000,Excel,Monfort brothers,Jeff Bridich,2016-02-17
+"Lester, Jon",lhp-s,25,2.075,ext,BOS,5,30000000,2009,2013,c,6000000,ISE,John Henry,Theo Epstein,2009-03-15
+"Lewis, Colby",rhp-s,32,6.136,ext,TEX,1,2000000,2013,2013,,2000000,Octagon,RDavis / BSimpson,Jon Daniels,2012-09-17
+"Lidge, Brad",rhp,32,6.043,ext,PHI,3,37500000,2009,2011,c,12500000,Turner Gary,Bill Giles,Pat Gillick,2008-07-06
+"Ligtenberg, Kerry",rhp,30,3.048,ext,ATL,2,2900000,2001,2002,,1450000,Lonnie Cooper,Time Warner,John Schuerholz,2001-01-18
+"Lilly, Ted",lhp-s,35,10.102,ext,LAN,3,33000000,2011,2013,,11000000,Larry O'Brien,Frank McCourt,Ned Colletti,2010-10-20
+"Lilly, Ted",lhp-s,28,4.102,ext,TOR,2,5000000,2004,2005,,2500000,Larry O'Brien,Edward Rogers,J.P. Ricciardi,2004-01-14
+"Lima, Jose",rhp-s,27,4.1,ext,HOU,3,18750000,2000,2002,,6250000,Joel Klein,Drayton McLane,Gerry Hunsicker,2000-01-07
+"Lincecum, Tim",rhp-s,30,6.148,ext,SFN,2,35000000,2014,2015,,17500000,Beverly Hills Sports,Charles Johnson,Brian Sabean,2013-10-23
+"Lincecum, Tim",rhp-s,28,4.148,ext,SFN,2,40500000,2012,2013,,20250000,Beverly Hills Sports,Charles Johnson,Brian Sabean,2012-01-30
+"Linceum, Tim",rhp-s,26,2.148,ext,SFN,2,23000000,2010,2011,,11500000,Beverly Hills Sports,Bill Neukom,Brian Sabean,2010-02-12
+"Lind, Adam",1b-dh,26,2.085,ext,TOR,4,18000000,2010,2013,c (3),4500000,John Courtright,Edward Rogers,Alex Anthopoulos,2010-04-03
+"Lindor, Francisco",ss,27,5.113,ext,NYN,10,341000000,2022,2031,,34100000,SportsMeter,Steve Cohen,Sandy Alderson,2021-04-05
+"Lindstrom, Matt",rhp,31,4,ext,COL,2,6600000,2011,2012,c,3300000,Sparta Group,Monfort brothers,Dan O'Dowd,2011-01-17
+"Linebrink, Scott",rhp,28,3.016,ext,SDN,2,2275000,2005,2006,c,1137500,Joe Sambito,John Moores,Kevin Towers,2005-01-15
+"Lo Duca, Paul",c,33,5.042,ext,NYN,3,18000000,2005,2007,,6000000,Eddie Bane,Fred Wilpon,Omar Minaya,2005-01-13
+"Lo Duca, Paul",c,30,2.042,ext,LAN,3,7250000,2002,2004,,2416667,Eddie Bane,Fox / Robert Daly,Dan Evans,2002-02-26
+"Loaiza, Esteban",rhp,29,5.08,ext,TOR,2,10300000,2001,2002,,5150000,John Boggs,Interbrew SA,Gord Ash,2001-01-18
+"Lohse, Kyle",rhp-s,30,7.092,ext,STL,4,41000000,2009,2012,,10250000,Boras Corp.,Bill DeWitt Jr.,John Mozeliak,2008-09-29
+"Long, Terrance",cf,26,1.17,ext,OAK,4,11600000,2002,2005,,2900000,Casey Close,SSchott / KHofmann,Billy Beane,2001-08-15
+"Longoria, Evan",3b,27,4.17,ext,TBA,6,100000000,2017,2022,c,16666667,TWC Sports,Stuart Sternberg,Andrew Friedman,2012-11-26
+"Longoria, Evan",3b,22,0.006,ext,TBA,6,17500000,2008,2013,c (3),2916667,TWC Sports,Stuart Sternberg,Andrew Friedman,2008-04-18
+"Lopez, Javier",lhp,34,6.167,ext,SFN,2,8500000,2012,2013,,4250000,Meister Sports,Charles Johnson,Brian Sabean,2011-11-01
+"Lopez, Jose",2b,23,1.14,ext,SEA,4,6000000,2007,2010,c,1500000,World Sports,Nintendo America,Bill Bavasi,2007-04-01
+"Lopez, Pablo",rhp-s,27,4.093,ext,MIN,4,73500000,2024,2027,,18375000,Excel,Jim Pohlad,Derek Falvey,2023-04-17
+"López, Reynaldo",rhp,30,6.004,ext,ATL,3,30000000,2025,2027,c,10000000,CAA,Atl Braves Holdings,Alex Anthopoulos,2024-11-02
+"Lowe, Brandon",2b,24,0.058,ext,TBA,6,24000000,2019,2024,c (2),4000000,Bledsoe Agency,Stuart Sternberg,Erik Neander,2019-03-20
+"Lowell, Mike",3b,27,2.02,ext,FLA,3,6500000,2001,2003,,2166667,ACES,John Henry,Dave Dombrowski,2001-03-02
+"Lowry, Noah",lhp-s,25,1.113,ext,SFN,4,9250000,2006,2009,c,2312500,ABC Management,Peter McGowan,Brian Sabean,2006-04-01
+"Lucroy, Jonathan",c,26,1.136,ext,MIL,5,11000000,2012,2016,c,2200000,Sports One,Mark Attanasio,Doug Melvin,2012-03-26
+"Luebke, Cory",lhp,27,1.033,ext,SDN,4,12000000,2012,2015,,3000000,Meister Sports,John Moores,Josh Byrnes,2012-03-30
+"Lugo, Seth",rhp-s,35,8.082,ext,KCA,2,46000000,2026,2027,c,23000000,Ballengee,John Sherman,J.J. Picollo,2025-07-28
+"Luzardo, Jesus",lhp-s,28,5.165,ext,PHI,5,135000000,2027,2031,c,27000000,Roc Nation,John Middleton,DDombrowski / PMattingly,2026-03-09
+"Lynn, Lance",rhp-s,35,10.119,ext,CHA,2,38000000,2022,2023,,19000000,Excel,Jerry Reinsdorf,Ken Williams / Rick Hahn,2021-07-17
+"Lynn, Lance",rhp-s,28,3.119,ext,STL,3,22000000,2015,2017,,7333333,Headline Sports,Bill DeWitt Jr.,John Mozeliak,2015-01-15
+"MacDougal, Mike",rhp,30,2.16,ext,CHA,3,6450000,2007,2009,c,2150000,Rex Gary,Jerry Reinsdorf,Ken Williams,2006-12-08
+"Machado, Manny",3b,30,10.056,ext,SDN,11,350000000,2023,2033,,31818182,MVP Sports,Peter Seidler,A.J. Preller,2023-02-27
+"Maddux, Greg",rhp-s,31,11.021,ext,ATL,5,57500000,1998,2002,,11500000,Boras Corp.,Time Warner,John Schuerholz,1997-08-10
+"Madson, Ryan",rhp,28,5.027,ext,PHI,3,12000000,2009,2011,,4000000,Boras Corp.,Bill Giles,"Ruben Amaro, Jr.",2009-01-20
+"Maholm, Paul",lhp,27,3.037,ext,PIT,3,14500000,2009,2011,,4833333,Bo McKinnis,Bob Nutting,Neal Huntington,2009-01-30
+"Maile, Luke",c,33,6.148,ext,CIN,1,3500000,2024,2024,c,3500000,Meister Sports,Bob Castellini,NKrall / BMeador,2023-10-19
+"Maldonado, Martin",c,34,8.156,ext,HOU,1,5000000,2022,2022,c,5000000,MVP Sports,Jim Crane,James Click,2021-04-21
+"Maldonado, Martin",c,28,2.156,ext,MIL,2,1950000,2015,2016,,975000,Praver-Shapiro,Mark Attanasio,Doug Melvin,2015-01-15
+"Mancini, Trey",1b,30,5.015,ext,BAL,1,7750000,2022,2022,m,7750000,Frontline,John Angelos,Mike Elias,2022-04-02
+"Mantei, Matt",rhp,27,5.131,ext,ARI,4,22000000,2001,2004,,5500000,Bob Garber,Jerry Colangelo,Joe Garagiola Jr.,2001-01-18
+"Margot, Manuel",rf,28,6.012,ext,TBA,2,19000000,2023,2024,c,9500000,Wasserman,Stuart Sternberg,Erik Neander,2022-04-05
+"Markakis, Nick",rf,25,3,ext,BAL,6,66100000,2009,2014,m,11016667,TWC Sports,Peter Angelos,Andy MacPhail,2009-01-20
+"Marmol, Carlos",rhp,28,4.084,ext,CHN,3,20000000,2011,2013,,6666667,Barry Praver,Tom Ricketts,Jim Hendry,2011-02-14
+"Marquez, German",rhp-s,24,2.027,ext,COL,5,43000000,2019,2023,c,8600000,LA Sports Mgt,Monfort brothers,Jeff Bridich,2019-04-06
+"Márquez, Germán",rhp-s,29,7.027,ext,COL,2,20000000,2024,2025,,10000000,LA Sports Mgt,Monfort brothers,Bill Schmidt,2023-09-08
+"Marrero, Eli",c,29,4.001,ext,STL,2,4500000,2003,2004,,2250000,ACES,Bill DeWitt Jr.,Walt Jocketty,2002-12-16
+"Marshall, Sean",lhp,29,5.088,ext,CIN,3,16500000,2013,2015,,5500000,Meister Sports,Bob Castellini,Walt Jocketty,2012-02-27
+"Marshall, Sean",lhp,28,4.088,ext,CHN,2,4700000,2011,2012,,2350000,Meister Sports,Tom Ricketts,Jim Hendry,2011-01-18
+"Marte, Damaso",lhp,32,5.122,ext,PIT,2,5000000,2007,2008,c,2500000,ACES,Kevin McClatchy,Dave Littlefield,2006-11-01
+"Marte, Damaso",lhp,29,2.122,ext,CHA,3,4500000,2004,2006,c (2),1500000,Martin Arburua,Jerry Reinsdorf,Ken Williams,2004-03-02
+"Marte, Ketel",2b,30,8.162,ext,ARI,6,116500000,2025,2031,p,19416667,QC Sports,Ken Kendrick,Mike Hazen,2025-04-02
+"Marte, Ketel",2b,27,5.162,ext,ARI,5,76000000,2023,2027,c,15200000,Wasserman,Ken Kendrick,Mike Hazen,2022-03-27
+"Marte, Ketel",2b,23,1.162,ext,ARI,5,24000000,2018,2022,c (2),4800000,GSE,Ken Kendrick,Mike Hazen,2018-03-26
+"Marte, Starling",lf,25,1.07,ext,PIT,6,31000000,2014,2019,c (2),5166667,Legacy Agency,Bob Nutting,Neal Huntington,2014-03-27
+"Martinez, Carlos",rhp-s,25,3.073,ext,STL,5,51000000,2017,2021,c (2),10200000,Octagon,Bill DeWitt Jr.,John Mozeliak,2017-02-01
+"Martinez, JD",rf-dh,28,4.036,ext,DET,2,18500000,2016,2017,,9250000,RMG Baseball,Mike Ilitch,Al Avila,2016-02-08
+"Martinez, José",rf,30,2.027,ext,STL,2,3250000,2019,2020,,1625000,Octagon,Bill DeWitt Jr.,John Mozeliak,2019-02-23
+"Martinez, Justin",rhp,23,1.024,ext,ARI,5,18000000,2025,2029,c (2),3600000,Nova Sports,Ken Kendrick,Mike Hazen,2025-03-21
+"Martínez, Pedro",rhp-s,26,5.026,ext,BOS,6,75000000,1998,2003,c,12500000,Bronner & Gilhooley,Yawkey Trust,Dan Duquette,1997-12-09
+"Martinez, Victor",c-dh,26,1.114,ext,CLE,5,15500000,2005,2009,c,3100000,Octagon,Paul Dolan,Mark Shapiro,2005-04-05
+"Masset, Nick",rhp,30,4.146,ext,CIN,2,5500000,2012,2013,,2750000,Jet Sports,Bob Castellini,Walt Jocketty,2012-01-25
+"Mateo, Jorge",ss,30,5,ext,BAL,1,3550000,2025,2025,c,3550000,Quality Control Sports,David Rubenstein,Mike Elias,2025-01-28
+"Mathis, Jeff",c,30,6.012,ext,TOR,2,3000000,2013,2014,c,1500000,Jet Sports,Edward Rogers,Alex Anthopoulos,2012-08-15
+"Matsui, Hideki",lf-dh,32,3,ext,NYA,4,52000000,2006,2009,,13000000,Wasserman,George Steinbrenner,Brian Cashman,2005-11-16
+"Matzek, Tyler",lhp,32,4.019,ext,ATL,2,3100000,2023,2024,c,1550000,Rep 1,Liberty Media,Alex Anthopoulos,2022-11-18
+"Mauer, Joe",c,27,6,ext,MIN,8,184000000,2011,2018,,23000000,Shapiro Robinson,Jim Pohlad,Bill Smith,2010-03-22
+"Mauer, Joe",c,27,3,ext,MIN,4,33000000,2007,2010,,8250000,Shapiro Robinson,Jim Pohlad,Terry Ryan,2007-02-11
+"Maybin, Cameron",cf,25,2.073,ext,SDN,5,25000000,2012,2016,c,5000000,Brian Goldberg,John Moores,Josh Byrnes,2012-03-03
+"Mays, Joe",rhp,26,2.157,ext,MIN,4,20000000,2002,2005,c,5000000,Steve Hilliard,Carl Pohlad,Terry Ryan,2002-01-16
+"McCann, Brian",c,23,1.117,ext,ATL,6,26800000,2007,2012,c,4466667,Jet Sports,Liberty Media,John Schuerholz,2007-03-01
+"McClanahan, Shane",lhp-s,27,2.158,ext,TBA,2,7200000,2024,2025,,3600000,Vayner Sports,Stuart Sternberg,Erik Neander,2024-01-11
+"McCullers Jr., Lance",rhp-s,28,6.14,ext,HOU,5,85000000,2022,2026,,17000000,Boras Corp.,Jim Crane,James Click,2021-03-24
+"McCutchen, Andrew",cf,25,2.123,ext,PIT,6,51500000,2012,2017,c,8583333,Aegis Sports,Bob Nutting,Neal Huntington,2012-03-05
+"McDonald, John",ss-2b,33,6.118,ext,TOR,2,3800000,2008,2009,,1900000,ISE,Edward Rogers,J.P. Ricciardi,2007-09-11
+"McGonigle, Kevin",ss,21,0.02,ext,DET,8,150000000,2027,2034,,18750000,Vayner Sports,Chris Ilitch,SHarris / JGreenberg,
+"McGowan, Dustin",rhp,30,5.113,ext,TOR,3,4100000,2012,2014,c,1366667,ACES,Edward Rogers,Alex Anthopoulos,2012-03-26
+"McGwire, Mark",1b,34,11.047,ext,STL,3,28500000,1998,2000,m,9500000,Bob Cohen,Bill Dewitt Jr.,Walt Jocketty,1997-09-16
+"McLouth, Nate",cf,27,3.056,ext,PIT,3,15750000,2009,2011,c,5250000,Mike Nicotera,Bob Nutting,Neal Huntington,2009-02-17
+"McMahon, Ryan",3b,27,4.006,ext,COL,6,70000000,2022,2027,,11666667,Wasserman,Monfort brothers,Bill Schmidt,2022-03-21
+"McNeil, Jeff",2b,31,4.069,ext,NYN,4,50000000,2023,2026,c,12500000,Paragon,Steve Cohen,Billy Eppler,2023-01-27
+"Means, John",lhp-s,28,3.007,ext,BAL,2,5925000,2022,2023,,2962500,Wasserman,John Angelos,Mike Elias,2022-05-24
+"Merrifield, Whit",2b-rf,30,2.101,ext,KCA,4,16250000,2019,2022,c,4062500,L Warner Cos.,David Glass,Dayton Moore,2019-01-28
+"Merrill, Jackson",cf,22,1,ext,SDN,9,135000000,2026,2034,,15000000,KHG Sports,Peter Seidler,A.J. Preller,2025-04-02
+"Mesoraco, Devin",c,27,3.028,ext,CIN,4,28000000,2015,2018,,7000000,Jet Sports,Bob Castellini,Walt Jocketty,2015-01-26
+"Michaels, Jason",lf,31,5.016,ext,CLE,2,4000000,2007,2008,,2000000,Wasserman,Lawrence Dolan,Mark Shapiro,2007-01-01
+"Mikolas, Miles",rhp-s,34,6.037,ext,STL,3,55750000,2023,2025,,18583333,Octagon,Bill DeWitt Jr.,John Mozeliak,2023-03-24
+"Mikolas, Miles",rhp-s,30,2.037,ext,STL,4,68000000,2020,2023,,17000000,Octagon,Bill DeWitt Jr.,John Mozeliak,2019-02-26
+"Miley, Wade",lhp-s,28,3.044,ext,BOS,3,19250000,2015,2017,,6416667,O'Connell Sports,John Henry,Ben Cherington,2015-02-05
+"Millar, Kevin",1b,31,4.136,ext,BOS,2,5300000,2003,2004,c,2650000,ACES,John Henry,Theo Epstein,2003-02-21
+"Millar, Kevin",1b,29,2.015,ext,FLA,2,1600000,2001,2002,,800000,ACES,John Henry,Dave Dombrowski,2001-01-18
+"Miller, Trever",lhp,36,9.095,ext,STL,2,4000000,2010,2011,,2000000,Magnus Sports,Bill DeWitt Jr.,John Mozeliak,2009-09-01
+"Moehler, Brian",rhp-s,37,11.01,ext,HOU,1,2300000,2009,2009,m,2300000,,Drayton McLane,Ed Wade,2008-08-29
+"Molina, Bengie",c,26,1.077,ext,ANA,4,4250000,2001,2004,c,1062500,Alan Nero,Disney Co.,Bill Stoneman,2001-03-16
+"Molina, Jose",c,31,4.026,ext,ANA,2,2100000,2006,2007,,1050000,Alan Nero,Arturo Moreno,Bill Stoneman,2006-01-01
+"Molina, Yadier",c,39,17.123,ext,STL,1,10000000,2022,2022,,10000000,MDR Sports,Bill DeWitt Jr.,John Mozeliak,2021-08-24
+"Molina, Yadier",c,34,12.123,ext,STL,3,60000000,2018,2020,,20000000,MDR Sports,Bill DeWitt Jr.,John Mozeliak,2017-04-02
+"Molina, Yadier",c,29,7.123,ext,STL,5,75000000,2013,2017,c,15000000,MDR Sports,Bill DeWitt Jr.,John Mozeliak,2012-03-01
+"Molina, Yadier",c,25,3.123,ext,STL,4,15500000,2008,2011,c,3875000,MDR Sports,Bill DeWitt Jr.,John Mozeliak,2008-01-20
+"Moncada, Yoan",2b-3b,25,2.106,ext,CHA,5,70000000,2020,2024,,14000000,Movement  Group,Jerry Reinsdorf,Rick Hahn,2020-03-06
+"Mondesi, Raul",rf,27,3.155,ext,LAN,4,36000000,1998,2001,c (2),9000000,Jeff Moorad,Fox Entertainment,Fred Claire,1998-01-23
+"Montero, Miguel",c,29,5.031,ext,ARI,5,60000000,2013,2017,,12000000,Octagon,Ken Kendrick,Kevin Towers,2012-05-26
+"Moniak, Mickey",rf-lf,28,4.16,ext,COL,2,16250000,2027,2028,,8125000,Wasserman,Monfort brothers,P DePodesta / J Byrnes,2026-08-04
+"Moore, Dylan",3b,30,4,ext,SEA,3,8875000,2023,2025,,2958333,Rep 1,John Stanton,Jerry Dipoto,2023-02-01
+"Moore, Matt",lhp-s,23,0.017,ext,TBA,5,14000000,2012,2016,c (3),2800000,Sosnick-Cobbe,Stuart Sternberg,Andrew Friedman,2011-12-09
+"Mora, Melvin",3b,34,6.088,ext,BAL,3,25000000,2007,2009,c,8333333,Lon Babby,Peter Angelos,Mike Flanagan,2006-05-18
+"Mora, Melvin",3b,32,4.088,ext,BAL,3,10500000,2004,2006,,3500000,Lon Babby,Peter Angelos,"MFlanagan, JBeattie",2004-01-28
+"Morneau, Justin",1b,27,3.168,ext,MIN,6,80000000,2008,2013,,13333333,ISE,Carl Pohlad,Bill Smith,2008-01-25
+"Morrow, Brandon",rhp,27,4.091,ext,TOR,3,21000000,2012,2014,,7000000,Wasserman,Edward Rogers,Alex Anthopoulos,2012-01-24
+"Morse, Mike",1b-of,30,4.114,ext,WAS,2,10500000,2012,2013,,5250000,ACES,Ted Lerner,Mike Rizzo,2012-01-20
+"Morton, Charlie",rhp-s,39,14.01,ext,ATL,1,20000000,2023,2023,c,20000000,Jet Sports,Liberty Media,Alex Anthopoulos,2022-09-30
+"Morton, Charlie",rhp-s,38,13.01,ext,ATL,1,20000000,2022,2022,c,20000000,Jet Sports,Liberty Media,Alex Anthopoulos,2021-09-06
+"Morton, Charlie",rhp-s,30,5.01,ext,PIT,3,21000000,2014,2016,c,7000000,Jet Sports,Bob Nutting,Neal Huntington,2013-12-11
+"Moustakas, Mike",3b,27,4.111,ext,KCA,2,14300000,2016,2017,,7150000,Boras Corp.,David Glass,Dayton Moore,2016-02-11
+"Moyer, Jamie",lhp-s,44,17.126,ext,PHI,2,10500000,2007,2008,,5250000,self-represented,Bill Giles,Pat Gillick,2006-10-01
+"Mulder, Mark",lhp-s,23,1.167,ext,OAK,4,14200000,2002,2005,c,3550000,Gregg Clifton,SSchott / KHofmann,Billy Beane,2001-09-25
+"Muncy, Max",3b,35,9.027,ext,LAN,1,10000000,2027,2027,c,10000000,Hub Sports Mgmt,Mark Walters,AFriedman / BGomes,2026-02-12
+"Muncy, Max",3b,33,7.027,ext,LAN,2,24000000,2024,2025,c,12000000,Hub Sports,Mark Walters,AFriedman / BGomes,2023-11-02
+"Muncy, Max",3b,32,6.027,ext,LAN,1,14000000,2023,2023,c,14000000,Hub Sports,Mark Walters,Andrew Friedman,2022-08-22
+"Muncy, Max",3b,29,3.027,ext,LAN,3,26000000,2020,2022,,8666667,Hub Sports,Mark Walterss,Andrew Friedman,2020-02-06
+"Munoz, Andres",rhp,23,2.08,ext,SEA,4,7500000,2022,2025,c (3),1875000,Hector Gomez,John Stanton,Jerry Dipoto,2021-12-01
+"Murphy, Sean",c,28,3.029,ext,ATL,6,73000000,2023,2028,c,12166667,Rowley Sports,Liberty Media,Alex Anthopoulos,2022-12-27
+"Musgrove, Joe",rhp-s,30,6.063,ext,SDN,5,100000000,2023,2027,,20000000,Full Circle,Peter Seidler,A.J. Preller,2022-08-01
+"Myers, Brett",rhp-s,30,8.068,ext,HOU,2,23000000,2011,2012,c,11500000,Landis Baseball,Drayton McLane,Ed Wade,2010-08-01
+"Myers, Brett",rhp,26,4.068,ext,PHI,3,25750000,2007,2009,,8583333,Landis Baseball,Bill Giles,Pat Gillick,2007-02-01
+"Myers, Mike",rhp,31,4.06,ext,COL,3,4000000,2000,2002,,1333333,ACES,Jerry McMorris,Dan O'Dowd,1999-12-23
+"Myers, Wil",1b-rf,26,3.104,ext,SDN,6,83000000,2017,2022,c,13833333,CAA,Ron Fowler,A.J. Preller,2017-01-17
+"Nathan, Joe",rhp,33,6.12,ext,MIN,4,47000000,2008,2011,c,11750000,Pro Agents,Carl Pohlad,Bill Smith,2008-03-24
+"Nathan, Joe",rhp,31,4.12,ext,MIN,2,10000000,2006,2007,c,5000000,Dave Pepe,Carl Pohlad,Terry Ryan,2005-03-04
+"Nathan, Joe",rhp,29,2.12,ext,MIN,2,1640000,2004,2005,,820000,Dave Pepe,Carl Pohlad,Terry Ryan,2004-03-04
+"Neagle, Denny",lhp-s,28,5.072,ext,ATL,4,17500000,1997,2000,c,4375000,Barry Meister,Time Warner,John Schuerholz,1996-11-27
+"Nevin, Phil",3b,31,5.113,ext,SDN,4,34000000,2002,2005,,8500000,Barry Axelrod,John Moores,Kevin Towers,2001-11-16
+"Nido, Tomas",c,29,4.089,ext,NYN,2,3700000,2023,2024,,1850000,ACES,Steve Cohen,Billy Eppler,2023-01-18
+"Niese, Jon",lhp-s,25,2.107,ext,NYN,5,25500000,2012,2016,c (2),5100000,O'Connell Sports,Fred Wilpon,Sandy Alderson,2012-04-04
+"Nixon, Trot",rf,30,5.044,ext,BOS,3,19000000,2004,2006,,6333333,Ron Shapiro,John Henry,Theo Epstein,2004-01-01
+"Nola, Aaron",rhp-s,26,3.076,ext,PHI,4,45000000,2019,2022,c,11250000,Paragon,John Middleton,Matt Klentak,2019-02-13
+"Nolasco, Ricky",rhp-s,28,4.142,ext,FLA,3,26500000,2011,2013,,8833333,Sosnick-Cobbe,Jeffrey Loria,Larry Beinfest,2010-12-19
+"O'Hearn, Ryan",rf-1b,30,4.17,ext,BAL,1,3500000,2024,2024,c,3500000,Republik Sports,David Rubenstein,Mike Elias,2024-02-14
+"Oberg, Scott",rhp,30,4.063,ext,COL,3,13000000,2020,2022,c,4333333,Big League Mgt,Monfort brothers,Jeff Bridich,2019-12-10
+"Ochoa, Alex",rf-lf,29,5.03,ext,CIN,2,4350000,2001,2002,,2175000,Boras Corp.,Carl Lindner,Jim Bowden,2001-01-18
+"Odor, Rougned",ss,23,2.121,ext,TEX,6,49500000,2017,2022,c,8250000,Beverly Hills Sports,RDavis BSimpson,Jon Daniels,2017-03-30
+"Ohman, Will",lhp,29,4.04,ext,CHN,2,2500000,2007,2008,,1250000,Dan Horwits,Tribune Company,Jim Hendry,2007-01-16
+"Ohtani, Shohei",rhp-dh,26,3,ext,LAA,2,9000000,2021,2022,,4500000,CAA,Arturo Moreno,Perry Minasian,2021-02-08
+"Olson, Matt",1b,28,4.103,ext,ATL,8,168000000,2022,2029,c,21000000,Jet Sports,Liberty Media,Alex Anthopoulos,2022-03-15
+"Ordonez, Magglio",rf,28,4.032,ext,CHA,3,29500000,2002,2004,,9833333,Adam Katz,Jerry Reinsdorf,Ken Williams,2001-07-28
+"Ordonez, Rey",ss,29,4,ext,NYN,4,19000000,2000,2003,,4750000,Adam Katz,Doubleday / Wilpon,Steve Phillips,2000-01-25
+"Ortiz, David",1b-dh,38,15.048,ext,BOS,1,16000000,2015,2015,c (2),16000000,FCuza / DBentz,John Henry,Ben Cherington,2014-03-24
+"Ortiz, David",dh-1b,30,7.048,ext,BOS,4,52000000,2007,2010,c,13000000,FCuza / DBentz,John Henry,Theo Epstein,2006-04-01
+"Ortiz, David",1b-dh,28,5.048,ext,BOS,2,12500000,2005,2006,,6250000,FCuza / DBentz,John Henry,Theo Epstein,2004-05-01
+"Ortiz, Russ",rhp-s,26,1.125,ext,SFN,4,8700000,2000,2003,c,2175000,John Boggs,Peter McGowan,Brian Sabean,2000-02-20
+"Oswalt, Roy",rhp-s,29,5.149,ext,HOU,5,73000000,2007,2011,c,14600000,Robert Garber,Drayton McLane,Tim Purpura,2006-08-29
+"Oswalt, Roy",rhp-s,27,3.149,ext,HOU,2,16900000,2005,2006,,8450000,Bob Garber,Drayton McLane,Tim Purpura,2005-02-08
+"Otero, Dan",rhp,33,4.124,ext,CLE,2,2500000,2018,2019,c,1250000,ACES,Paul Dolan,Chris Antonetti,2017-12-05
+"Ottavino, Adam",rhp,30,4.087,ext,COL,3,10400000,2016,2018,,3466667,All Bases Covered,Monfort brothers,Jeff Bridich,2015-12-17
+"Overbay, Lyle",1b,30,4.026,ext,TOR,4,24000000,2007,2010,,6000000,Octagon,Edward Rogers,J.P. Ricciardi,2007-01-01
+"Ozuna, Pablo",2b,32,4.055,ext,CHA,1,1250000,2007,2007,c,1250000,,Jerry Reinsdorf,Ken Williams,2007-04-01
+"Paddack, Chris",rhp-s,27,4,ext,MIN,3,12525000,2023,2025,,4175000,Boras Corp.,Jim Pohlad,Derek Falvey,2023-01-13
+"Palmeiro, Orlando",lf-rf,32,4.1,ext,ANA,2,1900000,2001,2002,,950000,,Disney Co.,Bill Stoneman,2001-01-18
+"Paredes, Isaac",3b,27,4.16,ext,HOU,1,9350000,2026,2026,c,9350000,CAA,Jim Crane,Dana Brown,2026-02-04
+"Pasquantino, Vinnie",1b,28,3.101,ext,KCA,2,11100000,2026,2027,,5550000,Bledsoe Agency,John Sherman,J.J. Picollo,2026-01-30
+"Patterson, Danny",rhp,31,5.01,ext,DET,3,7000000,2002,2004,,2333333,,Mike Ilitch,Randy Smith,2002-01-16
+"Peavy, Jake",rhp-s,32,10.101,ext,CHA,2,29000000,2013,2014,,14500000,CAA,Jerry Reinsdorf,Ken Williams / Rick Hahn,2012-10-30
+"Peavy, Jake",rhp-s,27,5.101,ext,SDN,3,52000000,2008,2010,c,17333333,Barry Axelrod,John Moores,Kevin Towers,2007-12-12
+"Peavy, Jake",rhp-s,24,2.101,ext,SDN,4,14500000,2005,2008,c,3625000,CAA,John Moores,Kevin Towers,2005-03-05
+"Pedroia, Dustin",2b,29,7.041,ext,BOS,8,110000000,2014,2021,,13750000,ACES,John Henry,Ben Cherington,2013-07-24
+"Pedroia, Dustin",2b,25,3.041,ext,BOS,6,40500000,2009,2014,c,6750000,ACES,John Henry,Theo Epstein,2008-12-03
+"Pena, Carlos",1b,30,4.133,ext,TBA,3,24125000,2008,2010,,8041667,Boras Corp.,Stuart Sternberg,Andrew Friedman,2008-01-18
+"Pence, Hunter",rf,31,6.156,ext,SFN,5,90000000,2014,2018,,18000000,Beverly Hills Sports,Charles Johnson,Brian Sabean,2013-09-29
+"Penny, Brad",rhp-s,27,5,ext,LAN,3,25500000,2006,2008,c,8500000,Greg Genske,Frank McCourt,Paul DePodesta,2005-06-11
+"Peralta, David",lf,32,5.12,ext,ARI,3,22000000,2020,2022,,7333333,Onyx,Ken Kendrick,Mike Hazen,2020-01-13
+"Peralta, Freddy",rhp-s,24,1.09,ext,MIL,5,15500000,2020,2024,c (2),3100000,Rep 1,Mark Attanasio,David Stearns,2020-02-28
+"Peralta, Jhonny",2b,24,1.118,ext,CLE,5,13000000,2006,2010,c,2600000,Bill Rego,Paul Dolan,Mark Shapiro,2006-03-01
+"Peralta, Wily",rhp,30,5.049,ext,KCA,1,3250000,2019,2019,m,3250000,GSE,David Glass,Dayton Moore,2018-10-31
+"Percival, Troy",rhp,32,7,ext,ANA,2,16000000,2003,2004,,8000000,Paul Cohen,Disney Co.,Bill Stoneman,2002-02-04
+"Perdomo, Geraldo",ss,24,3.015,ext,ARI,4,45000000,2026,2030,c,11250000,Republik,Ken Kendrick,Mike Hazen,2025-02-17
+"Pérez, Martin",lhp-s,23,1.038,ext,TEX,4,12500000,2014,2017,c (3),3125000,OL Baseball Group,RDavis / BSimpson,Jon Daniels,2013-11-07
+"Perez, Roberto",c,28,2.083,ext,CLE,4,9000000,2017,2020,c (2),2250000,MDR Sports,Paul Dolan,"Chris Antonetti, Mike Chernoff",2017-04-02
+"Perez, Salvador",c,36,14.05,ext,KCA,2,25000000,2026,2027,,12500000,Beverly Hills SC,John Sherman,J.J. Picollo,2025-11-04
+"Perez, Salvador",c,31,9.05,ext,KCA,4,82000000,2022,2025,club,20500000,Beverly Hills Sports,John Sherman,Dayton Moore,2021-03-21
+"Perez, Salvador",c,26,4.05,ext,KCA,5,52500000,2017,2021,,10500000,Beverly Hills Sports,David Glass,Dayton Moore,2016-03-01
+"Perez, Salvador",c,22,0.05,ext,KCA,5,7000000,2012,2016,c (3),1400000,Morgan Group,David Glass,Dayton Moore,2012-02-27
+"Perkins, Glen",lhp,31,6.01,ext,MIN,4,22175000,2014,2017,c,5543750,ISE,Jim Pohlad,Terry Ryan,2014-03-14
+"Perkins, Glen",lhp-s,29,4.01,ext,MIN,3,10300000,2013,2015,c,3433333,SFX,Jim Pohlad,Terry Ryan,2012-03-08
+"Pfaadt, Brandon",rhp-s,26,1.097,ext,ARI,5,45000000,2026,2030,c m,9000000,Frontline,Ken Kendrick,Mike Hazen,2025-03-28
+"Phillips, Brandon",2b,31,7.022,ext,CIN,6,72500000,2012,2017,,12083333,ACES,Bob Castellini,Walt Jocketty,2012-04-10
+"Phillips, Brandon",2b,27,3.022,ext,CIN,4,27000000,2008,2011,c,6750000,ACES,Bob Castellini,Wayne Krivsky,2008-02-15
+"Pierre, Juan",cf,24,1.056,ext,COL,4,7500000,2002,2005,,1875000,ISE,Jerry McMorris,Dan O'Dowd,2002-03-13
+"Pierzynski, A.J.",c,31,8.1,ext,CHA,2,12500000,2009,2010,,6250000,Octagon,Jerry Reinsdorf,Ken Williams,2007-09-29
+"Pierzynski, A.J.",c,29,5.1,ext,CHA,3,15000000,2006,2008,,5000000,Octagon,Jerry Reinsdorf,Ken Williams,2005-12-19
+"Piñeiro, Joel",rhp,29,6.144,ext,STL,2,13000000,2008,2009,,6500000,Wasserman,Bill DeWitt Jr.,Walt Jocketty,2007-10-15
+"Piñeiro, Joel",rhp-s,25,2.144,ext,SEA,3,14500000,2004,2006,,4833333,Arn Tellum,Nintendo America,Bill Bavasi,2004-01-01
+"Piscotty, Stephen",rf,26,1.076,ext,STL,6,33500000,2017,2022,c,5583333,CAA,Bill DeWitt Jr.,John Mozeliak,2017-04-03
+"Podsednik, Scott",cf,29,2.05,ext,MIL,2,2750000,2005,2006,,1375000,Ken Felder,Wendy Selig-Prieb,Doug Melvin,2004-05-05
+"Polanco, Gregory",lf,25,2.103,ext,PIT,5,35000000,2017,2021,c (2),7000000,Beverly Hills Sports,Bob Nutting,Neal Huntington,2016-04-05
+"Polanco, Jorge",ss-3b,25,2.024,ext,MIN,5,25750000,2019,2023,c (2),5150000,Octagon,Jim Pohlad,Derek Falvey,2019-02-14
+"Polanco, Placido",2b-3b,30,7.064,ext,DET,4,18400000,2006,2009,,4600000,ACES,Mike Ilitch,Dave Dombrowski,2005-08-02
+"Pollock, AJ",cf,28,3.052,ext,ARI,2,10250000,2016,2017,,5125000,GSE,Ken Kendrick,Dave Stewart,2016-02-08
+"Porcello, Rick",rhp-s,26,6.17,ext,BOS,4,82500000,2015,2018,,20625000,Excel,John Henry,Ben Cherington,2015-04-07
+"Posada, Jorge",c,31,5.085,ext,NYA,5,51000000,2002,2006,c,10200000,Alan Nero,George Steinbrenner,Brian Cashman,2002-02-02
+"Posey, Buster",c,26,2.161,ext,SFN,9,167000000,2013,2020,c,18555556,CAA,Charles Johnson,Brian Sabean,2013-03-29
+"Prado, Martin",3b,33,9.105,ext,MIA,3,40000000,2017,2019,,13333333,GSE,Jeffrey Loria,Michael Hill,2016-10-05
+"Prado, Martin",3b,29,5.105,ext,ARI,4,40000000,2013,2016,,10000000,Legacy Agency,Ken Kendrick,Kevin Towers,2013-01-30
+"Pratt, Cooper",ss,21,0,ext,MIL,8,50750000,2026,2033,c (2),6343750,Boras Corp.,Mark Attanasio,Matt Arnold,
+"Pressly, Ryan",rhp,33,8.039,ext,CHN,2,30000000,2023,2024,m,15000000,Ballengee,Jim Crane,James Click,2022-04-05
+"Pressly, Ryan",rhp,30,5.039,ext,HOU,2,17500000,2019,2020,c / v,8750000,Ballengee,Jim Crane,Jeff Luhnow,2019-03-20
+"Pujols, Albert",1b,24,3,ext,STL,7,100000000,2004,2010,c,14285714,Beverly Hills SC,Bill DeWitt Jr.,Walt Jocketty,2004-02-01
+"Putz, JJ",rhp,36,9.022,ext,ARI,1,7000000,2013,2013,,7000000,Landis Baseball,Ken Kendrick,Kevin Towers,2013-01-14
+"Putz, JJ",rhp,30,3.022,ext,SEA,3,13100000,2007,2009,c,4366667,Landis Baseball,Nintendo America,Bill Bavasi,2007-01-17
+Quantrill. Paul,rhp,33,9.075,ext,LAN,3,9600000,2002,2004,p,3200000,,Rogers Communications,Gord Ash,2001-08-02
+"Quentin, Carlos",rf,30,6.065,ext,SDN,3,27000000,2013,2015,m,9000000,CAA,John Moores,Josh Byrnes,2012-07-22
+"Quintana, Jose",lhp-s,25,1.133,ext,CHA,5,21000000,2014,2018,c (2),4200000,MDR Sports,Jerry Reinsdorf,Rick Hahn,2014-03-24
+"Raburn, Ryan",lf-rf,33,6.109,ext,CLE,2,4850000,2014,2015,c,2425000,Career Sports,Paul Dolan,Chris Antonetti,2013-08-07
+"Raburn, Ryan",lf-rf,30,3.109,ext,DET,2,3400000,2011,2012,,1700000,Career Sports,Mike Ilitch,Dave Dombrowski,2011-01-12
+"Rafaela, Ceddane",cf,23,0.011,ext,BOS,8,50000000,2024,2031,c,6250000,MVP Sports,John Henry,Craig Breslow,2024-04-09
+"Ragans, Cole",lhp-s,27,2.029,ext,KCA,3,13250000,2025,2027,,4416667,Wasserman,John Sherman,J.J. Picollo,2025-02-14
+"Raleigh, Cal",c,28,3.085,ext,SEA,6,105000000,2025,2030,v,17500000,Excel,John Stanton,J Dipoto / J Hollander,2025-03-25
+"Ramirez, Alexei",ss,29,3,ext,CHA,4,32500000,2011,2015,c,8125000,Jaime Torres,Jerry Reinsdorf,Ken Williams,2011-02-03
+"Ramirez, Aramis",3b,27,5.111,ext,CHN,4,42000000,2005,2008,m v,10500000,Rep 1,Tribune Company,Jim Hendry,2005-04-05
+"Ramirez, Aramis",3b,24,2.111,ext,PIT,3,9500000,2002,2004,,3166667,Rep 1,Kevin McClatchy,Dave Littlefield,2002-02-27
+"Ramirez, Hanley",ss,24,2.014,ext,FLA,6,70000000,2009,2014,,11666667,Wasserman,Jeffrey Loria,Larry Beinfest,2008-05-17
+"Ramirez, Jose",3b,29,7.074,ext,CLE,7,141000000,2022,2028,,20142857,Republik,Paul Dolan,Chris Antonetti,2022-04-06
+"Ramirez, Jose",3b,24,2.074,ext,CLE,5,26000000,2017,2021,c (2),5200000,Beverly Hills Sports,Paul Dolan,Chris Antonetti,2017-03-25
+"Ramírez, José",3b,33,11.074,ext,CLE,7,175000000,2026,2032,,25000000,Republik Sports,Paul Dolan,CAntonetti / MChernoff,2026-01-26
+"Ramirez, Manny",lf-dh,24,2.033,ext,CLE,4,10100000,1996,1999,c,2525000,Jeff Moorad,Dick Jacobs,John Hart,1996-12-13
+"Randa, Joe",3b,32,5.114,ext,KCA,2,8500000,2002,2003,,4250000,Ron Shapiro,David Glass,Allard Baird,2001-03-17
+"Rasmussen, Drew",rhp-s,29,4.111,ext,TBA,2,8500000,2025,2026,c,4250000,Beverly Hills Sports,Stuart Silverman,Erik Neander,2025-01-07
+"Rea, Colin",rhp,36,6.057,ext,CHN,1,6500000,2026,2026,c,6500000,Sterling Sports,Tom Ricketts,Jed Hoyer,2025-11-06
+"Rea, Colin",rhp,34,4.057,ext,MIL,1,5000000,2024,2024,c,5000000,Sterling Sports,Mark Attanasio,Matt Arnold,2023-11-02
+"Refsnyder, Rob",2b-of,32,4.048,ext,BOS,1,2000000,2023,2023,c,2000000,PSI Sports,John Henry,Craig Breslow,2023-06-03
+"Remlinger, Mike",rhp,34,5.095,ext,ATL,2,3000000,2000,2001,c,1500000,Patrick Gibbons,Time Warner,John Schuerholz,2000-01-01
+"Renteria, Edgar",ss,23,3.143,ext,STL,4,20000000,2000,2003,c (2),5000000,Barry Meister,Bill DeWitt Jr.,Walt Jocketty,2000-02-01
+"Reyes, Dennys",lhp,30,8.039,ext,MIN,2,2000000,2007,2008,,1000000,Paragon Sports,Carl Pohlad,Terry Ryan,2006-08-24
+"Reyes, Jose",ss,24,3.111,ext,NYN,4,23250000,2007,2010,,5812500,Legacy Agency,Fred Wilpon,Omar Minaya,2006-08-01
+"Reynolds, Bryan",lf,28,3.163,ext,PIT,8,106750000,2023,2029,c,13343750,CAA,Bob Nutting,Ben Cherington,2023-04-25
+"Reynolds, Bryan",cf,27,2.163,ext,PIT,2,13500000,2022,2023,,6750000,CAA,Bob Nutting,Ben Cherington,2022-04-14
+"Reynolds, Mark",3b,26,2.138,ext,ARI,3,14500000,2010,2012,c,4833333,Jeff Borris,Ken Kendrick,Josh Byrnes,2010-03-15
+"Richard, Clayton",lhp-s,34,7.163,ext,SDN,2,6000000,2018,2019,,3000000,ISE,Ron Fowler,A.J. Preller,2017-09-20
+"Riley, Austin",3b,26,3.138,ext,ATL,10,212000000,2023,2032,c,21200000,ALIGND,Liberty Media,Alex Anthopoulos,2022-08-01
+"Rios, Alex",rf,27,2.13,ext,TOR,7,69835000,2008,2014,c,9976429,Wasserman,Edward Rogers,J.P. Ricciardi,2008-04-04
+"Ripken Jr., Cal",ss,37,16.057,ext,BAL,2,15100000,1998,1999,c,7550000,Ron Shapiro,Peter Angelos,Pat Gillick,1997-04-03
+"Ripken Jr., Cal",ss,32,11.057,ext,BAL,5,32500000,1993,1997,,6500000,Ron Shapiro,Eli Jacobs,Roland Hemond,1992-08-24
+"Rivera, Juan",lf-rf,27,3.047,ext,ANA,2,3275000,2006,2007,,1637500,Diego Bentz,Arturo Moreno,Bill Stoneman,2006-01-01
+"Rivera, Mariano",rhp,31,5.105,ext,NYA,4,39990000,2001,2004,,9997500,SFX,George Steinbrenner,Brian Cashman,2001-02-17
+"Rizzo, Anthony",1b,23,0.168,ext,CHN,7,41000000,2013,2019,c (2),5857143,Sports One,Tom Ricketts,Theo Epstein,2013-05-13
+"Robert, Luis",cf,22,0,ext,CHA,6,50000000,2020,2025,c (2),8333333,Boras Corp.,Jerry Reinsdorf,Ken Williams / Rick Hahn,2020-01-02
+"Roberts, Brian",2b,32,7.131,ext,BAL,4,40000000,2010,2013,,10000000,ISE,Peter Angelos,Andy MacPhail,2009-02-20
+"Roberts, Brian",2b,29,5.131,ext,BAL,2,14300000,2008,2009,,7150000,ISE,Peter Angelos,Mike Flanagan,2007-03-14
+"Robles, Victor",cf,27,5.17,ext,SEA,2,9750000,2025,2026,c,4875000,Republik,John Stanton,J Dipoto / J Hollander,2024-08-12
+"Rodriguez, Alex",ss,21,2.011,ext,SEA,4,10700000,1997,2000,,2675000,Boras Corp.,Nintendo America,Woody Woodward,1997-01-01
+"Rodriguez, Ivan",cf,26,6.109,ext,TEX,5,42000000,1998,2002,,8400000,Jeff Moorad,"GW Bush, E Rose",Doug Melvin,1997-07-31
+"Rodriguez, Julio",cf,22,1.15,ext,SEA,12,209300000,2023,2034,p,17441667,Octagon,John Stanton,Jerry Dipoto,2022-08-26
+"Rodriguez, Wandy",lhp-s,32,5.105,ext,HOU,3,34000000,2011,2013,c,11333333,Adam Katz,Drayton McLane,Ed Wade,2011-01-25
+"Rojas, Miguel",ss,34,8.043,ext,LAN,2,11000000,2023,2024,,5500000,Beverly Hills Sports,Mark Walters,Andrew Friedman,2023-02-04
+"Rojas, Miguel",ss,33,7.043,ext,MIA,2,10000000,2022,2023,,5000000,Beverly Hills Sports,Bruce Sherman,Kim Ng,2021-10-27
+"Rojas, Miguel",ss,31,5.043,ext,MIA,2,10250000,2020,2021,,5125000,Beverly Hills Sports,Bruce Sherman,Michael Hill,2019-09-18
+"Rolen, Scott",3b,35,14.06,ext,CIN,2,13000000,2011,2012,,6500000,ACES,Bob Castellini,Walt Jocketty,2009-12-19
+"Rolen, Scott",3b,28,10.06,ext,STL,8,90000000,2003,2010,,11250000,ACES,Bill DeWitt Jr.,Walt Jocketty,2002-09-26
+"Rolen, Scott",3b,23,1.06,ext,PHI,4,10000000,1998,2001,,2500000,ACES,Bill Giles,Ed Wade,1998-03-04
+"Rollins, Jimmy",ss,27,5.015,ext,PHI,5,40000000,2006,2010,c,8000000,Dan Lozano,Bill Giles,Ed Wade,2005-06-13
+"Romero, J.C.",lhp,29,4.055,ext,MIN,2,4000000,2005,2006,c,2000000,Dan Lozano,Carl Pohlad,Terry Ryan,2005-01-17
+"Romero, Ricky",lhp-s,26,1,ext,TOR,5,30100000,2011,2015,c,6020000,CAA,Edward Rogers,Alex Anthopoulos,2010-08-14
+"Rooker, Brent",dh-lf,30,3.059,ext,ATH,5,60000000,2025,2029,c,12000000,Bledsoe Agency,John Fisher,David Forst,2025-01-07
+"Rosado, José",lhp-s,25,3.1,ext,KCA,2,5500000,2000,2001,,2750000,Boras Corp.,Greater KC Foundation,Herk Robinson,1999-12-16
+"Ross, David",c,34,8.001,ext,ATL,2,3250000,2011,2012,,1625000,Sports One,Liberty Media,Frank Wren,2010-07-27
+"Ross, David",c,30,4.001,ext,CIN,2,5000000,2007,2008,c,2500000,Sports One,Bob Castellini,Walt Jocketty,2007-01-15
+"Rowand, Aaron",cf,27,3.065,ext,CHA,3,8500000,2005,2007,m,2833333,Craig Landis,Jerry Reinsdorf,Ken Williams,2005-01-15
+"Rueter, Kirk",lhp-s,31,7.001,ext,SFN,2,12000000,2004,2005,,6000000,CSMG,Peter McGowan,Brian Sabean,2002-03-13
+"Rueter, Kirk",lhp-s,30,6.124,ext,SFN,3,15600000,2001,2003,,5200000,CSMG,Peter McGowan,Brian Sabean,2000-08-10
+"Ruiz, Carlos",c,31,3.069,ext,PHI,3,8850000,2010,2012,c,2950000,Marc Kligman,Bill Giles,"Ruben Amaro, Jr.",2010-01-24
+"Ruiz, Keibert",c,24,1.064,ext,WAS,8,50000000,2023,2030,c (2),6250000,Octagon,Mark Lerner,Mike Rizzo,2023-03-10
+"Ryan, Brendan",ss,29,3.082,ext,SEA,2,2750000,2011,2012,,1375000,Wasserman,Nintendo America,Jack Zduriencik,2011-01-03
+"Ryan, Joe",rhp-s,30,4.033,ext,MIN,1,6200000,2026,2026,m,6200000,CAA,Tom Pohlad,Jeremy Zoll,2026-01-26
+"Sabathia, CC",lhp-s,31,11,ext,NYA,5,122000000,2012,2016,v,24400000,GSE,Hal Steinbrenner,Brian Cashman,2011-10-30
+"Sabathia, CC",lhp-s,24,4,ext,CLE,2,17750000,2007,2008,,8875000,GSE,Larry Dolan,Mark Shapiro,2005-04-27
+"Sabathia, CC",lhp-s,21,1,ext,CLE,4,9500000,2002,2005,c,2375000,CAA,Larry Dolan,Mark Shapiro,2002-02-23
+"Sale, Chris",lhp-s,37,15.061,ext,ATL,1,27000000,2027,2027,c,27000000,Wasserman,Atl Braves Holdings,Alex Anthopoulos,2026-02-24
+"Sale, Chris",lhp-s,35,13.061,ext,ATL,2,38000000,2024,2025,c,19000000,Wasserman,Atl Braves Holdings,Alex Anthopoulos,2024-01-04
+"Sale, Chris",lhp-s,35,13.061,ext,ATL,2,38000000,2024,2025,c,19000000,Wasserman,Braves Holdings,Alex Anthopoulos,2024-01-04
+"Sale, Chris",lhp-s,30,8.061,ext,BOS,5,145000000,2019,2023,,29000000,Jet Sports,John Henry,Dave Dombrowski,2019-03-23
+"Sale, Chris",lhp-s,24,2.061,ext,CHA,5,32500000,2013,2017,c (2),6500000,Jet Sports,Jerry Reinsdorf,Ken Williams / Rick Hahn,2013-03-07
+"Sanchez, Cristopher",lhp-s,29,3.083,ext,PHI,6,104000000,2027,2032,cond,17333333,Mato Sports,John Middleton,DDombrowski / PMattingly,2026-03-22
+"Sánchez, Cristopher",lhp-s,27,1.083,ext,PHI,4,22500000,2025,2028,c (2),5625000,Mato Sports,John Middleton,DDombrowski / SFuld,2024-06-22
+"Sanchez, Freddy",2b,33,7.052,ext,SFN,1,6000000,2011,2011,,6000000,Apex,Bill Neukom,Brian Sabean,2011-04-01
+"Sanchez, Freddy",2b,32,6.052,ext,SFN,2,12000000,2010,2011,,6000000,Apex,Bill Neukom,Brian Sabean,2009-10-30
+"Sanchez, Freddy",2b,30,4.052,ext,PIT,2,11000000,2008,2009,,5500000,Apex,Bob Nutting,Neal Huntington,2008-02-05
+"Sandberg, Ryne",2b,32,10.032,ext,CHN,4,28400000,1993,1996,c,7100000,Jim Turner,Tribune Company,Larry Himes,1992-03-03
+"Sandoval, Pablo",3b,25,3.047,ext,SFN,3,17150000,2012,2014,,5716667,Morgan Group,Charles Johnson,Brian Sabean,2012-01-17
+"Sano, Miguel",3b,27,4.066,ext,MIN,3,30000000,2020,2022,c,10000000,Cobb Eddy,Jim Pohlad,Derek Falvey,2020-01-14
+"Santana, Carlos",1b,26,1.115,ext,CLE,5,21001900,2012,2016,c,4200380,Wasserman,Lawrence Dolan,Chris Antonetti,2012-04-10
+"Santana, Ervin",rhp-s,26,3.104,ext,LAA,4,30000000,2009,2012,c,7500000,Octagon,Arturo Moreno,Tony Reagins,2009-02-14
+"Santana, Johan",lhp-s,29,7.122,ext,NYN,6,138000000,2008,2013,c,23000000,Peter Greenberg,Fred Wilpon,Omar Minaya,2008-02-02
+"Santana, Johan",lhp-s,26,4.122,ext,MIN,4,40000000,2005,2008,,10000000,Peter Greenberg,Carl Pohlad,Terry Ryan,2005-02-15
+"Santiago, Ramon",ss,30,5.095,ext,DET,2,2500000,2010,2011,,1250000,ACES,Mike Ilitch,Dave Dombrowski,2009-12-16
+"Santos, Sergio",rhp,28,2,ext,CHA,3,8250000,2012,2014,c (3),2750000,Paragon,Jerry Reinsdorf,Ken Williams,2011-09-30
+"Schilling, Curt",rhp-s,37,13.134,ext,BOS,3,37500000,2004,2006,c,12500000,Ed Hayes,John Henry,Theo Epstein,2003-11-30
+"Schilling, Curt",rhp-s,34,10.134,ext,ARI,3,32000000,2002,2004,,10666667,Ed Hayes,Jerry Colangelo,Joe Garagiola Jr.,2000-12-14
+"Schneider, Brian",c,29,4.125,ext,WAS,4,16000000,2006,2009,,4000000,Ron Shapiro,MLB,Jim Bowden,2006-01-17
+"Schoop, Jonathan",2b,30,8.027,ext,DET,2,15000000,2022,2023,,7500000,VC Sports,Mike Ilitch,Al Avila,2021-08-07
+"Schumaker, Skip",2b-3b,32,5.051,ext,STL,2,3000000,2012,2013,,1500000,CAA,Bill DeWitt Jr.,John Mozeliak,2011-12-13
+"Schumaker, Skip",2b,30,3.051,ext,STL,2,4700000,2010,2011,,2350000,CAA,Bill DeWitt Jr.,John Mozeliak,2010-02-08
+"Scutaro, Marco",2b,32,4.138,ext,TOR,2,2650000,2008,2009,,1325000,Legacy Agency,Edward Rogers,J.P. Ricciardi,2008-01-17
+"Seager, Kyle",3b,27,3.085,ext,SEA,7,100000000,2015,2021,c,14285714,Jet Sports,Nintendo America,Jack Zduriencik,2014-12-02
+"Segura, Jean",2b,27,4.065,ext,SEA,5,70000000,2018,2022,c,14000000,CAA,John Stanton,Jerry Dipoto,2017-06-06
+"Senzatela, Antonio",rhp-s,27,4.106,ext,COL,5,50500000,2022,2026,c,10100000,Republik Sports,Monfort brothers,Bill Schmidt,2021-10-05
+"Severino, Luis",rhp-s,25,2.17,ext,NYA,4,40000000,2019,2022,c,10000000,Rep 1,Hal Steinbrenner,Brian Cashman,2019-02-15
+"Sheets, Ben",rhp-s,26,4,ext,MIL,4,38500000,2005,2008,,9625000,Casey Close,Mark Attanasio,Doug Melvin,2005-04-15
+"Sheffield, Gary",rf,38,18.031,ext,DET,2,28000000,2007,2008,,14000000,Rufus Williams,Mike Ilitch,Dave Dombrowski,2006-11-10
+"Sheffield, Gary",rf,28,8.031,ext,FLA,6,61000000,1998,2003,c,10166667,Jim Neader,Wayne Huizenga,Dave Dombrowski,1997-04-03
+"Shields, James",rhp-s,26,1.125,ext,TBA,4,11000000,2008,2011,c (3),2750000,Page Odle,Stuart Sternberg,Andrew Friedman,2008-01-23
+"Shields, Scot",rhp,31,4.146,ext,LAA,3,14600000,2008,2010,,4866667,Landis Baseball,Arturo Moreno,Bill Stoneman,2007-03-01
+"Shoppach, Kelly",c,30,4.021,ext,TBA,2,5500000,2010,2011,c,2750000,Landis Baseball,Stuart Sternberg,Andrew Friedman,2010-01-05
+"Silva, Carlos",rhp,26,3,ext,MIN,2,5050000,2005,2006,c,2525000,Peter Greenberg,Carl Pohlad,Terry Ryan,2005-02-20
+"Simmons, Andrelton",ss,24,1.125,ext,ATL,7,58000000,2014,2020,,8285714,ISE,Liberty Media,Frank Wren,2014-02-20
+"Singleton, Jonathan",1b,22,0,ext,HOU,5,10000000,2014,2018,c (3),2000000,Apex,Jim Crane,Jeff Luhnow,2014-06-03
+"Sirotka, Mike",lhp,30,3.075,ext,CHA,2,6800000,2001,2002,,3400000,Hendricks Sports,Jerry Reinsdorf,Ron Schueler,2000-07-26
+"Sizemore, Grady",cf,32,9.045,ext,PHI,1,2000000,2015,2015,,2000000,CAA,Bill Giles,"Ruben Amaro, Jr.",2014-10-23
+"Sizemore, Grady",cf,25,1.056,ext,CLE,6,23450000,2006,2011,c,3908333,CAA,Paul Dolan,Mark Shapiro,2006-03-09
+"Smith, Seth",rf,32,6.119,ext,SDN,2,13000000,2015,2016,c,6500000,Aegis,Ron Fowler,Omar Minaya,2014-07-02
+"Smith, Will",cf,30,5.09,ext,LAN,10,140000000,2024,2033,,14000000,Apex,Mark Walters,AFriedman / BGomes,2024-03-27
+"Smoak, Justin",1b,30,6.077,ext,TOR,2,8500000,2017,2018,c,4250000,Bledsoe Agency,Edward Rogers,Mark Shapiro,2016-07-16
+"Smoltz, John",rhp-s,41,19.072,ext,ATL,1,14000000,2008,2008,c (2),14000000,Lonnie Cooper,Liberty Media,Frank Wren,2007-04-26
+"Smoltz, John",rhp-s,38,16.072,ext,ATL,2,20000000,2005,2006,c,10000000,Lonnie Cooper,Time Warner,John Schuerholz,2004-12-17
+"Smoltz, John",rhp,35,13.072,ext,ATL,3,30000000,2002,2004,c,10000000,Lonnie Cooper,Time Warner,John Schuerholz,2000-06-24
+"Smoltz, John",rhp-s,30,8.072,ext,ATL,4,31000000,1997,2000,c,7750000,Lonnie Cooper,Time Warner,John Schuerholz,1996-11-20
+"Snell, Blake",lhp-s,26,2.072,ext,TBA,5,50000000,2019,2023,,10000000,Apex,Stuart Sternberg,Erik Neander,2019-03-21
+"Snell, Ian",rhp,26,2.088,ext,PIT,3,8600000,2008,2010,c (2),2866667,Joe Sroba,Bob Nutting,Neal Huntington,2008-03-16
+"Snyder, Chris",c,28,4.047,ext,ARI,3,14250000,2009,2011,c,4750000,Lagardere,Ken Kendrick,Josh Byrnes,2008-12-30
+"Soderstrom, Tyler",lf,24,2.053,ext,ATH,7,86000000,2026,2032,c,12285714,Paragon,John Fisher,David Forst,2025-12-29
+"Solarte, Yangervis",3b,29,3,ext,SDN,2,7500000,2017,2018,c (2),3750000,Legacy Agency,Ron Fowler,A.J. Preller,2017-01-13
+"Soria, Joakim",rhp,24,1,ext,KCA,3,8750000,2009,2011,c (3),2916667,Oscar Suarez,David Glass,Dayton Moore,2008-05-17
+"Soriano, Rafael",rhp,28,5.057,ext,ATL,2,9000000,2008,2009,,4500000,Legacy Agency,Liberty Media,Frank Wren,2008-01-24
+"Span, Denard",cf,26,1.111,ext,MIN,5,16500000,2010,2014,c,3300000,CAA,Jim Pohlad,Bill Smith,2010-03-13
+"Springer, George",cf,28,3.166,ext,HOU,2,24000000,2018,2019,,12000000,Legacy,Jim Crane,Jeff Luhnow,2018-02-05
+"Springs, Jeffrey",lhp-s,30,4.055,ext,TBA,4,31000000,2023,2026,c,7750000,Alliance Sports,Stuart Sternberg,Erik Neander,2023-01-25
+"Stairs, Matt",lf-dh,38,10.077,ext,KCA,1,1350000,2006,2006,,1350000,Bob Garber,David Glass,Allard Baird,2005-09-09
+"Stairs, Matt",lf-dh,37,9.077,ext,KCA,1,1200000,2005,2005,,1200000,Bob Garber,David Glass,Allard Baird,2004-09-01
+"Stanton, Giancarlo",rf,25,4.118,ext,MIA,13,325000000,2015,2027,c,25000000,Wasserman,Jeffrey Loria,Michael Hill,2014-11-18
+"Stassi, Max",c,31,5.049,ext,LAA,3,18000000,2022,2024,,6000000,Wasserman,Arturo Moreno,Perry Minasian,2022-03-24
+"Stephan, Trevor",rhp,27,2,ext,CLE,4,10000000,2023,2026,c (2),2500000,PSI Sports,Paul Dolan,Chris Antonetti,2023-03-29
+"Stewart, Chris",c,34,5.091,ext,PIT,2,3000000,2016,2017,c,1500000,James Kuzmich,Bob Nutting,Neal Huntington,2016-01-19
+"Story, Trevor",ss,27,4,ext,COL,2,27500000,2020,2021,,13750000,Wasserman,Monfort brothers,Jeff Bridich,2020-01-30
+"Strahm, Matt",lhp,32,7.064,ext,PHI,1,7500000,2025,2025,c,7500000,ACES,John Middleton,DDombrowski / SFuld,2024-03-24
+"Strasburg, Stephen",rhp-s,27,5.118,ext,WAS,7,175000000,2016,2022,,25000000,Boras Corp.,Ted Lerner,Mike Rizzo,2016-05-10
+"Straw, Myles",cf,27,2.112,ext,CLE,5,25000000,2022,2026,c (2),5000000,Frontline,Paul Dolan,Chris Antonetti,2022-04-09
+"Street, Huston",rhp-s,32,11,ext,LAA,2,18000000,2016,2017,c,9000000,self-represented,Arturo Moreno,Jerry Dipoto,2015-05-13
+"Street, Huston",rhp,29,8,ext,SDN,2,14000000,2013,2014,c,7000000,Hendricks Sports,John Moores,Josh Byrnes,2012-07-29
+"Street, Huston",rhp-s,26,5,ext,COL,3,22500000,2010,2012,c,7500000,Hendricks Sports,Monfort brothers,Dan O'Dowd,2010-01-27
+"Strider, Spencer",rhp-s,24,1.003,ext,ATL,6,75000000,2023,2028,c,12500000,Frontline,Liberty Media,Alex Anthopoulos,2022-10-10
+"Strop, Pedro",rhp,32,5.156,ext,CHN,2,11850000,2017,2018,c,5925000,GSE,Tom Ricketts,Theo Epstein,2017-02-24
+"Suarez, Eugenio",3b,26,3.061,ext,CIN,7,66000000,2018,2024,c,9428571,Octagon,Bob Castellini,Dick Williams,2018-03-16
+"Sullivan, Scott",rhp,30,4.05,ext,CIN,3,6950000,2001,2003,c,2316667,John Courtright,Carl Lindner,Jim Bowden,2001-02-07
+"Suppan, Jeff",rhp-s,26,3.164,ext,KCA,2,6500000,2001,2002,,3250000,Scott Leventhal,David Glass,Allard Baird,2001-02-08
+"Suzuki, Ichiro",rf,42,15,ext,MIA,1,2000000,2016,2016,c,2000000,John Boggs,Jeffrey Loria,Michael Hill,2015-10-06
+"Suzuki, Ichiro",rf,34,7,ext,SEA,5,90000000,2008,2012,,18000000,Tony Attanasio,Nintendo America,Bill Bavasi,2007-07-13
+"Suzuki, Ichiro",rf,30,3,ext,SEA,4,44000000,2004,2007,,11000000,Tony Attanasio,Nintendo America,Bill Bavasi,2003-12-01
+"Suzuki, Kurt",c,34,10.113,ext,ATL,1,3500000,2018,2018,,3500000,MVP Sports,Liberty Media,John Hart,2017-09-23
+"Suzuki, Kurt",c,31,7.113,ext,MIN,2,12000000,2015,2016,v,6000000,MVP Sports,Jim Pohlad,Terry Ryan,2014-07-31
+"Suzuki, Kurt",c,27,3.113,ext,OAK,4,16250000,2011,2014,c,4062500,Beverly Hills Sports,,Billy Beane,2010-07-23
+"Sweeney, Mike",1b,28,5.066,ext,KCA,5,55000000,2003,2007,,11000000,ACES,David Glass,Allard Baird,2002-03-29
+"Sweeney, Mike",1b,26,3.066,ext,KCA,2,13000000,2001,2002,,6500000,ACES,David Glass,Allard Baird,2001-01-18
+"Sweeney, Ryan",cf,29,6.028,ext,CHN,2,3500000,2014,2015,c,1750000,Reynolds Sports,Tom Ricketts,"Theo Epstein, Jed Hoyer",2013-10-08
+"Swisher, Nick",rf,26,2.031,ext,OAK,5,26750000,2007,2011,c,5350000,Pro Star,Lewis Wolff,Billy Beane,2007-05-11
+"Tabata, Jose",rf,22,0.117,ext,PIT,6,15000000,2011,2016,c (3),2500000,ACES,Robert Nutting,Neal Huntington,2011-08-19
+"Tatis Jr., Fernando",ss,22,2,ext,SDN,14,340000000,2021,2034,,24285714,MVP Sports,Peter Seidler,A.J. Preller,2021-02-22
+"Tatis, Fernando",3b,25,2.065,ext,STL,4,14000000,2000,2003,c,3500000,Gary Goodman,Bill DeWitt Jr.,Walt Jocketty,2000-03-11
+"Taylor, Chris",lf-rf,29,4.037,ext,LAN,2,13400000,2020,2021,,6700000,Meister Sports,Mark Walters,Andrew Friedman,2020-02-07
+"Taylor, Michael A.",cf,31,6.129,ext,KCA,2,9000000,2022,2023,,4500000,ALIGND,John Sherman,Dayton Moore,2021-09-29
+"Teahen, Mark",3b-rf,28,4.155,ext,CHA,3,14000000,2010,2012,,4666667,CAA,Jerry Reinsdorf,Ken Williams,2009-12-08
+"Teheran, Julio",rhp-s,23,1.062,ext,ATL,6,32400000,2014,2019,c,5400000,ISE,Liberty Media,Frank Wren,2014-02-14
+"Teixeira, Mark",1b,26,3,ext,TEX,2,15400000,2006,2007,,7700000,Boras Corp.,Tom Hicks,Jon Daniels,2006-01-17
+"Tejada, Miguel",ss,26,2.033,ext,OAK,4,11300000,2000,2003,,2825000,SFX Pat Rooney,SSchott / KHofmann,Billy Beane,2000-01-01
+"Thomas, Frank",1b-dh,30,7.063,ext,CHA,4,31925000,1998,2001,cond (5),7981250,Robert Fraley,Jerry Reinsdorf,Ron Schueler,1997-09-30
+"Thomas, Frank",1b-dh,26,3.063,ext,CHA,4,29000000,1995,1998,c (2),7250000,Robert Fraley,Jerry Reinsdorf,Ron Schueler,1993-10-27
+"Thomas, Frank",1b,24,1.063,ext,CHA,3,4000000,1992,1994,,1333333,Robert Fraley,Jerry Reinsdorf,Ron Schueler,1992-03-12
+"Thome, Jim",1b,28,5.042,ext,CLE,3,24500000,1999,2001,c,8166667,Pat Rooney,Dick Jacobs,John Hart,1997-05-20
+"Thornton, Matt",lhp,34,6.129,ext,CHA,2,12000000,2012,2013,c,6000000,Adam Hubble,Jerry Reinsdorf,Ken Williams,2011-03-06
+"Thornton, Matt",lhp,30,2.129,ext,CHA,3,3250000,2007,2009,c (2),1083333,Adam Hubble,Jerry Reinsdorf,Ken Williams,2007-04-01
+"Tomlin, Josh",rhp,31,5.033,ext,CLE,2,5500000,2016,2017,c,2750000,SSG,Paul Dolan,Chris Antonetti,2016-01-26
+"Torrens, Luis",c,30,5.105,ext,NYN,2,11500000,2027,2028,,5750000,ISE,Steve Cohen,David Stearns,
+"Torres, Salomon",rhp,35,5.129,ext,PIT,2,6500000,2007,2008,c,3250000,,Kevin McClatchy,Dave Littlefield,2006-04-04
+"Tovar, Ezequiel",ss,22,1.014,ext,COL,7,63500000,2024,2030,c,9071429,Rimas Sports,Monfort brothers,Bill Schmidt,2024-03-24
+"Towers, Josh",rhp,29,2.15,ext,TOR,2,5200000,2006,2007,,2600000,,Edward Rogers,J.P. Ricciardi,2005-11-15
+"Tracy, Chad",3b-1b,33,7.116,ext,WAS,1,1000000,2013,2013,,1000000,Octagon,Ted Lerner,Mike Rizzo,2012-08-25
+"Tracy, Chad",1b,27,3,ext,ARI,3,13250000,2007,2009,c,4416667,CSMG,Ken Kendrick,Josh Byrnes,2006-05-01
+"Trammell, Bubba",rf,30,5,ext,SDN,3,8750000,2002,2004,c,2916667,Ed Hardison,John Moores,Kevin Towers,2001-09-05
+"Treinen, Blake",rhp,34,7.065,ext,LAN,1,8000000,2022,2022,,8000000,Apex,Mark Walters,Andrew Friedman,2022-05-22
+"Trevino, Jose",c,31,5.063,ext,CIN,3,14925000,2025,2027,c,4975000,Paragon Sports,Bob Castellini,NKrall / BMeador,2025-03-20
+"Trout, Mike",cf,27,7.07,ext,LAA,12,426500000,2019,2030,,35541667,Landis Baseball,Arturo Moreno,Billy Eppler,2019-03-20
+"Trout, Mike",cf,22,2.07,ext,LAA,6,144500000,2014,2019,,24083333,Landis Baseball,Arturo Moreno,Jerry Dipoto,2014-03-28
+"Tulowitzki, Troy",ss,26,4.033,ext,COL,10,157750000,2011,2020,,15775000,TWC Sports,Monfort brothers,Dan O'Dowd,2010-11-29
+"Tulowitzki, Troy",ss,23,1.033,ext,COL,6,31000000,2008,2013,c,5166667,TWC Sports,Monfort brothers,Dan O'Dowd,2008-01-23
+"Turnbow, Derrick",rhp,28,2.045,ext,MIL,3,6500000,2006,2008,,2166667,Rick Thurman,Mark Attanasio,Doug Melvin,2006-04-02
+"Turnbull, Spencer",rhp-s,29,3.02,ext,DET,2,3650000,2022,2023,,1825000,Boras Corp.,Chris Ilitch,Al Avila,2022-04-04
+"Uehara, Koji",rhp-c,40,6,ext,BOS,2,18000000,2015,2016,,9000000,Relativity,John Henry,Ben Cherington,2014-10-30
+"Uggla, Dan",2b,31,5,ext,ATL,5,62000000,2011,2015,,12400000,Lagardere,Liberty Media,Frank Wren,2011-01-05
+"Upton, Justin",rf,30,10.06,ext,LAA,5,106000000,2018,2022,,21200000,Reynolds Sports,Arturo Moreno,Billy Eppler,2017-11-02
+"Upton, Justin",rf,22,2.06,ext,ARI,6,51250000,2010,2015,,8541667,Reynolds Sports,Ken Kendrick,Josh Byrnes,2010-03-03
+"Uribe, Jose",ss,26,3.089,ext,CHA,3,9750000,2005,2007,c,3250000,,Jerry Reinsdorf,Ken Williams,2004-12-16
+"Utley, Chase",2b,35,10.027,ext,PHI,2,27000000,2014,2015,c (3),13500000,Wasserman,Bill Giles,"Ruben Amaro, Jr.",2013-08-08
+"Utley, Chase",2b,28,3.027,ext,PHI,7,85000000,2007,2013,,12142857,Wasserman,Bill Giles,Pat Gillick,2007-01-21
+"Varitek, Jason",c,30,4.02,ext,BOS,3,14900000,2002,2004,,4966667,Boras Corp.,John Henry,Dan Duquette,2001-04-06
+"Vasquez, Christian",c,27,3.031,ext,BOS,3,13550000,2019,2021,c,4516667,MDR Sports,John Henry,Dave Dombrowski,2018-03-24
+"Vazquez, Felipe",lhp,26,2.162,ext,PIT,4,22000000,2018,2021,c (2),5500000,Magnus Sports,Bob Nutting,Neal Huntington,2018-01-15
+"Vazquez, Javier",rhp-s,30,8.141,ext,CHA,3,34500000,2008,2010,,11500000,ACES,Jerry Reinsdorf,Ken Williams,2007-03-01
+"Vazquez, Javier",rhp-s,27,5.141,ext,NYA,4,45000000,2004,2007,,11250000,ACES,George Steinbrenner,Brian Cashman,2004-01-05
+"Venable, Will",rf-cf,31,4.155,ext,SDN,2,8500000,2014,2015,,4250000,Turner Gary,Ron Fowler,Josh Byrnes,2013-09-03
+"Ventura, Yordano",rhp-s,24,1.013,ext,KCA,5,23000000,2015,2019,c (2),4600000,Relativity,David Glass,Dayton Moore,2015-04-04
+"Verlander, Justin",rhp-s,36,13.002,ext,HOU,2,66000000,2020,2021,,33000000,ISE,Jim Crane,Jeff Luhnow,2019-03-24
+"Verlander, Justin",rhp-s,30,7.002,ext,DET,7,180000000,2013,2019,c,25714286,ISE,Mike Ilitch,Dave Dombrowski,2013-03-29
+"Verlander, Justin",rhp-s,27,4.002,ext,DET,5,80000000,2010,2014,,16000000,ISE,Mike Ilitch,Dave Dombrowski,2010-02-04
+"Victorino, Shane",cf,29,4.092,ext,PHI,3,22000000,2010,2012,,7333333,ACES,Bill Giles,"Ruben Amaro, Jr.",2010-01-21
+"Vidro, Jose",2b,26,3.042,ext,MON,4,19000000,2001,2004,,4750000,ACES,Jeffrey Loria,Jim Beattie,2001-01-18
+"Villarreal, Oscar",rhp,26,5,ext,HOU,2,2850000,2008,2009,c,1425000,,Drayton McLane,Ed Wade,2007-12-28
+"Vina, Fernando",2b,31,6.031,ext,STL,3,15000000,2000,2003,c,5000000,ACES,Bill DeWitt Jr.,Walt Jocketty,2000-05-04
+"Vizquel, Omar",ss-3b,44,21.13,ext,CHA,1,1750000,2011,2011,,1750000,Adam Katz,Jerry Reinsdorf,Ken Williams,2010-11-02
+"Vizquel, Omar",ss,34,11.13,ext,CLE,2,15000000,2003,2004,m,7500000,Wasserman,Dick Jacobs,John Hart,2001-02-28
+"Vizquel, Omar",ss,29,6.13,ext,CLE,6,18000000,1996,2001,c,3000000,Adam Katz,Dick Jacobs,John Hart,1995-12-13
+"Vogelsong, Ryan",rhp,34,5.02,ext,SFN,2,8300000,2012,2013,c,4150000,Dave Meier,Charles Johnson,Brian Sabean,2012-01-11
+"Votto, Joey",1b,28,4.027,ext,CIN,10,225000000,2014,2023,,22500000,MVP Sports,Bob Castellini,Walt Jocketty,2012-04-03
+"Votto, Joey",1b,27,3.027,ext,CIN,3,38000000,2011,2013,,12666667,MVP Sports,Bob Castellini,Walt Jocketty,2011-01-17
+"Wacha, Michael",rhp-s,34,11.062,ext,KCA,3,51000000,2025,2027,c,17000000,CAA,John Sherman,J.J. Picollo,2024-11-03
+"Wainwright, Adam",rhp-s,41,17.027,ext,STL,1,17500000,2023,2023,,17500000,Aegis,Bill DeWitt Jr.,John Mozeliak,2022-10-26
+"Wainwright, Adam",rhp-s,40,16.027,ext,STL,1,17500000,2022,2022,,17500000,Aegis,Bill DeWitt Jr.,John Mozeliak,2021-10-01
+"Wainwright, Adam",rhp-s,31,7.027,ext,STL,5,97500000,2014,2018,,19500000,Aegis,Bill DeWitt Jr.,John Mozeliak,2013-03-27
+"Wainwright, Adam",rhp-s,26,2.027,ext,STL,4,15000000,2008,2011,c,3750000,Jet Sports,Bill DeWitt Jr.,John Mozeliak,2008-03-20
+"Wakefield, Tim",rhp-s,43,16.006,ext,BOS,2,5000000,2010,2011,,2500000,Barry Meister,John Henry,Theo Epstein,2009-11-09
+"Wakefield, Tim",rhp-s,38,11.006,ext,BOS,1,4000000,2006,2006,c (recur),4000000,Barry Meister,John Henry,Theo Epstein,2005-04-01
+"Wakefield, Tim",rhp-s,36,9.006,ext,BOS,3,13020000,2003,2005,,4340000,,John Henry,Mike Port,2002-11-01
+"Wakefield, Tim",rhp-s,31,4.006,ext,BOS,3,12000000,1998,2000,c,4000000,Bill Moore,Yawkey Trust,Dan Duquette,1997-11-04
+"Walden, Jordan",rhp,27,4.043,ext,STL,2,6600000,2015,2016,,3300000,Gaylord Sports,Bill DeWitt Jr.,John Mozeliak,2014-12-23
+"Walker, Todd",2b,28,3.1,ext,COL,3,6550000,2001,2003,,2183333,Jeff Moorad,Jerry McMorris,Dan O'Dowd,2001-01-28
+"Weaver, Jeff",rhp,25,3,ext,DET,4,22000000,2002,2005,,5500000,Boras Corp.,Mike Ilitch,Randy Smith,2002-01-22
+"Weaver, Jered",rhp-s,29,5.129,ext,LAA,5,85000000,2012,2016,,17000000,Boras Corp.,Arturo Moreno,Tony Reagins,2011-08-22
+"Webb, Brandon",rhp-s,27,2.158,ext,ARI,4,19500000,2006,2009,c,4875000,MSM Sports,Ken Kendrick,Josh Byrnes,2006-01-13
+"Webb, Brandon",rhp-s,25,0.158,ext,ARI,3,3300000,2004,2006,c,1100000,MSM Sports,Jerry Colangelo,Joe Garagiola Jr.,2004-03-13
+"Webb, Logan",rhp-s,26,3.044,ext,SFN,5,90000000,2024,2028,,18000000,ACES,Greg Johnson,Farhan Zaidi,2023-04-15
+"Weeks, Rickie",2b,28,5.131,ext,MIL,5,50000000,2011,2015,v,10000000,Greg Genske,Mark Attanasio,Doug Melvin,2011-02-16
+"Wells, Vernon",cf,28,5.113,ext,TOR,7,126000000,2008,2014,,18000000,GSE,Edward Rogers,J.P. Ricciardi,2006-12-20
+"Wells, Vernon",cf,24,1.113,ext,TOR,5,14700000,2003,2007,,2940000,Brian Peters,Edward Rogers,J.P. Ricciardi,2003-03-14
+"Werth, Jayson",rf,30,5.102,ext,PHI,2,10000000,2009,2010,,5000000,Beverly Hills Sports,Bill Giles,"Ruben Amaro, Jr.",2009-01-21
+"Westbrook, Jake",rhp-s,30,6.144,ext,CLE,3,33000000,2008,2010,,11000000,Shapiro Robinson,Paul Dolan,Mark Shapiro,2007-04-01
+"Westbrook, Jake",rhp-s,27,3.144,ext,CLE,2,7500000,2005,2006,c,3750000,Ron Shapiro,Paul Dolan,Mark Shapiro,2005-01-25
+"Westbrook, Jake",rhp-s,35,11.144,ext,STL,1,9750000,2013,2013,m,9750000,Shapiro Robinson,Bill DeWitt Jr.,John Mozeliak,2012-08-22
+"Wetherholt, JJ",2b,23,0.105,ext,STL,8,112500000,2027,2034,,14062500,Covenant Spts Gp,Bill DeWitt Jr.,Chaim Bloom,
+"Wheeler, Dan",rhp,30,5.047,ext,TBA,3,10500000,2008,2010,c,3500000,Myles Shoda,Stuart Sternberg,Andrew Friedman,2008-04-01
+"Wheeler, Zack",rhp-s,34,10.098,ext,PHI,3,126000000,2025,2027,,42000000,Wasserman,John Middleton,DDombrowski / SFuld,2024-03-04
+"White, Evan",1b,24,0,ext,SEA,6,24000000,2020,2025,c (3),4000000,True Gravity,John Stanton,Jerry Dipoto,2019-11-25
+"Whitlock, Garrett",rhp-s,26,1,ext,BOS,4,18750000,2023,2026,,4687500,Kent Matthes,John Henry,Chaim Bloom,2022-04-10
+"Wickman, Bob",rhp,38,14.043,ext,ATL,1,6500000,2007,2007,,6500000,Dick Moss,Time Warner,John Schuerholz,2006-09-20
+"Williams, Jerome",rhp,33,6.043,ext,PHI,1,2500000,2015,2015,,2500000,Full Circle,Bill Giles,"Ruben Amaro, Jr.",2014-10-21
+"Williams, Matt",3b,28,7.001,ext,SFN,5,30750000,1994,1996,,6150000,Jeff Moorad,Peter McGowan,Bob Quinn,1993-12-28
+"Willis, Dontrelle",lhp-s,26,4.073,ext,DET,3,29000000,2008,2010,,9666667,Sosnick-Cobbe,Mike Ilitch,Dave Dombrowski,2007-12-20
+"Wilson, Brian",rhp,28,2.169,ext,SFN,2,15000000,2010,2011,,7500000,Beverly Hills Sports,Bill Neukom,Brian Sabean,2010-03-26
+"Wilson, Jack",ss,32,8.147,ext,SEA,2,10000000,2010,2011,,5000000,PSI Sports,Nintendo America,Jack Zduriencik,2009-11-13
+"Wilson, Jack",ss,28,5.147,ext,PIT,3,20200000,2007,2009,c,6733333,PSI Sports,Kevin McClatchy,Dave Littlefield,2006-02-26
+"Wilson, Jack",ss,27,3.147,ext,PIT,2,8000000,2005,2006,,4000000,PSI Sports,Kevin McClatchy,Dave Littlefield,2005-01-10
+"Wilson, Jacob",ss,24,1.073,ext,ATH,7,70000000,2026,2032,c,10000000,PSI Sports,John Fisher,David Forst,2026-02-02
+"Wilson, Preston",cf,26,2.038,ext,FLA,5,32000000,2001,2005,,6400000,Robert Bry,John Henry,Dave Dombrowski,2001-03-11
+"Wilson, Vance",c,34,7.028,ext,DET,2,1900000,2007,2008,,950000,,Mike Ilitch,Dave Dombrowski,2006-08-17
+"Winn, Randy",cf-rf,32,7,ext,SFN,3,23250000,2007,2009,,7750000,Craig Landis,Peter McGowan,Brian Sabean,2006-02-28
+"Winn, Randy",cf-rf,30,5,ext,SEA,2,7250000,2004,2005,m,3625000,Craig Landis,Nintendo America,Bill Bavasi,2003-12-10
+"Witt Jr., Bobby",ss,24,2,ext,KCA,11,288777777,2024,2034,p/c,26252525,Octagon,John Sherman,J.J. Picollo,2024-02-05
+"Wolf, Randy",lhp-s,26,3.115,ext,PHI,4,22500000,2003,2006,,5625000,Arn Tellum,Bill Giles,Ed Wade,2002-12-12
+"Wong, Kolten",2b,25,2.045,ext,STL,5,25500000,2016,2020,c,5100000,PSI Sports,Bill DeWitt Jr.,John Mozeliak,2016-03-02
+"Wood, Kerry",rhp,27,5.169,ext,CHN,3,32500000,2004,2006,m,10833333,"SFX (Greg Landry, Pat Rooney)",Tribune Company,Jim Hendry,2004-02-27
+"Wright, David",3b,30,8.075,ext,NYN,8,138000000,2013,2020,,17250000,ACES,Fred Wilpon,Sandy Alderson,2012-12-03
+"Wright, David",3b,24,2.075,ext,NYN,6,55000000,2007,2012,c,9166667,ACES,Fred Wilpon,Omar Minaya,2006-08-06
+"Wuertz, Michael",rhp,31,4.139,ext,OAK,2,5250000,2010,2011,c,2625000,Beverly Hills Sports,Lewis Wolff,Billy Beane,2010-01-29
+"Yelich, Christian",lf,28,6.069,ext,MIL,9,215000000,2020,2028,m,23888889,Paragon,Mark Attanasio,David Stearns,2020-03-06
+"Yelich, Christian",lf,23,1.069,ext,MIA,7,49570000,2015,2020,c,7081429,Paragon,Jeffrey Loria,Michael Hill,2015-03-22
+"Youkilis, Kevin",3b-1b,30,4.093,ext,BOS,4,41250000,2009,2012,c,10312500,Pro Star,John Henry,Theo Epstein,2009-01-16
+"Young, Chris",cf,25,2.045,ext,ARI,5,28000000,2009,2013,c,5600000,CAA,Ken Kendrick,Josh Byrnes,2008-04-08
+"Young, Chris",lhp-s,28,3.041,ext,SDN,4,14500000,2007,2010,c,3625000,Lon Babby,John Moores,Kevin Towers,2007-04-01
+"Young, Chris",rhp-s,26,0.041,ext,TEX,3,1500000,2005,2007,c,500000,Lon Babby,Tom Hicks,John Hart,2004-11-18
+"Young, Dmitri",1b-dh,28,5.001,ext,DET,4,28500000,2002,2005,,7125000,Adam Katz,Mike Ilitch,Randy Smith,2002-02-13
+"Young, Michael",2b,30,5.134,ext,TEX,5,80000000,2009,2013,,16000000,MVP Sports,Tom Hicks,Jon Daniels,2007-03-01
+"Young, Michael",2b,27,2.134,ext,TEX,4,10500000,2004,2007,c,2625000,Dan Lozano,Tom Hicks,John Hart,2004-04-01
+"Zambrano, Carlos",rhp-s,27,6.042,ext,CHN,5,91500000,2008,2012,c,18300000,Barry Praver,Tribune Company,Jim Hendry,2007-08-17
+"Ziegler, Brad",rhp,34,5.122,ext,ARI,2,10500000,2014,2015,c,5250000,Icon,Ken Kendrick,Kevin Towers,2013-12-20
+"Zimmermann, Jordan",rhp-s,28,4.154,ext,WAS,2,24000000,2014,2015,,12000000,Relativity,Ted Lerner,Mike Rizzo,2014-01-17
+"Zimmerman, Ryan",3b,29,8.032,ext,WAS,6,100000000,2014,2019,c,16666667,CAA,Ted Lerner,Mike Rizzo,2012-02-26
+"Zimmerman, Ryan",3b,24,3.032,ext,WAS,5,45000000,2009,2013,,9000000,CAA,Ted Lerner,Mike Rizzo,2009-04-20
+"Zito, Barry",lhp-s,24,1.072,ext,OAK,4,9300000,2002,2005,c,2325000,Boras Corp.,SSchott / KHofmann,Billy Beane,2002-05-01
+"Zobrist, Ben",2b-rf,29,2.134,ext,TBA,4,18000000,2010,2013,c (2),4500000,Octagon,Stuart Sternberg,Andrew Friedman,2010-04-22

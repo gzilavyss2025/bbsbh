@@ -84,3 +84,12 @@ undefined/
 # copied data, so there is nothing here worth committing.
 .scratch/research.duckdb
 .scratch/research.duckdb.wal
+
+# contract-identity pipeline: the full statsapi season-players response (one
+# call per season, ~15 MB across 1991-2026) rebuilds in a couple of minutes
+# via `node scripts/gen-contracts-season-players.mjs`. Only the trimmed
+# public/data/contracts-history/season-players/*.json copy is worth
+# committing. The admin override snapshot is a live Redis read, re-taken
+# every research-db.mjs run.
+.scratch/contracts/season-players-raw/
+.scratch/contracts/identity-overrides-snapshot.json
