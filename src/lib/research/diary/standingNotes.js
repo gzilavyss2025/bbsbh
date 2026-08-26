@@ -53,6 +53,11 @@ export const TRAPS = [
     body: 'The salary and contract files are current-season snapshots looking forward; attendance is this season only. So the most obvious alternative explanation for almost any club-level finding here — that it is really about money — cannot be tested with what is on hand. Every entry carrying that gap says so.',
   },
   {
+    id: 'check-the-database-before-re-deriving',
+    title: 'A panel worth joining here may already be sitting in the research database',
+    body: 'scripts/research-db.mjs registers every cached research JSON panel from both diaries — this one and the Contender Diary\'s — as a read-only DuckDB view over the JSON, queryable with plain SQL, no re-derivation and no fresh statsapi pull. Before a spike re-derives a join across panels, or re-pulls statsapi for a panel that might already exist, check the catalog in docs/agents/research-database.md.',
+  },
+  {
     id: 'zero-reads-as-missing',
     title: 'A perfect zero can look exactly like missing data',
     body: 'A rate stat gated on "greater than zero" to catch missing lines also catches a real 0.00 ERA — a short, dominant stint, not an empty one — and silently drops the man who earned it. It happened here to twenty-three of a study\'s best short outings, all quietly read as though they had never been recorded. The fix is a null check, not a floor: ask whether the value exists, never whether it is positive.',

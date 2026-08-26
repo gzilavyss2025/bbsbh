@@ -72,6 +72,9 @@ try {
         'know what a p-value is; the formal numbers go in the entry\'s ' +
         '`technical` list. If this was a refactor, a rerun with no change in ' +
         'conclusion, or a typo, no entry is needed — say so and move on. ' +
+        'Before you pull new data or build a new join, check the catalog in ' +
+        'docs/agents/research-database.md (scripts/research-db.mjs) for a panel ' +
+        'that may already cover it. ' +
         'Full instructions: docs/agents/research-diary.md\n',
     )
   }
