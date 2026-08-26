@@ -161,6 +161,12 @@ reference examples) rather than inventing a new one:
   built once against `public/data/postseason-history.json` + per-game
   boxscores. Any factor spike that touches trades, acquisitions, or
   situational roster use can join against it rather than re-deriving it.
+- **A spike that joins more than one factor's panel should query the shared
+  database, not hand-roll a new join script.** `scripts/research-db.mjs`
+  registers every cached research panel from both diaries as a read-only
+  DuckDB view over its JSON file (`docs/agents/research-database.md`). Reuse
+  an existing view for the join. Add a new one to the catalog when a spike
+  produces a panel worth keeping.
 - **State statistical significance in win-shares-of-doubt terms in the
   entry text**, formal numbers folded behind the `technical` disclosure — the
   two rules in `docs/agents/contender-diary.md` govern voice; this document
@@ -225,15 +231,31 @@ land or a factor turns out to need more groundwork than expected:
    homegrown share, star diversity and postseason experience. Whether those are
    four signals or one underlying "this is a good, established club" trait is
    now the highest-value open question in the program, and it needs no new data
-   pull — all four panels are built and on disk.
+   pull — the four panels sit in the shared DuckDB layer
+   (`scripts/research-db.mjs`, `docs/agents/research-database.md`) and this
+   spike can join them with one real SQL query instead of four separate JSON
+   reads: `team_success_roster_age` for age,
+   `level_benchmarks_homegrown_panel` for homegrown share,
+   `team_success_postseason_experience` for postseason experience, and
+   `team_success_outcome_ladder` for the ladder outcome each factor
+   regresses against. Star diversity has no panel of its own to join — it
+   is computed from other views already in the catalog
+   (`team_success_roster_age_cache`, `public_war_history`,
+   `public_all_star_rosters`, `public_awards_history`), so this spike
+   recomputes it from those rather than reading a fifth view.
 7. **Trades / acquisition** — two partially-overlapping sources
    (`trade-deadline/`, `team-transactions/`) need reconciling into one
-   team-season "value acquired in-season" number first.
+   team-season "value acquired in-season" number first. Once the spike builds
+   that panel, register it in the shared catalog
+   (`docs/agents/research-database.md`) so a later spike can find it, instead
+   of leaving it as a standalone script.
 8. **Injuries** — needs a new IL-stint sweep off the transactions endpoint;
-   heavier lift than the above.
+   heavier lift than the above. Register the resulting panel in the shared
+   catalog (`docs/agents/research-database.md`) once it exists, the same way.
 9. **Situational rosters / roster construction** — richest data
    (`team-records/`) but the least obvious single number to regress; likely
-   needs its own sub-framework before a spike can run.
+   needs its own sub-framework before a spike can run. Register any panel it
+   produces in the shared catalog (`docs/agents/research-database.md`) too.
 10. **Payroll (adjusted)** — blocked until a historical payroll source is
    found; revisit if/when one turns up rather than approximating with
    current-season salary data pretending to be historical.

@@ -46,7 +46,7 @@ function Shell({ children }) {
 
 const COUNT_WORDS = [
   'No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
-  'Ten', 'Eleven', 'Twelve',
+  'Ten', 'Eleven', 'Twelve', 'Thirteen',
 ]
 function countWord(n) {
   return COUNT_WORDS[n] ?? String(n)
