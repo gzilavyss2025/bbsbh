@@ -8,6 +8,9 @@ reading of the whole stack.
 It exists because that research produced long technical documents in `docs/`
 and no way for the person who commissioned it to read the answers. The
 documents keep the method. The diary keeps the findings, in English.
+Before a spike re-pulls statsapi for a panel, check
+`docs/agents/research-database.md` — the panel may already exist as a
+queryable view.
 
 The first four entries ask about **clubs** — how long a stay at a level takes,
 whether some organizations move men faster, whether leaning on your own players

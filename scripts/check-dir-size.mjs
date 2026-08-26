@@ -547,7 +547,12 @@ const BUDGETS = {
   // diaries (standing instruction, 2026-08-25). A flat lint guard exactly like
   // check-caps.mjs and check-typography.mjs beside it, and it runs on import,
   // so scripts/lib/ is not open to it either.
-  scripts: 99,
+  // +1 for research-db.mjs — the local DuckDB query layer over the research
+  // diaries' cached panels (research tool, never shipped). A standalone CLI
+  // entry point with a dispatch at the bottom, not a helper another script
+  // imports, so scripts/lib/ is not open to it; stays flat with every other
+  // top-level script here.
+  scripts: 100,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

@@ -69,6 +69,7 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@duckdb/node-api": "^1.5.5-r.4",
     "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.61.1",
     "@vitejs/plugin-react": "^6.0.4",
