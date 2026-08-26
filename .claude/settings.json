@@ -58,6 +58,15 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/spoiler-review-reminder.mjs\""
           }
         ]
+      },
+      {
+        "matcher": "Bash|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/api-reference-reminder.mjs\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
