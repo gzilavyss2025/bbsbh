@@ -107,15 +107,16 @@ phase, spike by spike, not part of standing up the framework itself.
 | --- | --- | --- | --- |
 | Situational rosters | bench/bullpen depth, platoon splits used, pinch-hit frequency | `team-records/{season}/{teamId}.json` (per-game situational ledger) | Not started |
 | Roster construction | positional WAR distribution, starter/reliever split, lineup vs. bench WAR share | `war-history/`, `war.json` | Not started |
-| Trades / player acquisition | in-season trade WAR added, deadline activity | `trade-deadline/{year}.json` (deadline window only, 2000s+ per its own floor), `team-transactions/{season}/{teamId}.json` (full-season roster moves) | Not started |
+| Trades / player acquisition | in-season trade WAR added, deadline activity | `trade-deadline/{year}.json` (deadline window only, 2000s+ per its own floor), `team-transactions/{season}/{teamId}.json` (full-season roster moves) | **Done, bounded** — `docs/team-success-trade-deadline-value.md`. Deadline-only (2021-2025, 150 team-seasons — the thinnest window in this program; the full-season `team-transactions/` reconciliation is still not attempted). Net WAR acquired at the deadline tracks the outcome ladder strongly and survives every stress test, but an independent recheck could not confirm whether that link is the deadline itself or just good teams being the ones who shop — two equally defensible controls bracket the true effect from near-zero to near-full, so that half of the question is open, not settled |
 | Payroll (adjusted) | Opening Day payroll ÷ that year's league-average payroll | **Gap.** `salaries.json`/`team-contracts/` are a CURRENT snapshot (Contracts tab), not a historical time series. statsapi carries no historical salary data. This factor needs an external source (e.g. a public payroll archive) before it can be built at all — flag this honestly rather than fake a proxy. | Blocked on a data source |
 | Injuries | team-season "WAR lost to IL time," weighted by the hurt player's value | `rehab.json` is a current snapshot only; historical IL stints would come from the `transactions` endpoint's status-change entries, joined to `war-history` for the lost player's value. Buildable, not built. | Not started |
-| Diversity of star players | count of All-Stars/top-WAR players per roster; how concentrated team WAR was in its top 1-2 players vs. spread across 8+ | `all-star-rosters.json` (back to 1933), `awards-history.json`, `war-history/` | **Done** — `docs/team-success-star-diversity.md`. A spread-out lineup is a real, sizable edge for MAKING the postseason (this program's strongest correlation to date on the hitting side); pitching concentration barely matters. Neither side separates division winners from wild-card teams. Ran on 2010-2025, which was `war-history`'s own floor at the time; that floor is now **1901**, so a refit on the full ladder window (about 750 team-seasons, up from 450) is the cheapest re-test. The joint model refit this on the wider window and confirmed it holds — see `docs/team-success-joint-model.md` |
+| Diversity of star players | count of All-Stars/top-WAR players per roster; how concentrated team WAR was in its top 1-2 players vs. spread across 8+ | `all-star-rosters.json` (back to 1933), `awards-history.json`, `war-history/` | **Done** — `docs/team-success-star-diversity.md`. A spread-out lineup is a real, sizable edge for MAKING the postseason (this program's strongest correlation to date on the hitting side); pitching concentration barely matters. Neither side separates division winners from wild-card teams. Ran on 2010-2025, which was `war-history`'s own floor at the time; that floor is now **1901**, so a refit on the full ladder window (about 750 team-seasons, up from 450) is the cheapest re-test. The joint model refit this on the wider window and confirmed it holds — see `docs/team-success-joint-model.md`. A follow-up checked the same idea through All-Star/award recognition instead of WAR (`docs/team-success-star-diversity-awards.md`): the sign matches at first glance, but fails the program's own breadth-confound check and reverses once held fixed — the WAR-based finding above is unaffected and remains the one to trust |
 | Where their best players played (homegrown vs. acquired) | parent-org-at-first-pro-season classification, reused directly from the prospect research line | The homegrown-dependence spike (`docs/homegrown-dependence.md`) already built and validated this exact classifier — reuse its method and cached data, don't rebuild it. That spike's own finding was that homegrown DEPENDENCE doesn't predict a team's regular-season win total; this program asks the postseason-ladder question instead, which is a different outcome variable over the same classifier | **Done** — `docs/team-success-homegrown.md`. Does not predict postseason depth (weak, not significant), but DOES separate division winners from wild-card teams among postseason clubs (+5pp both sides of the ball, p<0.05) — the mirror image of the age spike's null on that same cut. The joint model confirmed this null does not change under joint control, and that the division-winner split gets slightly STRONGER — see `docs/team-success-joint-model.md` |
-| Age of team | PA-weighted batter age, IP-weighted pitcher age, season-average | Built from statsapi's own per-team-stint `stat.age`, PA/IP-weighted | **Done** — `docs/team-success-roster-age.md`. Real, modest, likely-partly-circular effect (older teams go deeper, especially pitching staffs; age doesn't separate division winners from wild cards). Biggest open follow-up: a pre-trade-deadline age cut, to separate a genuine age effect from contending teams simply renting veterans. The joint model found roster age and postseason experience largely overlap (rho +0.58) — see `docs/team-success-joint-model.md` |
+| Age of team | PA-weighted batter age, IP-weighted pitcher age, season-average | Built from statsapi's own per-team-stint `stat.age`, PA/IP-weighted | **Done** — `docs/team-success-roster-age.md`. Real, modest, likely-partly-circular effect (older teams go deeper, especially pitching staffs; age doesn't separate division winners from wild cards). The joint model found roster age and postseason experience largely overlap (rho +0.58) — see `docs/team-success-joint-model.md`. The pre-trade-deadline age cut flagged above as the next spike is now **done** — `docs/team-success-roster-age-deadline-cut.md`. Pitching age keeps ~74% of its whole-season correlation once deadline pickups are cut out; batting age keeps only ~52%, and the World Series-winner batting comparison shrinks to a shaky one at n=25 either side |
 | **Prior postseason experience** (commissioned directly, not in the original ask) | share of a club's regular-season playing time (PA/IP) given to players who had appeared in a postseason game in a STRICTLY EARLIER season, on any club; plus a late-rounds-only variant | Built from the postseason game list 1969-2025 (`gameType=F,D,L,W`) + boxscores, reusing spike #2's `postseason-boxscore-cache.json` and spike #1's `roster-age-cache.json` for the weights — no new regular-season pull | **Done** — `docs/team-success-postseason-experience.md`. A large, robust effect on REACHING the postseason (rho +0.35 batting / +0.37 pitching; ~20pp more experienced playing time than clubs that missed), and a clean, well-powered NULL on advancing once a club is in (rho -0.02 / +0.02 across 234 postseason clubs). Roughly half the qualifying effect is prior-year continuity, but a within-club test still leaves +0.18/+0.21. Pitching edges batting on raw numbers; the two are indistinguishable under controls. Open follow-up: a player-level version. The joint model found this factor shares over half its predictive power with roster age — see `docs/team-success-joint-model.md` |
 
 | **What is different about the games themselves** (commissioned directly, not in the original ask) | paired same-player, same-season comparisons of October vs. regular season, with BOTH ends of the matchup held: plate discipline, offence, pitch mix and velocity, starter workload; plus better-club win rate over every series against a fair-opponent model | Built from statsapi's `gameType=R` vs `gameType=P` splits (team, player and pitchArsenal endpoints) + the committed `postseason-history.json` bracket | **Done** — `docs/team-success-october-texture.md`. What survives: pitchers throw 0.52 mph harder (0.39 in the newest tracking era), starters go a full inning less than their own regular season and the gap GROWS by era (−0.85 → −1.24 IP), and October hitters walk more (+0.49pp). What does NOT: at-bats are not longer once both ends are held (−0.009, t=−1.05 — the naive +0.037 is a roster fact), the strikeout surge is not settled, the hitting dip's sign flips under a usage floor, and the mix narrowing vanishes above 300 October pitches. Two nulls that matter: the quicker hook does not predict how far a club goes once postseason volume is held, and the better club has won 50.5% of 198 series — against 56.4% from a fair-opponent model, which 198 series cannot tell apart |
+| **Organization pipeline behavior** (surfaced by the joint model's fifth signal, not in the original ask) | how long an organization typically keeps a player at Triple-A before his debut, and why a Triple-A stay ends (merit vs. injury/roster-rule/trade) | `docs/price-the-blockage.md`'s 962-stay Triple-A cohort (2009-2023); the joint model's own contemporaneous tenure lead (`docs/team-success-joint-model.md`) | **Done, no-ship on both halves.** Giving the joint model's tenure lead genuine temporal separation (only counting debuts before the season it predicts) drops it from +0.298 SD (contemporaneous, p=0.0003) to a non-significant +0.159 SD (lagged, p=0.145) on the best-powered sample, and incumbent depth explains neither the drop nor what's left — `docs/team-success-organization-tenure.md`. A sibling spike asked a different question on the same cohort, whether a farm system's MIX of promotion reasons (clean merit vs. forced) predicts anything: confirmed null on every cut tried, including the Seattle Mariners running the league's highest merit-promotion share and its longest drought — `docs/team-success-exit-reason-mix.md` |
 Nothing here is ranked by importance yet — that ranking is itself a question
 a first pass over several factors should answer, not an assumption to bake
 into the plan.
@@ -179,10 +180,8 @@ land or a factor turns out to need more groundwork than expected:
 
 1. ~~**Age of team**~~ — done, `docs/team-success-roster-age.md`. Proved the
    pipeline end to end and surfaced a real (if likely partly circular) effect.
-   Its own best follow-up — a pre-trade-deadline age cut — is a strong
-   candidate for the NEXT spike, ahead of the rest of this list, precisely
-   because it would tell a real age effect apart from teams simply renting
-   veterans once they're already winning.
+   Its own best follow-up — a pre-trade-deadline age cut — is now done, item 8
+   below (`docs/team-success-roster-age-deadline-cut.md`).
 2. ~~**Where their best players played**~~ — done, `docs/team-success-homegrown.md`.
    Reused the existing classifier as-is; a null on postseason depth, but a
    real, if secondary, division-winner-vs-wild-card split (opposite pattern
@@ -192,9 +191,10 @@ land or a factor turns out to need more groundwork than expected:
 3. ~~**Diversity of star players**~~ — done, `docs/team-success-star-diversity.md`.
    A real, sizable hitting-side effect on making the postseason (the strongest
    correlation this program has found so far); pitching concentration and
-   the wonDivision split both came back null. Best open follow-up: a joint
-   model with roster age and homegrown share, now that three spikes have all
-   found something on the same hitting/making-the-postseason cut.
+   the wonDivision split both came back null. The joint model (item 6) is
+   that follow-up. A second follow-up tried the same idea through recognition
+   instead of WAR — item 9 below (`docs/team-success-star-diversity-awards.md`)
+   — and did not hold up.
 4. ~~**Prior postseason experience**~~ — done,
    `docs/team-success-postseason-experience.md`. Jumped the queue; commissioned
    directly rather than drawn from this list, and added to the factor catalog
@@ -240,23 +240,83 @@ land or a factor turns out to need more groundwork than expected:
    program's other stress-tested findings also surfaced a fifth, unconfirmed
    lead: organization Triple-A tenure predicts the ladder about as strongly
    as roster age, independent of all four factors — reported as a lead, not
-   a finding, since the direction of cause and effect is unresolved. Best
-   open follow-up, shared with several other spikes here: a historical
+   a finding, since the direction of cause and effect is unresolved. That
+   lead was tested directly at item 10 below and did not survive being
+   forced to predict forward in time. Best open follow-up, shared with
+   several other spikes here: a historical
    payroll source, now this program's single largest unmeasured confound.
-7. **Trades / acquisition** — two partially-overlapping sources
-   (`trade-deadline/`, `team-transactions/`) need reconciling into one
-   team-season "value acquired in-season" number first. Once the spike builds
-   that panel, register it in the shared catalog
-   (`docs/agents/research-database.md`) so a later spike can find it, instead
-   of leaving it as a standalone script.
-8. **Injuries** — needs a new IL-stint sweep off the transactions endpoint;
+7. ~~**Trades / acquisition**~~ — done, `docs/team-success-trade-deadline-value.md`.
+   Ran narrower than the full catalog question: the deadline window only
+   (2021-2025, 150 team-seasons — the smallest sample tried anywhere in this
+   program), not the full-season reconciliation with `team-transactions/`
+   this item originally called for. The raw link (net WAR acquired at the
+   deadline tracks the outcome ladder, rho=0.56) is real and stress-test-proof.
+   The harder question — deadline effect or selection effect — came back
+   genuinely unresolved: an independent recheck found two equally defensible
+   pre-/post-treatment controls bracket the true effect from near-zero to
+   near-full, so the write-up reports that half open rather than settled.
+   Best open follow-up: the full-season reconciliation this item still calls
+   for, and a cleaner "already good" proxy measured on the actual day of the
+   deadline rather than a season-end or prior-season stand-in.
+8. **Roster age, deadline cut** (extends item 1) — done,
+   `docs/team-success-roster-age-deadline-cut.md`. Item 1's own biggest open
+   worry, answered directly: cut every trade-deadline pickup out of a team's
+   age measure and remeasure through July 31 only. Pitching age keeps about
+   three-quarters of its whole-season correlation to the ladder; batting age
+   keeps only about half — roughly half of the original batting-age headline
+   was a trade-deadline artifact, the pitching-age headline mostly was not.
+   The one comparison that flips from significant to shaky: World Series
+   winners' batting-age edge, at only 25 champions either side of the cut.
+   Confirmed complementary to, not a duplicate of, item 4's postseason-usage
+   check — that spike reweights by actual October role and still gives a
+   deadline rental his age; this one zeroes him out entirely for having no
+   pre-deadline PA/IP with his new club. Best open follow-up: fold this
+   correction into item 1's own text, which had guessed this exact question
+   was already answered by the usage check.
+9. **Star diversity, checked through recognition** (extends item 3) — done,
+   `docs/team-success-star-diversity-awards.md`. Tried a second measurement of
+   "star" — All-Star and award recognition instead of WAR — on the four
+   seasons `awards-history.json` covers. Looked like a second witness at
+   first, on both sides of the ball, but failed the breadth-confound check
+   this program already knows to run (`docs/team-success-postseason-usage.md`'s
+   own lesson): once held fixed against how many players got any recognition
+   at all, the pattern reverses. The original WAR-based finding was run
+   through the identical check and survives intact. Best open follow-up: fold
+   the breadth-confound check directly into future concentration measures
+   before a headline is written, not after.
+10. **Organization tenure, forced to predict forward** (extends item 6's
+   fifth signal) — done, `docs/team-success-organization-tenure.md`. The
+   joint model's own "what would move this next" note, answered: give the
+   organization Triple-A tenure lead genuine temporal separation (count only
+   debuts before the season being predicted) and test it against
+   `docs/price-the-blockage.md`'s incumbent-depth measure. The lead does not
+   survive — it drops from +0.298 SD (contemporaneous) to a non-significant
+   +0.159 SD (lagged) on the best-powered sample — and depth explains neither
+   the drop nor what's left, because the two measures are close to
+   uncorrelated. No-ship, but not a disproof: a properly lagged measure is
+   also a noisier one, so this is a bounded null, not a settled "the effect
+   isn't real." Best open follow-up: revisit once more seasons widen the
+   lagged sample, and correct item 6's framing, which had marked this exact
+   idea "largely superseded" by the usage check before it was actually run.
+11. **Exit-reason mix** (sibling of item 10, same Triple-A cohort) — done,
+   `docs/team-success-exit-reason-mix.md`. A different angle on the same
+   962-stay cohort: not how long a player waits at Triple-A, but why his wait
+   ends — a clean merit promotion versus injury, a roster rule, or a trade.
+   Confirmed null at every volume cut and every band, sign itself unstable
+   across cuts. The Seattle Mariners are the illustrative case: the highest
+   merit-promotion share in the cohort, and the longest postseason drought.
+   Best open follow-up: whether promoting-at-all (any exit that season, of
+   any reason) predicts anything on its own — a pattern this spike noticed on
+   verification but did not chase down (org-seasons with zero classified
+   exits average a higher ladder rung, p=0.22, not significant but unexamined).
+12. **Injuries** — needs a new IL-stint sweep off the transactions endpoint;
    heavier lift than the above. Register the resulting panel in the shared
    catalog (`docs/agents/research-database.md`) once it exists, the same way.
-9. **Situational rosters / roster construction** — richest data
+13. **Situational rosters / roster construction** — richest data
    (`team-records/`) but the least obvious single number to regress; likely
    needs its own sub-framework before a spike can run. Register any panel it
    produces in the shared catalog (`docs/agents/research-database.md`) too.
-10. **Payroll (adjusted)** — blocked until a historical payroll source is
+14. **Payroll (adjusted)** — blocked until a historical payroll source is
    found; revisit if/when one turns up rather than approximating with
    current-season salary data pretending to be historical.
 
