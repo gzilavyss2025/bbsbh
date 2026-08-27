@@ -31,6 +31,7 @@
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/admin/research'                   -> { name: 'admin-research' }  (research diary, Clerk-admin gated)
 //   '/admin/contenders'                 -> { name: 'admin-contenders' }  (Contender Diary, Clerk-admin gated)
+//   '/admin/contracts'                  -> { name: 'admin-contracts' }  (contract-identity review queue, Clerk-admin gated)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
 //   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }
 //   '/player/{name-id}/{stats|analytics|history}'
@@ -325,6 +326,13 @@ export function parseRoute(url) {
   // how a prospect develops (docs/agents/contender-diary.md).
   if (parts.length === 2 && parts[0] === 'admin' && parts[1] === 'contenders')
     return { name: 'admin-contenders' }
+  // The historical-contract identity review queue (ADR-0066) — same
+  // reasoning as the two lines above: owner-only, unlisted, under /admin
+  // because that is what it is. Reviews the ambiguous/unresolved rows the
+  // scripts/gen-contracts-identity.mjs pipeline could not confidently match
+  // on its own.
+  if (parts.length === 2 && parts[0] === 'admin' && parts[1] === 'contracts')
+    return { name: 'admin-contracts' }
   // The guides at /learn are NOT React routes — they are standalone documents
   // rendered by api/page.js, because the crawlers this app wants to reach do not
   // execute JavaScript (see src/copy/landing/render.js). The SPA only ever sees

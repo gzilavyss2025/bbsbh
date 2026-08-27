@@ -272,6 +272,16 @@ async function main() {
   await writeJsonAtomic(join(outDir, 'free_agency.json'), freeAgency, 2)
   await writeJsonAtomic(join(outDir, 'salaries.json'), salaries, 2)
 
+  // A separate, much smaller file for the /admin/contracts review queue
+  // (PR2): every non-exact row across all four files, so the review page
+  // never has to fetch salaries.json's full ~8 MB just to find the ~700
+  // rows in it actually worth a human's attention.
+  const pending = [extensions, arbitration, freeAgency, salaries]
+    .flat()
+    .filter((row) => row.confidence !== 'exact')
+  await writeJsonAtomic(join(outDir, 'pending.json'), pending, 2)
+  console.log(`Wrote pending.json: ${pending.length} rows needing review`)
+
   console.log('\nMatch-rate report:')
   report('extensions', extensions)
   report('arbitration', arbitration)

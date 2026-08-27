@@ -67,7 +67,10 @@ const BUDGETS = {
   // store (the ballpark-photo pattern applied to a club's mark) — a URL like
   // every other file here, so it stays flat for the same rename-is-an-outage
   // reason.
-  api: 14,
+  // 14 -> 15 for `contract-identity.js`: the admin override store behind
+  // /admin/contracts (ADR-0066), same shape as identity.js one entry above —
+  // a narrow, allowlist-gated endpoint, so it stays flat with every sibling.
+  api: 15,
   // The 51 stylesheet partials src/index.css @imports in order. This one is a
   // deliberate exception rather than a directory awaiting subdivision: the files
   // are an ORDERED SEQUENCE, not independent modules, and the numeric prefix is
