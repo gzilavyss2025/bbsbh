@@ -167,12 +167,16 @@ const PANEL_PATHS = [
   // Per-player shards of the same rows, grouped by personId instead of rowKey
   // (scripts/gen-contracts-shards.mjs) -- sharded across 100 files, same glob
   // pattern as war-history and season-players above.
-  // KNOWN ISSUE: 67 of the 100 shards hold free-text values (e.g.
-  // "non-tendered", "1 y/$2.325+opt") in term fields DuckDB's
-  // auto-detection infers as numeric. The view registers, but a full scan
-  // of its flattened companion view (*__players) throws a cast error. This
-  // panel needs a hand-written schema before it is join-ready -- do not add
-  // one here without a decision; see docs/agents/research-database.md.
+  // KNOWN ISSUE: all 100 shards hold a term field that mixes a number and
+  // a free-text value in the same shard (e.g. "non-tendered",
+  // "1 y/$2.325+opt") -- term: 100 shards, club_offer: 78, settled_salary:
+  // 65, player_request: 8. DuckDB's nested-struct auto-detection infers
+  // those fields as numeric, so the view registers but a full scan of its
+  // flattened companion view (*__players) throws a cast error. Deferred:
+  // this needs a hand-written schema, the same way
+  // registerOutcomeLadderByTeam/registerRosterAgeByTeam already do for
+  // their panels. Do not add one here without a decision; see
+  // docs/agents/research-database.md.
   'public/data/contracts-history/player/*.json',
 ];
 

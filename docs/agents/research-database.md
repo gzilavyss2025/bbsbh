@@ -74,13 +74,30 @@ of date.
 
 The `contracts-history/terms/*.json` panel (dollar terms, keyed by
 `rowKey`) joins cleanly to every `contracts-history/identity/*.json` row on
-`rowKey` — a checked, 1:1 match. The `contracts-history/player/*.json`
-panel (the same rows re-grouped by `personId`) does not load safely yet: a
-scan of its flattened companion view fails, because 67 of its 100 shards
-hold free-text values (`"non-tendered"`, `"DFA"`, `"1 y/$2.325+opt"`) in
-term fields DuckDB's auto-detection infers as numeric. Loading it needs a
-hand-written schema; see the note beside the entry in `PANEL_PATHS`. Do not
-treat that panel as join-ready until someone adds one.
+`rowKey` — a checked, 1:1 match: 36,366 rows on each side, zero unmatched
+(2,420 arbitration + 999 extensions + 5,598 free agency + 27,349 salaries).
+
+The `contracts-history/player/*.json` panel (the same rows re-grouped by
+`personId`) is cataloged but **deferred, not built**. `CREATE VIEW`
+succeeds, so the loader reports it clean, but any query that touches term
+values throws a cast error (`Failed to cast value to numerical`). The
+cause: a source money field can hold both a number and a free-text value in
+the same shard (`"non-tendered"`, `"DFA"`, `"1 y/$2.325+opt"`), and DuckDB's
+nested-struct auto-detection infers that field as numeric anyway. This is
+not a handful of stray rows — all 100 of the 100 shards carry at least one
+such field. Per field, the shards with a genuine number/text collision are:
+`term` 100, `club_offer` 78, `settled_salary` 65, `player_request` 8 (a few
+more at single digits: `guarantee` 3, `prior_salary` 3, `opt_out` 3, `note`
+2, `salary` 1). Closing this needs a hand-written schema — the same fix the
+two entries below already use (`team_success_outcome_ladder_by_team` and
+`team_success_roster_age_by_team`) — not a generic-convention tweak. No
+spike needs this panel yet, so it stays open as a follow-up rather than
+unscoped work inside a foundation change; do not add a schema here without
+a decision.
+
+`contracts-history/identity/pending.json` also exists and is not cataloged.
+It was found and deliberately left alone — a note here so the next reader
+does not have to rediscover it.
 
 Most panels need no hand-written schema. A small generic rule decides the
 shape: a bare id-keyed dict collapses to one row per key; a bare scalar
