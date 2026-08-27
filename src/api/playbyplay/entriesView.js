@@ -90,33 +90,45 @@ export function stepCommitReady(entries, cap, halfInProgress) {
 // that FOLLOWS it (nextStepBoundary's own header has the count: 655 of 678),
 // so a mound visit or a pitching change announced after an out reaches the
 // feed the moment the NEXT batter steps in — after the tap that revealed the
-// out, and with the cap already stored. Under the old walk that entry grew the
-// last boundary past the stored cap, the `bounds.filter(b => b <= cap)` count
-// dropped by one, and the reader — following the newest window — was moved
-// back an at-bat while a card they had already charted reappeared. Replayed
-// against a real feed (gamePk 823263, MIL @ SD, 11 innings) that fired on 14 of
-// 89 taps; on one of them the count fell to zero and the windowed view dropped
-// out from under the reader entirely. The same disqualified window is why a
-// tier-1 notice (ADR-0017) could never cross the screen: it was filed into a
-// window the count had just discarded.
+// out, and with the cap already stored. A walk that used the boundary VALUE
+// itself to count windows (`bounds.filter(b => b <= cap)`) broke here: that
+// value can retroactively grow once the trailing notice is discovered, and the
+// count built on it dropped by one — the reader, following the newest window,
+// was moved back an at-bat while a card they had already charted reappeared.
+// Replayed against a real feed (gamePk 823263, MIL @ SD, 11 innings) that
+// fired on 14 of 89 taps; on one of them the count fell to zero and the
+// windowed view dropped out from under the reader entirely.
 //
 // So the anchor is the at-bat, and the count of windows is the count of
 // at-bats at or under the cap — which only ever grows, because an at-bat's own
-// index cannot move. Window i covers (anchor[i-1], anchor[i]]: the leading
-// notices plus the plate appearance they stage. A notice arriving after the
-// tap that revealed the previous at-bat is simply not revealed yet, and lands
-// at the head of the next window when it is.
+// index cannot move, no matter how much trailing content streams in around it.
 //
-// WHY THE LAST WINDOW DOES NOT SWALLOW WHAT TRAILS IT. An earlier draft of
-// this ran the last window out to the cap, so a notice already inside the cap
-// showed at once. It also showed AGAIN at the head of the next window as soon
-// as that at-bat was revealed — the same mound visit drawn twice in
-// consecutive taps, 25 times in the game above. A card belongs to exactly one
-// window. The one exception is a note NO at-bat will ever follow (a closing
-// ejection, a walk-off's aftermath): `entries` holds the whole half, so a look
-// past the cap can tell "not revealed yet" from "nobody left to bat" without
-// reading anything the cap does not already permit — the count of at-bats
-// ahead is not a score.
+// Window i covers [anchor[i], anchor[i+1]): the plate appearance PLUS the
+// notices that trail it — a pitching change, a mound visit, an ejection —
+// same direction nextStepBoundary already bundles into the tap that reveals
+// anchor[i] in the first place. A trailing notice is therefore on screen the
+// moment its own tap reveals it, not deferred to the batter it precedes: a
+// scorer finishes the batter, pencils the change, THEN sees who's next up —
+// not the other way around (gamePk 823584 bottom 1st: Robert Gasser relieved
+// Dustin May after the first out, and a reader had no way to know it until
+// they'd already revealed Gasser's own first batter faced). The one exception
+// is content before the half's FIRST at-bat (an extras placement, a pre-pitch
+// note the persistent header didn't already cover) — nothing precedes it to
+// trail, so it leads the half's opening window instead, same as always.
+//
+// WHY A WINDOW NEVER CHANGES ONCE CLOSED. A window closes the instant a LATER
+// at-bat is found — at that at-bat's own index, which never moves — so its
+// `{ start, end }` is identical on every future render regardless of how much
+// MORE trailing content streams in beyond it. That is what keeps a card from
+// being drawn twice: it is written into exactly one window, permanently, the
+// first time the cap reaches it, never re-attached to a later one. (An
+// earlier draft ran the LAST window out to the cap so a revealed notice showed
+// at once — the right instinct, wrong anchor: on the next render it also
+// showed AGAIN at the head of the next window once that at-bat was revealed,
+// the same mound visit drawn twice in consecutive taps, 25 times in the game
+// above. Anchoring on the PRECEDING at-bat instead of the following one gets
+// the early visibility without the double-draw, because the window that shows
+// it early is the same window that keeps it later.)
 //
 // The reveal CAP is untouched: nextStepBoundary above still bundles a tap as
 // "the next at-bat plus what the managers did after it" (see its own doc) —
@@ -132,22 +144,19 @@ export function focusWindows(entries, cap) {
   const limit = cap == null ? entries.length : Math.min(Math.max(0, cap), entries.length)
   const wins = []
   let start = 0
-  let more = false
-  for (let i = 0; i < entries.length; i++) {
+  let sawAtBat = false
+  for (let i = 0; i < limit; i++) {
     if (entries[i].kind !== 'atbat') continue
-    if (i >= limit) {
-      // An at-bat past the cap: it will own the trailing notices when it is
-      // revealed, so they must not be drawn twice by showing them now.
-      more = true
-      break
+    if (sawAtBat) {
+      // A later at-bat: it closes the PRECEDING one's window right here — the
+      // trailing notices between them stay with the batter who came before,
+      // never re-drawn against the one who comes after.
+      wins.push({ start, end: i })
+      start = i
     }
-    wins.push({ start, end: i + 1 })
-    start = i + 1
+    sawAtBat = true
   }
-  if (wins.length === 0) return limit > 0 ? [{ start: 0, end: limit }] : []
-  // Nobody left to bat — the notes after the last at-bat have no other window
-  // to go to, so the last one runs out to the cap.
-  if (!more) wins[wins.length - 1].end = Math.max(wins[wins.length - 1].end, limit)
+  if (start < limit) wins.push({ start, end: limit })
   return wins
 }
 
