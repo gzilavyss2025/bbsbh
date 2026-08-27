@@ -8,7 +8,7 @@
 // source page can't be fetched from the browser: www.mlb.com sends no CORS
 // headers (verified live with curl + an Origin header + an OPTIONS
 // preflight), unlike statsapi.mlb.com's Access-Control-Allow-Origin: *,
-// which is what lets the rest of this app be a no-backend PWA. A plain
+// which is what lets the rest of the app fetch game data client-side. A plain
 // server-side fetch() has no such restriction. See docs/top-prospects.md
 // for the full rationale and gotchas.
 //

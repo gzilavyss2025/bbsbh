@@ -284,7 +284,8 @@
 /* ---- linked highlighting: chart markers ----
    One hand-drawn baseball per selectWinProbBigPlays() entry — a circle plus
    two seam arcs, all inline SVG (no fetched icon, same "nothing external"
-   rule as the rest of this no-backend app). `.winprob__bigdot-hit` is an
+   rule the rest of the client's game-data rendering follows).
+   `.winprob__bigdot-hit` is an
    invisible larger circle for a comfortable tap target around the small
    visible glyph. `.winprob__bigdot-ball` scales as one unit via a CSS
    transform (transform-box:fill-box pins the scale origin to the glyph's own

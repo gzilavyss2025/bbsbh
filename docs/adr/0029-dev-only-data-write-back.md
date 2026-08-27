@@ -1,9 +1,9 @@
 # The lab writes to disk — a dev-only, allowlisted write-back
 
-This app has no backend by default: every screen is a static PWA reading
-`statsapi.mlb.com` or a committed JSON file. The three narrow exceptions
-(ADR-0012 link previews, ADR-0022 reveal sync, ADR-0025 admin copy) are Vercel
-edge functions. This records a fourth thing that is *not* one of them, and why
+Every screen reads `statsapi.mlb.com` or a committed JSON file directly; the
+three narrow `api/` functions that exist so far (ADR-0012 link previews,
+ADR-0022 reveal sync, ADR-0025 admin copy) are Vercel edge functions. This
+records a fourth thing that is *not* one of them, and why
 that distinction matters: a **Vite dev-server middleware that writes files in
 this repo**, used only while `npm run dev` is running.
 

@@ -24,8 +24,9 @@ import { test, expect } from '../fixtures.js'
 // reuses that spec's `.gamestamp` selector for stamp art rather than inventing
 // a second one.
 //
-// Signed out, against localStorage, with no backend configured — the posture a
-// visitor with no Clerk key has. Viewport-independent, so mobile only.
+// Signed out, against localStorage, with none of the account/sync functions
+// configured — the posture a visitor with no Clerk key has.
+// Viewport-independent, so mobile only.
 const TEAM = 158
 const PAGE = `/team/${TEAM}/stamp-in`
 const CONSENT_KEY = 'bbsbh:stampIn'

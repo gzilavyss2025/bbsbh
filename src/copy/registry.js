@@ -8,8 +8,8 @@
 // looks like:
 //
 //   - the runtime (src/copy/CopyProvider.jsx + copyContext.js) reads DEFAULTS
-//     for instant, offline, backend-free rendering — the app works identically
-//     with no copy store;
+//     for instant, offline rendering — the app works identically with no copy
+//     store configured;
 //   - the admin panel (src/screens/AdminCopy.jsx) renders one labelled field
 //     per FIELD, with its help text, group, and length budget;
 //   - the write endpoint (api/copy.js) validates an incoming override map

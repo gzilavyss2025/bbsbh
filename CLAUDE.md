@@ -10,7 +10,7 @@ shows lineups, umpires, rosters, and inning totals from the public MLB Stats API
 number that would spoil the game stays sealed until you tap to reveal it. This app is
 **not** a data-entry tool. The user keeps score on paper.
 
-React 19 + Vite, phone-first (iPhone), installable PWA, **no backend**.
+React 19 + Vite, phone-first (iPhone), installable PWA with Vercel backend.
 
 ## Maintaining these docs
 
@@ -131,13 +131,13 @@ time as `revealedThrough` advances (ADR-0008). Both are detailed in `src/CLAUDE.
 
 ## Architecture (map)
 
-**No backend, by default.** Every device queries `https://statsapi.mlb.com`
+**Game data is client-direct.** Every device queries `https://statsapi.mlb.com`
 directly. Each game's reveal high-water mark (`revealedThrough`) persists in
 `localStorage` under `bbsbh:reveal:{gamePk}` — only that half-index, never a score,
 so the spoiler rule still holds on return. A same-device tab picks up another tab's
 reveal through a `storage` listener in `useRevealProgress.js`.
 
-**Fifteen narrow, opt-in exceptions (`api/`)**, all Vercel functions, inert when unconfigured;
+**Fifteen Vercel functions live in `api/`**, each inert when unconfigured;
 **fourteen never render or fetch a score.** Link previews (`og.js` + `preview.js` + `_lib/cards.js`)
 render Open Graph cards, failing safe to the default (ADR-0012). Reveal sync (Clerk-gated) mirrors
 `revealedThrough` via `reveal.js` + Upstash Redis, ratcheted both sides (ADR-0022);

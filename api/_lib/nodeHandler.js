@@ -16,12 +16,12 @@
 // It went unnoticed because nothing that matters *breaks* when they fail: the
 // client treats every one of these as optional (CopyProvider falls back to
 // shipped defaults, both sync components swallow errors and stay local-only), so
-// a 500 looks exactly like "this deploy has no backend configured" — which is a
-// supported state. The lesson worth keeping: a graceful degrade can hide a hard
-// failure indefinitely. These endpoints need real request-level checks against a
-// deploy, not just module-level smoke tests — importing the module in Node and
-// calling it with a `Request` exercises a shape production never passes, which is
-// exactly how this shipped.
+// a 500 looks exactly like "this deploy's optional functions were never
+// configured" — which is a supported state. The lesson worth keeping: a
+// graceful degrade can hide a hard failure indefinitely. These endpoints need
+// real request-level checks against a deploy, not just module-level smoke
+// tests — importing the module in Node and calling it with a `Request`
+// exercises a shape production never passes, which is exactly how this shipped.
 //
 // The helpers below read whichever shape they are handed rather than assuming
 // one, so the functions keep working if Vercel's runtime contract shifts again.

@@ -1,4 +1,4 @@
-# A local DuckDB layer queries the research JSON — it is not a backend
+# A local DuckDB layer queries the research JSON — it never touches the shipped app
 
 Two research programs — the Contender Diary (`docs/agents/contender-diary.md`)
 and the prospect-research diary (`docs/agents/research-diary.md`) — each write
@@ -10,11 +10,10 @@ the storage problem: it registers every cataloged panel as a DuckDB view over
 `read_json_auto()`, so a new spike starts from a SQL `JOIN` instead of another
 hand-rolled merge.
 
-## Why this does not conflict with "no backend"
+## Why this never touches the shipped app
 
-Root `CLAUDE.md` states the rule: every device queries `statsapi.mlb.com`
-directly, no backend. That rule protects the shipped app. This tool never
-touches it:
+Root `CLAUDE.md` describes the shipped app's game-data path: every device
+queries `statsapi.mlb.com` directly. This tool never touches that path:
 
 - **It never runs in the shipped app.** No import from `src/`, no build
   step, no Vercel function, no CI job. It is a script a developer runs by

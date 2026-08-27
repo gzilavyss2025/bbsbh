@@ -38,9 +38,9 @@ Two candidate values were identified for the notes (beyond the modal):
 
 ## Key architectural facts (don't relearn these)
 
-- **There is no database.** bbsbh is no-backend (root `CLAUDE.md`). "Push results to
-  the database" = regenerate a committed `public/data/*.json` and let the app fetch
-  it same-origin — the build-time-fetch pattern every `gen-*.mjs` uses.
+- **There is no database.** Game data is client-direct (root `CLAUDE.md`). "Push
+  results to the database" = regenerate a committed `public/data/*.json` and let
+  the app fetch it same-origin — the build-time-fetch pattern every `gen-*.mjs` uses.
 - **The nightly slot already exists:** `.github/workflows/update-nightly-data.yml`.
   A production build is a new `scripts/gen-game-notes-insights.mjs` wired into it
   (or a sibling workflow), **not** a Claude Code scheduled agent (a deterministic

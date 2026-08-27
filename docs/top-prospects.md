@@ -9,8 +9,8 @@ available anyway — embedded directly in the server-rendered HTML of
 `public/data/top-prospects.json`, and why it's a **scheduled, off-device
 script**, not app code.
 
-**Why not in the app:** the PWA is backend-free — every request runs in the
-user's browser. `statsapi.mlb.com` (the API the rest of the app uses) sends
+**Why not in the app:** every game-data request runs client-side, straight
+from the user's browser. `statsapi.mlb.com` (the API the rest of the app uses) sends
 `Access-Control-Allow-Origin: *`, which is what makes that possible.
 `www.mlb.com` sends **no CORS headers at all** (verified live with `curl`
 using an `Origin` header and an `OPTIONS` preflight) — a browser `fetch()`

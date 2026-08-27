@@ -8,8 +8,9 @@
 // leaves localStorage authoritative. That is correct — it is the offline-first
 // contract — and it is also exactly how ADR-0022's total production failure hid
 // for weeks: "a graceful degrade can mask a hard failure indefinitely." A 500, a
-// 501, an expired token and a deploy with no backend at all were indistinguishable
-// from the outside, and the user had no way to see any of it. This module is the
+// 501, an expired token and a deploy whose sync functions were never
+// configured were indistinguishable from the outside, and the user had no way
+// to see any of it. This module is the
 // other half of that lesson: the catches stay, they just stop being silent.
 //
 // It reports on the MECHANISM and never on the data. A channel record holds a

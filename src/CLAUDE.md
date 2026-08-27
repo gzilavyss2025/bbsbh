@@ -1,6 +1,6 @@
 # src — the app shell
 
-React 18 + Vite SPA, phone-first, no backend. This file covers screens, routing,
+React 18 + Vite SPA, phone-first. This file covers screens, routing,
 fetching, and the design system. The data layer has its own file
 (`src/api/CLAUDE.md`), as does club identity — colours, logo treatments, the
 `src/lib/data/*.json` stores, and their two editors: the dev-only lab
@@ -150,7 +150,7 @@ goes through `fillTokens` — never an ad hoc `.replace` at a call site, which
 skips both the closed-set check and the drop-the-token-and-tidy-the-gap path.
 The unlinked `/admin` route (`screens/AdminCopy.jsx`) is the Clerk-admin-gated
 editor (with version history). It stores UI text only — never a score — see
-ADR-0025 and the "no backend exceptions" prose in the root `CLAUDE.md`. When
+ADR-0025 and the `api/` functions prose in the root `CLAUDE.md`. When
 adding a new consent string, add a registry field; never inline the literal in a
 component.
 

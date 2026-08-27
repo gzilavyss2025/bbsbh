@@ -16,8 +16,8 @@ Create `public/logos/historical/` and drop each file there under the exact
 `logo` filename already referenced by `public/data/milb-history.json`'s
 `nameHistory` entries (so the eventual wiring is a one-line join, not a
 rename pass). That keeps historical art alongside `public/data/*.json` as a
-same-origin static asset — no new CDN dependency, consistent with the rest of
-the app's "no backend" rule.
+same-origin static asset — no new CDN dependency, consistent with how the
+rest of the app's static data is served.
 
 ## Format & sizing
 

@@ -144,8 +144,8 @@ without letting it corrupt the mechanism the rest of the app depends on.
 
 Scores Unlocked has **no server component** — it is pure client state
 (`localStorage` + render), so it is deliberately absent from the Architecture
-"no backend" exceptions list (only the copy store it uses, ADR-0025, is a backend
-exception). It does widen the DOM contract: a score-bearing node can exist
+map's `api/` functions list (only the copy store it uses, ADR-0025, is one).
+It does widen the DOM contract: a score-bearing node can exist
 without a per-value reveal — but only behind an explicit, fail-closed consent,
 and only for what that consent covered. The invariant that protects the app is no
 longer "no score in the DOM, ever" but "no score in the DOM except behind a

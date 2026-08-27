@@ -117,8 +117,9 @@ user hasn't re-consented to.
 ## Cost accepted
 
 Follow Live, like Scores Unlocked, has **no server component** — it is
-client-only (localStorage + the existing feed poll), so it is not a "no backend"
-exception. It does auto-navigate the innings view for a caught-up follower
+client-only (localStorage + the existing feed poll), so it is not one of the
+Architecture map's `api/` functions. It does auto-navigate the innings view
+for a caught-up follower
 (guarded so a paged-back reader is left alone, and `replace:true` so Back is not
 polluted); that guarded auto-nav is deletable in isolation if live use shows it's
 twitchy. See ADR-0026 for Scores Unlocked, the render-override sibling.

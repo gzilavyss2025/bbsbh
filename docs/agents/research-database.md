@@ -4,10 +4,10 @@ A local, embedded DuckDB layer over the JSON panels the research diaries
 already write. It is a query convenience, not a new data source: it never
 copies data, and it changes nothing about the app's architecture.
 
-**This is not the backend the app does not have.** The root `CLAUDE.md`
-states the rule: "No backend, by default" — every device queries
-`statsapi.mlb.com` directly. This tool runs on one machine, at dev time, by
-hand. It never runs in the shipped app, never runs in CI, and never runs on
+**This never touches the shipped app.** The root `CLAUDE.md` describes the
+app's game-data path: every device queries `statsapi.mlb.com` directly. This
+tool runs on one machine, at dev time, by hand. It never runs in the shipped
+app, never runs in CI, and never runs on
 Vercel. The JSON files under `.scratch/` and `public/data/` stay the one
 source of truth; DuckDB only makes them queryable with SQL joins instead of
 a fresh Node script that re-reads and re-parses the same files on every
