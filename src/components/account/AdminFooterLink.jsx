@@ -1,7 +1,8 @@
 import { useUser } from '@clerk/clerk-react'
 import { useRouteLink } from '../../lib/nav.js'
 
-// The one footer row only an admin sees: the prospect-research diary.
+// The footer rows only an admin sees: the prospect-research diary, the
+// Contender diary, and the contracts identity workbench.
 //
 // WHY IT IS NOT IN lib/reportPages.js WITH THE OTHER PAGES. Same reason its
 // sibling AdminMenuLink is not — that registry is the single source the site
@@ -48,6 +49,12 @@ export function AdminFooterLink() {
       <p className="sitefooter__adminrow">
         <a className="dirlink" {...linkProps('/admin/contenders')}>
           Contender diary
+          <span className="dirtag">Admin</span>
+        </a>
+      </p>
+      <p className="sitefooter__adminrow">
+        <a className="dirlink" {...linkProps('/admin/contracts')}>
+          Contracts workbench
           <span className="dirtag">Admin</span>
         </a>
       </p>
