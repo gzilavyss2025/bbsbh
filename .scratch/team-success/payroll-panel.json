@@ -1,0 +1,6283 @@
+{
+ "generatedAt": "2026-08-27T19:30:59.993Z",
+ "source": "scripts/data/contracts/salaries.csv joined to .scratch/team-success/roster-age-cache.json through public/data/contracts-history/identity/salaries.json",
+ "method": "Each salary row is attributed across the clubs the player appeared for that season, pro rata by PA + (league PA per inning) * IP at each club. See this builder's header for the four read-time exclusion rules and docs/contracts-data-caveats.md for the population regimes. coverageRows and coverageDollars are SEASON figures and sit on the season alone: an unattributed row has no club, so no club-specific coverage rate exists.",
+ "window": [
+  2000,
+  2025
+ ],
+ "counts": {
+  "totalRows": 27349,
+  "outOfWindow": 1257,
+  "frontOffice": 23,
+  "droppedRepeat": 27,
+  "droppedTwinnedObligation": 26,
+  "noDollars": 3677,
+  "eligibleRows": 22339,
+  "untrustedId": 326,
+  "noStint": 1178,
+  "attributedRows": 20835,
+  "splitRows": 2235,
+  "bothGroupsAndSplit": 591,
+  "zeroWeightEqualSplit": 7,
+  "groupFromStints": 36,
+  "groupUnknown": 0,
+  "paidNoAppearanceRows": 1178,
+  "attributedTeamRows": 23223,
+  "identityCollisions": 21,
+  "identityCollisionDollars": 62882634
+ },
+ "identityCollisions": [
+  {
+   "season": 2025,
+   "mlbId": 571970,
+   "rows": [
+    {
+     "rowKey": "salaries#1376",
+     "name": "Muncy, Max",
+     "position": "3b",
+     "salary": 14500000
+    },
+    {
+     "rowKey": "salaries#2214",
+     "name": "Muncy, Max",
+     "position": "ss",
+     "salary": 760000
+    }
+   ],
+   "dollars": 15260000
+  },
+  {
+   "season": 2025,
+   "mlbId": 606996,
+   "rows": [
+    {
+     "rowKey": "salaries#1792",
+     "name": "Hart, Kyle",
+     "position": "lhp-s",
+     "salary": 1000000
+    },
+    {
+     "rowKey": "salaries#2030",
+     "name": "Hurt, Kyle",
+     "position": "rhp",
+     "salary": 770000
+    }
+   ],
+   "dollars": 1770000
+  },
+  {
+   "season": 2025,
+   "mlbId": 645444,
+   "rows": [
+    {
+     "rowKey": "salaries#1981",
+     "name": "Herrera, Jose",
+     "position": "c",
+     "salary": 772200
+    },
+    {
+     "rowKey": "salaries#2081",
+     "name": "Ferrer, Jose",
+     "position": "lhp",
+     "salary": 765400
+    }
+   ],
+   "dollars": 1537600
+  },
+  {
+   "season": 2025,
+   "mlbId": 695243,
+   "rows": [
+    {
+     "rowKey": "salaries#1928",
+     "name": "Miller, Tyson",
+     "position": "rhp",
+     "salary": 778000
+    },
+    {
+     "rowKey": "salaries#2085",
+     "name": "Miller, Mason",
+     "position": "rhp-c",
+     "salary": 765000
+    }
+   ],
+   "dollars": 1543000
+  },
+  {
+   "season": 2024,
+   "mlbId": 671277,
+   "rows": [
+    {
+     "rowKey": "salaries#2941",
+     "name": "García Jr., Luis",
+     "position": "2b",
+     "salary": 1950000
+    },
+    {
+     "rowKey": "salaries#2945",
+     "name": "Garcia, Luis",
+     "position": "rhp-s",
+     "salary": 1875000
+    }
+   ],
+   "dollars": 3825000
+  },
+  {
+   "season": 2024,
+   "mlbId": 682847,
+   "rows": [
+    {
+     "rowKey": "salaries#3282",
+     "name": "Ortiz, Luis",
+     "position": "rhp",
+     "salary": 747500
+    },
+    {
+     "rowKey": "salaries#3352",
+     "name": "Ortiz, Luis",
+     "position": "rhp",
+     "salary": 744000
+    }
+   ],
+   "dollars": 1491500
+  },
+  {
+   "season": 2022,
+   "mlbId": 650895,
+   "rows": [
+    {
+     "rowKey": "salaries#5402",
+     "name": "Castillo, Diego",
+     "position": "rhp",
+     "salary": 2150000
+    },
+    {
+     "rowKey": "salaries#5973",
+     "name": "Castillo, Diego",
+     "position": "3b",
+     "salary": 700000
+    }
+   ],
+   "dollars": 2850000
+  },
+  {
+   "season": 2016,
+   "mlbId": 622110,
+   "rows": [
+    {
+     "rowKey": "salaries#13009",
+     "name": "Duffy, Matt",
+     "position": "3b",
+     "salary": 537500
+    },
+    {
+     "rowKey": "salaries#13227",
+     "name": "Duffy, Matt",
+     "position": "3b",
+     "salary": 510200
+    }
+   ],
+   "dollars": 1047700
+  },
+  {
+   "season": 2015,
+   "mlbId": 456068,
+   "rows": [
+    {
+     "rowKey": "salaries#13619",
+     "name": "Gonzalez, Miguel",
+     "position": "rhp-s",
+     "salary": 3666667
+    },
+    {
+     "rowKey": "salaries#13638",
+     "name": "Gonzalez, Miguel",
+     "position": "rhp-s",
+     "salary": 3275000
+    }
+   ],
+   "dollars": 6941667
+  },
+  {
+   "season": 2014,
+   "mlbId": 448602,
+   "rows": [
+    {
+     "rowKey": "salaries#15388",
+     "name": "Reynolds, Mark",
+     "position": "1b",
+     "salary": 2000000
+    },
+    {
+     "rowKey": "salaries#15570",
+     "name": "Reynolds, Matt",
+     "position": "lhp",
+     "salary": 550000
+    }
+   ],
+   "dollars": 2550000
+  },
+  {
+   "season": 2014,
+   "mlbId": 456068,
+   "rows": [
+    {
+     "rowKey": "salaries#15291",
+     "name": "Gonzalez, Miguel",
+     "position": "rhp-s",
+     "salary": 3666667
+    },
+    {
+     "rowKey": "salaries#15599",
+     "name": "Gonzalez, Miguel",
+     "position": "rhp-s",
+     "salary": 529000
+    }
+   ],
+   "dollars": 4195667
+  },
+  {
+   "season": 2012,
+   "mlbId": 112020,
+   "rows": [
+    {
+     "rowKey": "salaries#16859",
+     "name": "Carpenter, Chris",
+     "position": "rhp-s",
+     "salary": 8500000
+    },
+    {
+     "rowKey": "salaries#17522",
+     "name": "Carpenter, Chris",
+     "position": "rhp",
+     "salary": 482000
+    }
+   ],
+   "dollars": 8982000
+  },
+  {
+   "season": 2010,
+   "mlbId": 425446,
+   "rows": [
+    {
+     "rowKey": "salaries#18813",
+     "name": "Miles, Aaron",
+     "position": "",
+     "salary": 2700000
+    },
+    {
+     "rowKey": "salaries#18972",
+     "name": "Miles, Aaron",
+     "position": "",
+     "salary": 1000000
+    }
+   ],
+   "dollars": 3700000
+  },
+  {
+   "season": 2008,
+   "mlbId": 425766,
+   "rows": [
+    {
+     "rowKey": "salaries#20870",
+     "name": "Loney, James",
+     "position": "1b",
+     "salary": 411000
+    },
+    {
+     "rowKey": "salaries#21103",
+     "name": "Hoey, James",
+     "position": "rhp",
+     "salary": 390000
+    }
+   ],
+   "dollars": 801000
+  },
+  {
+   "season": 2008,
+   "mlbId": 435539,
+   "rows": [
+    {
+     "rowKey": "salaries#20972",
+     "name": "Owens, Jerry",
+     "position": "cf",
+     "salary": 397500
+    },
+    {
+     "rowKey": "salaries#21130",
+     "name": "Owens, Henry",
+     "position": "rhp",
+     "salary": 390000
+    }
+   ],
+   "dollars": 787500
+  },
+  {
+   "season": 2004,
+   "mlbId": 119865,
+   "rows": [
+    {
+     "rowKey": "salaries#24279",
+     "name": "Nunez, Abraham",
+     "position": "inf",
+     "salary": 625000
+    },
+    {
+     "rowKey": "salaries#24629",
+     "name": "Nunez, Abraham",
+     "position": "p",
+     "salary": 300000
+    }
+   ],
+   "dollars": 925000
+  },
+  {
+   "season": 2004,
+   "mlbId": 430829,
+   "rows": [
+    {
+     "rowKey": "salaries#24637",
+     "name": "Thompson, Rich",
+     "position": "rhp",
+     "salary": 300000
+    },
+    {
+     "rowKey": "salaries#24638",
+     "name": "Thompson, Rich",
+     "position": "of",
+     "salary": 300000
+    }
+   ],
+   "dollars": 600000
+  },
+  {
+   "season": 2003,
+   "mlbId": 110230,
+   "rows": [
+    {
+     "rowKey": "salaries#24966",
+     "name": "Anderson, Brian",
+     "position": "lhp",
+     "salary": 1500000
+    },
+    {
+     "rowKey": "salaries#25345",
+     "name": "Anderson, Ryan",
+     "position": "p",
+     "salary": 300000
+    }
+   ],
+   "dollars": 1800000
+  },
+  {
+   "season": 2003,
+   "mlbId": 119865,
+   "rows": [
+    {
+     "rowKey": "salaries#25080",
+     "name": "Nunez, Abraham",
+     "position": "inf",
+     "salary": 675000
+    },
+    {
+     "rowKey": "salaries#25402",
+     "name": "Nunez, Abraham",
+     "position": "p",
+     "salary": 300000
+    }
+   ],
+   "dollars": 975000
+  },
+  {
+   "season": 2003,
+   "mlbId": 135783,
+   "rows": [
+    {
+     "rowKey": "salaries#25361",
+     "name": "Castro, Ramon",
+     "position": "c",
+     "salary": 300000
+    },
+    {
+     "rowKey": "salaries#25362",
+     "name": "Castro, Ramon",
+     "position": "inf",
+     "salary": 300000
+    }
+   ],
+   "dollars": 600000
+  },
+  {
+   "season": 2002,
+   "mlbId": 121002,
+   "rows": [
+    {
+     "rowKey": "salaries#25898",
+     "name": "Reed, Steve",
+     "position": "p",
+     "salary": 500000
+    },
+    {
+     "rowKey": "salaries#26139",
+     "name": "Green, Steve",
+     "position": "p",
+     "salary": 200000
+    }
+   ],
+   "dollars": 700000
+  }
+ ],
+ "seasons": [
+  {
+   "year": 2000,
+   "regime": "2000-2005",
+   "regimeComplete": false,
+   "eligibleRows": 554,
+   "eligibleDollars": 1249673375,
+   "attributedRows": 513,
+   "attributedDollars": 1206968208,
+   "coverageRows": 0.9259927797833934,
+   "coverageDollars": 0.9658269369786325,
+   "meanPayroll": 40232273.6,
+   "paPerInning": 4.3996747165331875,
+   "teams": {
+    "108": {
+     "payroll": 30601667,
+     "payrollIndex": 0.7606248482064408,
+     "playerCount": 19,
+     "splitPlayerCount": 0,
+     "regime": "2000-2005"
+    },
+    "109": {
+     "payroll": 61849481.475086,
+     "payrollIndex": 1.537310122962725,
+     "playerCount": 21,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "110": {
+     "payroll": 59590662.89468293,
+     "payrollIndex": 1.4811656802483797,
+     "playerCount": 23,
+     "splitPlayerCount": 10,
+     "regime": "2000-2005"
+    },
+    "111": {
+     "payroll": 36805170.9499502,
+     "payrollIndex": 0.9148170773513083,
+     "playerCount": 15,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "112": {
+     "payroll": 36286829.91278356,
+     "payrollIndex": 0.90193336507792,
+     "playerCount": 14,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "113": {
+     "payroll": 30328921.80137872,
+     "payrollIndex": 0.7538455843414904,
+     "playerCount": 20,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "114": {
+     "payroll": 64588009.1590799,
+     "payrollIndex": 1.6053780554693757,
+     "playerCount": 24,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "115": {
+     "payroll": 38072750.89052393,
+     "payrollIndex": 0.9463236223996033,
+     "playerCount": 17,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "116": {
+     "payroll": 36195167,
+     "payrollIndex": 0.8996550222307098,
+     "playerCount": 16,
+     "splitPlayerCount": 0,
+     "regime": "2000-2005"
+    },
+    "117": {
+     "payroll": 43198636.12750142,
+     "payrollIndex": 1.0737309195347444,
+     "playerCount": 14,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "118": {
+     "payroll": 20015102.612392098,
+     "payrollIndex": 0.4974887278652852,
+     "playerCount": 20,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "119": {
+     "payroll": 64566926.389984645,
+     "payrollIndex": 1.6048540291788194,
+     "playerCount": 17,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "120": {
+     "payroll": 17852826.22211583,
+     "payrollIndex": 0.4437439056915697,
+     "playerCount": 17,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "121": {
+     "payroll": 55502537.239436835,
+     "payrollIndex": 1.37955258982522,
+     "playerCount": 19,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "133": {
+     "payroll": 15676515.317812575,
+     "payrollIndex": 0.3896502463090372,
+     "playerCount": 16,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "134": {
+     "payroll": 17528561.803548794,
+     "payrollIndex": 0.43568409724547097,
+     "playerCount": 16,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "135": {
+     "payroll": 39965855.224284,
+     "payrollIndex": 0.9933779935390974,
+     "playerCount": 18,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "136": {
+     "payroll": 54540701.96382416,
+     "payrollIndex": 1.3556455323922871,
+     "playerCount": 23,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "137": {
+     "payroll": 48388800.87249858,
+     "payrollIndex": 1.202735926723728,
+     "playerCount": 22,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "138": {
+     "payroll": 45921938.709301926,
+     "payrollIndex": 1.141420421969439,
+     "playerCount": 21,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "139": {
+     "payroll": 37751269.19094064,
+     "payrollIndex": 0.9383329802902474,
+     "playerCount": 21,
+     "splitPlayerCount": 9,
+     "regime": "2000-2005"
+    },
+    "140": {
+     "payroll": 47786572.57138318,
+     "payrollIndex": 1.1877671405421935,
+     "playerCount": 17,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "141": {
+     "payroll": 40113159.80741056,
+     "payrollIndex": 0.99703934722224,
+     "playerCount": 24,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "142": {
+     "payroll": 11759143.109540636,
+     "payrollIndex": 0.29228134672311024,
+     "playerCount": 18,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "143": {
+     "payroll": 29230103.52305819,
+     "payrollIndex": 0.7265337229924334,
+     "playerCount": 17,
+     "splitPlayerCount": 8,
+     "regime": "2000-2005"
+    },
+    "144": {
+     "payroll": 67946285.9143998,
+     "payrollIndex": 1.6888502645895658,
+     "playerCount": 21,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "145": {
+     "payroll": 28242794.62182368,
+     "payrollIndex": 0.7019935016007566,
+     "playerCount": 23,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "146": {
+     "payroll": 10021494.732641604,
+     "payrollIndex": 0.24909093709885696,
+     "playerCount": 18,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "147": {
+     "payroll": 91677198.38225907,
+     "payrollIndex": 2.278697925295951,
+     "playerCount": 24,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "158": {
+     "payroll": 24963122.580356497,
+     "payrollIndex": 0.6204750650819917,
+     "playerCount": 18,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    }
+   }
+  },
+  {
+   "year": 2001,
+   "regime": "2000-2005",
+   "regimeComplete": false,
+   "eligibleRows": 619,
+   "eligibleDollars": 1632075694,
+   "attributedRows": 592,
+   "attributedDollars": 1562398820,
+   "coverageRows": 0.9563812600969306,
+   "coverageDollars": 0.9573078171213791,
+   "meanPayroll": 52079960.666666664,
+   "paPerInning": 4.319415995441315,
+   "teams": {
+    "108": {
+     "payroll": 29346500,
+     "payrollIndex": 0.5634892888615981,
+     "playerCount": 22,
+     "splitPlayerCount": 0,
+     "regime": "2000-2005"
+    },
+    "109": {
+     "payroll": 65189511.232490815,
+     "payrollIndex": 1.2517196710214646,
+     "playerCount": 23,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "110": {
+     "payroll": 42863685.661756694,
+     "payrollIndex": 0.823036060570438,
+     "playerCount": 21,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "111": {
+     "payroll": 71969599.50660223,
+     "payrollIndex": 1.3819057961129713,
+     "playerCount": 23,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "112": {
+     "payroll": 57683548.719478704,
+     "payrollIndex": 1.1075958580052954,
+     "playerCount": 22,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "113": {
+     "payroll": 40078495.96720539,
+     "payrollIndex": 0.7695569553849009,
+     "playerCount": 20,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "114": {
+     "payroll": 81627584.64618164,
+     "payrollIndex": 1.5673511193418908,
+     "playerCount": 28,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "115": {
+     "payroll": 60309636.906160876,
+     "payrollIndex": 1.158020016416056,
+     "playerCount": 26,
+     "splitPlayerCount": 12,
+     "regime": "2000-2005"
+    },
+    "116": {
+     "payroll": 36016193.70705797,
+     "payrollIndex": 0.6915557010032426,
+     "playerCount": 21,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "117": {
+     "payroll": 56285459.23887027,
+     "payrollIndex": 1.0807508016206184,
+     "playerCount": 24,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "118": {
+     "payroll": 31281301.08517253,
+     "payrollIndex": 0.6006398753905715,
+     "playerCount": 25,
+     "splitPlayerCount": 8,
+     "regime": "2000-2005"
+    },
+    "119": {
+     "payroll": 89828875.85777928,
+     "payrollIndex": 1.7248261079289464,
+     "playerCount": 21,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "120": {
+     "payroll": 21931898.073823065,
+     "payrollIndex": 0.42111971270862325,
+     "playerCount": 19,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "121": {
+     "payroll": 78438088.80190141,
+     "payrollIndex": 1.5061088333752342,
+     "playerCount": 24,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "133": {
+     "payroll": 25288862.64559242,
+     "payrollIndex": 0.48557760647039705,
+     "playerCount": 21,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "134": {
+     "payroll": 30836756.57192564,
+     "payrollIndex": 0.5921040679983164,
+     "playerCount": 23,
+     "splitPlayerCount": 9,
+     "regime": "2000-2005"
+    },
+    "135": {
+     "payroll": 30006741.977655806,
+     "payrollIndex": 0.5761667557644944,
+     "playerCount": 20,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "136": {
+     "payroll": 63093334,
+     "payrollIndex": 1.2114704618120489,
+     "playerCount": 21,
+     "splitPlayerCount": 0,
+     "regime": "2000-2005"
+    },
+    "137": {
+     "payroll": 58896311.46884276,
+     "payrollIndex": 1.1308824107184636,
+     "playerCount": 26,
+     "splitPlayerCount": 8,
+     "regime": "2000-2005"
+    },
+    "138": {
+     "payroll": 61785761.56561931,
+     "payrollIndex": 1.1863634452620615,
+     "playerCount": 22,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "139": {
+     "payroll": 28420703.385802798,
+     "payrollIndex": 0.5457128427516887,
+     "playerCount": 16,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "140": {
+     "payroll": 71486870.14088011,
+     "payrollIndex": 1.3726367920748963,
+     "playerCount": 20,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "141": {
+     "payroll": 58541889.67524116,
+     "payrollIndex": 1.124077071600217,
+     "playerCount": 19,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "142": {
+     "payroll": 20914297.979938313,
+     "payrollIndex": 0.4015805256420697,
+     "playerCount": 20,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "143": {
+     "payroll": 38744802.602424055,
+     "payrollIndex": 0.7439483844929694,
+     "playerCount": 24,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "144": {
+     "payroll": 88556650.56827024,
+     "payrollIndex": 1.7003978005104403,
+     "playerCount": 25,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "145": {
+     "payroll": 60210977.24287572,
+     "payrollIndex": 1.1561256282094936,
+     "playerCount": 21,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "146": {
+     "payroll": 23495876.516236074,
+     "payrollIndex": 0.4511500434230245,
+     "playerCount": 19,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "147": {
+     "payroll": 106006002.9249863,
+     "payrollIndex": 2.0354470619413227,
+     "playerCount": 24,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "158": {
+     "payroll": 33262601.329228412,
+     "payrollIndex": 0.6386833035862459,
+     "playerCount": 19,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    }
+   }
+  },
+  {
+   "year": 2002,
+   "regime": "2000-2005",
+   "regimeComplete": false,
+   "eligibleRows": 710,
+   "eligibleDollars": 1878111070,
+   "attributedRows": 681,
+   "attributedDollars": 1824421113,
+   "coverageRows": 0.9591549295774648,
+   "coverageDollars": 0.9714127892340254,
+   "meanPayroll": 60814037.1,
+   "paPerInning": 4.312903002149348,
+   "teams": {
+    "108": {
+     "payroll": 57916667,
+     "payrollIndex": 0.9523568860387333,
+     "playerCount": 21,
+     "splitPlayerCount": 0,
+     "regime": "2000-2005"
+    },
+    "109": {
+     "payroll": 91474923.57575758,
+     "payrollIndex": 1.5041744955254348,
+     "playerCount": 29,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "110": {
+     "payroll": 45297723.21715133,
+     "payrollIndex": 0.7448563748968957,
+     "playerCount": 26,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "111": {
+     "payroll": 103547150.75957453,
+     "payrollIndex": 1.7026850328865033,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "112": {
+     "payroll": 66779537.93886545,
+     "payrollIndex": 1.0980941427890412,
+     "playerCount": 21,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "113": {
+     "payroll": 44824382.9421449,
+     "payrollIndex": 0.7370729699861498,
+     "playerCount": 27,
+     "splitPlayerCount": 8,
+     "regime": "2000-2005"
+    },
+    "114": {
+     "payroll": 59847693.91028577,
+     "payrollIndex": 0.9841098661461133,
+     "playerCount": 26,
+     "splitPlayerCount": 8,
+     "regime": "2000-2005"
+    },
+    "115": {
+     "payroll": 52879192.06367264,
+     "payrollIndex": 0.8695228040315817,
+     "playerCount": 24,
+     "splitPlayerCount": 8,
+     "regime": "2000-2005"
+    },
+    "116": {
+     "payroll": 42793929.46550209,
+     "payrollIndex": 0.7036850619723467,
+     "playerCount": 24,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "117": {
+     "payroll": 56048899.25600486,
+     "payrollIndex": 0.9216441125893426,
+     "playerCount": 23,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "118": {
+     "payroll": 43893320.3570543,
+     "payrollIndex": 0.7217629752959502,
+     "playerCount": 26,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "119": {
+     "payroll": 82856049.92643811,
+     "payrollIndex": 1.3624494257829514,
+     "playerCount": 26,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "120": {
+     "payroll": 32859182.462794304,
+     "payrollIndex": 0.5403223339500068,
+     "playerCount": 27,
+     "splitPlayerCount": 9,
+     "regime": "2000-2005"
+    },
+    "121": {
+     "payroll": 87825661.74568482,
+     "payrollIndex": 1.4441675957356368,
+     "playerCount": 28,
+     "splitPlayerCount": 9,
+     "regime": "2000-2005"
+    },
+    "133": {
+     "payroll": 38561104.33021872,
+     "payrollIndex": 0.634082296934349,
+     "playerCount": 25,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "134": {
+     "payroll": 35384562.00743282,
+     "payrollIndex": 0.5818485944165811,
+     "playerCount": 25,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "135": {
+     "payroll": 35118484.102559425,
+     "payrollIndex": 0.577473323219968,
+     "playerCount": 25,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "136": {
+     "payroll": 81950490.3799335,
+     "payrollIndex": 1.347558792144939,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "137": {
+     "payroll": 77599403.69613741,
+     "payrollIndex": 1.276011384814599,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "138": {
+     "payroll": 71924057.57027085,
+     "payrollIndex": 1.1826884219510374,
+     "playerCount": 26,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "139": {
+     "payroll": 31772796.42189556,
+     "payrollIndex": 0.5224582668249722,
+     "playerCount": 20,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "140": {
+     "payroll": 89678987.48668629,
+     "payrollIndex": 1.4746428910684222,
+     "playerCount": 26,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "141": {
+     "payroll": 60127990.44901995,
+     "payrollIndex": 0.988718942472904,
+     "playerCount": 23,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "142": {
+     "payroll": 30096326.530612245,
+     "payrollIndex": 0.49489111339744035,
+     "playerCount": 20,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "143": {
+     "payroll": 55548886.70572111,
+     "payrollIndex": 0.9134221201986459,
+     "playerCount": 30,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "144": {
+     "payroll": 90360367,
+     "payrollIndex": 1.4858472041810886,
+     "playerCount": 24,
+     "splitPlayerCount": 0,
+     "regime": "2000-2005"
+    },
+    "145": {
+     "payroll": 51806494.84758122,
+     "payrollIndex": 0.8518838300833874,
+     "playerCount": 23,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "146": {
+     "payroll": 36709291.87044614,
+     "payrollIndex": 0.6036318853504652,
+     "playerCount": 24,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "147": {
+     "payroll": 131715555.63729905,
+     "payrollIndex": 2.165874227700286,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "158": {
+     "payroll": 37221999.34325503,
+     "payrollIndex": 0.612062627614226,
+     "playerCount": 21,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    }
+   }
+  },
+  {
+   "year": 2003,
+   "regime": "2000-2005",
+   "regimeComplete": false,
+   "eligibleRows": 793,
+   "eligibleDollars": 2007681000,
+   "attributedRows": 747,
+   "attributedDollars": 1933581000,
+   "coverageRows": 0.9419924337957125,
+   "coverageDollars": 0.9630917461489151,
+   "meanPayroll": 64452700,
+   "paPerInning": 4.3255465132378506,
+   "teams": {
+    "108": {
+     "payroll": 73802620.10440357,
+     "payrollIndex": 1.1450663836333244,
+     "playerCount": 25,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "109": {
+     "payroll": 77495071.65236698,
+     "payrollIndex": 1.2023557066246562,
+     "playerCount": 27,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "110": {
+     "payroll": 50605477.10248825,
+     "payrollIndex": 0.785156822018135,
+     "playerCount": 28,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "111": {
+     "payroll": 103177415.1574002,
+     "payrollIndex": 1.6008237848437723,
+     "playerCount": 34,
+     "splitPlayerCount": 11,
+     "regime": "2000-2005"
+    },
+    "112": {
+     "payroll": 69905840.3201625,
+     "payrollIndex": 1.0846068561931852,
+     "playerCount": 27,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "113": {
+     "payroll": 55183068.43692613,
+     "payrollIndex": 0.8561793134643875,
+     "playerCount": 27,
+     "splitPlayerCount": 9,
+     "regime": "2000-2005"
+    },
+    "114": {
+     "payroll": 37662550.33447868,
+     "payrollIndex": 0.584344028015563,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "115": {
+     "payroll": 62718635.180323064,
+     "payrollIndex": 0.9730955441792674,
+     "playerCount": 31,
+     "splitPlayerCount": 9,
+     "regime": "2000-2005"
+    },
+    "116": {
+     "payroll": 36401912.62219408,
+     "payrollIndex": 0.5647849139321407,
+     "playerCount": 24,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "117": {
+     "payroll": 61562438.34461897,
+     "payrollIndex": 0.9551568568053622,
+     "playerCount": 26,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "118": {
+     "payroll": 44901111.439861,
+     "payrollIndex": 0.6966521408701419,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "119": {
+     "payroll": 104787080.20243481,
+     "payrollIndex": 1.625798146585555,
+     "playerCount": 26,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "120": {
+     "payroll": 46862484.359726295,
+     "payrollIndex": 0.727083339561047,
+     "playerCount": 25,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "121": {
+     "payroll": 97396048.97902694,
+     "payrollIndex": 1.511124421149571,
+     "playerCount": 27,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "133": {
+     "payroll": 47624339.801254824,
+     "payrollIndex": 0.7389037201118778,
+     "playerCount": 25,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "134": {
+     "payroll": 42353788.76239682,
+     "payrollIndex": 0.6571297829632711,
+     "playerCount": 27,
+     "splitPlayerCount": 9,
+     "regime": "2000-2005"
+    },
+    "135": {
+     "payroll": 52958932.15229567,
+     "payrollIndex": 0.8216712744740821,
+     "playerCount": 30,
+     "splitPlayerCount": 9,
+     "regime": "2000-2005"
+    },
+    "136": {
+     "payroll": 84068741.04005273,
+     "payrollIndex": 1.3043478557151635,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "137": {
+     "payroll": 75096533.31105117,
+     "payrollIndex": 1.1651417754578346,
+     "playerCount": 29,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "138": {
+     "payroll": 84080434.51460734,
+     "payrollIndex": 1.3045292829409372,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "139": {
+     "payroll": 25551107.301571332,
+     "payrollIndex": 0.3964319152117961,
+     "playerCount": 24,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "140": {
+     "payroll": 73701396.72719891,
+     "payrollIndex": 1.1434958772432948,
+     "playerCount": 25,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "141": {
+     "payroll": 46485968.792917065,
+     "payrollIndex": 0.7212416049741448,
+     "playerCount": 28,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "142": {
+     "payroll": 48967847.94895151,
+     "payrollIndex": 0.7597485900350414,
+     "playerCount": 25,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "143": {
+     "payroll": 68287518.11993495,
+     "payrollIndex": 1.059498176491209,
+     "playerCount": 31,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "144": {
+     "payroll": 97977055.88495311,
+     "payrollIndex": 1.520138890767231,
+     "playerCount": 25,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "145": {
+     "payroll": 55653785.19059376,
+     "payrollIndex": 0.863482603375712,
+     "playerCount": 28,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "146": {
+     "payroll": 47893560.87449804,
+     "payrollIndex": 0.7430807533974223,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "147": {
+     "payroll": 130182886.17472595,
+     "payrollIndex": 2.0198205222547068,
+     "playerCount": 36,
+     "splitPlayerCount": 16,
+     "regime": "2000-2005"
+    },
+    "158": {
+     "payroll": 30235349.166585285,
+     "payrollIndex": 0.46910911671016553,
+     "playerCount": 28,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    }
+   }
+  },
+  {
+   "year": 2004,
+   "regime": "2000-2005",
+   "regimeComplete": false,
+   "eligibleRows": 826,
+   "eligibleDollars": 2001184475,
+   "attributedRows": 775,
+   "attributedDollars": 1895341325,
+   "coverageRows": 0.9382566585956417,
+   "coverageDollars": 0.9471097485902693,
+   "meanPayroll": 63178044.166666664,
+   "paPerInning": 4.34481725584182,
+   "teams": {
+    "108": {
+     "payroll": 94805955.78231293,
+     "payrollIndex": 1.500615554546297,
+     "playerCount": 26,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "109": {
+     "payroll": 64516027.09665751,
+     "payrollIndex": 1.0211779732601596,
+     "playerCount": 30,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "110": {
+     "payroll": 40281826.02440594,
+     "payrollIndex": 0.6375921660085042,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "111": {
+     "payroll": 127996854.25758164,
+     "payrollIndex": 2.0259705083607824,
+     "playerCount": 35,
+     "splitPlayerCount": 8,
+     "regime": "2000-2005"
+    },
+    "112": {
+     "payroll": 83721813.69737904,
+     "payrollIndex": 1.3251726102270107,
+     "playerCount": 32,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "113": {
+     "payroll": 46062357.88102364,
+     "payrollIndex": 0.7290880635606408,
+     "playerCount": 25,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "114": {
+     "payroll": 30396955.37886104,
+     "payrollIndex": 0.48113163013835053,
+     "playerCount": 26,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "115": {
+     "payroll": 48009772.96958554,
+     "payrollIndex": 0.7599123018581184,
+     "playerCount": 24,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "116": {
+     "payroll": 50271357.14285714,
+     "payrollIndex": 0.795709297524927,
+     "playerCount": 28,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "117": {
+     "payroll": 68195582.5461101,
+     "payrollIndex": 1.0794190204148602,
+     "playerCount": 30,
+     "splitPlayerCount": 8,
+     "regime": "2000-2005"
+    },
+    "118": {
+     "payroll": 40632384.93811617,
+     "payrollIndex": 0.6431409119112016,
+     "playerCount": 29,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "119": {
+     "payroll": 76879686.33804335,
+     "payrollIndex": 1.2168734779954742,
+     "playerCount": 30,
+     "splitPlayerCount": 11,
+     "regime": "2000-2005"
+    },
+    "120": {
+     "payroll": 35016119.11930643,
+     "payrollIndex": 0.554245063790393,
+     "playerCount": 26,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "121": {
+     "payroll": 79347813.08744986,
+     "payrollIndex": 1.255939688131633,
+     "playerCount": 30,
+     "splitPlayerCount": 10,
+     "regime": "2000-2005"
+    },
+    "133": {
+     "payroll": 58600453.44827104,
+     "payrollIndex": 0.9275445959308313,
+     "playerCount": 28,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "134": {
+     "payroll": 28736317.16517756,
+     "payrollIndex": 0.4548465775447211,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "135": {
+     "payroll": 58219211.33550529,
+     "payrollIndex": 0.9215101876519043,
+     "playerCount": 33,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "136": {
+     "payroll": 66826744.95445242,
+     "payrollIndex": 1.0577526708196332,
+     "playerCount": 27,
+     "splitPlayerCount": 8,
+     "regime": "2000-2005"
+    },
+    "137": {
+     "payroll": 65614934.672184594,
+     "payrollIndex": 1.038571794009471,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "138": {
+     "payroll": 88936139.24050632,
+     "payrollIndex": 1.407706433676367,
+     "playerCount": 27,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "139": {
+     "payroll": 27286106.695830137,
+     "payrollIndex": 0.4318922349645408,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "140": {
+     "payroll": 39649416.65866286,
+     "payrollIndex": 0.6275822112198635,
+     "playerCount": 28,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "141": {
+     "payroll": 48169861.77418384,
+     "payrollIndex": 0.7624462328575647,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "142": {
+     "payroll": 46869586.12975392,
+     "payrollIndex": 0.7418651012068328,
+     "playerCount": 26,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "143": {
+     "payroll": 91627859.22993805,
+     "payrollIndex": 1.4503117410254016,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "144": {
+     "payroll": 82434772.72727273,
+     "payrollIndex": 1.3048009607547506,
+     "playerCount": 29,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "145": {
+     "payroll": 67971460.77614564,
+     "payrollIndex": 1.0758715574802176,
+     "playerCount": 29,
+     "splitPlayerCount": 7,
+     "regime": "2000-2005"
+    },
+    "146": {
+     "payroll": 45904349.311244175,
+     "payrollIndex": 0.7265870591078498,
+     "playerCount": 29,
+     "splitPlayerCount": 10,
+     "regime": "2000-2005"
+    },
+    "147": {
+     "payroll": 165729095.31198215,
+     "payrollIndex": 2.6232071204164056,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "158": {
+     "payroll": 26630509.30919893,
+     "payrollIndex": 0.42151525360529346,
+     "playerCount": 24,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    }
+   }
+  },
+  {
+   "year": 2005,
+   "regime": "2000-2005",
+   "regimeComplete": false,
+   "eligibleRows": 846,
+   "eligibleDollars": 2068442197,
+   "attributedRows": 784,
+   "attributedDollars": 2010647297,
+   "coverageRows": 0.9267139479905437,
+   "coverageDollars": 0.9720587309213553,
+   "meanPayroll": 67021576.56666667,
+   "paPerInning": 4.30908964740896,
+   "teams": {
+    "108": {
+     "payroll": 77955613.97080292,
+     "payrollIndex": 1.163142050131574,
+     "playerCount": 27,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "109": {
+     "payroll": 64588782.603925616,
+     "payrollIndex": 0.9637013319088198,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "110": {
+     "payroll": 70667668.69095817,
+     "payrollIndex": 1.0544017659844918,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "111": {
+     "payroll": 110485249.90524091,
+     "payrollIndex": 1.6485026996543526,
+     "playerCount": 38,
+     "splitPlayerCount": 14,
+     "regime": "2000-2005"
+    },
+    "112": {
+     "payroll": 78300299.25619532,
+     "payrollIndex": 1.1682849504190587,
+     "playerCount": 31,
+     "splitPlayerCount": 8,
+     "regime": "2000-2005"
+    },
+    "113": {
+     "payroll": 53469519.89102851,
+     "payrollIndex": 0.7977956149366634,
+     "playerCount": 27,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "114": {
+     "payroll": 36699645.72552472,
+     "payrollIndex": 0.5475795647543358,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "115": {
+     "payroll": 38820035.71311169,
+     "payrollIndex": 0.579216988047084,
+     "playerCount": 36,
+     "splitPlayerCount": 12,
+     "regime": "2000-2005"
+    },
+    "116": {
+     "payroll": 66731219.0298908,
+     "payrollIndex": 0.9956677005876301,
+     "playerCount": 28,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "117": {
+     "payroll": 74465926.7525607,
+     "payrollIndex": 1.1110739342051899,
+     "playerCount": 29,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "118": {
+     "payroll": 33473585.941948783,
+     "payrollIndex": 0.49944491993041157,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2000-2005"
+    },
+    "119": {
+     "payroll": 69622638.44393593,
+     "payrollIndex": 1.0388093209756408,
+     "playerCount": 30,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "120": {
+     "payroll": 55101658.07729082,
+     "payrollIndex": 0.8221480439583654,
+     "playerCount": 34,
+     "splitPlayerCount": 9,
+     "regime": "2000-2005"
+    },
+    "121": {
+     "payroll": 90685029.41176471,
+     "payrollIndex": 1.3530721605983096,
+     "playerCount": 23,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "133": {
+     "payroll": 55157146.25819496,
+     "payrollIndex": 0.8229759591424993,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "134": {
+     "payroll": 33540109.489928335,
+     "payrollIndex": 0.500437489060942,
+     "playerCount": 23,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "135": {
+     "payroll": 59442156.11055484,
+     "payrollIndex": 0.8869107406243637,
+     "playerCount": 29,
+     "splitPlayerCount": 10,
+     "regime": "2000-2005"
+    },
+    "136": {
+     "payroll": 63728846.67177529,
+     "payrollIndex": 0.9508705992373055,
+     "playerCount": 31,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "137": {
+     "payroll": 81195105.88295348,
+     "payrollIndex": 1.2114771099451582,
+     "playerCount": 29,
+     "splitPlayerCount": 10,
+     "regime": "2000-2005"
+    },
+    "138": {
+     "payroll": 90363500,
+     "payrollIndex": 1.3482747591011233,
+     "playerCount": 25,
+     "splitPlayerCount": 0,
+     "regime": "2000-2005"
+    },
+    "139": {
+     "payroll": 29406502.667865705,
+     "payrollIndex": 0.43876172680920034,
+     "playerCount": 26,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    },
+    "140": {
+     "payroll": 52908080.80996459,
+     "payrollIndex": 0.7894186248713007,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2000-2005"
+    },
+    "141": {
+     "payroll": 44245934.782608695,
+     "payrollIndex": 0.6601744848332098,
+     "playerCount": 26,
+     "splitPlayerCount": 1,
+     "regime": "2000-2005"
+    },
+    "142": {
+     "payroll": 56290000,
+     "payrollIndex": 0.8398787805895327,
+     "playerCount": 25,
+     "splitPlayerCount": 0,
+     "regime": "2000-2005"
+    },
+    "143": {
+     "payroll": 90806369.76812117,
+     "payrollIndex": 1.3548826276534343,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "144": {
+     "payroll": 77623704.5794482,
+     "payrollIndex": 1.158189773441625,
+     "playerCount": 26,
+     "splitPlayerCount": 5,
+     "regime": "2000-2005"
+    },
+    "145": {
+     "payroll": 66360000,
+     "payrollIndex": 0.9901289017573528,
+     "playerCount": 24,
+     "splitPlayerCount": 0,
+     "regime": "2000-2005"
+    },
+    "146": {
+     "payroll": 55124026.452689,
+     "payrollIndex": 0.8224817928276706,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2000-2005"
+    },
+    "147": {
+     "payroll": 193649438.76905835,
+     "payrollIndex": 2.889359646388419,
+     "playerCount": 31,
+     "splitPlayerCount": 9,
+     "regime": "2000-2005"
+    },
+    "158": {
+     "payroll": 39739501.34265779,
+     "payrollIndex": 0.5929359376249338,
+     "playerCount": 23,
+     "splitPlayerCount": 2,
+     "regime": "2000-2005"
+    }
+   }
+  },
+  {
+   "year": 2006,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 887,
+   "eligibleDollars": 2263921649,
+   "attributedRows": 821,
+   "attributedDollars": 2177317049,
+   "coverageRows": 0.9255918827508456,
+   "coverageDollars": 0.9617457609284958,
+   "meanPayroll": 72577234.96666667,
+   "paPerInning": 4.3476582366267476,
+   "teams": {
+    "108": {
+     "payroll": 88917515.33249198,
+     "payrollIndex": 1.2251433300446082,
+     "playerCount": 25,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 51424556.78412777,
+     "payrollIndex": 0.7085494068180758,
+     "playerCount": 27,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 70902601.92425671,
+     "payrollIndex": 0.9769261939617969,
+     "playerCount": 29,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 106555765.80122665,
+     "payrollIndex": 1.468170644006563,
+     "playerCount": 31,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 90014056.86072472,
+     "payrollIndex": 1.2402519454215422,
+     "playerCount": 31,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 62439019.48810342,
+     "payrollIndex": 0.86031135681568,
+     "playerCount": 40,
+     "splitPlayerCount": 20,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 47660976.91917399,
+     "payrollIndex": 0.6566932033310964,
+     "playerCount": 27,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 40702220.51843049,
+     "payrollIndex": 0.5608124990863076,
+     "playerCount": 32,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 79617534.77603787,
+     "payrollIndex": 1.0970042439975107,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 79246053.63992955,
+     "payrollIndex": 1.0918858189668668,
+     "playerCount": 32,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 52057501.60253957,
+     "payrollIndex": 0.7172703896262869,
+     "playerCount": 42,
+     "splitPlayerCount": 15,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 89285678.94342159,
+     "payrollIndex": 1.230216044802875,
+     "playerCount": 33,
+     "splitPlayerCount": 14,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 52277439.72926501,
+     "payrollIndex": 0.7203007906442707,
+     "playerCount": 32,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 100381774.68139198,
+     "payrollIndex": 1.3831027694496134,
+     "playerCount": 33,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 63870290.07177033,
+     "payrollIndex": 0.8800320114303711,
+     "playerCount": 30,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 40477139.85002157,
+     "payrollIndex": 0.5577112419426277,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 72477896.92165306,
+     "payrollIndex": 0.9986312781816609,
+     "playerCount": 36,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 76885458.67269686,
+     "payrollIndex": 1.0593605378877946,
+     "playerCount": 28,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 82302974.18109696,
+     "payrollIndex": 1.1340053698504378,
+     "playerCount": 29,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 91644107.86929917,
+     "payrollIndex": 1.2627114812432514,
+     "playerCount": 29,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 29036414.626827892,
+     "payrollIndex": 0.4000760657272733,
+     "playerCount": 32,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 64378947.95375481,
+     "payrollIndex": 0.8870405159871801,
+     "playerCount": 41,
+     "splitPlayerCount": 13,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 70765530.70593469,
+     "payrollIndex": 0.9750375684391385,
+     "playerCount": 29,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 63389195.43692627,
+     "payrollIndex": 0.873403285011336,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 80243899.93136685,
+     "payrollIndex": 1.105634569410385,
+     "playerCount": 31,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 69121856.15813237,
+     "payrollIndex": 0.9523903217018217,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 100162739.78261505,
+     "payrollIndex": 1.3800848134903165,
+     "playerCount": 28,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 17006671.567037836,
+     "payrollIndex": 0.2343251513349699,
+     "playerCount": 33,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 187436594.9918379,
+     "payrollIndex": 2.582581095544959,
+     "playerCount": 33,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 56634633.27790711,
+     "payrollIndex": 0.7803360558433827,
+     "playerCount": 33,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2007,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 917,
+   "eligibleDollars": 2437457929,
+   "attributedRows": 835,
+   "attributedDollars": 2358348929,
+   "coverageRows": 0.910577971646674,
+   "coverageDollars": 0.9675444654618283,
+   "meanPayroll": 78611630.96666667,
+   "paPerInning": 4.343583287917283,
+   "teams": {
+    "108": {
+     "payroll": 101015927.7370183,
+     "payrollIndex": 1.2849997703247198,
+     "playerCount": 29,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 45941423.860069,
+     "payrollIndex": 0.5844100077194598,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 81554120.3780579,
+     "payrollIndex": 1.0374307131808387,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 125791345.95861648,
+     "payrollIndex": 1.6001620168897808,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 95785996.42354006,
+     "payrollIndex": 1.2184710486945087,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 66303628.59203827,
+     "payrollIndex": 0.8434328072922529,
+     "playerCount": 31,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 62718648.40946007,
+     "payrollIndex": 0.7978291206813196,
+     "playerCount": 32,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 60008924.401715614,
+     "payrollIndex": 0.7633593612522926,
+     "playerCount": 38,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 91881240.06545329,
+     "payrollIndex": 1.1687995648431881,
+     "playerCount": 28,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 87746593.51251397,
+     "payrollIndex": 1.1162037020923883,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 67663003.95314881,
+     "payrollIndex": 0.8607251003587453,
+     "playerCount": 30,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 105884408.48503213,
+     "payrollIndex": 1.3469305646378182,
+     "playerCount": 33,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 26163388.71215788,
+     "payrollIndex": 0.33281829152294046,
+     "playerCount": 26,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 119984948.26607998,
+     "payrollIndex": 1.5263002025356356,
+     "playerCount": 33,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 62398648.1568634,
+     "payrollIndex": 0.7937584730091913,
+     "playerCount": 32,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 42138950.80171289,
+     "payrollIndex": 0.5360396455784117,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 63032415.50281829,
+     "payrollIndex": 0.8018204778062121,
+     "playerCount": 33,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 92021473.48712546,
+     "payrollIndex": 1.170583441095948,
+     "playerCount": 25,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 77106468.1731372,
+     "payrollIndex": 0.9808531794211509,
+     "playerCount": 27,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 98711501.81800085,
+     "payrollIndex": 1.2556857122053229,
+     "playerCount": 33,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 24854691.220640507,
+     "payrollIndex": 0.31617065967222496,
+     "playerCount": 33,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 60796204.353159316,
+     "payrollIndex": 0.7733741636646421,
+     "playerCount": 37,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 69578262.74676993,
+     "payrollIndex": 0.8850886553450709,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 72242270.23606841,
+     "payrollIndex": 0.9189768657350587,
+     "playerCount": 25,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 91999345.74854285,
+     "payrollIndex": 1.1703019593570436,
+     "playerCount": 34,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 71675189.65907544,
+     "payrollIndex": 0.911763167583529,
+     "playerCount": 29,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 106361492.5991122,
+     "payrollIndex": 1.3529994390297306,
+     "playerCount": 28,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 34781499.059482664,
+     "payrollIndex": 0.4424472388091134,
+     "playerCount": 34,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 187986076.47872958,
+     "payrollIndex": 2.391326501779876,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 64220840.20385928,
+     "payrollIndex": 0.8169381478815845,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2008,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 909,
+   "eligibleDollars": 2624272155,
+   "attributedRows": 841,
+   "attributedDollars": 2512651535,
+   "coverageRows": 0.9251925192519251,
+   "coverageDollars": 0.9574660654813067,
+   "meanPayroll": 83755051.16666667,
+   "paPerInning": 4.327516087120305,
+   "teams": {
+    "108": {
+     "payroll": 101210228.31556286,
+     "payrollIndex": 1.2084074560967268,
+     "playerCount": 29,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 65115874.95812219,
+     "payrollIndex": 0.7774560943022549,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 49504620.26280708,
+     "payrollIndex": 0.5910642949079735,
+     "playerCount": 28,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 113986370.7771674,
+     "payrollIndex": 1.3609492106970662,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 117782996.0392856,
+     "payrollIndex": 1.4062793156785935,
+     "playerCount": 31,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 64230876.0302073,
+     "payrollIndex": 0.7668895802163903,
+     "playerCount": 31,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 64387778.47361817,
+     "payrollIndex": 0.7687629292410199,
+     "playerCount": 29,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 71304038.0535105,
+     "payrollIndex": 0.8513401527463755,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 129825068.64531732,
+     "payrollIndex": 1.5500565856854955,
+     "playerCount": 28,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 89543730.1604567,
+     "payrollIndex": 1.0691143866925825,
+     "playerCount": 30,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 60598301.29245424,
+     "payrollIndex": 0.7235181693324726,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 107034937.11948293,
+     "payrollIndex": 1.27795202353218,
+     "playerCount": 34,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 50425535.62314189,
+     "payrollIndex": 0.6020596360546496,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 129065556.38075006,
+     "payrollIndex": 1.5409883294551234,
+     "playerCount": 29,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 47275185.84893204,
+     "payrollIndex": 0.5644457879305421,
+     "playerCount": 26,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 47484160.19873158,
+     "payrollIndex": 0.5669408535640607,
+     "playerCount": 33,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 59891235.49292168,
+     "payrollIndex": 0.71507610178331,
+     "playerCount": 29,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 105660223.22674505,
+     "payrollIndex": 1.261538519228991,
+     "playerCount": 24,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 68229112.67605634,
+     "payrollIndex": 0.814626840120785,
+     "playerCount": 26,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 90249631.61312908,
+     "payrollIndex": 1.0775425524311202,
+     "playerCount": 29,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 44786817.89713455,
+     "payrollIndex": 0.5347357236760792,
+     "playerCount": 35,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 67378764.28994083,
+     "payrollIndex": 0.8044740388954192,
+     "playerCount": 38,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 82200112.34512374,
+     "payrollIndex": 0.9814346860292794,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 57202180.668000795,
+     "payrollIndex": 0.6829699208728615,
+     "playerCount": 26,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 94495949.05783755,
+     "payrollIndex": 1.1282417924836228,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 95205010.32842909,
+     "payrollIndex": 1.1367076851159437,
+     "playerCount": 32,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 122882295.26474757,
+     "payrollIndex": 1.4671627985782068,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 24247060.474827934,
+     "payrollIndex": 0.28949967956652534,
+     "playerCount": 35,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 209075950.33928502,
+     "payrollIndex": 2.496278701128587,
+     "playerCount": 33,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 82371933.14627297,
+     "payrollIndex": 0.9834861539557609,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2009,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 859,
+   "eligibleDollars": 2722089702,
+   "attributedRows": 798,
+   "attributedDollars": 2640440729,
+   "coverageRows": 0.9289871944121071,
+   "coverageDollars": 0.9700050395326759,
+   "meanPayroll": 88014690.96666667,
+   "paPerInning": 4.323326862636347,
+   "teams": {
+    "108": {
+     "payroll": 115188638.00904977,
+     "payrollIndex": 1.3087433102807184,
+     "playerCount": 29,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 70382733.40780495,
+     "payrollIndex": 0.7996702895254229,
+     "playerCount": 28,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 62163374.00647315,
+     "payrollIndex": 0.7062840683041874,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 125967418.39387573,
+     "payrollIndex": 1.4312090062508167,
+     "playerCount": 36,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 134461725.89338034,
+     "payrollIndex": 1.527719116167826,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 70229229.14860843,
+     "payrollIndex": 0.7979262141044836,
+     "playerCount": 27,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 58369972.43945962,
+     "payrollIndex": 0.6631844274902444,
+     "playerCount": 28,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 74149018.37017544,
+     "payrollIndex": 0.8424618385384947,
+     "playerCount": 30,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 119379539.71032721,
+     "payrollIndex": 1.3563592441123173,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 103060785.71428572,
+     "payrollIndex": 1.1709498105642089,
+     "playerCount": 28,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 71547528.17898685,
+     "payrollIndex": 0.8129043844065039,
+     "playerCount": 31,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 109201958.73225059,
+     "payrollIndex": 1.240724219251171,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 51122314.45788028,
+     "payrollIndex": 0.5808384247720823,
+     "playerCount": 29,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 142421826.69799858,
+     "payrollIndex": 1.618159708723368,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 53929745.78198866,
+     "payrollIndex": 0.6127357284298502,
+     "playerCount": 27,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 38470000.11556305,
+     "payrollIndex": 0.4370861238396279,
+     "playerCount": 29,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 38438690.543464266,
+     "payrollIndex": 0.4367303926343608,
+     "playerCount": 27,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 100056982.9414145,
+     "payrollIndex": 1.1368213856401377,
+     "playerCount": 29,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 79798678.35204701,
+     "payrollIndex": 0.9066518040978947,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 108112407.82039304,
+     "payrollIndex": 1.2283450255064563,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 65153722.86426802,
+     "payrollIndex": 0.7402596333485206,
+     "playerCount": 33,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 65917286.469801106,
+     "payrollIndex": 0.7489350442048999,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 78800699.31867793,
+     "payrollIndex": 0.8953130261915218,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 67011197.523933634,
+     "payrollIndex": 0.7613637767507748,
+     "playerCount": 31,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 115397610.70232132,
+     "payrollIndex": 1.311117603605803,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 98865493.33354802,
+     "payrollIndex": 1.1232839909759023,
+     "playerCount": 30,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 96681713.42688313,
+     "payrollIndex": 1.0984724523261562,
+     "playerCount": 29,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 36831727.21784283,
+     "payrollIndex": 0.41847249377711176,
+     "playerCount": 28,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 203392305.08937797,
+     "payrollIndex": 2.310890407675324,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 85936404.33791886,
+     "payrollIndex": 0.9763870485038127,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2010,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 852,
+   "eligibleDollars": 2796867786,
+   "attributedRows": 792,
+   "attributedDollars": 2700113856,
+   "coverageRows": 0.9295774647887324,
+   "coverageDollars": 0.9654063268616732,
+   "meanPayroll": 90003795.2,
+   "paPerInning": 4.2847609224421985,
+   "teams": {
+    "108": {
+     "payroll": 104080559.28667828,
+     "payrollIndex": 1.1564018945578673,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 48457980.95101576,
+     "payrollIndex": 0.5383993068662927,
+     "playerCount": 30,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 82199251.10877806,
+     "payrollIndex": 0.9132865000428122,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 159769728.466852,
+     "payrollIndex": 1.7751443493224162,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 136738460.71265134,
+     "payrollIndex": 1.5192521649648318,
+     "playerCount": 28,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 72637948.08950414,
+     "payrollIndex": 0.807054279523361,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 42333571.70277088,
+     "payrollIndex": 0.47035318464849446,
+     "playerCount": 28,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 82286198.39038013,
+     "payrollIndex": 0.9142525402126612,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 117486649.16714922,
+     "payrollIndex": 1.3053521677178033,
+     "playerCount": 26,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 80946992.34254168,
+     "payrollIndex": 0.8993731004638977,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 64861223.40000812,
+     "payrollIndex": 0.7206498709957524,
+     "playerCount": 28,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 97412976.82686533,
+     "payrollIndex": 1.0823207689231458,
+     "playerCount": 32,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 63174503.9101533,
+     "payrollIndex": 0.7019093335983381,
+     "playerCount": 28,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 133696488.69265349,
+     "payrollIndex": 1.4854539010889787,
+     "playerCount": 26,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 50231654.41165154,
+     "payrollIndex": 0.5581059587546319,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 36214404.14934773,
+     "payrollIndex": 0.40236530102841406,
+     "playerCount": 31,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 41717427.81339205,
+     "payrollIndex": 0.46350743011103657,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 90020764.67642064,
+     "payrollIndex": 1.0001885417874095,
+     "playerCount": 27,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 106296062.70032774,
+     "payrollIndex": 1.1810175611386633,
+     "playerCount": 34,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 110823148.33436827,
+     "payrollIndex": 1.2313163915822105,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 65810935.802581534,
+     "payrollIndex": 0.7312017860618119,
+     "playerCount": 28,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 66217431.14944651,
+     "payrollIndex": 0.7357182105743748,
+     "playerCount": 34,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 60875212.427609205,
+     "payrollIndex": 0.6763627277309435,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 88588943.80017582,
+     "payrollIndex": 0.9842800917819053,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 147798025.08573875,
+     "payrollIndex": 1.6421310318894058,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 90987149.09540565,
+     "payrollIndex": 1.0109256936690338,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 115798643.72310904,
+     "payrollIndex": 1.2865973425430512,
+     "playerCount": 28,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 54083884.10213506,
+     "payrollIndex": 0.60090670601116,
+     "playerCount": 28,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 215918687.76871678,
+     "payrollIndex": 2.3989953677944102,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 72648947.91157202,
+     "payrollIndex": 0.807176494614885,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2011,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 865,
+   "eligibleDollars": 2873119712,
+   "attributedRows": 814,
+   "attributedDollars": 2719897012,
+   "coverageRows": 0.9410404624277456,
+   "coverageDollars": 0.9466702694774453,
+   "meanPayroll": 90663233.73333333,
+   "paPerInning": 4.255831584751342,
+   "teams": {
+    "108": {
+     "payroll": 135740082.02497986,
+     "payrollIndex": 1.4971899460836628,
+     "playerCount": 30,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 54972948.2137454,
+     "payrollIndex": 0.6063422398481468,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 82347197.0146548,
+     "payrollIndex": 0.9082755337942346,
+     "playerCount": 28,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 160274253.2343126,
+     "payrollIndex": 1.767797668741061,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 120550019.90049751,
+     "payrollIndex": 1.3296461524312029,
+     "playerCount": 25,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 80323306.78494623,
+     "payrollIndex": 0.8859523698570051,
+     "playerCount": 31,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 50096443.80222008,
+     "payrollIndex": 0.5525552281707504,
+     "playerCount": 31,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 80912713.04861188,
+     "payrollIndex": 0.8924534203864761,
+     "playerCount": 29,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 108119325.60928234,
+     "payrollIndex": 1.1925377152031926,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 63189781.55021787,
+     "payrollIndex": 0.6969725096732949,
+     "playerCount": 26,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 31621158.87558708,
+     "payrollIndex": 0.34877598750331373,
+     "playerCount": 25,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 99170178.90179336,
+     "payrollIndex": 1.0938301538359132,
+     "playerCount": 31,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 64905850.01050999,
+     "payrollIndex": 0.7159004520114159,
+     "playerCount": 30,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 90465349.6015345,
+     "payrollIndex": 0.9978173717873238,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 55582352.8047207,
+     "payrollIndex": 0.6130638685159234,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 47281506.20757854,
+     "payrollIndex": 0.5215069467591136,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 42564626.87985533,
+     "payrollIndex": 0.469480572522376,
+     "playerCount": 30,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 80616315.71176685,
+     "payrollIndex": 0.8891842083295048,
+     "playerCount": 27,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 125125324.69890456,
+     "payrollIndex": 1.3801109837636516,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 114512267.99366364,
+     "payrollIndex": 1.2630507790013004,
+     "playerCount": 32,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 42171308,
+     "payrollIndex": 0.4651423323818115,
+     "playerCount": 26,
+     "splitPlayerCount": 0,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 89640646.3681721,
+     "payrollIndex": 0.9887210358261767,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 57810938.00487608,
+     "payrollIndex": 0.6376447830541174,
+     "playerCount": 35,
+     "splitPlayerCount": 14,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 110075653.26559164,
+     "payrollIndex": 1.214115675482697,
+     "playerCount": 25,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 174309383.8448171,
+     "payrollIndex": 1.9226027648375215,
+     "playerCount": 30,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 90350883.33138552,
+     "payrollIndex": 0.9965548283567016,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 122374535.29887415,
+     "payrollIndex": 1.349770245994235,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 60034898.79873422,
+     "payrollIndex": 0.6621746911798242,
+     "playerCount": 27,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 194875774.53744426,
+     "payrollIndex": 2.149446545339757,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 89881987.68072182,
+     "payrollIndex": 0.9913829893282939,
+     "playerCount": 31,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2012,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 881,
+   "eligibleDollars": 2981490530,
+   "attributedRows": 823,
+   "attributedDollars": 2855485355,
+   "coverageRows": 0.9341657207718501,
+   "coverageDollars": 0.9577375229831772,
+   "meanPayroll": 95182845.16666667,
+   "paPerInning": 4.248127873541124,
+   "teams": {
+    "108": {
+     "payroll": 151059307.6159976,
+     "payrollIndex": 1.5870434147192214,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 69176744.92355299,
+     "payrollIndex": 0.7267774440070941,
+     "playerCount": 31,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 83183366.80088626,
+     "payrollIndex": 0.8739323420646952,
+     "playerCount": 34,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 140230283.07626158,
+     "payrollIndex": 1.473272655705092,
+     "playerCount": 40,
+     "splitPlayerCount": 17,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 77821844.6599753,
+     "payrollIndex": 0.8176036818788934,
+     "playerCount": 30,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 78886396.88505748,
+     "payrollIndex": 0.8287879685349407,
+     "playerCount": 26,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 63834697.69730824,
+     "payrollIndex": 0.670653389122091,
+     "playerCount": 28,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 70807780.47532614,
+     "payrollIndex": 0.7439132582277888,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 118719949.80687863,
+     "payrollIndex": 1.2472830539893833,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 37444536.697389804,
+     "payrollIndex": 0.39339585438766644,
+     "playerCount": 27,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 57700228.84001351,
+     "payrollIndex": 0.6062040774152054,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 124238206.44545045,
+     "payrollIndex": 1.3052583816748426,
+     "playerCount": 37,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 88374601.9355105,
+     "payrollIndex": 0.9284719508096776,
+     "playerCount": 32,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 93774400.54342994,
+     "payrollIndex": 0.9852027471886292,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 49023411.02539262,
+     "payrollIndex": 0.5150446064051968,
+     "playerCount": 31,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 66166668.4732272,
+     "payrollIndex": 0.6951532952956839,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 55496970.16776876,
+     "payrollIndex": 0.5830564328119493,
+     "playerCount": 31,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 73084687.54471432,
+     "payrollIndex": 0.7678346598774377,
+     "playerCount": 28,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 115099143.52611028,
+     "payrollIndex": 1.2092425197478585,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 111377937.29021388,
+     "payrollIndex": 1.1701471740542042,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 64803560.31709466,
+     "payrollIndex": 0.6808323517081528,
+     "playerCount": 30,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 127596627.75076996,
+     "payrollIndex": 1.3405422744754714,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 77788072.66025552,
+     "payrollIndex": 0.8172488700463553,
+     "playerCount": 30,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 89446619.1172665,
+     "payrollIndex": 0.9397346650086374,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 162947823.2266285,
+     "payrollIndex": 1.7119452874234247,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 85358957.85341664,
+     "payrollIndex": 0.8967893080307879,
+     "playerCount": 34,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 116757611.17117971,
+     "payrollIndex": 1.226666538142827,
+     "playerCount": 30,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 110917997.59230499,
+     "payrollIndex": 1.1653150039598608,
+     "playerCount": 27,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 202367534.7102834,
+     "payrollIndex": 2.1260925154730836,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 91999386.1703346,
+     "payrollIndex": 0.9665542778138458,
+     "playerCount": 28,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2013,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 872,
+   "eligibleDollars": 3152450017,
+   "attributedRows": 811,
+   "attributedDollars": 3022717342,
+   "coverageRows": 0.930045871559633,
+   "coverageDollars": 0.9588470318957003,
+   "meanPayroll": 100757244.73333333,
+   "paPerInning": 4.235025962125839,
+   "teams": {
+    "108": {
+     "payroll": 120294459.85780233,
+     "payrollIndex": 1.1939038247440834,
+     "playerCount": 25,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 88160224.98544092,
+     "payrollIndex": 0.8749765361167626,
+     "playerCount": 30,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 90148566.09936857,
+     "payrollIndex": 0.8947105127572518,
+     "playerCount": 33,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 157231558.51954493,
+     "payrollIndex": 1.560498790292231,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 82872328.39137101,
+     "payrollIndex": 0.822494983965699,
+     "playerCount": 34,
+     "splitPlayerCount": 15,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 106295489.43532969,
+     "payrollIndex": 1.0549662182273247,
+     "playerCount": 26,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 78526924.5696497,
+     "payrollIndex": 0.7793675261514051,
+     "playerCount": 34,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 69896461.82250553,
+     "payrollIndex": 0.6937115242431974,
+     "playerCount": 26,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 151372606.37601647,
+     "payrollIndex": 1.5023496005338677,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 17783124.929156885,
+     "payrollIndex": 0.1764947520768571,
+     "playerCount": 26,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 79059364.41611221,
+     "payrollIndex": 0.7846519089059325,
+     "playerCount": 30,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 228529110.6246146,
+     "payrollIndex": 2.2681159179118633,
+     "playerCount": 34,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 116069897.96940655,
+     "payrollIndex": 1.1519757043436436,
+     "playerCount": 29,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 48125176.80279394,
+     "payrollIndex": 0.47763490288130894,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 53718853.440307796,
+     "payrollIndex": 0.5331512744565562,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 79438361.96206336,
+     "payrollIndex": 0.788413400667187,
+     "playerCount": 32,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 65874044.707787804,
+     "payrollIndex": 0.6537896593156325,
+     "playerCount": 31,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 78101016.17593412,
+     "payrollIndex": 0.7751404515143129,
+     "playerCount": 28,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 134069909.8125,
+     "payrollIndex": 1.330623025345054,
+     "playerCount": 28,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 91531239.72126494,
+     "payrollIndex": 0.9084333336378325,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 59669010.71300405,
+     "payrollIndex": 0.5922056609519798,
+     "playerCount": 28,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 121929826.30585815,
+     "payrollIndex": 1.2101345826651047,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 116997655.53145336,
+     "payrollIndex": 1.161183554007479,
+     "playerCount": 29,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 72535011.3973846,
+     "payrollIndex": 0.7198987188400953,
+     "playerCount": 28,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 166827916.33059078,
+     "payrollIndex": 1.6557411506450157,
+     "playerCount": 29,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 91278959.1771807,
+     "payrollIndex": 0.9059294884329349,
+     "playerCount": 32,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 106483279.30349658,
+     "payrollIndex": 1.056830003493227,
+     "playerCount": 28,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 30955891.7271183,
+     "payrollIndex": 0.307232415982066,
+     "playerCount": 28,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 242365923.2092944,
+     "payrollIndex": 2.4054441330819056,
+     "playerCount": 37,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 76575147.68564768,
+     "payrollIndex": 0.7599964438121883,
+     "playerCount": 26,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2014,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 883,
+   "eligibleDollars": 3438566573,
+   "attributedRows": 821,
+   "attributedDollars": 3298615239,
+   "coverageRows": 0.9297848244620611,
+   "coverageDollars": 0.9592995130299604,
+   "meanPayroll": 109953841.3,
+   "paPerInning": 4.21723313028791,
+   "teams": {
+    "108": {
+     "payroll": 133558127.22978576,
+     "payrollIndex": 1.2146745002330879,
+     "playerCount": 35,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 100571300.97864184,
+     "payrollIndex": 0.9146683716509851,
+     "playerCount": 30,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 110519140.52599083,
+     "payrollIndex": 1.0051412412636722,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 134801198.36153823,
+     "payrollIndex": 1.225979890904805,
+     "playerCount": 31,
+     "splitPlayerCount": 14,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 66814710.95968813,
+     "payrollIndex": 0.6076614529308685,
+     "playerCount": 31,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 112324984.45454545,
+     "payrollIndex": 1.0215648960191939,
+     "playerCount": 32,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 78085049.40595151,
+     "payrollIndex": 0.7101620869515862,
+     "playerCount": 29,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 95322464.93939394,
+     "payrollIndex": 0.8669316488845028,
+     "playerCount": 28,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 165688445.84252864,
+     "payrollIndex": 1.5068909269887294,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 42574846.37143533,
+     "payrollIndex": 0.38720653929018606,
+     "playerCount": 28,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 89549280.64143884,
+     "payrollIndex": 0.814426122659153,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 225799761.57194155,
+     "payrollIndex": 2.0535868406440256,
+     "playerCount": 34,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 140650633.4822957,
+     "payrollIndex": 1.2791788974297136,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 74535750.92896175,
+     "payrollIndex": 0.6778821917244082,
+     "playerCount": 25,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 77474169.37390748,
+     "payrollIndex": 0.7046063007705714,
+     "playerCount": 35,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 80947026.43014927,
+     "payrollIndex": 0.736190982262202,
+     "playerCount": 31,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 67893613.9561254,
+     "payrollIndex": 0.6174737794824581,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 90458726.77523354,
+     "payrollIndex": 0.8226972855675352,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 150349963.72553423,
+     "payrollIndex": 1.3673916431470252,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 116412737.38253558,
+     "payrollIndex": 1.058741886651445,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 76672073.9658509,
+     "payrollIndex": 0.697311463240811,
+     "playerCount": 28,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 130449700.43031467,
+     "payrollIndex": 1.1864042118764493,
+     "playerCount": 34,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 130158428.22938345,
+     "payrollIndex": 1.1837551711745742,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 84508032.63378565,
+     "payrollIndex": 0.7685773560490028,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 173514719.68787512,
+     "payrollIndex": 1.578068738994343,
+     "playerCount": 32,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 102438219.93609273,
+     "payrollIndex": 0.9316474870268379,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 81299837.70344548,
+     "payrollIndex": 0.739399703932358,
+     "playerCount": 27,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 39810935.540148824,
+     "payrollIndex": 0.36206952908109835,
+     "playerCount": 26,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 218995448.02486882,
+     "payrollIndex": 1.9917034769831985,
+     "playerCount": 33,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 106435909.51061134,
+     "payrollIndex": 0.9680053761851732,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2015,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 887,
+   "eligibleDollars": 3746155682,
+   "attributedRows": 825,
+   "attributedDollars": 3552950357,
+   "coverageRows": 0.9301014656144306,
+   "coverageDollars": 0.948425708539467,
+   "meanPayroll": 118431678.56666666,
+   "paPerInning": 4.230312617586756,
+   "teams": {
+    "108": {
+     "payroll": 131132049.12523755,
+     "payrollIndex": 1.107237951131645,
+     "playerCount": 33,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 62543723.81890223,
+     "payrollIndex": 0.5280996146963803,
+     "playerCount": 34,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 114448890.10372695,
+     "payrollIndex": 0.9663705816624245,
+     "playerCount": 29,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 169165659.50281274,
+     "payrollIndex": 1.4283818447070924,
+     "playerCount": 33,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 121898455.14044452,
+     "payrollIndex": 1.0292723755648399,
+     "playerCount": 35,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 103123879.1428579,
+     "payrollIndex": 0.870745736199358,
+     "playerCount": 26,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 74109303.53667489,
+     "payrollIndex": 0.625755747394544,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 94806960.06358041,
+     "payrollIndex": 0.8005202764242879,
+     "playerCount": 26,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 161581112.7935436,
+     "payrollIndex": 1.3643403078390686,
+     "playerCount": 28,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 81294855.92382117,
+     "payrollIndex": 0.6864283011750043,
+     "playerCount": 32,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 120353505.2895886,
+     "payrollIndex": 1.0162273029157491,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 220914460.8378267,
+     "payrollIndex": 1.865332515011777,
+     "playerCount": 36,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 173327337.51945078,
+     "payrollIndex": 1.463521750406355,
+     "playerCount": 30,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 108143843.6965343,
+     "payrollIndex": 0.9131327445946719,
+     "playerCount": 36,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 67478959.62283579,
+     "payrollIndex": 0.5697712000666363,
+     "playerCount": 33,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 99653394.8250663,
+     "payrollIndex": 0.8414420536053634,
+     "playerCount": 34,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 106308921.68771458,
+     "payrollIndex": 0.8976392378655004,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 121003104.31112826,
+     "payrollIndex": 1.0217123135936481,
+     "playerCount": 29,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 164668588.29120836,
+     "payrollIndex": 1.3904099839175577,
+     "playerCount": 31,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 128267073.18955041,
+     "payrollIndex": 1.0830469916657246,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 70700200.7677817,
+     "payrollIndex": 0.5969703513742203,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 170670364.5764615,
+     "payrollIndex": 1.441087103062455,
+     "playerCount": 38,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 125497990.75330564,
+     "payrollIndex": 1.0596657268744296,
+     "playerCount": 36,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 109522432.08828522,
+     "payrollIndex": 0.924773113188915,
+     "playerCount": 28,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 90317931.83001536,
+     "payrollIndex": 0.7626163280221877,
+     "playerCount": 28,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 87726023.5580932,
+     "payrollIndex": 0.7407310663819658,
+     "playerCount": 33,
+     "splitPlayerCount": 17,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 112146472.2855925,
+     "payrollIndex": 0.9469296867430943,
+     "playerCount": 27,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 65621649.30183147,
+     "payrollIndex": 0.5540886534415893,
+     "playerCount": 26,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 211299034.63636363,
+     "payrollIndex": 1.7841428678005333,
+     "playerCount": 29,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 85224178.77976348,
+     "payrollIndex": 0.7196062726729802,
+     "playerCount": 28,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2016,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 869,
+   "eligibleDollars": 3861698943,
+   "attributedRows": 804,
+   "attributedDollars": 3662052593,
+   "coverageRows": 0.9252013808975834,
+   "coverageDollars": 0.9483009025439713,
+   "meanPayroll": 122068419.76666667,
+   "paPerInning": 4.2621941363464915,
+   "teams": {
+    "108": {
+     "payroll": 117539348.48895769,
+     "payrollIndex": 0.9628972728051507,
+     "playerCount": 27,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 97901269.82638288,
+     "payrollIndex": 0.8020196379499366,
+     "playerCount": 28,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 150417226.44630745,
+     "payrollIndex": 1.232237025217738,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 194748694.04229105,
+     "payrollIndex": 1.5954060387981794,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 162290967.0497542,
+     "payrollIndex": 1.3295082164573997,
+     "playerCount": 32,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 84348908.426146,
+     "payrollIndex": 0.6909969719226203,
+     "playerCount": 28,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 77497334.36601785,
+     "payrollIndex": 0.6348680069272111,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 89626071,
+     "payrollIndex": 0.7342281580389088,
+     "playerCount": 30,
+     "splitPlayerCount": 0,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 195811749.4553377,
+     "payrollIndex": 1.6041147237723823,
+     "playerCount": 30,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 89206764.87953852,
+     "payrollIndex": 0.7307931490393414,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 127676908.47443828,
+     "payrollIndex": 1.0459454518907694,
+     "playerCount": 28,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 225180359.05871803,
+     "payrollIndex": 1.844706104077938,
+     "playerCount": 40,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 145690857.36237255,
+     "payrollIndex": 1.1935180093332909,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 161393514.5686813,
+     "payrollIndex": 1.3221561717370014,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 57010849.91460916,
+     "payrollIndex": 0.46704012408438794,
+     "playerCount": 24,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 91202763.4831101,
+     "payrollIndex": 0.7471446231338444,
+     "playerCount": 30,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 76124934.7213773,
+     "payrollIndex": 0.6236251347145301,
+     "playerCount": 31,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 132216515.32272755,
+     "payrollIndex": 1.0831344878180527,
+     "playerCount": 29,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 176100860.56594983,
+     "payrollIndex": 1.4426406182906764,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 132191417.55477433,
+     "payrollIndex": 1.0829288837150324,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 56092963.00511101,
+     "payrollIndex": 0.45952067793072526,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 167881449.54708552,
+     "payrollIndex": 1.3753061591850726,
+     "playerCount": 33,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 146567159.44145232,
+     "payrollIndex": 1.2006967872740133,
+     "playerCount": 35,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 96830919.88927712,
+     "payrollIndex": 0.7932511953080826,
+     "playerCount": 25,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 70421487.8547467,
+     "payrollIndex": 0.5769017735246931,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 74322361.72235933,
+     "payrollIndex": 0.6088582277416735,
+     "playerCount": 28,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 122637442.66036212,
+     "payrollIndex": 1.0046615078230974,
+     "playerCount": 25,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 73299670.45417394,
+     "payrollIndex": 0.6004802109692743,
+     "playerCount": 29,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 207377237.870726,
+     "payrollIndex": 1.6988606739329206,
+     "playerCount": 30,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 62444585.54721422,
+     "payrollIndex": 0.5115539765860557,
+     "playerCount": 28,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2017,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 889,
+   "eligibleDollars": 4071356638,
+   "attributedRows": 820,
+   "attributedDollars": 3771594835,
+   "coverageRows": 0.922384701912261,
+   "coverageDollars": 0.926372993168377,
+   "meanPayroll": 125719827.83333333,
+   "paPerInning": 4.283584159789166,
+   "teams": {
+    "108": {
+     "payroll": 148299039.22081572,
+     "payrollIndex": 1.179599445661154,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 99259428.38603115,
+     "payrollIndex": 0.7895288284805743,
+     "playerCount": 29,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 165496736.10012296,
+     "payrollIndex": 1.3163932766398778,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 163198408.00572738,
+     "payrollIndex": 1.2981119272775283,
+     "playerCount": 33,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 168284646.75397167,
+     "payrollIndex": 1.3385688610476503,
+     "playerCount": 30,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 79601153.84586948,
+     "payrollIndex": 0.6331630834827158,
+     "playerCount": 28,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 118941671.95504114,
+     "payrollIndex": 0.9460852278029048,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 103716455.67669705,
+     "payrollIndex": 0.8249808917507735,
+     "playerCount": 33,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 164060045.3625484,
+     "payrollIndex": 1.3049655586550968,
+     "playerCount": 26,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 117240593.33252917,
+     "payrollIndex": 0.9325545170802726,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 137245924.64727455,
+     "payrollIndex": 1.0916808192675969,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 182801148.20089167,
+     "payrollIndex": 1.4540359412775445,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 173325970.65261546,
+     "payrollIndex": 1.378668533354926,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 136775553.9604788,
+     "payrollIndex": 1.0879393991996398,
+     "playerCount": 32,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 59681222.77956721,
+     "payrollIndex": 0.47471607150692696,
+     "playerCount": 32,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 94922649.42063059,
+     "payrollIndex": 0.7550332438131355,
+     "playerCount": 28,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 34313976.92080143,
+     "payrollIndex": 0.27294005657000614,
+     "playerCount": 32,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 150417173.30877113,
+     "payrollIndex": 1.196447496795645,
+     "playerCount": 34,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 189187981.0143347,
+     "payrollIndex": 1.504838053589614,
+     "playerCount": 28,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 142665156.83033088,
+     "payrollIndex": 1.1347864476831926,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 78432517.25576001,
+     "payrollIndex": 0.6238675204020955,
+     "playerCount": 36,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 148905367.65070263,
+     "payrollIndex": 1.1844223001013519,
+     "playerCount": 36,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 166274520.4226426,
+     "payrollIndex": 1.3225799246485812,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 105917261.88699259,
+     "payrollIndex": 0.8424865330503556,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 75220274.38070148,
+     "payrollIndex": 0.5983167148496332,
+     "playerCount": 30,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 125825699.11455421,
+     "payrollIndex": 1.0008421207938754,
+     "playerCount": 30,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 95487738.59582312,
+     "payrollIndex": 0.7595280731883529,
+     "playerCount": 30,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 95946256.49807227,
+     "payrollIndex": 0.7631752138991802,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 181763645.11208454,
+     "payrollIndex": 1.4457834396102456,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 68386617.707616,
+     "payrollIndex": 0.5439604785195544,
+     "playerCount": 32,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2018,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 879,
+   "eligibleDollars": 4020474634,
+   "attributedRows": 820,
+   "attributedDollars": 3822264615,
+   "coverageRows": 0.9328782707622298,
+   "coverageDollars": 0.9506998459028209,
+   "meanPayroll": 127408820.5,
+   "paPerInning": 4.257145485065193,
+   "teams": {
+    "108": {
+     "payroll": 164542846.4603989,
+     "payrollIndex": 1.2914556921151226,
+     "playerCount": 29,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 123712115.58842614,
+     "payrollIndex": 0.9709854867420749,
+     "playerCount": 34,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 129450104.42334625,
+     "payrollIndex": 1.0160215275154065,
+     "playerCount": 30,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 203774258.6209469,
+     "payrollIndex": 1.599373244499559,
+     "playerCount": 31,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 198483717.77299553,
+     "payrollIndex": 1.5578491111845394,
+     "playerCount": 29,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 94534077.04825446,
+     "payrollIndex": 0.7419743521466354,
+     "playerCount": 33,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 137118700.9126914,
+     "payrollIndex": 1.076210425420989,
+     "playerCount": 33,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 135995474.93252242,
+     "payrollIndex": 1.067394505331932,
+     "playerCount": 28,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 110759025.74269165,
+     "payrollIndex": 0.8693199207718249,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 161382869.1611435,
+     "payrollIndex": 1.2666538197890587,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 104518692.37067936,
+     "payrollIndex": 0.8203411032337385,
+     "playerCount": 32,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 169067194.38175505,
+     "payrollIndex": 1.3269661685766494,
+     "playerCount": 33,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 174104697.7231505,
+     "payrollIndex": 1.3665042737221673,
+     "playerCount": 30,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 163986213.04788116,
+     "payrollIndex": 1.2870868155308066,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 69673364.41622256,
+     "payrollIndex": 0.5468488299538301,
+     "playerCount": 34,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 80791338.67367642,
+     "payrollIndex": 0.6341110321610458,
+     "playerCount": 30,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 77554898.86232755,
+     "payrollIndex": 0.6087090246811252,
+     "playerCount": 28,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 161478748.35627964,
+     "payrollIndex": 1.2674063516370095,
+     "playerCount": 34,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 217237855.96637794,
+     "payrollIndex": 1.7050456562885923,
+     "playerCount": 29,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 150740627.30892682,
+     "payrollIndex": 1.183125522372502,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 50146321.682834305,
+     "payrollIndex": 0.39358595021946935,
+     "playerCount": 30,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 116251223.1099851,
+     "payrollIndex": 0.9124268057248446,
+     "playerCount": 30,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 123879163.49052341,
+     "payrollIndex": 0.972296603990015,
+     "playerCount": 30,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 111933976.19488345,
+     "payrollIndex": 0.878541813318831,
+     "playerCount": 32,
+     "splitPlayerCount": 13,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 95916322.92920822,
+     "payrollIndex": 0.752823254722841,
+     "playerCount": 33,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 86050346.18672432,
+     "payrollIndex": 0.6753876682087667,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 78997343.34728204,
+     "payrollIndex": 0.6200304110599787,
+     "playerCount": 27,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 78292671.55509003,
+     "payrollIndex": 0.6144996182198392,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 156147245.51457945,
+     "payrollIndex": 1.2255607178670918,
+     "playerCount": 33,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 95743179.21819545,
+     "payrollIndex": 0.7514642929937135,
+     "playerCount": 35,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2019,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 875,
+   "eligibleDollars": 3887858407,
+   "attributedRows": 839,
+   "attributedDollars": 3729999300,
+   "coverageRows": 0.9588571428571429,
+   "coverageDollars": 0.9593968991474128,
+   "meanPayroll": 124333310,
+   "paPerInning": 4.295317417670993,
+   "teams": {
+    "108": {
+     "payroll": 158345239.63643694,
+     "payrollIndex": 1.2735544451960374,
+     "playerCount": 35,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 99066147.39954014,
+     "payrollIndex": 0.7967788149413874,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 77498345.37499598,
+     "payrollIndex": 0.6233112057822314,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 199329785.67736694,
+     "payrollIndex": 1.603188925617495,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 197512074.49327943,
+     "payrollIndex": 1.5885692618758354,
+     "playerCount": 33,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 128028198.92911711,
+     "payrollIndex": 1.0297176109050512,
+     "playerCount": 31,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 120570400.97162877,
+     "payrollIndex": 0.9697353104460001,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 146835782.27587545,
+     "payrollIndex": 1.1809850656744798,
+     "playerCount": 29,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 96894159.59954526,
+     "payrollIndex": 0.77930974088557,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 162347748.23325843,
+     "payrollIndex": 1.3057462093887666,
+     "playerCount": 29,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 84062928.53121586,
+     "payrollIndex": 0.6761094716389024,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 170969939.73571894,
+     "payrollIndex": 1.3750936071413118,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 202246256.37693912,
+     "payrollIndex": 1.6266457989169525,
+     "playerCount": 36,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 117094695.0181699,
+     "payrollIndex": 0.941780565627746,
+     "playerCount": 33,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 95883352.00055797,
+     "payrollIndex": 0.7711799195288694,
+     "playerCount": 33,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 62645951.43130985,
+     "payrollIndex": 0.5038549318063666,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 72613137.81454802,
+     "payrollIndex": 0.584019984785638,
+     "playerCount": 31,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 107952638.94673489,
+     "payrollIndex": 0.8682519507180729,
+     "playerCount": 33,
+     "splitPlayerCount": 14,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 191898913.29988027,
+     "payrollIndex": 1.5434231848237634,
+     "playerCount": 33,
+     "splitPlayerCount": 15,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 149974147.90972894,
+     "payrollIndex": 1.2062266170644773,
+     "playerCount": 30,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 56396064.034850456,
+     "payrollIndex": 0.4535877315166021,
+     "playerCount": 33,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 100475879.15465946,
+     "payrollIndex": 0.8081171421774218,
+     "playerCount": 29,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 57628668.09227475,
+     "payrollIndex": 0.46350143893277473,
+     "playerCount": 38,
+     "splitPlayerCount": 15,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 104047005.68819109,
+     "payrollIndex": 0.8368393448882772,
+     "playerCount": 28,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 159966833.78430128,
+     "payrollIndex": 1.2865967598248713,
+     "playerCount": 35,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 126714236.09404217,
+     "payrollIndex": 1.019149543224114,
+     "playerCount": 36,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 81156557.9582638,
+     "payrollIndex": 0.6527338326170501,
+     "playerCount": 25,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 68525731.41534647,
+     "payrollIndex": 0.551145396316936,
+     "playerCount": 26,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 215904035.26422963,
+     "payrollIndex": 1.736493907097218,
+     "playerCount": 35,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 117414444.85799268,
+     "payrollIndex": 0.9443522806397793,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2020,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 899,
+   "eligibleDollars": 3987209077,
+   "attributedRows": 818,
+   "attributedDollars": 3671346714,
+   "coverageRows": 0.9098998887652948,
+   "coverageDollars": 0.9207810885007172,
+   "meanPayroll": 122378223.8,
+   "paPerInning": 4.299400939533682,
+   "teams": {
+    "108": {
+     "payroll": 175379762.91338634,
+     "payrollIndex": 1.433096162598385,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 74114193.33842951,
+     "payrollIndex": 0.6056158607069889,
+     "playerCount": 29,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 52476975.84784825,
+     "payrollIndex": 0.42880975240832225,
+     "playerCount": 29,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 94891841.96048737,
+     "payrollIndex": 0.7753980979129669,
+     "playerCount": 27,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 185873797.3602005,
+     "payrollIndex": 1.5188469940858915,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 145389294.03379053,
+     "payrollIndex": 1.1880323926861123,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 91764442.28591287,
+     "payrollIndex": 0.7498429004483792,
+     "playerCount": 26,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 119328415.90255003,
+     "payrollIndex": 0.9750788350839754,
+     "playerCount": 26,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 97502658.76716705,
+     "payrollIndex": 0.7967320961163276,
+     "playerCount": 30,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 207778790,
+     "payrollIndex": 1.6978411971362506,
+     "playerCount": 26,
+     "splitPlayerCount": 0,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 81635684.96657097,
+     "payrollIndex": 0.6670768902479444,
+     "playerCount": 30,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 199513441.1081081,
+     "payrollIndex": 1.6303018209691331,
+     "playerCount": 32,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 167022102.98162028,
+     "payrollIndex": 1.3648024770696197,
+     "playerCount": 25,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 132831452.65368551,
+     "payrollIndex": 1.0854173931366171,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 102537837.93238623,
+     "payrollIndex": 0.8378765008059076,
+     "playerCount": 33,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 39139749.42528736,
+     "payrollIndex": 0.31982609495340103,
+     "playerCount": 26,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 145509282.4663717,
+     "payrollIndex": 1.1890128647738365,
+     "playerCount": 38,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 65598634.63546338,
+     "payrollIndex": 0.5360319229887645,
+     "playerCount": 33,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 123147245.18181819,
+     "payrollIndex": 1.0062839724089718,
+     "playerCount": 28,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 137250200,
+     "payrollIndex": 1.1215246940036077,
+     "playerCount": 26,
+     "splitPlayerCount": 0,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 60368190.21476614,
+     "payrollIndex": 0.49329193005305033,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 132652844.53029294,
+     "payrollIndex": 1.0839579167866051,
+     "playerCount": 27,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 101817305.34995207,
+     "payrollIndex": 0.8319887492103973,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 132884654.8888889,
+     "payrollIndex": 1.08585212926492,
+     "playerCount": 30,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 172894017.113675,
+     "payrollIndex": 1.4127841681722055,
+     "playerCount": 26,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 148100375,
+     "payrollIndex": 1.2101856882809243,
+     "playerCount": 27,
+     "splitPlayerCount": 0,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 125111833.33333333,
+     "payrollIndex": 1.0223373852671764,
+     "playerCount": 27,
+     "splitPlayerCount": 1,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 49380909.97239476,
+     "payrollIndex": 0.4035105955868168,
+     "playerCount": 32,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 212941131,
+     "payrollIndex": 1.740024690569173,
+     "playerCount": 28,
+     "splitPlayerCount": 0,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 96509648.83561279,
+     "payrollIndex": 0.7886178262673297,
+     "playerCount": 30,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2021,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 905,
+   "eligibleDollars": 3803830456,
+   "attributedRows": 859,
+   "attributedDollars": 3663366024,
+   "coverageRows": 0.949171270718232,
+   "coverageDollars": 0.9630728988516201,
+   "meanPayroll": 122112200.8,
+   "paPerInning": 4.26652587117212,
+   "teams": {
+    "108": {
+     "payroll": 182610658.5983244,
+     "payrollIndex": 1.4954333588452071,
+     "playerCount": 28,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 81172090.85893127,
+     "payrollIndex": 0.6647336656545729,
+     "playerCount": 31,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 24575484.137670934,
+     "payrollIndex": 0.20125330619437115,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 155532463.6306803,
+     "payrollIndex": 1.2736848784292838,
+     "playerCount": 36,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 116086825.09067756,
+     "payrollIndex": 0.9506570541694599,
+     "playerCount": 29,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 123768693.61996688,
+     "payrollIndex": 1.0135653342509152,
+     "playerCount": 34,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 43174280.843799494,
+     "payrollIndex": 0.3535623841102657,
+     "playerCount": 28,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 85351414.2678348,
+     "payrollIndex": 0.6989589386536943,
+     "playerCount": 30,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 79178898.55063501,
+     "payrollIndex": 0.6484110353585161,
+     "playerCount": 28,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 158232006.57850558,
+     "payrollIndex": 1.2957919482399958,
+     "playerCount": 36,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 88573817.18453637,
+     "payrollIndex": 0.7253478080343989,
+     "playerCount": 28,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 291837327.81189406,
+     "payrollIndex": 2.389911293875346,
+     "playerCount": 33,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 152534695.30921942,
+     "payrollIndex": 1.2491355844044325,
+     "playerCount": 28,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 200421010.00633258,
+     "payrollIndex": 1.6412857084984467,
+     "playerCount": 36,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 95864475.84885669,
+     "payrollIndex": 0.7850523962455411,
+     "playerCount": 34,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 42235806.606914416,
+     "payrollIndex": 0.34587704037936245,
+     "playerCount": 33,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 174559056.42777163,
+     "payrollIndex": 1.429497259767442,
+     "playerCount": 38,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 75859154.28106713,
+     "payrollIndex": 0.6212250191552288,
+     "playerCount": 36,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 159769732.1373556,
+     "payrollIndex": 1.3083846748371404,
+     "playerCount": 34,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 167988791.44306055,
+     "payrollIndex": 1.3756921121927772,
+     "playerCount": 33,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 60132369.20381821,
+     "payrollIndex": 0.49243538982894336,
+     "playerCount": 34,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 53197325.34771988,
+     "payrollIndex": 0.43564299880933666,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 130486358.74241672,
+     "payrollIndex": 1.0685775695430486,
+     "playerCount": 37,
+     "splitPlayerCount": 13,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 110815188.51987578,
+     "payrollIndex": 0.9074866212703275,
+     "playerCount": 26,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 185262066.34264657,
+     "payrollIndex": 1.5171462403341318,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 138798279.48114863,
+     "payrollIndex": 1.1366454668070205,
+     "playerCount": 34,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 133989951.514514,
+     "payrollIndex": 1.0972691560441845,
+     "playerCount": 32,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 47120997.09155167,
+     "payrollIndex": 0.3858827928973963,
+     "playerCount": 33,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 218065793.89599773,
+     "payrollIndex": 1.7857821943046803,
+     "playerCount": 42,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 86171010.62627605,
+     "payrollIndex": 0.7056707688645314,
+     "playerCount": 35,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2022,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 974,
+   "eligibleDollars": 4335687674,
+   "attributedRows": 910,
+   "attributedDollars": 4169220770,
+   "coverageRows": 0.9342915811088296,
+   "coverageDollars": 0.9616054207506092,
+   "meanPayroll": 138974025.66666666,
+   "paPerInning": 4.226363115781656,
+   "teams": {
+    "108": {
+     "payroll": 147864791.47976375,
+     "payrollIndex": 1.0639742985816778,
+     "playerCount": 34,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 90094039.71650392,
+     "payrollIndex": 0.6482797003563613,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 49328711.98478655,
+     "payrollIndex": 0.3549491478580532,
+     "playerCount": 35,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 177249517.52378365,
+     "payrollIndex": 1.2754147163364318,
+     "playerCount": 32,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 137747443.8465112,
+     "payrollIndex": 0.9911740210858001,
+     "playerCount": 35,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 96613434.9792873,
+     "payrollIndex": 0.6951905905857365,
+     "playerCount": 34,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 64765820.04381954,
+     "payrollIndex": 0.4660282360904065,
+     "playerCount": 31,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 126437391.12300035,
+     "payrollIndex": 0.9097915277079489,
+     "playerCount": 31,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 129360198.15532109,
+     "payrollIndex": 0.930822846461938,
+     "playerCount": 33,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 172238919.79605317,
+     "payrollIndex": 1.2393605133751637,
+     "playerCount": 34,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 86039241.76718782,
+     "payrollIndex": 0.6191030399706166,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 261078805.7355176,
+     "payrollIndex": 1.878615838341784,
+     "playerCount": 34,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 116632717.28253534,
+     "payrollIndex": 0.839241122382699,
+     "playerCount": 33,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 254357507.5987938,
+     "payrollIndex": 1.830252137970572,
+     "playerCount": 34,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 46928041.43327192,
+     "payrollIndex": 0.337674908733163,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 47572824.53434037,
+     "payrollIndex": 0.3423145030600553,
+     "playerCount": 34,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 210771995.7928851,
+     "payrollIndex": 1.5166286993688158,
+     "playerCount": 36,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 113153657.68659315,
+     "payrollIndex": 0.8142072386821086,
+     "playerCount": 38,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 149807241.00523123,
+     "payrollIndex": 1.0779513674342884,
+     "playerCount": 35,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 161154056.3274333,
+     "payrollIndex": 1.1595983893707311,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 82715002.12485598,
+     "payrollIndex": 0.5951831770582107,
+     "playerCount": 37,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 122259367.26506503,
+     "payrollIndex": 0.8797281843033588,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 148428427.91622955,
+     "payrollIndex": 1.0680299948440692,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 127287138.76777615,
+     "payrollIndex": 0.9159059626946271,
+     "playerCount": 33,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 228396345.82890552,
+     "payrollIndex": 1.643446282377406,
+     "playerCount": 38,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 181586971.95513585,
+     "payrollIndex": 1.3066252566553525,
+     "playerCount": 37,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 188345816.15484202,
+     "payrollIndex": 1.3552591230723579,
+     "playerCount": 34,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 75665465.25791582,
+     "payrollIndex": 0.5444576056205042,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 244770175.46355006,
+     "payrollIndex": 1.7612656342749877,
+     "playerCount": 38,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 130569701.45310402,
+     "payrollIndex": 0.9395259353447769,
+     "playerCount": 34,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2023,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 958,
+   "eligibleDollars": 4714113679,
+   "attributedRows": 888,
+   "attributedDollars": 4507119848,
+   "coverageRows": 0.9269311064718163,
+   "coverageDollars": 0.9560906153107641,
+   "meanPayroll": 150237328.26666668,
+   "paPerInning": 4.2728102613297,
+   "teams": {
+    "108": {
+     "payroll": 226918178.65700814,
+     "payrollIndex": 1.5103981232562609,
+     "playerCount": 36,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 111516180.44632375,
+     "payrollIndex": 0.7422667970265414,
+     "playerCount": 36,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 80365235.67040235,
+     "payrollIndex": 0.5349218905687441,
+     "playerCount": 33,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 168425887.39076182,
+     "payrollIndex": 1.1210655123726043,
+     "playerCount": 32,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 167559087.01814058,
+     "payrollIndex": 1.1152959717223425,
+     "playerCount": 31,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 64855522.55955662,
+     "payrollIndex": 0.4316871399925326,
+     "playerCount": 36,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 89874102.12573235,
+     "payrollIndex": 0.5982141932543459,
+     "playerCount": 35,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 158063813.60126844,
+     "payrollIndex": 1.0520941461412971,
+     "playerCount": 33,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 118958485.30963112,
+     "payrollIndex": 0.7918037859305075,
+     "playerCount": 32,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 194225471.42855936,
+     "payrollIndex": 1.292791037150335,
+     "playerCount": 32,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 85845347.66835812,
+     "payrollIndex": 0.5713982580679633,
+     "playerCount": 34,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 210595562.8483635,
+     "payrollIndex": 1.4017525822514814,
+     "playerCount": 37,
+     "splitPlayerCount": 12,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 64409133.58993247,
+     "payrollIndex": 0.4287159145669059,
+     "playerCount": 28,
+     "splitPlayerCount": 2,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 246746389.17593372,
+     "payrollIndex": 1.6423773773317267,
+     "playerCount": 33,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 52911584.977117956,
+     "payrollIndex": 0.35218667416130767,
+     "playerCount": 31,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 58568668.77166262,
+     "payrollIndex": 0.38984098990169086,
+     "playerCount": 28,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 234429888.10058507,
+     "payrollIndex": 1.5603970784443075,
+     "playerCount": 38,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 137401206.67092365,
+     "payrollIndex": 0.9145610365690257,
+     "playerCount": 32,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 177454270.49489728,
+     "payrollIndex": 1.181159652812258,
+     "playerCount": 32,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 168083947.24216035,
+     "payrollIndex": 1.1187895124427163,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 76690597.53133753,
+     "payrollIndex": 0.5104630015465534,
+     "playerCount": 34,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 210145966.60881165,
+     "payrollIndex": 1.398760008802932,
+     "playerCount": 34,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 191108363.3779644,
+     "payrollIndex": 1.2720431438899984,
+     "playerCount": 33,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 150918705.52677536,
+     "payrollIndex": 1.0045353393059497,
+     "playerCount": 33,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 223556629.5951469,
+     "payrollIndex": 1.4880231975261213,
+     "playerCount": 32,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 193601558.5061324,
+     "payrollIndex": 1.288638188257019,
+     "playerCount": 35,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 157398641.7042604,
+     "payrollIndex": 1.0476666719264511,
+     "playerCount": 31,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 103588239.22770548,
+     "payrollIndex": 0.6894973467834805,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 255962046.42801744,
+     "payrollIndex": 1.7037180398581941,
+     "playerCount": 33,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 126941135.74652918,
+     "payrollIndex": 0.8449373881384028,
+     "playerCount": 34,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2024,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 962,
+   "eligibleDollars": 4852598558,
+   "attributedRows": 892,
+   "attributedDollars": 4634572913,
+   "coverageRows": 0.9272349272349273,
+   "coverageDollars": 0.9550703314123188,
+   "meanPayroll": 154485763.76666668,
+   "paPerInning": 4.231551848100871,
+   "teams": {
+    "108": {
+     "payroll": 158409540.0357331,
+     "payrollIndex": 1.025398950514255,
+     "playerCount": 34,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 159819175.4654634,
+     "payrollIndex": 1.0345236452133688,
+     "playerCount": 36,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 109736739.27255318,
+     "payrollIndex": 0.7103356102009383,
+     "playerCount": 39,
+     "splitPlayerCount": 14,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 137318126.48648763,
+     "payrollIndex": 0.8888723668667048,
+     "playerCount": 35,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 198511036.47981188,
+     "payrollIndex": 1.2849794805665098,
+     "playerCount": 34,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 88044361.1735901,
+     "payrollIndex": 0.5699189299188188,
+     "playerCount": 36,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 90240530.859319,
+     "payrollIndex": 0.584134930359131,
+     "playerCount": 35,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 127462301.15594232,
+     "payrollIndex": 0.8250747385918339,
+     "playerCount": 30,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 86779335.78304009,
+     "payrollIndex": 0.5617303087817884,
+     "playerCount": 27,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 242888025.57035565,
+     "payrollIndex": 1.572235652323347,
+     "playerCount": 33,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 104045967.76430306,
+     "payrollIndex": 0.6734987433628691,
+     "playerCount": 33,
+     "splitPlayerCount": 4,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 308931934.0461827,
+     "payrollIndex": 1.9997437078589941,
+     "playerCount": 40,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 87412886.95851105,
+     "payrollIndex": 0.5658313415243773,
+     "playerCount": 28,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 255128141.20559478,
+     "payrollIndex": 1.651467002428373,
+     "playerCount": 38,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 55623104.180911854,
+     "payrollIndex": 0.36005326850003005,
+     "playerCount": 30,
+     "splitPlayerCount": 5,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 92265982.74048659,
+     "payrollIndex": 0.5972458593650347,
+     "playerCount": 35,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 160859221.47935444,
+     "payrollIndex": 1.0412559549649776,
+     "playerCount": 34,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 139268447.50881863,
+     "payrollIndex": 0.9014969671844191,
+     "playerCount": 37,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 181688851.32231554,
+     "payrollIndex": 1.176087989549225,
+     "playerCount": 33,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 173793963.89317632,
+     "payrollIndex": 1.1249836855884825,
+     "playerCount": 32,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 76248596.45293176,
+     "payrollIndex": 0.4935639025489537,
+     "playerCount": 36,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 255304849.47627646,
+     "payrollIndex": 1.6526108506793262,
+     "playerCount": 34,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 188000546.98212284,
+     "payrollIndex": 1.216944153288302,
+     "playerCount": 35,
+     "splitPlayerCount": 17,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 127022794.54145622,
+     "payrollIndex": 0.8222297734392525,
+     "playerCount": 34,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 237733850.46772364,
+     "payrollIndex": 1.5388722214351984,
+     "playerCount": 31,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 230344838.76025674,
+     "payrollIndex": 1.4910424957225614,
+     "playerCount": 35,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 103326518.22104467,
+     "payrollIndex": 0.6688416828951808,
+     "playerCount": 29,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 62858554.92674538,
+     "payrollIndex": 0.406888980538596,
+     "playerCount": 35,
+     "splitPlayerCount": 16,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 289690800.9085657,
+     "payrollIndex": 1.8751941528159901,
+     "playerCount": 38,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 105813888.88092521,
+     "payrollIndex": 0.6849426529731578,
+     "playerCount": 34,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    }
+   }
+  },
+  {
+   "year": 2025,
+   "regime": "2006-2026",
+   "regimeComplete": true,
+   "eligibleRows": 969,
+   "eligibleDollars": 4939913400,
+   "attributedRows": 912,
+   "attributedDollars": 4714232096,
+   "coverageRows": 0.9411764705882353,
+   "coverageDollars": 0.9543147246265491,
+   "meanPayroll": 157141069.86666667,
+   "paPerInning": 4.2466860127684285,
+   "teams": {
+    "108": {
+     "payroll": 166677038.0234596,
+     "payrollIndex": 1.0606841239205267,
+     "playerCount": 34,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "109": {
+     "payroll": 152054479.61744097,
+     "payrollIndex": 0.967630421165252,
+     "playerCount": 31,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "110": {
+     "payroll": 142267909.8122927,
+     "payrollIndex": 0.9053515413443871,
+     "playerCount": 39,
+     "splitPlayerCount": 14,
+     "regime": "2006-2026"
+    },
+    "111": {
+     "payroll": 177956594.65697595,
+     "payrollIndex": 1.1324639370724097,
+     "playerCount": 36,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "112": {
+     "payroll": 205340669.18646494,
+     "payrollIndex": 1.3067282115407217,
+     "playerCount": 36,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "113": {
+     "payroll": 113464517.81185807,
+     "payrollIndex": 0.7220551438788859,
+     "playerCount": 35,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "114": {
+     "payroll": 82299138.05885167,
+     "payrollIndex": 0.523727744304414,
+     "playerCount": 30,
+     "splitPlayerCount": 3,
+     "regime": "2006-2026"
+    },
+    "115": {
+     "payroll": 112338941.5585512,
+     "payrollIndex": 0.7148923044361998,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "116": {
+     "payroll": 139931633.82113755,
+     "payrollIndex": 0.8904841613963095,
+     "playerCount": 39,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "117": {
+     "payroll": 199953340.58749688,
+     "payrollIndex": 1.2724448214407358,
+     "playerCount": 39,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "118": {
+     "payroll": 126137546.20888907,
+     "payrollIndex": 0.8027026054736427,
+     "playerCount": 30,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "119": {
+     "payroll": 314473386.6411064,
+     "payrollIndex": 2.00121703961883,
+     "playerCount": 41,
+     "splitPlayerCount": 11,
+     "regime": "2006-2026"
+    },
+    "120": {
+     "payroll": 70369561.82612336,
+     "payrollIndex": 0.4478113957467105,
+     "playerCount": 32,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "121": {
+     "payroll": 327781559.8601261,
+     "payrollIndex": 2.0859063778695597,
+     "playerCount": 39,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "133": {
+     "payroll": 72472929.56236927,
+     "payrollIndex": 0.46119661539699425,
+     "playerCount": 31,
+     "splitPlayerCount": 6,
+     "regime": "2006-2026"
+    },
+    "134": {
+     "payroll": 78491218.04757595,
+     "payrollIndex": 0.49949525044073656,
+     "playerCount": 29,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "135": {
+     "payroll": 186651980.0147399,
+     "payrollIndex": 1.1877988368865826,
+     "playerCount": 39,
+     "splitPlayerCount": 9,
+     "regime": "2006-2026"
+    },
+    "136": {
+     "payroll": 141964711.7501614,
+     "payrollIndex": 0.9034220771859176,
+     "playerCount": 35,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "137": {
+     "payroll": 163480459.2594297,
+     "payrollIndex": 1.0403420276961457,
+     "playerCount": 31,
+     "splitPlayerCount": 10,
+     "regime": "2006-2026"
+    },
+    "138": {
+     "payroll": 133948348.6193985,
+     "payrollIndex": 0.8524082770535605,
+     "playerCount": 29,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "139": {
+     "payroll": 64962200.121760696,
+     "payrollIndex": 0.41340052079880046,
+     "playerCount": 36,
+     "splitPlayerCount": 13,
+     "regime": "2006-2026"
+    },
+    "140": {
+     "payroll": 216927899.3451702,
+     "payrollIndex": 1.3804659693944576,
+     "playerCount": 33,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "141": {
+     "payroll": 231139092.41735244,
+     "payrollIndex": 1.4709018629787405,
+     "playerCount": 34,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "142": {
+     "payroll": 120664990.60603555,
+     "payrollIndex": 0.767876855543997,
+     "playerCount": 36,
+     "splitPlayerCount": 17,
+     "regime": "2006-2026"
+    },
+    "143": {
+     "payroll": 288306891.1530945,
+     "payrollIndex": 1.834701083540549,
+     "playerCount": 34,
+     "splitPlayerCount": 8,
+     "regime": "2006-2026"
+    },
+    "144": {
+     "payroll": 214266726.0175693,
+     "payrollIndex": 1.3635310374262657,
+     "playerCount": 46,
+     "splitPlayerCount": 18,
+     "regime": "2006-2026"
+    },
+    "145": {
+     "payroll": 72210213.27448744,
+     "payrollIndex": 0.4595247654591979,
+     "playerCount": 39,
+     "splitPlayerCount": 13,
+     "regime": "2006-2026"
+    },
+    "146": {
+     "payroll": 46856081.88577608,
+     "payrollIndex": 0.29817845790112796,
+     "playerCount": 32,
+     "splitPlayerCount": 7,
+     "regime": "2006-2026"
+    },
+    "147": {
+     "payroll": 248152695.01155043,
+     "payrollIndex": 1.5791714745362662,
+     "playerCount": 43,
+     "splitPlayerCount": 13,
+     "regime": "2006-2026"
+    },
+    "158": {
+     "payroll": 102689341.24275406,
+     "payrollIndex": 0.653485058552073,
+     "playerCount": 39,
+     "splitPlayerCount": 13,
+     "regime": "2006-2026"
+    }
+   }
+  }
+ ]
+}

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T15:14:49.436Z",
+  "generatedAt": "2026-08-27T19:20:44.717Z",
   "source": "statsapi /api/v1/stats?stats=season&group={hitting,pitching}&teamId=...&playerPool=all, per team per season",
   "method": "battingAge = PA-weighted mean of statsapi's per-player-per-team-stint age; pitchingAge = IP-weighted (fractional innings converted from baseball notation). *Relative fields are each team's age minus that SEASON's own league-wide weighted average.",
   "seasons": [
@@ -7373,18 +7373,18 @@
     },
     {
       "year": 2024,
-      "leagueBattingAge": 27.92950154646107,
-      "leaguePitchingAge": 28.828712675499304,
+      "leagueBattingAge": 27.943101907930437,
+      "leaguePitchingAge": 28.880053189433237,
       "teams": {
         "108": {
           "battingAge": 27.255564853556486,
           "battingPA": 5975,
           "battingN": 31,
-          "pitchingAge": 28.346798029556666,
-          "pitchingIP": 1353.3333333333328,
-          "pitchingN": 38,
-          "battingAgeRelative": -0.6739366929045829,
-          "pitchingAgeRelative": -0.4819146459426378
+          "pitchingAge": 28.6738877242022,
+          "pitchingIP": 1430.9999999999995,
+          "pitchingN": 40,
+          "battingAgeRelative": -0.6875370543739514,
+          "pitchingAgeRelative": -0.20616546523103807
         },
         "109": {
           "battingAge": 28.54392106938256,
@@ -7393,18 +7393,18 @@
           "pitchingAge": 28.226327944572745,
           "pitchingIP": 1443.333333333333,
           "pitchingN": 32,
-          "battingAgeRelative": 0.6144195229214908,
-          "pitchingAgeRelative": -0.6023847309265591
+          "battingAgeRelative": 0.6008191614521223,
+          "pitchingAgeRelative": -0.6537252448604924
         },
         "110": {
-          "battingAge": 26.836860523246127,
-          "battingPA": 6001,
-          "battingN": 33,
+          "battingAge": 26.86981865284974,
+          "battingPA": 6176,
+          "battingN": 34,
           "pitchingAge": 29.263060564031445,
           "pitchingIP": 1441.9999999999995,
           "pitchingN": 34,
-          "battingAgeRelative": -1.0926410232149415,
-          "pitchingAgeRelative": 0.434347888532141
+          "battingAgeRelative": -1.073283255080696,
+          "pitchingAgeRelative": 0.38300737459820766
         },
         "111": {
           "battingAge": 27.289567183462534,
@@ -7413,28 +7413,28 @@
           "pitchingAge": 29.057824690224873,
           "pitchingIP": 1452.6666666666667,
           "pitchingN": 34,
-          "battingAgeRelative": -0.6399343629985346,
-          "pitchingAgeRelative": 0.22911201472556897
+          "battingAgeRelative": -0.6535347244679031,
+          "pitchingAgeRelative": 0.17777150079163562
         },
         "112": {
-          "battingAge": 27.996312554872695,
-          "battingPA": 5695,
-          "battingN": 25,
-          "pitchingAge": 29.083094555873917,
-          "pitchingIP": 1396.0000000000002,
-          "pitchingN": 35,
-          "battingAgeRelative": 0.06681100841162646,
-          "pitchingAgeRelative": 0.25438188037461273
+          "battingAge": 27.79005886200131,
+          "battingPA": 6116,
+          "battingN": 26,
+          "pitchingAge": 29.1824528740982,
+          "pitchingIP": 1432.3333333333335,
+          "pitchingN": 36,
+          "battingAgeRelative": -0.15304304592912743,
+          "pitchingAgeRelative": 0.30239968466496236
         },
         "113": {
           "battingAge": 27.01859296482412,
           "battingPA": 5970,
           "battingN": 36,
-          "pitchingAge": 28.60564435564436,
-          "pitchingIP": 1334.6666666666667,
-          "pitchingN": 31,
-          "battingAgeRelative": -0.9109085816369493,
-          "pitchingAgeRelative": -0.22306831985494568
+          "pitchingAge": 28.762138188608784,
+          "pitchingIP": 1428,
+          "pitchingN": 32,
+          "battingAgeRelative": -0.9245089431063178,
+          "pitchingAgeRelative": -0.11791500082445339
         },
         "114": {
           "battingAge": 26.1591024126877,
@@ -7443,8 +7443,8 @@
           "pitchingAge": 27.862745098039216,
           "pitchingIP": 1428,
           "pitchingN": 30,
-          "battingAgeRelative": -1.7703991337733669,
-          "pitchingAgeRelative": -0.9659675774600878
+          "battingAgeRelative": -1.7839994952427354,
+          "pitchingAgeRelative": -1.0173080913940211
         },
         "115": {
           "battingAge": 27.869399269830733,
@@ -7453,8 +7453,8 @@
           "pitchingAge": 28.16471962616822,
           "pitchingIP": 1426.6666666666667,
           "pitchingN": 33,
-          "battingAgeRelative": -0.06010227663033518,
-          "pitchingAgeRelative": -0.6639930493310828
+          "battingAgeRelative": -0.07370263809970368,
+          "pitchingAgeRelative": -0.7153335632650162
         },
         "116": {
           "battingAge": 26.651885068925427,
@@ -7463,8 +7463,8 @@
           "pitchingAge": 27.68993319511634,
           "pitchingIP": 1446.9999999999998,
           "pitchingN": 26,
-          "battingAgeRelative": -1.2776164775356413,
-          "pitchingAgeRelative": -1.138779480382965
+          "battingAgeRelative": -1.2912168390050098,
+          "pitchingAgeRelative": -1.1901199943168983
         },
         "117": {
           "battingAge": 28.80301293597511,
@@ -7473,8 +7473,8 @@
           "pitchingAge": 29.493715083798886,
           "pitchingIP": 1431.9999999999995,
           "pitchingN": 32,
-          "battingAgeRelative": 0.873511389514043,
-          "pitchingAgeRelative": 0.665002408299582
+          "battingAgeRelative": 0.8599110280446745,
+          "pitchingAgeRelative": 0.6136618943656487
         },
         "118": {
           "battingAge": 27.938983617519224,
@@ -7483,28 +7483,28 @@
           "pitchingAge": 29.142156862745093,
           "pitchingIP": 1428.0000000000002,
           "pitchingN": 31,
-          "battingAgeRelative": 0.009482071058155128,
-          "pitchingAgeRelative": 0.31344418724578915
+          "battingAgeRelative": -0.004118290411213366,
+          "pitchingAgeRelative": 0.2621036733118558
         },
         "119": {
           "battingAge": 30.33077537969624,
           "battingPA": 6255,
           "battingN": 22,
-          "pitchingAge": 28.958220693044975,
-          "pitchingIP": 1356.3333333333333,
-          "pitchingN": 39,
-          "battingAgeRelative": 2.401273833235173,
-          "pitchingAgeRelative": 0.1295080175456711
+          "pitchingAge": 29.331565598339868,
+          "pitchingIP": 1445.6666666666665,
+          "pitchingN": 40,
+          "battingAgeRelative": 2.3876734717658046,
+          "pitchingAgeRelative": 0.45151240890663047
         },
         "120": {
-          "battingAge": 26.098175965665234,
-          "battingPA": 5592,
-          "battingN": 27,
+          "battingAge": 26.345838218053927,
+          "battingPA": 5971,
+          "battingN": 28,
           "pitchingAge": 28.71827057182705,
           "pitchingIP": 1434.0000000000002,
           "pitchingN": 25,
-          "battingAgeRelative": -1.8313255807958342,
-          "pitchingAgeRelative": -0.1104421036722556
+          "battingAgeRelative": -1.5972636898765096,
+          "pitchingAgeRelative": -0.16178261760618895
         },
         "121": {
           "battingAge": 30.033733376581253,
@@ -7513,8 +7513,8 @@
           "pitchingAge": 30.825745320083204,
           "pitchingIP": 1442.3333333333333,
           "pitchingN": 37,
-          "battingAgeRelative": 2.1042318301201846,
-          "pitchingAgeRelative": 1.9970326445839
+          "battingAgeRelative": 2.090631468650816,
+          "pitchingAgeRelative": 1.9456921306499666
         },
         "133": {
           "battingAge": 26.486741796486577,
@@ -7523,8 +7523,8 @@
           "pitchingAge": 28.07030162412993,
           "pitchingIP": 1436.666666666667,
           "pitchingN": 32,
-          "battingAgeRelative": -1.442759749974492,
-          "pitchingAgeRelative": -0.7584110513693751
+          "battingAgeRelative": -1.4563601114438605,
+          "pitchingAgeRelative": -0.8097515653033085
         },
         "134": {
           "battingAge": 28.55455142951035,
@@ -7533,8 +7533,8 @@
           "pitchingAge": 26.963623725671912,
           "pitchingIP": 1438.6666666666672,
           "pitchingN": 32,
-          "battingAgeRelative": 0.6250498830492823,
-          "pitchingAgeRelative": -1.865088949827392
+          "battingAgeRelative": 0.6114495215799138,
+          "pitchingAgeRelative": -1.9164294637613253
         },
         "135": {
           "battingAge": 28.965099131574636,
@@ -7543,8 +7543,8 @@
           "pitchingAge": 28.617415470125056,
           "pitchingIP": 1439.3333333333335,
           "pitchingN": 26,
-          "battingAgeRelative": 1.0355975851135675,
-          "pitchingAgeRelative": -0.21129720537424745
+          "battingAgeRelative": 1.021997223644199,
+          "pitchingAgeRelative": -0.2626377193081808
         },
         "136": {
           "battingAge": 28.95780451623537,
@@ -7553,18 +7553,18 @@
           "pitchingAge": 27.434054431263085,
           "pitchingIP": 1433,
           "pitchingN": 28,
-          "battingAgeRelative": 1.0283029697743018,
-          "pitchingAgeRelative": -1.3946582442362185
+          "battingAgeRelative": 1.0147026083049333,
+          "pitchingAgeRelative": -1.4459987581701519
         },
         "137": {
-          "battingAge": 28.439329805996472,
-          "battingPA": 5670,
-          "battingN": 29,
+          "battingAge": 28.669580996370836,
+          "battingPA": 6062,
+          "battingN": 30,
           "pitchingAge": 27.1557777261102,
           "pitchingIP": 1433.6666666666667,
           "pitchingN": 31,
-          "battingAgeRelative": 0.5098282595354036,
-          "pitchingAgeRelative": -1.6729349493891057
+          "battingAgeRelative": 0.7264790884403993,
+          "pitchingAgeRelative": -1.724275463323039
         },
         "138": {
           "battingAge": 27.703467451750083,
@@ -7573,38 +7573,38 @@
           "pitchingAge": 31.12049861495845,
           "pitchingIP": 1444.0000000000002,
           "pitchingN": 25,
-          "battingAgeRelative": -0.226034094710986,
-          "pitchingAgeRelative": 2.291785939459146
+          "battingAgeRelative": -0.2396344561803545,
+          "pitchingAgeRelative": 2.2404454255252126
         },
         "139": {
-          "battingAge": 27.239744582043343,
-          "battingPA": 5168,
-          "battingN": 23,
-          "pitchingAge": 27.93937875751503,
-          "pitchingIP": 1330.6666666666667,
-          "pitchingN": 29,
-          "battingAgeRelative": -0.6897569644177253,
-          "pitchingAgeRelative": -0.8893339179842741
+          "battingAge": 27.1996336996337,
+          "battingPA": 6006,
+          "battingN": 25,
+          "pitchingAge": 28.096714484035168,
+          "pitchingIP": 1440.6666666666667,
+          "pitchingN": 30,
+          "battingAgeRelative": -0.7434682082967363,
+          "pitchingAgeRelative": -0.7833387053980694
         },
         "140": {
           "battingAge": 28.055014042623494,
           "battingPA": 6053,
           "battingN": 33,
-          "pitchingAge": 31.43715434891906,
-          "pitchingIP": 1326,
-          "pitchingN": 33,
-          "battingAgeRelative": 0.12551249616242544,
-          "pitchingAgeRelative": 2.6084416734197546
+          "pitchingAge": 31.47723558253561,
+          "pitchingIP": 1427.6666666666667,
+          "pitchingN": 34,
+          "battingAgeRelative": 0.11191213469305694,
+          "pitchingAgeRelative": 2.597182393102372
         },
         "141": {
-          "battingAge": 28.025720164609055,
-          "battingPA": 5832,
-          "battingN": 26,
-          "pitchingAge": 30.537484116899616,
-          "pitchingIP": 1311.6666666666665,
-          "pitchingN": 33,
-          "battingAgeRelative": 0.09621861814798649,
-          "pitchingAgeRelative": 1.7087714414003123
+          "battingAge": 28.062376237623763,
+          "battingPA": 6060,
+          "battingN": 27,
+          "pitchingAge": 30.737038766931338,
+          "pitchingIP": 1427.3333333333333,
+          "pitchingN": 34,
+          "battingAgeRelative": 0.11927432969332585,
+          "pitchingAgeRelative": 1.8569855774981008
         },
         "142": {
           "battingAge": 28.741466601339212,
@@ -7613,18 +7613,18 @@
           "pitchingAge": 27.757232122193937,
           "pitchingIP": 1440.3333333333335,
           "pitchingN": 34,
-          "battingAgeRelative": 0.8119650548781436,
-          "pitchingAgeRelative": -1.071480553305367
+          "battingAgeRelative": 0.7983646934087751,
+          "pitchingAgeRelative": -1.1228210672393004
         },
         "143": {
           "battingAge": 29.168666882906262,
           "battingPA": 6166,
           "battingN": 21,
-          "pitchingAge": 29.662085308056874,
-          "pitchingIP": 1406.6666666666667,
-          "pitchingN": 28,
-          "battingAgeRelative": 1.2391653364451933,
-          "pitchingAgeRelative": 0.8333726325575697
+          "pitchingAge": 29.645563770794826,
+          "pitchingIP": 1442.6666666666667,
+          "pitchingN": 29,
+          "battingAgeRelative": 1.2255649749758248,
+          "pitchingAgeRelative": 0.765510581361589
         },
         "144": {
           "battingAge": 29.288888888888888,
@@ -7633,28 +7633,28 @@
           "pitchingAge": 31.488914549653575,
           "pitchingIP": 1443.3333333333333,
           "pitchingN": 30,
-          "battingAgeRelative": 1.3593873424278193,
-          "pitchingAgeRelative": 2.6602018741542715
+          "battingAgeRelative": 1.3457869809584508,
+          "pitchingAgeRelative": 2.608861360220338
         },
         "145": {
-          "battingAge": 27.149548857746208,
-          "battingPA": 5209,
-          "battingN": 28,
-          "pitchingAge": 27.181190223166837,
-          "pitchingIP": 1254.6666666666667,
-          "pitchingN": 33,
-          "battingAgeRelative": -0.7799526887148609,
-          "pitchingAgeRelative": -1.647522452332467
+          "battingAge": 27.773726358834555,
+          "battingPA": 5869,
+          "battingN": 30,
+          "pitchingAge": 27.53356807511736,
+          "pitchingIP": 1420.0000000000002,
+          "pitchingN": 35,
+          "battingAgeRelative": -0.16937554909588215,
+          "pitchingAgeRelative": -1.346485114315879
         },
         "146": {
-          "battingAge": 27.28350116189001,
-          "battingPA": 5164,
-          "battingN": 27,
-          "pitchingAge": 26.91304347826086,
-          "pitchingIP": 1288.0000000000005,
-          "pitchingN": 43,
-          "battingAgeRelative": -0.6460003845710602,
-          "pitchingAgeRelative": -1.9156691972384436
+          "battingAge": 27.170965608465607,
+          "battingPA": 6048,
+          "battingN": 29,
+          "pitchingAge": 26.910018552875687,
+          "pitchingIP": 1437.3333333333337,
+          "pitchingN": 45,
+          "battingAgeRelative": -0.7721362994648295,
+          "pitchingAgeRelative": -1.9700346365575498
         },
         "147": {
           "battingAge": 27.993915132105684,
@@ -7663,8 +7663,8 @@
           "pitchingAge": 30.08260670032125,
           "pitchingIP": 1452.6666666666663,
           "pitchingN": 33,
-          "battingAgeRelative": 0.06441358564461552,
-          "pitchingAgeRelative": 1.2538940248219461
+          "battingAgeRelative": 0.05081322417524703,
+          "pitchingAgeRelative": 1.2025535108880128
         },
         "158": {
           "battingAge": 26.365316045380876,
@@ -7673,15 +7673,15 @@
           "pitchingAge": 28.88012909174736,
           "pitchingIP": 1445.9999999999995,
           "pitchingN": 36,
-          "battingAgeRelative": -1.5641855010801926,
-          "pitchingAgeRelative": 0.05141641624805615
+          "battingAgeRelative": -1.577785862549561,
+          "pitchingAgeRelative": 0.00007590231412279991
         }
       }
     },
     {
       "year": 2025,
-      "leagueBattingAge": 27.781237214165568,
-      "leaguePitchingAge": 29.021376908232256,
+      "leagueBattingAge": 27.8839530739206,
+      "leaguePitchingAge": 29.047746179144895,
       "teams": {
         "108": {
           "battingAge": 27.938,
@@ -7690,38 +7690,38 @@
           "pitchingAge": 29.87214718211459,
           "pitchingIP": 1431.333333333333,
           "pitchingN": 41,
-          "battingAgeRelative": 0.15676278583443093,
-          "pitchingAgeRelative": 0.8507702738823326
+          "battingAgeRelative": 0.05404692607939765,
+          "pitchingAgeRelative": 0.8244010029696938
         },
         "109": {
-          "battingAge": 27.315857966164714,
-          "battingPA": 5379,
-          "battingN": 33,
-          "pitchingAge": 29.034141256189724,
-          "pitchingIP": 1279,
-          "pitchingN": 40,
-          "battingAgeRelative": -0.46537924800085406,
-          "pitchingAgeRelative": 0.012764347957467947
+          "battingAge": 27.75925925925926,
+          "battingPA": 6210,
+          "battingN": 35,
+          "pitchingAge": 29.779778393351794,
+          "pitchingIP": 1444,
+          "pitchingN": 42,
+          "battingAgeRelative": -0.12469381466134166,
+          "pitchingAgeRelative": 0.7320322142068996
         },
         "110": {
-          "battingAge": 25.71021140805744,
-          "battingPA": 5014,
-          "battingN": 41,
+          "battingAge": 26.48704318936877,
+          "battingPA": 6020,
+          "battingN": 44,
           "pitchingAge": 30.580269892973476,
           "pitchingIP": 1432.6666666666667,
           "pitchingN": 41,
-          "battingAgeRelative": -2.0710258061081284,
-          "pitchingAgeRelative": 1.5588929847412203
+          "battingAgeRelative": -1.3969098845518317,
+          "pitchingAgeRelative": 1.5325237138285814
         },
         "111": {
-          "battingAge": 27.5308242506812,
-          "battingPA": 5872,
-          "battingN": 25,
+          "battingAge": 27.55607476635514,
+          "battingPA": 6206,
+          "battingN": 26,
           "pitchingAge": 28.742232451093212,
           "pitchingIP": 1448.3333333333333,
           "pitchingN": 35,
-          "battingAgeRelative": -0.2504129634843686,
-          "pitchingAgeRelative": -0.27914445713904357
+          "battingAgeRelative": -0.32787830756545944,
+          "pitchingAgeRelative": -0.3055137280516824
         },
         "112": {
           "battingAge": 28.321161960402467,
@@ -7730,8 +7730,8 @@
           "pitchingAge": 30.764924506387928,
           "pitchingIP": 1434.9999999999998,
           "pitchingN": 33,
-          "battingAgeRelative": 0.539924746236899,
-          "pitchingAgeRelative": 1.743547598155672
+          "battingAgeRelative": 0.43720888648186573,
+          "pitchingAgeRelative": 1.7171783272430332
         },
         "113": {
           "battingAge": 27.155540940480105,
@@ -7740,28 +7740,28 @@
           "pitchingAge": 28.820209059233456,
           "pitchingIP": 1435,
           "pitchingN": 28,
-          "battingAgeRelative": -0.6256962736854632,
-          "pitchingAgeRelative": -0.20116784899880003
+          "battingAgeRelative": -0.7284121334404965,
+          "pitchingAgeRelative": -0.22753711991143888
         },
         "114": {
-          "battingAge": 26.503097667638485,
-          "battingPA": 5488,
-          "battingN": 23,
+          "battingAge": 27.45986875315497,
+          "battingPA": 5943,
+          "battingN": 24,
           "pitchingAge": 26.861766065649554,
           "pitchingIP": 1442.0000000000002,
           "pitchingN": 26,
-          "battingAgeRelative": -1.2781395465270826,
-          "pitchingAgeRelative": -2.159610842582701
+          "battingAgeRelative": -0.42408432076562974,
+          "pitchingAgeRelative": -2.18598011349534
         },
         "115": {
-          "battingAge": 26.431632467768296,
-          "battingPA": 5507,
-          "battingN": 35,
+          "battingAge": 26.673832092078538,
+          "battingPA": 5908,
+          "battingN": 36,
           "pitchingAge": 27.800094741828513,
           "pitchingIP": 1407.3333333333335,
           "pitchingN": 31,
-          "battingAgeRelative": -1.3496047463972722,
-          "pitchingAgeRelative": -1.2212821664037428
+          "battingAgeRelative": -1.2101209818420635,
+          "pitchingAgeRelative": -1.2476514373163816
         },
         "116": {
           "battingAge": 26.69932709666831,
@@ -7770,8 +7770,8 @@
           "pitchingAge": 28.412624738918545,
           "pitchingIP": 1436.3333333333333,
           "pitchingN": 39,
-          "battingAgeRelative": -1.0819101174972587,
-          "pitchingAgeRelative": -0.6087521693137106
+          "battingAgeRelative": -1.184625977252292,
+          "pitchingAgeRelative": -0.6351214402263494
         },
         "117": {
           "battingAge": 28.852143913257763,
@@ -7780,18 +7780,18 @@
           "pitchingAge": 28.994683310217297,
           "pitchingIP": 1442,
           "pitchingN": 36,
-          "battingAgeRelative": 1.0709066990921947,
-          "pitchingAgeRelative": -0.026693598014958297
+          "battingAgeRelative": 0.9681908393371614,
+          "pitchingAgeRelative": -0.05306286892759715
         },
         "118": {
-          "battingAge": 28.190689655172413,
-          "battingPA": 5800,
-          "battingN": 31,
+          "battingAge": 28.253328894806923,
+          "battingPA": 6008,
+          "battingN": 32,
           "pitchingAge": 29.83851508120649,
           "pitchingIP": 1436.6666666666667,
           "pitchingN": 27,
-          "battingAgeRelative": 0.4094524410068452,
-          "pitchingAgeRelative": 0.8171381729742357
+          "battingAgeRelative": 0.36937582088632226,
+          "pitchingAgeRelative": 0.7907689020615969
         },
         "119": {
           "battingAge": 30.751575884919994,
@@ -7800,18 +7800,18 @@
           "pitchingAge": 29.12375665047421,
           "pitchingIP": 1440.9999999999998,
           "pitchingN": 40,
-          "battingAgeRelative": 2.970338670754426,
-          "pitchingAgeRelative": 0.10237974224195412
+          "battingAgeRelative": 2.867622810999393,
+          "pitchingAgeRelative": 0.07601047132931527
         },
         "120": {
-          "battingAge": 25.506190823015295,
-          "battingPA": 5492,
-          "battingN": 27,
-          "pitchingAge": 26.905128822537918,
-          "pitchingIP": 1384.3333333333335,
-          "pitchingN": 29,
-          "battingAgeRelative": -2.2750463911502727,
-          "pitchingAgeRelative": -2.1162480856943375
+          "battingAge": 25.792377131394183,
+          "battingPA": 5982,
+          "battingN": 28,
+          "pitchingAge": 27.07213114754098,
+          "pitchingIP": 1423.3333333333335,
+          "pitchingN": 30,
+          "battingAgeRelative": -2.0915759425264184,
+          "pitchingAgeRelative": -1.9756150316039154
         },
         "121": {
           "battingAge": 28.9561346714147,
@@ -7820,28 +7820,28 @@
           "pitchingAge": 30.41317504655492,
           "pitchingIP": 1432.000000000001,
           "pitchingN": 46,
-          "battingAgeRelative": 1.1748974572491306,
-          "pitchingAgeRelative": 1.3917981383226632
+          "battingAgeRelative": 1.0721815974940974,
+          "pitchingAgeRelative": 1.3654288674100243
         },
         "133": {
           "battingAge": 26.02227280117054,
           "battingPA": 6151,
           "battingN": 28,
-          "pitchingAge": 28.67555979037638,
-          "pitchingIP": 1399.333333333333,
-          "pitchingN": 34,
-          "battingAgeRelative": -1.7589644129950273,
-          "pitchingAgeRelative": -0.34581711785587643
+          "pitchingAge": 28.604219800602838,
+          "pitchingIP": 1437.6666666666663,
+          "pitchingN": 35,
+          "battingAgeRelative": -1.8616802727500605,
+          "pitchingAgeRelative": -0.4435263785420567
         },
         "134": {
-          "battingAge": 29.07415016809862,
-          "battingPA": 5354,
-          "battingN": 25,
-          "pitchingAge": 27.50311153662039,
-          "pitchingIP": 1392.666666666667,
-          "pitchingN": 30,
-          "battingAgeRelative": 1.292912953933051,
-          "pitchingAgeRelative": -1.5182653716118644
+          "battingAge": 29.175266311584554,
+          "battingPA": 6008,
+          "battingN": 27,
+          "pitchingAge": 27.56943150046598,
+          "pitchingIP": 1430.666666666667,
+          "pitchingN": 31,
+          "battingAgeRelative": 1.2913132376639531,
+          "pitchingAgeRelative": -1.4783146786789132
         },
         "135": {
           "battingAge": 29.82733694759323,
@@ -7850,58 +7850,58 @@
           "pitchingAge": 29.537101651546873,
           "pitchingIP": 1433,
           "pitchingN": 28,
-          "battingAgeRelative": 2.0460997334276634,
-          "pitchingAgeRelative": 0.5157247433146175
+          "battingAgeRelative": 1.94338387367263,
+          "pitchingAgeRelative": 0.48935547240197863
         },
         "136": {
-          "battingAge": 28.59501246882793,
-          "battingPA": 6015,
-          "battingN": 27,
+          "battingAge": 28.636935483870968,
+          "battingPA": 6200,
+          "battingN": 28,
           "pitchingAge": 27.661121239744762,
           "pitchingIP": 1462.6666666666663,
           "pitchingN": 33,
-          "battingAgeRelative": 0.8137752546623638,
-          "pitchingAgeRelative": -1.3602556684874934
+          "battingAgeRelative": 0.7529824099503664,
+          "pitchingAgeRelative": -1.3866249394001322
         },
         "137": {
-          "battingAge": 27.821578947368423,
-          "battingPA": 5700,
-          "battingN": 27,
-          "pitchingAge": 30.087061087061084,
-          "pitchingIP": 1386.0000000000002,
-          "pitchingN": 29,
-          "battingAgeRelative": 0.04034173320285461,
-          "pitchingAgeRelative": 1.0656841788288283
+          "battingAge": 28.20009881422925,
+          "battingPA": 6072,
+          "battingN": 28,
+          "pitchingAge": 29.98930481283422,
+          "pitchingIP": 1433.666666666667,
+          "pitchingN": 31,
+          "battingAgeRelative": 0.3161457403086487,
+          "pitchingAgeRelative": 0.9415586336893256
         },
         "138": {
           "battingAge": 26.636678200692042,
           "battingPA": 6069,
           "battingN": 24,
-          "pitchingAge": 29.483763132760263,
-          "pitchingIP": 1396.0000000000002,
-          "pitchingN": 23,
-          "battingAgeRelative": -1.1445590134735255,
-          "pitchingAgeRelative": 0.46238622452800726
+          "pitchingAge": 29.49674115456238,
+          "pitchingIP": 1432.0000000000002,
+          "pitchingN": 24,
+          "battingAgeRelative": -1.2472748732285588,
+          "pitchingAgeRelative": 0.44899497541748445
         },
         "139": {
-          "battingAge": 27.30415944540728,
-          "battingPA": 5770,
-          "battingN": 29,
-          "pitchingAge": 27.47031611410949,
-          "pitchingIP": 1297,
-          "pitchingN": 28,
-          "battingAgeRelative": -0.47707776875828856,
-          "pitchingAgeRelative": -1.5510607941227654
+          "battingAge": 27.335814722911497,
+          "battingPA": 6045,
+          "battingN": 30,
+          "pitchingAge": 27.613181183046116,
+          "pitchingIP": 1431.3333333333333,
+          "pitchingN": 30,
+          "battingAgeRelative": -0.5481383510091042,
+          "pitchingAgeRelative": -1.4345649960987785
         },
         "140": {
           "battingAge": 28.962950711214027,
           "battingPA": 6046,
           "battingN": 33,
-          "pitchingAge": 31.834280303030308,
-          "pitchingIP": 1407.9999999999998,
-          "pitchingN": 28,
-          "battingAgeRelative": 1.1817134970484595,
-          "pitchingAgeRelative": 2.8129033947980524
+          "pitchingAge": 31.862554862554866,
+          "pitchingIP": 1442.9999999999998,
+          "pitchingN": 29,
+          "battingAgeRelative": 1.0789976372934262,
+          "pitchingAgeRelative": 2.8148086834099715
         },
         "141": {
           "battingAge": 28.1168284789644,
@@ -7910,18 +7910,18 @@
           "pitchingAge": 31.416318961520624,
           "pitchingIP": 1438.0000000000002,
           "pitchingN": 38,
-          "battingAgeRelative": 0.3355912647988326,
-          "pitchingAgeRelative": 2.394942053288368
+          "battingAgeRelative": 0.23287540504379933,
+          "pitchingAgeRelative": 2.368572782375729
         },
         "142": {
-          "battingAge": 27.604466394674684,
-          "battingPA": 4657,
-          "battingN": 22,
-          "pitchingAge": 28.348268345846453,
-          "pitchingIP": 1376.3333333333333,
-          "pitchingN": 35,
-          "battingAgeRelative": -0.17677081949088347,
-          "pitchingAgeRelative": -0.6731085623858029
+          "battingAge": 28.095890410958905,
+          "battingPA": 6059,
+          "battingN": 26,
+          "pitchingAge": 28.30140186915888,
+          "pitchingIP": 1426.6666666666665,
+          "pitchingN": 37,
+          "battingAgeRelative": 0.21193733703830375,
+          "pitchingAgeRelative": -0.7463443099860143
         },
         "143": {
           "battingAge": 30.345929289652936,
@@ -7930,8 +7930,8 @@
           "pitchingAge": 29.969220087942606,
           "pitchingIP": 1440.3333333333333,
           "pitchingN": 28,
-          "battingAgeRelative": 2.5646920754873683,
-          "pitchingAgeRelative": 0.9478431797103504
+          "battingAgeRelative": 2.461976215732335,
+          "pitchingAgeRelative": 0.9214739087977115
         },
         "144": {
           "battingAge": 28.354025218234725,
@@ -7940,8 +7940,8 @@
           "pitchingAge": 29.05146036161335,
           "pitchingIP": 1438,
           "pitchingN": 46,
-          "battingAgeRelative": 0.5727880040691566,
-          "pitchingAgeRelative": 0.030083453381095637
+          "battingAgeRelative": 0.47007214431412336,
+          "pitchingAgeRelative": 0.0037141824684567837
         },
         "145": {
           "battingAge": 26.797728411558378,
@@ -7950,18 +7950,18 @@
           "pitchingAge": 27.41242937853106,
           "pitchingIP": 1416.0000000000005,
           "pitchingN": 32,
-          "battingAgeRelative": -0.9835088026071901,
-          "pitchingAgeRelative": -1.6089475297011973
+          "battingAgeRelative": -1.0862246623622234,
+          "pitchingAgeRelative": -1.635316800613836
         },
         "146": {
-          "battingAge": 25.61619293712317,
-          "battingPA": 5805,
-          "battingN": 25,
+          "battingAge": 25.69211983067405,
+          "battingPA": 6142,
+          "battingN": 26,
           "pitchingAge": 27.259353348729785,
           "pitchingIP": 1443.3333333333337,
           "pitchingN": 31,
-          "battingAgeRelative": -2.165044277042398,
-          "pitchingAgeRelative": -1.7620235595024702
+          "battingAgeRelative": -2.1918332432465526,
+          "pitchingAgeRelative": -1.788392830415109
         },
         "147": {
           "battingAge": 28.61748195669607,
@@ -7970,8 +7970,8 @@
           "pitchingAge": 30.322296827969446,
           "pitchingIP": 1439.6666666666665,
           "pitchingN": 34,
-          "battingAgeRelative": 0.8362447425305035,
-          "pitchingAgeRelative": 1.30091991973719
+          "battingAgeRelative": 0.7335288827754702,
+          "pitchingAgeRelative": 1.274550648824551
         },
         "158": {
           "battingAge": 26.88292917938012,
@@ -7980,8 +7980,8 @@
           "pitchingAge": 28.247803975959307,
           "pitchingIP": 1442.0000000000002,
           "pitchingN": 33,
-          "battingAgeRelative": -0.8983080347854475,
-          "pitchingAgeRelative": -0.7735729322729483
+          "battingAgeRelative": -1.0010238945404808,
+          "pitchingAgeRelative": -0.7999422031855872
         }
       }
     }
