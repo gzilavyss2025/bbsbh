@@ -160,6 +160,20 @@ const PANEL_PATHS = [
   // The season-players candidate pool itself (scripts/gen-contracts-season-players.mjs)
   // -- sharded one file per season, same glob pattern as war-history above.
   'public/data/contracts-history/season-players/*.json',
+  // The dollar terms behind each identity row above (scripts/gen-contracts-shards.mjs):
+  // one row per rowKey, keyed the same way -- sharded per source file, same glob
+  // pattern as war-history and season-players above.
+  'public/data/contracts-history/terms/*.json',
+  // Per-player shards of the same rows, grouped by personId instead of rowKey
+  // (scripts/gen-contracts-shards.mjs) -- sharded across 100 files, same glob
+  // pattern as war-history and season-players above.
+  // KNOWN ISSUE: 67 of the 100 shards hold free-text values (e.g.
+  // "non-tendered", "1 y/$2.325+opt") in term fields DuckDB's
+  // auto-detection infers as numeric. The view registers, but a full scan
+  // of its flattened companion view (*__players) throws a cast error. This
+  // panel needs a hand-written schema before it is join-ready -- do not add
+  // one here without a decision; see docs/agents/research-database.md.
+  'public/data/contracts-history/player/*.json',
 ];
 
 function viewNameFor(relPath) {

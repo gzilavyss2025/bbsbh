@@ -61,13 +61,26 @@ embedded, no server, no account, same as DuckDB itself.
 
 ## What the catalog covers
 
-56 cataloged panels become 69 views, spanning every panel the Contender
+71 cataloged panels become 85 views, spanning every panel the Contender
 Diary, the prospect-research diary, and the blockage-exit-reason spike have
 produced, plus the public leaderboard files those spikes joined against
-(`public/data/war.json`, `rookies.json`, `war-history/*.json`, and more).
-The full, current list of paths is the `PANEL_PATHS` array at the top of
-`scripts/research-db.mjs` — read that array before this document; it is the
-one place the list cannot drift out of date.
+(`public/data/war.json`, `rookies.json`, `war-history/*.json`, and more) and
+the historical-contract money panels (`contracts-history/identity/*.json`,
+`contracts-history/season-players/*.json`, `contracts-history/terms/*.json`,
+`contracts-history/player/*.json`). The full, current list of paths is the
+`PANEL_PATHS` array at the top of `scripts/research-db.mjs` — read that
+array before this document; it is the one place the list cannot drift out
+of date.
+
+The `contracts-history/terms/*.json` panel (dollar terms, keyed by
+`rowKey`) joins cleanly to every `contracts-history/identity/*.json` row on
+`rowKey` — a checked, 1:1 match. The `contracts-history/player/*.json`
+panel (the same rows re-grouped by `personId`) does not load safely yet: a
+scan of its flattened companion view fails, because 67 of its 100 shards
+hold free-text values (`"non-tendered"`, `"DFA"`, `"1 y/$2.325+opt"`) in
+term fields DuckDB's auto-detection infers as numeric. Loading it needs a
+hand-written schema; see the note beside the entry in `PANEL_PATHS`. Do not
+treat that panel as join-ready until someone adds one.
 
 Most panels need no hand-written schema. A small generic rule decides the
 shape: a bare id-keyed dict collapses to one row per key; a bare scalar
