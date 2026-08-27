@@ -107,6 +107,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | reveal-only.test.js | 21 | derive.js, linescore.js, pitchers.js | ADR-0001 reveal-only contract |
 | reveal-progress-core.test.js | 15 | src/hooks/revealProgressCore.js, select.js | Reveal-progress state machine |
 | rookies.test.js | 18 | src/api/rookies.js | Rookie pill + the sharded reads (compact status map, per-id record shard) |
+| roster-age-cache-completeness.test.js | 3 | .scratch/team-success/roster-age-cache.json, build-roster-age.mjs | Every club's per-player stints add up to the club's own captured season total, so a stint statsapi drops for a traded player (Correa 2025, Devers 2025) cannot sit in the committed cache unseen |
 | roster-availability.test.js | 3 | src/api/select.js | The bench/bullpen strike-through's two ceilings (`enteredAsOf`) — the reveal mark AND the half on screen, so a replayed inning shows the bench that half opened with |
 | route.test.js | 77 | src/lib/route.js | Full router surface, both hubs' tab tables included (the count was stale at 36; `node --test` reports 77) |
 | sac-bunt-double-play.test.js | 4 | src/api/boxscore.js, src/api/scorecard/notation.js, src/api/playbyplay/scorebookCode.js, src/api/scorecardGame.js | sac_bunt_double_play IS an at-bat, unlike sac_fly_double_play — Rule 9.08(c) credits no sacrifice, scored as an ordinary double play (issue #765) |
