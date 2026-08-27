@@ -622,12 +622,12 @@
   line-height: var(--lh-prose);
   color: var(--text-heading);
   /* Approved exception to the ALL-CAPS INVARIANT, scoped to this one
-     narrative: title case reads better for a play-of-the-game sentence than
-     shouting it. The nested .bs__potgWhen inning tag and .bs__potgScore below
-     aren't affected — #root * still matches them directly and wins over this
-     rule's inherited value. The `#root` prefix on the selector is what lets
-     this rule beat `#root *` in the first place. */
-  text-transform: capitalize; /* caps-exempt: approved title case for the box score's play-of-the-game narrative only */
+     narrative: it reads as a natural sentence, not shouted chrome. The nested
+     .bs__potgWhen inning tag and .bs__potgScore below aren't affected —
+     #root * still matches them directly and wins over this rule's inherited
+     value. The `#root` prefix on the selector is what lets this rule beat
+     `#root *` in the first place. */
+  text-transform: none; /* caps-exempt: sentence case for the box score's play-of-the-game narrative only */
 }
 /* The inning it happened in, inline ahead of the description — same font as
    the description, tinted the scorebook's kraft-tape amber so it reads as a

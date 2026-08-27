@@ -346,7 +346,7 @@
   font-size: var(--fs-small);
   line-height: var(--lh-prose);
   color: var(--text-heading);
-  text-transform: capitalize; /* caps-exempt: approved title case for the series page's play-of-the-game narrative, same convention as .bs__potgDesc */
+  text-transform: none; /* caps-exempt: sentence case for the series page's play-of-the-game narrative, same convention as .bs__potgDesc */
 }
 .psseries__potgWhen {
   font-family: var(--font-body);
