@@ -21,24 +21,43 @@
 //
 // A cell this cannot confidently parse never gets truncated into something
 // that merely LOOKS like a position -- it comes back `primary: 'unknown'`
-// (still `isPlayer: true` when the row plainly is a player, e.g. the
-// transaction narrative and the 67 blanks) or `isPlayer: false` (a
-// front-office title, or the leaked id).
+// (still `isPlayer: true` when the row plainly is a player, e.g. the 67
+// blanks) or `isPlayer: false` (a front-office title, or the leaked id).
 //
 // `isPlayer` and `role` answer two different questions -- do not use one for
 // the other. `isPlayer` says whether the CELL ITSELF asserts a position;
-// `role` says which dataset the ROW belongs in. They disagree on exactly one
-// case: the leaked numeric id ("72000017", salaries#4035, Tyler O'Neill,
-// 2023). Its cell asserts nothing (`isPlayer: false`), but the row carries
-// real service time (`mls: 4.059`) that no front-office title ever does --
-// confirmed against the season-players cache and the identity crosswalk,
-// which both resolve it to a real outfielder, not a guess. Splitting on
-// `isPlayer === false` would file a $4.95M Cardinals payroll row as
-// executive compensation. `role` is the field a splitter must read:
-// `'front-office'` for a genuine job title, `'player'` for everything else a
-// corrupt or missing cell might hide, and `'unknown'` reserved for a future
-// cell this function cannot confidently place in either bucket (no row in
-// the current export needs it).
+// `role` says which of three buckets the ROW's cell content falls in:
+//
+//   - `'front-office'` -- the cell matches one of the six known job titles.
+//   - `'player'` -- the cell names a real position, or is blank (confirmed
+//     against real rows: Alex Rodriguez, Josh Hamilton, Carl Crawford among
+//     the 67 blanks), or is the one leaked numeric id (confirmed against a
+//     real row -- see below).
+//   - `'unknown'` -- the cell is neither: it failed to tokenize into any
+//     recognized position AND it is not one of the six known titles. This is
+//     the loud-failure bucket parseMoney calls `'unparsed'` -- a title this
+//     module has never seen ("pitching coach", "asst GM") must land here,
+//     not fall through to `'player'` and get silently priced as payroll. The
+//     one 275-character transaction narrative also lands here: it is not a
+//     known title either, and this module has no way to positively confirm
+//     it belongs to a player from the string alone.
+//
+// `role` is a per-cell classification, not a per-row one -- it does NOT know
+// whether the person actually played that season. "mgr" always classifies
+// `role: 'front-office'`, even on a row where the man was still an active
+// player and the cell simply carries his LATER title (Robin Ventura, 2001:
+// `role: 'front-office'` from this function, but he stayed on salaries.csv's
+// roster because a season-players cross-check -- done by the row-level
+// `resolveRole()` below, not this function -- found him in that year's
+// pool). Splitting salaries.csv on `normalizePosition().role` alone, with no
+// cross-check, would silently exclude every mislabeled player row.
+//
+// The leaked numeric id ("72000017", salaries#4035, Tyler O'Neill, 2023) is
+// the one case `isPlayer` and `role` disagree on `'player'`'s definition:
+// its cell asserts nothing (`isPlayer: false`), but it is a real row --
+// carries real service time (`mls: 4.059`) that no front-office title ever
+// does, confirmed against the season-players cache and the identity
+// crosswalk, both of which resolve it to a real outfielder, not a guess.
 
 // Job titles a club paid, not a playing position. Field managers ("mgr" /
 // "Manager") are included: they do not appear on a season player roster
@@ -69,7 +88,13 @@ export const POSITIONS = [
   'RP',
 ]
 
-const TOKEN_MAP = {
+// Object.create(null): a plain {} object literal inherits Object.prototype,
+// so TOKEN_MAP['constructor'] returns the Object constructor function
+// instead of undefined -- a real cell reading "constructor" never appears
+// today, but nothing rules it out of a future export, and a plain object
+// would resolve it to a function as `primary` instead of failing the lookup.
+// A null-prototype object has no inherited keys to collide with.
+const TOKEN_MAP = Object.assign(Object.create(null), {
   c: 'C',
   '1b': '1B',
   '2b': '2B',
@@ -86,12 +111,16 @@ const TOKEN_MAP = {
   lhp: 'LHP',
   sp: 'SP',
   rp: 'RP',
-}
+})
 
 const NUMERIC_ID = /^\d+$/
 
 /**
- * Normalizes one salaries.csv `position` cell.
+ * Normalizes one salaries.csv `position` cell. Pure and string-only -- it has
+ * no way to know whether the named person actually played that season. See
+ * the header comment for what `role` does and does not mean, and see
+ * `resolveRole()` below for the row-level check that can tell a mislabeled
+ * player's "mgr" cell from a genuine front-office one.
  *
  * @param {string|null|undefined} raw
  * @returns {{
@@ -107,9 +136,6 @@ export function normalizePosition(raw) {
   const folded = original.trim().toLowerCase()
 
   if (folded === '') {
-    // A blank cell in this file is a real player row with the position never
-    // recorded (confirmed against real rows: Alex Rodriguez, Josh Hamilton,
-    // Carl Crawford among them), not a non-player row.
     return { primary: 'unknown', secondary: [], isPlayer: true, role: 'player', raw: original }
   }
   if (NON_PLAYER_TITLES.has(folded)) {
@@ -148,13 +174,40 @@ export function normalizePosition(raw) {
   }
 
   if (resolved.length === 0 || resolved.includes(null)) {
-    // Could not confidently parse every token -- e.g. the transaction
-    // narrative. The row is still a real player (the name and salary are
-    // intact); leave the position unknown rather than guess at one.
-    return { primary: 'unknown', secondary: [], isPlayer: true, role: 'player', raw: original }
+    // Could not confidently parse every token, and it is not one of the six
+    // known titles either -- e.g. the transaction narrative, or a future
+    // title this module has never seen ("pitching coach"). Flag it loudly
+    // instead of guessing which bucket it belongs in: primary stays
+    // 'unknown' (never truncated into something that looks like a
+    // position), and role ALSO stays 'unknown' rather than defaulting to
+    // 'player', which would let an unrecognized front-office row hide in the
+    // player pool in silence.
+    return { primary: 'unknown', secondary: [], isPlayer: true, role: 'unknown', raw: original }
   }
 
   const [primary, ...rest] = resolved
   const secondary = [...new Set(rest)].filter((code) => code !== primary)
   return { primary, secondary, isPlayer: true, role: 'player', raw: original }
+}
+
+/**
+ * Row-level classification: normalizePosition()'s `role`, corrected for a
+ * cell that carries the person's LATER front-office title on an EARLIER
+ * season he was still playing (see the header comment's Robin Ventura
+ * example). `seasonPlayerNames` is the set of `lastFirstName` values from
+ * that row's own year, e.g.
+ * public/data/contracts-history/season-players/{year}.json -- pass it only
+ * when a `role: 'front-office'` cell needs the cross-check; omit it (or pass
+ * undefined) to get normalizePosition()'s cell-only role unchanged.
+ *
+ * @param {{ position: string, player: string }} row
+ * @param {Set<string>} [seasonPlayerNames]
+ * @returns {'player'|'front-office'|'unknown'}
+ */
+export function resolveRole(row, seasonPlayerNames) {
+  const { role } = normalizePosition(row?.position)
+  if (role === 'front-office' && seasonPlayerNames?.has(row.player)) {
+    return 'player' // the cell's title was real, just for a later season
+  }
+  return role
 }
