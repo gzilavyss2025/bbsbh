@@ -12,8 +12,9 @@ import { test, expect, openStampCard } from '../fixtures.js'
 //
 // The mint round trip (stamp -> it appears in /logbook -> un-stamp) rides along
 // because the setup is shared, and because local-first is the posture that has
-// to work with no backend configured at all: this whole spec runs signed out,
-// against localStorage, exactly as a visitor with no Clerk key does.
+// to work with none of the account/sync functions configured: this whole spec
+// runs signed out, against localStorage, exactly as a visitor with no Clerk
+// key does.
 //
 // scripts/check-stamp-surfaces.mjs guards the same containment statically at
 // lint time; this is the runtime half. Viewport-independent — mobile only.

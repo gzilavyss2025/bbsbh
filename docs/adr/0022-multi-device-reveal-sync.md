@@ -1,6 +1,6 @@
-# Multi-device reveal sync — the second, narrower exception to "no backend"
+# Multi-device reveal sync
 
-ADR-0012 established the first exception (a crawler-only edge layer for link
+ADR-0012 added the first `api/` function (a crawler-only edge layer for link
 previews, invisible to the app itself). This is the second, and the first one
 that's a real, opt-in **feature**: syncing `revealedThrough` — the reveal
 high-water mark — across a signed-in user's own devices.
@@ -47,7 +47,7 @@ knowing which devices belong to the same person, which requires an account.
   outright with no `ClerkProvider` ancestor. Signed-out users never trigger
   a single network call to `/api/reveal`.
 
-## Why this doesn't violate the spirit of "no backend"
+## Why this stays narrow
 
 - **Off by default, and inert until configured.** Three separate env vars
   (`VITE_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`,

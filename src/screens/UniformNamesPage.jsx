@@ -37,7 +37,7 @@ const ANCHOR_SCOPE = 'uniformnames'
 // public/data/uniform-names.json — the file src/api/uniforms.js's
 // fetchUniformNameOverrides (and this page itself, on the next load) read
 // back. No effect outside `npm run dev` — see that middleware's own comment
-// for why this is the one deliberate exception to the app's no-backend rule.
+// for why this is the one place that writes back to disk this way.
 export function UniformNamesPage() {
   useDocumentTitle('Uniform Names')
   const teams = useMemo(

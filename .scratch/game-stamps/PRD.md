@@ -129,9 +129,9 @@ The rest of this doc says Logbook.
 
 ---
 
-## 1. Where this sits in the "no backend" posture
+## 1. Where this sits among the `api/` functions
 
-This is the **fourth** opt-in exception, and the first one that stores
+This is the **fourth** one, and the first one that stores
 score-bearing data. It needs its own ADR. The honest framing:
 
 - ADR-0012 — link previews (crawler-only, never a score)

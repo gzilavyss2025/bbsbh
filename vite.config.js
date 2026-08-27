@@ -29,10 +29,10 @@ import { describeLogoCaveat } from './src/lib/logoArt.js'
 
 // Dev-only save endpoint for the curation surfaces — the Team Identity Lab
 // (/identity-lab) and the Uniform Names page — writing straight back to the
-// committed store each one edits. This app has no backend anywhere else: every
-// other page is a static PWA reading statsapi.mlb.com or a committed JSON file
-// directly, so this is the one deliberate exception, and it's scoped as
-// narrowly as possible. `configureServer` only runs under `vite dev` (never
+// committed store each one edits. Every other page reads statsapi.mlb.com or a
+// committed JSON file directly rather than writing back to disk, so this is
+// the one place that does, and it's scoped as narrowly as possible.
+// `configureServer` only runs under `vite dev` (never
 // `vite build`/`vite preview`, and never bundled into the client), so it is
 // absent from the deployed app entirely — one of the four independent isolation
 // layers ADR-0029 records.
@@ -55,8 +55,8 @@ import { describeLogoCaveat } from './src/lib/logoArt.js'
 // upload.
 //
 // The route lives under `/__dev/…` rather than `/api/…` because this repo's
-// `api/` directory is reserved for the real backend exceptions (OG previews,
-// reveal sync, copy — see root CLAUDE.md), which are Vercel edge functions, not
+// `api/` directory is reserved for the real Vercel functions (OG previews,
+// reveal sync, copy — see root CLAUDE.md), which are edge functions, not
 // Vite dev middleware; a shared `/api/` prefix would misleadingly suggest this
 // is another one.
 

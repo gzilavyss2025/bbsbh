@@ -1,8 +1,8 @@
-# Dynamic link previews live in a thin edge layer — the one exception to "no backend"
+# Dynamic link previews live in a thin edge layer
 
-bbsbh is otherwise a pure static SPA: every device queries statsapi directly and
-there is no server of our own (see the architecture note in `CLAUDE.md`). Link
-previews break that model on purpose, and only that model.
+bbsbh's game-data path is otherwise pure client-direct: every device queries
+statsapi directly (see the architecture note in `CLAUDE.md`). Link previews
+are the first departure from that path, and only that path.
 
 ## The problem
 
@@ -38,7 +38,7 @@ Add a **crawler-only edge layer**, and nothing more:
 - **`vercel.json`** rewrites the deep-link paths to `api/preview` (encoding the
   route in the query); everything else keeps the existing SPA rewrite.
 
-## Why this doesn't violate the spirit of "no backend"
+## Why this stays narrow
 
 - **The app is untouched.** The SPA still fetches every byte of game data
   directly from the client. This layer is invisible to it.

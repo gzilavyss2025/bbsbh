@@ -1,9 +1,10 @@
 name: Update top prospects snapshot
 
 # Weekly refresh of public/data/top-prospects.json (see docs/top-prospects.md
-# and scripts/fetch-top-prospects.mjs). This app has no backend and the
-# source page (www.mlb.com) can't be fetched from the browser (no CORS
-# headers), so the scrape has to run off-device on a schedule and commit its
+# and scripts/fetch-top-prospects.mjs). The client fetches game data straight
+# from the browser, and the source page (www.mlb.com) can't be fetched that
+# way (no CORS headers), so the scrape has to run off-device on a schedule
+# and commit its
 # output — the app just reads the resulting static file at runtime. The
 # commit this workflow makes rides the existing Vercel auto-deploy on push
 # to main; no separate publish step.

@@ -1,6 +1,6 @@
-# Admin-editable copy store — the third exception to "no backend"
+# Admin-editable copy store
 
-ADR-0012 established the first exception (a crawler-only edge layer for link
+ADR-0012 added the first `api/` function (a crawler-only edge layer for link
 previews). ADR-0022 added the second (multi-device reveal sync). This is the
 third: a global, admin-editable store for the wording of the spoiler-consent
 surfaces, so the site owner can tune those strings — and their humor — as the
@@ -48,7 +48,7 @@ workflow section).
   boundary. Grouped fields with char counters, per-field reset-to-default, and a
   live preview of each modal.
 
-## Why this doesn't violate the spirit of "no backend"
+## Why this stays narrow
 
 - **Off by default, inert until configured.** With no Clerk / no Upstash, `GET`
   returns an empty override map and the app renders shipped defaults; `POST`

@@ -67,8 +67,8 @@ function claims(label, re, actual, fix) {
 
 const apiEndpoints = readdirSync(join(ROOT, 'api')).filter((f) => f.endsWith('.js'))
 claims(
-  'the api/ exception count',
-  /\*\*(\w+) narrow, opt-in exceptions/i,
+  'the api/ function count',
+  /\*\*(\w+) Vercel functions live in `api\//i,
   apiEndpoints.length,
   `api/*.js currently holds: ${apiEndpoints.join(', ')}.`,
 )

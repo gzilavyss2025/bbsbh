@@ -12,8 +12,8 @@
 //      lat/lon — never the box-score weather field. The box score is used only
 //      to help confirm roof state, and even that is cross-checked.
 //
-// Data sources, all queried straight from the browser (no backend, matching the
-// rest of the app): MLB Stats API for coordinates + roofType, and Open-Meteo
+// Data sources, all queried straight from the browser, matching the rest of
+// the game-data path: MLB Stats API for coordinates + roofType, and Open-Meteo
 // (free, key-less, CORS-enabled) for the outdoor reading at first pitch.
 
 import { fetchVenue } from './game.js'

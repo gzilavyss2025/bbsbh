@@ -17,7 +17,7 @@
 // game-notes cron (gen-game-notes.mjs) has already run — so a build-time parse
 // wouldn't have it in time. The PDF host (img.mlbstatic.com) serves with
 // `Access-Control-Allow-Origin: *`, so the browser can fetch and parse it
-// directly, no backend and no game-notes.json bloat. pdfjs-dist is heavy, so
+// directly, no proxy function and no game-notes.json bloat. pdfjs-dist is heavy, so
 // this whole module is meant to be dynamically imported (by the modal, on open)
 // — Vite code-splits it into its own chunk that never touches the main bundle.
 //

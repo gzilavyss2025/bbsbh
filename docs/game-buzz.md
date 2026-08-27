@@ -7,7 +7,7 @@ Sabathia in 2008" — not links to recaps. This documents how
 exact time window to seed those notes, and why it lives in a **post-game
 terminal script**, not the app.
 
-**Why not in the app:** the PWA is spoiler-safe and backend-free. Game-night
+**Why not in the app:** the PWA is spoiler-safe. Game-night
 social posts are wall-to-wall spoilers (the top result is usually the final
 score), so they're only ever useful *after* you've revealed your way through
 the game. A script you run once per game from a terminal fits that, and keeps

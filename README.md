@@ -3,7 +3,7 @@
 **A spoiler-safe second screen for people who keep score by hand.**
 
 [tallybb.com](https://tallybb.com) · installable PWA · no sign-in
-needed · no backend
+needed
 
 Tally Baseball sits next to your paper scorebook. It looks up the game in front
 of you and shows what you need to fill the book in: lineups, uniform numbers,
@@ -174,10 +174,11 @@ a guess. Look again closer to first pitch and the details usually fill in.
 
 ## For developers
 
-React 19 and Vite, phone-first, installable PWA, **no backend**. Every device
-queries `https://statsapi.mlb.com` directly. There is no router library and no
-state library: routing is a small parse/build pair in `src/lib/route.js`, and
-fetching goes through one `useAsync` hook.
+React 19 and Vite, phone-first, installable PWA. Every device queries
+`https://statsapi.mlb.com` directly for game data; `api/` adds a set of
+optional Vercel functions for everything else (see Layout, below). There is no
+router library and no state library: routing is a small parse/build pair in
+`src/lib/route.js`, and fetching goes through one `useAsync` hook.
 
 ### Quick start
 
@@ -256,8 +257,9 @@ public/data/      precomputed JSON from the nightly generators
 
 The optional functions in `api/` cover link previews, reveal sync across your
 own devices, editable copy, preferences, and the Game Log's books and stamps.
-Each one stays inert until you configure its environment, so a plain clone runs
-with no backend at all. `docs/api/` describes them.
+Each one stays inert until you configure its environment, so a plain clone
+runs the same as it would with none of them set up. `docs/api/` describes
+them.
 
 ### Docs map
 

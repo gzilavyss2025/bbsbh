@@ -4,7 +4,7 @@
 // strikeout milestones, "first since…" facts, crowd moments), not link spam.
 //
 // Runs OFF-DEVICE, after the game, from a terminal — deliberately not part of
-// the PWA. The app stays spoiler-safe and backend-free; this script is a
+// the PWA. The app stays spoiler-safe; this script is a
 // post-game notes helper, and reading the buzz before revealing your way
 // through the innings would spoil the game anyway. See docs/game-buzz.md for
 // the source scoping (why these two, auth, query design, ranking).

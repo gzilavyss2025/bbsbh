@@ -13,7 +13,7 @@ description: Launch bbsbh's dev server and drive it with Playwright to verify a 
 > (never `@playwright/test` directly) and every `page.goto`/`reload` carries it
 > automatically. Harmless on non-slate routes, so use it everywhere.
 
-This is a phone-first PWA with no backend — every screen fetches live from
+This is a phone-first PWA — every screen fetches live from
 `statsapi.mlb.com`. The repository has a CI-gated unit suite and permanent
 Playwright invariant specs; browser verification is still required for
 user-visible changes because unit tests cannot prove layout or interaction. This

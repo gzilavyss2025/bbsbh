@@ -57,8 +57,8 @@ GitHub Action and commit static JSON (that's the `war.json` / `rehab.json` /
   already run. A build-time parse would always be a day behind for the game
   you're actually scoring.
 - The PDF host (`img.mlbstatic.com`) serves with **`Access-Control-Allow-Origin:
-  *`**, so the browser can `fetch()` and parse the PDF directly. No backend, no
-  proxy, no `game-notes.json` bloat.
+  *`**, so the browser can `fetch()` and parse the PDF directly — no proxy
+  function, no `game-notes.json` bloat.
 
 So the parser is a lazily-imported client module. `pdfjs-dist` is heavy
 (~365 KB chunk + a ~1.3 MB worker), so:

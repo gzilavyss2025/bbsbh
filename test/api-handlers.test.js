@@ -567,7 +567,7 @@ test('re-stamping keeps the keepsake’s original date and its page', () => {
 // integration injects the REST credentials as KV_REST_API_URL/KV_REST_API_TOKEN.
 // Every one of these endpoints read only the UPSTASH_* names, so a project with
 // a live, correctly-linked store 501'd on every request — indistinguishable from
-// a deploy that has no backend on purpose, which is why it went unnoticed.
+// a deploy where these functions were never configured, which is why it went unnoticed.
 test('the Upstash-native name pair configures a store', () => {
   assert.deepEqual(
     redisConfigFromEnv({

@@ -12,10 +12,10 @@ loop over all 30 teams doing a manual nearest-date lookup across
 SQLite database (`scripts/lib/schema.sql`, `scripts/lib/db.js`) instead of
 hand-rolling their own JSON read-merge-write cycle, then export the exact
 same reader shapes `teamScore.js` / `seasonScore.js` already expect — this is
-purely an authoring-side change; no client code moved. "No backend" (root
-`CLAUDE.md`) holds: everything still happens at generation time in GitHub
-Actions, the client still reads static same-origin JSON, and Vercel's build
-never touches SQLite.
+purely an authoring-side change; no client code moved. The game-data path
+(root `CLAUDE.md`) is unaffected: everything still happens at generation time
+in GitHub Actions, the client still reads static same-origin JSON, and
+Vercel's build never touches SQLite.
 
 **Runtime**: `node:sqlite` (built into Node ≥22.5, stable since Node 26),
 not `better-sqlite3`. The nightly workflows run `node scripts/gen-*.mjs`

@@ -257,7 +257,8 @@ Everything works with none of these set — each feature they gate degrades to
   Vercel's **KV** integration injects the same Upstash REST credentials under
   those names, and reading only the `UPSTASH_*` pair meant a project with a
   correctly-linked store still 501'd on every request, forever, looking exactly
-  like a deploy with no backend. `api/_lib/redis.js` is the single resolver; its
+  like a deploy where these functions were never configured. `api/_lib/redis.js`
+  is the single resolver; its
   header explains why a pair is atomic and why `KV_URL`, `REDIS_URL` and
   `KV_REST_API_READ_ONLY_TOKEN` are deliberately *not* accepted.
 

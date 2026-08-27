@@ -7,8 +7,8 @@ import { CopyContext } from './copyContext.js'
 // defaults <- localStorage cache <- live /api/copy fetch, each layered on top
 // of the last through resolveCopy (which re-sanitizes every source). If the
 // network is down, the store is unconfigured, or the cache is garbage, the app
-// paints shipped defaults — the same "works with no backend" guarantee the rest
-// of the app keeps. Nothing here is score-bearing, so a stale value is a
+// paints shipped defaults — the same graceful-degrade guarantee the rest of
+// the account/content layer keeps. Nothing here is score-bearing, so a stale value is a
 // cosmetic wording lag, never a spoiler. The consumer hook lives in
 // copyContext.js.
 
