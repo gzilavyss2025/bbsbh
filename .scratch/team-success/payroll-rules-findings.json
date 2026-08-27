@@ -1,12 +1,12 @@
 {
- "generatedAt": "2026-08-27T18:54:36.070Z",
+ "generatedAt": "2026-08-27T19:36:32.605Z",
  "counts": {
   "playerSeasons": 20814,
-  "splitPlayerSeasons": 2197,
+  "splitPlayerSeasons": 2248,
   "r2Ties": 27,
   "r3Missing": 0,
-  "r4ExcludedDollars": 8044798051,
-  "r4ExcludedPlayerSeasons": 2197
+  "r4ExcludedDollars": 8387294242,
+  "r4ExcludedPlayerSeasons": 2248
  },
  "tolerance": {
   "maxMedianAbsMovement": 1,
@@ -38,8 +38,8 @@
  "pairSummaries": {
   "r1-r2": {
    "medianAbsMovement": 1,
-   "shareBeyondThreeRanks": 0.04871794871794872,
-   "movementsBeyondThreeRanks": 38,
+   "shareBeyondThreeRanks": 0.05384615384615385,
+   "movementsBeyondThreeRanks": 42,
    "totalClubSeasons": 780,
    "minSpearman": 0.9581757508342603,
    "worstSingleMovement": {
@@ -53,8 +53,8 @@
   },
   "r1-r3": {
    "medianAbsMovement": 1,
-   "shareBeyondThreeRanks": 0.06153846153846154,
-   "movementsBeyondThreeRanks": 48,
+   "shareBeyondThreeRanks": 0.06282051282051282,
+   "movementsBeyondThreeRanks": 49,
    "totalClubSeasons": 780,
    "minSpearman": 0.9430478309232481,
    "worstSingleMovement": {
@@ -68,8 +68,8 @@
   },
   "r1-r4": {
    "medianAbsMovement": 1,
-   "shareBeyondThreeRanks": 0.08461538461538462,
-   "movementsBeyondThreeRanks": 66,
+   "shareBeyondThreeRanks": 0.0858974358974359,
+   "movementsBeyondThreeRanks": 67,
    "totalClubSeasons": 780,
    "minSpearman": 0.939043381535039,
    "worstSingleMovement": {
@@ -83,8 +83,8 @@
   },
   "r2-r3": {
    "medianAbsMovement": 0,
-   "shareBeyondThreeRanks": 0.03333333333333333,
-   "movementsBeyondThreeRanks": 26,
+   "shareBeyondThreeRanks": 0.03717948717948718,
+   "movementsBeyondThreeRanks": 29,
    "totalClubSeasons": 780,
    "minSpearman": 0.9684093437152391,
    "worstSingleMovement": {
@@ -98,8 +98,8 @@
   },
   "r2-r4": {
    "medianAbsMovement": 1,
-   "shareBeyondThreeRanks": 0.15128205128205127,
-   "movementsBeyondThreeRanks": 118,
+   "shareBeyondThreeRanks": 0.1564102564102564,
+   "movementsBeyondThreeRanks": 122,
    "totalClubSeasons": 780,
    "minSpearman": 0.8745272525027808,
    "worstSingleMovement": {
@@ -113,8 +113,8 @@
   },
   "r3-r4": {
    "medianAbsMovement": 1,
-   "shareBeyondThreeRanks": 0.16025641025641027,
-   "movementsBeyondThreeRanks": 125,
+   "shareBeyondThreeRanks": 0.16666666666666666,
+   "movementsBeyondThreeRanks": 130,
    "totalClubSeasons": 780,
    "minSpearman": 0.8651835372636263,
    "worstSingleMovement": {
@@ -138,6 +138,7 @@
    "Chicago White Sox",
    "Cincinnati Reds",
    "Cleveland Guardians",
+   "Detroit Tigers",
    "Houston Astros",
    "Los Angeles Dodgers",
    "Miami Marlins",
@@ -147,6 +148,7 @@
    "Philadelphia Phillies",
    "Pittsburgh Pirates",
    "San Diego Padres",
+   "San Francisco Giants",
    "Seattle Mariners",
    "Texas Rangers",
    "Washington Nationals"
@@ -155,7 +157,6 @@
    "Arizona Diamondbacks",
    "Athletics",
    "Atlanta Braves",
-   "Baltimore Orioles",
    "Boston Red Sox",
    "Chicago Cubs",
    "Chicago White Sox",

@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-27T18:54:36.070Z",
+ "generatedAt": "2026-08-27T19:36:32.605Z",
  "source": "payroll-by-player.json (W1.1) + first-club-cache.json (real MLB game-log dates)",
  "rules": {
   "r1": "pro-rata by combined PA + paPerInning*IP share (W1.1 default, reused verbatim)",
@@ -13,11 +13,11 @@
  ],
  "counts": {
   "playerSeasons": 20814,
-  "splitPlayerSeasons": 2197,
+  "splitPlayerSeasons": 2248,
   "r2Ties": 27,
   "r3Missing": 0,
-  "r4ExcludedDollars": 8044798051,
-  "r4ExcludedPlayerSeasons": 2197
+  "r4ExcludedDollars": 8387294242,
+  "r4ExcludedPlayerSeasons": 2248
  },
  "tolerance": {
   "maxMedianAbsMovement": 1,
@@ -14042,27 +14042,27 @@
   {
    "year": 2024,
    "correlations": {
-    "r1-r2": 0.9951056729699667,
-    "r1-r3": 0.9951056729699667,
-    "r1-r4": 0.985761957730812,
-    "r2-r3": 0.9955506117908788,
-    "r2-r4": 0.9755283648498332,
-    "r3-r4": 0.9795328142380423
+    "r1-r2": 0.9813125695216908,
+    "r1-r3": 0.9839822024471635,
+    "r1-r4": 0.9835372636262514,
+    "r2-r3": 0.9911012235817576,
+    "r2-r4": 0.9604004449388209,
+    "r3-r4": 0.9688542825361512
    },
    "teams": {
     "108": {
      "name": "Los Angeles Angels",
      "r1": {
-      "payroll": 151091334.75526837,
+      "payroll": 158409540.0357331,
       "rank": 14
      },
      "r2": {
-      "payroll": 152078810,
-      "rank": 14
+      "payroll": 163078810,
+      "rank": 12
      },
      "r3": {
-      "payroll": 148188810,
-      "rank": 14
+      "payroll": 159188810,
+      "rank": 12
      },
      "r4": {
       "payroll": 148188810,
@@ -14072,92 +14072,92 @@
     "109": {
      "name": "Arizona Diamondbacks",
      "r1": {
-      "payroll": 160929441.66177654,
-      "rank": 12
-     },
-     "r2": {
-      "payroll": 155629000,
+      "payroll": 159819175.4654634,
       "rank": 13
      },
+     "r2": {
+      "payroll": 153829000,
+      "rank": 14
+     },
      "r3": {
-      "payroll": 155629000,
-      "rank": 12
+      "payroll": 153829000,
+      "rank": 13
      },
      "r4": {
-      "payroll": 154880700,
+      "payroll": 153080700,
       "rank": 11
      }
     },
     "110": {
      "name": "Baltimore Orioles",
      "r1": {
-      "payroll": 116635905.82283041,
+      "payroll": 109736739.27255318,
       "rank": 19
      },
      "r2": {
-      "payroll": 109650900,
-      "rank": 20
+      "payroll": 99170900,
+      "rank": 21
      },
      "r3": {
-      "payroll": 109650900,
-      "rank": 20
+      "payroll": 99170900,
+      "rank": 22
      },
      "r4": {
-      "payroll": 105402000,
+      "payroll": 88622000,
       "rank": 21
      }
     },
     "111": {
      "name": "Boston Red Sox",
      "r1": {
-      "payroll": 150355424.11127046,
-      "rank": 15
+      "payroll": 137318126.48648763,
+      "rank": 16
      },
      "r2": {
-      "payroll": 150218667,
-      "rank": 15
+      "payroll": 133768667,
+      "rank": 16
      },
      "r3": {
-      "payroll": 148468667,
-      "rank": 13
+      "payroll": 132018667,
+      "rank": 15
      },
      "r4": {
-      "payroll": 146454667,
-      "rank": 13
+      "payroll": 130004667,
+      "rank": 15
      }
     },
     "112": {
      "name": "Chicago Cubs",
      "r1": {
-      "payroll": 199318398.96597677,
+      "payroll": 198511036.47981188,
       "rank": 8
      },
      "r2": {
-      "payroll": 200793500,
-      "rank": 8
+      "payroll": 199660500,
+      "rank": 9
      },
      "r3": {
-      "payroll": 200543500,
-      "rank": 8
+      "payroll": 199410500,
+      "rank": 9
      },
      "r4": {
-      "payroll": 189031500,
+      "payroll": 185631500,
       "rank": 8
      }
     },
     "113": {
      "name": "Cincinnati Reds",
      "r1": {
-      "payroll": 79371794.80190867,
-      "rank": 27
+      "payroll": 88044361.1735901,
+      "rank": 25
      },
      "r2": {
-      "payroll": 78463333,
-      "rank": 27
+      "payroll": 92463333,
+      "rank": 24
      },
      "r3": {
-      "payroll": 75623333,
-      "rank": 27
+      "payroll": 89623333,
+      "rank": 28
      },
      "r4": {
       "payroll": 71613333,
@@ -14172,11 +14172,11 @@
      },
      "r2": {
       "payroll": 86980129,
-      "rank": 26
+      "rank": 28
      },
      "r3": {
       "payroll": 91383529,
-      "rank": 25
+      "rank": 26
      },
      "r4": {
       "payroll": 85489129,
@@ -14199,18 +14199,18 @@
      },
      "r4": {
       "payroll": 120102486,
-      "rank": 18
+      "rank": 17
      }
     },
     "116": {
      "name": "Detroit Tigers",
      "r1": {
       "payroll": 86779335.78304009,
-      "rank": 25
+      "rank": 27
      },
      "r2": {
       "payroll": 96941233,
-      "rank": 23
+      "rank": 22
      },
      "r3": {
       "payroll": 96941233,
@@ -14224,73 +14224,73 @@
     "117": {
      "name": "Houston Astros",
      "r1": {
-      "payroll": 249472465.79805964,
+      "payroll": 242888025.57035565,
       "rank": 5
      },
      "r2": {
-      "payroll": 243467966,
+      "payroll": 233467966,
       "rank": 6
      },
      "r3": {
-      "payroll": 243467966,
+      "payroll": 233467966,
       "rank": 6
      },
      "r4": {
-      "payroll": 242702966,
+      "payroll": 232702966,
       "rank": 5
      }
     },
     "118": {
      "name": "Kansas City Royals",
      "r1": {
-      "payroll": 108874144.00142248,
+      "payroll": 104045967.76430306,
       "rank": 21
      },
      "r2": {
-      "payroll": 108307261,
-      "rank": 21
+      "payroll": 102057261,
+      "rank": 20
      },
      "r3": {
-      "payroll": 108307261,
-      "rank": 21
+      "payroll": 102057261,
+      "rank": 20
      },
      "r4": {
-      "payroll": 108307261,
-      "rank": 20
+      "payroll": 102057261,
+      "rank": 19
      }
     },
     "119": {
      "name": "Los Angeles Dodgers",
      "r1": {
-      "payroll": 304635336.49778086,
+      "payroll": 308931934.0461827,
       "rank": 1
      },
      "r2": {
-      "payroll": 298953750,
+      "payroll": 302953750,
       "rank": 1
      },
      "r3": {
-      "payroll": 298185000,
+      "payroll": 302185000,
       "rank": 1
      },
      "r4": {
-      "payroll": 285285000,
+      "payroll": 282285000,
       "rank": 2
      }
     },
     "120": {
      "name": "Washington Nationals",
      "r1": {
-      "payroll": 85920760.9742591,
+      "payroll": 87412886.95851105,
       "rank": 26
      },
      "r2": {
-      "payroll": 87929467,
-      "rank": 25
+      "payroll": 89929467,
+      "rank": 27
      },
      "r3": {
-      "payroll": 90579467,
-      "rank": 26
+      "payroll": 92579467,
+      "rank": 24
      },
      "r4": {
       "payroll": 70054467,
@@ -14300,26 +14300,26 @@
     "121": {
      "name": "New York Mets",
      "r1": {
-      "payroll": 256620267.18984675,
-      "rank": 3
+      "payroll": 255128141.20559478,
+      "rank": 4
      },
      "r2": {
-      "payroll": 250041500,
-      "rank": 3
+      "payroll": 248041500,
+      "rank": 4
      },
      "r3": {
-      "payroll": 253397550,
-      "rank": 3
+      "payroll": 251397550,
+      "rank": 4
      },
      "r4": {
-      "payroll": 248881500,
+      "payroll": 246881500,
       "rank": 3
      }
     },
     "133": {
      "name": "Athletics",
      "r1": {
-      "payroll": 55623104.18091185,
+      "payroll": 55623104.180911854,
       "rank": 30
      },
      "r2": {
@@ -14338,19 +14338,19 @@
     "134": {
      "name": "Pittsburgh Pirates",
      "r1": {
-      "payroll": 92826504.34596333,
+      "payroll": 92265982.74048659,
       "rank": 23
      },
      "r2": {
-      "payroll": 91903500,
-      "rank": 24
+      "payroll": 91135500,
+      "rank": 25
      },
      "r3": {
-      "payroll": 92658500,
-      "rank": 24
+      "payroll": 91890500,
+      "rank": 25
      },
      "r4": {
-      "payroll": 82412000,
+      "payroll": 81644000,
       "rank": 23
      }
     },
@@ -14358,53 +14358,53 @@
      "name": "San Diego Padres",
      "r1": {
       "payroll": 160859221.47935444,
-      "rank": 13
+      "rank": 12
      },
      "r2": {
       "payroll": 156639554,
-      "rank": 12
+      "rank": 13
      },
      "r3": {
       "payroll": 146786154,
-      "rank": 15
+      "rank": 14
      },
      "r4": {
       "payroll": 144879554,
-      "rank": 14
+      "rank": 13
      }
     },
     "136": {
      "name": "Seattle Mariners",
      "r1": {
-      "payroll": 144380947.50881863,
-      "rank": 16
+      "payroll": 139268447.50881863,
+      "rank": 15
      },
      "r2": {
-      "payroll": 142673047,
-      "rank": 16
+      "payroll": 134573047,
+      "rank": 15
      },
      "r3": {
-      "payroll": 138738047,
+      "payroll": 130638047,
       "rank": 16
      },
      "r4": {
-      "payroll": 127963047,
-      "rank": 16
+      "payroll": 119863047,
+      "rank": 18
      }
     },
     "137": {
      "name": "San Francisco Giants",
      "r1": {
-      "payroll": 174859583.0296326,
-      "rank": 11
+      "payroll": 181688851.32231554,
+      "rank": 10
      },
      "r2": {
-      "payroll": 176865625,
-      "rank": 11
+      "payroll": 186865625,
+      "rank": 10
      },
      "r3": {
-      "payroll": 176865625,
-      "rank": 11
+      "payroll": 186865625,
+      "rank": 10
      },
      "r4": {
       "payroll": 165515625,
@@ -14414,54 +14414,54 @@
     "138": {
      "name": "St. Louis Cardinals",
      "r1": {
-      "payroll": 178939640.58490565,
-      "rank": 9
+      "payroll": 173793963.89317632,
+      "rank": 11
      },
      "r2": {
-      "payroll": 179676367,
-      "rank": 10
+      "payroll": 172176367,
+      "rank": 11
      },
      "r3": {
-      "payroll": 179676367,
-      "rank": 10
+      "payroll": 172176367,
+      "rank": 11
      },
      "r4": {
-      "payroll": 177326367,
+      "payroll": 169826367,
       "rank": 9
      }
     },
     "139": {
      "name": "Tampa Bay Rays",
      "r1": {
-      "payroll": 62070530.4072563,
+      "payroll": 76248596.45293176,
       "rank": 28
      },
      "r2": {
-      "payroll": 69085567,
-      "rank": 28
+      "payroll": 90818567,
+      "rank": 26
      },
      "r3": {
-      "payroll": 69085567,
-      "rank": 29
+      "payroll": 90818567,
+      "rank": 27
      },
      "r4": {
-      "payroll": 47885567,
+      "payroll": 47118567,
       "rank": 28
      }
     },
     "140": {
      "name": "Texas Rangers",
      "r1": {
-      "payroll": 251794619.29724833,
-      "rank": 4
+      "payroll": 255304849.47627646,
+      "rank": 3
      },
      "r2": {
-      "payroll": 248781333,
-      "rank": 5
+      "payroll": 253281333,
+      "rank": 3
      },
      "r3": {
-      "payroll": 249816333,
-      "rank": 4
+      "payroll": 254316333,
+      "rank": 3
      },
      "r4": {
       "payroll": 246793333,
@@ -14471,20 +14471,20 @@
     "141": {
      "name": "Toronto Blue Jays",
      "r1": {
-      "payroll": 177756891.80608156,
-      "rank": 10
+      "payroll": 188000546.98212284,
+      "rank": 9
      },
      "r2": {
-      "payroll": 192162600,
-      "rank": 9
+      "payroll": 207362600,
+      "rank": 8
      },
      "r3": {
-      "payroll": 192162600,
-      "rank": 9
+      "payroll": 207362600,
+      "rank": 8
      },
      "r4": {
       "payroll": 142896600,
-      "rank": 15
+      "rank": 14
      }
     },
     "142": {
@@ -14503,60 +14503,60 @@
      },
      "r4": {
       "payroll": 126323040,
-      "rank": 17
+      "rank": 16
      }
     },
     "143": {
      "name": "Philadelphia Phillies",
      "r1": {
-      "payroll": 243622152.6067611,
+      "payroll": 237733850.46772364,
       "rank": 6
      },
      "r2": {
-      "payroll": 248922785,
-      "rank": 4
+      "payroll": 240122785,
+      "rank": 5
      },
      "r3": {
-      "payroll": 248922785,
+      "payroll": 240122785,
       "rank": 5
      },
      "r4": {
-      "payroll": 235401285,
+      "payroll": 222351285,
       "rank": 6
      }
     },
     "144": {
      "name": "Atlanta Braves",
      "r1": {
-      "payroll": 237174119.0122071,
+      "payroll": 230344838.76025674,
       "rank": 7
      },
      "r2": {
-      "payroll": 231527300,
+      "payroll": 221527300,
       "rank": 7
      },
      "r3": {
-      "payroll": 226730000,
+      "payroll": 216730000,
       "rank": 7
      },
      "r4": {
-      "payroll": 224880000,
+      "payroll": 214880000,
       "rank": 7
      }
     },
     "145": {
      "name": "Chicago White Sox",
      "r1": {
-      "payroll": 94926934.88009107,
+      "payroll": 103326518.22104467,
       "rank": 22
      },
      "r2": {
-      "payroll": 98352883,
-      "rank": 22
+      "payroll": 110602883,
+      "rank": 19
      },
      "r3": {
-      "payroll": 101152883,
-      "rank": 22
+      "payroll": 113402883,
+      "rank": 19
      },
      "r4": {
       "payroll": 79764500,
@@ -14566,16 +14566,16 @@
     "146": {
      "name": "Miami Marlins",
      "r1": {
-      "payroll": 58073882.756782725,
+      "payroll": 62858554.92674538,
       "rank": 29
      },
      "r2": {
-      "payroll": 62780900,
+      "payroll": 69503900,
       "rank": 29
      },
      "r3": {
-      "payroll": 74665900,
-      "rank": 28
+      "payroll": 81388900,
+      "rank": 29
      },
      "r4": {
       "payroll": 36027400,
@@ -14585,39 +14585,39 @@
     "147": {
      "name": "New York Yankees",
      "r1": {
-      "payroll": 292448088.931221,
+      "payroll": 289690800.9085657,
       "rank": 2
      },
      "r2": {
-      "payroll": 292308083,
+      "payroll": 288183083,
       "rank": 2
      },
      "r3": {
-      "payroll": 289508083,
+      "payroll": 285383083,
       "rank": 2
      },
      "r4": {
-      "payroll": 287108083,
+      "payroll": 282983083,
       "rank": 1
      }
     },
     "158": {
      "name": "Milwaukee Brewers",
      "r1": {
-      "payroll": 114486455.25260663,
+      "payroll": 105813888.88092521,
       "rank": 20
      },
      "r2": {
-      "payroll": 110572327,
-      "rank": 19
+      "payroll": 96572327,
+      "rank": 23
      },
      "r3": {
-      "payroll": 114572327,
-      "rank": 19
+      "payroll": 100572327,
+      "rank": 21
      },
      "r4": {
-      "payroll": 109794827,
-      "rank": 19
+      "payroll": 95794827,
+      "rank": 20
      }
     }
    }
@@ -14625,18 +14625,18 @@
   {
    "year": 2025,
    "correlations": {
-    "r1-r2": 0.9879866518353726,
+    "r1-r2": 0.9830923248053393,
     "r1-r3": 0.985761957730812,
-    "r1-r4": 0.996440489432703,
-    "r2-r3": 0.9942157953281424,
-    "r2-r4": 0.9866518353726362,
-    "r3-r4": 0.9839822024471635
+    "r1-r4": 0.9866518353726362,
+    "r2-r3": 0.9826473859844271,
+    "r2-r4": 0.956840934371524,
+    "r3-r4": 0.9586206896551724
    },
    "teams": {
     "108": {
      "name": "Los Angeles Angels",
      "r1": {
-      "payroll": 166675851.90203446,
+      "payroll": 166677038.0234596,
       "rank": 12
      },
      "r2": {
@@ -14645,7 +14645,7 @@
      },
      "r3": {
       "payroll": 154611667,
-      "rank": 14
+      "rank": 15
      },
      "r4": {
       "payroll": 153761667,
@@ -14655,111 +14655,111 @@
     "109": {
      "name": "Arizona Diamondbacks",
      "r1": {
-      "payroll": 129282977.31555347,
-      "rank": 17
+      "payroll": 152054479.61744097,
+      "rank": 14
      },
      "r2": {
-      "payroll": 130593173,
-      "rank": 19
+      "payroll": 164493173,
+      "rank": 13
      },
      "r3": {
-      "payroll": 130593173,
-      "rank": 19
+      "payroll": 164493173,
+      "rank": 12
      },
      "r4": {
       "payroll": 125555573,
-      "rank": 17
+      "rank": 13
      }
     },
     "110": {
      "name": "Baltimore Orioles",
      "r1": {
-      "payroll": 128363226.80623178,
-      "rank": 19
+      "payroll": 142267909.8122927,
+      "rank": 15
      },
      "r2": {
-      "payroll": 141755200,
-      "rank": 15
+      "payroll": 162480200,
+      "rank": 14
      },
      "r3": {
-      "payroll": 140965200,
-      "rank": 15
+      "payroll": 161690200,
+      "rank": 13
      },
      "r4": {
       "payroll": 99696500,
-      "rank": 20
+      "rank": 19
      }
     },
     "111": {
      "name": "Boston Red Sox",
      "r1": {
-      "payroll": 173843075.7332732,
+      "payroll": 177956594.65697595,
       "rank": 11
      },
      "r2": {
-      "payroll": 167456311,
-      "rank": 13
+      "payroll": 157156311,
+      "rank": 15
      },
      "r3": {
-      "payroll": 168456311,
-      "rank": 12
+      "payroll": 185222892,
+      "rank": 10
      },
      "r4": {
-      "payroll": 149406311,
+      "payroll": 139106311,
       "rank": 12
      }
     },
     "112": {
      "name": "Chicago Cubs",
      "r1": {
-      "payroll": 221724850.10486344,
-      "rank": 7
-     },
-     "r2": {
-      "payroll": 211951750,
-      "rank": 9
-     },
-     "r3": {
-      "payroll": 211885250,
+      "payroll": 205340669.18646494,
       "rank": 8
      },
+     "r2": {
+      "payroll": 193551750,
+      "rank": 8
+     },
+     "r3": {
+      "payroll": 193485250,
+      "rank": 9
+     },
      "r4": {
-      "payroll": 210341750,
+      "payroll": 191941750,
       "rank": 8
      }
     },
     "113": {
      "name": "Cincinnati Reds",
      "r1": {
-      "payroll": 122364598.13620873,
-      "rank": 20
+      "payroll": 113464517.81185807,
+      "rank": 21
      },
      "r2": {
-      "payroll": 123793833,
-      "rank": 20
+      "payroll": 111073833,
+      "rank": 22
      },
      "r3": {
-      "payroll": 128393833,
-      "rank": 20
+      "payroll": 115673833,
+      "rank": 22
      },
      "r4": {
-      "payroll": 107668833,
-      "rank": 19
+      "payroll": 94948833,
+      "rank": 21
      }
     },
     "114": {
      "name": "Cleveland Guardians",
      "r1": {
-      "payroll": 70780150.71707952,
-      "rank": 26
+      "payroll": 82299138.05885167,
+      "rank": 24
      },
      "r2": {
-      "payroll": 71914800,
-      "rank": 26
+      "payroll": 83914800,
+      "rank": 25
      },
      "r3": {
-      "payroll": 71914800,
-      "rank": 26
+      "payroll": 83914800,
+      "rank": 25
      },
      "r4": {
       "payroll": 65914800,
@@ -14769,77 +14769,77 @@
     "115": {
      "name": "Colorado Rockies",
      "r1": {
-      "payroll": 104126534.67171673,
-      "rank": 21
+      "payroll": 112338941.5585512,
+      "rank": 22
      },
      "r2": {
-      "payroll": 106504986,
+      "payroll": 118504986,
       "rank": 21
      },
      "r3": {
-      "payroll": 104504986,
-      "rank": 22
+      "payroll": 116504986,
+      "rank": 21
      },
      "r4": {
       "payroll": 95734986,
-      "rank": 21
+      "rank": 20
      }
     },
     "116": {
      "name": "Detroit Tigers",
      "r1": {
-      "payroll": 143808744.76128203,
-      "rank": 15
+      "payroll": 139931633.82113755,
+      "rank": 17
      },
      "r2": {
-      "payroll": 131634360,
-      "rank": 18
+      "payroll": 126406633,
+      "rank": 19
      },
      "r3": {
-      "payroll": 131634360,
-      "rank": 18
+      "payroll": 126406633,
+      "rank": 19
      },
      "r4": {
-      "payroll": 129384360,
-      "rank": 15
+      "payroll": 124156633,
+      "rank": 14
      }
     },
     "117": {
      "name": "Houston Astros",
      "r1": {
-      "payroll": 226274054.6195109,
-      "rank": 6
+      "payroll": 199953340.58749688,
+      "rank": 9
      },
      "r2": {
-      "payroll": 224204966,
-      "rank": 6
+      "payroll": 182371633,
+      "rank": 11
      },
      "r3": {
-      "payroll": 235704966,
-      "rank": 5
+      "payroll": 193871633,
+      "rank": 8
      },
      "r4": {
-      "payroll": 221124966,
-      "rank": 6
+      "payroll": 179291633,
+      "rank": 9
      }
     },
     "118": {
      "name": "Kansas City Royals",
      "r1": {
-      "payroll": 132729381.37319626,
-      "rank": 16
+      "payroll": 126137546.20888907,
+      "rank": 19
      },
      "r2": {
-      "payroll": 132657056,
-      "rank": 17
+      "payroll": 122663806,
+      "rank": 20
      },
      "r3": {
-      "payroll": 132657056,
-      "rank": 17
+      "payroll": 122663806,
+      "rank": 20
      },
      "r4": {
-      "payroll": 128157056,
-      "rank": 16
+      "payroll": 117382056,
+      "rank": 17
      }
     },
     "119": {
@@ -14854,26 +14854,26 @@
      },
      "r3": {
       "payroll": 320135059,
-      "rank": 2
+      "rank": 1
      },
      "r4": {
       "payroll": 288240059,
-      "rank": 3
+      "rank": 2
      }
     },
     "120": {
      "name": "Washington Nationals",
      "r1": {
-      "payroll": 58505157.377939746,
-      "rank": 29
-     },
-     "r2": {
-      "payroll": 59822225,
+      "payroll": 70369561.82612336,
       "rank": 28
      },
+     "r2": {
+      "payroll": 75349952,
+      "rank": 26
+     },
      "r3": {
-      "payroll": 59058900,
-      "rank": 29
+      "payroll": 74586627,
+      "rank": 26
      },
      "r4": {
       "payroll": 45889800,
@@ -14883,35 +14883,35 @@
     "121": {
      "name": "New York Mets",
      "r1": {
-      "payroll": 339270861.3223254,
+      "payroll": 327781559.8601261,
       "rank": 1
      },
      "r2": {
-      "payroll": 337061387,
+      "payroll": 320136387,
       "rank": 1
      },
      "r3": {
-      "payroll": 336061387,
-      "rank": 1
+      "payroll": 319136387,
+      "rank": 2
      },
      "r4": {
-      "payroll": 331227137,
+      "payroll": 314302137,
       "rank": 1
      }
     },
     "133": {
      "name": "Athletics",
      "r1": {
-      "payroll": 71512831.69578111,
-      "rank": 25
+      "payroll": 72472929.56236927,
+      "rank": 26
      },
      "r2": {
-      "payroll": 73763571,
-      "rank": 24
+      "payroll": 75306571,
+      "rank": 27
      },
      "r3": {
       "payroll": 73206571,
-      "rank": 24
+      "rank": 27
      },
      "r4": {
       "payroll": 67133571,
@@ -14921,16 +14921,16 @@
     "134": {
      "name": "Pittsburgh Pirates",
      "r1": {
-      "payroll": 69230100.05297056,
-      "rank": 27
+      "payroll": 78491218.04757595,
+      "rank": 25
      },
      "r2": {
-      "payroll": 71706000,
-      "rank": 27
+      "payroll": 86131000,
+      "rank": 24
      },
      "r3": {
-      "payroll": 72481000,
-      "rank": 25
+      "payroll": 86906000,
+      "rank": 24
      },
      "r4": {
       "payroll": 51034000,
@@ -14940,73 +14940,73 @@
     "135": {
      "name": "San Diego Padres",
      "r1": {
-      "payroll": 195765614.3102728,
+      "payroll": 186651980.0147399,
       "rank": 10
      },
      "r2": {
-      "payroll": 197456704,
+      "payroll": 183131954,
       "rank": 10
      },
      "r3": {
-      "payroll": 189313704,
-      "rank": 10
+      "payroll": 176531954,
+      "rank": 11
      },
      "r4": {
-      "payroll": 185783404,
+      "payroll": 173001654,
       "rank": 10
      }
     },
     "136": {
      "name": "Seattle Mariners",
      "r1": {
-      "payroll": 158915459.72795308,
-      "rank": 14
+      "payroll": 141964711.7501614,
+      "rank": 16
      },
      "r2": {
-      "payroll": 161047814,
-      "rank": 14
+      "payroll": 135147814,
+      "rank": 18
      },
      "r3": {
-      "payroll": 154797814,
-      "rank": 13
+      "payroll": 130397814,
+      "rank": 18
      },
      "r4": {
-      "payroll": 147389481,
-      "rank": 14
+      "payroll": 121489481,
+      "rank": 16
      }
     },
     "137": {
      "name": "San Francisco Giants",
      "r1": {
-      "payroll": 166459236.36272258,
+      "payroll": 163480459.2594297,
       "rank": 13
      },
      "r2": {
-      "payroll": 171711105,
-      "rank": 11
+      "payroll": 185486105,
+      "rank": 9
      },
      "r3": {
-      "payroll": 173211105,
-      "rank": 11
+      "payroll": 159919524,
+      "rank": 14
      },
      "r4": {
-      "payroll": 148961105,
-      "rank": 13
+      "payroll": 121894524,
+      "rank": 15
      }
     },
     "138": {
      "name": "St. Louis Cardinals",
      "r1": {
-      "payroll": 128675874.93981077,
+      "payroll": 133948348.6193985,
       "rank": 18
      },
      "r2": {
-      "payroll": 133983665,
-      "rank": 16
+      "payroll": 142183665,
+      "rank": 17
      },
      "r3": {
-      "payroll": 133983665,
-      "rank": 16
+      "payroll": 142183665,
+      "rank": 17
      },
      "r4": {
       "payroll": 111983665,
@@ -15016,15 +15016,15 @@
     "139": {
      "name": "Tampa Bay Rays",
      "r1": {
-      "payroll": 60298089.47044605,
-      "rank": 28
+      "payroll": 64962200.121760696,
+      "rank": 29
      },
      "r2": {
-      "payroll": 54703667,
+      "payroll": 61200467,
       "rank": 29
      },
      "r3": {
-      "payroll": 66703667,
+      "payroll": 73200467,
       "rank": 28
      },
      "r4": {
@@ -15035,54 +15035,54 @@
     "140": {
      "name": "Texas Rangers",
      "r1": {
-      "payroll": 221659267.65600514,
-      "rank": 8
+      "payroll": 216927899.3451702,
+      "rank": 6
      },
      "r2": {
-      "payroll": 217367000,
-      "rank": 8
+      "payroll": 210367000,
+      "rank": 7
      },
      "r3": {
-      "payroll": 223617000,
-      "rank": 7
+      "payroll": 215117000,
+      "rank": 6
      },
      "r4": {
-      "payroll": 217367000,
-      "rank": 7
+      "payroll": 208867000,
+      "rank": 6
      }
     },
     "141": {
      "name": "Toronto Blue Jays",
      "r1": {
-      "payroll": 231927832.36530557,
+      "payroll": 231139092.41735244,
       "rank": 5
      },
      "r2": {
-      "payroll": 228448961,
+      "payroll": 227448961,
       "rank": 5
      },
      "r3": {
-      "payroll": 229448961,
-      "rank": 6
+      "payroll": 228448961,
+      "rank": 5
      },
      "r4": {
-      "payroll": 226925961,
+      "payroll": 225925961,
       "rank": 5
      }
     },
     "142": {
      "name": "Minnesota Twins",
      "r1": {
-      "payroll": 85924216.69215801,
-      "rank": 23
+      "payroll": 120664990.60603555,
+      "rank": 20
      },
      "r2": {
-      "payroll": 90425057,
-      "rank": 23
+      "payroll": 144033390,
+      "rank": 16
      },
      "r3": {
-      "payroll": 88882057,
-      "rank": 23
+      "payroll": 142490390,
+      "rank": 16
      },
      "r4": {
       "payroll": 72878907,
@@ -15092,54 +15092,54 @@
     "143": {
      "name": "Philadelphia Phillies",
      "r1": {
-      "payroll": 294124716.3831293,
+      "payroll": 288306891.1530945,
       "rank": 3
      },
      "r2": {
-      "payroll": 291810785,
+      "payroll": 282935785,
       "rank": 3
      },
      "r3": {
-      "payroll": 292581785,
+      "payroll": 283706785,
       "rank": 3
      },
      "r4": {
-      "payroll": 289425785,
-      "rank": 2
+      "payroll": 280550785,
+      "rank": 3
      }
     },
     "144": {
      "name": "Atlanta Braves",
      "r1": {
-      "payroll": 214265985.54731444,
-      "rank": 9
+      "payroll": 214266726.0175693,
+      "rank": 7
      },
      "r2": {
       "payroll": 220695700,
-      "rank": 7
+      "rank": 6
      },
      "r3": {
       "payroll": 199427200,
-      "rank": 9
+      "rank": 7
      },
      "r4": {
       "payroll": 193237200,
-      "rank": 9
+      "rank": 7
      }
     },
     "145": {
      "name": "Chicago White Sox",
      "r1": {
-      "payroll": 72210373.40405801,
-      "rank": 24
+      "payroll": 72210213.27448744,
+      "rank": 27
      },
      "r2": {
       "payroll": 72116900,
-      "rank": 25
+      "rank": 28
      },
      "r3": {
       "payroll": 69201850,
-      "rank": 27
+      "rank": 29
      },
      "r4": {
       "payroll": 59601850,
@@ -15149,15 +15149,15 @@
     "146": {
      "name": "Miami Marlins",
      "r1": {
-      "payroll": 43805746.75737179,
+      "payroll": 46856081.88577608,
       "rank": 30
      },
      "r2": {
-      "payroll": 44637725,
+      "payroll": 49137725,
       "rank": 30
      },
      "r3": {
-      "payroll": 45409725,
+      "payroll": 49909725,
       "rank": 30
      },
      "r4": {
@@ -15168,38 +15168,38 @@
     "147": {
      "name": "New York Yankees",
      "r1": {
-      "payroll": 263753700.1693553,
+      "payroll": 248152695.01155043,
       "rank": 4
      },
      "r2": {
-      "payroll": 262811833,
+      "payroll": 239610033,
       "rank": 4
      },
      "r3": {
-      "payroll": 264340208,
+      "payroll": 241138408,
       "rank": 4
      },
      "r4": {
-      "payroll": 258719133,
+      "payroll": 235517333,
       "rank": 4
      }
     },
     "158": {
      "name": "Milwaukee Brewers",
      "r1": {
-      "payroll": 103480198.98302317,
-      "rank": 22
+      "payroll": 102689341.24275406,
+      "rank": 23
      },
      "r2": {
-      "payroll": 100298836,
-      "rank": 22
+      "payroll": 99298836,
+      "rank": 23
      },
      "r3": {
-      "payroll": 111048836,
-      "rank": 21
+      "payroll": 110048836,
+      "rank": 23
      },
      "r4": {
-      "payroll": 88242136,
+      "payroll": 87242136,
       "rank": 22
      }
     }
