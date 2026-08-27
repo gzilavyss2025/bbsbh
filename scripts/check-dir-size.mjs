@@ -374,7 +374,13 @@ const BUDGETS = {
   // OWN 600-line cap; same trade as the two paragraphs above, one file over.
   // Component-imported (StampDetailModal.jsx), not part of index.css's core
   // cascade, so ordering relative to its sibling doesn't matter here.
-  'src/styles': 103,
+  // 103 -> 105 for 74-contract-workbench.css and 74a-contract-lookup.css —
+  // the /admin/contracts match workbench (ADR-0067) and its lookup deck. Two
+  // files, not one, because two agents built them against a fixed component
+  // interface and a shared partial would have been the only place they could
+  // collide. They stay flat siblings in the ordered @import chain: the deck
+  // sits inside the workbench's layout and has to cascade right after it.
+  'src/styles': 105,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -455,7 +461,13 @@ const BUDGETS = {
   // measured against the pre-merge tree) — re-measured post-merge per this
   // file's own "rebase and re-measure" rule rather than trusting either
   // branch's number.
-  'src/api': 105,
+  // 105 -> 106 for contractsHistory.js — the read-side merge that joins an
+  // admin's live identity override onto the static historical-contract
+  // shards (ADR-0067). It belongs beside the other src/api readers: it is a
+  // data-layer module with no surface, and its spoiler class is the same
+  // spoiler-FREE as its neighbours — historical contract records carry no
+  // game, no linescore and no reveal state.
+  'src/api': 106,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -559,7 +571,13 @@ const BUDGETS = {
   // the historical-contract identity-resolution pipeline (ADR-0066). Each
   // runs on import (fetches statsapi / writes the resolved crosswalk), same
   // shape as every other gen-*.mjs already flat here.
-  scripts: 102,
+  // 102 -> 104 for gen-contracts-shards.mjs and gen-contracts-search-index.mjs,
+  // the two hand-run generators behind the historical-contracts read path
+  // (ADR-0067). Neither can live in scripts/lib/: both RUN on import and
+  // write files, which is exactly what that subdirectory is not for. They
+  // stay flat with every other gen-*.mjs, like their sibling
+  // gen-contracts-identity.mjs.
+  scripts: 104,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

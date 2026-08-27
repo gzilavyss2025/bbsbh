@@ -92,6 +92,8 @@
 @import './styles/64-milb-alumni.css';
 @import './styles/69-hit-chart.css';
 @import './styles/73-spray-map.css';
+@import './styles/74-contract-workbench.css';
+@import './styles/74a-contract-lookup.css';
 /* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
    rather than three more numbered siblings: src/styles is a flat directory at
    its own file ratchet (scripts/check-dir-size.mjs), so the honest way to split
@@ -160,5 +162,9 @@
                               screens/team/modules/ballpark/BallparkEditFields.jsx
      65-team-records          screens/team/modules/records/RecordsCard.jsx
      72-club-transactions     screens/team/TeamTransactionsPage.jsx
+     74-contract-workbench   screens/admin/ContractIdentityReviewPage.jsx,
+                              components/admin/contracts/{TierBar,ReviewQueue,
+                              DecisionPane,CandidateList,RosterSearch}.jsx
+     74a-contract-lookup      components/admin/contracts/LookupDeck.jsx
      research/diary           screens/research/ResearchDiaryPage.jsx
    ------------------------------------------------------------ */

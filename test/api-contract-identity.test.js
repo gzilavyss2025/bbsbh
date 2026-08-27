@@ -39,6 +39,40 @@ test('sanitizeOverrides drops a non-positive-integer mlbId', () => {
   assert.deepEqual(clean, {})
 })
 
+test('sanitizeOverrides round-trips a human-confirmed match through confidence/originalConfidence', () => {
+  const clean = sanitizeOverrides({
+    'extensions#3': JSON.stringify({
+      mlbId: 605141,
+      dismissed: false,
+      note: 'confirmed',
+      correctedBy: 'x',
+      correctedAt: 'y',
+      confidence: 'exact',
+      originalConfidence: 'fuzzy',
+    }),
+  })
+  assert.equal(clean['extensions#3'].confidence, 'exact')
+  assert.equal(clean['extensions#3'].originalConfidence, 'fuzzy')
+})
+
+test('sanitizeOverrides defaults confidence/originalConfidence to null when absent', () => {
+  const clean = sanitizeOverrides({
+    'extensions#3': JSON.stringify({ mlbId: 605141, dismissed: false, note: null, correctedBy: 'x', correctedAt: 'y' }),
+  })
+  assert.equal(clean['extensions#3'].confidence, null)
+  assert.equal(clean['extensions#3'].originalConfidence, null)
+})
+
+test('sanitizeOverrides refuses a confidence value other than the literal "exact"', () => {
+  const clean = sanitizeOverrides({ 'extensions#3': JSON.stringify({ mlbId: 605141, confidence: 'fuzzy' }) })
+  assert.deepEqual(clean, {})
+})
+
+test('sanitizeOverrides refuses an originalConfidence value outside its fixed vocabulary', () => {
+  const clean = sanitizeOverrides({ 'extensions#3': JSON.stringify({ mlbId: 605141, originalConfidence: 'nonsense' }) })
+  assert.deepEqual(clean, {})
+})
+
 test('mergeOverrides: a patch never touches a row it does not name', () => {
   const prev = { 'extensions#1': { mlbId: 111, dismissed: false, note: null, correctedBy: 'a', correctedAt: 't' } }
   const merged = mergeOverrides(prev, { 'arbitration#2': { mlbId: 222 } }, STAMP)
@@ -70,6 +104,43 @@ test('mergeOverrides: one bad entry refuses the WHOLE patch, never a partial app
     STAMP,
   )
   assert.equal(merged, undefined, 'a patch with any invalid entry is refused outright')
+})
+
+test('mergeOverrides: a patch value of neither field still round-trips as it does today', () => {
+  const merged = mergeOverrides({}, { 'salaries#5': { mlbId: 999 } }, STAMP)
+  assert.equal(merged['salaries#5'].mlbId, 999)
+  assert.equal(merged['salaries#5'].confidence, null)
+  assert.equal(merged['salaries#5'].originalConfidence, null)
+})
+
+test('mergeOverrides: a promoted match round-trips confidence and originalConfidence', () => {
+  const merged = mergeOverrides(
+    {},
+    { 'salaries#5': { mlbId: 999, confidence: 'exact', originalConfidence: 'ambiguous' } },
+    STAMP,
+  )
+  assert.equal(merged['salaries#5'].confidence, 'exact')
+  assert.equal(merged['salaries#5'].originalConfidence, 'ambiguous')
+})
+
+test('mergeOverrides: confidence "fuzzy" is refused', () => {
+  const merged = mergeOverrides({}, { 'salaries#5': { mlbId: 999, confidence: 'fuzzy' } }, STAMP)
+  assert.equal(merged, undefined)
+})
+
+test('mergeOverrides: originalConfidence "nonsense" is refused', () => {
+  const merged = mergeOverrides({}, { 'salaries#5': { mlbId: 999, originalConfidence: 'nonsense' } }, STAMP)
+  assert.equal(merged, undefined)
+})
+
+test('mergeOverrides: a patch with one bad confidence value among several rows changes nothing', () => {
+  const prev = { 'extensions#1': { mlbId: 111, dismissed: false, note: null, correctedBy: 'a', correctedAt: 't', confidence: null, originalConfidence: null } }
+  const merged = mergeOverrides(
+    prev,
+    { 'arbitration#2': { mlbId: 222, confidence: 'exact' }, 'salaries#9': { mlbId: 333, confidence: 'close-enough' } },
+    STAMP,
+  )
+  assert.equal(merged, undefined, 'the whole patch is refused, including the otherwise-valid row')
 })
 
 test('mergeOverrides: an unrecognized rowKey in the patch refuses the write', () => {
