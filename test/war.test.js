@@ -2,7 +2,7 @@
 // wrappers plus the pure year-union helper the player page reads.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { fetchWarData, fetchWarHistory, warByYearFor, warShardKey } from '../src/api/war.js'
+import { fetchWarData, fetchWarHistory, warByYearFor, warByTeamFor, warShardKey } from '../src/api/war.js'
 
 // --------------------------------------------------------------------------
 // warByYearFor — pure, no fetch involved
@@ -32,6 +32,24 @@ test('warByYearFor skips a season/current entry the player has no value in', () 
 test('warByYearFor degrades to {} for missing/null history or current', () => {
   assert.deepEqual(warByYearFor(1, 'hitting', null, null), {})
   assert.deepEqual(warByYearFor(1, 'hitting', undefined, undefined), {})
+})
+
+// --------------------------------------------------------------------------
+// warByTeamFor — pure, no fetch involved
+// --------------------------------------------------------------------------
+test('warByTeamFor turns a multi-team player\'s row list into a teamId -> war map', () => {
+  const current = { season: 2026, pitByTeam: { 684974: [{ teamId: 114, war: -0.1 }, { teamId: 158, war: -0.1 }] } }
+  assert.deepEqual(warByTeamFor(684974, 'pitching', current), { 114: -0.1, 158: -0.1 })
+})
+
+test('warByTeamFor returns null for a one-team player (nothing to split)', () => {
+  const current = { season: 2026, batByTeam: {} }
+  assert.equal(warByTeamFor(1, 'hitting', current), null)
+})
+
+test('warByTeamFor returns null for missing/null current', () => {
+  assert.equal(warByTeamFor(1, 'hitting', null), null)
+  assert.equal(warByTeamFor(1, 'hitting', undefined), null)
 })
 
 // --------------------------------------------------------------------------
