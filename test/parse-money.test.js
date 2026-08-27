@@ -41,9 +41,10 @@ test('an explicit "n/a" is blank too, and keeps its own raw text', () => {
 
 // --------------------------------------------------- fixed-phrase statuses
 // One test per distinct non-numeric value this repo's real export carries
-// today (2026-08-27), across arbitration.csv (settled_salary, club_offer),
-// salaries.csv (salary), and free_agency.csv (guarantee, aav). extensions.csv
-// carries none -- its guarantee/aav are clean numbers.
+// today (2026-08-27), across arbitration.csv (prior_salary, player_request,
+// settled_salary, club_offer), salaries.csv (salary), and free_agency.csv
+// (guarantee, aav). extensions.csv carries none -- its guarantee/aav are
+// clean numbers.
 const FIXED_PHRASES = [
   ['forfeited', 'forfeited'], // salaries.salary's one prose value
   ['outrighted', 'outrighted'],
@@ -71,6 +72,31 @@ for (const [raw, status] of FIXED_PHRASES) {
 test('a fixed-phrase status is matched case-insensitively', () => {
   assert.equal(parseMoneyCell('FORFEITED').status, 'forfeited')
   assert.equal(parseMoneyCell('Club Option').status, 'club-option')
+})
+
+// ---------------------------------------------------- arbitration.prior_salary
+// Three distinct prose values, each its own kind of "not a settled figure":
+// a bare arbitration-class code, a lone dash meaning nothing was recorded,
+// and a figure the source itself flagged as unconfirmed.
+test('"A3" is an arbitration-class year code, the same vocabulary Cot\'s out-year A1..A4 codes use (ADR-0052)', () => {
+  const r = parseMoneyCell('A3')
+  assert.equal(r.amount, null)
+  assert.equal(r.status, 'arbitration-year')
+  assert.equal(r.raw, 'A3')
+})
+
+test('a bare "-" is blank, same as an empty cell', () => {
+  const r = parseMoneyCell('-')
+  assert.equal(r.amount, null)
+  assert.equal(r.status, 'blank')
+  assert.equal(r.raw, '-')
+})
+
+test('"?  $700,000" keeps the stated figure but flags it unconfirmed, never silently drops it', () => {
+  const r = parseMoneyCell('?  $700,000')
+  assert.equal(r.amount, 700000, 'the source did write a number down -- coercing it to null would be the silent drop the rule forbids')
+  assert.equal(r.status, 'unconfirmed')
+  assert.equal(r.raw, '?  $700,000')
 })
 
 // ------------------------------------------------------- overseas signings
@@ -148,6 +174,45 @@ for (const [raw, years, guarantee] of EXTENSIONS) {
   })
 }
 
+// ------------------------------------------------- arbitration.player_request
+// Every distinct value in player_request is multi-year-shaped, but a
+// player's REQUEST is not a settlement -- passing column: 'player_request'
+// reads the same shape as 'multi-year-request' instead of
+// 'settled-as-extension'. This is the column the ~210-case file-and-trial
+// subsample is built from, so getting the status (not just the null amount)
+// right here matters downstream.
+const PLAYER_REQUESTS = [
+  ['2 y/$7.2M', 2, 7_200_000],
+  ['2 y / $3M', 2, 3_000_000],
+  ['8 y / $168M', 8, 168_000_000],
+  ['3 y/$14.5M', 3, 14_500_000],
+  ['6 y / $70M', 6, 70_000_000],
+  ['5 y / $56M', 5, 56_000_000],
+  ['2 y / $6M', 2, 6_000_000],
+  ['7 y / $100M', 7, 100_000_000],
+  ['2 y / $6.25M', 2, 6_250_000],
+  ['7 y / $131M', 7, 131_000_000],
+  ['2 y / $25M', 2, 25_000_000],
+  ['2 yr / $11M', 2, 11_000_000],
+]
+
+for (const [raw, years, guarantee] of PLAYER_REQUESTS) {
+  test(`player_request "${raw}" is a filed request, not a settlement (years=${years}, guarantee=${guarantee})`, () => {
+    const r = parseMoneyCell(raw, 'player_request')
+    assert.equal(r.status, 'multi-year-request')
+    assert.equal(r.amount, null)
+    assert.equal(r.years, years)
+    assert.equal(r.guarantee, guarantee)
+    assert.equal(r.raw, raw)
+  })
+}
+
+test('the same multi-year shape in settled_salary or club_offer still reads as settled-as-extension', () => {
+  assert.equal(parseMoneyCell('2 y/$7.2M', 'settled_salary').status, 'settled-as-extension')
+  assert.equal(parseMoneyCell('2 y/$7.2M', 'club_offer').status, 'settled-as-extension')
+  assert.equal(parseMoneyCell('2 y/$7.2M').status, 'settled-as-extension', 'no column argument keeps the original default')
+})
+
 // ---------------------------------------------------------- unparsed, loud
 test('genuinely unrecognized prose is unparsed, not a guess', () => {
   const r = parseMoneyCell('some brand-new prose form nobody mapped yet')
@@ -165,8 +230,12 @@ test('genuinely unrecognized prose is unparsed, not a guess', () => {
 const here = dirname(fileURLToPath(import.meta.url))
 const dataDir = join(here, '..', 'scripts', 'data', 'contracts')
 
+// Every money-bearing column in all four files -- nine total. Missing one
+// here is exactly how the last version of this test under-covered
+// arbitration.prior_salary and arbitration.player_request: it read as
+// "zero unparsed" while two whole columns went unchecked.
 const TARGET_COLUMNS = [
-  ['arbitration.csv', ['settled_salary', 'club_offer']],
+  ['arbitration.csv', ['prior_salary', 'player_request', 'club_offer', 'settled_salary']],
   ['salaries.csv', ['salary']],
   ['free_agency.csv', ['guarantee', 'aav']],
   ['extensions.csv', ['guarantee', 'aav']],
@@ -180,11 +249,16 @@ test('every money cell in the real CSVs parses to a known status -- zero unparse
     for (const row of rows) {
       for (const column of columns) {
         cellCount++
-        const r = parseMoneyCell(row[column])
+        const r = parseMoneyCell(row[column], column)
         if (r.status === 'unparsed') unparsed.push(`${file}:${column}="${row[column]}"`)
       }
     }
   }
   assert.ok(cellCount > 40000, `expected tens of thousands of money cells, saw ${cellCount}`)
+  // No named-exception list needed today: every value found across all nine
+  // columns maps to a real status (see the enumeration above). If a future
+  // export adds prose this function has never seen, this assertion is the
+  // one that catches it -- fix it by adding a mapped case, never by adding
+  // an exception here.
   assert.deepEqual(unparsed, [], `new prose form(s) need a mapped status: ${unparsed.join(', ')}`)
 })

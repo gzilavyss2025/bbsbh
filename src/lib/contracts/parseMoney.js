@@ -10,11 +10,22 @@
 // nothing this function collapses together is actually lost.
 //
 // Every non-numeric value below was found by scanning the real 2026-08-27
-// export of all four files (61 distinct raw strings across five money
-// columns: arbitration.settled_salary, arbitration.club_offer,
-// salaries.salary, free_agency.guarantee, free_agency.aav; extensions.csv's
-// guarantee/aav are clean numbers, no prose). See test/parse-money.test.js
-// for the full enumeration and the live-data coverage assertion.
+// export of all four files: 76 distinct raw strings across NINE money
+// columns -- arbitration.prior_salary, arbitration.player_request,
+// arbitration.club_offer, arbitration.settled_salary, salaries.salary,
+// free_agency.guarantee, free_agency.aav, extensions.guarantee,
+// extensions.aav (the last four of those nine are clean numbers, no prose).
+// See test/parse-money.test.js for the full enumeration and the live-data
+// coverage assertion, which now runs over all nine.
+//
+// `column` (second, optional argument) matters for exactly one shape: a
+// multi-year figure. In `settled_salary` (and `club_offer`, which this
+// source sometimes uses to flag "the case settled as an extension" rather
+// than to carry a counter-number) it IS the deal that happened --
+// 'settled-as-extension'. In `player_request` the same shape is what the
+// player FILED, not what got settled, so it reads as 'multi-year-request'
+// instead. Every other column defaults to the settled reading, matching the
+// original three columns this parser covered.
 
 // A pure numeric cell, once $ and thousands separators are stripped. Every
 // plain-number cell in these files is already whole dollars (a $61.875M
@@ -22,10 +33,25 @@
 const NUMERIC = /^-?\d+(\.\d+)?$/
 
 // A cell that means "nothing was stated" beyond an actually-empty string.
-// Cot's writes this explicitly as "n/a" on a handful of rows; it carries the
-// same amount (null) as a blank cell, so it folds into the same status. `raw`
-// keeps the literal text either way.
+// Cot's writes this as "n/a" on a handful of rows and as a bare "-" on
+// arbitration.prior_salary; both carry the same amount (null) as a blank
+// cell, so they fold into the same status. `raw` keeps the literal text
+// either way.
 const BLANK_TEXT = /^n\/a$/i
+const BLANK_DASH = /^-+$/
+
+// arbitration.prior_salary's "A3": the same A1..A4 arbitration-class-year
+// vocabulary scripts/lib/salaries.mjs's cellFor() already reads off Cot's
+// out-year columns (ADR-0052) -- the player's PRIOR season was itself an
+// unsettled arbitration year, not a dollar figure.
+const ARBITRATION_CODE = /^A\d+$/i
+
+// arbitration.prior_salary's "?  $700,000": the source states a figure but
+// flags its own uncertainty about it with a leading "?". Coercing this to
+// null would throw away a number the source actually wrote down, so `amount`
+// carries the parsed figure -- 'unconfirmed' is what marks it as hedged
+// rather than a plain settled number.
+const UNCONFIRMED = /^\?\s*\$?([\d,]+(?:\.\d+)?)$/
 
 // One-off statuses that are a single fixed phrase, case-insensitive, with no
 // dollar figure anywhere in the cell. Each is a real transaction or contract
@@ -74,23 +100,23 @@ const OVERSEAS_SIGNINGS = new Set([
   'signed by leones de yucatán',
 ])
 
-// An extension-shaped cell: Cot's writes a multi-year settlement as
-// "<years> y/$<amount>[M] extn" (or "ext"/"extension"), sometimes as
-// "<years> / $<amount> extn" with no "y", sometimes as "extn, <years>
-// y/$<amount>", and sometimes as "<years> y+opt" with no dollar figure at
-// all. Any cell already past the plain-numeric check that carries the
-// keyword "extn"/"ext"/"extension", OR the "<years>.../$<amount>" shape
-// itself (some rows drop the keyword and just write "2 y / $13.5"), is this
-// status. A single settled arbitration year is always a plain number, so a
-// year-count paired with a dollar figure only shows up here for a real
-// multi-year deal.
+// A multi-year-shaped cell: Cot's writes one as "<years> y/$<amount>[M]
+// extn" (or "ext"/"extension"), sometimes as "<years> / $<amount> extn" with
+// no "y", sometimes as "extn, <years> y/$<amount>", sometimes as "<years>
+// y+opt" with no dollar figure at all, and in player_request as a bare
+// "<years> y / $<amount>" with no keyword. Any cell already past the
+// plain-numeric check that carries the keyword "extn"/"ext"/"extension", OR
+// the "<years>.../$<amount>" shape itself, is this shape. A single settled
+// arbitration year is always a plain number, so a year-count paired with a
+// dollar figure only shows up for a real multi-year figure -- what STATUS
+// that resolves to depends on which column it came from; see `column` above.
 const EXTENSION_KEYWORD = /\bextn?\b|\bextension\b/i
 const YEARS_WITH_DOLLAR = /\d+\s*(?:yr|y)?\s*\/\s*\$/i
 const YEARS = /(\d+)\s*(?:yr|y)\b|(\d+)\s*\/\s*\$/i
 const DOLLAR_AMOUNT = /\$\s*([\d.]+)\s*m?/i
 const EXTENSION_MILLION = 1_000_000
 
-function parseExtension(trimmed) {
+function parseMultiYear(trimmed) {
   const yearsMatch = trimmed.match(YEARS)
   const years = yearsMatch ? Number(yearsMatch[1] ?? yearsMatch[2]) : null
   const dollarMatch = trimmed.match(DOLLAR_AMOUNT)
@@ -99,21 +125,30 @@ function parseExtension(trimmed) {
 }
 
 // The base shape every call returns. `years`/`guarantee` stay null unless a
-// 'settled-as-extension' cell states them.
+// multi-year cell states them.
 function result(amount, status, raw, extra) {
   return { amount, status, raw, years: extra?.years ?? null, guarantee: extra?.guarantee ?? null }
 }
 
-export function parseMoneyCell(raw) {
+export function parseMoneyCell(raw, column) {
   const trimmed = String(raw ?? '').trim()
 
-  if (trimmed === '' || BLANK_TEXT.test(trimmed)) {
+  if (trimmed === '' || BLANK_TEXT.test(trimmed) || BLANK_DASH.test(trimmed)) {
     return result(null, 'blank', raw)
   }
 
   const numeric = trimmed.replace(/[$,]/g, '')
   if (NUMERIC.test(numeric)) {
     return result(Number(numeric), null, raw)
+  }
+
+  const unconfirmed = trimmed.match(UNCONFIRMED)
+  if (unconfirmed) {
+    return result(Number(unconfirmed[1].replace(/,/g, '')), 'unconfirmed', raw)
+  }
+
+  if (ARBITRATION_CODE.test(trimmed)) {
+    return result(null, 'arbitration-year', raw)
   }
 
   const exact = EXACT_STATUS.get(trimmed.toLowerCase())
@@ -130,7 +165,8 @@ export function parseMoneyCell(raw) {
   }
 
   if (EXTENSION_KEYWORD.test(trimmed) || YEARS_WITH_DOLLAR.test(trimmed)) {
-    return result(null, 'settled-as-extension', raw, parseExtension(trimmed))
+    const status = column === 'player_request' ? 'multi-year-request' : 'settled-as-extension'
+    return result(null, status, raw, parseMultiYear(trimmed))
   }
 
   // The loud fallback. A future export that adds a new prose form lands
