@@ -16,7 +16,7 @@ import {
   fetchTeamAbbrevs,
 } from '../person-fetch.js'
 import { resolveCareerOrgs } from '../careerTimeline.js'
-import { fetchWarData, fetchWarHistory, warByYearFor } from '../war.js'
+import { fetchWarData, fetchWarHistory, warByYearFor, warByTeamFor } from '../war.js'
 import { fetchVsTeamSplitsForPlayer, vsTeamSplitsFor } from '../vsTeamSplits.js'
 import {
   buildBlock,
@@ -118,6 +118,7 @@ export async function loadPlayerStats(id, asOf) {
         levelOnlySplits,
         logTagLevel: onRehab,
         warByYear: warByYearFor(id, group, warCurrent, warHistory),
+        warByTeam: warByTeamFor(id, group, warCurrent) ?? {},
         transactions: txns,
         orgOf,
       })

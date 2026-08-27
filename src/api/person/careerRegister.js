@@ -142,7 +142,7 @@ function missingSeasonRows(presentYears, debutYear, currentSeason, transactions,
   return rows
 }
 
-export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSplits, currentSeason, currentSportId, careerStat, warByYear = {}, transactions = [], orgOf = null }) {
+export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSplits, currentSeason, currentSportId, careerStat, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null }) {
   // Group every split (MLB + all MiLB levels) into season -> sportId -> rows.
   const bySeason = new Map()
   for (const s of [...(mlbSplits ?? []), ...(milbSplits ?? [])]) {
@@ -258,13 +258,13 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     .reduce((sum, s) => sum + num(s.stat?.saves), 0)
   const showSaves = role === 'CL' || careerSaves >= 20
 
-  // Season WAR (MLB calc, see src/api/war.js) is MLB-only and lives outside the stat line, so it's
-  // appended as a trailing column rather than folded into yearByYearCells. Only
-  // worth a column when the player has an MLB row to carry a value — a pure
-  // prospect's all-MiLB register would otherwise gain a dead all-dashes column.
+  // Season WAR (MLB calc, see src/api/war.js) is MLB-only, so it's a trailing column
+  // added only when an MLB row exists — else a MiLB-only register gains a dead column.
   const showWar = real.some((s) => s.tier === 'mlb')
+  // A stint row's own share, from warByTeam (current season only, src/api/war.js).
   const warCell = (st, carriesSeasonWar) =>
-    carriesSeasonWar && st?.tier === 'mlb' && warByYear[st.year] != null ? warByYear[st.year].toFixed(1) : DASH
+    (carriesSeasonWar && st?.tier === 'mlb' && warByYear[st.year] != null ? warByYear[st.year]
+      : st?.tier === 'mlb' && st.year === cur ? warByTeam[st.teamIds?.[0]] : null)?.toFixed(1) ?? DASH
   const withWar = (cells, war) => (showWar ? [...cells, war] : cells)
 
   // Baseball-Reference's compact convention is a combined N-TM row. Here each

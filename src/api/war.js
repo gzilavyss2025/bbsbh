@@ -11,13 +11,28 @@ import { staticJson } from './staticJson.js'
 // and `fld` (season fielding runs) maps, which nothing reads today — they were
 // the Lineup Strength grade's inputs and were kept when it was removed because
 // they ride along on the one request WAR itself needs
-// (`.scratch/lineup-strength/README.md`).
+// (`.scratch/lineup-strength/README.md`). `batByTeam`/`pitByTeam` carry that
+// same season's WAR split by team stint (`personId -> [{ teamId, war }]`),
+// present only for a player with more than one team this season — see
+// `warByTeamFor` below.
 // Degrades to empty maps before the file exists or on any fetch failure — a
 // missing WAR badge, not a broken page. Cached in-memory for the session
 // since the file only changes once a day.
 export const fetchWarData = staticJson('/data/war.json', {
-  fallback: { season: null, bat: {}, pit: {} },
+  fallback: { season: null, bat: {}, pit: {}, batByTeam: {}, pitByTeam: {} },
 })
+
+// A traded player's WAR split by team, `teamId -> war`, for THIS season only
+// — war.json's `batByTeam`/`pitByTeam` carry no history, so a completed
+// season's per-team split isn't available (warByYearFor's history shard has
+// no equivalent). Returns null for a player who stayed on one team all
+// season (nothing to split) or before the current-season file loads.
+export function warByTeamFor(personId, group, current) {
+  const key = group === 'pitching' ? 'pitByTeam' : 'batByTeam'
+  const rows = current?.[key]?.[personId]
+  if (!rows?.length) return null
+  return Object.fromEntries(rows.map((r) => [r.teamId, r.war]))
+}
 
 // Season WAR for COMPLETED seasons — the multi-year companion to war.json above,
 // keyed by PLAYER: { bat: { [personId]: {season: war} }, pit }.

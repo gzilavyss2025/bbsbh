@@ -228,8 +228,8 @@ test('careerRegisterView: an MLB season split between two clubs is one row per c
     currentSeason: 2026,
     currentSportId: 1,
     careerStat: null,
-    // A season's WAR is not published per club: it belongs to the combined row,
-    // and the career total must count it once — never once per club.
+    // With no warByTeam supplied, a season's WAR belongs to the combined row
+    // only, and the career total must count it once — never once per club.
     warByYear: { 2026: 1.8 },
     transactions: [],
   })
@@ -250,6 +250,59 @@ test('careerRegisterView: an MLB season split between two clubs is one row per c
   assert.equal(mlbTotal.cells[8], '1.8', 'season WAR counted once, not twice')
   // Distinct row keys, or React collapses the second club's line.
   assert.equal(new Set(register.rows.map((r) => r.key)).size, 3)
+})
+
+test('careerRegisterView: with warByTeam supplied, each stint row carries its own club\'s split instead of a dash', () => {
+  const bosStat = { ...MLB_STAT, gamesPlayed: 40, inningsPitched: '41.0' }
+  const nyyStat = { ...MLB_STAT, gamesPlayed: 20, inningsPitched: '20.0' }
+  const register = careerRegisterView({
+    mlbSplits: [
+      { season: 2026, sport: { id: 1 }, team: { id: 111 }, stat: bosStat },
+      { season: 2026, sport: { id: 1 }, team: { id: 147 }, stat: nyyStat },
+    ],
+    milbSplits: [],
+    group: 'pitching',
+    role: null,
+    debutYear: 2026,
+    currentStat: null,
+    currentSeason: 2026,
+    currentSportId: 1,
+    careerStat: null,
+    warByYear: { 2026: 1.8 },
+    warByTeam: { 111: -0.4, 147: 2.2 },
+    transactions: [],
+  })
+
+  const subtotal = register.rows.find((r) => r.subtotal)
+  const stints = register.rows.filter((r) => !r.subtotal)
+  // cells: [G, GS, W-L, ERA, IP, K, BB, WHIP, WAR]
+  assert.equal(subtotal.cells[8], '1.8', 'the combined row still carries the season total')
+  assert.deepEqual(stints.map((r) => r.teamIds[0]), [111, 147])
+  assert.deepEqual(stints.map((r) => r.cells[8]), ['-0.4', '2.2'], 'each stint shows its OWN club\'s split, not a dash')
+})
+
+test('careerRegisterView: warByTeam only applies to the CURRENT season, not a past stint at the same club', () => {
+  const register = careerRegisterView({
+    mlbSplits: [
+      { season: 2025, sport: { id: 1 }, team: { id: 111 }, stat: MLB_STAT },
+      { season: 2026, sport: { id: 1 }, team: { id: 111 }, stat: { ...MLB_STAT, gamesPlayed: 40 } },
+      { season: 2026, sport: { id: 1 }, team: { id: 147 }, stat: { ...MLB_STAT, gamesPlayed: 20 } },
+    ],
+    milbSplits: [],
+    group: 'pitching',
+    role: null,
+    debutYear: 2025,
+    currentStat: null,
+    currentSeason: 2026,
+    currentSportId: 1,
+    careerStat: null,
+    warByYear: {},
+    warByTeam: { 111: -0.4, 147: 2.2 },
+    transactions: [],
+  })
+
+  const row2025 = register.rows.find((r) => r.year === '2025')
+  assert.equal(row2025.cells[8], '—', 'a past season at the same club must not borrow this season\'s split')
 })
 
 test('careerRegisterView: a career footer appears only when its side has more than one row', () => {

@@ -2,7 +2,9 @@
 // MLB Stats API personId, plus parallel `wrc` (wRC+, offense only) and `fld`
 // (season fielding runs) maps on the same keys. The last two feed the Lineup
 // Strength value model, which needs a bat and a glove SEPARATELY rather than
-// the WAR total that bundles them.
+// the WAR total that bundles them. `batByTeam`/`pitByTeam` carry the same
+// season's WAR split by team stint, `personId -> [{ teamId, war }]`, present
+// only for a player with `numTeams > 1` in the bulk pull.
 //
 // The `pa` (hitter plate appearances) map this file used to carry is GONE:
 // it rode along on the FanGraphs VALUE view, and `stats=sabermetrics`
@@ -68,6 +70,35 @@ async function fetchSabermetrics(group) {
   return json.stats?.[0]?.splits ?? []
 }
 
+// The bulk leaderboard above gives one row per player: the season TOTAL, even
+// for a player with `numTeams > 1`, with no way to split it out of that row.
+// Per-team WAR only comes back from a per-PLAYER query, which returns the
+// total split PLUS one row per team stint (no `team` field on the total row)
+// — no `playerPool` needed, since that filter only applies to the bulk pull.
+async function fetchTeamSplits(id, group) {
+  const url =
+    `https://statsapi.mlb.com/api/v1/people/${id}/stats?stats=sabermetrics&group=${group}` +
+    `&season=${season}&sportId=1`
+  const res = await fetch(url)
+  if (!res.ok)
+    throw new Error(`statsapi sabermetrics ${group} team splits for person ${id}: HTTP ${res.status}`)
+  const json = await res.json()
+  return (json.stats?.[0]?.splits ?? []).filter((s) => s.team)
+}
+
+async function teamWarSplits(ids, group) {
+  const out = {}
+  for (const id of ids) {
+    const rows = []
+    for (const split of await fetchTeamSplits(id, group)) {
+      const w = num(split.stat?.war)
+      if (w != null) rows.push({ teamId: split.team.id, war: Math.round(w * 10) / 10 })
+    }
+    if (rows.length) out[id] = rows
+  }
+  return out
+}
+
 const num = (v) => {
   const n = Number(v)
   return Number.isFinite(n) ? n : null
@@ -76,6 +107,7 @@ const num = (v) => {
 const bat = {}
 const wrc = {}
 const fld = {}
+const batTraded = []
 for (const split of await fetchSabermetrics('hitting')) {
   const id = split.player?.id
   if (!id) continue
@@ -85,21 +117,36 @@ for (const split of await fetchSabermetrics('hitting')) {
   if (r != null) wrc[id] = Math.round(r * 10) / 10
   const f = num(split.stat?.fielding)
   if (f != null) fld[id] = Math.round(f * 10) / 10
+  if (split.numTeams > 1) batTraded.push(id)
 }
+const batByTeam = await teamWarSplits(batTraded, 'hitting')
 
 // Pitcher WAR uses the FIP-based `war` field, not the RA9-based `ra9War` —
 // matches the philosophy (and, per the header comment above, closely matches
 // the numbers) of the FanGraphs fWAR this replaced.
 const pit = {}
+const pitTraded = []
 for (const split of await fetchSabermetrics('pitching')) {
   const id = split.player?.id
   if (!id) continue
   const w = num(split.stat?.war)
   if (w != null) pit[id] = Math.round(w * 10) / 10
+  if (split.numTeams > 1) pitTraded.push(id)
 }
+const pitByTeam = await teamWarSplits(pitTraded, 'pitching')
 
-await writeJsonAtomic(out, { season, generatedAt: new Date().toISOString(), bat, pit, wrc, fld })
+await writeJsonAtomic(out, {
+  season,
+  generatedAt: new Date().toISOString(),
+  bat,
+  pit,
+  wrc,
+  fld,
+  batByTeam,
+  pitByTeam,
+})
 console.log(
   `wrote ${out} (${Object.keys(bat).length} batters, ${Object.keys(pit).length} pitchers, ` +
-    `${Object.keys(wrc).length} wRC+, ${Object.keys(fld).length} Fld)`,
+    `${Object.keys(wrc).length} wRC+, ${Object.keys(fld).length} Fld, ` +
+    `${Object.keys(batByTeam).length} multi-team batters, ${Object.keys(pitByTeam).length} multi-team pitchers)`,
 )
