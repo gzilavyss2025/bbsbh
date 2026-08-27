@@ -135,7 +135,7 @@ const BUDGETS = {
   // for rookie-crossing.mjs, and src/lib/research/diary for the diary's first
   // `corrected` entry. Banded, not fitted: this file's own budgets grow a
   // comment block at a time, so a little headroom is the point.
-  'scripts/check-dir-size.mjs': 850, // 807
+  'scripts/check-dir-size.mjs': 900, // 807 -> 854: the src/styles bump for the contract workbench's two partials, and its paragraph of why (ADR-0067). This file grows one paragraph per real budget move, which is the point of it.
   'src/api/whatsBrewing.js': 1600, // 1581
   // 1500 -> 1600 for the veloVariety/centuryClub/veloPeak join (docs/callouts.md):
   // +9 lines to attach gen-pitch-arsenal.mjs's century-pitch sweep

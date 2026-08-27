@@ -42,6 +42,7 @@ export const config = { runtime: 'nodejs' }
 const OVERRIDES_KEY = 'contracts:identity:overrides'
 const ROW_KEY_RE = /^(extensions|arbitration|free_agency|salaries)#\d+$/
 const NOTE_MAX_LENGTH = 500
+const ORIGINAL_CONFIDENCE_VALUES = new Set(['fuzzy', 'ambiguous', 'unresolved'])
 
 function reply(res, body, status = 200, extraHeaders = {}) {
   return jsonResponse(res, body, status, extraHeaders)
@@ -81,7 +82,21 @@ function sanitizeOverrideValue(raw) {
   const note = typeof raw.note === 'string' ? raw.note.slice(0, NOTE_MAX_LENGTH) : null
   const correctedBy = typeof raw.correctedBy === 'string' ? raw.correctedBy : null
   const correctedAt = typeof raw.correctedAt === 'string' ? raw.correctedAt : null
-  return { mlbId, dismissed, note, correctedBy, correctedAt }
+  // `confidence: 'exact'` means a human confirmed the match; `originalConfidence`
+  // preserves the tier the automated pipeline assigned before that confirmation.
+  // Both default to null and both reject any non-null value outside their fixed
+  // vocabulary — same "invalid means invalid, not dropped" rule as every other
+  // field here.
+  const confidence = raw.confidence == null ? null : raw.confidence === 'exact' ? 'exact' : undefined
+  if (confidence === undefined) return undefined
+  const originalConfidence =
+    raw.originalConfidence == null
+      ? null
+      : ORIGINAL_CONFIDENCE_VALUES.has(raw.originalConfidence)
+        ? raw.originalConfidence
+        : undefined
+  if (originalConfidence === undefined) return undefined
+  return { mlbId, dismissed, note, correctedBy, correctedAt, confidence, originalConfidence }
 }
 
 // Runs stored Redis strings AND an incoming patch's raw values through the

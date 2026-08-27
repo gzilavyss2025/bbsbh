@@ -160,5 +160,9 @@
                               screens/team/modules/ballpark/BallparkEditFields.jsx
      65-team-records          screens/team/modules/records/RecordsCard.jsx
      72-club-transactions     screens/team/TeamTransactionsPage.jsx
+     74-contract-workbench   screens/admin/ContractIdentityReviewPage.jsx,
+                              components/admin/contracts/{TierBar,ReviewQueue,
+                              DecisionPane,CandidateList,RosterSearch}.jsx
+     74a-contract-lookup      components/admin/contracts/LookupDeck.jsx
      research/diary           screens/research/ResearchDiaryPage.jsx
    ------------------------------------------------------------ */

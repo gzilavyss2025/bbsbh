@@ -70,7 +70,9 @@ cron, `.github/workflows/update-nightly-data.yml`; a couple are hand-run). The
 driver is either an **unofficial/bulk source** (WAR) or **cost** (everything that
 would need dozens of statsapi calls per page load). `war.js` is the template.
 `docs/scripts/generators.md` documents each GENERATOR; `docs/api/static-data.md` documents
-each READER.
+each READER. `contractsHistory.js` reads sharded `public/data/contracts-history/`
+chunks and joins an admin's identity correction live at read time, never on
+rebuild — ADR-0067 has the reasoning.
 
 Three rules that keep biting. A file that grows without bound (the rookie
 dataset, the vs-team splits, per-date `callouts/*.json`) is kept OUT of the PWA

@@ -1,0 +1,188 @@
+/* LookupDeck (/admin/contracts) — the other way into the review queue:
+   search FROM a name Gary already remembers instead of only working the
+   automated matcher's own shortlist for the pending row (ADR-0066).
+
+   Two equal columns, permanently — this page is worked on a desktop and the
+   room is there — stacking below 900px, where it isn't. Tokens only, no raw
+   hex; the same custom properties research/diary.css already defines. */
+
+.lookupdeck {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+@media (max-width: 900px) {
+  .lookupdeck {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lookupdeck__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.lookupdeck__heading {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-snug);
+}
+
+.lookupdeck__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.lookupdeck__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.lookupdeck__field--compact {
+  flex: 1 1 8rem;
+  min-width: 8rem;
+}
+
+.lookupdeck__label {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+
+.lookupdeck__input,
+.lookupdeck__select {
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-ui);
+}
+
+.lookupdeck__input:focus-visible,
+.lookupdeck__select:focus-visible,
+.lookupdeck__link:focus-visible,
+.lookupdeck__usebtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.lookupdeck__status {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+
+.lookupdeck__status--error {
+  color: var(--accent-negative);
+}
+
+.lookupdeck__count {
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+}
+
+.lookupdeck__list {
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  max-height: 24rem;
+}
+
+.lookupdeck__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.lookupdeck__row:first-child {
+  border-top: none;
+}
+
+.lookupdeck__rowmain {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.lookupdeck__rowname {
+  color: var(--text-heading);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-ui);
+}
+
+.lookupdeck__rowmeta {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lookupdeck__rowactions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.lookupdeck__link {
+  color: var(--accent-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-decoration: none;
+}
+
+.lookupdeck__link:hover {
+  text-decoration: underline;
+}
+
+.lookupdeck__usebtn {
+  padding: var(--space-1) var(--space-3);
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--accent-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+
+.lookupdeck__usebtn:disabled {
+  border-color: var(--border-rule);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}

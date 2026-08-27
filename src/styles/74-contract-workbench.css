@@ -1,0 +1,596 @@
+/* The historical-contract identity workbench (/admin/contracts, ADR-0066).
+
+   An admin tool, dressed like one — the same choice 62-identity-admin made.
+   A reviewer sits here for an hour clearing a backlog; nobody reads the page.
+   Density beats atmosphere: fixed rail, one decision in the pane beside it.
+
+   DESKTOP FIRST, and the only page in this app that is. Two panes plus a
+   keyboard layer has no phone form. Below 900px the regions stack and the page
+   says so rather than pretending. It stays usable, not pretty.
+
+   It borrows the diary's shell (.researchdiary__main, its caps exemption), so
+   prose here is sentence case. Labels stay shouted. */
+
+.cwb__main {
+  max-width: 84rem;
+}
+
+.cwb {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.cwb__narrow {
+  display: none;
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+
+.cwb__error {
+  margin: 0;
+  padding: var(--space-3);
+  border-left: var(--bw-heavy) solid var(--accent-negative);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+
+/* ---- R1 tier bar ---- */
+
+.cwb__tierbar {
+  padding-bottom: var(--space-3);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+
+.cwb__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.cwb__tab {
+  flex: 1 1 12rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  text-align: left;
+  cursor: pointer;
+}
+
+.cwb__tab--on {
+  border-color: var(--accent-primary);
+  background: var(--surface-inset);
+}
+
+.cwb__tab:focus-visible,
+.cwb__qitem:focus-visible,
+.cwb__disclose:focus-visible,
+.cwb__mini:focus-visible,
+.cwb__use:focus-visible,
+.cwb__primary:focus-visible,
+.cwb__danger:focus-visible,
+.cwb__field:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.cwb__tabname {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+}
+
+.cwb__tabcount,
+.cwb__progressline {
+  margin: 0;
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.cwb__tabblurb,
+.cwb__what {
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+}
+
+.cwb__progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-top: var(--space-3);
+}
+
+.cwb__toggle,
+.cwb__hint {
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+
+.cwb__hint {
+  margin: var(--space-2) 0 0;
+}
+
+.cwb__disclose {
+  margin-left: auto;
+  padding: var(--space-1) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+
+.cwb__sheet {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+}
+
+.cwb__sheetrow {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.cwb__key {
+  min-width: 6.5rem;
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+}
+
+/* ---- R2 queue + R3 pane ---- */
+
+.cwb__body {
+  display: grid;
+  grid-template-columns: 240px minmax(420px, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.cwb__queue {
+  max-height: 72vh;
+  overflow-y: auto;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.cwb__qlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cwb__qitem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cwb__qitem--on {
+  background: var(--surface-inset);
+  box-shadow: inset 3px 0 0 var(--accent-primary);
+}
+
+.cwb__qitem--done .cwb__qname {
+  color: var(--text-caption);
+}
+
+.cwb__qname {
+  color: var(--text-heading);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-snug);
+}
+
+.cwb__qsub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+}
+
+.cwb__qcount {
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-field);
+  font-variant-numeric: tabular-nums;
+}
+
+.cwb__pane {
+  min-width: 420px;
+  padding: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.cwb__panemeta,
+.cwb__rowhead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+}
+
+.cwb__badge {
+  padding: 1px var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+}
+
+.cwb__badge--fuzzy {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.cwb__badge--target,
+.cwb__qdone {
+  border-color: var(--accent-positive);
+  color: var(--accent-positive);
+}
+
+.cwb__panetitle {
+  margin: var(--space-2) 0 var(--space-4);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-title);
+}
+
+.cwb__block {
+  margin-bottom: var(--space-5);
+}
+
+.cwb__blocklede {
+  margin: 0 0 var(--space-3);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+.cwb__assigned {
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  border-left: var(--bw-heavy) solid var(--accent-primary);
+  background: var(--surface-inset);
+}
+
+.cwb__assignedname {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-snug);
+}
+
+.cwb__warn {
+  margin: 0;
+  padding: var(--space-3);
+  border-left: var(--bw-heavy) solid var(--accent-negative);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+/* ---- Buttons ---- */
+
+.cwb__primary,
+.cwb__danger,
+.cwb__mini,
+.cwb__use {
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+
+.cwb__primary,
+.cwb__use--primary {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.cwb__danger {
+  margin-top: var(--space-3);
+  border-color: var(--accent-negative);
+  color: var(--accent-negative);
+}
+
+.cwb__mini {
+  padding: 1px var(--space-2);
+  font-size: var(--fs-caption);
+}
+
+.cwb__primary[disabled],
+.cwb__danger[disabled],
+.cwb__mini[disabled],
+.cwb__use[disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.cwb__field {
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--bg-page);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+}
+
+.cwb__field--id {
+  width: 8em;
+}
+
+/* ---- Candidates ---- */
+
+.cwb__cands {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cwb__cand {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-3) 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.cwb__candkey {
+  width: 1.6rem;
+  padding: 2px 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  text-align: center;
+}
+
+.cwb__candline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin: 0 0 var(--space-1);
+}
+
+.cwb__candname {
+  color: var(--text-heading);
+  font-family: var(--font-body);
+  font-size: var(--fs-field);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-snug);
+}
+
+/* The one word that differs. Kraft-tape amber, the same ink this app already
+   uses to mean "look here" — a reviewer comparing "Ron" against "Ronnie"
+   should not have to read both strings to find the difference. */
+.cwb__diff {
+  padding: 0 2px;
+  border-radius: var(--radius-xs);
+  background: var(--seal);
+  color: var(--text-on-seal);
+}
+
+.cwb__candid,
+.cwb__scorenum {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.cwb__scorerow {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.cwb__scorebar {
+  flex: 1 1 auto;
+  overflow: hidden;
+  max-width: 18rem;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+}
+
+.cwb__scorefill {
+  display: block;
+  height: 100%;
+  background: var(--accent-primary);
+}
+
+.cwb__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cwb__chip {
+  padding: 1px var(--space-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+}
+
+.cwb__chip--none {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.cwb__chip--share {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* ---- Roster search, per-row list ---- */
+
+.cwb__roster {
+  margin-bottom: var(--space-3);
+}
+
+.cwb__rosterlist {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cwb__rosterrow {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 2px 0;
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+}
+
+.cwb__manual {
+  margin: var(--space-3) 0 0;
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+
+.cwb__rows {
+  margin: 0;
+  padding: 0;
+  border-top: var(--bw-rule) solid var(--border-rule);
+  list-style: none;
+}
+
+.cwb__row {
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.cwb__row--done {
+  opacity: 0.6;
+}
+
+.cwb__rowmeta,
+.cwb__rowstate {
+  display: block;
+  margin: 2px 0 0;
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+}
+
+.cwb__rowactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+}
+
+/* ---- R4 record deck ---- */
+
+.cwb__deck {
+  padding-top: var(--space-3);
+  border-top: var(--bw-rule) solid var(--border-rule);
+}
+
+/* ---- Stacked, and honest about it ---- */
+
+@media (max-width: 900px) {
+  .cwb__narrow {
+    display: block;
+  }
+
+  .cwb__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cwb__queue {
+    max-height: 40vh;
+  }
+
+  .cwb__pane {
+    min-width: 0;
+  }
+}

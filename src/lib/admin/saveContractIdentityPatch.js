@@ -4,9 +4,12 @@
 // that writes (api/contract-identity.js), so a reviewer's stale view of the
 // queue can never delete another reviewer's correction.
 //
-// `patch` is `{ rowKey: { mlbId, dismissed?, note? } | null }` — a value of
-// `null` clears that row's override. Resolves to the full stored override
-// map the server echoed back.
+// `patch` is `{ rowKey: { mlbId, dismissed?, note?, confidence?,
+// originalConfidence? } | null }` — a value of `null` clears that row's
+// override. `confidence: 'exact'` marks a human-confirmed match;
+// `originalConfidence` is one of `'fuzzy' | 'ambiguous' | 'unresolved'`,
+// the tier the automated pipeline assigned before that confirmation.
+// Resolves to the full stored override map the server echoed back.
 //
 // Throws with a message worth showing a human: a signed-out session (403), a
 // deploy with no override store configured (501), a patch the endpoint

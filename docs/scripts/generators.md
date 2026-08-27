@@ -829,6 +829,54 @@ Re-run only to fold in a new season.
   one-off dataset behind `/first-scorebook`, a personal retrospective over a
   fixed set of already-scored games. Hand-run by definition: its input is a
   closed list, not a moving season.
+- `gen-contracts-shards.mjs` → `public/data/contracts-history/player/{00..99}.json`
+  **and** `public/data/contracts-history/terms/{sourceFile}-{bucket}.json` — the
+  join that puts real dollar terms behind a real player id. Reads the four
+  historical contract CSVs (`scripts/data/contracts/*.csv`) and the row-to-player
+  crosswalk `gen-contracts-identity.mjs` wrote to
+  `public/data/contracts-history/identity/`, keyed on `rowKey`
+  (`${sourceFile}#${csvRowIndex}`). **RUN `gen-contracts-identity.mjs` FIRST** —
+  this script resolves no id of its own. The player shards bucket on
+  `mlbId % 100` through `src/lib/shardKey.js`'s `shardKey100`, the same
+  arithmetic `src/api/person/contracts.js` recomputes from the id alone, so a
+  player page reads one shard rather than the league. TWO OUTPUTS BECAUSE THEY
+  COVER DIFFERENT ROWS: a player shard can only carry a row that HAS a player
+  (confidence `exact` or `fuzzy` — fuzzy is trustworthy per ADR-0066, while
+  `ambiguous`/`unresolved` stay out and stay in the review queue), so the
+  500-row `terms/` buckets carry every source row regardless, which is what the
+  review queue and the search index need. A bucket file IS the rowKey map —
+  `{ [rowKey]: { season, teamId, terms } }`, no `meta` key and no wrapper, so a
+  reader `Object.assign`s several buckets into one lookup. **`season` and
+  `teamId` ride along there, duplicating the player shard's copy, because of the
+  APPENDED row**: when an admin override newly assigns a row to a player, that
+  player's shard was written before the override existed and does not carry it,
+  so the bucket is the only per-rowKey file the reader fetches for it — and the
+  override record carries neither field. Bare terms would leave an appended row
+  with no season and unable to join a season-sorted list at all. `terms` is a
+  PER-SOURCE object under that source's own column names (`guarantee`/`aav` for
+  extensions, `player_request`/`club_offer`/`settled_salary` for arbitration,
+  `salary` for salaries) — there is no unified "amount" field, on purpose, and nothing is
+  computed, summed or annualized: a cell is passed through as stated or it is
+  absent (ADR-0052 is a stated-figures rule). Arbitration's `note` column holds
+  a dollar figure on most rows, one that differs from `settled_salary`; its
+  meaning is undocumented by the source, so it is carried verbatim and a surface
+  must not label it. **`salaries.csv` has no club column at all** — every
+  salaries row's `teamId` is null and none is inferred; team-keyed output is out
+  of scope. The player shards' `meta` deliberately carries no
+  source/attribution field, unlike `fever/gen-player-contracts.mjs`'s shards:
+  this is a first-party dataset.
+- `gen-contracts-search-index.mjs` → `public/data/contracts-history/search-index.json`
+  — one flat array over all four crosswalk files, in crosswalk order, seven
+  fields a name search needs: `rowKey`, `sourceFile`, `rawName`, `season`,
+  `rawTeamCode`, `mlbId`, `confidence`. A projection of
+  `gen-contracts-identity.mjs`'s output and nothing more, so **run that first**.
+  Specifically NOT the `candidates` near-miss list, which is what makes
+  `identity/salaries.json` 8 MB on its own and is only ever read by
+  `/admin/contracts` — which has `pending.json` for it. An `ambiguous` or
+  `unresolved` row is still listed, with `mlbId` null: the contract is real and
+  has to stay findable by the name the source printed, and `confidence` is what
+  tells a caller not to join through it. Carries no dollar terms; those are in
+  the `terms/` buckets above, on the same `rowKey`.
 
 ## Assets / off-app
 

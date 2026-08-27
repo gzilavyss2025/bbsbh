@@ -227,6 +227,10 @@
       "class": "spoiler-free",
       "why": "The season command map's shard reader — a count of a pitcher's pitches per zone cell, and what those pitches earned, over games already final. A cell count is not a line and not a running score; same footing as the pitch arsenal it is swept beside, and as WAR. The player page is an open surface (ADR-0034), so no SealBox and no cutoff."
     },
+    "contractsHistory.js": {
+      "class": "spoiler-free",
+      "why": "Historical contract records joined to an admin identity override: who signed what, in which season, for how much. Carries no game, no linescore and no reveal state, so it sits in the same season-long identity class as its neighbours person/contracts.js and salaries.js (ADR-0034, ADR-0052 for the money pair, ADR-0067 for this module). No SealBox, and no surface consumes it yet — issue #928 owns where this data renders."
+    },
     "dayHighlights.js": {
       "class": "reveal-only",
       "why": "Ranks a past day's Final games by how memorable they were — the ranking itself narrates outcomes. Only ever called from inside the slate's shared reveal.",
@@ -338,6 +342,10 @@
       "class": "spoiler-free",
       "why": "Builds the leader-board pool for a scope. Season aggregates — an open surface (ADR-0034)."
     },
+    "levelTenure.js": {
+      "class": "spoiler-free",
+      "why": "Static level-tenure-benchmark reader — how much playing time a typical prospect accumulates at a MiLB level before promotion, from a historical debut cohort. Season aggregate, not game state."
+    },
     "linescore.js": {
       "class": "reveal-only",
       "why": "The per-inning and total runs themselves. The canonical reveal-only module (ADR-0001). Also holds revealStampFacts, whose one caller is StampGameButton inside the box score's seal (ADR-0035). ScorebugMount.jsx replaced screens/InningViewer.jsx on this list in ADR-0043: revealRunsThrough moved down one component with the scorebug's placement logic, and it is reached under exactly the gate it always was — the component returns null before touching it unless the game has started AND the half on screen has a reveal-safe live snapshot. HalfTally.jsx joined it the same way: focus mode's console band shows a FINISHED half's line once that half sits at or under the reveal mark, read inside a SealBox render function exactly as StatBox reads it (ADR-0043), and its ADR-0046 ink-in animation reads nothing of its own — the timing is `--tally-i`/`--tally-step`, plain numbers off beats.js, never a value out of this module. HalfClose.jsx, this file's former third importer, is retired (ADR-0046's amendment): its closing rule drew the same finished half's R/H/E/LOB a second time in a separate spot, and the ink-in above replaced it rather than adding to it.",
@@ -379,16 +387,16 @@
         "screens/LogbookStatsPage.jsx"
       ]
     },
+    "logbookMilestones.js": {
+      "class": "spoiler-free",
+      "why": "The Game Log retrospective's milestone/collection-progress shelf. Reads only team identity (which club, which club was home) off a stamped game's already-resolved facts, never a score or a result — same footing as ClubsSeen.jsx's grid. Docs: docs/design-inspiration.md §8."
+    },
     "logbookRetrospective.js": {
       "class": "reveal-only",
       "why": "The ported First Scorebook sections (performances/moments/leaders/rotation/bullpen) for the Game Log retrospective. Pure, but it handles scores and pitching lines, so ADR-0001 applies; the discipline is the INPUT — only ever the user's own stamps and the facts/boxscores/moments resolved for those exact gamePks.",
       "importers": [
         "screens/LogbookStatsPage.jsx"
       ]
-    },
-    "logbookMilestones.js": {
-      "class": "spoiler-free",
-      "why": "The Game Log retrospective's milestone/collection-progress shelf. Reads only team identity (which club, which club was home) off a stamped game's already-resolved facts, never a score or a result — same footing as ClubsSeen.jsx's grid. Docs: docs/design-inspiration.md §8."
     },
     "logbookStats.js": {
       "class": "reveal-only",
@@ -683,10 +691,6 @@
     "prehalf-callouts.js": {
       "class": "caller-gated",
       "why": "The pre-half strip shown ABOVE a half's seal — what a broadcast would tell you as the half begins, before any of its results. It OWNS the gate for the checkpoint/tto/inning builders it calls."
-    },
-    "levelTenure.js": {
-      "class": "spoiler-free",
-      "why": "Static level-tenure-benchmark reader — how much playing time a typical prospect accumulates at a MiLB level before promotion, from a historical debut cohort. Season aggregate, not game state."
     },
     "prospectTrend.js": {
       "class": "spoiler-free",

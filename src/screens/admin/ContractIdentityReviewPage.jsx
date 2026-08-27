@@ -1,47 +1,61 @@
-// The historical-contract identity review queue (ADR-0066, route:
-// /admin/contracts, admin only, unlinked). Reviews every row
-// scripts/gen-contracts-identity.mjs could not confidently match on its
-// own — fuzzy (auto-resolved, but worth a glance), ambiguous, and
-// unresolved — and lets an admin assign or dismiss a row without touching
-// a spreadsheet.
+// The historical-contract identity workbench (ADR-0066, route /admin/contracts,
+// admin only, unlinked). Reviews every row scripts/gen-contracts-identity.mjs
+// could not confidently match on its own and lets an admin settle it without
+// touching a spreadsheet.
 //
 // Reads TWO separate things and merges them client-side, deliberately not
 // through one API call: public/data/contracts-history/identity/pending.json
-// (the ~1,800 non-exact rows, a static file the CDN can cache) and
-// GET /api/contract-identity (the small Redis-backed override map — see
-// that file's own header for why these are not the same endpoint).
+// (the pending rows, a static file the CDN can cache) and
+// GET /api/contract-identity (the small Redis-backed override map — see that
+// file's own header for why these are not the same endpoint).
 //
-// NOTHING HERE IS SCORE-BEARING — every field is a historical contract
-// record or an MLB id, no game, no linescore, no reveal state.
-import { useCallback, useMemo, useState } from 'react'
+// THE OVERRIDE MAP IS SERVER TRUTH. Every PATCH echoes the whole stored map
+// back and it REPLACES this page's copy wholesale. Nothing is merged locally,
+// because a second reviewer's correction only reaches this tab through that
+// echo, and a local merge would quietly outrank it.
+//
+// This file owns the page's state, both fetches, and the keyboard layer; the
+// four regions render from components/admin/contracts/. NOTHING HERE IS
+// SCORE-BEARING — historical contract records and MLB ids only.
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth, useUser } from '@clerk/clerk-react'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
-import { teamAbbr } from '../../lib/teams.js'
 import { saveContractIdentityPatch } from '../../lib/admin/saveContractIdentityPatch.js'
+import {
+  MODE_CHOOSE,
+  MODE_CONFIRM,
+  buildGroups,
+  candidatePatch,
+  confirmPatch,
+  dismissPatch,
+  isGroupResolved,
+  tierCounts,
+} from '../../lib/admin/contractGroups.js'
+import { TierBar } from '../../components/admin/contracts/TierBar.jsx'
+import { ReviewQueue } from '../../components/admin/contracts/ReviewQueue.jsx'
+import { DecisionPane } from '../../components/admin/contracts/DecisionPane.jsx'
+import { LookupDeck } from '../../components/admin/contracts/LookupDeck.jsx'
 import '../../styles/research/diary.css'
+// After diary.css, not before: .cwb__main and .researchdiary__main carry the
+// same specificity, so source order is what lets the workbench widen the
+// measure the diary shell caps at 46rem.
+import '../../styles/74-contract-workbench.css'
 
 // Stable references for the "no data yet" fallback — a fresh {} or [] every
-// render would defeat the filtered-rows useMemo below on every keystroke.
+// render would defeat every memo below on every keystroke.
 const EMPTY_OVERRIDES = {}
 const EMPTY_ROWS = []
-
-const SOURCE_LABEL = {
-  extensions: 'Extension',
-  arbitration: 'Arbitration',
-  free_agency: 'Free agency',
-  salaries: 'Salary',
-}
 
 function Shell({ children }) {
   useDocumentTitle('Contract identity review')
   return (
     <div className="screen researchdiary">
       <SiteHeader />
-      <main className="researchdiary__main">{children}</main>
+      <main className="researchdiary__main cwb__main">{children}</main>
       <ReportFooter />
     </div>
   )
@@ -57,281 +71,221 @@ async function fetchJson(url) {
   return res.json()
 }
 
-function usePendingRows() {
-  return useAsync(() => fetchJson('/data/contracts-history/identity/pending.json'), [])
-}
-
-function useOverrides() {
-  return useAsync(async () => {
+function Workbench() {
+  const pending = useAsync(() => fetchJson('/data/contracts-history/identity/pending.json'), [])
+  const overridesQuery = useAsync(async () => {
     const body = await fetchJson('/api/contract-identity')
     return body?.overrides ?? {}
   }, [])
-}
 
-// Lazily fetches and caches one season's player pool for the roster-search
-// picker — the same static file the matching pipeline itself reads, so
-// "search for the right player" always offers exactly the candidates the
-// pipeline could have matched against.
-function useSeasonPool() {
-  const [cache, setCache] = useState({})
-  const load = useCallback(
-    async (season) => {
-      if (!season || cache[season]) return cache[season] ?? []
-      try {
-        const pool = await fetchJson(`/data/contracts-history/season-players/${season}.json`)
-        setCache((prev) => ({ ...prev, [season]: pool }))
-        return pool
-      } catch {
-        setCache((prev) => ({ ...prev, [season]: [] }))
-        return []
-      }
-    },
-    [cache],
-  )
-  return { cache, load }
-}
-
-function RosterSearch({ season, onPick }) {
-  const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState('')
-  const { cache, load } = useSeasonPool()
-  const pool = cache[season]
-
-  const matches = useMemo(() => {
-    if (!pool || query.trim().length < 2) return []
-    const q = query.trim().toLowerCase() // caps-js-exempt
-    return pool.filter((p) => p.lastFirstName?.toLowerCase().includes(q)).slice(0, 10) // caps-js-exempt
-  }, [pool, query])
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        className="researchdiary__disclose"
-        onClick={() => {
-          setOpen(true)
-          load(season)
-        }}
-      >
-        + Search {season ?? 'that'} season&apos;s roster
-      </button>
-    )
-  }
-
-  return (
-    <div className="researchdiary__technical">
-      <input
-        type="text"
-        placeholder="Type a name…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        aria-label={`Search ${season} roster by name`}
-      />
-      {pool == null && <p className="caps-exempt">Loading {season} roster…</p>}
-      <ul className="researchdiary__techlist">
-        {matches.map((p) => (
-          <li key={p.id} className="caps-exempt">
-            {p.lastFirstName} — {p.position ?? '—'}, teamId {p.teamId ?? '—'} (id {p.id}){' '}
-            <button type="button" onClick={() => onPick(p.id)}>
-              Use this player
-            </button>
-          </li>
-        ))}
-        {query.trim().length >= 2 && matches.length === 0 && pool && (
-          <li className="caps-exempt">No match in this season&apos;s roster.</li>
-        )}
-      </ul>
-    </div>
-  )
-}
-
-function Row({ row, override, onCorrect, onDismiss, onUndo, saving }) {
-  const [manualId, setManualId] = useState('')
-  const team = row.rawTeamCode ? teamAbbr({ id: row.rawTeamCode }) : '—'
-  const season = row.matchedSeason ?? row.season
-
-  return (
-    <article className="researchdiary__entry">
-      <header className="researchdiary__entryhead">
-        <p className="researchdiary__meta">
-          <span className="researchdiary__source">{SOURCE_LABEL[row.sourceFile] ?? row.sourceFile}</span>
-          <time>{row.season}</time>
-          <span className={`researchdiary__verdict researchdiary__verdict--${row.confidence}`}>
-            {row.confidence}
-          </span>
-        </p>
-        <h2 className="researchdiary__title">{row.rawName}</h2>
-        <p className="researchdiary__question caps-exempt">
-          Club {team} · matched against the {season} roster · {row.matchedVia}
-        </p>
-      </header>
-
-      {override ? (
-        <div className="researchdiary__limits">
-          <p className="caps-exempt">
-            {override.dismissed
-              ? 'Marked: no confident id exists.'
-              : `Corrected to mlbId ${override.mlbId}.`}{' '}
-            ({override.correctedBy}, {override.correctedAt})
-          </p>
-          <button type="button" disabled={saving} onClick={() => onUndo(row.rowKey)}>
-            Undo
-          </button>
-        </div>
-      ) : (
-        <>
-          {row.candidates?.length > 0 && (
-            <ul className="researchdiary__points">
-              {row.candidates.map((c) => (
-                <li key={c.id} className="caps-exempt">
-                  {c.lastFirstName} (score {c.score}, {c.reasons?.join(', ') || 'no context clues'}){' '}
-                  <button type="button" disabled={saving} onClick={() => onCorrect(row.rowKey, c.id)}>
-                    Use this player
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <RosterSearch season={season} onPick={(id) => onCorrect(row.rowKey, id)} />
-
-          <p className="researchdiary__prose caps-exempt">
-            Or enter an MLB id directly:{' '}
-            <input
-              type="number"
-              min="1"
-              value={manualId}
-              onChange={(e) => setManualId(e.target.value)}
-              style={{ width: '8em' }}
-              aria-label="MLB id"
-            />{' '}
-            <button
-              type="button"
-              disabled={saving || !manualId}
-              onClick={() => onCorrect(row.rowKey, Number(manualId))}
-            >
-              Save
-            </button>
-          </p>
-
-          <button type="button" disabled={saving} onClick={() => onDismiss(row.rowKey)}>
-            Dismiss — no confident id exists
-          </button>
-        </>
-      )}
-    </article>
-  )
-}
-
-function ReviewQueue() {
-  const pending = usePendingRows()
-  const overridesQuery = useOverrides()
-  const [sourceFilter, setSourceFilter] = useState('all')
-  const [confidenceFilter, setConfidenceFilter] = useState('all')
-  const [search, setSearch] = useState('')
-  const [showResolved, setShowResolved] = useState(false)
+  const [mode, setMode] = useState(MODE_CONFIRM)
+  const [groupKey, setGroupKey] = useState(null)
   const [overrides, setOverrides] = useState(null)
-  const [savingRowKey, setSavingRowKey] = useState(null)
+  const [sessionResolved, setSessionResolved] = useState(() => new Set())
+  const [showReviewed, setShowReviewed] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const deckRef = useRef(null)
   const { getToken } = useAuth()
 
-  const effectiveOverrides = overrides ?? overridesQuery.data ?? EMPTY_OVERRIDES
+  const effective = overrides ?? overridesQuery.data ?? EMPTY_OVERRIDES
+  const rows = pending.data ?? EMPTY_ROWS
+  const groups = useMemo(() => buildGroups(rows), [rows])
+  const counts = useMemo(() => tierCounts(groups, effective), [groups, effective])
+  const resolvedTotal = useMemo(
+    () => rows.filter((row) => effective[row.rowKey]).length,
+    [rows, effective],
+  )
+
+  // A resolved group leaves the rail, except the one you are standing on —
+  // otherwise the pane you just acted in would vanish before you could read
+  // what it did, and Undo would be unreachable without the reviewed toggle.
+  const visible = useMemo(
+    () =>
+      groups.filter(
+        (g) =>
+          g.mode === mode &&
+          (showReviewed || !isGroupResolved(g, effective) || g.key === groupKey),
+      ),
+    [groups, mode, showReviewed, effective, groupKey],
+  )
+  const group = visible.find((g) => g.key === groupKey) ?? visible[0] ?? null
+  const selectedKey = group?.key ?? null
+  const targetRow = group
+    ? (group.rows.find((row) => !effective[row.rowKey]) ?? group.rows[0])
+    : null
+  // What a GROUP-level keystroke writes. A confirm group whose rows carry
+  // different ids has no bulk action, so even "no match exists" narrows to the
+  // row in front of the reviewer — the same rule the pane applies to its own
+  // shared buttons.
+  const bulkRows = useMemo(
+    () => (group ? (group.bulk.offered ? group.rows : [targetRow]) : []),
+    [group, targetRow],
+  )
 
   const applyPatch = useCallback(
-    async (rowKey, value) => {
-      setSavingRowKey(rowKey)
+    async (patch) => {
+      const keys = Object.keys(patch)
+      if (!keys.length || saving) return
+      // PIN THE DERIVED SELECTION FIRST. `group` falls through to visible[0] on
+      // load and again after every tab switch, while `groupKey` is still null
+      // or still naming the other tab's group — and the clause that keeps the
+      // group you are standing on in the rail keys on `groupKey`. Without this
+      // the group you just resolved drops out of `visible` the moment the
+      // override lands, taking its Undo with it, and the next Enter — which the
+      // shortcut sheet promises will "move on" — fires at a group nobody has
+      // looked at. Reachable on the first keystroke of a session, so it is set
+      // here, on the one path every action funnels through.
+      if (selectedKey && selectedKey !== groupKey) setGroupKey(selectedKey)
+      setSaving(true)
       setError(null)
       try {
-        const result = await saveContractIdentityPatch(getToken, { [rowKey]: value })
+        const result = await saveContractIdentityPatch(getToken, patch)
         setOverrides(result)
+        setSessionResolved((prev) => {
+          const next = new Set(prev)
+          for (const key of keys) {
+            if (patch[key] === null) next.delete(key)
+            else next.add(key)
+          }
+          return next
+        })
       } catch (err) {
         setError(err.message)
       } finally {
-        setSavingRowKey(null)
+        setSaving(false)
       }
     },
-    [getToken],
+    [getToken, saving, selectedKey, groupKey],
   )
 
-  const rows = pending.data ?? EMPTY_ROWS
-  const filtered = useMemo(() => {
-    return rows.filter((row) => {
-      if (sourceFilter !== 'all' && row.sourceFile !== sourceFilter) return false
-      if (confidenceFilter !== 'all' && row.confidence !== confidenceFilter) return false
-      if (search.trim() && !row.rawName.toLowerCase().includes(search.trim().toLowerCase())) return false // caps-js-exempt
-      if (!showResolved && effectiveOverrides[row.rowKey]) return false
-      return true
-    })
-  }, [rows, sourceFilter, confidenceFilter, search, showResolved, effectiveOverrides])
+  const step = useCallback(
+    (delta) => {
+      if (!visible.length) return
+      const at = Math.max(0, visible.findIndex((g) => g.key === selectedKey))
+      const next = Math.min(visible.length - 1, Math.max(0, at + delta))
+      setGroupKey(visible[next].key)
+    },
+    [visible, selectedKey],
+  )
+
+  // The primary action, in one place, so a keystroke and a button can never
+  // disagree about what "the primary action" means in a given mode.
+  const runPrimary = useCallback(
+    (scope) => {
+      if (!group || saving) return
+      const rowsFor = scope === 'row' ? [targetRow] : bulkRows
+      if (group.mode === MODE_CONFIRM) {
+        if (scope === 'group' && !group.bulk.offered) {
+          setError('These rows carry different ids — confirm them one at a time.')
+          return
+        }
+        applyPatch(confirmPatch(rowsFor))
+        return
+      }
+      if (group.mode === MODE_CHOOSE) {
+        const top = scope === 'row' ? targetRow?.candidates?.[0] : group.bulk.candidates[0]
+        if (top) applyPatch(candidatePatch(rowsFor, top.id))
+        return
+      }
+      applyPatch(dismissPatch(rowsFor))
+    },
+    [group, targetRow, bulkRows, saving, applyPatch],
+  )
+
+  const useAsMatch = useCallback(
+    (match) => {
+      if (!group) return
+      const id = Number(match?.id ?? match?.mlbId ?? match)
+      if (!Number.isFinite(id)) return
+      // ONE ROW, always. The deck's own button says "use as this row's match",
+      // and it is the single path from a free-text lookup into the queue —
+      // deliberately the narrowest action on the page, because the record it
+      // found was matched against nothing. Group-level answers come from the
+      // pane, where the reviewer can see what they are answering for.
+      applyPatch(candidatePatch([targetRow], id))
+    },
+    [group, targetRow, applyPatch],
+  )
+
+  useEffect(() => {
+    const onKey = (e) => {
+      const el = document.activeElement
+      const typing =
+        el &&
+        (el.tagName === 'INPUT' ||
+          el.tagName === 'TEXTAREA' ||
+          el.tagName === 'SELECT' ||
+          el.isContentEditable)
+      if (e.key === 'Escape') {
+        if (typing) el.blur()
+        else setShortcutsOpen(false)
+        return
+      }
+      if (typing || e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.key === 'ArrowDown') step(1)
+      else if (e.key === 'ArrowUp') step(-1)
+      else if (e.key === 'Enter') {
+        // Once a group is settled the primary thing left to do with it is
+        // leave it, so the same key carries the reviewer forward.
+        if (group && isGroupResolved(group, effective)) step(1)
+        else runPrimary(e.shiftKey ? 'row' : 'group')
+      } else if (e.key === '?') setShortcutsOpen((open) => !open)
+      else if (e.key === '/') {
+        deckRef.current?.querySelector('input')?.focus()
+      } else if (e.key === 'x' || e.key === 'X') applyPatch(dismissPatch(bulkRows))
+      else if (e.key === 's' || e.key === 'S') step(1)
+      else if (/^[1-9]$/.test(e.key)) {
+        if (group?.mode !== MODE_CHOOSE) return
+        const pick = group.bulk.candidates[Number(e.key) - 1]
+        if (pick) applyPatch(candidatePatch(group.rows, pick.id))
+      } else return
+      e.preventDefault()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [step, runPrimary, applyPatch, group, bulkRows, effective])
 
   if (pending.loading || overridesQuery.loading) return <Notice>Loading the review queue…</Notice>
   if (pending.error) return <Notice>Could not load pending.json — {pending.error.message}</Notice>
 
   return (
-    <>
-      <header className="researchdiary__masthead">
-        <p className="researchdiary__eyebrow">Admin review</p>
-        <h1 className="researchdiary__masttitle">Contract identity review</h1>
-        <p className="researchdiary__lede caps-exempt">
-          {rows.length} rows across the four historical contract files did not resolve to a
-          confident MLB id on their own (ADR-0066). {filtered.length} shown below.
-        </p>
-      </header>
+    <div className="cwb">
+      <p className="cwb__narrow caps-exempt">
+        This page is built for a desktop screen. It still works here, but the queue and the decision
+        pane are stacked and the shortcuts need a keyboard.
+      </p>
 
-      {error && <Notice>{error}</Notice>}
+      <TierBar
+        mode={mode}
+        onMode={setMode}
+        counts={counts}
+        sessionResolved={sessionResolved.size}
+        resolvedTotal={resolvedTotal}
+        totalRows={rows.length}
+        showReviewed={showReviewed}
+        onShowReviewed={setShowReviewed}
+        shortcutsOpen={shortcutsOpen}
+        onShortcuts={setShortcutsOpen}
+      />
 
-      <section className="researchdiary__traps">
-        <label className="caps-exempt">
-          File:{' '}
-          <select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)}>
-            <option value="all">All</option>
-            {Object.keys(SOURCE_LABEL).map((f) => (
-              <option key={f} value={f}>
-                {SOURCE_LABEL[f]}
-              </option>
-            ))}
-          </select>
-        </label>{' '}
-        <label className="caps-exempt">
-          Confidence:{' '}
-          <select value={confidenceFilter} onChange={(e) => setConfidenceFilter(e.target.value)}>
-            <option value="all">All</option>
-            <option value="fuzzy">Fuzzy</option>
-            <option value="ambiguous">Ambiguous</option>
-            <option value="unresolved">Unresolved</option>
-          </select>
-        </label>{' '}
-        <label className="caps-exempt">
-          Search: <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} />
-        </label>{' '}
-        <label className="caps-exempt">
-          <input
-            type="checkbox"
-            checked={showResolved}
-            onChange={(e) => setShowResolved(e.target.checked)}
-          />{' '}
-          Show already-reviewed rows too
-        </label>
-      </section>
+      {error && <p className="cwb__error caps-exempt">{error}</p>}
 
-      <ol className="researchdiary__entries">
-        {filtered.slice(0, 200).map((row) => (
-          <li key={row.rowKey}>
-            <Row
-              row={row}
-              override={effectiveOverrides[row.rowKey]}
-              onCorrect={(rowKey, mlbId) => applyPatch(rowKey, { mlbId })}
-              onDismiss={(rowKey) => applyPatch(rowKey, { dismissed: true })}
-              onUndo={(rowKey) => applyPatch(rowKey, null)}
-              saving={savingRowKey === row.rowKey}
-            />
-          </li>
-        ))}
-      </ol>
-      {filtered.length > 200 && (
-        <Notice>Showing the first 200 of {filtered.length} matches — narrow the filters to see more.</Notice>
-      )}
-    </>
+      <div className="cwb__body">
+        <ReviewQueue
+          groups={visible}
+          selectedKey={selectedKey}
+          overrides={effective}
+          onSelect={setGroupKey}
+        />
+        <DecisionPane group={group} overrides={effective} saving={saving} onSave={applyPatch} />
+      </div>
+
+      <div className="cwb__deck" ref={deckRef}>
+        <LookupDeck selectedRow={targetRow} onUseAsMatch={useAsMatch} disabled={saving} />
+      </div>
+    </div>
   )
 }
 
@@ -344,7 +298,7 @@ function ReviewGate() {
   if (user?.publicMetadata?.role !== 'admin') {
     return <Notice>This account is signed in but does not have the admin role.</Notice>
   }
-  return <ReviewQueue />
+  return <Workbench />
 }
 
 export function ContractIdentityReviewPage() {
