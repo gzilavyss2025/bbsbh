@@ -415,8 +415,25 @@ test('deferred-money names carry an asterisk the join must strip', () => {
   const starred = salaries.filter((r) => r.player.includes('*'))
   assert.equal(starred.length, 48)
   assert.deepEqual([...new Set(starred.map((r) => r.year))].sort(), ['2025', '2026'])
-  // The same men appear without the asterisk in earlier seasons, so a raw name
-  // join splits one player in two.
-  const bare = new Set(starred.map((r) => r.player.replace('*', '')))
-  assert.ok(salaries.some((r) => !r.player.includes('*') && bare.has(r.player)))
+
+  // Every starred name carries exactly ONE asterisk, and it always trails. The
+  // stripper below would be wrong under either assumption, so state both here
+  // rather than leaving them implicit in a single-occurrence replace.
+  for (const row of starred) {
+    assert.equal((row.player.match(/\*/g) ?? []).length, 1, `${row.player} carries more than one asterisk`)
+    assert.ok(row.player.endsWith('*'), `${row.player} carries a non-trailing asterisk`)
+  }
+
+  // replaceAll, not replace: a string-literal first argument to replace strips
+  // only the first occurrence, which would silently leave a name half-cleaned
+  // the day a second asterisk appears.
+  const bare = new Set(starred.map((r) => r.player.replaceAll('*', '')))
+  assert.equal(bare.size, 30, '48 starred rows belong to 30 distinct men')
+
+  // Those same 30 men appear WITHOUT the asterisk in 259 other rows, so a raw
+  // name join splits each of them in two. Pin both counts: a regression that
+  // broke 29 of the 30 joins would still satisfy a `some` check.
+  const unstarred = salaries.filter((r) => !r.player.includes('*') && bare.has(r.player))
+  assert.equal(unstarred.length, 259)
+  assert.equal(new Set(unstarred.map((r) => r.player)).size, 30, 'every starred man also appears unstarred')
 })
