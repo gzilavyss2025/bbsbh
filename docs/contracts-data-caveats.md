@@ -6,12 +6,11 @@ them. This document states what the files actually contain, which statistics
 survive their defects, and which do not. Cite it instead of re-deriving a
 coverage claim.
 
-All figures below were measured from the files on 2026-08-27, at commit
-`9c77710a`. `test/contracts-data-caveats.test.js` pins the classification and the
-structural claims, so a regenerated export that changes what the data MEANS fails
-`npm test` and sends the next reader back here. It deliberately leaves the
-per-season row counts and dollar totals unpinned: those move whenever a source
-fix lands, and this document names the commit it read them at.
+All figures below were measured on 2026-08-27 against the CSVs as they stand on
+`origin/main`, and re-verified there after the executives split was reverted.
+`test/contracts-data-caveats.test.js` pins them. Its reconciliation test is the
+tripwire for the failure that matters most — a deleted row — so read
+"Never delete a row from these CSVs" at the end before you touch a source file.
 
 ## The files
 
@@ -58,7 +57,10 @@ that carry no salary figure.** The salaried population does not step:
   $5,112,468,062 (2026), with no step at 2015 or 2017.
 - **The salaried player count, from 2006 on** — 863 to 974 a season, flat.
 - **The median salary among salaried rows.** It reproduces
-  `salaries_summary.csv`'s own `median_salary` exactly in 26 of 27 seasons.
+  `salaries_summary.csv`'s own `median_salary` exactly in **all 27 seasons**, and
+  so do `total_payroll` and `players_with_salary`. The match is exact only when a
+  non-numeric salary cell is treated as a status carrying no dollars. Apply that
+  one rule and the summary reconciles everywhere; skip it and 2021 breaks.
 
 ### What does not survive
 
@@ -69,12 +71,26 @@ that carry no salary figure.** The salaried population does not step:
   not enter its denominator.
 - **Any service-time distribution across the break.** The unsalaried block has a
   different shape in 2015 than in every other year (see anomaly 2).
-- **Any dollar total before 2006.** 2000 lists 559 salaried players, 2001 lists
-  631 and 2002 lists 716. Thirty clubs each carry a 25-man active roster, so the
-  league floor is 750 players. Those three seasons are provably incomplete, and
-  2003–2005 (800, 829, 848) sit close enough to the floor to be suspect. The
-  file's early totals under-report the league, and they under-report it by an
-  unknown amount, because the missing men are the cheap ones.
+- **Any dollar total before 2006.** See the regime boundary below.
+
+### The two population regimes — 2000–2005 and 2006–2026
+
+**This is a panel rule, not a caution.** Any series built over `salaries.csv`
+marks 2000–2005 as its own population regime and carries a per-season coverage
+figure beside the value, so the thinness is visible in the output rather than
+silent inside it.
+
+The boundary is arithmetic. Thirty clubs each carry a 25-man active roster, so
+the league floor is 750 players. The file lists 559 salaried players in 2000, 631
+in 2001 and 716 in 2002 — all three below the floor, so all three are provably
+incomplete. 2003–2005 (800, 829, 848) clear the floor by too little to trust
+against a 40-man reality. From 2006 the count is stable at 863 to 974 and stays
+there through 2026.
+
+The early totals therefore under-report the league by an unknown amount, and the
+error has a direction: the missing men are the cheap ones, so an early mean or
+median reads richer than the league really was. **Never put a 2000–2005 figure in
+the same series as a 2006–2026 figure without saying which regime it came from.**
 
 ## Anomaly 1 — 88 duplicate (year, player) pairs
 
@@ -248,11 +264,19 @@ Every rate below divides by the file's full row count.
 
 **`free_agency.csv`** (5,598 rows)
 
-- no guarantee: 1,045 = **18.7%**
+- guarantee cell empty: 1,045 = 18.7%
+- **no USABLE guarantee: 2,201 = 39.3%** — the figure any market series must use.
+  The empty cells are only half the problem; see the sentinel below.
 - no agent: 1,454 = **26.0%**
 - no AAV: 2,211 = **39.5%**
 - no term in years: 947 = 16.9%
 - no new club: 214 = 3.8%
+
+The two guarantee figures mean different things and they are not
+interchangeable. 18.7% counts the cells the source left empty. **39.3% counts the
+rows that state no usable dollar figure**, which is what a median, a mean or a
+market series actually needs. Quote 18.7% only when the subject is literally
+blank cells.
 
 **`arbitration.csv`** (2,420 rows)
 
@@ -271,6 +295,41 @@ reached a hearing — a biased sample, not only a small one.
 - no guarantee, no AAV, no service time: **0%**. This file is the complete one.
 - no agent: 18 = 1.8%
 - no signed date: 6 = 0.6%
+
+## `guarantee = 1` is a sentinel, not a dollar
+
+**This is the single largest distortion in `free_agency.csv`.** 1,156 rows —
+**20.7% of the file** — carry a `guarantee` of exactly `1`. It is not one dollar.
+It is the source's mark for a minor-league deal, and 1,153 of the 1,156 also
+carry `years` of `0`.
+
+The `details` cell names the real money on 858 of them, and it names it in prose:
+2023 Ehire Adrianza reads `$1M in majors`, Jesse Chavez `$1.2M in majors`,
+Roberto Pérez `$2.5M salary in majors`. That is a split-contract major-league
+rate, which is why the guarantee column has no single number to hold.
+
+The sentinel runs from 1991 to 2023 and stops there. **No row after 2023 uses
+it**, so a series that spans the change compares two conventions and reads the
+difference as a market move.
+
+Its effect on a central tendency is not marginal:
+
+| season | median guarantee, sentinels in | sentinels dropped |
+| --- | --- | --- |
+| 2020 | $3,000,000 | $6,050,000 |
+| 2023 | $7,500,000 | $11,500,000 |
+
+Both medians are taken over the rows carrying a numeric guarantee. The 2020
+figure halves. Nothing about the market halved.
+
+**Rule: treat `guarantee = 1` as no guarantee. Never let it into a sum, a mean, a
+median or a distribution.** Read the real figure out of `details` only for a
+one-off question, and say so — the cell is prose, and 298 of the 1,156 rows do
+not carry it at all.
+
+**Cost when wrong:** every free-agency market series before 2024 is pulled toward
+zero by a fifth of its rows, and the 2024 convention change appears as a sudden
+rise in guarantees that no signing produced.
 
 ## Five more defects a consumer must handle
 
@@ -309,17 +368,53 @@ reached a hearing — a biased sample, not only a small one.
    deletes $74,756,667 of real player salary, and it trusts the one field that is
    wrong. Filter on whether the man played.
 
-## Why the CSVs were not edited
+   The 23 genuine non-player rows are listed in
+   `scripts/data/contracts/executives.csv`, which is a VIEW and not a removal.
+   They remain in `salaries.csv`. A reader excludes them by calling
+   `resolveRole()` in `src/lib/contracts/positions.js` for the row's year and
+   treating `role === 'front-office'` as an executive. That check needs both
+   halves — a front-office title AND absence from that season's player pool —
+   which is exactly why Robin Ventura and Brad Ausmus stay classified as players.
+   The next section says why the rows may never simply be deleted.
 
-`salaries_summary.csv` is a mechanical rollup of `salaries.csv`: its
-`total_payroll`, `players_with_salary` and `median_salary` reconcile against the
-detail rows exactly in 26 of 27 seasons, with 2021 off by the one `forfeited`
-cell. Removing the 27 repeated rows from the detail file would therefore make the
-summary wrong for 2000–2009 unless both files changed together. That is a
-deliberate, separately reviewed change, and it is not this document's job.
+## Never delete a row from these CSVs
 
-The rules above are the contract instead. Apply them at read time.
+**A row's position in the file IS its identity.** `scripts/gen-contracts-identity.mjs`
+keys every row as `` `${sourceFile}#${index}` `` — `salaries#12345` is simply the
+12,345th row of `salaries.csv`. `gen-contracts-shards.mjs` reuses that `rowKey` for
+the terms buckets, for the player shards, and for the bucket a row lands in
+(`Math.floor(i / TERMS_BUCKET_SIZE)`). ADR-0067's stored admin corrections are keyed
+on it as well, in Upstash, outside the repository.
 
-ADR-0066 removed 45 divider rows from `free_agency.csv` at the source, because
-those rows were not player rows at all. A repeated player row is a different case:
-the row is real, and only the second copy is wrong.
+So deleting one row silently re-points **every later row** in that file. Row 12,346
+becomes `salaries#12345` and inherits the previous occupant's resolved `mlbId`, its
+terms, its place in a player's shard, and any correction a human already confirmed
+against it. Nothing fails. Nothing warns. The crosswalk stays green while it points
+at the wrong men, and the stored overrides — the one artifact a rebuild cannot
+repair — attach to strangers.
+
+**The rule: a row is flagged, never removed.** A row that does not belong in a
+result set is excluded at read time, on a field.
+
+This is how the club executives were handled. `scripts/data/contracts/executives.csv`
+lists the 23 front-office rows — Tony La Russa, Dusty Baker, Billy Beane, Brian
+Cashman and the rest — as a VIEW over `salaries.csv`. **Those 23 rows stay in
+`salaries.csv`.** Downstream drops them at read time through `resolveRole()`.
+
+The deletion was tried first. It broke `salaries_summary.csv`'s reconciliation in
+five seasons — 2000, 2001, 2002, 2003 and 2004 — before anybody read a `rowKey`.
+The rows were restored, and `salaries.csv` is once again byte-identical to
+`origin/main` at 27,349 rows.
+
+`salaries_summary.csv` is a mechanical rollup of `salaries.csv`, and that is the
+cheapest check that a deletion has happened: its `total_payroll`,
+`players_with_salary` and `median_salary` reconcile against the detail rows exactly
+in all 27 seasons. If a season stops reconciling, a row moved.
+
+The 27 repeated rows of anomaly 1 are subject to the same rule. They are
+de-duplicated at read time. They are not deleted.
+
+ADR-0066 removed 45 divider rows from `free_agency.csv` at the source, and that
+remains the one precedent — those rows were not player rows at all, and the removal
+happened before any `rowKey` was minted against that file. It is not a licence to
+delete anything now. Every rule in this document applies at read time instead.

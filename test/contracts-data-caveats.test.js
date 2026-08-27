@@ -28,6 +28,7 @@ const salaries = load('salaries.csv')
 const freeAgency = load('free_agency.csv')
 const arbitration = load('arbitration.csv')
 const extensions = load('extensions.csv')
+const summary = load('salaries_summary.csv')
 
 const isNumber = (cell) => cell !== '' && Number.isFinite(Number(cell))
 const salaried = salaries.filter((r) => isNumber(r.salary))
@@ -92,11 +93,15 @@ test('the salaried population does not step at 2015 or 2017', () => {
     const n = perYear.get(String(year))
     assert.ok(n >= 850 && n <= 1000, `${year} has ${n} salaried rows, outside the stable band`)
   }
+  // THE REGIME BOUNDARY, which W1 and every W2 spike read from the doc.
   // 2000-2002 sit under the 750-player league floor (30 clubs, 25 active each),
   // so those seasons are provably incomplete and their totals under-report.
   for (const year of ['2000', '2001', '2002']) {
     assert.ok(perYear.get(year) < 750, `${year} is no longer below the 750 floor`)
   }
+  assert.equal(perYear.get('2000'), 559)
+  assert.equal(perYear.get('2001'), 631)
+  assert.equal(perYear.get('2002'), 716)
 })
 
 test('the 2015 unsalaried block reaches deep into veteran service time', () => {
@@ -228,6 +233,63 @@ test('two men named Chris Young are never merged into one', () => {
   assert.notEqual(rows[0].position, rows[1].position)
 })
 
+// ---------------------------------------------- the row-deletion tripwire
+
+test('salaries_summary reconciles against every season of salaries.csv', () => {
+  // A wave once deleted 23 rows from the detail file and broke five seasons
+  // here before anybody read a rowKey. This is the cheapest check that a row
+  // moved. If it fails, do not adjust the summary -- find the deleted row and
+  // put it back. Exclusion belongs at read time, on a field.
+  assert.equal(salaries.length, 27349)
+  const failures = []
+  for (const season of summary) {
+    const paid = salaries.filter((r) => r.year === season.year && isNumber(r.salary))
+    const dollars = paid.reduce((sum, r) => sum + Number(r.salary), 0)
+    const sorted = paid.map((r) => Number(r.salary)).sort((a, b) => a - b)
+    const middle = sorted.length / 2
+    const median =
+      sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[middle - 1] + sorted[middle]) / 2
+    if (Number(season.total_payroll) !== dollars) failures.push(`${season.year} total`)
+    if (Number(season.players_with_salary) !== paid.length) failures.push(`${season.year} count`)
+    if (Number(season.median_salary) !== median) failures.push(`${season.year} median`)
+  }
+  assert.deepEqual(failures, [], 'a season stopped reconciling — a row was deleted or edited')
+  assert.equal(summary.length, 27)
+})
+
+test('every job-title row is still in salaries.csv, flagged and not deleted', () => {
+  // The 49 rows whose position cell holds a front-office title instead of a
+  // playing position. 26 of them belong to men who were playing that season and
+  // are players; 23 are genuine executives, listed as a VIEW in executives.csv
+  // and excluded downstream by resolveRole(). Neither group may leave this file.
+  const titles = salaries.filter((r) =>
+    /^(mgr|Manager|GM|SVP, GM|VP, AGM|spec ass't to GM)$/.test(r.position),
+  )
+  assert.equal(titles.length, 49)
+  // The executives among them, named, so a future deletion cannot pass quietly.
+  for (const [year, player] of [
+    ['2001', 'La Russa, Tony'],
+    ['2000', 'Baker, Dusty'],
+    ['2002', 'Beane, Billy'],
+    ['2001', 'Cashman, Brian'],
+    ['2004', 'Wedge, Eric'],
+  ]) {
+    assert.ok(
+      salaries.some((r) => r.year === year && r.player === player),
+      `${year} ${player} was deleted from salaries.csv — flag a row, never remove it`,
+    )
+  }
+  // And the players wrongly wearing a manager's title, who must never be swept
+  // out with them.
+  for (const [year, player, salary] of [
+    ['2002', 'Ventura, Robin', '8500000'],
+    ['2003', 'Ausmus, Brad', '5500000'],
+  ]) {
+    const row = salaries.find((r) => r.year === year && r.player === player)
+    assert.equal(row?.salary, salary)
+  }
+})
+
 // ------------------------------------------------------- obligation rows
 // A row with no position and no service time is money without a roster spot.
 // Twinned rows restate a salary the file already carries; orphan rows are the
@@ -299,6 +361,37 @@ test('free agency blank counts hold', () => {
   assert.equal(blankCount(freeAgency, 'guarantee'), 1045)
   assert.equal(blankCount(freeAgency, 'agent'), 1454)
   assert.equal(blankCount(freeAgency, 'aav'), 2211)
+})
+
+test('guarantee of 1 is a minor-league sentinel, not one dollar', () => {
+  // The single largest distortion in this file: a fifth of its rows. Counting
+  // it as a dollar halves the 2020 median guarantee.
+  const sentinels = freeAgency.filter((r) => r.guarantee === '1')
+  assert.equal(sentinels.length, 1156)
+  assert.equal(sentinels.filter((r) => r.years === '0').length, 1153)
+  const years = sentinels.map((r) => Number(r.year))
+  assert.deepEqual([Math.min(...years), Math.max(...years)], [1991, 2023])
+  // The convention stops after 2023, so a series spanning the change compares
+  // two conventions and reads the difference as a market move.
+  assert.equal(sentinels.filter((r) => Number(r.year) > 2023).length, 0)
+  // 1,045 empty cells plus 1,156 sentinels: 2,201 rows state no usable figure.
+  assert.equal(blankCount(freeAgency, 'guarantee') + sentinels.length, 2201)
+})
+
+test('dropping the sentinel doubles the 2020 median guarantee', () => {
+  const median = (values) => {
+    const sorted = values.slice().sort((a, b) => a - b)
+    const middle = sorted.length / 2
+    return sorted.length % 2
+      ? sorted[(sorted.length - 1) / 2]
+      : (sorted[middle - 1] + sorted[middle]) / 2
+  }
+  const priced = (year) =>
+    freeAgency.filter((r) => r.year === year && Number.isFinite(Number(r.guarantee)) && r.guarantee !== '')
+  assert.equal(median(priced('2020').map((r) => Number(r.guarantee))), 3000000)
+  assert.equal(median(priced('2020').filter((r) => r.guarantee !== '1').map((r) => Number(r.guarantee))), 6050000)
+  assert.equal(median(priced('2023').map((r) => Number(r.guarantee))), 7500000)
+  assert.equal(median(priced('2023').filter((r) => r.guarantee !== '1').map((r) => Number(r.guarantee))), 11500000)
 })
 
 test('arbitration states no filed figures in nine cases out of ten', () => {
