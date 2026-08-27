@@ -11,9 +11,18 @@
 // bottom of this file reproduces it on a captured real game: 14 of 89 taps.
 //
 // The second property is the other half of the fix: a card belongs to exactly
-// ONE window. An earlier draft ran the last window out to the cap so a
-// revealed notice showed at once — and then showed it AGAIN at the head of the
-// next window when that at-bat was revealed.
+// ONE window, and once a window closes, its content never changes underneath
+// a reader who already saw it. Windows are anchored on AT-BATS (never on a
+// boundary value that can retroactively grow), which is what keeps the COUNT
+// of windows monotonic no matter how a live half's trailing notices stream
+// in — that count is what the two properties above actually depend on. A mid-
+// half notice TRAILS the batter who came before it (matching nextStepBoundary,
+// which already bundles it into that batter's own reveal tap) rather than
+// leading the batter who comes after — a pitching change is on the page the
+// moment you finish the batter who forced it, not one tap later, bundled with
+// a result it had nothing to do with (gamePk 823584 bottom 1st: Robert Gasser
+// relieved Dustin May after the first out, and the reader had no way to know
+// it until they'd already revealed Gasser's own first batter faced).
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
@@ -29,11 +38,14 @@ const shown = (entries, wins) => wins.map(({ start, end }) => entries.slice(star
 const label = (e) =>
   e.kind === 'atbat' ? `AB:${e.batter.last}` : e.kind === 'placed' ? `PLACED:${e.runner.last}` : `note:${e.eventType}`
 
-test('one window per at-bat, with the notices that stage it at its head', () => {
+test('one window per at-bat, trailing notices staying with the batter who preceded them', () => {
+  // The leading note has no earlier at-bat to trail, so it stages the half's
+  // first window same as always. The mound visit, coming AFTER Alpha and
+  // BEFORE Bravo, now trails Alpha's own window instead of leading Bravo's.
   const entries = [note('pitching_substitution'), ab('Alpha'), note('mound_visit'), ab('Bravo')]
   assert.deepEqual(shown(entries, focusWindows(entries, entries.length)), [
-    ['note:pitching_substitution', 'AB:Alpha'],
-    ['note:mound_visit', 'AB:Bravo'],
+    ['note:pitching_substitution', 'AB:Alpha', 'note:mound_visit'],
+    ['AB:Bravo'],
   ])
 })
 
@@ -44,20 +56,23 @@ test('the extras placement rides at the head of the leadoff hitter’s window', 
   ])
 })
 
-test('a notice is drawn in exactly one window, never twice across two taps', () => {
+test('a mid-half notice is visible the moment its own tap reveals it, and never moves window after that', () => {
   // The cap that one "Next at-bat" tap produces sweeps the notice trailing the
-  // at-bat it revealed (nextStepBoundary). It must not be drawn there AND
-  // again at the head of the next batter's window on the following tap.
+  // at-bat it revealed (nextStepBoundary) — so the notice must show up in
+  // THAT SAME tap's window, not wait for the batter it precedes.
   const entries = [ab('Alpha'), note('mound_visit'), ab('Bravo')]
   const firstTap = nextStepBoundary(entries, 0)
   assert.equal(firstTap, 2, 'the tap reveals the at-bat and the notice trailing it')
 
   const atTap = shown(entries, focusWindows(entries, firstTap))
+  assert.deepEqual(atTap, [['AB:Alpha', 'note:mound_visit']], 'not deferred to Bravo\'s window')
+
+  // Once Bravo is revealed too, Alpha's window — the notice included — must
+  // be byte-for-byte the same as it was a tap ago: a card belongs to exactly
+  // one window, and once closed that window's content never changes under a
+  // reader who has already seen it.
   const afterNext = shown(entries, focusWindows(entries, nextStepBoundary(entries, firstTap)))
-  const drawnAtTap = atTap.flat().filter((c) => c === 'note:mound_visit').length
-  const drawnAfter = afterNext.flat().filter((c) => c === 'note:mound_visit').length
-  assert.equal(drawnAtTap + drawnAfter, 1, 'the mound visit is on screen in one of the two states, not both')
-  assert.deepEqual(afterNext, [['AB:Alpha'], ['note:mound_visit', 'AB:Bravo']])
+  assert.deepEqual(afterNext, [['AB:Alpha', 'note:mound_visit'], ['AB:Bravo']])
 })
 
 test('notes no at-bat will ever follow ride the last window', () => {
@@ -92,6 +107,36 @@ test('no window ever reaches past the cap', () => {
   assert.deepEqual(focusWindows(entries, 0), [])
 })
 
+// The exact real-game shape that motivated the trailing fix: gamePk 823584
+// (2026-08-26 MIL@NYM), bottom 1st. Ewing lines out for the first out; Dustin
+// May leaves hurt and Robert Gasser relieves him, both announced nested at
+// the head of Lindor's play (statsapi's usual placement); Lindor and Bichette
+// each make the last two outs. The reveal cap already bundles the injury
+// delay and the pitching change into the SAME "Next at-bat" tap that reveals
+// Ewing's out (nextStepBoundary) — this pins that the windowed display
+// matches, instead of stranding "who's pitching now" until Lindor's own tap.
+test('a real mid-inning pitching change is on screen with the batter who forced it, not the next one up', () => {
+  const entries = [
+    ab('Ewing'),
+    note('game_advisory'),
+    note('pitching_substitution'),
+    ab('Lindor'),
+    ab('Bichette'),
+  ]
+  const firstTap = nextStepBoundary(entries, 0)
+  assert.equal(firstTap, 3, 'one tap reveals the out, the injury delay, and the pitching change together')
+
+  assert.deepEqual(shown(entries, focusWindows(entries, firstTap)), [
+    ['AB:Ewing', 'note:game_advisory', 'note:pitching_substitution'],
+  ])
+
+  const secondTap = nextStepBoundary(entries, firstTap)
+  assert.deepEqual(shown(entries, focusWindows(entries, secondTap)), [
+    ['AB:Ewing', 'note:game_advisory', 'note:pitching_substitution'],
+    ['AB:Lindor'],
+  ])
+})
+
 test('a cap holding only leading notices still yields the window that shows them', () => {
   // The live edge of an extra half: the placement is posted before the leadoff
   // plate appearance resolves, and is genuinely the only card there is. The
@@ -103,14 +148,14 @@ test('a cap holding only leading notices still yields the window that shows them
 const CODES = { pitching_substitution: 'P', mound_visit: 'MV', stolen_base_2b: 'SB' }
 const codeFor = (t) => CODES[t]
 
-test('a chip carries the notice marks of the cards in its own window', () => {
+test('a chip carries the notice marks of the cards trailing IT, not the next batter', () => {
   const entries = [ab('Alpha', { code: '6-3' }), note('pitching_substitution'), note('mound_visit'), ab('Bravo', { code: 'K' })]
   const items = buildTrailItems(entries, focusWindows(entries, entries.length), codeFor)
   assert.deepEqual(
     items.map((i) => ({ name: i.name, code: i.code, notices: i.notices })),
     [
-      { name: 'Alpha', code: '6-3', notices: [] },
-      { name: 'Bravo', code: 'K', notices: ['P', 'MV'] },
+      { name: 'Alpha', code: '6-3', notices: ['P', 'MV'] },
+      { name: 'Bravo', code: 'K', notices: [] },
     ],
   )
 })
