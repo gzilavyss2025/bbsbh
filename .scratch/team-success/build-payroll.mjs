@@ -412,8 +412,15 @@ for (let year = FIRST_SEASON; year <= LAST_SEASON; year++) {
       payrollIndex: meanPayroll > 0 ? team.payroll / meanPayroll : null,
       playerCount: team.players.size,
       splitPlayerCount: team.split.size,
-      coverageRows,
-      coverageDollars,
+      // NO coverage figure lives on a club row, and there is a reason it
+      // cannot. A row that fails to attribute has no club -- having no club is
+      // EXACTLY why it failed -- so a club-specific coverage rate is not a
+      // number this join is able to produce. A season rate copied onto a club
+      // row reads as that club's own rate, which is worse than no field at
+      // all: 2025 Washington would carry 0.954 beside dollars that fall far
+      // short of published. Coverage lives once, on the season. `regime` stays
+      // here because a regime is a label, not a rate, so no reader can mistake
+      // it for a club measurement.
       regime,
     }
   }
@@ -444,7 +451,9 @@ const panel = {
   method:
     'Each salary row is attributed across the clubs the player appeared for that season, pro rata ' +
     "by PA + (league PA per inning) * IP at each club. See this builder's header for the four " +
-    'read-time exclusion rules and docs/contracts-data-caveats.md for the population regimes.',
+    'read-time exclusion rules and docs/contracts-data-caveats.md for the population regimes. ' +
+    'coverageRows and coverageDollars are SEASON figures and sit on the season alone: an ' +
+    'unattributed row has no club, so no club-specific coverage rate exists.',
   window: [FIRST_SEASON, LAST_SEASON],
   counts,
   identityCollisions,
