@@ -1,0 +1,209 @@
+{
+ "generatedAt": "2026-08-27T18:54:36.070Z",
+ "counts": {
+  "playerSeasons": 20814,
+  "splitPlayerSeasons": 2197,
+  "r2Ties": 27,
+  "r3Missing": 0,
+  "r4ExcludedDollars": 8044798051,
+  "r4ExcludedPlayerSeasons": 2197
+ },
+ "tolerance": {
+  "maxMedianAbsMovement": 1,
+  "maxShareBeyondThreeRanks": 0.1,
+  "rankMovementThreshold": 3,
+  "minSpearman": 0.95
+ },
+ "gateChecks": {
+  "r1-r2": {
+   "okMedian": true,
+   "okShare": true,
+   "okRho": true,
+   "pass": true
+  },
+  "r1-r3": {
+   "okMedian": true,
+   "okShare": true,
+   "okRho": false,
+   "pass": false
+  },
+  "r1-r4": {
+   "okMedian": true,
+   "okShare": true,
+   "okRho": false,
+   "pass": false
+  }
+ },
+ "gatePasses": false,
+ "pairSummaries": {
+  "r1-r2": {
+   "medianAbsMovement": 1,
+   "shareBeyondThreeRanks": 0.04871794871794872,
+   "movementsBeyondThreeRanks": 38,
+   "totalClubSeasons": 780,
+   "minSpearman": 0.9581757508342603,
+   "worstSingleMovement": {
+    "year": 2007,
+    "teamId": 140,
+    "team": "Texas Rangers",
+    "rankA": 24,
+    "rankB": 16,
+    "movement": 8
+   }
+  },
+  "r1-r3": {
+   "medianAbsMovement": 1,
+   "shareBeyondThreeRanks": 0.06153846153846154,
+   "movementsBeyondThreeRanks": 48,
+   "totalClubSeasons": 780,
+   "minSpearman": 0.9430478309232481,
+   "worstSingleMovement": {
+    "year": 2007,
+    "teamId": 133,
+    "team": "Athletics",
+    "rankA": 23,
+    "rankB": 15,
+    "movement": 8
+   }
+  },
+  "r1-r4": {
+   "medianAbsMovement": 1,
+   "shareBeyondThreeRanks": 0.08461538461538462,
+   "movementsBeyondThreeRanks": 66,
+   "totalClubSeasons": 780,
+   "minSpearman": 0.939043381535039,
+   "worstSingleMovement": {
+    "year": 2013,
+    "teamId": 112,
+    "team": "Chicago Cubs",
+    "rankA": 17,
+    "rankB": 27,
+    "movement": 10
+   }
+  },
+  "r2-r3": {
+   "medianAbsMovement": 0,
+   "shareBeyondThreeRanks": 0.03333333333333333,
+   "movementsBeyondThreeRanks": 26,
+   "totalClubSeasons": 780,
+   "minSpearman": 0.9684093437152391,
+   "worstSingleMovement": {
+    "year": 2007,
+    "teamId": 133,
+    "team": "Athletics",
+    "rankA": 22,
+    "rankB": 15,
+    "movement": 7
+   }
+  },
+  "r2-r4": {
+   "medianAbsMovement": 1,
+   "shareBeyondThreeRanks": 0.15128205128205127,
+   "movementsBeyondThreeRanks": 118,
+   "totalClubSeasons": 780,
+   "minSpearman": 0.8745272525027808,
+   "worstSingleMovement": {
+    "year": 2013,
+    "teamId": 112,
+    "team": "Chicago Cubs",
+    "rankA": 13,
+    "rankB": 27,
+    "movement": 14
+   }
+  },
+  "r3-r4": {
+   "medianAbsMovement": 1,
+   "shareBeyondThreeRanks": 0.16025641025641027,
+   "movementsBeyondThreeRanks": 125,
+   "totalClubSeasons": 780,
+   "minSpearman": 0.8651835372636263,
+   "worstSingleMovement": {
+    "year": 2013,
+    "teamId": 112,
+    "team": "Chicago Cubs",
+    "rankA": 13,
+    "rankB": 27,
+    "movement": 14
+   }
+  }
+ },
+ "clubsBeyondThreeVsR1": {
+  "r1-r2": [
+   "Arizona Diamondbacks",
+   "Athletics",
+   "Atlanta Braves",
+   "Baltimore Orioles",
+   "Boston Red Sox",
+   "Chicago Cubs",
+   "Chicago White Sox",
+   "Cincinnati Reds",
+   "Cleveland Guardians",
+   "Houston Astros",
+   "Los Angeles Dodgers",
+   "Miami Marlins",
+   "Milwaukee Brewers",
+   "Minnesota Twins",
+   "New York Mets",
+   "Philadelphia Phillies",
+   "Pittsburgh Pirates",
+   "San Diego Padres",
+   "Seattle Mariners",
+   "Texas Rangers",
+   "Washington Nationals"
+  ],
+  "r1-r3": [
+   "Arizona Diamondbacks",
+   "Athletics",
+   "Atlanta Braves",
+   "Baltimore Orioles",
+   "Boston Red Sox",
+   "Chicago Cubs",
+   "Chicago White Sox",
+   "Cincinnati Reds",
+   "Cleveland Guardians",
+   "Colorado Rockies",
+   "Detroit Tigers",
+   "Houston Astros",
+   "Los Angeles Dodgers",
+   "Miami Marlins",
+   "Milwaukee Brewers",
+   "Minnesota Twins",
+   "New York Mets",
+   "Philadelphia Phillies",
+   "Pittsburgh Pirates",
+   "San Diego Padres",
+   "Seattle Mariners",
+   "St. Louis Cardinals",
+   "Tampa Bay Rays",
+   "Texas Rangers",
+   "Toronto Blue Jays",
+   "Washington Nationals"
+  ],
+  "r1-r4": [
+   "Arizona Diamondbacks",
+   "Athletics",
+   "Atlanta Braves",
+   "Baltimore Orioles",
+   "Boston Red Sox",
+   "Chicago Cubs",
+   "Chicago White Sox",
+   "Cincinnati Reds",
+   "Colorado Rockies",
+   "Detroit Tigers",
+   "Houston Astros",
+   "Los Angeles Angels",
+   "Los Angeles Dodgers",
+   "Miami Marlins",
+   "Milwaukee Brewers",
+   "Minnesota Twins",
+   "New York Mets",
+   "Philadelphia Phillies",
+   "Pittsburgh Pirates",
+   "San Diego Padres",
+   "Seattle Mariners",
+   "Tampa Bay Rays",
+   "Toronto Blue Jays",
+   "Washington Nationals"
+  ]
+ }
+}
