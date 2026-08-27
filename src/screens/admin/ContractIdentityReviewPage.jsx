@@ -40,6 +40,10 @@ import { ReviewQueue } from '../../components/admin/contracts/ReviewQueue.jsx'
 import { DecisionPane } from '../../components/admin/contracts/DecisionPane.jsx'
 import { LookupDeck } from '../../components/admin/contracts/LookupDeck.jsx'
 import '../../styles/research/diary.css'
+// After diary.css, not before: .cwb__main and .researchdiary__main carry the
+// same specificity, so source order is what lets the workbench widen the
+// measure the diary shell caps at 46rem.
+import '../../styles/74-contract-workbench.css'
 
 // Stable references for the "no data yet" fallback — a fresh {} or [] every
 // render would defeat every memo below on every keystroke.
@@ -111,11 +115,29 @@ function Workbench() {
   const targetRow = group
     ? (group.rows.find((row) => !effective[row.rowKey]) ?? group.rows[0])
     : null
+  // What a GROUP-level keystroke writes. A confirm group whose rows carry
+  // different ids has no bulk action, so even "no match exists" narrows to the
+  // row in front of the reviewer — the same rule the pane applies to its own
+  // shared buttons.
+  const bulkRows = useMemo(
+    () => (group ? (group.bulk.offered ? group.rows : [targetRow]) : []),
+    [group, targetRow],
+  )
 
   const applyPatch = useCallback(
     async (patch) => {
       const keys = Object.keys(patch)
       if (!keys.length || saving) return
+      // PIN THE DERIVED SELECTION FIRST. `group` falls through to visible[0] on
+      // load and again after every tab switch, while `groupKey` is still null
+      // or still naming the other tab's group — and the clause that keeps the
+      // group you are standing on in the rail keys on `groupKey`. Without this
+      // the group you just resolved drops out of `visible` the moment the
+      // override lands, taking its Undo with it, and the next Enter — which the
+      // shortcut sheet promises will "move on" — fires at a group nobody has
+      // looked at. Reachable on the first keystroke of a session, so it is set
+      // here, on the one path every action funnels through.
+      if (selectedKey && selectedKey !== groupKey) setGroupKey(selectedKey)
       setSaving(true)
       setError(null)
       try {
@@ -135,7 +157,7 @@ function Workbench() {
         setSaving(false)
       }
     },
-    [getToken, saving],
+    [getToken, saving, selectedKey, groupKey],
   )
 
   const step = useCallback(
@@ -153,7 +175,7 @@ function Workbench() {
   const runPrimary = useCallback(
     (scope) => {
       if (!group || saving) return
-      const rowsFor = scope === 'row' ? [targetRow] : group.rows
+      const rowsFor = scope === 'row' ? [targetRow] : bulkRows
       if (group.mode === MODE_CONFIRM) {
         if (scope === 'group' && !group.bulk.offered) {
           setError('These rows carry different ids — confirm them one at a time.')
@@ -169,7 +191,7 @@ function Workbench() {
       }
       applyPatch(dismissPatch(rowsFor))
     },
-    [group, targetRow, saving, applyPatch],
+    [group, targetRow, bulkRows, saving, applyPatch],
   )
 
   const useAsMatch = useCallback(
@@ -177,10 +199,12 @@ function Workbench() {
       if (!group) return
       const id = Number(match?.id ?? match?.mlbId ?? match)
       if (!Number.isFinite(id)) return
-      // A conflict group has no bulk action at all, so a record picked out of
-      // the deck lands on the row in front of the reviewer, not on rows whose
-      // ids the matcher already says disagree.
-      applyPatch(candidatePatch(group.bulk.offered ? group.rows : [targetRow], id))
+      // ONE ROW, always. The deck's own button says "use as this row's match",
+      // and it is the single path from a free-text lookup into the queue —
+      // deliberately the narrowest action on the page, because the record it
+      // found was matched against nothing. Group-level answers come from the
+      // pane, where the reviewer can see what they are answering for.
+      applyPatch(candidatePatch([targetRow], id))
     },
     [group, targetRow, applyPatch],
   )
@@ -210,7 +234,7 @@ function Workbench() {
       } else if (e.key === '?') setShortcutsOpen((open) => !open)
       else if (e.key === '/') {
         deckRef.current?.querySelector('input')?.focus()
-      } else if (e.key === 'x' || e.key === 'X') applyPatch(dismissPatch(group ? group.rows : []))
+      } else if (e.key === 'x' || e.key === 'X') applyPatch(dismissPatch(bulkRows))
       else if (e.key === 's' || e.key === 'S') step(1)
       else if (/^[1-9]$/.test(e.key)) {
         if (group?.mode !== MODE_CHOOSE) return
@@ -221,7 +245,7 @@ function Workbench() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [step, runPrimary, applyPatch, group, effective])
+  }, [step, runPrimary, applyPatch, group, bulkRows, effective])
 
   if (pending.loading || overridesQuery.loading) return <Notice>Loading the review queue…</Notice>
   if (pending.error) return <Notice>Could not load pending.json — {pending.error.message}</Notice>

@@ -1,4 +1,4 @@
-import { shardKey100 } from '../lib/shardKey.js'
+import { shardKey100, termsBucketKey } from '../lib/shardKey.js'
 import { staticJsonBy } from './staticJson.js'
 
 // The historical-contract read side: makes an admin's correction (recorded by
@@ -30,11 +30,6 @@ const fetchTermsBucket = staticJsonBy(
   (key) => `/data/contracts-history/terms/${key}.json`,
   { fallback: null },
 )
-
-function bucketFileKey(rowKey) {
-  const [sourceFile, seq] = String(rowKey).split('#')
-  return `${sourceFile}-${Math.floor(Number(seq) / 500)}`
-}
 
 async function fetchOverrides() {
   // Public, edge-cached ~60s (ADR-0066). A failure here degrades to {} —
@@ -145,7 +140,7 @@ export async function fetchPlayerContractHistory(personId) {
     .filter(([, override]) => !override.dismissed && override.mlbId != null && String(override.mlbId) === id)
     .map(([rowKey]) => rowKey)
 
-  const bucketKeys = new Set(mineRowKeys.map(bucketFileKey))
+  const bucketKeys = new Set(mineRowKeys.map(termsBucketKey))
   const termsByRowKey = {}
   await Promise.all(
     [...bucketKeys].map(async (key) => {

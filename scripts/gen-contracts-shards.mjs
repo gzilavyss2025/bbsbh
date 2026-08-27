@@ -60,7 +60,7 @@ import { fileURLToPath } from 'node:url'
 import { readFile } from 'node:fs/promises'
 import { parseCsv } from './lib/csv.mjs'
 import { readJsonOr, writeShards } from './lib/io.js'
-import { shardKey100 } from '../src/lib/shardKey.js'
+import { shardKey100, TERMS_BUCKET_SIZE } from '../src/lib/shardKey.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const sourceDir = join(here, 'data', 'contracts')
@@ -71,7 +71,6 @@ const termsDir = join(here, '..', 'public', 'data', 'contracts-history', 'terms'
 // 500 rows a bucket keeps salaries.csv's 27k rows at ~55 files instead of one
 // multi-megabyte map, while staying far from the per-row-file end where the
 // directory itself becomes the cost.
-const BUCKET_SIZE = 500
 
 // Which columns of each source carry the deal: its money, and the term span
 // that money is stated over (a guarantee with no year count is unreadable).
@@ -156,7 +155,7 @@ async function main() {
       const season = ident?.season ?? null
       const teamId = ident?.rawTeamCode ?? null
 
-      const bucketName = `${sourceFile}-${Math.floor(i / BUCKET_SIZE)}`
+      const bucketName = `${sourceFile}-${Math.floor(i / TERMS_BUCKET_SIZE)}`
       if (!buckets.has(bucketName)) buckets.set(bucketName, {})
       buckets.get(bucketName)[rowKey] = { season, teamId, terms }
 
@@ -222,7 +221,7 @@ async function main() {
   )
   console.log(
     `Wrote ${termResult.written} term buckets (swept ${termResult.swept}): ` +
-      `${totalRows} rows, ${BUCKET_SIZE} per bucket -> public/data/contracts-history/terms/`,
+      `${totalRows} rows, ${TERMS_BUCKET_SIZE} per bucket -> public/data/contracts-history/terms/`,
   )
 }
 

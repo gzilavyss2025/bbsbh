@@ -14,6 +14,7 @@ import { searchPeople } from '../../../api/search.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue.js'
 import { playerPath } from '../../../lib/route.js'
+import '../../../styles/74a-contract-lookup.css'
 
 const SEARCH_INDEX_URL = '/data/contracts-history/search-index.json'
 const RECORD_RESULT_CAP = 100

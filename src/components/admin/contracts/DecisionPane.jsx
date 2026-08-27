@@ -87,7 +87,15 @@ export function DecisionPane({ group, overrides, saving, onSave }) {
   const rows = group.rows
   const target = rows.find((row) => !overrides[row.rowKey]) ?? rows[0]
   const resolvedCount = rows.filter((row) => overrides[row.rowKey]).length
-  const scope = group.count === 1 ? 'this row' : `all ${group.count}`
+  // THE SCOPE OF EVERY GROUP-LEVEL ACTION, computed once. A confirm group whose
+  // rows carry different ids is the case bulkPlan deliberately withholds bulk
+  // from, and the roster picker, the manual-id box and "no match exists" are
+  // group-level actions too — so they have to narrow with it, or three working
+  // bulk buttons sit directly under a banner saying there is no bulk here. The
+  // label is derived FROM this list rather than from group.count, so a button
+  // can never promise a scope it does not write.
+  const bulkRows = bulk.offered ? rows : [target]
+  const scope = bulkRows.length === 1 ? 'this row' : `all ${bulkRows.length}`
 
   const nameFor = (id, season) => (cache[season] ?? []).find((p) => p.id === id) ?? null
 
@@ -141,7 +149,7 @@ export function DecisionPane({ group, overrides, saving, onSave }) {
                 type="button"
                 className="cwb__primary"
                 disabled={saving}
-                onClick={() => save(confirmPatch(rows))}
+                onClick={() => save(confirmPatch(bulkRows))}
               >
                 Confirm {scope} — promote to exact
               </button>
@@ -167,7 +175,7 @@ export function DecisionPane({ group, overrides, saving, onSave }) {
             candidates={bulk.candidates}
             disabled={saving}
             showRowShare
-            onPick={(id) => save(candidatePatch(rows, id))}
+            onPick={(id) => save(candidatePatch(bulkRows, id))}
           />
         </div>
       )}
@@ -187,7 +195,7 @@ export function DecisionPane({ group, overrides, saving, onSave }) {
           cache={cache}
           load={load}
           disabled={saving}
-          onPick={(id) => save(candidatePatch(rows, id))}
+          onPick={(id) => save(candidatePatch(bulkRows, id))}
         />
         <p className="cwb__manual caps-exempt">
           Or an MLB id directly:{' '}
@@ -203,7 +211,7 @@ export function DecisionPane({ group, overrides, saving, onSave }) {
             type="button"
             className="cwb__mini"
             disabled={saving || !manualId}
-            onClick={() => save(candidatePatch(rows, Number(manualId)))}
+            onClick={() => save(candidatePatch(bulkRows, Number(manualId)))}
           >
             Apply to {scope}
           </button>
@@ -212,7 +220,7 @@ export function DecisionPane({ group, overrides, saving, onSave }) {
           type="button"
           className="cwb__danger"
           disabled={saving}
-          onClick={() => save(dismissPatch(rows))}
+          onClick={() => save(dismissPatch(bulkRows))}
         >
           No match exists — {scope}
         </button>
