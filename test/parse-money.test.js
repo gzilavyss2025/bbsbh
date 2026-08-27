@@ -18,6 +18,7 @@ test('a plain dollar figure parses to a number with no status', () => {
     raw: '61875000',
     years: null,
     guarantee: null,
+    detailsAmount: null,
   })
 })
 
@@ -27,7 +28,14 @@ test('$ and thousands commas strip before the numeric check', () => {
 
 // -------------------------------------------------------------------- blank
 test('an empty or whitespace-only cell is blank, never 0', () => {
-  assert.deepEqual(parseMoneyCell(''), { amount: null, status: 'blank', raw: '', years: null, guarantee: null })
+  assert.deepEqual(parseMoneyCell(''), {
+    amount: null,
+    status: 'blank',
+    raw: '',
+    years: null,
+    guarantee: null,
+    detailsAmount: null,
+  })
   assert.equal(parseMoneyCell('   ').status, 'blank')
   assert.equal(parseMoneyCell(undefined).status, 'blank')
 })
@@ -161,6 +169,14 @@ const EXTENSIONS = [
   ['extn, 2 y/$8.5', 2, 8_500_000], // "extn, " prefix instead of a trailing suffix
   ['extn, 5 y/$60M', 5, 60_000_000],
   ['extension', null, null], // bare -- the years/amount live in a different column this function never sees
+  // Regression cases for the 1000x bug: the old DOLLAR_AMOUNT regex excluded
+  // "," from its character class, so "$1,500,000" matched only "$1" and got
+  // multiplied by a million anyway -- 1,000,000 instead of 1,500,000.
+  // "$700,000" read as $700,000,000 the same way. Both stayed inside
+  // 'settled-as-extension' the whole time; the shape matched, only the
+  // number was wrong.
+  ['2 y/$1,500,000', 2, 1_500_000],
+  ['3 y/$700,000', 3, 700_000],
 ]
 
 for (const [raw, years, guarantee] of EXTENSIONS) {
@@ -213,6 +229,103 @@ test('the same multi-year shape in settled_salary or club_offer still reads as s
   assert.equal(parseMoneyCell('2 y/$7.2M').status, 'settled-as-extension', 'no column argument keeps the original default')
 })
 
+// -------------------------------------------- free_agency guarantee/aav sentinel
+// free_agency.csv writes "1" in guarantee (and, on a 39-row subset, aav) to
+// flag a minor-league deal -- a real number, so the old code silently read
+// it as amount: 1, the same shape as a genuine settled figure. Verified
+// against the real 2026-08-27 export: 1,156 guarantee cells equal "1",
+// 1,153 of them alongside years="0". `column` gates this reading the same
+// way it gates the multi-year shape -- "1" means the number one everywhere
+// else.
+test('a bare "1" outside guarantee/aav is just the number one', () => {
+  assert.deepEqual(parseMoneyCell('1', 'settled_salary'), {
+    amount: 1,
+    status: null,
+    raw: '1',
+    years: null,
+    guarantee: null,
+    detailsAmount: null,
+  })
+  assert.equal(parseMoneyCell('1').status, null, 'no column argument does not opt into the sentinel reading either')
+})
+
+test('guarantee "1" with years "0" is a minor-league-deal, not a $1 guarantee', () => {
+  const r = parseMoneyCell('1', 'guarantee', { years: '0', details: '' })
+  assert.equal(r.amount, null)
+  assert.equal(r.status, 'minor-league-deal')
+  assert.equal(r.raw, '1')
+  assert.equal(r.detailsAmount, null, 'no details string here to mine')
+})
+
+test('aav "1" reads the same sentinel as guarantee -- 39 real rows carry it', () => {
+  const r = parseMoneyCell('1', 'aav', { years: '0', details: '$500,000 in majors' })
+  assert.equal(r.status, 'minor-league-deal')
+  assert.equal(r.amount, null)
+  assert.equal(r.detailsAmount, 500000)
+})
+
+// details-mining: Cot's free-text column states the real majors salary on
+// 853 of the 858 sentinel rows that carry any details at all. Recovered
+// figures land ONLY in `detailsAmount`, never in `amount` or `guarantee` --
+// a number the source stated in a money column and a number inferred from
+// prose must never be confused by a downstream reader.
+const DETAILS_RECOVERABLE = [
+  ['$1M in majors', 1_000_000],
+  ['$1.2M in majors', 1_200_000],
+  ['$2.5M salary in majors', 2_500_000],
+  ['$1,000,000 in majors', 1_000_000],
+  ['$350000 in majors', 350_000], // no comma
+  ['$1 million in majors', 1_000_000], // spelled out
+  ['$750,000 im majors', 750_000], // real typo in the source, tolerated
+  ['$1,000,000 in. majors', 1_000_000], // real typo in the source, tolerated
+  ['$1.3M in majors, 3/21/19 opt-out', 1_300_000], // trailing prose ignored
+  ['$800,000 in majors. $1.2M in performance bonuses', 800_000], // majors figure, not the bonus
+  ['$1.6M in majors, $0.15M in minors', 1_600_000], // majors figure, not the minors one
+]
+
+for (const [details, expected] of DETAILS_RECOVERABLE) {
+  test(`details "${details}" recovers a majors figure of ${expected}`, () => {
+    const r = parseMoneyCell('1', 'guarantee', { years: '0', details })
+    assert.equal(r.status, 'minor-league-deal')
+    assert.equal(r.amount, null, 'the recovered figure never becomes the cell amount')
+    assert.equal(r.detailsAmount, expected)
+  })
+}
+
+// Left unrecovered on purpose -- a details string that states no majors
+// figure, or none at all, stays null rather than guessed at.
+const DETAILS_UNRECOVERABLE = ['$1.5M in minors', '$750,000 in minors', 'retired after signing', '']
+
+for (const details of DETAILS_UNRECOVERABLE) {
+  test(`details "${details}" recovers nothing -- left unrecovered, not guessed`, () => {
+    const r = parseMoneyCell('1', 'guarantee', { years: '0', details })
+    assert.equal(r.detailsAmount, null)
+  })
+}
+
+// The 3 rows (of 1,156) where "1" does not pair with years="0" -- found by
+// checking each individually, not swept into 'minor-league-deal'.
+test('Lee, Travis 2006: years="1", details says he accepted arbitration -- no free-agent guarantee ever existed', () => {
+  const r = parseMoneyCell('1', 'guarantee', { years: '1', details: 'accepted salary arbitration' })
+  assert.equal(r.amount, null)
+  assert.equal(r.status, 'accepted-arbitration')
+  assert.equal(r.detailsAmount, null)
+})
+
+test('Hawkins, LaTroy 2013: years="1", a real one-year deal -- not the minor-league pattern, but detailsAmount still recovers the real figure', () => {
+  const r = parseMoneyCell('1', 'guarantee', { years: '1', details: '$1,000,000 in majors' })
+  assert.equal(r.amount, null, 'the "1" in the structured cell is still not a usable dollar amount')
+  assert.equal(r.status, 'flagged-guarantee')
+  assert.equal(r.detailsAmount, 1_000_000)
+})
+
+test('Bundy, Dylan 2023: years="" (blank, not "0"), no details -- flagged, nothing to recover', () => {
+  const r = parseMoneyCell('1', 'guarantee', { years: '', details: '' })
+  assert.equal(r.amount, null)
+  assert.equal(r.status, 'flagged-guarantee')
+  assert.equal(r.detailsAmount, null)
+})
+
 // ---------------------------------------------------------- unparsed, loud
 test('genuinely unrecognized prose is unparsed, not a guess', () => {
   const r = parseMoneyCell('some brand-new prose form nobody mapped yet')
@@ -241,6 +354,14 @@ const TARGET_COLUMNS = [
   ['extensions.csv', ['guarantee', 'aav']],
 ]
 
+// free_agency.csv rows carry the sibling fields (years, details) the
+// guarantee/aav sentinel needs to classify itself -- every other file's
+// target columns pass no context, since none of them use it.
+function contextFor(file, row) {
+  if (file !== 'free_agency.csv') return undefined
+  return { years: row.years, details: row.details }
+}
+
 test('every money cell in the real CSVs parses to a known status -- zero unparsed', () => {
   const unparsed = []
   let cellCount = 0
@@ -249,16 +370,37 @@ test('every money cell in the real CSVs parses to a known status -- zero unparse
     for (const row of rows) {
       for (const column of columns) {
         cellCount++
-        const r = parseMoneyCell(row[column], column)
+        const r = parseMoneyCell(row[column], column, contextFor(file, row))
         if (r.status === 'unparsed') unparsed.push(`${file}:${column}="${row[column]}"`)
       }
     }
   }
   assert.ok(cellCount > 40000, `expected tens of thousands of money cells, saw ${cellCount}`)
   // No named-exception list needed today: every value found across all nine
-  // columns maps to a real status (see the enumeration above). If a future
-  // export adds prose this function has never seen, this assertion is the
-  // one that catches it -- fix it by adding a mapped case, never by adding
-  // an exception here.
+  // prose columns, plus the guarantee/aav sentinel, maps to a real status
+  // (see the enumeration above). If a future export adds prose this
+  // function has never seen, this assertion is the one that catches it --
+  // fix it by adding a mapped case, never by adding an exception here.
   assert.deepEqual(unparsed, [], `new prose form(s) need a mapped status: ${unparsed.join(', ')}`)
+})
+
+// The orchestrator's own number, confirmed here against the live file: once
+// a blank cell AND every sentinel status (minor-league-deal,
+// flagged-guarantee, accepted-arbitration) count as "no usable guarantee",
+// free_agency.csv has no usable guarantee on 2,201 of 5,598 rows (39.3%) --
+// nearly double the pre-sentinel-fix reading, which only counted the 1,045
+// blank cells. Pinned so a future export silently changing this doesn't go
+// unnoticed.
+const NO_GUARANTEE_STATUSES = new Set(['blank', 'minor-league-deal', 'flagged-guarantee', 'accepted-arbitration'])
+
+test('free_agency.csv: 2,201 of 5,598 rows (39.3%) carry no usable guarantee', () => {
+  const rows = parseCsv(readFileSync(join(dataDir, 'free_agency.csv'), 'utf8'))
+  let noGuarantee = 0
+  for (const row of rows) {
+    const r = parseMoneyCell(row.guarantee, 'guarantee', contextFor('free_agency.csv', row))
+    if (NO_GUARANTEE_STATUSES.has(r.status)) noGuarantee++
+  }
+  assert.equal(rows.length, 5598)
+  assert.equal(noGuarantee, 2201)
+  assert.equal(Math.round((1000 * noGuarantee) / rows.length) / 10, 39.3)
 })
