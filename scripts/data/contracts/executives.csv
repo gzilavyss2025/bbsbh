@@ -1,0 +1,25 @@
+# Club front-office compensation split out of scripts/data/contracts/salaries.csv on 2026-08-27 (see src/lib/contracts/positions.js normalizePosition() for the position-string classifier, and test/contracts-positions.test.js for the regression coverage). A row lands here only when BOTH hold: its position cell is a genuine front-office job title (GM, assistant GM, field manager -- never a real or corrupted playing position), AND the named person does not appear in that year's public/data/contracts-history/season-players/{year}.json pool. That second check matters: several rows carry a "mgr" position cell for a season the man was still an active player (Robin Ventura, Brad Ausmus, Mike Matheny, Joe Girardi and others were tagged with their LATER managerial title on an EARLIER playing season) -- those rows stayed in salaries.csv, not here. Nothing here is deleted; this is executive compensation, a small, real dataset nothing else in this repo holds, and it explains part of the identity crosswalk's unresolved tail (docs/adr/0066): a general manager's row will never match a season player roster. To reread the classification, or to redo the split, use normalizePosition() plus the season-players pool for each candidate year -- do not split on isPlayer or mls alone; see the header comment in positions.js for why.
+year,player,position,mls,salary
+2004,"Wedge, Eric",mgr,,450000
+2003,"Gardenhire, Ron",mgr,,450000
+2003,"Mackanin, Pete",mgr,,400000
+2003,"Miley, Dave",mgr,,400000
+2003,"Narron, Jerry",mgr,,400000
+2002,"Beane, Billy",GM,,400000
+2002,"Mackanin, Pete",mgr,,350000
+2002,"Miley, Dave",mgr,,350000
+2002,"Narron, Jerry",mgr,,350000
+2001,"La Russa, Tony",mgr,,1900000
+2001,"Randolph, Willie",mgr,,700000
+2001,"Manuel, Jerry",mgr,,700000
+2001,"Howe, Art",mgr,,700000
+2001,"Collins, Terry",mgr,,700000
+2001,"Guillen, Ozzie",mgr,,500000
+2001,"Cashman, Brian","SVP, GM",,350000
+2001,"Narron, Jerry",mgr,,300000
+2001,"Miley, Dave",mgr,,300000
+2001,"Mackanin, Pete",mgr,,300000
+2000,"Baker, Dusty",mgr,,800000
+2000,"Price, Bryan",mgr,,800000
+2000,"Hillman, Trey",Manager,,325000
+2000,"Pena, Tony",mgr,,325000

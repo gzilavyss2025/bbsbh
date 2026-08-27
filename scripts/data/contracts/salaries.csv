@@ -24334,7 +24334,6 @@ year,player,position,mls,salary
 2004,"McMillon, Billy",of,,450000
 2004,"Robinson, Kerry",of,,450000
 2004,"Tejera, Michael",p,,450000
-2004,"Wedge, Eric",mgr,,450000
 2004,"Zambrano, Carlos",rhp-s,,450000
 2004,"Dunn, Adam",lf-1b,,445000
 2004,"Burba, Dave",sp,,440000
@@ -25146,7 +25145,6 @@ year,player,position,mls,salary
 2003,"Bragg, Darren",of,,450000
 2003,"Campillo, Jorge",rhp,,450000
 2003,"Daubach, Brian",1b-dh,,450000
-2003,"Gardenhire, Ron",mgr,,450000
 2003,"Kolb, Danny",p,,450000
 2003,"May, Darrell",p,,450000
 2003,"Rios, Armando",of,,450000
@@ -25168,9 +25166,6 @@ year,player,position,mls,salary
 2003,"Ankiel, Rick",of,,400000
 2003,"Dunn, Adam",dh-1b,,400000
 2003,"Laker, Tim",c,,400000
-2003,"Mackanin, Pete",mgr,,400000
-2003,"Miley, Dave",mgr,,400000
-2003,"Narron, Jerry",mgr,,400000
 2003,"Parque, Jim",sp,,400000
 2003,"Roberts, Dave",of,,400000
 2003,"Branyan, Russell",1b-3b,,395000
@@ -25912,7 +25907,6 @@ year,player,position,mls,salary
 2002,"Furcal, Rafael",2b,,405000
 2002,"Anderson, Marlon",2b-of,,400000
 2002,"Ankiel, Rick",of,,400000
-2002,"Beane, Billy",GM,,400000
 2002,"Castro, Juan",2b-ss,,400000
 2002,"Gil, Benji",inf,,400000
 2002,"Williamson, Scott",rhp,,400000
@@ -25933,12 +25927,9 @@ year,player,position,mls,salary
 2002,"Davis, Ben",c,,350000
 2002,"Gonzalez, Wiki",c,,350000
 2002,"Henderson, Rickey",of,,350000
-2002,"Mackanin, Pete",mgr,,350000
-2002,"Miley, Dave",mgr,,350000
 2002,"Miller, Wade",rhp,,350000
 2002,"Molina, Benjie",c,,350000
 2002,"Mora, Melvin",3b,,350000
-2002,"Narron, Jerry",mgr,,350000
 2002,"Oropesa, Eddie",lhp,,350000
 2002,"Washburn, Jarrod",lhp-s,,350000
 2002,"Almanza, Armando",rp,,346000
@@ -26428,7 +26419,6 @@ year,player,position,mls,salary
 2001,"Veres, Dave",rp,,1900000
 2001,"Rocker, John",lhp,,1900000
 2001,"Meadows, Brian",sp,,1900000
-2001,"La Russa, Tony",mgr,,1900000
 2001,"Vander Wal, John",of,,1850000
 2001,"Varitek, Jason",c,,1800000
 2001,"Tucker, Michael",of,,1800000
@@ -26525,13 +26515,9 @@ year,player,position,mls,salary
 2001,"Levine, Al",p,,715000
 2001,"Blanco, Henry",c,,712500
 2001,"Holtz, Mike",p,,705000
-2001,"Randolph, Willie",mgr,,700000
 2001,"Morgan, Mike",rhp,,700000
 2001,"Millar, Kevin",dh-1b,,700000
-2001,"Manuel, Jerry",mgr,,700000
 2001,"Lopez, Luis",ss,,700000
-2001,"Howe, Art",mgr,,700000
-2001,"Collins, Terry",mgr,,700000
 2001,"Bautista, Danny",of,,675000
 2001,"Aybar, Manny",rhp,,665000
 2001,"Yan, Esteban",rhp,,650000
@@ -26554,7 +26540,6 @@ year,player,position,mls,salary
 2001,"Santiago, Benito",c,,500000
 2001,"Mahomes, Pat",rp,,500000
 2001,"Lowell, Mike",3b,,500000
-2001,"Guillen, Ozzie",mgr,,500000
 2001,"Cordova, Marty",of,,500000
 2001,"Relaford, Desi",inf,,475000
 2001,"Dessens, Elmer",rhp,,475000
@@ -26600,7 +26585,6 @@ year,player,position,mls,salary
 2001,"Molina, Benjie",c,,350000
 2001,"Johnson, Jason",rhp,,350000
 2001,"Gil, Benji",inf,,350000
-2001,"Cashman, Brian","SVP, GM",,350000
 2001,"Boehringer, Brian",rp,,350000
 2001,"Jiminez, Jose",rp,,345000
 2001,"Cabrera, Orlando",ss,,340000
@@ -26619,11 +26603,8 @@ year,player,position,mls,salary
 2001,"Berkman, Lance",1b-of,,305000
 2001,"Thomson, John",p,,300000
 2001,"Redmond, Mike",mgr,,300000
-2001,"Narron, Jerry",mgr,,300000
-2001,"Miley, Dave",mgr,,300000
 2001,"Merced, Orlando",of,,300000
 2001,"Martinez, Ramon E.",ss,,300000
-2001,"Mackanin, Pete",mgr,,300000
 2001,"Koskie, Corey",3b,,300000
 2001,"Henderson, Rickey",of,,300000
 2001,"Chen, Bruce",lhp-s,,300000
@@ -27073,12 +27054,10 @@ year,player,position,mls,salary
 2000,"Houston, Tyler",c,,835000
 2000,"Boehringer, Brian",rp,,830000
 2000,"Isringhausen, Jason",rhp,,825000
-2000,"Baker, Dusty",mgr,,800000
 2000,"Bere, Jason",sp,,800000
 2000,"Burrell, Pat",lf,,800000
 2000,"Henry, Doug",rhp,,800000
 2000,"Lopez, Albie",rhp,,800000
-2000,"Price, Bryan",mgr,,800000
 2000,"Lopez, Luis",ss,,775000
 2000,"Kim, Byung Hyun",rhp,,762500
 2000,"Burkett, John",sp,,750000
@@ -27158,10 +27137,8 @@ year,player,position,mls,salary
 2000,"Batista, Miguel",rhp,,325000
 2000,"Encarnacion, Juan",of,,325000
 2000,"Garcia, Freddy",rhp-s,,325000
-2000,"Hillman, Trey",Manager,,325000
 2000,"Howry, Bobby",rhp,,325000
 2000,"McCarty, David",1b-of,,325000
-2000,"Pena, Tony",mgr,,325000
 2000,"Kotsay, Mark",of-1b,,324000
 2000,"Walker, Todd",2b,,322500
 2000,"Dellucci, David",of,,312500
