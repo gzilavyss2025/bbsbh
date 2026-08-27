@@ -111,11 +111,13 @@ which sets no default params and no caching.
 | `stats` | `/api/v1/stats` | `stats=season&group&season&sportId&playerPool=all&limit=5000` | via `statsLevels.js:37` | 8 (`gen-minors-leaders.mjs`) |
 | `game` (feed/live) | `/api/v1.1/game/{pk}/feed/live` | none | `game-buzz.mjs:60` | 1 |
 | `game_winProbability` | `/api/v1/game/{pk}/winProbability` | none | `game-buzz.mjs:148` | 1 |
+| `stats` | `/api/v1/stats` | `stats=sabermetrics&group&season&sportId=1&playerPool=ALL` | `gen-war.mjs:63`, `gen-war-history.mjs:53` | 2 each |
 
-**Non-statsapi (scripts):** FanGraphs leaderboard (`gen-war.mjs:28`, `gen-war-history.mjs:37`),
-Baseball Savant percentile CSV (`gen-savant-percentiles.mjs:93`), `dapi.mlbinfra.com`
-(`gen-game-notes.mjs:66`), `mlb.com/prospects` HTML scrape (`fetch-top-prospects.mjs:28`),
-Bluesky + Reddit (`game-buzz.mjs`).
+**Non-statsapi (scripts):** Baseball Savant percentile CSV (`gen-savant-percentiles.mjs:93`),
+`dapi.mlbinfra.com` (`gen-game-notes.mjs:66`), `mlb.com/prospects` HTML scrape
+(`fetch-top-prospects.mjs:28`), Bluesky + Reddit (`game-buzz.mjs`). The FanGraphs
+leaderboard scrape this table used to list was retired: `gen-war.mjs`/`gen-war-history.mjs`
+now pull WAR from statsapi's own `stats=sabermetrics` endpoint (see that file's header).
 
 ### 1c. Vercel edge layer — `api/` (crawler-only, server-side)
 
