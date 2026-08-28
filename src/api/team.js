@@ -200,8 +200,8 @@ export async function fetchRosterEntriesForTeams(teamIds, rosterType = 'active')
 // /teams/affiliates endpoint (a plain team hydrate doesn't carry this) when
 // the static file is missing, stale for the requested season, or doesn't
 // cover the org. That file is regenerated weekly by scripts/gen-affiliates.mjs
-// (see the Monday block of .github/workflows/update-nightly-data.yml) from the
-// SAME endpoint this
+// (see the structural data block of .github/workflows/update-nightly-data.yml)
+// from the SAME endpoint this
 // fallback calls, shaped identically — an org's farm system changes at most
 // once a year (the offseason PDC realignment), so it's safe to read the
 // season snapshot rather than fetching live on every team-page visit AND
