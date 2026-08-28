@@ -1,0 +1,281 @@
+{
+ "shape": {
+  "totalRows": 27349,
+  "totalBlank": 8041,
+  "totalBlankRate": 0.2940144063768328,
+  "pre2010": {
+   "rows": 7970,
+   "blank": 7970,
+   "rate": 1
+  },
+  "from2010": {
+   "rows": 19379,
+   "blank": 71,
+   "rate": 0.0036637597399246605
+  },
+  "bySeason": [
+   {
+    "season": 2000,
+    "rows": 559,
+    "blank": 559,
+    "blankRate": 1
+   },
+   {
+    "season": 2001,
+    "rows": 631,
+    "blank": 631,
+    "blankRate": 1
+   },
+   {
+    "season": 2002,
+    "rows": 716,
+    "blank": 716,
+    "blankRate": 1
+   },
+   {
+    "season": 2003,
+    "rows": 800,
+    "blank": 800,
+    "blankRate": 1
+   },
+   {
+    "season": 2004,
+    "rows": 829,
+    "blank": 829,
+    "blankRate": 1
+   },
+   {
+    "season": 2005,
+    "rows": 848,
+    "blank": 848,
+    "blankRate": 1
+   },
+   {
+    "season": 2006,
+    "rows": 890,
+    "blank": 890,
+    "blankRate": 1
+   },
+   {
+    "season": 2007,
+    "rows": 921,
+    "blank": 921,
+    "blankRate": 1
+   },
+   {
+    "season": 2008,
+    "rows": 913,
+    "blank": 913,
+    "blankRate": 1
+   },
+   {
+    "season": 2009,
+    "rows": 863,
+    "blank": 863,
+    "blankRate": 1
+   },
+   {
+    "season": 2010,
+    "rows": 877,
+    "blank": 39,
+    "blankRate": 0.04446978335233751
+   },
+   {
+    "season": 2011,
+    "rows": 865,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2012,
+    "rows": 881,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2013,
+    "rows": 872,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2014,
+    "rows": 883,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2015,
+    "rows": 1683,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2016,
+    "rows": 869,
+    "blank": 6,
+    "blankRate": 0.006904487917146145
+   },
+   {
+    "season": 2017,
+    "rows": 1237,
+    "blank": 21,
+    "blankRate": 0.016976556184316895
+   },
+   {
+    "season": 2018,
+    "rows": 1239,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2019,
+    "rows": 1224,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2020,
+    "rows": 1206,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2021,
+    "rows": 1269,
+    "blank": 1,
+    "blankRate": 0.0007880220646178094
+   },
+   {
+    "season": 2022,
+    "rows": 1269,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2023,
+    "rows": 1256,
+    "blank": 1,
+    "blankRate": 0.0007961783439490446
+   },
+   {
+    "season": 2024,
+    "rows": 1246,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2025,
+    "rows": 1246,
+    "blank": 0,
+    "blankRate": 0
+   },
+   {
+    "season": 2026,
+    "rows": 1257,
+    "blank": 3,
+    "blankRate": 0.002386634844868735
+   }
+  ]
+ },
+ "join": {
+  "salaryRows": 27349,
+  "rowsWithNoMlbId": 714,
+  "rowsJoinedToA2005to2025Debut": 18259
+ },
+ "testA_fullFile": [
+  {
+   "bucket": "line +31 or later",
+   "rows": 12209,
+   "blank": 793,
+   "rate": 0.06495208452780736
+  },
+  {
+   "bucket": "line +1 to +30",
+   "rows": 2576,
+   "blank": 145,
+   "rate": 0.0562888198757764
+  },
+  {
+   "bucket": "on or before the line",
+   "rows": 2687,
+   "blank": 268,
+   "rate": 0.09973948641607741
+  }
+ ],
+ "testB_from2010": [
+  {
+   "bucket": "line +31 or later",
+   "rows": 11433,
+   "blank": 17,
+   "rate": 0.0014869238170209043
+  },
+  {
+   "bucket": "line +1 to +30",
+   "rows": 2434,
+   "blank": 3,
+   "rate": 0.0012325390304026294
+  },
+  {
+   "bucket": "on or before the line",
+   "rows": 2425,
+   "blank": 6,
+   "rate": 0.002474226804123711
+  }
+ ],
+ "testA_pooled": {
+  "z": 6.8276335649575,
+  "p": 8.683831431710587e-12,
+  "p1": 0.09973948641607741,
+  "p2": 0.0634426783902604,
+  "diff": 0.036296808025817015
+ },
+ "testB_pooled": {
+  "z": 1.1745392083914197,
+  "p": 0.24017923918030848,
+  "p1": 0.002474226804123711,
+  "p2": 0.0014422730222831183,
+  "diff": 0.0010319537818405929
+ },
+ "byDebutEra": [
+  {
+   "era": "debuted 2010-2025",
+   "rows": 13111,
+   "blank": 38,
+   "rate": 0.002898329646861414
+  },
+  {
+   "era": "debuted 2005-2009",
+   "rows": 4361,
+   "blank": 1168,
+   "rate": 0.2678284797064893
+  }
+ ],
+ "testC_coverage": [
+  {
+   "bucket": "on or before the line",
+   "debuts": 526,
+   "withRow": 372,
+   "rate": 0.7072243346007605
+  },
+  {
+   "bucket": "line +1 to +30",
+   "debuts": 612,
+   "withRow": 390,
+   "rate": 0.6372549019607843
+  },
+  {
+   "bucket": "line +31 or later",
+   "debuts": 2786,
+   "withRow": 1834,
+   "rate": 0.6582914572864321
+  }
+ ],
+ "testC_pooled": {
+  "z": 2.37797326262621,
+  "p": 0.017408064948186253,
+  "p1": 0.7072243346007605,
+  "p2": 0.6545026486168334,
+  "diff": 0.052721685983927125
+ }
+}

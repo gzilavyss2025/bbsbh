@@ -1,0 +1,27 @@
+Men who provably banked NO service year (joined the roster after the line):
+  total with a next-spring cell      2193
+  cell is a bare integer             18   of these, WRONG (reads >= 1 year): 11  61.1%
+  cell carries a day count           2175   of these, WRONG (reads >= 1 year): 12  0.6%
+
+So a day-count cell is right 99.4% of the time on this test, and a bare
+integer is wrong 61.1% of the time. The two are different populations.
+
+Men who COULD have banked a year (joined on or before the line):
+  total with a next-spring cell      187
+  cell is a bare integer             65  reading exactly "1": 65
+
+THE BIND. A man who banks exactly one year is written "1". A man whose
+service was rounded to a season count is also written "1". The cell cannot
+tell them apart, so `mls` can neither confirm the line nor be used to
+measure who beat it. Excluding the bare integers removes the confirmations
+along with the errors.
+
+examples of a provably wrong cell:
+  Brad Bergesen 2009: line 2009-04-18, joined 2009-04-21 (+3), next spring reads "1"
+  Jonny Venters 2010: line 2010-04-15, joined 2010-04-17 (+2), next spring reads "1"
+  Brennan Boesch 2010: line 2010-04-15, joined 2010-04-23 (+8), next spring reads "1"
+  Josh Collmenter 2011: line 2011-04-10, joined 2011-04-15 (+5), next spring reads "1"
+  Yoervis Medina 2013: line 2013-04-12, joined 2013-04-16 (+4), next spring reads "1"
+  Hansel Robles 2015: line 2015-04-16, joined 2015-04-21 (+5), next spring reads "1"
+  Derek Law 2016: line 2016-04-14, joined 2016-04-15 (+1), next spring reads "1"
+  Adley Rutschman 2022: line 2022-04-17, joined 2022-05-21 (+34), next spring reads "1"
