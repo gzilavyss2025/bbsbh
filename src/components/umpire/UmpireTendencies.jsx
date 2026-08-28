@@ -1,4 +1,5 @@
 import '../../styles/53-umpire-tendencies.css'
+import { humanDate } from '../../lib/dates.js'
 import { LEAN_TIERS, LEAN_TIER_LABELS, leanCaretFraction } from '../../lib/statTiers.js'
 import { HomePlateIcon } from '../badges/UmpireTierGlyph.jsx'
 import { UmpireZoneMap } from './UmpireZoneMap.jsx'
@@ -178,9 +179,16 @@ export function UmpireTendencies({ umpire }) {
         </div>
       )}
 
+      {/* The run stamp the shard carries (gen-umpires.mjs writes generatedAt),
+          not the words "updated nightly". The cadence claim was true of the
+          cron's schedule and said nothing about THIS file: on a night the cron
+          fails — or, as on 2026-08-28, never gets dispatched at all — the line
+          went on promising freshness it had no way to check. A date can be
+          read and disbelieved; a claim cannot. */}
       <div className="umptend__prov">
         {umpire.season && `${umpire.season} season · `}
-        {season.games} scored {season.games === 1 ? 'game' : 'games'} · updated nightly
+        {season.games} scored {season.games === 1 ? 'game' : 'games'}
+        {umpire.generatedAt && ` · updated ${humanDate(umpire.generatedAt.slice(0, 10))}`}
       </div>
     </section>
   )

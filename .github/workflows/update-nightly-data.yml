@@ -457,6 +457,16 @@ jobs:
             exit 1
           fi
 
+      # AFTER the commit, so it judges what actually shipped rather than what the
+      # runner happened to have on disk. This catches the failure the step below
+      # cannot: a generator that threw goes red there, but one that ran, exited
+      # 0 and produced NOTHING leaves a stale file and reports success. Every
+      # incident in this file's header is that shape. always(), because a night
+      # where something already failed is exactly when the staleness matters.
+      - name: Data freshness
+        if: always()
+        run: node scripts/check-data-freshness.mjs
+
       - name: Fail if any generator errored
         if: |
           steps.teams.outcome == 'failure' ||

@@ -87,7 +87,13 @@ export function BullpenPage() {
              uses. Ranked on the share of each staff that is likely down rather than the count,
              because four tired arms out of six is a different night than four out of eleven."
         meta={[
-          { label: 'As of', value: humanDate(asOf) },
+          // The DATA's own stamp, not today's date. This used to read
+          // humanDate(asOf) — i.e. toApiDate(), today, computed in the browser —
+          // which told the reader nothing: it said "today" whether workload.json
+          // was written last night or last week. `asOf` still drives the
+          // availability math below (a bullpen is down or not AS OF TODAY);
+          // it just can no longer vouch for how fresh the file behind it is.
+          { label: 'Data', value: data?.asOf ? humanDate(data.asOf) : '—' },
           { label: 'Arms tracked', value: league.arms || '—' },
           { label: 'Clubs', value: league.clubs || '—' },
         ]}
