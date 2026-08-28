@@ -231,7 +231,16 @@ don't run these by hand.
   `gen-comeback-wins.mjs` each paid once, as a `--since` backfill and a
   `--rebuild`. The app derives one more layer at READ time, which is what lets a
   dated (`?d=`) team page apply its own day-before cutoff exactly rather than
-  print a season total that looks past it. SQLite-backed (`team-records` group,
+  print a season total that looks past it. The scored-by-inning rows are the
+  worked example of that bill NOT being paid: the raw inning line was already in
+  the ledger, so nineteen new splits cost one `--export-only` run and no
+  network. What ships per row is `ib`, a bitmask of the innings the club scored
+  in **its own half** (bit n-1 for inning n, capped at 31 bits so the value
+  stays positive), plus `ix` when any of that scoring came after the game's
+  scheduled length — a separate flag rather than a fixed bit position, because a
+  MiLB doubleheader is scheduled for seven innings and its eighth is extra
+  baseball. Together they cost about 1.2 KB on a club's ~135-game season file,
+  roughly 4.5%. SQLite-backed (`team-records` group,
   ADR-0021), APPEND-ONLY over newly-Final games; `team_record_ingested_games` is
   the idempotency guard, so the nightly cost is the ~65 games that finished,
   never the season. That table is **seven columns plus a `payload_json`**, not

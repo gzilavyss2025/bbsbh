@@ -818,7 +818,7 @@
     },
     "teamRecords.js": {
       "class": "cutoff-gated",
-      "why": "The shard is a row PER GAME carrying `rs`/`ra`/`hi`/`ha`, and `teamRecordsFor(data, { cutoff = null })` defaults the cutoff to null — so a bare link tallies every Final row, tonight's included. Same shape as standings.js, which is correctly cutoff-gated for the same reason: a season aggregate rather than one line, so no SealBox, but the safety lives entirely in the date the CALLER requests. ADR-0034 sanctions what it shows; the old spoiler-free label hid that a date gate exists at all."
+      "why": "The shard is a row PER GAME carrying `rs`/`ra`/`hi`/`ha`, and `teamRecordsFor(data, { cutoff = null })` defaults the cutoff to null — so a bare link tallies every Final row, tonight's included. Same shape as standings.js, which is correctly cutoff-gated for the same reason: a season aggregate rather than one line, so no SealBox, but the safety lives entirely in the date the CALLER requests. ADR-0034 sanctions what it shows; the old spoiler-free label hid that a date gate exists at all. `lastOccurrence` answers a DATE rather than a rate (`when was the last time this club scored in the top of the 1st`), which makes the caller's date the whole guarantee twice over: it applies the same `cutoff` before it looks, and inside `teamRecordsFor` it reads the already-filtered games, so a row's last-seen date can never name a game the row itself did not count."
     },
     "teamScore.js": {
       "class": "cutoff-gated",

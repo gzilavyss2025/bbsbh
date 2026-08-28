@@ -76,6 +76,8 @@ import {
   leadStateAfter,
   leadTrailFlags,
   lastAtBatOutcome,
+  inningsScoredMask,
+  scoredInExtras,
   starterLine,
   isQualityStart,
   battedAroundHalves,
@@ -291,6 +293,13 @@ function shipRow(r, getaway) {
     if (state != null) row[key] = state
   }
   put('x', innings.length > p.scheduledInnings ? 1 : 0)
+  // The club's own scoring line as a bitmask (see inningsScoredMask), plus the
+  // one thing the mask cannot say on its own: whether any of that scoring
+  // happened past the scheduled length. Together they answer "scored in the
+  // top/bottom of the Nth" and "scored in extra innings" for a row that costs
+  // a handful of bytes.
+  put('ib', inningsScoredMask(innings, isHome))
+  put('ix', scoredInExtras(innings, isHome, p.scheduledInnings) ? 1 : 0)
   put('sf', first ? (first === (isHome ? 'home' : 'away') ? 1 : -1) : 0)
   put('cb', won && trailed ? 1 : 0)
   put('ll', !won && r.result === 'L' && led ? 1 : 0)

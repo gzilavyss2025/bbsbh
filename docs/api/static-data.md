@@ -553,15 +553,27 @@ for each generator; the reader modules:
 - `teamRecords.js` — the Numbers tab's situational **Records** card, from
   `public/data/team-records/{season}/{teamId}.json` (`gen-team-records.mjs`),
   MLB and all four full-season MiLB levels. The file is a compact ROW PER GAME,
-  not finished records; `teamRecordsFor(data, { cutoff, half })` does the
-  tallying, and that is the point rather than an implementation detail. Two
+  not finished records; `teamRecordsFor(data, { cutoff, half, month })` does the
+  tallying, and that is the point rather than an implementation detail. Three
   things follow. A dated (`?d=`) page passes the same day-before `cutoff` its
   standings use, so the records cannot look further ahead than the rest of the
   tab — a precomputed season total could not do that without a date-keyed
-  snapshot per club per day. And `half` (`'all' | 'pre' | 'post'`, `HALVES`)
+  snapshot per club per day. `half` (`'all' | 'pre' | 'post'`, `HALVES`)
   answers the pre/post-All-Star lever off the same rows, with no second dataset;
   `data.allStarDate` absent (an early-season file) makes the lever a no-op and
-  the card hides it.
+  the card hides it. And `month` (1-12, or null) scopes every row to one
+  calendar month by filtering the same `games` array before the fold, so it
+  costs no per-row logic at all; `monthsPlayed(data, { cutoff })` is the menu a
+  selector offers, so a control can never name a month with no games behind it.
+  The three levers compose — August, post-break, before a cutoff, is one filter.
+  `lastOccurrence(data, predicate, { cutoff })` is the one query here that
+  answers a DATE rather than a rate: the newest game matching a row's own
+  predicate, as `{ date, opp, result }`. `opp` is a team ID — the shard carries
+  league and division names but no club names — so a surface prints the
+  opponent only if it already holds a club list (`/situational-records` does;
+  the card does not). Rows in the `Scoring by inning` group carry it as `last`,
+  computed over the SAME filtered games the row was counted over, so the record
+  and the date beside it can never disagree about which games they mean.
   `RECORD_GROUPS` is the declared table — each row a label and a PREDICATE over
   one game. A predicate returning false EXCLUDES that game from the row rather
   than scoring it a loss, so a row nobody has a game for is dropped instead of
@@ -582,7 +594,7 @@ for each generator; the reader modules:
   into. `fetchLevelTeamRecords(sportId, season)` pulls that level's thirty
   shards (`teams-static.js` supplies the club list; `staticJsonBy` memoizes each
   one, so paging between splits, halves and levels re-downloads nothing);
-  `buildRankingIndex(entries, { cutoff, half })` calls `teamRecordsFor` per club
+  `buildRankingIndex(entries, { cutoff, half, month })` calls `teamRecordsFor` per club
   and inverts the result into a metric-keyed table; `rankMetric` sorts one of
   them. It derives NOTHING new — a changed predicate in `RECORD_GROUPS` changes
   the card and this page together, which is why the row `id`s there are stable

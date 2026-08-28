@@ -480,6 +480,13 @@ test('situationalRecordsPath carries the explorer state and the usual scope hint
   // 'all' is the default, so it stays out of the URL rather than pinning the
   // page to a lever the reader never touched.
   assert.equal(situationalRecordsPath({ metric: 'lead-8', half: 'all' }), '/situational-records?metric=lead-8')
+  // The month lever rides the same way: written when set, absent for the whole
+  // season, so it never pins a link to a stretch the reader never chose.
+  assert.equal(
+    situationalRecordsPath({ metric: 'scored-top-1', month: 8 }),
+    '/situational-records?metric=scored-top-1&month=8',
+  )
+  assert.equal(situationalRecordsPath({ metric: 'scored-top-1', month: null }), '/situational-records?metric=scored-top-1')
 })
 
 test('parseRoute reads the split and the half back off the URL', () => {
@@ -490,16 +497,18 @@ test('parseRoute reads the split and the half back off the URL', () => {
     category: null,
     metric: null,
     half: null,
+    month: null,
     sort: null,
     order: null,
   })
-  assert.deepEqual(parseRoute('/situational-records?category=late-innings&metric=lead-8&half=post&sort=played&order=asc&s=12&d=2026-07-05'), {
+  assert.deepEqual(parseRoute('/situational-records?category=late-innings&metric=lead-8&half=post&month=8&sort=played&order=asc&s=12&d=2026-07-05'), {
     name: 'situational-records',
     asOf: '2026-07-05',
     sportId: 12,
     category: 'late-innings',
     metric: 'lead-8',
     half: 'post',
+    month: '8',
     sort: 'played',
     order: 'asc',
   })

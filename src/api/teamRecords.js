@@ -45,6 +45,13 @@ export async function fetchTeamRecords(teamId, season) {
 const margin = (g) => Math.abs(g.rs - g.ra)
 const starterOuts = (g) => g.si ?? null
 const oppStarterOuts = (g) => g.oi ?? null
+// `ib` is the club's OWN scoring line as a bitmask — bit n-1 set when it
+// scored in inning n of the half it bats (scripts/lib/team-records.mjs's
+// inningsScoredMask). A club bats one half per game, so `h` decides which of
+// the two rows at a given inning number the game can even qualify for: a home
+// club never batted the top of the 2nd, and is therefore absent from that row
+// rather than counted as a loss in it.
+const scoredInInning = (g, n) => ((g.ib ?? 0) & (1 << (n - 1))) !== 0
 
 // The record rows, in the order the card prints them, grouped by subject.
 // A predicate returning false EXCLUDES the game from that row entirely (it is
@@ -67,6 +74,29 @@ export const RECORD_GROUPS = [
       { id: 'opp-scored-first', k: 'Opponent scores first', p: (g) => g.sf === -1 },
       { id: 'scored-4-plus', k: 'Scoring 4+ runs', p: (g) => g.rs >= 4 },
       { id: 'scored-3-fewer', k: 'Scoring 3 or fewer', p: (g) => g.rs <= 3 },
+    ],
+  },
+  // Its own group rather than nineteen more rows inside Scoring. The two
+  // render surfaces both key their headings, their jump nav and their
+  // "more in this group" list off a group title, and a Scoring group of
+  // twenty-three would have swamped all three. The card draws this one as a
+  // compact inning grid (records/InningScoringGrid.jsx) instead of flat rows.
+  //
+  // Each row carries `last: true`: teamRecordsFor appends the most recent
+  // game that matched, which is the "when was the last time…" half of the
+  // question these rows exist to answer.
+  {
+    title: 'Scoring by inning',
+    rows: [
+      ...Array.from({ length: 9 }, (_, i) => i + 1).flatMap((n) => [
+        { id: `scored-top-${n}`, k: `Scoring in the top of the ${ordinal(n)}`, half: 'top', inning: n, last: true, p: (g) => !g.h && scoredInInning(g, n) },
+        { id: `scored-bottom-${n}`, k: `Scoring in the bottom of the ${ordinal(n)}`, half: 'bottom', inning: n, last: true, p: (g) => Boolean(g.h) && scoredInInning(g, n) },
+      ]),
+      // Extras as ONE bucket, the way the `x` flag already treats them, and
+      // read off the generator's own `ix` flag rather than a fixed bit
+      // position — a MiLB doubleheader is scheduled for seven innings, so its
+      // eighth is extra baseball and no bit number can say that.
+      { id: 'scored-extras', k: 'Scoring in extra innings', inning: 'X', last: true, p: (g) => g.ix === 1 },
     ],
   },
   {
@@ -147,6 +177,15 @@ export const RECORD_GROUPS = [
 ]
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+// 1st, 2nd, 3rd, 4th — the inning names the by-inning rows print. Only 1-9 are
+// ever asked for here, so the teen exception every general implementation
+// needs cannot be reached; it is written anyway because the next caller might.
+export function ordinal(n) {
+  const rest = n % 100
+  if (rest >= 11 && rest <= 13) return `${n}th`
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`
+}
 
 // ---------------------------------------------------------------------------
 // Tally
@@ -199,6 +238,73 @@ export const HALVES = [
 function inHalf(game, half, allStarDate) {
   if (half === 'all' || !allStarDate) return true
   return half === 'pre' ? game.d < allStarDate : game.d > allStarDate
+}
+
+// The fourth lever, and the only one that is a plain query parameter rather
+// than a named split: one calendar month, 1-12, or null for the whole season.
+// It filters the SAME `games` array every row is folded from, so a month
+// scopes every record at once — old rows and new — with no per-row logic.
+function inMonth(game, month) {
+  return !month || Number(game.d.slice(5, 7)) === month
+}
+
+// The one place the three levers are applied, so teamRecordsFor and
+// lastOccurrence can never disagree about what "the filtered games" means.
+function filterGames(data, { cutoff = null, half = 'all', month = null } = {}) {
+  const allStarDate = data?.allStarDate ?? null
+  return (data?.games ?? []).filter(
+    (g) => (!cutoff || g.d <= cutoff) && inHalf(g, half, allStarDate) && inMonth(g, month),
+  )
+}
+
+// The months this club actually played, in calendar order — the menu a month
+// selector offers, so a control never prints a month with no games behind it.
+// Cutoff-aware for the same reason every other reader here is: a dated page
+// must not learn that a later month exists.
+export function monthsPlayed(data, { cutoff = null } = {}) {
+  const seen = new Set()
+  for (const g of data?.games ?? []) {
+    if (cutoff && g.d > cutoff) continue
+    seen.add(Number(g.d.slice(5, 7)))
+  }
+  return [...seen].sort((a, b) => a - b).map((m) => ({ month: m, label: MONTHS[m - 1], short: SHORT_MONTHS[m - 1] }))
+}
+
+// WHEN was the last time? Every other row in this module answers a rate; this
+// answers a date, which is the query shape the situational-records system did
+// not have. Returns `{ date, opp, result }` for the most recent game matching
+// `predicate`, or null when it has never happened.
+//
+// `opp` is the opponent's team ID, not a name — the shard carries league and
+// division names but no club names, so a surface that wants to print the
+// opponent resolves the id against the team list it already holds
+// (SituationalRecordsPage does; the Numbers card does not, and prints the date
+// and the result alone).
+//
+// Takes EITHER the fetched shard or an already-filtered games array. The
+// array form is what teamRecordsFor uses — it has filtered once for the whole
+// card and must not re-filter nineteen times, and more importantly a row's
+// "last time" has to sit inside the same half and month the row itself was
+// counted over. The shard form is the standalone capability, and it honours
+// the same `cutoff` every other reader here does: a dated page must not learn
+// that something happened after its own date.
+export function lastOccurrence(data, predicate, opts = {}) {
+  const games = Array.isArray(data) ? data : filterGames(data, opts)
+  let best = null
+  for (const g of games) {
+    if (!predicate(g)) continue
+    if (!best || g.d > best.d) best = g
+  }
+  return best ? { date: best.d, opp: best.o, result: best.r } : null
+}
+
+// "Aug 26" — the compact form both surfaces print a last-occurrence date in.
+// Parsed off the ISO string rather than through Date, which would shift the
+// day by one in any timezone behind UTC.
+export function shortDate(iso) {
+  if (!iso) return DASH
+  const [, m, d] = iso.split('-')
+  return `${SHORT_MONTHS[Number(m) - 1] ?? ''} ${Number(d)}`.trim()
 }
 
 // ---------------------------------------------------------------------------
@@ -281,11 +387,12 @@ export function seriesRecordCounts(games) {
 // per-date rank series. Counted only over dates inside the cutoff and the
 // chosen half, so the pre-break figure is a real "where did we sit at the
 // break" answer rather than a season total.
-export function daysAtPlace(dailyRank, { cutoff, half, allStarDate }) {
+export function daysAtPlace(dailyRank, { cutoff, half, allStarDate, month = null }) {
   const days = [0, 0, 0, 0, 0]
   for (const [date, rank] of Object.entries(dailyRank ?? {})) {
     if (cutoff && date > cutoff) continue
     if (!inHalf({ d: date }, half, allStarDate)) continue
+    if (!inMonth({ d: date }, month)) continue
     if (rank >= 1 && rank <= 5) days[rank - 1]++
   }
   return days
@@ -357,12 +464,10 @@ export const COUNT_METRICS = [
 // `data` is the fetched shard; `cutoff` is the dated page's day-before cutoff
 // (null on a live page); `half` is one of HALVES' keys. Returns null when the
 // club has no file or no games inside the filter, and the card then hides.
-export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
+export function teamRecordsFor(data, { cutoff = null, half = 'all', month = null } = {}) {
   if (!data?.games?.length) return null
   const allStarDate = data.allStarDate ?? null
-  const games = data.games.filter(
-    (g) => (!cutoff || g.d <= cutoff) && inHalf(g, half, allStarDate),
-  )
+  const games = filterGames(data, { cutoff, half, month })
   if (!games.length) return null
 
   const groups = RECORD_GROUPS.map((group) => ({
@@ -371,7 +476,14 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
       .map((row) => {
         const t = blank()
         for (const g of games) if (row.p(g)) fold(t, g.r)
-        return { id: row.id, k: row.k, played: t.wins + t.losses + t.ties, ...formatRecord(t) }
+        const out = { id: row.id, k: row.k, played: t.wins + t.losses + t.ties, ...formatRecord(t) }
+        // A row that asked for it carries WHEN it last happened, over the same
+        // filtered games it was counted over — so "last time" never names a
+        // date outside the half or month the reader is looking at.
+        if (row.last) out.last = lastOccurrence(games, row.p)
+        if (row.half) out.half = row.half
+        if (row.inning != null) out.inning = row.inning
+        return out
       })
       .filter((r) => r.played > 0),
   })).filter((g) => g.rows.length > 0)
@@ -383,7 +495,7 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
     if (!byMonth.has(m)) byMonth.set(m, blank())
     fold(byMonth.get(m), g.r)
   }
-  const monthGroup = {
+  const monthGroup = month ? null : {
     title: 'By month',
     rows: [...byMonth.entries()]
       .sort((a, b) => a[0] - b[0])
@@ -442,7 +554,7 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
   return {
     allStarDate,
     gamesCounted: games.length,
-    groups: [...groups, monthGroup, ...opponentGroups],
+    groups: [...groups, ...(monthGroup ? [monthGroup] : []), ...opponentGroups],
     counts: {
       comebackWins: games.filter((g) => g.cb === 1).length,
       lossesAfterLeading: games.filter((g) => g.ll === 1).length,
@@ -455,7 +567,7 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
       seriesWon: seriesRecord.won,
       seriesLost: seriesRecord.lost,
       streaks: longestStreaks(games),
-      daysAtPlace: daysAtPlace(data.dailyRank, { cutoff, half, allStarDate }),
+      daysAtPlace: daysAtPlace(data.dailyRank, { cutoff, half, allStarDate, month }),
     },
   }
 }
