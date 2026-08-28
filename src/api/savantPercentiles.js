@@ -11,7 +11,7 @@ import { staticJson } from './staticJson.js'
 // on any fetch failure — the card simply doesn't render. Cached in-memory for
 // the session since the file only changes once a day.
 export const fetchSavantPercentiles = staticJson('/data/savant-percentiles.json', {
-  fallback: { season: null, bat: {}, pit: {} },
+  fallback: { season: null, bat: {}, pit: {}, midBat: {}, midPit: {} },
 })
 
 // A single player's percentile map for one group, or null when he isn't in
@@ -32,6 +32,20 @@ export function savantPercentilesFor(data, personId, group) {
 export function savantRawFor(data, personId, group) {
   const key = group === 'pitching' ? 'rawPit' : 'rawBat'
   return data?.[key]?.[personId] ?? null
+}
+
+// The league BASELINE the strip's already-drawn 50th-percentile reference
+// line stands for — one map per group, not per player: every player of a
+// group reads the same figures. The MEDIAN raw rate over the population that
+// has both a percentile rank and a raw value for that metric (see
+// gen-savant-percentiles.mjs's medianRates call for why median, not a
+// leaderboard mean — a percentile rank puts the median observation at 50 BY
+// CONSTRUCTION, so it is the one summary that agrees with the rule already on
+// the page). Missing a key when that metric's own intersection was too thin
+// to trust, same degradation discipline as the raw-rate map above.
+export function medianRatesFor(data, group) {
+  const key = group === 'pitching' ? 'midPit' : 'midBat'
+  return data?.[key] ?? null
 }
 
 // "Hits like" — the closest bats in Statcast SKILL space to one hitter, for
@@ -121,6 +135,25 @@ export const BATTER_METRICS = [
     fmt: dec1,
     def: 'How fast he runs at full sprint.',
   },
+  {
+    key: 'batSpeed',
+    label: 'Bat speed',
+    fmt: dec1,
+    def: 'How fast he swings the bat.',
+  },
+  {
+    key: 'swingLength',
+    label: 'Swing length',
+    fmt: dec1,
+    def: 'How far his bat travels on its way to the ball — a shorter swing gets there quicker.',
+    lowerIsBetter: true,
+  },
+  {
+    key: 'squaredUp',
+    label: 'Squared-up %',
+    fmt: pct1,
+    def: 'How often he times his swing to hit the ball on the sweet spot of the bat.',
+  },
 ]
 
 export const PITCHER_METRICS = [
@@ -192,23 +225,42 @@ export const PITCHER_METRICS = [
 // own sample floor for has no percentile and is left out entirely, same as the
 // card grid always did.
 //
+// `baseline` is the league figure the strip's already-drawn 50th-percentile
+// reference line stands for — `median`'s value for this metric, formatted
+// with the SAME `fmt` as the player's own `value` so the two read as directly
+// comparable figures, not two different scales. Null when that metric had no
+// trustworthy median (see medianRatesFor); the row still renders fine without
+// one, same degradation as a missing raw value. It is deliberately not a
+// separate visible caption — PercentileStrip.jsx renders it as a bare,
+// subordinate figure, and this module's own job is only to hand over the
+// number, correctly formatted, or null.
+//
 // Returns null when fewer than three metrics are known — a two-row strip is a
 // stat line, not a profile, and the labelled season tables above already say it
 // better.
-export function percentileRows(savant, raw, group) {
+export function percentileRows(savant, raw, group, median) {
   if (!savant) return null
   const metrics = group === 'pitching' ? PITCHER_METRICS : BATTER_METRICS
   const rows = metrics
     .filter((m) => Number.isFinite(savant[m.key]))
     .map((m) => {
       const rawValue = raw?.[m.key]
+      const medianValue = median?.[m.key]
+      const baseline = Number.isFinite(medianValue) && m.fmt ? m.fmt(medianValue) : null
       return {
         key: m.key,
         label: m.label,
         percentile: savant[m.key],
         value: Number.isFinite(rawValue) && m.fmt ? m.fmt(rawValue) : null,
+        baseline,
         lowerIsBetter: Boolean(m.lowerIsBetter),
-        def: m.def,
+        // The baseline figure gets its own sentence here, not on the visible
+        // row — the flip-open disclosure is prose already, so it is where a
+        // reader learns what the lighter number means, rather than the strip
+        // carrying a caption or a unit word next to it.
+        def: baseline != null
+          ? `${m.def} The lighter number beside his own is the median of every qualified player. Half of them rank above it. Half rank below.`
+          : m.def,
       }
     })
   return rows.length >= 3 ? rows : null

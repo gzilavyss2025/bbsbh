@@ -14,6 +14,7 @@ import {
   fetchSavantPercentiles,
   savantPercentilesFor,
   savantRawFor,
+  medianRatesFor,
   similarHittersFor,
 } from '../savantPercentiles.js'
 import {
@@ -95,6 +96,10 @@ export async function loadPlayerAnalytics(id, asOf) {
       // The raw season rates behind those percentiles, for the strip's own
       // labels (see savantRawFor).
       block.savantRaw = savantRawFor(savantData, id, group)
+      // The league-wide MEDIAN behind each metric — one map per group, same
+      // for every player, so it rides the block for the strip's baseline
+      // figure (see medianRatesFor).
+      block.savantMedian = medianRatesFor(savantData, group)
       // "Pitches like" / "Hits like" — one field for both groups, since a block
       // only ever renders its own card. A pitcher ranks in arsenal space against
       // the level he is actually pitching at (see similarPitchersFor); a hitter

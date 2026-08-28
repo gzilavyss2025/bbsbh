@@ -97,15 +97,39 @@
   color: var(--text-caption);
 }
 
+/* The value column: the player's own raw rate, and — stacked directly under
+   it, not beside it, so the column never widens and the four-column grid
+   never shifts — the league median the track's reference line stands for.
+   Two lines in one grid cell, not two grid columns. */
+.pctstrip__value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-self: end;
+}
+
 /* The raw rate the rank was computed from. Mono tabular so the decimal points
    line up down the column — the radar drew these as SVG text at five
    different angles, where they never could. */
-.pctstrip__value {
+.pctstrip__value-player {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-small);
   color: var(--text-body);
-  justify-self: end;
+}
+
+/* The league median — bare figures, no word beside them. This is the SAME
+   ink as .pctstrip__track::before's pencilled reference line (var(--text-
+   caption)), on purpose: the shared ink is what tells a reader "this number
+   is what that line means" without a caption having to say so. Smaller and
+   lighter than the player's own value above it, which stays the number the
+   eye lands on first. */
+.pctstrip__value-baseline {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-solid);
+  color: var(--text-caption);
 }
 
 /* The track: a hairline rule the full width of the column, with the

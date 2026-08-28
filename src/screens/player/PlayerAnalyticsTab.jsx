@@ -86,7 +86,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
             />
           )}
 
-          <StatcastPercentiles savant={block.savant} raw={block.savantRaw} group={block.group} />
+          <StatcastPercentiles savant={block.savant} raw={block.savantRaw} median={block.savantMedian} group={block.group} />
 
           {/* The rates behind the headline tiles (a pitcher's FIP/ERA−/
               K%/BB%; a hitter's wOBA/wRC+/discipline) — beside Statcast's
