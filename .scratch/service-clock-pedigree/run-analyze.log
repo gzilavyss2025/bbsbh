@@ -1,0 +1,148 @@
+
+==============================================================================
+1. THE RETEST AT TRUE PEDIGREE GRAIN
+==============================================================================
+  Read the power columns first. They were fixed before any of this was run.
+
+  grain                           n      RR            95% CI   Wald    LRT  MDE80
+  top-100, observed-deep         70   0.529       0.056-4.958  0.577  0.556   none
+  top-30, observed               34   1.413       0.275-7.268  0.679  0.678   none
+  top-10, observed               12 5233467.052           0.000-—  0.990  0.077   none
+  top-30, all seasons            49   0.757       0.180-3.179  0.704  0.703   none
+  top-10, all seasons            19   1.781      0.146-21.785  0.652  0.647   none
+  the whole cohort, for scale   834   1.266       0.856-1.872  0.238  0.236   none
+
+  The same grains under the EXACT test, which fits nothing:
+
+  grain                         band n  post/pre      RR              95% CI      p
+  top-100, observed-deep             5       1/4   0.333           0.01-3.37  0.400
+  top-30, observed                   7       4/3   1.167           0.20-7.96  1.000
+  top-10, observed                   2       2/0       —            0.33-inf  0.130
+  top-30, all seasons                9       4/5   0.859           0.17-3.99  1.000
+  top-10, all seasons                3       2/1   2.516         0.13-148.44  0.588
+  the whole cohort, for scale      133     70/63   1.193           0.84-1.70  0.340
+
+==============================================================================
+2. KILL CRITERION — rank-matched controls
+==============================================================================
+  A club only gains by managing the clock for a man it means to hold six
+  years, so the effect must be LARGER for ranked men. Asked as one model:
+  does the line coefficient DIFFER between ranked and unranked men?
+
+  top-100  x line   interaction 1.250  CI 0.649-2.410  Wald p=0.505  LRT p=0.498
+  top-30   x line   interaction 0.814  CI 0.313-2.117  Wald p=0.672  LRT p=0.677
+  top-10   x line   interaction 0.961  CI 0.196-4.711  Wald p=0.961  LRT p=0.961
+
+  The interaction is the only specification here with usable power, and it
+  buys that power with an assumption the subset fits never make: that absent
+  a service clock a ranked man follows the SAME April promotion shape as an
+  unranked one. Section 4 tests exactly that assumption.
+
+==============================================================================
+3. Does the estimate sharpen as the pedigree sharpens?
+==============================================================================
+  A practice aimed at the men worth holding should grow as the cut tightens.
+
+  top-100, observed-deep       n  70   GLM 0.529   exact 0.333 on 5 in-band promotions
+  top-30, observed             n  34   GLM 1.413   exact 1.167 on 7 in-band promotions
+  top-10, observed             n  12   GLM 5233467.052   exact — on 2 in-band promotions
+
+==============================================================================
+4. KILL CRITERION — the placebo
+==============================================================================
+  Each season's line is slid by a fixed number of days and everything is
+  refitted. A real line must stand out from its neighbours. In the parent
+  spike three shifted dates were individually MORE significant than the
+  true line, and the pedigree cut gets no easier test.
+
+  top-100, observed-deep
+    true line   GLM 0.529 (p=0.577, LRT p=0.556)   exact 0.333 (p=0.400) on 5
+    placebo shifts at least as large: 20 of 25  ->  permutation p = 0.808
+    placebo shifts individually significant at p<0.05: 0
+
+  top-30, observed
+    true line   GLM 1.413 (p=0.679, LRT p=0.678)   exact 1.167 (p=1.000) on 7
+    placebo shifts at least as large: 8 of 25  ->  permutation p = 0.346
+    placebo shifts individually significant at p<0.05: 0
+
+  top-30, all seasons
+    true line   GLM 0.757 (p=0.704, LRT p=0.703)   exact 0.859 (p=1.000) on 9
+    placebo shifts at least as large: 17 of 25  ->  permutation p = 0.692
+    placebo shifts individually significant at p<0.05: 0
+
+  top-100 x line INTERACTION under the same placebo sweep
+    true line 1.250 (p=0.505)
+    placebo shifts at least as large: 10 of 25  ->  permutation p = 0.423
+    placebo shifts individually significant: 4 (shifts 8, 10, 12, 14)
+
+==============================================================================
+5. KILL CRITERION — roster need
+==============================================================================
+  Injured-list placements by the promoting club in the 21 days before the
+  promotion, at the arriving man's own side of the roster. In the parent
+  spike this ran AGAINST the clock reading: need is higher BEFORE the line.
+
+  top-100, observed-deep       before the line 2.38 (n=13)   after 1.53 (n=57)
+  top-30, observed             before the line 1.83 (n=6)   after 1.36 (n=28)
+  the whole cohort, for scale  before the line 2.26 (n=155)   after 1.64 (n=679)
+
+==============================================================================
+6. KILL CRITERION — club fixed effects
+==============================================================================
+  The parent spike showed a club dummy is ORTHOGONAL to the line: the line
+  falls on the same date for all thirty clubs in a season, so adding club
+  dummies cannot move the coefficient, and its doing nothing is arithmetic
+  rather than a passed test. That reasoning is unchanged here, so it is not
+  repeated as though it were evidence.
+
+  The within-club question the parent asked instead — give every club its
+  own line coefficient and test whether they differ — CANNOT be asked at
+  this grain, and the reason is countable:
+    top-100, observed-deep       70 promotions across 27 clubs — 2.59 per club
+    top-30, observed             34 promotions across 24 clubs — 1.42 per club
+    top-10, observed             12 promotions across 10 clubs — 1.20 per club
+  A model asking thirty clubs to differ needs thirty coefficients. It is not
+  run, and no club is named.
+
+==============================================================================
+7. Leave one season out
+==============================================================================
+  top-100, observed-deep       7 refits, ratio 0.000 to 1.213; significant in 0 of 7 (Wald), 0 of 7 (LRT)
+  top-30, observed             10 refits, ratio 0.542 to 1.978; significant in 0 of 10 (Wald), 0 of 10 (LRT)
+  top-30, all seasons          16 refits, ratio 0.231 to 0.941; significant in 0 of 16 (Wald), 0 of 16 (LRT)
+
+==============================================================================
+8. Sensitivity — the choices that could have made this come out otherwise
+==============================================================================
+  a. peak rank known at promotion time, against peak rank over the whole
+     ranking window (which lets a rank published AFTER the debut season in):
+     top-100 observed-deep    known at promotion 0.529 (n=70)   whole window 0.505 (n=71)
+     top-30 observed          known at promotion 1.413 (n=34)   whole window 1.511 (n=35)
+
+  b. the window groups. The censored years capture fewer ranked men because
+     the lists that would have named them do not exist. Coding those men as
+     unranked is the trap the prospect-value spike measured at a 35%
+     overstatement, so they never enter a ranked-versus-unranked comparison:
+     base cohort by window: {"censored":287,"observed-shallow":148,"observed-deep":399}
+     censored           15 of 287 promotions are top-30 (5.2%)
+     observed-shallow   10 of 148 promotions are top-30 (6.8%)
+     observed-deep      24 of 399 promotions are top-30 (6.0%)
+     The censored share is lower because the early lists are missing, not
+     because those men were worse. A season fixed effect absorbs it.
+
+==============================================================================
+9. What the raw calendar looks like, before any control
+==============================================================================
+  This is the number the day-of-season shape explains away in the parent
+  spike. It is shown for completeness, not as evidence.
+
+  top-100, observed-deep       57 of 70 promotions fall after the line (81.4%)
+  top-30, observed             28 of 34 promotions fall after the line (82.4%)
+  top-10, observed             10 of 12 promotions fall after the line (83.3%)
+  the whole cohort, for scale  679 of 834 promotions fall after the line (81.4%)
+
+  Every grain sits near the cohort share, and the cohort share is mostly
+  exposure: only a week or two of the first forty-five days sits before the
+  line at all.
+
+wrote findings.json

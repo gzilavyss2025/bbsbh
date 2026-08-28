@@ -1,0 +1,2799 @@
+{
+ "grains": {
+  "top100-deep": {
+   "label": "top-100, observed-deep",
+   "n": 70,
+   "glm": {
+    "n": 70,
+    "cells": 315,
+    "rateRatio": 0.5287798727960157,
+    "ci": [
+     0.05639627644980001,
+     4.957918704492095
+    ],
+    "se": 1.1419230050241727,
+    "z": -0.5579912572041721,
+    "p": 0.5768502927603258,
+    "lr": 0.3470142570297412,
+    "lrtP": 0.5558080845765587
+   },
+   "exact": {
+    "bandDays": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePost": 18,
+    "exposurePre": 24,
+    "kPost": 1,
+    "kPre": 4,
+    "n": 5,
+    "ratePost": 0.05555555555555555,
+    "ratePre": 0.16666666666666666,
+    "rateRatio": 0.3333333333333333,
+    "ci": [
+     0.006768537453727894,
+     3.368421478242347
+    ],
+    "p": 0.40024989587671933
+   },
+   "power": {
+    "key": "top100-deep",
+    "label": "top-100, observed-deep",
+    "note": "A \"ranked at all\" cut is only comparable where every list year is a top-100 list, so it runs on the observed-deep window alone (debut 2016-2023).",
+    "identification": "within-group; identified only inside the bins the line falls in",
+    "nCohort": 70,
+    "n": 70,
+    "postLine": 57,
+    "preLine": 13,
+    "identifyingBins": [
+     3,
+     4
+    ],
+    "identifyingDays": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "identifyingEvents": 5,
+    "seasons": [
+     2016,
+     2017,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023
+    ],
+    "cells": 315,
+    "columns": 22,
+    "analytic": {
+     "se": 0.9913193316264421,
+     "mde80": 16.075240634278455,
+     "mdeJustSignificant": 6.979560086893847,
+     "ciSpanFactorAtNull": 48.71425900656165
+    },
+    "simulation": {
+     "sims": 1000,
+     "curve": [
+      {
+       "rr": 1,
+       "waldPower": 0.014,
+       "lrtPower": 0.033,
+       "convergedShare": 1,
+       "meanPostLineEvents": 57.785
+      },
+      {
+       "rr": 1.25,
+       "waldPower": 0.014,
+       "lrtPower": 0.048,
+       "convergedShare": 1,
+       "meanPostLineEvents": 59.666
+      },
+      {
+       "rr": 1.5,
+       "waldPower": 0.022,
+       "lrtPower": 0.079,
+       "convergedShare": 1,
+       "meanPostLineEvents": 61.252
+      },
+      {
+       "rr": 1.75,
+       "waldPower": 0.029,
+       "lrtPower": 0.114,
+       "convergedShare": 1,
+       "meanPostLineEvents": 62.647
+      },
+      {
+       "rr": 2,
+       "waldPower": 0.025,
+       "lrtPower": 0.107,
+       "convergedShare": 1,
+       "meanPostLineEvents": 62.795
+      },
+      {
+       "rr": 2.5,
+       "waldPower": 0.023,
+       "lrtPower": 0.146,
+       "convergedShare": 1,
+       "meanPostLineEvents": 64.522
+      },
+      {
+       "rr": 3,
+       "waldPower": 0.033,
+       "lrtPower": 0.186,
+       "convergedShare": 1,
+       "meanPostLineEvents": 65.503
+      },
+      {
+       "rr": 4,
+       "waldPower": 0.034,
+       "lrtPower": 0.263,
+       "convergedShare": 1,
+       "meanPostLineEvents": 66.363
+      },
+      {
+       "rr": 5,
+       "waldPower": 0.038,
+       "lrtPower": 0.277,
+       "convergedShare": 1,
+       "meanPostLineEvents": 66.846
+      },
+      {
+       "rr": 6,
+       "waldPower": 0.029,
+       "lrtPower": 0.327,
+       "convergedShare": 1,
+       "meanPostLineEvents": 67.608
+      },
+      {
+       "rr": 8,
+       "waldPower": 0.022,
+       "lrtPower": 0.354,
+       "convergedShare": 1,
+       "meanPostLineEvents": 68.493
+      },
+      {
+       "rr": 10,
+       "waldPower": 0.03,
+       "lrtPower": 0.387,
+       "convergedShare": 1,
+       "meanPostLineEvents": 68.559
+      }
+     ],
+     "mde80Wald": null,
+     "mde80Lrt": null,
+     "maxWaldPower": 0.038,
+     "maxLrtPower": 0.387,
+     "sizeWald": 0.014,
+     "sizeLrt": 0.033
+    }
+   },
+   "exactPower": {
+    "key": "top100-deep",
+    "label": "top-100, observed-deep",
+    "seasons": [
+     2016,
+     2017,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023
+    ],
+    "bandDays": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePostLineDays": 18,
+    "exposurePreLineDays": 24,
+    "nInBand": 5,
+    "nTotal": 70,
+    "curve": [
+     {
+      "rr": 1.25,
+      "power": 0.026524537874001244
+     },
+     {
+      "rr": 1.5,
+      "power": 0.041587990903309315
+     },
+     {
+      "rr": 1.75,
+      "power": 0.058896278445719534
+     },
+     {
+      "rr": 2,
+      "power": 0.07776000000000008
+     },
+     {
+      "rr": 2.5,
+      "power": 0.11798236980223098
+     },
+     {
+      "rr": 3,
+      "power": 0.1590361251087417
+     },
+     {
+      "rr": 4,
+      "power": 0.23730468750000028
+     },
+     {
+      "rr": 5,
+      "power": 0.3066820026178278
+     },
+     {
+      "rr": 6,
+      "power": 0.36664783205320095
+     },
+     {
+      "rr": 8,
+      "power": 0.46266436603796063
+     },
+     {
+      "rr": 10,
+      "power": 0.5348249858964674
+     },
+     {
+      "rr": 15,
+      "power": 0.6532541369668823
+     },
+     {
+      "rr": 20,
+      "power": 0.7241964340209968
+     }
+    ],
+    "mde80": null,
+    "maxPower": 0.7241964340209968
+   }
+  },
+  "top30-obs": {
+   "label": "top-30, observed",
+   "n": 34,
+   "glm": {
+    "n": 34,
+    "cells": 450,
+    "rateRatio": 1.4131655814107997,
+    "ci": [
+     0.2747751063087796,
+     7.267896234529868
+    ],
+    "se": 0.8355278531972221,
+    "z": 0.41390874021719254,
+    "p": 0.678941029105447,
+    "lr": 0.17255287393723506,
+    "lrtP": 0.6778529677530241
+   },
+   "exact": {
+    "bandDays": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePost": 32,
+    "exposurePre": 28,
+    "kPost": 4,
+    "kPre": 3,
+    "n": 7,
+    "ratePost": 0.125,
+    "ratePre": 0.10714285714285714,
+    "rateRatio": 1.1666666666666667,
+    "ci": [
+     0.1973716907811092,
+     7.964430423150559
+    ],
+    "p": 1
+   },
+   "power": {
+    "key": "top30-obs",
+    "label": "top-30, observed",
+    "note": "Rank 30 exists on a top-50 list, so the shallow years are comparable and the observed window (debut 2013-2023) is usable.",
+    "identification": "within-group; identified only inside the bins the line falls in",
+    "nCohort": 34,
+    "n": 34,
+    "postLine": 28,
+    "preLine": 6,
+    "identifyingBins": [
+     3,
+     4
+    ],
+    "identifyingDays": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "identifyingEvents": 7,
+    "seasons": [
+     2013,
+     2014,
+     2015,
+     2016,
+     2017,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023
+    ],
+    "cells": 450,
+    "columns": 25,
+    "analytic": {
+     "se": 0.8302704292717802,
+     "mde80": 10.237788552801597,
+     "mdeJustSignificant": 5.090265759961923,
+     "ciSpanFactorAtNull": 25.910805507040735
+    },
+    "simulation": {
+     "sims": 1000,
+     "curve": [
+      {
+       "rr": 1,
+       "waldPower": 0.006,
+       "lrtPower": 0.028,
+       "convergedShare": 1,
+       "meanPostLineEvents": 27.571
+      },
+      {
+       "rr": 1.25,
+       "waldPower": 0.008,
+       "lrtPower": 0.062,
+       "convergedShare": 1,
+       "meanPostLineEvents": 28.395
+      },
+      {
+       "rr": 1.5,
+       "waldPower": 0.019,
+       "lrtPower": 0.079,
+       "convergedShare": 1,
+       "meanPostLineEvents": 29.352
+      },
+      {
+       "rr": 1.75,
+       "waldPower": 0.01,
+       "lrtPower": 0.113,
+       "convergedShare": 1,
+       "meanPostLineEvents": 29.889
+      },
+      {
+       "rr": 2,
+       "waldPower": 0.021,
+       "lrtPower": 0.151,
+       "convergedShare": 1,
+       "meanPostLineEvents": 30.336
+      },
+      {
+       "rr": 2.5,
+       "waldPower": 0.023,
+       "lrtPower": 0.161,
+       "convergedShare": 1,
+       "meanPostLineEvents": 31.132
+      },
+      {
+       "rr": 3,
+       "waldPower": 0.031,
+       "lrtPower": 0.23,
+       "convergedShare": 1,
+       "meanPostLineEvents": 31.395
+      },
+      {
+       "rr": 4,
+       "waldPower": 0.029,
+       "lrtPower": 0.282,
+       "convergedShare": 1,
+       "meanPostLineEvents": 32.107
+      },
+      {
+       "rr": 5,
+       "waldPower": 0.023,
+       "lrtPower": 0.337,
+       "convergedShare": 1,
+       "meanPostLineEvents": 32.49
+      },
+      {
+       "rr": 6,
+       "waldPower": 0.03,
+       "lrtPower": 0.414,
+       "convergedShare": 1,
+       "meanPostLineEvents": 32.525
+      },
+      {
+       "rr": 8,
+       "waldPower": 0.031,
+       "lrtPower": 0.431,
+       "convergedShare": 1,
+       "meanPostLineEvents": 32.823
+      },
+      {
+       "rr": 10,
+       "waldPower": 0.018,
+       "lrtPower": 0.493,
+       "convergedShare": 1,
+       "meanPostLineEvents": 33.367
+      }
+     ],
+     "mde80Wald": null,
+     "mde80Lrt": null,
+     "maxWaldPower": 0.031,
+     "maxLrtPower": 0.493,
+     "sizeWald": 0.006,
+     "sizeLrt": 0.028
+    }
+   },
+   "exactPower": {
+    "key": "top30-obs",
+    "label": "top-30, observed",
+    "seasons": [
+     2013,
+     2014,
+     2015,
+     2016,
+     2017,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023
+    ],
+    "bandDays": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePostLineDays": 32,
+    "exposurePreLineDays": 28,
+    "nInBand": 7,
+    "nTotal": 34,
+    "curve": [
+     {
+      "rr": 1.25,
+      "power": 0.02437011341604648
+     },
+     {
+      "rr": 1.5,
+      "power": 0.040086073243669265
+     },
+     {
+      "rr": 1.75,
+      "power": 0.05852766346593511
+     },
+     {
+      "rr": 2,
+      "power": 0.07883971151487937
+     },
+     {
+      "rr": 2.5,
+      "power": 0.12236680494047755
+     },
+     {
+      "rr": 3,
+      "power": 0.16670431262895719
+     },
+     {
+      "rr": 4,
+      "power": 0.2503788261815468
+     },
+     {
+      "rr": 5,
+      "power": 0.32339621581081357
+     },
+     {
+      "rr": 6,
+      "power": 0.38561137381519384
+     },
+     {
+      "rr": 8,
+      "power": 0.48356112228450804
+     },
+     {
+      "rr": 10,
+      "power": 0.5558980372082858
+     },
+     {
+      "rr": 15,
+      "power": 0.6724231791785655
+     },
+     {
+      "rr": 20,
+      "power": 0.7410108730732876
+     }
+    ],
+    "mde80": null,
+    "maxPower": 0.7410108730732876
+   }
+  },
+  "top10-obs": {
+   "label": "top-10, observed",
+   "n": 12,
+   "glm": {
+    "n": 12,
+    "cells": 270,
+    "rateRatio": 5233467.05188947,
+    "ci": [
+     0,
+     null
+    ],
+    "se": 1271.8250378312293,
+    "z": 0.012164082379618475,
+    "p": 0.9902946512908831,
+    "lr": 3.1218542849107322,
+    "lrtP": 0.07724874064620202
+   },
+   "exact": {
+    "bandDays": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePost": 13,
+    "exposurePre": 23,
+    "kPost": 2,
+    "kPre": 0,
+    "n": 2,
+    "ratePost": 0.15384615384615385,
+    "ratePre": 0,
+    "rateRatio": null,
+    "ci": [
+     0.3322776575300699,
+     null
+    ],
+    "p": 0.13040123456790137
+   },
+   "power": {
+    "key": "top10-obs",
+    "label": "top-10, observed",
+    "note": "The grain the well-known individual cases live in.",
+    "identification": "within-group; identified only inside the bins the line falls in",
+    "nCohort": 12,
+    "n": 12,
+    "postLine": 10,
+    "preLine": 2,
+    "identifyingBins": [
+     3,
+     4
+    ],
+    "identifyingDays": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "identifyingEvents": 2,
+    "seasons": [
+     2015,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023
+    ],
+    "cells": 270,
+    "columns": 21,
+    "analytic": {
+     "se": 1.532261656693307,
+     "mde80": 73.16990901287113,
+     "mdeJustSignificant": 20.150575466549974,
+     "ciSpanFactorAtNull": 406.04569163312567
+    },
+    "simulation": {
+     "sims": 1000,
+     "curve": [
+      {
+       "rr": 1,
+       "waldPower": 0.002,
+       "lrtPower": 0.028,
+       "convergedShare": 1,
+       "meanPostLineEvents": 8.852
+      },
+      {
+       "rr": 1.25,
+       "waldPower": 0.001,
+       "lrtPower": 0.027,
+       "convergedShare": 1,
+       "meanPostLineEvents": 9.36
+      },
+      {
+       "rr": 1.5,
+       "waldPower": 0,
+       "lrtPower": 0.037,
+       "convergedShare": 1,
+       "meanPostLineEvents": 9.79
+      },
+      {
+       "rr": 1.75,
+       "waldPower": 0,
+       "lrtPower": 0.046,
+       "convergedShare": 1,
+       "meanPostLineEvents": 9.844
+      },
+      {
+       "rr": 2,
+       "waldPower": 0.002,
+       "lrtPower": 0.046,
+       "convergedShare": 1,
+       "meanPostLineEvents": 10.201
+      },
+      {
+       "rr": 2.5,
+       "waldPower": 0,
+       "lrtPower": 0.059,
+       "convergedShare": 1,
+       "meanPostLineEvents": 10.488
+      },
+      {
+       "rr": 3,
+       "waldPower": 0,
+       "lrtPower": 0.061,
+       "convergedShare": 1,
+       "meanPostLineEvents": 10.821
+      },
+      {
+       "rr": 4,
+       "waldPower": 0.002,
+       "lrtPower": 0.086,
+       "convergedShare": 1,
+       "meanPostLineEvents": 11.204
+      },
+      {
+       "rr": 5,
+       "waldPower": 0,
+       "lrtPower": 0.082,
+       "convergedShare": 1,
+       "meanPostLineEvents": 11.253
+      },
+      {
+       "rr": 6,
+       "waldPower": 0.001,
+       "lrtPower": 0.101,
+       "convergedShare": 1,
+       "meanPostLineEvents": 11.324
+      },
+      {
+       "rr": 8,
+       "waldPower": 0,
+       "lrtPower": 0.079,
+       "convergedShare": 1,
+       "meanPostLineEvents": 11.434
+      },
+      {
+       "rr": 10,
+       "waldPower": 0,
+       "lrtPower": 0.104,
+       "convergedShare": 1,
+       "meanPostLineEvents": 11.544
+      }
+     ],
+     "mde80Wald": null,
+     "mde80Lrt": null,
+     "maxWaldPower": 0.002,
+     "maxLrtPower": 0.104,
+     "sizeWald": 0.002,
+     "sizeLrt": 0.028
+    }
+   },
+   "exactPower": {
+    "key": "top10-obs",
+    "label": "top-10, observed",
+    "seasons": [
+     2015,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023
+    ],
+    "bandDays": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePostLineDays": 13,
+    "exposurePreLineDays": 23,
+    "nInBand": 2,
+    "nTotal": 12,
+    "curve": [
+     {
+      "rr": 1.25,
+      "power": 0
+     },
+     {
+      "rr": 1.5,
+      "power": 0
+     },
+     {
+      "rr": 1.75,
+      "power": 0
+     },
+     {
+      "rr": 2,
+      "power": 0
+     },
+     {
+      "rr": 2.5,
+      "power": 0
+     },
+     {
+      "rr": 3,
+      "power": 0
+     },
+     {
+      "rr": 4,
+      "power": 0
+     },
+     {
+      "rr": 5,
+      "power": 0
+     },
+     {
+      "rr": 6,
+      "power": 0
+     },
+     {
+      "rr": 8,
+      "power": 0
+     },
+     {
+      "rr": 10,
+      "power": 0
+     },
+     {
+      "rr": 15,
+      "power": 0
+     },
+     {
+      "rr": 20,
+      "power": 0
+     }
+    ],
+    "mde80": null,
+    "maxPower": 0
+   }
+  },
+  "top30-ext": {
+   "label": "top-30, all seasons",
+   "n": 49,
+   "glm": {
+    "n": 49,
+    "cells": 720,
+    "rateRatio": 0.757201886780092,
+    "ci": [
+     0.18036664501770566,
+     3.178828864322713
+    ],
+    "se": 0.7319582730431852,
+    "z": -0.379974348412095,
+    "p": 0.703964570360006,
+    "lr": 0.1453388836154943,
+    "lrtP": 0.7030302014701398
+   },
+   "exact": {
+    "bandDays": [
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePost": 54,
+    "exposurePre": 58,
+    "kPost": 4,
+    "kPre": 5,
+    "n": 9,
+    "ratePost": 0.07407407407407407,
+    "ratePre": 0.08620689655172414,
+    "rateRatio": 0.8592592592592592,
+    "ci": [
+     0.17050144786738525,
+     3.9921097804934735
+    ],
+    "p": 1
+   },
+   "power": {
+    "key": "top30-ext",
+    "label": "top-30, all seasons",
+    "note": "Every debut season 2009-2025. The censored years capture fewer ranked men, and a season fixed effect absorbs an undercount that does not vary across days within a season. An explicitly labelled power arm, never the primary.",
+    "identification": "within-group; identified only inside the bins the line falls in",
+    "nCohort": 49,
+    "n": 49,
+    "postLine": 39,
+    "preLine": 10,
+    "identifyingBins": [
+     2,
+     3,
+     4
+    ],
+    "identifyingDays": [
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "identifyingEvents": 10,
+    "seasons": [
+     2009,
+     2010,
+     2011,
+     2012,
+     2013,
+     2014,
+     2015,
+     2016,
+     2017,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023,
+     2024,
+     2025
+    ],
+    "cells": 720,
+    "columns": 31,
+    "analytic": {
+     "se": 0.7267615903074433,
+     "mde80": 7.660638009989508,
+     "mdeJustSignificant": 4.155582940417481,
+     "ciSpanFactorAtNull": 17.268869574688793
+    },
+    "simulation": {
+     "sims": 1000,
+     "curve": [
+      {
+       "rr": 1,
+       "waldPower": 0.015,
+       "lrtPower": 0.034,
+       "convergedShare": 1,
+       "meanPostLineEvents": 39.78
+      },
+      {
+       "rr": 1.25,
+       "waldPower": 0.03,
+       "lrtPower": 0.063,
+       "convergedShare": 1,
+       "meanPostLineEvents": 41.169
+      },
+      {
+       "rr": 1.5,
+       "waldPower": 0.03,
+       "lrtPower": 0.075,
+       "convergedShare": 1,
+       "meanPostLineEvents": 42.144
+      },
+      {
+       "rr": 1.75,
+       "waldPower": 0.044,
+       "lrtPower": 0.11,
+       "convergedShare": 1,
+       "meanPostLineEvents": 43.188
+      },
+      {
+       "rr": 2,
+       "waldPower": 0.068,
+       "lrtPower": 0.143,
+       "convergedShare": 1,
+       "meanPostLineEvents": 43.597
+      },
+      {
+       "rr": 2.5,
+       "waldPower": 0.077,
+       "lrtPower": 0.226,
+       "convergedShare": 1,
+       "meanPostLineEvents": 45.037
+      },
+      {
+       "rr": 3,
+       "waldPower": 0.065,
+       "lrtPower": 0.224,
+       "convergedShare": 1,
+       "meanPostLineEvents": 45.368
+      },
+      {
+       "rr": 4,
+       "waldPower": 0.084,
+       "lrtPower": 0.329,
+       "convergedShare": 1,
+       "meanPostLineEvents": 45.922
+      },
+      {
+       "rr": 5,
+       "waldPower": 0.093,
+       "lrtPower": 0.431,
+       "convergedShare": 1,
+       "meanPostLineEvents": 46.702
+      },
+      {
+       "rr": 6,
+       "waldPower": 0.09,
+       "lrtPower": 0.5,
+       "convergedShare": 1,
+       "meanPostLineEvents": 47.127
+      },
+      {
+       "rr": 8,
+       "waldPower": 0.07,
+       "lrtPower": 0.53,
+       "convergedShare": 1,
+       "meanPostLineEvents": 47.274
+      },
+      {
+       "rr": 10,
+       "waldPower": 0.102,
+       "lrtPower": 0.589,
+       "convergedShare": 1,
+       "meanPostLineEvents": 47.926
+      }
+     ],
+     "mde80Wald": null,
+     "mde80Lrt": null,
+     "maxWaldPower": 0.102,
+     "maxLrtPower": 0.589,
+     "sizeWald": 0.015,
+     "sizeLrt": 0.034
+    }
+   },
+   "exactPower": {
+    "key": "top30-ext",
+    "label": "top-30, all seasons",
+    "seasons": [
+     2009,
+     2010,
+     2011,
+     2012,
+     2013,
+     2014,
+     2015,
+     2016,
+     2017,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023,
+     2024,
+     2025
+    ],
+    "bandDays": [
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePostLineDays": 54,
+    "exposurePreLineDays": 58,
+    "nInBand": 9,
+    "nTotal": 49,
+    "curve": [
+     {
+      "rr": 1.25,
+      "power": 0.03289428566990097
+     },
+     {
+      "rr": 1.5,
+      "power": 0.05768518116195115
+     },
+     {
+      "rr": 1.75,
+      "power": 0.0878939446427264
+     },
+     {
+      "rr": 2,
+      "power": 0.12183099776574693
+     },
+     {
+      "rr": 2.5,
+      "power": 0.19508313964051466
+     },
+     {
+      "rr": 3,
+      "power": 0.2687646155197642
+     },
+     {
+      "rr": 4,
+      "power": 0.401727262776862
+     },
+     {
+      "rr": 5,
+      "power": 0.5090620258237254
+     },
+     {
+      "rr": 6,
+      "power": 0.5931440503561436
+     },
+     {
+      "rr": 8,
+      "power": 0.7106465123204527
+     },
+     {
+      "rr": 10,
+      "power": 0.7851704372210762
+     },
+     {
+      "rr": 15,
+      "power": 0.8824840186554614
+     },
+     {
+      "rr": 20,
+      "power": 0.9263437956842495
+     }
+    ],
+    "mde80": 10.761947230814995,
+    "maxPower": 0.9263437956842495
+   }
+  },
+  "top10-ext": {
+   "label": "top-10, all seasons",
+   "n": 19,
+   "glm": {
+    "n": 19,
+    "cells": 450,
+    "rateRatio": 1.78072345447644,
+    "ci": [
+     0.1455581456167853,
+     21.784943796074575
+    ],
+    "se": 1.2776527361216476,
+    "z": 0.4516248433688684,
+    "p": 0.6515393187377397,
+    "lr": 0.21021336822015257,
+    "lrtP": 0.6466002614491168
+   },
+   "exact": {
+    "bandDays": [
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePost": 31,
+    "exposurePre": 39,
+    "kPost": 2,
+    "kPre": 1,
+    "n": 3,
+    "ratePost": 0.06451612903225806,
+    "ratePre": 0.02564102564102564,
+    "rateRatio": 2.5161290322580645,
+    "ci": [
+     0.13098657937752195,
+     148.4445348903874
+    ],
+    "p": 0.587600583090379
+   },
+   "power": {
+    "key": "top10-ext",
+    "label": "top-10, all seasons",
+    "note": "The same extension at the sharpest grain.",
+    "identification": "within-group; identified only inside the bins the line falls in",
+    "nCohort": 19,
+    "n": 19,
+    "postLine": 16,
+    "preLine": 3,
+    "identifyingBins": [
+     2,
+     3,
+     4
+    ],
+    "identifyingDays": [
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "identifyingEvents": 4,
+    "seasons": [
+     2010,
+     2011,
+     2012,
+     2015,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023,
+     2024
+    ],
+    "cells": 450,
+    "columns": 25,
+    "analytic": {
+     "se": 1.235570535624117,
+     "mde80": 31.867109017797098,
+     "mdeJustSignificant": 11.265199121213346,
+     "ciSpanFactorAtNull": 126.90471124058594
+    },
+    "simulation": {
+     "sims": 1000,
+     "curve": [
+      {
+       "rr": 1,
+       "waldPower": 0.004,
+       "lrtPower": 0.025,
+       "convergedShare": 1,
+       "meanPostLineEvents": 15.611
+      },
+      {
+       "rr": 1.25,
+       "waldPower": 0.004,
+       "lrtPower": 0.035,
+       "convergedShare": 1,
+       "meanPostLineEvents": 15.934
+      },
+      {
+       "rr": 1.5,
+       "waldPower": 0.004,
+       "lrtPower": 0.044,
+       "convergedShare": 1,
+       "meanPostLineEvents": 16.62
+      },
+      {
+       "rr": 1.75,
+       "waldPower": 0.007,
+       "lrtPower": 0.056,
+       "convergedShare": 1,
+       "meanPostLineEvents": 16.852
+      },
+      {
+       "rr": 2,
+       "waldPower": 0.004,
+       "lrtPower": 0.076,
+       "convergedShare": 1,
+       "meanPostLineEvents": 16.963
+      },
+      {
+       "rr": 2.5,
+       "waldPower": 0.004,
+       "lrtPower": 0.077,
+       "convergedShare": 1,
+       "meanPostLineEvents": 17.59
+      },
+      {
+       "rr": 3,
+       "waldPower": 0.006,
+       "lrtPower": 0.082,
+       "convergedShare": 1,
+       "meanPostLineEvents": 17.839
+      },
+      {
+       "rr": 4,
+       "waldPower": 0.003,
+       "lrtPower": 0.101,
+       "convergedShare": 1,
+       "meanPostLineEvents": 17.785
+      },
+      {
+       "rr": 5,
+       "waldPower": 0.005,
+       "lrtPower": 0.128,
+       "convergedShare": 1,
+       "meanPostLineEvents": 18.24
+      },
+      {
+       "rr": 6,
+       "waldPower": 0.007,
+       "lrtPower": 0.107,
+       "convergedShare": 1,
+       "meanPostLineEvents": 18.358
+      },
+      {
+       "rr": 8,
+       "waldPower": 0.004,
+       "lrtPower": 0.146,
+       "convergedShare": 1,
+       "meanPostLineEvents": 18.704
+      },
+      {
+       "rr": 10,
+       "waldPower": 0,
+       "lrtPower": 0.136,
+       "convergedShare": 1,
+       "meanPostLineEvents": 18.867
+      }
+     ],
+     "mde80Wald": null,
+     "mde80Lrt": null,
+     "maxWaldPower": 0.007,
+     "maxLrtPower": 0.146,
+     "sizeWald": 0.004,
+     "sizeLrt": 0.025
+    }
+   },
+   "exactPower": {
+    "key": "top10-ext",
+    "label": "top-10, all seasons",
+    "seasons": [
+     2010,
+     2011,
+     2012,
+     2015,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023,
+     2024
+    ],
+    "bandDays": [
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePostLineDays": 31,
+    "exposurePreLineDays": 39,
+    "nInBand": 3,
+    "nTotal": 19,
+    "curve": [
+     {
+      "rr": 1.25,
+      "power": 0
+     },
+     {
+      "rr": 1.5,
+      "power": 0
+     },
+     {
+      "rr": 1.75,
+      "power": 0
+     },
+     {
+      "rr": 2,
+      "power": 0
+     },
+     {
+      "rr": 2.5,
+      "power": 0
+     },
+     {
+      "rr": 3,
+      "power": 0
+     },
+     {
+      "rr": 4,
+      "power": 0
+     },
+     {
+      "rr": 5,
+      "power": 0
+     },
+     {
+      "rr": 6,
+      "power": 0
+     },
+     {
+      "rr": 8,
+      "power": 0
+     },
+     {
+      "rr": 10,
+      "power": 0
+     },
+     {
+      "rr": 15,
+      "power": 0
+     },
+     {
+      "rr": 20,
+      "power": 0
+     }
+    ],
+    "mde80": null,
+    "maxPower": 0
+   }
+  },
+  "all": {
+   "label": "the whole cohort, for scale",
+   "n": 834,
+   "glm": {
+    "n": 834,
+    "cells": 720,
+    "rateRatio": 1.265817868136488,
+    "ci": [
+     0.8559249121863907,
+     1.8720040186710667
+    ],
+    "se": 0.199638303794766,
+    "z": 1.1807275701143873,
+    "p": 0.23771108974731692,
+    "lr": 1.40224635461027,
+    "lrtP": 0.23634794491116107
+   },
+   "exact": {
+    "bandDays": [
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePost": 54,
+    "exposurePre": 58,
+    "kPost": 70,
+    "kPre": 63,
+    "n": 133,
+    "ratePost": 1.2962962962962963,
+    "ratePre": 1.0862068965517242,
+    "rateRatio": 1.1934156378600822,
+    "ci": [
+     0.8369114782590948,
+     1.704803645220557
+    ],
+    "p": 0.33998615739148375
+   },
+   "power": null,
+   "exactPower": {
+    "key": "all",
+    "label": "the whole cohort, for scale",
+    "seasons": [
+     2009,
+     2010,
+     2011,
+     2012,
+     2013,
+     2014,
+     2015,
+     2016,
+     2017,
+     2018,
+     2019,
+     2021,
+     2022,
+     2023,
+     2024,
+     2025
+    ],
+    "bandDays": [
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "exposurePostLineDays": 54,
+    "exposurePreLineDays": 58,
+    "nInBand": 133,
+    "nTotal": 834,
+    "curve": [
+     {
+      "rr": 1.25,
+      "power": 0.24559869238771417
+     },
+     {
+      "rr": 1.5,
+      "power": 0.6392250120805528
+     },
+     {
+      "rr": 1.75,
+      "power": 0.891056926923582
+     },
+     {
+      "rr": 2,
+      "power": 0.9763300282264008
+     },
+     {
+      "rr": 2.5,
+      "power": 0.9993562848993849
+     },
+     {
+      "rr": 3,
+      "power": 0.9999870442106129
+     },
+     {
+      "rr": 4,
+      "power": 0.9999999946701309
+     },
+     {
+      "rr": 5,
+      "power": 0.9999999999962387
+     },
+     {
+      "rr": 6,
+      "power": 0.9999999999998789
+     },
+     {
+      "rr": 8,
+      "power": 0.9999999999998701
+     },
+     {
+      "rr": 10,
+      "power": 0.9999999999998681
+     },
+     {
+      "rr": 15,
+      "power": 0.9999999999998788
+     },
+     {
+      "rr": 20,
+      "power": 0.9999999999998844
+     }
+    ],
+    "mde80": 1.659605453522105,
+    "maxPower": 0.9999999999998844
+   }
+  }
+ },
+ "interaction": {
+  "top100": {
+   "n": 399,
+   "cells": 630,
+   "rateRatio": 1.1402055100914326,
+   "ci": [
+    0.6434496974977624,
+    2.0204665730647653
+   ],
+   "se": 0.29189793027420213,
+   "z": 0.4495013652413778,
+   "p": 0.6530700747899916,
+   "interaction": {
+    "n": 399,
+    "cells": 630,
+    "rateRatio": 1.25030047871405,
+    "ci": [
+     0.6487110905424346,
+     2.4097804243880487
+    ],
+    "se": 0.33477128966390607,
+    "z": 0.6672731870835128,
+    "p": 0.5045975190168185
+   },
+   "lr": 0.4594023621865517,
+   "lrtP": 0.4979032785812849
+  },
+  "top30": {
+   "n": 399,
+   "cells": 630,
+   "rateRatio": 1.1989416826004609,
+   "ci": [
+    0.6805231522162654,
+    2.1122883969420183
+   ],
+   "se": 0.28894524061557036,
+   "z": 0.6279364079887058,
+   "p": 0.5300454854768216,
+   "interaction": {
+    "n": 399,
+    "cells": 630,
+    "rateRatio": 0.8135593187813616,
+    "ci": [
+     0.31262456684968787,
+     2.1171681158833207
+    ],
+    "se": 0.48796726444712424,
+    "z": -0.42284893276503127,
+    "p": 0.6724055616466268
+   },
+   "lr": 0.1733938131752666,
+   "lrtP": 0.677113149034802
+  },
+  "top10": {
+   "n": 399,
+   "cells": 630,
+   "rateRatio": 1.1844266503218437,
+   "ci": [
+    0.6739249820073807,
+    2.081635979443865
+   ],
+   "se": 0.2877016811389292,
+   "z": 0.5883136220760002,
+   "p": 0.5563217166180963,
+   "interaction": {
+    "n": 399,
+    "cells": 630,
+    "rateRatio": 0.9607842957268872,
+    "ci": [
+     0.19594161747263092,
+     4.71113015612597
+    ],
+    "se": 0.8111903983746782,
+    "z": -0.049316847717989436,
+    "p": 0.9606666593882921
+   },
+   "lr": 0.0024149453867039483,
+   "lrtP": 0.960805924089996
+  }
+ },
+ "placebo": {
+  "top100-deep": {
+   "sweep": [
+    {
+     "shift": -10,
+     "ratio": 0.8643467572319934,
+     "p": 0.8491691259602656,
+     "lrtP": 0.8492517895910868,
+     "exactRatio": 0.5294117647058824,
+     "exactP": 0.6882646815527553,
+     "exactN": 6
+    },
+    {
+     "shift": -8,
+     "ratio": 1.674113069686789,
+     "p": 0.5027531081336222,
+     "lrtP": 0.5087352037187891,
+     "exactRatio": 1.3333333333333333,
+     "exactP": 0.7314238600777381,
+     "exactN": 8
+    },
+    {
+     "shift": -6,
+     "ratio": 3.0904134521325437,
+     "p": 0.23425851191081937,
+     "lrtP": 0.2288931665677476,
+     "exactRatio": 2,
+     "exactP": 0.6572856547866975,
+     "exactN": 5
+    },
+    {
+     "shift": -4,
+     "ratio": 1.0032265051009848,
+     "p": 0.9968753382055854,
+     "lrtP": 0.9968749977584876,
+     "exactRatio": 0.6666666666666666,
+     "exactP": 1,
+     "exactN": 6
+    },
+    {
+     "shift": -2,
+     "ratio": 0.3369578282464255,
+     "p": 0.3355900554446215,
+     "lrtP": 0.28958518027131586,
+     "exactRatio": 0.3333333333333333,
+     "exactP": 0.40024989587671933,
+     "exactN": 5
+    },
+    {
+     "shift": 0,
+     "ratio": 0.5287798727960157,
+     "p": 0.5768502927603258,
+     "lrtP": 0.5558080845765587,
+     "exactRatio": 0.3333333333333333,
+     "exactP": 0.40024989587671933,
+     "exactN": 5
+    },
+    {
+     "shift": 2,
+     "ratio": 0.7055265383436178,
+     "p": 0.7410151202051966,
+     "lrtP": 0.7406632023122195,
+     "exactRatio": 0.4444444444444444,
+     "exactP": 0.6401499375260299,
+     "exactN": 4
+    },
+    {
+     "shift": 4,
+     "ratio": 1.4731419546919642,
+     "p": 0.6868082318501832,
+     "lrtP": 0.6824330108475686,
+     "exactRatio": 1.3333333333333333,
+     "exactP": 0.9999999999999977,
+     "exactN": 4
+    },
+    {
+     "shift": 6,
+     "ratio": 1.4877033360315632,
+     "p": 0.5964190722049068,
+     "lrtP": 0.5971738860088712,
+     "exactRatio": 1.3333333333333333,
+     "exactP": 0.7314238600777381,
+     "exactN": 8
+    },
+    {
+     "shift": 8,
+     "ratio": 2.407903933387993,
+     "p": 0.18298466718701223,
+     "lrtP": 0.17189132527405682,
+     "exactRatio": 2,
+     "exactP": 0.34343704570024086,
+     "exactN": 10
+    },
+    {
+     "shift": 10,
+     "ratio": 2.17039477095874,
+     "p": 0.20335723894595759,
+     "lrtP": 0.20301016478949774,
+     "exactRatio": 1.5555555555555556,
+     "exactP": 0.5769222104776636,
+     "exactN": 13
+    },
+    {
+     "shift": 12,
+     "ratio": 0.9890114849455298,
+     "p": 0.9858300980602729,
+     "lrtP": 0.9858260718963401,
+     "exactRatio": 0.8333333333333334,
+     "exactP": 0.9999999999999958,
+     "exactN": 13
+    },
+    {
+     "shift": 14,
+     "ratio": 2.4266511811592224,
+     "p": 0.1387617481066692,
+     "lrtP": 0.13408702933030092,
+     "exactRatio": 1.7777777777777777,
+     "exactP": 0.2937510973846741,
+     "exactN": 14
+    },
+    {
+     "shift": 16,
+     "ratio": 1.0480285164150915,
+     "p": 0.9358242517809985,
+     "lrtP": 0.9358411195751737,
+     "exactRatio": 0.6666666666666666,
+     "exactP": 0.5728541548091782,
+     "exactN": 12
+    },
+    {
+     "shift": 18,
+     "ratio": 0.7123157876314654,
+     "p": 0.5723190294116596,
+     "lrtP": 0.5678910100673223,
+     "exactRatio": 0.6666666666666666,
+     "exactP": 0.6042639723855681,
+     "exactN": 15
+    },
+    {
+     "shift": 20,
+     "ratio": 0.352388934463719,
+     "p": 0.07974714471702071,
+     "lrtP": 0.0700427594443025,
+     "exactRatio": 0.2222222222222222,
+     "exactP": 0.0321755602051871,
+     "exactN": 14
+    },
+    {
+     "shift": 22,
+     "ratio": 6.397181073411846e-8,
+     "p": 0.9903059830624176,
+     "lrtP": 0.0008555524664077829,
+     "exactRatio": 0,
+     "exactP": 0.0005344856692610736,
+     "exactN": 14
+    },
+    {
+     "shift": 24,
+     "ratio": 1.3375762475601604e-7,
+     "p": 0.9909369852359683,
+     "lrtP": 0.018493676471247,
+     "exactRatio": 0,
+     "exactP": 0.022550127922889258,
+     "exactN": 7
+    },
+    {
+     "shift": 26,
+     "ratio": 2.4098237361601216,
+     "p": 0.3027380039943097,
+     "lrtP": 0.3017500368853745,
+     "exactRatio": 0.4444444444444444,
+     "exactP": 0.6401499375260299,
+     "exactN": 4
+    },
+    {
+     "shift": 28,
+     "ratio": 1.7893068729058064,
+     "p": 0.4552844605842882,
+     "lrtP": 0.44494862277859726,
+     "exactRatio": 3.111111111111111,
+     "exactP": 0.1107330469155545,
+     "exactN": 10
+    },
+    {
+     "shift": 30,
+     "ratio": 2.698009437886743,
+     "p": 0.110771312093493,
+     "lrtP": 0.10509135500496891,
+     "exactRatio": 2.1333333333333333,
+     "exactP": 0.26157256180592525,
+     "exactN": 13
+    },
+    {
+     "shift": 32,
+     "ratio": 3.5497366238141965,
+     "p": 0.06432145919446719,
+     "lrtP": 0.06556592392951521,
+     "exactRatio": 1.8,
+     "exactP": 0.36837149648753303,
+     "exactN": 12
+    },
+    {
+     "shift": 34,
+     "ratio": 8.389688396719915e-8,
+     "p": 0.9945936749052975,
+     "lrtP": 0.06596762058685735,
+     "exactRatio": 0,
+     "exactP": 0.5626822157434405,
+     "exactN": 3
+    },
+    {
+     "shift": 36,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    },
+    {
+     "shift": 38,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    },
+    {
+     "shift": 40,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    }
+   ],
+   "real": {
+    "shift": 0,
+    "ratio": 0.5287798727960157,
+    "p": 0.5768502927603258,
+    "lrtP": 0.5558080845765587,
+    "exactRatio": 0.3333333333333333,
+    "exactP": 0.40024989587671933,
+    "exactN": 5
+   },
+   "placebosAtLeastAsLarge": 20,
+   "placebosRun": 25,
+   "permutationP": 0.8076923076923077
+  },
+  "top30-obs": {
+   "sweep": [
+    {
+     "shift": -10,
+     "ratio": 1009095.526644181,
+     "p": 0.9925277329183999,
+     "lrtP": 0.3749254291767381,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    },
+    {
+     "shift": -8,
+     "ratio": 0.6927348174392497,
+     "p": 0.7903765432786368,
+     "lrtP": 0.7924777884331374,
+     "exactRatio": 1.75,
+     "exactP": 0.9999999999999996,
+     "exactN": 3
+    },
+    {
+     "shift": -6,
+     "ratio": 2.0474269702826975,
+     "p": 0.5777329883337369,
+     "lrtP": 0.5686273460959277,
+     "exactRatio": 1.75,
+     "exactP": 0.9999999999999996,
+     "exactN": 3
+    },
+    {
+     "shift": -4,
+     "ratio": 0.48034928824707257,
+     "p": 0.427295314650444,
+     "lrtP": 0.4406122837588591,
+     "exactRatio": 0.65625,
+     "exactP": 0.7122049638774598,
+     "exactN": 7
+    },
+    {
+     "shift": -2,
+     "ratio": 0.38220910607847236,
+     "p": 0.2825330921651674,
+     "lrtP": 0.2807120463155375,
+     "exactRatio": 0.5833333333333334,
+     "exactP": 0.6696230452674916,
+     "exactN": 5
+    },
+    {
+     "shift": 0,
+     "ratio": 1.4131655814107997,
+     "p": 0.678941029105447,
+     "lrtP": 0.6778529677530241,
+     "exactRatio": 1.1666666666666667,
+     "exactP": 1,
+     "exactN": 7
+    },
+    {
+     "shift": 2,
+     "ratio": 2.9145036472834125,
+     "p": 0.35379640738648244,
+     "lrtP": 0.3542664796654301,
+     "exactRatio": 2.625,
+     "exactP": 0.6283259259259253,
+     "exactN": 4
+    },
+    {
+     "shift": 4,
+     "ratio": 5.102622707989949,
+     "p": 0.2097319127214906,
+     "lrtP": 0.19322602009308765,
+     "exactRatio": 2.625,
+     "exactP": 0.6283259259259253,
+     "exactN": 4
+    },
+    {
+     "shift": 6,
+     "ratio": 1.356653204683655,
+     "p": 0.8148297895699983,
+     "lrtP": 0.8126048612421071,
+     "exactRatio": 1.75,
+     "exactP": 0.9999999999999996,
+     "exactN": 3
+    },
+    {
+     "shift": 8,
+     "ratio": 9.533857251581738,
+     "p": 0.1471498928630418,
+     "lrtP": 0.09147985387360691,
+     "exactRatio": null,
+     "exactP": 0.06528395061728401,
+     "exactN": 5
+    },
+    {
+     "shift": 10,
+     "ratio": 0.5464977871364656,
+     "p": 0.49924955558647555,
+     "lrtP": 0.49908486139729435,
+     "exactRatio": 0.5833333333333334,
+     "exactP": 0.6696230452674916,
+     "exactN": 5
+    },
+    {
+     "shift": 12,
+     "ratio": 0.2675147279237133,
+     "p": 0.15140472016454254,
+     "lrtP": 0.1318061299889487,
+     "exactRatio": 0.35,
+     "exactP": 0.2630391396433474,
+     "exactN": 7
+    },
+    {
+     "shift": 14,
+     "ratio": 2.126188100107221,
+     "p": 0.4160986374269744,
+     "lrtP": 0.4016059441927715,
+     "exactRatio": 2.625,
+     "exactP": 0.29778011186099657,
+     "exactN": 8
+    },
+    {
+     "shift": 16,
+     "ratio": 0.6809778233675612,
+     "p": 0.6351372093580139,
+     "lrtP": 0.6346230302484891,
+     "exactRatio": 0.525,
+     "exactP": 0.4858062021277244,
+     "exactN": 8
+    },
+    {
+     "shift": 18,
+     "ratio": 0.8847810370662111,
+     "p": 0.8768928354460584,
+     "lrtP": 0.8768756238147949,
+     "exactRatio": 0.875,
+     "exactP": 1,
+     "exactN": 8
+    },
+    {
+     "shift": 20,
+     "ratio": 3.7533696407646375,
+     "p": 0.21349775329233345,
+     "lrtP": 0.20804701206103082,
+     "exactRatio": 2.625,
+     "exactP": 0.6283259259259253,
+     "exactN": 4
+    },
+    {
+     "shift": 22,
+     "ratio": 0.671709170508438,
+     "p": 0.7539912452322329,
+     "lrtP": 0.7482589702700396,
+     "exactRatio": 0.2916666666666667,
+     "exactP": 0.3451456790123455,
+     "exactN": 4
+    },
+    {
+     "shift": 24,
+     "ratio": 9.273619442780105e-7,
+     "p": 0.990551606395193,
+     "lrtP": 0.2928058325134334,
+     "exactRatio": 0,
+     "exactP": 0.4666666666666671,
+     "exactN": 1
+    },
+    {
+     "shift": 26,
+     "ratio": 3.436702343373648,
+     "p": 0.5682146026149303,
+     "lrtP": 0.5485103583245519,
+     "exactRatio": 0.875,
+     "exactP": 1,
+     "exactN": 2
+    },
+    {
+     "shift": 28,
+     "ratio": 0.2019165318610848,
+     "p": 0.1656389908481104,
+     "lrtP": 0.17766695240796615,
+     "exactRatio": 1.3125,
+     "exactP": 1,
+     "exactN": 5
+    },
+    {
+     "shift": 30,
+     "ratio": 0.40603332527219277,
+     "p": 0.36568915375304445,
+     "lrtP": 0.36002783812988826,
+     "exactRatio": 0.5833333333333334,
+     "exactP": 0.6696230452674916,
+     "exactN": 5
+    },
+    {
+     "shift": 32,
+     "ratio": 1.239574557585728,
+     "p": 0.8550568447523503,
+     "lrtP": 0.8545772024510443,
+     "exactRatio": 1.222222222222222,
+     "exactP": 0.9999999999999981,
+     "exactN": 4
+    },
+    {
+     "shift": 34,
+     "ratio": 1.817154103667643e-7,
+     "p": 0.9949664955911233,
+     "lrtP": 0.22373771512721696,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    },
+    {
+     "shift": 36,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    },
+    {
+     "shift": 38,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    },
+    {
+     "shift": 40,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    }
+   ],
+   "real": {
+    "shift": 0,
+    "ratio": 1.4131655814107997,
+    "p": 0.678941029105447,
+    "lrtP": 0.6778529677530241,
+    "exactRatio": 1.1666666666666667,
+    "exactP": 1,
+    "exactN": 7
+   },
+   "placebosAtLeastAsLarge": 8,
+   "placebosRun": 25,
+   "permutationP": 0.34615384615384615
+  },
+  "top30-ext": {
+   "sweep": [
+    {
+     "shift": -10,
+     "ratio": 1.4948986518125724,
+     "p": 0.7409634133433837,
+     "lrtP": 0.7345955231222111,
+     "exactRatio": 0.6,
+     "exactP": 1,
+     "exactN": 2
+    },
+    {
+     "shift": -8,
+     "ratio": 1.5935992266633106,
+     "p": 0.663154983488455,
+     "lrtP": 0.6626716399831952,
+     "exactRatio": 1.611111111111111,
+     "exactP": 0.6771644242296289,
+     "exactN": 5
+    },
+    {
+     "shift": -6,
+     "ratio": 1.9540946181040428,
+     "p": 0.5816705534520709,
+     "lrtP": 0.5764635815050214,
+     "exactRatio": 2.148148148148148,
+     "exactP": 0.6121025419096208,
+     "exactN": 3
+    },
+    {
+     "shift": -4,
+     "ratio": 0.6952718320704547,
+     "p": 0.6679489229041738,
+     "lrtP": 0.6727197800830138,
+     "exactRatio": 0.8055555555555555,
+     "exactP": 1,
+     "exactN": 7
+    },
+    {
+     "shift": -2,
+     "ratio": 0.20766309743228892,
+     "p": 0.05120642465402758,
+     "lrtP": 0.04597795553714079,
+     "exactRatio": 0.35802469135802467,
+     "exactP": 0.2915709919927317,
+     "exactN": 8
+    },
+    {
+     "shift": 0,
+     "ratio": 0.757201886780092,
+     "p": 0.703964570360006,
+     "lrtP": 0.7030302014701398,
+     "exactRatio": 0.8592592592592592,
+     "exactP": 1,
+     "exactN": 9
+    },
+    {
+     "shift": 2,
+     "ratio": 1.2344713006560537,
+     "p": 0.8059302689483405,
+     "lrtP": 0.8061073061432057,
+     "exactRatio": 0.6444444444444444,
+     "exactP": 0.7279549223787681,
+     "exactN": 8
+    },
+    {
+     "shift": 4,
+     "ratio": 1.4156859202124705,
+     "p": 0.6986687235494194,
+     "lrtP": 0.6976811841641387,
+     "exactRatio": 1.4320987654320987,
+     "exactP": 0.7178791787631693,
+     "exactN": 7
+    },
+    {
+     "shift": 6,
+     "ratio": 0.884092766370298,
+     "p": 0.8801106877933014,
+     "lrtP": 0.8803168111887035,
+     "exactRatio": 1.074074074074074,
+     "exactP": 1,
+     "exactN": 8
+    },
+    {
+     "shift": 8,
+     "ratio": 1.682105616622558,
+     "p": 0.5110520897229042,
+     "lrtP": 0.502981316764363,
+     "exactRatio": 2.148148148148148,
+     "exactP": 0.3287395664092001,
+     "exactN": 9
+    },
+    {
+     "shift": 10,
+     "ratio": 0.8569510290188358,
+     "p": 0.8320642226613464,
+     "lrtP": 0.8318251622397425,
+     "exactRatio": 0.537037037037037,
+     "exactP": 0.5103188602817844,
+     "exactN": 9
+    },
+    {
+     "shift": 12,
+     "ratio": 0.7955447649484471,
+     "p": 0.7640834224654789,
+     "lrtP": 0.7638929438487256,
+     "exactRatio": 0.7160493827160493,
+     "exactP": 0.7554717267861203,
+     "exactN": 10
+    },
+    {
+     "shift": 14,
+     "ratio": 1.3138387136704155,
+     "p": 0.7173664741967963,
+     "lrtP": 0.7155187952698545,
+     "exactRatio": 1.611111111111111,
+     "exactP": 0.5366038279218448,
+     "exactN": 10
+    },
+    {
+     "shift": 16,
+     "ratio": 0.7517734619761761,
+     "p": 0.688189848748984,
+     "lrtP": 0.6881217664996717,
+     "exactRatio": 0.537037037037037,
+     "exactP": 0.5103188602817844,
+     "exactN": 9
+    },
+    {
+     "shift": 18,
+     "ratio": 1.2994628674465647,
+     "p": 0.708848394386743,
+     "lrtP": 0.7078907433921446,
+     "exactRatio": 1.074074074074074,
+     "exactP": 0.9999999999999937,
+     "exactN": 12
+    },
+    {
+     "shift": 20,
+     "ratio": 4.211620764747743,
+     "p": 0.07089597864400665,
+     "lrtP": 0.06372047228611866,
+     "exactRatio": 2.148148148148148,
+     "exactP": 0.3287395664092001,
+     "exactN": 9
+    },
+    {
+     "shift": 22,
+     "ratio": 1.9140898175806622,
+     "p": 0.40982328834020254,
+     "lrtP": 0.41305889754789793,
+     "exactRatio": 1.074074074074074,
+     "exactP": 1,
+     "exactN": 8
+    },
+    {
+     "shift": 24,
+     "ratio": 2.30931923581458,
+     "p": 0.45377903579506085,
+     "lrtP": 0.45330809195200483,
+     "exactRatio": 1.074074074074074,
+     "exactP": 0.9999999999999977,
+     "exactN": 4
+    },
+    {
+     "shift": 26,
+     "ratio": 7.6912583457856085,
+     "p": 0.08978256179828625,
+     "lrtP": 0.11026844404639402,
+     "exactRatio": 2.148148148148148,
+     "exactP": 0.6121025419096208,
+     "exactN": 3
+    },
+    {
+     "shift": 28,
+     "ratio": 0.3931589547875964,
+     "p": 0.34789577522656656,
+     "lrtP": 0.3676414299240722,
+     "exactRatio": 1.611111111111111,
+     "exactP": 0.6771644242296289,
+     "exactN": 5
+    },
+    {
+     "shift": 30,
+     "ratio": 0.22272443202447817,
+     "p": 0.09320878034605662,
+     "lrtP": 0.07633928740066198,
+     "exactRatio": 0.4296296296296296,
+     "exactP": 0.45521496588749616,
+     "exactN": 7
+    },
+    {
+     "shift": 32,
+     "ratio": 0.4595103636163928,
+     "p": 0.40637462587351425,
+     "lrtP": 0.39615671866795954,
+     "exactRatio": 0.7903225806451614,
+     "exactP": 1,
+     "exactN": 6
+    },
+    {
+     "shift": 34,
+     "ratio": 9.386712380925186e-8,
+     "p": 0.9946483927117447,
+     "lrtP": 0.08945885133017617,
+     "exactRatio": 0,
+     "exactP": 0.3408203125000005,
+     "exactN": 5
+    },
+    {
+     "shift": 36,
+     "ratio": 0.0000018499344739950762,
+     "p": 0.996031042565747,
+     "lrtP": 0.7089584603042904,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    },
+    {
+     "shift": 38,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    },
+    {
+     "shift": 40,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1,
+     "exactRatio": null,
+     "exactP": 1,
+     "exactN": 0
+    }
+   ],
+   "real": {
+    "shift": 0,
+    "ratio": 0.757201886780092,
+    "p": 0.703964570360006,
+    "lrtP": 0.7030302014701398,
+    "exactRatio": 0.8592592592592592,
+    "exactP": 1,
+    "exactN": 9
+   },
+   "placebosAtLeastAsLarge": 17,
+   "placebosRun": 25,
+   "permutationP": 0.6923076923076923
+  },
+  "interaction": {
+   "sweep": [
+    {
+     "shift": -10,
+     "ratio": 0.46406250068264954,
+     "p": 0.2126041263881464,
+     "lrtP": 0.23655553151517572
+    },
+    {
+     "shift": -8,
+     "ratio": 0.6210191080872911,
+     "p": 0.3723942517248149,
+     "lrtP": 0.38992750920039887
+    },
+    {
+     "shift": -6,
+     "ratio": 0.7643865354539123,
+     "p": 0.576146783805667,
+     "lrtP": 0.584492978327729
+    },
+    {
+     "shift": -4,
+     "ratio": 0.8068965509455607,
+     "p": 0.5741169370722222,
+     "lrtP": 0.5801002667763765
+    },
+    {
+     "shift": -2,
+     "ratio": 0.9384047675936485,
+     "p": 0.8515466958376509,
+     "lrtP": 0.8521728684704885
+    },
+    {
+     "shift": 0,
+     "ratio": 1.25030047871405,
+     "p": 0.5045975190168185,
+     "lrtP": 0.4979032785812849
+    },
+    {
+     "shift": 2,
+     "ratio": 1.3807531358654777,
+     "p": 0.3079606757660379,
+     "lrtP": 0.2980776590905242
+    },
+    {
+     "shift": 4,
+     "ratio": 1.5381637143348714,
+     "p": 0.1627448203394869,
+     "lrtP": 0.15206489399851475
+    },
+    {
+     "shift": 6,
+     "ratio": 1.747425471405937,
+     "p": 0.05950988397906187,
+     "lrtP": 0.052412937369277324
+    },
+    {
+     "shift": 8,
+     "ratio": 1.9220430076495054,
+     "p": 0.022809411505333776,
+     "lrtP": 0.019151582961010827
+    },
+    {
+     "shift": 10,
+     "ratio": 1.8820281098320955,
+     "p": 0.021427251015347926,
+     "lrtP": 0.01909514985121097
+    },
+    {
+     "shift": 12,
+     "ratio": 1.691954021060015,
+     "p": 0.047896420238796145,
+     "lrtP": 0.046653659086553056
+    },
+    {
+     "shift": 14,
+     "ratio": 1.6852022042077448,
+     "p": 0.048708474017948866,
+     "lrtP": 0.04818148756334484
+    },
+    {
+     "shift": 16,
+     "ratio": 1.384401708383476,
+     "p": 0.22225195131125342,
+     "lrtP": 0.2244865474528861
+    },
+    {
+     "shift": 18,
+     "ratio": 1.1526479745118503,
+     "p": 0.6065062379972047,
+     "lrtP": 0.6081149193146932
+    },
+    {
+     "shift": 20,
+     "ratio": 0.8526315788091134,
+     "p": 0.5942745502813365,
+     "lrtP": 0.5911605852368882
+    },
+    {
+     "shift": 22,
+     "ratio": 0.6982889323021118,
+     "p": 0.2807393809184011,
+     "lrtP": 0.2685335735223522
+    },
+    {
+     "shift": 24,
+     "ratio": 0.9821731746174828,
+     "p": 0.9575762301494178,
+     "lrtP": 0.9575242055768517
+    },
+    {
+     "shift": 26,
+     "ratio": 1.2149122801921697,
+     "p": 0.5697760465024408,
+     "lrtP": 0.5746757504956602
+    },
+    {
+     "shift": 28,
+     "ratio": 1.0518518517600166,
+     "p": 0.8934352801262226,
+     "lrtP": 0.8938436101944486
+    },
+    {
+     "shift": 30,
+     "ratio": 1.9935483840261392,
+     "p": 0.11760605469607921,
+     "lrtP": 0.13444432415946284
+    },
+    {
+     "shift": 32,
+     "ratio": 2.7102272642580445,
+     "p": 0.05787632961843436,
+     "lrtP": 0.07266350077898842
+    },
+    {
+     "shift": 34,
+     "ratio": 1.4572192683012163e-7,
+     "p": 0.9948609166476452,
+     "lrtP": 0.16339831633149937
+    },
+    {
+     "shift": 36,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1
+    },
+    {
+     "shift": 38,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1
+    },
+    {
+     "shift": 40,
+     "ratio": 1,
+     "p": 0.999999999,
+     "lrtP": 1
+    }
+   ],
+   "real": {
+    "shift": 0,
+    "ratio": 1.25030047871405,
+    "p": 0.5045975190168185,
+    "lrtP": 0.4979032785812849
+   },
+   "placebosAtLeastAsLarge": 10,
+   "placebosRun": 25,
+   "permutationP": 0.4230769230769231
+  }
+ },
+ "rosterNeed": {
+  "top100-deep": {
+   "meanBefore": 2.3846153846153846,
+   "meanAfter": 1.5263157894736843,
+   "nBefore": 13,
+   "nAfter": 57
+  },
+  "top30-obs": {
+   "meanBefore": 1.8333333333333333,
+   "meanAfter": 1.3571428571428572,
+   "nBefore": 6,
+   "nAfter": 28
+  },
+  "all": {
+   "meanBefore": 2.264516129032258,
+   "meanAfter": 1.637702503681885,
+   "nBefore": 155,
+   "nAfter": 679
+  }
+ },
+ "clubs": {
+  "top100-deep": {
+   "promotions": 70,
+   "clubs": 27
+  },
+  "top30-obs": {
+   "promotions": 34,
+   "clubs": 24
+  },
+  "top10-obs": {
+   "promotions": 12,
+   "clubs": 10
+  }
+ },
+ "loso": {
+  "top100-deep": {
+   "fits": [
+    {
+     "dropped": 2016,
+     "ratio": 0.6623250825672793,
+     "p": 0.7205116136043781,
+     "lrtP": 0.7110431367822199
+    },
+    {
+     "dropped": 2017,
+     "ratio": 8.399130290513276e-7,
+     "p": 0.9863852121297783,
+     "lrtP": 0.10285910683122723
+    },
+    {
+     "dropped": 2018,
+     "ratio": 0.544937598556011,
+     "p": 0.6067023717329567,
+     "lrtP": 0.5915169526243217
+    },
+    {
+     "dropped": 2019,
+     "ratio": 0.5762254022226397,
+     "p": 0.6400844765483655,
+     "lrtP": 0.6271034766706894
+    },
+    {
+     "dropped": 2021,
+     "ratio": 0.5762254231336501,
+     "p": 0.6400844960257718,
+     "lrtP": 0.6271034766811023
+    },
+    {
+     "dropped": 2022,
+     "ratio": 1.2127192414015862,
+     "p": 0.8670266792962433,
+     "lrtP": 0.8692912076528617
+    },
+    {
+     "dropped": 2023,
+     "ratio": 0.4980583964368212,
+     "p": 0.5546688749515118,
+     "lrtP": 0.5358954433171037
+    }
+   ],
+   "significantWald": 0,
+   "significantLrt": 0
+  },
+  "top30-obs": {
+   "fits": [
+    {
+     "dropped": 2013,
+     "ratio": 1.433528581848993,
+     "p": 0.6680335711405991,
+     "lrtP": 0.6667633441620764
+    },
+    {
+     "dropped": 2014,
+     "ratio": 1.4710610728403586,
+     "p": 0.6449332253894308,
+     "lrtP": 0.6436530852198392
+    },
+    {
+     "dropped": 2015,
+     "ratio": 0.5422584422190239,
+     "p": 0.6096549657130524,
+     "lrtP": 0.5954828105742161
+    },
+    {
+     "dropped": 2016,
+     "ratio": 1.6096175150173673,
+     "p": 0.5721768088559452,
+     "lrtP": 0.5704785747545688
+    },
+    {
+     "dropped": 2017,
+     "ratio": 1.1139907300248764,
+     "p": 0.9044549223145519,
+     "lrtP": 0.9044849325219153
+    },
+    {
+     "dropped": 2018,
+     "ratio": 1.2182401605485473,
+     "p": 0.8142727984757673,
+     "lrtP": 0.8138766387092369
+    },
+    {
+     "dropped": 2019,
+     "ratio": 1.656674072928336,
+     "p": 0.5904501617333401,
+     "lrtP": 0.5844635140607048
+    },
+    {
+     "dropped": 2021,
+     "ratio": 1.6566742941991037,
+     "p": 0.5904500687120845,
+     "lrtP": 0.5844635077913742
+    },
+    {
+     "dropped": 2022,
+     "ratio": 1.9781077082051488,
+     "p": 0.41835086968475144,
+     "lrtP": 0.4164496074803361
+    },
+    {
+     "dropped": 2023,
+     "ratio": 1.6951858625792693,
+     "p": 0.5747790299234304,
+     "lrtP": 0.5685774088233738
+    }
+   ],
+   "significantWald": 0,
+   "significantLrt": 0
+  },
+  "top30-ext": {
+   "fits": [
+    {
+     "dropped": 2009,
+     "ratio": 0.7451851436738455,
+     "p": 0.687401649764369,
+     "lrtP": 0.6863932021723236
+    },
+    {
+     "dropped": 2010,
+     "ratio": 0.7995365948080047,
+     "p": 0.7605145779894903,
+     "lrtP": 0.7598803157969963
+    },
+    {
+     "dropped": 2011,
+     "ratio": 0.8826649640867738,
+     "p": 0.8652428698665465,
+     "lrtP": 0.8650159924879927
+    },
+    {
+     "dropped": 2012,
+     "ratio": 0.8421403886783265,
+     "p": 0.8153930157491424,
+     "lrtP": 0.8150152309556836
+    },
+    {
+     "dropped": 2013,
+     "ratio": 0.7689752178115359,
+     "p": 0.720106420477614,
+     "lrtP": 0.7193013252512246
+    },
+    {
+     "dropped": 2014,
+     "ratio": 0.7775873525225265,
+     "p": 0.7314266903433139,
+     "lrtP": 0.7306432989832863
+    },
+    {
+     "dropped": 2015,
+     "ratio": 0.2309959692473249,
+     "p": 0.19848823744625232,
+     "lrtP": 0.14738304003151736
+    },
+    {
+     "dropped": 2016,
+     "ratio": 0.8232435447151014,
+     "p": 0.7913409499896823,
+     "lrtP": 0.7908509157859189
+    },
+    {
+     "dropped": 2017,
+     "ratio": 0.5775802752792255,
+     "p": 0.48933771941221604,
+     "lrtP": 0.48341686945133155
+    },
+    {
+     "dropped": 2018,
+     "ratio": 0.681655015151202,
+     "p": 0.6022903912500328,
+     "lrtP": 0.6007680922433576
+    },
+    {
+     "dropped": 2019,
+     "ratio": 0.7989922947818032,
+     "p": 0.770886357947561,
+     "lrtP": 0.7708689374033599
+    },
+    {
+     "dropped": 2021,
+     "ratio": 0.798992293416749,
+     "p": 0.7708863562554953,
+     "lrtP": 0.7708689374042188
+    },
+    {
+     "dropped": 2022,
+     "ratio": 0.9412999376744536,
+     "p": 0.9347355597624186,
+     "lrtP": 0.9346834567969828
+    },
+    {
+     "dropped": 2023,
+     "ratio": 0.8021934406388509,
+     "p": 0.7753112144509263,
+     "lrtP": 0.7752857626910273
+    },
+    {
+     "dropped": 2024,
+     "ratio": 0.8360334536753302,
+     "p": 0.8158333466532228,
+     "lrtP": 0.8157840304915794
+    },
+    {
+     "dropped": 2025,
+     "ratio": 0.8709871053445886,
+     "p": 0.8573258635858518,
+     "lrtP": 0.857304308809497
+    }
+   ],
+   "significantWald": 0,
+   "significantLrt": 0
+  }
+ },
+ "sensitivity": {
+  "fits": {
+   "top-100 observed-deep": {
+    "knownAtPromotion": {
+     "n": 70,
+     "cells": 315,
+     "rateRatio": 0.5287798727960157,
+     "ci": [
+      0.05639627644980001,
+      4.957918704492095
+     ],
+     "se": 1.1419230050241727,
+     "z": -0.5579912572041721,
+     "p": 0.5768502927603258,
+     "lr": 0.3470142570297412,
+     "lrtP": 0.5558080845765587
+    },
+    "wholeWindow": {
+     "n": 71,
+     "cells": 315,
+     "rateRatio": 0.5048380870147079,
+     "ci": [
+      0.053897877836457116,
+      4.728599795227533
+     ],
+     "se": 1.141401353668147,
+     "z": -0.5988406432956345,
+     "p": 0.5492790613139943,
+     "lr": 0.40262920096571975,
+     "lrtP": 0.5257344250208231
+    }
+   },
+   "top-30 observed": {
+    "knownAtPromotion": {
+     "n": 34,
+     "cells": 450,
+     "rateRatio": 1.4131655814107997,
+     "ci": [
+      0.2747751063087796,
+      7.267896234529868
+     ],
+     "se": 0.8355278531972221,
+     "z": 0.41390874021719254,
+     "p": 0.678941029105447,
+     "lr": 0.17255287393723506,
+     "lrtP": 0.6778529677530241
+    },
+    "wholeWindow": {
+     "n": 35,
+     "cells": 450,
+     "rateRatio": 1.510883075393692,
+     "ci": [
+      0.294889885248967,
+      7.741085000537832
+     ],
+     "se": 0.8335956942328475,
+     "z": 0.4950772909265849,
+     "p": 0.6205455654956357,
+     "lr": 0.24712578233683757,
+     "lrtP": 0.6191062135443864
+    }
+   }
+  },
+  "windowCounts": {
+   "censored": 287,
+   "observed-shallow": 148,
+   "observed-deep": 399
+  },
+  "top30ShareByWindow": {
+   "censored": {
+    "n": 287,
+    "ranked": 15
+   },
+   "observed-shallow": {
+    "n": 148,
+    "ranked": 10
+   },
+   "observed-deep": {
+    "n": 399,
+    "ranked": 24
+   }
+  }
+ }
+}
