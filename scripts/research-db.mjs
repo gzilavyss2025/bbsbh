@@ -157,6 +157,20 @@ const PANEL_PATHS = [
   // per element with no flattening step needed.
   '.scratch/top-prospects-history/rows.json',
   '.scratch/top-prospects-history/seasons.json',
+  // What a ranking is worth in dollars (docs/prospect-ranking-value.md,
+  // .scratch/prospect-value/). panel.json is one row per player in the UNION of
+  // the ranked population and the 3,061-man debut cohort, carrying the rank
+  // facts, the career earnings joined from salaries.csv, and `windowStatus` --
+  // the flag that says whether the man's ranking window sat inside a published
+  // list at all. A 2006 debut is 'censored', NOT unranked: no list exists for
+  // his ranking years. Any query that compares ranked against unranked must
+  // filter windowStatus = 'observed-deep' or it is measuring a data gap.
+  // Same plain-ARRAY shape as rows.json above, for the same reason; the
+  // metadata sits beside it in panel-meta.json rather than wrapping it.
+  '.scratch/prospect-value/panel.json',
+  '.scratch/prospect-value/panel-meta.json',
+  '.scratch/prospect-value/bios.json',
+  '.scratch/prospect-value/findings.json',
   '.scratch/blockage/incumbent-ids.json',
   '.scratch/blockage/incumbent-bio.json',
   '.scratch/blockage/exits.json',

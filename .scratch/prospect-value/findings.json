@@ -1,0 +1,1193 @@
+{
+ "generatedAt": "2026-08-28T15:13:32.412Z",
+ "panelMeta": {
+  "counts": {
+   "rows": 3253,
+   "debutCohort": 3060,
+   "rankedPlayers": 757,
+   "rankedInDebutCohort": 564,
+   "rankedNotInDebutCohort": 193,
+   "rankedNeverDebuted": 58,
+   "windowStatus": {
+    "censored": 1268,
+    "observed-shallow": 492,
+    "no-debut": 58,
+    "observed-deep": 1435
+   }
+  },
+  "rankWindow": {
+   "first": 2009,
+   "last": 2024,
+   "depths": {
+    "2009": 50,
+    "2010": 50,
+    "2011": 50,
+    "2012": 100,
+    "2013": 100,
+    "2014": 100,
+    "2015": 100,
+    "2016": 100,
+    "2017": 100,
+    "2018": 100,
+    "2019": 100,
+    "2020": 99,
+    "2021": 99,
+    "2022": 100,
+    "2023": 100,
+    "2024": 100
+   }
+  },
+  "indexBaseYear": 2025,
+  "lastPaidSeason": 2025
+ },
+ "cohortAccounting": {
+  "debutCohortN": 3060,
+  "rankedN": 757,
+  "rankedInDebutCohort": 564,
+  "rankedOutsideDebutCohort": {
+   "neverDebuted": 58,
+   "debut2024plus": 79,
+   "debutPre2005": 1,
+   "belowRookieThreshold": 55
+  },
+  "windowGroups": {
+   "observed-deep": {
+    "cohortN": 1398,
+    "rankedN": 331
+   },
+   "observed-shallow": {
+    "cohortN": 483,
+    "rankedN": 117
+   },
+   "censored": {
+    "cohortN": 1179,
+    "rankedN": 116
+   },
+   "no-debut": {
+    "cohortN": 0,
+    "rankedN": 0
+   }
+  },
+  "note": "The censored group holds cohort men whose ranking window reaches into 2005-2008, where no list exists. Its rankedN are men who happen to appear on a later list. The remaining men in it are NOT unranked — they are unobserved — and never enter a ranked-versus-unranked comparison."
+ },
+ "zeroMeaning": {
+  "claim": "A zero in salaries.csv conflates \"never paid\" with \"not in this file\". The file is a salary roster of about 870-970 men a season; a short-service man can miss it entirely.",
+  "cohortMissingAnySalaryRow": 314,
+  "cohortN": 3060,
+  "cohortMissRate": 0.10261437908496732,
+  "byDebutYear": {
+   "2005": {
+    "n": 151,
+    "missing": 6,
+    "rate": 0.039735099337748346
+   },
+   "2006": {
+    "n": 151,
+    "missing": 10,
+    "rate": 0.06622516556291391
+   },
+   "2007": {
+    "n": 131,
+    "missing": 9,
+    "rate": 0.06870229007633588
+   },
+   "2008": {
+    "n": 154,
+    "missing": 20,
+    "rate": 0.12987012987012986
+   },
+   "2009": {
+    "n": 141,
+    "missing": 21,
+    "rate": 0.14893617021276595
+   },
+   "2010": {
+    "n": 144,
+    "missing": 9,
+    "rate": 0.0625
+   },
+   "2011": {
+    "n": 167,
+    "missing": 12,
+    "rate": 0.0718562874251497
+   },
+   "2012": {
+    "n": 140,
+    "missing": 14,
+    "rate": 0.1
+   },
+   "2013": {
+    "n": 158,
+    "missing": 23,
+    "rate": 0.14556962025316456
+   },
+   "2014": {
+    "n": 163,
+    "missing": 18,
+    "rate": 0.11042944785276074
+   },
+   "2015": {
+    "n": 162,
+    "missing": 19,
+    "rate": 0.11728395061728394
+   },
+   "2016": {
+    "n": 184,
+    "missing": 17,
+    "rate": 0.09239130434782608
+   },
+   "2017": {
+    "n": 171,
+    "missing": 14,
+    "rate": 0.08187134502923976
+   },
+   "2018": {
+    "n": 162,
+    "missing": 15,
+    "rate": 0.09259259259259259
+   },
+   "2019": {
+    "n": 192,
+    "missing": 15,
+    "rate": 0.078125
+   },
+   "2020": {
+    "n": 140,
+    "missing": 13,
+    "rate": 0.09285714285714286
+   },
+   "2021": {
+    "n": 163,
+    "missing": 20,
+    "rate": 0.12269938650306748
+   },
+   "2022": {
+    "n": 201,
+    "missing": 23,
+    "rate": 0.11442786069651742
+   },
+   "2023": {
+    "n": 185,
+    "missing": 36,
+    "rate": 0.1945945945945946
+   }
+  },
+  "differential": {
+   "rankedN": 331,
+   "rankedMissRate": 0.04833836858006042,
+   "unrankedN": 1067,
+   "unrankedMissRate": 0.12839737582005623
+  },
+  "consequence": "Every \"never earned\" figure below is therefore reported twice: once from the authoritative fact (statsapi says he never debuted) and once from the file (no salary row). The second is an upper bound on the first, not a measurement of it."
+ },
+ "neverEarn": {
+  "censorRule": "first ranked in 2009-2018, so every man has had at least seven seasons through 2025 to draw a major-league salary",
+  "overall": {
+   "n": 474,
+   "neverDebuted": 18,
+   "neverDebutedRate": 0.0379746835443038,
+   "noSalaryRow": 60,
+   "noSalaryRowRate": 0.12658227848101267,
+   "debutedButNoSalaryRow": 42,
+   "medianIndexed": 11020765.548676576
+  },
+  "byPeakRankBand": {
+   "1-10": {
+    "n": 82,
+    "neverDebuted": 0,
+    "neverDebutedRate": 0,
+    "noSalaryRow": 1,
+    "noSalaryRowRate": 0.012195121951219513,
+    "debutedButNoSalaryRow": 1,
+    "medianIndexed": 50362047.12143707
+   },
+   "11-25": {
+    "n": 96,
+    "neverDebuted": 0,
+    "neverDebutedRate": 0,
+    "noSalaryRow": 6,
+    "noSalaryRowRate": 0.0625,
+    "debutedButNoSalaryRow": 6,
+    "medianIndexed": 15972594.791572824
+   },
+   "26-50": {
+    "n": 136,
+    "neverDebuted": 10,
+    "neverDebutedRate": 0.07352941176470588,
+    "noSalaryRow": 22,
+    "noSalaryRowRate": 0.16176470588235295,
+    "debutedButNoSalaryRow": 12,
+    "medianIndexed": 8119857.6101052575
+   },
+   "51-75": {
+    "n": 88,
+    "neverDebuted": 3,
+    "neverDebutedRate": 0.03409090909090909,
+    "noSalaryRow": 17,
+    "noSalaryRowRate": 0.19318181818181818,
+    "debutedButNoSalaryRow": 14,
+    "medianIndexed": 3971957.7373175994
+   },
+   "76-100": {
+    "n": 72,
+    "neverDebuted": 5,
+    "neverDebutedRate": 0.06944444444444445,
+    "noSalaryRow": 14,
+    "noSalaryRowRate": 0.19444444444444445,
+    "debutedButNoSalaryRow": 9,
+    "medianIndexed": 2763785.0213905014
+   }
+  },
+  "byGroup": {
+   "hitting": {
+    "n": 252,
+    "neverDebuted": 9,
+    "neverDebutedRate": 0.03571428571428571,
+    "noSalaryRow": 28,
+    "noSalaryRowRate": 0.1111111111111111,
+    "debutedButNoSalaryRow": 19,
+    "medianIndexed": 12385094.477865348
+   },
+   "pitching": {
+    "n": 221,
+    "neverDebuted": 9,
+    "neverDebutedRate": 0.04072398190045249,
+    "noSalaryRow": 32,
+    "noSalaryRowRate": 0.14479638009049775,
+    "debutedButNoSalaryRow": 23,
+    "medianIndexed": 9422205.295779923
+   }
+  },
+  "depth100Only": {
+   "n": 364,
+   "neverDebuted": 15,
+   "neverDebutedRate": 0.04120879120879121,
+   "noSalaryRow": 53,
+   "noSalaryRowRate": 0.14560439560439561,
+   "debutedButNoSalaryRow": 38,
+   "medianIndexed": 8298936.611814309
+  }
+ },
+ "rankCurve": {
+  "design": "population = every man first ranked 2009-2016; earnings measured over the 10 seasons from his first ranking, strictly truncated so every man gets the same number of seasons; dollars indexed to 2025 league-average salary",
+  "n": 372,
+  "zeroes": 49,
+  "windowSanity": {
+   "paidBeforeTheWindowOpened": 9,
+   "stillPaidAfterWindowClosed": 150,
+   "dollarsFallingOutsideTheWindow": 6626688394,
+   "shareOfCareerDollarsTruncated": 0.38299767663202416,
+   "note": "A man still being paid in season eleven keeps earning, and those dollars are deliberately outside the window. Truncating is what makes a 2009 name comparable with a 2016 one; the untruncated \"career so far\" figure is in the robustness block so the difference is visible."
+  },
+  "byBand": [
+   {
+    "band": "1-10",
+    "n": 69,
+    "zeroes": 1,
+    "median": 33140787,
+    "medianCI": [
+     28735860,
+     45342985
+    ],
+    "mean": 48631276,
+    "p25": 19499617,
+    "p75": 71621430,
+    "p90": 114502554
+   },
+   {
+    "band": "11-25",
+    "n": 75,
+    "zeroes": 6,
+    "median": 21351570,
+    "medianCI": [
+     5564191,
+     33119129
+    ],
+    "mean": 33975578,
+    "p25": 2544867,
+    "p75": 59655452,
+    "p90": 83933044
+   },
+   {
+    "band": "26-50",
+    "n": 110,
+    "zeroes": 18,
+    "median": 7605829,
+    "medianCI": [
+     4446030,
+     13434545
+    ],
+    "mean": 21865326,
+    "p25": 707117,
+    "p75": 34427936,
+    "p90": 67895851
+   },
+   {
+    "band": "51-75",
+    "n": 66,
+    "zeroes": 13,
+    "median": 5537022,
+    "medianCI": [
+     2310209,
+     10995642
+    ],
+    "mean": 22996693,
+    "p25": 653268,
+    "p75": 44948114,
+    "p90": 71954340
+   },
+   {
+    "band": "76-100",
+    "n": 52,
+    "zeroes": 11,
+    "median": 2763785,
+    "medianCI": [
+     1220728,
+     15332160
+    ],
+    "mean": 16322711,
+    "p25": 638453,
+    "p75": 28092195,
+    "p90": 47255056
+   }
+  ],
+  "spearmanRankVsEarnings": -0.34270585723366453,
+  "models": {
+   "linearInRank": {
+    "beta": [
+     7.121890717937427,
+     -0.023389583792234214
+    ],
+    "p": [
+     0,
+     2.0964229840991777e-7
+    ],
+    "r2": 0.0678827121394604,
+    "aic": 659.0706910874782
+   },
+   "linearInLogRank": {
+    "beta": [
+     8.323131868950718,
+     -0.6476889242302519
+    ],
+    "p": [
+     0,
+     2.7715795991589687e-8
+    ],
+    "r2": 0.07699875716282756,
+    "aic": 655.4146486417882
+   },
+   "both": {
+    "beta": [
+     8.08938956445121,
+     -0.006588216386388623,
+     -0.4971799971228563
+    ],
+    "p": [
+     0,
+     0.4832406464441419,
+     0.04186042162987258
+    ],
+    "r2": 0.07822664125908474,
+    "aic": 656.9194413130763
+   },
+   "verdict": "log-in-rank fits better",
+   "interpretation": "r2 is the number to read out loud. Peak rank explains a single-digit share of the variance in what a man earns; it moves the average a lot and predicts the individual barely at all."
+  },
+  "hurdle": {
+   "stage1EarnedAnything": {
+    "beta": [
+     1.0763276939588806,
+     -0.0634945282095698
+    ],
+    "p": [
+     0,
+     0.00007950502765941003
+    ],
+    "r2": 0.04038385699489977,
+    "n": 372
+   },
+   "stage2AmountGivenAny": {
+    "beta": [
+     7.821123287730053,
+     -0.2128302957434336
+    ],
+    "p": [
+     0,
+     8.720912880733067e-11
+    ],
+    "r2": 0.11594265919730595,
+    "n": 323
+   },
+   "reading": "Stage 1 is a linear probability fit of \"drew any major-league salary\" on ln(rank); stage 2 is log10(dollars) on ln(rank) among men who drew one."
+  },
+  "concentration": {
+   "totalIndexedDollars": 10675475035,
+   "top10": {
+    "n": 69,
+    "dollars": 3355558078,
+    "shareOfPool": 0.3143240059278539
+   },
+   "top25": {
+    "n": 144,
+    "dollars": 5903726458,
+    "shareOfPool": 0.5530176820323406
+   },
+   "bottomHalf": {
+    "n": 118,
+    "dollars": 2366562719,
+    "shareOfPool": 0.2216821931772212
+   }
+  },
+  "marginalRankPosition": {
+   "at5": {
+    "rank": 5,
+    "oneStepDownMultiplier": 0.7420996301671834,
+    "percentLostPerPosition": 25.79003698328166,
+    "dollarsLostAtBandMedian": 8547021
+   },
+   "at30": {
+    "rank": 30,
+    "oneStepDownMultiplier": 0.9515034541272355,
+    "percentLostPerPosition": 4.8496545872764525,
+    "dollarsLostAtBandMedian": 368856
+   },
+   "at95": {
+    "rank": 95,
+    "oneStepDownMultiplier": 0.9844240650647011,
+    "percentLostPerPosition": 1.5575934935298852,
+    "dollarsLostAtBandMedian": 43049
+   }
+  }
+ },
+ "outcomeLadder": {
+  "design": "salaries.csv plays no part here. \"Never debuted\" is statsapi's own mlbDebutDate; \"cleared the rookie threshold\" is membership of the 3,061-man debut cohort (130 AB or 50 IP, career). Restricted to men first ranked 2009-2016, so the youngest has had nine full seasons.",
+  "overall": {
+   "n": 372,
+   "neverDebuted": 12,
+   "debutedBelowRookieThreshold": 31,
+   "clearedRookieThreshold": 329,
+   "clearedRate": 0.8844086021505376
+  },
+  "byBand": {
+   "1-10": {
+    "n": 69,
+    "neverDebuted": 0,
+    "debutedBelowRookieThreshold": 0,
+    "clearedRookieThreshold": 69,
+    "clearedRate": 1
+   },
+   "11-25": {
+    "n": 75,
+    "neverDebuted": 0,
+    "debutedBelowRookieThreshold": 4,
+    "clearedRookieThreshold": 71,
+    "clearedRate": 0.9466666666666667
+   },
+   "26-50": {
+    "n": 110,
+    "neverDebuted": 6,
+    "debutedBelowRookieThreshold": 12,
+    "clearedRookieThreshold": 92,
+    "clearedRate": 0.8363636363636363
+   },
+   "51-75": {
+    "n": 66,
+    "neverDebuted": 2,
+    "debutedBelowRookieThreshold": 6,
+    "clearedRookieThreshold": 58,
+    "clearedRate": 0.8787878787878788
+   },
+   "76-100": {
+    "n": 52,
+    "neverDebuted": 4,
+    "debutedBelowRookieThreshold": 9,
+    "clearedRookieThreshold": 39,
+    "clearedRate": 0.75
+   }
+  },
+  "byGroup": {
+   "hitting": {
+    "n": 200,
+    "neverDebuted": 7,
+    "debutedBelowRookieThreshold": 12,
+    "clearedRookieThreshold": 181,
+    "clearedRate": 0.905
+   },
+   "pitching": {
+    "n": 172,
+    "neverDebuted": 5,
+    "debutedBelowRookieThreshold": 19,
+    "clearedRookieThreshold": 148,
+    "clearedRate": 0.8604651162790697
+   }
+  }
+ },
+ "firstVsPeak": {
+  "spearmanFirstRank": -0.287596280594546,
+  "spearmanPeakRank": -0.34270585723366453,
+  "spearmanNSeasons": -0.023424805322300624,
+  "modelPeakOnly": {
+   "beta": [
+    8.323131868950718,
+    -0.6476889242302519
+   ],
+   "p": [
+    0,
+    2.7715795991589687e-8
+   ],
+   "r2": 0.07699875716282756,
+   "aic": 655.4146486417882,
+   "n": 372
+  },
+  "modelFirstOnly": {
+   "beta": [
+    8.706787349292824,
+    -0.6799562144320248
+   ],
+   "p": [
+    0,
+    0.000022036930716229364
+   ],
+   "r2": 0.04640621637061704,
+   "aic": 667.5445257114117,
+   "n": 372
+  },
+  "modelBoth": {
+   "beta": [
+    8.507057418694217,
+    -0.5966091943863887,
+    -0.09532138851125183
+   ],
+   "p": [
+    0,
+    0.00042727750099558204,
+    0.6772606578378192
+   ],
+   "r2": 0.07743185403135511,
+   "aic": 657.2400553276306,
+   "n": 372
+  },
+  "modelPeakPlusSeasons": {
+   "beta": [
+    8.40140875063613,
+    -0.6572352943111124,
+    -0.024047958858771423
+   ],
+   "p": [
+    0,
+    2.0464939542996774e-7,
+    0.8447505070510132
+   ],
+   "r2": 0.07709466370561147,
+   "aic": 657.3759931276348,
+   "n": 372
+  }
+ },
+ "byGroup": {
+  "hitting": {
+   "n": 200,
+   "zeroes": 24,
+   "median": 14580277,
+   "medianCI": [
+    9150890,
+    24348666
+   ],
+   "mean": 31406647,
+   "p90": 81790235,
+   "slopeLogRank": -0.6400839305077639,
+   "slopeP": 0.000007227286670796751,
+   "r2": 0.09230043705529256,
+   "byBand": [
+    {
+     "band": "1-10",
+     "n": 44,
+     "zeroes": 1,
+     "median": 33363170,
+     "medianCI": [
+      25817328,
+      59484937
+     ],
+     "mean": 47708286,
+     "p25": 19175467,
+     "p75": 71740770,
+     "p90": 105672133
+    },
+    {
+     "band": "11-25",
+     "n": 38,
+     "zeroes": 1,
+     "median": 30194130,
+     "medianCI": [
+      10053422,
+      56713418
+     ],
+     "mean": 40429715,
+     "p25": 3384306,
+     "p75": 70647350,
+     "p90": 87370775
+    },
+    {
+     "band": "26-50",
+     "n": 58,
+     "zeroes": 11,
+     "median": 8050776,
+     "medianCI": [
+      3935201,
+      15700361
+     ],
+     "mean": 23412630,
+     "p25": 697422,
+     "p75": 35316001,
+     "p90": 69209849
+    },
+    {
+     "band": "51-75",
+     "n": 30,
+     "zeroes": 5,
+     "median": 5991128,
+     "medianCI": [
+      1970146,
+      34075168
+     ],
+     "mean": 29392965,
+     "p25": 811903,
+     "p75": 57511857,
+     "p90": 81535466
+    },
+    {
+     "band": "76-100",
+     "n": 30,
+     "zeroes": 6,
+     "median": 1841740,
+     "medianCI": [
+      781141,
+      9411389
+     ],
+     "mean": 13537141,
+     "p25": 661888,
+     "p75": 19753484,
+     "p90": 47663542
+    }
+   ]
+  },
+  "pitching": {
+   "n": 172,
+   "zeroes": 25,
+   "median": 12883451,
+   "medianCI": [
+    5388120,
+    19147756
+   ],
+   "mean": 25547358,
+   "p90": 68172738,
+   "slopeLogRank": -0.6470790556947854,
+   "slopeP": 0.0012080224059923816,
+   "r2": 0.05805810824642943,
+   "byBand": [
+    {
+     "band": "1-10",
+     "n": 25,
+     "zeroes": 0,
+     "median": 30702084,
+     "medianCI": [
+      20461462,
+      39092388
+     ],
+     "mean": 50255739,
+     "p25": 19975451,
+     "p75": 61702086,
+     "p90": 123626011
+    },
+    {
+     "band": "11-25",
+     "n": 37,
+     "zeroes": 5,
+     "median": 11793801,
+     "medianCI": [
+      2700314,
+      36135928
+     ],
+     "mean": 27347005,
+     "p25": 1552770,
+     "p75": 50169656,
+     "p90": 70936022
+    },
+    {
+     "band": "26-50",
+     "n": 52,
+     "zeroes": 7,
+     "median": 5995602,
+     "medianCI": [
+      3462890,
+      18125728
+     ],
+     "mean": 20139487,
+     "p25": 868717,
+     "p75": 31821215,
+     "p90": 59815962
+    },
+    {
+     "band": "51-75",
+     "n": 36,
+     "zeroes": 8,
+     "median": 4348715,
+     "medianCI": [
+      1241923,
+      13677122
+     ],
+     "mean": 17666466,
+     "p25": 644359,
+     "p75": 19675025,
+     "p90": 56237903
+    },
+    {
+     "band": "76-100",
+     "n": 22,
+     "zeroes": 5,
+     "median": 14281486,
+     "medianCI": [
+      1229439,
+      32339658
+     ],
+     "mean": 20121217,
+     "p25": 767707,
+     "p75": 33049768,
+     "p90": 47164793
+    }
+   ]
+  },
+  "medianGap": 1696826,
+  "mannWhitney": {
+   "u": 18646,
+   "z": 1.399980329471257,
+   "p": 0.1615193181248198
+  },
+  "topBandOnly": {
+   "u": 2929,
+   "z": 1.56149016501283,
+   "p": 0.11840816537726517
+  }
+ },
+ "rankedVsUnranked": {
+  "design": "debut cohort only (already selected on reaching the majors); observed-deep window only; six seasons of earnings from the debut season, indexed to 2025",
+  "h6": {
+   "rankedN": 209,
+   "unrankedN": 640,
+   "rankedMedian": 5356195,
+   "rankedMedianCI": [
+    3943435,
+    6823842
+   ],
+   "unrankedMedian": 2228597,
+   "unrankedMedianCI": [
+    1994437,
+    2513013
+   ],
+   "ratioOfMedians": 2.4033933130624723,
+   "rankedMean": 8813736,
+   "unrankedMean": 3891537,
+   "ratioOfMeans": 2.2648472852909705,
+   "mannWhitney": {
+    "u": 92199,
+    "z": 8.229973539874022,
+    "p": 2.220446049250313e-16
+   }
+  },
+  "h6ByGroup": {
+   "hitting": {
+    "rankedN": 122,
+    "unrankedN": 239,
+    "rankedMedian": 7195521,
+    "rankedMedianCI": [
+     4731039,
+     8977994
+    ],
+    "unrankedMedian": 2241242,
+    "unrankedMedianCI": [
+     1994437,
+     3006955
+    ],
+    "ratioOfMedians": 3.210506427377927,
+    "rankedMean": 10824823,
+    "unrankedMean": 4301486,
+    "ratioOfMeans": 2.516530894244185,
+    "mannWhitney": {
+     "u": 20774.5,
+     "z": 6.606899991541144,
+     "p": 3.945088700163524e-11
+    }
+   },
+   "pitching": {
+    "rankedN": 87,
+    "unrankedN": 401,
+    "rankedMedian": 3672422,
+    "rankedMedianCI": [
+     2898181,
+     5623639
+    ],
+    "unrankedMedian": 2190326,
+    "unrankedMedianCI": [
+     1601575,
+     2513013
+    ],
+    "ratioOfMedians": 1.6766552967252815,
+    "rankedMean": 5993592,
+    "unrankedMean": 3647203,
+    "ratioOfMeans": 1.6433393889034258,
+    "mannWhitney": {
+     "u": 22355.5,
+     "z": 4.124111808574582,
+     "p": 0.0000372377231548926
+    }
+   }
+  },
+  "h3": {
+   "rankedN": 331,
+   "unrankedN": 1067,
+   "rankedMedian": 1258239,
+   "rankedMedianCI": [
+    1201194,
+    1307452
+   ],
+   "unrankedMedian": 755764,
+   "unrankedMedianCI": [
+    749541,
+    765500
+   ],
+   "ratioOfMedians": 1.6648571150898548,
+   "rankedMean": 1313359,
+   "unrankedMean": 1168179,
+   "ratioOfMeans": 1.1242785432974423,
+   "mannWhitney": {
+    "u": 209925.5,
+    "z": 5.219405198028718,
+    "p": 1.798472182290567e-7
+   }
+  },
+  "h6ExcludingMenWithNoSalaryRow": {
+   "rankedN": 200,
+   "unrankedN": 575,
+   "rankedMedian": 5633579,
+   "rankedMedianCI": [
+    4161295,
+    7036646
+   ],
+   "unrankedMedian": 2627590,
+   "unrankedMedianCI": [
+    2312836,
+    2975840
+   ],
+   "ratioOfMedians": 2.1440096258587227,
+   "rankedMean": 9210354,
+   "unrankedMean": 4331449,
+   "ratioOfMeans": 2.1263908008581436,
+   "mannWhitney": {
+    "u": 78848,
+    "z": 7.8283311655329815,
+    "p": 4.9960036108132044e-15
+   }
+  },
+  "trapIfCensoredPooledAsUnranked": {
+   "rankedN": 442,
+   "unrankedN": 2069,
+   "rankedMedian": 7026975,
+   "rankedMedianCI": [
+    5946891,
+    8118654
+   ],
+   "unrankedMedian": 2166985,
+   "unrankedMedianCI": [
+    2040536,
+    2409840
+   ],
+   "ratioOfMedians": 3.2427421646653394,
+   "rankedMean": 9719653,
+   "unrankedMean": 4836627,
+   "ratioOfMeans": 2.0095930585559127,
+   "mannWhitney": {
+    "u": 640187.5,
+    "z": 13.230331992453804,
+    "p": 0
+   }
+  }
+ },
+ "developmentMeasures": {
+  "n": 839,
+  "spearmanAgeRelToLevel": -0.3014457547012839,
+  "spearmanSeasonsToDebut": -0.24977401862974444,
+  "spearmanAgeAtDebut": -0.30066693039082704,
+  "model": {
+   "terms": [
+    "intercept",
+    "ageRelToLevel",
+    "seasonsToDebut",
+    "wasRanked"
+   ],
+   "beta": [
+    6.295193418009143,
+    -0.10532701004321399,
+    -0.12815479903273877,
+    0.49810719451456187
+   ],
+   "p": [
+    0,
+    0.01146670602114419,
+    0.0019336437968368037,
+    0.004983769782689662
+   ],
+   "r2": 0.05638993345315324,
+   "n": 839
+  },
+  "incrementalR2OfRanking": 0.00891102738515448,
+  "levelTrendPercentile": {
+   "available": false,
+   "reason": "public/data/prospect-trend.json is a snapshot of the CURRENT season (dataThrough 2026-08-28) holding 732 active minor leaguers. Its overlap with the 3,061-man debut cohort is exactly 0 players, and with the 757 ranked men exactly 23 — all of them men still in the minors today. The measure named in the spike brief cannot be computed for any historical cohort and is dropped, not approximated."
+  }
+ },
+ "robustness": {
+  "fullSlope": {
+   "slope": -0.6476889242302519,
+   "p": 2.7715795991589687e-8,
+   "r2": 0.07699875716282756,
+   "n": 372
+  },
+  "leaveOneRankSeasonOut": {
+   "seasons": [
+    {
+     "dropped": 2009,
+     "n": 322,
+     "slope": -0.6146258781048672,
+     "p": 0.0000031949575498568805,
+     "spearman": -0.30419446302746894
+    },
+    {
+     "dropped": 2010,
+     "n": 339,
+     "slope": -0.6463677710831561,
+     "p": 1.369777605786382e-7,
+     "spearman": -0.3481942708878547
+    },
+    {
+     "dropped": 2011,
+     "n": 345,
+     "slope": -0.6489104132933754,
+     "p": 2.2482993045080946e-7,
+     "spearman": -0.3281928137688711
+    },
+    {
+     "dropped": 2012,
+     "n": 299,
+     "slope": -0.6294051178363809,
+     "p": 9.81768374042069e-7,
+     "spearman": -0.34834790364366514
+    },
+    {
+     "dropped": 2013,
+     "n": 326,
+     "slope": -0.681507694492371,
+     "p": 2.565577184032719e-8,
+     "spearman": -0.36261260168250214
+    },
+    {
+     "dropped": 2014,
+     "n": 331,
+     "slope": -0.6933679310658718,
+     "p": 1.7835154242362705e-8,
+     "spearman": -0.361003189430179
+    },
+    {
+     "dropped": 2015,
+     "n": 322,
+     "slope": -0.6426406284444379,
+     "p": 6.744117875268074e-8,
+     "spearman": -0.3644779433561455
+    },
+    {
+     "dropped": 2016,
+     "n": 320,
+     "slope": -0.6184617020243159,
+     "p": 8.757893783517545e-7,
+     "spearman": -0.322436793482823
+    }
+   ],
+   "survivedIn": 8,
+   "outOf": 8,
+   "slopeRange": [
+    -0.6933679310658718,
+    -0.6146258781048672
+   ]
+  },
+  "leaveOneDebutYearOut": {
+   "years": [
+    {
+     "dropped": 2016,
+     "rankedN": 161,
+     "unrankedN": 504,
+     "ratioOfMedians": 2.3051847252309217,
+     "p": 5.666578317686799e-12
+    },
+    {
+     "dropped": 2017,
+     "rankedN": 167,
+     "unrankedN": 511,
+     "ratioOfMedians": 2.34308955623677,
+     "p": 8.10496114667103e-12
+    },
+    {
+     "dropped": 2018,
+     "rankedN": 177,
+     "unrankedN": 510,
+     "ratioOfMedians": 2.4916118139398007,
+     "p": 3.3306690738754696e-16
+    },
+    {
+     "dropped": 2019,
+     "rankedN": 169,
+     "unrankedN": 488,
+     "ratioOfMedians": 2.47577071687928,
+     "p": 4.1744385725905886e-14
+    },
+    {
+     "dropped": 2020,
+     "rankedN": 162,
+     "unrankedN": 547,
+     "ratioOfMedians": 2.4239434704989766,
+     "p": 2.0050627824730327e-13
+    }
+   ],
+   "survivedIn": 5,
+   "outOf": 5
+  },
+  "variants": [
+   {
+    "label": "headline (all first-ranked 2009-2016, indexed dollars)",
+    "n": 372,
+    "slope": -0.6476889242302519,
+    "p": 2.7715795991589687e-8,
+    "r2": 0.07699875716282756,
+    "median": 13490944
+   },
+   {
+    "label": "depth-100 first-ranking seasons only (drops 2009-2011 top-50 lists)",
+    "n": 262,
+    "slope": -0.5949260013325706,
+    "p": 0.00015731664386164912,
+    "r2": 0.05207450821133963,
+    "median": 11332156
+   },
+   {
+    "label": "top-50 first-ranking seasons only (2009-2011)",
+    "n": 110,
+    "slope": -0.6689148183377647,
+    "p": 0.00015797942258222175,
+    "r2": 0.11674682080765386,
+    "median": 22180518
+   },
+   {
+    "label": "identity-collision ids removed",
+    "n": 372,
+    "slope": -0.6476889242302519,
+    "p": 2.7715795991589687e-8,
+    "r2": 0.07699875716282756,
+    "median": 13490944
+   },
+   {
+    "label": "men who earned nothing EXCLUDED rather than carried as zeroes (the survivorship version)",
+    "n": 323,
+    "slope": -0.2128302493284977,
+    "p": 8.720912880733067e-11,
+    "r2": 0.11594266020708899,
+    "median": 20628969
+   },
+   {
+    "label": "nominal dollars instead of indexed",
+    "n": 372,
+    "slope": -0.6425781740838126,
+    "p": 2.7897665844101027e-8,
+    "r2": 0.07696952023927106,
+    "median": 11740380
+   },
+   {
+    "label": "2020 salaries prorated to 60/162 of the contracted figure",
+    "n": 372,
+    "slope": -0.6460295183129148,
+    "p": 2.5888101773396954e-8,
+    "r2": 0.07730361448582357,
+    "median": 12619510
+   },
+   {
+    "label": "untruncated career-so-far dollars instead of a fixed ten-season window",
+    "n": 372,
+    "slope": -0.658587411694306,
+    "p": 1.0627698499021676e-8,
+    "r2": 0.08126714096366783,
+    "median": 14837720
+   },
+   {
+    "label": "men who never reached the majors dropped",
+    "n": 360,
+    "slope": -0.5265391801171369,
+    "p": 9.84058835418189e-7,
+    "r2": 0.06273351375961234,
+    "median": 14171680
+   },
+   {
+    "label": "hitters only",
+    "n": 200,
+    "slope": -0.6400839305077639,
+    "p": 0.000007227286670796751,
+    "r2": 0.09230043705529256,
+    "median": 14580277
+   },
+   {
+    "label": "pitchers only",
+    "n": 172,
+    "slope": -0.6470790556947854,
+    "p": 0.0012080224059923816,
+    "r2": 0.05805810824642943,
+    "median": 12883451
+   }
+  ],
+  "identityCollisions": {
+   "idsInPanel": 12,
+   "idsInCurvePool": 0,
+   "dollarsInCurvePool": 0,
+   "note": "Twelve of the 21 are real homonym pairs that must not be merged and nine are wrong fuzzy matches in the contract crosswalk. They are flagged, not repaired: repairing them belongs in the admin workbench."
+  },
+  "horizonSensitivity": [
+   {
+    "horizonSeasons": 3,
+    "rankedN": 331,
+    "unrankedN": 1067,
+    "rankedMedian": 1258239,
+    "unrankedMedian": 755764,
+    "ratio": 1.6648571150898548,
+    "p": 1.798472182290567e-7
+   },
+   {
+    "horizonSeasons": 6,
+    "rankedN": 209,
+    "unrankedN": 640,
+    "rankedMedian": 5356195,
+    "unrankedMedian": 2228597,
+    "ratio": 2.4033933130624723,
+    "p": 2.220446049250313e-16
+   },
+   {
+    "horizonSeasons": 9,
+    "rankedN": 90,
+    "unrankedN": 265,
+    "rankedMedian": 13350613,
+    "unrankedMedian": 2589988,
+    "ratio": 5.154701309297402,
+    "p": 1.017205208952987e-10
+   }
+  ]
+ },
+ "headlines": {
+  "neverEarned": "18 of 474 men first ranked 2009-2018 never reached the majors at all (3.8%); 60 (12.7%) never appear in salaries.csv, which is the upper bound rather than the measurement.",
+  "topTenVersusBottom": "median indexed earnings $33,140,787 for a peak rank of 1-10 (n=69) against $2,763,785 for 76-100 (n=52)",
+  "curveShape": "log-in-rank fits better"
+ }
+}
