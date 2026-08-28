@@ -149,6 +149,11 @@ const PANEL_PATHS = [
   'public/data/all-star-rosters.json',
   'public/data/awards-history.json',
   '.scratch/game-notes/insights/verdicts-*.json', // filename carries a date stamp
+  // Extension-value spike (W3.3, docs/contracts-extension-value.md): a
+  // season-by-season price-of-a-win panel derived from free_agency.csv, and
+  // the extensions.csv outcomes it prices.
+  '.scratch/contracts-extensions/fa-war-price.json',
+  '.scratch/contracts-extensions/extension-outcomes.json',
   // Historical contract identity crosswalk (scripts/gen-contracts-identity.mjs):
   // one row per source-CSV row, keyed on real MLB id like every panel above.
   // A row with no confident id has mlbId = null, confidence != 'exact'/'fuzzy'
