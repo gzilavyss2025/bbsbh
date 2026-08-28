@@ -195,6 +195,7 @@ export function PlayerHubShell({ core, asOf = null, sportId = null, active, chil
           active={active}
           asOf={asOf}
           sportId={sportId}
+          rosterStatus={status}
         />
 
         {children}

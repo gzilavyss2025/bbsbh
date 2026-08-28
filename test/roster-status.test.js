@@ -106,3 +106,25 @@ test('no ended stint resolving to any org still falls back to the most recent st
   )
   assert.deepEqual(status.lastTeam, { id: 9001, name: 'Águilas Cibaeñas' })
 })
+
+test('a retired player carries his age at the final roster date, not his current or death age', () => {
+  const status = rosterStatusView(
+    {
+      active: false,
+      birthDate: '1895-02-06',
+      currentAge: 53,
+      rosterEntries: [
+        {
+          team: { id: 144, name: 'Boston Braves' },
+          status: { code: 'A' },
+          startDate: '1935-01-01',
+          endDate: '1935-12-31',
+        },
+      ],
+    },
+    ON_DATE,
+  )
+
+  assert.equal(status.state, 'retired')
+  assert.equal(status.retiredAge, 40)
+})

@@ -184,6 +184,18 @@ export function rosterStatusView(person, onDate) {
   }
   const stop = newest(ended.filter((e) => stintOrg(e) != null)) ?? last
   const stopOrg = stop ? stintOrg(stop) : null
+  // `currentAge` is not a live age for every historical player: statsapi
+  // freezes it at death for deceased players. A retired page needs neither a
+  // death date nor a clock. Measure the final roster date against birth date
+  // once, and the Overview can keep saying a stable baseball fact.
+  const ageOn = (birthDate, throughDate) => {
+    const birth = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate ?? '')
+    const through = /^(\d{4})-(\d{2})-(\d{2})$/.exec(throughDate ?? '')
+    if (!birth || !through) return null
+    let age = Number(through[1]) - Number(birth[1])
+    if (`${through[2]}-${through[3]}` < `${birth[2]}-${birth[3]}`) age -= 1
+    return age >= 0 ? age : null
+  }
   return {
     state: retired ? 'retired' : 'free-agent',
     label: retired ? 'Retired' : 'Free Agent',
@@ -193,6 +205,7 @@ export function rosterStatusView(person, onDate) {
         ? { id: stop.team.id, name: stop.team.name ?? '' }
         : null,
     through: stop?.endDate ?? null,
+    retiredAge: retired ? ageOn(person.birthDate, stop?.endDate) : null,
   }
 }
 

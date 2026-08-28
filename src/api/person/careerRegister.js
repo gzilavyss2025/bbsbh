@@ -116,9 +116,10 @@ function byTeamStints(splits) {
 // player page already pulls full career transactions, see fetchTransactions)
 // that separates "hurt all year" from a genuine gap (unsigned, holdout,
 // retired-then-returned) the app has no data to explain.
-function missingSeasonRows(presentYears, debutYear, currentSeason, transactions, group) {
+function missingSeasonRows(presentYears, debutYear, currentSeason, transactions, group, retiredYear) {
   const rows = []
-  for (let yr = debutYear; yr < currentSeason; yr++) {
+  const endSeason = retiredYear ? Math.min(currentSeason, retiredYear) : currentSeason
+  for (let yr = debutYear; yr < endSeason; yr++) {
     if (presentYears.has(yr)) continue
     const injured = (transactions ?? []).some(
       (t) => isIlPlacementTxn(t) && txnDate(t)?.slice(0, 4) === String(yr),
@@ -141,8 +142,7 @@ function missingSeasonRows(presentYears, debutYear, currentSeason, transactions,
   }
   return rows
 }
-
-export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSplits, currentSeason, currentSportId, careerStat, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null }) {
+export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSplits, currentSeason, currentSportId, retiredYear = null, careerStat, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null }) {
   // Group every split (MLB + all MiLB levels) into season -> sportId -> rows.
   const bySeason = new Map()
   for (const s of [...(mlbSplits ?? []), ...(milbSplits ?? [])]) {
@@ -359,7 +359,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   // Gap years (see missingSeasonRows) slot into the same sorted ledger as the
   // real rows rather than a separate section — a missed season reads most
   // clearly inline, between the years on either side of it.
-  const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions, group) : []
+  const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions, group, retiredYear) : []
   const allRows = gapRows.length ? [...rows, ...gapRows].sort((a, b) => b.year - a.year) : rows
 
   return { columns, rows: allRows, totals }

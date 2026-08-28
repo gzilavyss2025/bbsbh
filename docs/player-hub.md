@@ -1,7 +1,9 @@
 # The player hub (`/player/{id}`)
 
 The player page is not one page. It is a pinned identity header plus **four tabs,
-each a real route**, and **each tab loads only its own data**. That is the team
+each a real route**, and **each tab loads only its own data**. Retired players
+omit Analytics because its current-season sources have nothing to add; their
+other three tabs keep the same routes and loading boundaries. That is the team
 hub's shape (ADR-0034) applied one page over, for the same reason: a reader who
 wants a game log should not wait on a Statcast file, a pitch-arsenal pool, an
 awards feed and a whole career's transactions to land first.
@@ -39,7 +41,8 @@ one tab and "today" on the next.
 
 ## What is on which tab
 
-- **Overview** — who he is now. The fact grid, the Contract card, each stat
+- **Overview** — who he is now. The fact grid (including age at retirement for
+  a retired player), the Contract card, each stat
   block's current-season tiles with their league-rank chips and any other level
   he has played at this year, Milestone Watch, and the season's Photos and
   Highlights rails. A player who has **not debuted** leads instead with his
@@ -47,7 +50,8 @@ one tab and "today" on the next.
 - **Stats** — what he has done. The game log with its level toggle, the recent
   form (hitter) or workload (pitcher) card that summarizes it, the splits, and
   the career register.
-- **Analytics** — what is under those numbers. The Prospect card below the
+- **Analytics** — what is under those numbers, for players who are not retired.
+  The Prospect card below the
   majors — a level-relative OPS/ERA standing (`prospectTrend.js`) alongside how
   far his current sample sits into a typical STAY at that level
   (`levelTenure.js`, `docs/level-tenure-benchmark.md`) — Statcast percentiles
@@ -82,7 +86,8 @@ for it on top of its own loader**.
 drift into two different-looking things. The control is deliberately **not**
 club-coloured on either hub: `.teamtabs__btn` inks its active tab from
 `--accent-primary`, per ADR-0030's rule that a club may colour a card that
-identifies the club, never a control.
+identifies the club, never a control. `tabVisibility.js` removes Analytics from
+that list when the shared roster status says the player is retired.
 
 `src/screens/player/parts.jsx` holds the small pieces more than one tab draws —
 `SectionTitle`, `StatGrid`, `Fact`, and the two date formatters. A piece only one
