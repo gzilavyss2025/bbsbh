@@ -39,9 +39,11 @@ name: Update nightly data
 # job, before any consumer, and inherit this file's rebase-retry push — none
 # of the three had one, and affiliates + top-prospects were scheduled at the
 # same MINUTE, the exact collision that forced the 2026-07-11 consolidation.
-# Monday-gated rather than nightly because fetch-top-prospects.mjs scrapes
-# www.mlb.com (be a good citizen) and gen-mono-logos.mjs pulls a mark per club
-# at five levels; the underlying data moves once a year at most.
+# They arrived Monday-GATED and were made unconditional a day later, on
+# 2026-08-29, because the gate blocked the fix it was supposed to enable — see
+# the block's own comment below. The lesson is worth keeping: a cadence gate on
+# a producer makes its consumers ungateable, and a CALENDAR gate is not
+# self-healing. Gate on whether the producer succeeded, never on what day it is.
 # gen-comeback-wins.mjs was added to the batch without joining the commit
 # step's `git add` list or the fail-check below — harmless on a clean
 # fast-forward push, but its always-unstaged output broke the push-race
@@ -55,12 +57,16 @@ name: Update nightly data
 # hand-run backfill. The slate card's per-game logo swap fell back to
 # defaultTreatmentFor's side-only guess for every game since, with no
 # generator failure to surface it. Fixed 2026-07-25.
-# A GENERATOR THAT WRITES A DIRECTORY MUST STAGE THE DIRECTORY. Two do now:
-# gen-vs-team-splits.mjs writes public/data/vs-team-splits/ (one shard per
-# club plus an index — it used to be one file), and gen-rookies.mjs writes
-# BOTH public/data/rookies.json (the append-only master) and the derived
-# public/data/rookies/ the app actually reads. Staging only the old path
-# would be the jerseys.json bug again, one level up.
+# BOTH of those were the same bug — a hand-maintained `git add` list drifting
+# from what the generators actually write — and on 2026-08-29 the list was
+# replaced by `git add -A -- public scripts/data src/lib/data` plus an assert
+# that the tree is clean afterward. A new generator no longer has to be
+# remembered here at all, a directory output can no longer be half-staged, and
+# anything written outside those three roots now fails the job loudly instead
+# of being discarded in silence. scripts/CLAUDE.md called this out first: a new
+# generator took "three edits, not one — miss the second and the job computes
+# the file and throws it away; miss the third and a broken generator reports
+# green. Both have happened." Two of the three are now structural.
 # scripts/warm-previews.mjs (added 2026-07-22) is the one step here that
 # ISN'T a gen-*.mjs data generator — it writes no public/data/* file, so it
 # deliberately has no entry in the commit step's `git add` list, only in the
@@ -76,12 +82,7 @@ name: Update nightly data
 on:
   schedule:
     - cron: '0 7 * * *' # ~3am US Eastern (2-3am during EST) — moved earlier 2026-07-22; the "Wait for yesterday's slate" step below backs off hourly if a late West Coast game is still in progress, up to the old ~7am ET ceiling, instead of always waiting that long
-  workflow_dispatch:
-    inputs:
-      run_weekly:
-        description: 'Also run the weekly steps (teams, club marks, MiLB parks, affiliates, top prospects) whatever day it is'
-        type: boolean
-        default: false
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -115,28 +116,25 @@ jobs:
           done
           echo "still not all settled after 4 hours — proceeding anyway (matches the old fixed ~7am ET run time)"
 
-      # ---- Weekly block (Mondays only) ----------------------------------
-      # Was three separate Monday crons until 2026-08-28; see the header for
-      # why they moved and why they now sit ABOVE every generator that reads
-      # what they write. Everything in this block is skipped six days a week,
-      # so `steps.<id>.outcome` is 'skipped' — not 'failure' — on those days,
-      # which is what keeps the fail-check at the bottom quiet.
-      - name: Weekly steps due?
-        id: weekly
-        env:
-          FORCE: ${{ github.event.inputs.run_weekly }}
-        run: |
-          if [ "$FORCE" = "true" ] || [ "$(date -u +%u)" = "1" ]; then
-            echo "Weekly steps are due (Monday, or forced via workflow_dispatch)."
-            echo "due=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Not Monday — skipping the weekly steps."
-            echo "due=false" >> "$GITHUB_OUTPUT"
-          fi
-
+      # ---- Structural data: slow-moving upstream, rebuilt nightly --------
+      # Three separate Monday crons until 2026-08-28, then a Monday-GATED block
+      # here until 2026-08-29. They run every night now, unconditionally, and
+      # the gate they used to carry is the reason. While they were Monday-only,
+      # `steps.teams.outcome` was 'skipped' six days a week, so the five
+      # consumers further down COULD NOT be gated on their producer succeeding —
+      # the one protection this file leans on everywhere else. The calendar gate
+      # fixed the ordering half of the Monday bug and left the staleness half
+      # unfixable inside its own idiom.
+      # A calendar gate was not self-healing either: a Monday run GitHub dropped
+      # (it dropped 2026-08-28's outright) or delayed past midnight UTC skipped
+      # the block for a full week and reported 'skipped', not 'failure'.
+      # The cost of running nightly is 11 requests — gen-teams 5, gen-affiliates
+      # 4, fetch-top-prospects 2, gen-milb-ballparks 0 — in a job that already
+      # sweeps thousands, plus gen-mono-logos' ~250 content-hashed CDN fetches,
+      # which produced ZERO file churn on the 2026-08-28 run. Nothing here is
+      # expensive enough to be worth a cadence rule.
       - name: Teams
         id: teams
-        if: steps.weekly.outputs.due == 'true'
         continue-on-error: true
         run: node scripts/gen-teams.mjs
       # Both of the next two READ the teams.json the step above just wrote, so
@@ -147,25 +145,23 @@ jobs:
       # Same gate, same reason, as "Club ledgers and league salaries" below.
       - name: Club marks
         id: mono-logos
-        if: steps.weekly.outputs.due == 'true' && steps.teams.outcome == 'success'
+        if: steps.teams.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-mono-logos.mjs
       - name: MiLB ballparks
         id: milb-ballparks
-        if: steps.weekly.outputs.due == 'true' && steps.teams.outcome == 'success'
+        if: steps.teams.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-milb-ballparks.mjs
       - name: Affiliates
         id: affiliates
-        if: steps.weekly.outputs.due == 'true'
         continue-on-error: true
         run: node scripts/gen-affiliates.mjs
       - name: Top prospects
         id: top-prospects
-        if: steps.weekly.outputs.due == 'true'
         continue-on-error: true
         run: node scripts/fetch-top-prospects.mjs
-      # ---- End weekly block ---------------------------------------------
+      # ---- End structural data -------------------------------------------
 
       - name: Game notes
         id: game-notes
@@ -179,8 +175,15 @@ jobs:
       # war.json the step above just wrote (plus the committed war-history
       # shards and affiliates.json) to rank each farm club's alumni. Run it
       # before WAR and it ranks on yesterday's numbers.
+      # Gated on its producer, not just ordered after it: every generator here
+      # is continue-on-error, so a failed producer leaves the PREVIOUS run's file
+      # on disk and a consumer would rebuild happily against it — publishing
+      # yesterday's numbers under today's stamp with nothing marked red. The
+      # producer's own failure is what turns the job red; this only stops the
+      # staleness spreading. See the header.
       - name: MiLB alumni
         id: milb-alumni
+        if: steps.war.outcome == 'success' && steps.affiliates.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-milb-alumni.mjs
       - name: Rehab assignments
@@ -197,6 +200,7 @@ jobs:
         run: node scripts/gen-umpire-accuracy.mjs
       - name: Minor-league leaders
         id: minors-leaders
+        if: steps.teams.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-minors-leaders.mjs
       - name: Game call-outs
@@ -205,6 +209,7 @@ jobs:
         run: node scripts/gen-callouts.mjs
       - name: Former teammates
         id: former-teammates
+        if: steps.war.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-former-teammates.mjs
       - name: Career matchups
@@ -304,6 +309,7 @@ jobs:
         run: node scripts/fever/gen-salaries.mjs
       - name: Prospect level percentile
         id: prospect-trend
+        if: steps.top-prospects.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-prospect-trend.mjs
       - name: Comeback wins
@@ -348,10 +354,11 @@ jobs:
         run: node scripts/gen-gate.mjs
       # The Farm Report. READS two files it does not fetch —
       # public/data/affiliates.json and public/data/top-prospects.json — and
-      # joins them to live minor-league standings. Both come from the weekly
-      # block at the top of this job (they used to come from two separate
+      # joins them to live minor-league standings. Both come from the structural
+      # data block at the top of this job (they used to come from two separate
       # Monday crons that ran AFTER this one, which is exactly why this step
-      # spent every Monday on week-old rankings). MUST stay below that block.
+      # spent every Monday on week-old rankings). MUST stay below that block,
+      # and is gated on both producers above.
       # the doubleheader report. A full rebuild of 2004-to-now every night — twenty-three
       # schedule requests with a narrow fields filter — because only the current
       # season's rows can change and the file is 20 KB either way. No SQLite,
@@ -362,6 +369,7 @@ jobs:
         run: node scripts/gen-doubleheaders.mjs
       - name: Farm system
         id: farm-system
+        if: steps.affiliates.outcome == 'success' && steps.top-prospects.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-farm-system.mjs
       - name: Video highlights
@@ -369,12 +377,13 @@ jobs:
         continue-on-error: true
         run: node scripts/gen-highlights.mjs
       # Reads public/data/teams.json for each club's league and division, so it
-      # MUST stay below the weekly block at the top of this job that writes it
-      # (that file used to come from update-teams.yml, a separate Monday cron
-      # that ran two hours AFTER this one). Append-only over newly-Final games
-      # at all five levels.
+      # MUST stay below the structural data block at the top of this job that
+      # writes it (that file used to come from update-teams.yml, a separate
+      # Monday cron that ran two hours AFTER this one), and is gated on it.
+      # Append-only over newly-Final games at all five levels.
       - name: Team situational records
         id: team-records
+        if: steps.teams.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-team-records.mjs
       - name: Warm preview cache
@@ -409,20 +418,44 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/teams.json public/data/logos/mono src/lib/data/mono-logo-manifest.json src/lib/data/milb-ballparks.json public/data/affiliates.json public/data/top-prospects.json public/data/game-notes public/data/war.json public/data/milb-alumni scripts/data/milb-alumni-scan.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/savant-matchup.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json public/data/player-contracts public/data/team-contracts public/data/salaries.json public/data/prospect-trend.json public/data/postseason-odds.json public/data/manager-history scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/spray scripts/data/spray-ingested.json public/data/attendance.json public/data/gate.json public/data/doubleheaders.json public/data/farm-system.json public/data/highlights public/data/team-records scripts/data/team-records.sql public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
-          git diff --cached --quiet && exit 0
-          git commit -m "Update nightly data"
-          # Retry with a rebase on a push race — a concurrent push to main
-          # (a manual workflow_dispatch run, a maintainer's own direct push,
-          # another cron) would otherwise get silently rejected here.
-          for i in 1 2 3 4 5; do
-            git push && exit 0
-            git fetch origin "$(git rev-parse --abbrev-ref HEAD)"
-            git rebase "origin/$(git rev-parse --abbrev-ref HEAD)"
-            sleep $((RANDOM % 10 + 1))
-          done
-          echo "push failed after retries" >&2
-          exit 1
+          # -A over the three roots every generator writes into, instead of the
+          # 60-path list this used to carry. That list was hand-maintained and
+          # drifted twice, both silently: gen-jerseys.mjs's jerseys.json was
+          # recomputed nightly and thrown away for weeks because only its .sql
+          # sibling was staged, and gen-comeback-wins.mjs was never added at
+          # all. Neither is possible now. Verified 2026-08-28 that nothing under
+          # these three roots is ignored or untracked, so this stages exactly
+          # what the enumerated list did — and everything a new generator adds.
+          git add -A -- public scripts/data src/lib/data
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Update nightly data"
+            # Retry with a rebase on a push race — a concurrent push to main
+            # (a manual workflow_dispatch run, a maintainer's own direct push,
+            # another cron) would otherwise get silently rejected here.
+            pushed=
+            for i in 1 2 3 4 5; do
+              if git push; then pushed=1; break; fi
+              git fetch origin "$(git rev-parse --abbrev-ref HEAD)"
+              git rebase "origin/$(git rev-parse --abbrev-ref HEAD)"
+              sleep $((RANDOM % 10 + 1))
+            done
+            if [ -z "$pushed" ]; then
+              echo "push failed after retries" >&2
+              exit 1
+            fi
+          fi
+          # A generator that writes anywhere ELSE still never reaches the
+          # deploy, and would be as silent as jerseys.json was. Surface it.
+          # package.json/package-lock.json are excluded because the "Compress
+          # curated logos" step installs sharp on demand.
+          leftover="$(git status --porcelain | grep -vE 'package(-lock)?[.]json$' || true)"
+          if [ -n "$leftover" ]; then
+            echo "::error::Generator output outside public/, scripts/data/ and src/lib/data/ was not committed:"
+            echo "$leftover"
+            exit 1
+          fi
 
       - name: Fail if any generator errored
         if: |

@@ -2,8 +2,9 @@
 // (name, abbreviation, league/division ids+names, MiLB parent org, home venue)
 // at each searchable level. Team/org structure (realignment, expansion,
 // affiliate shuffles) changes roughly once a decade, so this is pulled from
-// statsapi weekly — the Monday block of .github/workflows/update-nightly-data.yml
-// (its own update-teams.yml cron until 2026-08-28) — rather than fetched live on
+// statsapi nightly — the structural data block of
+// .github/workflows/update-nightly-data.yml (its own weekly update-teams.yml
+// cron until 2026-08-28) — rather than fetched live on
 // every LogoSheet level switch or team-directory search.
 //
 // `venue` needs no hydrate param — verified live against sportId 1 and 11

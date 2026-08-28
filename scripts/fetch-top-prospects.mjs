@@ -3,9 +3,9 @@
 // every org's full farm-system prospect leaderboard into
 // public/data/top-prospects.json, which the PWA reads at runtime.
 //
-// Runs OFF-DEVICE — a scheduled GitHub Actions workflow (the Monday block of
-// .github/workflows/update-nightly-data.yml; its own update-top-prospects.yml
-// cron until 2026-08-28), not app code — because the
+// Runs OFF-DEVICE — a scheduled GitHub Actions workflow (the structural data
+// block of .github/workflows/update-nightly-data.yml; its own weekly
+// update-top-prospects.yml cron until 2026-08-28), not app code — because the
 // source page can't be fetched from the browser: www.mlb.com sends no CORS
 // headers (verified live with curl + an Origin header + an OPTIONS
 // preflight), unlike statsapi.mlb.com's Access-Control-Allow-Origin: *,

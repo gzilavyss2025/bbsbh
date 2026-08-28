@@ -63,10 +63,17 @@ Run these in order, in the primary checkout (the repo root, not a task worktree)
    folded into it on 2026-08-28. A **missing** run matters as much as a failed
    one: on 2026-08-27/28 GitHub's scheduler skipped it entirely after an Actions
    incident, and nothing anywhere went red. Check the run actually exists for
-   today, not just that the last one passed. On Mondays the run also carries the
-   weekly steps (teams, club marks, MiLB parks, affiliates, top prospects); if
-   one of those is red, `gh workflow run update-nightly-data.yml -f
-   run_weekly=true` re-runs the weekly block on any day.
+   today, not just that the last one passed. Recover either case with
+   `gh workflow run update-nightly-data.yml` — it rebuilds every dataset,
+   including the structural ones, and one run catches up however many nights
+   were missed.
+
+   `data-freshness-check.yml` (added 2026-08-29) is the automated version of
+   this step: a second schedule at 15:00 UTC that fails, and emails the
+   maintainer, if nothing has touched `public/data` in 26 hours. It exists
+   because a run that never happens cannot fail, so the nightly job could never
+   catch its own absence. Check it here too — if IT is also missing a run, both
+   schedules were dropped and the answer is the same manual dispatch.
 
 7. **README drift.** Check whether `README.md` has fallen behind the code:
 

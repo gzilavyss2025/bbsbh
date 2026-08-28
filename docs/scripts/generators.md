@@ -663,13 +663,13 @@ don't run these by hand.
   a failed warm is logged and skipped, never fatal to the run.
 - `gen-affiliates.mjs` → `public/data/affiliates.json` — every MLB org's full
   farm system (AAA/AA/A+/A), keyed by parent org id, in ONE
-  `/teams/affiliates?teamIds=…` request for all 30. Runs in the nightly batch's
-  **Monday-only weekly block** (`.github/workflows/update-nightly-data.yml`), not
-  every night, because a farm system changes at most once a year (the PDC
-  realignment). Its siblings `gen-teams.mjs` + `gen-mono-logos.mjs` sit in that
-  same block for the same reason. All three had their own weekly crons until
-  2026-08-28; they were folded in so the nightly steps that READ their output
-  stop spending every Monday on the previous week's files. App reads it via `src/api/team.js`.
+  `/teams/affiliates?teamIds=…` request for all 30. Runs nightly, in the
+  **structural data block** at the top of `.github/workflows/update-nightly-data.yml`,
+  alongside its siblings `gen-teams.mjs` + `gen-mono-logos.mjs`. The underlying
+  data changes at most once a year (the PDC realignment), so all three had their
+  own weekly crons until 2026-08-28 — but running them on a cadence made the
+  nightly steps that READ their output impossible to gate on them, so as of
+  2026-08-29 they simply run every night (11 requests between them). App reads it via `src/api/team.js`.
 - `gen-milb-ballparks.mjs` → `src/lib/data/milb-ballparks.json` — every current
   MiLB team's venue name, deduped by `venueKey` (one venue can host two clubs,
   e.g. Roger Dean Chevrolet Stadium). Read straight from the `teams.json` this
@@ -679,7 +679,7 @@ don't run these by hand.
   copy-editable name/photo/logo, since nobody has hand-verified its dimensions.
   `src/copy/registry.js`'s `milbParkFields()` derives one park's worth of
   registry fields per entry, the same shape `parkFields()` derives from
-  `BALLPARKS`. Runs in the nightly batch's Monday-only weekly block right after
+  `BALLPARKS`. Runs in the nightly batch's structural data block right after
   `gen-teams.mjs`, same reasoning as `gen-mono-logos.mjs` above.
 
 ## Hand-run generators (immutable data — NOT on a cron)

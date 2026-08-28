@@ -13,8 +13,7 @@ resolver** reads on every render. The knockout mark doesn't fit that shape:
 `public/data/logos/mono/{teamId}.svg` is a file
 `scripts/gen-mono-logos.mjs` precomputes (ADR-0031), and nothing at
 render time reads `mono-ink.json` at all — the file only ever fed that one
-generator, run weekly by the Monday block of
-`.github/workflows/update-nightly-data.yml`. What the lab's
+generator, run nightly by the structural data block in `.github/workflows/update-nightly-data.yml`. What the lab's
 Knockout mark editor (`MonoInkEditor.jsx`) tunes is a *pin set* — which shapes
 of a club's art are ink vs. paper — not the art itself, and saving one only
 changes what the generator's *next run* produces.
@@ -90,7 +89,7 @@ almost always does.
 so.** Every sibling field's caveat is "none" — the overlay is read on the
 next render, full stop. This one's caveat is real and is rendered as its own
 paragraph in `IdentityMonoField.jsx`: what visitors see updates on
-the nightly batch's Monday-only weekly cadence, not the moment you save. An admin who
+the nightly batch's cadence, not the moment you save. An admin who
 expects instant feedback here would ship a false negative ("I saved it and
 nothing changed") without that sentence.
 
