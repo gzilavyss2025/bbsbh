@@ -1,0 +1,81 @@
+
+==============================================================================
+0. The model mirror reproduces the parent spike
+==============================================================================
+  season FE only          ratio 1.560   published 1.560
+  + day-of-season bins    ratio 1.266   published 1.266
+  Both match to three decimals. The specification below is the parent's.
+
+==============================================================================
+MINIMUM DETECTABLE EFFECT, COMPUTED BEFORE THE TEST IS RUN
+==============================================================================
+  alpha 0.05 two-sided, power counted only for rejections in the right
+  direction. The cohort size is held fixed, so a rate ratio moves men across
+  the line rather than adding promotions.
+
+  grain                             n ident     SE    MDE80  MDE80  MDE80
+                                          n        analytic   Wald    LRT
+  top-100, observed-deep           70     5  0.991    16.08   none   none
+  top-30, observed                 34     7  0.830    10.24   none   none
+  top-10, observed                 12     2  1.532    73.17   none   none
+  top-30, all seasons              49    10  0.727     7.66   none   none
+  top-10, all seasons              19     4  1.236    31.87   none   none
+  top-100 x line, interaction      70     5  0.320     2.45   2.44   2.40
+
+  "none" means no rate ratio in the grid up to 10 reaches 80% power.
+
+  top-100, observed-deep
+    seasons 7: 2016, 2017, 2018, 2019, 2021, 2022, 2023
+    the line is identified only inside day bins 3, 4 — days 10 to 15
+    of 70 promotions, 5 land on those days
+    a 95% Wald interval at the null spans a factor of 48.7 end to end
+    Wald power 1.5 / 2 / 3 / 5 / 10: 0.02 / 0.03 / 0.03 / 0.04 / 0.03   peak 0.04
+    LRT  power 1.5 / 2 / 3 / 5 / 10: 0.08 / 0.11 / 0.19 / 0.28 / 0.39   peak 0.39
+    size at the null (should be near 0.025 one-sided): Wald 0.014, LRT 0.033
+
+  top-30, observed
+    seasons 10: 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022, 2023
+    the line is identified only inside day bins 3, 4 — days 10 to 15
+    of 34 promotions, 7 land on those days
+    a 95% Wald interval at the null spans a factor of 25.9 end to end
+    Wald power 1.5 / 2 / 3 / 5 / 10: 0.02 / 0.02 / 0.03 / 0.02 / 0.02   peak 0.03
+    LRT  power 1.5 / 2 / 3 / 5 / 10: 0.08 / 0.15 / 0.23 / 0.34 / 0.49   peak 0.49
+    size at the null (should be near 0.025 one-sided): Wald 0.006, LRT 0.028
+
+  top-10, observed
+    seasons 6: 2015, 2018, 2019, 2021, 2022, 2023
+    the line is identified only inside day bins 3, 4 — days 10 to 15
+    of 12 promotions, 2 land on those days
+    a 95% Wald interval at the null spans a factor of 406.0 end to end
+    Wald power 1.5 / 2 / 3 / 5 / 10: 0.00 / 0.00 / 0.00 / 0.00 / 0.00   peak 0.00
+    LRT  power 1.5 / 2 / 3 / 5 / 10: 0.04 / 0.05 / 0.06 / 0.08 / 0.10   peak 0.10
+    size at the null (should be near 0.025 one-sided): Wald 0.002, LRT 0.028
+
+  top-30, all seasons
+    seasons 16: 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022, 2023, 2024, 2025
+    the line is identified only inside day bins 2, 3, 4 — days 7 to 15
+    of 49 promotions, 10 land on those days
+    a 95% Wald interval at the null spans a factor of 17.3 end to end
+    Wald power 1.5 / 2 / 3 / 5 / 10: 0.03 / 0.07 / 0.07 / 0.09 / 0.10   peak 0.10
+    LRT  power 1.5 / 2 / 3 / 5 / 10: 0.07 / 0.14 / 0.22 / 0.43 / 0.59   peak 0.59
+    size at the null (should be near 0.025 one-sided): Wald 0.015, LRT 0.034
+
+  top-10, all seasons
+    seasons 10: 2010, 2011, 2012, 2015, 2018, 2019, 2021, 2022, 2023, 2024
+    the line is identified only inside day bins 2, 3, 4 — days 7 to 15
+    of 19 promotions, 4 land on those days
+    a 95% Wald interval at the null spans a factor of 126.9 end to end
+    Wald power 1.5 / 2 / 3 / 5 / 10: 0.00 / 0.00 / 0.01 / 0.01 / 0.00   peak 0.01
+    LRT  power 1.5 / 2 / 3 / 5 / 10: 0.04 / 0.08 / 0.08 / 0.13 / 0.14   peak 0.15
+    size at the null (should be near 0.025 one-sided): Wald 0.004, LRT 0.025
+
+  top-100 x line, interaction
+    seasons 7: 2016, 2017, 2018, 2019, 2021, 2022, 2023
+    the line is identified only inside day bins 3, 4 — days 10 to 15
+    of 70 promotions, 5 land on those days
+    a 95% Wald interval at the null spans a factor of 3.5 end to end
+    Wald power 1.5 / 2 / 3 / 5 / 10: 0.20 / 0.56 / 0.94 / 1.00 / 1.00   peak 1.00
+    LRT  power 1.5 / 2 / 3 / 5 / 10: 0.24 / 0.59 / 0.95 / 1.00 / 1.00   peak 1.00
+    size at the null (should be near 0.025 one-sided): Wald 0.017, LRT 0.024
+
+wrote power.json

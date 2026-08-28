@@ -1,0 +1,852 @@
+{
+ "builtAt": "2026-08-28T16:11:23.080Z",
+ "sims": 1000,
+ "grid": [
+  1,
+  1.25,
+  1.5,
+  1.75,
+  2,
+  2.5,
+  3,
+  4,
+  5,
+  6,
+  8,
+  10
+ ],
+ "results": [
+  {
+   "key": "top100-deep",
+   "label": "top-100, observed-deep",
+   "note": "A \"ranked at all\" cut is only comparable where every list year is a top-100 list, so it runs on the observed-deep window alone (debut 2016-2023).",
+   "identification": "within-group; identified only inside the bins the line falls in",
+   "nCohort": 70,
+   "n": 70,
+   "postLine": 57,
+   "preLine": 13,
+   "identifyingBins": [
+    3,
+    4
+   ],
+   "identifyingDays": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "identifyingEvents": 5,
+   "seasons": [
+    2016,
+    2017,
+    2018,
+    2019,
+    2021,
+    2022,
+    2023
+   ],
+   "cells": 315,
+   "columns": 22,
+   "analytic": {
+    "se": 0.9913193316264421,
+    "mde80": 16.075240634278455,
+    "mdeJustSignificant": 6.979560086893847,
+    "ciSpanFactorAtNull": 48.71425900656165
+   },
+   "simulation": {
+    "sims": 1000,
+    "curve": [
+     {
+      "rr": 1,
+      "waldPower": 0.014,
+      "lrtPower": 0.033,
+      "convergedShare": 1,
+      "meanPostLineEvents": 57.785
+     },
+     {
+      "rr": 1.25,
+      "waldPower": 0.014,
+      "lrtPower": 0.048,
+      "convergedShare": 1,
+      "meanPostLineEvents": 59.666
+     },
+     {
+      "rr": 1.5,
+      "waldPower": 0.022,
+      "lrtPower": 0.079,
+      "convergedShare": 1,
+      "meanPostLineEvents": 61.252
+     },
+     {
+      "rr": 1.75,
+      "waldPower": 0.029,
+      "lrtPower": 0.114,
+      "convergedShare": 1,
+      "meanPostLineEvents": 62.647
+     },
+     {
+      "rr": 2,
+      "waldPower": 0.025,
+      "lrtPower": 0.107,
+      "convergedShare": 1,
+      "meanPostLineEvents": 62.795
+     },
+     {
+      "rr": 2.5,
+      "waldPower": 0.023,
+      "lrtPower": 0.146,
+      "convergedShare": 1,
+      "meanPostLineEvents": 64.522
+     },
+     {
+      "rr": 3,
+      "waldPower": 0.033,
+      "lrtPower": 0.186,
+      "convergedShare": 1,
+      "meanPostLineEvents": 65.503
+     },
+     {
+      "rr": 4,
+      "waldPower": 0.034,
+      "lrtPower": 0.263,
+      "convergedShare": 1,
+      "meanPostLineEvents": 66.363
+     },
+     {
+      "rr": 5,
+      "waldPower": 0.038,
+      "lrtPower": 0.277,
+      "convergedShare": 1,
+      "meanPostLineEvents": 66.846
+     },
+     {
+      "rr": 6,
+      "waldPower": 0.029,
+      "lrtPower": 0.327,
+      "convergedShare": 1,
+      "meanPostLineEvents": 67.608
+     },
+     {
+      "rr": 8,
+      "waldPower": 0.022,
+      "lrtPower": 0.354,
+      "convergedShare": 1,
+      "meanPostLineEvents": 68.493
+     },
+     {
+      "rr": 10,
+      "waldPower": 0.03,
+      "lrtPower": 0.387,
+      "convergedShare": 1,
+      "meanPostLineEvents": 68.559
+     }
+    ],
+    "mde80Wald": null,
+    "mde80Lrt": null,
+    "maxWaldPower": 0.038,
+    "maxLrtPower": 0.387,
+    "sizeWald": 0.014,
+    "sizeLrt": 0.033
+   }
+  },
+  {
+   "key": "top30-obs",
+   "label": "top-30, observed",
+   "note": "Rank 30 exists on a top-50 list, so the shallow years are comparable and the observed window (debut 2013-2023) is usable.",
+   "identification": "within-group; identified only inside the bins the line falls in",
+   "nCohort": 34,
+   "n": 34,
+   "postLine": 28,
+   "preLine": 6,
+   "identifyingBins": [
+    3,
+    4
+   ],
+   "identifyingDays": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "identifyingEvents": 7,
+   "seasons": [
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2021,
+    2022,
+    2023
+   ],
+   "cells": 450,
+   "columns": 25,
+   "analytic": {
+    "se": 0.8302704292717802,
+    "mde80": 10.237788552801597,
+    "mdeJustSignificant": 5.090265759961923,
+    "ciSpanFactorAtNull": 25.910805507040735
+   },
+   "simulation": {
+    "sims": 1000,
+    "curve": [
+     {
+      "rr": 1,
+      "waldPower": 0.006,
+      "lrtPower": 0.028,
+      "convergedShare": 1,
+      "meanPostLineEvents": 27.571
+     },
+     {
+      "rr": 1.25,
+      "waldPower": 0.008,
+      "lrtPower": 0.062,
+      "convergedShare": 1,
+      "meanPostLineEvents": 28.395
+     },
+     {
+      "rr": 1.5,
+      "waldPower": 0.019,
+      "lrtPower": 0.079,
+      "convergedShare": 1,
+      "meanPostLineEvents": 29.352
+     },
+     {
+      "rr": 1.75,
+      "waldPower": 0.01,
+      "lrtPower": 0.113,
+      "convergedShare": 1,
+      "meanPostLineEvents": 29.889
+     },
+     {
+      "rr": 2,
+      "waldPower": 0.021,
+      "lrtPower": 0.151,
+      "convergedShare": 1,
+      "meanPostLineEvents": 30.336
+     },
+     {
+      "rr": 2.5,
+      "waldPower": 0.023,
+      "lrtPower": 0.161,
+      "convergedShare": 1,
+      "meanPostLineEvents": 31.132
+     },
+     {
+      "rr": 3,
+      "waldPower": 0.031,
+      "lrtPower": 0.23,
+      "convergedShare": 1,
+      "meanPostLineEvents": 31.395
+     },
+     {
+      "rr": 4,
+      "waldPower": 0.029,
+      "lrtPower": 0.282,
+      "convergedShare": 1,
+      "meanPostLineEvents": 32.107
+     },
+     {
+      "rr": 5,
+      "waldPower": 0.023,
+      "lrtPower": 0.337,
+      "convergedShare": 1,
+      "meanPostLineEvents": 32.49
+     },
+     {
+      "rr": 6,
+      "waldPower": 0.03,
+      "lrtPower": 0.414,
+      "convergedShare": 1,
+      "meanPostLineEvents": 32.525
+     },
+     {
+      "rr": 8,
+      "waldPower": 0.031,
+      "lrtPower": 0.431,
+      "convergedShare": 1,
+      "meanPostLineEvents": 32.823
+     },
+     {
+      "rr": 10,
+      "waldPower": 0.018,
+      "lrtPower": 0.493,
+      "convergedShare": 1,
+      "meanPostLineEvents": 33.367
+     }
+    ],
+    "mde80Wald": null,
+    "mde80Lrt": null,
+    "maxWaldPower": 0.031,
+    "maxLrtPower": 0.493,
+    "sizeWald": 0.006,
+    "sizeLrt": 0.028
+   }
+  },
+  {
+   "key": "top10-obs",
+   "label": "top-10, observed",
+   "note": "The grain the well-known individual cases live in.",
+   "identification": "within-group; identified only inside the bins the line falls in",
+   "nCohort": 12,
+   "n": 12,
+   "postLine": 10,
+   "preLine": 2,
+   "identifyingBins": [
+    3,
+    4
+   ],
+   "identifyingDays": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "identifyingEvents": 2,
+   "seasons": [
+    2015,
+    2018,
+    2019,
+    2021,
+    2022,
+    2023
+   ],
+   "cells": 270,
+   "columns": 21,
+   "analytic": {
+    "se": 1.532261656693307,
+    "mde80": 73.16990901287113,
+    "mdeJustSignificant": 20.150575466549974,
+    "ciSpanFactorAtNull": 406.04569163312567
+   },
+   "simulation": {
+    "sims": 1000,
+    "curve": [
+     {
+      "rr": 1,
+      "waldPower": 0.002,
+      "lrtPower": 0.028,
+      "convergedShare": 1,
+      "meanPostLineEvents": 8.852
+     },
+     {
+      "rr": 1.25,
+      "waldPower": 0.001,
+      "lrtPower": 0.027,
+      "convergedShare": 1,
+      "meanPostLineEvents": 9.36
+     },
+     {
+      "rr": 1.5,
+      "waldPower": 0,
+      "lrtPower": 0.037,
+      "convergedShare": 1,
+      "meanPostLineEvents": 9.79
+     },
+     {
+      "rr": 1.75,
+      "waldPower": 0,
+      "lrtPower": 0.046,
+      "convergedShare": 1,
+      "meanPostLineEvents": 9.844
+     },
+     {
+      "rr": 2,
+      "waldPower": 0.002,
+      "lrtPower": 0.046,
+      "convergedShare": 1,
+      "meanPostLineEvents": 10.201
+     },
+     {
+      "rr": 2.5,
+      "waldPower": 0,
+      "lrtPower": 0.059,
+      "convergedShare": 1,
+      "meanPostLineEvents": 10.488
+     },
+     {
+      "rr": 3,
+      "waldPower": 0,
+      "lrtPower": 0.061,
+      "convergedShare": 1,
+      "meanPostLineEvents": 10.821
+     },
+     {
+      "rr": 4,
+      "waldPower": 0.002,
+      "lrtPower": 0.086,
+      "convergedShare": 1,
+      "meanPostLineEvents": 11.204
+     },
+     {
+      "rr": 5,
+      "waldPower": 0,
+      "lrtPower": 0.082,
+      "convergedShare": 1,
+      "meanPostLineEvents": 11.253
+     },
+     {
+      "rr": 6,
+      "waldPower": 0.001,
+      "lrtPower": 0.101,
+      "convergedShare": 1,
+      "meanPostLineEvents": 11.324
+     },
+     {
+      "rr": 8,
+      "waldPower": 0,
+      "lrtPower": 0.079,
+      "convergedShare": 1,
+      "meanPostLineEvents": 11.434
+     },
+     {
+      "rr": 10,
+      "waldPower": 0,
+      "lrtPower": 0.104,
+      "convergedShare": 1,
+      "meanPostLineEvents": 11.544
+     }
+    ],
+    "mde80Wald": null,
+    "mde80Lrt": null,
+    "maxWaldPower": 0.002,
+    "maxLrtPower": 0.104,
+    "sizeWald": 0.002,
+    "sizeLrt": 0.028
+   }
+  },
+  {
+   "key": "top30-ext",
+   "label": "top-30, all seasons",
+   "note": "Every debut season 2009-2025. The censored years capture fewer ranked men, and a season fixed effect absorbs an undercount that does not vary across days within a season. An explicitly labelled power arm, never the primary.",
+   "identification": "within-group; identified only inside the bins the line falls in",
+   "nCohort": 49,
+   "n": 49,
+   "postLine": 39,
+   "preLine": 10,
+   "identifyingBins": [
+    2,
+    3,
+    4
+   ],
+   "identifyingDays": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "identifyingEvents": 10,
+   "seasons": [
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+   ],
+   "cells": 720,
+   "columns": 31,
+   "analytic": {
+    "se": 0.7267615903074433,
+    "mde80": 7.660638009989508,
+    "mdeJustSignificant": 4.155582940417481,
+    "ciSpanFactorAtNull": 17.268869574688793
+   },
+   "simulation": {
+    "sims": 1000,
+    "curve": [
+     {
+      "rr": 1,
+      "waldPower": 0.015,
+      "lrtPower": 0.034,
+      "convergedShare": 1,
+      "meanPostLineEvents": 39.78
+     },
+     {
+      "rr": 1.25,
+      "waldPower": 0.03,
+      "lrtPower": 0.063,
+      "convergedShare": 1,
+      "meanPostLineEvents": 41.169
+     },
+     {
+      "rr": 1.5,
+      "waldPower": 0.03,
+      "lrtPower": 0.075,
+      "convergedShare": 1,
+      "meanPostLineEvents": 42.144
+     },
+     {
+      "rr": 1.75,
+      "waldPower": 0.044,
+      "lrtPower": 0.11,
+      "convergedShare": 1,
+      "meanPostLineEvents": 43.188
+     },
+     {
+      "rr": 2,
+      "waldPower": 0.068,
+      "lrtPower": 0.143,
+      "convergedShare": 1,
+      "meanPostLineEvents": 43.597
+     },
+     {
+      "rr": 2.5,
+      "waldPower": 0.077,
+      "lrtPower": 0.226,
+      "convergedShare": 1,
+      "meanPostLineEvents": 45.037
+     },
+     {
+      "rr": 3,
+      "waldPower": 0.065,
+      "lrtPower": 0.224,
+      "convergedShare": 1,
+      "meanPostLineEvents": 45.368
+     },
+     {
+      "rr": 4,
+      "waldPower": 0.084,
+      "lrtPower": 0.329,
+      "convergedShare": 1,
+      "meanPostLineEvents": 45.922
+     },
+     {
+      "rr": 5,
+      "waldPower": 0.093,
+      "lrtPower": 0.431,
+      "convergedShare": 1,
+      "meanPostLineEvents": 46.702
+     },
+     {
+      "rr": 6,
+      "waldPower": 0.09,
+      "lrtPower": 0.5,
+      "convergedShare": 1,
+      "meanPostLineEvents": 47.127
+     },
+     {
+      "rr": 8,
+      "waldPower": 0.07,
+      "lrtPower": 0.53,
+      "convergedShare": 1,
+      "meanPostLineEvents": 47.274
+     },
+     {
+      "rr": 10,
+      "waldPower": 0.102,
+      "lrtPower": 0.589,
+      "convergedShare": 1,
+      "meanPostLineEvents": 47.926
+     }
+    ],
+    "mde80Wald": null,
+    "mde80Lrt": null,
+    "maxWaldPower": 0.102,
+    "maxLrtPower": 0.589,
+    "sizeWald": 0.015,
+    "sizeLrt": 0.034
+   }
+  },
+  {
+   "key": "top10-ext",
+   "label": "top-10, all seasons",
+   "note": "The same extension at the sharpest grain.",
+   "identification": "within-group; identified only inside the bins the line falls in",
+   "nCohort": 19,
+   "n": 19,
+   "postLine": 16,
+   "preLine": 3,
+   "identifyingBins": [
+    2,
+    3,
+    4
+   ],
+   "identifyingDays": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "identifyingEvents": 4,
+   "seasons": [
+    2010,
+    2011,
+    2012,
+    2015,
+    2018,
+    2019,
+    2021,
+    2022,
+    2023,
+    2024
+   ],
+   "cells": 450,
+   "columns": 25,
+   "analytic": {
+    "se": 1.235570535624117,
+    "mde80": 31.867109017797098,
+    "mdeJustSignificant": 11.265199121213346,
+    "ciSpanFactorAtNull": 126.90471124058594
+   },
+   "simulation": {
+    "sims": 1000,
+    "curve": [
+     {
+      "rr": 1,
+      "waldPower": 0.004,
+      "lrtPower": 0.025,
+      "convergedShare": 1,
+      "meanPostLineEvents": 15.611
+     },
+     {
+      "rr": 1.25,
+      "waldPower": 0.004,
+      "lrtPower": 0.035,
+      "convergedShare": 1,
+      "meanPostLineEvents": 15.934
+     },
+     {
+      "rr": 1.5,
+      "waldPower": 0.004,
+      "lrtPower": 0.044,
+      "convergedShare": 1,
+      "meanPostLineEvents": 16.62
+     },
+     {
+      "rr": 1.75,
+      "waldPower": 0.007,
+      "lrtPower": 0.056,
+      "convergedShare": 1,
+      "meanPostLineEvents": 16.852
+     },
+     {
+      "rr": 2,
+      "waldPower": 0.004,
+      "lrtPower": 0.076,
+      "convergedShare": 1,
+      "meanPostLineEvents": 16.963
+     },
+     {
+      "rr": 2.5,
+      "waldPower": 0.004,
+      "lrtPower": 0.077,
+      "convergedShare": 1,
+      "meanPostLineEvents": 17.59
+     },
+     {
+      "rr": 3,
+      "waldPower": 0.006,
+      "lrtPower": 0.082,
+      "convergedShare": 1,
+      "meanPostLineEvents": 17.839
+     },
+     {
+      "rr": 4,
+      "waldPower": 0.003,
+      "lrtPower": 0.101,
+      "convergedShare": 1,
+      "meanPostLineEvents": 17.785
+     },
+     {
+      "rr": 5,
+      "waldPower": 0.005,
+      "lrtPower": 0.128,
+      "convergedShare": 1,
+      "meanPostLineEvents": 18.24
+     },
+     {
+      "rr": 6,
+      "waldPower": 0.007,
+      "lrtPower": 0.107,
+      "convergedShare": 1,
+      "meanPostLineEvents": 18.358
+     },
+     {
+      "rr": 8,
+      "waldPower": 0.004,
+      "lrtPower": 0.146,
+      "convergedShare": 1,
+      "meanPostLineEvents": 18.704
+     },
+     {
+      "rr": 10,
+      "waldPower": 0,
+      "lrtPower": 0.136,
+      "convergedShare": 1,
+      "meanPostLineEvents": 18.867
+     }
+    ],
+    "mde80Wald": null,
+    "mde80Lrt": null,
+    "maxWaldPower": 0.007,
+    "maxLrtPower": 0.146,
+    "sizeWald": 0.004,
+    "sizeLrt": 0.025
+   }
+  },
+  {
+   "key": "top100-deep-interaction",
+   "label": "top-100 x line, interaction",
+   "note": "The rank-matched question asked as ONE model: does the line coefficient DIFFER between ranked and unranked men? The day-of-season bins are then estimated off all 399 men of the observed-deep cohort rather than off the 70 ranked ones.",
+   "identification": "shared day bins across groups; assumes a common April shape",
+   "nCohort": 399,
+   "n": 70,
+   "postLine": 57,
+   "preLine": 13,
+   "identifyingBins": [
+    3,
+    4
+   ],
+   "identifyingDays": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "identifyingEvents": 5,
+   "seasons": [
+    2016,
+    2017,
+    2018,
+    2019,
+    2021,
+    2022,
+    2023
+   ],
+   "cells": 630,
+   "columns": 24,
+   "analytic": {
+    "se": 0.3201039105416303,
+    "mde80": 2.451752600040914,
+    "mdeJustSignificant": 1.8727419955385336,
+    "ciSpanFactorAtNull": 3.507162581853649
+   },
+   "simulation": {
+    "sims": 1000,
+    "curve": [
+     {
+      "rr": 1,
+      "waldPower": 0.017,
+      "lrtPower": 0.024,
+      "convergedShare": 1,
+      "meanPostLineEvents": 54.882
+     },
+     {
+      "rr": 1.25,
+      "waldPower": 0.079,
+      "lrtPower": 0.104,
+      "convergedShare": 1,
+      "meanPostLineEvents": 66.295
+     },
+     {
+      "rr": 1.5,
+      "waldPower": 0.204,
+      "lrtPower": 0.24,
+      "convergedShare": 1,
+      "meanPostLineEvents": 77.037
+     },
+     {
+      "rr": 1.75,
+      "waldPower": 0.396,
+      "lrtPower": 0.437,
+      "convergedShare": 1,
+      "meanPostLineEvents": 87.421
+     },
+     {
+      "rr": 2,
+      "waldPower": 0.564,
+      "lrtPower": 0.593,
+      "convergedShare": 1,
+      "meanPostLineEvents": 96.378
+     },
+     {
+      "rr": 2.5,
+      "waldPower": 0.833,
+      "lrtPower": 0.854,
+      "convergedShare": 1,
+      "meanPostLineEvents": 114.279
+     },
+     {
+      "rr": 3,
+      "waldPower": 0.938,
+      "lrtPower": 0.952,
+      "convergedShare": 1,
+      "meanPostLineEvents": 129.357
+     },
+     {
+      "rr": 4,
+      "waldPower": 0.995,
+      "lrtPower": 0.995,
+      "convergedShare": 1,
+      "meanPostLineEvents": 155.717
+     },
+     {
+      "rr": 5,
+      "waldPower": 0.999,
+      "lrtPower": 0.999,
+      "convergedShare": 1,
+      "meanPostLineEvents": 177.482
+     },
+     {
+      "rr": 6,
+      "waldPower": 1,
+      "lrtPower": 1,
+      "convergedShare": 1,
+      "meanPostLineEvents": 195.557
+     },
+     {
+      "rr": 8,
+      "waldPower": 0.999,
+      "lrtPower": 1,
+      "convergedShare": 1,
+      "meanPostLineEvents": 223.108
+     },
+     {
+      "rr": 10,
+      "waldPower": 0.996,
+      "lrtPower": 1,
+      "convergedShare": 1,
+      "meanPostLineEvents": 245.234
+     }
+    ],
+    "mde80Wald": 2.438661710037175,
+    "mde80Lrt": 2.396551724137931,
+    "maxWaldPower": 1,
+    "maxLrtPower": 1,
+    "sizeWald": 0.017,
+    "sizeLrt": 0.024
+   }
+  }
+ ]
+}
