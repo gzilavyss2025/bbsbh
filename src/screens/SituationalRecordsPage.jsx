@@ -116,9 +116,24 @@ function SituationTile({ result, favoriteTeamId, linkProps, path }) {
         {favorite ? (
           <>
             <span>{favorite.team.teamName ?? favorite.team.name}</span>
-            <strong>
-              {favorite.rank == null ? 'Not ranked' : `#${favorite.rank}`} ·{' '}
-              {result.metric.kind === 'count' ? favorite.value : favorite.v}
+            {/* The figure, then the rank on its own line under it — the house
+                form PlayerContractCard's PayRankLine already sets, and for the
+                same reason: a rank is a fact ABOUT the figure, not a decoration
+                on it, and no "#" belongs in front of the number. `result.of`
+                is the field a rank actually runs against — the clubs at this
+                level that CAN be ranked on this split, which is not always
+                thirty (a club that has never been in the split keeps its row
+                but no rank). "Not ranked" is that club, and it keeps its
+                figure. */}
+            <strong className="trrank__tilemine">
+              <span className="trrank__tilemineval">
+                {result.metric.kind === 'count' ? favorite.value : favorite.v}
+              </span>
+              <span className="trrank__tileminerank">
+                {favorite.rank == null
+                  ? 'Not ranked'
+                  : `${favorite.tied ? 'Tied ' : ''}${favorite.rank} of ${result.of}`}
+              </span>
             </strong>
           </>
         ) : (
