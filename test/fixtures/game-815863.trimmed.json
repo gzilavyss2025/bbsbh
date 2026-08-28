@@ -1,0 +1,1992 @@
+{
+ "gamePk": 815863,
+ "gameData": {
+  "game": {
+   "pk": 815863,
+   "type": "R",
+   "doubleHeader": "N",
+   "id": "2026/08/26/bufaaa-rocaaa-1",
+   "gamedayType": "E",
+   "tiebreaker": "N",
+   "gameNumber": 1,
+   "calendarEventID": "44-815863-2026-08-26",
+   "season": "2026",
+   "seasonDisplay": "2026"
+  },
+  "datetime": {
+   "officialDate": "2026-08-26"
+  },
+  "status": {
+   "abstractGameState": "Final"
+  },
+  "teams": {
+   "away": {
+    "id": 422,
+    "name": "Buffalo Bisons",
+    "abbreviation": "BUF",
+    "sport": {
+     "id": 11,
+     "link": "/api/v1/sports/11",
+     "name": "Triple-A"
+    },
+    "league": {
+     "id": 117,
+     "name": "International League",
+     "link": "/api/v1/league/117"
+    }
+   },
+   "home": {
+    "id": 534,
+    "name": "Rochester Red Wings",
+    "abbreviation": "ROC",
+    "sport": {
+     "id": 11,
+     "link": "/api/v1/sports/11",
+     "name": "Triple-A"
+    },
+    "league": {
+     "id": 117,
+     "name": "International League",
+     "link": "/api/v1/league/117"
+    }
+   }
+  },
+  "absChallenges": {
+   "hasChallenges": true,
+   "away": {
+    "usedSuccessful": 0,
+    "usedFailed": 2,
+    "remaining": 0
+   },
+   "home": {
+    "usedSuccessful": 1,
+    "usedFailed": 0,
+    "remaining": 2
+   }
+  }
+ },
+ "liveData": {
+  "linescore": {
+   "currentInning": 9
+  },
+  "plays": {
+   "allPlays": [
+    {
+     "about": {
+      "inning": 1,
+      "halfInning": "top",
+      "atBatIndex": 0
+     },
+     "result": {
+      "description": "Rudy Martin Jr. walks."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 1,
+      "halfInning": "top",
+      "atBatIndex": 1
+     },
+     "result": {
+      "description": "Kyle Hayes challenged (pitch result), call on the field was overturned: Josh Kasevich called out on strikes. Rudy Martin Jr. to 3rd. Rudy Martin Jr. steals (15) 2nd base. Rudy Martin Jr. to 3rd. Throwing error by catcher Kyle Hayes."
+     },
+     "reviewDetails": {
+      "isOverturned": true,
+      "inProgress": false,
+      "reviewType": "MJ",
+      "challengeTeamId": 534,
+      "player": {
+       "id": 690469,
+       "fullName": "Kyle Hayes",
+       "link": "/api/v1/people/690469"
+      }
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 1,
+      "halfInning": "top",
+      "atBatIndex": 2
+     },
+     "result": {
+      "description": "Sean Keys singles on a sharp line drive to right fielder Leandro Pineda. Rudy Martin Jr. scores."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 1,
+      "halfInning": "top",
+      "atBatIndex": 3
+     },
+     "result": {
+      "description": "Davis Schneider strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 1,
+      "halfInning": "top",
+      "atBatIndex": 4
+     },
+     "result": {
+      "description": "Yohendrick Piñango flies out to left fielder Sam Petersen."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 1,
+      "halfInning": "bottom",
+      "atBatIndex": 5
+     },
+     "result": {
+      "description": "Seaver King flies out to right fielder Davis Schneider."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 1,
+      "halfInning": "bottom",
+      "atBatIndex": 6
+     },
+     "result": {
+      "description": "Yohandy Morales strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 1,
+      "halfInning": "bottom",
+      "atBatIndex": 7
+     },
+     "result": {
+      "description": "Trey Lipscomb strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 2,
+      "halfInning": "top",
+      "atBatIndex": 8
+     },
+     "result": {
+      "description": "Jay Harry flies out to center fielder Johnathon Thomas."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 2,
+      "halfInning": "top",
+      "atBatIndex": 9
+     },
+     "result": {
+      "description": "Lenyn Sosa pops out to third baseman Seaver King in foul territory."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3,
+       "details": {
+        "hasReview": true
+       },
+       "reviewDetails": {
+        "isOverturned": false,
+        "inProgress": false,
+        "reviewType": "MJ",
+        "challengeTeamId": 422,
+        "player": {
+         "id": 672820,
+         "fullName": "Lenyn Sosa",
+         "link": "/api/v1/people/672820"
+        }
+       }
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 2,
+      "halfInning": "top",
+      "atBatIndex": 10
+     },
+     "result": {
+      "description": "Nick Goodwin flies out to center fielder Johnathon Thomas."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 7
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 8
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 2,
+      "halfInning": "bottom",
+      "atBatIndex": 11
+     },
+     "result": {
+      "description": "Cayden Wallace homers (7) on a fly ball to left center field."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 2,
+      "halfInning": "bottom",
+      "atBatIndex": 12
+     },
+     "result": {
+      "description": "Leandro Pineda homers (7) on a fly ball to right field."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 2,
+      "halfInning": "bottom",
+      "atBatIndex": 13
+     },
+     "result": {
+      "description": "Sam Petersen singles on a line drive to left fielder Yohendrick Piñango."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 2,
+      "halfInning": "bottom",
+      "atBatIndex": 14
+     },
+     "result": {
+      "description": "Liover Peguero homers (2) on a line drive to left field. Sam Petersen scores."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 2,
+      "halfInning": "bottom",
+      "atBatIndex": 15
+     },
+     "result": {
+      "description": "Kyle Hayes called out on strikes."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 2,
+      "halfInning": "bottom",
+      "atBatIndex": 16
+     },
+     "result": {
+      "description": "Johnathon Thomas strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 7
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 8
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 9
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 10
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 2,
+      "halfInning": "bottom",
+      "atBatIndex": 17
+     },
+     "result": {
+      "description": "Seaver King grounds out, shortstop Josh Kasevich to first baseman Sean Keys."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 3,
+      "halfInning": "top",
+      "atBatIndex": 18
+     },
+     "result": {
+      "description": "C.J. Stubbs walks."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 7
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 3,
+      "halfInning": "top",
+      "atBatIndex": 19
+     },
+     "result": {
+      "description": "Rudy Martin Jr. strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 7
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 8
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 3,
+      "halfInning": "top",
+      "atBatIndex": 20
+     },
+     "result": {
+      "description": "Josh Kasevich pops out to first baseman Yohandy Morales in foul territory."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1,
+       "details": {
+        "hasReview": true
+       },
+       "reviewDetails": {
+        "isOverturned": false,
+        "inProgress": false,
+        "reviewType": "MJ",
+        "challengeTeamId": 422,
+        "player": {
+         "id": 688460,
+         "fullName": "Josh Kasevich",
+         "link": "/api/v1/people/688460"
+        }
+       }
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 3,
+      "halfInning": "top",
+      "atBatIndex": 21
+     },
+     "result": {
+      "description": "Sean Keys strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 3,
+      "halfInning": "bottom",
+      "atBatIndex": 22
+     },
+     "result": {
+      "description": "Yohandy Morales lines out sharply to center fielder Rudy Martin Jr."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 3,
+      "halfInning": "bottom",
+      "atBatIndex": 23
+     },
+     "result": {
+      "description": "Trey Lipscomb hit by pitch."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 3,
+      "halfInning": "bottom",
+      "atBatIndex": 24
+     },
+     "result": {
+      "description": "Cayden Wallace doubles (7) on a sharp line drive to left fielder Yohendrick Piñango. Trey Lipscomb scores."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 3,
+      "halfInning": "bottom",
+      "atBatIndex": 25
+     },
+     "result": {
+      "description": "Leandro Pineda grounds out, second baseman Lenyn Sosa to first baseman Sean Keys. Cayden Wallace to 3rd."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 3,
+      "halfInning": "bottom",
+      "atBatIndex": 26
+     },
+     "result": {
+      "description": "Sam Petersen called out on strikes."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 4,
+      "halfInning": "top",
+      "atBatIndex": 27
+     },
+     "result": {
+      "description": "Davis Schneider walks."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 4,
+      "halfInning": "top",
+      "atBatIndex": 28
+     },
+     "result": {
+      "description": "Yohendrick Piñango singles on a ground ball to right fielder Leandro Pineda. Davis Schneider to 2nd."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 4,
+      "halfInning": "top",
+      "atBatIndex": 29
+     },
+     "result": {
+      "description": "Jay Harry flies out to right fielder Leandro Pineda. Davis Schneider to 3rd."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 4,
+      "halfInning": "top",
+      "atBatIndex": 30
+     },
+     "result": {
+      "description": "Lenyn Sosa grounds into a double play, second baseman Cayden Wallace to first baseman Yohandy Morales. Yohendrick Piñango out at 2nd. Lenyn Sosa out at 1st."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 4,
+      "halfInning": "bottom",
+      "atBatIndex": 31
+     },
+     "result": {
+      "description": "Liover Peguero grounds out, shortstop Josh Kasevich to first baseman Sean Keys."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 4,
+      "halfInning": "bottom",
+      "atBatIndex": 32
+     },
+     "result": {
+      "description": "Kyle Hayes flies out to center fielder Rudy Martin Jr."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 4,
+      "halfInning": "bottom",
+      "atBatIndex": 33
+     },
+     "result": {
+      "description": "Johnathon Thomas flies out to left fielder Yohendrick Piñango."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 5,
+      "halfInning": "top",
+      "atBatIndex": 34
+     },
+     "result": {
+      "description": "Nick Goodwin flies out to right fielder Leandro Pineda."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 5,
+      "halfInning": "top",
+      "atBatIndex": 35
+     },
+     "result": {
+      "description": "C.J. Stubbs strikes out on a foul tip."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 5,
+      "halfInning": "top",
+      "atBatIndex": 36
+     },
+     "result": {
+      "description": "Rudy Martin Jr. singles on a line drive to center fielder Johnathon Thomas."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 5,
+      "halfInning": "top",
+      "atBatIndex": 37
+     },
+     "result": {
+      "description": "Josh Kasevich singles on a line drive to left fielder Sam Petersen. Rudy Martin Jr. scores."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 7
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 5,
+      "halfInning": "top",
+      "atBatIndex": 38
+     },
+     "result": {
+      "description": "Sean Keys singles on a ground ball to center fielder Johnathon Thomas. Josh Kasevich to 3rd."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 5,
+      "halfInning": "top",
+      "atBatIndex": 39
+     },
+     "result": {
+      "description": "Davis Schneider grounds out, third baseman Seaver King to first baseman Yohandy Morales."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 5,
+      "halfInning": "bottom",
+      "atBatIndex": 40
+     },
+     "result": {
+      "description": "Seaver King grounds out, third baseman Nick Goodwin to first baseman Sean Keys."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 5,
+      "halfInning": "bottom",
+      "atBatIndex": 41
+     },
+     "result": {
+      "description": "Yohandy Morales grounds out, second baseman Lenyn Sosa to first baseman Sean Keys."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 5,
+      "halfInning": "bottom",
+      "atBatIndex": 42
+     },
+     "result": {
+      "description": "Trey Lipscomb flies out to left fielder Yohendrick Piñango."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 6,
+      "halfInning": "top",
+      "atBatIndex": 43
+     },
+     "result": {
+      "description": "Yohendrick Piñango doubles (13) on a sharp line drive to center fielder Johnathon Thomas."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 6,
+      "halfInning": "top",
+      "atBatIndex": 44
+     },
+     "result": {
+      "description": "Jay Harry strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 6,
+      "halfInning": "top",
+      "atBatIndex": 45
+     },
+     "result": {
+      "description": "Lenyn Sosa strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 6,
+      "halfInning": "top",
+      "atBatIndex": 46
+     },
+     "result": {
+      "description": "Nick Goodwin grounds out, shortstop Trey Lipscomb to first baseman Yohandy Morales."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 6,
+      "halfInning": "bottom",
+      "atBatIndex": 47
+     },
+     "result": {
+      "description": "Cayden Wallace strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 6,
+      "halfInning": "bottom",
+      "atBatIndex": 48
+     },
+     "result": {
+      "description": "Leandro Pineda hit by pitch."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 6,
+      "halfInning": "bottom",
+      "atBatIndex": 49
+     },
+     "result": {
+      "description": "Sam Petersen grounds into a force out, fielded by second baseman Lenyn Sosa. Leandro Pineda out at 2nd. Sam Petersen to 1st."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 6,
+      "halfInning": "bottom",
+      "atBatIndex": 50
+     },
+     "result": {
+      "description": "Liover Peguero walks. Sam Petersen to 2nd."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 7
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 6,
+      "halfInning": "bottom",
+      "atBatIndex": 51
+     },
+     "result": {
+      "description": "Kyle Hayes strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 7,
+      "halfInning": "top",
+      "atBatIndex": 52
+     },
+     "result": {
+      "description": "C.J. Stubbs pops out to first baseman Yohandy Morales in foul territory."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 7,
+      "halfInning": "top",
+      "atBatIndex": 53
+     },
+     "result": {
+      "description": "Rudy Martin Jr. strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 7,
+      "halfInning": "top",
+      "atBatIndex": 54
+     },
+     "result": {
+      "description": "Josh Kasevich grounds out, third baseman Seaver King to first baseman Yohandy Morales."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 7,
+      "halfInning": "bottom",
+      "atBatIndex": 55
+     },
+     "result": {
+      "description": "Johnathon Thomas pops out to third baseman Nick Goodwin."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 7,
+      "halfInning": "bottom",
+      "atBatIndex": 56
+     },
+     "result": {
+      "description": "Seaver King grounds out softly, catcher C.J. Stubbs to first baseman Sean Keys."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 7,
+      "halfInning": "bottom",
+      "atBatIndex": 57
+     },
+     "result": {
+      "description": "Yohandy Morales strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 8,
+      "halfInning": "top",
+      "atBatIndex": 58
+     },
+     "result": {
+      "description": "Sean Keys singles on a ground ball to center fielder Johnathon Thomas."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 8,
+      "halfInning": "top",
+      "atBatIndex": 59
+     },
+     "result": {
+      "description": "Davis Schneider walks. Sean Keys to 2nd."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 8,
+      "halfInning": "top",
+      "atBatIndex": 60
+     },
+     "result": {
+      "description": "Yohendrick Piñango walks. Sean Keys to 3rd. Davis Schneider to 2nd."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 8,
+      "halfInning": "top",
+      "atBatIndex": 61
+     },
+     "result": {
+      "description": "Jay Harry out on a sacrifice fly to left fielder Sam Petersen. Sean Keys scores."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 8,
+      "halfInning": "top",
+      "atBatIndex": 62
+     },
+     "result": {
+      "description": "Lenyn Sosa grounds into a double play, shortstop Trey Lipscomb to second baseman Cayden Wallace to first baseman Yohandy Morales. Yohendrick Piñango out at 2nd. Lenyn Sosa out at 1st."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 8,
+      "halfInning": "bottom",
+      "atBatIndex": 63
+     },
+     "result": {
+      "description": "Trey Lipscomb strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 8,
+      "halfInning": "bottom",
+      "atBatIndex": 64
+     },
+     "result": {
+      "description": "Cayden Wallace walks."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 8,
+      "halfInning": "bottom",
+      "atBatIndex": 65
+     },
+     "result": {
+      "description": "Leandro Pineda homers (8) on a fly ball to right center field."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 8,
+      "halfInning": "bottom",
+      "atBatIndex": 66
+     },
+     "result": {
+      "description": "Sam Petersen flies out to right fielder Davis Schneider."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 9,
+      "halfInning": "top",
+      "atBatIndex": 67
+     },
+     "result": {
+      "description": "Ismael Munguia strikes out swinging."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 9,
+      "halfInning": "top",
+      "atBatIndex": 68
+     },
+     "result": {
+      "description": "Peyton Williams walks."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      }
+     ]
+    },
+    {
+     "about": {
+      "inning": 9,
+      "halfInning": "top",
+      "atBatIndex": 69
+     },
+     "result": {
+      "description": "Rudy Martin Jr. lines into an unassisted double play, first baseman Yohandy Morales. Peyton Williams out at 1st."
+     },
+     "playEvents": [
+      {
+       "isPitch": true,
+       "pitchNumber": 1
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 2
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 3
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 4
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 5
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 6
+      },
+      {
+       "isPitch": true,
+       "pitchNumber": 7
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

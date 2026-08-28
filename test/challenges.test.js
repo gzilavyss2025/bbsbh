@@ -11,8 +11,39 @@
 // own header comments for that game's specifics.
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFileSync } from 'node:fs'
 import { buildFeed } from './fixtures/mini-game.js'
-import { challengeForPlay, selectChallengeState } from '../src/api/challenges.js'
+import { challengeForPlay, selectChallengeState, gameHasAbs } from '../src/api/challenges.js'
+
+// A field-trimmed snapshot of statsapi's /api/v1.1/game/815863/feed/live —
+// Buffalo at Rochester, 2026-08-26, a real TRIPLE-A game with three real ABS
+// challenges. Built by .scratch/abs-aaa-gate/build-fixture.mjs; the suite reads
+// it from disk, so these tests run offline and identically every time, the same
+// arrangement invariant-real-game.test.js uses for the pinned MLB game.
+const AAA = JSON.parse(
+  readFileSync(new URL('./fixtures/game-815863.trimmed.json', import.meta.url), 'utf8'),
+)
+
+// A minimal feed carrying only what gameHasAbs looks at.
+function levelFeed(sportId, leagueName, absChallenges) {
+  return {
+    gameData: {
+      teams: {
+        away: { id: 1, sport: { id: sportId }, league: { name: leagueName } },
+        home: { id: 2, sport: { id: sportId }, league: { name: leagueName } },
+      },
+      ...(absChallenges === undefined ? {} : { absChallenges }),
+    },
+  }
+}
+
+// The bank a game starts with, as the feed itself reports it before a pitch is
+// thrown — the pregame shape at every level that runs the system.
+const PREGAME_BANK = {
+  hasChallenges: false,
+  away: { usedSuccessful: 0, usedFailed: 0, remaining: 2 },
+  home: { usedSuccessful: 0, usedFailed: 0, remaining: 2 },
+}
 
 // mini-game.js's [0] top 1: Ashby strikeout, pitches C(1) S(2) S(3) — away
 // (id 158) challenges pitch 2 and loses (upheld).
@@ -110,4 +141,109 @@ test('selectChallengeState clamps to the reached half — a later challenge neve
   const throughTop1 = selectChallengeState(feed, 1, 'top')
   assert.equal(throughTop1.away.outcomes.length, 1)
   assert.equal(throughTop1.home.outcomes.length, 0)
+})
+
+// --- gameHasAbs: which games run the ABS challenge system ----------------------
+// The system is NOT a level. In 2026 it runs at MLB, at Triple-A and, inside
+// Single-A, in the Florida State League alone — while Double-A, High-A and the
+// other two Single-A leagues do not run it. The feed says so itself through
+// gameData.absChallenges, which is present on exactly the games that run it.
+
+test('gameHasAbs is true for an MLB game', () => {
+  assert.equal(gameHasAbs(levelFeed(1, 'American League', PREGAME_BANK)), true)
+})
+
+test('gameHasAbs is true for a Triple-A game — the level does run challenges', () => {
+  assert.equal(gameHasAbs(levelFeed(11, 'International League', PREGAME_BANK)), true)
+})
+
+test('gameHasAbs is true on the real captured Triple-A feed', () => {
+  assert.equal(gameHasAbs(AAA), true)
+  assert.equal(AAA.gameData.teams.away.sport.id, 11)
+})
+
+test('gameHasAbs is true for a Florida State League game, false for its Single-A siblings', () => {
+  // Same sportId (14), opposite answers — a level allowlist cannot tell these
+  // two apart, and would put a misleading "2 left" row on the Carolina game.
+  assert.equal(gameHasAbs(levelFeed(14, 'Florida State League', PREGAME_BANK)), true)
+  assert.equal(gameHasAbs(levelFeed(14, 'Carolina League', undefined)), false)
+  assert.equal(gameHasAbs(levelFeed(14, 'California League', undefined)), false)
+})
+
+test('gameHasAbs is false at a level with no challenge data — no empty row', () => {
+  assert.equal(gameHasAbs(levelFeed(12, 'Eastern League', undefined)), false)
+  assert.equal(gameHasAbs(levelFeed(13, 'Midwest League', undefined)), false)
+})
+
+test('gameHasAbs follows the feed, not the level — an MLB game with no bank shows nothing', () => {
+  // The degrade-correctly property: a level that LOSES the system loses the key
+  // and the row goes away on its own, with no code change here.
+  assert.equal(gameHasAbs(levelFeed(1, 'American League', undefined)), false)
+})
+
+test('gameHasAbs reads presence, never the running counts — true before any challenge', () => {
+  // hasChallenges is "one has been used", false until the first one; the row
+  // still has to show the full bank pregame, so the gate must not read it.
+  assert.equal(PREGAME_BANK.hasChallenges, false)
+  assert.equal(gameHasAbs(levelFeed(11, 'International League', PREGAME_BANK)), true)
+})
+
+test('gameHasAbs degrades to false on a missing or empty feed', () => {
+  assert.equal(gameHasAbs(null), false)
+  assert.equal(gameHasAbs(undefined), false)
+  assert.equal(gameHasAbs({}), false)
+  assert.equal(gameHasAbs({ gameData: {} }), false)
+})
+
+// --- the reveal seal, on real Triple-A data ------------------------------------
+// The level gate widened; the REVEAL gate did not. These pin that on the real
+// Triple-A feed, exactly as the clamp is pinned on the mini fixture above.
+
+test('the captured Triple-A game carries three real MJ challenges', () => {
+  const full = selectChallengeState(AAA, Infinity, 'bottom')
+  assert.equal(full.away.teamId, 422) // Buffalo
+  assert.equal(full.home.teamId, 534) // Rochester
+  // Our own derivation agrees with the tally the feed keeps for itself.
+  const bank = AAA.gameData.absChallenges
+  for (const side of ['away', 'home']) {
+    const o = full[side].outcomes
+    assert.equal(o.filter((c) => c.outcome === 'success').length, bank[side].usedSuccessful)
+    assert.equal(o.filter((c) => c.outcome === 'fail').length, bank[side].usedFailed)
+  }
+  assert.equal(full.away.outcomes.length + full.home.outcomes.length, 3)
+})
+
+test('a Triple-A challenge from a sealed half never reaches the DOM', () => {
+  // Rochester's Hayes challenges in the TOP 1st and wins it; Buffalo's two
+  // come in the top 2nd and the top 3rd.
+  const throughTop1 = selectChallengeState(AAA, 1, 'top')
+  assert.equal(throughTop1.home.outcomes.length, 1)
+  assert.equal(throughTop1.home.outcomes[0].outcome, 'success')
+  assert.equal(throughTop1.away.outcomes.length, 0) // top 2nd is still sealed
+
+  const throughTop2 = selectChallengeState(AAA, 2, 'top')
+  assert.equal(throughTop2.away.outcomes.length, 1) // Sosa's, top 2nd
+  assert.equal(throughTop2.away.outcomes[0].inning, 2)
+
+  // Nothing at all before the first half is reached.
+  const nothing = selectChallengeState(AAA, 0, 'bottom')
+  assert.equal(nothing.away.outcomes.length, 0)
+  assert.equal(nothing.home.outcomes.length, 0)
+})
+
+test('every Triple-A challenge returned sits at or before the reached half', () => {
+  const order = (inning, half) => (half === 'bottom' ? inning * 2 : inning * 2 - 1)
+  for (let i = 1; i <= 9; i += 1) {
+    for (const half of ['top', 'bottom']) {
+      const state = selectChallengeState(AAA, i, half)
+      for (const side of ['away', 'home']) {
+        for (const c of state[side].outcomes) {
+          assert.ok(
+            order(c.inning, c.half) <= order(i, half),
+            `challenge in ${c.half} ${c.inning} leaked through ${half} ${i}`,
+          )
+        }
+      }
+    }
+  }
 })

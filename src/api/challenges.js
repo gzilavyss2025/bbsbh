@@ -18,13 +18,43 @@
 // clamped scope (StatBox's inning/half, or playbyplay.js's single half), same
 // footing as every other per-play read in this app.
 
-// A club starts each game with this many challenges.
-export const START_CHALLENGES = 2
+// A club starts each game with this many challenges. THE RULES DO NOT CHANGE BY
+// LEVEL: every game that runs the system opens with `remaining: 2` a side in
+// gameData.absChallenges, keeps one on a success and spends one on a failure
+// (Triple-A clubs reach exactly 2 failures and stop, over 114 club-games of a
+// season-wide sample), and refills in extra innings the same way MLB does
+// (Triple-A clubs reach 3 failures only in games past the 9th). Single-A's
+// Florida State League opens at 2 a side as well. See .scratch/abs-aaa-gate/.
 
-// ABS is an MLB (sportId 1) system; MiLB feeds carry no challenges, so the row
-// stays hidden there rather than showing a misleading "2 remaining" start state.
+// THE SYSTEM IS NOT A LEVEL, so this does not read one. In 2026 the ABS
+// challenge system runs at MLB (sportId 1), at Triple-A (11) and, inside
+// Single-A (14), in the Florida State League ALONE — while Double-A (12),
+// High-A (13) and Single-A's other two leagues (Carolina, California) do not
+// run it at all. A sportId allowlist cannot draw that line: it would either
+// hide Triple-A's real challenges (which is what the earlier `sport.id === 1`
+// check did) or put a misleading "2 left" row on every Carolina League box
+// score.
+//
+// The feed draws the line itself. `gameData.absChallenges` is present on
+// exactly the games that run the system and absent on every game that does
+// not — so a level that GAINS the system next season gets its row with no
+// change here, and a level that loses it loses the row the same way.
+// Confirmed 2026-08-28 over Final games at all five levels the app searches:
+// present at MLB, Triple-A and the Florida State League; the key is absent on
+// every Eastern League, Midwest League, South Atlantic League, Carolina League
+// and California League game checked, none of which carried an `MJ` review
+// either. .scratch/abs-aaa-gate/ has the probes.
+//
+// PRESENCE ONLY — never the values. The same object also carries live
+// whole-game counts (`hasChallenges`, `usedFailed`, `remaining`) that are NOT
+// clamped to the reached half; reading one would leak a later half's outcome
+// straight past the seal. Presence alone is spoiler-free: the key is already
+// there before the first pitch (`hasChallenges: false`, `remaining: 2` at every
+// level pregame), so it says which RULES this game plays under, the same class
+// of fact as the venue or the club ids beside it. The remaining count AbsRow
+// shows still comes from scanChallenges' clamped walk, never from here.
 export function gameHasAbs(feed) {
-  return feed?.gameData?.teams?.away?.sport?.id === 1
+  return feed?.gameData?.absChallenges != null
 }
 
 // An ABS challenge review can sit at EITHER the play level (`play.reviewDetails`)

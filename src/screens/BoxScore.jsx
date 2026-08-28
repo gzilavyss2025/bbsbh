@@ -817,8 +817,10 @@ function TeamBlock({ side, theme }) {
 // comes" sentinel BoxDefense uses below) since the box score is already
 // behind its own seal. Previously this data only reached the page as raw
 // feed text buried in the Pitching notes ("ABS Challenge: ATL 1-2…"); this is
-// the same StatBox pip row instead of a second copy of it. MLB only —
-// gameHasAbs is false at every MiLB park. Its own independent card below the
+// the same StatBox pip row instead of a second copy of it. Renders only where
+// the feed says the game runs the challenge system (gameHasAbs) — MLB,
+// Triple-A and the Florida State League today, nothing at the levels that run
+// no challenges. Its own independent card below the
 // team's batting/pitching card (BoxScoreBody), not a tail section of it —
 // bs__abscard scopes the attached-header + card-frame treatment (see
 // index.css) to just this copy of the shared .abs/.abs__title markup; the

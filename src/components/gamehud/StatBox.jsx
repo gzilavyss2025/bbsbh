@@ -86,7 +86,9 @@ export function StatBox({
           const rolling = rollingPitches(getDerived(), inning, half)
           const rollingMissed = rollingMissedCalls(getDerived(), inning, half)
           // ABS challenge history through this half (reveal-only, clamped to the
-          // reached half — see api/challenges.js). MLB only.
+          // reached half — see api/challenges.js). Only for a game the FEED says
+          // runs the challenge system — MLB, Triple-A and the Florida State
+          // League today; gameHasAbs reads the feed, not the level.
           const challenges = gameHasAbs(feed) ? selectChallengeState(feed, inning, half) : null
           // Plate-umpire favor + worst call through this half (reveal-only,
           // clamped — see api/umpireFavor.js). MLB + AAA only (pitch tracking).
@@ -226,7 +228,8 @@ export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
 // 0: extra-inning bonus challenges (see api/challenges.js) aren't tracked
 // precisely, so the unused count is a conservative lower bound rather than an
 // overstated bank. The logo falls back to the abbreviation for a club with no
-// mark (never for MLB, where ABS lives, but keeps the row robust).
+// mark — which a MiLB club can be, now that Triple-A and the Florida State
+// League reach this row too.
 // Exported: the box score's pitching-notes area reuses this exact row for the
 // whole-game challenge tally instead of growing a second copy.
 //
