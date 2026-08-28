@@ -1,0 +1,82 @@
+name: Data freshness check
+
+# A dead-man's switch for update-nightly-data.yml, and the one check that
+# workflow can never do for itself: A RUN THAT NEVER HAPPENS CANNOT FAIL.
+#
+# On 2026-08-28 GitHub's scheduler simply did not dispatch the nightly cron.
+# No run record, nothing queued, nothing red — the workflow was `active`,
+# Actions was enabled, the file was unchanged and had run clean for days.
+# (The 08-27 run had already fired eleven hours late after two GitHub Actions
+# incidents on 08-26.) Scheduled workflows are the first thing dropped under
+# queue pressure and a dropped run is never backfilled, so the site quietly
+# served day-old data until a human happened to notice. Nothing in the repo
+# could have caught that, because every guard lived INSIDE the run.
+#
+# So this is a second, independent schedule whose only job is to ask whether
+# the first one produced anything. Both schedules being dropped on the same day
+# is far less likely than one. It runs eight hours after the nightly, giving
+# that job's own four-hour "wait for the slate" backoff room to finish.
+#
+# It deliberately does NO checkout and NO push: two `gh api` calls against the
+# commit list, so it costs no Vercel deployment and needs no secret beyond the
+# automatic GITHUB_TOKEN. When it fails, GitHub emails the repo owner — which
+# is the entire point, and the only alerting this repo has.
+on:
+  schedule:
+    - cron: '0 15 * * *' # ~11am US Eastern, eight hours behind the nightly's 07:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      # 26 hours, not 24: the nightly's "Wait for yesterday's slate to go Final"
+      # step backs off hourly up to four times, so a legitimate run can land
+      # well after its nominal 07:00, and a two-hour cushion keeps a late-but-
+      # healthy night from crying wolf.
+      - name: Nightly data landed in the last 26 hours
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          since="$(date -u -d '26 hours ago' +%Y-%m-%dT%H:%M:%SZ)"
+          echo "Looking for a commit touching public/data since $since"
+          n="$(gh api "repos/${GITHUB_REPOSITORY}/commits?path=public/data&since=${since}&per_page=1" --jq 'length')"
+          if [ "$n" -gt 0 ]; then
+            echo "OK — nightly data has landed since $since."
+            exit 0
+          fi
+          echo "::error::No commit has touched public/data since $since. The nightly"
+          echo "::error::data cron has not landed. Check whether a run exists at all —"
+          echo "::error::gh run list --workflow=update-nightly-data.yml — because GitHub"
+          echo "::error::silently drops scheduled runs and never backfills them. Recover"
+          echo "::error::with: gh workflow run update-nightly-data.yml"
+          exit 1
+
+      # The README drift check the /start-day skill already does, run unattended
+      # so it doesn't depend on a human starting a session. Approximated with
+      # two single-path API calls (the commits API takes one `path` and has no
+      # exclude), comparing when src/ last changed against when README.md did.
+      # Advisory only: it must not fail the job, or a normal week of feature
+      # work would bury the staleness alarm above under a README warning.
+      - name: README drift (advisory)
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          last() {
+            gh api "repos/${GITHUB_REPOSITORY}/commits?path=$1&per_page=1" --jq '.[0].commit.committer.date // ""'
+          }
+          readme="$(last README.md)"
+          src="$(last src)"
+          echo "README.md last changed: ${readme:-never}"
+          echo "src/ last changed:      ${src:-never}"
+          if [ -n "$src" ] && [ -n "$readme" ] && [[ "$src" > "$readme" ]]; then
+            echo "::warning::src/ has changed since README.md was last written. Run" \
+                 "/start-day and say yes to the README regeneration step if the" \
+                 "user-facing feature list has actually moved."
+          else
+            echo "README is not behind src/."
+          fi

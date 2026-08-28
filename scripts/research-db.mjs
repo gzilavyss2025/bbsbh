@@ -101,6 +101,8 @@ const PANEL_PATHS = [
   '.scratch/team-success/milb-field-cache.json',
   '.scratch/team-success/exit-reason-mix.json',
   '.scratch/team-success/exit-reason-mix-findings.json',
+  '.scratch/team-success/free-agency-market.json',
+  '.scratch/team-success/free-agency-market-findings.json',
   '.scratch/level-benchmarks/raw.json',
   '.scratch/level-benchmarks/dates.json',
   '.scratch/level-benchmarks/homegrown-cohort.json',
@@ -135,6 +137,14 @@ const PANEL_PATHS = [
   '.scratch/prospect-traits/q2-size.json',
   '.scratch/prospect-traits/q3-pitchers.json',
   '.scratch/prospect-traits/q5-final-four.json',
+  // The service-clock spike (docs/service-time-debut-clock.md). panel.json is
+  // one row per major-league debut 2005-2025 with the season's service line,
+  // the wire-resolved roster-add date and the roster-need counts beside it.
+  // The 47MB transaction wire it was built from is git-ignored and is not
+  // cataloged; rebuild it with .scratch/service-clock/pull.mjs.
+  '.scratch/service-clock/panel.json',
+  '.scratch/service-clock/controls.json',
+  '.scratch/service-clock/k0-blank-rate.json',
   // Historical Top Prospects lists (.scratch/top-prospects-history/pull.mjs):
   // rows.json is one row per (season, rank, mlbId), 2009-2024 -- mlbId joins
   // directly to prospect-traits/bio.json above, no crosswalk. seasons.json is
@@ -161,6 +171,11 @@ const PANEL_PATHS = [
   'public/data/all-star-rosters.json',
   'public/data/awards-history.json',
   '.scratch/game-notes/insights/verdicts-*.json', // filename carries a date stamp
+  // Extension-value spike (W3.3, docs/contracts-extension-value.md): a
+  // season-by-season price-of-a-win panel derived from free_agency.csv, and
+  // the extensions.csv outcomes it prices.
+  '.scratch/contracts-extensions/fa-war-price.json',
+  '.scratch/contracts-extensions/extension-outcomes.json',
   // Historical contract identity crosswalk (scripts/gen-contracts-identity.mjs):
   // one row per source-CSV row, keyed on real MLB id like every panel above.
   // A row with no confident id has mlbId = null, confidence != 'exact'/'fuzzy'

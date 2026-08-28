@@ -32,9 +32,11 @@
 // populate, because a snapshot 14+ days back already exists.
 //
 // Depends on public/data/top-prospects.json already existing
-// (fetch-top-prospects.mjs, its own weekly GitHub Actions schedule) for the
-// playerId list; skips gracefully — not a failure — if that snapshot is
-// missing or empty, since the two crons run on independent schedules.
+// (fetch-top-prospects.mjs) for the playerId list; skips gracefully — not a
+// failure — if that snapshot is missing or empty. The two ran on independent
+// schedules until 2026-08-28; they are now the same nightly job, and this step
+// is gated on that one having succeeded, so a stale snapshot can no longer
+// reach this file at all.
 //
 // This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at
 // request time. Run by hand: node scripts/gen-prospect-trend.mjs

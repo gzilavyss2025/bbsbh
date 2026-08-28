@@ -52,51 +52,45 @@
 // time: the live app only ever fetches this small same-origin static file
 // (src/api/war.js), never statsapi.mlb.com's whole-league leaderboard directly.
 // Run by hand: node scripts/gen-war.mjs
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
+import { teamWarSplits } from './lib/war-splits.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'war.json')
 const season = new Date().getFullYear()
 
-async function fetchSabermetrics(group) {
+// The committed war.json, used ONLY to carry a traded player's per-team split
+// forward when statsapi flakes on his one request (see lib/war-splits.mjs).
+// Missing or unparseable is fine — a first run has nothing to carry.
+const previous = await readFile(out, 'utf8')
+  .then((t) => JSON.parse(t))
+  .catch(() => ({}))
+
+// Retried for the same reason the per-player splits are: this is two requests
+// a night against an API that intermittently 500s, and losing either one loses
+// the whole file. Local to this script, matching the convention lib/statsapi.mjs
+// documents (gen-manager-history/gen-milb-history/gen-workload each keep their
+// own counts rather than unifying them).
+async function fetchSabermetrics(group, attempts = 3) {
   const url =
     `https://statsapi.mlb.com/api/v1/stats?stats=sabermetrics&group=${group}` +
     `&season=${season}&sportId=1&limit=3000&playerPool=ALL`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`statsapi sabermetrics ${group} leaderboard: HTTP ${res.status}`)
-  const json = await res.json()
-  return json.stats?.[0]?.splits ?? []
-}
-
-// The bulk leaderboard above gives one row per player: the season TOTAL, even
-// for a player with `numTeams > 1`, with no way to split it out of that row.
-// Per-team WAR only comes back from a per-PLAYER query, which returns the
-// total split PLUS one row per team stint (no `team` field on the total row)
-// — no `playerPool` needed, since that filter only applies to the bulk pull.
-async function fetchTeamSplits(id, group) {
-  const url =
-    `https://statsapi.mlb.com/api/v1/people/${id}/stats?stats=sabermetrics&group=${group}` +
-    `&season=${season}&sportId=1`
-  const res = await fetch(url)
-  if (!res.ok)
-    throw new Error(`statsapi sabermetrics ${group} team splits for person ${id}: HTTP ${res.status}`)
-  const json = await res.json()
-  return (json.stats?.[0]?.splits ?? []).filter((s) => s.team)
-}
-
-async function teamWarSplits(ids, group) {
-  const out = {}
-  for (const id of ids) {
-    const rows = []
-    for (const split of await fetchTeamSplits(id, group)) {
-      const w = num(split.stat?.war)
-      if (w != null) rows.push({ teamId: split.team.id, war: Math.round(w * 10) / 10 })
+  let lastErr
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error(`statsapi sabermetrics ${group} leaderboard: HTTP ${res.status}`)
+      const json = await res.json()
+      return json.stats?.[0]?.splits ?? []
+    } catch (err) {
+      lastErr = err
+      if (attempt < attempts) await new Promise((r) => setTimeout(r, 400 * 2 ** (attempt - 1)))
     }
-    if (rows.length) out[id] = rows
   }
-  return out
+  throw lastErr
 }
 
 const num = (v) => {
@@ -119,7 +113,9 @@ for (const split of await fetchSabermetrics('hitting')) {
   if (f != null) fld[id] = Math.round(f * 10) / 10
   if (split.numTeams > 1) batTraded.push(id)
 }
-const batByTeam = await teamWarSplits(batTraded, 'hitting')
+const { byTeam: batByTeam, carried: batCarried } = await teamWarSplits(batTraded, 'hitting', season, {
+  previous: previous.batByTeam ?? {},
+})
 
 // Pitcher WAR uses the FIP-based `war` field, not the RA9-based `ra9War` —
 // matches the philosophy (and, per the header comment above, closely matches
@@ -133,7 +129,9 @@ for (const split of await fetchSabermetrics('pitching')) {
   if (w != null) pit[id] = Math.round(w * 10) / 10
   if (split.numTeams > 1) pitTraded.push(id)
 }
-const pitByTeam = await teamWarSplits(pitTraded, 'pitching')
+const { byTeam: pitByTeam, carried: pitCarried } = await teamWarSplits(pitTraded, 'pitching', season, {
+  previous: previous.pitByTeam ?? {},
+})
 
 await writeJsonAtomic(out, {
   season,
@@ -144,9 +142,21 @@ await writeJsonAtomic(out, {
   fld,
   batByTeam,
   pitByTeam,
+  // How many traded players' splits came from the PREVIOUS file because
+  // statsapi would not serve them tonight. Normally 0. A non-zero value that
+  // persists night after night means a player is durably broken upstream, not
+  // flaking — which no amount of retrying will fix, and which nothing would
+  // otherwise surface, since the carried value looks like a real one.
+  carriedForward: { bat: batCarried.length, pit: pitCarried.length },
 })
 console.log(
   `wrote ${out} (${Object.keys(bat).length} batters, ${Object.keys(pit).length} pitchers, ` +
     `${Object.keys(wrc).length} wRC+, ${Object.keys(fld).length} Fld, ` +
     `${Object.keys(batByTeam).length} multi-team batters, ${Object.keys(pitByTeam).length} multi-team pitchers)`,
 )
+if (batCarried.length || pitCarried.length) {
+  console.log(
+    `carried ${batCarried.length + pitCarried.length} player(s) forward from the previous war.json ` +
+      `— statsapi would not serve their team splits: ${[...batCarried, ...pitCarried].join(', ')}`,
+  )
+}

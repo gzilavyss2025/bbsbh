@@ -13,7 +13,8 @@
 // Reads public/data/teams.json (every active club at each searchable level,
 // written by gen-teams.mjs) rather than re-enumerating statsapi, so the two
 // files can't cover different team sets. Run it AFTER gen-teams.mjs — that's
-// how .github/workflows/update-teams.yml wires them, which is also the cadence
+// how the structural data block of .github/workflows/update-nightly-data.yml
+// wires them (update-teams.yml until 2026-08-28), which is also the cadence
 // this needs: a club's mark only changes when it rebrands or a new affiliate
 // appears, and until this file exists for a team the app falls back to the
 // full-color CDN mark on its own.

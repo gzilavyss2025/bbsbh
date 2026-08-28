@@ -1,0 +1,32 @@
+=== A. shape of the blankness ===
+all rows 27349, blank 8041 (29.4%)
+2000-2009: 7970 rows, 7970 blank (100.0%)
+2010-2026: 19379 rows, 71 blank (0.4%)
+
+=== the join ===
+salary rows 27349; no resolved mlbId 714; joined to a 2005-2025 debut 18259
+
+=== B1. blank rate by debut timing, FULL FILE (2000-2026 rows) ===
+  line +31 or later      rows  12209 blank   793 6.5%
+  line +1 to +30         rows   2576 blank   145 5.6%
+  on or before the line  rows   2687 blank   268 10.0%
+  pooled: pre-line 10.0% vs post-line 6.3%  z=6.83 p=0.0000
+
+=== B2. blank rate by debut timing, 2010-2026 ROWS ONLY ===
+  line +31 or later      rows  11433 blank    17 0.1%
+  line +1 to +30         rows   2434 blank     3 0.1%
+  on or before the line  rows   2425 blank     6 0.2%
+  pooled: pre-line 0.2% vs post-line 0.1%  z=1.17 p=0.2402
+
+=== B3. blank rate by DEBUT era (all rows) ===
+  debuted 2010-2025      rows  13111 blank    38 0.3%
+  debuted 2005-2009      rows   4361 blank  1168 26.8%
+
+=== C. does a following-season salary row exist, by debut timing? ===
+  (debuts 2009-2025 whose following season is 2010-2026; 3924 men)
+  on or before the line  debuts   526 with a next-year row   372 70.7%
+  line +1 to +30         debuts   612 with a next-year row   390 63.7%
+  line +31 or later      debuts  2786 with a next-year row  1834 65.8%
+  pooled: pre-line 70.7% vs post-line 65.5%  z=2.38 p=0.017408
+
+wrote k0-blank-rate.json

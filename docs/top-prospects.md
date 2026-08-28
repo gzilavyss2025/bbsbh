@@ -26,9 +26,10 @@ node scripts/fetch-top-prospects.mjs
 ```
 
 No flags. Writes `public/data/top-prospects.json`. In production this runs
-weekly via `.github/workflows/update-top-prospects.yml` (Monday mornings
-ET), which commits the refreshed file straight to `main` — that push rides
-the existing Vercel auto-deploy, no separate publish step.
+nightly, in the structural data block in `.github/workflows/update-nightly-data.yml` (its own weekly `update-top-prospects.yml` cron until
+2026-08-28), which commits the refreshed file straight to `main` in the nightly
+batch's single commit — that push rides the existing Vercel
+auto-deploy, no separate publish step and no second deployment.
 
 ## The pipeline
 

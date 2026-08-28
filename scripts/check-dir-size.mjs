@@ -703,7 +703,14 @@ const BUDGETS = {
   // are imported by scripts/gen-contracts-identity.mjs and tested without a
   // live statsapi call, exactly the testable-helper convention this
   // directory exists for.
-  'scripts/lib': 30,
+  // +1 for war-splits.mjs — the retry and carry-forward half of gen-war.mjs's
+  // ~180 per-player split requests, moved here for the same reason as every
+  // entry above it: gen-war.mjs does its work at import, so this behavior was
+  // untestable while it lived there. It earned the move by breaking in
+  // production first — one transient HTTP 500 aborted the whole generator on
+  // 2026-08-28 — and test/war-splits.test.js now pins all five cases (retry,
+  // give-up, one-player-fails, carry-forward, outage threshold).
+  'scripts/lib': 31,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

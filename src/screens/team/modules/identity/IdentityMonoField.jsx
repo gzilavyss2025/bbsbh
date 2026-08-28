@@ -20,7 +20,7 @@ import '../../../../styles/17-identity-lab-workbench.css'
 // THE ONE FIELD IN THIS DRAWER WHERE SAVE ISN'T INSTANT. Every sibling field
 // is a runtime override a resolver reads on the very next render; this one
 // only reaches a visitor once scripts/gen-mono-logos.mjs next runs and
-// fetches it (weekly, .github/workflows/update-teams.yml) — the SVG a
+// fetches it (nightly, .github/workflows/update-nightly-data.yml) — the SVG a
 // masthead actually draws is a precomputed file, not something this store
 // renders live. Said explicitly below rather than left to be discovered.
 //
@@ -116,7 +116,7 @@ export function IdentityMonoField({ teamId, fields, values, onChange }) {
     <div className="iddrawer__mono">
       <p className="iddrawer__warn">
         This mark is precomputed, not rendered live — what visitors see updates the next time the
-        weekly team-data refresh runs, not the instant you save here.
+        nightly team-data refresh runs, not the instant you save here.
       </p>
 
       <div className="idlab__monoinksource" role="group" aria-label="Source art">

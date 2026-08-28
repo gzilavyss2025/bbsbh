@@ -1,0 +1,149 @@
+
+==========================================================================
+T1. Does the derived line actually divide who banks a service year?
+==========================================================================
+The line is  regularSeasonEndDate - 171 days,  derived per season, never
+hard-coded. It moves from 2011-04-10 to 2025-04-10 across the window.
+
+The hard prediction: a man on the active roster only from day +1 onward
+CANNOT reach 172 days, so he must show 0 years of service the next spring.
+
+service cells available 2596; bare integers dropped 212; usable 2384
+
+measured on the DEBUT date:
+  on or before the line    n  185  banked a full year    3  1.6%
+  line +1 to +14           n  182  banked a full year    2  1.1%
+  line +15 or later        n 2017  banked a full year   10  0.5%
+measured on the ROSTER-ADD date from the wire (service starts here):
+  on or before the line    n  122  banked a full year    2  1.6%
+  line +1 to +14           n  190  banked a full year    2  1.1%
+  line +15 or later        n 1985  banked a full year   10  0.5%
+
+violations of the hard prediction (joined after the line, still banked a year): 12 of 2175
+   Andrew Brackman 2011: line 2011-04-10, added 2011-09-06 (+149), next-spring mls 1.05
+   Miguel González 2012: line 2012-04-15, added 2012-05-29 (+44), next-spring mls 1.107
+   Tsuyoshi Wada 2014: line 2014-04-10, added 2014-07-08 (+89), next-spring mls 1.145
+   Tyler Anderson 2016: line 2016-04-14, added 2016-06-11 (+58), next-spring mls 1.065
+   Teoscar Hernández 2016: line 2016-04-14, added 2016-08-12 (+120), next-spring mls 1.022
+   Jarlín García 2017: line 2017-04-13, added 2017-04-14 (+1), next-spring mls 1.003
+   Christian Villanueva 2017: line 2017-04-13, added 2017-09-18 (+158), next-spring mls 1.014
+   Jesse Biddle 2018: line 2018-04-13, added 2018-04-18 (+5), next-spring mls 1.166
+   José Soriano 2023: line 2023-04-14, added 2023-06-03 (+50), next-spring mls 1.121
+   José Fermin 2025: line 2025-04-10, added 2025-04-26 (+16), next-spring mls 1.075
+   Ryan Rolison 2025: line 2025-04-10, added 2025-05-11 (+31), next-spring mls 2.114
+   Josh Simpson 2025: line 2025-04-10, added 2025-06-21 (+72), next-spring mls 1.099
+
+==========================================================================
+T2. Is the debut rate higher just after the line than just before it?
+==========================================================================
+Rate ratio = debuts per club-day in the free zone / in the costly zone.
+A club that manages the clock promotes in the free zone, so the clock
+predicts a ratio above 1 and a JUMP at the line, not a slope.
+
+  debut clock                costly  443/ 230d = 1.926/d   free  351/ 280d = 1.254/d   ratio 0.651  p=0.0000
+  roster-add clock           costly  155/ 208d = 0.745/d   free  308/ 252d = 1.222/d   ratio 1.640  p=0.0000
+
+==========================================================================
+T3. Placebo — the identical test at dates with no service consequence
+==========================================================================
+The same zones, the same widths, slid along the calendar. If the line
+carries a clock, the ratio at shift 0 stands out from its neighbours. If
+it does not, what the test found is a seasonal promotion rhythm.
+
+  shift   0 (THE LINE)  ratio 0.651  p=0.0000
+  shift  10               ratio 1.025  p=0.7830
+  shift  20               ratio 0.811  p=0.0085
+  shift  30               ratio 1.135  p=0.1306
+  shift  35               ratio 1.141  p=0.1069
+  shift  40               ratio 1.192  p=0.0281
+  shift  50               ratio 0.928  p=0.3466
+  shift  60               ratio 0.911  p=0.2497
+
+  placebo shifts run: 76
+  placebo ratio median 0.973, min 0.425, max 1.309
+  placebo shifts whose ratio EQUALS OR BEATS the real line: 70 of 76  -> permutation p = 0.9221
+
+==========================================================================
+T4. Rank-matched controls, and the contrast that matters
+==========================================================================
+The clock is only worth managing for a man the club expects to hold for
+six years. A seasonal rhythm moves everyone. So the sharpest test is not
+the pooled ratio — it is whether the ratio is LARGER for the men the
+incentive reaches than for the men it does not.
+
+  round 1 pick             n  539  costly  49  free  34  ratio 0.553  p=0.0079
+  rounds 2-5               n  676  costly  59  free  48  ratio 0.649  p=0.0318
+  round 6+ / undrafted     n 1705  costly 170  free 116  ratio 0.544  p=0.0000
+  age at debut <= 23       n  646  costly  48  free  39  ratio 0.648  p=0.0515
+  age at debut 24-26       n 1689  costly 143  free 126  ratio 0.703  p=0.0039
+  age at debut 27+         n  585  costly  87  free  33  ratio 0.303  p=0.0000
+  award tier A or B        n  727  costly  50  free  60  ratio 0.957  p=0.8481
+  award tier C or none     n 2193  costly 228  free 138  ratio 0.483  p=0.0000
+
+  INCENTIVE PRESENT        n  794  costly  59  free  51  ratio 0.689  p=0.0549
+  INCENTIVE ABSENT         n  307  costly  50  free  10  ratio 0.160  p=0.0000
+  free-zone share: incentive present 46.4% vs absent 16.7%  z=3.86 p=0.0001
+
+==========================================================================
+T5. Club fixed effects
+==========================================================================
+Stratified by club: within each club, compare the men it promoted in the
+free zone against the men it promoted in the costly zone, against the
+club's own exposure. Summing observed - expected across clubs removes
+every between-club difference in how often a club promotes at all.
+
+  all debuts     clubs 30  observed in free zone 308  expected 250.2  z=5.39  p=0.0000
+  incentive grp  clubs 26  observed in free zone 41  expected 32.5  z=2.23  p=0.0257
+
+==========================================================================
+T6. Roster need
+==========================================================================
+A club with an injury promotes when it must, whatever the calendar says.
+IL placements by the promoting club in the 21 days before the debut, from
+the wire. Available from 2009 on: the wire holds 102-177 rows a season in
+2005-2008 against 6,055 in 2009, so no earlier season can carry it.
+
+  all debuts 2009-2025
+    no IL placement in 21 days  n 1132  costly  31  free  58  ratio 1.554  p=0.0548
+    at least one IL placement   n 2495  costly 124  free 250  ratio 1.674  p=0.0000
+  incentive-present group
+    no IL placement in 21 days  n  199  costly   4  free   4  ratio 0.801  p=1.0000
+    at least one IL placement   n  377  costly  14  free  37  ratio 2.117  p=0.0160
+
+  mean IL placements in the 21 days before: costly zone 2.26 (n=155), free zone 2.01 (n=308)
+
+==========================================================================
+T7. Era splits and leave-one-season-out
+==========================================================================
+  2005-2011  debuts 1521  costly 131  free  92  ratio 0.537  p=0.0000
+  2012-2016  debuts 1182  costly 101  free  83  ratio 0.575  p=0.0002
+  2017-2021  debuts 1035  costly 103  free  80  ratio 0.735  p=0.0386
+  2022-2025  debuts 1061  costly 108  free  96  ratio 0.841  p=0.2339
+
+  leave-one-season-out refits: 20
+  ratio range 0.618 to 0.666
+  significant at p<0.05 in 20 of 20 refits
+
+  per season (costly -> free):
+    2005   12 ->   6   ratio 0.357
+    2006   19 ->  15   ratio 0.620
+    2007   18 ->  13   ratio 0.567
+    2008   27 ->  14   ratio 0.444
+    2009   25 ->  17   ratio 0.583
+    2010   17 ->  15   ratio 0.630
+    2011   13 ->  12   ratio 0.593
+    2012   12 ->  13   ratio 0.619
+    2013   20 ->  16   ratio 0.629
+    2014   12 ->  13   ratio 0.774
+    2015   31 ->  26   ratio 0.599
+    2016   26 ->  15   ratio 0.412
+    2017   21 ->  16   ratio 0.544
+    2018   28 ->  20   ratio 0.765
+    2019   21 ->  20   ratio 0.952
+    2021   33 ->  24   ratio 0.727
+    2022   30 ->  27   ratio 0.579
+    2023   22 ->  18   ratio 0.877
+    2024   32 ->  19   ratio 0.636
+    2025   24 ->  32   ratio 1.333
+
+wrote findings.json
