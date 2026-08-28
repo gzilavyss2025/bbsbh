@@ -1,0 +1,112 @@
+promotions modelled: 834 first-time roster additions, 16 seasons (2009-2025, 2020 excluded)
+line lands on day: 2009:12  2010:10  2011:9  2012:8  2013:11  2014:10  2015:10  2016:10  2017:10  2018:15  2019:14  2021:14  2022:9  2023:15  2024:15  2025:14
+
+==========================================================================
+D1. One band of the calendar, opposite service consequence
+==========================================================================
+Band: days 12-14 of the season, the same three days of April in every year.
+  AFTER the line (free) in 9 seasons: 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2022
+  BEFORE the line (costly) in 6 seasons: 2018, 2019, 2021, 2023, 2024, 2025
+
+  band is FREE   : 33 of 443 promotions = 7.4%
+  band is COSTLY : 26 of 346 promotions = 7.5%
+  season-level: mean share 7.8% (free, n=9 seasons) vs 7.8% (costly, n=6 seasons)  t=0.02 p=0.9846
+
+  per season:
+    2010 line day 10  band free     3/ 36 = 8.3%
+    2011 line day  9  band free     7/ 35 = 20.0%
+    2012 line day  8  band free     4/ 48 = 8.3%
+    2013 line day 11  band free     4/ 44 = 9.1%
+    2014 line day 10  band free     3/ 45 = 6.7%
+    2015 line day 10  band free     2/ 59 = 3.4%
+    2016 line day 10  band free     0/ 54 = 0.0%
+    2017 line day 10  band free     2/ 45 = 4.4%
+    2018 line day 15  band costly   8/ 53 = 15.1%
+    2019 line day 14  band costly   5/ 54 = 9.3%
+    2021 line day 14  band costly   4/ 64 = 6.3%
+    2022 line day  9  band free     8/ 77 = 10.4%
+    2023 line day 15  band costly   3/ 52 = 5.8%
+    2024 line day 15  band costly   5/ 56 = 8.9%
+    2025 line day 14  band costly   1/ 67 = 1.5%
+
+==========================================================================
+D2. Poisson model: season fixed effects + day-of-season shape + the line
+==========================================================================
+The rate ratio is promotions per day past the line against promotions per
+day before it, after the stated controls. 1.00 means the line does nothing.
+
+  no controls (raw jump at the line)                   rate ratio 1.560  95% CI 1.309-1.859  z=4.96  p=0.0000
+  + season fixed effects only                          rate ratio 1.560  95% CI 1.309-1.859  z=4.96  p=0.0000
+  + season FE + day-of-season shape  <-- THE TEST      rate ratio 1.266  95% CI 0.856-1.872  z=1.18  p=0.2377
+
+==========================================================================
+D3. The rhythm the model is controlling for
+==========================================================================
+Promotions per day by day of season, pooled over all seasons. This is the
+shape the third model absorbs — and the reason the raw jump is not enough.
+
+  day  1    5 promotions / 16 season-days = 0.31/d   (past the line in 0 of 16 seasons)  ###
+  day  2   11 promotions / 16 season-days = 0.69/d   (past the line in 0 of 16 seasons)  ######
+  day  3    4 promotions / 16 season-days = 0.25/d   (past the line in 0 of 16 seasons)  ##
+  day  4   20 promotions / 16 season-days = 1.25/d   (past the line in 0 of 16 seasons)  ##########
+  day  5   14 promotions / 16 season-days = 0.88/d   (past the line in 0 of 16 seasons)  #######
+  day  6   14 promotions / 16 season-days = 0.88/d   (past the line in 0 of 16 seasons)  #######
+  day  7   15 promotions / 16 season-days = 0.94/d   (past the line in 0 of 16 seasons)  ########
+  day  8    9 promotions / 16 season-days = 0.56/d   (past the line in 0 of 16 seasons)  #####
+  day  9   15 promotions / 16 season-days = 0.94/d   (past the line in 1 of 16 seasons)  ########
+  day 10    9 promotions / 16 season-days = 0.56/d   (past the line in 3 of 16 seasons)  #####
+  day 11   24 promotions / 16 season-days = 1.50/d   (past the line in 8 of 16 seasons)  ############
+  day 12   23 promotions / 16 season-days = 1.44/d   (past the line in 9 of 16 seasons)  ############
+  day 13   19 promotions / 16 season-days = 1.19/d   (past the line in 10 of 16 seasons)  ##########
+  day 14   21 promotions / 16 season-days = 1.31/d   (past the line in 10 of 16 seasons)  ###########
+  day 15   22 promotions / 16 season-days = 1.38/d   (past the line in 13 of 16 seasons)  ###########
+  day 16   20 promotions / 16 season-days = 1.25/d   (past the line in 16 of 16 seasons)  ##########
+  day 17   16 promotions / 16 season-days = 1.00/d   (past the line in 16 of 16 seasons)  ########
+  day 18   23 promotions / 16 season-days = 1.44/d   (past the line in 16 of 16 seasons)  ############
+  day 19   20 promotions / 16 season-days = 1.25/d   (past the line in 16 of 16 seasons)  ##########
+  day 20   27 promotions / 16 season-days = 1.69/d   (past the line in 16 of 16 seasons)  ##############
+  day 21   19 promotions / 16 season-days = 1.19/d   (past the line in 16 of 16 seasons)  ##########
+  day 22   26 promotions / 16 season-days = 1.63/d   (past the line in 16 of 16 seasons)  #############
+  day 23   25 promotions / 16 season-days = 1.56/d   (past the line in 16 of 16 seasons)  #############
+  day 24   22 promotions / 16 season-days = 1.38/d   (past the line in 16 of 16 seasons)  ###########
+  day 25   23 promotions / 16 season-days = 1.44/d   (past the line in 16 of 16 seasons)  ############
+  day 26   24 promotions / 16 season-days = 1.50/d   (past the line in 16 of 16 seasons)  ############
+  day 27   20 promotions / 16 season-days = 1.25/d   (past the line in 16 of 16 seasons)  ##########
+  day 28   25 promotions / 16 season-days = 1.56/d   (past the line in 16 of 16 seasons)  #############
+  day 29   15 promotions / 16 season-days = 0.94/d   (past the line in 16 of 16 seasons)  ########
+  day 30   24 promotions / 16 season-days = 1.50/d   (past the line in 16 of 16 seasons)  ############
+  day 31   13 promotions / 16 season-days = 0.81/d   (past the line in 16 of 16 seasons)  #######
+  day 32   27 promotions / 16 season-days = 1.69/d   (past the line in 16 of 16 seasons)  ##############
+  day 33   27 promotions / 16 season-days = 1.69/d   (past the line in 16 of 16 seasons)  ##############
+  day 34   22 promotions / 16 season-days = 1.38/d   (past the line in 16 of 16 seasons)  ###########
+  day 35   12 promotions / 16 season-days = 0.75/d   (past the line in 16 of 16 seasons)  ######
+  day 36   21 promotions / 16 season-days = 1.31/d   (past the line in 16 of 16 seasons)  ###########
+  day 37   16 promotions / 16 season-days = 1.00/d   (past the line in 16 of 16 seasons)  ########
+  day 38   14 promotions / 16 season-days = 0.88/d   (past the line in 16 of 16 seasons)  #######
+  day 39   19 promotions / 16 season-days = 1.19/d   (past the line in 16 of 16 seasons)  ##########
+  day 40   11 promotions / 16 season-days = 0.69/d   (past the line in 16 of 16 seasons)  ######
+  day 41   15 promotions / 16 season-days = 0.94/d   (past the line in 16 of 16 seasons)  ########
+  day 42   15 promotions / 16 season-days = 0.94/d   (past the line in 16 of 16 seasons)  ########
+  day 43   23 promotions / 16 season-days = 1.44/d   (past the line in 16 of 16 seasons)  ############
+  day 44   18 promotions / 16 season-days = 1.13/d   (past the line in 16 of 16 seasons)  #########
+  day 45   27 promotions / 16 season-days = 1.69/d   (past the line in 16 of 16 seasons)  ##############
+
+==========================================================================
+D4. Does the jump move with the line?
+==========================================================================
+If the line drives promotions, the step sits on day ~11 in short seasons
+and on day ~21 in long ones. If a rhythm drives them, both step together.
+
+  per-day promotions per season, day 1 to 32. A "|" marks the first day
+  that is past the line in EVERY season of the group.
+
+  short seasons, line early (lines on day 8/9/10/11)
+    0.2 0.4 0.1 1.1 0.8 1.3 1.6 0.4 1.0 0.6 1.3 |1.3 |0.8 |1.6 |1.4 |1.2 |0.9 |1.7 |0.9 |1.3 |1.3 |1.3 |1.3 |1.0 |1.2 |1.1 |1.3 |1.4 |0.9 |1.6 |0.4 |2.0
+  long seasons,  line late  (lines on day 14/15)
+    0.5 1.2 0.5 1.5 1.2 0.3 0.2 0.8 0.7 0.7 1.8 1.5 1.8 1.0 1.2 |1.2 |1.3 |1.3 |1.7 |2.0 |1.0 |2.2 |2.2 |1.8 |1.7 |2.0 |1.3 |1.8 |1.2 |1.7 |1.2 |1.3
+
+  line early (band free)     days 1-11: 0.93/d   days 12-14: 2.52/d   days 15-30: 0.92/d
+
+  line late (band costly)    days 1-11: 0.98/d   days 12-14: 2.61/d   days 15-30: 1.28/d
+
+wrote decisive.json

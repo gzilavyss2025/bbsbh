@@ -1,0 +1,298 @@
+{
+  "generatedAt": "2026-08-28T13:34:49.844Z",
+  "method": "Season = performance year (not signing year). Observation = one (AAV, WAR delivered) pair from a free-agent contract with a resolved mlbId, real numeric AAV, real numeric year count, and a played season <=2025. ratioDollarsPerWar = sum(AAV)/sum(WAR) that season. slopeDollarsPerWar = OLS slope of AAV on WAR that season (marginal price net of replacement-level pay).",
+  "lastWarSeason": 2025,
+  "counts": {
+    "faCsvRows": 5598,
+    "excludedNoNumericAav": 2250,
+    "excludedNoYearsOrFirstYear": 4,
+    "excludedNoIdentity": 30,
+    "fuzzyIdentityIncluded": 114,
+    "dealsUsed": 3314,
+    "seasonObservations": 5206,
+    "seasonsSkippedUnplayed": 379,
+    "seasonsSkippedNoWarRow": 270
+  },
+  "bySeason": {
+    "1991": {
+      "n": 48,
+      "ratioDollarsPerWar": 1165070.6122448982,
+      "slopeDollarsPerWar": 107651.82056663847,
+      "intercept": 1403282.8547896903,
+      "sumAav": 74214998,
+      "sumWar": 63.69999999999999
+    },
+    "1992": {
+      "n": 74,
+      "ratioDollarsPerWar": 1789696.6037735848,
+      "slopeDollarsPerWar": 246771.52030460964,
+      "intercept": 1878615.5408183064,
+      "sumAav": 161251664,
+      "sumWar": 90.10000000000001
+    },
+    "1993": {
+      "n": 125,
+      "ratioDollarsPerWar": 1626396.6589595373,
+      "slopeDollarsPerWar": 331138.3165897746,
+      "intercept": 1792637.5458397516,
+      "sumAav": 281366622,
+      "sumWar": 173.00000000000003
+    },
+    "1994": {
+      "n": 120,
+      "ratioDollarsPerWar": 2434831.169590643,
+      "slopeDollarsPerWar": 515913.6806762292,
+      "intercept": 1914120.195192128,
+      "sumAav": 291449291,
+      "sumWar": 119.70000000000002
+    },
+    "1995": {
+      "n": 104,
+      "ratioDollarsPerWar": 1734501.895023859,
+      "slopeDollarsPerWar": 535939.1179080005,
+      "intercept": 1690664.9942586187,
+      "sumAav": 254451428,
+      "sumWar": 146.69999999999993
+    },
+    "1996": {
+      "n": 116,
+      "ratioDollarsPerWar": 1316469.837219534,
+      "slopeDollarsPerWar": 415406.1436445156,
+      "intercept": 1765618.7719793245,
+      "sumAav": 299233594,
+      "sumWar": 227.29999999999995
+    },
+    "1997": {
+      "n": 124,
+      "ratioDollarsPerWar": 1686362.3312589752,
+      "slopeDollarsPerWar": 492125.382920067,
+      "intercept": 2011904.0202257903,
+      "sumAav": 352281091,
+      "sumWar": 208.90000000000003
+    },
+    "1998": {
+      "n": 151,
+      "ratioDollarsPerWar": 1771773.2278751603,
+      "slopeDollarsPerWar": 590043.351641271,
+      "intercept": 1830507.4043119648,
+      "sumAav": 414417758,
+      "sumWar": 233.9
+    },
+    "1999": {
+      "n": 147,
+      "ratioDollarsPerWar": 2506387.894474863,
+      "slopeDollarsPerWar": 856603.3169699443,
+      "intercept": 2254705.5892567225,
+      "sumAav": 503533328,
+      "sumWar": 200.9
+    },
+    "2000": {
+      "n": 122,
+      "ratioDollarsPerWar": 3529607.5881929444,
+      "slopeDollarsPerWar": 1086194.1939519127,
+      "intercept": 2781886.233279339,
+      "sumAav": 490262494,
+      "sumWar": 138.9
+    },
+    "2001": {
+      "n": 127,
+      "ratioDollarsPerWar": 3385008.9885611082,
+      "slopeDollarsPerWar": 1275543.5861349287,
+      "intercept": 2758914.9869526643,
+      "sumAav": 562249993,
+      "sumWar": 166.09999999999997
+    },
+    "2002": {
+      "n": 130,
+      "ratioDollarsPerWar": 3734145.580110499,
+      "slopeDollarsPerWar": 1254572.3055254032,
+      "intercept": 3452328.9438454006,
+      "sumAav": 675880350,
+      "sumWar": 180.99999999999991
+    },
+    "2003": {
+      "n": 138,
+      "ratioDollarsPerWar": 3603974.920802536,
+      "slopeDollarsPerWar": 1332574.4995366824,
+      "intercept": 3117414.78107067,
+      "sumAav": 682592850,
+      "sumWar": 189.39999999999992
+    },
+    "2004": {
+      "n": 192,
+      "ratioDollarsPerWar": 3501231.58804297,
+      "slopeDollarsPerWar": 1315466.9722816083,
+      "intercept": 2437355.23038806,
+      "sumAav": 749613683,
+      "sumWar": 214.10000000000005
+    },
+    "2005": {
+      "n": 195,
+      "ratioDollarsPerWar": 4011989.2699784045,
+      "slopeDollarsPerWar": 1511368.2878043852,
+      "intercept": 2968685.935247616,
+      "sumAav": 928775516,
+      "sumWar": 231.49999999999983
+    },
+    "2006": {
+      "n": 179,
+      "ratioDollarsPerWar": 4603847.868691817,
+      "slopeDollarsPerWar": 1773078.2067126927,
+      "intercept": 3227709.9888823433,
+      "sumAav": 939645350,
+      "sumWar": 204.10000000000002
+    },
+    "2007": {
+      "n": 180,
+      "ratioDollarsPerWar": 6382480.223089795,
+      "slopeDollarsPerWar": 1934334.5603065847,
+      "intercept": 4430847.318539052,
+      "sumAav": 1144378704,
+      "sumWar": 179.29999999999998
+    },
+    "2008": {
+      "n": 166,
+      "ratioDollarsPerWar": 6100942.901062045,
+      "slopeDollarsPerWar": 1699252.765752864,
+      "intercept": 4743749.187992847,
+      "sumAav": 1091458685,
+      "sumWar": 178.9
+    },
+    "2009": {
+      "n": 167,
+      "ratioDollarsPerWar": 6474880.243597748,
+      "slopeDollarsPerWar": 1860218.4817239814,
+      "intercept": 4423996.096263416,
+      "sumAav": 1036628327,
+      "sumWar": 160.10000000000008
+    },
+    "2010": {
+      "n": 172,
+      "ratioDollarsPerWar": 6219315.051608985,
+      "slopeDollarsPerWar": 1497960.6490825582,
+      "intercept": 4520971.337768039,
+      "sumAav": 1024321189,
+      "sumWar": 164.70000000000002
+    },
+    "2011": {
+      "n": 149,
+      "ratioDollarsPerWar": 8600160.804498268,
+      "slopeDollarsPerWar": 1913682.7723883041,
+      "intercept": 5187629.936321557,
+      "sumAav": 994178589,
+      "sumWar": 115.60000000000002
+    },
+    "2012": {
+      "n": 146,
+      "ratioDollarsPerWar": 6305957.3393900115,
+      "slopeDollarsPerWar": 2160245.4200419905,
+      "intercept": 4375713.745010477,
+      "sumAav": 971748026,
+      "sumWar": 154.09999999999988
+    },
+    "2013": {
+      "n": 160,
+      "ratioDollarsPerWar": 7766776.092409239,
+      "slopeDollarsPerWar": 1861877.463128258,
+      "intercept": 5591200.88960043,
+      "sumAav": 1176666578,
+      "sumWar": 151.50000000000003
+    },
+    "2014": {
+      "n": 167,
+      "ratioDollarsPerWar": 8544597.96934866,
+      "slopeDollarsPerWar": 1933711.2008568847,
+      "intercept": 6199190.826022825,
+      "sumAav": 1338084042,
+      "sumWar": 156.6
+    },
+    "2015": {
+      "n": 163,
+      "ratioDollarsPerWar": 11567748.352272725,
+      "slopeDollarsPerWar": 2320252.422068315,
+      "intercept": 6989518.396326279,
+      "sumAav": 1425146597,
+      "sumWar": 123.20000000000003
+    },
+    "2016": {
+      "n": 159,
+      "ratioDollarsPerWar": 10736225.50734312,
+      "slopeDollarsPerWar": 2323140.6738708513,
+      "intercept": 7926289.987761926,
+      "sumAav": 1608286581,
+      "sumWar": 149.80000000000004
+    },
+    "2017": {
+      "n": 161,
+      "ratioDollarsPerWar": 11314431.520991053,
+      "slopeDollarsPerWar": 1860507.546464614,
+      "intercept": 8532019.586948395,
+      "sumAav": 1643986900,
+      "sumWar": 145.29999999999998
+    },
+    "2018": {
+      "n": 155,
+      "ratioDollarsPerWar": 12987141.635012386,
+      "slopeDollarsPerWar": 2056877.3810722516,
+      "intercept": 8539709.684852583,
+      "sumAav": 1572742852,
+      "sumWar": 121.1
+    },
+    "2019": {
+      "n": 158,
+      "ratioDollarsPerWar": 10128037.889963724,
+      "slopeDollarsPerWar": 1874835.7074334507,
+      "intercept": 8639744.563231058,
+      "sumAav": 1675177467,
+      "sumWar": 165.4
+    },
+    "2020": {
+      "n": 151,
+      "ratioDollarsPerWar": 26068530.7153729,
+      "slopeDollarsPerWar": 4378498.171445396,
+      "intercept": 9437318.795602897,
+      "sumAav": 1712702468,
+      "sumWar": 65.70000000000002
+    },
+    "2021": {
+      "n": 158,
+      "ratioDollarsPerWar": 8043003.349925337,
+      "slopeDollarsPerWar": 2346421.3854379775,
+      "intercept": 7243312.130794369,
+      "sumAav": 1615839373,
+      "sumWar": 200.89999999999998
+    },
+    "2022": {
+      "n": 162,
+      "ratioDollarsPerWar": 11277482.876712326,
+      "slopeDollarsPerWar": 2653815.0537420553,
+      "intercept": 8937739.675782153,
+      "sumAav": 1893489375,
+      "sumWar": 167.90000000000003
+    },
+    "2023": {
+      "n": 177,
+      "ratioDollarsPerWar": 11970743.59041167,
+      "slopeDollarsPerWar": 2804583.978363928,
+      "intercept": 9937774.178259674,
+      "sumAav": 2297185695,
+      "sumWar": 191.90000000000003
+    },
+    "2024": {
+      "n": 180,
+      "ratioDollarsPerWar": 10992826.051305544,
+      "slopeDollarsPerWar": 2863837.7314219936,
+      "intercept": 9858656.390169883,
+      "sumAav": 2399733927,
+      "sumWar": 218.29999999999998
+    },
+    "2025": {
+      "n": 183,
+      "ratioDollarsPerWar": 11141628.077782746,
+      "slopeDollarsPerWar": 3862902.0482406747,
+      "intercept": 8897546.51807957,
+      "sumAav": 2492382201,
+      "sumWar": 223.69999999999996
+    }
+  }
+}

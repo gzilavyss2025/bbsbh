@@ -1,0 +1,83 @@
+{
+ "provable": 2193,
+ "bareInteger": 18,
+ "bareIntegerWrong": 11,
+ "dayCount": 2175,
+ "dayCountWrong": 12,
+ "couldBank": 187,
+ "couldBankBare": 65,
+ "examples": [
+  {
+   "name": "Brad Bergesen",
+   "debutSeason": 2009,
+   "line": "2009-04-18",
+   "rosterAdd": "2009-04-21",
+   "daysPastLine": 3,
+   "cellSaid": "1",
+   "couldNotExceedDays": 169
+  },
+  {
+   "name": "Jonny Venters",
+   "debutSeason": 2010,
+   "line": "2010-04-15",
+   "rosterAdd": "2010-04-17",
+   "daysPastLine": 2,
+   "cellSaid": "1",
+   "couldNotExceedDays": 170
+  },
+  {
+   "name": "Brennan Boesch",
+   "debutSeason": 2010,
+   "line": "2010-04-15",
+   "rosterAdd": "2010-04-23",
+   "daysPastLine": 8,
+   "cellSaid": "1",
+   "couldNotExceedDays": 164
+  },
+  {
+   "name": "Josh Collmenter",
+   "debutSeason": 2011,
+   "line": "2011-04-10",
+   "rosterAdd": "2011-04-15",
+   "daysPastLine": 5,
+   "cellSaid": "1",
+   "couldNotExceedDays": 167
+  },
+  {
+   "name": "Yoervis Medina",
+   "debutSeason": 2013,
+   "line": "2013-04-12",
+   "rosterAdd": "2013-04-16",
+   "daysPastLine": 4,
+   "cellSaid": "1",
+   "couldNotExceedDays": 168
+  },
+  {
+   "name": "Hansel Robles",
+   "debutSeason": 2015,
+   "line": "2015-04-16",
+   "rosterAdd": "2015-04-21",
+   "daysPastLine": 5,
+   "cellSaid": "1",
+   "couldNotExceedDays": 167
+  },
+  {
+   "name": "Derek Law",
+   "debutSeason": 2016,
+   "line": "2016-04-14",
+   "rosterAdd": "2016-04-15",
+   "daysPastLine": 1,
+   "cellSaid": "1",
+   "couldNotExceedDays": 171
+  },
+  {
+   "name": "Adley Rutschman",
+   "debutSeason": 2022,
+   "line": "2022-04-17",
+   "rosterAdd": "2022-05-21",
+   "daysPastLine": 34,
+   "cellSaid": "1",
+   "couldNotExceedDays": 138
+  }
+ ]
+}

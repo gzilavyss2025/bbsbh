@@ -1,0 +1,942 @@
+{
+  "generatedAt": "2026-08-28T13:42:32.392Z",
+  "partOne": {
+    "settledNumericN": 1843,
+    "fullRegressionN": 1717,
+    "mlsVsPriorSalaryPearson": 0.5738818132676213,
+    "mlsVsLogPriorSalaryPearson": 0.7301705631508613,
+    "logLinearFit": {
+      "n": 1717,
+      "k": 5,
+      "r2": 0.7924886565927791,
+      "coefficients": [
+        {
+          "label": "intercept",
+          "beta": 6.827777543199118,
+          "se": 0.2154892669520317,
+          "t": 31.68500055605551,
+          "p": 0
+        },
+        {
+          "label": "mls",
+          "beta": -0.011166979991946324,
+          "se": 0.013941686559129696,
+          "t": -0.8009776969654824,
+          "p": 0.42314433634077053
+        },
+        {
+          "label": "log_priorSalary",
+          "beta": 0.5449578249881024,
+          "se": 0.017957801272726427,
+          "t": 30.34657844308379,
+          "p": 0
+        },
+        {
+          "label": "priorWarp",
+          "beta": 0.1417006149944274,
+          "se": 0.008632229539109434,
+          "t": 16.41529738666406,
+          "p": 0
+        },
+        {
+          "label": "careerWarp",
+          "beta": 0.035718081545632205,
+          "se": 0.0032268369594290244,
+          "t": 11.069069182829855,
+          "p": 0
+        }
+      ]
+    },
+    "levelFit": {
+      "n": 1717,
+      "k": 5,
+      "r2": 0.8982432111828463,
+      "coefficients": [
+        {
+          "label": "intercept",
+          "beta": 0.6239862141569693,
+          "se": 0.12927209264226783,
+          "t": 4.8269212743675025,
+          "p": 0.0000013884409417741495
+        },
+        {
+          "label": "mls",
+          "beta": -0.09067537009895706,
+          "se": 0.03753063314344523,
+          "t": -2.4160362483731137,
+          "p": 0.015690490385965594
+        },
+        {
+          "label": "priorSalary_M",
+          "beta": 1.0762332620999944,
+          "se": 0.019209888576717037,
+          "t": 56.024961196517374,
+          "p": 0
+        },
+        {
+          "label": "priorWarp",
+          "beta": 0.6166993989355878,
+          "se": 0.0288864006729373,
+          "t": 21.34912569821663,
+          "p": 0
+        },
+        {
+          "label": "careerWarp",
+          "beta": 0.09950281647030791,
+          "se": 0.011873726623023214,
+          "t": 8.380083155811542,
+          "p": 0
+        }
+      ]
+    },
+    "vif": {
+      "mls": 2.2495108272685185,
+      "log_priorSalary": 3.2905307489790365,
+      "priorWarp": 2.0335657191179166,
+      "careerWarp": 3.048308986216409
+    },
+    "byServiceBucket": {
+      "2": {
+        "n": 197,
+        "fit": {
+          "n": 197,
+          "k": 5,
+          "r2": 0.5887247398249476,
+          "coefficients": [
+            {
+              "label": "intercept",
+              "beta": 13.000054696810224,
+              "se": 4.419852419237512,
+              "t": 2.9412870529855657,
+              "p": 0.0032686511293364973
+            },
+            {
+              "label": "mls",
+              "beta": -0.5104943086144331,
+              "se": 1.9162421160057064,
+              "t": -0.2664038663749487,
+              "p": 0.7899280898417969
+            },
+            {
+              "label": "log_priorSalary",
+              "beta": 0.1521969797304541,
+              "se": 0.18937184202912552,
+              "t": 0.8036938232192202,
+              "p": 0.4215736026481487
+            },
+            {
+              "label": "priorWarp",
+              "beta": 0.154028257988842,
+              "se": 0.029858005529193554,
+              "t": 5.158692124905713,
+              "p": 2.49137845020897e-7
+            },
+            {
+              "label": "careerWarp",
+              "beta": 0.08273069540993658,
+              "se": 0.014135052012569089,
+              "t": 5.852875202466271,
+              "p": 4.847071410907233e-9
+            }
+          ]
+        }
+      },
+      "3": {
+        "n": 681,
+        "fit": {
+          "n": 681,
+          "k": 5,
+          "r2": 0.6403373001057944,
+          "coefficients": [
+            {
+              "label": "intercept",
+              "beta": 9.157055992599837,
+              "se": 0.9395124611748324,
+              "t": 9.74660408564375,
+              "p": 0
+            },
+            {
+              "label": "mls",
+              "beta": -0.14324377312644287,
+              "se": 0.3631489775172821,
+              "t": -0.3944490608392969,
+              "p": 0.6932494444402524
+            },
+            {
+              "label": "log_priorSalary",
+              "beta": 0.395163678827537,
+              "se": 0.03604751839042585,
+              "t": 10.962299111621833,
+              "p": 0
+            },
+            {
+              "label": "priorWarp",
+              "beta": 0.10643127144921491,
+              "se": 0.01617025442385825,
+              "t": 6.581916935838802,
+              "p": 4.668221365022873e-11
+            },
+            {
+              "label": "careerWarp",
+              "beta": 0.08379559759923888,
+              "se": 0.006319576159767488,
+              "t": 13.259686327179562,
+              "p": 0
+            }
+          ]
+        }
+      },
+      "4": {
+        "n": 508,
+        "fit": {
+          "n": 508,
+          "k": 5,
+          "r2": 0.8798388446727549,
+          "coefficients": [
+            {
+              "label": "intercept",
+              "beta": 3.434954953616703,
+              "se": 0.8796982384759674,
+              "t": 3.9046968646516658,
+              "p": 0.00009438146036466755
+            },
+            {
+              "label": "mls",
+              "beta": -0.21660538528448559,
+              "se": 0.2231772998246361,
+              "t": -0.9705529435775302,
+              "p": 0.3317708691048553
+            },
+            {
+              "label": "log_priorSalary",
+              "beta": 0.8488195033190259,
+              "se": 0.023780309068051057,
+              "t": 35.69421662645328,
+              "p": 0
+            },
+            {
+              "label": "priorWarp",
+              "beta": 0.15210814914249352,
+              "se": 0.010855616683327227,
+              "t": 14.011930743290822,
+              "p": 0
+            },
+            {
+              "label": "careerWarp",
+              "beta": -0.011885958725099637,
+              "se": 0.004413000990245945,
+              "t": -2.6933958889588214,
+              "p": 0.007072919057080185
+            }
+          ]
+        }
+      },
+      "5": {
+        "n": 331,
+        "fit": {
+          "n": 331,
+          "k": 5,
+          "r2": 0.8981417306605056,
+          "coefficients": [
+            {
+              "label": "intercept",
+              "beta": 4.310467781442196,
+              "se": 1.332881501899688,
+              "t": 3.233946735173912,
+              "p": 0.0012210468464235458
+            },
+            {
+              "label": "mls",
+              "beta": -0.25392827604370716,
+              "se": 0.2594638543034142,
+              "t": -0.9786653201673564,
+              "p": 0.327745301052043
+            },
+            {
+              "label": "log_priorSalary",
+              "beta": 0.8166862830045973,
+              "se": 0.026964643998193483,
+              "t": 30.28730077279388,
+              "p": 0
+            },
+            {
+              "label": "priorWarp",
+              "beta": 0.12112888803035494,
+              "se": 0.011469757443376426,
+              "t": 10.560719233021327,
+              "p": 0
+            },
+            {
+              "label": "careerWarp",
+              "beta": -0.0037568614982246627,
+              "se": 0.003925767085718401,
+              "t": -0.9569751379015321,
+              "p": 0.33857971207686965
+            }
+          ]
+        }
+      }
+    },
+    "byPosition": {
+      "pitcher": {
+        "n": 964,
+        "fit": {
+          "n": 964,
+          "k": 5,
+          "r2": 0.7846848351491474,
+          "coefficients": [
+            {
+              "label": "intercept",
+              "beta": 5.7942956273495305,
+              "se": 0.29741532609538396,
+              "t": 19.482168936685007,
+              "p": 0
+            },
+            {
+              "label": "mls",
+              "beta": 0.00863891400512666,
+              "se": 0.01760266623005199,
+              "t": 0.49077303927844484,
+              "p": 0.6235868240575204
+            },
+            {
+              "label": "log_priorSalary",
+              "beta": 0.6103772708565394,
+              "se": 0.024468206534102414,
+              "t": 24.945729880358407,
+              "p": 0
+            },
+            {
+              "label": "priorWarp",
+              "beta": 0.1614245226941814,
+              "se": 0.012506905229592942,
+              "t": 12.906831844558178,
+              "p": 0
+            },
+            {
+              "label": "careerWarp",
+              "beta": 0.030474297733876974,
+              "se": 0.005124160802980595,
+              "t": 5.947178261101963,
+              "p": 2.737463589141953e-9
+            }
+          ]
+        }
+      },
+      "hitter": {
+        "n": 753,
+        "fit": {
+          "n": 753,
+          "k": 5,
+          "r2": 0.8066217718885161,
+          "coefficients": [
+            {
+              "label": "intercept",
+              "beta": 7.868987456836925,
+              "se": 0.30100059878155805,
+              "t": 26.142763465223542,
+              "p": 0
+            },
+            {
+              "label": "mls",
+              "beta": -0.028576899136796508,
+              "se": 0.02168627219139218,
+              "t": -1.317741421143805,
+              "p": 0.18759031771015544
+            },
+            {
+              "label": "log_priorSalary",
+              "beta": 0.4807964559089491,
+              "se": 0.025522857032775407,
+              "t": 18.837877565647528,
+              "p": 0
+            },
+            {
+              "label": "priorWarp",
+              "beta": 0.11789617736528954,
+              "se": 0.01140244291295435,
+              "t": 10.339554274930624,
+              "p": 0
+            },
+            {
+              "label": "careerWarp",
+              "beta": 0.039549806877213975,
+              "se": 0.004070701215278285,
+              "t": 9.715723357139154,
+              "p": 0
+            }
+          ]
+        }
+      }
+    },
+    "leaveOneSeasonOut": {
+      "mls": {
+        "sameSignCount": 9,
+        "significantCount": 0,
+        "refits": 9
+      },
+      "log_priorSalary": {
+        "sameSignCount": 9,
+        "significantCount": 9,
+        "refits": 9
+      },
+      "priorWarp": {
+        "sameSignCount": 9,
+        "significantCount": 9,
+        "refits": 9
+      },
+      "careerWarp": {
+        "sameSignCount": 9,
+        "significantCount": 9,
+        "refits": 9
+      }
+    }
+  },
+  "partTwo": {
+    "exchangedN": 198,
+    "exchangedSettledNumericN": 158,
+    "outOfRangeExcluded": [
+      {
+        "player": "Severino, Luis",
+        "season": 2019,
+        "pos": 6.588235294117647,
+        "note": "4-year extension"
+      },
+      {
+        "player": "Nola, Aaron",
+        "season": 2019,
+        "pos": 2.977777777777778,
+        "note": "signed 4-year extension"
+      },
+      {
+        "player": "Springer, George",
+        "season": 2018,
+        "pos": 1.75,
+        "note": null
+      }
+    ],
+    "cleanN": 155,
+    "meanSettlePosition": 0.48414222142641095,
+    "medianSettlePosition": 0.5,
+    "sdSettlePosition": 0.44628086990709365,
+    "exactAtOffer": 63,
+    "exactAtRequest": 57,
+    "strictlyBetween": 35,
+    "byClub": [
+      {
+        "club": "MIA",
+        "n": 13,
+        "meanPosition": 0.41258741258741255
+      },
+      {
+        "club": "TBA",
+        "n": 13,
+        "meanPosition": 0.5524475524475524
+      },
+      {
+        "club": "HOU",
+        "n": 12,
+        "meanPosition": 0.79004329004329
+      },
+      {
+        "club": "ATL",
+        "n": 11,
+        "meanPosition": 0.36363636363636365
+      },
+      {
+        "club": "BAL",
+        "n": 11,
+        "meanPosition": 0.5446355446355446
+      },
+      {
+        "club": "CIN",
+        "n": 6,
+        "meanPosition": 0.6666666666666666
+      },
+      {
+        "club": "MIN",
+        "n": 6,
+        "meanPosition": 0.2833333333333333
+      },
+      {
+        "club": "ANA",
+        "n": 6,
+        "meanPosition": 0.6666666666666666
+      },
+      {
+        "club": "MIL",
+        "n": 5,
+        "meanPosition": 0.2148148148148148
+      },
+      {
+        "club": "SEA",
+        "n": 5,
+        "meanPosition": 0.4726775956284153
+      },
+      {
+        "club": "TOR",
+        "n": 5,
+        "meanPosition": 0.2
+      },
+      {
+        "club": "WAS",
+        "n": 5,
+        "meanPosition": 0.13999999999999999
+      },
+      {
+        "club": "KCA",
+        "n": 4,
+        "meanPosition": 0.5
+      },
+      {
+        "club": "CHN",
+        "n": 4,
+        "meanPosition": 0.525
+      },
+      {
+        "club": "PHI",
+        "n": 4,
+        "meanPosition": 0.46710526315789475
+      },
+      {
+        "club": "ARI",
+        "n": 4,
+        "meanPosition": 0.578125
+      },
+      {
+        "club": "SLN",
+        "n": 4,
+        "meanPosition": 0.25
+      },
+      {
+        "club": "DET",
+        "n": 3,
+        "meanPosition": 0.5208333333333334
+      },
+      {
+        "club": "LAA",
+        "n": 3,
+        "meanPosition": 0.5353535353535354
+      },
+      {
+        "club": "BOS",
+        "n": 3,
+        "meanPosition": 0.5666666666666667
+      },
+      {
+        "club": "LAN",
+        "n": 3,
+        "meanPosition": 0.5555555555555555
+      },
+      {
+        "club": "NYA",
+        "n": 3,
+        "meanPosition": 0.3333333333333333
+      },
+      {
+        "club": "PIT",
+        "n": 3,
+        "meanPosition": 0
+      },
+      {
+        "club": "STL",
+        "n": 3,
+        "meanPosition": 0.6666666666666666
+      },
+      {
+        "club": "NYN",
+        "n": 3,
+        "meanPosition": 0.6666666666666666
+      },
+      {
+        "club": "CHA",
+        "n": 3,
+        "meanPosition": 0.9166666666666666
+      },
+      {
+        "club": "SFN",
+        "n": 2,
+        "meanPosition": 0.5
+      },
+      {
+        "club": "COL",
+        "n": 2,
+        "meanPosition": 0.16666666666666666
+      },
+      {
+        "club": "CLE",
+        "n": 2,
+        "meanPosition": 1
+      },
+      {
+        "club": "OAK",
+        "n": 2,
+        "meanPosition": 0.5
+      },
+      {
+        "club": "SDN",
+        "n": 1,
+        "meanPosition": 0.288135593220339
+      },
+      {
+        "club": "KC",
+        "n": 1,
+        "meanPosition": 0
+      }
+    ],
+    "clubVarianceTest": {
+      "clubsIncluded": 12,
+      "rowsIncluded": 98,
+      "observedBetweenVar": 0.04122591810083566,
+      "permutations": 20000,
+      "p": 0.1097
+    }
+  },
+  "partThree": {
+    "exactConfidenceN": 2297,
+    "platform": {
+      "n": 2207,
+      "pearson": 0.8683250040723329,
+      "spearman": 0.806390037479109,
+      "meanWarp": 1.031445400996829,
+      "meanWar": 1.0789306751246026,
+      "sdWarp": 1.3459933477017898,
+      "sdWar": 1.430490404912604,
+      "meanDiff": 0.047485274127775215,
+      "medianDiff": 0
+    },
+    "career": {
+      "n": 2296,
+      "pearson": 0.9078894058443281,
+      "spearman": 0.830103115698297,
+      "meanWarp": 4.210104529616729,
+      "meanWar": 4.417595818815328,
+      "sdWarp": 4.34233001443123,
+      "sdWar": 4.536006217816071,
+      "meanDiff": 0.20749128919860638,
+      "medianDiff": 0
+    },
+    "unitCheck": {
+      "n": 2207,
+      "k": 2,
+      "r2": 0.75398831269722,
+      "coefficients": [
+        {
+          "label": "intercept",
+          "beta": 0.12707613346060587,
+          "se": 0.019036108111097485,
+          "t": 6.6755311915109505,
+          "p": 2.4768187500967542e-11
+        },
+        {
+          "label": "priorWarp",
+          "beta": 0.92283560597981,
+          "se": 0.011225756265464902,
+          "t": 82.2069875878952,
+          "p": 0
+        }
+      ]
+    },
+    "byPosition": {
+      "pitcher": {
+        "n": 1223,
+        "pearson": 0.8570238908867741,
+        "spearman": 0.7733313265361784,
+        "meanWarp": 0.8460343417825017,
+        "meanWar": 0.8717906786590339,
+        "sdWarp": 1.186534654423076,
+        "sdWar": 1.224783852445627,
+        "meanDiff": 0.025756336876533135,
+        "medianDiff": 0
+      },
+      "hitter": {
+        "n": 984,
+        "pearson": 0.8714457928704946,
+        "spearman": 0.8337592413009152,
+        "meanWarp": 1.2618902439024393,
+        "meanWar": 1.3363821138211387,
+        "sdWarp": 1.4892231032885,
+        "sdWar": 1.6141767516899594,
+        "meanDiff": 0.07449186991869916,
+        "medianDiff": 0
+      }
+    },
+    "byEra": {
+      "2017-2019": {
+        "n": 677,
+        "pearson": 0.8922128188626921,
+        "spearman": 0.8424001053554829,
+        "meanWarp": 1.2508124076809446,
+        "meanWar": 1.2645494830132942,
+        "sdWarp": 1.6355323613839288,
+        "sdWar": 1.5938532166442656,
+        "meanDiff": 0.013737075332348579,
+        "medianDiff": 0
+      },
+      "2020-2022": {
+        "n": 780,
+        "pearson": 0.8606610767500473,
+        "spearman": 0.7690934454997204,
+        "meanWarp": 0.8887179487179481,
+        "meanWar": 0.9984615384615384,
+        "sdWarp": 1.0891661818699319,
+        "sdWar": 1.3598350926821778,
+        "meanDiff": 0.10974358974358973,
+        "medianDiff": 0
+      },
+      "2023-2025": {
+        "n": 750,
+        "pearson": 0.8548823459826735,
+        "spearman": 0.8039268168200618,
+        "meanWarp": 0.9818666666666667,
+        "meanWar": 0.9950666666666672,
+        "sdWarp": 1.2711429957150968,
+        "sdWar": 1.3268367127202294,
+        "meanDiff": 0.013199999999999979,
+        "medianDiff": 0
+      }
+    },
+    "robustnessWithFuzzy": {
+      "n": 2292,
+      "pearson": 0.8671265508691194,
+      "spearman": 0.8034738427928709,
+      "meanWarp": 1.0205933682373487,
+      "meanWar": 1.0678010471204178,
+      "sdWarp": 1.3383013889907267,
+      "sdWar": 1.4209421752762625,
+      "meanDiff": 0.047207678883071515,
+      "medianDiff": 0
+    },
+    "leaveOneSeasonOut": [
+      {
+        "excludedSeason": 2017,
+        "n": 2011,
+        "pearson": 0.8670768451190115
+      },
+      {
+        "excludedSeason": 2018,
+        "n": 1964,
+        "pearson": 0.8594365449421617
+      },
+      {
+        "excludedSeason": 2019,
+        "n": 1969,
+        "pearson": 0.867763788461671
+      },
+      {
+        "excludedSeason": 2020,
+        "n": 1988,
+        "pearson": 0.8684544703065772
+      },
+      {
+        "excludedSeason": 2021,
+        "n": 1927,
+        "pearson": 0.8701434404391657
+      },
+      {
+        "excludedSeason": 2022,
+        "n": 1926,
+        "pearson": 0.8726498129644166
+      },
+      {
+        "excludedSeason": 2023,
+        "n": 1936,
+        "pearson": 0.8742714498032145
+      },
+      {
+        "excludedSeason": 2024,
+        "n": 1986,
+        "pearson": 0.8660460354497393
+      },
+      {
+        "excludedSeason": 2025,
+        "n": 1949,
+        "pearson": 0.8694544831788846
+      }
+    ],
+    "topWarHigherThanWarp": [
+      {
+        "player": "Ohtani, Shohei",
+        "season": 2023,
+        "platformSeason": 2022,
+        "position": "RHP",
+        "priorWarp": 3.5,
+        "mlbWar": 9.2,
+        "diff": 5.699999999999999
+      },
+      {
+        "player": "Turner, Trea",
+        "season": 2022,
+        "platformSeason": 2021,
+        "position": "SS",
+        "priorWarp": 3,
+        "mlbWar": 7.1,
+        "diff": 4.1
+      },
+      {
+        "player": "Gallo, Joey",
+        "season": 2022,
+        "platformSeason": 2021,
+        "position": "OF",
+        "priorWarp": 1.3,
+        "mlbWar": 4.4,
+        "diff": 3.1000000000000005
+      },
+      {
+        "player": "Odorizzi, Jake",
+        "season": 2019,
+        "platformSeason": 2018,
+        "position": "RHP",
+        "priorWarp": -0.6,
+        "mlbWar": 2.4,
+        "diff": 3
+      },
+      {
+        "player": "Davis, J.D.",
+        "season": 2024,
+        "platformSeason": 2023,
+        "position": "3B",
+        "priorWarp": -0.6,
+        "mlbWar": 2.1,
+        "diff": 2.7
+      },
+      {
+        "player": "Estrada, Thairo",
+        "season": 2024,
+        "platformSeason": 2023,
+        "position": "2B",
+        "priorWarp": 0.8,
+        "mlbWar": 3.5,
+        "diff": 2.7
+      },
+      {
+        "player": "Edman, Tommy",
+        "season": 2023,
+        "platformSeason": 2022,
+        "position": "2B",
+        "priorWarp": 2.7,
+        "mlbWar": 5.4,
+        "diff": 2.7
+      },
+      {
+        "player": "Rodon, Carlos",
+        "season": 2019,
+        "platformSeason": 2018,
+        "position": "LHP",
+        "priorWarp": -1.8,
+        "mlbWar": 0.9,
+        "diff": 2.7
+      },
+      {
+        "player": "Adames, Willy",
+        "season": 2022,
+        "platformSeason": 2021,
+        "position": "SS",
+        "priorWarp": 0.5,
+        "mlbWar": 3.1,
+        "diff": 2.6
+      },
+      {
+        "player": "Frazier, Adam",
+        "season": 2022,
+        "platformSeason": 2021,
+        "position": "SS",
+        "priorWarp": 0.6,
+        "mlbWar": 3.2,
+        "diff": 2.6
+      }
+    ],
+    "topWarpHigherThanWar": [
+      {
+        "player": "Guerrero Jr., Vladimir",
+        "season": 2024,
+        "platformSeason": 2023,
+        "position": "1B",
+        "priorWarp": 4.2,
+        "mlbWar": 1.2,
+        "diff": -3
+      },
+      {
+        "player": "Semien, Marcus",
+        "season": 2019,
+        "platformSeason": 2018,
+        "position": "SS",
+        "priorWarp": 5.6,
+        "mlbWar": 2.9,
+        "diff": -2.6999999999999997
+      },
+      {
+        "player": "Castellanos, Nick",
+        "season": 2019,
+        "platformSeason": 2018,
+        "position": "3B",
+        "priorWarp": 4.6,
+        "mlbWar": 2,
+        "diff": -2.5999999999999996
+      },
+      {
+        "player": "Blackmon, Charlie",
+        "season": 2018,
+        "platformSeason": 2017,
+        "position": "CF",
+        "priorWarp": 7.9,
+        "mlbWar": 5.5,
+        "diff": -2.4000000000000004
+      },
+      {
+        "player": "Keuchel, Dallas",
+        "season": 2018,
+        "platformSeason": 2017,
+        "position": "LHP",
+        "priorWarp": 4.7,
+        "mlbWar": 2.3,
+        "diff": -2.4000000000000004
+      },
+      {
+        "player": "Diaz, Elias",
+        "season": 2020,
+        "platformSeason": 2019,
+        "position": "C",
+        "priorWarp": 1,
+        "mlbWar": -1.4,
+        "diff": -2.4
+      },
+      {
+        "player": "Walls, Taylor",
+        "season": 2026,
+        "platformSeason": 2025,
+        "position": "SS",
+        "priorWarp": 2.6,
+        "mlbWar": 0.3,
+        "diff": -2.3000000000000003
+      },
+      {
+        "player": "Vaughn, Andrew",
+        "season": 2025,
+        "platformSeason": 2024,
+        "position": "1B",
+        "priorWarp": 2.2,
+        "mlbWar": -0.1,
+        "diff": -2.3000000000000003
+      },
+      {
+        "player": "Narvaez, Omar",
+        "season": 2020,
+        "platformSeason": 2019,
+        "position": "C",
+        "priorWarp": 3.5,
+        "mlbWar": 1.2,
+        "diff": -2.3
+      },
+      {
+        "player": "Rogers, Trevor",
+        "season": 2026,
+        "platformSeason": 2025,
+        "position": "LHP",
+        "priorWarp": 5.5,
+        "mlbWar": 3.3,
+        "diff": -2.2
+      }
+    ]
+  }
+}
