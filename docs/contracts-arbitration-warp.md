@@ -78,6 +78,20 @@ baked into `priorSalary` before the regression ever sees it. All four
 variance-inflation factors sit at 2.0-3.3 — real but not severe
 collinearity, and the model does not need `mls` dropped to stay stable.
 
+**A nominal-dollar note, stated once for the whole document.** Every dollar
+figure here is nominal. None is adjusted for inflation, and the window runs
+nine seasons, 2018-2026. A 2018 dollar and a 2026 dollar buy different
+amounts, so the $617,000, $100,000 and $1.08 readings below are a blended
+average across the whole window, not a price tag from one year. This check
+ran before that claim was written: adding a season fixed effect to the
+log-linear model moves the `mls`, prior-WARP and career-WARP coefficients by
+well under a percentage point. So those coefficients — and every
+correlation in Part Three, none of which is a dollar figure — hold
+regardless of inflation. The prior-salary coefficient and the three dollar
+readings below do mix real pay growth with nine years of un-adjusted price
+growth, and should be read as one pooled number for the window, not a
+constant-dollar price.
+
 **A concrete dollar reading**, from the same regression run in levels instead
 of logs (R² = 0.90): each additional platform-year WARP win is associated
 with about **$617,000** more in the settlement, holding prior salary and
