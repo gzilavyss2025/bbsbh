@@ -289,6 +289,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             <StatcastPercentiles
               savant={block.savant}
               raw={block.savantRaw}
+              median={block.savantMedian}
               group={block.group}
               limit={PREVIEW_STATCAST_ROWS}
             />

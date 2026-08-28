@@ -176,3 +176,57 @@ test('the pitching group reads the pitcher metric list', () => {
   assert.ok(rows.some((r) => r.key === 'chase'))
   assert.ok(rows.some((r) => r.key === 'fbVelo'))
 })
+
+// ------------------------------------------------ league baseline (median)
+
+const MEDIAN_BAT = { xwoba: 0.31, ev: 88.9, hardHit: 40.2, brl: 7.9, chase: 29.5, sprintSpeed: 27.3 }
+
+test('a row carries the league median, formatted like the player\'s own value', () => {
+  const rows = percentileRows(BAT, RAW_BAT, 'hitting', MEDIAN_BAT)
+  const chase = rows.find((r) => r.key === 'chase')
+  assert.equal(chase.baseline, '29.5%')
+  const xwoba = rows.find((r) => r.key === 'xwoba')
+  assert.equal(xwoba.baseline, '.310')
+})
+
+test('no median map at all leaves every row\'s baseline null, not an error', () => {
+  const rows = percentileRows(BAT, RAW_BAT, 'hitting')
+  assert.ok(rows.every((r) => r.baseline === null))
+})
+
+test('a metric missing from the median map gets a null baseline on its own row only', () => {
+  const thin = { xwoba: 0.31 } // every other metric had too thin an intersection
+  const rows = percentileRows(BAT, RAW_BAT, 'hitting', thin)
+  assert.equal(rows.find((r) => r.key === 'xwoba').baseline, '.310')
+  assert.equal(rows.find((r) => r.key === 'ev').baseline, null)
+})
+
+test('a row still renders fine with a baseline but no raw value', () => {
+  const rows = percentileRows(BAT, null, 'hitting', MEDIAN_BAT)
+  const chase = rows.find((r) => r.key === 'chase')
+  assert.equal(chase.value, null)
+  assert.equal(chase.baseline, '29.5%')
+})
+
+test('the definition explains the baseline only when a baseline is present', () => {
+  const withMedian = percentileRows(BAT, RAW_BAT, 'hitting', MEDIAN_BAT).find((r) => r.key === 'chase')
+  const withoutMedian = percentileRows(BAT, RAW_BAT, 'hitting').find((r) => r.key === 'chase')
+  assert.match(withMedian.def, /median/i)
+  assert.doesNotMatch(withoutMedian.def, /median/i)
+  // The metric's own plain-language gloss is always still there, word for
+  // word — the baseline sentence is appended, never a replacement.
+  assert.ok(withMedian.def.startsWith(withoutMedian.def))
+})
+
+test('a lower-is-better metric\'s baseline is the raw figure, not a verdict', () => {
+  // Chase % and swing length are lower-is-better: the median printed beside
+  // them must still be Savant's own raw median rate, unflipped — the strip's
+  // dot position (not the baseline number) is what already encodes direction.
+  const rows = percentileRows(BAT_WITH_TRACKING, RAW_BAT_WITH_TRACKING, 'hitting', {
+    ...MEDIAN_BAT,
+    swingLength: 7.3,
+  })
+  const swingLength = rows.find((r) => r.key === 'swingLength')
+  assert.equal(swingLength.lowerIsBetter, true)
+  assert.equal(swingLength.baseline, '7.3')
+})

@@ -446,7 +446,15 @@ don't run these by hand.
   check runs against its OWN population, not `rawBat`'s: that board's
   `minSwings=q` filter keeps a much smaller high-volume-swing pool than
   `custom`'s, so comparing against `rawBat`'s full count would warn every
-  night for no reason. App reads it via `src/api/savantPercentiles.js`.
+  night for no reason. The file also carries `midBat`/`midPit` — the pctstrip's
+  league-BASELINE figure, per metric: the MEDIAN raw rate over the population
+  that has both a percentile rank and a raw value for that metric (`scripts/
+  lib/savant.mjs`'s `medianRates`), not an unweighted leaderboard mean —
+  Savant's own percentile rank puts the median observation at 50 by
+  construction, so it is the one summary that agrees with the strip's
+  already-drawn 50th-percentile reference line. Skipped per metric below
+  `MEDIAN_FLOOR` (30) rather than printed off a handful of players. App reads
+  it via `src/api/savantPercentiles.js`.
 - `gen-savant-matchup.mjs` → `public/data/savant-matchup.json` — season Statcast
   RATES (chase, whiff, hard-hit, pull, ground-ball) for every qualified batter
   AND pitcher, plus the league mean/SD each is scored against. A sibling of the

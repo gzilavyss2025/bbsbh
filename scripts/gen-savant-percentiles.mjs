@@ -17,7 +17,7 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
-import { parseCsv } from './lib/savant.mjs'
+import { parseCsv, medianRates } from './lib/savant.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'savant-percentiles.json')
@@ -290,8 +290,33 @@ if (thinPit.length) {
   console.error(`WARNING: pit raw rates mostly blank for ${thinPit.join(', ')} — selection id may have changed`)
 }
 
-await writeJsonAtomic(out, { season, generatedAt: new Date().toISOString(), bat, pit, rawBat, rawPit })
+// The pctstrip's league-baseline figure (a bare, subordinate number printed
+// beside a player's own value, at the strip's already-drawn 50th-percentile
+// reference line) — the MEDIAN raw rate over the population that has both a
+// percentile rank and a raw value for that metric (see medianRates' header in
+// lib/savant.mjs for why median, not a leaderboard mean). MEDIAN_FLOOR guards
+// against printing a baseline off a handful of players; it is set well below
+// every real intersection measured here — the thinnest, the three
+// bat-tracking metrics, still run ~180-200 of ~640 rawBat ids — so in
+// practice it only bites if a metric's own coverage collapses, the same
+// signal the WARNING block above already watches for.
+const MEDIAN_FLOOR = 30
+const midBat = medianRates(bat, rawBat, Object.values(METRICS.bat), MEDIAN_FLOOR)
+const midPit = medianRates(pit, rawPit, Object.values(METRICS.pit), MEDIAN_FLOOR)
+
+await writeJsonAtomic(out, {
+  season,
+  generatedAt: new Date().toISOString(),
+  bat,
+  pit,
+  rawBat,
+  rawPit,
+  midBat,
+  midPit,
+})
 console.log(
   `wrote ${out} (${Object.keys(bat).length} batters, ${Object.keys(pit).length} pitchers; ` +
-  `raw rates for ${Object.keys(rawBat).length}/${Object.keys(rawPit).length})`,
+  `raw rates for ${Object.keys(rawBat).length}/${Object.keys(rawPit).length}; ` +
+  `medians for ${Object.keys(midBat).length}/${Object.values(METRICS.bat).length} bat metrics, ` +
+  `${Object.keys(midPit).length}/${Object.values(METRICS.pit).length} pit metrics, floor ${MEDIAN_FLOOR})`,
 )

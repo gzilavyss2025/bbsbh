@@ -39,9 +39,16 @@ const DASH = '—'
 // spoiler-free season aggregate data.
 // No axis caption and no footnote: the strip carries its own reading. The
 // league-average rule is drawn as a pencilled reference line, every dot sits
-// visibly left or right of it, and each row prints its own rank in figures —
-// so there is nothing left for a line of prose to add. The radar this replaced
-// had no caption either; this is parity, not a subtraction.
+// visibly left or right of it, and each row prints its own rank in figures.
+// Below the player's own raw value, each row ALSO prints the raw figure that
+// reference line stands for — the league median (see savantPercentiles.js's
+// percentileRows) — in the SAME pencil-graphite ink as the line itself,
+// visually subordinate to the player's bold, navy-ink number. No word says
+// "median" or "average" on the row: the shared ink is the caption, so a
+// reader connects the two without being told. That is the entire design;
+// the flip-open definition below is where the words live, for a reader who
+// wants them. The radar this replaced had no caption either; this is parity,
+// not a subtraction.
 export function PercentileStrip({ rows }) {
   if (!rows?.length) return null
 
@@ -56,7 +63,7 @@ export function PercentileStrip({ rows }) {
 
 function StripRow({ row }) {
   const [open, setOpen] = useState(false)
-  const { label, value, percentile, lowerIsBetter, def } = row
+  const { label, value, baseline, percentile, lowerIsBetter, def } = row
   const bar = deviationBar(percentile)
   const dot = dotFraction(percentile)
   if (bar == null) return null
@@ -65,9 +72,13 @@ function StripRow({ row }) {
   // wrong to LISTEN to — "xwOBA .380 95" says neither what .380 is nor what 95
   // is. So the row carries its own prose name and the columns are hidden from
   // the accessibility tree, rather than each column trying to caption itself.
+  // `median` names the baseline figure in as few words as it can — the fuller
+  // "half above it, half below" explanation lives in `def` instead, which is
+  // already prose and already only read on request.
   const spoken = [
     `${label}:`,
     value != null ? `${value},` : null,
+    baseline != null ? `median ${baseline},` : null,
     `${percentile}th percentile`,
     lowerIsBetter ? '(a lower rate is better; the rank accounts for it)' : null,
     open ? `— ${def}` : '— tap for definition',
@@ -95,7 +106,11 @@ function StripRow({ row }) {
         </span>
 
         <span className="pctstrip__value" aria-hidden="true">
-          {value ?? DASH}
+          <span className="pctstrip__value-player">{value ?? DASH}</span>
+          {/* The league median, in the track's own pencil-graphite ink — see
+              this file's header for why that ink, not a word, is the
+              caption. */}
+          {baseline != null && <span className="pctstrip__value-baseline">{baseline}</span>}
         </span>
 
         <span className="pctstrip__track" aria-hidden="true">

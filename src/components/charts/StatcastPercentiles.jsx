@@ -25,8 +25,8 @@ import { PercentileStrip } from './PercentileStrip.jsx'
 // `limit` trims to the strip's own leading rows (its canonical metric order,
 // unchanged) — the Overview's preview asks for the top 3; the Analytics tab
 // leaves it unset and gets every metric, same as before this prop existed.
-export function StatcastPercentiles({ savant, raw, group, limit }) {
-  const allRows = percentileRows(savant, raw, group)
+export function StatcastPercentiles({ savant, raw, median, group, limit }) {
+  const allRows = percentileRows(savant, raw, group, median)
   if (!allRows) return null
   const rows = limit ? allRows.slice(0, limit) : allRows
 
