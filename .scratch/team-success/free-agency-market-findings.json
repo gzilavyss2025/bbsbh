@@ -1,0 +1,351 @@
+{
+  "generatedAt": "2026-08-28T13:44:21.382Z",
+  "n": {
+    "totalRows": 5598,
+    "noMlbId": 75,
+    "fullyScoreable": 3157,
+    "winnersCurseSet": 3123
+  },
+  "qoEraBoundary": {
+    "A": {
+      "n": 751,
+      "minYear": 1991,
+      "maxYear": 2012
+    },
+    "B": {
+      "n": 765,
+      "minYear": 1991,
+      "maxYear": 2012
+    },
+    "C": {
+      "n": 273,
+      "minYear": 1991,
+      "maxYear": 2007
+    },
+    "rejected": {
+      "n": 138,
+      "minYear": 2013,
+      "maxYear": 2026
+    },
+    "accepted": {
+      "n": 19,
+      "minYear": 2016,
+      "maxYear": 2026
+    }
+  },
+  "sentinelCheck": {
+    "2020": {
+      "withSentinelDropped": 6050000,
+      "withSentinelAsDollar": 3000000
+    },
+    "2023": {
+      "withSentinelDropped": 11500000,
+      "withSentinelAsDollar": 7500000
+    }
+  },
+  "mainQuestion": {
+    "spearmanAavIndexVsPriorWarPerYear": 0.6449140321858465,
+    "spearmanAavIndexVsFutureWarPerYear": 0.39000098720099713,
+    "spearmanPriorVsFutureWarPerYear": 0.42873634955711326,
+    "partialPastControllingFuture": 0.573828246952483,
+    "partialFutureControllingPast": 0.14590719467315905,
+    "permutationPPast": 0,
+    "permutationPFuture": 0,
+    "leaveOneSeasonOutPast": {
+      "yearsTested": 35,
+      "sameSignCount": 35,
+      "range": [
+        0.5680472200839352,
+        0.5784609613912494
+      ]
+    },
+    "leaveOneSeasonOutFuture": {
+      "yearsTested": 35,
+      "sameSignCount": 35,
+      "range": [
+        0.13568214899369077,
+        0.15437391914372064
+      ]
+    }
+  },
+  "overpayByAge": [
+    {
+      "bucket": "28-30",
+      "n": 492,
+      "priorWarPerYear": 1.6834010840108393,
+      "actualWarPerYear": 1.2383090560072274,
+      "gap": 0.44509202800361314,
+      "declineRatio": 0.2644004641740787,
+      "avgAavIndex": 2.0772702908013416
+    },
+    {
+      "bucket": "34-36",
+      "n": 916,
+      "priorWarPerYear": 1.120014556040758,
+      "actualWarPerYear": 0.6264938136826786,
+      "gap": 0.4935207423580788,
+      "declineRatio": 0.44063779322892954,
+      "avgAavIndex": 1.1400496333128571
+    },
+    {
+      "bucket": "31-33",
+      "n": 1116,
+      "priorWarPerYear": 1.303912783751493,
+      "actualWarPerYear": 0.772302120669056,
+      "gap": 0.5316106630824367,
+      "declineRatio": 0.40770415759935824,
+      "avgAavIndex": 1.5603358984841504
+    },
+    {
+      "bucket": "37+",
+      "n": 574,
+      "priorWarPerYear": 1.3109175377468063,
+      "actualWarPerYear": 0.6274796747967475,
+      "gap": 0.6834378629500588,
+      "declineRatio": 0.5213431381235054,
+      "avgAavIndex": 1.3415303347510845
+    },
+    {
+      "bucket": "≤27",
+      "n": 25,
+      "priorWarPerYear": 2.0653333333333332,
+      "actualWarPerYear": 1.1644999999999999,
+      "gap": 0.9008333333333333,
+      "declineRatio": 0.43616849580374434,
+      "avgAavIndex": 3.026671072624783
+    }
+  ],
+  "overpayByPosition": [
+    {
+      "bucket": "SP",
+      "n": 520,
+      "priorWarPerYear": 1.9621794871794886,
+      "actualWarPerYear": 1.4397152014652013,
+      "gap": 0.5224642857142857,
+      "declineRatio": 0.26626732627059296,
+      "avgAavIndex": 2.256531708812207
+    },
+    {
+      "bucket": "DH",
+      "n": 44,
+      "priorWarPerYear": 1.603030303030303,
+      "actualWarPerYear": 0.8920454545454546,
+      "gap": 0.7109848484848482,
+      "declineRatio": 0.4435255198487711,
+      "avgAavIndex": 1.6515438577004062
+    },
+    {
+      "bucket": "IF",
+      "n": 716,
+      "priorWarPerYear": 1.4892458100558665,
+      "actualWarPerYear": 0.8375260485944853,
+      "gap": 0.6517197614613826,
+      "declineRatio": 0.4376173208349899,
+      "avgAavIndex": 1.4576850021597942
+    },
+    {
+      "bucket": "P",
+      "n": 976,
+      "priorWarPerYear": 0.7622950819672139,
+      "actualWarPerYear": 0.4335621584699451,
+      "gap": 0.32873292349726757,
+      "declineRatio": 0.43124103942652264,
+      "avgAavIndex": 1.0942646167574568
+    },
+    {
+      "bucket": "RP",
+      "n": 39,
+      "priorWarPerYear": 1.2632478632478634,
+      "actualWarPerYear": 0.7261111111111113,
+      "gap": 0.5371367521367524,
+      "declineRatio": 0.4252029769959406,
+      "avgAavIndex": 2.248500737919057
+    },
+    {
+      "bucket": "OF",
+      "n": 541,
+      "priorWarPerYear": 1.645902649414664,
+      "actualWarPerYear": 0.8363971041281574,
+      "gap": 0.8095055452865062,
+      "declineRatio": 0.4918307565604761,
+      "avgAavIndex": 1.7322761588104412
+    },
+    {
+      "bucket": "C",
+      "n": 287,
+      "priorWarPerYear": 0.949709639953542,
+      "actualWarPerYear": 0.49740418118466895,
+      "gap": 0.4523054587688736,
+      "declineRatio": 0.4762565733153973,
+      "avgAavIndex": 0.9432767328980589
+    }
+  ],
+  "overpayByLength": [
+    {
+      "bucket": "1yr",
+      "n": 1915,
+      "priorWarPerYear": 0.9933507397737164,
+      "actualWarPerYear": 0.5963446475195822,
+      "gap": 0.39700609225413513,
+      "declineRatio": 0.39966355926263514,
+      "avgAavIndex": 0.9488150565279329
+    },
+    {
+      "bucket": "2-3yr",
+      "n": 968,
+      "priorWarPerYear": 1.4676652892561983,
+      "actualWarPerYear": 0.8780647382920115,
+      "gap": 0.5896005509641874,
+      "declineRatio": 0.4017268482672861,
+      "avgAavIndex": 1.8593378576231963
+    },
+    {
+      "bucket": "4-6yr",
+      "n": 215,
+      "priorWarPerYear": 3.0572093023255817,
+      "actualWarPerYear": 1.7889999999999988,
+      "gap": 1.2682093023255812,
+      "declineRatio": 0.4148258025254829,
+      "avgAavIndex": 4.019383422469956
+    },
+    {
+      "bucket": "7+yr",
+      "n": 25,
+      "priorWarPerYear": 5.326666666666667,
+      "actualWarPerYear": 2.3075888888888887,
+      "gap": 3.019077777777779,
+      "declineRatio": 0.566785565289946,
+      "avgAavIndex": 6.894207343944336
+    }
+  ],
+  "lastYearVsFirstYear": {
+    "minYears3": {
+      "minYears": 3,
+      "n": 528,
+      "meanFirstYearWar": 1.9594696969696963,
+      "meanLastYearWar": 1.0539772727272718,
+      "meanDiff": -0.9054924242424248,
+      "pctDeclined": 67.61363636363636,
+      "permutationP": 0,
+      "leaveOneSeasonOutSameSignCount": 33,
+      "leaveOneSeasonOutYearsTested": 33
+    },
+    "minYears4": {
+      "minYears": 4,
+      "n": 240,
+      "meanFirstYearWar": 2.5887499999999988,
+      "meanLastYearWar": 1.1291666666666664,
+      "meanDiff": -1.459583333333333,
+      "pctDeclined": 76.66666666666667,
+      "permutationP": 0,
+      "leaveOneSeasonOutSameSignCount": 32,
+      "leaveOneSeasonOutYearsTested": 32
+    }
+  },
+  "agentAxis": {
+    "distinctRawAgents": 429,
+    "top8": [
+      {
+        "agency": "Boras Corp.",
+        "n": 382
+      },
+      {
+        "agency": "ACES",
+        "n": 228
+      },
+      {
+        "agency": "Excel",
+        "n": 149
+      },
+      {
+        "agency": "CAA",
+        "n": 137
+      },
+      {
+        "agency": "Wasserman",
+        "n": 135
+      },
+      {
+        "agency": "Hendricks Sports",
+        "n": 122
+      },
+      {
+        "agency": "Octagon",
+        "n": 96
+      },
+      {
+        "agency": "ISE",
+        "n": 89
+      }
+    ],
+    "noAgentCount": 1487,
+    "noAgentPct": 26.563058235083957,
+    "findings": [
+      {
+        "agency": "Boras Corp.",
+        "nInWinnersCurseSet": 257,
+        "totalSignings": 382,
+        "partialCorrelation": 0.057051418246474105,
+        "permutationP": 0.0025
+      },
+      {
+        "agency": "ACES",
+        "nInWinnersCurseSet": 164,
+        "totalSignings": 228,
+        "partialCorrelation": 0.05073309516697621,
+        "permutationP": 0.0055
+      },
+      {
+        "agency": "Excel",
+        "nInWinnersCurseSet": 84,
+        "totalSignings": 149,
+        "partialCorrelation": 0.0045015781346446565,
+        "permutationP": 0.7935
+      },
+      {
+        "agency": "CAA",
+        "nInWinnersCurseSet": 76,
+        "totalSignings": 137,
+        "partialCorrelation": -0.02586076817546752,
+        "permutationP": 0.122
+      },
+      {
+        "agency": "Wasserman",
+        "nInWinnersCurseSet": 77,
+        "totalSignings": 135,
+        "partialCorrelation": -0.02172063451774314,
+        "permutationP": 0.2415
+      },
+      {
+        "agency": "Hendricks Sports",
+        "nInWinnersCurseSet": 77,
+        "totalSignings": 122,
+        "partialCorrelation": -0.015030275556230334,
+        "permutationP": 0.4025
+      },
+      {
+        "agency": "Octagon",
+        "nInWinnersCurseSet": 48,
+        "totalSignings": 96,
+        "partialCorrelation": -0.05107910401299805,
+        "permutationP": 0.003
+      },
+      {
+        "agency": "ISE",
+        "nInWinnersCurseSet": 50,
+        "totalSignings": 89,
+        "partialCorrelation": -0.004898913297666381,
+        "permutationP": 0.774
+      }
+    ]
+  },
+  "changingClubs": {
+    "n": 3312,
+    "medianAavIndexMoved": 1,
+    "medianAavIndexStayed": 0.9166666666666666,
+    "nMoved": 2407,
+    "nStayed": 905,
+    "controlledPartialCorrelation": -0.010055778320397347,
+    "permutationP": 0.572
+  }
+}

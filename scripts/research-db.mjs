@@ -101,6 +101,8 @@ const PANEL_PATHS = [
   '.scratch/team-success/milb-field-cache.json',
   '.scratch/team-success/exit-reason-mix.json',
   '.scratch/team-success/exit-reason-mix-findings.json',
+  '.scratch/team-success/free-agency-market.json',
+  '.scratch/team-success/free-agency-market-findings.json',
   '.scratch/level-benchmarks/raw.json',
   '.scratch/level-benchmarks/dates.json',
   '.scratch/level-benchmarks/homegrown-cohort.json',
