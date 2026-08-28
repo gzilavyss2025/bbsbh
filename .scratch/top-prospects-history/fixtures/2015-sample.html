@@ -1,0 +1,22 @@
+<!--
+Real (not fabricated) excerpt of https://www.mlb.com/prospects/2015's HTML
+response, fetched 2026-08-28. Three RankedPlayerEntity blocks in a row, byte-
+for-byte as MLB.com served them -- HTML-entity-encoded, quotes and all.
+
+Each block's free-text prospectBio.contentText (the scouting-report prose,
+which can run past a thousand characters per entry) is cut and replaced with
+"...TRUNCATED FOR FIXTURE SIZE..." -- everything else, including the
+"__typename":"RankedPlayerEntity" / "rank" / "player":{"__ref":"Person:ID"}
+spans the parser actually reads, is untouched. That's deliberate: the parser
+never reads past the first Person ref in an entry, so trimming the prose
+after it changes nothing the parser sees, while keeping the fixture small.
+
+Rank 1 is 621439 (Byron Buxton, 2015's #1 -- confirmed live: his own blurb
+elsewhere on the real page opens "Ever since Buxton was taken with the No. 2
+overall pick of the 2012 Draft..."). Ranks 2 and 3 are 592178 and 621043.
+-->
+{"getPlayerRankingsFromSelection({\"limit\":100,\"slug\":\"sel-pr-2015-top100\"})":[
+{&quot;__typename&quot;:&quot;RankedPlayerEntity&quot;,&quot;rank&quot;:1,&quot;playerEntity&quot;:{&quot;__typename&quot;:&quot;PlayerEntity&quot;,&quot;formattedThumbnail({\&quot;aspectRatio\&quot;:\&quot;16:9\&quot;,\&quot;width\&quot;:640})&quot;:&quot;https://img.mlbstatic.com/mlb-images/image/private/t_16x9/w_640/q_auto/mlb/edvwwctwgouiqjdxtmfa&quot;,&quot;eta&quot;:null,&quot;gradesHitting&quot;:null,&quot;gradesPitching&quot;:null,&quot;playerPhotoCustomActionUrl&quot;:null,&quot;playerPhotoCustomUrl&quot;:null,&quot;player&quot;:{&quot;__ref&quot;:&quot;Person:621439&quot;},&quot;position&quot;:&quot;OF&quot;,&quot;prospectBio&quot;:[{&quot;__typename&quot;:&quot;ProspectBio&quot;,&quot;contentText&quot;:&quot;...TRUNCATED FOR FIXTURE SIZE...&quot;}]},
+{&quot;__typename&quot;:&quot;RankedPlayerEntity&quot;,&quot;rank&quot;:2,&quot;playerEntity&quot;:{&quot;__typename&quot;:&quot;PlayerEntity&quot;,&quot;formattedThumbnail({\&quot;aspectRatio\&quot;:\&quot;16:9\&quot;,\&quot;width\&quot;:640})&quot;:null,&quot;eta&quot;:null,&quot;gradesHitting&quot;:null,&quot;gradesPitching&quot;:null,&quot;playerPhotoCustomActionUrl&quot;:null,&quot;playerPhotoCustomUrl&quot;:null,&quot;player&quot;:{&quot;__ref&quot;:&quot;Person:592178&quot;},&quot;position&quot;:&quot;3B&quot;,&quot;prospectBio&quot;:[{&quot;__typename&quot;:&quot;ProspectBio&quot;,&quot;contentText&quot;:&quot;...TRUNCATED FOR FIXTURE SIZE...&quot;}]},
+{&quot;__typename&quot;:&quot;RankedPlayerEntity&quot;,&quot;rank&quot;:3,&quot;playerEntity&quot;:{&quot;__typename&quot;:&quot;PlayerEntity&quot;,&quot;formattedThumbnail({\&quot;aspectRatio\&quot;:\&quot;16:9\&quot;,\&quot;width\&quot;:640})&quot;:null,&quot;eta&quot;:null,&quot;gradesHitting&quot;:null,&quot;gradesPitching&quot;:null,&quot;playerPhotoCustomActionUrl&quot;:null,&quot;playerPhotoCustomUrl&quot;:null,&quot;player&quot;:{&quot;__ref&quot;:&quot;Person:621043&quot;},&quot;position&quot;:&quot;SS&quot;,&quot;prospectBio&quot;:[{&quot;__typename&quot;:&quot;ProspectBio&quot;,&quot;contentText&quot;:&quot;...TRUNCATED FOR FIXTURE SIZE...&quot;}]}
+]}

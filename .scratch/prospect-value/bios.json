@@ -1,0 +1,7572 @@
+{
+ "284566": {
+  "id": 284566,
+  "name": "Eaton, Adam",
+  "birthDate": "1977-11-23",
+  "mlbDebutDate": "2000-05-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2009-08-24"
+ },
+ "444440": {
+  "id": 444440,
+  "name": "Adenhart, Nick",
+  "birthDate": "1986-08-24",
+  "mlbDebutDate": "2008-05-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2009-04-08"
+ },
+ "444876": {
+  "id": 444876,
+  "name": "Escobar, Alcides",
+  "birthDate": "1986-12-16",
+  "mlbDebutDate": "2008-09-03",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2022-07-16"
+ },
+ "446308": {
+  "id": 446308,
+  "name": "Wieters, Matt",
+  "birthDate": "1986-05-21",
+  "mlbDebutDate": "2009-05-29",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2020-09-25"
+ },
+ "446345": {
+  "id": 446345,
+  "name": "Taylor, Michael",
+  "birthDate": "1985-12-19",
+  "mlbDebutDate": "2011-09-02",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2014-09-28"
+ },
+ "449089": {
+  "id": 449089,
+  "name": "Miller, Adam",
+  "birthDate": "1984-11-26",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "450317": {
+  "id": 450317,
+  "name": "Arencibia, J.P.",
+  "birthDate": "1986-01-05",
+  "mlbDebutDate": "2010-08-07",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2015-10-01"
+ },
+ "451085": {
+  "id": 451085,
+  "name": "Matusz, Brian",
+  "birthDate": "1987-02-11",
+  "mlbDebutDate": "2009-08-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2016-07-31"
+ },
+ "451143": {
+  "id": 451143,
+  "name": "Gamel, Mat",
+  "birthDate": "1985-07-26",
+  "mlbDebutDate": "2008-09-03",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2012-05-01"
+ },
+ "451584": {
+  "id": 451584,
+  "name": "Davis, Wade",
+  "birthDate": "1985-09-07",
+  "mlbDebutDate": "2009-09-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-09-11"
+ },
+ "451594": {
+  "id": 451594,
+  "name": "Fowler, Dexter",
+  "birthDate": "1986-03-22",
+  "mlbDebutDate": "2008-09-02",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2021-04-09"
+ },
+ "452035": {
+  "id": 452035,
+  "name": "Blanks, Kyle",
+  "birthDate": "1986-09-11",
+  "mlbDebutDate": "2009-06-19",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2015-06-16"
+ },
+ "452291": {
+  "id": 452291,
+  "name": "Owens, Henry",
+  "birthDate": "1979-04-23",
+  "mlbDebutDate": "2006-07-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2007-06-08"
+ },
+ "453181": {
+  "id": 453181,
+  "name": "LaPorta, Matt",
+  "birthDate": "1985-01-08",
+  "mlbDebutDate": "2009-05-03",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2012-10-02"
+ },
+ "453562": {
+  "id": 453562,
+  "name": "Arrieta, Jake",
+  "birthDate": "1986-03-06",
+  "mlbDebutDate": "2010-06-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-09-19"
+ },
+ "453974": {
+  "id": 453974,
+  "name": "Marson, Lou",
+  "birthDate": "1986-06-26",
+  "mlbDebutDate": "2008-09-28",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2013-04-24"
+ },
+ "455092": {
+  "id": 455092,
+  "name": "Elbert, Scott",
+  "birthDate": "1985-08-13",
+  "mlbDebutDate": "2008-08-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2014-09-27"
+ },
+ "456034": {
+  "id": 456034,
+  "name": "Price, David",
+  "birthDate": "1985-08-26",
+  "mlbDebutDate": "2008-09-14",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-09-30"
+ },
+ "457428": {
+  "id": 457428,
+  "name": "McDonald, James",
+  "birthDate": "1984-10-19",
+  "mlbDebutDate": "2008-09-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2013-05-01"
+ },
+ "457705": {
+  "id": 457705,
+  "name": "McCutchen, Andrew",
+  "birthDate": "1986-10-10",
+  "mlbDebutDate": "2009-06-04",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "457706": {
+  "id": 457706,
+  "name": "Jackson, Austin",
+  "birthDate": "1987-02-01",
+  "mlbDebutDate": "2010-04-05",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2018-09-30"
+ },
+ "457727": {
+  "id": 457727,
+  "name": "Maybin, Cameron",
+  "birthDate": "1987-04-04",
+  "mlbDebutDate": "2007-08-17",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2021-05-29"
+ },
+ "457763": {
+  "id": 457763,
+  "name": "Posey, Buster",
+  "birthDate": "1987-03-27",
+  "mlbDebutDate": "2009-09-11",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2021-10-03"
+ },
+ "457775": {
+  "id": 457775,
+  "name": "Jennings, Desmond",
+  "birthDate": "1986-10-30",
+  "mlbDebutDate": "2010-09-01",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2016-08-02"
+ },
+ "458675": {
+  "id": 458675,
+  "name": "Rasmus, Colby",
+  "birthDate": "1986-08-11",
+  "mlbDebutDate": "2009-04-07",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2018-07-01"
+ },
+ "462101": {
+  "id": 462101,
+  "name": "Andrus, Elvis",
+  "birthDate": "1988-08-26",
+  "mlbDebutDate": "2009-04-06",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-10-01"
+ },
+ "462102": {
+  "id": 462102,
+  "name": "Hanson, Tommy",
+  "birthDate": "1986-08-28",
+  "mlbDebutDate": "2009-06-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2013-09-28"
+ },
+ "464433": {
+  "id": 464433,
+  "name": "Francisco, Juan",
+  "birthDate": "1987-06-24",
+  "mlbDebutDate": "2009-09-14",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2014-09-28"
+ },
+ "467793": {
+  "id": 467793,
+  "name": "Santana, Carlos",
+  "birthDate": "1986-04-08",
+  "mlbDebutDate": "2010-06-11",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "468504": {
+  "id": 468504,
+  "name": "Chacín, Jhoulys",
+  "birthDate": "1988-01-07",
+  "mlbDebutDate": "2009-07-25",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-09-11"
+ },
+ "471911": {
+  "id": 471911,
+  "name": "Carrasco, Carlos",
+  "birthDate": "1987-03-21",
+  "mlbDebutDate": "2009-09-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "474463": {
+  "id": 474463,
+  "name": "Anderson, Brett",
+  "birthDate": "1988-02-01",
+  "mlbDebutDate": "2009-04-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-10-03"
+ },
+ "474832": {
+  "id": 474832,
+  "name": "Belt, Brandon",
+  "birthDate": "1988-04-20",
+  "mlbDebutDate": "2011-03-31",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-10-01"
+ },
+ "474892": {
+  "id": 474892,
+  "name": "Carter, Chris",
+  "birthDate": "1986-12-18",
+  "mlbDebutDate": "2010-08-09",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "475138": {
+  "id": 475138,
+  "name": "Drabek, Kyle",
+  "birthDate": "1987-12-08",
+  "mlbDebutDate": "2010-09-15",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2016-04-07"
+ },
+ "475174": {
+  "id": 475174,
+  "name": "Alonso, Yonder",
+  "birthDate": "1987-04-08",
+  "mlbDebutDate": "2010-09-01",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2019-09-29"
+ },
+ "475253": {
+  "id": 475253,
+  "name": "Smoak, Justin",
+  "birthDate": "1986-12-05",
+  "mlbDebutDate": "2010-04-23",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2020-09-17"
+ },
+ "476451": {
+  "id": 476451,
+  "name": "Hellickson, Jeremy",
+  "birthDate": "1987-04-08",
+  "mlbDebutDate": "2010-08-02",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2019-05-19"
+ },
+ "476454": {
+  "id": 476454,
+  "name": "Betances, Dellin",
+  "birthDate": "1988-03-23",
+  "mlbDebutDate": "2011-09-22",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-04-07"
+ },
+ "476883": {
+  "id": 476883,
+  "name": "Álvarez, Pedro",
+  "birthDate": "1987-02-06",
+  "mlbDebutDate": "2010-06-16",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2018-06-15"
+ },
+ "477165": {
+  "id": 477165,
+  "name": "Wallace, Brett",
+  "birthDate": "1986-08-26",
+  "mlbDebutDate": "2010-07-31",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2016-09-28"
+ },
+ "488726": {
+  "id": 488726,
+  "name": "Brantley, Michael",
+  "birthDate": "1987-05-15",
+  "mlbDebutDate": "2009-09-01",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": false,
+  "lastPlayedDate": "2023-10-01"
+ },
+ "488771": {
+  "id": 488771,
+  "name": "Castro, Jason",
+  "birthDate": "1987-06-18",
+  "mlbDebutDate": "2010-06-22",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2022-06-29"
+ },
+ "489149": {
+  "id": 489149,
+  "name": "Morrison, Logan",
+  "birthDate": "1987-08-25",
+  "mlbDebutDate": "2010-07-27",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2020-08-09"
+ },
+ "489294": {
+  "id": 489294,
+  "name": "Scheppers, Tanner",
+  "birthDate": "1987-01-17",
+  "mlbDebutDate": "2012-06-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2017-06-29"
+ },
+ "491703": {
+  "id": 491703,
+  "name": "Feliz, Neftalí",
+  "birthDate": "1988-05-02",
+  "mlbDebutDate": "2009-08-03",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "494686": {
+  "id": 494686,
+  "name": "Martinez, Fernando",
+  "birthDate": "1988-10-10",
+  "mlbDebutDate": "2009-05-26",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2013-05-05"
+ },
+ "501317": {
+  "id": 501317,
+  "name": "Peguero, Francisco",
+  "birthDate": "1988-06-01",
+  "mlbDebutDate": "2012-08-25",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2013-09-29"
+ },
+ "501381": {
+  "id": 501381,
+  "name": "Pineda, Michael",
+  "birthDate": "1989-01-18",
+  "mlbDebutDate": "2011-04-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-09-03"
+ },
+ "501647": {
+  "id": 501647,
+  "name": "Rosario, Wilin",
+  "birthDate": "1989-02-23",
+  "mlbDebutDate": "2011-09-06",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "501957": {
+  "id": 501957,
+  "name": "Tillman, Chris",
+  "birthDate": "1988-04-15",
+  "mlbDebutDate": "2009-07-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2018-05-10"
+ },
+ "501983": {
+  "id": 501983,
+  "name": "Snider, Travis",
+  "birthDate": "1988-02-02",
+  "mlbDebutDate": "2008-08-29",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2015-10-04"
+ },
+ "501985": {
+  "id": 501985,
+  "name": "Minor, Mike",
+  "birthDate": "1987-12-26",
+  "mlbDebutDate": "2010-08-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-09-17"
+ },
+ "502026": {
+  "id": 502026,
+  "name": "Jeffress, Jeremy",
+  "birthDate": "1987-09-21",
+  "mlbDebutDate": "2010-09-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "502042": {
+  "id": 502042,
+  "name": "Archer, Chris",
+  "birthDate": "1988-09-26",
+  "mlbDebutDate": "2012-06-20",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-09-10"
+ },
+ "502043": {
+  "id": 502043,
+  "name": "Gibson, Kyle",
+  "birthDate": "1987-10-23",
+  "mlbDebutDate": "2013-06-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2025-05-17"
+ },
+ "502082": {
+  "id": 502082,
+  "name": "Chisenhall, Lonnie",
+  "birthDate": "1988-10-04",
+  "mlbDebutDate": "2011-06-27",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2018-07-01"
+ },
+ "502126": {
+  "id": 502126,
+  "name": "Brown, Domonic",
+  "birthDate": "1987-09-03",
+  "mlbDebutDate": "2010-07-28",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2015-09-02"
+ },
+ "502154": {
+  "id": 502154,
+  "name": "Britton, Zack",
+  "birthDate": "1987-12-22",
+  "mlbDebutDate": "2011-04-03",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-09-30"
+ },
+ "502188": {
+  "id": 502188,
+  "name": "Samardzija, Jeff",
+  "birthDate": "1985-01-23",
+  "mlbDebutDate": "2008-07-25",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2020-09-25"
+ },
+ "502205": {
+  "id": 502205,
+  "name": "Green, Grant",
+  "birthDate": "1987-09-27",
+  "mlbDebutDate": "2013-07-08",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2017-04-20"
+ },
+ "502239": {
+  "id": 502239,
+  "name": "Cahill, Trevor",
+  "birthDate": "1988-03-01",
+  "mlbDebutDate": "2009-04-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-06-11"
+ },
+ "502249": {
+  "id": 502249,
+  "name": "Anderson, Lars",
+  "birthDate": "1987-09-25",
+  "mlbDebutDate": "2010-09-06",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2012-05-01"
+ },
+ "502706": {
+  "id": 502706,
+  "name": "Holland, Derek",
+  "birthDate": "1986-10-09",
+  "mlbDebutDate": "2009-04-22",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-09-29"
+ },
+ "502748": {
+  "id": 502748,
+  "name": "Peacock, Brad",
+  "birthDate": "1988-02-02",
+  "mlbDebutDate": "2011-09-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-09-07"
+ },
+ "503449": {
+  "id": 503449,
+  "name": "Peralta, Wily",
+  "birthDate": "1989-05-08",
+  "mlbDebutDate": "2012-04-22",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "505830": {
+  "id": 505830,
+  "name": "Villalona, Angel",
+  "birthDate": "1990-08-13",
+  "mlbDebutDate": null,
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "508892": {
+  "id": 508892,
+  "name": "Triunfel, Carlos",
+  "birthDate": "1990-02-27",
+  "mlbDebutDate": "2012-09-07",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2014-08-17"
+ },
+ "516416": {
+  "id": 516416,
+  "name": "Segura, Jean",
+  "birthDate": "1990-03-17",
+  "mlbDebutDate": "2012-07-24",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-07-31"
+ },
+ "516770": {
+  "id": 516770,
+  "name": "Castro, Starlin",
+  "birthDate": "1990-03-24",
+  "mlbDebutDate": "2010-05-07",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2021-07-11"
+ },
+ "516782": {
+  "id": 516782,
+  "name": "Marte, Starling",
+  "birthDate": "1988-10-09",
+  "mlbDebutDate": "2012-07-26",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "517414": {
+  "id": 517414,
+  "name": "Delgado, Randall",
+  "birthDate": "1990-02-09",
+  "mlbDebutDate": "2011-06-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "518418": {
+  "id": 518418,
+  "name": "Aumont, Phillippe",
+  "birthDate": "1989-01-07",
+  "mlbDebutDate": "2012-08-23",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2015-06-19"
+ },
+ "518452": {
+  "id": 518452,
+  "name": "Bettis, Chad",
+  "birthDate": "1989-04-26",
+  "mlbDebutDate": "2013-08-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2019-08-13"
+ },
+ "518490": {
+  "id": 518490,
+  "name": "Brentz, Bryce",
+  "birthDate": "1988-12-30",
+  "mlbDebutDate": "2014-09-17",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2016-08-10"
+ },
+ "518502": {
+  "id": 518502,
+  "name": "Brown, Gary",
+  "birthDate": "1988-09-28",
+  "mlbDebutDate": "2014-09-03",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2014-09-28"
+ },
+ "518516": {
+  "id": 518516,
+  "name": "Bumgarner, Madison",
+  "birthDate": "1989-08-01",
+  "mlbDebutDate": "2009-09-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2023-04-19"
+ },
+ "518595": {
+  "id": 518595,
+  "name": "d'Arnaud, Travis",
+  "birthDate": "1989-02-10",
+  "mlbDebutDate": "2013-08-17",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "518625": {
+  "id": 518625,
+  "name": "Dominguez, Matt",
+  "birthDate": "1989-08-28",
+  "mlbDebutDate": "2011-09-06",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2016-06-06"
+ },
+ "518692": {
+  "id": 518692,
+  "name": "Freeman, Freddie",
+  "birthDate": "1989-09-12",
+  "mlbDebutDate": "2010-09-01",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "518735": {
+  "id": 518735,
+  "name": "Grandal, Yasmani",
+  "birthDate": "1988-11-08",
+  "mlbDebutDate": "2012-06-02",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2024-09-28"
+ },
+ "518774": {
+  "id": 518774,
+  "name": "Harvey, Matt",
+  "birthDate": "1989-03-27",
+  "mlbDebutDate": "2012-07-26",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-09-08"
+ },
+ "518792": {
+  "id": 518792,
+  "name": "Heyward, Jason",
+  "birthDate": "1989-08-09",
+  "mlbDebutDate": "2010-04-05",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2025-05-23"
+ },
+ "519023": {
+  "id": 519023,
+  "name": "Mesoraco, Devin",
+  "birthDate": "1988-06-19",
+  "mlbDebutDate": "2011-09-03",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2018-09-29"
+ },
+ "519025": {
+  "id": 519025,
+  "name": "Middlebrooks, Will",
+  "birthDate": "1988-09-09",
+  "mlbDebutDate": "2012-05-02",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2017-10-01"
+ },
+ "519043": {
+  "id": 519043,
+  "name": "Moore, Matt",
+  "birthDate": "1989-06-18",
+  "mlbDebutDate": "2011-09-14",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "519058": {
+  "id": 519058,
+  "name": "Moustakas, Mike",
+  "birthDate": "1988-09-11",
+  "mlbDebutDate": "2011-06-10",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-09-30"
+ },
+ "519076": {
+  "id": 519076,
+  "name": "Nelson, Jimmy",
+  "birthDate": "1989-06-05",
+  "mlbDebutDate": "2013-09-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-07-30"
+ },
+ "519105": {
+  "id": 519105,
+  "name": "Parker, Jarrod",
+  "birthDate": "1988-11-24",
+  "mlbDebutDate": "2011-09-27",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2013-09-28"
+ },
+ "519141": {
+  "id": 519141,
+  "name": "Pomeranz, Drew",
+  "birthDate": "1988-11-22",
+  "mlbDebutDate": "2011-09-11",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "519144": {
+  "id": 519144,
+  "name": "Porcello, Rick",
+  "birthDate": "1988-12-27",
+  "mlbDebutDate": "2009-04-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2020-09-26"
+ },
+ "519203": {
+  "id": 519203,
+  "name": "Rizzo, Anthony",
+  "birthDate": "1989-08-08",
+  "mlbDebutDate": "2011-06-09",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2024-09-28"
+ },
+ "519242": {
+  "id": 519242,
+  "name": "Sale, Chris",
+  "birthDate": "1989-03-30",
+  "mlbDebutDate": "2010-08-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "519301": {
+  "id": 519301,
+  "name": "Solís, Sammy",
+  "birthDate": "1988-08-10",
+  "mlbDebutDate": "2015-04-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2018-09-28"
+ },
+ "519317": {
+  "id": 519317,
+  "name": "Stanton, Giancarlo",
+  "birthDate": "1989-11-08",
+  "mlbDebutDate": "2010-06-08",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "519322": {
+  "id": 519322,
+  "name": "Storen, Drew",
+  "birthDate": "1987-08-11",
+  "mlbDebutDate": "2010-05-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2017-09-01"
+ },
+ "524968": {
+  "id": 524968,
+  "name": "Montero, Jesus",
+  "birthDate": "1989-11-28",
+  "mlbDebutDate": "2011-09-01",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": false,
+  "lastPlayedDate": "2015-10-03"
+ },
+ "527048": {
+  "id": 527048,
+  "name": "Pérez, Martín",
+  "birthDate": "1991-04-04",
+  "mlbDebutDate": "2012-06-27",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "527054": {
+  "id": 527054,
+  "name": "Teheran, Julio",
+  "birthDate": "1991-01-27",
+  "mlbDebutDate": "2011-05-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2024-04-08"
+ },
+ "527055": {
+  "id": 527055,
+  "name": "Vizcaíno, Arodys",
+  "birthDate": "1990-11-13",
+  "mlbDebutDate": "2011-08-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-06-13"
+ },
+ "532077": {
+  "id": 532077,
+  "name": "Osuna, Roberto",
+  "birthDate": "1995-02-07",
+  "mlbDebutDate": "2015-04-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2020-08-01"
+ },
+ "541652": {
+  "id": 541652,
+  "name": "Rondón, Bruce",
+  "birthDate": "1990-12-09",
+  "mlbDebutDate": "2013-04-25",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "542194": {
+  "id": 542194,
+  "name": "Bethancourt, Christian",
+  "birthDate": "1991-09-02",
+  "mlbDebutDate": "2013-09-29",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "542642": {
+  "id": 542642,
+  "name": "Liriano, Rymer",
+  "birthDate": "1991-06-20",
+  "mlbDebutDate": "2014-08-11",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "542921": {
+  "id": 542921,
+  "name": "Beckham, Tim",
+  "birthDate": "1990-01-27",
+  "mlbDebutDate": "2013-09-19",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2022-08-24"
+ },
+ "543037": {
+  "id": 543037,
+  "name": "Cole, Gerrit",
+  "birthDate": "1990-09-08",
+  "mlbDebutDate": "2013-06-11",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "543054": {
+  "id": 543054,
+  "name": "Cosart, Jarred",
+  "birthDate": "1990-05-25",
+  "mlbDebutDate": "2013-07-12",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2017-06-04"
+ },
+ "543070": {
+  "id": 543070,
+  "name": "Crow, Aaron",
+  "birthDate": "1986-11-10",
+  "mlbDebutDate": "2011-03-31",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2014-09-28"
+ },
+ "543094": {
+  "id": 543094,
+  "name": "Decker, Jaff",
+  "birthDate": "1990-02-23",
+  "mlbDebutDate": "2013-06-20",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2017-05-08"
+ },
+ "543135": {
+  "id": 543135,
+  "name": "Eovaldi, Nathan",
+  "birthDate": "1990-02-13",
+  "mlbDebutDate": "2011-08-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "543184": {
+  "id": 543184,
+  "name": "Friedrich, Christian",
+  "birthDate": "1987-07-08",
+  "mlbDebutDate": "2012-05-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2016-09-29"
+ },
+ "543238": {
+  "id": 543238,
+  "name": "Gose, Anthony",
+  "birthDate": "1990-08-10",
+  "mlbDebutDate": "2012-07-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "543243": {
+  "id": 543243,
+  "name": "Gray, Sonny",
+  "birthDate": "1989-11-07",
+  "mlbDebutDate": "2013-07-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "543305": {
+  "id": 543305,
+  "name": "Hicks, Aaron",
+  "birthDate": "1989-10-02",
+  "mlbDebutDate": "2013-04-01",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2024-04-28"
+ },
+ "543333": {
+  "id": 543333,
+  "name": "Hosmer, Eric",
+  "birthDate": "1989-10-24",
+  "mlbDebutDate": "2011-05-06",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-05-16"
+ },
+ "543343": {
+  "id": 543343,
+  "name": "Hultzen, Danny",
+  "birthDate": "1989-11-28",
+  "mlbDebutDate": "2019-09-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2019-09-24"
+ },
+ "543391": {
+  "id": 543391,
+  "name": "Kelly, Casey",
+  "birthDate": "1989-10-04",
+  "mlbDebutDate": "2012-08-27",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "543424": {
+  "id": 543424,
+  "name": "Lamb, John",
+  "birthDate": "1990-07-10",
+  "mlbDebutDate": "2015-08-14",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2018-06-26"
+ },
+ "543432": {
+  "id": 543432,
+  "name": "Lavarnway, Ryan",
+  "birthDate": "1987-08-07",
+  "mlbDebutDate": "2011-08-18",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2021-09-12"
+ },
+ "543434": {
+  "id": 543434,
+  "name": "Lawrie, Brett",
+  "birthDate": "1990-01-18",
+  "mlbDebutDate": "2011-08-05",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2016-07-21"
+ },
+ "543475": {
+  "id": 543475,
+  "name": "Lyles, Jordan",
+  "birthDate": "1990-10-19",
+  "mlbDebutDate": "2011-05-31",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2024-04-12"
+ },
+ "543484": {
+  "id": 543484,
+  "name": "Mahtook, Mikie",
+  "birthDate": "1989-11-30",
+  "mlbDebutDate": "2015-04-10",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2019-04-10"
+ },
+ "543495": {
+  "id": 543495,
+  "name": "Martin, Ethan",
+  "birthDate": "1989-06-06",
+  "mlbDebutDate": "2013-08-02",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2014-06-07"
+ },
+ "543507": {
+  "id": 543507,
+  "name": "May, Trevor",
+  "birthDate": "1989-09-23",
+  "mlbDebutDate": "2014-08-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2023-09-30"
+ },
+ "543542": {
+  "id": 543542,
+  "name": "Meyer, Alex",
+  "birthDate": "1990-01-03",
+  "mlbDebutDate": "2015-06-26",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2017-07-19"
+ },
+ "543557": {
+  "id": 543557,
+  "name": "Montgomery, Mike",
+  "birthDate": "1989-07-01",
+  "mlbDebutDate": "2015-06-02",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2020-09-26"
+ },
+ "543606": {
+  "id": 543606,
+  "name": "Odorizzi, Jake",
+  "birthDate": "1990-03-27",
+  "mlbDebutDate": "2012-09-23",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-10-04"
+ },
+ "543685": {
+  "id": 543685,
+  "name": "Rendon, Anthony",
+  "birthDate": "1990-06-06",
+  "mlbDebutDate": "2013-04-21",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "543807": {
+  "id": 543807,
+  "name": "Springer, George",
+  "birthDate": "1989-09-19",
+  "mlbDebutDate": "2014-04-16",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "543829": {
+  "id": 543829,
+  "name": "Strange-Gordon, Dee",
+  "birthDate": "1988-04-22",
+  "mlbDebutDate": "2011-06-06",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2022-06-07"
+ },
+ "543903": {
+  "id": 543903,
+  "name": "Webster, Allen",
+  "birthDate": "1990-02-10",
+  "mlbDebutDate": "2013-04-21",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2019-05-10"
+ },
+ "543910": {
+  "id": 543910,
+  "name": "Westmoreland, Ryan",
+  "birthDate": "1990-04-27",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "543939": {
+  "id": 543939,
+  "name": "Wong, Kolten",
+  "birthDate": "1990-10-10",
+  "mlbDebutDate": "2013-08-16",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-10-01"
+ },
+ "544365": {
+  "id": 544365,
+  "name": "Banuelos, Manny",
+  "birthDate": "1991-03-13",
+  "mlbDebutDate": "2015-07-02",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "544369": {
+  "id": 544369,
+  "name": "Gregorius, Didi",
+  "birthDate": "1990-02-18",
+  "mlbDebutDate": "2012-09-05",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "544727": {
+  "id": 544727,
+  "name": "Familia, Jeurys",
+  "birthDate": "1989-10-10",
+  "mlbDebutDate": "2012-09-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "544931": {
+  "id": 544931,
+  "name": "Strasburg, Stephen",
+  "birthDate": "1988-07-20",
+  "mlbDebutDate": "2010-06-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-06-09"
+ },
+ "545333": {
+  "id": 545333,
+  "name": "Bauer, Trevor",
+  "birthDate": "1991-01-17",
+  "mlbDebutDate": "2012-06-28",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-06-28"
+ },
+ "545338": {
+  "id": 545338,
+  "name": "Franklin, Nick",
+  "birthDate": "1991-03-02",
+  "mlbDebutDate": "2013-05-27",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2018-05-08"
+ },
+ "545346": {
+  "id": 545346,
+  "name": "Lee, Zach",
+  "birthDate": "1991-09-13",
+  "mlbDebutDate": "2015-07-25",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2017-04-18"
+ },
+ "545350": {
+  "id": 545350,
+  "name": "Marisnick, Jake",
+  "birthDate": "1991-03-30",
+  "mlbDebutDate": "2013-07-23",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2023-07-18"
+ },
+ "545361": {
+  "id": 545361,
+  "name": "Trout, Mike",
+  "birthDate": "1991-08-07",
+  "mlbDebutDate": "2011-07-08",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "545363": {
+  "id": 545363,
+  "name": "Turner, Jacob",
+  "birthDate": "1991-05-21",
+  "mlbDebutDate": "2011-07-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2018-08-07"
+ },
+ "546276": {
+  "id": 546276,
+  "name": "Escobar, Edwin",
+  "birthDate": "1992-04-22",
+  "mlbDebutDate": "2014-08-27",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "546990": {
+  "id": 546990,
+  "name": "Alford, Anthony",
+  "birthDate": "1994-07-20",
+  "mlbDebutDate": "2017-05-19",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2022-04-23"
+ },
+ "546991": {
+  "id": 546991,
+  "name": "Almora Jr., Albert",
+  "birthDate": "1994-04-16",
+  "mlbDebutDate": "2016-06-07",
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "547180": {
+  "id": 547180,
+  "name": "Harper, Bryce",
+  "birthDate": "1992-10-16",
+  "mlbDebutDate": "2012-04-28",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "547182": {
+  "id": 547182,
+  "name": "Buckel, Cody",
+  "birthDate": "1992-06-18",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "547973": {
+  "id": 547973,
+  "name": "Chapman, Aroldis",
+  "birthDate": "1988-02-28",
+  "mlbDebutDate": "2010-08-31",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "547982": {
+  "id": 547982,
+  "name": "Martin, Leonys",
+  "birthDate": "1988-03-06",
+  "mlbDebutDate": "2011-09-02",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2019-06-20"
+ },
+ "554429": {
+  "id": 554429,
+  "name": "Ackley, Dustin",
+  "birthDate": "1988-02-26",
+  "mlbDebutDate": "2011-06-17",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2016-05-29"
+ },
+ "554430": {
+  "id": 554430,
+  "name": "Wheeler, Zack",
+  "birthDate": "1990-05-30",
+  "mlbDebutDate": "2013-06-18",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "554431": {
+  "id": 554431,
+  "name": "Matzek, Tyler",
+  "birthDate": "1990-10-19",
+  "mlbDebutDate": "2014-06-11",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "570256": {
+  "id": 570256,
+  "name": "Polanco, Gregory",
+  "birthDate": "1991-09-14",
+  "mlbDebutDate": "2014-06-10",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2021-08-27"
+ },
+ "570267": {
+  "id": 570267,
+  "name": "Santana, Domingo",
+  "birthDate": "1992-08-05",
+  "mlbDebutDate": "2014-07-01",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2020-08-29"
+ },
+ "570489": {
+  "id": 570489,
+  "name": "Alcántara, Arismendy",
+  "birthDate": "1991-10-29",
+  "mlbDebutDate": "2014-07-09",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2017-08-09"
+ },
+ "570615": {
+  "id": 570615,
+  "name": "Moya, Steven",
+  "birthDate": "1991-08-09",
+  "mlbDebutDate": "2014-09-01",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2016-10-01"
+ },
+ "570649": {
+  "id": 570649,
+  "name": "Ventura, Yordano",
+  "birthDate": "1991-06-03",
+  "mlbDebutDate": "2013-09-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2016-09-30"
+ },
+ "570805": {
+  "id": 570805,
+  "name": "Taveras, Oscar",
+  "birthDate": "1992-06-19",
+  "mlbDebutDate": "2014-05-31",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2014-09-28"
+ },
+ "571446": {
+  "id": 571446,
+  "name": "Appel, Mark",
+  "birthDate": "1991-07-15",
+  "mlbDebutDate": "2022-06-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-08-02"
+ },
+ "571448": {
+  "id": 571448,
+  "name": "Arenado, Nolan",
+  "birthDate": "1991-04-16",
+  "mlbDebutDate": "2013-04-28",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "571561": {
+  "id": 571561,
+  "name": "Cingrani, Tony",
+  "birthDate": "1989-07-05",
+  "mlbDebutDate": "2012-09-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2018-09-22"
+ },
+ "571573": {
+  "id": 571573,
+  "name": "Colvin, Brody",
+  "birthDate": "1990-08-14",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "571602": {
+  "id": 571602,
+  "name": "Davidson, Matt",
+  "birthDate": "1991-03-26",
+  "mlbDebutDate": "2013-08-11",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "571718": {
+  "id": 571718,
+  "name": "Goodwin, Brian",
+  "birthDate": "1990-11-02",
+  "mlbDebutDate": "2016-08-06",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2021-09-23"
+ },
+ "571740": {
+  "id": 571740,
+  "name": "Hamilton, Billy",
+  "birthDate": "1990-09-09",
+  "mlbDebutDate": "2013-09-03",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "571760": {
+  "id": 571760,
+  "name": "Heaney, Andrew",
+  "birthDate": "1991-06-05",
+  "mlbDebutDate": "2014-06-19",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "571804": {
+  "id": 571804,
+  "name": "Jackson, Brett",
+  "birthDate": "1988-08-02",
+  "mlbDebutDate": "2012-08-05",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2014-09-26"
+ },
+ "571875": {
+  "id": 571875,
+  "name": "Lamb, Jake",
+  "birthDate": "1990-10-09",
+  "mlbDebutDate": "2014-08-07",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-05-07"
+ },
+ "571927": {
+  "id": 571927,
+  "name": "Matz, Steven",
+  "birthDate": "1991-05-29",
+  "mlbDebutDate": "2015-06-28",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "571946": {
+  "id": 571946,
+  "name": "Miller, Shelby",
+  "birthDate": "1990-10-10",
+  "mlbDebutDate": "2012-09-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "571976": {
+  "id": 571976,
+  "name": "Myers, Wil",
+  "birthDate": "1990-12-10",
+  "mlbDebutDate": "2013-06-18",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-05-23"
+ },
+ "572008": {
+  "id": 572008,
+  "name": "Owings, Chris",
+  "birthDate": "1991-08-12",
+  "mlbDebutDate": "2013-09-03",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-05-31"
+ },
+ "572020": {
+  "id": 572020,
+  "name": "Paxton, James",
+  "birthDate": "1988-11-06",
+  "mlbDebutDate": "2013-09-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "572039": {
+  "id": 572039,
+  "name": "Piscotty, Stephen",
+  "birthDate": "1991-01-14",
+  "mlbDebutDate": "2015-07-21",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2022-08-14"
+ },
+ "572070": {
+  "id": 572070,
+  "name": "Richards, Garrett",
+  "birthDate": "1988-05-27",
+  "mlbDebutDate": "2011-08-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-08-16"
+ },
+ "572096": {
+  "id": 572096,
+  "name": "Rosenthal, Trevor",
+  "birthDate": "1990-05-29",
+  "mlbDebutDate": "2012-07-18",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2020-09-27"
+ },
+ "572138": {
+  "id": 572138,
+  "name": "Singleton, Jon",
+  "birthDate": "1991-09-18",
+  "mlbDebutDate": "2014-06-03",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "572140": {
+  "id": 572140,
+  "name": "Skaggs, Tyler",
+  "birthDate": "1991-07-13",
+  "mlbDebutDate": "2012-08-22",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2019-06-29"
+ },
+ "572191": {
+  "id": 572191,
+  "name": "Taylor, Michael A.",
+  "birthDate": "1991-03-26",
+  "mlbDebutDate": "2014-08-12",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "572287": {
+  "id": 572287,
+  "name": "Zunino, Mike",
+  "birthDate": "1991-03-25",
+  "mlbDebutDate": "2013-06-12",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2023-06-14"
+ },
+ "572750": {
+  "id": 572750,
+  "name": "Butler, Eddie",
+  "birthDate": "1991-03-13",
+  "mlbDebutDate": "2014-06-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "572955": {
+  "id": 572955,
+  "name": "Johnson, Pierce",
+  "birthDate": "1991-05-10",
+  "mlbDebutDate": "2017-05-19",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "573186": {
+  "id": 573186,
+  "name": "Stroman, Marcus",
+  "birthDate": "1991-05-01",
+  "mlbDebutDate": "2014-05-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2025-07-31"
+ },
+ "573349": {
+  "id": 573349,
+  "name": "Lee, Hak-Ju",
+  "birthDate": "1990-11-04",
+  "mlbDebutDate": null,
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "574831": {
+  "id": 574831,
+  "name": "Choice, Michael",
+  "birthDate": "1989-11-10",
+  "mlbDebutDate": "2013-09-02",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2015-06-24"
+ },
+ "575929": {
+  "id": 575929,
+  "name": "Contreras, Willson",
+  "birthDate": "1992-05-13",
+  "mlbDebutDate": "2016-06-17",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "576397": {
+  "id": 576397,
+  "name": "Gyorko, Jedd",
+  "birthDate": "1988-09-23",
+  "mlbDebutDate": "2013-04-01",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2020-09-27"
+ },
+ "578428": {
+  "id": 578428,
+  "name": "Iglesias, Jose",
+  "birthDate": "1990-01-05",
+  "mlbDebutDate": "2011-05-08",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "588751": {
+  "id": 588751,
+  "name": "Hechavarría, Adeiny",
+  "birthDate": "1989-04-15",
+  "mlbDebutDate": "2012-08-04",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2020-09-27"
+ },
+ "592122": {
+  "id": 592122,
+  "name": "Austin, Tyler",
+  "birthDate": "1991-09-06",
+  "mlbDebutDate": "2016-08-13",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2019-09-29"
+ },
+ "592145": {
+  "id": 592145,
+  "name": "Biddle, Jesse",
+  "birthDate": "1991-10-22",
+  "mlbDebutDate": "2018-04-21",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-05-16"
+ },
+ "592178": {
+  "id": 592178,
+  "name": "Bryant, Kris",
+  "birthDate": "1992-01-04",
+  "mlbDebutDate": "2015-04-17",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592206": {
+  "id": 592206,
+  "name": "Castellanos, Nick",
+  "birthDate": "1992-03-04",
+  "mlbDebutDate": "2013-09-01",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592230": {
+  "id": 592230,
+  "name": "Cowart, Kaleb",
+  "birthDate": "1992-06-02",
+  "mlbDebutDate": "2015-08-18",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2019-09-29"
+ },
+ "592254": {
+  "id": 592254,
+  "name": "De León, José",
+  "birthDate": "1992-08-07",
+  "mlbDebutDate": "2016-09-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592261": {
+  "id": 592261,
+  "name": "DeShields, Delino",
+  "birthDate": "1992-08-16",
+  "mlbDebutDate": "2015-04-08",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592314": {
+  "id": 592314,
+  "name": "Foltynewicz, Mike",
+  "birthDate": "1991-10-07",
+  "mlbDebutDate": "2014-08-02",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-10-03"
+ },
+ "592332": {
+  "id": 592332,
+  "name": "Gausman, Kevin",
+  "birthDate": "1991-01-06",
+  "mlbDebutDate": "2013-05-23",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592346": {
+  "id": 592346,
+  "name": "González, Chi Chi",
+  "birthDate": "1992-01-15",
+  "mlbDebutDate": "2015-05-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2023-09-17"
+ },
+ "592351": {
+  "id": 592351,
+  "name": "Gray, Jon",
+  "birthDate": "1991-11-05",
+  "mlbDebutDate": "2015-08-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592450": {
+  "id": 592450,
+  "name": "Judge, Aaron",
+  "birthDate": "1992-04-26",
+  "mlbDebutDate": "2016-08-13",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592468": {
+  "id": 592468,
+  "name": "Kingham, Nick",
+  "birthDate": "1991-11-08",
+  "mlbDebutDate": "2018-04-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592518": {
+  "id": 592518,
+  "name": "Machado, Manny",
+  "birthDate": "1992-07-06",
+  "mlbDebutDate": "2012-08-09",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592567": {
+  "id": 592567,
+  "name": "Moran, Colin",
+  "birthDate": "1992-10-01",
+  "mlbDebutDate": "2016-05-18",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2022-09-04"
+ },
+ "592593": {
+  "id": 592593,
+  "name": "Nicolino, Justin",
+  "birthDate": "1991-11-22",
+  "mlbDebutDate": "2015-06-20",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2017-10-01"
+ },
+ "592604": {
+  "id": 592604,
+  "name": "O'Conner, Justin",
+  "birthDate": "1992-03-31",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592609": {
+  "id": 592609,
+  "name": "Olt, Mike",
+  "birthDate": "1988-08-27",
+  "mlbDebutDate": "2012-08-02",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2015-10-04"
+ },
+ "592626": {
+  "id": 592626,
+  "name": "Pederson, Joc",
+  "birthDate": "1992-04-21",
+  "mlbDebutDate": "2014-09-01",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592637": {
+  "id": 592637,
+  "name": "Peterson, D.J.",
+  "birthDate": "1991-12-31",
+  "mlbDebutDate": null,
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "592647": {
+  "id": 592647,
+  "name": "Pompey, Dalton",
+  "birthDate": "1992-12-11",
+  "mlbDebutDate": "2014-09-02",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2018-05-11"
+ },
+ "592662": {
+  "id": 592662,
+  "name": "Ray, Robbie",
+  "birthDate": "1991-10-01",
+  "mlbDebutDate": "2014-05-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592663": {
+  "id": 592663,
+  "name": "Realmuto, J.T.",
+  "birthDate": "1991-03-18",
+  "mlbDebutDate": "2014-06-05",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592665": {
+  "id": 592665,
+  "name": "Reed, Addison",
+  "birthDate": "1988-12-27",
+  "mlbDebutDate": "2011-09-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2018-09-26"
+ },
+ "592669": {
+  "id": 592669,
+  "name": "Renfroe, Hunter",
+  "birthDate": "1992-01-28",
+  "mlbDebutDate": "2016-09-21",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2025-05-20"
+ },
+ "592717": {
+  "id": 592717,
+  "name": "Sanchez, Aaron",
+  "birthDate": "1992-07-01",
+  "mlbDebutDate": "2014-07-23",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592743": {
+  "id": 592743,
+  "name": "Simmons, Andrelton",
+  "birthDate": "1989-09-04",
+  "mlbDebutDate": "2012-06-02",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592767": {
+  "id": 592767,
+  "name": "Smyly, Drew",
+  "birthDate": "1989-06-13",
+  "mlbDebutDate": "2012-04-12",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2024-09-29"
+ },
+ "592789": {
+  "id": 592789,
+  "name": "Syndergaard, Noah",
+  "birthDate": "1992-08-29",
+  "mlbDebutDate": "2015-05-12",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2023-08-27"
+ },
+ "592791": {
+  "id": 592791,
+  "name": "Taillon, Jameson",
+  "birthDate": "1991-11-18",
+  "mlbDebutDate": "2016-06-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592826": {
+  "id": 592826,
+  "name": "Velasquez, Vince",
+  "birthDate": "1992-06-07",
+  "mlbDebutDate": "2015-06-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592836": {
+  "id": 592836,
+  "name": "Walker, Taijuan",
+  "birthDate": "1992-08-13",
+  "mlbDebutDate": "2013-08-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "592863": {
+  "id": 592863,
+  "name": "Williams, Mason",
+  "birthDate": "1991-08-21",
+  "mlbDebutDate": "2015-06-12",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2021-06-19"
+ },
+ "592885": {
+  "id": 592885,
+  "name": "Yelich, Christian",
+  "birthDate": "1991-12-05",
+  "mlbDebutDate": "2013-07-23",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "593372": {
+  "id": 593372,
+  "name": "Martinez, Carlos",
+  "birthDate": "1991-09-21",
+  "mlbDebutDate": "2013-05-03",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-07-04"
+ },
+ "593423": {
+  "id": 593423,
+  "name": "Montas, Frankie",
+  "birthDate": "1993-03-21",
+  "mlbDebutDate": "2015-09-02",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "593428": {
+  "id": 593428,
+  "name": "Bogaerts, Xander",
+  "birthDate": "1992-10-01",
+  "mlbDebutDate": "2013-08-20",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "593528": {
+  "id": 593528,
+  "name": "Bonifacio, Jorge",
+  "birthDate": "1993-06-04",
+  "mlbDebutDate": "2017-04-21",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "593700": {
+  "id": 593700,
+  "name": "Hanson, Alen",
+  "birthDate": "1992-10-22",
+  "mlbDebutDate": "2016-05-16",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "593871": {
+  "id": 593871,
+  "name": "Polanco, Jorge",
+  "birthDate": "1993-07-05",
+  "mlbDebutDate": "2014-06-26",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "593934": {
+  "id": 593934,
+  "name": "Sanó, Miguel",
+  "birthDate": "1993-05-11",
+  "mlbDebutDate": "2015-07-02",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "593958": {
+  "id": 593958,
+  "name": "Rodriguez, Eduardo",
+  "birthDate": "1993-04-07",
+  "mlbDebutDate": "2015-05-28",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "594011": {
+  "id": 594011,
+  "name": "Herrera, Rosell",
+  "birthDate": "1992-10-16",
+  "mlbDebutDate": "2018-04-26",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2019-06-18"
+ },
+ "594555": {
+  "id": 594555,
+  "name": "Cecchini, Garin",
+  "birthDate": "1991-04-20",
+  "mlbDebutDate": "2014-06-01",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2015-08-16"
+ },
+ "594760": {
+  "id": 594760,
+  "name": "Blair, Aaron",
+  "birthDate": "1992-05-26",
+  "mlbDebutDate": "2016-04-24",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "595751": {
+  "id": 595751,
+  "name": "Alfaro, Jorge",
+  "birthDate": "1993-06-11",
+  "mlbDebutDate": "2016-09-12",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "595777": {
+  "id": 595777,
+  "name": "Profar, Jurickson",
+  "birthDate": "1993-02-20",
+  "mlbDebutDate": "2012-09-02",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "595879": {
+  "id": 595879,
+  "name": "Báez, Javier",
+  "birthDate": "1992-12-01",
+  "mlbDebutDate": "2014-08-05",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "595881": {
+  "id": 595881,
+  "name": "Beede, Tyler",
+  "birthDate": "1993-05-23",
+  "mlbDebutDate": "2018-04-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "595918": {
+  "id": 595918,
+  "name": "Cole, A.J.",
+  "birthDate": "1992-01-05",
+  "mlbDebutDate": "2015-04-28",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "595978": {
+  "id": 595978,
+  "name": "Hedges, Austin",
+  "birthDate": "1992-08-18",
+  "mlbDebutDate": "2015-05-04",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "596019": {
+  "id": 596019,
+  "name": "Lindor, Francisco",
+  "birthDate": "1993-11-14",
+  "mlbDebutDate": "2015-06-14",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "596057": {
+  "id": 596057,
+  "name": "Norris, Daniel",
+  "birthDate": "1993-04-25",
+  "mlbDebutDate": "2014-09-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2023-08-28"
+ },
+ "596059": {
+  "id": 596059,
+  "name": "Odor, Rougned",
+  "birthDate": "1994-02-03",
+  "mlbDebutDate": "2014-05-08",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "596064": {
+  "id": 596064,
+  "name": "Owens, Henry",
+  "birthDate": "1992-07-21",
+  "mlbDebutDate": "2015-08-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "596112": {
+  "id": 596112,
+  "name": "Stephenson, Robert",
+  "birthDate": "1993-02-24",
+  "mlbDebutDate": "2016-04-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "596115": {
+  "id": 596115,
+  "name": "Story, Trevor",
+  "birthDate": "1992-11-15",
+  "mlbDebutDate": "2016-04-04",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "596119": {
+  "id": 596119,
+  "name": "Swihart, Blake",
+  "birthDate": "1992-04-03",
+  "mlbDebutDate": "2015-05-02",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "596133": {
+  "id": 596133,
+  "name": "Weaver, Luke",
+  "birthDate": "1993-08-21",
+  "mlbDebutDate": "2016-08-13",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "596142": {
+  "id": 596142,
+  "name": "Sánchez, Gary",
+  "birthDate": "1992-12-02",
+  "mlbDebutDate": "2015-10-03",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "596143": {
+  "id": 596143,
+  "name": "Sardinas, Luis",
+  "birthDate": "1993-05-16",
+  "mlbDebutDate": "2014-04-20",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2018-04-28"
+ },
+ "596146": {
+  "id": 596146,
+  "name": "Kepler, Max",
+  "birthDate": "1993-02-10",
+  "mlbDebutDate": "2015-09-27",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "596451": {
+  "id": 596451,
+  "name": "Quinn, Roman",
+  "birthDate": "1993-05-14",
+  "mlbDebutDate": "2016-09-11",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2022-08-19"
+ },
+ "596748": {
+  "id": 596748,
+  "name": "Franco, Maikel",
+  "birthDate": "1992-08-26",
+  "mlbDebutDate": "2014-09-02",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "598264": {
+  "id": 598264,
+  "name": "Barnes, Matt",
+  "birthDate": "1990-06-17",
+  "mlbDebutDate": "2014-09-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2024-05-02"
+ },
+ "598265": {
+  "id": 598265,
+  "name": "Bradley Jr., Jackie",
+  "birthDate": "1990-04-19",
+  "mlbDebutDate": "2013-04-01",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2023-06-07"
+ },
+ "600869": {
+  "id": 600869,
+  "name": "Candelario, Jeimer",
+  "birthDate": "1993-11-24",
+  "mlbDebutDate": "2016-07-03",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "600944": {
+  "id": 600944,
+  "name": "Paulino, David",
+  "birthDate": "1994-02-06",
+  "mlbDebutDate": "2016-09-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-08-13"
+ },
+ "602083": {
+  "id": 602083,
+  "name": "Almonte, Miguel",
+  "birthDate": "1993-04-04",
+  "mlbDebutDate": "2015-09-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2018-09-29"
+ },
+ "605137": {
+  "id": 605137,
+  "name": "Bell, Josh",
+  "birthDate": "1992-08-14",
+  "mlbDebutDate": "2016-07-08",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "605141": {
+  "id": 605141,
+  "name": "Betts, Mookie",
+  "birthDate": "1992-10-07",
+  "mlbDebutDate": "2014-06-29",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "605151": {
+  "id": 605151,
+  "name": "Bradley, Archie",
+  "birthDate": "1992-08-10",
+  "mlbDebutDate": "2015-04-11",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2023-06-30"
+ },
+ "605152": {
+  "id": 605152,
+  "name": "Bradley, Jed",
+  "birthDate": "1990-06-12",
+  "mlbDebutDate": "2016-09-03",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2016-09-24"
+ },
+ "605164": {
+  "id": 605164,
+  "name": "Bundy, Dylan",
+  "birthDate": "1992-11-15",
+  "mlbDebutDate": "2012-09-23",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-10-01"
+ },
+ "605195": {
+  "id": 605195,
+  "name": "Crick, Kyle",
+  "birthDate": "1992-11-30",
+  "mlbDebutDate": "2017-06-22",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-06-13"
+ },
+ "605218": {
+  "id": 605218,
+  "name": "Edwards Jr., Carl",
+  "birthDate": "1991-09-03",
+  "mlbDebutDate": "2015-09-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "605228": {
+  "id": 605228,
+  "name": "Fernández, José",
+  "birthDate": "1992-07-31",
+  "mlbDebutDate": "2013-04-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2016-09-20"
+ },
+ "605232": {
+  "id": 605232,
+  "name": "Finnegan, Brandon",
+  "birthDate": "1993-04-14",
+  "mlbDebutDate": "2014-09-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2018-05-06"
+ },
+ "605233": {
+  "id": 605233,
+  "name": "Fisher, Derek",
+  "birthDate": "1993-08-21",
+  "mlbDebutDate": "2017-06-14",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2021-06-21"
+ },
+ "605242": {
+  "id": 605242,
+  "name": "Fulmer, Michael",
+  "birthDate": "1993-03-15",
+  "mlbDebutDate": "2016-04-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "605260": {
+  "id": 605260,
+  "name": "Guerrieri, Taylor",
+  "birthDate": "1992-12-01",
+  "mlbDebutDate": "2018-09-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2019-09-27"
+ },
+ "605304": {
+  "id": 605304,
+  "name": "Johnson, Erik",
+  "birthDate": "1989-12-30",
+  "mlbDebutDate": "2013-09-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2016-06-28"
+ },
+ "605347": {
+  "id": 605347,
+  "name": "López, Jorge",
+  "birthDate": "1993-02-10",
+  "mlbDebutDate": "2015-09-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "605400": {
+  "id": 605400,
+  "name": "Nola, Aaron",
+  "birthDate": "1993-06-04",
+  "mlbDebutDate": "2015-07-21",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "605483": {
+  "id": 605483,
+  "name": "Snell, Blake",
+  "birthDate": "1992-12-04",
+  "mlbDebutDate": "2016-04-23",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "605486": {
+  "id": 605486,
+  "name": "Spangenberg, Cory",
+  "birthDate": "1991-03-16",
+  "mlbDebutDate": "2014-09-01",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2022-07-26"
+ },
+ "605490": {
+  "id": 605490,
+  "name": "Starling, Bubba",
+  "birthDate": "1992-08-03",
+  "mlbDebutDate": "2019-07-12",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2020-09-22"
+ },
+ "605538": {
+  "id": 605538,
+  "name": "Wisler, Matt",
+  "birthDate": "1992-09-12",
+  "mlbDebutDate": "2015-06-19",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-09-04"
+ },
+ "605540": {
+  "id": 605540,
+  "name": "Woodruff, Brandon",
+  "birthDate": "1993-02-10",
+  "mlbDebutDate": "2017-08-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "605548": {
+  "id": 605548,
+  "name": "Zimmer, Bradley",
+  "birthDate": "1992-11-27",
+  "mlbDebutDate": "2017-05-16",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2022-10-05"
+ },
+ "606115": {
+  "id": 606115,
+  "name": "Arcia, Orlando",
+  "birthDate": "1994-08-04",
+  "mlbDebutDate": "2016-08-02",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "606132": {
+  "id": 606132,
+  "name": "Tapia, Raimel",
+  "birthDate": "1994-02-04",
+  "mlbDebutDate": "2016-09-02",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "606160": {
+  "id": 606160,
+  "name": "Montero, Rafael",
+  "birthDate": "1990-10-17",
+  "mlbDebutDate": "2014-05-14",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "606299": {
+  "id": 606299,
+  "name": "Peraza, José",
+  "birthDate": "1994-04-30",
+  "mlbDebutDate": "2015-08-10",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "607043": {
+  "id": 607043,
+  "name": "Nimmo, Brandon",
+  "birthDate": "1993-03-27",
+  "mlbDebutDate": "2016-06-26",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "607074": {
+  "id": 607074,
+  "name": "Rodón, Carlos",
+  "birthDate": "1992-12-10",
+  "mlbDebutDate": "2015-04-21",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "607192": {
+  "id": 607192,
+  "name": "Glasnow, Tyler",
+  "birthDate": "1993-08-23",
+  "mlbDebutDate": "2016-07-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "607200": {
+  "id": 607200,
+  "name": "Fedde, Erick",
+  "birthDate": "1993-02-25",
+  "mlbDebutDate": "2017-07-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "607208": {
+  "id": 607208,
+  "name": "Turner, Trea",
+  "birthDate": "1993-06-30",
+  "mlbDebutDate": "2015-08-21",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "607223": {
+  "id": 607223,
+  "name": "Reed, AJ",
+  "birthDate": "1993-05-10",
+  "mlbDebutDate": "2016-06-25",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2019-08-01"
+ },
+ "607237": {
+  "id": 607237,
+  "name": "Garrett, Amir",
+  "birthDate": "1992-05-03",
+  "mlbDebutDate": "2017-04-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "607536": {
+  "id": 607536,
+  "name": "Freeland, Kyle",
+  "birthDate": "1993-05-14",
+  "mlbDebutDate": "2017-04-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608324": {
+  "id": 608324,
+  "name": "Bregman, Alex",
+  "birthDate": "1994-03-30",
+  "mlbDebutDate": "2016-07-25",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608325": {
+  "id": 608325,
+  "name": "Cecchini, Gavin",
+  "birthDate": "1993-12-22",
+  "mlbDebutDate": "2016-09-11",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2017-10-01"
+ },
+ "608331": {
+  "id": 608331,
+  "name": "Fried, Max",
+  "birthDate": "1994-01-18",
+  "mlbDebutDate": "2017-08-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608334": {
+  "id": 608334,
+  "name": "Fulmer, Carson",
+  "birthDate": "1993-12-13",
+  "mlbDebutDate": "2016-07-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608336": {
+  "id": 608336,
+  "name": "Gallo, Joey",
+  "birthDate": "1993-11-19",
+  "mlbDebutDate": "2015-06-02",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2024-09-29"
+ },
+ "608337": {
+  "id": 608337,
+  "name": "Giolito, Lucas",
+  "birthDate": "1994-07-14",
+  "mlbDebutDate": "2016-06-28",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608348": {
+  "id": 608348,
+  "name": "Kelly, Carson",
+  "birthDate": "1994-07-14",
+  "mlbDebutDate": "2016-09-05",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608365": {
+  "id": 608365,
+  "name": "Russell, Addison",
+  "birthDate": "1994-01-23",
+  "mlbDebutDate": "2015-04-21",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608369": {
+  "id": 608369,
+  "name": "Seager, Corey",
+  "birthDate": "1994-04-27",
+  "mlbDebutDate": "2015-09-03",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608371": {
+  "id": 608371,
+  "name": "Sims, Lucas",
+  "birthDate": "1994-05-10",
+  "mlbDebutDate": "2017-08-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608379": {
+  "id": 608379,
+  "name": "Wacha, Michael",
+  "birthDate": "1991-07-01",
+  "mlbDebutDate": "2013-05-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608384": {
+  "id": 608384,
+  "name": "Williams, Nick",
+  "birthDate": "1993-09-08",
+  "mlbDebutDate": "2017-06-30",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608385": {
+  "id": 608385,
+  "name": "Winker, Jesse",
+  "birthDate": "1993-08-17",
+  "mlbDebutDate": "2017-04-14",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608566": {
+  "id": 608566,
+  "name": "Márquez, Germán",
+  "birthDate": "1995-02-22",
+  "mlbDebutDate": "2016-09-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608577": {
+  "id": 608577,
+  "name": "Mazara, Nomar",
+  "birthDate": "1995-04-26",
+  "mlbDebutDate": "2016-04-10",
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "608700": {
+  "id": 608700,
+  "name": "Plawecki, Kevin",
+  "birthDate": "1991-02-26",
+  "mlbDebutDate": "2015-04-21",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2022-10-04"
+ },
+ "609275": {
+  "id": 609275,
+  "name": "Mondesi, Adalberto",
+  "birthDate": "1995-07-27",
+  "mlbDebutDate": "2016-07-26",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2022-04-26"
+ },
+ "609280": {
+  "id": 609280,
+  "name": "Andujar, Miguel",
+  "birthDate": "1995-03-02",
+  "mlbDebutDate": "2017-06-28",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "615698": {
+  "id": 615698,
+  "name": "Quantrill, Cal",
+  "birthDate": "1995-02-10",
+  "mlbDebutDate": "2019-05-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "620439": {
+  "id": 620439,
+  "name": "Barreto, Franklin",
+  "birthDate": "1996-02-27",
+  "mlbDebutDate": "2017-06-24",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "620446": {
+  "id": 620446,
+  "name": "Urena, Richard",
+  "birthDate": "1996-02-26",
+  "mlbDebutDate": "2017-09-01",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2019-09-29"
+ },
+ "621002": {
+  "id": 621002,
+  "name": "Robertson, Daniel",
+  "birthDate": "1994-03-22",
+  "mlbDebutDate": "2017-04-04",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2021-07-04"
+ },
+ "621020": {
+  "id": 621020,
+  "name": "Swanson, Dansby",
+  "birthDate": "1994-02-11",
+  "mlbDebutDate": "2016-08-17",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "621028": {
+  "id": 621028,
+  "name": "Newman, Kevin",
+  "birthDate": "1993-08-04",
+  "mlbDebutDate": "2018-08-16",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "621043": {
+  "id": 621043,
+  "name": "Correa, Carlos",
+  "birthDate": "1994-09-22",
+  "mlbDebutDate": "2015-06-08",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "621052": {
+  "id": 621052,
+  "name": "Reyes, Alex",
+  "birthDate": "1994-08-29",
+  "mlbDebutDate": "2016-08-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-10-03"
+ },
+ "621076": {
+  "id": 621076,
+  "name": "Kaprielian, James",
+  "birthDate": "1994-03-02",
+  "mlbDebutDate": "2020-08-16",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "621111": {
+  "id": 621111,
+  "name": "Buehler, Walker",
+  "birthDate": "1994-07-28",
+  "mlbDebutDate": "2017-09-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "621121": {
+  "id": 621121,
+  "name": "McCullers Jr., Lance",
+  "birthDate": "1993-10-02",
+  "mlbDebutDate": "2015-05-18",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "621244": {
+  "id": 621244,
+  "name": "Berríos, José",
+  "birthDate": "1994-05-27",
+  "mlbDebutDate": "2016-04-27",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "621249": {
+  "id": 621249,
+  "name": "Underwood Jr., Duane",
+  "birthDate": "1994-07-20",
+  "mlbDebutDate": "2018-06-25",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "621311": {
+  "id": 621311,
+  "name": "Dahl, David",
+  "birthDate": "1994-04-01",
+  "mlbDebutDate": "2016-07-25",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2024-07-06"
+ },
+ "621433": {
+  "id": 621433,
+  "name": "Phillips, Brett",
+  "birthDate": "1994-05-30",
+  "mlbDebutDate": "2017-06-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2023-10-01"
+ },
+ "621439": {
+  "id": 621439,
+  "name": "Buxton, Byron",
+  "birthDate": "1993-12-18",
+  "mlbDebutDate": "2015-06-14",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "621445": {
+  "id": 621445,
+  "name": "Hawkins, Courtney",
+  "birthDate": "1993-11-12",
+  "mlbDebutDate": null,
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "621446": {
+  "id": 621446,
+  "name": "Brinson, Lewis",
+  "birthDate": "1994-05-08",
+  "mlbDebutDate": "2017-06-11",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2022-09-20"
+ },
+ "621566": {
+  "id": 621566,
+  "name": "Olson, Matt",
+  "birthDate": "1994-03-29",
+  "mlbDebutDate": "2016-09-12",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "622092": {
+  "id": 622092,
+  "name": "Zimmer, Kyle",
+  "birthDate": "1991-09-13",
+  "mlbDebutDate": "2019-03-31",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-10-02"
+ },
+ "622097": {
+  "id": 622097,
+  "name": "Thompson, Jake",
+  "birthDate": "1994-01-31",
+  "mlbDebutDate": "2016-08-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "622253": {
+  "id": 622253,
+  "name": "Tate, Dillon",
+  "birthDate": "1994-05-01",
+  "mlbDebutDate": "2019-07-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "622534": {
+  "id": 622534,
+  "name": "Margot, Manuel",
+  "birthDate": "1994-09-28",
+  "mlbDebutDate": "2016-09-21",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2025-04-07"
+ },
+ "622663": {
+  "id": 622663,
+  "name": "Severino, Luis",
+  "birthDate": "1994-02-20",
+  "mlbDebutDate": "2015-08-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "622761": {
+  "id": 622761,
+  "name": "Mateo, Jorge",
+  "birthDate": "1995-06-23",
+  "mlbDebutDate": "2020-08-13",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "622795": {
+  "id": 622795,
+  "name": "Méndez, Yohander",
+  "birthDate": "1995-01-17",
+  "mlbDebutDate": "2016-09-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "622864": {
+  "id": 622864,
+  "name": "Romero, Fernando",
+  "birthDate": "1994-12-24",
+  "mlbDebutDate": "2018-05-02",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2019-09-29"
+ },
+ "623352": {
+  "id": 623352,
+  "name": "Hader, Josh",
+  "birthDate": "1994-04-07",
+  "mlbDebutDate": "2017-06-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "624413": {
+  "id": 624413,
+  "name": "Alonso, Pete",
+  "birthDate": "1994-12-07",
+  "mlbDebutDate": "2019-03-28",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "624414": {
+  "id": 624414,
+  "name": "Arroyo, Christian",
+  "birthDate": "1995-05-30",
+  "mlbDebutDate": "2017-04-24",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "624424": {
+  "id": 624424,
+  "name": "Conforto, Michael",
+  "birthDate": "1993-03-01",
+  "mlbDebutDate": "2015-07-24",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "624427": {
+  "id": 624427,
+  "name": "Gonsalves, Stephen",
+  "birthDate": "1994-07-08",
+  "mlbDebutDate": "2018-08-20",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "624503": {
+  "id": 624503,
+  "name": "Gordon, Nick",
+  "birthDate": "1995-10-24",
+  "mlbDebutDate": "2021-05-06",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2024-08-03"
+ },
+ "624512": {
+  "id": 624512,
+  "name": "McGuire, Reese",
+  "birthDate": "1995-03-02",
+  "mlbDebutDate": "2018-09-06",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "624577": {
+  "id": 624577,
+  "name": "Puig, Yasiel",
+  "birthDate": "1990-12-07",
+  "mlbDebutDate": "2013-06-03",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2019-09-27"
+ },
+ "624585": {
+  "id": 624585,
+  "name": "Soler, Jorge",
+  "birthDate": "1992-02-25",
+  "mlbDebutDate": "2014-08-27",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "625643": {
+  "id": 625643,
+  "name": "López, Reynaldo",
+  "birthDate": "1994-01-04",
+  "mlbDebutDate": "2016-07-19",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "627894": {
+  "id": 627894,
+  "name": "Gohara, Luiz",
+  "birthDate": "1996-07-31",
+  "mlbDebutDate": "2017-09-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2018-07-08"
+ },
+ "628711": {
+  "id": 628711,
+  "name": "Urías, Julio",
+  "birthDate": "1996-08-12",
+  "mlbDebutDate": "2016-05-27",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2023-09-01"
+ },
+ "640441": {
+  "id": 640441,
+  "name": "Ball, Trey",
+  "birthDate": "1994-06-27",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "640449": {
+  "id": 640449,
+  "name": "Frazier, Clint",
+  "birthDate": "1994-09-06",
+  "mlbDebutDate": "2017-07-01",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2023-07-02"
+ },
+ "640451": {
+  "id": 640451,
+  "name": "Harvey, Hunter",
+  "birthDate": "1994-12-09",
+  "mlbDebutDate": "2019-08-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "640455": {
+  "id": 640455,
+  "name": "Manaea, Sean",
+  "birthDate": "1992-02-01",
+  "mlbDebutDate": "2016-04-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "640457": {
+  "id": 640457,
+  "name": "Meadows, Austin",
+  "birthDate": "1995-05-03",
+  "mlbDebutDate": "2018-05-18",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2023-04-06"
+ },
+ "640462": {
+  "id": 640462,
+  "name": "Puk, A.J.",
+  "birthDate": "1995-04-25",
+  "mlbDebutDate": "2019-08-21",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "640463": {
+  "id": 640463,
+  "name": "Shipley, Braden",
+  "birthDate": "1992-02-22",
+  "mlbDebutDate": "2016-07-25",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2018-06-25"
+ },
+ "640464": {
+  "id": 640464,
+  "name": "Stewart, Kohl",
+  "birthDate": "1994-10-07",
+  "mlbDebutDate": "2018-08-12",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-07-05"
+ },
+ "641313": {
+  "id": 641313,
+  "name": "Anderson, Tim",
+  "birthDate": "1993-06-23",
+  "mlbDebutDate": "2016-06-10",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2025-05-25"
+ },
+ "641343": {
+  "id": 641343,
+  "name": "Bauers, Jake",
+  "birthDate": "1995-10-06",
+  "mlbDebutDate": "2018-06-07",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "641355": {
+  "id": 641355,
+  "name": "Bellinger, Cody",
+  "birthDate": "1995-07-13",
+  "mlbDebutDate": "2017-04-25",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "641432": {
+  "id": 641432,
+  "name": "Calhoun, Willie",
+  "birthDate": "1994-11-04",
+  "mlbDebutDate": "2017-09-12",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "641470": {
+  "id": 641470,
+  "name": "Collins, Zack",
+  "birthDate": "1995-02-06",
+  "mlbDebutDate": "2019-06-19",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2023-08-20"
+ },
+ "641487": {
+  "id": 641487,
+  "name": "Crawford, J.P.",
+  "birthDate": "1995-01-11",
+  "mlbDebutDate": "2017-09-05",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "641540": {
+  "id": 641540,
+  "name": "Dunning, Dane",
+  "birthDate": "1994-12-20",
+  "mlbDebutDate": "2020-08-19",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "641541": {
+  "id": 641541,
+  "name": "Duplantier, Jon",
+  "birthDate": "1994-07-11",
+  "mlbDebutDate": "2019-04-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-06-13"
+ },
+ "641662": {
+  "id": 641662,
+  "name": "Hansen, Alec",
+  "birthDate": "1994-10-10",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "641703": {
+  "id": 641703,
+  "name": "Honeywell, Brent",
+  "birthDate": "1995-03-31",
+  "mlbDebutDate": "2021-04-11",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "641786": {
+  "id": 641786,
+  "name": "Lewis, Kyle",
+  "birthDate": "1995-07-13",
+  "mlbDebutDate": "2019-09-10",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2023-08-19"
+ },
+ "641816": {
+  "id": 641816,
+  "name": "Mahle, Tyler",
+  "birthDate": "1994-09-29",
+  "mlbDebutDate": "2017-08-27",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "641856": {
+  "id": 641856,
+  "name": "McKinney, Billy",
+  "birthDate": "1994-08-23",
+  "mlbDebutDate": "2018-03-30",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "641857": {
+  "id": 641857,
+  "name": "McMahon, Ryan",
+  "birthDate": "1994-12-14",
+  "mlbDebutDate": "2017-08-12",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "641933": {
+  "id": 641933,
+  "name": "O'Neill, Tyler",
+  "birthDate": "1995-06-22",
+  "mlbDebutDate": "2018-04-19",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "641999": {
+  "id": 641999,
+  "name": "Ray, Corey",
+  "birthDate": "1994-09-22",
+  "mlbDebutDate": "2021-04-24",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2021-04-24"
+ },
+ "642003": {
+  "id": 642003,
+  "name": "Reed, Cody",
+  "birthDate": "1993-04-15",
+  "mlbDebutDate": "2016-06-18",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2021-05-18"
+ },
+ "642082": {
+  "id": 642082,
+  "name": "Sisco, Chance",
+  "birthDate": "1995-02-24",
+  "mlbDebutDate": "2017-09-02",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": false,
+  "lastPlayedDate": "2021-09-03"
+ },
+ "642086": {
+  "id": 642086,
+  "name": "Smith, Dominic",
+  "birthDate": "1995-06-15",
+  "mlbDebutDate": "2017-08-11",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "642203": {
+  "id": 642203,
+  "name": "Widener, Taylor",
+  "birthDate": "1994-10-24",
+  "mlbDebutDate": "2020-07-25",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2022-10-04"
+ },
+ "642336": {
+  "id": 642336,
+  "name": "Mejía, Francisco",
+  "birthDate": "1995-10-27",
+  "mlbDebutDate": "2017-09-01",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "642528": {
+  "id": 642528,
+  "name": "Loáisiga, Jonathan",
+  "birthDate": "1994-11-02",
+  "mlbDebutDate": "2018-06-15",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "642564": {
+  "id": 642564,
+  "name": "Martes, Francis",
+  "birthDate": "1995-11-24",
+  "mlbDebutDate": "2017-06-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "642708": {
+  "id": 642708,
+  "name": "Rosario, Amed",
+  "birthDate": "1995-11-20",
+  "mlbDebutDate": "2017-08-01",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "642715": {
+  "id": 642715,
+  "name": "Adames, Willy",
+  "birthDate": "1995-09-02",
+  "mlbDebutDate": "2018-05-22",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "642770": {
+  "id": 642770,
+  "name": "Guerra, Javy",
+  "birthDate": "1995-09-25",
+  "mlbDebutDate": "2018-05-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "643217": {
+  "id": 643217,
+  "name": "Benintendi, Andrew",
+  "birthDate": "1994-07-06",
+  "mlbDebutDate": "2016-08-02",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "643290": {
+  "id": 643290,
+  "name": "Dunn, Justin",
+  "birthDate": "1995-09-22",
+  "mlbDebutDate": "2019-09-12",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "643376": {
+  "id": 643376,
+  "name": "Jansen, Danny",
+  "birthDate": "1995-04-15",
+  "mlbDebutDate": "2018-08-13",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "645277": {
+  "id": 645277,
+  "name": "Albies, Ozzie",
+  "birthDate": "1997-01-07",
+  "mlbDebutDate": "2017-08-01",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "645302": {
+  "id": 645302,
+  "name": "Robles, Victor",
+  "birthDate": "1997-05-19",
+  "mlbDebutDate": "2017-09-07",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "646240": {
+  "id": 646240,
+  "name": "Devers, Rafael",
+  "birthDate": "1996-10-24",
+  "mlbDebutDate": "2017-07-25",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "647336": {
+  "id": 647336,
+  "name": "Soroka, Michael",
+  "birthDate": "1997-08-04",
+  "mlbDebutDate": "2018-05-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "649966": {
+  "id": 649966,
+  "name": "Urías, Luis",
+  "birthDate": "1997-06-03",
+  "mlbDebutDate": "2018-08-28",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "650391": {
+  "id": 650391,
+  "name": "Jiménez, Eloy",
+  "birthDate": "1996-11-27",
+  "mlbDebutDate": "2019-03-28",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "650402": {
+  "id": 650402,
+  "name": "Torres, Gleyber",
+  "birthDate": "1996-12-13",
+  "mlbDebutDate": "2018-04-22",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656061": {
+  "id": 656061,
+  "name": "Abreu, Albert",
+  "birthDate": "1995-09-26",
+  "mlbDebutDate": "2020-08-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656252": {
+  "id": 656252,
+  "name": "Bradley, Bobby",
+  "birthDate": "1996-05-29",
+  "mlbDebutDate": "2019-06-23",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656266": {
+  "id": 656266,
+  "name": "Bukauskas, J.B.",
+  "birthDate": "1996-10-11",
+  "mlbDebutDate": "2021-04-20",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656288": {
+  "id": 656288,
+  "name": "Canning, Griffin",
+  "birthDate": "1996-05-11",
+  "mlbDebutDate": "2019-04-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656302": {
+  "id": 656302,
+  "name": "Cease, Dylan",
+  "birthDate": "1995-12-28",
+  "mlbDebutDate": "2019-07-03",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656305": {
+  "id": 656305,
+  "name": "Chapman, Matt",
+  "birthDate": "1993-04-28",
+  "mlbDebutDate": "2017-06-15",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656308": {
+  "id": 656308,
+  "name": "Chavis, Michael",
+  "birthDate": "1995-08-11",
+  "mlbDebutDate": "2019-04-20",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656371": {
+  "id": 656371,
+  "name": "Díaz, Isan",
+  "birthDate": "1996-05-27",
+  "mlbDebutDate": "2019-08-05",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656412": {
+  "id": 656412,
+  "name": "Faedo, Alex",
+  "birthDate": "1995-11-12",
+  "mlbDebutDate": "2022-05-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656427": {
+  "id": 656427,
+  "name": "Flaherty, Jack",
+  "birthDate": "1995-10-15",
+  "mlbDebutDate": "2017-09-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656509": {
+  "id": 656509,
+  "name": "Harrison, Monte",
+  "birthDate": "1995-08-10",
+  "mlbDebutDate": "2020-08-04",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2022-07-12"
+ },
+ "656514": {
+  "id": 656514,
+  "name": "Haseley, Adam",
+  "birthDate": "1996-04-12",
+  "mlbDebutDate": "2019-06-04",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2023-06-29"
+ },
+ "656546": {
+  "id": 656546,
+  "name": "Hoffman, Jeff",
+  "birthDate": "1993-01-08",
+  "mlbDebutDate": "2016-08-20",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656550": {
+  "id": 656550,
+  "name": "Holmes, Grant",
+  "birthDate": "1996-03-22",
+  "mlbDebutDate": "2024-06-16",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656577": {
+  "id": 656577,
+  "name": "Jackson, Alex",
+  "birthDate": "1995-12-25",
+  "mlbDebutDate": "2019-04-07",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656605": {
+  "id": 656605,
+  "name": "Keller, Mitch",
+  "birthDate": "1996-04-04",
+  "mlbDebutDate": "2019-05-27",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656626": {
+  "id": 656626,
+  "name": "Kolek, Tyler",
+  "birthDate": "1995-12-15",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "656629": {
+  "id": 656629,
+  "name": "Kopech, Michael",
+  "birthDate": "1996-04-30",
+  "mlbDebutDate": "2018-08-21",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656686": {
+  "id": 656686,
+  "name": "Martin, Corbin",
+  "birthDate": "1995-12-28",
+  "mlbDebutDate": "2019-05-12",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656713": {
+  "id": 656713,
+  "name": "McKay, Brendan",
+  "birthDate": "1995-12-18",
+  "mlbDebutDate": "2019-06-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2019-09-29"
+ },
+ "656794": {
+  "id": 656794,
+  "name": "Newcomb, Sean",
+  "birthDate": "1993-06-12",
+  "mlbDebutDate": "2017-06-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656814": {
+  "id": 656814,
+  "name": "Ortiz, Luis",
+  "birthDate": "1995-09-22",
+  "mlbDebutDate": "2018-09-07",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656887": {
+  "id": 656887,
+  "name": "Reid-Foley, Sean",
+  "birthDate": "1995-08-30",
+  "mlbDebutDate": "2018-08-13",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656941": {
+  "id": 656941,
+  "name": "Schwarber, Kyle",
+  "birthDate": "1993-03-05",
+  "mlbDebutDate": "2015-06-16",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656954": {
+  "id": 656954,
+  "name": "Sheffield, Justus",
+  "birthDate": "1996-05-13",
+  "mlbDebutDate": "2018-09-19",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "656976": {
+  "id": 656976,
+  "name": "Smith, Pavin",
+  "birthDate": "1996-02-06",
+  "mlbDebutDate": "2020-09-12",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "657053": {
+  "id": 657053,
+  "name": "Toussaint, Touki",
+  "birthDate": "1996-06-20",
+  "mlbDebutDate": "2018-08-13",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "657077": {
+  "id": 657077,
+  "name": "Verdugo, Alex",
+  "birthDate": "1996-05-15",
+  "mlbDebutDate": "2017-09-01",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "657088": {
+  "id": 657088,
+  "name": "Wall, Forrest",
+  "birthDate": "1995-11-20",
+  "mlbDebutDate": "2023-07-22",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "657108": {
+  "id": 657108,
+  "name": "White, Evan",
+  "birthDate": "1996-04-26",
+  "mlbDebutDate": "2020-07-24",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "657140": {
+  "id": 657140,
+  "name": "Wright, Kyle",
+  "birthDate": "1995-10-02",
+  "mlbDebutDate": "2018-09-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "657376": {
+  "id": 657376,
+  "name": "Schmidt, Clarke",
+  "birthDate": "1996-02-20",
+  "mlbDebutDate": "2020-09-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "657624": {
+  "id": 657624,
+  "name": "James, Josh",
+  "birthDate": "1993-03-08",
+  "mlbDebutDate": "2018-09-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "657746": {
+  "id": 657746,
+  "name": "Ryan, Joe",
+  "birthDate": "1996-06-05",
+  "mlbDebutDate": "2021-09-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "658431": {
+  "id": 658431,
+  "name": "Medina, Adonis",
+  "birthDate": "1996-12-18",
+  "mlbDebutDate": "2020-09-20",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "658530": {
+  "id": 658530,
+  "name": "Pérez, Franklin",
+  "birthDate": "1997-12-06",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "659262": {
+  "id": 659262,
+  "name": "Espinoza, Anderson",
+  "birthDate": "1998-03-09",
+  "mlbDebutDate": "2022-05-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "660162": {
+  "id": 660162,
+  "name": "Moncada, Yoán",
+  "birthDate": "1995-05-27",
+  "mlbDebutDate": "2016-09-02",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "660271": {
+  "id": 660271,
+  "name": "Ohtani, Shohei",
+  "birthDate": "1994-07-05",
+  "mlbDebutDate": "2018-03-29",
+  "primaryPosition": "TWP",
+  "positionType": "Two-Way Player",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "660613": {
+  "id": 660613,
+  "name": "Hernández, Ronaldo",
+  "birthDate": "1997-11-11",
+  "mlbDebutDate": null,
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "660644": {
+  "id": 660644,
+  "name": "Bruján, Vidal",
+  "birthDate": "1998-02-09",
+  "mlbDebutDate": "2021-07-07",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "660670": {
+  "id": 660670,
+  "name": "Acuña Jr., Ronald",
+  "birthDate": "1997-12-18",
+  "mlbDebutDate": "2018-04-25",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "660688": {
+  "id": 660688,
+  "name": "Ruiz, Keibert",
+  "birthDate": "1998-07-20",
+  "mlbDebutDate": "2020-08-16",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "660813": {
+  "id": 660813,
+  "name": "Graterol, Brusdar",
+  "birthDate": "1998-08-26",
+  "mlbDebutDate": "2019-09-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "660821": {
+  "id": 660821,
+  "name": "Sánchez, Jesús",
+  "birthDate": "1997-10-07",
+  "mlbDebutDate": "2020-08-21",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "662139": {
+  "id": 662139,
+  "name": "Varsho, Daulton",
+  "birthDate": "1996-07-02",
+  "mlbDebutDate": "2020-07-30",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663330": {
+  "id": 663330,
+  "name": "Jones, Jahmai",
+  "birthDate": "1997-08-04",
+  "mlbDebutDate": "2020-08-31",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663366": {
+  "id": 663366,
+  "name": "Burrows, Beau",
+  "birthDate": "1996-09-18",
+  "mlbDebutDate": "2020-07-27",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663465": {
+  "id": 663465,
+  "name": "Allard, Kolby",
+  "birthDate": "1997-08-13",
+  "mlbDebutDate": "2018-07-31",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663474": {
+  "id": 663474,
+  "name": "McKenzie, Triston",
+  "birthDate": "1997-08-02",
+  "mlbDebutDate": "2020-08-22",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663524": {
+  "id": 663524,
+  "name": "Randolph, Cornelius",
+  "birthDate": "1997-06-02",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663531": {
+  "id": 663531,
+  "name": "Allen, Logan",
+  "birthDate": "1997-05-23",
+  "mlbDebutDate": "2019-06-18",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663538": {
+  "id": 663538,
+  "name": "Hoerner, Nico",
+  "birthDate": "1997-05-13",
+  "mlbDebutDate": "2019-09-09",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663554": {
+  "id": 663554,
+  "name": "Mize, Casey",
+  "birthDate": "1997-05-01",
+  "mlbDebutDate": "2020-08-19",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663556": {
+  "id": 663556,
+  "name": "McClanahan, Shane",
+  "birthDate": "1997-04-28",
+  "mlbDebutDate": "2020-10-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663586": {
+  "id": 663586,
+  "name": "Riley, Austin",
+  "birthDate": "1997-04-02",
+  "mlbDebutDate": "2019-05-15",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663611": {
+  "id": 663611,
+  "name": "Madrigal, Nick",
+  "birthDate": "1997-03-05",
+  "mlbDebutDate": "2020-07-31",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663616": {
+  "id": 663616,
+  "name": "Larnach, Trevor",
+  "birthDate": "1997-02-26",
+  "mlbDebutDate": "2021-05-08",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663624": {
+  "id": 663624,
+  "name": "Mountcastle, Ryan",
+  "birthDate": "1997-02-18",
+  "mlbDebutDate": "2020-08-21",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663647": {
+  "id": 663647,
+  "name": "Hayes, Ke'Bryan",
+  "birthDate": "1997-01-28",
+  "mlbDebutDate": "2020-09-01",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663656": {
+  "id": 663656,
+  "name": "Tucker, Kyle",
+  "birthDate": "1997-01-17",
+  "mlbDebutDate": "2018-07-07",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663662": {
+  "id": 663662,
+  "name": "Cameron, Daz",
+  "birthDate": "1997-01-15",
+  "mlbDebutDate": "2020-09-09",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663697": {
+  "id": 663697,
+  "name": "India, Jonathan",
+  "birthDate": "1996-12-15",
+  "mlbDebutDate": "2021-04-01",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663698": {
+  "id": 663698,
+  "name": "Bart, Joey",
+  "birthDate": "1996-12-15",
+  "mlbDebutDate": "2020-08-20",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663738": {
+  "id": 663738,
+  "name": "Lynch IV, Daniel",
+  "birthDate": "1996-11-17",
+  "mlbDebutDate": "2021-05-03",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663757": {
+  "id": 663757,
+  "name": "Grisham, Trent",
+  "birthDate": "1996-11-01",
+  "mlbDebutDate": "2019-08-01",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663878": {
+  "id": 663878,
+  "name": "Pearson, Nate",
+  "birthDate": "1996-08-20",
+  "mlbDebutDate": "2020-07-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663886": {
+  "id": 663886,
+  "name": "Stephenson, Tyler",
+  "birthDate": "1996-08-16",
+  "mlbDebutDate": "2020-07-27",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663898": {
+  "id": 663898,
+  "name": "Rodgers, Brendan",
+  "birthDate": "1996-08-09",
+  "mlbDebutDate": "2019-05-17",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663903": {
+  "id": 663903,
+  "name": "Singer, Brady",
+  "birthDate": "1996-08-04",
+  "mlbDebutDate": "2020-07-25",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "663978": {
+  "id": 663978,
+  "name": "Paddack, Chris",
+  "birthDate": "1996-01-08",
+  "mlbDebutDate": "2019-03-31",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "664023": {
+  "id": 664023,
+  "name": "Happ, Ian",
+  "birthDate": "1994-08-12",
+  "mlbDebutDate": "2017-05-13",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "664068": {
+  "id": 664068,
+  "name": "Kingery, Scott",
+  "birthDate": "1994-04-29",
+  "mlbDebutDate": "2018-03-30",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "664079": {
+  "id": 664079,
+  "name": "Jay, Tyler",
+  "birthDate": "1994-04-19",
+  "mlbDebutDate": "2024-04-11",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2024-07-30"
+ },
+ "664314": {
+  "id": 664314,
+  "name": "Florial, Estevan",
+  "birthDate": "1997-11-25",
+  "mlbDebutDate": "2020-08-28",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "664350": {
+  "id": 664350,
+  "name": "Sánchez, Sixto",
+  "birthDate": "1998-07-29",
+  "mlbDebutDate": "2020-08-22",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2024-05-31"
+ },
+ "664761": {
+  "id": 664761,
+  "name": "Bohm, Alec",
+  "birthDate": "1996-08-03",
+  "mlbDebutDate": "2020-08-13",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "664856": {
+  "id": 664856,
+  "name": "Adams, Chance",
+  "birthDate": "1994-08-10",
+  "mlbDebutDate": "2018-08-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2020-09-22"
+ },
+ "665487": {
+  "id": 665487,
+  "name": "Tatis Jr., Fernando",
+  "birthDate": "1999-01-02",
+  "mlbDebutDate": "2019-03-28",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "665489": {
+  "id": 665489,
+  "name": "Guerrero Jr., Vladimir",
+  "birthDate": "1999-03-16",
+  "mlbDebutDate": "2019-04-26",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "665506": {
+  "id": 665506,
+  "name": "Pache, Cristian",
+  "birthDate": "1998-11-19",
+  "mlbDebutDate": "2020-08-21",
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "665620": {
+  "id": 665620,
+  "name": "García, Deivi",
+  "birthDate": "1999-05-19",
+  "mlbDebutDate": "2020-08-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2024-04-27"
+ },
+ "665742": {
+  "id": 665742,
+  "name": "Soto, Juan",
+  "birthDate": "1998-10-25",
+  "mlbDebutDate": "2018-05-15",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "665750": {
+  "id": 665750,
+  "name": "Taveras, Leody",
+  "birthDate": "1998-09-08",
+  "mlbDebutDate": "2020-07-24",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "665751": {
+  "id": 665751,
+  "name": "Álvarez, Yadier",
+  "birthDate": "1996-03-07",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "665795": {
+  "id": 665795,
+  "name": "Cabrera, Edward",
+  "birthDate": "1998-04-13",
+  "mlbDebutDate": "2021-08-25",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "665804": {
+  "id": 665804,
+  "name": "Amaya, Miguel",
+  "birthDate": "1999-03-09",
+  "mlbDebutDate": "2023-05-04",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "665833": {
+  "id": 665833,
+  "name": "Cruz, Oneil",
+  "birthDate": "1998-10-04",
+  "mlbDebutDate": "2021-10-02",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "665862": {
+  "id": 665862,
+  "name": "Chisholm Jr., Jazz",
+  "birthDate": "1998-02-01",
+  "mlbDebutDate": "2020-09-01",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "665926": {
+  "id": 665926,
+  "name": "Giménez, Andrés",
+  "birthDate": "1998-09-04",
+  "mlbDebutDate": "2020-07-24",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666120": {
+  "id": 666120,
+  "name": "Anderson, Ian",
+  "birthDate": "1998-05-02",
+  "mlbDebutDate": "2020-08-26",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666129": {
+  "id": 666129,
+  "name": "Garrett, Braxton",
+  "birthDate": "1997-08-05",
+  "mlbDebutDate": "2020-09-13",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666130": {
+  "id": 666130,
+  "name": "Groome, Jay",
+  "birthDate": "1998-08-23",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666134": {
+  "id": 666134,
+  "name": "Jones, Nolan",
+  "birthDate": "1998-05-07",
+  "mlbDebutDate": "2022-07-08",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666135": {
+  "id": 666135,
+  "name": "Kirilloff, Alex",
+  "birthDate": "1997-11-09",
+  "mlbDebutDate": "2020-09-30",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2024-06-11"
+ },
+ "666139": {
+  "id": 666139,
+  "name": "Lowe, Josh",
+  "birthDate": "1998-02-02",
+  "mlbDebutDate": "2021-09-08",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666157": {
+  "id": 666157,
+  "name": "Lodolo, Nick",
+  "birthDate": "1998-02-05",
+  "mlbDebutDate": "2022-04-13",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666158": {
+  "id": 666158,
+  "name": "Lux, Gavin",
+  "birthDate": "1997-11-23",
+  "mlbDebutDate": "2019-09-02",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666159": {
+  "id": 666159,
+  "name": "Manning, Matt",
+  "birthDate": "1998-01-28",
+  "mlbDebutDate": "2021-06-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666160": {
+  "id": 666160,
+  "name": "Moniak, Mickey",
+  "birthDate": "1998-05-13",
+  "mlbDebutDate": "2020-09-16",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666164": {
+  "id": 666164,
+  "name": "Rutherford, Blake",
+  "birthDate": "1997-05-02",
+  "mlbDebutDate": "2023-08-04",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666176": {
+  "id": 666176,
+  "name": "Adell, Jo",
+  "birthDate": "1999-04-08",
+  "mlbDebutDate": "2020-08-04",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666182": {
+  "id": 666182,
+  "name": "Bichette, Bo",
+  "birthDate": "1998-03-05",
+  "mlbDebutDate": "2019-07-29",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666183": {
+  "id": 666183,
+  "name": "Bishop, Hunter",
+  "birthDate": "1998-06-25",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666185": {
+  "id": 666185,
+  "name": "Carlson, Dylan",
+  "birthDate": "1998-10-23",
+  "mlbDebutDate": "2020-08-15",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666198": {
+  "id": 666198,
+  "name": "Kieboom, Carter",
+  "birthDate": "1997-09-03",
+  "mlbDebutDate": "2019-04-26",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666200": {
+  "id": 666200,
+  "name": "Luzardo, Jesús",
+  "birthDate": "1997-09-30",
+  "mlbDebutDate": "2019-09-11",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666206": {
+  "id": 666206,
+  "name": "Pérez, Delvin",
+  "birthDate": "1998-11-24",
+  "mlbDebutDate": null,
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666207": {
+  "id": 666207,
+  "name": "Pint, Riley",
+  "birthDate": "1997-11-06",
+  "mlbDebutDate": "2023-05-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666211": {
+  "id": 666211,
+  "name": "Trammell, Taylor",
+  "birthDate": "1997-09-13",
+  "mlbDebutDate": "2021-04-01",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666213": {
+  "id": 666213,
+  "name": "Welker, Colton",
+  "birthDate": "1997-10-09",
+  "mlbDebutDate": "2021-09-08",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2021-10-03"
+ },
+ "666215": {
+  "id": 666215,
+  "name": "Whitley, Forrest",
+  "birthDate": "1997-09-15",
+  "mlbDebutDate": "2024-04-16",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2025-06-27"
+ },
+ "666310": {
+  "id": 666310,
+  "name": "Naylor, Bo",
+  "birthDate": "2000-02-21",
+  "mlbDebutDate": "2022-10-01",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666364": {
+  "id": 666364,
+  "name": "Balazovic, Jordan",
+  "birthDate": "1998-09-17",
+  "mlbDebutDate": "2023-06-18",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666374": {
+  "id": 666374,
+  "name": "Brash, Matt",
+  "birthDate": "1998-05-12",
+  "mlbDebutDate": "2022-04-12",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666622": {
+  "id": 666622,
+  "name": "Marquez, Brailyn",
+  "birthDate": "1999-01-30",
+  "mlbDebutDate": "2020-09-27",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2020-09-27"
+ },
+ "666783": {
+  "id": 666783,
+  "name": "Díaz, Yusniel",
+  "birthDate": "1996-10-07",
+  "mlbDebutDate": "2022-08-02",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "666915": {
+  "id": 666915,
+  "name": "Dalbec, Bobby",
+  "birthDate": "1995-06-29",
+  "mlbDebutDate": "2020-08-30",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668227": {
+  "id": 668227,
+  "name": "Arozarena, Randy",
+  "birthDate": "1995-02-28",
+  "mlbDebutDate": "2019-08-14",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668390": {
+  "id": 668390,
+  "name": "Winn, Cole",
+  "birthDate": "1999-11-25",
+  "mlbDebutDate": "2024-04-14",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668472": {
+  "id": 668472,
+  "name": "Pratto, Nick",
+  "birthDate": "1998-10-06",
+  "mlbDebutDate": "2022-07-14",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668709": {
+  "id": 668709,
+  "name": "Bleday, JJ",
+  "birthDate": "1997-11-10",
+  "mlbDebutDate": "2022-07-23",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668881": {
+  "id": 668881,
+  "name": "Greene, Hunter",
+  "birthDate": "1999-08-06",
+  "mlbDebutDate": "2022-04-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668885": {
+  "id": 668885,
+  "name": "Martin, Austin",
+  "birthDate": "1999-03-23",
+  "mlbDebutDate": "2024-03-30",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668904": {
+  "id": 668904,
+  "name": "Lewis, Royce",
+  "birthDate": "1999-06-05",
+  "mlbDebutDate": "2022-05-06",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668909": {
+  "id": 668909,
+  "name": "Williams, Gavin",
+  "birthDate": "1999-07-26",
+  "mlbDebutDate": "2023-06-21",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668930": {
+  "id": 668930,
+  "name": "Turang, Brice",
+  "birthDate": "1999-11-21",
+  "mlbDebutDate": "2023-03-30",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668939": {
+  "id": 668939,
+  "name": "Rutschman, Adley",
+  "birthDate": "1998-02-06",
+  "mlbDebutDate": "2022-05-21",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "668968": {
+  "id": 668968,
+  "name": "Crouse, Hans",
+  "birthDate": "1998-09-15",
+  "mlbDebutDate": "2021-09-26",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669003": {
+  "id": 669003,
+  "name": "Mitchell, Garrett",
+  "birthDate": "1998-09-04",
+  "mlbDebutDate": "2022-08-27",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669004": {
+  "id": 669004,
+  "name": "Melendez, MJ",
+  "birthDate": "1998-11-29",
+  "mlbDebutDate": "2022-05-03",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669016": {
+  "id": 669016,
+  "name": "Marsh, Brandon",
+  "birthDate": "1997-12-18",
+  "mlbDebutDate": "2021-07-18",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669022": {
+  "id": 669022,
+  "name": "Gore, MacKenzie",
+  "birthDate": "1999-02-24",
+  "mlbDebutDate": "2022-04-15",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669023": {
+  "id": 669023,
+  "name": "Downs, Jeter",
+  "birthDate": "1998-07-27",
+  "mlbDebutDate": "2022-06-22",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-08-19"
+ },
+ "669060": {
+  "id": 669060,
+  "name": "Wilson, Bryse",
+  "birthDate": "1997-12-20",
+  "mlbDebutDate": "2018-08-20",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669084": {
+  "id": 669084,
+  "name": "Hall, DL",
+  "birthDate": "1998-09-19",
+  "mlbDebutDate": "2022-08-13",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669087": {
+  "id": 669087,
+  "name": "Huff, Sam",
+  "birthDate": "1998-01-14",
+  "mlbDebutDate": "2020-09-11",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669127": {
+  "id": 669127,
+  "name": "Langeliers, Shea",
+  "birthDate": "1997-11-18",
+  "mlbDebutDate": "2022-08-16",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669134": {
+  "id": 669134,
+  "name": "Campusano, Luis",
+  "birthDate": "1998-09-29",
+  "mlbDebutDate": "2020-09-04",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669160": {
+  "id": 669160,
+  "name": "May, Dustin",
+  "birthDate": "1997-09-06",
+  "mlbDebutDate": "2019-08-02",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669203": {
+  "id": 669203,
+  "name": "Burnes, Corbin",
+  "birthDate": "1994-10-22",
+  "mlbDebutDate": "2018-07-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669221": {
+  "id": 669221,
+  "name": "Murphy, Sean",
+  "birthDate": "1994-10-04",
+  "mlbDebutDate": "2019-05-19",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669222": {
+  "id": 669222,
+  "name": "Senzel, Nick",
+  "birthDate": "1995-06-29",
+  "mlbDebutDate": "2019-05-03",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669224": {
+  "id": 669224,
+  "name": "Wells, Austin",
+  "birthDate": "1999-07-12",
+  "mlbDebutDate": "2023-09-01",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669302": {
+  "id": 669302,
+  "name": "Gilbert, Logan",
+  "birthDate": "1997-05-05",
+  "mlbDebutDate": "2021-05-13",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669304": {
+  "id": 669304,
+  "name": "Miranda, Jose F",
+  "birthDate": "1998-06-29",
+  "mlbDebutDate": "2022-05-02",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669357": {
+  "id": 669357,
+  "name": "Gorman, Nolan",
+  "birthDate": "2000-05-10",
+  "mlbDebutDate": "2022-05-20",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669358": {
+  "id": 669358,
+  "name": "Baz, Shane",
+  "birthDate": "1999-06-17",
+  "mlbDebutDate": "2021-09-20",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669364": {
+  "id": 669364,
+  "name": "Edwards, Xavier",
+  "birthDate": "1999-08-09",
+  "mlbDebutDate": "2023-05-02",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669370": {
+  "id": 669370,
+  "name": "Lacy, Asa",
+  "birthDate": "1999-06-02",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669373": {
+  "id": 669373,
+  "name": "Skubal, Tarik",
+  "birthDate": "1996-11-20",
+  "mlbDebutDate": "2020-08-18",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669374": {
+  "id": 669374,
+  "name": "Hiura, Keston",
+  "birthDate": "1996-08-02",
+  "mlbDebutDate": "2019-05-14",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669391": {
+  "id": 669391,
+  "name": "White, Owen",
+  "birthDate": "1999-08-09",
+  "mlbDebutDate": "2023-06-13",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669461": {
+  "id": 669461,
+  "name": "Liberatore, Matthew",
+  "birthDate": "1999-11-06",
+  "mlbDebutDate": "2022-05-21",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669720": {
+  "id": 669720,
+  "name": "Hays, Austin",
+  "birthDate": "1995-07-05",
+  "mlbDebutDate": "2017-09-07",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "669923": {
+  "id": 669923,
+  "name": "Kirby, George",
+  "birthDate": "1998-02-04",
+  "mlbDebutDate": "2022-05-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "670541": {
+  "id": 670541,
+  "name": "Alvarez, Yordan",
+  "birthDate": "1997-06-27",
+  "mlbDebutDate": "2019-06-09",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "670867": {
+  "id": 670867,
+  "name": "Maitan, Kevin",
+  "birthDate": "2000-02-12",
+  "mlbDebutDate": null,
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "670970": {
+  "id": 670970,
+  "name": "Morejon, Adrian",
+  "birthDate": "1999-02-27",
+  "mlbDebutDate": "2019-07-21",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "671213": {
+  "id": 671213,
+  "name": "Casas, Triston",
+  "birthDate": "2000-01-15",
+  "mlbDebutDate": "2022-09-04",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "671218": {
+  "id": 671218,
+  "name": "Ramos, Heliot",
+  "birthDate": "1999-09-07",
+  "mlbDebutDate": "2022-04-10",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "671221": {
+  "id": 671221,
+  "name": "Waters, Drew",
+  "birthDate": "1998-12-30",
+  "mlbDebutDate": "2022-08-22",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "671277": {
+  "id": 671277,
+  "name": "García Jr., Luis",
+  "birthDate": "2000-05-16",
+  "mlbDebutDate": "2020-08-14",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "671288": {
+  "id": 671288,
+  "name": "Corry, Seth",
+  "birthDate": "1998-11-03",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "671289": {
+  "id": 671289,
+  "name": "Freeman, Tyler",
+  "birthDate": "1999-05-21",
+  "mlbDebutDate": "2022-08-03",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "671655": {
+  "id": 671655,
+  "name": "Valera, George",
+  "birthDate": "2000-11-13",
+  "mlbDebutDate": "2025-09-01",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "671737": {
+  "id": 671737,
+  "name": "Bradley, Taj",
+  "birthDate": "2001-03-20",
+  "mlbDebutDate": "2023-04-12",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "671739": {
+  "id": 671739,
+  "name": "Harris II, Michael",
+  "birthDate": "2001-03-07",
+  "mlbDebutDate": "2022-05-28",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "672012": {
+  "id": 672012,
+  "name": "Black, Tyler",
+  "birthDate": "2000-07-26",
+  "mlbDebutDate": "2024-04-30",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "672078": {
+  "id": 672078,
+  "name": "Pardinho, Eric",
+  "birthDate": "2001-01-05",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "672282": {
+  "id": 672282,
+  "name": "Detmers, Reid",
+  "birthDate": "1999-07-08",
+  "mlbDebutDate": "2021-08-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "672284": {
+  "id": 672284,
+  "name": "Kelenic, Jarred",
+  "birthDate": "1999-07-16",
+  "mlbDebutDate": "2021-05-13",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "672356": {
+  "id": 672356,
+  "name": "Arias, Gabriel",
+  "birthDate": "2000-02-27",
+  "mlbDebutDate": "2022-04-20",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "672515": {
+  "id": 672515,
+  "name": "Moreno, Gabriel",
+  "birthDate": "2000-02-14",
+  "mlbDebutDate": "2022-06-11",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "672695": {
+  "id": 672695,
+  "name": "Perdomo, Geraldo",
+  "birthDate": "1999-10-22",
+  "mlbDebutDate": "2021-04-03",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "672710": {
+  "id": 672710,
+  "name": "Contreras, Roansy",
+  "birthDate": "1999-11-07",
+  "mlbDebutDate": "2021-09-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "672715": {
+  "id": 672715,
+  "name": "Patiño, Luis",
+  "birthDate": "1999-10-26",
+  "mlbDebutDate": "2020-08-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "672724": {
+  "id": 672724,
+  "name": "Peraza, Oswald",
+  "birthDate": "2000-06-15",
+  "mlbDebutDate": "2022-09-02",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "673258": {
+  "id": 673258,
+  "name": "Baez, Michel",
+  "birthDate": "1996-01-21",
+  "mlbDebutDate": "2019-07-23",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "673357": {
+  "id": 673357,
+  "name": "Robert Jr., Luis",
+  "birthDate": "1997-08-03",
+  "mlbDebutDate": "2020-07-24",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "673516": {
+  "id": 673516,
+  "name": "Mesa, Victor",
+  "birthDate": "1996-07-20",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": null
+ },
+ "673962": {
+  "id": 673962,
+  "name": "Jung, Josh",
+  "birthDate": "1998-02-12",
+  "mlbDebutDate": "2022-09-09",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "675659": {
+  "id": 675659,
+  "name": "Jones, Greg",
+  "birthDate": "1998-03-07",
+  "mlbDebutDate": "2024-06-06",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "675921": {
+  "id": 675921,
+  "name": "Howard, Spencer",
+  "birthDate": "1996-07-28",
+  "mlbDebutDate": "2020-08-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": false,
+  "lastPlayedDate": "2024-07-20"
+ },
+ "676059": {
+  "id": 676059,
+  "name": "Westburg, Jordan",
+  "birthDate": "1999-02-18",
+  "mlbDebutDate": "2023-06-26",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "676106": {
+  "id": 676106,
+  "name": "Hancock, Emerson",
+  "birthDate": "1999-05-31",
+  "mlbDebutDate": "2023-08-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "676272": {
+  "id": 676272,
+  "name": "Miller, Bobby",
+  "birthDate": "1999-04-05",
+  "mlbDebutDate": "2023-05-23",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "676440": {
+  "id": 676440,
+  "name": "Bibee, Tanner",
+  "birthDate": "1999-03-05",
+  "mlbDebutDate": "2023-04-26",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "676475": {
+  "id": 676475,
+  "name": "Burleson, Alec",
+  "birthDate": "1998-11-25",
+  "mlbDebutDate": "2022-09-08",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "676917": {
+  "id": 676917,
+  "name": "Cavalli, Cade",
+  "birthDate": "1998-08-14",
+  "mlbDebutDate": "2022-08-26",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "676974": {
+  "id": 676974,
+  "name": "Meyer, Max",
+  "birthDate": "1999-03-12",
+  "mlbDebutDate": "2022-07-16",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "676979": {
+  "id": 676979,
+  "name": "Crochet, Garrett",
+  "birthDate": "1999-06-21",
+  "mlbDebutDate": "2020-09-18",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677008": {
+  "id": 677008,
+  "name": "Kjerstad, Heston",
+  "birthDate": "1999-02-12",
+  "mlbDebutDate": "2023-09-14",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677551": {
+  "id": 677551,
+  "name": "Franco, Wander",
+  "birthDate": "2001-03-01",
+  "mlbDebutDate": "2021-06-22",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": false,
+  "lastPlayedDate": "2023-08-12"
+ },
+ "677565": {
+  "id": 677565,
+  "name": "Robinson, Kristian",
+  "birthDate": "2000-12-11",
+  "mlbDebutDate": null,
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677587": {
+  "id": 677587,
+  "name": "Rocchio, Brayan",
+  "birthDate": "2001-01-13",
+  "mlbDebutDate": "2023-05-16",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677593": {
+  "id": 677593,
+  "name": "García, Luis",
+  "birthDate": "2000-10-01",
+  "mlbDebutDate": null,
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677594": {
+  "id": 677594,
+  "name": "Rodríguez, Julio",
+  "birthDate": "2000-12-29",
+  "mlbDebutDate": "2022-04-08",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677595": {
+  "id": 677595,
+  "name": "Mauricio, Ronny",
+  "birthDate": "2001-04-04",
+  "mlbDebutDate": "2023-09-01",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677649": {
+  "id": 677649,
+  "name": "Duran, Ezequiel",
+  "birthDate": "1999-05-22",
+  "mlbDebutDate": "2022-06-04",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677950": {
+  "id": 677950,
+  "name": "Thomas, Alek",
+  "birthDate": "2000-04-28",
+  "mlbDebutDate": "2022-05-08",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677951": {
+  "id": 677951,
+  "name": "Witt Jr., Bobby",
+  "birthDate": "2000-06-14",
+  "mlbDebutDate": "2022-04-07",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677954": {
+  "id": 677954,
+  "name": "Groshans, Jordan",
+  "birthDate": "1999-11-10",
+  "mlbDebutDate": "2022-09-13",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "677960": {
+  "id": 677960,
+  "name": "Weathers, Ryan",
+  "birthDate": "1999-12-17",
+  "mlbDebutDate": "2020-10-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "678246": {
+  "id": 678246,
+  "name": "Vargas, Miguel",
+  "birthDate": "1999-11-17",
+  "mlbDebutDate": "2022-08-03",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "678554": {
+  "id": 678554,
+  "name": "Mead, Curtis",
+  "birthDate": "2000-10-26",
+  "mlbDebutDate": "2023-08-04",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "678662": {
+  "id": 678662,
+  "name": "Tovar, Ezequiel",
+  "birthDate": "2001-08-01",
+  "mlbDebutDate": "2022-09-23",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "678882": {
+  "id": 678882,
+  "name": "Rafaela, Ceddanne",
+  "birthDate": "2000-09-18",
+  "mlbDebutDate": "2023-08-28",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "678894": {
+  "id": 678894,
+  "name": "Peguero, Liover",
+  "birthDate": "2000-12-31",
+  "mlbDebutDate": "2022-06-18",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "679529": {
+  "id": 679529,
+  "name": "Torkelson, Spencer",
+  "birthDate": "1999-08-26",
+  "mlbDebutDate": "2022-04-08",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "679822": {
+  "id": 679822,
+  "name": "Foscue, Justin",
+  "birthDate": "1999-03-02",
+  "mlbDebutDate": "2024-04-05",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "679881": {
+  "id": 679881,
+  "name": "Martínez, J.P.",
+  "birthDate": "1996-03-21",
+  "mlbDebutDate": "2023-08-11",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "680552": {
+  "id": 680552,
+  "name": "Swaggerty, Travis",
+  "birthDate": "1997-08-19",
+  "mlbDebutDate": "2022-06-07",
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": false,
+  "lastPlayedDate": "2022-06-12"
+ },
+ "680570": {
+  "id": 680570,
+  "name": "Rodriguez, Grayson",
+  "birthDate": "1999-11-16",
+  "mlbDebutDate": "2023-04-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "680573": {
+  "id": 680573,
+  "name": "Woods Richardson, Simeon",
+  "birthDate": "2000-09-27",
+  "mlbDebutDate": "2022-10-02",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "680574": {
+  "id": 680574,
+  "name": "McLain, Matt",
+  "birthDate": "1999-08-06",
+  "mlbDebutDate": "2023-05-15",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "680686": {
+  "id": 680686,
+  "name": "Gray, Josiah",
+  "birthDate": "1997-12-21",
+  "mlbDebutDate": "2021-07-20",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "680695": {
+  "id": 680695,
+  "name": "Davis, Brennen",
+  "birthDate": "1999-11-02",
+  "mlbDebutDate": null,
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "680776": {
+  "id": 680776,
+  "name": "Duran, Jarren",
+  "birthDate": "1996-09-05",
+  "mlbDebutDate": "2021-07-17",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "680779": {
+  "id": 680779,
+  "name": "Davis, Henry",
+  "birthDate": "1999-09-21",
+  "mlbDebutDate": "2023-06-19",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "681082": {
+  "id": 681082,
+  "name": "Stott, Bryson",
+  "birthDate": "1997-10-06",
+  "mlbDebutDate": "2022-04-08",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "681297": {
+  "id": 681297,
+  "name": "Cowser, Colton",
+  "birthDate": "2000-03-20",
+  "mlbDebutDate": "2023-07-05",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "681351": {
+  "id": 681351,
+  "name": "O'Hoppe, Logan",
+  "birthDate": "2000-02-09",
+  "mlbDebutDate": "2022-09-28",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "681624": {
+  "id": 681624,
+  "name": "Pages, Andy",
+  "birthDate": "2000-12-08",
+  "mlbDebutDate": "2024-04-16",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682243": {
+  "id": 682243,
+  "name": "Miller, Bryce",
+  "birthDate": "1998-08-23",
+  "mlbDebutDate": "2023-05-02",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682616": {
+  "id": 682616,
+  "name": "Cartaya, Diego",
+  "birthDate": "2001-09-07",
+  "mlbDebutDate": null,
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682617": {
+  "id": 682617,
+  "name": "Luciano, Marco",
+  "birthDate": "2001-09-10",
+  "mlbDebutDate": "2023-07-26",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682619": {
+  "id": 682619,
+  "name": "Martinez, Orelvis",
+  "birthDate": "2001-11-19",
+  "mlbDebutDate": "2024-06-21",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682622": {
+  "id": 682622,
+  "name": "Marte, Noelvi",
+  "birthDate": "2001-10-16",
+  "mlbDebutDate": "2023-08-19",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682626": {
+  "id": 682626,
+  "name": "Alvarez, Francisco",
+  "birthDate": "2001-11-19",
+  "mlbDebutDate": "2022-09-30",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682634": {
+  "id": 682634,
+  "name": "Alcántara, Kevin",
+  "birthDate": "2002-07-12",
+  "mlbDebutDate": "2024-09-25",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682641": {
+  "id": 682641,
+  "name": "Matos, Luis",
+  "birthDate": "2002-01-28",
+  "mlbDebutDate": "2023-06-14",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682668": {
+  "id": 682668,
+  "name": "Acuña, Luisangel",
+  "birthDate": "2002-03-12",
+  "mlbDebutDate": "2024-09-14",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682829": {
+  "id": 682829,
+  "name": "De La Cruz, Elly",
+  "birthDate": "2002-01-11",
+  "mlbDebutDate": "2023-06-06",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682848": {
+  "id": 682848,
+  "name": "Rodríguez, Endy",
+  "birthDate": "2000-05-26",
+  "mlbDebutDate": "2023-07-17",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682928": {
+  "id": 682928,
+  "name": "Abrams, CJ",
+  "birthDate": "2000-10-03",
+  "mlbDebutDate": "2022-04-08",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682929": {
+  "id": 682929,
+  "name": "Allan, Matt",
+  "birthDate": "2001-04-17",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682982": {
+  "id": 682982,
+  "name": "Espino, Daniel",
+  "birthDate": "2001-01-05",
+  "mlbDebutDate": "2026-06-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682985": {
+  "id": 682985,
+  "name": "Greene, Riley",
+  "birthDate": "2000-09-28",
+  "mlbDebutDate": "2022-06-18",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682987": {
+  "id": 682987,
+  "name": "Jones, Spencer",
+  "birthDate": "2001-05-14",
+  "mlbDebutDate": "2026-05-08",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682990": {
+  "id": 682990,
+  "name": "Priester, Quinn",
+  "birthDate": "2000-09-16",
+  "mlbDebutDate": "2023-07-17",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "682998": {
+  "id": 682998,
+  "name": "Carroll, Corbin",
+  "birthDate": "2000-08-21",
+  "mlbDebutDate": "2022-08-29",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "683002": {
+  "id": 683002,
+  "name": "Henderson, Gunnar",
+  "birthDate": "2001-06-29",
+  "mlbDebutDate": "2022-08-31",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "683003": {
+  "id": 683003,
+  "name": "Jones, Jared",
+  "birthDate": "2001-08-06",
+  "mlbDebutDate": "2024-03-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "683004": {
+  "id": 683004,
+  "name": "Leiter, Jack",
+  "birthDate": "2000-04-21",
+  "mlbDebutDate": "2024-04-18",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "683011": {
+  "id": 683011,
+  "name": "Volpe, Anthony",
+  "birthDate": "2001-04-28",
+  "mlbDebutDate": "2023-03-30",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "683146": {
+  "id": 683146,
+  "name": "Baty, Brett",
+  "birthDate": "1999-11-13",
+  "mlbDebutDate": "2022-08-17",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "683175": {
+  "id": 683175,
+  "name": "Phillips, Connor",
+  "birthDate": "2001-05-04",
+  "mlbDebutDate": "2023-09-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "683357": {
+  "id": 683357,
+  "name": "Caissie, Owen",
+  "birthDate": "2002-07-08",
+  "mlbDebutDate": "2025-08-14",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "683734": {
+  "id": 683734,
+  "name": "Vaughn, Andrew",
+  "birthDate": "1998-04-03",
+  "mlbDebutDate": "2021-04-02",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "683737": {
+  "id": 683737,
+  "name": "Busch, Michael",
+  "birthDate": "1997-11-09",
+  "mlbDebutDate": "2023-04-25",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "686217": {
+  "id": 686217,
+  "name": "Frelick, Sal",
+  "birthDate": "2000-04-19",
+  "mlbDebutDate": "2023-07-22",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "686610": {
+  "id": 686610,
+  "name": "Waldichuk, Ken",
+  "birthDate": "1998-01-08",
+  "mlbDebutDate": "2022-09-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "686611": {
+  "id": 686611,
+  "name": "Crews, Dylan",
+  "birthDate": "2002-02-26",
+  "mlbDebutDate": "2024-08-26",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "686613": {
+  "id": 686613,
+  "name": "Brown, Hunter",
+  "birthDate": "1998-08-29",
+  "mlbDebutDate": "2022-09-05",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "686752": {
+  "id": 686752,
+  "name": "Pepiot, Ryan",
+  "birthDate": "1997-08-21",
+  "mlbDebutDate": "2022-05-11",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "686796": {
+  "id": 686796,
+  "name": "Walston, Blake",
+  "birthDate": "2001-06-28",
+  "mlbDebutDate": "2024-05-01",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "686797": {
+  "id": 686797,
+  "name": "Lee, Brooks",
+  "birthDate": "2001-02-14",
+  "mlbDebutDate": "2024-07-03",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "686894": {
+  "id": 686894,
+  "name": "Wiemer, Joey",
+  "birthDate": "1999-02-11",
+  "mlbDebutDate": "2023-04-01",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "687221": {
+  "id": 687221,
+  "name": "Rushing, Dalton",
+  "birthDate": "2001-02-21",
+  "mlbDebutDate": "2025-05-15",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "687263": {
+  "id": 687263,
+  "name": "Neto, Zach",
+  "birthDate": "2001-01-31",
+  "mlbDebutDate": "2023-04-15",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "687401": {
+  "id": 687401,
+  "name": "Ortiz, Joey",
+  "birthDate": "1998-07-14",
+  "mlbDebutDate": "2023-04-27",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "687551": {
+  "id": 687551,
+  "name": "Gilbert, Drew",
+  "birthDate": "2000-09-27",
+  "mlbDebutDate": "2025-08-08",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "687597": {
+  "id": 687597,
+  "name": "Beck, Jordan",
+  "birthDate": "2001-04-19",
+  "mlbDebutDate": "2024-04-30",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "687931": {
+  "id": 687931,
+  "name": "Whisenhunt, Carson",
+  "birthDate": "2000-10-20",
+  "mlbDebutDate": "2025-07-28",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "688457": {
+  "id": 688457,
+  "name": "Cross, Gavin",
+  "birthDate": "2001-02-13",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "689672": {
+  "id": 689672,
+  "name": "Thorpe, Drew",
+  "birthDate": "2000-10-01",
+  "mlbDebutDate": "2024-06-11",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "690291": {
+  "id": 690291,
+  "name": "Jung, Jace",
+  "birthDate": "2000-10-04",
+  "mlbDebutDate": "2024-08-16",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "690953": {
+  "id": 690953,
+  "name": "Abel, Mick",
+  "birthDate": "2001-08-18",
+  "mlbDebutDate": "2025-05-18",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "690986": {
+  "id": 690986,
+  "name": "Harrison, Kyle",
+  "birthDate": "2001-08-12",
+  "mlbDebutDate": "2023-08-22",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "690987": {
+  "id": 690987,
+  "name": "Hassell III, Robert",
+  "birthDate": "2001-08-15",
+  "mlbDebutDate": "2025-05-22",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "690988": {
+  "id": 690988,
+  "name": "Hendrick, Austin",
+  "birthDate": "2001-06-15",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "690990": {
+  "id": 690990,
+  "name": "Horton, Cade",
+  "birthDate": "2001-08-20",
+  "mlbDebutDate": "2025-05-10",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "690993": {
+  "id": 690993,
+  "name": "Keith, Colt",
+  "birthDate": "2001-08-14",
+  "mlbDebutDate": "2024-03-28",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691006": {
+  "id": 691006,
+  "name": "Parada, Kevin",
+  "birthDate": "2001-08-03",
+  "mlbDebutDate": null,
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691011": {
+  "id": 691011,
+  "name": "Romo, Drew",
+  "birthDate": "2001-08-29",
+  "mlbDebutDate": "2024-08-17",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691016": {
+  "id": 691016,
+  "name": "Soderstrom, Tyler",
+  "birthDate": "2001-11-24",
+  "mlbDebutDate": "2023-07-14",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691019": {
+  "id": 691019,
+  "name": "Teel, Kyle",
+  "birthDate": "2002-02-15",
+  "mlbDebutDate": "2025-06-06",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691023": {
+  "id": 691023,
+  "name": "Walker, Jordan",
+  "birthDate": "2002-05-22",
+  "mlbDebutDate": "2023-03-30",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691026": {
+  "id": 691026,
+  "name": "Winn, Masyn",
+  "birthDate": "2002-03-21",
+  "mlbDebutDate": "2023-08-18",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691176": {
+  "id": 691176,
+  "name": "Domínguez, Jasson",
+  "birthDate": "2003-02-07",
+  "mlbDebutDate": "2023-09-01",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691181": {
+  "id": 691181,
+  "name": "Rodriguez, Emmanuel",
+  "birthDate": "2003-02-28",
+  "mlbDebutDate": null,
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691182": {
+  "id": 691182,
+  "name": "Amador, Adael",
+  "birthDate": "2003-04-11",
+  "mlbDebutDate": "2024-06-09",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691267": {
+  "id": 691267,
+  "name": "Ramírez, Alex",
+  "birthDate": "2003-01-13",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691406": {
+  "id": 691406,
+  "name": "Caminero, Junior",
+  "birthDate": "2003-07-05",
+  "mlbDebutDate": "2023-09-23",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691587": {
+  "id": 691587,
+  "name": "Pérez, Eury",
+  "birthDate": "2003-04-15",
+  "mlbDebutDate": "2023-05-12",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691620": {
+  "id": 691620,
+  "name": "Quero, Jeferson",
+  "birthDate": "2002-10-08",
+  "mlbDebutDate": "2026-03-29",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691718": {
+  "id": 691718,
+  "name": "Crow-Armstrong, Pete",
+  "birthDate": "2002-03-25",
+  "mlbDebutDate": "2023-09-11",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691723": {
+  "id": 691723,
+  "name": "Mayo, Coby",
+  "birthDate": "2001-12-10",
+  "mlbDebutDate": "2024-08-02",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691725": {
+  "id": 691725,
+  "name": "Painter, Andrew",
+  "birthDate": "2003-04-10",
+  "mlbDebutDate": "2026-03-31",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691728": {
+  "id": 691728,
+  "name": "Veen, Zac",
+  "birthDate": "2001-12-12",
+  "mlbDebutDate": "2025-04-08",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691775": {
+  "id": 691775,
+  "name": "Clifford, Ryan",
+  "birthDate": "2003-07-20",
+  "mlbDebutDate": null,
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691781": {
+  "id": 691781,
+  "name": "House, Brady",
+  "birthDate": "2003-06-04",
+  "mlbDebutDate": "2025-06-16",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691783": {
+  "id": 691783,
+  "name": "Lawlar, Jordan",
+  "birthDate": "2002-07-17",
+  "mlbDebutDate": "2023-09-07",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "691785": {
+  "id": 691785,
+  "name": "Mayer, Marcelo",
+  "birthDate": "2002-12-12",
+  "mlbDebutDate": "2025-05-24",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "692585": {
+  "id": 692585,
+  "name": "Fernández, Yanquiel",
+  "birthDate": "2003-01-01",
+  "mlbDebutDate": "2025-07-02",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "693049": {
+  "id": 693049,
+  "name": "Colás, Oscar",
+  "birthDate": "1998-09-17",
+  "mlbDebutDate": "2023-03-30",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "693304": {
+  "id": 693304,
+  "name": "Gonzales, Nick",
+  "birthDate": "1999-05-27",
+  "mlbDebutDate": "2023-06-23",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "693308": {
+  "id": 693308,
+  "name": "Frasso, Nick",
+  "birthDate": "1998-10-18",
+  "mlbDebutDate": "2026-08-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "693311": {
+  "id": 693311,
+  "name": "Hence, Tink",
+  "birthDate": "2002-08-06",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694183": {
+  "id": 694183,
+  "name": "Hernández, Cristian",
+  "birthDate": "2003-12-13",
+  "mlbDebutDate": null,
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694192": {
+  "id": 694192,
+  "name": "Chourio, Jackson",
+  "birthDate": "2004-03-11",
+  "mlbDebutDate": "2024-03-29",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694194": {
+  "id": 694194,
+  "name": "Bleis, Miguel",
+  "birthDate": "2004-03-01",
+  "mlbDebutDate": null,
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694212": {
+  "id": 694212,
+  "name": "Basallo, Samuel",
+  "birthDate": "2004-08-13",
+  "mlbDebutDate": "2025-08-17",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694224": {
+  "id": 694224,
+  "name": "Gonzalez, Gabriel",
+  "birthDate": "2004-01-04",
+  "mlbDebutDate": "2026-05-22",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694297": {
+  "id": 694297,
+  "name": "Pfaadt, Brandon",
+  "birthDate": "1998-10-15",
+  "mlbDebutDate": "2023-05-03",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694351": {
+  "id": 694351,
+  "name": "Berry, Jacob",
+  "birthDate": "2001-05-05",
+  "mlbDebutDate": null,
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694357": {
+  "id": 694357,
+  "name": "Tiedemann, Ricky",
+  "birthDate": "2002-08-18",
+  "mlbDebutDate": "2026-08-15",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694358": {
+  "id": 694358,
+  "name": "Roby, Tekoah",
+  "birthDate": "2001-09-18",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694371": {
+  "id": 694371,
+  "name": "Troy, Tommy",
+  "birthDate": "2002-01-17",
+  "mlbDebutDate": "2026-05-24",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694377": {
+  "id": 694377,
+  "name": "Yorke, Nick",
+  "birthDate": "2002-04-02",
+  "mlbDebutDate": "2024-09-16",
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694384": {
+  "id": 694384,
+  "name": "Schanuel, Nolan",
+  "birthDate": "2002-02-14",
+  "mlbDebutDate": "2023-08-18",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694462": {
+  "id": 694462,
+  "name": "Waldrep, Hurston",
+  "birthDate": "2002-03-01",
+  "mlbDebutDate": "2024-06-09",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694497": {
+  "id": 694497,
+  "name": "Carter, Evan",
+  "birthDate": "2002-08-29",
+  "mlbDebutDate": "2023-09-08",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694633": {
+  "id": 694633,
+  "name": "Hampton, Chase",
+  "birthDate": "2001-08-07",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694671": {
+  "id": 694671,
+  "name": "Langford, Wyatt",
+  "birthDate": "2001-11-15",
+  "mlbDebutDate": "2024-03-28",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694813": {
+  "id": 694813,
+  "name": "Stone, Gavin",
+  "birthDate": "1998-10-15",
+  "mlbDebutDate": "2023-05-03",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694819": {
+  "id": 694819,
+  "name": "Misiorowski, Jacob",
+  "birthDate": "2002-04-03",
+  "mlbDebutDate": "2025-06-12",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "694973": {
+  "id": 694973,
+  "name": "Skenes, Paul",
+  "birthDate": "2002-05-29",
+  "mlbDebutDate": "2024-05-11",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "695076": {
+  "id": 695076,
+  "name": "Lowder, Rhett",
+  "birthDate": "2002-03-08",
+  "mlbDebutDate": "2024-08-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "695490": {
+  "id": 695490,
+  "name": "Arroyo, Edwin",
+  "birthDate": "2003-08-25",
+  "mlbDebutDate": "2026-06-01",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "695534": {
+  "id": 695534,
+  "name": "Petty, Chase",
+  "birthDate": "2003-04-04",
+  "mlbDebutDate": "2025-04-30",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "695549": {
+  "id": 695549,
+  "name": "Jobe, Jackson",
+  "birthDate": "2002-07-30",
+  "mlbDebutDate": "2024-09-25",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "695578": {
+  "id": 695578,
+  "name": "Wood, James",
+  "birthDate": "2002-09-17",
+  "mlbDebutDate": "2024-07-01",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "695657": {
+  "id": 695657,
+  "name": "Montgomery, Colson",
+  "birthDate": "2002-02-27",
+  "mlbDebutDate": "2025-07-04",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "695670": {
+  "id": 695670,
+  "name": "Ford, Harry",
+  "birthDate": "2003-02-21",
+  "mlbDebutDate": "2025-09-05",
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "695865": {
+  "id": 695865,
+  "name": "Flores, Wilmer",
+  "birthDate": "2001-02-20",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "696135": {
+  "id": 696135,
+  "name": "Watson, Kahlil",
+  "birthDate": "2003-04-16",
+  "mlbDebutDate": "2026-06-18",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "696143": {
+  "id": 696143,
+  "name": "Solometo, Anthony",
+  "birthDate": "2002-12-02",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "696149": {
+  "id": 696149,
+  "name": "Chandler, Bubba",
+  "birthDate": "2002-09-14",
+  "mlbDebutDate": "2025-08-22",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "700246": {
+  "id": 700246,
+  "name": "Williams, Carson",
+  "birthDate": "2003-06-25",
+  "mlbDebutDate": "2025-08-22",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "700363": {
+  "id": 700363,
+  "name": "Smith-Shawver, AJ",
+  "birthDate": "2002-11-20",
+  "mlbDebutDate": "2023-06-04",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "700669": {
+  "id": 700669,
+  "name": "Graceffo, Gordon",
+  "birthDate": "2000-03-17",
+  "mlbDebutDate": "2024-06-29",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "700932": {
+  "id": 700932,
+  "name": "Manzardo, Kyle",
+  "birthDate": "2000-07-18",
+  "mlbDebutDate": "2024-05-06",
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "701327": {
+  "id": 701327,
+  "name": "Green, Elijah",
+  "birthDate": "2003-12-04",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "701350": {
+  "id": 701350,
+  "name": "Anthony, Roman",
+  "birthDate": "2004-05-13",
+  "mlbDebutDate": "2025-06-09",
+  "primaryPosition": "LF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "701538": {
+  "id": 701538,
+  "name": "Merrill, Jackson",
+  "birthDate": "2003-04-19",
+  "mlbDebutDate": "2024-03-20",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "701649": {
+  "id": 701649,
+  "name": "Triantos, James",
+  "birthDate": "2003-01-29",
+  "mlbDebutDate": "2026-07-25",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702222": {
+  "id": 702222,
+  "name": "Crawford, Justin",
+  "birthDate": "2004-01-13",
+  "mlbDebutDate": "2026-03-26",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702253": {
+  "id": 702253,
+  "name": "Collier, Cam",
+  "birthDate": "2004-11-20",
+  "mlbDebutDate": null,
+  "primaryPosition": "3B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702258": {
+  "id": 702258,
+  "name": "Jones, Druw",
+  "birthDate": "2003-11-28",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702261": {
+  "id": 702261,
+  "name": "Johnson, Termarr",
+  "birthDate": "2004-06-11",
+  "mlbDebutDate": null,
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702266": {
+  "id": 702266,
+  "name": "Lesko, Dylan",
+  "birthDate": "2003-09-07",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702273": {
+  "id": 702273,
+  "name": "Schultz, Noah",
+  "birthDate": "2003-08-05",
+  "mlbDebutDate": "2026-04-14",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702281": {
+  "id": 702281,
+  "name": "Snelling, Robby",
+  "birthDate": "2003-12-19",
+  "mlbDebutDate": "2026-05-08",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702284": {
+  "id": 702284,
+  "name": "Young, Cole",
+  "birthDate": "2003-07-29",
+  "mlbDebutDate": "2025-05-31",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702518": {
+  "id": 702518,
+  "name": "Williams, Jett",
+  "birthDate": "2003-11-03",
+  "mlbDebutDate": null,
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702548": {
+  "id": 702548,
+  "name": "Porter, Brock",
+  "birthDate": "2003-06-03",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "702616": {
+  "id": 702616,
+  "name": "Holliday, Jackson",
+  "birthDate": "2003-12-04",
+  "mlbDebutDate": "2024-04-10",
+  "primaryPosition": "2B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "703149": {
+  "id": 703149,
+  "name": "Arias, Roderick",
+  "birthDate": "2004-09-09",
+  "mlbDebutDate": null,
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "703601": {
+  "id": 703601,
+  "name": "Clark, Max",
+  "birthDate": "2004-12-21",
+  "mlbDebutDate": "2026-07-31",
+  "primaryPosition": "CF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "800050": {
+  "id": 800050,
+  "name": "DeLauter, Chase",
+  "birthDate": "2001-10-08",
+  "mlbDebutDate": "2025-10-01",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "800060": {
+  "id": 800060,
+  "name": "Isaac, Xavier",
+  "birthDate": "2003-12-17",
+  "mlbDebutDate": null,
+  "primaryPosition": "1B",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "800611": {
+  "id": 800611,
+  "name": "Meyer, Noble",
+  "birthDate": "2005-01-10",
+  "mlbDebutDate": null,
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "801403": {
+  "id": 801403,
+  "name": "Dollander, Chase",
+  "birthDate": "2001-10-26",
+  "mlbDebutDate": "2025-04-06",
+  "primaryPosition": "P",
+  "positionType": "Pitcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "805779": {
+  "id": 805779,
+  "name": "Wilson, Jacob",
+  "birthDate": "2002-03-30",
+  "mlbDebutDate": "2024-07-19",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "805795": {
+  "id": 805795,
+  "name": "Miller, Aidan",
+  "birthDate": "2004-06-09",
+  "mlbDebutDate": null,
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "805805": {
+  "id": 805805,
+  "name": "Jenkins, Walker",
+  "birthDate": "2005-02-19",
+  "mlbDebutDate": null,
+  "primaryPosition": "OF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "805810": {
+  "id": 805810,
+  "name": "Mitchell, Blake",
+  "birthDate": "2004-08-03",
+  "mlbDebutDate": null,
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "805811": {
+  "id": 805811,
+  "name": "Eldridge, Bryce",
+  "birthDate": "2004-10-20",
+  "mlbDebutDate": "2025-09-15",
+  "primaryPosition": "DH",
+  "positionType": "Hitter",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "806068": {
+  "id": 806068,
+  "name": "Emerson, Colt",
+  "birthDate": "2005-07-20",
+  "mlbDebutDate": "2026-05-17",
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "806956": {
+  "id": 806956,
+  "name": "Salas, Ethan",
+  "birthDate": "2006-06-01",
+  "mlbDebutDate": null,
+  "primaryPosition": "C",
+  "positionType": "Catcher",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "806964": {
+  "id": 806964,
+  "name": "Walcott, Sebastian",
+  "birthDate": "2006-03-14",
+  "mlbDebutDate": null,
+  "primaryPosition": "SS",
+  "positionType": "Infielder",
+  "active": true,
+  "lastPlayedDate": null
+ },
+ "807713": {
+  "id": 807713,
+  "name": "Shaw, Matt",
+  "birthDate": "2001-11-06",
+  "mlbDebutDate": "2025-03-18",
+  "primaryPosition": "RF",
+  "positionType": "Outfielder",
+  "active": true,
+  "lastPlayedDate": null
+ }
+}

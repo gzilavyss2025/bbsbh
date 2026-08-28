@@ -27,11 +27,14 @@ const WATCHED = [
   'docs/team-movement-windows.md',
   'docs/homegrown-dependence.md',
   'docs/prospect-traits.md',
+  'docs/prospect-ranking-value.md',
   'scripts/gen-level-tenure-benchmark.mjs',
   'public/data/level-tenure-benchmark.json',
   'src/api/levelTenure.js',
   '.scratch/level-benchmarks/',
   '.scratch/prospect-traits/',
+  '.scratch/top-prospects-history/',
+  '.scratch/prospect-value/',
 ]
 
 const DIARY = 'src/lib/research/diary'

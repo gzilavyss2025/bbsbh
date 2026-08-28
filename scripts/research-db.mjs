@@ -145,6 +145,32 @@ const PANEL_PATHS = [
   '.scratch/service-clock/panel.json',
   '.scratch/service-clock/controls.json',
   '.scratch/service-clock/k0-blank-rate.json',
+  // Historical Top Prospects lists (.scratch/top-prospects-history/pull.mjs):
+  // rows.json is one row per (season, rank, mlbId), 2009-2024 -- mlbId joins
+  // directly to prospect-traits/bio.json above, no crosswalk. seasons.json is
+  // the per-season coverage record (2005-2024): status ("ok"/"unavailable"),
+  // list depth, row count, fetch timestamp -- depth is NOT assumed 100 (2009-
+  // 2011 are top-50 lists; 2020/2021 top out at 99, confirmed not a parsing
+  // gap). Deliberately a plain top-level ARRAY for both files, not a
+  // {meta,rows} wrapper -- a sibling panel in this wave registered that shape
+  // and it threw on every row-grain query; a bare array registers as one row
+  // per element with no flattening step needed.
+  '.scratch/top-prospects-history/rows.json',
+  '.scratch/top-prospects-history/seasons.json',
+  // What a ranking is worth in dollars (docs/prospect-ranking-value.md,
+  // .scratch/prospect-value/). panel.json is one row per player in the UNION of
+  // the ranked population and the 3,061-man debut cohort, carrying the rank
+  // facts, the career earnings joined from salaries.csv, and `windowStatus` --
+  // the flag that says whether the man's ranking window sat inside a published
+  // list at all. A 2006 debut is 'censored', NOT unranked: no list exists for
+  // his ranking years. Any query that compares ranked against unranked must
+  // filter windowStatus = 'observed-deep' or it is measuring a data gap.
+  // Same plain-ARRAY shape as rows.json above, for the same reason; the
+  // metadata sits beside it in panel-meta.json rather than wrapping it.
+  '.scratch/prospect-value/panel.json',
+  '.scratch/prospect-value/panel-meta.json',
+  '.scratch/prospect-value/bios.json',
+  '.scratch/prospect-value/findings.json',
   '.scratch/blockage/incumbent-ids.json',
   '.scratch/blockage/incumbent-bio.json',
   '.scratch/blockage/exits.json',
