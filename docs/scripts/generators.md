@@ -438,8 +438,15 @@ don't run these by hand.
   therefore fails as blank cells rather than as an error, so the script logs
   per-metric coverage and WARNS when a metric returns mostly empty — check that
   warning first if spoke labels go missing. The raw fetch is never fatal; on
-  failure the radar plots its shape with no labels. App reads it via
-  `src/api/savantPercentiles.js`.
+  failure the radar plots its shape with no labels. Bat speed, swing length,
+  and squared-up % (batter-only, no pitcher analog) ride the percentile board
+  for free but need a THIRD leaderboard for their raw rate — Savant's own
+  `/leaderboard/bat-tracking` board, keyed on the column `id` rather than
+  `player_id` like every other fetch here, merged into `rawBat`. Its coverage
+  check runs against its OWN population, not `rawBat`'s: that board's
+  `minSwings=q` filter keeps a much smaller high-volume-swing pool than
+  `custom`'s, so comparing against `rawBat`'s full count would warn every
+  night for no reason. App reads it via `src/api/savantPercentiles.js`.
 - `gen-savant-matchup.mjs` → `public/data/savant-matchup.json` — season Statcast
   RATES (chase, whiff, hard-hit, pull, ground-ball) for every qualified batter
   AND pitcher, plus the league mean/SD each is scored against. A sibling of the

@@ -125,6 +125,43 @@ test('no savant map at all returns null rather than an empty strip', () => {
   assert.equal(percentileRows(null, RAW_BAT, 'hitting'), null)
 })
 
+// ------------------------------------------------- bat tracking (issue #937)
+
+const BAT_WITH_TRACKING = { ...BAT, batSpeed: 71, squaredUp: 44, swingLength: 12 }
+const RAW_BAT_WITH_TRACKING = { ...RAW_BAT, batSpeed: 71.2, squaredUp: 23.4, swingLength: 7.5 }
+
+test('bat speed, squared-up %, and swing length join the batter strip', () => {
+  const rows = percentileRows(BAT_WITH_TRACKING, RAW_BAT_WITH_TRACKING, 'hitting')
+  assert.equal(rows.length, 9)
+  for (const key of ['batSpeed', 'squaredUp', 'swingLength']) {
+    assert.ok(rows.some((r) => r.key === key), `missing row for ${key}`)
+  }
+})
+
+test('bat speed and squared-up % format as one-decimal numbers, mph and percent', () => {
+  const rows = percentileRows(BAT_WITH_TRACKING, RAW_BAT_WITH_TRACKING, 'hitting')
+  assert.equal(rows.find((r) => r.key === 'batSpeed').value, '71.2')
+  assert.equal(rows.find((r) => r.key === 'squaredUp').value, '23.4%')
+})
+
+test('swing length is flagged lower-is-better; bat speed and squared-up % are not', () => {
+  const rows = percentileRows(BAT_WITH_TRACKING, RAW_BAT_WITH_TRACKING, 'hitting')
+  assert.equal(rows.find((r) => r.key === 'swingLength').lowerIsBetter, true)
+  assert.equal(rows.find((r) => r.key === 'batSpeed').lowerIsBetter, false)
+  assert.equal(rows.find((r) => r.key === 'squaredUp').lowerIsBetter, false)
+})
+
+test('bat tracking has no pitcher analog: the pitching group never gets these rows', () => {
+  const rows = percentileRows(
+    { xera: 83, k: 88, bb: 3, whiff: 100, chase: 36, fbVelo: 27, hardHit: 100 },
+    null,
+    'pitching',
+  )
+  for (const key of ['batSpeed', 'squaredUp', 'swingLength']) {
+    assert.ok(!rows.some((r) => r.key === key), `pitching strip unexpectedly carries ${key}`)
+  }
+})
+
 test('the pitching group reads the pitcher metric list', () => {
   const rows = percentileRows(
     { xera: 83, k: 88, bb: 3, whiff: 100, chase: 36, fbVelo: 27, hardHit: 100 },

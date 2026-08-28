@@ -121,6 +121,25 @@ export const BATTER_METRICS = [
     fmt: dec1,
     def: 'How fast he runs at full sprint.',
   },
+  {
+    key: 'batSpeed',
+    label: 'Bat speed',
+    fmt: dec1,
+    def: 'How fast he swings the bat.',
+  },
+  {
+    key: 'swingLength',
+    label: 'Swing length',
+    fmt: dec1,
+    def: 'How far his bat travels on its way to the ball — a shorter swing gets there quicker.',
+    lowerIsBetter: true,
+  },
+  {
+    key: 'squaredUp',
+    label: 'Squared-up %',
+    fmt: pct1,
+    def: 'How often he times his swing to hit the ball on the sweet spot of the bat.',
+  },
 ]
 
 export const PITCHER_METRICS = [

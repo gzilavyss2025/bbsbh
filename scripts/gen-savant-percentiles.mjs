@@ -34,6 +34,12 @@ const METRICS = {
     brl_percent: 'brl',
     chase_percent: 'chase',
     sprint_speed: 'sprintSpeed',
+    // Bat-tracking percentiles the percentile-rankings board already reports
+    // — free, since fetchPercentiles('batter') is fetched nightly regardless
+    // (issue #937). No pitcher analog, so METRICS.pit stays untouched.
+    bat_speed: 'batSpeed',
+    squared_up_rate: 'squaredUp',
+    swing_length: 'swingLength',
   },
   pit: {
     xera: 'xera',
@@ -168,24 +174,120 @@ async function fetchRawRates(type) {
   }
 }
 
-const [bat, pit, rawBat, rawPit] = await Promise.all([
+// The raw-rate companion for the three bat-tracking metrics added to
+// METRICS.bat above (bat speed, squared-up rate, swing length). The percentile
+// board covers their PERCENTILE ranks for free, but not the raw rate the strip
+// shows beside every percentile — and this is NOT the `custom` board: adding
+// `avg_bat_speed`/`swing_length`/`squared_up_per_swing` as `custom` selections
+// was tried first and came back blank for every row, the exact trap
+// RAW_METRICS above already warns about. Savant's own dedicated bat-tracking
+// leaderboard works instead — but it keys rows on the column **"id"**, NOT
+// "player_id" like every other Savant fetch in this file. The value is the
+// same MLBAM/statsapi personId this app joins on everywhere; only the column
+// name differs. Verified live 2026-08-27 (issue #937). Batter-only: bat
+// tracking has no pitcher board.
+//
+// Never fatal, same as fetchRawRates: a failure or a renamed column leaves
+// this map empty and these three rows lose only their raw value — never their
+// percentile (already covered by the METRICS.bat fetch above), and never the
+// nightly file as a whole.
+//
+// Scale trap: unlike every `_percent` column on the `custom` board above
+// (already percentage points, e.g. 25.3), `squared_up_per_swing` here is a
+// 0–1 fraction (verified live: 0.2349) — multiplied by 100 below so it stores
+// in the same percentage-point scale RAW_METRICS uses and the strip's `pct1`
+// formatter expects.
+async function fetchBatTracking() {
+  const wanted = {
+    avg_bat_speed: 'batSpeed',
+    squared_up_per_swing: 'squaredUp',
+    swing_length: 'swingLength',
+  }
+  const SCALE_100 = new Set(['squaredUp'])
+  const url =
+    `https://baseballsavant.mlb.com/leaderboard/bat-tracking` +
+    `?attackZone=&batSide=&contactType=&count=&dateStart=&dateEnd=&gameType=` +
+    `&isHardHit=&minSwings=q&minGroupSwings=1&pitchHand=&pitchType=` +
+    `&seasonStart=${season}&seasonEnd=${season}&team=&type=batter&csv=true`
+  try {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const rows = parseCsv((await res.text()).replace(/^﻿/, ''))
+    if (rows.length < 2) throw new Error('empty response')
+
+    const [header, ...data] = rows
+    const colIndex = {}
+    header.forEach((name, i) => { colIndex[name] = i })
+    if (!('id' in colIndex)) throw new Error("no 'id' column")
+
+    const map = {}
+    for (const r of data) {
+      const id = r[colIndex.id]
+      if (!id) continue
+      const entry = {}
+      let hasAny = false
+      for (const [srcCol, outKey] of Object.entries(wanted)) {
+        const raw = colIndex[srcCol] == null ? '' : r[colIndex[srcCol]]
+        let n = raw === '' || raw == null ? null : Number(raw)
+        if (Number.isFinite(n) && SCALE_100.has(outKey)) n *= 100
+        entry[outKey] = Number.isFinite(n) ? n : null
+        if (entry[outKey] != null) hasAny = true
+      }
+      if (hasAny) map[id] = entry
+    }
+    return map
+  } catch (err) {
+    console.error(`Savant bat-tracking: ${err.message} — bat speed/squared-up %/swing length lose their raw value`)
+    return {}
+  }
+}
+
+const [bat, pit, rawBat, rawPit, batTracking] = await Promise.all([
   fetchPercentiles('batter'),
   fetchPercentiles('pitcher'),
   fetchRawRates('batter'),
   fetchRawRates('pitcher'),
+  fetchBatTracking(),
 ])
+
+// Merge the bat-tracking raw rates into rawBat under the same id namespace
+// RAW_METRICS.bat already uses, so savantRawFor()/percentileRows() need no
+// shape change to pick these three up.
+for (const [id, entry] of Object.entries(batTracking)) {
+  rawBat[id] = { ...(rawBat[id] ?? {}), ...entry }
+}
 
 // A selection id Savant has renamed doesn't error — it comes back as a column
 // of blanks (see RAW_METRICS). Report per-metric coverage so a silent blanking
 // shows up in the job log the day it happens, rather than as spoke labels
 // quietly vanishing from the app.
-for (const [group, raw, wanted] of [['bat', rawBat, RAW_METRICS.bat], ['pit', rawPit, RAW_METRICS.pit]]) {
-  const ids = Object.keys(raw)
-  const thin = [...new Set(Object.values(wanted))]
-    .filter((key) => ids.filter((id) => raw[id][key] != null).length < ids.length / 2)
-  if (thin.length) {
-    console.error(`WARNING: ${group} raw rates mostly blank for ${thin.join(', ')} — selection id may have changed`)
-  }
+//
+// The bat-tracking keys are checked against batTracking's OWN population, not
+// rawBat's merged one: the bat-tracking board's `minSwings=q` filter keeps a
+// much smaller, high-volume-swing pool (~200 rows) than the `custom` board's
+// (~640), so checking those three keys against rawBat's full id count would
+// trip "mostly blank" every night even with nothing broken — that's a real,
+// expected population gap, not a renamed column.
+const BAT_TRACKING_KEYS = ['batSpeed', 'squaredUp', 'swingLength']
+const thinBat = [...new Set(Object.values(RAW_METRICS.bat))].filter((key) => {
+  const ids = Object.keys(rawBat)
+  return ids.filter((id) => rawBat[id][key] != null).length < ids.length / 2
+})
+const thinBatTracking = BAT_TRACKING_KEYS.filter((key) => {
+  const ids = Object.keys(batTracking)
+  return ids.filter((id) => batTracking[id][key] != null).length < ids.length / 2
+})
+const thinPit = [...new Set(Object.values(RAW_METRICS.pit))].filter((key) => {
+  const ids = Object.keys(rawPit)
+  return ids.filter((id) => rawPit[id][key] != null).length < ids.length / 2
+})
+if (thinBat.length || thinBatTracking.length) {
+  console.error(
+    `WARNING: bat raw rates mostly blank for ${[...thinBat, ...thinBatTracking].join(', ')} — selection id may have changed`,
+  )
+}
+if (thinPit.length) {
+  console.error(`WARNING: pit raw rates mostly blank for ${thinPit.join(', ')} — selection id may have changed`)
 }
 
 await writeJsonAtomic(out, { season, generatedAt: new Date().toISOString(), bat, pit, rawBat, rawPit })
