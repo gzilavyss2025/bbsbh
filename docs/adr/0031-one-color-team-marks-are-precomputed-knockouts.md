@@ -37,7 +37,8 @@ Three things about this shape are deliberate:
   waiting on a live feed, pop the mark in after paint, and mean injecting
   remote markup into the DOM. Following the build-time-fetch pattern
   (`src/api/CLAUDE.md`) makes it a plain `<img src>` at runtime. It rides
-  `update-teams.yml` so coverage tracks `teams.json`, and it is the cheapest
+  the nightly batch's Monday-only weekly block, right behind `gen-teams.mjs`,
+  so coverage tracks `teams.json`, and it is the cheapest
   generator here: one CDN fetch per club, no statsapi enumeration of its own.
 - **Coverage is allowed to be partial.** A club with no knockout file — new
   affiliate, art that can't be re-inked — falls through `TeamLogo`'s existing
