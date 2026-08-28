@@ -23,7 +23,8 @@ import {
 // and /salaries, the league money board that came with the Contracts tab.
 // Typed out rather than derived, so this test fails if the flattening loses
 // one — deriving the expectation from the thing under test would assert
-// nothing.
+// nothing. A NEW report page is added here in the same commit that adds it to
+// PAGE_GROUPS; that is the point of the list, not a chore around it.
 const PATHS_BEFORE_GROUPING = [
   '/attendance',
   '/farm-system-rankings',
@@ -39,6 +40,8 @@ const PATHS_BEFORE_GROUPING = [
   '/rehab',
   '/milestones',
   '/umpires',
+  // The ABS Challenge System board, filed beside Umpire Rankings.
+  '/abs-challenges',
   '/awards',
   '/postseason-history',
   '/postseason-leaders',

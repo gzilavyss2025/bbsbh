@@ -18,7 +18,7 @@ import { fetchPersonStats, fetchMilbYearByYear, fetchPlayerAwards } from '../per
 import { buildCareerTimeline } from '../careerTimeline.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from '../war.js'
 import { fetchPlayerContract } from '../person/contracts.js'
-import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor } from '../savantPercentiles.js'
+import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, medianRatesFor } from '../savantPercentiles.js'
 import { fetchProspectTrend, prospectTrendById, prospectCardView } from '../prospectTrend.js'
 import {
   awardsView,
@@ -118,6 +118,7 @@ export async function loadPlayerOverview(id, asOf) {
         if (tileSportId === 1) {
           block.savant = savantPercentilesFor(savantData, id, group)
           block.savantRaw = savantRawFor(savantData, id, group)
+          block.savantMedian = medianRatesFor(savantData, group)
         }
         return { group, block, ...yby }
       }),

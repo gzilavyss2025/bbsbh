@@ -23,7 +23,7 @@
 // season-aggregate-over-Final-games footing, and no live game can be in them.
 
 import { fetchStaticTeams } from './teams-static.js'
-import { fetchTeamRecords, teamRecordsFor, COUNT_METRICS } from './teamRecords.js'
+import { fetchTeamRecords, teamRecordsFor, monthsPlayed, COUNT_METRICS } from './teamRecords.js'
 
 const DASH = '—'
 const COUNTS_GROUP = 'Season counts'
@@ -38,6 +38,19 @@ export async function fetchLevelTeamRecords(sportId, season) {
   return teams
     .map((team, i) => ({ team, data: shards[i] }))
     .filter((e) => e.data?.games?.length)
+}
+
+// Every calendar month any club at the level has played, in order — the menu
+// the page's month lever offers. A union rather than one club's answer,
+// because a level's clubs do not all open on the same day, and cutoff-aware
+// for the same reason every reader here is: a dated page must not learn that a
+// later month exists.
+export function levelMonths(entries, { cutoff = null } = {}) {
+  const seen = new Map()
+  for (const { data } of entries) {
+    for (const m of monthsPlayed(data, { cutoff })) seen.set(m.month, m)
+  }
+  return [...seen.values()].sort((a, b) => a.month - b.month)
 }
 
 // ---------------------------------------------------------------------------
@@ -60,9 +73,9 @@ function orderWithinGroup(group, metrics) {
   return metrics
 }
 
-// Pivot a level's ledgers into one table per metric. `cutoff` and `half` are
-// applied by teamRecordsFor exactly as the card applies them, so this index is
-// the card's own numbers for thirty clubs at once.
+// Pivot a level's ledgers into one table per metric. `cutoff`, `half` and
+// `month` are applied by teamRecordsFor exactly as the card applies them, so
+// this index is the card's own numbers for thirty clubs at once.
 //
 // Returns:
 //   groups   — [{ title, metrics: [{ id, k, group, kind, better }] }], the
@@ -71,7 +84,7 @@ function orderWithinGroup(group, metrics) {
 //              club that HAS the split; a club that has never been in it is
 //              absent here and surfaces as a dash row at rank-less bottom
 //   teams    — every club in the level, so a missing row can still be printed
-export function buildRankingIndex(entries, { cutoff = null, half = 'all' } = {}) {
+export function buildRankingIndex(entries, { cutoff = null, half = 'all', month = null } = {}) {
   const groups = []
   const groupIndex = new Map() // title -> { title, metrics: [] }
   const seen = new Map() // metricId -> metric
@@ -91,7 +104,7 @@ export function buildRankingIndex(entries, { cutoff = null, half = 'all' } = {})
 
   const teams = []
   for (const { team, data } of entries) {
-    const records = teamRecordsFor(data, { cutoff, half })
+    const records = teamRecordsFor(data, { cutoff, half, month })
     teams.push(team)
     if (!records) continue
 
@@ -108,6 +121,10 @@ export function buildRankingIndex(entries, { cutoff = null, half = 'all' } = {})
           rate: row.rate,
           v: row.v,
           pct: row.pct,
+          // Carried through only when the row has one (the by-inning splits),
+          // so the board can print WHEN each club last did it beside how often
+          // it wins when it does. Null for every other metric.
+          last: row.last ?? null,
         })
       }
     }
@@ -221,6 +238,7 @@ export function rankMetric(index, metricId, { sortBy = 'pct', order } = {}) {
       ties: 0,
       rate: null,
       value: null,
+      last: null,
       v: DASH,
       pct: DASH,
     }))

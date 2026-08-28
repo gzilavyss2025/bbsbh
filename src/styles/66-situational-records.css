@@ -352,6 +352,24 @@
 .trrank__tilefoot--mine {
   background: var(--field-soft);
 }
+/* The favourite club's own standing: the figure, and under it the rank
+   against the field that can be ranked on this split. Two lines because they
+   are two facts — a middle dot between them is the same mistake as a "#" in
+   front of the number, only thinner. Right-aligned against the arrow, and both
+   lines stay on one line each (the parent already sets nowrap), so a wide
+   figure shortens the club name beside it rather than wrapping mid-number. */
+.trrank__tilemine {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  line-height: var(--lh-title);
+}
+.trrank__tileminerank {
+  font-family: var(--font-display);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
 .trrank__tilearrow {
   color: var(--trrank-edge);
   font-size: var(--fs-title-sm);

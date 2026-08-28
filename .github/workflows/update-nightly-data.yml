@@ -316,6 +316,14 @@ jobs:
         id: comeback-wins
         continue-on-error: true
         run: node scripts/gen-comeback-wins.mjs
+      # Every ABS challenge of the season, MLB and Triple-A, for
+      # /abs-challenges. Append-only over newly-Final games, so the trailing
+      # window is all it ever needs; the one-time season backfill is
+      # `--since=2026-03-26`, run by hand.
+      - name: ABS challenges
+        id: abs-challenges
+        continue-on-error: true
+        run: node scripts/gen-abs-challenges.mjs
       - name: Jerseys
         id: jerseys
         continue-on-error: true
@@ -501,6 +509,7 @@ jobs:
           steps.salaries.outcome == 'failure' ||
           steps.prospect-trend.outcome == 'failure' ||
           steps.comeback-wins.outcome == 'failure' ||
+          steps.abs-challenges.outcome == 'failure' ||
           steps.jerseys.outcome == 'failure' ||
           steps.pitch-arsenal.outcome == 'failure' ||
           steps.spray.outcome == 'failure' ||

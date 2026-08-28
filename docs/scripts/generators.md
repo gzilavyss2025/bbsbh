@@ -214,6 +214,35 @@ don't run these by hand.
   `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
   old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
+- `gen-abs-challenges.mjs` → `public/data/abs-challenges.json` — every ABS
+  (Automated Ball-Strike) CHALLENGE of the season, at both levels that run the
+  system: MLB (sportId 1, 2026 is its first season) and Triple-A (sportId 11,
+  which has run it for several). SQLite-backed (`abs-challenges` group,
+  ADR-0021), APPEND-ONLY incremental sweep of newly-Final games like
+  `gen-comeback-wins.mjs`: `--days` trailing window nightly,
+  `--since=2026-03-26` for the one-time backfill (Opening Day — there is no
+  history before it), `--sports=1,11` to restrict a level, `--export-only` to
+  re-derive every split with no re-sweep, `--rebuild` for a schema change.
+  `abs_ingested_games` is both the idempotency guard AND the denominator table:
+  it carries the two club ids and the plate umpire, so a club or umpire nobody
+  challenged still has a games figure. FACTS ONLY in the row table (who
+  challenged, what the umpire called, outcome, inning, umpire, run value,
+  zone-edge distance); every split — per club, per role, per umpire, call type,
+  miss distance, the biggest overturn — is derived at export time in
+  `scripts/lib/abs-challenges.mjs`, which also holds the per-game row
+  derivation, since a generator does its work at import and nothing inside one
+  can be unit-tested (`test/abs-challenges.test.js`).
+  Imports rather than re-derives: `selectChallengeState` (`src/api/challenges.js`,
+  which knows an ABS review can sit at either the play or the pitch-event level
+  and that MLB's older manager's-replay reviews must be excluded on
+  `reviewType`), `missEdge` (`src/api/umpireFavor.js`), and `pitchFavor`
+  (`src/lib/runExpectancy.js`, against the hand-run `run-expectancy.json` —
+  absent, `favor` is null and the run figures degrade rather than reading zero).
+  **The trap**: on a SUCCESSFUL challenge the feed rewrites the pitch to the
+  CORRECTED call, so the printed call is the umpire's own only when the
+  challenge FAILED; `umpireCallFor` flips it back. Getting that wrong puts every
+  batter in the catcher's column. App reads it via
+  `src/api/around-the-game/absChallenges.js` (the `/abs-challenges` report page).
 - `gen-team-records.mjs` → `public/data/team-records/{season}/{teamId}.json` (one
   file per club per season, ~24 KB) — the per-game LEDGER every club's
   situational records are read off, at MLB, the four full-season MiLB levels,
@@ -231,7 +260,16 @@ don't run these by hand.
   `gen-comeback-wins.mjs` each paid once, as a `--since` backfill and a
   `--rebuild`. The app derives one more layer at READ time, which is what lets a
   dated (`?d=`) team page apply its own day-before cutoff exactly rather than
-  print a season total that looks past it. SQLite-backed (`team-records` group,
+  print a season total that looks past it. The scored-by-inning rows are the
+  worked example of that bill NOT being paid: the raw inning line was already in
+  the ledger, so nineteen new splits cost one `--export-only` run and no
+  network. What ships per row is `ib`, a bitmask of the innings the club scored
+  in **its own half** (bit n-1 for inning n, capped at 31 bits so the value
+  stays positive), plus `ix` when any of that scoring came after the game's
+  scheduled length — a separate flag rather than a fixed bit position, because a
+  MiLB doubleheader is scheduled for seven innings and its eighth is extra
+  baseball. Together they cost about 1.2 KB on a club's ~135-game season file,
+  roughly 4.5%. SQLite-backed (`team-records` group,
   ADR-0021), APPEND-ONLY over newly-Final games; `team_record_ingested_games` is
   the idempotency guard, so the nightly cost is the ~65 games that finished,
   never the season. That table is **seven columns plus a `payload_json`**, not
@@ -438,8 +476,23 @@ don't run these by hand.
   therefore fails as blank cells rather than as an error, so the script logs
   per-metric coverage and WARNS when a metric returns mostly empty — check that
   warning first if spoke labels go missing. The raw fetch is never fatal; on
-  failure the radar plots its shape with no labels. App reads it via
-  `src/api/savantPercentiles.js`.
+  failure the radar plots its shape with no labels. Bat speed, swing length,
+  and squared-up % (batter-only, no pitcher analog) ride the percentile board
+  for free but need a THIRD leaderboard for their raw rate — Savant's own
+  `/leaderboard/bat-tracking` board, keyed on the column `id` rather than
+  `player_id` like every other fetch here, merged into `rawBat`. Its coverage
+  check runs against its OWN population, not `rawBat`'s: that board's
+  `minSwings=q` filter keeps a much smaller high-volume-swing pool than
+  `custom`'s, so comparing against `rawBat`'s full count would warn every
+  night for no reason. The file also carries `midBat`/`midPit` — the pctstrip's
+  league-BASELINE figure, per metric: the MEDIAN raw rate over the population
+  that has both a percentile rank and a raw value for that metric (`scripts/
+  lib/savant.mjs`'s `medianRates`), not an unweighted leaderboard mean —
+  Savant's own percentile rank puts the median observation at 50 by
+  construction, so it is the one summary that agrees with the strip's
+  already-drawn 50th-percentile reference line. Skipped per metric below
+  `MEDIAN_FLOOR` (30) rather than printed off a handful of players. App reads
+  it via `src/api/savantPercentiles.js`.
 - `gen-savant-matchup.mjs` → `public/data/savant-matchup.json` — season Statcast
   RATES (chase, whiff, hard-hit, pull, ground-ball) for every qualified batter
   AND pitcher, plus the league mean/SD each is scored against. A sibling of the

@@ -179,3 +179,42 @@ export function meanSdGrouped(rows, groupKey, valueKey, minRows = 15) {
 // (src/api/matchup/notes.js) — a tenth of a point on a chase rate is a
 // database talking, not a game note — but the z-score wants the tenth.
 export const round1 = (n) => Math.round(n * 10) / 10
+
+// Median of an array of numbers — the value at the middle of the sorted list,
+// averaging the two middle values when the count is even. Used instead of a
+// mean for the pctstrip's league-baseline figure (gen-savant-percentiles.mjs):
+// a percentile rank puts the median observation at 50 BY CONSTRUCTION, so the
+// median is the one summary that agrees with the strip's already-drawn
+// 50th-percentile reference line. A mean over a bulk leaderboard would not —
+// and getting a mean right per metric would need reinventing a different
+// weighting denominator for each one (PA for xwOBA, batted-ball events for
+// EV, swings for bat speed, ...), which the median sidesteps entirely.
+export function median(values) {
+  if (!values.length) return null
+  const sorted = [...values].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  // round1 on BOTH branches — an odd-length list's middle value comes straight
+  // off a raw Savant column (e.g. 72.13707063) and needs the same one-decimal
+  // storage precision the even-length average already gets, or the file would
+  // carry two different precisions depending on a population's parity alone.
+  return round1(sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2)
+}
+
+// The per-metric median of `rawMap`'s values, over the INTERSECTION of
+// `pctMap` and `rawMap` — only ids that have a non-null value in BOTH maps
+// for that key. That intersection is, by definition, the population whose
+// 50th percentile the strip's reference line already draws: computing the
+// median over a wider or narrower population would draw a line and print a
+// number that disagree. A metric whose intersection is thinner than `floor`
+// is left out of the result entirely rather than printing a baseline off a
+// handful of players.
+export function medianRates(pctMap, rawMap, keys, floor) {
+  const out = {}
+  for (const key of keys) {
+    const values = Object.keys(pctMap)
+      .filter((id) => pctMap[id][key] != null && rawMap[id]?.[key] != null)
+      .map((id) => rawMap[id][key])
+    if (values.length >= floor) out[key] = median(values)
+  }
+  return out
+}

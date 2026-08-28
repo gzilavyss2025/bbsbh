@@ -58,7 +58,14 @@ function halfOrder(inning, half) {
 // (same formula, same batter-oriented horizontal flip) so the live "worst
 // call" edge and the season zone-map tendency never disagree about which
 // edge a given pitch belongs to.
-function missEdge(pX, pZ, top, bot, batSide) {
+//
+// EXPORTED for scripts/gen-abs-challenges.mjs, which needs the same edge
+// distance for the pitch a club challenged and would otherwise be the THIRD
+// copy of this formula in the repo. It is pure geometry over one pitch — no
+// feed, no game state, nothing sealed — so a build-time importer is the same
+// arrangement gen-umpire-accuracy.mjs already has with challenges.js's
+// challengeForPlay. No UI module may import it: this file stays reveal-only.
+export function missEdge(pX, pZ, top, bot, batSide) {
   const bx = batSide === 'L' ? -pX : pX
   const clearances = {
     high: top + BALL_R - pZ, // <0 ⇒ above the zone

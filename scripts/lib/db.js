@@ -89,6 +89,14 @@ export const GROUPS = {
     file: join(dataDir, 'team-records.sql'),
     tables: ['team_record_games', 'team_record_ingested_games'],
   },
+  // Both tables are written by the one nightly gen-abs-challenges.mjs — its
+  // own group, same as jerseys/pitch-arsenal/team-records above. The row table
+  // stays small (one row per ABS challenge, a few thousand a season across MLB
+  // and Triple-A); the ledger carries one row per swept game.
+  'abs-challenges': {
+    file: join(dataDir, 'abs-challenges.sql'),
+    tables: ['abs_challenges', 'abs_ingested_games'],
+  },
 }
 
 // Reconstitutes a fresh in-memory database: apply the schema, then replay

@@ -25,8 +25,20 @@ import {
   tagSeries,
   isGetawayDay,
   dailyDivisionRanks,
+  inningsScoredMask,
+  scoredInExtras,
 } from '../scripts/lib/team-records.mjs'
-import { teamRecordsFor, longestStreaks, sweepCounts, seriesRecordCounts, daysAtPlace } from '../src/api/teamRecords.js'
+import {
+  teamRecordsFor,
+  longestStreaks,
+  sweepCounts,
+  seriesRecordCounts,
+  daysAtPlace,
+  lastOccurrence,
+  monthsPlayed,
+  ordinal,
+  shortDate,
+} from '../src/api/teamRecords.js'
 
 // A linescore's innings array, from `[away, home]` pairs. `null` home means
 // that side did not bat.
@@ -437,4 +449,194 @@ test('a club with no file, or no games in the filter, returns null so the card h
   assert.equal(teamRecordsFor(null), null)
   assert.equal(teamRecordsFor(shard([])), null)
   assert.equal(teamRecordsFor(shard([row({ d: '2026-08-01' })]), { cutoff: '2026-04-01' }), null)
+})
+
+// ---------------------------------------------------------------------------
+// inningsScoredMask / scoredInExtras — the per-inning scoring line, stored as
+// one integer, and the extras flag that no fixed bit position could carry
+// ---------------------------------------------------------------------------
+
+test('the mask reads the club own half — the away side gets the tops, the home side the bottoms', () => {
+  // Away 2 in the 1st and 1 in the 3rd; home 3 in the 2nd.
+  const innings = runs([[2, 0], [0, 3], [1, 0]])
+  // Bits 0 and 2 -> 1 + 4.
+  assert.equal(inningsScoredMask(innings, false), 5)
+  // Bit 1 -> 2.
+  assert.equal(inningsScoredMask(innings, true), 2)
+})
+
+test('a home side that never batted never scored, so its bit stays clear', () => {
+  // The road club wins in the top of the 9th shape: the home half is null,
+  // which must not read as "batted and scored nothing" OR as a set bit.
+  const innings = runs([[0, 0], [1, null]])
+  assert.equal(inningsScoredMask(innings, true), 0)
+  assert.equal(inningsScoredMask(innings, false), 2)
+})
+
+test('a scoreless club has an empty mask, so the shipped row omits the key entirely', () => {
+  assert.equal(inningsScoredMask(runs([[0, 1], [0, 2]]), false), 0)
+})
+
+test('the mask stops at 31 bits so the stored value can never go negative', () => {
+  // Thirty-five innings, a run in every one. Only the first 31 are recorded,
+  // and the result is still a positive 32-bit integer.
+  const innings = runs(Array.from({ length: 35 }, () => [1, 1]))
+  const mask = inningsScoredMask(innings, false)
+  assert.ok(mask > 0, 'the mask must stay positive')
+  assert.equal(mask, 2 ** 31 - 1)
+})
+
+test('extras are read against the game scheduled length, not against the ninth', () => {
+  // A MiLB doubleheader game scheduled for seven: the eighth inning IS extra
+  // baseball, and a fixed "bit 9 or higher" test would have missed it.
+  const seven = runs([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 1], [2, 0]])
+  assert.equal(scoredInExtras(seven, false, 7), true)
+  assert.equal(scoredInExtras(seven, true, 7), false)
+  // The same line at a nine-inning level is all regulation.
+  assert.equal(scoredInExtras(seven, false, 9), false)
+  // And a nine-inning game that went to the tenth.
+  const ten = runs(Array.from({ length: 10 }, (_, i) => [i === 9 ? 3 : 0, 0]))
+  assert.equal(scoredInExtras(ten, false, 9), true)
+})
+
+// ---------------------------------------------------------------------------
+// The scored-by-inning rows
+// ---------------------------------------------------------------------------
+
+// A shipped row's `ib` for the innings this club scored in, its own half.
+const mask = (...innings) => innings.reduce((m, n) => m | (1 << (n - 1)), 0)
+
+test('a club only ever qualifies for ONE half of a given inning — the one it batted', () => {
+  const result = teamRecordsFor(shard([
+    // Away, scored in the 1st and the 5th.
+    row({ d: '2026-04-01', ib: mask(1, 5) }),
+    // Home, scored in the 1st.
+    row({ d: '2026-04-02', h: 1, ib: mask(1), r: 'L' }),
+  ]))
+  assert.equal(rowsOf(result, 'Scoring by inning', 'Scoring in the top of the 1st').v, '1-0')
+  assert.equal(rowsOf(result, 'Scoring by inning', 'Scoring in the bottom of the 1st').v, '0-1')
+  // The home game never batted a top half, so it is absent from the top row
+  // rather than counted as a loss there — and the away game likewise from the
+  // bottom row.
+  assert.equal(rowsOf(result, 'Scoring by inning', 'Scoring in the top of the 1st').played, 1)
+  assert.equal(rowsOf(result, 'Scoring by inning', 'Scoring in the bottom of the 1st').played, 1)
+  assert.equal(rowsOf(result, 'Scoring by inning', 'Scoring in the top of the 5th').v, '1-0')
+  // An inning nobody scored in is dropped, not printed as 0-0.
+  assert.equal(rowsOf(result, 'Scoring by inning', 'Scoring in the top of the 2nd'), undefined)
+})
+
+test('an absent ib means the club was shut out, and it lands in no by-inning row', () => {
+  const result = teamRecordsFor(shard([row({ rs: 0, ra: 3, r: 'L' })]))
+  assert.equal(result.groups.find((g) => g.title === 'Scoring by inning'), undefined)
+})
+
+test('the extras row reads the generator flag, so a seven-inning level still counts', () => {
+  const result = teamRecordsFor(shard([
+    row({ d: '2026-04-01', ib: mask(8), ix: 1 }),
+    row({ d: '2026-04-02', ib: mask(3), r: 'L' }),
+  ]))
+  assert.equal(rowsOf(result, 'Scoring by inning', 'Scoring in extra innings').v, '1-0')
+})
+
+// ---------------------------------------------------------------------------
+// lastOccurrence — the "when was the last time" capability
+// ---------------------------------------------------------------------------
+
+test('lastOccurrence returns the newest match with its opponent and result', () => {
+  const data = shard([
+    row({ d: '2026-04-01', ib: mask(1) }),
+    row({ d: '2026-05-20', o: 12, ib: mask(1), r: 'L' }),
+    row({ d: '2026-06-01', ib: mask(4) }),
+  ])
+  assert.deepEqual(
+    lastOccurrence(data, (g) => ((g.ib ?? 0) & 1) !== 0),
+    { date: '2026-05-20', opp: 12, result: 'L' },
+  )
+  assert.equal(lastOccurrence(data, (g) => g.ib === 999), null)
+})
+
+test('lastOccurrence honours the cutoff, so a dated page cannot learn of a later one', () => {
+  const data = shard([
+    row({ d: '2026-04-01', ib: mask(1) }),
+    row({ d: '2026-08-20', ib: mask(1) }),
+  ])
+  assert.equal(lastOccurrence(data, () => true).date, '2026-08-20')
+  assert.equal(lastOccurrence(data, () => true, { cutoff: '2026-05-01' }).date, '2026-04-01')
+})
+
+test('a row last-seen date sits inside the same scope the row was counted over', () => {
+  const games = [
+    row({ d: '2026-04-05', ib: mask(1) }),
+    row({ d: '2026-08-20', ib: mask(1) }),
+  ]
+  // Scoped to April, the August game is neither counted nor named as the last
+  // time — the two would otherwise disagree on the same line.
+  const april = teamRecordsFor(shard(games), { month: 4 })
+  assert.equal(rowsOf(april, 'Scoring by inning', 'Scoring in the top of the 1st').last.date, '2026-04-05')
+  const full = teamRecordsFor(shard(games))
+  assert.equal(rowsOf(full, 'Scoring by inning', 'Scoring in the top of the 1st').last.date, '2026-08-20')
+  // Only the by-inning rows carry it; a rate row stays a rate row.
+  assert.equal(rowsOf(full, 'Scoring', 'Scoring 4+ runs').last, undefined)
+})
+
+// ---------------------------------------------------------------------------
+// The month lever
+// ---------------------------------------------------------------------------
+
+test('a month filters the games every row is folded from, old rows included', () => {
+  const games = [
+    row({ d: '2026-04-05', hr: 2 }),
+    row({ d: '2026-08-10', hr: 1, r: 'L' }),
+    row({ d: '2026-08-20', hr: 3 }),
+  ]
+  assert.equal(teamRecordsFor(shard(games)).gamesCounted, 3)
+  assert.equal(teamRecordsFor(shard(games), { month: 8 }).gamesCounted, 2)
+  assert.equal(rowsOf(teamRecordsFor(shard(games), { month: 8 }), 'Hits and homers', 'Hitting a home run').v, '1-1')
+  assert.equal(rowsOf(teamRecordsFor(shard(games), { month: 4 }), 'Hits and homers', 'Hitting a home run').v, '1-0')
+})
+
+test('the month lever composes with the All-Star half rather than replacing it', () => {
+  const games = [
+    row({ d: '2026-07-05' }),
+    row({ d: '2026-07-20', r: 'L' }),
+    row({ d: '2026-08-01' }),
+  ]
+  // July, post-break: only the 07-20 game (the break is 2026-07-14).
+  assert.equal(teamRecordsFor(shard(games), { half: 'post', month: 7 }).gamesCounted, 1)
+  assert.equal(teamRecordsFor(shard(games), { half: 'pre', month: 7 }).gamesCounted, 1)
+  // A scope with no games returns null so the card can say so.
+  assert.equal(teamRecordsFor(shard(games), { half: 'pre', month: 8 }), null)
+})
+
+test('a month scope drops the By month group, which would only restate the header', () => {
+  const games = [row({ d: '2026-04-05' }), row({ d: '2026-08-10', r: 'L' })]
+  assert.ok(teamRecordsFor(shard(games)).groups.some((g) => g.title === 'By month'))
+  assert.ok(!teamRecordsFor(shard(games), { month: 8 }).groups.some((g) => g.title === 'By month'))
+})
+
+test('days at a place respect the month as well as the cutoff and the half', () => {
+  const dailyRank = { '2026-07-01': 1, '2026-08-01': 1, '2026-08-02': 2 }
+  const opts = { allStarDate: '2026-07-14', half: 'all', cutoff: null }
+  assert.deepEqual(daysAtPlace(dailyRank, opts), [2, 1, 0, 0, 0])
+  assert.deepEqual(daysAtPlace(dailyRank, { ...opts, month: 8 }), [1, 1, 0, 0, 0])
+})
+
+test('the month menu is the months actually played, in order and cutoff-aware', () => {
+  const data = shard([
+    row({ d: '2026-08-10' }),
+    row({ d: '2026-04-05' }),
+    row({ d: '2026-04-06' }),
+  ])
+  assert.deepEqual(monthsPlayed(data).map((m) => m.month), [4, 8])
+  assert.deepEqual(monthsPlayed(data).map((m) => m.short), ['Apr', 'Aug'])
+  assert.deepEqual(monthsPlayed(data, { cutoff: '2026-05-01' }).map((m) => m.month), [4])
+})
+
+test('inning names and short dates print the way the two surfaces read them', () => {
+  assert.deepEqual([1, 2, 3, 4, 9].map(ordinal), ['1st', '2nd', '3rd', '4th', '9th'])
+  // Parsed off the ISO string: going through Date would shift the day by one
+  // in any timezone behind UTC.
+  assert.equal(shortDate('2026-08-26'), 'Aug 26')
+  assert.equal(shortDate('2026-04-01'), 'Apr 1')
+  assert.equal(shortDate(null), '—')
 })

@@ -226,6 +226,14 @@ const DoubleheadersPage = lazyNamed(
   () => import('./screens/around-the-game/DoubleheadersPage.jsx'),
   'DoubleheadersPage',
 )
+// Filed under "This season" in the menu, not with the five above — it reports
+// on a result on the field rather than on the conditions around one. It lives
+// in this directory because it wears the same masthead, boards and stylesheet;
+// see src/lib/reportPages.js.
+const AbsChallengesPage = lazyNamed(
+  () => import('./screens/around-the-game/AbsChallengesPage.jsx'),
+  'AbsChallengesPage',
+)
 const ManagerPage = lazyNamed(() => import('./screens/ManagerPage.jsx'), 'ManagerPage')
 const GameNotesDebugPage = lazyNamed(
   () => import('./screens/GameNotesDebugPage.jsx'),
@@ -412,6 +420,7 @@ export default function App() {
         category={route.category}
         metric={route.metric}
         half={route.half}
+        month={route.month}
         sort={route.sort}
         order={route.order}
       />
@@ -426,6 +435,8 @@ export default function App() {
     content = <BullpenPage />
   } else if (route.name === 'doubleheaders') {
     content = <DoubleheadersPage />
+  } else if (route.name === 'abs-challenges') {
+    content = <AbsChallengesPage />
   } else if (route.name === 'manager') {
     content = <ManagerPage id={route.id} />
   } else if (route.name === 'game-notes-debug') {
