@@ -135,6 +135,18 @@ const PANEL_PATHS = [
   '.scratch/prospect-traits/q2-size.json',
   '.scratch/prospect-traits/q3-pitchers.json',
   '.scratch/prospect-traits/q5-final-four.json',
+  // Historical Top Prospects lists (.scratch/top-prospects-history/pull.mjs):
+  // rows.json is one row per (season, rank, mlbId), 2009-2024 -- mlbId joins
+  // directly to prospect-traits/bio.json above, no crosswalk. seasons.json is
+  // the per-season coverage record (2005-2024): status ("ok"/"unavailable"),
+  // list depth, row count, fetch timestamp -- depth is NOT assumed 100 (2009-
+  // 2011 are top-50 lists; 2020/2021 top out at 99, confirmed not a parsing
+  // gap). Deliberately a plain top-level ARRAY for both files, not a
+  // {meta,rows} wrapper -- a sibling panel in this wave registered that shape
+  // and it threw on every row-grain query; a bare array registers as one row
+  // per element with no flattening step needed.
+  '.scratch/top-prospects-history/rows.json',
+  '.scratch/top-prospects-history/seasons.json',
   '.scratch/blockage/incumbent-ids.json',
   '.scratch/blockage/incumbent-bio.json',
   '.scratch/blockage/exits.json',

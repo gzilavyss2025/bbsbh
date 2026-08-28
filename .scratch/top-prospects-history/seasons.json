@@ -1,0 +1,162 @@
+[
+  {
+    "season": 2005,
+    "status": "unavailable",
+    "depth": null,
+    "rowCount": 0,
+    "fetchedAt": "2026-08-28T14:35:21.880Z",
+    "note": "HTTP 200, 625514 bytes, zero RankedPlayerEntity matches -- a real empty shell, confirmed live, not a fetch or parse failure. MLB Pipeline's Top Prospects page has no ranked list before 2009."
+  },
+  {
+    "season": 2006,
+    "status": "unavailable",
+    "depth": null,
+    "rowCount": 0,
+    "fetchedAt": "2026-08-28T14:35:23.127Z",
+    "note": "HTTP 200, 625706 bytes, zero RankedPlayerEntity matches -- a real empty shell, confirmed live, not a fetch or parse failure. MLB Pipeline's Top Prospects page has no ranked list before 2009."
+  },
+  {
+    "season": 2007,
+    "status": "unavailable",
+    "depth": null,
+    "rowCount": 0,
+    "fetchedAt": "2026-08-28T14:35:24.367Z",
+    "note": "HTTP 200, 625706 bytes, zero RankedPlayerEntity matches -- a real empty shell, confirmed live, not a fetch or parse failure. MLB Pipeline's Top Prospects page has no ranked list before 2009."
+  },
+  {
+    "season": 2008,
+    "status": "unavailable",
+    "depth": null,
+    "rowCount": 0,
+    "fetchedAt": "2026-08-28T14:35:25.622Z",
+    "note": "HTTP 200, 625706 bytes, zero RankedPlayerEntity matches -- a real empty shell, confirmed live, not a fetch or parse failure. MLB Pipeline's Top Prospects page has no ranked list before 2009."
+  },
+  {
+    "season": 2009,
+    "status": "ok",
+    "depth": 50,
+    "rowCount": 50,
+    "fetchedAt": "2026-08-28T14:35:26.889Z",
+    "note": "50 ranks retrieved, contiguous 1..50, no duplicate ranks or ids."
+  },
+  {
+    "season": 2010,
+    "status": "ok",
+    "depth": 50,
+    "rowCount": 50,
+    "fetchedAt": "2026-08-28T14:35:28.136Z",
+    "note": "50 ranks retrieved, contiguous 1..50, no duplicate ranks or ids."
+  },
+  {
+    "season": 2011,
+    "status": "ok",
+    "depth": 50,
+    "rowCount": 50,
+    "fetchedAt": "2026-08-28T14:35:29.417Z",
+    "note": "50 ranks retrieved, contiguous 1..50, no duplicate ranks or ids."
+  },
+  {
+    "season": 2012,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:30.692Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  },
+  {
+    "season": 2013,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:31.943Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  },
+  {
+    "season": 2014,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:33.209Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  },
+  {
+    "season": 2015,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:34.490Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  },
+  {
+    "season": 2016,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:35.769Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  },
+  {
+    "season": 2017,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:37.058Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  },
+  {
+    "season": 2018,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:38.368Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  },
+  {
+    "season": 2019,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:39.651Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  },
+  {
+    "season": 2020,
+    "status": "ok",
+    "depth": 99,
+    "rowCount": 99,
+    "fetchedAt": "2026-08-28T14:35:40.963Z",
+    "note": "99 ranks retrieved, contiguous 1..99, no duplicate ranks or ids. Non-round depth -- confirmed NOT a parsing gap by the contiguity check above; MLB simply published 99 names this year."
+  },
+  {
+    "season": 2021,
+    "status": "ok",
+    "depth": 99,
+    "rowCount": 99,
+    "fetchedAt": "2026-08-28T14:35:42.290Z",
+    "note": "99 ranks retrieved, contiguous 1..99, no duplicate ranks or ids. Non-round depth -- confirmed NOT a parsing gap by the contiguity check above; MLB simply published 99 names this year."
+  },
+  {
+    "season": 2022,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:43.587Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  },
+  {
+    "season": 2023,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:44.857Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  },
+  {
+    "season": 2024,
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 100,
+    "fetchedAt": "2026-08-28T14:35:46.146Z",
+    "note": "100 ranks retrieved, contiguous 1..100, no duplicate ranks or ids."
+  }
+]
