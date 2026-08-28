@@ -585,7 +585,12 @@ const BUDGETS = {
   // scripts/lib/ because it RUNS as a script; its pure half is exported from the
   // same file for test/data-freshness.test.js, the guard-plus-CLI shape
   // gen-attendance.mjs and friends already use.
-  scripts: 105,
+  // 105 -> 106 for gen-abs-challenges.mjs, the nightly sweep behind
+  // /abs-challenges (the ABS Challenge System season board). It RUNS on
+  // import, fetching statsapi and writing public/data, which is exactly what
+  // scripts/lib/ is not for; its pure half lives there instead, as
+  // abs-challenges.mjs. Flat with every other gen-*.mjs here.
+  scripts: 106,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -718,7 +723,13 @@ const BUDGETS = {
   // production first — one transient HTTP 500 aborted the whole generator on
   // 2026-08-28 — and test/war-splits.test.js now pins all five cases (retry,
   // give-up, one-player-fails, carry-forward, outage threshold).
-  'scripts/lib': 31,
+  // +1 for abs-challenges.mjs — the pure half of gen-abs-challenges.mjs: one
+  // Final game's feed to challenge rows, and the accumulated rows to every
+  // split public/data/abs-challenges.json ships. Both halves are unit-tested
+  // without a live statsapi call (test/abs-challenges.test.js), which is the
+  // testable-helper convention this directory exists for, and neither could be
+  // tested inside a generator that does its work at import.
+  'scripts/lib': 32,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

@@ -29,13 +29,29 @@ import { BROADCAST_STRAND } from '../../lib/reportPages.js'
 // width of the slab. Opt-in, per page: a measure is right for the four pages
 // whose dek is two or three lines of prose, and wrong for a one-line dek that
 // would otherwise break early and leave half the slab empty.
-export function BroadcastMasthead({ eyebrow, title, dek, dekFull = false, meta = [] }) {
+//
+// `strand` overrides that chip for a page that wears this masthead but is
+// filed under a DIFFERENT menu group — /abs-challenges is listed under "This
+// season" beside Umpire Rankings, because it is a season-to-date officiating
+// board, while its files sit in this package because that is where the report
+// components and the one report stylesheet live. The chip must name the group
+// the reader came through, or it breaks the very promise the paragraph above
+// makes. Pass groupLabelFor(path) rather than a literal, so it still cannot
+// drift from the menu.
+export function BroadcastMasthead({
+  eyebrow,
+  title,
+  dek,
+  dekFull = false,
+  meta = [],
+  strand = BROADCAST_STRAND,
+}) {
   return (
     <header className="bcast">
       <div className="bcast__bar" aria-hidden="true" />
       <div className="bcast__body">
         <p className="bcast__eyebrow">
-          <span className="bcast__strand">{BROADCAST_STRAND}</span>
+          <span className="bcast__strand">{strand}</span>
           {eyebrow ? <span className="bcast__slash">/</span> : null}
           {eyebrow ? <span>{eyebrow}</span> : null}
         </p>

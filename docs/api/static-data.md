@@ -545,11 +545,29 @@ for each generator; the reader modules:
   clubs instead of the two in one game, and ranks on the SHARE of each staff
   that is likely down rather than the count. Starters are excluded outright.
   Inherits `workload.js`'s spoiler class unchanged.
-- `around-the-game/clubs.js` — the one club-identity lookup those three boards share,
+- `around-the-game/absChallenges.js` — `/abs-challenges`, the season board for
+  the ABS Challenge System, from `public/data/abs-challenges.json`
+  (`gen-abs-challenges.mjs`). MLB and Triple-A are separate levels on the page,
+  never blended: two different leagues of hitters, catchers and umpires, and
+  Triple-A has years of the rule MLB is in its first season of. The FILE ships
+  each club's, umpire's and player's own totals; ranking, and the
+  minimum-sample floors (`MIN_PLAYER_CHALLENGES`, `MIN_UMPIRE_GAMES`), are
+  derived here — the same split `gate.js` keeps with its generator. Two things
+  the module knows that a reader of the JSON alone would not. A club with no
+  challenges still holds a board row, because its games denominator comes off
+  the swept-games ledger rather than off the challenge rows. And role and call
+  type are ONE fact, not two: a batter may only challenge a called strike, a
+  catcher or a pitcher only a called ball (`ROLE_CALL`), so the page prints one
+  table — `callSplitAnomalies` exists to surface the day that stops holding
+  rather than to assert it silently. Spoiler-free: a challenge is a ball-strike
+  judgment, not a run.
+- `around-the-game/clubs.js` — the one club-identity lookup those boards share,
   off the static `teams.json`. `clubShort` (Padres) is what a board ROW uses
   and `clubName` (San Diego Padres) what prose uses; the full name in a row
   makes the club column wide enough on a phone to push every number off the
-  right edge.
+  right edge. `loadClubs([1, 11])` reaches past MLB for the one board that
+  needs it (ABS Challenges, above); club ids never collide across levels, so
+  one Map holds them all.
 - `teamRecords.js` — the Numbers tab's situational **Records** card, from
   `public/data/team-records/{season}/{teamId}.json` (`gen-team-records.mjs`),
   MLB and all four full-season MiLB levels. The file is a compact ROW PER GAME,
