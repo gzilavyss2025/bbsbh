@@ -663,11 +663,13 @@ don't run these by hand.
   a failed warm is logged and skipped, never fatal to the run.
 - `gen-affiliates.mjs` → `public/data/affiliates.json` — every MLB org's full
   farm system (AAA/AA/A+/A), keyed by parent org id, in ONE
-  `/teams/affiliates?teamIds=…` request for all 30. On its OWN workflow
-  (`.github/workflows/update-affiliates.yml`), not the nightly batch, because a
-  farm system changes at most once a year (the PDC realignment). Its sibling
-  `gen-teams.mjs` + `gen-mono-logos.mjs` run on `update-teams.yml` for the same
-  reason. App reads it via `src/api/team.js`.
+  `/teams/affiliates?teamIds=…` request for all 30. Runs in the nightly batch's
+  **Monday-only weekly block** (`.github/workflows/update-nightly-data.yml`), not
+  every night, because a farm system changes at most once a year (the PDC
+  realignment). Its siblings `gen-teams.mjs` + `gen-mono-logos.mjs` sit in that
+  same block for the same reason. All three had their own weekly crons until
+  2026-08-28; they were folded in so the nightly steps that READ their output
+  stop spending every Monday on the previous week's files. App reads it via `src/api/team.js`.
 - `gen-milb-ballparks.mjs` → `src/lib/data/milb-ballparks.json` — every current
   MiLB team's venue name, deduped by `venueKey` (one venue can host two clubs,
   e.g. Roger Dean Chevrolet Stadium). Read straight from the `teams.json` this
@@ -677,8 +679,8 @@ don't run these by hand.
   copy-editable name/photo/logo, since nobody has hand-verified its dimensions.
   `src/copy/registry.js`'s `milbParkFields()` derives one park's worth of
   registry fields per entry, the same shape `parkFields()` derives from
-  `BALLPARKS`. Runs on `update-teams.yml` right after `gen-teams.mjs`, same
-  reasoning as `gen-mono-logos.mjs` above.
+  `BALLPARKS`. Runs in the nightly batch's Monday-only weekly block right after
+  `gen-teams.mjs`, same reasoning as `gen-mono-logos.mjs` above.
 
 ## Hand-run generators (immutable data — NOT on a cron)
 
@@ -916,8 +918,8 @@ Re-run only to fold in a new season.
   score pages. Replaces a `filter: brightness(0) invert(1)` that flattened any mark
   with light interior detail into an unreadable blob — see ADR-0031 and
   `src/lib/logoMono.js`, which holds the pure ink-vs-paper conversion this script
-  fetches for (`test/logo-mono.test.js` pins it). Runs on the WEEKLY
-  `update-teams.yml` right after `gen-teams.mjs`, whose `teams.json` is its team list,
+  fetches for (`test/logo-mono.test.js` pins it). Runs in the nightly batch's
+  MONDAY-ONLY weekly block right after `gen-teams.mjs`, whose `teams.json` is its team list,
   so coverage can't drift from the club set. Partial coverage is fine by design: a
   club with no file falls through `TeamLogo`'s variant → base chain to its full-color
   mark, so a new affiliate self-heals on the next run. The ink/paper split is a

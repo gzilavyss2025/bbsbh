@@ -15,7 +15,33 @@ name: Update nightly data
 # left the git remote's push auth pointed at its own (invalid) OIDC token
 # instead of the checkout's GH_BOT_TOKEN — silently discarding every
 # generator's output at the final push for every run from 2026-07-18 to
-# 2026-07-21. README regen is regenerate-readme.yml now, workflow_dispatch-only.
+# 2026-07-21.
+# DO NOT PUT README REGEN BACK IN THIS FILE. It needs an Anthropic credential
+# this repo has never had (GH_BOT_TOKEN is the only secret set), and the
+# action that carries one repoints the git remote's auth — which is what cost
+# four nights of generator output above. It moved to the /start-day skill on
+# 2026-08-28: that runs in the maintainer's own Claude Code session, on his
+# own auth, so there is no secret to add and no second credential inside this
+# job. It also puts a human on a user-facing prose diff before it lands.
+# regenerate-readme.yml is deleted; nothing here regenerates the README.
+#
+# The three WEEKLY crons folded in here on 2026-08-28 (update-teams.yml,
+# update-affiliates.yml, update-top-prospects.yml — all deleted). They ran
+# Monday 09:00/10:00/10:00 UTC, i.e. AFTER this 07:00 batch, and five steps
+# below read what they write: gen-minors-leaders + gen-team-records read
+# teams.json, gen-milb-alumni + gen-farm-system read affiliates.json, and
+# gen-farm-system + gen-prospect-trend read top-prospects.json. So every
+# Monday those five ran on the PREVIOUS week's files and the fresh ones only
+# reached them on Tuesday — the Farm Report and the prospect-trend percentile
+# disagreed with the /prospects page for ~21 hours a week, with nothing red
+# anywhere. Same cross-file ordering bug as "Postseason odds" after "Team
+# Scores" below, one workflow up. They now run Monday-gated at the TOP of this
+# job, before any consumer, and inherit this file's rebase-retry push — none
+# of the three had one, and affiliates + top-prospects were scheduled at the
+# same MINUTE, the exact collision that forced the 2026-07-11 consolidation.
+# Monday-gated rather than nightly because fetch-top-prospects.mjs scrapes
+# www.mlb.com (be a good citizen) and gen-mono-logos.mjs pulls a mark per club
+# at five levels; the underlying data moves once a year at most.
 # gen-comeback-wins.mjs was added to the batch without joining the commit
 # step's `git add` list or the fail-check below — harmless on a clean
 # fast-forward push, but its always-unstaged output broke the push-race
@@ -50,7 +76,12 @@ name: Update nightly data
 on:
   schedule:
     - cron: '0 7 * * *' # ~3am US Eastern (2-3am during EST) — moved earlier 2026-07-22; the "Wait for yesterday's slate" step below backs off hourly if a late West Coast game is still in progress, up to the old ~7am ET ceiling, instead of always waiting that long
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      run_weekly:
+        description: 'Also run the weekly steps (teams, club marks, MiLB parks, affiliates, top prospects) whatever day it is'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -83,6 +114,58 @@ jobs:
             sleep 3600
           done
           echo "still not all settled after 4 hours — proceeding anyway (matches the old fixed ~7am ET run time)"
+
+      # ---- Weekly block (Mondays only) ----------------------------------
+      # Was three separate Monday crons until 2026-08-28; see the header for
+      # why they moved and why they now sit ABOVE every generator that reads
+      # what they write. Everything in this block is skipped six days a week,
+      # so `steps.<id>.outcome` is 'skipped' — not 'failure' — on those days,
+      # which is what keeps the fail-check at the bottom quiet.
+      - name: Weekly steps due?
+        id: weekly
+        env:
+          FORCE: ${{ github.event.inputs.run_weekly }}
+        run: |
+          if [ "$FORCE" = "true" ] || [ "$(date -u +%u)" = "1" ]; then
+            echo "Weekly steps are due (Monday, or forced via workflow_dispatch)."
+            echo "due=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Not Monday — skipping the weekly steps."
+            echo "due=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Teams
+        id: teams
+        if: steps.weekly.outputs.due == 'true'
+        continue-on-error: true
+        run: node scripts/gen-teams.mjs
+      # Both of the next two READ the teams.json the step above just wrote, so
+      # both are gated on it having actually succeeded — not merely on it being
+      # Monday. Without that gate a failed teams fetch would leave last week's
+      # file on disk and these two would rebuild happily against it, publishing
+      # marks and a park list for a stale team set with nothing marked red.
+      # Same gate, same reason, as "Club ledgers and league salaries" below.
+      - name: Club marks
+        id: mono-logos
+        if: steps.weekly.outputs.due == 'true' && steps.teams.outcome == 'success'
+        continue-on-error: true
+        run: node scripts/gen-mono-logos.mjs
+      - name: MiLB ballparks
+        id: milb-ballparks
+        if: steps.weekly.outputs.due == 'true' && steps.teams.outcome == 'success'
+        continue-on-error: true
+        run: node scripts/gen-milb-ballparks.mjs
+      - name: Affiliates
+        id: affiliates
+        if: steps.weekly.outputs.due == 'true'
+        continue-on-error: true
+        run: node scripts/gen-affiliates.mjs
+      - name: Top prospects
+        id: top-prospects
+        if: steps.weekly.outputs.due == 'true'
+        continue-on-error: true
+        run: node scripts/fetch-top-prospects.mjs
+      # ---- End weekly block ---------------------------------------------
 
       - name: Game notes
         id: game-notes
@@ -263,11 +346,12 @@ jobs:
         id: gate
         continue-on-error: true
         run: node scripts/gen-gate.mjs
-      # The Farm Report. READS two files it does not fetch — the committed
-      # public/data/affiliates.json (update-affiliates.yml) and
-      # public/data/top-prospects.json (update-top-prospects.yml) — and joins
-      # them to live minor-league standings, so it must run after a checkout
-      # but has no dependency on any step in this file.
+      # The Farm Report. READS two files it does not fetch —
+      # public/data/affiliates.json and public/data/top-prospects.json — and
+      # joins them to live minor-league standings. Both come from the weekly
+      # block at the top of this job (they used to come from two separate
+      # Monday crons that ran AFTER this one, which is exactly why this step
+      # spent every Monday on week-old rankings). MUST stay below that block.
       # the doubleheader report. A full rebuild of 2004-to-now every night — twenty-three
       # schedule requests with a narrow fields filter — because only the current
       # season's rows can change and the file is 20 KB either way. No SQLite,
@@ -284,10 +368,11 @@ jobs:
         id: highlights
         continue-on-error: true
         run: node scripts/gen-highlights.mjs
-      # Reads the committed public/data/teams.json (update-teams.yml's weekly
-      # output) for each club's league and division, so it must not be reordered
-      # ahead of a checkout — but it has no dependency on any step above it in
-      # this file. Append-only over newly-Final games at all five levels.
+      # Reads public/data/teams.json for each club's league and division, so it
+      # MUST stay below the weekly block at the top of this job that writes it
+      # (that file used to come from update-teams.yml, a separate Monday cron
+      # that ran two hours AFTER this one). Append-only over newly-Final games
+      # at all five levels.
       - name: Team situational records
         id: team-records
         continue-on-error: true
@@ -324,7 +409,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes public/data/war.json public/data/milb-alumni scripts/data/milb-alumni-scan.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/savant-matchup.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json public/data/player-contracts public/data/team-contracts public/data/salaries.json public/data/prospect-trend.json public/data/postseason-odds.json public/data/manager-history scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/spray scripts/data/spray-ingested.json public/data/attendance.json public/data/gate.json public/data/doubleheaders.json public/data/farm-system.json public/data/highlights public/data/team-records scripts/data/team-records.sql public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
+          git add public/data/teams.json public/data/logos/mono src/lib/data/mono-logo-manifest.json src/lib/data/milb-ballparks.json public/data/affiliates.json public/data/top-prospects.json public/data/game-notes public/data/war.json public/data/milb-alumni scripts/data/milb-alumni-scan.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/savant-matchup.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json public/data/player-contracts public/data/team-contracts public/data/salaries.json public/data/prospect-trend.json public/data/postseason-odds.json public/data/manager-history scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/spray scripts/data/spray-ingested.json public/data/attendance.json public/data/gate.json public/data/doubleheaders.json public/data/farm-system.json public/data/highlights public/data/team-records scripts/data/team-records.sql public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race — a concurrent push to main
@@ -341,6 +426,11 @@ jobs:
 
       - name: Fail if any generator errored
         if: |
+          steps.teams.outcome == 'failure' ||
+          steps.mono-logos.outcome == 'failure' ||
+          steps.milb-ballparks.outcome == 'failure' ||
+          steps.affiliates.outcome == 'failure' ||
+          steps.top-prospects.outcome == 'failure' ||
           steps.game-notes.outcome == 'failure' ||
           steps.war.outcome == 'failure' ||
           steps.milb-alumni.outcome == 'failure' ||

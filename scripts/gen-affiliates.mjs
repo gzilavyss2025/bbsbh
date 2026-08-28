@@ -9,7 +9,8 @@
 //
 // An org's farm system changes at most once a year (the PDC realignment,
 // each offseason) and essentially never mid-season, so this runs weekly
-// (.github/workflows/update-affiliates.yml) rather than fetched live on every
+// (the Monday block of .github/workflows/update-nightly-data.yml; its own
+// update-affiliates.yml cron until 2026-08-28) rather than fetched live on every
 // team-page visit AND every prospect resolved on the Prospects page (the
 // latter used to fan out one live request per distinct org — up to ~30 on a
 // single page load). src/api/team.js reads this file first and only falls

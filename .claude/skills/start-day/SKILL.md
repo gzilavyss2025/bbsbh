@@ -59,6 +59,34 @@ Run these in order, in the primary checkout (the repo root, not a task worktree)
    any visible error (see the 2026-07 README-regen incident). Flag a failed or
    missing run prominently.
 
+   `update-nightly-data.yml` is the ONLY data cron — the three weekly ones
+   folded into it on 2026-08-28. A **missing** run matters as much as a failed
+   one: on 2026-08-27/28 GitHub's scheduler skipped it entirely after an Actions
+   incident, and nothing anywhere went red. Check the run actually exists for
+   today, not just that the last one passed. On Mondays the run also carries the
+   weekly steps (teams, club marks, MiLB parks, affiliates, top prospects); if
+   one of those is red, `gh workflow run update-nightly-data.yml -f
+   run_weekly=true` re-runs the weekly block on any day.
+
+7. **README drift.** Check whether `README.md` has fallen behind the code:
+
+   ```bash
+   git log --format=%H -1 -- README.md          # last README commit
+   git log --format=%H "<that sha>..origin/main" -- ':(exclude)public/data' ':(exclude)README.md' | head -n1
+   ```
+
+   If the second command prints nothing, the README is current — say nothing
+   about it. If it prints a sha, real code has landed since the README was last
+   written, so report it under **Needs you** as one line: the README may be
+   stale, and you can regenerate it on request.
+
+   **Do not regenerate it as part of this skill** — that's work, not a status
+   check, and README prose is user-facing. Only when he says yes: make a task
+   branch and worktree the normal way, follow `readme-prompt.md` in this skill's
+   directory, run `npm run lint`, and open a PR. Never push README.md to `main`
+   directly. A README-only commit deploys nothing (`scripts/vercel-ignore-build.sh`
+   doesn't watch that path), so it costs no deployment either way.
+
 ## Report format
 
 Keep it short. A few lines of "here's what I did", then:

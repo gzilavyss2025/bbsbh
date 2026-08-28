@@ -142,8 +142,9 @@ A test only has impact if a failure *stops* something. The chain here:
 
 ### The nightly crons and branch protection (important)
 
-The data crons (`update-nightly-data.yml`, `update-teams.yml`, …) **push
-generated `public/data/*.json` straight to `main`** — they don't open PRs. A
+The data cron (`update-nightly-data.yml` — the only one since the three weekly
+crons folded into it on 2026-08-28) **pushes generated `public/data/*.json`
+straight to `main`** — it doesn't open a PR. A
 required status check would normally reject
 those pushes (the default `GITHUB_TOKEN` can't satisfy a check on a bare push,
 and a PR opened by `GITHUB_TOKEN` doesn't even trigger CI). They get around this
@@ -161,9 +162,15 @@ Consequences to keep in mind when touching CI:
   which is why rule #2 above (always PR your own work) matters.
 - If you ever rotate or remove `GH_BOT_TOKEN`, the crons stop being able to push
   to `main`. Keep it valid and admin-scoped.
-- `regenerate-readme.yml` pushes as `github-actions[bot]` with the default token
-  rather than `GH_BOT_TOKEN` — if the nightly README rewrite ever stops landing,
-  that token mismatch is the first thing to check (give it `GH_BOT_TOKEN` too).
+- Nothing in CI regenerates the README any more. `regenerate-readme.yml` was
+  deleted on 2026-08-28: it had never once succeeded (it called
+  `anthropics/claude-code-action` with an `ANTHROPIC_API_KEY` secret this repo
+  has never had, and checked out with the default token rather than
+  `GH_BOT_TOKEN`, so even a success could not have pushed). README regeneration
+  is a step in the `/start-day` skill now, run in the maintainer's own session
+  and landed through a normal PR. Do not put it back in a workflow — see
+  `update-nightly-data.yml`'s header for the four nights of generator output
+  that credential cost in July 2026.
 
 ## A local safety net (optional): the pre-commit hook
 
