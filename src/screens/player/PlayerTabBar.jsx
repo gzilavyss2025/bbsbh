@@ -1,5 +1,6 @@
 import { playerTabPath } from '../../lib/route.js'
 import { HubTabBar } from '../../components/chrome/HubTabBar.jsx'
+import { playerTabsFor } from './tabVisibility.js'
 
 // The player hub's tab bar — this page's tab list over the shared hub control
 // (components/chrome/HubTabBar.jsx), the same control the team hub renders. Not
@@ -12,17 +13,10 @@ import { HubTabBar } from '../../components/chrome/HubTabBar.jsx'
 //
 // Labels are written in ordinary sentence case; the ALL-CAPS invariant does the
 // uppercasing in CSS (see the block comment in src/styles/01-base.css).
-const TABS = [
-  { key: 'overview', label: 'Overview' },
-  { key: 'stats', label: 'Stats' },
-  { key: 'analytics', label: 'Analytics' },
-  { key: 'history', label: 'History' },
-]
-
-export function PlayerTabBar({ playerId, name = '', active, asOf = null, sportId = null }) {
+export function PlayerTabBar({ playerId, name = '', active, asOf = null, sportId = null, rosterStatus = null }) {
   return (
     <HubTabBar
-      tabs={TABS}
+      tabs={playerTabsFor(rosterStatus)}
       active={active}
       ariaLabel="Player sections"
       // The cutoff hints are passed straight through rather than read off

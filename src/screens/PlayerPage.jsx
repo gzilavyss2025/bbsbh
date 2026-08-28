@@ -83,6 +83,7 @@ export function PlayerPage({ id, asOf, sportId }) {
   const data = overview.data
   const { bio, blocks } = data
   const status = core.data.rosterStatus
+  const retired = status?.state === 'retired'
   const club = status ? null : bio.team
   const enteringLabel = asOf ? `entering ${monthDay(asOf)}` : 'season to date'
   // The game-log preview's own note — the Stats tab's own wording
@@ -114,7 +115,11 @@ export function PlayerPage({ id, asOf, sportId }) {
 
       <div className="factgrid">
         <Fact label="Ht / Wt" value={bio.heightWeight} />
-        <Fact label="Age" value={bio.age} mono />
+        <Fact
+          label={retired ? 'Age at retirement' : 'Age'}
+          value={retired ? status.retiredAge ?? DASH : bio.age}
+          mono
+        />
         <Fact label="Born" value={bio.born} />
         <Fact
           label="MLB Debut"
@@ -285,7 +290,7 @@ export function PlayerPage({ id, asOf, sportId }) {
         <section key={`analytics-${block.group}`}>
           {blocks.length > 1 && <h2 className="player__blocktitle">{block.title}</h2>}
 
-          {block.savant && (
+          {!retired && block.savant && (
             <StatcastPercentiles
               savant={block.savant}
               raw={block.savantRaw}
@@ -295,7 +300,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             />
           )}
 
-          {showProspectCard && block.group === data.prospectCardGroup && (
+          {!retired && showProspectCard && block.group === data.prospectCardGroup && (
             <ProspectCard
               view={data.prospectCard}
               level={SPORT_LABEL[data.sportId] ?? ''}
@@ -310,7 +315,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             />
           )}
 
-          {(block.savant || (showProspectCard && block.group === data.prospectCardGroup)) && (
+          {!retired && (block.savant || (showProspectCard && block.group === data.prospectCardGroup)) && (
             <PreviewDoor label="Full analytics" onClick={() => go('analytics')} />
           )}
 

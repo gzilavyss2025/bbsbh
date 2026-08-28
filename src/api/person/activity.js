@@ -442,7 +442,7 @@ export function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSe
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, altGameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, levelOnlyStat, levelOnlySplits, logTagLevel = false, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, altGameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, retiredYear = null, tileStat, levelOnlyStat, levelOnlySplits, logTagLevel = false, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null }) {
   // The date-cut current-season stat at the player's CURRENT level. It leads
   // the "Current season" tiles, so it can't move mid-game. `tileStat` (see
   // loadPlayer) resolves to the live level for an active MLB/single-level
@@ -508,7 +508,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     register: careerRegisterView({
       mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, role, debutYear,
       currentStat: levelOnlyStat ?? tile, currentSplits: levelOnlySplits,
-      currentSeason, currentSportId, careerStat: career, warByYear, warByTeam,
+      currentSeason, currentSportId, retiredYear, careerStat: career, warByYear, warByTeam,
       transactions, orgOf,
     }),
     milestones: milestoneWatchView(milestoneStat, group),

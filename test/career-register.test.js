@@ -473,3 +473,26 @@ test('careerRegisterView: with no date-cut splits the current season collapses t
   assert.equal(register.rows[0].cells[0], 55, 'still the date-cut stat, never the live line')
   assert.deepEqual(register.rows[0].teamIds, [111, 147], 'the clubs survive the collapse')
 })
+
+test('careerRegisterView: a retired career stops at retirement instead of filling gaps through today', () => {
+  const register = careerRegisterView({
+    mlbSplits: [
+      { season: 2010, sport: { id: 1 }, team: { id: 158 }, stat: MLB_STAT },
+      { season: 2012, sport: { id: 1 }, team: { id: 144 }, stat: MLB_STAT },
+    ],
+    milbSplits: [],
+    group: 'pitching',
+    role: null,
+    debutYear: 2001,
+    currentStat: null,
+    currentSeason: 2026,
+    currentSportId: 1,
+    retiredYear: 2012,
+    careerStat: null,
+    warByYear: {},
+    transactions: [],
+  })
+
+  assert.ok(register.rows.some((row) => row.year === '2011' && row.gap), 'an in-career gap remains visible')
+  assert.ok(!register.rows.some((row) => Number(row.year) > 2012), 'post-retirement filler rows are pruned')
+})

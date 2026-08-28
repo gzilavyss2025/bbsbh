@@ -30,7 +30,10 @@ import { boxscoreLinks, currentSeasonFor, playerContext, yearByYearFor } from '.
 export async function loadPlayerStats(id, asOf) {
   const ctx = await playerContext(id, asOf)
   if (!ctx) return null
-  const { bio, txns, groups, season, cutoff, debutYear, onRehab, currentActivitySportId, careerSportId } = ctx
+  const { bio, txns, groups, season, cutoff, debutYear, rosterStatus, onRehab, currentActivitySportId, careerSportId } = ctx
+  const retiredYear = rosterStatus?.state === 'retired'
+    ? Number(rosterStatus.through?.slice(0, 4)) || null
+    : null
 
   // WAR feeds the register's own column here (the Overview's tiles read the
   // same two static files, session-cached, so the second tab pays nothing).
@@ -113,6 +116,7 @@ export async function loadPlayerStats(id, asOf) {
         currentSeason: season,
         currentSportId: tileSportId,
         debutYear,
+        retiredYear,
         tileStat,
         levelOnlyStat,
         levelOnlySplits,
