@@ -1,8 +1,8 @@
 import '../styles/66-situational-records.css'
 import '../styles/situational-records/66a-detail.css'
 import { useMemo } from 'react'
-import { fetchLevelTeamRecords, buildRankingIndex, rankMetric, bestOrder } from '../api/situationalRecordRankings.js'
-import { HALVES } from '../api/teamRecords.js'
+import { fetchLevelTeamRecords, buildRankingIndex, rankMetric, bestOrder, levelMonths } from '../api/situationalRecordRankings.js'
+import { HALVES, shortDate } from '../api/teamRecords.js'
 import { seasonOf, cutoffFor } from './team/data/shared.js'
 import { SPORT_LABEL, offDayTreatmentFor } from '../lib/teams.js'
 import { situationalRecordsPath } from '../lib/route.js'
@@ -31,6 +31,7 @@ const SORTS = [
 
 const GROUP_NOTES = {
   Scoring: 'Runs on the board and the games they shaped.',
+  'Scoring by inning': 'Which half of which inning a club put runs on the board, and the last time it did.',
   'Hits and homers': 'Contact, power and what each club allowed.',
   Defense: 'Clean sheets and costly mistakes.',
   'Leading and trailing': 'Who closed leads and who changed the ending.',
@@ -45,6 +46,7 @@ const GROUP_NOTES = {
 
 const GROUP_KEYS = {
   Scoring: 'scoring',
+  'Scoring by inning': 'scoring-by-inning',
   'Hits and homers': 'hits-homers',
   Defense: 'defense',
   'Leading and trailing': 'late-innings',
@@ -195,6 +197,7 @@ export function SituationalRecordsPage({
   category: routeCategory,
   metric: routeMetric,
   half: routeHalf,
+  month: routeMonth,
   sort: routeSort,
   order: routeOrder,
 }) {
@@ -202,6 +205,10 @@ export function SituationalRecordsPage({
   const linkProps = useRouteLink()
   const sportId = routeSportId ?? 1
   const half = HALVES.some((item) => item.key === routeHalf) ? routeHalf : 'all'
+  // A free-form query value: anything outside 1-12 falls back to the whole
+  // season rather than erroring, the same stance every other param here takes.
+  const monthNum = Number(routeMonth)
+  const month = Number.isInteger(monthNum) && monthNum >= 1 && monthNum <= 12 ? monthNum : null
   const sortBy = routeSort === 'played' ? 'played' : 'pct'
   const order = routeOrder === 'asc' || routeOrder === 'desc' ? routeOrder : null
   const { favoriteTeamId } = useFavoriteTeam()
@@ -213,9 +220,10 @@ export function SituationalRecordsPage({
     [sportId, season],
   )
   const index = useMemo(
-    () => buildRankingIndex(data ?? [], { cutoff, half }),
-    [data, cutoff, half],
+    () => buildRankingIndex(data ?? [], { cutoff, half, month }),
+    [data, cutoff, half, month],
   )
+  const months = useMemo(() => levelMonths(data ?? [], { cutoff }), [data, cutoff])
 
   // A stale metric link still opens a useful board. A bare route stays bare:
   // it is the situational index, not an implicit first leaderboard.
@@ -247,6 +255,16 @@ export function SituationalRecordsPage({
     ? overviewGroups.find((group) => group.key === routeCategory) ?? null
     : null
   const leaders = result?.ranked.filter((row) => row.rank != null).slice(0, 3) ?? []
+  // "When was the last time?" — carried only by the splits that answer a date
+  // as well as a rate (the by-inning scoring rows), so the column appears only
+  // on those boards rather than as a permanent empty fifth column. The
+  // opponent is a team id in the ledger, resolved here against the level's own
+  // club list; a club from outside that list degrades to the date alone.
+  const hasLast = Boolean(result?.ranked.some((row) => row.last))
+  const clubAbbr = useMemo(
+    () => new Map(index.teams.map((t) => [t.id, t.abbreviation ?? ''])),
+    [index],
+  )
   const showHalves = (data ?? []).some((entry) => entry.data?.allStarDate)
   const dir = result?.order ?? 'desc'
   const flipLabel = result?.byQuality
@@ -269,6 +287,7 @@ export function SituationalRecordsPage({
     category: nextCategory = routeCategory,
     metric: nextMetric = resolvedId,
     half: nextHalf = half,
+    month: nextMonth = month,
     sport: nextSport = sportId,
     sort: nextSort = sortBy,
     order: nextOrder = order,
@@ -276,6 +295,7 @@ export function SituationalRecordsPage({
     category: nextMetric ? null : nextCategory,
     metric: nextMetric,
     half: nextHalf,
+    month: nextMonth,
     sort: nextMetric ? nextSort : null,
     order: nextMetric ? nextOrder : null,
     d: asOf,
@@ -310,6 +330,29 @@ export function SituationalRecordsPage({
                 className={`trrank__chip${item.key === half ? ' is-on' : ''}`}
                 aria-pressed={item.key === half}
                 onClick={() => navigate(pathFor({ half: item.key }))}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {months.length > 1 && (
+          <div className="trrank__chips" role="group" aria-label="Month">
+            <button
+              type="button"
+              className={`trrank__chip${month == null ? ' is-on' : ''}`}
+              aria-pressed={month == null}
+              onClick={() => navigate(pathFor({ month: null }))}
+            >
+              Every month
+            </button>
+            {months.map((item) => (
+              <button
+                key={item.month}
+                type="button"
+                className={`trrank__chip${item.month === month ? ' is-on' : ''}`}
+                aria-pressed={item.month === month}
+                onClick={() => navigate(pathFor({ month: item.month }))}
               >
                 {item.label}
               </button>
@@ -430,6 +473,7 @@ export function SituationalRecordsPage({
                       <th>W-L</th>
                       <th>Win pct</th>
                       <th>Games</th>
+                      {hasLast && <th>Last</th>}
                     </>
                   )}
                 </tr>
@@ -457,6 +501,22 @@ export function SituationalRecordsPage({
                         <td className="trrank__num">{row.v}</td>
                         <td className="trrank__num trrank__pct">{row.pct}</td>
                         <td className="trrank__num">{row.played || '—'}</td>
+                        {hasLast && (
+                          <td className="trrank__num trrank__last">
+                            {row.last ? (
+                              <>
+                                <span>{shortDate(row.last.date)}</span>
+                                {clubAbbr.get(row.last.opp) && (
+                                  <span className="trrank__lastopp">
+                                    {row.last.result} vs {clubAbbr.get(row.last.opp)}
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              '—'
+                            )}
+                          </td>
+                        )}
                       </>
                     )}
                   </tr>

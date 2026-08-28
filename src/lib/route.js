@@ -41,7 +41,7 @@
 //   '/team/{name-id}'                   -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{name-id}'                 -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
-//   '/situational-records'              -> { name: 'situational-records', asOf, sportId, metric, half }
+//   '/situational-records'              -> { name: 'situational-records', asOf, sportId, metric, half, month }
 //                                          (one situational record, every club at one level, ranked.
 //                                           '?metric=' and '?half=' set the page's OPENING state only,
 //                                           not a live mirror of its controls — same as standings.)
@@ -372,6 +372,7 @@ export function parseRoute(url) {
       category: q.get('category') || null,
       metric: q.get('metric') || null,
       half: q.get('half') || null,
+      month: q.get('month') || null,
       sort: q.get('sort') || null,
       order: q.get('order') || null,
     }
@@ -725,12 +726,16 @@ export function umpirePath(id, name) {
 // how every row of the Numbers tab's Records card opens its own ranking. Built
 // on top of linkQuery so the `?d=`/`?s=` hints stay identical to every other
 // link's, rather than a second hand-built query that could drift from theirs.
-export function situationalRecordsPath({ category, metric, half, sort, order, ...opts } = {}) {
+export function situationalRecordsPath({ category, metric, half, month, sort, order, ...opts } = {}) {
   const base = linkQuery(opts)
   const q = new URLSearchParams(base.slice(1))
   if (category) q.set('category', category)
   if (metric) q.set('metric', metric)
   if (half && half !== 'all') q.set('half', half)
+  // A calendar month, 1-12. The fourth scope lever beside the level and the
+  // All-Star half; absent means the whole season, so it never rides along on a
+  // link that did not ask for it.
+  if (month) q.set('month', String(month))
   if (sort && sort !== 'pct') q.set('sort', sort)
   if (order === 'asc' || order === 'desc') q.set('order', order)
   const qs = q.toString()

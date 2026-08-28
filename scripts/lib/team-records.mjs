@@ -48,6 +48,47 @@ export function decodeInnings(encoded) {
   return (encoded ?? []).map(([a, h]) => ({ a, h }))
 }
 
+// The club's OWN scoring line, as a bitmask: bit `n-1` is set when the club
+// scored in inning `n` of the half it bats (the top when it is the road club,
+// the bottom when it is at home). One small integer instead of the pair array
+// — the shipped per-game row is ~160 rows per club per season and committed,
+// and every situational-record predicate only ever asks "did we score there",
+// never how many.
+//
+// A home side that did not bat (`h` null — it was already ahead after the top
+// of the last inning, or walked the game off early) never scored, so its bit
+// stays clear. That is the same distinction inningRuns keeps null for.
+//
+// Capped at 31 bits so the value stays a positive 32-bit integer: bit 31 would
+// make it negative and `put`'s omit-if-falsy path would still keep it, but a
+// reader's `1 << 31` comparison would then have to reason about the sign. The
+// longest game on record is 26 innings, so the cap is unreachable in practice.
+const MASK_BITS = 31
+export function inningsScoredMask(innings, isHome) {
+  let mask = 0
+  for (let i = 0; i < innings.length && i < MASK_BITS; i++) {
+    const mine = isHome ? innings[i].h : innings[i].a
+    if (mine != null && mine > 0) mask |= 1 << i
+  }
+  return mask
+}
+
+// Did the club score after the game's SCHEDULED length ran out? A separate
+// flag rather than "any bit at or above the ninth", because a MiLB
+// doubleheader is scheduled for seven and its eighth inning is extra baseball
+// — reading extras off a fixed bit position would miss every one of those and
+// would also call a nine-inning game's ninth inning regulation at a level
+// where it is not. `scheduledInnings` is the game's own answer, the same field
+// the `x` (went to extras) flag is derived from.
+export function scoredInExtras(innings, isHome, scheduledInnings) {
+  if (!scheduledInnings) return false
+  for (let i = scheduledInnings; i < innings.length; i++) {
+    const mine = isHome ? innings[i].h : innings[i].a
+    if (mine != null && mine > 0) return true
+  }
+  return false
+}
+
 // Which side put the game's first run on the board, or null for a 0-0 game
 // (suspended/shortened — a Final regular-season game can be 0-0 only if it
 // was called). The away side bats the top of every inning, so within one

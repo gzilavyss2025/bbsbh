@@ -140,3 +140,107 @@ button.tstatrow__k.trec__rank,
   color: var(--text-caption);
   font-size: var(--fs-caption);
 }
+
+/* The month lever, under the half toggle. Same pill control, deliberately —
+   both answer "over which stretch of the season?", and mixing a pill group
+   with a dropdown would have read as two unrelated controls. Up to eight pills
+   wrap rather than squeezing, so each keeps a real tap target on a phone. */
+.trec__months {
+  flex-wrap: wrap;
+}
+.trec__months .trec__half {
+  flex: 0 1 auto;
+  min-width: 3rem;
+}
+
+/* Scoring by inning (records/InningScoringGrid.jsx). Nineteen splits as a
+   ten-line grid: the inning number is the row, the half the club batted is the
+   column. A club bats one half per game, so the two columns are its road and
+   home games — never two views of the same games. */
+.trecinn {
+  padding: 0 8px var(--space-1);
+}
+.trecinn__legend {
+  margin: 0 0 var(--space-1);
+  color: var(--text-caption);
+  font-size: var(--fs-caption);
+}
+.trecinn__grid {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr 1fr;
+  gap: 2px var(--space-1);
+  align-items: stretch;
+}
+.trecinn__colhead {
+  padding-bottom: 2px;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.trecinn__rowhead {
+  align-self: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+/* Every filled cell is a button — it opens that split ranked across the whole
+   level, the same door every other row on this card is. The rules here only
+   undo the browser's button chrome; the type roles come from the spans. */
+.trecinn__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  margin: 0;
+  padding: 4px 6px;
+  border: 0;
+  border-left: var(--bw-hair) solid var(--border-hairline);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.trecinn__cell--none {
+  color: var(--text-caption);
+  cursor: default;
+}
+.trecinn__cell:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+.trecinn__rec {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.trecinn__pct {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.trecinn__last {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--graphite-soft);
+  border-bottom: var(--bw-hair) dotted var(--border-rule);
+}
+/* Extras is one bucket, not two halves — it gets its own line under the grid
+   rather than a mostly-empty pair of cells inside it. */
+.trecinn__extras {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr;
+  gap: var(--space-1);
+  align-items: center;
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}

@@ -412,6 +412,7 @@ export default function App() {
         category={route.category}
         metric={route.metric}
         half={route.half}
+        month={route.month}
         sort={route.sort}
         order={route.order}
       />

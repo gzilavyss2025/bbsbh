@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { COUNT_METRICS, HALVES, teamRecordsFor } from '../../../../api/teamRecords.js'
+import { COUNT_METRICS, HALVES, monthsPlayed, teamRecordsFor } from '../../../../api/teamRecords.js'
 import { situationalRecordsPath } from '../../../../lib/route.js'
 import { useNav } from '../../../../lib/nav.js'
+import { InningScoringGrid } from './InningScoringGrid.jsx'
 import '../../../../styles/65-team-records.css'
 
 // The Numbers tab's Records card: this club's W-L in ~50 situations, grouped
@@ -30,7 +31,7 @@ import '../../../../styles/65-team-records.css'
 // "out of thirty, where is that?" on every single line, and the ranking page is
 // the answer. The label is the button rather than the whole row, so the two
 // figures beside it stay selectable text.
-function RecordRows({ rows, sportId, half }) {
+function RecordRows({ rows, sportId, half, month }) {
   const navigate = useNav()
   return (
     <div className="tstats">
@@ -39,7 +40,7 @@ function RecordRows({ rows, sportId, half }) {
           <button
             type="button"
             className="tstatrow__k trec__rank"
-            onClick={() => navigate(situationalRecordsPath({ metric: r.id, half, s: sportId }))}
+            onClick={() => navigate(situationalRecordsPath({ metric: r.id, half, month, s: sportId }))}
           >
             {r.k}
           </button>
@@ -54,7 +55,7 @@ function RecordRows({ rows, sportId, half }) {
 // The counts that are a single number rather than a W-L. Days-at-place is
 // folded in as one row per place the club has actually spent a day at, so a
 // runaway leader doesn't print four empty lines.
-function SeasonCounts({ counts, sportId, half }) {
+function SeasonCounts({ counts, sportId, half, month }) {
   const navigate = useNav()
   // Order, wording and which end of each is the good one all live in the
   // COUNT_METRICS catalog (api/teamRecords.js), so this block and the ranking
@@ -71,7 +72,7 @@ function SeasonCounts({ counts, sportId, half }) {
           key={m.id}
           type="button"
           className="trec__count trec__rank"
-          onClick={() => navigate(situationalRecordsPath({ metric: m.id, half, s: sportId }))}
+          onClick={() => navigate(situationalRecordsPath({ metric: m.id, half, month, s: sportId }))}
         >
           <span className="trec__countv">{m.value}</span>
           <span className="trec__countk">{m.k}</span>
@@ -83,13 +84,22 @@ function SeasonCounts({ counts, sportId, half }) {
 
 export function RecordsCard({ data, cutoff }) {
   const [half, setHalf] = useState('all')
-  // Resolve against the chosen half. A club whose season has not reached the
+  // The second scope lever, beside the All-Star half: one calendar month, or
+  // null for the whole season. It reuses the half toggle's own control pattern
+  // — a row of pressed-state pills on the card's own paper — rather than
+  // introducing a select, because the two levers answer the same kind of
+  // question ("over which stretch?") and a card that mixed a pill group with a
+  // dropdown would read as two unrelated controls. The menu is the months this
+  // club has actually played, so it can never offer an empty scope.
+  const [month, setMonth] = useState(null)
+  // Resolve against the chosen scope. A club whose season has not reached the
   // break yet still resolves 'all'; the toggle itself is hidden below.
-  const records = teamRecordsFor(data, { cutoff, half })
+  const records = teamRecordsFor(data, { cutoff, half, month })
   const full = teamRecordsFor(data, { cutoff, half: 'all' })
   if (!full) return null
 
   const showHalves = Boolean(full.allStarDate)
+  const months = monthsPlayed(data, { cutoff })
 
   return (
     <div className="tstats-card trec">
@@ -112,21 +122,49 @@ export function RecordsCard({ data, cutoff }) {
           ))}
         </div>
       )}
+      {months.length > 1 && (
+        <div className="trec__halves trec__months" role="group" aria-label="Month">
+          <button
+            type="button"
+            className={`trec__half${month == null ? ' is-on' : ''}`}
+            aria-pressed={month == null}
+            onClick={() => setMonth(null)}
+          >
+            All
+          </button>
+          {months.map((m) => (
+            <button
+              key={m.month}
+              type="button"
+              className={`trec__half${m.month === month ? ' is-on' : ''}`}
+              aria-pressed={m.month === month}
+              onClick={() => setMonth(m.month)}
+            >
+              <span className="sr-only">{m.label}</span>
+              <span aria-hidden="true">{m.short}</span>
+            </button>
+          ))}
+        </div>
+      )}
       <div className="tstats-card__body">
         {records ? (
           records.groups.map((g) => (
             <div key={g.title} className="trec__group">
               <h4 className="trec__grouphead">{g.title}</h4>
-              <RecordRows rows={g.rows} sportId={data.sportId} half={half} />
+              {g.title === 'Scoring by inning' ? (
+                <InningScoringGrid rows={g.rows} sportId={data.sportId} half={half} month={month} />
+              ) : (
+                <RecordRows rows={g.rows} sportId={data.sportId} half={half} month={month} />
+              )}
             </div>
           ))
         ) : (
-          <p className="trec__empty">No games in this half of the season yet.</p>
+          <p className="trec__empty">No games in this stretch of the season yet.</p>
         )}
         {records && (
           <div className="trec__group">
             <h4 className="trec__grouphead">Season counts</h4>
-            <SeasonCounts counts={records.counts} sportId={data.sportId} half={half} />
+            <SeasonCounts counts={records.counts} sportId={data.sportId} half={half} month={month} />
           </div>
         )}
       </div>
