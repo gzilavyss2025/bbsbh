@@ -577,7 +577,15 @@ const BUDGETS = {
   // write files, which is exactly what that subdirectory is not for. They
   // stay flat with every other gen-*.mjs, like their sibling
   // gen-contracts-identity.mjs.
-  scripts: 104,
+  // 104 -> 105 for check-data-freshness.mjs, which fails the nightly job when a
+  // committed public/data dataset is older than the cron meant to write it. It
+  // belongs beside its siblings — check-fixture-freshness.mjs, check-dir-size.mjs
+  // and the rest of the check-*.mjs guards are all flat here, and a guard nobody
+  // can find next to the others is a guard nobody maintains. It is not in
+  // scripts/lib/ because it RUNS as a script; its pure half is exported from the
+  // same file for test/data-freshness.test.js, the guard-plus-CLI shape
+  // gen-attendance.mjs and friends already use.
+  scripts: 105,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
