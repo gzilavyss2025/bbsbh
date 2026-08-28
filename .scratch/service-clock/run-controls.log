@@ -1,0 +1,133 @@
+
+==============================================================================
+C1. The specification, with and without the April churn ramp
+==============================================================================
+  season FE only (no rhythm control)       n  834  ratio 1.560  CI 1.309-1.859  z=4.96  p=0.0000
+  + day-of-season bins  <-- THE TEST       n  834  ratio 1.266  CI 0.856-1.872  z=1.18  p=0.2377
+
+  The whole of the naive jump is the shape of April. Every line below asks
+  whether the controlled figure comes back somewhere.
+
+==============================================================================
+C2. Club fixed effects
+==============================================================================
+  The claim is about club behaviour, so it must survive a within-club
+  comparison. Cells become (club, season, day); a club that simply promotes
+  more men cannot contribute.
+
+  club FE, no rhythm control               n  834  ratio 1.560  CI 1.309-1.859  z=4.96  p=0.0000
+  club FE + day-of-season bins             n  834  ratio 1.266  CI 0.856-1.872  z=1.18  p=0.2377
+
+  THE TWO ESTIMATES ARE IDENTICAL TO THREE DECIMALS, AND THAT IS ARITHMETIC,
+  NOT A PASSED TEST. The line falls on the same date for all thirty clubs in
+  a season, so a club dummy is orthogonal to it and cannot move the
+  coefficient. Adding club fixed effects to this design answers nothing.
+  The within-club question has to be asked a different way: let every club
+  have its OWN line coefficient, and test whether they differ.
+
+  club-specific line coefficients: likelihood-ratio X2 = 34.79 on 29 df, p = 0.2112
+  No club departs from the common estimate by more than chance, so the
+  sample does not support naming one.
+
+  widest club estimates (thin — a median club contributes 28 promotions):
+    club 119  promotions  25  before/after the line   1/ 24
+    club 143  promotions  17  before/after the line   1/ 16
+    club 114  promotions  22  before/after the line   2/ 20
+
+==============================================================================
+C3. Rank-matched controls
+==============================================================================
+  A club only gains from managing the clock for a man it expects to hold
+  six years. If the line is being managed, the effect must be LARGER for
+  those men than for men the incentive does not reach.
+
+  round 1 pick                             n   87  ratio 2.126  CI 0.424-10.660  z=0.92  p=0.3592
+  rounds 1-5                               n  216  ratio 0.990  CI 0.430-2.277  z=-0.02  p=0.9806
+  round 6+ / no draft record               n  281  ratio 1.239  CI 0.609-2.518  z=0.59  p=0.5545
+  award tier A or B (prior seasons)        n  143  ratio 0.988  CI 0.358-2.728  z=-0.02  p=0.9817
+  age at debut <= 23                       n   85  ratio 0.933  CI 0.258-3.370  z=-0.11  p=0.9155
+  age at debut 27 or older                 n   47  ratio 8.301  CI 0.274-251.121  z=1.22  p=0.2238
+  INCENTIVE PRESENT (young + pedigree)     n  116  ratio 1.106  CI 0.379-3.226  z=0.18  p=0.8541
+  INCENTIVE ABSENT (age 27+)               n   47  ratio 8.301  CI 0.274-251.121  z=1.22  p=0.2238
+
+==============================================================================
+C4. Roster need
+==============================================================================
+  A club with an injury promotes when it must. IL placements by the
+  promoting club in the 21 days before the promotion, taken from the wire
+  and read at the arriving man’s own side of the roster: the position is
+  named inside the sentence, so no second pull was needed.
+
+  no same-side IL placement in 21 days     n  204  ratio 0.472  CI 0.180-1.240  z=-1.52  p=0.1277
+  at least one same-side placement         n  630  ratio 1.553  CI 1.007-2.397  z=1.99  p=0.0465
+
+  mean same-side IL placements in the prior 21 days: before the line 2.26 (n=155), after 1.64 (n=679)
+  difference 0.63 placements, t=3.78, p=0.0002
+  Roster need is HIGHER before the line, not lower. A club promoting in the
+  first ten days of a season is answering an injury, which is the ordinary
+  reason to promote early and is the opposite of holding a man back. The
+  control therefore works against the clock reading rather than for it.
+
+==============================================================================
+C5. Placebo — the same model with the line moved
+==============================================================================
+  Each season’s line is slid by the same number of days and the model is
+  refitted. A real line should stand out from its neighbours. Under the
+  null every shift, the true one included, sits near 1.00.
+
+  shift -10   ratio 0.685  p=0.1618
+  shift  -8   ratio 1.090  p=0.7252
+  shift  -6   ratio 1.667  p=0.0282
+  shift  -4   ratio 1.384  p=0.1467
+  shift  -2   ratio 0.906  p=0.6386
+  shift   0   ratio 1.266  p=0.2377  <== THE LINE
+  shift   2   ratio 1.326  p=0.1532
+  shift   4   ratio 1.149  p=0.4709
+  shift   6   ratio 0.953  p=0.8003
+  shift   8   ratio 0.897  p=0.5541
+  shift  10   ratio 0.764  p=0.1408
+  shift  12   ratio 0.700  p=0.0523
+  shift  14   ratio 0.943  p=0.7504
+  shift  16   ratio 0.833  p=0.3282
+  shift  18   ratio 0.897  p=0.5635
+  shift  20   ratio 0.971  p=0.8797
+  shift  22   ratio 0.847  p=0.4007
+  shift  24   ratio 0.856  p=0.4553
+  shift  26   ratio 1.310  p=0.2175
+  shift  28   ratio 1.864  p=0.0045
+  shift  30   ratio 1.596  p=0.0269
+  shift  32   ratio 1.492  p=0.0843
+  shift  34   ratio 0.803  p=0.4717
+  shift  36   ratio 1.572  p=0.5367
+  shift  38   ratio 1.000  p=1.0000
+  shift  40   ratio 1.000  p=1.0000
+
+  placebo shifts at least as large as the true line: 8 of 25  ->  permutation p = 0.346
+
+==============================================================================
+C6. Leave one season out, and the eras
+==============================================================================
+  refits 16; ratio 1.173 to 1.429
+  significant at p<0.05 in 0 of 16
+
+  2009-2011                                n  116  ratio 0.965  CI 0.189-4.930  z=-0.04  p=0.9657
+  2012-2016                                n  250  ratio 1.397  CI 0.502-3.887  z=0.64  p=0.5217
+  2017-2021                                n  216  ratio 1.282  CI 0.584-2.816  z=0.62  p=0.5353
+  2022-2025 (post-2022 CBA)                n  252  ratio 1.447  CI 0.694-3.019  z=0.99  p=0.3245
+
+==============================================================================
+C7. Power — what this null does and does not rule out
+==============================================================================
+  The controlled estimate is 1.266, 95% CI 0.856 to 1.872.
+  So the data are consistent with anything from a small REDUCTION in
+  promotions after the line to a 1.87-fold rise. This is a null with a
+  wide interval, not a demonstration that the line does nothing.
+
+  What it does exclude: the doubling-or-more that a widespread, uniform
+  practice would leave in a cohort of this size. What it cannot exclude:
+  a practice confined to a handful of men a year, which is what the
+  well-known individual cases actually look like. 834 first-time roster
+  additions fall in the first 45 days of a season across sixteen seasons —
+  about 52 a season, of whom the pedigree cut keeps about 8.
+
+wrote controls.json

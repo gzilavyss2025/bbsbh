@@ -137,6 +137,14 @@ const PANEL_PATHS = [
   '.scratch/prospect-traits/q2-size.json',
   '.scratch/prospect-traits/q3-pitchers.json',
   '.scratch/prospect-traits/q5-final-four.json',
+  // The service-clock spike (docs/service-time-debut-clock.md). panel.json is
+  // one row per major-league debut 2005-2025 with the season's service line,
+  // the wire-resolved roster-add date and the roster-need counts beside it.
+  // The 47MB transaction wire it was built from is git-ignored and is not
+  // cataloged; rebuild it with .scratch/service-clock/pull.mjs.
+  '.scratch/service-clock/panel.json',
+  '.scratch/service-clock/controls.json',
+  '.scratch/service-clock/k0-blank-rate.json',
   '.scratch/blockage/incumbent-ids.json',
   '.scratch/blockage/incumbent-bio.json',
   '.scratch/blockage/exits.json',

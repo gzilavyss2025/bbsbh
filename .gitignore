@@ -93,3 +93,11 @@ undefined/
 # every research-db.mjs run.
 .scratch/contracts/season-players-raw/
 .scratch/contracts/identity-overrides-snapshot.json
+
+# service-clock spike (docs/service-time-debut-clock.md): the league-wide
+# transaction wire 2005-2025 (47MB) and the games-per-date sweep. Both rebuild
+# from statsapi via `node .scratch/service-clock/pull.mjs` and
+# `pull-schedule.mjs` in about two minutes, and the pull skips anything already
+# cached. The derived panel and every findings file ARE committed.
+.scratch/service-clock/transactions.json
+.scratch/service-clock/schedule-days.json
