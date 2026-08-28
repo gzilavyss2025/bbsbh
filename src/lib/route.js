@@ -26,7 +26,8 @@
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
 //   '/salaries' '/attendance' '/pace-of-play' '/farm-system-rankings'
-//   '/bullpen-availability' '/doubleheaders' -> single-segment report pages (REPORT_ROUTES, reportPages.js)
+//   '/bullpen-availability' '/doubleheaders' '/abs-challenges'
+//                                       -> single-segment report pages (REPORT_ROUTES, reportPages.js)
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/admin/research'                   -> { name: 'admin-research' }  (research diary, Clerk-admin gated)

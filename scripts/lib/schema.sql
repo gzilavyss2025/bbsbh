@@ -538,3 +538,66 @@ SELECT
   ) AS surprise_json
 FROM team_snapshots q
 WHERE q.metric = 'quality';
+
+-- ABS CHALLENGES (gen-abs-challenges.mjs -> public/data/abs-challenges.json).
+-- One row per Automated Ball-Strike challenge, at every level that runs the
+-- system: MLB (sportId 1, its first season in 2026) and Triple-A (sportId 11,
+-- which has run it for several seasons). FACTS ONLY — every split the report
+-- page shows (per club, per role, per umpire, call type, miss distance, run
+-- value) is derived at export time from these rows, so a new cut costs
+-- `--export-only` rather than a re-sweep of the season's feeds.
+--
+-- `seq` is the challenge's 0-based order within its own game, which gives the
+-- table a stable primary key: a game can hold several challenges and nothing
+-- the feed carries identifies one of them on its own.
+--
+-- `call_type` is what the PLATE UMPIRE called, which is not always what the
+-- feed prints. On a successful challenge the feed rewrites the pitch to the
+-- corrected call (verified against gamePk 823036 and 815863), so the umpire's
+-- own call is the opposite of the printed one; on a failed challenge the
+-- printed call is his and it stood. gen-abs-challenges.mjs does that flip.
+--
+-- `favor` is the run-expectancy the overturn put back, signed toward the
+-- BATTING team exactly like src/lib/runExpectancy.js's pitchFavor everywhere
+-- else in this repo (positive = the umpire's call had helped the batting side,
+-- so the overturn took that back). NULL on a failed challenge, where no call
+-- moved, and on a pitch with no tracking or no run-expectancy table.
+-- `miss_inches` is how far the pitch sat from the nearest buffered zone edge.
+CREATE TABLE IF NOT EXISTS abs_challenges (
+  game_pk     INTEGER NOT NULL,
+  seq         INTEGER NOT NULL,
+  season      INTEGER NOT NULL,
+  date        TEXT NOT NULL,
+  level       TEXT NOT NULL,                 -- 'MLB' | 'AAA'
+  team_id     INTEGER NOT NULL,              -- the club that challenged
+  opp_id      INTEGER,
+  side        TEXT NOT NULL,                 -- 'away' | 'home'
+  player_id   INTEGER,
+  player_name TEXT NOT NULL DEFAULT '',
+  role        TEXT NOT NULL,                 -- 'batter' | 'catcher' | 'pitcher' | 'other'
+  outcome     TEXT NOT NULL,                 -- 'success' | 'fail'
+  inning      INTEGER NOT NULL,
+  half        TEXT NOT NULL,                 -- 'top' | 'bottom'
+  umpire_id   INTEGER,
+  umpire_name TEXT NOT NULL DEFAULT '',
+  call_type   TEXT,                          -- the umpire's call: 'strike' | 'ball'
+  favor       REAL,
+  miss_inches REAL,
+  PRIMARY KEY (game_pk, seq)
+);
+
+-- Idempotency guard AND the denominator table. A Final game's challenges are
+-- immutable, so an ingested gamePk is never refetched. The two club ids and
+-- the plate umpire are carried here because every rate on the report page
+-- needs a per-club or per-umpire GAMES figure, and a game nobody challenged
+-- leaves no row in abs_challenges to count.
+CREATE TABLE IF NOT EXISTS abs_ingested_games (
+  game_pk      INTEGER NOT NULL PRIMARY KEY,
+  date         TEXT NOT NULL,
+  season       INTEGER NOT NULL,
+  level        TEXT NOT NULL,
+  away_team_id INTEGER,
+  home_team_id INTEGER,
+  umpire_id    INTEGER,
+  challenges   INTEGER NOT NULL DEFAULT 0
+);

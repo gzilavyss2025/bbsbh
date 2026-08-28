@@ -76,6 +76,10 @@
       "class": "spoiler-free",
       "why": "Static all-star-rosters.json reader. Shows each game's final plainly, but an All-Star Game is decades-settled exhibition trivia outside the rule's scope (ADR-0019)."
     },
+    "around-the-game/absChallenges.js": {
+      "class": "spoiler-free",
+      "why": "Static abs-challenges.json — the season board for the ABS Challenge System, over Final MLB and Triple-A games. A challenge is a ball-strike judgment, not a run: it says a pitch was on the other side of the line, never who scored. Same footing as umpires.js's accuracy aggregates. The LIVE per-game challenge state, which can flip a called third strike, is challenges.js and stays reveal-only. No SealBox."
+    },
     "around-the-game/bullpen.js": {
       "class": "spoiler-free",
       "why": "Re-runs api/workload.js’s availability rules across all thirty clubs. Inherits that module’s classification unchanged: completed appearances only, as-of date excludes today, so no in-progress line can leak. No SealBox."

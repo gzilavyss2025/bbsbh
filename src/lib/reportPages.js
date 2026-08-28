@@ -64,6 +64,14 @@ export const PAGE_GROUPS = [
       { label: 'Salaries', path: '/salaries' },
       { label: 'Foul Tracker', path: '/fouls' },
       { label: 'Umpire Rankings', path: '/umpires' },
+      // The season board for the ABS Challenge System, 2026's first in MLB.
+      // Next to Umpire Rankings because the two are the same kind of page —
+      // a season-to-date officiating board read across the league — asking
+      // different halves of one question: that one scores every called pitch
+      // against the zone, this one scores only the calls a player thought
+      // were wrong. Not under "Around the game": this is about a result on
+      // the field, not about the conditions around it.
+      { label: 'ABS Challenges', path: '/abs-challenges' },
     ],
   },
   {
@@ -143,6 +151,17 @@ export const PAGE_GROUPS = [
     ],
   },
 ]
+
+// The menu group a report page is filed under, by address. One page wears the
+// broadcast masthead without belonging to the broadcast group
+// (/abs-challenges, see its row above), and that masthead's chip has to name
+// the group the reader actually came through. Reading it back from this table
+// is what keeps the words on the page and the words in the menu the same words
+// — the whole argument this file is built on. Falls back to the broadcast
+// strand, which is what every other page wearing that masthead belongs to.
+export function groupLabelFor(path) {
+  return PAGE_GROUPS.find((g) => g.pages.some((p) => p.path === path))?.label ?? BROADCAST_STRAND
+}
 
 // The flat list, derived. test/report-pages.test.js pins the SET (nothing
 // lost, nothing added, no duplicate path), not the order, because the order
@@ -240,8 +259,14 @@ export const FOOTER_TRAIL = [
 // 'pace'), which is what App.jsx's switch and the preview-card key read. The
 // address and the name are allowed to differ, and this table is the only place
 // that has to know they do.
+// (Plus one page that is NOT one of the four: '/abs-challenges' shares this
+// package's directory and stylesheet but is filed under "This season" — see
+// its row in PAGE_GROUPS. It is here because this table is what route.js
+// parses, and a single-segment report address belongs beside the menu row that
+// links to it whichever group that row sits in.)
 export const REPORT_ROUTES = {
   salaries: 'salaries',
+  'abs-challenges': 'abs-challenges',
   attendance: 'attendance',
   'pace-of-play': 'pace',
   doubleheaders: 'doubleheaders',

@@ -214,6 +214,35 @@ don't run these by hand.
   `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
   old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
+- `gen-abs-challenges.mjs` → `public/data/abs-challenges.json` — every ABS
+  (Automated Ball-Strike) CHALLENGE of the season, at both levels that run the
+  system: MLB (sportId 1, 2026 is its first season) and Triple-A (sportId 11,
+  which has run it for several). SQLite-backed (`abs-challenges` group,
+  ADR-0021), APPEND-ONLY incremental sweep of newly-Final games like
+  `gen-comeback-wins.mjs`: `--days` trailing window nightly,
+  `--since=2026-03-26` for the one-time backfill (Opening Day — there is no
+  history before it), `--sports=1,11` to restrict a level, `--export-only` to
+  re-derive every split with no re-sweep, `--rebuild` for a schema change.
+  `abs_ingested_games` is both the idempotency guard AND the denominator table:
+  it carries the two club ids and the plate umpire, so a club or umpire nobody
+  challenged still has a games figure. FACTS ONLY in the row table (who
+  challenged, what the umpire called, outcome, inning, umpire, run value,
+  zone-edge distance); every split — per club, per role, per umpire, call type,
+  miss distance, the biggest overturn — is derived at export time in
+  `scripts/lib/abs-challenges.mjs`, which also holds the per-game row
+  derivation, since a generator does its work at import and nothing inside one
+  can be unit-tested (`test/abs-challenges.test.js`).
+  Imports rather than re-derives: `selectChallengeState` (`src/api/challenges.js`,
+  which knows an ABS review can sit at either the play or the pitch-event level
+  and that MLB's older manager's-replay reviews must be excluded on
+  `reviewType`), `missEdge` (`src/api/umpireFavor.js`), and `pitchFavor`
+  (`src/lib/runExpectancy.js`, against the hand-run `run-expectancy.json` —
+  absent, `favor` is null and the run figures degrade rather than reading zero).
+  **The trap**: on a SUCCESSFUL challenge the feed rewrites the pitch to the
+  CORRECTED call, so the printed call is the umpire's own only when the
+  challenge FAILED; `umpireCallFor` flips it back. Getting that wrong puts every
+  batter in the catcher's column. App reads it via
+  `src/api/around-the-game/absChallenges.js` (the `/abs-challenges` report page).
 - `gen-team-records.mjs` → `public/data/team-records/{season}/{teamId}.json` (one
   file per club per season, ~24 KB) — the per-game LEDGER every club's
   situational records are read off, at MLB, the four full-season MiLB levels,

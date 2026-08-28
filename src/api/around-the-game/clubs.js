@@ -14,22 +14,29 @@
 
 import { fetchStaticTeams } from '../teams-static.js'
 
-// MLB only. Every one of these pages is a thirty-club league board; a MiLB
-// affiliate that appears on The Farm Report carries its own name inline from
-// farm-system.json, so nothing here has to reach past sportId 1.
-export async function loadClubs() {
+// MLB by default. Every one of these pages is a thirty-club league board, and
+// a MiLB affiliate that appears on The Farm Report carries its own name inline
+// from farm-system.json, so most callers never reach past sportId 1.
+//
+// `sportIds` is for the one board that does: /abs-challenges reports MLB and
+// Triple-A side by side, because both run the challenge system. teams.json
+// already carries every level (gen-teams.mjs writes bySportId 1 and 11 through
+// 14), so this stays one file and one memo rather than a second lookup — and
+// club ids never collide across levels, so one Map holds them all.
+export async function loadClubs(sportIds = [1]) {
   const data = await fetchStaticTeams()
-  const teams = data?.bySportId?.['1'] ?? []
   const byId = new Map()
-  for (const t of teams) {
-    byId.set(t.id, {
-      id: t.id,
-      name: t.name,
-      short: t.teamName ?? t.name,
-      abbr: t.abbreviation ?? '',
-      division: t.divisionName ?? '',
-      league: t.leagueName ?? '',
-    })
+  for (const sportId of sportIds) {
+    for (const t of data?.bySportId?.[String(sportId)] ?? []) {
+      byId.set(t.id, {
+        id: t.id,
+        name: t.name,
+        short: t.teamName ?? t.name,
+        abbr: t.abbreviation ?? '',
+        division: t.divisionName ?? '',
+        league: t.leagueName ?? '',
+      })
+    }
   }
   return byId
 }
