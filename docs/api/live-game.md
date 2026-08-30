@@ -220,9 +220,9 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   the key's counts are whole-game and would cross the seal. The retain-on-
   success rule and the extra-inning bonus challenge are both confirmed at MLB
   and Triple-A; neither is checked at Single-A. The key is reported per venue,
-  so it is exact at those two levels but misses one Florida State League park
-  (issue #964), and a wider `MJ`-scan gate would break the seal — see the
-  module header.
+  so it is exact at those two levels but misses one Florida State League park,
+  which `ABS_VENUE_IDS` covers by venue id (issue #964). A wider `MJ`-scan gate
+  would break the seal — see the module header and ADR-0068.
 - `umpireFavor.js` — reveal-only, cumulative-through-the-revealed-half plate-
   umpire consistency + favor, same `StatBox` row tier and half-clamp pattern as
   `challenges.js` — a per-game companion to `umpires.js`'s season aggregate.

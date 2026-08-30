@@ -194,6 +194,69 @@ test('gameHasAbs reads presence, never the running counts — true before any ch
   assert.equal(gameHasAbs(levelFeed(11, untouched)), true)
 })
 
+// A field-trimmed snapshot of gamePk 820258 — Clearwater at Tampa,
+// 2026-07-11, a Single-A Florida State League game at George M. Steinbrenner
+// Field. That park runs the challenge system and reports NO
+// `gameData.absChallenges` bank, which is the whole reason ABS_VENUE_IDS
+// exists (issue #964).
+//
+// The game holds NINE real challenges and this file derives SEVEN, which is
+// correct for today's code and wrong about the game. Two of the nine carry
+// `reviewType: "MZ"` rather than `"MJ"` — a second challenge type that occurs
+// only at Single-A (issue #965) — and one play carries two distinct
+// challenges, which #963 caps at one. The assertions below therefore pin the
+// VENUE GATE, which is what this fixture is for, and deliberately do not
+// assert a total that would have to change twice before it is right.
+const FSL_NO_BANK = JSON.parse(
+  readFileSync(new URL('./fixtures/game-820258.trimmed.json', import.meta.url), 'utf8'),
+)
+
+// --- the venue allowlist (issue #964) -----------------------------------------
+
+test('gameHasAbs is true at a park that runs challenges but reports no bank', () => {
+  // The fixture is the real thing: challenges in the play data, no bank key.
+  assert.equal(FSL_NO_BANK.gameData.absChallenges, undefined)
+  assert.equal(FSL_NO_BANK.gameData.venue.id, 2523)
+  assert.equal(gameHasAbs(FSL_NO_BANK), true)
+})
+
+test('the no-bank park still derives its real challenges, clamped', () => {
+  const full = selectChallengeState(FSL_NO_BANK, Infinity, 'bottom')
+  // Both clubs reach the row with real challenges — the point of the venue
+  // gate. NOT an assertion that the tally is complete: see the header above.
+  assert.ok(full.away.outcomes.length > 0)
+  assert.ok(full.home.outcomes.length > 0)
+  // Nothing before the first half is reached, and nothing from a sealed half.
+  const nothing = selectChallengeState(FSL_NO_BANK, 0, 'bottom')
+  assert.equal(nothing.away.outcomes.length + nothing.home.outcomes.length, 0)
+  const order = (inning, half) => (half === 'bottom' ? inning * 2 : inning * 2 - 1)
+  for (let i = 1; i <= 9; i += 1) {
+    for (const half of ['top', 'bottom']) {
+      const state = selectChallengeState(FSL_NO_BANK, i, half)
+      for (const side of ['away', 'home']) {
+        for (const c of state[side].outcomes) {
+          assert.ok(order(c.inning, c.half) <= order(i, half), 'challenge leaked past the seal')
+        }
+      }
+    }
+  }
+})
+
+test('the venue allowlist is an allowlist — a park with no challenges stays off', () => {
+  // Daytona's Jackie Robinson Ballpark (venue 2787) is the honest opposite of
+  // Steinbrenner: no bank key AND no challenges. It must keep showing nothing,
+  // or the fix for one park puts an empty "2 left" row on another.
+  const daytona = { gameData: { teams: { away: { id: 1, sport: { id: 14 } }, home: { id: 2, sport: { id: 14 } } }, venue: { id: 2787 } } }
+  assert.equal(gameHasAbs(daytona), false)
+})
+
+test('gameHasAbs still needs no venue when the feed reports a bank', () => {
+  // MLB and Triple-A never reach the allowlist — the key answers first, so a
+  // feed with no venue at all still works.
+  assert.equal(gameHasAbs(levelFeed(1, PREGAME_BANK)), true)
+  assert.equal(gameHasAbs(levelFeed(11, PREGAME_BANK)), true)
+})
+
 // The gate must never read play data. This is the test ADR-0068 leans on:
 // the tempting fix for the one Florida State League park the key misses
 // (issue #964) is to widen gameHasAbs to "has the key OR carries an MJ review
@@ -215,11 +278,18 @@ test('gameHasAbs ignores play data entirely — the row cannot depend on the unr
   // so a gate reading `liveData.plays.allPlays` defensively still fails.
   assert.equal(gameHasAbs({ ...AAA, liveData: { plays: { allPlays: [] } } }), withPlays)
 
-  // And the converse: the MJ reviews alone must NOT be enough. This is the
-  // Steinbrenner Field shape — real challenges in the play data, no bank key.
+  // And the converse: the MJ reviews alone must NOT be enough. Strip the bank
+  // from a feed whose venue is not on the allowlist and the answer is false,
+  // however many challenges the play data holds.
   const challengesButNoKey = { ...AAA, gameData: { ...AAA.gameData } }
   delete challengesButNoKey.gameData.absChallenges
   assert.equal(gameHasAbs(challengesButNoKey), false)
+
+  // Same for the no-bank park, which reaches the row through its VENUE: the
+  // answer must not move when its play data goes away.
+  const fslNoPlays = { ...FSL_NO_BANK }
+  delete fslNoPlays.liveData
+  assert.equal(gameHasAbs(fslNoPlays), true)
 })
 
 test('gameHasAbs degrades to false on a missing or empty feed', () => {

@@ -4,8 +4,9 @@ The box score's ABS challenge row used to gate on `sport.id === 1`. That hid
 real challenges at Triple-A, where the system has run for several seasons
 (issue #957). Replacing the level check turned out to be the easy half. The
 hard half is that the obvious better gate is a spoiler leak, and it looks like
-a cleanup. This ADR records why `gameHasAbs` reads
-`feed.gameData.absChallenges` and nothing else.
+a cleanup. This ADR records why `gameHasAbs` reads `gameData.absChallenges`
+and, where that key is missing, `gameData.venue.id` — and never anything from
+the play data.
 
 ## A level cannot draw this line
 
@@ -49,9 +50,9 @@ clamped walk.
 The key is reported per VENUE, not per league, and one park runs the system
 without reporting a bank. Every Tampa Tarpons home game at George M.
 Steinbrenner Field carries real `MJ` challenges and no `absChallenges` key —
-30 of them over 7 sampled games — so the gate hides a row that should show.
+30 of them over 7 sampled games — so the gate hid a row that should show.
 Daytona's Jackie Robinson Ballpark is the honest opposite: no key, and no
-challenges either. Issue #964 tracks the gap.
+challenges either, so it must keep showing nothing.
 
 The fix that suggests itself is to widen the gate to "has the key OR carries
 an `MJ` review somewhere in the feed". **That is forbidden.** It reads play
@@ -62,8 +63,14 @@ one-bit spoiler on the game's own surface, leaking exactly the kind of fact
 every test in the suite, because a gate that reads too much still returns the
 right booleans.
 
-The honest fix is a venue allowlist. `venue.id` is in `gameData` pregame,
-exactly like the key, so it says nothing about what has happened yet.
+**The fix taken instead is a venue allowlist** (`ABS_VENUE_IDS`, issue #964).
+`venue.id` is in `gameData` pregame, exactly like the key, so it says nothing
+about what has happened yet. It is an allowlist and not a denylist because the
+default has to stay "no row": Daytona would otherwise gain an empty "2 left"
+row from the same change that fixed Tampa. A sweep of every level the app
+searches found Steinbrenner to be the only such park, and
+`.scratch/abs-aaa-gate/venue-crosstab.mjs` re-derives the list on demand — a
+park that starts reporting its bank can simply come off it.
 
 `challenges.test.js` pins this structurally rather than by comment: the gate
 must return the same answer on a real feed with `liveData` deleted entirely.
@@ -72,8 +79,9 @@ A gate that starts reading play data fails that test the moment it is written.
 ## Which levels are actually claimed
 
 The gate is exact at MLB and Triple-A, which is the scope issue #957 asked
-for and where this row is read. Below that it is a strong heuristic with one
-known hole. Comments and docs say that, rather than the tidier and false
+for and where this row is read. Below that the bank key alone is a strong
+heuristic, and the venue allowlist covers its one known hole. Comments and
+docs say that, rather than the tidier and false
 "present on exactly the games that run the system" — a claim the first draft
 of this work made, and which its own verification could not have caught,
 because that sweep looked for challenges only inside games that already had
@@ -84,6 +92,25 @@ Two smaller facts fall out of the same change. Pre-2026 MLB feeds carry no
 bogus "2 left" row on every historical MLB box score; the new gate removes it.
 2025 Triple-A games do carry the key, so historical Triple-A box scores gain
 a correct row.
+
+## The row's EXISTENCE is settled; its COUNT is not
+
+This ADR is about whether the row renders. What it counts is a separate
+question with two open defects, both of which bite hardest at the level the
+venue allowlist just opened up. In the fixture game (820258) the feed's own
+box-score note lists nine challenges and the app derives seven.
+
+- **#963** — `challengeForPlay` keeps at most one challenge per play.
+- **#965** — a second review type, `reviewType: "MZ"`, is not recognized. It
+  occurs only at Single-A; MLB and Triple-A carry `MJ` alone.
+
+They are entangled and must be fixed together. Accepting `MZ` on its own makes
+one club's count WORSE in that game: the play carrying an `MZ` challenge also
+carries a play-level `MJ` challenge by the other club, so the one-per-play cap
+swaps one for the other instead of keeping both. Counting `MJ`+`MZ` reconciles
+exactly with the feed's own bank in every banked Single-A game checked (7/7,
+against 5/7 for `MJ` alone), which is the evidence that `MZ` is real — but the
+reconciliation only holds once a play may yield more than one challenge.
 
 ## Not fixed here: a play can carry two challenges
 

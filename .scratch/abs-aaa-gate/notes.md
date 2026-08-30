@@ -53,29 +53,41 @@ BayCare Ballpark                           1     1     5        0
 ```
 
 The key is reported per **venue**, not per league. Steinbrenner Field runs the
-challenge system without reporting a bank, so the gate hides a row that should
-show. Jackie Robinson Ballpark is the honest opposite: no key, no challenges.
+challenge system without reporting a bank, so the gate hid a row that should
+show. Jackie Robinson Ballpark is the honest opposite: no key, no challenges,
+and it has to keep showing nothing.
 
 **Do not "fix" this by widening the gate to include an `MJ` scan.** That reads
 play data to decide whether the row exists, which leaks a bit about unrevealed
 innings. ADR-0068 has the argument, and `challenges.test.js` fails if anyone
-tries it. The honest fix is a venue allowlist (`venue.id` is in `gameData`
-pregame, exactly like the key) — issue #964.
+tries it.
+
+Fixed instead by `ABS_VENUE_IDS` in `challenges.js` — a venue allowlist, since
+`venue.id` is in `gameData` pregame exactly like the key (issue #964). Rerun
+`venue-crosstab.mjs` to re-derive the list; Steinbrenner (venue `2523`) was the
+only park at any level.
 
 ## What the gate does and does not claim
 
 Exact at MLB and Triple-A, which is where this row is read and what #957 asked
 for: 89/89 MLB and 95/95 Triple-A Final games carried the key across six dates
 spanning the season, and all 125 Double-A, High-A, Carolina and California
-League games carried neither key nor review. Below that it is a strong
-heuristic with one known hole.
+League games carried neither key nor review. Below that the key alone is a
+strong heuristic, and `ABS_VENUE_IDS` covers its one known hole.
 
 ## Loose ends
 
 - **#963** — `challengeForPlay` keeps at most one challenge per play, so the
   tally runs one light on roughly a fifth of games at every level. Pre-existing;
   `probe2.mjs` is the reproducer.
-- **#964** — the Steinbrenner Field gap above.
+- **#965** — `reviewType: "MZ"` is a real ABS challenge the code does not
+  recognize. Single-A only: 8 of 36 Single-A reviews sampled, and ZERO at MLB
+  or Triple-A. Counting `MJ`+`MZ` reconciles with the feed's own bank 7/7 at
+  Single-A against 5/7 for `MJ` alone. **Do not fix it alone** — it is
+  entangled with #963, and accepting `MZ` by itself makes one club's count
+  worse in gamePk 820258, because the play holding the `MZ` challenge also
+  holds the other club's play-level `MJ` one and the cap keeps only one.
+- **#964** — the Steinbrenner Field gap above. Fixed by the venue allowlist.
 - `scripts/gen-abs-challenges.mjs` still sweeps MLB and Triple-A only. The FSL
   runs real challenges and is not in the season aggregate; adding it needs a
   backfill and a report page that splits one sportId into two populations.
