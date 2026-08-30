@@ -23,7 +23,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | cards.test.js | 38 | api/_lib/cards.js, api/_lib/entity.js, api/preview.js | OG preview card resolveGame race-condition fix, the per-route card set, and the one canonical origin — plus the edge copies of the app's slug helpers, asserted against route.js's own (ADR-0057) |
 | career-matchups.test.js | 16 | src/api/careerMatchups.js | Batting order's career-vs-starter notes (TeamInfo) |
 | career-register.test.js | 12 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels + chronological multi-org register rows/subtotals + the Team history rail's org order |
-| challenges.test.js | 7 | src/api/challenges.js | ABS challenge tracking |
+| challenges.test.js | 19 | src/api/challenges.js | ABS challenge tracking — the per-play primitive and the half-clamp, plus which games run the system (`gameHasAbs` reads the feed's `gameData.absChallenges`, not a level) and the clamp re-proved on a captured Triple-A game |
 | comeback-wins.test.js | 13 | scripts/gen-comeback-wins.mjs, src/api/comebackWins.js | Comeback-wins card |
 | compute-batter-line.test.js | 5 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
 | condensed-day-index.test.js | 14 | scripts/lib/highlights.mjs, src/api/gamePhotos.js | Day-index generation policy: condensed-cut selection (never the recap) + hero-photo pick for the slate's revealed result cards |
@@ -174,6 +174,13 @@ candidates noted, not acted on: `milb-color-chain.test.js` +
   comments that make the fixture legible and wouldn't reduce total tokens read once
   you need both files open anyway. Don't extract a fixture just because the file is
   long; only extract if the data itself (not its rationale) is reused across files.
+- **A captured feed goes in `test/fixtures/` with the script that built it.** A WHOLE
+  real game is the exception to the rule above: it is far too big to read inline and
+  its value is that it is unedited. `game-823035.trimmed.json` (MLB, the spoiler
+  invariant) and `game-815863.trimmed.json` (Triple-A, the ABS challenge clamp) are
+  both field-trimmed to the paths the selectors under test read, and both are rebuilt
+  by a committed script under `.scratch/` rather than by hand. The suite reads them
+  from disk, so it stays offline.
 - **A hook is exercised through one server render.** `callout-ledger.test.js` reads
   `useCalloutLedgerValue` by rendering a probe component with
   `react-dom/server`'s `renderToStaticMarkup`. That is the only React in the suite,

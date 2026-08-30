@@ -112,6 +112,27 @@ called out in CLAUDE.md's MiLB conventions. Pick a fresh recent AAA date if
 this one ages out of easy access; the pattern is what matters, not this
 specific gamePk.
 
+## Triple-A ABS challenges
+
+**2026-08-26 BUF @ ROC (AAA, sportId 11)** — gamePk `815863`
+Route base: `/08262026/bufroc/`
+
+Three real ABS challenges at a level the box-score row used to hide (issue
+#957): Rochester wins one in the top 1st, Buffalo loses one in the top 2nd
+and another in the top 3rd. Captured, field-trimmed, and committed as
+`test/fixtures/game-815863.trimmed.json` (rebuild it with
+`.scratch/abs-aaa-gate/build-fixture.mjs`), so `challenges.test.js` proves
+the half-clamp on real Triple-A data offline.
+
+**2026-08-29 SWB @ WOR (AAA, sportId 11)** — gamePk `815489`
+Route base: `/08292026/swbwor/`
+
+The same row in the browser, and a caution: the feed's own whole-game bank
+says Worcester used one challenge of each outcome, while the derived row
+shows only the success. One plate appearance here carries TWO distinct
+challenges, and `challengeForPlay` keeps one per play. Good for confirming a
+fix; do not treat the derived count as agreeing with the bank in general.
+
 ## Categories not included (couldn't verify)
 
 Batting out of order and an overturned replay challenge were searched but

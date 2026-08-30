@@ -83,9 +83,10 @@ expected. The tie breaks on the later date.
 with the pitch, the count and the box-score position beside each; `shot.mjs`
 drives the page at phone and desktop width and prints what rendered.
 
-## Left alone, deliberately
+## Left alone, deliberately — since resolved
 
-`gameHasAbs` in `src/api/challenges.js` still gates the LIVE box-score row on
-`sport.id === 1`, so Triple-A box scores show no challenge row even though
+`gameHasAbs` in `src/api/challenges.js` gated the LIVE box-score row on
+`sport.id === 1`, so Triple-A box scores showed no challenge row even though
 their feeds carry real challenges. Out of scope here (a live-UI change with its
-own spoiler footing); flagged for its own issue.
+own spoiler footing); flagged for its own issue, and fixed there — issue #957
+replaced the level check with the feed's own `gameData.absChallenges` key.

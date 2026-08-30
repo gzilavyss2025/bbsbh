@@ -213,8 +213,16 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
 - `challenges.js` — reveal-only ABS (Automated Ball-Strike) challenge history
   for the R/H/E card's third row (`StatBox`), clamped to the reached half. Each
   club's success/fail outcome list from the pitch-event `reviewDetails`
-  (`isOverturned` + `challengeTeamId`); MLB only (`gameHasAbs`). See ADR/`docs`
-  research on the retain-on-success rule + extra-inning bonus challenges.
+  (`isOverturned` + `challengeTeamId`). `gameHasAbs` gates it on the feed's own
+  `gameData.absChallenges` key, not on a level: the system runs at MLB, at
+  Triple-A and, inside Single-A, in the Florida State League alone, so a sportId
+  allowlist would get it wrong in both directions (issue #957). Presence only —
+  the key's counts are whole-game and would cross the seal. The retain-on-
+  success rule and the extra-inning bonus challenge are both confirmed at MLB
+  and Triple-A; neither is checked at Single-A. The key is reported per venue,
+  so it is exact at those two levels but misses one Florida State League park
+  (issue #964), and a wider `MJ`-scan gate would break the seal — see the
+  module header.
 - `umpireFavor.js` — reveal-only, cumulative-through-the-revealed-half plate-
   umpire consistency + favor, same `StatBox` row tier and half-clamp pattern as
   `challenges.js` — a per-game companion to `umpires.js`'s season aggregate.
