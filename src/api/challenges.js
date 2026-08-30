@@ -36,15 +36,30 @@ export const START_CHALLENGES = 2
 // check did) or put a misleading "2 left" row on every Carolina League box
 // score.
 //
-// The feed draws the line itself. `gameData.absChallenges` is present on
-// exactly the games that run the system and absent on every game that does
-// not — so a level that GAINS the system next season gets its row with no
-// change here, and a level that loses it loses the row the same way.
-// Confirmed 2026-08-28 over Final games at all five levels the app searches:
-// present at MLB, Triple-A and the Florida State League; the key is absent on
-// every Eastern League, Midwest League, South Atlantic League, Carolina League
-// and California League game checked, none of which carried an `MJ` review
-// either. .scratch/abs-aaa-gate/ has the probes.
+// The feed draws the line itself, and draws it EXACTLY at the two levels this
+// row is for. `gameData.absChallenges` was present on 89 of 89 MLB and 95 of
+// 95 Triple-A Final games sampled across six dates spanning the 2026 season,
+// and absent — with no `MJ` review anywhere in the play data — on all 125
+// Double-A, High-A, Carolina League and California League games checked. So a
+// level that GAINS the system next season gets its row with no change here,
+// and a level that loses it loses the row the same way.
+//
+// IT IS NOT A PERFECT ORACLE, and do not write code that assumes it is. The
+// key is reported per VENUE, not per league, and one park runs the challenge
+// system without reporting a bank: every Tampa Tarpons home game at George M.
+// Steinbrenner Field (Single-A, Florida State League) carries real `MJ`
+// challenges and NO `absChallenges` key — 30 of them over 7 sampled games — so
+// this gate hides a row that should show. Daytona's Jackie Robinson Ballpark
+// is the honest opposite: no key, and no challenges either. Every other FSL
+// park reports the key and its challenges agree. The gap is issue #964.
+//
+// Widening the gate to "has the key OR carries an `MJ` review" would fix that
+// park and BREAK THE SPOILER RULE, which is why it is not done: the row's
+// presence would then depend on unrevealed play data, so the row appearing at
+// all would tell you a challenge happened somewhere in a game you have not
+// revealed. Presence of the pregame key is the only gate available that says
+// nothing about what has happened yet. A venue allowlist is the honest fix.
+// .scratch/abs-aaa-gate/ has the probes.
 //
 // PRESENCE ONLY — never the values. The same object also carries live
 // whole-game counts (`hasChallenges`, `usedFailed`, `remaining`) that are NOT
@@ -90,11 +105,22 @@ function halfOrder(inning, half) {
 // place that knows how to find a challenge and pin it to a pitch, not two
 // copies that could drift.
 //
-// A play carries AT MOST one ABS challenge, which can sit at either location
-// — sometimes mirrored at both (see isAbsChallenge above). Pitch-level first:
-// checking playEvents[].reviewDetails (hasReview: true) before the play-level
-// fallback both dedupes a mirrored review AND, when the pitch-level location
-// is the one that matches, gives an exact pitch rather than a guess.
+// This returns AT MOST ONE challenge per play, and that is a KNOWN BUG, not a
+// property of the data — issue #963. A review can sit at either location and
+// is sometimes mirrored at both (see isAbsChallenge above), which is what the
+// pitch-level-first order below is for: checking playEvents[].reviewDetails
+// (hasReview: true) before the play-level fallback both dedupes a mirrored
+// review AND, when the pitch-level location is the one that matches, gives an
+// exact pitch rather than a guess.
+//
+// But the two locations are NOT always mirrors. One plate appearance can carry
+// two genuinely distinct challenges — the same club twice (gamePk 816831, bot
+// 6: pitch 2 upheld, pitch 4 overturned) or BOTH clubs (gamePk 823011, top 7:
+// team 134 overturned at the pitch level, team 138 upheld at the play level).
+// Treating the second as a mirror drops it, so the tally runs one light on
+// roughly a fifth of games at every level. Fixing it means returning a list
+// and deduping on (challengeTeamId, isOverturned, player.id); both callers
+// take the shape change.
 //
 // About half of real challenges (verified against gamePk 823036) carry no
 // pitch-level reviewDetails at all — only play.reviewDetails, with no pitch

@@ -24,13 +24,16 @@ const AAA = JSON.parse(
   readFileSync(new URL('./fixtures/game-815863.trimmed.json', import.meta.url), 'utf8'),
 )
 
-// A minimal feed carrying only what gameHasAbs looks at.
-function levelFeed(sportId, leagueName, absChallenges) {
+// A minimal feed carrying only what gameHasAbs looks at. The sportId is here
+// so a regression to the old `sport.id === 1` allowlist FAILS these tests; it
+// is deliberately NOT a league name, because gameHasAbs does not read one and
+// a parameter it ignores would imply a discrimination it cannot make.
+function levelFeed(sportId, absChallenges) {
   return {
     gameData: {
       teams: {
-        away: { id: 1, sport: { id: sportId }, league: { name: leagueName } },
-        home: { id: 2, sport: { id: sportId }, league: { name: leagueName } },
+        away: { id: 1, sport: { id: sportId } },
+        home: { id: 2, sport: { id: sportId } },
       },
       ...(absChallenges === undefined ? {} : { absChallenges }),
     },
@@ -150,11 +153,11 @@ test('selectChallengeState clamps to the reached half — a later challenge neve
 // gameData.absChallenges, which is present on exactly the games that run it.
 
 test('gameHasAbs is true for an MLB game', () => {
-  assert.equal(gameHasAbs(levelFeed(1, 'American League', PREGAME_BANK)), true)
+  assert.equal(gameHasAbs(levelFeed(1, PREGAME_BANK)), true)
 })
 
 test('gameHasAbs is true for a Triple-A game — the level does run challenges', () => {
-  assert.equal(gameHasAbs(levelFeed(11, 'International League', PREGAME_BANK)), true)
+  assert.equal(gameHasAbs(levelFeed(11, PREGAME_BANK)), true)
 })
 
 test('gameHasAbs is true on the real captured Triple-A feed', () => {
@@ -162,30 +165,33 @@ test('gameHasAbs is true on the real captured Triple-A feed', () => {
   assert.equal(AAA.gameData.teams.away.sport.id, 11)
 })
 
-test('gameHasAbs is true for a Florida State League game, false for its Single-A siblings', () => {
-  // Same sportId (14), opposite answers — a level allowlist cannot tell these
-  // two apart, and would put a misleading "2 left" row on the Carolina game.
-  assert.equal(gameHasAbs(levelFeed(14, 'Florida State League', PREGAME_BANK)), true)
-  assert.equal(gameHasAbs(levelFeed(14, 'Carolina League', undefined)), false)
-  assert.equal(gameHasAbs(levelFeed(14, 'California League', undefined)), false)
+test('one sportId, both answers — the gate splits games a level check cannot', () => {
+  // Single-A (14) is the case that rules a level allowlist out: the Florida
+  // State League runs the system and the Carolina and California Leagues do
+  // not, so the SAME sportId has to answer both ways off the feed alone.
+  assert.equal(gameHasAbs(levelFeed(14, PREGAME_BANK)), true)
+  assert.equal(gameHasAbs(levelFeed(14, undefined)), false)
 })
 
 test('gameHasAbs is false at a level with no challenge data — no empty row', () => {
-  assert.equal(gameHasAbs(levelFeed(12, 'Eastern League', undefined)), false)
-  assert.equal(gameHasAbs(levelFeed(13, 'Midwest League', undefined)), false)
+  assert.equal(gameHasAbs(levelFeed(12, undefined)), false)
+  assert.equal(gameHasAbs(levelFeed(13, undefined)), false)
 })
 
 test('gameHasAbs follows the feed, not the level — an MLB game with no bank shows nothing', () => {
-  // The degrade-correctly property: a level that LOSES the system loses the key
-  // and the row goes away on its own, with no code change here.
-  assert.equal(gameHasAbs(levelFeed(1, 'American League', undefined)), false)
+  // The degrade-correctly property, and the one that FAILS under the old
+  // `sport.id === 1` gate: a level that LOSES the system loses the key, and
+  // the row goes away on its own with no code change here.
+  assert.equal(gameHasAbs(levelFeed(1, undefined)), false)
 })
 
 test('gameHasAbs reads presence, never the running counts — true before any challenge', () => {
   // hasChallenges is "one has been used", false until the first one; the row
   // still has to show the full bank pregame, so the gate must not read it.
-  assert.equal(PREGAME_BANK.hasChallenges, false)
-  assert.equal(gameHasAbs(levelFeed(11, 'International League', PREGAME_BANK)), true)
+  // Asserted on a bank built inline here, not on the shared literal, so this
+  // pins gameHasAbs's behaviour rather than restating PREGAME_BANK.
+  const untouched = { hasChallenges: false, away: { remaining: 2 }, home: { remaining: 2 } }
+  assert.equal(gameHasAbs(levelFeed(11, untouched)), true)
 })
 
 test('gameHasAbs degrades to false on a missing or empty feed', () => {

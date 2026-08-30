@@ -87,8 +87,8 @@ export function StatBox({
           const rollingMissed = rollingMissedCalls(getDerived(), inning, half)
           // ABS challenge history through this half (reveal-only, clamped to the
           // reached half — see api/challenges.js). Only for a game the FEED says
-          // runs the challenge system — MLB, Triple-A and the Florida State
-          // League today; gameHasAbs reads the feed, not the level.
+          // runs the challenge system — every MLB and Triple-A game, and most
+          // Florida State League ones; gameHasAbs reads the feed, not the level.
           const challenges = gameHasAbs(feed) ? selectChallengeState(feed, inning, half) : null
           // Plate-umpire favor + worst call through this half (reveal-only,
           // clamped — see api/umpireFavor.js). MLB + AAA only (pitch tracking).

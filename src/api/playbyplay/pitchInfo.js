@@ -127,9 +127,11 @@ export function pitchCardInfo(feed, play) {
   const events = play.playEvents ?? []
   const pitches = events.filter((e) => e.isPitch || AUTOMATIC_CODES.has(pitchCallCode(e))).map(pitchCallCode)
   const pitchEvents = events.filter((e) => e.isPitch)
-  // At most one challenge per play (challengeForPlay's own contract) — pinned
-  // to a pitchNumber, matched against each pitch's own `no` below so only
-  // that one pitch's row carries it.
+  // At most one challenge per play — pinned to a pitchNumber, matched against
+  // each pitch's own `no` below so only that one pitch's row carries it. That
+  // ceiling is challengeForPlay's KNOWN UNDER-COUNT (issue #963), not a fact
+  // about the data: an at-bat can carry two real challenges, and the second
+  // one's pitch goes unmarked here until that is fixed.
   const challenge = challengeForPlay(feed, play)
   const pitchDetails = pitchEvents.map((e, i) => {
     const code = pitchCallCode(e)
