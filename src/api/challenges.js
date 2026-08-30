@@ -12,7 +12,7 @@
 // REVEAL-ONLY by caller contract: a challenge can flip a called third strike, so
 // this reads score-adjacent in-game state. It's computed only from inside
 // StatBox's SealBox reveal and CLAMPED to the half the user has reached — a
-// challenge in a later half never reaches the DOM. challengeForPlay itself
+// challenge in a later half never reaches the DOM. challengesForPlay itself
 // carries no gate of its own — it's only ever called (directly, or via
 // scanChallenges below) on a play already inside a reveal-only caller's own
 // clamped scope (StatBox's inning/half, or playbyplay.js's single half), same
@@ -99,12 +99,26 @@ export function gameHasAbs(feed) {
 // `challengeTeamId` alone isn't enough to identify one: the same game also has
 // a `reviewDetails` from MLB's older, unrelated manager's-replay-challenge
 // system (e.g. a pickoff-attempt review) that also sets `challengeTeamId`.
-// `reviewType` tells the two apart — every genuine ABS ball-strike challenge in
-// this game carries `"MJ"`; the manager's-replay review carries `"MA"` and only
-// ever appears on a non-`pitch` event. Requiring `reviewType === 'MJ'` is what
-// excludes it.
+// `reviewType` tells the two apart, and TWO of its values are ABS challenges:
+//
+//   MJ  everywhere the system runs.
+//   MZ  Single-A only — 8 of 36 Single-A reviews sampled, and ZERO at MLB or
+//       Triple-A (issue #965). Same shape, and the feed's own box-score note
+//       counts it as an ABS Challenge like any other.
+//
+// Every other value is something else and stays excluded: `MA` is the older
+// manager's replay (it only ever appears on a non-`pitch` event), and MLB also
+// emits occasional `MF`/`MC`/`MD`/`NH`. The evidence that the line falls
+// exactly here is arithmetic, not taxonomy — counting MJ+MZ makes the derived
+// per-club tally match the feed's OWN `gameData.absChallenges` bank in 7 of 7
+// banked Single-A games (against 5 of 7 for MJ alone), and leaves MLB and
+// Triple-A at the 24 of 24 they already reached, since neither emits MZ.
+const ABS_REVIEW_TYPES = new Set(['MJ', 'MZ'])
+
 function isAbsChallenge(review) {
-  return Boolean(review && review.challengeTeamId != null && review.reviewType === 'MJ')
+  return Boolean(
+    review && review.challengeTeamId != null && ABS_REVIEW_TYPES.has(review.reviewType),
+  )
 }
 
 // 1-based half order (top 1 = 1, bottom 1 = 2, top 2 = 3, …), for clamping to
@@ -113,28 +127,35 @@ function halfOrder(inning, half) {
   return half === 'bottom' ? inning * 2 : inning * 2 - 1
 }
 
-// The ABS challenge (if any) carried by one play, resolved down to the exact
-// pitch it belongs to — the shared primitive behind both this file's own
-// scanChallenges (below) and playbyplay.js's per-pitch marker, so there's one
-// place that knows how to find a challenge and pin it to a pitch, not two
-// copies that could drift.
+// EVERY ABS challenge carried by one play, in the order they happened, each
+// resolved down to the exact pitch it belongs to — the shared primitive behind
+// both this file's own scanChallenges (below) and playbyplay.js's per-pitch
+// marker, so there is one place that knows how to find a challenge and pin it
+// to a pitch, not two copies that could drift.
 //
-// This returns AT MOST ONE challenge per play, and that is a KNOWN BUG, not a
-// property of the data — issue #963. A review can sit at either location and
-// is sometimes mirrored at both (see isAbsChallenge above), which is what the
-// pitch-level-first order below is for: checking playEvents[].reviewDetails
-// (hasReview: true) before the play-level fallback both dedupes a mirrored
-// review AND, when the pitch-level location is the one that matches, gives an
-// exact pitch rather than a guess.
+// A LIST, because a plate appearance can carry more than one. This returned a
+// single challenge until issue #963, on TWO beliefs that the feed contradicts:
 //
-// But the two locations are NOT always mirrors. One plate appearance can carry
-// two genuinely distinct challenges — the same club twice (gamePk 816831, bot
-// 6: pitch 2 upheld, pitch 4 overturned) or BOTH clubs (gamePk 823011, top 7:
-// team 134 overturned at the pitch level, team 138 upheld at the play level).
-// Treating the second as a mirror drops it, so the tally runs one light on
-// roughly a fifth of games at every level. Fixing it means returning a list
-// and deduping on (challengeTeamId, isOverturned, player.id); both callers
-// take the shape change.
+//   1. That a play carries at most one challenge. It can carry several — the
+//      same club twice (gamePk 816831, bot 6: pitch 2 upheld, pitch 4
+//      overturned) or BOTH clubs (gamePk 823011, top 7).
+//   2. That `play.reviewDetails` MIRRORS a pitch-level review when both are
+//      present, so the play-level one should only be a fallback. It does not.
+//      In gamePk 816935 play#12 the play-level review and the pitch-3 review
+//      carry an identical club, outcome and player, and the feed's own bank
+//      counts BOTH — they are two challenges by the same catcher in one
+//      at-bat, not one reported twice. gamePk 815743 play#1 is the same shape.
+//
+// So there is no dedup here, and adding one would be a regression. Every ABS
+// review found is its own challenge. THE EVIDENCE IS ARITHMETIC: counting them
+// this way makes the derived per-club tally match the feed's own
+// `gameData.absChallenges` bank in 209 of 210 games sampled across nine dates
+// spanning the season — 103/103 MLB, 84/84 Triple-A, 22/23 Single-A. Under the
+// old mirror rule the same sample missed roughly one game in eight.
+//
+// The lone holdout is a feed gap, not a rule to model: in gamePk 820476 the
+// box-score note itself lists a Perez challenge that appears nowhere in
+// `allPlays`, so nothing derived from the play data can find it.
 //
 // About half of real challenges (verified against gamePk 823036) carry no
 // pitch-level reviewDetails at all — only play.reviewDetails, with no pitch
@@ -142,40 +163,42 @@ function halfOrder(inning, half) {
 // (`isHeuristic: true`) — true in every case checked (a challenge is always
 // on the deciding pitch of the plate appearance), but the feed never says so
 // explicitly, so callers that need to know the difference can check the flag.
-export function challengeForPlay(feed, play) {
+// Pitch-level entries come first and in pitch order; a play-level one is
+// appended last, which is also where it belongs in time.
+//
+// A review whose `challengeTeamId` matches neither club is dropped, same as
+// one carrying no ABS review type at all.
+export function challengesForPlay(feed, play) {
   const awayId = feed?.gameData?.teams?.away?.id ?? null
   const homeId = feed?.gameData?.teams?.home?.id ?? null
   const pitchEvents = (play.playEvents ?? []).filter((e) => e.isPitch)
 
-  let review = null
-  let pitchNumber = null
-  let isHeuristic = false
-  for (const e of pitchEvents) {
-    if (isAbsChallenge(e.reviewDetails)) {
-      review = e.reviewDetails
-      pitchNumber = e.pitchNumber ?? null
-      break
+  const build = (review, pitchNumber, isHeuristic) => {
+    const side =
+      review.challengeTeamId === awayId ? 'away' : review.challengeTeamId === homeId ? 'home' : null
+    if (!side) return null
+    return {
+      side,
+      teamId: review.challengeTeamId,
+      outcome: review.isOverturned ? 'success' : 'fail',
+      pitchNumber,
+      isHeuristic,
+      playerId: review.player?.id ?? null,
+      playerName: review.player?.fullName ?? '',
     }
   }
-  if (!review && isAbsChallenge(play.reviewDetails)) {
-    review = play.reviewDetails
-    isHeuristic = true
-    pitchNumber = pitchEvents.at(-1)?.pitchNumber ?? null
-  }
-  if (!review) return null
 
-  const side = review.challengeTeamId === awayId ? 'away' : review.challengeTeamId === homeId ? 'home' : null
-  if (!side) return null
-
-  return {
-    side,
-    teamId: review.challengeTeamId,
-    outcome: review.isOverturned ? 'success' : 'fail',
-    pitchNumber,
-    isHeuristic,
-    playerId: review.player?.id ?? null,
-    playerName: review.player?.fullName ?? '',
+  const out = []
+  for (const e of pitchEvents) {
+    if (!isAbsChallenge(e.reviewDetails)) continue
+    const c = build(e.reviewDetails, e.pitchNumber ?? null, false)
+    if (c) out.push(c)
   }
+  if (isAbsChallenge(play.reviewDetails)) {
+    const c = build(play.reviewDetails, pitchEvents.at(-1)?.pitchNumber ?? null, true)
+    if (c) out.push(c)
+  }
+  return out
 }
 
 // Every ABS challenge through (throughInning, throughHalf) inclusive, in
@@ -191,15 +214,16 @@ function scanChallenges(feed, throughInning, throughHalf) {
     const half = p.about?.halfInning
     if (inning == null || half == null) continue
     if (halfOrder(inning, half) > limit) break
-    const c = challengeForPlay(feed, p)
-    if (c) out.push({ ...c, inning, half, atBatIndex: p.about?.atBatIndex ?? null })
+    for (const c of challengesForPlay(feed, p)) {
+      out.push({ ...c, inning, half, atBatIndex: p.about?.atBatIndex ?? null })
+    }
   }
   return out
 }
 
 // Each club's challenges, in chronological order, through (throughInning,
 // throughHalf) inclusive — grouped by side for AbsRow's pip row + expandable
-// detail list (StatBox.jsx). Each entry is a full challengeForPlay record
+// detail list (StatBox.jsx). Each entry is a full challengesForPlay record
 // (outcome, inning, half, who), not just the outcome string — AbsRow reads
 // the extra fields to answer "who challenged, and when" once expanded.
 export function selectChallengeState(feed, throughInning, throughHalf) {

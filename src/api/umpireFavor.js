@@ -67,7 +67,7 @@ function halfOrder(inning, half) {
 // copy of this formula in the repo. It is pure geometry over one pitch — no
 // feed, no game state, nothing sealed — so a build-time importer is the same
 // arrangement gen-umpire-accuracy.mjs already has with challenges.js's
-// challengeForPlay. No UI module may import it: this file stays reveal-only.
+// challengesForPlay. No UI module may import it: this file stays reveal-only.
 export function missEdge(pX, pZ, top, bot, batSide) {
   const bx = batSide === 'L' ? -pX : pX
   const clearances = {

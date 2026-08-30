@@ -189,7 +189,7 @@ export function PitchList({ pitchDetails }) {
 }
 
 // The ABS challenge marker on a challenged pitch's row (see api/challenges.js's
-// challengeForPlay): an "ABS" label, then the challenging club's own mark,
+// challengesForPlay): an "ABS" label, then the challenging club's own mark,
 // then a plain solid dot for whether THAT CLUB's challenge succeeded.
 // Deliberately never "good for the batter/pitcher": the color only ever
 // answers one question — did the club whose mark is right next to it get the

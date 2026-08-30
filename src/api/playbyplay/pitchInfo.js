@@ -6,7 +6,7 @@
 // check-file-size.mjs) out of src/api/playbyplay.js.
 
 import { personNameParts } from '../select.js'
-import { challengeForPlay } from '../challenges.js'
+import { challengesForPlay } from '../challenges.js'
 
 // THE CODE TABLE. Every call code MLB itself publishes at
 // https://statsapi.mlb.com/api/v1/pitchCodes, sorted into the categories this
@@ -114,7 +114,7 @@ export function hasPitchLocations(pitchDetails) {
 // list. All Statcast-ish, so every field is null-guarded — at MiLB parks with
 // no tracking pX/pZ are simply absent and StrikeZone renders nothing (same
 // degrade as derive.js).
-// `feed` is only needed for challengeForPlay's team-id lookup (challenges.js)
+// `feed` is only needed for challengesForPlay's team-id lookup (challenges.js)
 // — everything else here reads straight off `play`.
 export function pitchCardInfo(feed, play) {
   // Two lists, and the split matters. `pitches` is the COUNT — every call that
@@ -127,12 +127,20 @@ export function pitchCardInfo(feed, play) {
   const events = play.playEvents ?? []
   const pitches = events.filter((e) => e.isPitch || AUTOMATIC_CODES.has(pitchCallCode(e))).map(pitchCallCode)
   const pitchEvents = events.filter((e) => e.isPitch)
-  // At most one challenge per play — pinned to a pitchNumber, matched against
-  // each pitch's own `no` below so only that one pitch's row carries it. That
-  // ceiling is challengeForPlay's KNOWN UNDER-COUNT (issue #963), not a fact
-  // about the data: an at-bat can carry two real challenges, and the second
-  // one's pitch goes unmarked here until that is fixed.
-  const challenge = challengeForPlay(feed, play)
+  // Every challenge this play carries, keyed by the pitch each was resolved to,
+  // so a pitch's own row picks up its own marker below and no other pitch's.
+  // An at-bat CAN carry more than one (issue #963) — the same club twice, or
+  // both clubs — which is why this is a map and not a single value.
+  //
+  // First-wins on a collision: two challenges resolving to the same pitchNumber
+  // would be one pitch with two markers, and ChallengeMark draws one. That only
+  // happens when a play-level review falls back to the last pitch that a
+  // pitch-level review already claimed, and the mirror case is deduped upstream,
+  // so it stays a tie-break rather than a lossy choice.
+  const byPitch = new Map()
+  for (const c of challengesForPlay(feed, play)) {
+    if (c.pitchNumber != null && !byPitch.has(c.pitchNumber)) byPitch.set(c.pitchNumber, c)
+  }
   const pitchDetails = pitchEvents.map((e, i) => {
     const code = pitchCallCode(e)
     const pd = e.pitchData ?? {}
@@ -149,7 +157,7 @@ export function pitchCardInfo(feed, play) {
       mph: typeof pd.startSpeed === 'number' ? pd.startSpeed : null,
       type: e.details?.type?.description ?? '',
       callDesc: e.details?.call?.description ?? '',
-      challenge: challenge?.pitchNumber === no ? challenge : null,
+      challenge: byPitch.get(no) ?? null,
     }
   })
   return { pitchEvents, pitches, pitchDetails }
