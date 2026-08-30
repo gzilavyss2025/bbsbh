@@ -819,8 +819,8 @@ function TeamBlock({ side, theme }) {
 // feed text buried in the Pitching notes ("ABS Challenge: ATL 1-2…"); this is
 // the same StatBox pip row instead of a second copy of it. Renders only where
 // the feed says the game runs the challenge system (gameHasAbs) — every MLB
-// and Triple-A game, most Florida State League ones, nothing at the levels
-// that run no challenges. Its own independent card below the
+// and Triple-A game, the Florida State League parks that run it, nothing at
+// the levels that run no challenges. Its own independent card below the
 // team's batting/pitching card (BoxScoreBody), not a tail section of it —
 // bs__abscard scopes the attached-header + card-frame treatment (see
 // index.css) to just this copy of the shared .abs/.abs__title markup; the

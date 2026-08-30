@@ -44,22 +44,24 @@ export const START_CHALLENGES = 2
 // level that GAINS the system next season gets its row with no change here,
 // and a level that loses it loses the row the same way.
 //
-// IT IS NOT A PERFECT ORACLE, and do not write code that assumes it is. The
+// IT IS NOT A PERFECT ORACLE, which is what ABS_VENUE_IDS below is for. The
 // key is reported per VENUE, not per league, and one park runs the challenge
 // system without reporting a bank: every Tampa Tarpons home game at George M.
 // Steinbrenner Field (Single-A, Florida State League) carries real `MJ`
-// challenges and NO `absChallenges` key — 30 of them over 7 sampled games — so
-// this gate hides a row that should show. Daytona's Jackie Robinson Ballpark
-// is the honest opposite: no key, and no challenges either. Every other FSL
-// park reports the key and its challenges agree. The gap is issue #964.
+// challenges and NO `absChallenges` key. Daytona's Jackie Robinson Ballpark is
+// the honest opposite — no key, and no challenges either — so it must keep
+// showing nothing. Every other park reports the key and its challenges agree
+// (issue #964).
 //
-// Widening the gate to "has the key OR carries an `MJ` review" would fix that
-// park and BREAK THE SPOILER RULE, which is why it is not done: the row's
-// presence would then depend on unrevealed play data, so the row appearing at
-// all would tell you a challenge happened somewhere in a game you have not
-// revealed. Presence of the pregame key is the only gate available that says
-// nothing about what has happened yet. A venue allowlist is the honest fix.
-// .scratch/abs-aaa-gate/ has the probes.
+// THE SECOND CLAUSE IS A VENUE ID, AND THAT IS NOT AN ACCIDENT. The obvious
+// alternative — "has the key OR carries an `MJ` review somewhere in the feed"
+// — WOULD BREAK THE SPOILER RULE: the row's presence would depend on
+// unrevealed play data, so the row appearing at all would tell you a challenge
+// happened in a game you have not revealed. `venue.id` is in `gameData` before
+// the first pitch, exactly like the key, so it says nothing about what has
+// happened yet. Do not replace it with a play scan; challenges.test.js fails
+// if you do, and ADR-0068 has the argument. .scratch/abs-aaa-gate/ has the
+// probes, and venue-crosstab.mjs re-derives this list.
 //
 // PRESENCE ONLY — never the values. The same object also carries live
 // whole-game counts (`hasChallenges`, `usedFailed`, `remaining`) that are NOT
@@ -69,8 +71,20 @@ export const START_CHALLENGES = 2
 // level pregame), so it says which RULES this game plays under, the same class
 // of fact as the venue or the club ids beside it. The remaining count AbsRow
 // shows still comes from scanChallenges' clamped walk, never from here.
+
+// Parks that run the challenge system but report no bank. Swept 2026-08-30
+// over Final games at every level the app searches: Steinbrenner is the ONLY
+// one, at MLB, Triple-A, Double-A, High-A and Single-A alike. Re-derive with
+// `node .scratch/abs-aaa-gate/venue-crosstab.mjs 14` and read the
+// MJ-but-no-key column — a park that starts reporting its bank can come off
+// this list, and nothing breaks if it is left on.
+const ABS_VENUE_IDS = new Set([
+  2523, // George M. Steinbrenner Field (Tampa Tarpons, Florida State League)
+])
+
 export function gameHasAbs(feed) {
-  return feed?.gameData?.absChallenges != null
+  if (feed?.gameData?.absChallenges != null) return true
+  return ABS_VENUE_IDS.has(feed?.gameData?.venue?.id)
 }
 
 // An ABS challenge review can sit at EITHER the play level (`play.reviewDetails`)
