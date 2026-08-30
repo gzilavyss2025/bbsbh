@@ -1,5 +1,5 @@
 // Unit coverage for ABS challenge tracking (src/api/challenges.js):
-// challengeForPlay — the shared primitive that finds a play's ABS challenge
+// challengesForPlay — the shared primitive that finds a play's ABS challenges
 // (if any) and pins it to a pitch, either from an exact pitch-level review
 // (playEvents[].reviewDetails, hasReview: true) or, for a play-level review
 // with no pitch flagged, the at-bat's last pitch as a working heuristic — and
@@ -13,7 +13,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { buildFeed } from './fixtures/mini-game.js'
-import { challengeForPlay, selectChallengeState, gameHasAbs } from '../src/api/challenges.js'
+import { challengesForPlay, selectChallengeState, gameHasAbs } from '../src/api/challenges.js'
 
 // A field-trimmed snapshot of statsapi's /api/v1.1/game/815863/feed/live —
 // Buffalo at Rochester, 2026-08-26, a real TRIPLE-A game with three real ABS
@@ -77,51 +77,192 @@ function withPlayLevelChallenge(feed) {
   return feed
 }
 
-test('challengeForPlay returns null for a play with no review', () => {
+test('challengesForPlay returns nothing for a play with no review', () => {
   const feed = buildFeed()
-  assert.equal(challengeForPlay(feed, feed.liveData.plays.allPlays[0]), null)
+  assert.deepEqual(challengesForPlay(feed, feed.liveData.plays.allPlays[0]), [])
 })
 
-test('challengeForPlay resolves a pitch-level review to its exact pitch, not a heuristic', () => {
+test('challengesForPlay resolves a pitch-level review to its exact pitch, not a heuristic', () => {
   const feed = withPitchLevelChallenge(buildFeed())
-  const c = challengeForPlay(feed, feed.liveData.plays.allPlays[0])
-  assert.deepEqual(c, {
-    side: 'away',
-    teamId: 158,
-    outcome: 'fail',
-    pitchNumber: 2,
-    isHeuristic: false,
-    playerId: 1,
-    playerName: 'Aaron Ashby',
-  })
+  assert.deepEqual(challengesForPlay(feed, feed.liveData.plays.allPlays[0]), [
+    {
+      side: 'away',
+      teamId: 158,
+      outcome: 'fail',
+      pitchNumber: 2,
+      isHeuristic: false,
+      playerId: 1,
+      playerName: 'Aaron Ashby',
+    },
+  ])
 })
 
-test('challengeForPlay falls back to the at-bat\'s last pitch for a play-level review', () => {
+test('challengesForPlay falls back to the at-bat\'s last pitch for a play-level review', () => {
   const feed = withPlayLevelChallenge(buildFeed())
-  const c = challengeForPlay(feed, feed.liveData.plays.allPlays[6])
-  assert.deepEqual(c, {
-    side: 'home',
-    teamId: 138,
-    outcome: 'success',
-    pitchNumber: 3, // the play's last pitch — no pitch-level flag to read instead
-    isHeuristic: true,
-    playerId: 12,
-    playerName: 'Leo Lowe',
-  })
+  assert.deepEqual(challengesForPlay(feed, feed.liveData.plays.allPlays[6]), [
+    {
+      side: 'home',
+      teamId: 138,
+      outcome: 'success',
+      pitchNumber: 3, // the play's last pitch — no pitch-level flag to read instead
+      isHeuristic: true,
+      playerId: 12,
+      playerName: 'Leo Lowe',
+    },
+  ])
 })
 
-test('challengeForPlay ignores a manager\'s-replay review (reviewType "MA"), only "MJ" is ABS', () => {
+test('challengesForPlay ignores a manager\'s-replay review (reviewType "MA")', () => {
   const feed = buildFeed()
   const play = feed.liveData.plays.allPlays[0]
   play.reviewDetails = { isOverturned: true, reviewType: 'MA', challengeTeamId: 158 }
-  assert.equal(challengeForPlay(feed, play), null)
+  assert.deepEqual(challengesForPlay(feed, play), [])
 })
 
-test('challengeForPlay returns null for a challengeTeamId belonging to neither club', () => {
+test('challengesForPlay ignores the other non-ABS review types MLB emits', () => {
+  // MF/MC/MD/NH all appear at MLB and none is an ABS challenge — counting them
+  // would break the reconciliation with the feed's own bank.
+  for (const reviewType of ['MF', 'MC', 'MD', 'NH']) {
+    const feed = buildFeed()
+    const play = feed.liveData.plays.allPlays[0]
+    play.reviewDetails = { isOverturned: true, reviewType, challengeTeamId: 158 }
+    assert.deepEqual(challengesForPlay(feed, play), [], `${reviewType} must not count`)
+  }
+})
+
+test('challengesForPlay returns nothing for a challengeTeamId belonging to neither club', () => {
   const feed = buildFeed()
   const play = feed.liveData.plays.allPlays[0]
   play.reviewDetails = { isOverturned: false, reviewType: 'MJ', challengeTeamId: 999 }
-  assert.equal(challengeForPlay(feed, play), null)
+  assert.deepEqual(challengesForPlay(feed, play), [])
+})
+
+// --- two challenges in one plate appearance (issue #963) ----------------------
+
+test('challengesForPlay keeps BOTH challenges when one at-bat carries two', () => {
+  // gamePk 823011's shape, top 7: one club challenges at the pitch level and
+  // the OTHER at the play level, same at-bat. The old single-result primitive
+  // treated the play-level one as a mirror-fallback and dropped it.
+  const feed = buildFeed()
+  const play = feed.liveData.plays.allPlays[0]
+  const pitch2 = play.playEvents.find((e) => e.isPitch && e.pitchNumber === 2)
+  pitch2.reviewDetails = {
+    isOverturned: true,
+    reviewType: 'MJ',
+    challengeTeamId: 158,
+    player: { id: 1, fullName: 'Aaron Ashby' },
+  }
+  play.reviewDetails = {
+    isOverturned: false,
+    reviewType: 'MJ',
+    challengeTeamId: 138,
+    player: { id: 12, fullName: 'Leo Lowe' },
+  }
+  const cs = challengesForPlay(feed, play)
+  assert.equal(cs.length, 2)
+  assert.deepEqual(
+    cs.map((c) => [c.side, c.outcome, c.pitchNumber, c.isHeuristic]),
+    [
+      ['away', 'success', 2, false], // exact pitch, found at the pitch level
+      ['home', 'fail', 3, true], // play level, resolved to the last pitch
+    ],
+  )
+})
+
+test('challengesForPlay keeps two challenges by the SAME club in one at-bat', () => {
+  // gamePk 816831's shape, bot 6: pitch 2 upheld, pitch 4 overturned, one club.
+  const feed = buildFeed()
+  const play = feed.liveData.plays.allPlays[0]
+  for (const [pitchNumber, isOverturned] of [
+    [1, false],
+    [2, true],
+  ]) {
+    const e = play.playEvents.find((ev) => ev.isPitch && ev.pitchNumber === pitchNumber)
+    e.reviewDetails = {
+      isOverturned,
+      reviewType: 'MJ',
+      challengeTeamId: 158,
+      player: { id: 1, fullName: 'Aaron Ashby' },
+    }
+  }
+  assert.deepEqual(
+    challengesForPlay(feed, play).map((c) => [c.outcome, c.pitchNumber]),
+    [
+      ['fail', 1],
+      ['success', 2],
+    ],
+  )
+})
+
+test('a play-level review alongside a pitch-level one counts as its OWN challenge', () => {
+  // NOT a mirror, though it looks like one. gamePk 816935 play#12 carries a
+  // play-level review and a pitch-3 review with an identical club, outcome and
+  // player, and the feed's own bank counts BOTH — two challenges by the same
+  // catcher in one at-bat. Deduping them (what this code used to do)
+  // undercounts; reconciling against the bank across 210 games settled it.
+  const feed = buildFeed()
+  const play = feed.liveData.plays.allPlays[0]
+  const review = {
+    isOverturned: false,
+    reviewType: 'MJ',
+    challengeTeamId: 158,
+    player: { id: 1, fullName: 'Aaron Ashby' },
+  }
+  play.playEvents.find((e) => e.isPitch && e.pitchNumber === 2).reviewDetails = { ...review }
+  play.reviewDetails = { ...review }
+  const cs = challengesForPlay(feed, play)
+  assert.equal(cs.length, 2)
+  assert.deepEqual(
+    cs.map((c) => [c.pitchNumber, c.isHeuristic]),
+    [
+      [2, false], // the pitch-level one keeps its exact pitch
+      [3, true], // the play-level one falls back to the at-bat's last pitch
+    ],
+  )
+})
+
+// --- reviewType MZ (issue #965) -----------------------------------------------
+
+test('challengesForPlay counts a reviewType "MZ" challenge', () => {
+  const feed = buildFeed()
+  const play = feed.liveData.plays.allPlays[0]
+  play.playEvents.find((e) => e.isPitch && e.pitchNumber === 2).reviewDetails = {
+    isOverturned: true,
+    reviewType: 'MZ',
+    challengeTeamId: 158,
+    player: { id: 1, fullName: 'Aaron Ashby' },
+  }
+  assert.deepEqual(
+    challengesForPlay(feed, play).map((c) => [c.side, c.outcome, c.pitchNumber]),
+    [['away', 'success', 2]],
+  )
+})
+
+test('an MZ and an MJ challenge in one at-bat both count', () => {
+  // gamePk 820258's shape, top 7 — the case that made fixing #965 alone WORSE
+  // than leaving it: the MZ sits at the pitch level and the other club's MJ at
+  // the play level, so the old one-per-play cap merely swapped which survived.
+  const feed = buildFeed()
+  const play = feed.liveData.plays.allPlays[0]
+  play.playEvents.find((e) => e.isPitch && e.pitchNumber === 2).reviewDetails = {
+    isOverturned: true,
+    reviewType: 'MZ',
+    challengeTeamId: 158,
+    player: { id: 1, fullName: 'Aaron Ashby' },
+  }
+  play.reviewDetails = {
+    isOverturned: false,
+    reviewType: 'MJ',
+    challengeTeamId: 138,
+    player: { id: 12, fullName: 'Leo Lowe' },
+  }
+  assert.deepEqual(
+    challengesForPlay(feed, play).map((c) => [c.side, c.outcome]),
+    [
+      ['away', 'success'],
+      ['home', 'fail'],
+    ],
+  )
 })
 
 test('selectChallengeState groups challenges by side, in chronological order', () => {
@@ -200,13 +341,9 @@ test('gameHasAbs reads presence, never the running counts — true before any ch
 // `gameData.absChallenges` bank, which is the whole reason ABS_VENUE_IDS
 // exists (issue #964).
 //
-// The game holds NINE real challenges and this file derives SEVEN, which is
-// correct for today's code and wrong about the game. Two of the nine carry
-// `reviewType: "MZ"` rather than `"MJ"` — a second challenge type that occurs
-// only at Single-A (issue #965) — and one play carries two distinct
-// challenges, which #963 caps at one. The assertions below therefore pin the
-// VENUE GATE, which is what this fixture is for, and deliberately do not
-// assert a total that would have to change twice before it is right.
+// The game holds NINE real challenges, two of them `reviewType: "MZ"` and one
+// at-bat carrying two — the exact shapes issues #965 and #963 were about. All
+// nine now derive, so this fixture pins those fixes as well as the venue gate.
 const FSL_NO_BANK = JSON.parse(
   readFileSync(new URL('./fixtures/game-820258.trimmed.json', import.meta.url), 'utf8'),
 )
@@ -222,10 +359,16 @@ test('gameHasAbs is true at a park that runs challenges but reports no bank', ()
 
 test('the no-bank park still derives its real challenges, clamped', () => {
   const full = selectChallengeState(FSL_NO_BANK, Infinity, 'bottom')
-  // Both clubs reach the row with real challenges — the point of the venue
-  // gate. NOT an assertion that the tally is complete: see the header above.
-  assert.ok(full.away.outcomes.length > 0)
-  assert.ok(full.home.outcomes.length > 0)
+  // All NINE, matching the feed's own box-score note: Clearwater 4-1 (Ferrara,
+  // Vierling twice, Cardoza, Villavicencio) and Tampa 2-2 (Rivera twice,
+  // Martin-Grudzielanek, Urena). Seven of them before #963 and #965.
+  const tally = (side) => [
+    full[side].outcomes.filter((c) => c.outcome === 'success').length,
+    full[side].outcomes.filter((c) => c.outcome === 'fail').length,
+  ]
+  assert.deepEqual(tally('away'), [4, 1])
+  assert.deepEqual(tally('home'), [2, 2])
+  assert.equal(full.away.outcomes.length + full.home.outcomes.length, 9)
   // Nothing before the first half is reached, and nothing from a sealed half.
   const nothing = selectChallengeState(FSL_NO_BANK, 0, 'bottom')
   assert.equal(nothing.away.outcomes.length + nothing.home.outcomes.length, 0)
@@ -309,15 +452,10 @@ test('the captured Triple-A game carries three real MJ challenges', () => {
   assert.equal(full.home.teamId, 534) // Rochester
   // Our own derivation agrees with the tally the feed keeps for itself.
   //
-  // THIS IS A FACT ABOUT THIS CAPTURE, NOT AN INVARIANT — do not read it as
-  // "the derivation always matches the bank", and do not reuse the assertion
-  // on a fresh gamePk without checking. challengeForPlay keeps at most ONE
-  // challenge per play, and a plate appearance can carry two distinct ones
-  // (both clubs, or one club twice), so the derived tally runs one light on
-  // roughly a fifth of games at every level — 815489 and 823011 are worked
-  // examples. This game happens to carry no such at-bat, which is what makes
-  // it a clean fixture; if a refresh of it ever fails here, suspect that bug
-  // rather than this assertion.
+  // Since #963 and #965 this is a real invariant rather than a fact about this
+  // capture: derived and banked agree in 209 of 210 games sampled across nine
+  // dates spanning the season, the one holdout being a feed that omits a
+  // challenge its OWN box-score note lists (gamePk 820476).
   const bank = AAA.gameData.absChallenges
   for (const side of ['away', 'home']) {
     const o = full[side].outcomes

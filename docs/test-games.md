@@ -119,7 +119,8 @@ Route base: `/08262026/bufroc/`
 
 Three real ABS challenges at a level the box-score row used to hide (issue
 #957): Rochester wins one in the top 1st, Buffalo loses one in the top 2nd
-and another in the top 3rd. Captured, field-trimmed, and committed as
+and another in the top 3rd. One sits at the play level and two at the pitch
+level, so it exercises both of the places a review can hide. Captured, field-trimmed, and committed as
 `test/fixtures/game-815863.trimmed.json` (rebuild it with
 `.scratch/abs-aaa-gate/build-fixture.mjs`), so `challenges.test.js` proves
 the half-clamp on real Triple-A data offline.
@@ -127,11 +128,22 @@ the half-clamp on real Triple-A data offline.
 **2026-08-29 SWB @ WOR (AAA, sportId 11)** — gamePk `815489`
 Route base: `/08292026/swbwor/`
 
-The same row in the browser, and a caution: the feed's own whole-game bank
-says Worcester used one challenge of each outcome, while the derived row
-shows only the success. One plate appearance here carries TWO distinct
-challenges, and `challengeForPlay` keeps one per play. Good for confirming a
-fix; do not treat the derived count as agreeing with the bank in general.
+One plate appearance here (bottom 3rd) carries TWO distinct Worcester
+challenges, one of each outcome — the shape that used to be undercounted
+(issue #963), since the old primitive kept one challenge per play and dropped
+the failure. The row now reads `1-2 · none left` for SWB and `1-1 · 1 left`
+for WOR, agreeing exactly with the feed's own `gameData.absChallenges` bank.
+
+**2026-07-11 CLR @ TAM, game 2 of a doubleheader (A, sportId 14)** — gamePk `820258`
+Route base: `/07112026/clrtam-2/`
+
+The densest ABS game pinned here, and the regression anchor for issues #963
+and #965: nine real challenges, two of them `reviewType: "MZ"` (a type that
+occurs only at Single-A), and one at-bat carrying two distinct ones. It is
+also at George M. Steinbrenner Field, the one park that runs the challenge
+system and reports no `gameData.absChallenges` bank (issue #964), so the row
+reaches the page through the venue allowlist rather than the key. Captured as
+`test/fixtures/game-820258.trimmed.json`. Clearwater 4-1, Tampa 2-2.
 
 ## Categories not included (couldn't verify)
 

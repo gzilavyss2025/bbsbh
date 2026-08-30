@@ -77,17 +77,13 @@ strong heuristic, and `ABS_VENUE_IDS` covers its one known hole.
 
 ## Loose ends
 
-- **#963** — `challengeForPlay` keeps at most one challenge per play, so the
-  tally runs one light on roughly a fifth of games at every level. Pre-existing;
-  `probe2.mjs` is the reproducer.
-- **#965** — `reviewType: "MZ"` is a real ABS challenge the code does not
-  recognize. Single-A only: 8 of 36 Single-A reviews sampled, and ZERO at MLB
-  or Triple-A. Counting `MJ`+`MZ` reconciles with the feed's own bank 7/7 at
-  Single-A against 5/7 for `MJ` alone. **Do not fix it alone** — it is
-  entangled with #963, and accepting `MZ` by itself makes one club's count
-  worse in gamePk 820258, because the play holding the `MZ` challenge also
-  holds the other club's play-level `MJ` one and the cap keeps only one.
-- **#964** — the Steinbrenner Field gap above. Fixed by the venue allowlist.
+- **#963 / #965 — both fixed.** `challengesForPlay` returns a LIST and counts
+  every ABS review, `MJ` and `MZ` alike. Two beliefs had to go: that a play
+  carries at most one challenge, and that a play-level `reviewDetails` mirrors
+  a pitch-level one (gamePk 816935 play#12 disproves it — identical club,
+  outcome and player, and the bank counts both). Derived now matches the feed's
+  own bank in 209 of 210 games sampled; the holdout, 820476, omits a challenge
+  its own box-score note lists.
 - `scripts/gen-abs-challenges.mjs` still sweeps MLB and Triple-A only. The FSL
   runs real challenges and is not in the season aggregate; adding it needs a
   backfill and a report page that splits one sportId into two populations.

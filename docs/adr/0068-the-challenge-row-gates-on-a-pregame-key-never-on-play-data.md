@@ -93,30 +93,28 @@ bogus "2 left" row on every historical MLB box score; the new gate removes it.
 2025 Triple-A games do carry the key, so historical Triple-A box scores gain
 a correct row.
 
-## The row's EXISTENCE is settled; its COUNT is not
+## The row's EXISTENCE and its COUNT are now separate, settled questions
 
-This ADR is about whether the row renders. What it counts is a separate
-question with two open defects, both of which bite hardest at the level the
-venue allowlist just opened up. In the fixture game (820258) the feed's own
-box-score note lists nine challenges and the app derives seven.
+This ADR is about whether the row renders. What it counts was a separate
+question with two defects, both since fixed together (issues #963 and #965) —
+they had to be, because fixing either alone made a real game's count worse.
 
-- **#963** — `challengeForPlay` keeps at most one challenge per play.
-- **#965** — a second review type, `reviewType: "MZ"`, is not recognized. It
-  occurs only at Single-A; MLB and Triple-A carry `MJ` alone.
+- **#963** — `challengeForPlay` kept at most one challenge per play, on the
+  belief that a play-level `reviewDetails` mirrors a pitch-level one when both
+  are present. It does not: in gamePk 816935 play#12 the two carry an identical
+  club, outcome and player, and the feed's own bank counts BOTH. There is no
+  dedup now, and adding one would be a regression.
+- **#965** — `reviewType: "MZ"` is a second ABS challenge type, Single-A only.
+  MLB and Triple-A emit `MJ` alone.
 
-They are entangled and must be fixed together. Accepting `MZ` on its own makes
-one club's count WORSE in that game: the play carrying an `MZ` challenge also
-carries a play-level `MJ` challenge by the other club, so the one-per-play cap
-swaps one for the other instead of keeping both. Counting `MJ`+`MZ` reconciles
-exactly with the feed's own bank in every banked Single-A game checked (7/7,
-against 5/7 for `MJ` alone), which is the evidence that `MZ` is real — but the
-reconciliation only holds once a play may yield more than one challenge.
+`challengesForPlay` returns a list and counts every ABS review it finds. The
+evidence is arithmetic: the derived per-club tally now matches the feed's own
+`gameData.absChallenges` bank in **209 of 210** games sampled across nine dates
+spanning the season — 103/103 MLB, 84/84 Triple-A, 22/23 Single-A. The lone
+holdout is a feed gap, not a rule: gamePk 820476's own box-score note lists a
+challenge that appears nowhere in `allPlays`.
 
-## Not fixed here: a play can carry two challenges
-
-`challengeForPlay` returns at most one challenge per play. A plate appearance
-can carry two distinct ones — the same club twice, or both clubs — so the
-derived tally runs one light on roughly a fifth of games at every level. That
-is a pre-existing under-count, tracked as issue #963, and it is independent of
-this gate: it changes what the row counts, never whether the row exists or
-whether anything crosses the seal.
+That reconciliation is worth keeping as the regression test for this area. It
+is the only check that can tell a counting rule from a plausible-sounding one —
+both of the beliefs above survived review precisely because they read as
+sensible and the unit fixtures agreed with them.

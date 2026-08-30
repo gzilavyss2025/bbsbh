@@ -77,7 +77,7 @@
 //   - `challenges`/`challengesOverturned` — how many Automated Ball-Strike
 //     challenges this game drew and how many overturned the plate umpire's
 //     call. Attributing them to him is the point: a challenge overturns HIS
-//     call. Resolved by challengeForPlay (src/api/challenges.js) rather than
+//     call. Resolved by challengesForPlay (src/api/challenges.js) rather than
 //     re-implemented, the same don't-let-them-drift import this file already
 //     makes for euz.js/runExpectancy.js — that module knows a review can sit
 //     at EITHER the play or the pitch-event level (sometimes mirrored at
@@ -95,7 +95,7 @@ import { readFile, readdir, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
-import { challengeForPlay } from '../src/api/challenges.js'
+import { challengesForPlay } from '../src/api/challenges.js'
 import { leanInputFromRows } from '../src/api/umpires.js'
 import { estimateGameConsistency } from '../src/lib/euz.js'
 import { pitchFavor } from '../src/lib/runExpectancy.js'
@@ -196,7 +196,8 @@ function computeGameAccuracy(feed) {
   const regionL = { high: 0, low: 0, inside: 0, outside: 0 }
   const regionR = { high: 0, low: 0, inside: 0, outside: 0 }
   // ABS challenges drawn by this game's plate umpire, and how many overturned
-  // him. Counted per PLAY (challengeForPlay resolves at most one per play).
+  // him. Counted per CHALLENGE, not per play: a plate appearance can carry two
+  // (issue #963), and both count against the umpire who was challenged.
   let challenges = 0
   let challengesOverturned = 0
   // 3×3 zone-map tallies (see cellIndex): all called judgments, how many were
@@ -277,13 +278,13 @@ function computeGameAccuracy(feed) {
       }
     }
 
-    // At most one ABS challenge per play, resolved by the app's own
-    // challengeForPlay so this count and the box score's can't disagree (see
-    // the header). It returns null for a play with no ABS review, for the
+    // EVERY ABS challenge on this play, resolved by the app's own
+    // challengesForPlay so this count and the box score's can't disagree (see
+    // the header). It returns nothing for a play with no ABS review, for the
     // older manager's-replay reviews, and for a review whose challengeTeamId
-    // matches neither club.
-    const abs = challengeForPlay(feed, p)
-    if (abs) {
+    // matches neither club — and more than one entry for a plate appearance
+    // that carried two (issue #963).
+    for (const abs of challengesForPlay(feed, p)) {
       challenges++
       if (abs.outcome === 'success') challengesOverturned++
     }
