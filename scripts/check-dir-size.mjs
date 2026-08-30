@@ -598,7 +598,11 @@ const BUDGETS = {
   // /run-value. Same shape as the entry above: it RUNS on import and writes
   // public/data, so scripts/lib/ cannot hold it. Its pure half is the reader,
   // src/api/around-the-game/runValue.js.
-  scripts: 107,
+  // 107 -> 108 for check-missing-imports.mjs, which catches a named import
+  // whose target no longer exports it. Flat beside the two dozen other
+  // check-*.mjs files `npm run lint` runs in a row; scripts/lib/ holds shared
+  // pure helpers, not runnable entry points.
+  scripts: 108,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
