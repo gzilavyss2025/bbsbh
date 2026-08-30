@@ -23,7 +23,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | cards.test.js | 38 | api/_lib/cards.js, api/_lib/entity.js, api/preview.js | OG preview card resolveGame race-condition fix, the per-route card set, and the one canonical origin — plus the edge copies of the app's slug helpers, asserted against route.js's own (ADR-0057) |
 | career-matchups.test.js | 16 | src/api/careerMatchups.js | Batting order's career-vs-starter notes (TeamInfo) |
 | career-register.test.js | 12 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels + chronological multi-org register rows/subtotals + the Team history rail's org order |
-| challenges.test.js | 18 | src/api/challenges.js | ABS challenge tracking — the per-play primitive and the half-clamp, plus which games run the system (`gameHasAbs` reads the feed's `gameData.absChallenges`, not a level) and the clamp re-proved on a captured Triple-A game |
+| challenges.test.js | 19 | src/api/challenges.js | ABS challenge tracking — the per-play primitive and the half-clamp, plus which games run the system (`gameHasAbs` reads the feed's `gameData.absChallenges`, not a level) and the clamp re-proved on a captured Triple-A game |
 | comeback-wins.test.js | 13 | scripts/gen-comeback-wins.mjs, src/api/comebackWins.js | Comeback-wins card |
 | compute-batter-line.test.js | 5 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
 | condensed-day-index.test.js | 14 | scripts/lib/highlights.mjs, src/api/gamePhotos.js | Day-index generation policy: condensed-cut selection (never the recap) + hero-photo pick for the slate's revealed result cards |

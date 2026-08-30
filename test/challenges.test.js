@@ -194,6 +194,34 @@ test('gameHasAbs reads presence, never the running counts — true before any ch
   assert.equal(gameHasAbs(levelFeed(11, untouched)), true)
 })
 
+// The gate must never read play data. This is the test ADR-0068 leans on:
+// the tempting fix for the one Florida State League park the key misses
+// (issue #964) is to widen gameHasAbs to "has the key OR carries an MJ review
+// somewhere in the feed", and that would make the ROW'S EXISTENCE depend on
+// unrevealed innings — the row showing up would tell you a challenge happened
+// in a game you have not revealed. It would pass every other test here, since
+// a gate that reads too much still returns the right booleans. This one it
+// cannot pass: strip the play data from a real feed that HAS challenges, and
+// the answer has to be identical.
+test('gameHasAbs ignores play data entirely — the row cannot depend on the unrevealed', () => {
+  const withPlays = gameHasAbs(AAA)
+  assert.equal(withPlays, true)
+
+  const noLiveData = { ...AAA }
+  delete noLiveData.liveData
+  assert.equal(gameHasAbs(noLiveData), withPlays)
+
+  // Same again with the plays emptied rather than the whole branch removed,
+  // so a gate reading `liveData.plays.allPlays` defensively still fails.
+  assert.equal(gameHasAbs({ ...AAA, liveData: { plays: { allPlays: [] } } }), withPlays)
+
+  // And the converse: the MJ reviews alone must NOT be enough. This is the
+  // Steinbrenner Field shape — real challenges in the play data, no bank key.
+  const challengesButNoKey = { ...AAA, gameData: { ...AAA.gameData } }
+  delete challengesButNoKey.gameData.absChallenges
+  assert.equal(gameHasAbs(challengesButNoKey), false)
+})
+
 test('gameHasAbs degrades to false on a missing or empty feed', () => {
   assert.equal(gameHasAbs(null), false)
   assert.equal(gameHasAbs(undefined), false)
