@@ -380,7 +380,11 @@ const BUDGETS = {
   // interface and a shared partial would have been the only place they could
   // collide. They stay flat siblings in the ordered @import chain: the deck
   // sits inside the workbench's layout and has to cascade right after it.
-  'src/styles': 105,
+  // 105 -> 106 for 75-run-value.css: the run value board and the two cards
+  // sharing its bar language. A new surface, not a split of an over-budget
+  // partial, so it takes the next free integer rather than a lettered sibling
+  // (same call as 59-stamp-in.css). Route-loaded, not from index.css.
+  'src/styles': 106,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -590,7 +594,11 @@ const BUDGETS = {
   // import, fetching statsapi and writing public/data, which is exactly what
   // scripts/lib/ is not for; its pure half lives there instead, as
   // abs-challenges.mjs. Flat with every other gen-*.mjs here.
-  scripts: 106,
+  // 106 -> 107 for gen-run-value.mjs, the nightly Baseball Savant sweep behind
+  // /run-value. Same shape as the entry above: it RUNS on import and writes
+  // public/data, so scripts/lib/ cannot hold it. Its pure half is the reader,
+  // src/api/around-the-game/runValue.js.
+  scripts: 107,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

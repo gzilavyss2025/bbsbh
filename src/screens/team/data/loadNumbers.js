@@ -3,6 +3,7 @@ import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.js'
 import { fetchTeamRecords } from '../../../api/teamRecords.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
+import { fetchRunValue, clubRunValue, clubBoard } from '../../../api/around-the-game/runValue.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { rankTeam, ordinal } from '../../../api/person.js'
 import {
@@ -18,8 +19,9 @@ import { seasonOf, cutoffFor, scoreCutoffFor, standingsRowsFor, injuredIdsFrom }
 const DASH = '—'
 
 // The Numbers tab's own data: standings, team batting/pitching ranks, the
-// leaderboard pool, comeback-win rates, the day-of-week record, and jersey
-// combos — see .scratch/team-page-ia/issues/05-numbers-tab.md.
+// leaderboard pool, comeback-win rates, the day-of-week record, the club's
+// season run value, and jersey combos — see
+// .scratch/team-page-ia/issues/05-numbers-tab.md.
 //
 // Fetches nothing else — no roster, 40-man, WAR, photos, prospects,
 // affiliates or transactions. Those belong to the other tabs.
@@ -47,6 +49,11 @@ export async function loadNumbers(id, asOf) {
     leaderPool,
     postseasonOddsData,
     comebackWinsData,
+    // Baseball Savant's season run values, MLB only — it runs no minor-league
+    // board, so an affiliate's card simply doesn't render. One static file,
+    // read through staticJson and shared with the player card and the league
+    // board, so a reader who has opened either already has it.
+    runValueData,
     // The situational-records ledger — one static file per club per season,
     // every level. The card tallies it against `standingsDate` itself, so it
     // reads no further ahead than the standings and the day-of-week card.
@@ -61,6 +68,7 @@ export async function loadNumbers(id, asOf) {
     loadCombinedPoolForTeams([{ id }], season, { withHand: true }),
     sportId === 1 ? fetchPostseasonOdds() : Promise.resolve(null),
     sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
+    sportId === 1 ? fetchRunValue() : Promise.resolve(null),
     fetchTeamRecords(id, season),
     // Cutoff-gated rows only — `won` stays null past standingsDate (see
     // fetchTeamSchedule), which is what keeps the day-of-week record from
@@ -117,6 +125,21 @@ export async function loadNumbers(id, asOf) {
 
   const dayOfWeek = schedule.some((g) => g.won != null) ? dayOfWeekRecord(schedule) : null
 
+  // The club's own run value ledger plus where it stands among the clubs — the
+  // ranking is derived here, in the reader, never shipped in the file (see
+  // api/around-the-game/runValue.js). Null when the club has nobody in the
+  // file at all, which is every MiLB affiliate and, in the first days of a
+  // season, possibly a real club too.
+  const clubRuns = clubRunValue(runValueData, id)
+  const clubs = clubRuns ? clubBoard(runValueData) : []
+  const runValue = clubRuns
+    ? {
+        club: clubRuns,
+        rank: clubs.find((r) => r.teamId === id)?.rank ?? null,
+        of: clubs.length,
+      }
+    : null
+
   // Record-by-jersey strip (MLB only) — one card per catalog jersey, tagged
   // with its logo treatment and the club's W-L in the games it wore it. The
   // worn-jersey join needs the per-game uniform assignment, one extra batched
@@ -158,6 +181,7 @@ export async function loadNumbers(id, asOf) {
     // cutoff travels with the data rather than being applied here.
     recordsCutoff: standingsDate,
     dayOfWeek,
+    runValue,
     jerseyCombos,
     homeRecord,
     awayRecord,

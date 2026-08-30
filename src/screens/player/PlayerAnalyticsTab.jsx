@@ -11,6 +11,7 @@ import { BattedBallMix } from '../../components/charts/BattedBallMix.jsx'
 import { SimilarPitchers } from '../../components/playercard/SimilarPitchers.jsx'
 import { SimilarHitters } from '../../components/playercard/SimilarHitters.jsx'
 import { FoulCard } from '../../components/playerstats/FoulCard.jsx'
+import { RunValueCard } from '../../components/playerstats/RunValueCard.jsx'
 import { SprayMapSection } from '../../components/playerstats/SprayMapSection.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
@@ -87,6 +88,17 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
           )}
 
           <StatcastPercentiles savant={block.savant} raw={block.savantRaw} median={block.savantMedian} group={block.group} />
+
+          {/* Directly under the percentile strip, and that is the argument for
+              it: the strip says how good his tools are against the league, and
+              this says what they were WORTH — the four things he can do to move
+              a run, on the one scale that lets a centre fielder's glove and a
+              starter's arm be added together (api/around-the-game/runValue.js).
+              Outside the blocks.map's per-group split on purpose: run value is
+              already split by what a man DID, so a two-way player's card is one
+              card carrying both halves, and rendering it once per block would
+              print the same four figures twice. */}
+          {block.group === blocks[0].group && <RunValueCard playerId={bio.id} />}
 
           {/* The rates behind the headline tiles (a pitcher's FIP/ERA−/
               K%/BB%; a hitter's wOBA/wRC+/discipline) — beside Statcast's

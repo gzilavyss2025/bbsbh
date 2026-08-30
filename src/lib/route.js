@@ -748,6 +748,12 @@ export function managerPath(id, name) {
 export function foulsPath() {
   return '/fouls'
 }
+// The league run value board. No arguments: the role filter and the club filter
+// are page state, not an address, the same call StandingsPage and the four
+// broadcast reports already made (see lib/reportPages.js's REPORT_ROUTES note).
+export function runValuePath() {
+  return '/run-value'
+}
 export function gamePhotosPath(gamePk) {
   return `/photos/${gamePk}`
 }

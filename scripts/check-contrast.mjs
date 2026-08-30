@@ -154,6 +154,14 @@ const PAIRINGS = [
   { fg: 'accent-link', bg: 'bg-canvas', min: TEXT, note: 'link text on app canvas' },
   { fg: 'accent-link', bg: 'bg-page', min: TEXT, note: 'link text on page' },
   { fg: 'accent-link', bg: 'surface-card', min: TEXT, note: 'link text on raised card' },
+  // The run value board's diverging pair, on each of the two grounds it lands
+  // on: the board rows sit on --bg-page, the two cards on --surface-card. The
+  // POSITIVE half is already covered three lines up (--accent-positive and
+  // --accent-link are both --field), so only the clay half is new — and it is
+  // the one worth pinning, since a red that reads fine on the manila canvas is
+  // the classic thing to lose when a paper token is retuned.
+  { fg: 'accent-negative', bg: 'bg-page', min: TEXT, note: 'run value, runs given back, on a board row' },
+  { fg: 'accent-negative', bg: 'surface-card', min: TEXT, note: 'run value, runs given back, on a card' },
   // Non-text UI: the focus ring must stay visible against the canvas.
   { fg: 'focus-ring', bg: 'bg-canvas', min: UI, note: 'focus ring on app canvas' },
   // A pinned pairing earns its place here for one of two failure classes this

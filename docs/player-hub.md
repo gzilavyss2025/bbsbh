@@ -55,11 +55,18 @@ one tab and "today" on the next.
   majors — a level-relative OPS/ERA standing (`prospectTrend.js`) alongside how
   far his current sample sits into a typical STAY at that level
   (`levelTenure.js`, `docs/level-tenure-benchmark.md`) — Statcast percentiles
-  and the advanced rates above them, the season's fouls, the pitch mix or
-  batted-ball mix, and the similarity neighbours.
+  and the advanced rates above them, his season's run value, the season's
+  fouls, the pitch mix or batted-ball mix, and the similarity neighbours.
 - **History** — how he got here. Awards, innings by position, the Firsts card,
   Path to the Majors and Team history (for a player who HAS debuted), and the
   transaction timeline.
+
+The Run value card is the one card on that shelf that sits INSIDE the
+`blocks.map` loop but renders only for the first block (`runValue.js`,
+`docs/run-value.md`). Its four figures are already split by what a man did —
+batting, defense, baserunning, pitching — so a two-way player's card is one
+card carrying both halves, and drawing it per block would print the same four
+numbers twice.
 
 The `blocks.map` shape is load-bearing on three of the four: a **two-way player
 has two stat blocks** (batting, then pitching), and every section inside that

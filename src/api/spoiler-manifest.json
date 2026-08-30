@@ -96,6 +96,10 @@
       "class": "spoiler-free",
       "why": "Static farm-system.json — minor-league affiliate season records and published prospect ranks, aggregates over completed games in another league (ADR-0034: a stat line is not a score). Computes the Farm Index; touches no MLB game. No SealBox."
     },
+    "around-the-game/runValue.js": {
+      "class": "spoiler-free",
+      "why": "Static run-value.json — a season aggregate of Baseball Savant run values (batting, fielding, baserunning, pitching), over completed games. Runs above average across a season carry no game's result, same footing as war.js and the other open season boards. No SealBox."
+    },
     "around-the-game/gate.js": {
       "class": "spoiler-free",
       "why": "Static gate.json — per-club home attendance and game DURATION, both season aggregates over Final games. A crowd count and a clock reading carry no result, same footing as the weather string and the umpire crew the app has always shown live. No SealBox."
