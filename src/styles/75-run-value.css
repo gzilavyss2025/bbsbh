@@ -1,0 +1,298 @@
+/* 75-run-value.css — the run value board and the two cards that share its
+   language (the player page's card, the club card on the team hub).
+
+   Imported by components/around-the-game/RunValueParts.jsx — the shared
+   primitives every run value surface draws — not by index.css, so a reader who
+   never opens one of those surfaces never pays for it. Same per-route split as
+   26a-percentile-strip.css and 58-logbook-shelf.css.
+
+   IT INHERITS THE REPORT BOARD RATHER THAN REPLACING IT. `.rpt` in
+   68-around-the-game.css already owns the table: the sticky first column, the
+   mono figures, the heavy head rule, the control chips. Everything here is the
+   part that is new — a face in the nameplate, a signed figure inked by which
+   way it leans, and the split bar.
+
+   THE INK IS THE APP'S, NOT THE SOURCE CHART'S. The published leaderboard this
+   reconstructs runs magenta for good and blue for bad. This uses the diverging
+   pair the scorebook has always used — outfield green for a run gained, infield
+   clay for one given back (--accent-positive / --accent-negative) — because a
+   second diverging palette in one app is a second thing a reader has to learn.
+   Both clear WCAG AA on --surface-card and --bg-page (check-contrast.mjs). */
+
+/* ---- the nameplate: rank, face, mark, name ------------------ */
+
+/* The face is the one thing this board's first cell has that ClubCell's does
+   not, and it is why the cell is wider here: at 132px the portrait ate the
+   name. Sized to --shot-2xs, the app's smallest row portrait (the box score's
+   stars and the wire's notes wear the same one). */
+.rpt th.team .rv__nameplate {
+  gap: 6px;
+}
+
+/* Wider than ClubCell's 132px, because this cell carries a face and a person's
+   name rather than a one-word club, and narrow enough that all five numeric
+   columns still land inside a 430px viewport beside it (which is what the
+   abbreviated column heads buy — see RunValuePage's shortHead). A name longer
+   than the cell wraps to two lines rather than truncating: a leader board that
+   cannot say who a player is has failed at its one job. */
+.rv__board th.team {
+  min-width: 152px;
+}
+
+.rv__nameplate .shot {
+  flex: none;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+  border-radius: var(--radius-xs);
+}
+
+.rv__face {
+  display: flex;
+}
+
+/* ---- the figures ------------------------------------------- */
+
+.rv__num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* The total is the row's headline and stays in the body ink at every value:
+   green or red here would make five inked columns on every row and the board
+   would shout. It is weight and size that mark it, the way a broadcast marks
+   the number it wants read first. */
+.rv__num--total {
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+.rv__num--up {
+  color: var(--accent-positive);
+  font-weight: var(--w-semibold);
+}
+
+.rv__num--down {
+  color: var(--accent-negative);
+  font-weight: var(--w-semibold);
+}
+
+/* A component a player has none of. Held back deliberately — a designated
+   hitter's zero in the fielding column is true and uninteresting, and printing
+   it at full strength puts a column of noughts in the reader's eye ahead of
+   the figures that carry the row. */
+.rv__num--flat {
+  color: var(--text-caption);
+}
+
+/* ---- the split bar ----------------------------------------- */
+
+.rvsplit {
+  margin-top: var(--space-3);
+}
+
+.rvsplit__track {
+  position: relative;
+  height: 18px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-page);
+  overflow: hidden;
+}
+
+/* `left` is set inline — the zero line moves with the surface's own balance of
+   gained and given-back runs (RunValueParts.jsx's RunValueSplit). */
+.rvsplit__zero {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--bw-hair);
+  background: var(--border-rule);
+  z-index: 1;
+}
+
+.rvsplit__seg {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+}
+
+.rvsplit__seg--up {
+  background: var(--accent-positive);
+}
+
+.rvsplit__seg--down {
+  background: var(--accent-negative);
+}
+
+/* The four components are told apart WITHIN a side by weight of ink, not by
+   four more colours: the pair above already says gained/given back, and a
+   second axis of colour on an 18px bar is a legend nobody reads. The legend
+   below names them in order, and the order is fixed (COMPONENTS), so the
+   segments are read positionally — which is how a stacked bar is read anyway. */
+.rvsplit__seg--fld,
+.rvsplit__seg--run {
+  opacity: 0.72;
+}
+
+.rvsplit__seg--run {
+  opacity: 0.52;
+}
+
+.rvsplit__legend {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+}
+
+.rvsplit__item dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.rvsplit__item dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- the player page's card -------------------------------- */
+
+.rvcard__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.rvcard__total {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+.rvcard__rank {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+  text-align: right;
+}
+
+.rvcard__note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+.rvcard__more {
+  margin-top: var(--space-2);
+}
+
+/* ---- the club card ----------------------------------------- */
+
+/* The club's own men under its four totals — a short list, not a board: the
+   whole roster is what /run-value's club filter is for, and the card's job is
+   to say who is carrying the season. */
+.rvclub__list {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+}
+
+.rvclub__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.rvclub__row:first-child {
+  border-top: 0;
+}
+
+.rvclub__seat {
+  flex: none;
+  min-width: 1.6em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.rvclub__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--fs-small);
+}
+
+.rvclub__pos {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.rvclub__value {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- the report page's legend ------------------------------ */
+
+/* What each of the four columns counts, under the board that prints them. A
+   definition list rather than a paragraph: a reader checking one column wants
+   to find that column, not read four sentences to reach it. */
+.rvlegend {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+@media (min-width: 640px) {
+  .rvlegend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.rvlegend__term {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+.rvlegend__def {
+  margin: 2px 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+/* ---- the four single-skill boards -------------------------- */
+
+/* Four short boards rather than one four-column table, because they answer four
+   independent questions and nothing about the man who leads in fielding relates
+   him to the man who leads in baserunning. Side by side once there is room; one
+   under the next on a phone, where a five-row board is short enough that four of
+   them still scan. */
+.rvleaders {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 720px) {
+  .rvleaders {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

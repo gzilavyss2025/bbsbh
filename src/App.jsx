@@ -234,6 +234,14 @@ const AbsChallengesPage = lazyNamed(
   () => import('./screens/around-the-game/AbsChallengesPage.jsx'),
   'AbsChallengesPage',
 )
+// Filed under "This season" beside League Leaders, for the same reason the
+// board above it is: it reports a result on the field. It lives in this
+// directory because it wears the same masthead and boards — see
+// src/lib/reportPages.js.
+const RunValuePage = lazyNamed(
+  () => import('./screens/around-the-game/RunValuePage.jsx'),
+  'RunValuePage',
+)
 const ManagerPage = lazyNamed(() => import('./screens/ManagerPage.jsx'), 'ManagerPage')
 const GameNotesDebugPage = lazyNamed(
   () => import('./screens/GameNotesDebugPage.jsx'),
@@ -437,6 +445,8 @@ export default function App() {
     content = <DoubleheadersPage />
   } else if (route.name === 'abs-challenges') {
     content = <AbsChallengesPage />
+  } else if (route.name === 'run-value') {
+    content = <RunValuePage />
   } else if (route.name === 'manager') {
     content = <ManagerPage id={route.id} />
   } else if (route.name === 'game-notes-debug') {

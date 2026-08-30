@@ -461,6 +461,36 @@ don't run these by hand.
   three-pillar composite) is NOT here: it lives in
   `src/api/around-the-game/farmSystem.js` where it is testable and visible, and the
   research behind every constant is `docs/farm-index.md`. Spoiler-free.
+- `gen-run-value.mjs` → `public/data/run-value.json` — every player's season RUN
+  VALUE, split four ways (batting, fielding, baserunning, pitching), in runs
+  above average. FOUR Baseball Savant CSV leaderboards merged on the MLBAM
+  player id: `swing-take` with `group=Batter` and again with `group=Pitcher`
+  (`runs_all` — the same pitch-by-pitch metric read from the two sides of the
+  plate, which is why a two-way player is the one row carrying both),
+  `fielding-run-value` (`total_runs`) and `baserunning-run-value`
+  (`runner_runs_tot`). **The four are additive because they share a scale** —
+  each is the run expectancy an event moved — which is the whole point of the
+  dataset and the one thing no other leader board in this repo can do.
+  CONTEXT NEUTRAL on purpose: Savant also publishes a leverage-weighted
+  swing/take board (`ddlLeverage`), and a leverage-weighted figure cannot be
+  compared across the four skills or across clubs. Three per-board traps, all
+  verified live 2026-08-30. The floor argument is spelled differently on each
+  board — `min` on swing/take, `minInnings` on fielding — and the baserunning
+  CSV export ignores a floor entirely and always returns its own qualified set,
+  so none is passed there. Savant's own defaults hide two thirds of the league
+  behind "qualified" (299 batters against 640 at `min=1`), which a club page
+  cannot use. And the `custom` board's `batting_run_value`/`pitching_run_value`
+  selections come back BLANK — the working source for both is
+  `swing_take_run_value`, or the swing/take board this reads instead, which is
+  the same numbers unrounded. The two swing/take fetches are FATAL on failure
+  (a leaderboard of pitchers with no pitching in it is worse than none) and the
+  other two fail soft, costing one column. Names, current club and position are
+  upgraded from statsapi `/people` in batches, never fatal — a Savant row
+  already carries a usable name and team id. **The file ships the four
+  components and nothing else**: the total, every rank, the role split and the
+  club roll-up are derived in `src/api/around-the-game/runValue.js`, the same
+  split `gen-gate.mjs` keeps with `gate.js`. `docs/run-value.md` is the
+  reconstruction and the check against a published board. Spoiler-free.
 - `gen-savant-percentiles.mjs` → `public/data/savant-percentiles.json` — season
   Statcast percentile ranks per player (`bat`/`pit`), keyed by personId, from
   Baseball Savant's CORS-open percentile-rankings CSV. Savant does the percentile

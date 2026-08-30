@@ -14,6 +14,7 @@ import { hiddenTeamTabs } from './data/shared.js'
 import { StandingsCard } from './modules/StandingsCard.jsx'
 import { TeamStats, todayDowLabel } from './modules/TeamStatsCard.jsx'
 import { ComebackCard } from './modules/ComebackCard.jsx'
+import { TeamRunValueCard } from './modules/TeamRunValueCard.jsx'
 import { RecordsCard } from './modules/records/RecordsCard.jsx'
 
 // Standings, team batting/pitching ranks and team leaders (full), plus jersey
@@ -73,6 +74,14 @@ export function NumbersTab({ id, asOf, sportId }) {
 
           {n.batting && <TeamStats title="Team batting" stats={n.batting} />}
           {n.pitching && <TeamStats title="Team pitching" stats={n.pitching} />}
+
+          {/* Between the two rank tables and the ledger on purpose: those
+              tables rank the club on runs scored and runs allowed, this says
+              where the runs CAME from — bats, gloves, legs, arms, on one
+              scale — and it names the men carrying it, which reads straight
+              into the leaders below. MLB only (Savant runs no minor-league
+              board), so an affiliate's page is unchanged. */}
+          <TeamRunValueCard data={n.runValue} clubName={teamClubName(team)} />
 
           {/* The full ledger — six categories a side, every one on screen. The
               "See all ›" door goes on to /team/{id}/leaders, which is where the

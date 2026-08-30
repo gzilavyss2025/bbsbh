@@ -545,6 +545,28 @@ for each generator; the reader modules:
   clubs instead of the two in one game, and ranks on the SHARE of each staff
   that is likely down rather than the count. Starters are excluded outright.
   Inherits `workload.js`'s spoiler class unchanged.
+- `around-the-game/runValue.js` — `/run-value`, the season run value board, plus
+  the player page's Run value card and the team hub's club card, from
+  `public/data/run-value.json` (`gen-run-value.mjs`, nightly). MLB only —
+  Baseball Savant runs no minor-league board, so an affiliate's card does not
+  render. Season aggregates over completed games, so spoiler-free with no
+  `SealBox` (same footing as `war.js` and `savantPercentiles.js`). The FILE
+  ships four numbers per player; `total`, `board`, `componentBoard`,
+  `playerRunValue`, `clubRunValue` and `clubBoard` are all derived here, the
+  same split `gate.js` keeps with its generator. Four things the module knows
+  that a reader of the JSON alone would not. **The total is summed from the
+  stored tenths and only then rounded**, so it can differ by one from the whole
+  runs the same row prints — the published board this reconstructs has the same
+  property (its leader's `+36 +24 +5 +0` totals `+66`, not `65`), and
+  `test/run-value.test.js` pins it. **The role split is drawn on the numbers,
+  not on a position code**: a pitcher is a player whose mound work is the larger
+  half of what he did, so a reliever who took an at-bat is still a pitcher, a
+  position player who mopped up an inning is not, and a two-way season lands
+  wherever its own figures put it. **Ranks read the tenths, not the printed
+  runs**, so two rows both showing `+36` are 7th and 8th rather than both 7th.
+  And the `MIN_ABS_RUNS` floor applies to the main board only — a bat a run from
+  average overall can still lead the league with the glove, which is what the
+  four single-skill boards are for.
 - `around-the-game/absChallenges.js` — `/abs-challenges`, the season board for
   the ABS Challenge System, from `public/data/abs-challenges.json`
   (`gen-abs-challenges.mjs`). MLB and Triple-A are separate levels on the page,

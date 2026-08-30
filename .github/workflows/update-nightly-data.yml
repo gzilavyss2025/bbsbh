@@ -236,6 +236,10 @@ jobs:
         id: savant-matchup
         continue-on-error: true
         run: node scripts/gen-savant-matchup.mjs
+      - name: Run value
+        id: run-value
+        continue-on-error: true
+        run: node scripts/gen-run-value.mjs
       - name: Milestone watch
         id: milestones
         continue-on-error: true
@@ -497,6 +501,7 @@ jobs:
           steps.vs-team-splits.outcome == 'failure' ||
           steps.savant-percentiles.outcome == 'failure' ||
           steps.savant-matchup.outcome == 'failure' ||
+          steps.run-value.outcome == 'failure' ||
           steps.milestones.outcome == 'failure' ||
           steps.rookies.outcome == 'failure' ||
           steps.season-score.outcome == 'failure' ||

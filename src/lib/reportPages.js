@@ -50,6 +50,12 @@ export const PAGE_GROUPS = [
       // question, narrowed to the six-team postseason field.
       { label: 'Postseason Race', path: '/postseason-race' },
       { label: 'League Leaders', path: '/leaders' },
+      // Directly under League Leaders because it is the same gesture asked a
+      // different way: that board ranks each skill in its own units, this one
+      // puts all four of them — bat, glove, legs, arm — on one scale of runs
+      // and adds them up. A reader who has just seen who leads in home runs is
+      // one row away from who has been worth the most, whatever he does.
+      { label: 'Run Value Leaders', path: '/run-value' },
       // Landed on main while this regrouping was in flight (#742): one
       // situational record, every club at one level, ranked. It belongs next
       // to League Leaders because it is the same gesture — a season-to-date
@@ -266,6 +272,7 @@ export const FOOTER_TRAIL = [
 // links to it whichever group that row sits in.)
 export const REPORT_ROUTES = {
   salaries: 'salaries',
+  'run-value': 'run-value',
   'abs-challenges': 'abs-challenges',
   attendance: 'attendance',
   'pace-of-play': 'pace',

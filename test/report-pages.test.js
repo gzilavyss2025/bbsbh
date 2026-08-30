@@ -42,6 +42,9 @@ const PATHS_BEFORE_GROUPING = [
   '/umpires',
   // The ABS Challenge System board, filed beside Umpire Rankings.
   '/abs-challenges',
+  // The season run value board, filed under League Leaders — the same
+  // season-to-date question read on one scale of runs.
+  '/run-value',
   '/awards',
   '/postseason-history',
   '/postseason-leaders',
