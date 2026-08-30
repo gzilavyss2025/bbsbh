@@ -204,6 +204,16 @@ test('the captured Triple-A game carries three real MJ challenges', () => {
   assert.equal(full.away.teamId, 422) // Buffalo
   assert.equal(full.home.teamId, 534) // Rochester
   // Our own derivation agrees with the tally the feed keeps for itself.
+  //
+  // THIS IS A FACT ABOUT THIS CAPTURE, NOT AN INVARIANT — do not read it as
+  // "the derivation always matches the bank", and do not reuse the assertion
+  // on a fresh gamePk without checking. challengeForPlay keeps at most ONE
+  // challenge per play, and a plate appearance can carry two distinct ones
+  // (both clubs, or one club twice), so the derived tally runs one light on
+  // roughly a fifth of games at every level — 815489 and 823011 are worked
+  // examples. This game happens to carry no such at-bat, which is what makes
+  // it a clean fixture; if a refresh of it ever fails here, suspect that bug
+  // rather than this assertion.
   const bank = AAA.gameData.absChallenges
   for (const side of ['away', 'home']) {
     const o = full[side].outcomes

@@ -14,10 +14,19 @@
 // LEVELS: MLB (sportId 1) and TRIPLE-A (sportId 11). Triple-A has run the
 // challenge system for several seasons and its feeds carry the same real `MJ`
 // reviews — verified against gamePks 815863, 816463 and 816544, three and four
-// challenges apiece. (The LIVE box-score row is still MLB-only, because
-// challenges.js's gameHasAbs gate reads sport.id === 1. That gate is a live-UI
-// question with its own spoiler footing and is deliberately untouched here;
-// this generator decides its own levels.) AA and below run no ABS at all.
+// challenges apiece. Double-A (12) and High-A (13) run no ABS at all.
+//
+// This generator decides its own levels, and deliberately sweeps only those
+// two. Single-A (14) runs the system in the FLORIDA STATE LEAGUE ALONE — real
+// challenges, same `MJ` shape (issue #957 measured 116 of them over eight
+// sampled dates) — while the Carolina and California Leagues do not. Adding
+// that league here means a season backfill and a report page that splits one
+// sportId into two populations, so it is left for its own change.
+//
+// The LIVE box-score row asks a different question and answers it its own way:
+// challenges.js's gameHasAbs reads the feed's `gameData.absChallenges` key
+// rather than a level, so it already covers every league that runs the system,
+// this one included.
 //
 // APPEND-ONLY, same shape as gen-comeback-wins.mjs / gen-fouls.mjs: each run
 // sweeps a small trailing window of newly-Final games and ingests only the

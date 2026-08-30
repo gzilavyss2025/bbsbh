@@ -38,8 +38,11 @@ export async function fetchRunExpectancy() {
 }
 
 // MLB + AAA only — the two levels with full Hawk-Eye pitch tracking (same
-// levels gen-umpire-accuracy.mjs sweeps); sport.id lives on gameData.teams.away,
-// same field gameHasAbs (challenges.js) reads.
+// levels gen-umpire-accuracy.mjs sweeps); sport.id lives on gameData.teams.away.
+// A LEVEL check is right here and wrong for challenges.js next door: pitch
+// tracking is a property of the ballparks a level equips, while the challenge
+// system is a rule a league opts into, so gameHasAbs reads the feed's own
+// `gameData.absChallenges` key instead of a sportId (issue #957).
 export function hasPitchTracking(feed) {
   const id = feed?.gameData?.teams?.away?.sport?.id
   return id === 1 || id === 11

@@ -25,6 +25,7 @@
 // season-wide sample), and refills in extra innings the same way MLB does
 // (Triple-A clubs reach 3 failures only in games past the 9th). Single-A's
 // Florida State League opens at 2 a side as well. See .scratch/abs-aaa-gate/.
+export const START_CHALLENGES = 2
 
 // THE SYSTEM IS NOT A LEVEL, so this does not read one. In 2026 the ABS
 // challenge system runs at MLB (sportId 1), at Triple-A (11) and, inside
