@@ -210,7 +210,19 @@ function extractDynamicNamedImports(text) {
 function extractExports(text) {
   const declLine = new Map()
   let hasDefault = false
-  const stripped = text.replace(/\/\*[\s\S]*?\*\//g, (s) => s.replace(/[^\n]/g, ' '))
+  // Line comments go FIRST. Blanking block comments first is wrong: a `/*`
+  // can sit inside a LINE comment — `// profiles/*.jsx's shelfMarks`
+  // (LogoShelf.jsx), `// (scripts/data/contracts/*.csv)` (positions.js) — and
+  // a block-first pass reads that as an opener and swallows everything down to
+  // the next real `*/`. In those two files that ate the actual `export` 30 and
+  // 70 lines below, so this guard could not see LogoShelf or POSITIONS at all
+  // and silently skipped them. Stripping `//` to end-of-line first cannot make
+  // the same mistake: a `/*` inside a line comment is gone before the block
+  // pass runs. (The `[^:'\"`]` guard keeps `https://` and the like intact.)
+  const stripped = text
+    .replace(/^\s*\/\/.*$/gm, '')
+    .replace(/([^:'\"`])\/\/.*$/gm, '$1')
+    .replace(/\/\*[\s\S]*?\*\//g, (s) => s.replace(/[^\n]/g, ' '))
   const lines = stripped.split('\n')
 
   const declPatterns = [
