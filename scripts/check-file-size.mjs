@@ -135,7 +135,7 @@ const BUDGETS = {
   // for rookie-crossing.mjs, and src/lib/research/diary for the diary's first
   // `corrected` entry. Banded, not fitted: this file's own budgets grow a
   // comment block at a time, so a little headroom is the point.
-  'scripts/check-dir-size.mjs': 900, // 807 -> 854: the src/styles bump for the contract workbench's two partials, and its paragraph of why (ADR-0067). This file grows one paragraph per real budget move, which is the point of it.
+  'scripts/check-dir-size.mjs': 950, // 807 -> 854: the src/styles bump for the contract workbench's two partials, and its paragraph of why (ADR-0067). This file grows one paragraph per real budget move, which is the point of it. 900 -> 950 at 905, for the scripts/ bump that check-missing-imports.mjs needed: same shape, one more paragraph, and the band keeps its headroom rather than being re-fitted to the line count of the day.
   'src/api/whatsBrewing.js': 1600, // 1581
   // 1500 -> 1600 for the veloVariety/centuryClub/veloPeak join (docs/callouts.md):
   // +9 lines to attach gen-pitch-arsenal.mjs's century-pitch sweep
