@@ -621,6 +621,18 @@ for each generator; the reader modules:
   Every shipped row omits its falsy keys, so each predicate coalesces: absent
   `h` is an away game, absent `n` a day game, absent `oh` a starting hand the
   generator could not resolve (counted in neither the RHS nor the LHS row).
+  The two starter-out totals are the exception and are written even at zero,
+  because a first pitcher who recorded no out is a real answer while an absent
+  key has to keep meaning "no pitching line at all".
+  The **opener rows do not read a length at all.** `sk` and `ok` carry the
+  generator's own verdict on each side's first pitcher — 1 an opener, 2 a
+  starter who exited early, absent for an ordinary outing or a role it could
+  not resolve — inferred from that pitcher's share of starts in his season at
+  that level, because no statsapi field separates a planned opener from a short
+  start (`docs/scripts/generators.md` has the measurement). Four rows read
+  those two digits, so the club and opponent forms can never disagree about a
+  game, and a game with no verdict enters none of them — the general
+  `starter-under-6` row still holds it.
   `longestStreaks` / `sweepCounts` / `daysAtPlace` are the season COUNTS, exported
   separately because they are single numbers rather than records; a sweep needs
   every game of its series inside the filter, so a set straddling the break

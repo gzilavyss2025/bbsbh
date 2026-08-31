@@ -1,6 +1,8 @@
-// Pure derivations behind scripts/gen-team-records.mjs — the per-game FACTS a
-// club's situational records are summed from, and the export-time flags those
-// facts collapse into.
+// The derivations behind scripts/gen-team-records.mjs — the per-game FACTS a
+// club's situational records are summed from, the export-time flags those
+// facts collapse into, and the small role-fact store the opener split reads.
+// Nothing here reaches the network: the one function that needs a feed takes
+// the fetcher as an argument, which is what makes its failure path testable.
 //
 // WHY THIS SPLIT EXISTS. The generator stores raw facts per (game, club) and
 // derives every flag at EXPORT time, never at ingest. A Final game's linescore
@@ -223,6 +225,157 @@ export function starterLine(side) {
     outs: ipToOuts(stat.inningsPitched),
     earnedRuns: Number(stat.earnedRuns) || 0,
   }
+}
+
+// ---------------------------------------------------------------------------
+// The first pitcher's role
+// ---------------------------------------------------------------------------
+
+// A planned OPENER and a starter yanked after five outs are the same shape in
+// the feed. statsapi carries no role, note or flag anywhere that separates
+// them, at any level, so the two records that want to name one of them have to
+// infer it.
+//
+// LENGTH ALONE WILL NOT DO IT, which is the finding that put this here. Over
+// the 2026 MLB season, of the first-pitcher appearances of five outs or fewer
+// about a quarter belonged to pitchers who start for a living — an injury, an
+// ejection, a first inning that got away. The ceiling is still right where it
+// was: the very next band up, six to eight outs, is majority real starter, so
+// reaching higher would cost more than it buys. It is the FLOOR that misleads,
+// and the shortest outings of all split roughly evenly.
+const SHORT_START_OUTS = 5
+
+// So the pitcher's own season decides it: what share of his appearances AT
+// THIS LEVEL were starts. Half is the line, and it is a judgement call rather
+// than a standard — named here so that moving it is one edit and an
+// `--export-only` run, never a re-fetch.
+const ROTATION_START_SHARE = 0.5
+
+// 'rotation' | 'relief' | null. Null is a real answer, not a failure: a level
+// whose season stats carry no row for the pitcher leaves the question open,
+// and the caller must not guess.
+export function starterProfile(facts) {
+  const played = Number(facts?.gamesPlayed)
+  const started = Number(facts?.gamesStarted)
+  if (!Number.isFinite(played) || !Number.isFinite(started) || played <= 0) return null
+  return started / played >= ROTATION_START_SHARE ? 'rotation' : 'relief'
+}
+
+// What the game's first pitcher was doing, as the one small number the shipped
+// row carries: 1 an opener, 2 a starter who exited early, 0 for everything
+// else — an ordinary outing, a role the join could not answer, or a side with
+// no pitching line at all. 0 is omitted from the shipped row like every other
+// falsy value, so an unclassified game enters NEITHER specialized record and
+// the general "Starter goes under 6" row still holds it.
+//
+// All four records read this single number, so the club and opponent forms can
+// never disagree, and no reader ever re-applies the five-out test itself.
+const FIRST_PITCHER_OPENER = 1
+const FIRST_PITCHER_EARLY_EXIT = 2
+export function firstPitcherKind(outs, facts) {
+  if (outs == null || outs > SHORT_START_OUTS) return 0
+  const profile = starterProfile(facts)
+  if (!profile) return 0
+  return profile === 'relief' ? FIRST_PITCHER_OPENER : FIRST_PITCHER_EARLY_EXIT
+}
+
+// One season's role facts are keyed by LEVEL and pitcher together: the same
+// arm can start at Triple-A and relieve in the majors, and a game has to be
+// read against the role its own level saw.
+export const roleKey = (sportId, personId) => `${sportId}:${personId}`
+
+// The (level, pitcher) pairs a season's ledger can ever ask about — the arms
+// that actually threw a first pitch, either side. `rows` is the stored ledger,
+// `{ sport_id, payload_json }` per (game, club).
+export function firstPitchersOnFile(rows) {
+  const wanted = new Set()
+  for (const r of rows ?? []) {
+    const p = JSON.parse(r.payload_json)
+    for (const id of [p.starterId, p.oppStarterId]) {
+      if (id != null) wanted.add(roleKey(r.sport_id, id))
+    }
+  }
+  return wanted
+}
+
+// The stored role table, as the map both the refresh and the export read.
+export function storedRoleFacts(rows) {
+  return new Map(
+    (rows ?? []).map((r) => [
+      roleKey(r.sport_id, r.person_id),
+      {
+        sportId: r.sport_id,
+        personId: r.person_id,
+        gamesPlayed: r.games_played,
+        gamesStarted: r.games_started,
+      },
+    ]),
+  )
+}
+
+// The role rows to hold after a refresh, keyed the same way, within one
+// season. `snapshots` is one entry per swept level, `{ sportId, roles }`, with
+// `roles` NULL when that level's bulk call failed.
+//
+// A FAILED LEVEL CONTRIBUTES NOTHING and its stored rows survive untouched.
+// That is the whole reason these facts are persisted rather than fetched at
+// export time: the export re-writes every club file on every run, so one bad
+// response would otherwise strip two records from 150 shards at once and
+// nothing about the output would look wrong.
+//
+// `wanted` narrows what is KEPT to the arms that actually threw a first pitch
+// on file. Fetching is bulk and costs the same either way; storing every
+// pitcher at six levels would nearly treble the committed dump with rows no
+// record can read.
+export function mergeRoleFacts(stored, snapshots, wanted = null) {
+  const out = new Map(stored)
+  for (const { sportId, roles } of snapshots ?? []) {
+    if (!roles) continue
+    for (const [id, facts] of Object.entries(roles)) {
+      const personId = Number(id)
+      const key = roleKey(sportId, personId)
+      if (wanted && !wanted.has(key)) continue
+      out.set(key, {
+        sportId,
+        personId,
+        gamesPlayed: Number(facts?.gamesPlayed) || 0,
+        gamesStarted: Number(facts?.gamesStarted) || 0,
+      })
+    }
+  }
+  return out
+}
+
+// Re-read one season's role facts into the ledger's own SQLite group, so the
+// export joins them with no network at all — which is what keeps
+// `--export-only` a genuinely offline mode. Returns the line to log.
+//
+// `fetchRoles(sportId, season)` is injected rather than imported, which is
+// what makes the failure path testable: a level whose fetch returns null keeps
+// every row it already had, and the re-exported shards keep their flags. The
+// generator calls this AFTER its sweep, since tonight's games can introduce a
+// first pitcher nobody had seen and the wanted set is read off the ledger as
+// it then stands.
+export async function refreshRoleFacts(db, season, sportIds, fetchRoles) {
+  const wanted = firstPitchersOnFile(
+    db.prepare('SELECT sport_id, payload_json FROM team_record_games WHERE season = ?').all(season),
+  )
+  const stored = storedRoleFacts(
+    db.prepare('SELECT * FROM team_record_pitcher_roles WHERE season = ?').all(season),
+  )
+  const snapshots = []
+  for (const sportId of sportIds) snapshots.push({ sportId, roles: await fetchRoles(sportId, season) })
+  const failed = snapshots.filter((s) => !s.roles).map((s) => s.sportId)
+  const merged = mergeRoleFacts(stored, snapshots, wanted)
+  const put = db.prepare(
+    `INSERT OR REPLACE INTO team_record_pitcher_roles
+       (person_id, season, sport_id, games_played, games_started) VALUES (?, ?, ?, ?, ?)`,
+  )
+  for (const f of merged.values()) put.run(f.personId, season, f.sportId, f.gamesPlayed, f.gamesStarted)
+  return (
+    `${merged.size} pitcher role fact(s) on file for ${season}` +
+    (failed.length ? `; kept the last snapshot for sportId ${failed.join(', ')}` : '')
+  )
 }
 
 // ---------------------------------------------------------------------------

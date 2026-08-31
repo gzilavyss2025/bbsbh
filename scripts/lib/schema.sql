@@ -526,6 +526,38 @@ CREATE TABLE IF NOT EXISTS team_record_ingested_games (
   season  INTEGER NOT NULL
 );
 
+-- Season ROLE FACTS for the pitchers who threw a game's first pitch — the join
+-- that separates a planned OPENER from a starter who left early. Written by
+-- gen-team-records.mjs off one bulk season-pitching call per level per run.
+--
+-- WHY A TABLE AND NOT A COLUMN. statsapi publishes no starter/reliever field
+-- anywhere, so the split is INFERRED from the pitcher's own season: what share
+-- of his appearances at this level were starts. That share is a judgement call
+-- (scripts/lib/team-records.mjs holds the line and the argument for it), which
+-- puts it on the same footing as every other definition here — facts are
+-- stored, the verdict is derived at export time, and moving the line costs
+-- `--export-only` rather than a refetch.
+--
+-- Keyed by LEVEL as well as by pitcher and season: one arm can start at
+-- Triple-A and relieve in the majors in the same year, and a game has to be
+-- read against the role its own level saw.
+--
+-- Only pitchers who actually threw a first pitch on file are kept — roughly
+-- 2,850 rows a season across six levels, against the ~7,400 pitchers who threw
+-- at all. Every other row would be a fact no record can ever read.
+--
+-- NEVER DELETED, only replaced. A level whose refresh fails writes nothing, so
+-- the last good snapshot stands and the re-exported shards keep their flags
+-- instead of quietly emptying two records at every club.
+CREATE TABLE IF NOT EXISTS team_record_pitcher_roles (
+  person_id     INTEGER NOT NULL,
+  season        INTEGER NOT NULL,
+  sport_id      INTEGER NOT NULL,
+  games_played  INTEGER NOT NULL,
+  games_started INTEGER NOT NULL,
+  PRIMARY KEY (person_id, season, sport_id)
+);
+
 CREATE VIEW IF NOT EXISTS season_grade AS
 SELECT
   q.season, q.team_id, q.date,

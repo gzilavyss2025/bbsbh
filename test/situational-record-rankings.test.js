@@ -48,6 +48,26 @@ test('a split ranks every club that has it, best win percentage first', () => {
   assert.equal(result.ranked[0].v, '2-0')
 })
 
+test('a group keeps the card’s print order even when only a late club has a row', () => {
+  // The Alphas never used an opener, so `used-opener` is first seen on the
+  // Betas — after every row the Alphas did have. It still has to print where
+  // RECORD_GROUPS puts it, above the vs-RHS/LHS pair.
+  const index = buildRankingIndex([
+    entry(1, 'Alphas', [row({ si: 20, oi: 20, oh: 'R' })]),
+    entry(2, 'Betas', [row({ si: 4, oi: 20, sk: 1, oh: 'R' })]),
+  ])
+  const ids = index.groups.find((g) => g.title === 'Starting pitching').metrics.map((m) => m.id)
+  // First-seen order would have been starter-6-plus, opp-starter-6-plus,
+  // vs-rhs, starter-under-6, used-opener.
+  assert.deepEqual(ids, [
+    'starter-6-plus',
+    'starter-under-6',
+    'opp-starter-6-plus',
+    'used-opener',
+    'vs-rhs',
+  ])
+})
+
 test('the menu carries the card’s own groups, and by-league is MLB only', () => {
   const mlb = buildRankingIndex([entry(1, 'Alphas', [row({})])])
   const titles = mlb.groups.map((g) => g.title)

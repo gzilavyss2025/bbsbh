@@ -34,22 +34,11 @@
 // reason — a per-game column would only fill in as each pitcher next appeared.
 //
 // VERIFIED AGAINST STATSAPI'S OWN SPLITS. statsapi publishes eight of these
-// records per club at every level (home, away, vs. LHS, vs. RHS, day, night,
-// one-run, extra-inning — one /standings call per league), which makes a free
-// oracle for a ledger this size. Over all 30 MLB clubs through 2026-08-16, the
-// overall record and the home / away / one-run / extra-inning splits matched
-// EXACTLY, and vs-LHS/vs-RHS matched for 29 of 30. Two disagreements are known
-// and deliberate:
-//   - Day/night differs by one game on 14 clubs, in BOTH directions. Nine of
-//     those are a doubleheader whose second game statsapi's standings files as
-//     a day game while its own schedule feed calls it night (Tampa Bay at
-//     Boston, 2026-07-17: a split doubleheader whose nightcap started 7:10pm
-//     local and carries `dayNight: night`). This generator takes the game's own
-//     `dayNight`, because that is what the game says about itself.
-//   - One Padres game's starting hand differs, because the starter here is
-//     always the boxscore's `pitchers[0]` — whoever actually threw the first
-//     pitch — rather than whoever the league later credits with the start.
-// Re-run the check after changing anything in this file's linescore handling.
+// records per club at every level — one /standings call per league — which
+// makes a free oracle for a ledger this size. What matched, and the two known
+// and deliberate disagreements (a doubleheader nightcap's day/night, and one
+// starting hand), are recorded in docs/scripts/generators.md. RE-RUN THAT
+// CHECK after changing anything in this file's linescore handling.
 //
 // Run by hand:
 //   node scripts/gen-team-records.mjs                 # trailing 3 days
@@ -60,6 +49,8 @@
 //                                                     # rows already on disk,
 //                                                     # no sweep — the mode for
 //                                                     # a changed definition
+//   node scripts/gen-team-records.mjs --export-only --refresh-roles
+//                                                     # ...re-reading the roles
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { readFile } from 'node:fs/promises'
@@ -81,6 +72,10 @@ import {
   starterLine,
   isQualityStart,
   battedAroundHalves,
+  firstPitcherKind,
+  refreshRoleFacts,
+  roleKey,
+  storedRoleFacts,
   tagSeries,
   isGetawayDay,
   dailyDivisionRanks,
@@ -106,6 +101,9 @@ const CHECKPOINT_EVERY = 300
 const BOX_FIELDS =
   'teams,away,home,teamStats,batting,homeRuns,pitchers,players,stats,pitching,inningsPitched,earnedRuns'
 const PBP_FIELDS = 'allPlays,about,inning,halfInning,result,type'
+// The two season numbers the opener inference needs and nothing else; the
+// unpruned bulk pitching line is ~40 fields per pitcher at the level.
+const ROLE_FIELDS = 'stats,splits,player,id,stat,gamesPlayed,gamesStarted'
 
 const args = parseArgs(process.argv.slice(2))
 const sports = args.sports ? String(args.sports).split(',').map(Number) : SPORT_IDS
@@ -143,6 +141,33 @@ async function pitchHandsFor(sportId, season) {
   } catch (err) {
     console.error(`pitch hands sportId ${sportId}: ${err.message}`)
     return {}
+  }
+}
+
+// Every pitcher's season line at one level, `{ [personId]: { gamesPlayed,
+// gamesStarted } }` — the facts the opener / early-exit split is inferred from
+// (scripts/lib/team-records.mjs holds the inference and the argument for it).
+// One bulk call per level per run, the same export-time-join shape the
+// handedness map above uses. Returns NULL, not `{}`, when the call fails: an
+// empty map would read as "no pitcher here has a role" and blank the level,
+// while null tells the merge to leave the stored snapshot standing.
+async function pitcherRolesFor(sportId, season) {
+  try {
+    const data = await getJson(
+      `/api/v1/stats?stats=season&group=pitching&season=${season}&sportId=${sportId}` +
+        `&playerPool=all&limit=8000&fields=${ROLE_FIELDS}`,
+    )
+    const map = {}
+    for (const split of data.stats?.[0]?.splits ?? []) {
+      const id = split?.player?.id
+      if (id == null) continue
+      const stat = split.stat ?? {}
+      map[id] = { gamesPlayed: Number(stat.gamesPlayed) || 0, gamesStarted: Number(stat.gamesStarted) || 0 }
+    }
+    return map
+  } catch (err) {
+    console.error(`pitcher roles sportId ${sportId}: ${err.message}`)
+    return null
   }
 }
 
@@ -257,8 +282,9 @@ async function rowsForGame({ game, sportId, date }, hands) {
 // A shipped row. Keys are short because there are ~160 of these per club per
 // season and the whole set is committed; a falsy value is OMITTED rather than
 // written as 0/false/null, which is most of the saving (a typical row carries
-// a dozen keys, not thirty). The reader treats every absent key as falsy.
-function shipRow(r, getaway) {
+// a dozen keys, not thirty). The reader treats an absent key as falsy — so the
+// few whose 0 is a real answer, marked below, are written the long way.
+function shipRow(r, getaway, roles) {
   const p = r.payload
   const innings = decodeInnings(p.innings)
   const isHome = p.isHome === true
@@ -309,10 +335,20 @@ function shipRow(r, getaway) {
   put('la', decided ? 1 : 0)
   put('wo', walkOff ? (won ? 1 : -1) : 0)
   put('ba', p.battedAround)
-  put('si', p.starterOuts)
+  // Both out totals ride around the omit-if-falsy path, as the lead states
+  // above do: no out recorded is a real answer, the shortest outing there is,
+  // while an ABSENT key keeps meaning "no pitching line at all" — the case
+  // every starter-length row excludes rather than counts.
+  if (p.starterOuts != null) row.si = p.starterOuts
   put('qs', isQualityStart(p.starterOuts, p.starterEr) ? 1 : 0)
-  put('oi', p.oppStarterOuts)
+  if (p.oppStarterOuts != null) row.oi = p.oppStarterOuts
   put('oh', p.oppStarterHand)
+  // What each side's FIRST PITCHER was doing when the outing was short: an
+  // opener, or a starter who exited early. Pitcher identity and season totals
+  // stay in the authoring layer; the row ships the verdict alone, one digit.
+  const roleOf = (id) => (id == null ? null : roles.get(roleKey(r.sport_id, id)))
+  put('sk', firstPitcherKind(p.starterOuts, roleOf(p.starterId)))
+  put('ok', firstPitcherKind(p.oppStarterOuts, roleOf(p.oppStarterId)))
   put('n', p.dayNight === 'night' ? 1 : 0)
   put('dh', p.doubleHeader !== 'N' ? 1 : 0)
   put('sg', r.seriesGame)
@@ -382,6 +418,12 @@ async function exportSeason(db, season, teamMeta, allStarDate) {
   const raw = db.prepare('SELECT * FROM team_record_games WHERE season = ?').all(season)
   if (raw.length === 0) return { written: 0, swept: 0 }
 
+  // The role facts, off the ledger's own group rather than the network. A
+  // season with no snapshot classifies nothing rather than guess.
+  const roles = storedRoleFacts(
+    db.prepare('SELECT * FROM team_record_pitcher_roles WHERE season = ?').all(season),
+  )
+
   // Unpack the payload once, and lift the two fields the ledger passes below
   // actually navigate by — the series tagger compares venues, and a
   // doubleheader needs its game number to order within a date. Sorting happens
@@ -416,7 +458,7 @@ async function exportSeason(db, season, teamMeta, allStarDate) {
   const entries = []
   for (const [teamId, teamRows] of byTeam) {
     const tagged = tagSeries(teamRows)
-    const games = tagged.map((t, i) => shipRow(t, isGetawayDay(t, tagged[i + 1])))
+    const games = tagged.map((t, i) => shipRow(t, isGetawayDay(t, tagged[i + 1]), roles))
     entries.push([
       String(teamId),
       {
@@ -462,9 +504,12 @@ async function exportSeason(db, season, teamMeta, allStarDate) {
 async function main() {
   const db = await openDb()
   const teamMeta = await loadTeamMeta()
+  const { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
+  // The season the run is about, for both bulk joins: a backfill window names
+  // its own year, the nightly trailing window names this one.
+  const roleSeason = Number(endDate.slice(0, 4))
 
   if (!args['export-only']) {
-    const { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
     const dates = datesBetween(startDate, endDate)
     const existing = new Set(
       db.prepare('SELECT game_pk FROM team_record_ingested_games').all().map((r) => String(r.game_pk)),
@@ -472,9 +517,8 @@ async function main() {
     const candidates = await candidatesFor(dates, existing)
     console.log(`${candidates.length} game(s) to ingest (${startDate}..${endDate})`)
 
-    const season = Number(endDate.slice(0, 4))
     const hands = {}
-    for (const sportId of sports) Object.assign(hands, await pitchHandsFor(sportId, season))
+    for (const sportId of sports) Object.assign(hands, await pitchHandsFor(sportId, roleSeason))
 
     const insertRow = db.prepare(
       `INSERT OR REPLACE INTO team_record_games (
@@ -513,6 +557,15 @@ async function main() {
     }
     console.log(`${ingested} game(s) ingested`)
     if (ingested > 0) await dumpGroup(db, 'team-records')
+  }
+
+  // The role refresh rides with a sweep, never with `--export-only` — that
+  // mode re-derives from what is on disk, and a rebuild that quietly reached
+  // for the network would not be that. Its own flag runs it alone: how a
+  // season's snapshot is first filled, and how a failed level is repaired.
+  if (!args['export-only'] || args['refresh-roles']) {
+    console.log(await refreshRoleFacts(db, roleSeason, sports, pitcherRolesFor))
+    await dumpGroup(db, 'team-records')
   }
 
   // Always re-export: an --export-only run is the whole point of the mode, and

@@ -41,7 +41,8 @@ export async function fetchTeamRecords(teamId, season) {
 
 // Every shipped row omits a falsy value rather than writing 0/false/null, so
 // each accessor coalesces. `h` absent means an away game, `n` absent a day
-// game, `oh` absent an unresolved starting hand.
+// game, `oh` absent an unresolved starting hand, `sk`/`ok` a first pitcher who
+// was neither an opener nor an early exit.
 const margin = (g) => Math.abs(g.rs - g.ra)
 const starterOuts = (g) => g.si ?? null
 const oppStarterOuts = (g) => g.oi ?? null
@@ -153,12 +154,22 @@ export const RECORD_GROUPS = [
       { id: 'starter-under-6', k: 'Starter goes under 6', p: (g) => starterOuts(g) != null && g.si < 18 },
       { id: 'opp-starter-6-plus', k: 'Opposing starter 6+', p: (g) => oppStarterOuts(g) != null && g.oi >= 18 },
       { id: 'opp-starter-under-6', k: 'Opposing starter under 6', p: (g) => oppStarterOuts(g) != null && g.oi < 18 },
-      // No statsapi field marks a start as a planned "opener" rather than an
-      // ace's bad night — this is a length heuristic, same tolerance the
-      // quality-start row already accepts. Five outs covers the common
-      // 1-2 inning opener stint, not just a bare single inning.
-      { id: 'used-opener', k: 'Started a game with an opener', p: (g) => starterOuts(g) != null && g.si <= 5 },
-      { id: 'faced-opener', k: 'Faced an opener', p: (g) => oppStarterOuts(g) != null && g.oi <= 5 },
+      // A planned OPENER and a starter pulled after five outs are the same
+      // shape in the feed — no statsapi field separates them, at any level —
+      // and length alone calls it wrong about a quarter of the time. So the
+      // generator infers it from the pitcher's own season at that level and
+      // ships ONE DIGIT per side: 1 an opener, 2 a starter who exited early,
+      // absent for an ordinary outing or a role it could not resolve. Neither
+      // row re-applies the five-out test, the two can never disagree about a
+      // game, and a game with no answer enters neither — the general
+      // "Starter goes under 6" row above still holds it.
+      { id: 'used-opener', k: 'Started a game with an opener', p: (g) => g.sk === 1 },
+      { id: 'faced-opener', k: 'Faced an opener', p: (g) => g.ok === 1 },
+      // The other half of that same short outing. Worded flat on purpose: the
+      // feed says the starter left, never why, so these rows claim no injury,
+      // no bad night, and no manager's call.
+      { id: 'starter-exits-early', k: 'Starter exits before 2 innings', p: (g) => g.sk === 2 },
+      { id: 'opp-starter-exits-early', k: 'Opposing starter exits before 2', p: (g) => g.ok === 2 },
       { id: 'vs-rhs', k: 'Vs. right-handed starter', p: (g) => g.oh === 'R' },
       { id: 'vs-lhs', k: 'Vs. left-handed starter', p: (g) => g.oh === 'L' },
     ],
