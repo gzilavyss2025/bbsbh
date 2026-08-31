@@ -69,7 +69,7 @@ const UNIT = String.fromCharCode(31)
 // vanishingly small, but the guarantee this module offers is not a probability:
 // test/contract-row-key.test.js asserts distinctness over the real CSVs, so a
 // collision is a failing test and never a silently merged pair of rows.
-export const ROW_KEY_HASH_LENGTH = 16
+const ROW_KEY_HASH_LENGTH = 16
 
 // A legacy positional key is `${sourceFile}#${index}`, at most five digits
 // today. A content key is sixteen hex characters. The two shapes can never be
@@ -98,12 +98,6 @@ export function contractRowKeys(sourceFile, rows) {
       .digest('hex')
     return `${sourceFile}#${digest.slice(0, ROW_KEY_HASH_LENGTH)}`
   })
-}
-
-// The source file a key names, or null when the key is not a content key.
-export function sourceFileOf(rowKey) {
-  const match = CONTENT_ROW_KEY_RE.exec(String(rowKey))
-  return match ? match[1] : null
 }
 
 // WHICH ROW COMES FIRST when a player holds two rows of the same source in the
