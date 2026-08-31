@@ -88,6 +88,13 @@ sealed until you tap: the line score, pitchers of record, three stars, both
 batting and pitching lines with every substitution, the defensive alignment, the
 game-info footer, and each club's game story from MLB.com.
 
+**A live scorecard, filled exactly as far as you've revealed.** A tab on the
+game turns the whole lineup card into a Numbers Game "22" sheet you can fill on
+screen, one at-bat at a time, in step with your own reveals. Before first
+pitch, the same game gives you a printable pre-pitch scorecard for filling in
+by hand, and a shareable preview card with both lineups and the day's matchup —
+neither one carries a score.
+
 ---
 
 ## Exploring the rest of baseball
@@ -102,11 +109,12 @@ first win. Prospects, All-Stars, rehab assignments, and Injured List stints are
 all flagged.
 
 **Team pages.** Tap a logo for the club hub: Overview, Roster, Games, Numbers,
-and Minors. Each tab is its own address and loads only its own data. You get the
-record and division rank, a month of schedule, the division standings, league
-ranks in every hitting and pitching category, the roster with WAR, the Injured
-List, and a leaders page for the club. A minor-league club also shows its parent
-organization, its affiliation history, and the farm system.
+Contracts, and Minors. Each tab is its own address and loads only its own data.
+You get the record and division rank, a month of schedule, the division
+standings, league ranks in every hitting and pitching category, the roster with
+WAR, the Injured List, the payroll, and a leaders page for the club. A
+minor-league club also shows its parent organization, its affiliation history,
+and the farm system.
 
 **Standings** open *through yesterday*, so today's games cannot spoil you. One
 tap brings in today. You can also scrub back to any earlier date.
@@ -120,12 +128,22 @@ Standalone reference pages, all reachable from the menu and the slate footer:
 | Page | What it gives you |
 |---|---|
 | Standings | Both leagues, through yesterday by default |
+| Postseason Race | The six-team postseason field, narrowed from Standings |
 | League Leaders | The majors, one league, one minor-league level, or one organization's whole system |
+| Run Value Leaders | Bat, glove, legs, and arm, added up on one scale of runs |
+| Situational Records | One record at a time, every club at a level, ranked |
+| Salaries | Who is paid the most, and what each club spends |
 | Foul Tracker | Season foul-ball boards for batters and pitchers, plus the top foul games |
+| Umpire Rankings | Every qualifying plate umpire, ranked by called-pitch accuracy, plus a page per umpire |
+| ABS Challenges | The season board for the Automated Ball-Strike challenge system |
+| Attendance | Season crowds, by club |
+| Bullpen Availability | How much work each staff's relievers have already logged |
+| Pace of Play | Game length across the league, tracked over the season |
+| Doubleheaders | Every doubleheader this season, and how each club fared |
 | Top MLB Prospects | The current Top 100, each row linked to the player |
+| Farm System Rankings | Every organization's farm system, ranked |
 | Rehab Assignments | Every big leaguer on a minor-league rehab stint, and where |
 | Milestone Watch | Career counting stats in reach this season, with projections |
-| Umpire Rankings | Every qualifying plate umpire, ranked by called-pitch accuracy, plus a page per umpire |
 | Awards History | Past award winners |
 | Postseason History / Leaders | Series by series, plus all-time postseason leaders |
 | Trade Deadline | Deadline moves, by season |
