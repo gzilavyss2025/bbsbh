@@ -26,18 +26,17 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // already text beside it, so the link's accessible name is the name itself and
 // the face announces nothing twice.
 //
-// `sub` — the position — stays a `.rpt__sub` BLOCK under the nameplate, but the
-// board indents it to land under the NAME. Unindented it starts at the cell's
-// left padding, which put "CF" under the RANK, two columns from the man it
+// `sub` — the position — sits ON THE NAME'S OWN LINE, immediately after it, at a
+// notch under the name's size. It rode under the nameplate as a `.rpt__sub`
+// block first, which put "CF" beneath the RANK, two columns from the man it
 // describes and reading as a second figure beside his place on the board.
 //
-// It is indented rather than inlined after the name, which was the first fix
-// and the wrong one: an inline chip is an unbreakable flex item, so it widened
-// the nameplate cell from 152px to 209px, the board from 383px to 405px, and —
-// through the sticky cell inside the scroller — put 22px of horizontal scroll
-// on the whole PAGE at 390px. A block-level label costs the cell no width at
-// all, however far it is indented, because its own line is far shorter than the
-// cell's minimum. See 75-run-value.css for the indent.
+// THE NAME AND THE POSITION ARE ONE FLEX ITEM, not two, and that is the part
+// worth reading twice. As its own item the position is unbreakable, so it added
+// its full width to the cell's minimum — with the bigger portrait that pushed
+// the board past its scroller and leaked horizontal scroll onto the whole PAGE
+// at 390px. Inside the link's own wrapper it shares the name's line box, wraps
+// with it, and contributes nothing the name did not already contribute.
 export function PlayerNameplate({ player, rank, tied, sub }) {
   return (
     <th scope="row" className="team">
@@ -54,11 +53,13 @@ export function PlayerNameplate({ player, rank, tied, sub }) {
         {player.teamId != null ? (
           <TeamLogo teamId={player.teamId} name={player.name} size={18} />
         ) : null}
-        <PlayerLink id={player.id} name={player.name}>
-          {player.name}
-        </PlayerLink>
+        <span className="rv__who">
+          <PlayerLink id={player.id} name={player.name}>
+            {player.name}
+          </PlayerLink>
+          {sub ? <span className="rv__pos">{sub}</span> : null}
+        </span>
       </span>
-      {sub ? <span className="rpt__sub rv__pos">{sub}</span> : null}
     </th>
   )
 }

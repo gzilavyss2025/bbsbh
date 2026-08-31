@@ -9,7 +9,6 @@ import {
   clubBoard,
   componentBoard,
   fetchRunValue,
-  signed,
 } from '../../api/around-the-game/runValue.js'
 import { loadClubs, clubShort } from '../../api/around-the-game/clubs.js'
 import { groupLabelFor } from '../../lib/reportPages.js'
@@ -21,7 +20,6 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
-import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
 import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
 import { PlayerNameplate, RunCell } from '../../components/around-the-game/RunValueParts.jsx'
@@ -38,18 +36,22 @@ import { PlayerNameplate, RunCell } from '../../components/around-the-game/RunVa
 // total leads, the four components sit beside it in the order a player meets
 // them in a game, and everything below asks who is best at one of them.
 //
-// CONTEXT NEUTRAL, and the masthead's meta row says so in two words. Every
+// CONTEXT NEUTRAL, and the source line at the foot says so in two words. Every
 // event is scored off the generic run-expectancy table, never off the leverage
 // of the game it happened in (see scripts/gen-run-value.mjs). This says how
 // much a player DID, not what it happened to be worth to his club's record on
 // the night.
 //
-// THE PAGE SHOWS, IT DOES NOT EXPLAIN. There is no dek, no note under a section
-// heading and no "how this was counted" essay: a board of signed runs under a
-// column key needs none of them, and six hundred words of prose around four
-// tables buries the tables. What survives is what a figure cannot be read
-// without — the column key under the board, and the source line at the foot.
-// Anything longer belongs in this comment or in docs/, not on the page.
+// THE PAGE SHOWS, IT DOES NOT EXPLAIN. No dek, no masthead meta row, no slab
+// row, no note under a section heading, no "how this was counted" essay: a
+// board of signed runs under a column key needs none of them, and six hundred
+// words of prose around four tables buries the tables. The masthead is a title
+// and nothing else, and the board starts under it.
+//
+// What survives is what a figure cannot be read without: the column key under
+// the board, and one source line at the foot carrying the provenance and the
+// season / through-date / population the meta row used to hold. Anything longer
+// belongs in this comment or in docs/, not on the page.
 //
 // SPOILER-FREE. A season aggregate off a nightly file, over completed games —
 // the same footing as every other open season board (ADR-0034).
@@ -95,8 +97,9 @@ export function RunValuePage() {
     () => board(data, { role, direction, limit: BOARD_LIMIT }),
     [data, role, direction],
   )
-  // The whole board, unlimited, for the figures the slabs quote — a leader is a
-  // fact about the league, not about the twenty-five rows on screen.
+  // The whole board, unlimited. It is what decides the page has anything to
+  // show, and the population the source line counts — a board of twenty-five
+  // rows is a window on the league, not the size of it.
   const everyone = useMemo(() => board(data), [data])
   const leaders = useMemo(
     () =>
@@ -108,17 +111,6 @@ export function RunValuePage() {
   )
   const byClub = useMemo(() => clubBoard(data), [data])
 
-  const best = everyone[0] ?? null
-  const worst = everyone[everyone.length - 1] ?? null
-  const glove = leaders.find((c) => c.key === 'fld')?.rows[0] ?? null
-  const twoWay = useMemo(
-    () =>
-      everyone.filter(
-        (p) => Math.abs(p.pit) >= MIN_ABS_RUNS && Math.abs(p.bat) >= MIN_ABS_RUNS,
-      ).length,
-    [everyone],
-  )
-
   return (
     <div className="screen">
       <SiteHeader />
@@ -127,15 +119,6 @@ export function RunValuePage() {
         strand={groupLabelFor(RUN_VALUE_PATH)}
         eyebrow="Run Value"
         title="Run Value Leaders"
-        meta={[
-          { label: 'Season', value: data?.season ?? '—' },
-          {
-            label: 'Through',
-            value: data?.generatedAt ? humanDateWithYear(data.generatedAt.slice(0, 10)) : '—',
-          },
-          { label: 'Players', value: everyone.length || '—' },
-          { label: 'Leverage', value: 'Context neutral' },
-        ]}
       />
 
       <AsyncStatus
@@ -149,62 +132,53 @@ export function RunValuePage() {
 
       {everyone.length > 0 && (
         <>
-          <SlabRow>
-            <Slab
-              tone="lead"
-              value={best ? signed(best.value) : '—'}
-              label="Best season"
-              note={best ? `${best.name}${best.pos ? ` · ${best.pos}` : ''}` : ''}
-            />
-            <Slab
-              value={glove ? signed(glove.value) : '—'}
-              label="Best with the glove"
-              note={glove ? `${glove.name}${glove.pos ? ` · ${glove.pos}` : ''}` : '—'}
-            />
-            <Slab
-              value={twoWay || '—'}
-              label="Two-way seasons"
-              note={`±${MIN_ABS_RUNS} run or more with the bat and on the mound`}
-            />
-            <Slab
-              value={worst ? signed(worst.value) : '—'}
-              label="Hardest season"
-              note={worst ? `${worst.name}${worst.pos ? ` · ${worst.pos}` : ''}` : ''}
-            />
-          </SlabRow>
+          {/* THE BOARD OPENS THE PAGE. No slab row over it, and no "The board"
+              heading on it: four big figures that only quote rows one and last
+              of the table under them are the table read twice, and a heading
+              naming the one board on a page called Run Value Leaders names
+              nothing. The h1 is the heading; the chips are the controls; the
+              first row is the leader.
 
-          <BroadcastSection title="The board">
-            <div className="rpt-controls" role="group" aria-label="Choose who to rank">
-              {ROLES.map((r) => (
+              A plain <section>, not a BroadcastSection, because that component
+              exists to draw a heading and there is none to draw here. */}
+          <section className="bcast-sec">
+            {/* ONE CONTROL ROW, two groups. Who to rank sits left, which end of
+                the board sits right — two rows of chips over one table read as
+                two separate decisions, and they are one. Still two labelled
+                groups for a screen reader, because they are two questions. */}
+            <div className="rv__controls">
+              <div className="rpt-controls" role="group" aria-label="Choose who to rank">
+                {ROLES.map((r) => (
+                  <button
+                    key={r.key}
+                    type="button"
+                    className={`rpt-chip${r.key === role ? ' is-on' : ''}`}
+                    aria-pressed={r.key === role}
+                    onClick={() => setRole(r.key)}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="rpt-controls" role="group" aria-label="Choose which end of the board">
                 <button
-                  key={r.key}
                   type="button"
-                  className={`rpt-chip${r.key === role ? ' is-on' : ''}`}
-                  aria-pressed={r.key === role}
-                  onClick={() => setRole(r.key)}
+                  className={`rpt-chip${direction === 'desc' ? ' is-on' : ''}`}
+                  aria-pressed={direction === 'desc'}
+                  onClick={() => setDirection('desc')}
                 >
-                  {r.label}
+                  Best first
                 </button>
-              ))}
-            </div>
-
-            <div className="rpt-controls" role="group" aria-label="Choose which end of the board">
-              <button
-                type="button"
-                className={`rpt-chip${direction === 'desc' ? ' is-on' : ''}`}
-                aria-pressed={direction === 'desc'}
-                onClick={() => setDirection('desc')}
-              >
-                Best first
-              </button>
-              <button
-                type="button"
-                className={`rpt-chip${direction === 'asc' ? ' is-on' : ''}`}
-                aria-pressed={direction === 'asc'}
-                onClick={() => setDirection('asc')}
-              >
-                Worst first
-              </button>
+                <button
+                  type="button"
+                  className={`rpt-chip${direction === 'asc' ? ' is-on' : ''}`}
+                  aria-pressed={direction === 'asc'}
+                  onClick={() => setDirection('asc')}
+                >
+                  Worst first
+                </button>
+              </div>
             </div>
 
             <BoardScroller label="Run value leaders">
@@ -248,7 +222,7 @@ export function RunValuePage() {
                 </div>
               ))}
             </dl>
-          </BroadcastSection>
+          </section>
 
           <BroadcastSection title="Best at one thing">
             <div className="rvleaders">
@@ -322,12 +296,20 @@ export function RunValuePage() {
               where the figures came from and the two constraints that change
               how a figure READS — the board's floor, and the rounding that lets
               four printed columns miss the printed total by one. Those are
-              facts about the data, so they sit in the data's own caption. */}
+              facts about the data, so they sit in the data's own caption.
+
+              IT OPENS ON THE SEASON, THE DATE AND THE POPULATION, which the
+              masthead's meta row used to carry. The row is gone, and those three
+              are the numbers that say how much to trust the page — so they move
+              down here rather than off it. */}
           <p className="rptsource">
-            Baseball Savant swing/take, fielding and baserunning run value · Context neutral ·
-            Stored to 0.1 run and printed whole, so the columns can miss the total by one ·
-            Main board floor ±{MIN_ABS_RUNS} run, single-skill boards none · Pitcher or position
-            player is decided by which half of a season was the larger
+            {data?.season ?? '—'} season, through{' '}
+            {data?.generatedAt ? humanDateWithYear(data.generatedAt.slice(0, 10)) : '—'} ·{' '}
+            {everyone.length || '—'} players · Baseball Savant swing/take, fielding and
+            baserunning run value · Context neutral · Stored to 0.1 run and printed whole, so the
+            columns can miss the total by one · Main board floor ±{MIN_ABS_RUNS} run, single-skill
+            boards none · Pitcher or position player is decided by which half of a season was the
+            larger
           </p>
         </>
       )}

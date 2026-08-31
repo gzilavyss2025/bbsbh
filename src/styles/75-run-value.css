@@ -39,6 +39,19 @@
   min-width: 152px;
 }
 
+/* THE PORTRAIT, ONE RUNG UP THE SHARED LADDER (tokens/layout.css) WHERE THERE
+   IS ROOM FOR IT. A leader board is a page a reader looks at faces on, and the
+   box-score rung — set for a one-line note, not for twenty-five rows of it —
+   was too small at the width this page is usually read at. The crop is
+   identical at every rung, so this is scale only.
+
+   Not on a phone, though, and that is the whole reason for the query. The
+   nameplate's fixed furniture — rank, portrait, club mark, three gaps — comes
+   off the top of a sticky column that is already sharing 358px with five figure
+   columns. Six more pixels of portrait took "Pete Crow-Armstrong CF" from one
+   line to three and the row from 69px to 100. Below 620px the old rung keeps
+   the name on the fewest lines it can manage, which is what a phone needs from
+   this board; above it, the bigger face costs nothing anyone can see. */
 .rv__nameplate .shot {
   flex: none;
   width: var(--shot-2xs-w);
@@ -46,26 +59,61 @@
   border-radius: var(--radius-xs);
 }
 
+@media (min-width: 620px) {
+  .rv__nameplate .shot {
+    width: var(--shot-xs-w);
+    height: var(--shot-xs-h);
+  }
+}
+
 .rv__face {
   display: flex;
 }
 
-/* THE POSITION, INDENTED UNDER THE NAME. A bare `.rpt__sub` starts at the
-   cell's left padding, so "CF" printed under the RANK — two columns from the
-   man it describes, reading as a second figure beside his place on the board.
-   The indent walks the fixed run of things the nameplate puts before the name:
-   the rank's own 2.2em floor, the 33px portrait, the 18px club mark, and the
-   three 6px gaps between them. Every one of those is a token or a stated
-   constant, so the sum moves when they move.
+/* NAME AND POSITION, ONE LINE. The two share a wrapper so they are a single
+   flex item inside the nameplate: the position then sits in the name's own line
+   box, wraps with it, and adds nothing to the cell's minimum width. As its own
+   flex item it was unbreakable, and together with the bigger portrait it pushed
+   the board past its scroller and leaked horizontal scroll onto the page at
+   390px. `min-width: 0` lets the wrapper shrink so a long name wraps inside the
+   cell rather than widening it — the board has always preferred a name on two
+   lines to a name cut off. RunValueParts.jsx carries the note.
 
-   Indent, not an inline chip beside the name: the chip was tried first and it
-   widened the sticky nameplate cell by 57px, which took the board past the
-   scroller and leaked 22px of horizontal scroll onto the page at 390px. A block
-   label costs the cell nothing however far it is pushed — "CF" plus this indent
-   is still well inside the cell's 152px floor. RunValueParts.jsx has the note. */
+   A notch under the name (12px against its 13px), and in mono: a position is a
+   code, not a word, and it should not compete with the man's name. */
+.rv__who {
+  min-width: 0;
+}
+
 .rv__pos {
-  padding-left: calc(2.2em + var(--shot-2xs-w) + 18px + 18px);
+  margin-left: 6px;
   font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+/* ---- the board's controls ---------------------------------- */
+
+/* ONE ROW, TWO GROUPS. Who to rank sits left, which end of the board sits
+   right. As two stacked `.rpt-controls` rows they read as two separate
+   decisions above one table; on one line, with the ends pushed apart, they read
+   as what they are — the two dials on the same board. Each group keeps its own
+   `.rpt-controls` (and its own aria-label), so the chips inside still wrap and
+   the two questions stay two questions for a screen reader.
+
+   It wraps rather than squeezing: on a narrow phone the direction pair drops
+   under the role chips, which is the stacked layout again, and correct there. */
+.rv__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0 var(--space-4);
+}
+
+.rv__controls > .rpt-controls {
+  margin-bottom: var(--space-2);
 }
 
 /* ---- the figures ------------------------------------------- */
