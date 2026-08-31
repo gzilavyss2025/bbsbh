@@ -384,7 +384,15 @@ const BUDGETS = {
   // sharing its bar language. A new surface, not a split of an over-budget
   // partial, so it takes the next free integer rather than a lettered sibling
   // (same call as 59-stamp-in.css). Route-loaded, not from index.css.
-  'src/styles': 106,
+  // 106 -> 107 for 76-workload-marks.css: the four shared workload marks (the
+  // day strip and its rest rail, the threshold bullets, the pen dots, the staff
+  // grid). It is flat and GLOBAL, @imported from index.css, because those marks
+  // are drawn on six surfaces including the slate — a card's dots cannot wait
+  // on a route chunk, and putting the ink in any one surface's partial would
+  // make five others import a stranger's stylesheet. A new shared vocabulary
+  // rather than a split of an over-budget partial, so it takes the next free
+  // integer.
+  'src/styles': 107,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

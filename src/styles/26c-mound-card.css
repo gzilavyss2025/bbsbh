@@ -13,7 +13,7 @@
    ============================================================ */
 
 .moundcard {
-  margin-block-start: var(--sp-5);
+  margin-block-start: var(--space-5);
 }
 
 /* --- the lead: a relative day for a starter, a verdict for a bullpen arm --- */
@@ -22,9 +22,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--sp-2) var(--sp-3);
+  gap: var(--space-2) var(--space-3);
   margin: 0;
-  padding-block: var(--sp-3);
+  padding-block: var(--space-3);
 }
 
 .moundcard__leadbig {
@@ -47,7 +47,7 @@
 .moundcard__avail {
   padding: 4px 10px;
   border: var(--bw-hair) solid;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -82,15 +82,15 @@
 .moundcard__outing {
   display: flex;
   justify-content: space-between;
-  gap: var(--sp-2);
-  padding-block: var(--sp-2);
+  gap: var(--space-2);
+  padding-block: var(--space-2);
   border-block-end: var(--bw-hair) solid var(--border-hairline);
 }
 
 .moundcard__when {
   font-family: var(--font-display);
   font-size: var(--fs-compact);
-  font-weight: var(--w-semi);
+  font-weight: var(--w-semibold);
   letter-spacing: var(--ls-wide);
   color: var(--text-caption);
   white-space: nowrap;
@@ -106,7 +106,7 @@
 /* --- the strips --- */
 
 .moundstrip {
-  margin-block-start: var(--sp-4);
+  margin-block-start: var(--space-4);
 }
 
 .moundstrip__head {
@@ -114,15 +114,15 @@
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--sp-2);
-  margin: 0 0 var(--sp-2);
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
 }
 
 .moundstrip__label,
 .moundstrip__note {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
-  font-weight: var(--w-semi);
+  font-weight: var(--w-semibold);
   letter-spacing: var(--ls-wide);
   color: var(--text-caption);
 }
@@ -142,7 +142,7 @@
   justify-content: center;
   height: 30px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-xs);
   background: var(--surface-inset);
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
@@ -150,21 +150,6 @@
   color: var(--text-caption);
 }
 
-.moundstrip__day--light {
-  color: var(--field-deep);
-  background: var(--field-soft);
-  border-color: var(--field);
-}
-.moundstrip__day--moderate {
-  color: var(--award-ink);
-  background: var(--award-soft);
-  border-color: var(--award-line);
-}
-.moundstrip__day--heavy {
-  color: var(--clay-deep);
-  background: var(--clay-soft);
-  border-color: var(--clay);
-}
 .moundstrip__day--elapsed {
   color: var(--text-on-ink);
   background: var(--accent-primary);
@@ -188,7 +173,7 @@
   height: 30px;
   border: var(--bw-hair) solid var(--border-rule);
   border-inline-start: 2px solid var(--text-caption);
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-xs);
   background: var(--surface-inset);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -197,44 +182,22 @@
   color: var(--text-caption);
 }
 
-.moundstrip__key {
+/* The verdict block: the one-word availability tag, then the threshold
+   bullets that reached it (components/workload/ThresholdBullets.jsx). The
+   reasons sentence that used to sit here is gone — the bars carry it. */
+.moundcard__verdict {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-3);
-  margin: var(--sp-2) 0 0;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-block-end: var(--space-3);
 }
 
-.moundstrip__keyitem {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semi);
-  letter-spacing: var(--ls-wide);
-  color: var(--text-caption);
-}
-
-.moundstrip__keyitem::before {
-  content: '';
-  width: 11px;
-  height: 11px;
-  border: var(--bw-hair) solid;
-  border-radius: var(--r-xs);
-}
-.moundstrip__keyitem--light::before {
-  background: var(--field-soft);
-  border-color: var(--field);
-}
-.moundstrip__keyitem--moderate::before {
-  background: var(--award-soft);
-  border-color: var(--award-line);
-}
-.moundstrip__keyitem--heavy::before {
-  background: var(--clay-soft);
-  border-color: var(--clay);
+/* The shared day strip's legend, which the bullpen strip needs and the
+   starter's turn strip does not. */
+.moundstrip__legend {
+  margin-block-start: var(--space-2);
 }
 
 .moundcard__foot {
-  margin-block-start: var(--sp-4);
+  margin-block-start: var(--space-4);
 }

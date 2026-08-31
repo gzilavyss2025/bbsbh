@@ -61,6 +61,39 @@ test('the arms list leads with the most-worked name', () => {
   assert.equal(bullpenFor(data, 158, AS_OF)[0].name, 'Burned')
 })
 
+// The order this list is in decides which row a reader sees first, and ranking
+// on pitches alone put the one name they came for below arms that were fine.
+// The fixture above cannot catch it — its most-worked arm IS its down arm — so
+// this one separates the two deliberately.
+const mixed = {
+  pitchers: {
+    // Three straight short outings: down on the hard flag, 24 pitches all week.
+    1: arm('Streak', 158, 'RP', ['2026-08-16', '2026-08-15', '2026-08-14'], 8),
+    // One big outing four days ago: nothing tripped, 60 pitches all week.
+    2: arm('Heavy', 158, 'RP', ['2026-08-13'], 60),
+  },
+}
+
+test('the arms list leads on availability, not on pitch count', () => {
+  const arms = bullpenFor(mixed, 158, AS_OF)
+  assert.deepEqual(arms.map((a) => a.name), ['Streak', 'Heavy'])
+  assert.equal(arms[0].status, 'down')
+  assert.ok(
+    arms[0].last7dayPitches < arms[1].last7dayPitches,
+    'the leading row threw FEWER pitches — status is what put it there',
+  )
+})
+
+// `leader` is the board's "Most used" column, which is a claim about pitch
+// count and nothing else. It used to be arms[0], which was only ever right
+// while the list was sorted on load.
+test('the most-used arm is the most-worked one, not merely the first row', () => {
+  const board = bullpenBoard(mixed, [158], AS_OF, 'downPct')
+  assert.equal(board[0].arms[0].name, 'Streak')
+  assert.equal(board[0].leader.name, 'Heavy')
+  assert.equal(board[0].leader.last7dayPitches, 60)
+})
+
 // The board's stated claim: four tired arms out of six is a different night
 // than four out of eleven, so the order is a share and not a count.
 test('the board ranks on the share of the staff, not the head count', () => {

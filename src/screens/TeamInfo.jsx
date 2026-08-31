@@ -570,7 +570,7 @@ function TeamSections({
       {showBullpen && (
         <BullpenBoard
           workload={workloadData}
-          bullpen={oppBullpenArms}
+          teamId={oppMeta.id}
           gameDate={boardGameDate}
           theme={oppTheme}
           masthead={oppMasthead}

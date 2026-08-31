@@ -20,7 +20,13 @@
 // backward-looking over completed appearances, and the as-of date excludes the
 // current day, so no in-progress line can leak. No SealBox.
 
-import { fetchWorkload, availabilityFor, workloadFor, bullpenStatusCounts } from '../workload.js'
+import {
+  fetchWorkload,
+  availabilityFor,
+  workloadFor,
+  bullpenStatusCounts,
+  compareArms,
+} from '../workload.js'
 
 export { fetchWorkload }
 
@@ -50,9 +56,15 @@ export function bullpenFor(data, teamId, asOfDate) {
       seasonPitches: load.season?.pitches ?? null,
     })
   }
-  // Most-taxed first, so the top of every club's list is the reason its
-  // headline number is what it is.
-  arms.sort((a, b) => b.last7dayPitches - a.last7dayPitches || a.name.localeCompare(b.name))
+  // STATUS FIRST, load second (api/workload.js's compareArms). Ranking on
+  // pitches alone read plausibly and buried the row a reader came for: an arm
+  // can throw the FEWEST pitches on his own staff and still be the only man
+  // unavailable, because three straight short outings trip the hard flag while
+  // no single count trips anything. Baltimore on 2026-08-31 was exactly that —
+  // Yennier Cano, sixth of eight by pitches, the club's one arm likely down.
+  // It also aligns this board with the lineup page's, which has always sorted
+  // status-first; the two were reading the same file and ordering it two ways.
+  arms.sort(compareArms)
   return arms
 }
 
@@ -91,7 +103,16 @@ export function bullpenBoard(data, teamIds, asOfDate, sortBy = 'freshPct') {
       perArm: Math.round((last7 / arms.length) * 10) / 10,
       // The single most-worked arm on the staff over the past week — the name
       // a broadcast puts on screen when it says a pen is running on fumes.
-      leader: arms[0] ?? null,
+      //
+      // Picked by pitch count EXPLICITLY rather than taken as arms[0]. That
+      // shortcut was correct only while the list was sorted on load alone; now
+      // that it leads with the unavailable arms (compareArms), arms[0] is the
+      // most-worked DOWN arm, which is a different claim and often a different
+      // man.
+      leader: arms.reduce(
+        (best, a) => (best == null || a.last7dayPitches > best.last7dayPitches ? a : best),
+        null,
+      ),
     })
   }
   if (!rows.length) return null

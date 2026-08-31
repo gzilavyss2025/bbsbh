@@ -1,6 +1,7 @@
 import { memo, useLayoutEffect, useRef } from 'react'
 import { useNav, useLinkScope } from '../../lib/nav.js'
 import { playerPath } from '../../lib/route.js'
+import { PenDots } from '../workload/PenDots.jsx'
 
 // Running pitching lines for every pitcher who has appeared in a revealed
 // half-inning — a separate block per team, each led by the team name with its
@@ -16,6 +17,18 @@ import { playerPath } from '../../lib/route.js'
 // (MarginNotes.jsx, api/pitcher-callouts.js's buildMarginNotes), which spans
 // both teams' pitchers and is capped/sorted by worthiness rather than listed
 // per row regardless of how many qualify.
+//
+// Each team block's heading also carries PEN DOTS — one dot an arm, available
+// first — answering the question this table raises mid-game and cannot itself
+// answer: who is left.
+//
+// THE SPOILER CONSTRAINT, and it is the whole reason this is safe. The dots are
+// built from the nightly workload file ALONE (api/workload.js's clubPenCounts,
+// which stops at yesterday). They must never be crossed with the pitchers who
+// have already appeared TONIGHT — that would turn the dot count into a count of
+// pitching changes, which tracks the score. The table beside them is gated by
+// the reveal mark; the dots are not, because they describe a day that is over.
+//
 // Memoized on `teams`, which InningViewer builds in a useMemo for that reason.
 export const PitchersSection = memo(function PitchersSection({ teams }) {
   const shown = teams.filter((t) => t.rows.length > 0)
@@ -25,7 +38,10 @@ export const PitchersSection = memo(function PitchersSection({ teams }) {
       <h3 className="pitchers__title">Pitchers</h3>
       {shown.map((t) => (
         <div className="pitchers__team" key={t.name}>
-          <h4 className="pitchers__teamname">{t.name}</h4>
+          <h4 className="pitchers__teamname">
+            {t.name}
+            {t.penCounts && <PenDots counts={t.penCounts} size="sm" />}
+          </h4>
           <table className="pitchers__grid">
             <thead>
               <tr>

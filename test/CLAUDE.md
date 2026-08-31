@@ -21,6 +21,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | callout-ledger.test.js | 8 | src/hooks/useCalloutLedger.js, prehalf-callouts.js, between-innings.js | The shown ledger (distinct halves, never the half a note sits on) and the two capped surfaces that read it — one record note per strip, once-per-game facts dropped |
 | callout-repetition.test.js | 9 | src/api/callout-notes/shared.js | rankNotes' three repetition rules (decay, once-per-game, diversity) + the one 0–MAGNITUDE_MAX bonus scale |
 | cards.test.js | 38 | api/_lib/cards.js, api/_lib/entity.js, api/preview.js | OG preview card resolveGame race-condition fix, the per-route card set, and the one canonical origin — plus the edge copies of the app's slug helpers, asserted against route.js's own (ADR-0057) |
+| css-tokens.test.js | 3 | src/styles/**, src/tokens/** | Every var(--token) resolves to a defined token |
 | career-matchups.test.js | 16 | src/api/careerMatchups.js | Batting order's career-vs-starter notes (TeamInfo) |
 | career-register.test.js | 12 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels + chronological multi-org register rows/subtotals + the Team history rail's org order |
 | challenges.test.js | 23 | src/api/challenges.js | ABS challenge tracking — the per-play primitive and the half-clamp, plus which games run the system (`gameHasAbs` reads the feed's `gameData.absChallenges`, not a level) and the clamp re-proved on a captured Triple-A game |
@@ -145,6 +146,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | winprob-atbat-step.test.js | 5 | src/api/playbyplay.js | lastVisibleAtBatIndex |
 | winprob.test.js | 17 | src/api/game.js, src/api/winprob.js | Win probability chart |
 | workload.test.js | 11 | src/api/workload.js | Rolling pitcher workload |
+| workload-marks.test.js | 14 | src/api/workload.js | The four workload marks — flags, rest runs, staff grid, pen dots |
 | worktrees.test.js | 15 | scripts/worktrees.mjs | Git-worktree staleness classification |
 | wpa-logo.test.js | 18 | src/lib/wpa/wpaLogo.js, teams.js, logoArt.js | WPA band logo resolver/recolor guard |
 
