@@ -1,0 +1,84 @@
+/* REPORT CHROME — the small shared pieces that replaced the prose.
+   ------------------------------------------------------------------
+   A per-route partial (see src/index.css's list): imported by the report
+   screens that use it, not by the @import chain, so a reader who never opens
+   one never pays for it.
+
+   /run-value and /abs-challenges used to carry ~640 and ~830 words of dek,
+   section notes and a "How this was counted" essay around their boards. The
+   prose is gone; these three rules are what a board genuinely could not be
+   read without, kept small enough that none of them can grow back into it. */
+
+/* ---- the column key ---------------------------------------- */
+
+/* THE KEY THAT REPLACED FOUR SECTION NOTES. A board of abbreviated heads needs
+   its abbreviations expanded somewhere, and a "Ran out" column needs its five
+   words — but that is a data dictionary, not an explanation of the page, and it
+   belongs beside the board it decodes rather than in a paragraph above it. Set
+   as tight term/definition pairs on one wrapping line: it reads as chrome
+   attached to the table, and it cannot grow into prose without looking wrong,
+   which is the point. */
+.rptkey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 0;
+}
+
+.rptkey__pair {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.rptkey dt {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+.rptkey dd {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+
+/* ---- the source line --------------------------------------- */
+
+/* WHAT IS LEFT OF `.method`, ON THE TWO PAGES THAT DROPPED IT. A report ends on
+   its provenance — where the figures came from, what they cover, and the one or
+   two constraints that change how a figure READS. That is a caption, so it is
+   set as one: mono-ish caption text on a hairline, no heading over it, the
+   fields separated by middots the way a photo credit runs. It is deliberately
+   not `.method`: the moment it has a heading and paragraphs it becomes the
+   four-hundred-word essay it replaced. */
+.rptsource {
+  margin: var(--space-8) 0 0;
+  padding: var(--space-3) 0 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+}
+
+/* ---- a pair of boards side by side ------------------------- */
+
+/* Two independent short boards, one under the next on a phone and side by side
+   once there is room. It exists because the two used to be ZIPPED INTO ONE
+   TABLE by row index, which related two unconnected men across a `<tr>` and
+   pinned two sticky columns to the same left:0 — see AbsChallengesPage. Same
+   shape as 75-run-value.css's `.rvleaders`, kept here because this stylesheet
+   is the one every report page already loads. */
+.rptpair {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 760px) {
+  .rptpair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

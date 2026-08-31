@@ -1,4 +1,5 @@
 import '../../styles/68-around-the-game.css'
+import '../../styles/report/chrome.css'
 import { useMemo, useState } from 'react'
 import {
   COMPONENTS,
@@ -37,10 +38,18 @@ import { PlayerNameplate, RunCell } from '../../components/around-the-game/RunVa
 // total leads, the four components sit beside it in the order a player meets
 // them in a game, and everything below asks who is best at one of them.
 //
-// CONTEXT NEUTRAL, and the masthead says so. Every event is scored off the
-// generic run-expectancy table, never off the leverage of the game it happened
-// in (see scripts/gen-run-value.mjs). This says how much a player DID, not what
-// it happened to be worth to his club's record on the night.
+// CONTEXT NEUTRAL, and the masthead's meta row says so in two words. Every
+// event is scored off the generic run-expectancy table, never off the leverage
+// of the game it happened in (see scripts/gen-run-value.mjs). This says how
+// much a player DID, not what it happened to be worth to his club's record on
+// the night.
+//
+// THE PAGE SHOWS, IT DOES NOT EXPLAIN. There is no dek, no note under a section
+// heading and no "how this was counted" essay: a board of signed runs under a
+// column key needs none of them, and six hundred words of prose around four
+// tables buries the tables. What survives is what a figure cannot be read
+// without — the column key under the board, and the source line at the foot.
+// Anything longer belongs in this comment or in docs/, not on the page.
 //
 // SPOILER-FREE. A season aggregate off a nightly file, over completed games —
 // the same footing as every other open season board (ADR-0034).
@@ -62,8 +71,8 @@ const COMPONENT_LEADERS = 5
 //
 // The full word is still announced, and still printed: the visually-hidden span
 // carries it for a screen reader (the column head is what names each figure in
-// a row), and the legend under the board defines all four in full. So nothing is
-// available only as an abbreviation.
+// a row), and the key under the board pairs every abbreviation with its word.
+// So nothing is available only as an abbreviation.
 function shortHead(c) {
   return (
     <>
@@ -101,6 +110,7 @@ export function RunValuePage() {
 
   const best = everyone[0] ?? null
   const worst = everyone[everyone.length - 1] ?? null
+  const glove = leaders.find((c) => c.key === 'fld')?.rows[0] ?? null
   const twoWay = useMemo(
     () =>
       everyone.filter(
@@ -117,9 +127,6 @@ export function RunValuePage() {
         strand={groupLabelFor(RUN_VALUE_PATH)}
         eyebrow="Run Value"
         title="Run Value Leaders"
-        dek="Everything a player does, in runs. Baseball Savant scores each swing, each play in
-             the field, each time on the bases and each pitch thrown against the runs it moved —
-             so a glove, a pair of legs and an arm can finally be added to a bat."
         meta={[
           { label: 'Season', value: data?.season ?? '—' },
           {
@@ -147,42 +154,26 @@ export function RunValuePage() {
               tone="lead"
               value={best ? signed(best.value) : '—'}
               label="Best season"
-              note={best ? `${best.name} — and the four columns below say how.` : ''}
+              note={best ? `${best.name}${best.pos ? ` · ${best.pos}` : ''}` : ''}
             />
             <Slab
-              value={leaders.find((c) => c.key === 'fld')?.rows[0]
-                ? signed(leaders.find((c) => c.key === 'fld').rows[0].value)
-                : '—'}
+              value={glove ? signed(glove.value) : '—'}
               label="Best with the glove"
-              note={
-                leaders.find((c) => c.key === 'fld')?.rows[0]?.name ??
-                'Not computed yet.'
-              }
+              note={glove ? `${glove.name}${glove.pos ? ` · ${glove.pos}` : ''}` : '—'}
             />
             <Slab
               value={twoWay || '—'}
-              label="Players on both sides"
-              note="Men worth at least a run with the bat AND on the mound. The one column no
-                    other leader board on this site can hold."
+              label="Two-way seasons"
+              note={`±${MIN_ABS_RUNS} run or more with the bat and on the mound`}
             />
             <Slab
               value={worst ? signed(worst.value) : '—'}
               label="Hardest season"
-              note={
-                worst
-                  ? `${worst.name}. A season this far below average is as hard to have as one far
-                     above it.`
-                  : ''
-              }
+              note={worst ? `${worst.name}${worst.pos ? ` · ${worst.pos}` : ''}` : ''}
             />
           </SlabRow>
 
-          <BroadcastSection
-            title="The board"
-            note="Total first, then the four things it is made of. A component a player has none
-                  of reads as a plain zero, not a blank: a designated hitter really did field
-                  nothing, and that is part of the answer."
-          >
+          <BroadcastSection title="The board">
             <div className="rpt-controls" role="group" aria-label="Choose who to rank">
               {ROLES.map((r) => (
                 <button
@@ -249,23 +240,17 @@ export function RunValuePage() {
               </table>
             </BoardScroller>
 
-            <dl className="rvlegend">
+            <dl className="rptkey">
               {COMPONENTS.map((c) => (
-                <div key={c.key}>
-                  <dt className="rvlegend__term">{c.label}</dt>
-                  <dd className="rvlegend__def">{c.about}</dd>
+                <div key={c.key} className="rptkey__pair">
+                  <dt>{c.short}</dt>
+                  <dd>{c.label}</dd>
                 </div>
               ))}
             </dl>
           </BroadcastSection>
 
-          <BroadcastSection
-            title="Best at one thing"
-            note="Each of the four on its own, across everybody — the best fielding season in
-                  baseball is the best fielding season in baseball, whoever it belongs to. No
-                  total floor applies here: a bat a run from average can still lead the league
-                  with the glove."
-          >
+          <BroadcastSection title="Best at one thing">
             <div className="rvleaders">
               {leaders.map((c) => (
                 <BoardScroller key={c.key} label={`${c.label} run value leaders`}>
@@ -293,13 +278,7 @@ export function RunValuePage() {
             </div>
           </BroadcastSection>
 
-          <BroadcastSection
-            title="By club"
-            note="Every club's men added up, counted for the club that holds each of them today.
-                  A player traded in July brings his whole season with him, because Savant carries
-                  one current club per player and no split — so read this as a roster, not as a
-                  club's season."
-          >
+          <BroadcastSection title="By club">
             <BoardScroller label="Run value by club">
               <table className="standings rpt">
                 <thead>
@@ -337,47 +316,19 @@ export function RunValuePage() {
             </BoardScroller>
           </BroadcastSection>
 
-          <section className="method">
-            <h2>How this was counted</h2>
-            <p>
-              <strong>Four Baseball Savant leaderboards, added on one scale.</strong> Batting and
-              pitching both come from the swing/take board — the same pitch-by-pitch scoring read
-              from the two sides of the plate, which is why a two-way player is the one man who
-              carries both. Defense comes from the fielding run value board: range, arm and double
-              plays, and for a catcher framing, blocking and throwing. Baserunning comes from the
-              baserunning run value board: taking the extra base, and stealing it. A player missing
-              from a board contributes nothing to that column.
-            </p>
-            <p>
-              <strong>The total is summed before it is rounded, so it can differ from the
-              columns.</strong> Every figure here is stored to a tenth of a run and printed as a
-              whole one. Add the four printed columns of the leader and you may get one less than
-              the printed total — that is the rounding, not an error, and it is how the source
-              publishes it too.
-            </p>
-            <p>
-              <strong>Context neutral, always.</strong> Savant also publishes a leverage-weighted
-              version of the swing/take figures, which weighs a swing by how much the game hung on
-              it. This page takes the neutral one on purpose: a leverage-weighted number answers
-              how much a season helped one club win, and cannot be compared across the four skills
-              or across clubs.
-            </p>
-            <p>
-              <strong>A player has to have moved a run to reach the main board.</strong> Without a
-              floor the foot of it fills with September call-ups a fraction of a run from average
-              on twenty plate appearances — true, and not what anybody came to read. The floor is
-              one run in either direction, and it is stated here rather than applied quietly. The
-              four single-skill boards above apply no such floor.
-            </p>
-            <p>
-              <strong>Pitcher or position player is decided by the numbers, not by a
-              position.</strong> A man is a pitcher here when his mound work is the larger half of
-              what he did. A reliever who has taken an at-bat is still a pitcher; a position player
-              who mopped up an inning is still a position player; and a two-way player lands on
-              whichever side his own season puts him, which is the only answer that stays right as
-              a season moves.
-            </p>
-          </section>
+          {/* THE SOURCE LINE, not a method essay. Four hundred words of "how
+              this was counted" under its own heading is the page explaining
+              itself instead of showing itself. What a reader needs from it is
+              where the figures came from and the two constraints that change
+              how a figure READS — the board's floor, and the rounding that lets
+              four printed columns miss the printed total by one. Those are
+              facts about the data, so they sit in the data's own caption. */}
+          <p className="rptsource">
+            Baseball Savant swing/take, fielding and baserunning run value · Context neutral ·
+            Stored to 0.1 run and printed whole, so the columns can miss the total by one ·
+            Main board floor ±{MIN_ABS_RUNS} run, single-skill boards none · Pitcher or position
+            player is decided by which half of a season was the larger
+          </p>
         </>
       )}
 

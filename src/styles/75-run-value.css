@@ -50,6 +50,24 @@
   display: flex;
 }
 
+/* THE POSITION, INDENTED UNDER THE NAME. A bare `.rpt__sub` starts at the
+   cell's left padding, so "CF" printed under the RANK — two columns from the
+   man it describes, reading as a second figure beside his place on the board.
+   The indent walks the fixed run of things the nameplate puts before the name:
+   the rank's own 2.2em floor, the 33px portrait, the 18px club mark, and the
+   three 6px gaps between them. Every one of those is a token or a stated
+   constant, so the sum moves when they move.
+
+   Indent, not an inline chip beside the name: the chip was tried first and it
+   widened the sticky nameplate cell by 57px, which took the board past the
+   scroller and leaked 22px of horizontal scroll onto the page at 390px. A block
+   label costs the cell nothing however far it is pushed — "CF" plus this indent
+   is still well inside the cell's 152px floor. RunValueParts.jsx has the note. */
+.rv__pos {
+  padding-left: calc(2.2em + var(--shot-2xs-w) + 18px + 18px);
+  font-family: var(--font-mono);
+}
+
 /* ---- the figures ------------------------------------------- */
 
 .rv__num {
@@ -245,40 +263,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- the report page's legend ------------------------------ */
-
-/* What each of the four columns counts, under the board that prints them. A
-   definition list rather than a paragraph: a reader checking one column wants
-   to find that column, not read four sentences to reach it. */
-.rvlegend {
-  display: grid;
-  gap: var(--space-3);
-  margin: var(--space-4) 0 0;
-  padding: var(--space-4);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-}
-
-@media (min-width: 640px) {
-  .rvlegend {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.rvlegend__term {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-heading);
-}
-
-.rvlegend__def {
-  margin: 2px 0 0;
-  font-size: var(--fs-small);
-  color: var(--text-muted);
-}
-
 /* ---- the four single-skill boards -------------------------- */
 
 /* Four short boards rather than one four-column table, because they answer four
@@ -294,5 +278,19 @@
 @media (min-width: 720px) {
   .rvleaders {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* THE DEAD GAP AT DESKTOP. `.rpt` is width:100%, and in the auto table layout
+   the slack all lands on the one auto-width column — the nameplate — so at
+   900px the Player column took 490 of 866px and left a 246px void between a
+   man's name and his first figure. Giving each figure column a floor spends
+   that slack on the figures instead: five columns on one rhythm, reading as a
+   ruled block rather than as numbers pushed against the right edge. No effect
+   on a phone, where the board is already tight and the scroller does the work. */
+@media (min-width: 720px) {
+  .rv__board thead th:not(.team),
+  .rv__board td.rv__num {
+    min-width: 104px;
   }
 }

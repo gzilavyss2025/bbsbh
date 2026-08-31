@@ -25,6 +25,19 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // The portrait carries `aria-hidden` (Headshot's own policy) and the name is
 // already text beside it, so the link's accessible name is the name itself and
 // the face announces nothing twice.
+//
+// `sub` — the position — stays a `.rpt__sub` BLOCK under the nameplate, but the
+// board indents it to land under the NAME. Unindented it starts at the cell's
+// left padding, which put "CF" under the RANK, two columns from the man it
+// describes and reading as a second figure beside his place on the board.
+//
+// It is indented rather than inlined after the name, which was the first fix
+// and the wrong one: an inline chip is an unbreakable flex item, so it widened
+// the nameplate cell from 152px to 209px, the board from 383px to 405px, and —
+// through the sticky cell inside the scroller — put 22px of horizontal scroll
+// on the whole PAGE at 390px. A block-level label costs the cell no width at
+// all, however far it is indented, because its own line is far shorter than the
+// cell's minimum. See 75-run-value.css for the indent.
 export function PlayerNameplate({ player, rank, tied, sub }) {
   return (
     <th scope="row" className="team">
@@ -45,7 +58,7 @@ export function PlayerNameplate({ player, rank, tied, sub }) {
           {player.name}
         </PlayerLink>
       </span>
-      {sub ? <span className="rpt__sub">{sub}</span> : null}
+      {sub ? <span className="rpt__sub rv__pos">{sub}</span> : null}
     </th>
   )
 }

@@ -1,4 +1,5 @@
 import '../../styles/68-around-the-game.css'
+import '../../styles/report/chrome.css'
 import { useMemo, useState } from 'react'
 import {
   fetchAbsChallenges,
@@ -50,6 +51,16 @@ import { BarCell } from '../../components/around-the-game/BroadcastBar.jsx'
 // can be measured in runs with the same run-expectancy table the box score's
 // umpire row and the season umpire pages already use. So the runs lead, the
 // rate sits beside them, and everything below asks who is good at this.
+//
+// AND IT MAKES THAT ARGUMENT IN FIGURES, NOT IN PROSE. There is no dek, no note
+// under a section heading and no "how this was counted" essay: eight hundred
+// words wrapped around six boards buries the boards, and every one of those
+// sentences was the page telling a reader what the table beside it already
+// showed. What a figure genuinely cannot be read without stays, moved to where
+// it is read — a sample floor into the column head it qualifies, the call under
+// review into the row header of the man who asked — and the provenance sits in
+// one source line at the foot. Anything longer belongs in this comment, in
+// scripts/gen-abs-challenges.mjs, or in docs/. Not on the page.
 //
 // SPOILER-FREE. A challenge is a ball-strike judgment, not a run
 // (api/around-the-game/absChallenges.js). Nothing on this page reads a score,
@@ -117,9 +128,6 @@ export function AbsChallengesPage() {
         strand={groupLabelFor(ABS_PATH)}
         eyebrow="The Challenge System"
         title="ABS Challenges"
-        dek="Every ball-strike challenge of the season: who called for one, who was right, which
-             plate umpires get overturned, and how many runs the whole thing has moved. A club is
-             issued two, keeps one each time it wins, and loses one each time it does not."
         meta={[
           { label: 'Level', value: shown === 'AAA' ? 'Triple-A' : 'MLB' },
           { label: 'Season', value: data?.season ?? '—' },
@@ -163,47 +171,41 @@ export function AbsChallengesPage() {
               tone="lead"
               value={num1(summary.runsRecovered)}
               label="Runs put back"
-              note={`Across ${commas(summary.success)} overturned calls — the run expectancy each
-                     one moved off the umpire’s call and onto the correct one, added up.`}
+              note={`Over ${commas(summary.success)} overturned calls`}
             />
             <Slab
               value={pct1(summary.successRate)}
               label="Challenges won"
-              note={`${commas(summary.success)} of ${commas(summary.total)}. Close to a coin
-                     flip, which is what a rule that costs a club nothing to lose produces.`}
+              note={`${commas(summary.success)} of ${commas(summary.total)}`}
             />
             <Slab
               value={num2(summary.perGame)}
               label="Challenges per game"
-              note={`Over ${commas(summary.games)} games. ${pct1(
+              note={`${pct1(
                 summary.games ? summary.gamesWithChallenge / summary.games : null,
-              )} of games saw at least one.`}
+              )} of ${commas(summary.games)} games had one`}
             />
             <Slab
               value={big ? num2(big.runs) : '—'}
               label="Biggest single overturn"
-              note={
-                big
-                  ? `${big.playerName}, ${humanDateWithYear(big.date)} — see below.`
-                  : 'Not computed yet.'
-              }
+              note={big ? `${big.playerName} · ${humanDateWithYear(big.date)}` : '—'}
             />
           </SlabRow>
 
-          <BroadcastSection
-            title="Who calls for one"
-            note="A batter can only challenge a called STRIKE, and a catcher or a pitcher can only
-                  challenge a called BALL — so who asks for the review and which kind of call is
-                  under review are one fact, not two. That is the comparison worth having: the
-                  hitter saw the pitch from the box, the catcher caught it, and the pitcher was
-                  sixty feet away."
-          >
+          <BroadcastSection title="Who calls for one">
+            {/* WHAT IS UNDER REVIEW RIDES WITH WHO ASKED, in the row header,
+                rather than in a column of its own. The two are one fact: a
+                batter can only challenge a called strike, a catcher or a
+                pitcher only a called ball. As a column it was three rows of
+                repeated words set right-aligned in mono like a figure, and it
+                took 233px — a quarter of the board — to say what the row label
+                already implies. As a sub-line it costs nothing and the three
+                numbers move left into the space it gave back. */}
             <BoardScroller label="Challenge success rate by who called for it">
               <table className="standings rpt">
                 <thead>
                   <tr>
                     <th className="team">Called by</th>
-                    <th>Reviewing</th>
                     <th>Called</th>
                     <th>Won</th>
                     <th>Success</th>
@@ -214,14 +216,12 @@ export function AbsChallengesPage() {
                     <tr key={r.role}>
                       <th scope="row" className="team">
                         {ROLE_LABEL[r.role] ?? r.role}
+                        {ROLE_CALL[r.role] ? (
+                          <span className="rpt__sub">
+                            on a called {ROLE_CALL[r.role]}
+                          </span>
+                        ) : null}
                       </th>
-                      <td>
-                        {ROLE_CALL[r.role] === 'strike'
-                          ? 'A called strike'
-                          : ROLE_CALL[r.role] === 'ball'
-                            ? 'A called ball'
-                            : '—'}
-                      </td>
                       <td>{commas(r.n)}</td>
                       <td>{commas(r.success)}</td>
                       <td>
@@ -234,22 +234,18 @@ export function AbsChallengesPage() {
                 </tbody>
               </table>
             </BoardScroller>
+            {/* The anomaly line has to carry its own antecedent now: it used to
+                read "do not follow that rule", where "that rule" lived in the
+                section note above it. */}
             {anomalies.length > 0 && (
               <p className="hint">
-                {commas(anomalies.reduce((n, a) => n + a.n, 0))} challenges this season do not
-                follow that rule. The feed recorded a review of a call the challenger’s job should
-                not be able to ask for, so the two splits disagree.
+                {commas(anomalies.reduce((n, a) => n + a.n, 0))} challenges sit outside that
+                split — the feed recorded a review of a call the challenger’s job cannot ask for.
               </p>
             )}
           </BroadcastSection>
 
-          <BroadcastSection
-            title="The clubs"
-            note="Bars are scaled across the league’s own range on the sorted column, not from
-                  zero. “Ran out” counts the games a club spent both of its challenges and had
-                  none left — the cost of a lost challenge is never the run it did not save, it
-                  is the call later in the game it can no longer argue."
-          >
+          <BroadcastSection title="The clubs">
             <div className="rpt-controls" role="group" aria-label="Sort the club board">
               {TEAM_SORTS.map((s) => (
                 <button
@@ -305,31 +301,42 @@ export function AbsChallengesPage() {
             </BoardScroller>
           </BroadcastSection>
 
+          {/* TWO BOARDS, TWO TABLES. These are two independent rankings, and
+              they used to be zipped into ONE table by row index — row 3 of the
+              count board sharing a <tr> with row 3 of the rate board, which
+              relates two men who have nothing to do with each other, and puts
+              the first board's Won/Called columns BETWEEN the two names.
+
+              It also broke the sticky column outright. `.rpt th.team` pins the
+              row-header cell to left:0 so the figures scroll under it; with a
+              second `.team` cell in the same row BOTH pinned to left:0, the
+              right-hand board's name column slid on top of the left-hand one on
+              any horizontal scroll — at 390px, 146px in, "Best success rate"
+              painted over "Most calls overturned" and clipped every name on the
+              left board mid-word, with the Won/Called columns hidden underneath.
+              One sticky column per table is the invariant; two tables keep it. */}
           {players && (
-            <BroadcastSection
-              title="The players"
-              note={`Two boards, because they answer different questions. The first is who has won
-                     the most reviews outright; the second is who is RIGHT most often, and needs a
-                     floor — ${players.minChallenges} challenges — or a man who called for one
-                     review and won it would top the league. ${commas(players.qualified)} players
-                     clear it.`}
-            >
-              <BoardScroller label="Most overturned calls won, and best success rate">
-                <table className="standings rpt">
-                  <thead>
-                    <tr>
-                      <th className="team">Most calls overturned</th>
-                      <th>Won</th>
-                      <th>Called</th>
-                      <th className="team">Best success rate</th>
-                      <th>Success</th>
-                      <th>Called</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {players.byCount.map((p, i) => {
-                      const q = players.byRate[i]
-                      return (
+            <BroadcastSection title="The players">
+              <div className="rptpair">
+                <BoardScroller label="Most overturned calls won">
+                  <table className="standings rpt">
+                    <thead>
+                      <tr>
+                        {/* Both heads carry a sub-line, and the left one says
+                            "no minimum" rather than saying nothing: it keeps
+                            the two headers the same height, so the two boards'
+                            rows line up across the pair, and it answers the
+                            question the right-hand floor raises about it. */}
+                        <th className="team">
+                          Most calls overturned
+                          <span className="rpt__sub">No minimum</span>
+                        </th>
+                        <th>Won</th>
+                        <th>Called</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {players.byCount.map((p) => (
                         <tr key={p.playerId}>
                           <th scope="row" className="team">
                             <PlayerLink id={p.playerId} name={p.name}>
@@ -341,39 +348,50 @@ export function AbsChallengesPage() {
                           </th>
                           <td>{commas(p.success)}</td>
                           <td>{commas(p.n)}</td>
-                          <td className="team">
-                            {q ? (
-                              <>
-                                <PlayerLink id={q.playerId} name={q.name}>
-                                  {q.name}
-                                </PlayerLink>
-                                <span className="rpt__sub">
-                                  {clubShort(clubs, q.teamId)} — {ROLE_LABEL[q.role] ?? q.role}
-                                </span>
-                              </>
-                            ) : (
-                              '—'
-                            )}
-                          </td>
-                          <td>{q ? pct1(q.rate) : '—'}</td>
-                          <td>{q ? commas(q.n) : '—'}</td>
                         </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </BoardScroller>
+                      ))}
+                    </tbody>
+                  </table>
+                </BoardScroller>
+
+                <BoardScroller label="Best challenge success rate">
+                  <table className="standings rpt">
+                    <thead>
+                      <tr>
+                        <th className="team">
+                          Best success rate
+                          <span className="rpt__sub">
+                            Minimum {players.minChallenges} called · {commas(players.qualified)}{' '}
+                            qualify
+                          </span>
+                        </th>
+                        <th>Success</th>
+                        <th>Called</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {players.byRate.map((q) => (
+                        <tr key={q.playerId}>
+                          <th scope="row" className="team">
+                            <PlayerLink id={q.playerId} name={q.name}>
+                              {q.name}
+                            </PlayerLink>
+                            <span className="rpt__sub">
+                              {clubShort(clubs, q.teamId)} — {ROLE_LABEL[q.role] ?? q.role}
+                            </span>
+                          </th>
+                          <td>{pct1(q.rate)}</td>
+                          <td>{commas(q.n)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </BoardScroller>
+              </div>
             </BroadcastSection>
           )}
 
-          <BroadcastSection
-            title="The plate umpires"
-            note={`Which umpires get overturned, over the ${MIN_UMPIRE_GAMES}-game floor a rate
-                   needs to mean anything. THIS IS NOT THE UMPIRE RANKINGS NUMBER. That board
-                   scores every called pitch of a man’s season against the zone; this one scores
-                   only the pitches somebody thought were wrong, which is a small, self-selected
-                   set. A man can sit high on one and low on the other, and neither is mistaken.`}
-          >
+          <BroadcastSection title="The plate umpires">
             <div className="rpt-controls" role="group" aria-label="Sort the umpire board">
               {UMPIRE_SORTS.map((s) => (
                 <button
@@ -392,7 +410,13 @@ export function AbsChallengesPage() {
               <table className="standings rpt">
                 <thead>
                   <tr>
-                    <th className="team">Umpire</th>
+                    {/* The floor rides in the column head it qualifies, where a
+                        reader meets it while reading the column, instead of in
+                        a paragraph above the board. */}
+                    <th className="team">
+                      Umpire
+                      <span className="rpt__sub">Minimum {MIN_UMPIRE_GAMES} games</span>
+                    </th>
                     <th>Games</th>
                     <th>Challenged</th>
                     <th>Per game</th>
@@ -426,13 +450,7 @@ export function AbsChallengesPage() {
             </BoardScroller>
           </BroadcastSection>
 
-          <BroadcastSection
-            title="How close was the call"
-            note="Every challenged pitch, measured from the nearest edge of the strike zone. The
-                  question is whether the system is catching howlers or coin flips — and the
-                  answer is mostly coin flips, which is what the middle of a rule-book zone plus
-                  one baseball’s width looks like from the batter’s box."
-          >
+          <BroadcastSection title="How close was the call">
             <BoardScroller label="Challenges by distance from the zone edge">
               <table className="standings rpt">
                 <thead>
@@ -466,17 +484,13 @@ export function AbsChallengesPage() {
           </BroadcastSection>
 
           {big && (
-            <BroadcastSection
-              title="The biggest overturn of the season"
-              note="One call, measured the same way the whole page is: how much run expectancy the
-                    correction moved."
-            >
+            <BroadcastSection title="The biggest overturn of the season">
               <SlabRow>
                 <Slab
                   tone="lead"
                   value={num2(big.runs)}
                   label="Runs on one pitch"
-                  note={`${inches(big.missInches)} off the edge of the zone.`}
+                  note={`${inches(big.missInches)} off the edge`}
                 />
                 <Slab
                   value={`${big.half === 'top' ? 'Top' : 'Bottom'} ${big.inning}`}
@@ -486,18 +500,20 @@ export function AbsChallengesPage() {
                 <Slab
                   value={clubShort(clubs, big.teamId)}
                   label="Challenged"
-                  note={`Against ${clubName(clubs, big.oppId)}.`}
+                  note={`Against ${clubName(clubs, big.oppId)}`}
                 />
                 <Slab
                   value={big.callType === 'strike' ? 'Strike' : 'Ball'}
                   label="What was called"
-                  note="…and what the challenge took off the board."
+                  note="Overturned"
                 />
               </SlabRow>
+              {/* The space before the comma was a stray {' '} after the player
+                  link, and it printed: "Iván Herrera , the catcher, asked…". */}
               <p className="hint">
                 <PlayerLink id={big.playerId} name={big.playerName}>
                   {big.playerName}
-                </PlayerLink>{' '}
+                </PlayerLink>
                 , {ROLE_IN_PROSE[big.role] ?? 'the club'}, asked for the review, and{' '}
                 {big.umpireId ? (
                   <UmpireLink id={big.umpireId} name={big.umpireName}>
@@ -511,48 +527,18 @@ export function AbsChallengesPage() {
             </BroadcastSection>
           )}
 
-          <section className="method">
-            <h2>How this was counted</h2>
-            <p>
-              <strong>One row per challenge, from the game’s own feed.</strong> Every completed
-              game is read once, and each ABS review it carries becomes a row: who asked, what the
-              umpire had called, whether it was overturned, which inning, and which plate umpire.
-              MLB’s older manager’s-replay reviews look similar in the feed and carry the same
-              club id; they are excluded on the review’s own type code, so nothing here counts a
-              pickoff argument as a ball-strike challenge.
-            </p>
-            <p>
-              <strong>Both levels that run the system.</strong> MLB started using the challenge
-              system this season. Triple-A has run it for several, and its games are on the board
-              as their own level rather than blended into MLB’s — different hitters, different
-              catchers, different umpires, and a league that has had years to learn the rule.
-              Use the switch above the boards to move between them. Regular season and
-              postseason count; the All-Star Game does not.
-            </p>
-            <p>
-              <strong>Runs are run expectancy, not runs that scored.</strong> Every base-out-count
-              state in baseball has an average number of runs that follow it. An overturned call
-              moves the game from one of those states to another, and the difference is what the
-              call was worth. It is the same table and the same arithmetic behind the plate
-              umpire’s figure in a box score, so the numbers here and there agree by
-              construction. A pitch whose tracking is missing contributes nothing to the run
-              total and still counts as a challenge.
-            </p>
-            <p>
-              <strong>What the umpire called is not always what the feed prints.</strong> When a
-              challenge succeeds, the feed rewrites the pitch to the corrected call — so the
-              printed call is the umpire’s own only when the challenge failed. Every call type on
-              this page is flipped back where it needs to be. It is the one trap in this data,
-              and getting it wrong would put every batter in the catcher’s column.
-            </p>
-            <p>
-              <strong>Distance is measured from the buffered zone.</strong> A pitch is a strike if
-              any part of the ball could clip the rule book’s zone — the plate’s half width plus a
-              baseball’s radius on every edge, against that batter’s own zone rather than a league
-              constant. “Off the edge” is how far the challenged pitch sat from the nearest of
-              those four boundaries.
-            </p>
-          </section>
+          {/* THE SOURCE LINE, not a method essay — see RunValuePage for the
+              argument. What survives here is the provenance, the scope, and the
+              one thing a reader cannot infer from the boards: the run figures
+              are run EXPECTANCY, not runs that scored. The feed's corrected-call
+              trap and the buffered-zone geometry are the generator's problem,
+              written up in scripts/gen-abs-challenges.mjs where the code that
+              has to get them right can be read beside them. */}
+          <p className="rptsource">
+            One row per ABS review, from each completed game’s own feed · Regular season and
+            postseason, no All-Star Game · Runs are run expectancy moved, not runs that scored ·
+            Distance is measured from the buffered rule-book zone, per batter
+          </p>
         </>
       )}
 
