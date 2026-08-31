@@ -164,5 +164,7 @@
                               components/admin/contracts/{TierBar,ReviewQueue,
                               DecisionPane,CandidateList,RosterSearch}.jsx
      74a-contract-lookup      components/admin/contracts/LookupDeck.jsx
+     report/chrome            screens/around-the-game/RunValuePage.jsx,
+                              screens/around-the-game/AbsChallengesPage.jsx
      research/diary           screens/research/ResearchDiaryPage.jsx
    ------------------------------------------------------------ */

@@ -35,6 +35,7 @@ import {
   playerBoards,
   roleRows,
   callSplitAnomalies,
+  callSplitOffBy,
   missBands,
   ROLE_CALL,
   MIN_PLAYER_CHALLENGES,
@@ -389,6 +390,50 @@ test('callSplitAnomalies: a call the challenger’s job cannot ask for is surfac
   )
   const found = callSplitAnomalies(summaryFor(odd, 'MLB'))
   assert.equal(found.length, 2)
+})
+
+// callSplitOffBy — how many challenges the disagreement is worth. The first of
+// these fails against the old arithmetic, which added the disagreeing rows'
+// `n` and so reported 21 challenges for one bad row (4,813 on the real
+// Triple-A board). The second pins the case that arithmetic got right by luck,
+// and the one a plain sum of `off` would get wrong in the other direction.
+test('callSplitOffBy: a challenger at no recognisable position is ONE challenge off, not a bucket', () => {
+  // The Triple-A board's real case. Twenty batters challenging called strikes,
+  // twenty catchers challenging called balls, and one man the box score put at
+  // no position anybody can read — whose challenge still lands in the ball
+  // column. The ball bucket is then 21 against the 20 the roles predict.
+  const rows = []
+  for (let i = 0; i < 20; i += 1) rows.push(row({ seq: i, player_id: 100 + i }))
+  for (let i = 0; i < 20; i += 1) {
+    rows.push(row({ seq: 100 + i, player_id: 200 + i, role: 'catcher', call_type: 'ball' }))
+  }
+  rows.push(row({ seq: 999, player_id: 999, role: 'other', call_type: 'ball' }))
+
+  const summary = summaryFor(buildExport(rows, [game({ challenges: 41 })], { season: 2026 }), 'MLB')
+  const found = callSplitAnomalies(summary)
+  assert.equal(found.length, 1)
+  assert.equal(found[0].callType, 'ball')
+  assert.equal(found[0].n, 21)
+  assert.equal(callSplitOffBy(found), 1)
+})
+
+test('callSplitOffBy: a misfiled challenge moves two buckets and is still one challenge', () => {
+  // A batter recorded against a called BALL. It is absent from the strike
+  // bucket the roles predict AND present in the ball bucket they do not, so
+  // both rows disagree — by one challenge between them, not two.
+  const found = callSplitAnomalies(
+    summaryFor(buildExport([row({ call_type: 'ball' })], [game({})], { season: 2026 }), 'MLB'),
+  )
+  assert.equal(found.length, 2)
+  assert.deepEqual(
+    found.map((c) => c.off).sort((a, b) => a - b),
+    [-1, 1],
+  )
+  assert.equal(callSplitOffBy(found), 1)
+})
+
+test('callSplitOffBy: a season that holds the rule is nothing off', () => {
+  assert.equal(callSplitOffBy(callSplitAnomalies(summaryFor(data, 'MLB'))), 0)
 })
 
 test('missBands: shares add to one over the challenges that carry a distance', () => {

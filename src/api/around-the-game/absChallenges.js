@@ -100,7 +100,9 @@ export const UMPIRE_SORTS = [
 // Plate umpires who worked at least MIN_UMPIRE_GAMES swept games, ranked on
 // the share of challenges against them that stood up.
 //
-// THIS IS NOT THE UMPIRE RANKINGS PAGE'S NUMBER, and the page says so. That
+// THIS IS NOT THE UMPIRE RANKINGS PAGE'S NUMBER, and the page says so twice:
+// "challenged pitches only" under the column head, and the whole distinction in
+// the source line at the foot (AbsChallengesPage.jsx). That
 // board scores EVERY called pitch against the rule-book zone. This one scores
 // only the pitches a player thought were wrong — a much smaller, self-selected
 // set — so a man can rank well on one and poorly on the other without either
@@ -160,6 +162,10 @@ export function roleRows(summary) {
 // not: the two are the same fact read twice (see ROLE_CALL). This returns the
 // rows that BREAK that, so the page can print them if the feed ever produces
 // one rather than quietly asserting a rule that stopped holding.
+//
+// Each row carries `off`, the signed distance between what the call split holds
+// and what the role rows predict. The row's own `n` is the WHOLE bucket, which
+// is not what disagrees — see callSplitOffBy.
 export function callSplitAnomalies(summary) {
   const roles = summary?.byRole ?? []
   const calls = summary?.byCall ?? []
@@ -168,7 +174,32 @@ export function callSplitAnomalies(summary) {
     const call = ROLE_CALL[r.role]
     if (call) expected[call] += r.n
   }
-  return calls.filter((c) => c.n !== expected[c.callType])
+  return calls
+    .map((c) => ({ ...c, off: c.n - (expected[c.callType] ?? 0) }))
+    .filter((c) => c.off !== 0)
+}
+
+// HOW MANY CHALLENGES THE DISAGREEMENT IS WORTH, which is not the size of the
+// rows that disagree. A bucket holding one challenge it should not hold still
+// holds every challenge it should, so printing its `n` reports a whole season's
+// worth of calls as broken — 4,813 for a single miscoded row on the Triple-A
+// board, which is the sort of number that makes a reader distrust the page it
+// was meant to keep honest.
+//
+// Neither is it the sum of the rows' `off`. ONE misfiled challenge moves two of
+// them: it leaves the bucket it belonged in and lands in the one it did not, so
+// adding counts it twice. The larger of the two sides is the smallest number of
+// challenges that explains what the feed printed, and it stays right in the
+// other case as well — a challenger at no recognisable position is predicted
+// into no bucket at all, leaving the call split one row heavy and nothing light.
+export function callSplitOffBy(anomalies) {
+  let over = 0
+  let under = 0
+  for (const a of anomalies ?? []) {
+    if (a.off > 0) over += a.off
+    else under -= a.off
+  }
+  return Math.max(over, under)
 }
 
 // Percentage of the season's challenges that fell in each distance band, so

@@ -38,9 +38,12 @@ export const fetchRunValue = staticJson('/data/run-value.json', {
 // big the numbers tend to be — and holding it in one place is what stops the
 // report board, the player card and the club card from each choosing their own.
 //
-// `short` is for a column head with no room; `about` is the one sentence the
-// page prints under the board, because "run value" means nothing to a reader
-// who has not met it before and a legend is where they will look.
+// `short` is for a column head with no room, and the key under the board pairs
+// it back with `label` so no column is available only as an abbreviation. There
+// is no third field for a definition of the component: the page prints the key
+// and nothing else now, and an `about`-style sentence that no surface renders is
+// a comment claiming a consumer it does not have. If one is ever wanted again,
+// it belongs in docs/ or in the surface that prints it.
 //
 // `inProse` is the same word mid-sentence, written out rather than lower-cased
 // from `label` at the call site — the convention absChallenges.js's
@@ -53,28 +56,24 @@ export const COMPONENTS = [
     label: 'Batting',
     short: 'Bat',
     inProse: 'batting',
-    about: 'What every swing and take was worth at the plate.',
   },
   {
     key: 'fld',
     label: 'Defense',
     short: 'Def',
     inProse: 'defense',
-    about: 'Range, arm and double plays — and for a catcher, framing, blocking and throwing.',
   },
   {
     key: 'run',
     label: 'Running',
     short: 'Run',
     inProse: 'baserunning',
-    about: 'Taking the extra base, and stealing it.',
   },
   {
     key: 'pit',
     label: 'Pitching',
     short: 'Pit',
     inProse: 'pitching',
-    about: 'The same pitch-by-pitch scoring as batting, read from the mound.',
   },
 ]
 

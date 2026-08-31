@@ -39,6 +39,19 @@
   min-width: 152px;
 }
 
+/* THE PORTRAIT, ONE RUNG UP THE SHARED LADDER (tokens/layout.css) WHERE THERE
+   IS ROOM FOR IT. A leader board is a page a reader looks at faces on, and the
+   box-score rung — set for a one-line note, not for twenty-five rows of it —
+   was too small at the width this page is usually read at. The crop is
+   identical at every rung, so this is scale only.
+
+   Not on a phone, though, and that is the whole reason for the query. The
+   nameplate's fixed furniture — rank, portrait, club mark, three gaps — comes
+   off the top of a sticky column that is already sharing 358px with five figure
+   columns. Six more pixels of portrait took "Pete Crow-Armstrong CF" from one
+   line to three and the row from 69px to 100. Below 620px the old rung keeps
+   the name on the fewest lines it can manage, which is what a phone needs from
+   this board; above it, the bigger face costs nothing anyone can see. */
 .rv__nameplate .shot {
   flex: none;
   width: var(--shot-2xs-w);
@@ -46,8 +59,61 @@
   border-radius: var(--radius-xs);
 }
 
+@media (min-width: 620px) {
+  .rv__nameplate .shot {
+    width: var(--shot-xs-w);
+    height: var(--shot-xs-h);
+  }
+}
+
 .rv__face {
   display: flex;
+}
+
+/* NAME AND POSITION, ONE LINE. The two share a wrapper so they are a single
+   flex item inside the nameplate: the position then sits in the name's own line
+   box, wraps with it, and adds nothing to the cell's minimum width. As its own
+   flex item it was unbreakable, and together with the bigger portrait it pushed
+   the board past its scroller and leaked horizontal scroll onto the page at
+   390px. `min-width: 0` lets the wrapper shrink so a long name wraps inside the
+   cell rather than widening it — the board has always preferred a name on two
+   lines to a name cut off. RunValueParts.jsx carries the note.
+
+   A notch under the name (12px against its 13px), and in mono: a position is a
+   code, not a word, and it should not compete with the man's name. */
+.rv__who {
+  min-width: 0;
+}
+
+.rv__pos {
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+/* ---- the board's controls ---------------------------------- */
+
+/* ONE ROW, TWO GROUPS. Who to rank sits left, which end of the board sits
+   right. As two stacked `.rpt-controls` rows they read as two separate
+   decisions above one table; on one line, with the ends pushed apart, they read
+   as what they are — the two dials on the same board. Each group keeps its own
+   `.rpt-controls` (and its own aria-label), so the chips inside still wrap and
+   the two questions stay two questions for a screen reader.
+
+   It wraps rather than squeezing: on a narrow phone the direction pair drops
+   under the role chips, which is the stacked layout again, and correct there. */
+.rv__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0 var(--space-4);
+}
+
+.rv__controls > .rpt-controls {
+  margin-bottom: var(--space-2);
 }
 
 /* ---- the figures ------------------------------------------- */
@@ -245,40 +311,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- the report page's legend ------------------------------ */
-
-/* What each of the four columns counts, under the board that prints them. A
-   definition list rather than a paragraph: a reader checking one column wants
-   to find that column, not read four sentences to reach it. */
-.rvlegend {
-  display: grid;
-  gap: var(--space-3);
-  margin: var(--space-4) 0 0;
-  padding: var(--space-4);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-}
-
-@media (min-width: 640px) {
-  .rvlegend {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.rvlegend__term {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-heading);
-}
-
-.rvlegend__def {
-  margin: 2px 0 0;
-  font-size: var(--fs-small);
-  color: var(--text-muted);
-}
-
 /* ---- the four single-skill boards -------------------------- */
 
 /* Four short boards rather than one four-column table, because they answer four
@@ -294,5 +326,26 @@
 @media (min-width: 720px) {
   .rvleaders {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* THE DEAD GAP AT DESKTOP. `.rpt` is width:100%, and in the auto table layout
+   the slack all lands on the one auto-width column — the nameplate — so at
+   900px the Player column took 490 of 866px and left a 246px void between a
+   man's name and his first figure. Giving each figure column a floor spends
+   that slack on the figures instead: five columns on one rhythm, reading as a
+   ruled block rather than as numbers pushed against the right edge. No effect
+   on a phone, where the board is already tight and the scroller does the work.
+
+   THE MAIN BOARD ONLY, which is why it keys on the modifier. The four
+   single-skill boards wear `.rv__board` too, for the nameplate cell, but they
+   have two columns and no dead gap to spend — and at this same breakpoint
+   `.rvleaders` puts them two-up in roughly 336px halves, where 104px off a
+   column already carrying rank, portrait and club mark is width they do not
+   have to give. */
+@media (min-width: 720px) {
+  .rv__board--main thead th:not(.team),
+  .rv__board--main td.rv__num {
+    min-width: 104px;
   }
 }

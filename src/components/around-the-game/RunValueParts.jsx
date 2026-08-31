@@ -25,6 +25,18 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // The portrait carries `aria-hidden` (Headshot's own policy) and the name is
 // already text beside it, so the link's accessible name is the name itself and
 // the face announces nothing twice.
+//
+// `sub` — the position — sits ON THE NAME'S OWN LINE, immediately after it, at a
+// notch under the name's size. It rode under the nameplate as a `.rpt__sub`
+// block first, which put "CF" beneath the RANK, two columns from the man it
+// describes and reading as a second figure beside his place on the board.
+//
+// THE NAME AND THE POSITION ARE ONE FLEX ITEM, not two, and that is the part
+// worth reading twice. As its own item the position is unbreakable, so it added
+// its full width to the cell's minimum — with the bigger portrait that pushed
+// the board past its scroller and leaked horizontal scroll onto the whole PAGE
+// at 390px. Inside the link's own wrapper it shares the name's line box, wraps
+// with it, and contributes nothing the name did not already contribute.
 export function PlayerNameplate({ player, rank, tied, sub }) {
   return (
     <th scope="row" className="team">
@@ -41,11 +53,13 @@ export function PlayerNameplate({ player, rank, tied, sub }) {
         {player.teamId != null ? (
           <TeamLogo teamId={player.teamId} name={player.name} size={18} />
         ) : null}
-        <PlayerLink id={player.id} name={player.name}>
-          {player.name}
-        </PlayerLink>
+        <span className="rv__who">
+          <PlayerLink id={player.id} name={player.name}>
+            {player.name}
+          </PlayerLink>
+          {sub ? <span className="rv__pos">{sub}</span> : null}
+        </span>
       </span>
-      {sub ? <span className="rpt__sub">{sub}</span> : null}
     </th>
   )
 }
