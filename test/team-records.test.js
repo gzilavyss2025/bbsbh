@@ -9,6 +9,8 @@
 // a set straddling the All-Star break.
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFileSync } from 'node:fs'
+import { DatabaseSync } from 'node:sqlite'
 import {
   inningRuns,
   encodeInnings,
@@ -22,6 +24,11 @@ import {
   isQualityStart,
   starterLine,
   battedAroundHalves,
+  starterProfile,
+  firstPitcherKind,
+  firstPitchersOnFile,
+  mergeRoleFacts,
+  refreshRoleFacts,
   tagSeries,
   isGetawayDay,
   dailyDivisionRanks,
@@ -181,6 +188,131 @@ test('a side with no pitching line degrades to nulls rather than throwing', () =
 })
 
 // ---------------------------------------------------------------------------
+// The first pitcher's role
+// ---------------------------------------------------------------------------
+
+// A reliever: two starts in forty appearances. A rotation arm: every
+// appearance a start.
+const RELIEF = { gamesPlayed: 40, gamesStarted: 2 }
+const ROTATION = { gamesPlayed: 22, gamesStarted: 22 }
+
+test('five outs is inside the short-outing test and six is outside it', () => {
+  assert.equal(firstPitcherKind(5, RELIEF), 1)
+  assert.equal(firstPitcherKind(6, RELIEF), 0)
+  // A first pitcher who never recorded an out is still a short outing; a side
+  // with no pitching line at all is not an outing to classify.
+  assert.equal(firstPitcherKind(0, RELIEF), 1)
+  assert.equal(firstPitcherKind(null, RELIEF), 0)
+})
+
+test('the same short outing is an opener from a reliever and an early exit from a starter', () => {
+  assert.equal(firstPitcherKind(4, RELIEF), 1)
+  assert.equal(firstPitcherKind(4, ROTATION), 2)
+})
+
+test('half the appearances as starts is a rotation profile; one fewer is relief', () => {
+  assert.equal(starterProfile({ gamesPlayed: 10, gamesStarted: 5 }), 'rotation')
+  assert.equal(starterProfile({ gamesPlayed: 10, gamesStarted: 4 }), 'relief')
+})
+
+test('a role the season stats cannot answer stays unknown rather than being guessed', () => {
+  assert.equal(starterProfile(undefined), null)
+  // A pitcher on the level's list who has not appeared: no denominator.
+  assert.equal(starterProfile({ gamesPlayed: 0, gamesStarted: 0 }), null)
+  assert.equal(firstPitcherKind(3, null), 0)
+})
+
+test('a level whose role fetch failed keeps every row it already had', () => {
+  const stored = new Map([
+    ['1:100', { sportId: 1, personId: 100, gamesPlayed: 40, gamesStarted: 1 }],
+    ['11:200', { sportId: 11, personId: 200, gamesPlayed: 20, gamesStarted: 20 }],
+  ])
+  const merged = mergeRoleFacts(
+    stored,
+    [
+      { sportId: 1, roles: { 100: { gamesPlayed: 41, gamesStarted: 1 } } },
+      { sportId: 11, roles: null },
+    ],
+    new Set(['1:100', '11:200']),
+  )
+  assert.equal(merged.get('1:100').gamesPlayed, 41)
+  assert.deepEqual(merged.get('11:200'), {
+    sportId: 11,
+    personId: 200,
+    gamesPlayed: 20,
+    gamesStarted: 20,
+  })
+})
+
+test('only the arms that threw a first pitch on file are kept', () => {
+  const ledger = [
+    { sport_id: 1, payload_json: JSON.stringify({ starterId: 100, oppStarterId: 200 }) },
+    { sport_id: 1, payload_json: JSON.stringify({ starterId: 200, oppStarterId: 100 }) },
+  ]
+  const wanted = firstPitchersOnFile(ledger)
+  assert.deepEqual([...wanted].sort(), ['1:100', '1:200'])
+  const merged = mergeRoleFacts(
+    new Map(),
+    [{ sportId: 1, roles: { 100: RELIEF, 200: ROTATION, 999: ROTATION } }],
+    wanted,
+  )
+  assert.deepEqual([...merged.keys()].sort(), ['1:100', '1:200'])
+})
+
+// The refresh against a real (in-memory) database, so the table all of this
+// rests on is exercised rather than assumed.
+const schemaDb = () => {
+  const db = new DatabaseSync(':memory:')
+  db.exec(readFileSync(new URL('../scripts/lib/schema.sql', import.meta.url), 'utf8'))
+  db.prepare(
+    `INSERT INTO team_record_games
+       (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json)
+     VALUES (1, 158, 2026, 1, '2026-04-01', 10, 'W', ?)`,
+  ).run(JSON.stringify({ starterId: 100, oppStarterId: 200 }))
+  return db
+}
+
+test('a refresh that fails leaves the last successful role facts on file', async () => {
+  const db = schemaDb()
+  db.prepare(
+    `INSERT INTO team_record_pitcher_roles
+       (person_id, season, sport_id, games_played, games_started) VALUES (?, ?, ?, ?, ?)`,
+  ).run(100, 2026, 1, 40, 1)
+  const line = await refreshRoleFacts(db, 2026, [1], async () => null)
+  assert.deepEqual(
+    db
+      .prepare('SELECT person_id, games_played FROM team_record_pitcher_roles')
+      .all()
+      .map((r) => [r.person_id, r.games_played]),
+    [[100, 40]],
+  )
+  assert.match(line, /kept the last snapshot for sportId 1/)
+  db.close()
+})
+
+test('a refresh that succeeds stores the ledger first pitchers and nobody else', async () => {
+  const db = schemaDb()
+  await refreshRoleFacts(db, 2026, [1], async () => ({
+    100: { gamesPlayed: 41, gamesStarted: 1 },
+    200: { gamesPlayed: 22, gamesStarted: 22 },
+    999: { gamesPlayed: 60, gamesStarted: 0 },
+  }))
+  assert.deepEqual(
+    db
+      .prepare(
+        'SELECT person_id, games_played, games_started FROM team_record_pitcher_roles ORDER BY person_id',
+      )
+      .all()
+      .map((r) => [r.person_id, r.games_played, r.games_started]),
+    [
+      [100, 41, 1],
+      [200, 22, 22],
+    ],
+  )
+  db.close()
+})
+
+// ---------------------------------------------------------------------------
 // battedAroundHalves
 // ---------------------------------------------------------------------------
 
@@ -314,13 +446,40 @@ test('an unresolved starting hand counts in neither the RHS nor the LHS row', ()
   assert.equal(rowsOf(result, 'Starting pitching', 'Vs. right-handed starter'), undefined)
 })
 
-test('an opener row is a length heuristic, not a role flag — 5 outs or fewer either side', () => {
+test('the opener and early-exit rows read the role flag, on the club and the opponent alike', () => {
   const result = teamRecordsFor(shard([
-    row({ si: 5, oi: 21 }),
-    row({ d: '2026-04-02', si: 21, oi: 3, r: 'L' }),
+    row({ sk: 1, ok: 2 }),
+    row({ d: '2026-04-02', sk: 2, ok: 1, r: 'L' }),
   ]))
   assert.equal(rowsOf(result, 'Starting pitching', 'Started a game with an opener').v, '1-0')
+  assert.equal(rowsOf(result, 'Starting pitching', 'Opposing starter exits before 2').v, '1-0')
   assert.equal(rowsOf(result, 'Starting pitching', 'Faced an opener').v, '0-1')
+  assert.equal(rowsOf(result, 'Starting pitching', 'Starter exits before 2 innings').v, '0-1')
+})
+
+test('a first pitcher who recorded no out is a short outing, not a missing one', () => {
+  // The generator writes `si`/`oi` at zero rather than omitting them, so the
+  // shortest outing in baseball is counted rather than read as "no line".
+  const result = teamRecordsFor(shard([row({ si: 0, oi: 0, sk: 1, ok: 2 })]))
+  assert.equal(rowsOf(result, 'Starting pitching', 'Starter goes under 6').v, '1-0')
+  assert.equal(rowsOf(result, 'Starting pitching', 'Opposing starter under 6').v, '1-0')
+  assert.equal(rowsOf(result, 'Starting pitching', 'Started a game with an opener').v, '1-0')
+  assert.equal(rowsOf(result, 'Starting pitching', 'Opposing starter exits before 2').v, '1-0')
+  assert.equal(rowsOf(result, 'Starting pitching', 'Quality start'), undefined)
+})
+
+test('a short outing with no role flag enters neither specialized row, and still counts under 6', () => {
+  const result = teamRecordsFor(shard([row({ si: 4, oi: 4 })]))
+  for (const k of [
+    'Started a game with an opener',
+    'Faced an opener',
+    'Starter exits before 2 innings',
+    'Opposing starter exits before 2',
+  ]) {
+    assert.equal(rowsOf(result, 'Starting pitching', k), undefined)
+  }
+  assert.equal(rowsOf(result, 'Starting pitching', 'Starter goes under 6').v, '1-0')
+  assert.equal(rowsOf(result, 'Starting pitching', 'Opposing starter under 6').v, '1-0')
 })
 
 test('the cutoff drops later games entirely, so a dated page cannot look ahead', () => {

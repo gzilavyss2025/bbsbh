@@ -282,7 +282,48 @@ don't run these by hand.
   other endpoint carries. Pitcher handedness is an EXPORT-time join off one bulk
   `/sports/{id}/players` call per level, same pattern and reasoning as
   `gen-pitch-arsenal.mjs`'s `throws`; an unresolved hand counts in neither the
-  vs-RHS nor the vs-LHS row rather than being guessed. Series boundaries, sweeps
+  vs-RHS nor the vs-LHS row rather than being guessed.
+  **The opener split is a second such join, and the only inference here.** A
+  planned opener and a starter pulled after five outs are the same shape in the
+  feed: statsapi carries no starter/reliever field, and no note or flag marks a
+  start as planned short, at any level. Length alone will not separate them —
+  over the 2026 MLB season about a quarter of the first-pitcher appearances of
+  five outs or fewer belonged to pitchers who start for a living, while the
+  next band up (six to eight outs) is majority real starter, which is what
+  pins the five-out ceiling where it is. So the pitcher's OWN SEASON at that
+  level decides it: `gamesStarted / gamesPlayed >= 0.5` reads as a rotation
+  profile and anything below it as relief, off one bulk
+  `/stats?stats=season&group=pitching&sportId=` call per level per run. A short
+  outing by a relief profile ships as an opener, by a rotation profile as a
+  starter who exited early, and a role the join cannot answer ships as NEITHER
+  — the general "Starter goes under 6" row still holds that game. Half is a
+  judgement call rather than a standard, so it lives as a named constant in
+  `scripts/lib/team-records.mjs` and moving it costs `--export-only`.
+  Those `gamesStarted` / `gamesPlayed` facts are PERSISTED, in the group's own
+  `team_record_pitcher_roles` table, for the only reason that matters here: the
+  export rewrites every club file on every run, so one failed response would
+  otherwise strip two records from 150 shards at once and nothing about the
+  output would look wrong. A level whose refresh fails writes nothing and its
+  last good snapshot stands. The refresh rides with a sweep and never with
+  `--export-only`; `--export-only --refresh-roles` runs it alone, which is how
+  a season's snapshot is first filled and how a failed level is repaired.
+  **Verified against statsapi's own splits**, which publishes eight of these
+  records per club at every level (home, away, vs. LHS, vs. RHS, day, night,
+  one-run, extra-inning — one `/standings` call per league) and so makes a free
+  oracle for a ledger this size. Over all 30 MLB clubs through 2026-08-16, the
+  overall record and the home / away / one-run / extra-inning splits matched
+  EXACTLY, and vs-LHS/vs-RHS matched for 29 of 30. Two disagreements are known
+  and deliberate. Day/night differs by one game on 14 clubs, in BOTH
+  directions; nine of those are a doubleheader whose second game statsapi's
+  standings files as a day game while its own schedule feed calls it night
+  (Tampa Bay at Boston, 2026-07-17: a split doubleheader whose nightcap started
+  7:10pm local and carries `dayNight: night`), and this generator takes the
+  game's own `dayNight`, because that is what the game says about itself. And
+  one Padres game's starting hand differs, because the starter here is always
+  the boxscore's `pitchers[0]` — whoever actually threw the first pitch —
+  rather than whoever the league later credits with the start. Re-run the check
+  after changing anything in the generator's linescore handling.
+  Series boundaries, sweeps
   and getaway days come from the LEDGER, not the feed's `seriesGameNumber` /
   `gamesInSeries` — those describe the series as SCHEDULED, and a rained-out
   middle game leaves them describing one that never happened. Daily division
