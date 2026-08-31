@@ -636,6 +636,36 @@
   margin-bottom: 0;
 }
 
+/* THE BOARD SCROLLER'S CONTAINMENT — why the whole page stopped sliding
+   sideways. A board wider than its scroller used to widen the ROOT: at 390px
+   /doubleheaders sat 171px over the viewport and /run-value 2px over it, so
+   the page itself scrolled under a thumb. `overflow-x: auto` on `.rpt-region`
+   did not stop that on its own — it clips what the region PAINTS, but the
+   table's layout overflow still counted toward an ancestor's scrollable area,
+   and the root is the ancestor that shows it. A page that slides a few pixels
+   for no visible reason reads as broken in a way the cause never explains.
+
+   `contain: paint` closes it. The box promises that nothing inside it paints
+   outside it, so the overflow stops at the region instead of propagating up.
+   Sticky columns still pin: the scroller is the scrollport the pinned cell
+   resolves against, and it sits INSIDE the containment rather than across it.
+   At 390px, with every board scrolled fully right, `th.team` measures 0px from
+   its region's left edge — the same as before. Nothing on these pages paints
+   outside a board either: every bar, meter and strip is a positioned span its
+   own cell clips, and the player hover card is mounted at the app root
+   (App.jsx), not in the table.
+
+   Measured at 390, 430, 900 and 1280: root scroll width equals the viewport on
+   all seven pages after this, against 171px and 131px of leak on
+   /doubleheaders and 2px on /run-value before it. Five of the seven measured
+   clean already — the fault needs a particular board geometry to show — so for
+   those this is a guard, not a repair. It lives here rather than in
+   report/chrome.css because this is the one stylesheet all seven report
+   screens import, and the rule belongs wherever `.rpt-region` is defined. */
+.rpt-region {
+  contain: paint;
+}
+
 /* The board scroller's focus ring. `.ledger-wrap` was never focusable before
    BoardScroller.jsx made it a keyboard-reachable region, so it had no focus
    treatment at all — and a focus stop a keyboard user cannot see is barely

@@ -82,26 +82,3 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
-/* ---- the scroller's containment ---------------------------- */
-
-/* A BOARD WIDER THAN ITS SCROLLER USED TO SCROLL THE WHOLE PAGE SIDEWAYS.
-   `.rpt-region` already clips with `overflow-x: auto`, but layout overflow from
-   the table inside it still reached the root's scroll width: /run-value sat 2px
-   over a 390px viewport before this, and 8px once the nameplate carried a
-   bigger portrait and the position on the name's line. A page that slides
-   under your thumb by a few pixels reads as broken in a way the cause never
-   explains.
-
-   `contain: paint` closes it — the box promises nothing paints outside it, so
-   the overflow stops here instead of propagating. Sticky still works: the
-   scroller is the scrollport the pinned cell resolves against, and it is inside
-   the containment, not across it. Measured at 390px: root scroll width equals
-   the viewport with a board 476px wide inside.
-
-   Scoped to this stylesheet, so it reaches /run-value and /abs-challenges and
-   not the five report pages that do not load it. They have the same latent
-   fault and want the same line, in their own change. */
-.rpt-region {
-  contain: paint;
-}
