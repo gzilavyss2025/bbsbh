@@ -25,6 +25,46 @@ test('sanitizeOverrides drops an unrecognized rowKey shape', () => {
   assert.deepEqual(clean, {})
 })
 
+// BOTH KEY SHAPES PASS, and they have to for as long as an un-migrated
+// correction can still sit in Redis. A row is named by a content hash now
+// (ADR-0069); it used to be named by its position in the source CSV. This
+// endpoint drops what it does not match, so rejecting the old shape would hide
+// a stored correction from the very migration written to move it.
+test('sanitizeOverrides keeps both the content and the legacy rowKey shape', () => {
+  const clean = sanitizeOverrides({
+    'salaries#3f0c7a1e58d4b269': JSON.stringify({ mlbId: 605141 }),
+    'salaries#24340': JSON.stringify({ mlbId: 279578 }),
+  })
+  assert.equal(clean['salaries#3f0c7a1e58d4b269'].mlbId, 605141)
+  assert.equal(clean['salaries#24340'].mlbId, 279578)
+})
+
+test('sanitizeOverrides drops a hash that is the wrong length or not hex', () => {
+  // The two shapes are disjoint by length, which is what stops one being read
+  // as the other. A near-miss is a typo, not a third shape.
+  const clean = sanitizeOverrides({
+    'salaries#3f0c7a1e58d4b2': JSON.stringify({ mlbId: 1 }),
+    'salaries#3f0c7a1e58d4b2690': JSON.stringify({ mlbId: 1 }),
+    'salaries#3f0c7a1e58d4b26g': JSON.stringify({ mlbId: 1 }),
+    'salaries#3F0C7A1E58D4B269': JSON.stringify({ mlbId: 1 }),
+    'salaries#12345678': JSON.stringify({ mlbId: 1 }),
+  })
+  // All five are refused: fifteen hex characters, seventeen, a non-hex digit,
+  // upper case, and a positional index eight digits wide — wider than any of
+  // these four files can address, and the width cap is what keeps the two
+  // shapes from overlapping.
+  assert.deepEqual(Object.keys(clean), [])
+})
+
+test('a patch may name a row under either key shape', () => {
+  const merged = mergeOverrides(
+    {},
+    { 'arbitration#1219': { mlbId: 571510 }, 'arbitration#00f2f1fb36d1742a': { mlbId: 571510 } },
+    STAMP,
+  )
+  assert.deepEqual(Object.keys(merged).sort(), ['arbitration#00f2f1fb36d1742a', 'arbitration#1219'])
+})
+
 test('sanitizeOverrides drops a value that is neither a real id nor dismissed', () => {
   const clean = sanitizeOverrides({ 'arbitration#1': JSON.stringify({ mlbId: null, dismissed: false }) })
   assert.deepEqual(clean, {})
