@@ -10,6 +10,7 @@ import {
   playerBoards,
   roleRows,
   callSplitAnomalies,
+  callSplitOffBy,
   missBands,
   TEAM_SORTS,
   UMPIRE_SORTS,
@@ -111,6 +112,7 @@ export function AbsChallengesPage() {
   const roles = useMemo(() => (summary ? roleRows(summary) : []), [summary])
   const bands = useMemo(() => (summary ? missBands(summary) : []), [summary])
   const anomalies = useMemo(() => (summary ? callSplitAnomalies(summary) : []), [summary])
+  const offBy = useMemo(() => callSplitOffBy(anomalies), [anomalies])
 
   const teamSortKey = TEAM_SORTS.find((s) => s.key === teamSort)?.key ?? 'rate'
   const teamValues = teams.map((r) => r[teamSortKey]).filter((v) => v != null)
@@ -234,13 +236,25 @@ export function AbsChallengesPage() {
                 </tbody>
               </table>
             </BoardScroller>
-            {/* The anomaly line has to carry its own antecedent now: it used to
-                read "do not follow that rule", where "that rule" lived in the
-                section note above it. */}
-            {anomalies.length > 0 && (
+            {/* The anomaly line has to carry its own antecedent, its own rule
+                and its own arithmetic.
+
+                THE ANTECEDENT. It used to read "do not follow that rule", where
+                "that rule" lived in the section note above it. The note is
+                gone, and the rows now say only "on a called strike" / "on a
+                called ball" — which states the rule but never names what breaks
+                it. So the line says both itself.
+
+                THE ARITHMETIC. It used to add the disagreeing rows' `n`, which
+                is each whole bucket rather than what disagrees: on the Triple-A
+                board a single miscoded challenge printed as 4,813 of them.
+                callSplitOffBy takes the real figure. */}
+            {offBy > 0 && (
               <p className="hint">
-                {commas(anomalies.reduce((n, a) => n + a.n, 0))} challenges sit outside that
-                split — the feed recorded a review of a call the challenger’s job cannot ask for.
+                {commas(offBy)} {offBy === 1 ? 'challenge does' : 'challenges do'} not fit these
+                rows — the feed put the challenger at no position it recognises, or recorded a
+                call his job cannot ask for: a batter can only challenge a called strike, a
+                catcher or a pitcher a called ball.
               </p>
             )}
           </BroadcastSection>
@@ -412,10 +426,21 @@ export function AbsChallengesPage() {
                   <tr>
                     {/* The floor rides in the column head it qualifies, where a
                         reader meets it while reading the column, instead of in
-                        a paragraph above the board. */}
+                        a paragraph above the board.
+
+                        SO DOES THE DENOMINATOR, in three words. This board is
+                        the one thing on the page that can be misread against
+                        another page — /umpire-rankings scores every called
+                        pitch of a man's season, this scores only the pitches
+                        somebody thought were wrong — and a reader who takes
+                        one for the other has the wrong idea of an umpire, not
+                        just a wrong figure. The source line at the foot says it
+                        in full; the head says enough to stop the mistake. */}
                     <th className="team">
                       Umpire
-                      <span className="rpt__sub">Minimum {MIN_UMPIRE_GAMES} games</span>
+                      <span className="rpt__sub">
+                        Minimum {MIN_UMPIRE_GAMES} games · challenged pitches only
+                      </span>
                     </th>
                     <th>Games</th>
                     <th>Challenged</th>
@@ -537,7 +562,9 @@ export function AbsChallengesPage() {
           <p className="rptsource">
             One row per ABS review, from each completed game’s own feed · Regular season and
             postseason, no All-Star Game · Runs are run expectancy moved, not runs that scored ·
-            Distance is measured from the buffered rule-book zone, per batter
+            Distance is measured from the buffered rule-book zone, per batter · An umpire’s rate
+            here is off challenged pitches only, a small self-selected set, so it is not the
+            Umpire Rankings figure, which scores every called pitch against the zone
           </p>
         </>
       )}

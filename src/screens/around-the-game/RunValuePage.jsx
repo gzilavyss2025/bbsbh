@@ -182,7 +182,12 @@ export function RunValuePage() {
             </div>
 
             <BoardScroller label="Run value leaders">
-              <table className="standings rpt rv__board">
+              {/* `rv__board--main` is the five-figure-column board only. The
+                  desktop column floor in 75-run-value.css is measured on THIS
+                  table's slack; the four single-skill boards share `rv__board`
+                  for the nameplate cell but have two columns and half the
+                  width, and must not take that floor. */}
+              <table className="standings rpt rv__board rv__board--main">
                 <thead>
                   <tr>
                     <th className="team">Player</th>
@@ -293,9 +298,12 @@ export function RunValuePage() {
           {/* THE SOURCE LINE, not a method essay. Four hundred words of "how
               this was counted" under its own heading is the page explaining
               itself instead of showing itself. What a reader needs from it is
-              where the figures came from and the two constraints that change
-              how a figure READS — the board's floor, and the rounding that lets
-              four printed columns miss the printed total by one. Those are
+              where the figures came from and the three constraints that change
+              how a figure READS — the floor, which is not the same measurement
+              on the main board as on a single-skill one; the rounding that lets
+              four printed columns miss the printed total by one; and the club
+              board being a roster rather than a club's season, which is the one
+              thing on this page a reader cannot get wrong quietly. Those are
               facts about the data, so they sit in the data's own caption.
 
               IT OPENS ON THE SEASON, THE DATE AND THE POPULATION, which the
@@ -307,9 +315,11 @@ export function RunValuePage() {
             {data?.generatedAt ? humanDateWithYear(data.generatedAt.slice(0, 10)) : '—'} ·{' '}
             {everyone.length || '—'} players · Baseball Savant swing/take, fielding and
             baserunning run value · Context neutral · Stored to 0.1 run and printed whole, so the
-            columns can miss the total by one · Main board floor ±{MIN_ABS_RUNS} run, single-skill
-            boards none · Pitcher or position player is decided by which half of a season was the
-            larger
+            columns can miss the total by one · Floor ±{MIN_ABS_RUNS} run, measured on the total
+            for the main board and on the skill itself for the four single-skill boards · Pitcher
+            or position player is decided by which half of a season was the larger · A club’s row
+            is its roster today: Savant carries one current club per player and no split, so a man
+            traded in July brings his whole season with him
           </p>
         </>
       )}

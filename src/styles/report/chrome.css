@@ -6,8 +6,8 @@
 
    /run-value and /abs-challenges used to carry ~640 and ~830 words of dek,
    section notes and a "How this was counted" essay around their boards. The
-   prose is gone; these three rules are what a board genuinely could not be
-   read without, kept small enough that none of them can grow back into it. */
+   prose is gone; what is left here is what a board genuinely could not be read
+   without, kept small enough that none of it can grow back into prose. */
 
 /* ---- the column key ---------------------------------------- */
 
@@ -81,4 +81,24 @@
   .rptpair {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+/* ---- a sub-line inside a column head ----------------------- */
+
+/* THE FLOOR RIDES IN THE HEAD IT QUALIFIES, which is a `.rpt__sub` in a
+   `<thead>` cell — the first place in the app to put one there, and the reason
+   this rule exists. `.rpt thead th` is nowrap so five figure heads each hold
+   one line; a sub-line under a head is a sentence, and unbreakable it holds
+   "Minimum 5 called · 214 qualify" on one 175px line, dragging the sticky name
+   column past its 132px floor on a phone — the width these boards were rebuilt
+   to give back. It also drops the head's display letter-spacing, set for a
+   small display cap and not for a body-font caption, back to the flat tracking
+   the same sub-line already gets in a body row.
+
+   Here rather than beside `.rpt__sub` in 68-around-the-game.css because a
+   sub-line in a HEAD is a report-board move, and that file is at its size cap
+   (ADR-0038). */
+.rpt thead th .rpt__sub {
+  white-space: normal;
+  letter-spacing: var(--ls-none);
 }

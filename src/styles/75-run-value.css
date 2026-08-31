@@ -335,10 +335,17 @@
    man's name and his first figure. Giving each figure column a floor spends
    that slack on the figures instead: five columns on one rhythm, reading as a
    ruled block rather than as numbers pushed against the right edge. No effect
-   on a phone, where the board is already tight and the scroller does the work. */
+   on a phone, where the board is already tight and the scroller does the work.
+
+   THE MAIN BOARD ONLY, which is why it keys on the modifier. The four
+   single-skill boards wear `.rv__board` too, for the nameplate cell, but they
+   have two columns and no dead gap to spend — and at this same breakpoint
+   `.rvleaders` puts them two-up in roughly 336px halves, where 104px off a
+   column already carrying rank, portrait and club mark is width they do not
+   have to give. */
 @media (min-width: 720px) {
-  .rv__board thead th:not(.team),
-  .rv__board td.rv__num {
+  .rv__board--main thead th:not(.team),
+  .rv__board--main td.rv__num {
     min-width: 104px;
   }
 }
