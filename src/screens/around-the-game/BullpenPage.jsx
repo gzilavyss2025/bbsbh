@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { fetchWorkload, bullpenBoard, leagueBullpen, BULLPEN_SORTS } from '../../api/around-the-game/bullpen.js'
 import { staffGridFor } from '../../api/workload.js'
 import { StaffGrid } from '../../components/workload/StaffGrid.jsx'
+import { ThresholdBullets } from '../../components/workload/ThresholdBullets.jsx'
 import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
 import { toApiDate, humanDate } from '../../lib/dates.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -39,6 +40,34 @@ import { BarCell, StatusMeter } from '../../components/around-the-game/Broadcast
 //
 // SPOILER-FREE, inherited from workload.js: completed appearances only, and
 // the as-of date excludes today, so no in-progress line can leak.
+
+// THE RULE, DRAWN. The staff grid above draws cells and rails — what each arm
+// threw and when — but never the thresholds those readings are judged against,
+// so this page had to spell them out in prose ("25 or more pitches yesterday,
+// 35 or more across three days…"). The bullets draw them instead, and the
+// paragraph keeps only the part no mark carries: how the flags COMBINE.
+//
+// Read off the arm the grid sorts to the top, which compareArms makes the row
+// this club's board most wants a reader to see (status first, then load) — not
+// a synthetic example. `flags` is the row's own availabilityFor evaluation,
+// i.e. the same single tiredFlagsFor call behind its status dot, so a bar short
+// of its tick can never sit under a "likely down" row.
+//
+// Renders nothing without flags, which keeps the degrade convention: a club
+// whose arms are missing from the file loses the mark, not the page.
+function PenRule({ row }) {
+  if (!row?.flags?.length) return null
+  return (
+    <figure className="penpage__rule">
+      <figcaption className="penpage__rulehead">
+        The rule, on{' '}
+        <PlayerLink id={row.personId}>{row.name}</PlayerLink>{' '}
+        — a tick is the published threshold, a bar past it is that flag tripped.
+      </figcaption>
+      <ThresholdBullets flags={row.flags} />
+    </figure>
+  )
+}
 
 // The reader-facing words for each status, and the order the legend prints
 // them in. Held here rather than inline so the meter, the legend and the arm
@@ -248,6 +277,7 @@ export function BullpenPage() {
               <div className="penpage__grid">
                 <h3 className="penpage__gridclub">{clubName(clubs, selected.teamId)}</h3>
                 <StaffGrid rows={grid} />
+                <PenRule row={grid[0]} />
               </div>
             )}
           </BroadcastSection>
@@ -255,11 +285,10 @@ export function BullpenPage() {
           <section className="method">
             <h2>How availability is decided</h2>
             <p>
-              <strong>Three flags, counted in pitches and days</strong> — 25 or more pitches
-              yesterday, 35 or more across three days, both of the previous two days. Two flags,
-              or three straight days on their own, files an arm as likely down. These are public
-              broadcast rules, not anything this site invented, and the bars on each pitcher’s
-              page draw them against those same numbers.
+              <strong>Two flags, or three straight days on its own, files an arm as likely
+              down.</strong> The bullets above draw each flag against the threshold that judges
+              it, so the numbers are on the page rather than in this paragraph. They are public
+              broadcast rules, not anything this site invented.
             </p>
             <p>
               <strong>Read it as workload, which is a fact, rather than availability, which is a

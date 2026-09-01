@@ -196,6 +196,26 @@ test('staffGridFor: relievers only, each row carrying its own strip and runs', (
   assert.equal(cano.flags.length, TIRED_FLAGS.length)
 })
 
+// THE MARK NAMES THE MAN IT DRAWS. The Pen prints the top row's threshold
+// bullets under the top row's NAME (BullpenPage.jsx's PenRule), so a row's
+// flags have to belong to that row's own pitcher and stay attached through
+// compareArms' sort. Attaching a shared array, or reading the flags back by
+// position after sorting, would draw one arm's bars beneath another arm's name
+// — wrong, and silent, because every value on screen is still a real number.
+// The grid test above only counts the flags; this one checks whose they are.
+test('staffGridFor: every row draws its OWN flags, through the sort', () => {
+  const idByName = { Cano: 'cano', Wilson: 'wilson', Nunez: 'nunez' }
+  const rows = staffGridFor(data, 110, AS_OF)
+  assert.ok(rows.length > 1, 'a one-row club could not tell a mix-up from a match')
+  for (const r of rows) {
+    assert.deepEqual(
+      r.flags,
+      tiredFlagsFor(data, idByName[r.name], AS_OF),
+      `${r.name}'s row must carry ${r.name}'s own flags`,
+    )
+  }
+})
+
 test('staffGridFor: an unknown club is null so the caller can hide the surface', () => {
   assert.equal(staffGridFor(data, 999, AS_OF), null)
   assert.equal(staffGridFor(null, 110, AS_OF), null)

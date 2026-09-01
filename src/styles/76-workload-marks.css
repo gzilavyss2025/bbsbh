@@ -484,3 +484,33 @@
   text-transform: uppercase;
   color: var(--text-heading);
 }
+
+/* The rule, drawn under the staff grid (BullpenPage.jsx's PenRule). The grid
+   shows what an arm threw; this shows the lines those readings are judged
+   against, which is why it sits INSIDE the same card rather than beside it.
+   Ruled off the grid above so the two read as reading and rule, not as two
+   boards. */
+.penpage__rule {
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.penpage__rulehead {
+  margin-bottom: var(--space-3);
+  font-family: var(--font-read);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+
+/* The caption is a SENTENCE, and it names a man — the same reasoning that
+   exempts `.method p` above it (ALL-CAPS INVARIANT, 01-base.css): two lines of
+   explanation set in capitals is skipped, not read, and "BRYSE WILSON" shouts a
+   name the grid three rows up prints as a surname. The `#root` prefix is
+   required to out-rank the `#root *` blanket, and the `*` half carries the
+   PlayerLink button inside. */
+#root .penpage__rulehead,
+#root .penpage__rulehead * {
+  text-transform: none; /* caps-exempt: the rule's caption reads as a sentence */
+}
