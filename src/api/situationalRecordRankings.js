@@ -23,7 +23,7 @@
 // season-aggregate-over-Final-games footing, and no live game can be in them.
 
 import { fetchStaticTeams } from './teams-static.js'
-import { fetchTeamRecords, teamRecordsFor, monthsPlayed, COUNT_METRICS } from './teamRecords.js'
+import { fetchTeamRecords, teamRecordsFor, monthsPlayed, COUNT_METRICS, RECORD_GROUPS } from './teamRecords.js'
 
 const DASH = '—'
 const COUNTS_GROUP = 'Season counts'
@@ -57,12 +57,18 @@ export function levelMonths(entries, { cutoff = null } = {}) {
 // The pivot
 // ---------------------------------------------------------------------------
 
+// Every record row's place in the printed order, by id. Read off RECORD_GROUPS
+// rather than off the order the metrics arrived in, because THOSE ARE NOT THE
+// SAME LIST: teamRecordsFor drops a row no game qualified for, so a split only
+// the twentieth club has ever been in is first seen twentieth and would sort
+// to the bottom of a group it belongs in the middle of.
+const RECORD_ORDER = new Map(RECORD_GROUPS.flatMap((g) => g.rows).map((r, i) => [r.id, i]))
+
 // Where a metric sorts within its group when clubs disagree about the set.
-// Record groups keep RECORD_GROUPS' order (every club walks the same list, so
-// first-seen IS that order). Months have to sort numerically — a club whose
-// season opened in April would otherwise put April ahead of a March-opening
-// club's March. Opponent groups sort by label, which is what teamRecordsFor
-// already does per club.
+// Months have to sort numerically — a club whose season opened in April would
+// otherwise put April ahead of a March-opening club's March. Opponent groups
+// sort by label, which is what teamRecordsFor already does per club. The
+// season counts keep COUNT_METRICS' order, which every club walks whole.
 function orderWithinGroup(group, metrics) {
   if (group === 'By month') {
     return [...metrics].sort((a, b) => Number(a.id.slice(6)) - Number(b.id.slice(6)))
@@ -70,7 +76,8 @@ function orderWithinGroup(group, metrics) {
   if (group === 'By division' || group === 'By league') {
     return [...metrics].sort((a, b) => a.k.localeCompare(b.k))
   }
-  return metrics
+  if (group === COUNTS_GROUP) return metrics
+  return [...metrics].sort((a, b) => RECORD_ORDER.get(a.id) - RECORD_ORDER.get(b.id))
 }
 
 // Pivot a level's ledgers into one table per metric. `cutoff`, `half` and
