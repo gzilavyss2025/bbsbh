@@ -471,7 +471,13 @@ const BUDGETS = {
   // data-layer module with no surface, and its spoiler class is the same
   // spoiler-FREE as its neighbours — historical contract records carry no
   // game, no linescore and no reveal state.
-  'src/api': 106,
+  // 106 -> 107 for scheduleShape.js — the reader over the multi-season
+  // schedule-shape ledger, which answers a DROUGHT ("the last time they won
+  // game 1 of a road trip was July 3") where teamRecords.js beside it answers
+  // a rate over one season. It belongs flat with the other src/api readers:
+  // a data-layer module with no surface of its own, and cutoff-gated for the
+  // same reason teamRecords.js is.
+  'src/api': 107,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -602,7 +608,12 @@ const BUDGETS = {
   // whose target no longer exports it. Flat beside the two dozen other
   // check-*.mjs files `npm run lint` runs in a row; scripts/lib/ holds shared
   // pure helpers, not runnable entry points.
-  scripts: 108,
+  // 108 -> 109 for gen-schedule-shape.mjs, the nightly multi-season schedule
+  // ledger behind the Team hub's Last Time card. Flat with every other
+  // gen-*.mjs: the nightly workflow runs this directory as a flat list, and
+  // scripts/lib/ is for helpers that do not run on import — which is exactly
+  // where its pure half (schedule-shape.mjs) went.
+  scripts: 109,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -741,7 +752,15 @@ const BUDGETS = {
   // without a live statsapi call (test/abs-challenges.test.js), which is the
   // testable-helper convention this directory exists for, and neither could be
   // tested inside a generator that does its work at import.
-  'scripts/lib': 32,
+  // +1 for schedule-shape.mjs — the pure half of gen-schedule-shape.mjs: a
+  // season of raw schedule rows to each club's ordered ledger, and that
+  // ledger cut into series, homestands and road trips. Same testable-helper
+  // reason as every entry above it — the generator does its work at import,
+  // so the segmentation would be untestable inside it, and
+  // test/schedule-shape.test.js pins the cases that make it hard (a neutral
+  // -site game inside a road series, a club that changed parks mid-range, a
+  // doubleheader that has to keep its order).
+  'scripts/lib': 33,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

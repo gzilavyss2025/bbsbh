@@ -16,6 +16,7 @@ import { TeamStats, todayDowLabel } from './modules/TeamStatsCard.jsx'
 import { ComebackCard } from './modules/ComebackCard.jsx'
 import { TeamRunValueCard } from './modules/TeamRunValueCard.jsx'
 import { RecordsCard } from './modules/records/RecordsCard.jsx'
+import { LastTimeCard } from './modules/records/LastTimeCard.jsx'
 
 // Standings, team batting/pitching ranks and team leaders (full), plus jersey
 // combos, the day-of-week record and comeback wins, each its own full card —
@@ -106,6 +107,8 @@ export function NumbersTab({ id, asOf, sportId }) {
           />
 
           {n.teamRecords && <RecordsCard data={n.teamRecords} cutoff={n.recordsCutoff} />}
+
+          {n.scheduleShape && <LastTimeCard data={n.scheduleShape} cutoff={n.recordsCutoff} />}
 
           {(isMilb || n.jerseyCombos.length > 0) &&
             (isMilb ? (
