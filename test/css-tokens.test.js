@@ -18,19 +18,24 @@
 // no stylesheet defines — those are set inline from JS (the club header triads,
 // ADR-0030), and the fallback is what makes that safe.
 //
-// A RATCHET, not a clean sweep — the same shape as check-dir-size.mjs's
-// budgets. The scan turned up more than the two files this test was written
-// for, in two kinds:
+// A RATCHET, not a clean sweep. What is left on the list is one kind only:
+// properties genuinely set from JS at runtime that carry no fallback. Those are
+// correct as they stand — they are listed so the check has something to compare
+// against, not because they need work.
 //
-//   - properties genuinely set from JS that simply carry no fallback. Those are
-//     correct as they stand; they are listed so the check has something to
-//     compare against, not because they need work.
-//   - the same typo class in other partials, each one a declaration that has
-//     never rendered. Guessing what value each was reaching for means changing
-//     how unrelated surfaces look, so they are pinned here to be fixed
-//     deliberately rather than swept in behind a workload feature.
+// The typo class the scan first turned up is GONE. Six declarations across five
+// partials named tokens that do not exist and had therefore never rendered, and
+// each was fixed to the value its own file's evidence pointed at rather than
+// guessed: --bw-thin to --bw-hair (three rules away in the same file, doing the
+// identical job), --fs-micro to --fs-caption (the smallest size the scale
+// defines, on captions already inked --text-caption), --fs-section to --fs-h3
+// (.section__title--bar's tier, a step above the --fs-label eyebrows beside it),
+// --dur-base to --dur-med (the middle tier; --dur-fast is the tap-feedback one),
+// and --space-7/--space-9 to --space-6/--space-8 (the scale has no 7 or 9; the
+// page keeps its bottom padding larger than its top).
 //
-// The list may only ever SHRINK. New code adds nothing to it.
+// The list may only ever SHRINK. New code adds nothing to it, and the stale
+// check below is what stops it rotting into a permanent exemption.
 const KNOWN_UNDEFINED = new Set([
   // --- set inline from JS at runtime; no fallback, but never unresolved ---
   '--team-color', // 20-charts.css — the club's own ink, set per chart
@@ -45,14 +50,6 @@ const KNOWN_UNDEFINED = new Set([
   '--pct',
   '--level-count', // 05-masthead-nav.css — how many levels the bar draws
   '--rankstrip-track-width', // 28-team-hub.css
-
-  // --- pre-existing typos: dropped declarations, each its own fix ---
-  '--space-7', // 02-wordmark-lab.css, 65-about-page.css (scale stops at 6, 8)
-  '--space-9', // 02-wordmark-lab.css
-  '--bw-thin', // 02-wordmark-lab.css (the scale has --bw-hair/rule/heavy)
-  '--fs-micro', // 17-identity-lab-workbench.css
-  '--dur-base', // 48c-stamp-sheet.css
-  '--fs-section', // 62-game-preview.css
 ])
 import test from 'node:test'
 import assert from 'node:assert/strict'

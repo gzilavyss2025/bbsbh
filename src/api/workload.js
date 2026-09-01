@@ -459,6 +459,33 @@ export function clubPenCounts(data, teamId, asOfDate) {
 // hides its dots (the degrade convention).
 export const fetchWorkloadSummary = staticJson('/data/workload-summary.json')
 
+// How far behind the slate the sidecar may fall and still describe the pen a
+// card is about. The file is rebuilt nightly, so nought is the ordinary case
+// and one is the morning after a cron run GitHub dropped — which happens (see
+// the nightly workflow's dead-man's switch). A day-old tally is a true reading
+// of a day that is over; two is not worth defending on an unlabelled mark.
+const MAX_SUMMARY_AGE_DAYS = 1
+
+// The sidecar's club map, but ONLY when it describes the day the slate is
+// showing. Null hides every card's dots (the degrade convention).
+//
+// The window is one-sided on purpose, and the two ends fail for different
+// reasons. A slate day BEFORE the file's asOf is a past game: its dots would be
+// tonight's pen drawn on a game already played, which is the wrong answer, not
+// a stale one — so it is refused at any distance. A slate day AFTER it is
+// merely old, and refused only past MAX_SUMMARY_AGE_DAYS.
+//
+// Strict equality was the first rule here, and it made the dots vanish from
+// every card for a whole day whenever the nightly rebuild slipped — the app's
+// most-used screen silently losing a feature, with nothing to tell a reader
+// whether the pens were healthy or the file was late.
+export function penSummaryClubs(summary, officialDate) {
+  if (!summary?.clubs || !summary.asOf || !officialDate) return null
+  const age = dayIndex(officialDate) - dayIndex(summary.asOf)
+  if (!Number.isFinite(age) || age < 0 || age > MAX_SUMMARY_AGE_DAYS) return null
+  return summary.clubs
+}
+
 // A club's counts out of that summary, ordered for drawing: available arms
 // first, then limited, then down, so the length of the leading run IS the
 // reading. Null for a club with no arms on file — a gap in the file, not an

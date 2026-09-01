@@ -35,10 +35,17 @@
   box-sizing: border-box;
 }
 
+/* `gap` belongs to the FLEX CONTAINER. On .pendots__dot it parsed, inherited
+   nothing and did nothing — the dot is not a container — so the small variant
+   drew 7px dots still spaced 5px apart, and the slate card's row never
+   tightened the way the rule says it does. */
+.pendots--sm {
+  gap: 4px;
+}
+
 .pendots--sm .pendots__dot {
   width: 7px;
   height: 7px;
-  gap: 4px;
 }
 
 .pendots__dot--fresh {

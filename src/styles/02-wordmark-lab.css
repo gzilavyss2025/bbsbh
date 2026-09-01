@@ -5,16 +5,16 @@
 .wordmarklab {
   width: min(1120px, calc(100% - var(--space-6)));
   margin: 0 auto;
-  padding: var(--space-7) 0 var(--space-9);
+  padding: var(--space-6) 0 var(--space-8);
 }
 
 .wordmarklab__intro {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-7);
+  gap: var(--space-6);
   padding: var(--space-5) 0 var(--space-6);
-  border-bottom: var(--bw-thin) solid var(--border-rule);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 
 .wordmarklab__intro h1,
@@ -100,7 +100,7 @@
   grid-template-columns: minmax(180px, 0.8fr) minmax(210px, 0.7fr) minmax(300px, 1.3fr);
   align-items: center;
   gap: var(--space-6);
-  margin: var(--space-7) 0;
+  margin: var(--space-6) 0;
   padding: var(--space-5);
   border-left: 3px double var(--clay);
   border-top: var(--bw-hair) solid var(--border-rule);
@@ -140,7 +140,7 @@
   gap: var(--space-3);
   min-width: 0;
   padding: var(--space-5);
-  border: var(--bw-thin) solid var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
   color: var(--text-body);
@@ -273,7 +273,7 @@
   grid-template-columns: max-content minmax(160px, 0.45fr) minmax(280px, 1fr);
   align-items: center;
   gap: var(--space-4);
-  margin: var(--space-7) 0 var(--space-4);
+  margin: var(--space-6) 0 var(--space-4);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
   background: var(--clay-soft);
@@ -307,7 +307,7 @@
 .wordmarklab__context {
   min-width: 0;
   overflow: hidden;
-  border: var(--bw-thin) solid var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--bg-canvas);
   box-shadow: var(--shadow-card);
@@ -511,7 +511,7 @@
 }
 
 .wordmarklab__recommendation {
-  margin-top: var(--space-7);
+  margin-top: var(--space-6);
   padding: var(--space-6);
   border-radius: var(--radius-md);
   background: var(--accent-primary);

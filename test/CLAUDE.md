@@ -146,7 +146,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | winprob-atbat-step.test.js | 5 | src/api/playbyplay.js | lastVisibleAtBatIndex |
 | winprob.test.js | 17 | src/api/game.js, src/api/winprob.js | Win probability chart |
 | workload.test.js | 11 | src/api/workload.js | Rolling pitcher workload |
-| workload-marks.test.js | 17 | src/api/workload.js | The four workload marks — flags, rest runs, staff grid, pen dots |
+| workload-marks.test.js | 20 | src/api/workload.js | The four workload marks — flags, rest runs, staff grid, pen dots |
 | worktrees.test.js | 15 | scripts/worktrees.mjs | Git-worktree staleness classification |
 | wpa-logo.test.js | 18 | src/lib/wpa/wpaLogo.js, teams.js, logoArt.js | WPA band logo resolver/recolor guard |
 

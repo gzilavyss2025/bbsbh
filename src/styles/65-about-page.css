@@ -25,7 +25,7 @@
    ============================================================ */
 
 .aboutpage {
-  padding-bottom: calc(var(--space-7) + env(safe-area-inset-bottom));
+  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
 }
 
 /* The marker has to reach DESCENDANTS, not just the element carrying it. The

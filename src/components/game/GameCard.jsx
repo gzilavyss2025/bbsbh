@@ -4,7 +4,7 @@ import { selectGameStatus } from '../../api/select.js'
 import { doubleHeaderLabel } from '../../lib/resultCards.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchJerseysData } from '../../api/jerseys.js'
-import { fetchWorkloadSummary } from '../../api/workload.js'
+import { fetchWorkloadSummary, penSummaryClubs } from '../../api/workload.js'
 import { PenDots } from '../workload/PenDots.jsx'
 import { parkBackdrop } from '../../lib/ballpark/parkBackdrop.js'
 import { parkWashColorOverride } from '../../lib/ballpark/parkWash.js'
@@ -96,13 +96,17 @@ export function GameCard({
   // writes both). staticJson memoizes the REQUEST, so a fifteen-card slate
   // costs one fetch, the same way jerseysData above does.
   const { data: penSummary } = useAsync(fetchWorkloadSummary, [])
-  const penDots =
-    penSummary?.clubs && game.officialDate === penSummary.asOf
-      ? {
-          away: penSummary.clubs[game.away?.id] ?? null,
-          home: penSummary.clubs[game.home?.id] ?? null,
-        }
-      : null
+  // penSummaryClubs holds the freshness rule (api/workload.js), not this card:
+  // the day the slate shows, or the morning after a nightly rebuild slipped,
+  // and never a past-day slate — those dots would be tonight's pen drawn on a
+  // game already played. Null hides them.
+  const penClubs = penSummaryClubs(penSummary, game.officialDate)
+  const penDots = penClubs
+    ? {
+        away: penClubs[game.away?.id] ?? null,
+        home: penClubs[game.home?.id] ?? null,
+      }
+    : null
   // The park this game is at, as a photo to wash in behind the '@' once the
   // card is on screen — null for every venue we hold no art for, which is
   // every MiLB park and every one-off neutral site (see

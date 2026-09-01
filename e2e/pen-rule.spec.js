@@ -1,5 +1,20 @@
 import { test, expect } from './fixtures.js'
 
+// Read the caption and the row it names out of ONE DOM snapshot. Two separate
+// round-trips let a re-render land between them, so the caption could be read
+// before a club switch and the grid after it — the spec then reported a mix-up
+// that never existed on screen. Polled, because the click's re-render is async
+// and the page also fills its grid from a fetch.
+const captionVsTopRow = (page) =>
+  page.evaluate(() => {
+    const cap = document.querySelector('.penpage__rulehead .plink')?.textContent?.trim()
+    const top = document
+      .querySelector('.staffgrid__row .staffgrid__name')
+      ?.getAttribute('aria-label')
+    if (!cap || !top) return 'not rendered yet'
+    return cap === top ? 'match' : `caption "${cap}" names a different arm than the top row "${top}"`
+  })
+
 // THE PEN'S RULE MARK — BullpenPage.jsx's PenRule, under the staff grid.
 //
 // The page used to state the thresholds in prose because the grid draws cells
@@ -24,13 +39,7 @@ test('the rule is drawn under the grid, on the arm the grid ranks first', async 
   // One bullet a flag, in api/workload.js's fixed TIRED_FLAGS order.
   await expect(rule.locator('.bullets__label')).toHaveText(['Yest.', '3 days', 'In a row'])
 
-  const captionArm = await rule.locator('.penpage__rulehead .plink').innerText()
-  const topArm = await page
-    .locator('.staffgrid__row')
-    .first()
-    .locator('.staffgrid__name')
-    .getAttribute('aria-label')
-  expect(captionArm).toBe(topArm)
+  await expect.poll(() => captionVsTopRow(page)).toBe('match')
 })
 
 // Every chip re-reads the grid AND the mark. A caption left behind on the
@@ -45,13 +54,7 @@ test('switching clubs moves the mark with the grid', async ({ page }) => {
 
   for (let i = 0; i < count; i++) {
     await chips.nth(i).click()
-    const captionArm = await page.locator('.penpage__rulehead .plink').innerText()
-    const topArm = await page
-      .locator('.staffgrid__row')
-      .first()
-      .locator('.staffgrid__name')
-      .getAttribute('aria-label')
-    expect(captionArm, `club chip ${i}`).toBe(topArm)
+    await expect.poll(() => captionVsTopRow(page), { message: `club chip ${i}` }).toBe('match')
     await expect(page.locator('.penpage__rule .bullets__row')).toHaveCount(3)
   }
 })

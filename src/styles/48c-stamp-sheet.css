@@ -155,7 +155,7 @@
 .postagestamp {
   opacity: 0.4;
   filter: grayscale(1);
-  transition: opacity var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out);
+  transition: opacity var(--dur-med) var(--ease-out), filter var(--dur-med) var(--ease-out);
 }
 
 .postagestamp.is-filled {

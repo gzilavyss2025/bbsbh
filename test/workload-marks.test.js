@@ -15,6 +15,7 @@ import {
   compareArms,
   dayStripFor,
   penDotsFrom,
+  penSummaryClubs,
   restRunsFor,
   staffGridFor,
   tiredFlagsFor,
@@ -296,6 +297,33 @@ test('clubPenCounts: tallies the same verdicts the grid shows', () => {
   assert.deepEqual(counts, { fresh: 1, limited: 0, down: 2 })
   const rows = staffGridFor(data, 110, AS_OF)
   assert.equal(counts.fresh + counts.limited + counts.down, rows.length)
+})
+
+// THE SIDECAR'S FRESHNESS GATE. The slate is the app's most-used screen and the
+// dots are unlabelled, so the window is one-sided: a day BEHIND the slate is a
+// true reading of a day that is over, but a day AHEAD means the file describes
+// a pen that had not been worked yet when the game on screen was played.
+const SUMMARY = { asOf: '2026-08-31', clubs: { 110: { fresh: 5, limited: 2, down: 1 } } }
+
+test('penSummaryClubs: the day the file describes, and the morning after', () => {
+  assert.equal(penSummaryClubs(SUMMARY, '2026-08-31'), SUMMARY.clubs, 'the file’s own day')
+  assert.equal(penSummaryClubs(SUMMARY, '2026-09-01'), SUMMARY.clubs, 'a cron run GitHub dropped')
+})
+
+test('penSummaryClubs: refuses a past-day slate at ANY distance', () => {
+  // Not staleness — the wrong answer. These dots would be tonight's pen drawn
+  // on a game that was played before those arms were worked.
+  assert.equal(penSummaryClubs(SUMMARY, '2026-08-30'), null)
+  assert.equal(penSummaryClubs(SUMMARY, '2026-07-04'), null)
+})
+
+test('penSummaryClubs: refuses a file more than a day behind, and any gap in it', () => {
+  assert.equal(penSummaryClubs(SUMMARY, '2026-09-02'), null, 'two days is not worth defending')
+  assert.equal(penSummaryClubs(null, '2026-08-31'), null)
+  assert.equal(penSummaryClubs({ asOf: '2026-08-31' }, '2026-08-31'), null, 'no clubs map')
+  assert.equal(penSummaryClubs({ clubs: {} }, '2026-08-31'), null, 'no stamp to judge against')
+  assert.equal(penSummaryClubs(SUMMARY, null), null)
+  assert.equal(penSummaryClubs(SUMMARY, 'not-a-date'), null)
 })
 
 test('penDotsFrom: available first, so the leading run IS the reading', () => {
