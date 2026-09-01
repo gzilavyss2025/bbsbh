@@ -1,0 +1,177 @@
+[
+  {
+    "season": 2005,
+    "rank": 16,
+    "playerName": "Adam Miller",
+    "team": "Indians",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2005,
+    "rank": 21,
+    "playerName": "Brian Dopirak",
+    "team": "Cubs",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2005,
+    "rank": 36,
+    "playerName": "Eric Duncan",
+    "team": "Yankees",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2005,
+    "rank": 66,
+    "playerName": "Ryan Harvey",
+    "team": "Cubs",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2005,
+    "rank": 68,
+    "playerName": "Javier Herrera",
+    "team": "Athletics",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2005,
+    "rank": 86,
+    "playerName": "Kyle Sleeth",
+    "team": "Tigers",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2005,
+    "rank": 92,
+    "playerName": "Jake Stevens",
+    "team": "Braves",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2005,
+    "rank": 93,
+    "playerName": "Richie Gardner",
+    "team": "Reds",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2005,
+    "rank": 100,
+    "playerName": "Greg Miller",
+    "team": "Dodgers",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2006,
+    "rank": 47,
+    "playerName": "Adam Miller",
+    "team": "Indians",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2006,
+    "rank": 65,
+    "playerName": "Marcus Sanders",
+    "team": "Giants",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2006,
+    "rank": 74,
+    "playerName": "Javier Herrera",
+    "team": "Athletics",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2006,
+    "rank": 75,
+    "playerName": "Matt Moses",
+    "team": "Twins",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2006,
+    "rank": 85,
+    "playerName": "Mark Pawelek",
+    "team": "Cubs",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2006,
+    "rank": 86,
+    "playerName": "Eric Duncan",
+    "team": "Yankees",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2007,
+    "rank": 23,
+    "playerName": "Adam Miller",
+    "team": "Indians",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2007,
+    "rank": 47,
+    "playerName": "Bill Rowell",
+    "team": "Orioles",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2007,
+    "rank": 54,
+    "playerName": "Chuck Lofgren",
+    "team": "Indians",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2007,
+    "rank": 78,
+    "playerName": "Brandon Erbe",
+    "team": "Orioles",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2007,
+    "rank": 91,
+    "playerName": "Will Inman",
+    "team": "Brewers",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2008,
+    "rank": 29,
+    "playerName": "Adam Miller",
+    "team": "Indians",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2008,
+    "rank": 33,
+    "playerName": "Angel Villalona",
+    "team": "Giants",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2008,
+    "rank": 71,
+    "playerName": "Chuck Lofgren",
+    "team": "Indians",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2008,
+    "rank": 84,
+    "playerName": "Tim Alderson",
+    "team": "Giants",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  },
+  {
+    "season": 2008,
+    "rank": 87,
+    "playerName": "Beau Mills",
+    "team": "Indians",
+    "note": "Baseball America ranked this player, but BA id is 'NA' -- Retrosheet (and this join) has no id for him because he never appeared in a major league game."
+  }
+]

@@ -87,10 +87,22 @@ pooling by rank is sound; what the short years lack is any observation of ranks
 51 to 100. The curve is refitted on the deep years alone in the robustness
 block, and the slope moves from −0.648 to −0.595.
 
-**2005 to 2008 do not exist in this data.** Those four seasons return an empty
-page from the source and are recorded `status: "unavailable"`, not as zero. A
-third-party file could supply them; that is issue #946 and it is deliberately
-deferred.
+**2005 to 2008 come from a second source, and the two are never pooled.**
+MLB Pipeline's page still returns an empty page for those four seasons —
+`seasons.json` keeps the confirmed-live note that says so. Issue #946 filled
+the gap instead from a third-party CSV transcription of Baseball America's
+preseason top-100 lists (`github.com/feralad/rostercrunch`), joined to an
+MLBAM id through the Chadwick Bureau register (`github.com/chadwickbureau/
+register`, Open Data Commons Attribution License 1.0) at a 375-of-375 join
+rate. The CSV itself declares **no licence** — no LICENSE file, no terms in
+its README — so these rows are Baseball America editorial content used
+without a declared licence, by deliberate choice. Every row in `rows.json`
+now carries a `source` field, `"mlb-pipeline"` or `"baseball-america"`: two
+different publications by two different sets of scouts, and a reader must
+always be able to tell which one produced a given rank. 25 Baseball
+America–ranked players carry no Retrosheet id because they never reached the
+majors; they are excluded from `rows.json` but recorded, not dropped, in
+`ba-non-debuts.json`. Built by `.scratch/top-prospects-history/pull-ba.mjs`.
 
 ## The money, and how it is counted
 
