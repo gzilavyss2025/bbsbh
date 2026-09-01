@@ -86,8 +86,15 @@ test('#982 a half read back a second time renders settled ink, never a replay', 
 
   // Same half, loaded fresh: the reveal mark persisted, so the cards come back
   // already written. This is the cold-load case useBecameTrue exists for.
+  //
+  // The longer timeout is on the ARRIVAL only, never on the assertion that
+  // matters. A reload re-fetches the feed and rebuilds the half from cold, which
+  // runs 8-11s on a quiet machine and longer under a full-suite load — the
+  // default 5s made this flaky in the sweep while passing standalone. The
+  // invariant below keeps the default: once the cards are up, ZERO of them may
+  // be writing.
   await page.reload()
-  await expect(page.locator('.pbp__atbat').first()).toBeVisible()
+  await expect(page.locator('.pbp__atbat').first()).toBeVisible({ timeout: 25_000 })
   await expect(page.locator('.pbp__atbat--writing')).toHaveCount(0)
 })
 
