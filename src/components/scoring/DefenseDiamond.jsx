@@ -1,6 +1,7 @@
 import { ordinal } from '../../lib/format.js'
 import { InjuredMark } from '../badges/InjuredMark.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { StruckLine } from './StruckLine.jsx'
 
 // The scorebook's defense diamond, drawn the way the #22 sheet prints it:
 // the infield square rotated onto its point, each fielder's surname on a
@@ -160,7 +161,8 @@ function DefenseSpot({ pos, stack, spot }) {
 function DefenseName({ entry }) {
   const entered = entry.inning != null && !entry.replaced
   return (
-    <span
+    <StruckLine
+      struck={entry.replaced}
       className={`defdiamond__name ${entry.replaced ? 'defdiamond__name--out' : ''} ${
         entered ? 'defdiamond__name--in' : ''
       }`}
@@ -176,6 +178,6 @@ function DefenseName({ entry }) {
         <span className="defdiamond__enter"> ({ordinal(entry.inning)})</span>
       )}
       <InjuredMark hurt={entry.hurt} />
-    </span>
+    </StruckLine>
   )
 }

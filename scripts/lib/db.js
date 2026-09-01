@@ -80,14 +80,17 @@ export const GROUPS = {
     file: join(dataDir, 'pitch-arsenal.sql'),
     tables: ['pitch_arsenal_totals', 'pitch_arsenal_ingested_games', 'pitch_command_cells', 'pitch_command_ingested_games'],
   },
-  // Both tables are written by the one nightly gen-team-records.mjs — its own
-  // group, same as jerseys/pitch-arsenal above. The largest group by row count
-  // (one row per club per game, at five levels — roughly 20,600 rows a
+  // All three tables are written by the one nightly gen-team-records.mjs — its
+  // own group, same as jerseys/pitch-arsenal above. The largest group by row
+  // count (one row per club per game, at five levels — roughly 20,600 rows a
   // season), which a primary-key-ordered TEXT dump handles fine: a nightly run
-  // appends ~130 rows and the diff shows exactly those.
+  // appends ~130 rows and the diff shows exactly those. The role table beside
+  // them is the one that RE-writes rather than appends — a pitcher's season
+  // totals move every time he throws — but only for the arms that worked that
+  // night, so its nightly diff is the same handful of lines.
   'team-records': {
     file: join(dataDir, 'team-records.sql'),
-    tables: ['team_record_games', 'team_record_ingested_games'],
+    tables: ['team_record_games', 'team_record_ingested_games', 'team_record_pitcher_roles'],
   },
   // Both tables are written by the one nightly gen-abs-challenges.mjs — its
   // own group, same as jerseys/pitch-arsenal/team-records above. The row table

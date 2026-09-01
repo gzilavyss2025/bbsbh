@@ -92,6 +92,31 @@
 @import './styles/64-milb-alumni.css';
 @import './styles/69-hit-chart.css';
 @import './styles/73-spray-map.css';
+/* The four workload marks. Global rather than component-imported because they
+   are drawn on six surfaces, the slate among them — a mark on a game card
+   cannot wait on a route chunk. */
+@import './styles/76-workload-marks.css';
+/* Motion — the animation layer (the motion study, issues #976-#983). A
+   SUBDIRECTORY for the same reason focus/ below is one: src/styles is a flat
+   directory at its own file ratchet (scripts/check-dir-size.mjs), the study
+   landed rules on six surfaces at once, and four of the host partials were
+   already at or over the file cap — which check-file-size.mjs says is never a
+   reason to widen a budget. Motion ONLY: every surface's resting appearance
+   stays in its own numbered partial, and only the keyframes, the rules that
+   reference them, and the hover states that exist purely to move something
+   live here. check-typography, check-focus-ring and check-strike-links walk
+   the tree as of the same commit, so these are guarded like any other partial.
+
+   BEFORE focus/, not after. focus/'s four sheets stay last and win on cascade
+   order rather than specificity (see focus/stage.css) — a contract this
+   package must not quietly take away. Where a motion rule has to outrank one
+   of them it does so on specificity, not position. See motion/slate.css. */
+@import './styles/motion/slate.css';
+@import './styles/motion/lineup.css';
+@import './styles/motion/strike.css';
+@import './styles/motion/playbyplay.css';
+@import './styles/motion/innings.css';
+
 /* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
    rather than three more numbered siblings: src/styles is a flat directory at
    its own file ratchet (scripts/check-dir-size.mjs), so the honest way to split
@@ -121,6 +146,7 @@
      17a-identity-lab-mark-panels  screens/identity-lab/index.jsx (DEV-only)
      26a-percentile-strip     components/charts/PercentileStrip.jsx
      26b-player-contract      components/playerstats/PlayerContractCard.jsx
+     26e-contract-history     components/player/ContractHistoryLedger.jsx
      30-standings             screens/StandingsPage.jsx
      32-milestone-watch       screens/MilestoneWatchPage.jsx
      34-postseason            screens/PostseasonHistoryPage.jsx

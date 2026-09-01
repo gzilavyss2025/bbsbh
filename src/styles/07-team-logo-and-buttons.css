@@ -469,22 +469,17 @@
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
+/* The dot at rest. Its breath — and the reduced-motion cut — live in
+   motion/innings.css, with the rest of this page's motion. It used to push a
+   ring outward on `box-shadow` here, which the compositor cannot take (it
+   repaints every frame) and which reads as a notification rather than as a
+   game quietly running. */
 .liveedge__dot {
   flex: none;
   width: 9px;
   height: 9px;
   border-radius: 50%;
   background: var(--seal);
-  box-shadow: 0 0 0 0 rgba(181, 130, 74, 0.55);
-  animation: liveedge-pulse 1.8s var(--ease-standard) infinite;
-}
-@keyframes liveedge-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(181, 130, 74, 0.5); }
-  70% { box-shadow: 0 0 0 7px rgba(181, 130, 74, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(181, 130, 74, 0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .liveedge__dot { animation: none; }
 }
 
 /* The innings bar's primary action while the shown half is still sealed. It IS

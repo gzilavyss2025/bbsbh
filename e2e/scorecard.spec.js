@@ -509,7 +509,10 @@ test('the results block: one line per decision, and a defense that shows who cam
   expect(await struck.count()).toBeGreaterThan(0)
   await expect(page.locator('.sc-footer__defense')).toContainText('(8th)')
   // The strike is drawn in the scorer's second pencil here — seam red, the same
-  // ink the replacement's own name and inning tag are written in.
+  // ink the replacement's own name and inning tag are written in. Since #981 the
+  // strike is a drawn BAR rather than `text-decoration` (styles/motion/strike.css),
+  // so the sheet recolours that bar; the fact asserted is unchanged, only what
+  // carries the colour.
   const strikeInk = await struck.first().evaluate((el) => {
     const seam = getComputedStyle(document.documentElement)
       .getPropertyValue('--accent-negative')
@@ -519,8 +522,10 @@ test('the results block: one line per decision, and a defense that shows who cam
     document.body.append(probe)
     const resolved = getComputedStyle(probe).color
     probe.remove()
-    return { got: getComputedStyle(el).textDecorationColor, want: resolved }
+    const bar = getComputedStyle(el.querySelector('.struckline'), '::after')
+    return { got: bar.backgroundColor, want: resolved, drawn: bar.content !== 'none' }
   })
+  expect(strikeInk.drawn).toBe(true)
   expect(strikeInk.got).toBe(strikeInk.want)
 })
 

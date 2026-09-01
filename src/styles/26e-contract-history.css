@@ -1,0 +1,231 @@
+/* ============================================================
+   CONTRACT HISTORY
+   The player page's historical-contract ledger
+   (components/player/ContractHistoryLedger.jsx) — arbitration cases,
+   extensions, free-agency signings and the season salary each one paid,
+   newest season first.
+
+   Route-loaded, imported by the component rather than by src/index.css:
+   only the lazy player HISTORY tab mounts this card, and the `.cthist__*`
+   namespace is its own, so nothing else in the cascade can want it. Numbered
+   26e so the prefix still tells the truth about where it sits — beside its
+   26a/26b/26c/26d player-page neighbours, after 26-player-page.css.
+
+   THE METAPHOR IS THE LEDGER PAGE, not the timeline. Money is read down a
+   column: the figures sit in one mono rail on the right, at one indent, so
+   the eye compares 2024 to 2023 without moving sideways. The year is inked at
+   the head of its own block, with the club penciled beside it, the way a
+   scorebook writes the date at the head of a page.
+   ============================================================ */
+
+.cthist {
+  margin: 22px 2px 0;
+}
+
+/* One ruled card holding every season, hairline-divided — not a bordered box
+   per season, which at a dozen seasons reads as a stack of receipts rather
+   than one page of a book. Same body as the Awards ledger above it. */
+.cthist__seasons {
+  margin: 0;
+  padding: 10px 12px;
+  list-style: none;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.cthist__season + .cthist__season {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* ---- the season's own head: year, then the club the deal names ---- */
+.cthist__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.cthist__year {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+.cthist__club {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+/* The mark is decorative — the club is named in text right beside it. */
+.cthist__club img {
+  flex: none;
+  align-self: center;
+}
+.cthist__clubname {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- one record ---- */
+.cthist__rows {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+/* Two columns and a full-width third line: what kind of record it is, the
+   figure, then everything the source also recorded. EACH ROW IS ITS OWN GRID,
+   so `auto` sizes the figure column to that row's own string and nothing is
+   measured across the card. The right edges still line up, and the reason is
+   the other column: `1fr` on the label takes all the slack, which pushes every
+   figure to the same right edge whatever its width. Widths down the column are
+   therefore NOT equal — only their right edge is, which is all a reader
+   scanning a money column needs. */
+.cthist__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: var(--space-3);
+  padding: 5px 0;
+}
+.cthist__row + .cthist__row {
+  border-top: var(--bw-hair) dotted var(--rule-grid);
+}
+.cthist__kind {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+/* The three DEAL kinds are the news on a page of payroll lines, so they take
+   the ink; the salary they explain stays penciled. */
+.cthist__row--extension .cthist__kind,
+.cthist__row--freeAgency .cthist__kind,
+.cthist__row--arbitration .cthist__kind {
+  color: var(--accent-primary);
+}
+.cthist__row--salary .cthist__kind {
+  color: var(--text-caption);
+}
+.cthist__figure {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+  text-align: right;
+}
+.cthist__row--salary .cthist__figure {
+  font-weight: var(--w-regular);
+  color: var(--text-body);
+}
+.cthist__sub {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-text);
+  color: var(--text-caption);
+}
+/* THE SUB-LINE IS PROSE, so it renders in the case it was written in. Every
+   other string on this card is a label, a figure or a badge and stays shouted
+   by the global ALL-CAPS invariant (01-base.css): the kind, the year, the club,
+   the value rail, the match badge. This one line is the sentence layer — "Per
+   year $17M · Covers 2025-2027 · club option", "from Boston Red Sox", "Terms
+   not recorded" — and shouting it flattens the very distinction the italic
+   below is drawing. Same shouted-heading / natural-case-body split as
+   .contractcard__sentence and .tscoremodal__body, and the `#root` prefix is
+   what lets it out-rank `#root *`. */
+/* The descendant half is not belt-and-braces: `#root *` matches the italic
+   `em` inside this line DIRECTLY, and a direct match beats an inherited value,
+   so exempting only the span leaves "Not recorded" shouting inside a sentence
+   that is not. */
+#root .cthist__sub,
+#root .cthist__sub * {
+  text-transform: none; /* caps-exempt: the card's one prose line, same idiom as .contractcard__foot */
+}
+/* "Terms not recorded" — the honest stand-in where a figure would be. Italic,
+   so a sentence about missing data never reads as data. */
+.cthist__none {
+  font-style: italic;
+}
+.cthist__fuzzy {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: 3px;
+  padding: 1px 6px;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* ---- the collapse control ---- */
+.cthist__toggle {
+  display: block;
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: 10px;
+  padding: 10px;
+  appearance: none;
+  cursor: pointer;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+.cthist__toggle:hover {
+  border-style: solid;
+  color: var(--text-heading);
+}
+.cthist__toggle:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* A wide screen has room for the year and the rows side by side, which keeps a
+   long career from reading as one very tall column of small type. */
+@media (min-width: 700px) {
+  .cthist__season {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    column-gap: var(--space-5);
+  }
+  .cthist__head {
+    display: block;
+  }
+  /* Flex rather than inline-flex, so the club always takes its own line under
+     the year instead of sitting beside it only when the name happens to be
+     short enough to fit. */
+  .cthist__club {
+    display: flex;
+    margin-top: 2px;
+  }
+  .cthist__rows {
+    margin-top: 0;
+  }
+}

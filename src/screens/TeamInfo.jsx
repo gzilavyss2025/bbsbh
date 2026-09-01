@@ -570,7 +570,7 @@ function TeamSections({
       {showBullpen && (
         <BullpenBoard
           workload={workloadData}
-          bullpen={oppBullpenArms}
+          teamId={oppMeta.id}
           gameDate={boardGameDate}
           theme={oppTheme}
           masthead={oppMasthead}
@@ -607,8 +607,14 @@ function TeamSections({
           </SectionMasthead>
           {lineup.length > 0 ? (
             <ol className="lineup__list">
-              {lineup.map((p) => (
-                <li key={p.id} className="lineup__row">
+              {lineup.map((p, i) => (
+                /* `--row-i` is the row's place in the posted order, and the
+                   only thing the ink-in cascade needs from this file (see
+                   styles/motion/lineup.css). Per row rather than one variable
+                   on the <ol>: a parent variable recalculates styles for every
+                   child, and per-child is what lets the Animation Lab pause the
+                   strip additively. Same shape HalfTally uses for `--tally-i`. */
+                <li key={p.id} className="lineup__row" style={{ '--row-i': i }}>
                   <span className="lineup__order">{p.order}</span>
                   <span className="lineup__namewrap">
                     <PlayerLink id={p.id} className="lineup__name">

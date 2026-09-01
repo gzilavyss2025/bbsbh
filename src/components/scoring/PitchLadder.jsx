@@ -12,8 +12,13 @@
 // as every other drawing in this bucket.
 export function PitchLadder({ ladder }) {
   if (ladder.length === 0) return null
-  const balls = ladder.filter((p) => p.side === 'ball')
-  const strikes = ladder.filter((p) => p.side === 'strike')
+  // The lanes stack independently, but the WRITE-ON runs in the order the
+  // pitches were actually thrown (styles/motion/playbyplay.css, beat 1), so
+  // each cell carries its place in the whole sequence rather than its place in
+  // its own lane. `--cell-i` is the only thing that index is for.
+  const seq = ladder.map((p, i) => ({ ...p, i }))
+  const balls = seq.filter((p) => p.side === 'ball')
+  const strikes = seq.filter((p) => p.side === 'strike')
   const label = ladder
     .map((p) => {
       if (p.label === 'X') return 'in play'
@@ -26,7 +31,7 @@ export function PitchLadder({ ladder }) {
       <div className="pbp__laddercol pbp__laddercol--ball">
         <span className="pbp__ladderhead">B</span>
         {balls.map((p, i) => (
-          <span key={i} className="pbp__cell">
+          <span key={i} className="pbp__cell" style={{ '--cell-i': p.i }}>
             {p.label}
           </span>
         ))}
@@ -34,7 +39,7 @@ export function PitchLadder({ ladder }) {
       <div className="pbp__laddercol pbp__laddercol--strike">
         <span className="pbp__ladderhead">S</span>
         {strikes.map((p, i) => (
-          <span key={i} className="pbp__cell">
+          <span key={i} className="pbp__cell" style={{ '--cell-i': p.i }}>
             {p.label}
           </span>
         ))}

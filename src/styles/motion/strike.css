@@ -1,0 +1,114 @@
+/* -------------------------------------------------------- motion / strike */
+/* DRAW THE CROSS-OUT (issue #981).
+
+   A starter comes out and his line is struck through. It used to simply BE
+   there on the next render, because `text-decoration: line-through` cannot
+   animate. This draws it instead: a graphite bar of the same weight and
+   colour, wiped left to right in 220ms. It is the most literal scorekeeping
+   gesture in an app about keeping score, and it fires on a state change a
+   handful of times a game — exactly the case STANDARDS.md's frequency table
+   says motion may be spent on.
+
+   ROUTE A: THE BAR REPLACES THE DECORATION PERMANENTLY, at all four sites, and
+   that is a structural fix rather than a flourish. `.plink` is a <button>: it
+   does not inherit an ancestor's `text-decoration` and it zeroes its own, so
+   every one of those four rules had to name `.plink` a second time or the line
+   drew over an un-linked inning tag and skipped the name beside it. That is
+   the bug scripts/check-strike-links.mjs was written for, documented in its
+   header. A bar over the WRAPPER covers a link, a tag or plain text without
+   having to know which it got, so the rules could drop their second selector
+   because the hazard is gone, not because it stopped being checked. The guard
+   still has three line-through rules to hold — two exempt pills in
+   12-sealbox.css and the roster's own self-targeting row — and it walks
+   subdirectories as of this commit, so it reaches this file too.
+
+   THE SETTLED APPEARANCE IS UNCHANGED: 1.5px (--bw-rule), --graphite-soft,
+   with the name's own colour dropping to --text-caption, which each surface's
+   own partial still declares. Only the drawing is here.
+
+   THE BAR HANGS OFF `.struckline`, THE INLINE SPAN StruckLine PUTS INSIDE THE
+   WRAPPER — NOT THE WRAPPER ITSELF, AND THAT DISTINCTION IS THE WHOLE FIX.
+   `text-decoration` crossed the GLYPHS. An absolutely-positioned bar fills its
+   containing block instead, and at two of these four sites that block is far
+   wider than the name in it: `.abhero__name`/`.abhero__pr` are items of a
+   COLUMN flex container (`.abhero__who`), so they stretch to its cross size —
+   262px of box behind 87px of name — and `.defdiamond__name` holds a 58px
+   `min-width` with centred text, because that width IS the writing line its
+   `border-bottom` prints. On the wrapper the bar ran a rule out into empty
+   card at one and hung off both ends of a short surname at the other.
+
+   An inline `.struckline` hugs exactly the text, and still sits OUTSIDE the
+   link, which is what Route A was for: it covers a `.plink` button, an
+   un-linked inning tag and bare text alike without having to know which it
+   got. It is one line by construction at all four sites — `.defdiamond__name`
+   is `white-space: nowrap` with an ellipsis, and the other three hold a single
+   name row — so no bar draws through the gap between two wrapped lines. A
+   fifth site must be checked for that before it joins them.
+
+   ONLY A SUBSTITUTION THE READER WAS HERE FOR DRAWS ITSELF. `.is-drawing`
+   comes from StruckLine.jsx via useBecameTrue: a cold load, a poll and a
+   return visit all render the line already down. See that hook's header. */
+.struckline {
+  position: relative;
+}
+.pbp__replaced > .struckline::after,
+.lineupcard__name--out > .struckline::after,
+.defdiamond__name--out > .struckline::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  /* 54%, not 50%: a line through the optical middle of lower-case text sits a
+     touch below the box's centre. */
+  top: 54%;
+  height: var(--bw-rule);
+  background: var(--graphite-soft);
+  /* The settled state IS the drawn bar, so the animation below runs 0 -> 1 and
+     lands on this. No `forwards` fill, and nothing to hand off to. */
+  transform: scaleX(1);
+  transform-origin: left center;
+  pointer-events: none;
+}
+.pbp__replaced > .struckline.is-drawing::after,
+.lineupcard__name--out > .struckline.is-drawing::after,
+.defdiamond__name--out > .struckline.is-drawing::after {
+  animation: strike-draw var(--dur-med) var(--ease-out) backwards;
+}
+
+/* THE TWO FLEX SITES PUT THEIR OWN LAYOUT BACK ONTO THE INNER SPAN. Both
+   wrappers laid their children out themselves, and a single inline child
+   between them and those children would have collapsed the row — `.abhero__pr`
+   would have lost the gap between the surname and its "PR" tag, `.pbp__batline`
+   its baseline alignment. Restated here rather than in each surface's own
+   partial because the inner span exists only for the bar above; the wrappers
+   keep their own declarations untouched, and this is what makes the extra
+   element cost nothing. The other two sites need nothing: `.lineupcard__name`
+   is a flex item in a ROW, so it already hugs, and `.defdiamond__name` lays its
+   content out as ordinary centred inline text. */
+.abhero__pr > .struckline {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.pbp__batline > .struckline {
+  display: inline-flex;
+  align-items: baseline;
+}
+@keyframes strike-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Reduced motion renders the settled strike, drawn instantly. The mark still
+   has to be there — it says who is out of the game. */
+@media (prefers-reduced-motion: reduce) {
+  .pbp__replaced > .struckline.is-drawing::after,
+  .lineupcard__name--out > .struckline.is-drawing::after,
+  .defdiamond__name--out > .struckline.is-drawing::after {
+    animation: none;
+  }
+}

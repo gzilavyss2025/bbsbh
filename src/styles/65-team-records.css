@@ -244,3 +244,13 @@ button.tstatrow__k.trec__rank,
   padding-top: var(--space-1);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
+
+/* The Last Time card. Its rows carry a PHRASE, a date and a count where the
+   Records card's carry a short label and two figures, so the two-column
+   `.tstats` grid it otherwise shares breaks "Series opener in Baltimore" one
+   word to a line at phone width. One row per line instead; everything else —
+   the card chrome, the rules, the caps treatment — is inherited unchanged, so
+   it still reads as a sibling of the cards above it rather than a new object. */
+.trec--lasttime .tstats {
+  grid-template-columns: 1fr;
+}

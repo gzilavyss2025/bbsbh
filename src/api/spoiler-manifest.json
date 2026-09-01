@@ -237,7 +237,7 @@
     },
     "contractsHistory.js": {
       "class": "spoiler-free",
-      "why": "Historical contract records joined to an admin identity override: who signed what, in which season, for how much. Carries no game, no linescore and no reveal state, so it sits in the same season-long identity class as its neighbours person/contracts.js and salaries.js (ADR-0034, ADR-0052 for the money pair, ADR-0067 for this module). No SealBox, and no surface consumes it yet — issue #928 owns where this data renders."
+      "why": "Historical contract records joined to an admin identity override: who signed what, in which season, for how much. Carries no game, no linescore and no reveal state, so it sits in the same season-long identity class as its neighbours person/contracts.js and salaries.js (ADR-0034, ADR-0052 for the money pair, ADR-0067 for this module). No SealBox: the player page's Contract history card reads it on the history tab, an open surface, the same way that page's other money cards read theirs."
     },
     "dayHighlights.js": {
       "class": "reveal-only",
@@ -481,6 +481,10 @@
     "person/careerRegister.js": {
       "class": "spoiler-free",
       "why": "The year-by-year career register. Season lines."
+    },
+    "person/contract/history.js": {
+      "class": "spoiler-free",
+      "why": "Pure view model over the historical-contract rows: which of the four source vocabularies a row speaks, how its money reads, and what an empty terms object says instead. Contract facts only — no game, no linescore, no reveal state — and the same class as contractsHistory.js, which supplies its rows."
     },
     "person/contract/view.js": {
       "class": "spoiler-free",
@@ -739,6 +743,10 @@
     "scheduleGames.js": {
       "class": "cutoff-gated",
       "why": "Every row it returns carries `won`, `runs` and `oppRuns` — one game's line. It adds no fetch of its own and inherits schedule.js's `resultsCutoff`, which is exactly what makes it cutoff-gated rather than spoiler-free: the safety is the DATE the caller asks for, never a property of these rows. Its own header already said so ('gated by fetchTeamSchedule's own resultsCutoff') while the class here claimed the rows were safe at render top-level on any surface. They are not — a caller that renders decided games on a scoring surface prints last night's finals, and nothing here would have objected."
+    },
+    "scheduleShape.js": {
+      "class": "cutoff-gated",
+      "why": "A decade of FINAL regular-season games per club — date, opponent, side of the road, W/L — written by a nightly cron that runs before the day's games, so the file cannot hold tonight even before a cutoff applies. Classified with teamRecords.js rather than spoiler-free for the same reason that module is: `ledgerOf(data, { cutoff = null })` defaults the cutoff to null, so the safety lives entirely in the date the CALLER asks for, and a caller that requests today on a page showing last week's game has leaked that week. Two things sharpen it here. The answer is a DATE ('the last time they won game 1 of a road trip was July 3'), which is exactly the shape that names a game rather than averaging over one — so the cutoff is applied BEFORE segmentation, not after, and a dated page sees the trip in progress on its own date rather than a completed trip with its tail hidden. And every fact here is a past, finished game on the Team hub, an open surface by rule (ADR-0034); nothing in it is ever read on a scoring surface."
     },
     "scorecard/alignment.js": {
       "class": "caller-gated",

@@ -1,6 +1,7 @@
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherPhoto } from './PitcherNotice.jsx'
 import { BallGlyph } from '../game/BoxScoreSkeleton.jsx'
+import { StruckLine } from '../scoring/StruckLine.jsx'
 
 // The focused plate appearance's header (ADR-0043) — focus mode only, threaded
 // down through AtBatCard as `focusHeader`.
@@ -50,9 +51,12 @@ export function AtBatHero({ batter, pitcher, pinchRunners, battingTeamId, pitchi
         <PitcherPhoto personId={batter.id} name={batter.last} teamId={battingTeamId} />
       </div>
       <div className="abhero__who">
-        <span className={`abhero__name ${replaced ? 'pbp__replaced' : ''}`}>
+        <StruckLine
+          struck={replaced}
+          className={`abhero__name ${replaced ? 'pbp__replaced' : ''}`}
+        >
           <NameParts id={batter.id} first={batter.first} last={batter.last} />
-        </span>
+        </StruckLine>
         <span className="abhero__meta">
           {batter.jersey ? <span className="abhero__jersey">{batter.jersey}</span> : null}
           {batter.pos && <span className="abhero__pos">{batter.pos}</span>}
@@ -61,13 +65,14 @@ export function AtBatHero({ batter, pitcher, pinchRunners, battingTeamId, pitchi
             for — the same crossed-out-and-replaced convention .pbp__top used,
             kept here because this header is now the card's only name row. */}
         {pinchRunners?.map((pr, i) => (
-          <span
+          <StruckLine
             key={pr.id}
+            struck={i < pinchRunners.length - 1}
             className={`abhero__pr ${i < pinchRunners.length - 1 ? 'pbp__replaced' : ''}`}
           >
             <PlayerLink id={pr.id}>{pr.last}</PlayerLink>
             <span className="abhero__pos">PR</span>
-          </span>
+          </StruckLine>
         ))}
       </div>
       <BallGlyph className="abhero__vs" />

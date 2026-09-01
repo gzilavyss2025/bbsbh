@@ -352,7 +352,7 @@
 }
 
 .idlab__recolorsourcelabel {
-  font-size: var(--fs-micro);
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   text-align: center;
   overflow-wrap: anywhere;
@@ -441,7 +441,7 @@
 }
 
 .idlab__wpaartlabel {
-  font-size: var(--fs-micro);
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   text-align: center;
   overflow-wrap: anywhere;

@@ -661,19 +661,19 @@
 }
 
 /* A fielder who's been replaced: struck through in pencil, the reliever penciled
-   on his own writing line above (the stack renders newest-on-top). Set on the
-   .plink too — a <button> won't take an ancestor's line-through, and .plink
-   zeroes text-decoration outright. Without it the innings/box-score diamond
-   (whose entries carry an id, so every surname IS a PlayerLink) drew the pencil
-   line over the un-linked " (6th)" tag alone, and over nothing at all for the
-   starter, who has no tag. Same fix as .lineupcard__name--out and
-   .pbp__replaced; scripts/check-strike-links.mjs is the guard. */
-.defdiamond__name--out,
-.defdiamond__name--out .plink {
+   on his own writing line above (the stack renders newest-on-top).
+
+   THE `.plink` HALF OF THIS RULE IS GONE BECAUSE THE PROBLEM IS (issue #981,
+   Route A). A <button> won't take an ancestor's line-through and .plink zeroes
+   text-decoration outright, so without the second selector this diamond — whose
+   entries carry an id, making every surname a PlayerLink — drew the pencil line
+   over the un-linked " (6th)" tag alone, and over nothing at all for the
+   starter, who has no tag. The strike is a bar drawn over the WRAPPER now
+   (styles/motion/strike.css), which covers a link, a tag or plain text without
+   having to know which it got. scripts/check-strike-links.mjs still guards the
+   line-through rules that remain elsewhere. */
+.defdiamond__name--out {
   color: var(--text-caption);
-  text-decoration: line-through;
-  text-decoration-color: var(--graphite-soft);
-  text-decoration-thickness: 1.5px;
 }
 
 /* A substitute currently on the field: his surname inked seam-red to match the
