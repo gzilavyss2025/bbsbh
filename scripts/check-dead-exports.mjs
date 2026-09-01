@@ -66,7 +66,6 @@ const CHECKED_ROOT = 'src'
 // name -> reason, keyed as "relative/path.js#exportName". Each reason is the
 // one that belongs in a PR description if this list needs to grow.
 const ALLOWLIST = {
-  'src/api/contractsHistory.js#fetchPlayerContractHistory': 'Shipped one PR ahead of its surface, deliberately. PR3 builds the historical-contract data layer and the admin workbench; issue #928 owns WHERE this data renders and has not designed that surface yet (ADR-0067). The module is covered by test/contracts-history-merge.test.js through its pure half, mergeContractHistoryRows, which the fetch wrapper delegates to. Delete this entry the moment a screen imports it.',
   'src/api/milbHistory.js#historicalClubName': 'Deliberately staged ahead of its first caller — the function\'s own header comment says "Not yet wired into any screen (no historical logo art exists yet)"; it is exposed for a future pass, not forgotten.',
   'src/lib/milbColors.js#MILB_COLORS': 'Re-exported on purpose ("so every existing MiLB caller ... still has one import for \'MiLB colors\'") even though every current caller happens to import it from brandColors.js instead. Kept open as the intended single entry point.',
   'src/lib/milbColors.js#MILB_RESEARCHED_PAIRS': 'Same re-export as MILB_COLORS above, same file, same rationale.',

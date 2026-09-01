@@ -237,7 +237,7 @@
     },
     "contractsHistory.js": {
       "class": "spoiler-free",
-      "why": "Historical contract records joined to an admin identity override: who signed what, in which season, for how much. Carries no game, no linescore and no reveal state, so it sits in the same season-long identity class as its neighbours person/contracts.js and salaries.js (ADR-0034, ADR-0052 for the money pair, ADR-0067 for this module). No SealBox, and no surface consumes it yet — issue #928 owns where this data renders."
+      "why": "Historical contract records joined to an admin identity override: who signed what, in which season, for how much. Carries no game, no linescore and no reveal state, so it sits in the same season-long identity class as its neighbours person/contracts.js and salaries.js (ADR-0034, ADR-0052 for the money pair, ADR-0067 for this module). No SealBox: the player page's Contract history card reads it on the history tab, an open surface, the same way that page's other money cards read theirs."
     },
     "dayHighlights.js": {
       "class": "reveal-only",
@@ -481,6 +481,10 @@
     "person/careerRegister.js": {
       "class": "spoiler-free",
       "why": "The year-by-year career register. Season lines."
+    },
+    "person/contract/history.js": {
+      "class": "spoiler-free",
+      "why": "Pure view model over the historical-contract rows: which of the four source vocabularies a row speaks, how its money reads, and what an empty terms object says instead. Contract facts only — no game, no linescore, no reveal state — and the same class as contractsHistory.js, which supplies its rows."
     },
     "person/contract/view.js": {
       "class": "spoiler-free",

@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react'
+import { fetchPlayerContractHistory } from '../../api/contractsHistory.js'
 import { loadPlayerCore } from '../../api/player/core.js'
 import { loadPlayerHistory, loadPositionScope } from '../../api/player/history.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { AwardsLedger } from '../../components/player/AwardsLedger.jsx'
 import { CareerTimeline } from '../../components/player/CareerTimeline.jsx'
+import { ContractHistoryLedger } from '../../components/player/ContractHistoryLedger.jsx'
 import { GameLink } from '../../components/player/GameLink.jsx'
 import { LevelProgressionCard } from '../../components/player/LevelProgressionCard.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
@@ -25,14 +27,27 @@ const PITCHER_FIRSTS_ORDER = ['debut', 'start', 'win', 'loss', 'save', 'so']
 // The player hub's HISTORY tab — `/player/{id}/history`. The biographical
 // archive: what he has won, then innings by position, then dated origin-story
 // events (Firsts), then Path to the Majors' compact summary before Team
-// History's expanded logo detail — summary before detail — then Transactions,
-// the longest and most archival section, last.
+// History's expanded logo detail — summary before detail — then Contract
+// history, and then Transactions, the longest and most archival section, last.
 //
 // Awards leads because it is identity — "who is this guy" — the place it held on
 // the single page, ahead of everything dated.
+//
+// Contract history sits between the clubs and the wire on purpose. Team History
+// says which clubs he played for; the contract ledger says what each of them
+// paid him to; the transaction timeline then records every move those deals
+// produced, move by move. Deal before wire, so the money reads as the cause and
+// the roster line as the consequence.
 export function PlayerHistoryTab({ id, asOf, sportId }) {
   const core = useAsync(() => loadPlayerCore(id, asOf), [id, asOf])
   const history = useAsync(() => loadPlayerHistory(id, asOf), [id, asOf])
+  // Its own load, deliberately outside the gate below: the contract archive is
+  // static shard data joined to a live identity correction (ADR-0067), and the
+  // rest of the tab must not wait on it. The card renders nothing until the
+  // rows arrive, and nothing at all for the thousands of players who have none.
+  // Keyed on the player alone — a career's money is an open, season-long record
+  // with no as-of cutoff over it (ADR-0034, ADR-0052).
+  const contracts = useAsync(() => fetchPlayerContractHistory(id), [id])
   const back = () => window.history.back()
 
   const gate = AsyncGate({
@@ -103,6 +118,8 @@ export function PlayerHistoryTab({ id, asOf, sportId }) {
       )}
 
       {data.timeline && <CareerTimeline entries={data.timeline.entries} />}
+
+      <ContractHistoryLedger rows={contracts.data} />
 
       {data.transactions && <TransactionTimeline rows={data.transactions.rows} />}
     </PlayerHubShell>
