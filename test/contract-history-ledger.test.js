@@ -180,16 +180,47 @@ test('a null teamId survives as null — every salaries row has one', () => {
   assert.equal(view.headline, '$510K')
 })
 
-test('a figure too small to be a contract is treated as a column that did not parse', () => {
-  // 1,156 free-agency rows read `years: 0, guarantee: 1`. A one-dollar signing
-  // is not a fact, so the row prints what it does know and nothing else.
+test('a free-agency guarantee of 1 reads as the minor-league deal it marks, never as $1', () => {
+  // The sentinel: 1,156 rows, a fifth of free_agency.csv, 1,153 of them with
+  // `years: 0` beside it. It is the source's mark for a minor-league deal, not
+  // one dollar and not a missing value (docs/contracts-data-caveats.md).
   const view = contractRowView(
     row({ rowKey: 'free_agency#631', sourceFile: 'free_agency', season: 2023, teamId: 144, terms: { years: 0, guarantee: 1, term: 2023 } }),
   )
-  assert.equal(view.headline, null)
+  assert.equal(view.headline, 'Minor-league deal')
   assert.equal(view.amount, null)
-  assert.equal(view.note, 'Terms not recorded')
+  // The terms WERE recorded; the row must not claim otherwise.
+  assert.equal(view.note, null)
   assert.deepEqual(view.details, [{ k: 'Covers', v: '2023' }])
+  const printed = JSON.stringify(view)
+  assert.equal(printed.includes('$1'), false)
+})
+
+test('the sentinel drops the per-year figure derived from it', () => {
+  // 39 of the 40 sentinel rows carrying an `aav` repeat the sentinel there too.
+  const view = contractRowView(
+    row({ rowKey: 'free_agency#1000', sourceFile: 'free_agency', season: 2021, teamId: 109, terms: { years: 0, guarantee: 1, aav: 1, term: 2021 } }),
+  )
+  assert.equal(view.headline, 'Minor-league deal')
+  assert.equal(view.details.some((d) => d.k === 'Per year'), false)
+  assert.equal(JSON.stringify(view).includes('$1'), false)
+})
+
+test('the sentinel is read by its meaning, not by its size', () => {
+  // A real one-dollar figure anywhere else is still nothing anyone signed, so
+  // the magnitude floor stays — but it is no longer what catches the sentinel,
+  // and it never reaches an extension row's guarantee.
+  const extension = contractRowView(
+    row({ sourceFile: 'extensions', season: 2006, teamId: 116, terms: { years: 2, guarantee: 1, aav: 1, first_year: 2007, final_year: 2008 } }),
+  )
+  assert.equal(extension.headline, '2 yr')
+  assert.equal(extension.amount, null)
+  // A free-agency guarantee that is small but NOT the sentinel is not a
+  // minor-league deal, and does not borrow its wording.
+  const notSentinel = contractRowView(
+    row({ sourceFile: 'free_agency', season: 2019, teamId: 158, terms: { years: 1, guarantee: 2, term: 2019 } }),
+  )
+  assert.equal(notSentinel.headline, '1 yr')
 })
 
 test('a money field holding a word prints the word, and a placeholder prints nothing', () => {

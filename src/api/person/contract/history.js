@@ -18,7 +18,7 @@
 // because the same key means different things per source and a generic reader
 // would print a filing figure as if it were a salary.
 //
-// THREE RULES THE SOURCE DATA FORCES.
+// FOUR RULES THE SOURCE DATA FORCES.
 //
 //  1. `terms` IS ALLOWED TO BE EMPTY, and often is — 3,974 of 27,349 salary
 //     rows and 717 of 5,598 free-agency rows carry `{}`. An empty row is still
@@ -35,6 +35,11 @@
 //     (issue #947) measured it against the settled salary on the rows carrying
 //     both and found the two disagree about 95% of the time. Its real meaning
 //     is unsettled, so the card says nothing rather than something wrong.
+//
+//  4. A FREE-AGENCY `guarantee` OF 1 IS A SENTINEL, NOT A DOLLAR — the
+//     source's mark for a minor-league deal, on a fifth of that file. It is
+//     read by its documented meaning, never by its size; see
+//     isMinorLeagueSentinel below and docs/contracts-data-caveats.md.
 //
 // AND ONE RULE THE FILE FORMAT FORCES: `rowKey` is an OPAQUE STRING. It is a
 // React key and a dedupe key, never a number and never a sort key. Its shape
@@ -98,15 +103,35 @@ function termNumber(value) {
   return Number.isFinite(value) ? value : null
 }
 
-// A figure too small to be a contract. 1,156 free-agency rows carry
-// `years: 0, guarantee: 1` — a column that did not parse, not a one-dollar
-// deal — and every implausible figure in the whole record is under ten
-// dollars, so the floor separates the artifact from the data cleanly. A row
-// that trips it prints as if the figure were missing, which it is.
+// A last-resort floor under a money cell: no contract in this record is for
+// less than ten dollars, so a figure that small is a cell that did not parse.
+// It catches NOTHING in the data as it stands — the one case that used to trip
+// it is the minor-league sentinel below, which is now read by its documented
+// meaning instead of by its size. The floor stays as a guard against a future
+// broken cell, not as an explanation of a known one.
 const MONEY_FLOOR = 10
 function moneyNumber(value) {
   const amount = termNumber(value)
   return amount != null && Math.abs(amount) >= MONEY_FLOOR ? amount : null
+}
+
+// THE MINOR-LEAGUE SENTINEL. A free-agency `guarantee` of exactly 1 is not one
+// dollar and not a missing value: it is the source's mark for a MINOR-LEAGUE
+// DEAL, on 1,156 rows — 20.7% of free_agency.csv — and 1,153 of them carry
+// `years: 0` beside it. It runs 1991 to 2023 and stops; no row after 2023 uses
+// it. A split contract has no single guarantee to hold, which is why the column
+// carries a mark rather than a number (docs/contracts-data-caveats.md).
+//
+// So the rule is the documented one — treat `guarantee = 1` as NO guarantee —
+// and the card says what the mark means rather than printing "$1" or claiming
+// the terms were never recorded. The real major-league rate is named in prose
+// in the source's `details` cell on 858 of them; that column is not in the
+// shipped shards (checked: zero rows here carry a `details` key), so this card
+// does not show it and does not go looking for it.
+const MINOR_LEAGUE_SENTINEL = 1
+const MINOR_LEAGUE_LABEL = 'Minor-league deal'
+function isMinorLeagueSentinel(kind, terms) {
+  return kind === 'freeAgency' && terms.guarantee === MINOR_LEAGUE_SENTINEL
 }
 
 // A money term as one display string: the figure when it is a figure, the word
@@ -214,9 +239,13 @@ export function contractRowView(row) {
   }
 
   if (kind === 'extension' || kind === 'freeAgency') {
-    const headline = dealHeadline(terms)
+    const minorLeague = isMinorLeagueSentinel(kind, terms)
+    const headline = minorLeague ? MINOR_LEAGUE_LABEL : dealHeadline(terms)
     const details = [
-      detail('Per year', shortMoney(moneyNumber(terms.aav))),
+      // A sentinel row's per-year figure goes with its guarantee: 39 of the 40
+      // that carry one read `1` a second time, and the fortieth has no
+      // guarantee left for it to be an average of.
+      detail('Per year', minorLeague ? null : shortMoney(moneyNumber(terms.aav))),
       detail('Covers', coversLabel(terms)),
       detail(null, optionLabel(terms.option)),
       detail(null, optOutLabel(terms.opt_out)),
@@ -224,7 +253,7 @@ export function contractRowView(row) {
     return {
       ...base,
       headline,
-      amount: moneyNumber(terms.guarantee),
+      amount: minorLeague ? null : moneyNumber(terms.guarantee),
       details,
       // The note tracks the HEADLINE, not the details: a row that knows only
       // which seasons a deal covered still has no money in it, and "Covers
