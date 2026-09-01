@@ -86,19 +86,30 @@
    back rather than snapping away.
 
    Both spans keep the `backface-visibility: hidden` the past-day flip card
-   needs; nothing here touches it. */
+   needs; nothing here touches it.
+
+   `color` IS IN BOTH LISTS BECAUSE 06a-gamecard-parkart.css ALREADY PUT IT
+   THERE. Over a ballpark photo the ink plate is undertoned by the club's own
+   `--park-tint` on hover, and that partial transitions `color` alongside
+   `opacity` so the sign follows the wash arriving under it. `transition` is a
+   shorthand: it resets every `transition-*` longhand, and these rules are
+   later in the cascade than that file, so a list of `transform, opacity` alone
+   silently dropped the colour leg and made the park-art hover snap. Any future
+   edit to these two lines has to carry `color` with it. */
 @media (hover: hover) and (pointer: fine) {
   .gamecard__atmark-ghost,
   .gamecard__atmark-ink {
     transition:
       transform 300ms var(--ease-out),
-      opacity 300ms var(--ease-out);
+      opacity 300ms var(--ease-out),
+      color 300ms var(--ease-out);
   }
   .gamecard__open:hover .gamecard__atmark-ghost,
   .gamecard__open:hover .gamecard__atmark-ink {
     transition:
       transform 240ms var(--ease-out),
-      opacity 240ms var(--ease-out);
+      opacity 240ms var(--ease-out),
+      color 240ms var(--ease-out);
   }
   .gamecard__open:hover .gamecard__atmark-ghost {
     opacity: 0.14;
@@ -109,8 +120,17 @@
   }
 
   /* Reduced motion keeps the ink-up and drops the slide — the plates stay out
-     of register, which is how they are printed. */
+     of register, which is how they are printed. The ink-up ARRIVES rather than
+     fading, which is also how 06a-gamecard-parkart.css has always had it: its
+     own reduce block zeroes the transition on these two spans, and the rules
+     above would otherwise have handed it back. */
   @media (prefers-reduced-motion: reduce) {
+    .gamecard__atmark-ghost,
+    .gamecard__atmark-ink,
+    .gamecard__open:hover .gamecard__atmark-ghost,
+    .gamecard__open:hover .gamecard__atmark-ink {
+      transition: none;
+    }
     .gamecard__open:hover .gamecard__atmark-ghost {
       transform: translate(calc(-50% + 2px), calc(-50% - 11px)) skewX(-8deg) rotate(-2deg);
     }

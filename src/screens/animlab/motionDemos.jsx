@@ -102,18 +102,25 @@ export function LineupDemo() {
   )
 }
 
-// The struck line at two of its four sites, both mid-draw. `.is-drawing` is
-// written on directly here — in the app StruckLine puts it there, and only for a
-// substitution the reader was watching (useBecameTrue), which is a transition a
-// frozen frame cannot hold.
+// The struck line at two of its four sites, both mid-draw. The inner
+// `.struckline` span is StruckLine's own shape, restated by hand because the
+// demo has no substitution to hand the component — it is what makes the bar hug
+// the name rather than the box, and a demo drawn without it would show a rule
+// the app does not draw. `.is-drawing` is written on directly for the same
+// reason: in the app it lands there only for a substitution the reader was
+// watching (useBecameTrue), which is a transition a frozen frame cannot hold.
 export function StrikeDemo() {
   return (
     <div className="animlab__strikerow">
-      <span className="pbp__batline pbp__replaced is-drawing">
-        Doerr, R<span className="pbp__pos">2B</span>
+      <span className="pbp__batline pbp__replaced">
+        <span className="struckline is-drawing">
+          Doerr, R<span className="pbp__pos">2B</span>
+        </span>
       </span>
-      <span className="defdiamond__name defdiamond__name--out is-drawing">
-        Camilli<span className="defdiamond__enter"> (6th)</span>
+      <span className="defdiamond__name defdiamond__name--out">
+        <span className="struckline is-drawing">
+          Camilli<span className="defdiamond__enter"> (6th)</span>
+        </span>
       </span>
     </div>
   )

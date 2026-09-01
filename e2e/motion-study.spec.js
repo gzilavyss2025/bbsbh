@@ -100,20 +100,57 @@ test('#982 a half read back a second time renders settled ink, never a replay', 
 
 test('#981 a struck name renders already drawn on a cold load', async ({ page }) => {
   await installMockApi(page)
-  await page.goto(`${BASE}/lineup1`)
-  await expect(page.locator('.lineup__row').first()).toBeVisible()
 
-  // The defense diamond carries this game's substitutions. Whatever is struck
-  // on arrival must show a full bar and no animation — the reader was not here
-  // when it happened.
-  const out = page.locator('.defdiamond__name--out')
+  // A REVEALED half, arrived at cold. This anchor game's defensive substitutions
+  // never reach a `.defdiamond__name--out` on its lineup pages — an earlier
+  // draft of this test walked that list and asserted nothing at all, because the
+  // list is empty on every route the game has. The pinch runners DO put a struck
+  // batter on a play-by-play card, so that is the subject: reveal the half, then
+  // reload, which is exactly the cold load useBecameTrue exists for.
+  await page.goto(`${BASE}/top7`)
+  await page.locator('.revealsplit__btn--quiet').click()
+  await page.locator('.trailstrip__summarybtn').click()
+  await expect(page.locator('.pbp__replaced').first()).toBeVisible()
+
+  await page.reload()
+  await expect(page.locator('.pbp__atbat').first()).toBeVisible({ timeout: 25_000 })
+  const out = page.locator('.pbp__replaced')
   const n = await out.count()
+  expect(n, 'there is a struck name to look at').toBeGreaterThan(0)
   for (let i = 0; i < n; i += 1) {
-    await expect(out.nth(i)).not.toHaveClass(/is-drawing/)
-    expect(await animName(out.nth(i), '::after'), 'settled, not drawing').toBe('none')
-    const bar = await out.nth(i).evaluate((el) => getComputedStyle(el, '::after').transform)
+    const ink = out.nth(i).locator('.struckline')
+    await expect(ink).not.toHaveClass(/is-drawing/)
+    expect(await animName(ink, '::after'), 'settled, not drawing').toBe('none')
+    const bar = await ink.evaluate((el) => getComputedStyle(el, '::after').transform)
     expect(bar, 'the bar is fully drawn').toBe('matrix(1, 0, 0, 1, 0, 0)')
+
+    // AND IT STOPS AT THE NAME. The bar fills its containing block, so on the
+    // wrapper it ran the width of the BOX — and `.abhero__name` is an item of a
+    // column flex container, which stretches it to the full card. 175px of
+    // pencil past an 87px name. `.struckline` is inline, so it hugs the glyphs.
+    const fit = await ink.evaluate((el) => {
+      const r = document.createRange()
+      r.selectNodeContents(el)
+      return {
+        bar: parseFloat(getComputedStyle(el, '::after').width) || 0,
+        text: r.getBoundingClientRect().width,
+      }
+    })
+    expect(fit.bar, 'the bar hugs the name').toBeLessThanOrEqual(fit.text + 3)
   }
+})
+
+test('#983 only the innings frontier seal breathes, not every kraft button', async ({ page }) => {
+  await installMockApi(page)
+  await page.goto(`/${MMDDYYYY}`)
+  await expect(page.locator('.gamecard').first()).toBeVisible()
+
+  // The home slate's "Reveal all results" wears `.btn--reveal` for its kraft
+  // texture — the same warning every reveal in the app wears — but it is not a
+  // frontier, it is on screen for as long as the reader browses the slate, and
+  // it spoils a whole day. A bare `.btn--reveal` rule breathed it.
+  const chip = page.locator('.daystate__chip--reveal')
+  if (await chip.count()) expect(await animName(chip.first())).toBe('none')
 })
 
 test('#978 the live dot breathes and nothing animates box-shadow', async ({ page }) => {
@@ -146,5 +183,7 @@ test('the whole study is off under reduced motion', async ({ page }) => {
   for (const sel of ['.liveedge__dot', '.btn--reveal', '.pbp__cell', '.pbp__leg', '.pbp__outcircle']) {
     expect(await animName(page.locator(`.animlab__live ${sel}`).first()), sel).toBe('none')
   }
-  expect(await animName(page.locator('.animlab__live .pbp__replaced').first(), '::after')).toBe('none')
+  expect(
+    await animName(page.locator('.animlab__live .pbp__replaced .struckline').first(), '::after'),
+  ).toBe('none')
 })

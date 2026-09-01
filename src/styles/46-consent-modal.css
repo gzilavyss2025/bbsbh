@@ -178,9 +178,12 @@
 .animlab__frame .wcall__count-new,
 .animlab__frame .pbp__code--ink,
 /* The motion study's un-staggered animations (issues #976-#983,
-   styles/motion/). Their staggered siblings need the additive form and are
-   listed separately below. The two breaths and the out-circle stamp are loops
-   or single one-shots, so the bare frame offset is a truthful reading. */
+   styles/motion/). Only the ones with NO delay of their own belong here: the
+   two breaths loop from zero and the strike bar draws from zero, so replacing
+   their delay with the bare frame offset reads true. Everything that starts
+   late — the staggered rows and cells, and the write-on's third and fourth
+   beats — needs the additive form below, or the frame offset would erase the
+   head start that IS the sequence. */
 .animlab__frame .gamecard__live::before,
 .animlab__frame .liveedge__dot,
 /* Matched WITH its `:not()`, not as a bare `.btn--reveal`. Its own rule in
@@ -192,26 +195,28 @@
    closing tally hits further down, broken the same way: on specificity, not on
    hoping about order. */
 .animlab__frame .btn--reveal:not(.revealsplit__btn--quiet),
-.animlab__frame .pbp__replaced.is-drawing::after,
-.animlab__frame .defdiamond__name--out.is-drawing::after,
-.animlab__frame .lineupcard__name--out.is-drawing::after,
-.animlab__frame .pbp__atbat--writing .pbp__code,
-.animlab__frame .pbp__atbat--writing .pbp__outcircle {
+.animlab__frame .pbp__replaced > .struckline.is-drawing::after,
+.animlab__frame .defdiamond__name--out > .struckline.is-drawing::after,
+.animlab__frame .lineupcard__name--out > .struckline.is-drawing::after {
   animation-play-state: paused;
   animation-delay: var(--animlab-delay, 0s);
 }
 
-/* THE MOTION STUDY'S STAGGERED ANIMATIONS, in the additive form — same reason
-   the closing tally below needs it. Each element already carries its own
-   staggered delay off `--row-i` / `--cell-i` / `--leg-i`, and overwriting that
-   with the bare frame offset would freeze every row, cell or leg at the same
-   instant, so the strip would show a stagger that does not exist. Adding the
-   frame offset to each element's own delay is what makes a frozen frame a
-   truthful reading of the real sequence.
+/* THE MOTION STUDY'S DELAYED ANIMATIONS, in the additive form — same reason
+   the closing tally below needs it. Each of these starts late: the staggered
+   ones off `--row-i` / `--cell-i` / `--leg-i`, and the write-on's last two
+   beats off a flat head start. Overwriting that with the bare frame offset
+   would freeze every row, cell or leg at the same instant, and would start the
+   result code and the out stamp at zero — so a strip labelled 0/140/300ms
+   showed the code fully inked from its second frame, 340ms before the app
+   draws a stroke of it. Adding the frame offset to each element's OWN delay is
+   what makes a frozen frame a truthful reading of the real sequence.
 
-   The basepath trace also restates its 280ms head start: that delay is part of
-   the sequence's shape (the pitches are written before the runner moves), not
-   an offset the frame may drop. */
+   So each delay below restates the shape it is part of: the pitches are
+   written before the runner moves (280ms), the code is inked after he stops
+   (480ms), and the out is stamped last (560ms). Keep these in step with
+   styles/motion/playbyplay.css — a frame is only worth reading if the two
+   agree. */
 .animlab__frame .lineup__row {
   animation-play-state: paused;
   animation-delay: calc(var(--row-i, 0) * 30ms + var(--animlab-delay, 0s));
@@ -223,6 +228,14 @@
 .animlab__frame .pbp__atbat--writing .pbp__leg {
   animation-play-state: paused;
   animation-delay: calc(280ms + var(--leg-i, 0) * 60ms + var(--animlab-delay, 0s));
+}
+.animlab__frame .pbp__atbat--writing .pbp__code {
+  animation-play-state: paused;
+  animation-delay: calc(480ms + var(--animlab-delay, 0s));
+}
+.animlab__frame .pbp__atbat--writing .pbp__outcircle {
+  animation-play-state: paused;
+  animation-delay: calc(560ms + var(--animlab-delay, 0s));
 }
 
 /* Focus mode's half-close tally ink-in (ADR-0046) needs a longer selector than

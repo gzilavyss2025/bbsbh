@@ -96,8 +96,12 @@ as a game quietly running.
 `sc-seal-breathe` (opacity 1 → 0.82, no scale) is the scorecard sheet's own,
 referenced where it stands in `styles/scorecard/box.css` rather than promoted —
 that file is in `index.css`'s core list, so the keyframe is always defined, and
-a keyframe resolves by name wherever it was declared. The frontier seal
-(`.btn--reveal`) runs it, byte for byte what `.sc-ab__seal` runs.
+a keyframe resolves by name wherever it was declared. The frontier seal runs it,
+byte for byte what `.sc-ab__seal` runs — scoped to `.pagenav--innings`, because
+`.btn--reveal` is the kraft skin and not the frontier. The home slate wears it
+on "Reveal all results" and a live game's lineup page on "Catch up to live", and
+a bare `.btn--reveal` rule put a permanent breath on a spoiler action on the
+app's front door.
 
 They stayed two keyframes rather than one: a full tape cover reads at opacity
 alone, while a 6–9px dot needs the deeper fade and a little scale to register.
@@ -129,20 +133,29 @@ dot that breathed harder in a close game would spoil the game.
 - **The write is capped at six cards.** A half can be twenty plate appearances,
   and beat 2 animates `stroke-dashoffset`, which repaints rather than riding the
   compositor. Fine for a handful of 108px diamonds, a screensaver for twenty.
-- **The cross-out's bar goes on the WRAPPER.** `.plink` is a `<button>`: it does
-  not inherit an ancestor's `text-decoration` and zeroes its own, so all four
-  strike rules had to name `.plink` a second time or the line drew over an
-  un-linked inning tag and skipped the name — the bug `check-strike-links.mjs`
-  exists for. A bar over the wrapper covers a link, a tag or plain text without
-  knowing which it got, so the hazard is gone rather than guarded. Before adding
-  a fifth site, check it cannot wrap onto two lines: a bar over a two-line
-  wrapper draws one rule through the gap between them. The four that exist are
-  either `white-space: nowrap` or blockified flex boxes.
-- **A staggered animation needs the ADDITIVE pause form in the Animation Lab.**
-  Overwriting an element's own staggered `animation-delay` with the bare frame
-  offset freezes every row or cell at the same instant, and the strip then shows
-  a stagger that does not exist. See the `.animlab__frame` block in
-  `46-consent-modal.css`.
+- **The cross-out's bar goes on an inner `.struckline` span, not on the
+  wrapper.** `.plink` is a `<button>`: it does not inherit an ancestor's
+  `text-decoration` and zeroes its own, so all four strike rules had to name
+  `.plink` a second time or the line drew over an un-linked inning tag and
+  skipped the name — the bug `check-strike-links.mjs` exists for. A bar that
+  sits outside the link covers a link, a tag or plain text without knowing
+  which it got, so the hazard is gone rather than guarded. But an
+  absolutely-positioned bar fills its containing block, and hanging it on the
+  wrapper drew it the width of the BOX: `.abhero__name` is an item of a column
+  flex container, so it stretches to the card's full cross size, and the line
+  ran 175px past an 87px name; `.defdiamond__name` holds the 58px `min-width`
+  its writing line is printed at, and a short surname was left with a rule off
+  both ends. `.struckline` is inline, so it hugs the glyphs the decoration used
+  to cross. The two flex sites restate their own layout on it
+  (`styles/motion/strike.css`). Before adding a fifth site, check it cannot wrap
+  onto two lines: a bar over a two-line box draws one rule through the gap.
+- **An animation that starts late needs the ADDITIVE pause form in the Animation
+  Lab.** Overwriting an element's own `animation-delay` with the bare frame
+  offset freezes every row or cell at the same instant, and starts a delayed
+  beat at zero — a strip labelled 0/140/300ms showed the write-on's result code
+  fully inked by its second frame, 340ms before the app draws a stroke of it.
+  Only an animation with no delay of its own may take the bare offset. See the
+  `.animlab__frame` block in `46-consent-modal.css`.
 - **Match a `:not()` selector's specificity in that pause list.** A bare
   `.animlab__frame .btn--reveal` TIED
   `.btn--reveal:not(.revealsplit__btn--quiet)` and lost on import order, and the

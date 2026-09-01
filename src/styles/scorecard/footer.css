@@ -255,11 +255,11 @@
    reads as one mark in one colour. Elsewhere — the innings viewer, the box
    score — the graphite strike stays.
 
-   Only the INK is restated now. The strike itself is a bar drawn over the
-   wrapper (styles/motion/strike.css, issue #981), so this recolours that bar
-   rather than declaring a second `text-decoration` — and the `.plink` half
-   this rule used to need went with the decoration, since a bar over the
-   wrapper covers the link and the inning tag alike. */
-.sc-footer__defense .defdiamond__name--out::after {
+   Only the INK is restated now. The strike itself is a bar drawn on the inner
+   `.struckline` span (styles/motion/strike.css, issue #981), so this recolours
+   that bar rather than declaring a second `text-decoration` — and the `.plink`
+   half this rule used to need went with the decoration, since a bar that sits
+   outside the link covers it and the inning tag alike. */
+.sc-footer__defense .defdiamond__name--out > .struckline::after {
   background: var(--accent-negative);
 }

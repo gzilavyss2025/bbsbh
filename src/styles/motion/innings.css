@@ -39,6 +39,23 @@
    nothing. It is the same shorthand .sc-ab__seal runs, byte for byte, which is
    the point — not a second breath, the same one.
 
+   SCOPED TO `.pagenav--innings`, AND THAT IS NOT DECORATION. `.btn--reveal` is
+   the kraft skin, not the frontier: the home slate wears it on "Reveal all
+   results" (both the day-state chip and its floating mobile twin) and a live
+   game's lineup page wears it on "Catch up to live". A bare `.btn--reveal` rule
+   put a permanent breath on the app's front door — a spoiler action, pulling
+   the eye every time the slate is opened — which is the opposite of what this
+   is for. InningActionBar's bar is the one place the tape is the frontier, so
+   it is the one place that breathes.
+
+   The `:where()` costs nothing on specificity, which is load-bearing twice
+   over: the :hover/:active/:focus-visible rules and the reduced-motion block
+   below still tie-and-win on order, and the Animation Lab's own pause rule
+   (`.animlab__frame .btn--reveal:not(...)`, three classes) still outranks this
+   one. The Lab's containers are named here because its demo button stands on
+   its own — a frozen strip of a seal that never breathes would be a frame with
+   nothing in it.
+
    ONE SEAL AT A TIME, AND IT MUST NOT SURVIVE THE TAP. Both hold structurally
    rather than by a rule here: InningActionBar renders .btn--reveal only while
    `currentSealed`, for the ONE half on screen, and swaps it for .btn--next the
@@ -58,7 +75,8 @@
    feeling unresponsive, and it is also what keeps the :focus-visible ring at
    the contrast check-focus-ring.mjs and check-contrast.mjs measure — a ring
    drawn over a surface mid-fade is a ring whose contrast nobody has checked. */
-.btn--reveal:not(.revealsplit__btn--quiet) {
+:where(.pagenav--innings, .animlab__live, .animlab__frame)
+  .btn--reveal:not(.revealsplit__btn--quiet) {
   animation: sc-seal-breathe 2.4s var(--ease-standard) infinite alternate;
 }
 .btn--reveal:hover,

@@ -522,7 +522,7 @@ test('the results block: one line per decision, and a defense that shows who cam
     document.body.append(probe)
     const resolved = getComputedStyle(probe).color
     probe.remove()
-    const bar = getComputedStyle(el, '::after')
+    const bar = getComputedStyle(el.querySelector('.struckline'), '::after')
     return { got: bar.backgroundColor, want: resolved, drawn: bar.content !== 'none' }
   })
   expect(strikeInk.drawn).toBe(true)
