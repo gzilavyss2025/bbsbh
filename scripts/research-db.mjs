@@ -145,16 +145,20 @@ const PANEL_PATHS = [
   '.scratch/service-clock/panel.json',
   '.scratch/service-clock/controls.json',
   '.scratch/service-clock/k0-blank-rate.json',
-  // Historical Top Prospects lists (.scratch/top-prospects-history/pull.mjs):
-  // rows.json is one row per (season, rank, mlbId), 2009-2024 -- mlbId joins
-  // directly to prospect-traits/bio.json above, no crosswalk. seasons.json is
-  // the per-season coverage record (2005-2024): status ("ok"/"unavailable"),
-  // list depth, row count, fetch timestamp -- depth is NOT assumed 100 (2009-
-  // 2011 are top-50 lists; 2020/2021 top out at 99, confirmed not a parsing
-  // gap). Deliberately a plain top-level ARRAY for both files, not a
-  // {meta,rows} wrapper -- a sibling panel in this wave registered that shape
-  // and it threw on every row-grain query; a bare array registers as one row
-  // per element with no flattening step needed.
+  // Historical Top Prospects lists, from TWO publications
+  // (.scratch/top-prospects-history/pull.mjs for 2009-2024, pull-ba.mjs for
+  // 2005-2008, #946): rows.json is one row per (season, rank, mlbId), 2005-
+  // 2024 -- mlbId joins directly to prospect-traits/bio.json above, no
+  // crosswalk. Every row carries a `source` field, "mlb-pipeline" or
+  // "baseball-america" -- the two rankings are never pooled without checking
+  // it (.scratch/prospect-value/panel.mjs filters to "mlb-pipeline" alone).
+  // seasons.json is the per-season coverage record (2005-2024): status
+  // ("ok"/"unavailable"), list depth, row count, fetch timestamp -- depth is
+  // NOT assumed 100 (2009-2011 are top-50 lists; 2020/2021 top out at 99,
+  // confirmed not a parsing gap). Deliberately a plain top-level ARRAY for
+  // both files, not a {meta,rows} wrapper -- a sibling panel in this wave
+  // registered that shape and it threw on every row-grain query; a bare array
+  // registers as one row per element with no flattening step needed.
   '.scratch/top-prospects-history/rows.json',
   '.scratch/top-prospects-history/seasons.json',
   // What a ranking is worth in dollars (docs/prospect-ranking-value.md,

@@ -22,13 +22,17 @@ session.
 
 ## The cohort, and the trap it is built around
 
-Prospects are ranked **before** they debut. The rank file starts in 2009. The
-debut cohort starts in 2005. So for a man who debuted in 2006, the seasons he
-could have appeared on a list are simply not in the file. He is **absent**, and
+Prospects are ranked **before** they debut. This panel draws only on MLB
+Pipeline's list, which starts in 2009 -- rows.json's underlying file now also
+holds 2005-2008 from a second source, Baseball America (#946), but this panel
+is deliberately pinned to MLB Pipeline alone (see "2005 to 2008" below) so
+every figure here stays reproducible. The debut cohort starts in 2005. So for
+a man who debuted in 2006, the seasons he could have appeared on MLB
+Pipeline's list are simply not in this panel's input. He is **absent**, and
 absent is not the same fact as unranked. Coding him as an unranked zero would
-read "no list exists for that year" as "this man was not good enough to be
-listed", and every early-cohort figure would be wrong in a way that looks
-completely plausible.
+read "no MLB Pipeline list covers that year" as "this man was not good enough
+to be listed", and every early-cohort figure would be wrong in a way that
+looks completely plausible.
 
 The panel therefore measures a **ranking window** for each man and records
 whether the window is observed. The window is the six seasons from four before
@@ -43,7 +47,7 @@ Three groups come out of it. Counts are of the 3,060-man debut cohort.
 |---|---|---|---|
 | **observed-deep** | the whole window sat inside a published top-100 list (debuts 2016–2023) | **1,398** | 331 |
 | **observed-shallow** | the whole window has a list, but at least one is a top-50 list (debuts 2013–2015) | **483** | 117 |
-| **censored** | the window reaches into 2005–2008, where no list exists (debuts 2005–2012) | **1,179** | 116 |
+| **censored** | the window reaches into 2005–2008, where MLB Pipeline itself has no list -- a second source now covers those years, but this panel deliberately does not draw on it (debuts 2005–2012) | **1,179** | 116 |
 
 **Only observed-deep is used for a ranked-versus-unranked comparison.** The
 1,063 unranked-looking men in the censored group are *unobserved*, not unranked,
@@ -103,6 +107,11 @@ always be able to tell which one produced a given rank. 25 Baseball
 America–ranked players carry no Retrosheet id because they never reached the
 majors; they are excluded from `rows.json` but recorded, not dropped, in
 `ba-non-debuts.json`. Built by `.scratch/top-prospects-history/pull-ba.mjs`.
+**This panel does not consume the Baseball America rows.** `panel.mjs` filters
+`rows.json` to `source === 'mlb-pipeline'` before it reads anything else, so
+every figure above still comes from MLB Pipeline alone. Extending the panel to
+the second source is a research decision -- it would move published numbers --
+and is deliberately left as future work.
 
 ## The money, and how it is counted
 

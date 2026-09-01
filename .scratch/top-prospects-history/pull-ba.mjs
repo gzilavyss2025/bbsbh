@@ -47,9 +47,10 @@
 //      which sidesteps the trap rather than filtering it out after.
 //
 // FAIL LOUD. The expected join rate for 2005-2008 (measured before this
-// script existed) is 375 of 375 non-'NA' rows. A run that resolves fewer
-// throws with the unresolved retro ids rather than writing a partial year --
-// see MIN_JOIN_RATE below.
+// script existed) is 375 of 375 non-'NA' rows -- zero tolerance, no
+// configurable threshold. A single unresolved retro id throws, naming it,
+// rather than writing a partial year (see the `unresolved.length > 0` check
+// in main()).
 //
 // Run by hand: node .scratch/top-prospects-history/pull-ba.mjs
 import { readFile } from 'node:fs/promises'
