@@ -122,16 +122,69 @@
 .animlab__entry:first-of-type {
   border-top: none;
 }
+/* Title on the left, its Play control hard right — one row, so the button is
+   read as belonging to the entry under it rather than to the page. */
+.animlab__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
 .animlab__title {
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
+.animlab__play {
+  flex: none;
+  min-width: 62px;
+  padding: 4px 12px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.animlab__play:hover {
+  border-color: var(--ink-1);
+  color: var(--text-heading);
+}
 .animlab__live {
   padding: 14px;
   background: var(--surface-inset);
   border-radius: var(--radius-md);
+}
+
+/* NOTHING ON THIS PAGE RUNS UNTIL IT IS ASKED TO. Fifteen demos mount at once
+   and most of them are one-shots, so a page that started them all played every
+   one below the fold to nobody and left the element with no animation on it at
+   all — the entries this page exists for were the ones showing settled ink by
+   the time you reached them. A stage rests on its first frame instead, and
+   Entry.jsx's Play remounts the one you want (a finished animation is gone, so
+   there is nothing a resume could have restarted).
+
+   A BLANKET, NOT A LIST, and deliberately unlike the frozen-frame block below.
+   That one names selectors because each needs its own `animation-delay`, and a
+   new animation missing from it silently fails to freeze. This one needs no
+   per-animation knowledge, so it can afford to catch everything — including the
+   pseudo-elements the drawn cross-out and the live dot ride on.
+
+   `!important` because `animation` is a SHORTHAND: every rule in styles/motion/
+   resets `animation-play-state` to running, and those sheets import after this
+   one. Same reason and same shape as the `:root[data-motion='reduced']` blanket
+   in 01-base.css. It cannot reach a transition, which is why the hover entries
+   are unaffected by it — they stay live for their own reason, see Entry.jsx. */
+.animlab__live:not(.is-running),
+.animlab__live:not(.is-running) *,
+.animlab__live:not(.is-running) *::before,
+.animlab__live:not(.is-running) *::after {
+  animation-play-state: paused !important;
 }
 .animlab__stagelabel {
   font-family: var(--font-display);
@@ -176,9 +229,66 @@
 .animlab__frame .postponed__stamp,
 .animlab__frame .wcall__count-old,
 .animlab__frame .wcall__count-new,
-.animlab__frame .pbp__code--ink {
+.animlab__frame .pbp__code--ink,
+/* The motion study's un-staggered animations (issues #976-#983,
+   styles/motion/). Only the ones with NO delay of their own belong here: the
+   two breaths loop from zero and the strike bar draws from zero, so replacing
+   their delay with the bare frame offset reads true. Everything that starts
+   late — the staggered rows and cells, and the write-on's third and fourth
+   beats — needs the additive form below, or the frame offset would erase the
+   head start that IS the sequence. */
+.animlab__frame .gamecard__live::before,
+.animlab__frame .liveedge__dot,
+/* Matched WITH its `:not()`, not as a bare `.btn--reveal`. Its own rule in
+   styles/motion/innings.css is `.btn--reveal:not(.revealsplit__btn--quiet)`,
+   which `:not()` scores at two classes — so a bare `.animlab__frame
+   .btn--reveal` TIED it and lost on import order, and the `animation`
+   shorthand there reset both declarations below to their defaults. The frame
+   rendered a seal breathing in real time instead of a frozen one. Same tie the
+   closing tally hits further down, broken the same way: on specificity, not on
+   hoping about order. */
+.animlab__frame .btn--reveal:not(.revealsplit__btn--quiet),
+.animlab__frame .pbp__replaced > .struckline.is-drawing::after,
+.animlab__frame .defdiamond__name--out > .struckline.is-drawing::after,
+.animlab__frame .lineupcard__name--out > .struckline.is-drawing::after {
   animation-play-state: paused;
   animation-delay: var(--animlab-delay, 0s);
+}
+
+/* THE MOTION STUDY'S DELAYED ANIMATIONS, in the additive form — same reason
+   the closing tally below needs it. Each of these starts late: the staggered
+   ones off `--row-i` / `--cell-i` / `--leg-i`, and the write-on's last two
+   beats off a flat head start. Overwriting that with the bare frame offset
+   would freeze every row, cell or leg at the same instant, and would start the
+   result code and the out stamp at zero — so a strip labelled 0/140/300ms
+   showed the code fully inked from its second frame, 340ms before the app
+   draws a stroke of it. Adding the frame offset to each element's OWN delay is
+   what makes a frozen frame a truthful reading of the real sequence.
+
+   So each delay below restates the shape it is part of: the pitches are
+   written before the runner moves (280ms), the code is inked after he stops
+   (480ms), and the out is stamped last (560ms). Keep these in step with
+   styles/motion/playbyplay.css — a frame is only worth reading if the two
+   agree. */
+.animlab__frame .lineup__row {
+  animation-play-state: paused;
+  animation-delay: calc(var(--row-i, 0) * 30ms + var(--animlab-delay, 0s));
+}
+.animlab__frame .pbp__atbat--writing .pbp__cell {
+  animation-play-state: paused;
+  animation-delay: calc(var(--cell-i, 0) * 35ms + var(--animlab-delay, 0s));
+}
+.animlab__frame .pbp__atbat--writing .pbp__leg {
+  animation-play-state: paused;
+  animation-delay: calc(280ms + var(--leg-i, 0) * 60ms + var(--animlab-delay, 0s));
+}
+.animlab__frame .pbp__atbat--writing .pbp__code {
+  animation-play-state: paused;
+  animation-delay: calc(480ms + var(--animlab-delay, 0s));
+}
+.animlab__frame .pbp__atbat--writing .pbp__outcircle {
+  animation-play-state: paused;
+  animation-delay: calc(560ms + var(--animlab-delay, 0s));
 }
 
 /* Focus mode's half-close tally ink-in (ADR-0046) needs a longer selector than
@@ -314,3 +424,14 @@
    in full now rather than behind a jump-tile. */
 
 
+
+/* The motion study's demo rows (screens/animlab/motionDemos.jsx) — the two
+   breathing dots side by side, and the two strike sites side by side. Layout
+   for the Lab only; neither exists in the app. */
+.animlab__breathrow,
+.animlab__strikerow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}

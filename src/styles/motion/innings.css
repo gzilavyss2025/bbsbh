@@ -1,0 +1,91 @@
+/* ------------------------------------------------------- motion / innings */
+/* THE INNINGS VIEWER'S IDLE MOTION (issues #978, #983).
+
+   The package rule is in motion/slate.css's header: motion only, resting
+   appearance stays with its surface. Both rules below are idle loops — the
+   only two on this page — and both are the same 2.4-second beat, because the
+   app should end with one idle idiom rather than three.
+
+   THIS PAGE IS THE ONE WHERE THE SEALING HAPPENS, so both are held to the
+   spoiler rule directly: neither may key its beat, its depth or its duration
+   off the score, the inning, or how late the game is. One says "in progress"
+   and the other says "press here"; that is the whole of what they know. */
+
+/* ---------------------------------------------------------------- #978 */
+/* The innings bar's live-edge dot, on the beat the slate card's LIVE pill
+   runs — @keyframes tally-breathe is declared once beside that pill in
+   motion/slate.css, and keyframes are document-global, so both dots share the
+   one definition. The dot itself is in 07-team-logo-and-buttons.css. */
+.liveedge__dot {
+  animation: tally-breathe 2.4s var(--ease-standard) infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .liveedge__dot {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------- #983 */
+/* The frontier seal breathes, so the eye lands on the tape without anything
+   shouting. The scorecard sheet already does this on the one box the reader
+   can play, and its comment calls it "the only idle motion on the page"; the
+   innings viewer, where the sealing actually happens, had none.
+
+   @keyframes sc-seal-breathe is REFERENCED WHERE IT STANDS, in
+   styles/scorecard/box.css, rather than promoted to a shared home. That file
+   is in index.css's core list, so the keyframe is always defined; order is the
+   cascade contract for RULES, and a keyframe resolves by name regardless of
+   where it was declared. Moving it would have been a safe edit that bought
+   nothing. It is the same shorthand .sc-ab__seal runs, byte for byte, which is
+   the point — not a second breath, the same one.
+
+   SCOPED TO `.pagenav--innings`, AND THAT IS NOT DECORATION. `.btn--reveal` is
+   the kraft skin, not the frontier: the home slate wears it on "Reveal all
+   results" (both the day-state chip and its floating mobile twin) and a live
+   game's lineup page wears it on "Catch up to live". A bare `.btn--reveal` rule
+   put a permanent breath on the app's front door — a spoiler action, pulling
+   the eye every time the slate is opened — which is the opposite of what this
+   is for. InningActionBar's bar is the one place the tape is the frontier, so
+   it is the one place that breathes.
+
+   The `:where()` costs nothing on specificity, which is load-bearing twice
+   over: the :hover/:active/:focus-visible rules and the reduced-motion block
+   below still tie-and-win on order, and the Animation Lab's own pause rule
+   (`.animlab__frame .btn--reveal:not(...)`, three classes) still outranks this
+   one. The Lab's containers are named here because its demo button stands on
+   its own — a frozen strip of a seal that never breathes would be a frame with
+   nothing in it.
+
+   ONE SEAL AT A TIME, AND IT MUST NOT SURVIVE THE TAP. Both hold structurally
+   rather than by a rule here: InningActionBar renders .btn--reveal only while
+   `currentSealed`, for the ONE half on screen, and swaps it for .btn--next the
+   moment the half is revealed (SealBox's reveal is one-directional and the
+   parent remounts on `key={inning}` — ADR-0002). There is no state in which a
+   revealed half leaves a seal breathing behind it, and none in which two are
+   on screen at once.
+
+   NOT THE SKIP. The reveal pair's second button carries .btn--reveal too, but
+   focus/stage.css strips its kraft texture: it is demoted on purpose, because
+   it ENDS the loop the reader is here for (see InningActionBar.jsx). It is no
+   longer a seal, so it does not breathe — only the tape does.
+
+   IT STOPS UNDER THE THUMB. The pair is tapped roughly forty times a half
+   hour, so the breath yields the moment the reader engages: hover, press and
+   focus each hold it at full opacity. That is what keeps the button from
+   feeling unresponsive, and it is also what keeps the :focus-visible ring at
+   the contrast check-focus-ring.mjs and check-contrast.mjs measure — a ring
+   drawn over a surface mid-fade is a ring whose contrast nobody has checked. */
+:where(.pagenav--innings, .animlab__live, .animlab__frame)
+  .btn--reveal:not(.revealsplit__btn--quiet) {
+  animation: sc-seal-breathe 2.4s var(--ease-standard) infinite alternate;
+}
+.btn--reveal:hover,
+.btn--reveal:active,
+.btn--reveal:focus-visible {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn--reveal:not(.revealsplit__btn--quiet) {
+    animation: none;
+  }
+}

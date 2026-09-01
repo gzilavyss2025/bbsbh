@@ -1,0 +1,120 @@
+/* ---------------------------------------------------- motion / play-by-play */
+/* THE CARD WRITES ITSELF (issue #982) — the flagship of the motion study.
+
+   When the reader unseals a half, its play-by-play cards write themselves, in
+   the order a scorer's hand actually makes the marks:
+
+     1  pitch cells drop down the ball / strike lanes   0ms,   35ms apart, 140ms
+     2  basepath legs trace, home -> 1st -> 2nd       280ms,   60ms apart, 180ms
+     3  the result code inks on the diamond           480ms,               180ms
+     4  an out's circle presses down like a stamp     560ms,               300ms
+
+   A reach finishes about 660ms; an out runs to about 860ms.
+
+   This is not decoration. It is the half the reader deliberately unsealed
+   being written down in front of them — the one thing the app has never
+   shown, in the app that exists so you can keep score by hand. It fires only
+   on a reveal the reader asked for, which is the rarest and most deliberate
+   action in the product.
+
+   BEATS 3 AND 4 ARE THE SCORECARD SHEET'S OWN, unchanged: @keyframes sc-ink
+   and sc-stamp, declared in styles/scorecard/box.css, with their own delays.
+   This extends that vocabulary to the feed rather than inventing a second one.
+   --ease-press on the stamp is the system's single ease-IN, which exists
+   because a stamp is pushed.
+
+   IT NEVER FETCHES OR COMPUTES ANYTHING EARLIER. The whole feed is reveal-only
+   (src/api/playbyplay.js, the same rule as linescore.js). This animates content
+   the reader has already unsealed and is never a reason to reach for it sooner:
+   every selector still runs inside SealBox's reveal render function, exactly
+   where it ran before (ADR-0001, ADR-0002).
+
+   WHEN IT RUNS, AND ONLY THEN. `.pbp__atbat--writing` is set by PlayByPlay on
+   the first six cards of a half HalfInning has just watched go sealed ->
+   unsealed (useBecameTrue). A cold load, a poll, a return visit, a navigation
+   between halves and a force-reveal all render settled ink.
+
+   In practice that is the post-half "See the whole half" view. Unsealing a
+   half does not snap to the stacked layout — focus mode holds the single
+   at-bat window on screen, and that one card already has ADR-0046's ink-set
+   as its arrival. The stacked read-back is where a half's worth of marks
+   actually appear at once, and it is the only state in which stacked cards
+   and a reveal-in-this-session coincide. HalfInning's comment carries the
+   full argument; do not "fix" this by dropping the windowed exclusion. */
+
+/* --- Beat 1: the pitches ------------------------------------------------- */
+/* `--cell-i` is the pitch's place in the WHOLE sequence, not in its own lane
+   (PitchLadder sets it), so the two lanes fill in the order the pitches were
+   actually thrown rather than both racing down from the top. */
+.pbp__atbat--writing .pbp__cell {
+  animation: sc-ink 140ms var(--ease-out) calc(var(--cell-i, 0) * 35ms) backwards;
+}
+
+/* --- Beat 2: the basepaths ----------------------------------------------- */
+/* The only new technique in the set. Every leg of the diamond is the same
+   length — sqrt(30^2 + 30^2) = 42.43 units in PlayDiamond's 0 0 100 100
+   viewBox — so one fixed dasharray draws all of them, and 43 rounds up so the
+   gap always closes. The legs are already emitted in travel order, which is
+   what `--leg-i` counts.
+
+   The GHOST legs (bases a runner was given, not ones he legged out) carry
+   their own dash pattern and are deliberately left alone — PlayDiamond marks
+   only the traveled ones. A scored diamond has no legs at all; it is a solid
+   polygon, and it arrives with the code in beat 3.
+
+   `stroke-dashoffset` REPAINTS — it is not a compositor property, and
+   STANDARDS.md's transform/opacity rule is a real constraint here, not a
+   formality. It is acceptable for a handful of 108px diamonds and would not be
+   for a whole half at once, which is the same reason PlayByPlay caps the write
+   at six cards. */
+.pbp__atbat--writing .pbp__leg {
+  stroke-dasharray: 43;
+  animation: leg-trace 180ms var(--ease-out) calc(280ms + var(--leg-i, 0) * 60ms) backwards;
+}
+@keyframes leg-trace {
+  from {
+    stroke-dashoffset: 43;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* --- Beat 3: the result code --------------------------------------------- */
+/* OPACITY ONLY, AND THAT IS LOAD-BEARING (ADR-0046). Two other rules already
+   own this mark's `transform`: `.pbp__code--center.pbp__klooking` flips a
+   backwards K with scaleX(-1), and focus mode's ink-set composes a scale onto
+   it. An animation that moved `transform` — sc-ink's 2px lift included — would
+   un-mirror a backwards K for the length of the write and snap it back at the
+   end. The centring itself stays where ADR-0046 put it, in the individual
+   `translate` property, and nothing here moves it back into `transform`. */
+.pbp__atbat--writing .pbp__code {
+  animation: pbp-ink 180ms var(--ease-out) 480ms backwards;
+}
+@keyframes pbp-ink {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- Beat 4: the out --------------------------------------------------- */
+.pbp__atbat--writing .pbp__outcircle {
+  animation: sc-stamp 300ms var(--ease-press) 560ms backwards;
+}
+
+/* Skip the whole sequence and render settled ink. Not slowed — the reader
+   asked for less movement, and the marks are the content. */
+@media (prefers-reduced-motion: reduce) {
+  .pbp__atbat--writing .pbp__cell,
+  .pbp__atbat--writing .pbp__leg,
+  .pbp__atbat--writing .pbp__code,
+  .pbp__atbat--writing .pbp__outcircle {
+    animation: none;
+  }
+  .pbp__atbat--writing .pbp__leg {
+    stroke-dasharray: none;
+  }
+}

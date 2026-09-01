@@ -138,10 +138,20 @@ export function PlayDiamond({ reached = 0, scored = false, earned = true, legNot
             strokeWidth={1.5}
             strokeLinejoin="round"
           />
+          {/* `pbp__leg` and `--leg-i` are for the write-on's basepath trace
+              (styles/motion/playbyplay.css, beat 2) and nothing else. Every
+              leg is the same length — sqrt(30**2 + 30**2) = 42.43 units in this
+              0 0 100 100 viewBox — so one fixed stroke-dasharray draws all of
+              them, and the index is already travel order because that is the
+              order this loop emits them in. The GHOST legs below are
+              deliberately not marked: they carry their own dash pattern, which
+              a trace would overwrite. */}
           {Array.from({ length: traveled }).map((_, i) =>
             i < ghostLegs ? null : (
               <line
                 key={i}
+                className="pbp__leg"
+                style={{ '--leg-i': i - ghostLegs }}
                 x1={BASES[i][0]}
                 y1={BASES[i][1]}
                 x2={BASES[i + 1][0]}

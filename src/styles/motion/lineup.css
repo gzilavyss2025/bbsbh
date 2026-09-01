@@ -1,0 +1,139 @@
+/* -------------------------------------------------------- motion / lineup */
+/* THE LINEUP CARD'S MOTION (issues #979, #980).
+
+   The package rule is in motion/slate.css's header: motion only, resting
+   appearance stays with its surface (10-lineup.css). The card had no motion at
+   all before these two.
+
+   Neither rule reads a score. A batting order and a row under the cursor are
+   both pre-pitch facts — the lineup card renders OUTSIDE the seal on purpose,
+   as the pre-scoring reference (ADR-0010) — so there is nothing here for the
+   spoiler rule to gate. */
+
+/* ---------------------------------------------------------------- #979 */
+/* A row the reader points at draws its own hairline rule, left to right, the
+   way you run a finger or a card edge down a printed sheet to hold your place.
+   The batting-order number inks up from graphite at the same time.
+
+   This is the one hover in the study that does a job rather than being
+   pleasant: a lineup is a list read across four columns, row tracking is the
+   actual task, and STANDARDS.md lists "state indication" as a valid purpose
+   for motion. It carries to .roster__row unchanged, which is the same list
+   shape in the innings viewer's roster panel.
+
+   ANCHORED TO bottom: 0, NEVER A FIXED HEIGHT. An open Breakout or Cooling
+   RadarPill note wraps its row onto extra lines (.radarpill__note takes
+   `flex: 1 0 100%` inside the namewrap — see 10-lineup.css's `:has()`
+   overrides), and a rule positioned off a height would float mid-row on
+   exactly those rows. `align-items: start` on the row is load-bearing for the
+   same case and is not touched here.
+
+   The row is `position: relative` for the first time here rather than in
+   10-lineup.css, because nothing but this pseudo-element needs it.
+
+   AT --bw-hair AGAINST THE NEXT ROW'S BORDER, not --bw-rule. Each row already
+   carries `border-top: var(--bw-hair) solid var(--border-hairline)`, so a
+   heavier rule at the bottom of a hovered row stacked against the next row's
+   own top border and read as a doubled frame. One hairline in graphite is
+   darker than the border it sits against, which is what makes it read as a
+   drawn line rather than a thickened one. */
+.lineup__row,
+.roster__row {
+  position: relative;
+}
+.lineup__row::after,
+.roster__row::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: var(--bw-hair);
+  background: var(--graphite);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lineup__row::after,
+  .roster__row::after {
+    transition: transform var(--dur-snappy) var(--ease-out);
+  }
+  .lineup__row:hover::after,
+  .roster__row:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* The number inks up on the same beat. A plain colour change takes `ease`,
+     per STANDARDS.md's easing order. */
+  .lineup__order,
+  .roster__order {
+    transition: color var(--dur-snappy) ease;
+  }
+  .lineup__row:hover .lineup__order,
+  .roster__row:hover .roster__order {
+    color: var(--ink-1);
+  }
+
+  /* Reduced motion keeps the rule and drops the wipe — it is a tracking aid,
+     and reduced motion means less movement, not fewer affordances. */
+  @media (prefers-reduced-motion: reduce) {
+    .lineup__row::after,
+    .roster__row::after {
+      transition: none;
+    }
+    .lineup__row:hover::after,
+    .roster__row:hover::after {
+      transform: scaleX(1);
+    }
+  }
+}
+
+/* ---------------------------------------------------------------- #980 */
+/* The lineup gets posted: the batting order inks in from the top, 30ms a row,
+   about 420ms end to end. Rows start at QUARTER ink rather than nothing, so
+   every name is readable in the first frame and the motion reads as the card
+   settling rather than as a load. The order 1 through 9 is what the reader
+   came to the page to learn, and the cascade teaches it.
+
+   Same ink-in shape as the scorecard sheet's @keyframes sc-ink (scorecard/
+   box.css), with the floor raised from 0 to 0.25.
+
+   ONCE PER MOUNT, NEVER ON A POLL — AND NO RENDER DIFF IS NEEDED FOR IT.
+   TeamInfo renders these rows keyed by player id, so a poll that returns the
+   same nine names reconciles the same nine <li> nodes: React does not remount
+   them, and a CSS animation does not restart on a node that was not remounted.
+   The page's own Refresh goes through `useAsync`'s reload, which keeps the
+   last-good data mounted, so that does not re-fire it either. Its siblings
+   #981 and #982 DO need the "did this change in this session" diff
+   (useFreshSet), because they animate a state CHANGE inside a mounted list;
+   this one animates an arrival, which is exactly what a mount already is.
+   A substitution that swaps a player id re-inks that one row, which is the
+   right answer rather than an exception.
+
+   `--row-i` IS SET PER ROW, INLINE, NOT ON THE PARENT. STANDARDS.md warns off
+   driving child transforms through a variable on the parent, since that
+   recalculates styles for every child; per-child is the shape HalfTally
+   already uses for `--tally-i`, and it is what lets the Animation Lab pause
+   this strip ADDITIVELY (see 46-consent-modal.css) so a frozen frame reads
+   the real stagger rather than nine rows stopped at the same instant.
+
+   THE STAGGER NEVER BLOCKS A TAP. It is opacity and a 2px lift on rows that
+   are in the DOM, hit-testable and interactive from the first frame.
+
+   KEPT TO THE NINE. `.roster__row` is deliberately absent — running this down
+   a 40-man roster would be slow and silly. */
+@media (prefers-reduced-motion: no-preference) {
+  .lineup__row {
+    animation: lineup-post 180ms var(--ease-out) calc(var(--row-i, 0) * 30ms) backwards;
+  }
+}
+@keyframes lineup-post {
+  from {
+    opacity: 0.25;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

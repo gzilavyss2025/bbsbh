@@ -15,6 +15,7 @@ import { PitcherNotice } from '../playbyplay/PitcherNotice.jsx'
 import { BatterNotice } from '../playbyplay/BatterNotice.jsx'
 import { FinalizedLineCard } from '../playbyplay/PitcherHandoffCard.jsx'
 import { UpNextBatters } from '../playbyplay/UpNextBatters.jsx'
+import { useBecameTrue } from '../../hooks/motion/useBecameTrue.js'
 
 export function HalfInning({
   feed,
@@ -57,6 +58,31 @@ export function HalfInning({
   // through one at-bat at a time already reads like a fully revealed one
   // instead of flipping layouts only on the very last tap.
   const startedRevealing = revealed || revealedAtBatCount > 0
+
+  // THE WRITE-ON (issue #982, styles/motion/playbyplay.css): the cards of a
+  // half the reader JUST unsealed write themselves, in the order a scorer's
+  // hand makes the marks. True only for the render in which this half went
+  // sealed -> unsealed with the page already open, so a cold load, a poll, a
+  // return visit, a navigation between halves and a force-reveal (the Scores
+  // Unlocked pass, ADR-0026, or the reader's own stamp, ADR-0048) all render
+  // settled ink — see useBecameTrue.
+  //
+  // NOT WHILE WINDOWED, WHICH IS WHAT DECIDES THE MOMENT THIS FIRES. A half
+  // the reader unseals does NOT snap to the stacked view — `useFocusMode`
+  // deliberately holds the single-at-bat window on screen afterwards
+  // (`windowed = currentSealed || (postHalf && !summaryOpen)`), and that one
+  // card already has its own arrival beat: the denotation ink-set, a constant
+  // 180ms hold and a settle (ADR-0046), which composes a `scale` onto the very
+  // marks this would otherwise animate. The two are alternatives, not layers.
+  //
+  // So the write runs at the OTHER end of the same gesture — "See the whole
+  // half", the post-half link that drops out of the windowed mode (`postHalf`
+  // is still true, so this flag is still armed). That is the half the reader
+  // just charted, laid out to be read back, and it is the only state in which
+  // stacked cards and a reveal-in-this-session coincide: arriving at an
+  // already-revealed half renders stacked too, but `startedRevealing` was
+  // already true at mount, so useBecameTrue keeps it settled.
+  const writing = useBecameTrue(startedRevealing) && !windowed
 
   // Persistent "Now Pitching" card (in addition to Margin Notes — see
   // InningViewer): the arm this half OPENS with, shown at the top of the half
@@ -439,6 +465,7 @@ export function HalfInning({
                 callouts={callouts}
                 vsTeam={vsTeam}
                 highlightsMap={highlightsMap}
+                writing={writing}
                 stepCap={stepping ? revealedAtBatCount : null}
                 halfInProgress={halfInProgress}
                 windowed={windowed}

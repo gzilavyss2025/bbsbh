@@ -1,0 +1,172 @@
+/* --------------------------------------------------------- motion / slate */
+/* THE HOME SLATE'S MOTION (issues #976, #977, #978).
+
+   THE PACKAGE. src/styles/motion/ holds motion and nothing else: the
+   keyframes, the rules that reference them, and the hover states that exist
+   only to move something. A surface's RESTING appearance stays in its own
+   numbered partial, where it has always been — so .gamecard__atmark-ghost is
+   still printed out of register in 06-loader-and-cards.css, and only the
+   closing of that gap lives here.
+
+   Split out for the same reason focus/ was (see focus/stage.css's header):
+   src/styles is a flat directory sitting at its own file ratchet
+   (check-dir-size.mjs), so a partial that outgrows the 600-line cap
+   subdivides rather than adding numbered siblings — ADR-0038's own answer.
+   The motion study landed rules on six surfaces at once, four of whose host
+   partials were already at or over budget, and check-file-size.mjs is
+   explicit that widening a budget "is never the fix for a file that just
+   grew." check-typography, check-focus-ring and check-strike-links walk the
+   tree rather than the flat directory as of the same commit, exactly as their
+   headers instruct, so these rules are guarded like any other.
+
+   ORDER. These sheets are imported after the numbered partials and BEFORE
+   focus/ — focus/'s four stay last, and their header says every rule in them
+   wins on cascade order rather than specificity, which is a contract this
+   package must not quietly take away. Nothing here needs to outrank focus
+   mode; where a motion rule has to beat one, it does it on specificity.
+
+   The bar every animation in this package had to clear is in
+   .agents/skills/review-animations/STANDARDS.md, and each has an entry in the
+   Animation Lab (/animation-lab). */
+
+/* ---------------------------------------------------------------- #978 */
+/* The app's one idle beat, shared by every "this game is in progress" dot:
+   the slate card's LIVE pill below, and the innings bar's .liveedge__dot in
+   motion/innings.css.
+
+   A slow sigh on the compositor's two free properties, deliberately NOT the
+   outward ring an alert would push — the reader is keeping score by hand and
+   the card is waiting on them, not paging them. It replaces a `box-shadow`
+   ring that repainted every frame; STANDARDS.md is explicit that only
+   `transform` and `opacity` skip layout and paint.
+
+   Kept separate from the scorecard sheet's own breath (@keyframes
+   sc-seal-breathe, styles/scorecard/box.css) on purpose: the seal is a full
+   tape cover that reads at opacity alone, while a 6-9px dot needs the deeper
+   fade and a little scale to register at all. Same 2.4s beat, same easing, so
+   the two still read as one idiom.
+
+   IT SAYS "IN PROGRESS" AND NOTHING ELSE. Never key its beat, depth or
+   duration off the score, the inning or how late the game is. A dot that
+   breathed harder in a close game would spoil the game, which is the one rule
+   this app exists to hold. */
+@keyframes tally-breathe {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0.5;
+    transform: scale(0.88);
+  }
+}
+.gamecard__live::before {
+  animation: tally-breathe 2.4s var(--ease-standard) infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gamecard__live::before {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------- #976 */
+/* Pointing at a card pulls its two '@' plates into register: the ghost closes
+   the 2px horizontal slip AND the 1px vertical one (both are the same
+   misregistration, so they close together — the -12px/-11px pair is print
+   slop, not a layout fix, see 06-loader-and-cards.css), and both plates ink up
+   a few hundredths. The card snaps into print under the cursor and drifts back
+   out when it leaves.
+
+   Deliberately about the smallest hover that still registers. A slate card is
+   seen fifteen times a slate, which STANDARDS.md's frequency table puts in the
+   "remove or drastically reduce" band, so this buys its place by being nearly
+   nothing: two pixels and four hundredths of opacity, on `transform` and
+   `opacity` only, over texture that is aria-hidden and that nobody is reading.
+   The longer leg is the exit (300ms out against 240ms in) so a card settles
+   back rather than snapping away.
+
+   Both spans keep the `backface-visibility: hidden` the past-day flip card
+   needs; nothing here touches it.
+
+   `color` IS IN BOTH LISTS BECAUSE 06a-gamecard-parkart.css ALREADY PUT IT
+   THERE. Over a ballpark photo the ink plate is undertoned by the club's own
+   `--park-tint` on hover, and that partial transitions `color` alongside
+   `opacity` so the sign follows the wash arriving under it. `transition` is a
+   shorthand: it resets every `transition-*` longhand, and these rules are
+   later in the cascade than that file, so a list of `transform, opacity` alone
+   silently dropped the colour leg and made the park-art hover snap. Any future
+   edit to these two lines has to carry `color` with it. */
+@media (hover: hover) and (pointer: fine) {
+  .gamecard__atmark-ghost,
+  .gamecard__atmark-ink {
+    transition:
+      transform 300ms var(--ease-out),
+      opacity 300ms var(--ease-out),
+      color 300ms var(--ease-out);
+  }
+  .gamecard__open:hover .gamecard__atmark-ghost,
+  .gamecard__open:hover .gamecard__atmark-ink {
+    transition:
+      transform 240ms var(--ease-out),
+      opacity 240ms var(--ease-out),
+      color 240ms var(--ease-out);
+  }
+  .gamecard__open:hover .gamecard__atmark-ghost {
+    opacity: 0.14;
+    transform: translate(-50%, calc(-50% - 12px)) skewX(-8deg) rotate(-2deg);
+  }
+  .gamecard__open:hover .gamecard__atmark-ink {
+    opacity: 0.11;
+  }
+
+  /* Reduced motion keeps the ink-up and drops the slide — the plates stay out
+     of register, which is how they are printed. The ink-up ARRIVES rather than
+     fading, which is also how 06a-gamecard-parkart.css has always had it: its
+     own reduce block zeroes the transition on these two spans, and the rules
+     above would otherwise have handed it back. */
+  @media (prefers-reduced-motion: reduce) {
+    .gamecard__atmark-ghost,
+    .gamecard__atmark-ink,
+    .gamecard__open:hover .gamecard__atmark-ghost,
+    .gamecard__open:hover .gamecard__atmark-ink {
+      transition: none;
+    }
+    .gamecard__open:hover .gamecard__atmark-ghost {
+      transform: translate(calc(-50% + 2px), calc(-50% - 11px)) skewX(-8deg) rotate(-2deg);
+    }
+  }
+}
+
+/* ---------------------------------------------------------------- #977 */
+/* Thumbing the second page: pointing at a twin bill shifts game 2's sheet down
+   and out and cants it under a degree, the way a second sheet catches when a
+   finger runs down a stack. Only the sheet moves — game 1's card is what the
+   reader is reading, and it stays put.
+
+   This is the rarest card on the slate, a handful of times a season, which is
+   the band STANDARDS.md allows a real gesture in, and the sheet is pure
+   decoration, so moving it costs the reader nothing.
+
+   It cannot move any layout. Five more pixels down stays inside the 8px
+   overhang .gamecardstack already claims as its own margin-bottom, and the
+   sheet is inset on the left and stops short of the right edge on purpose
+   (06-loader-and-cards.css says why), so neither the slide nor the rotation
+   reaches outside the card's column at any width. The origin is the top left
+   so the free corner — the one hanging past the bottom right — swings widest. */
+@media (hover: hover) and (pointer: fine) {
+  .gamecardstack__sheet {
+    transform-origin: top left;
+    transition: transform 220ms var(--ease-out);
+  }
+  .gamecardstack:hover .gamecardstack__sheet {
+    transform: translate(5px, 5px) rotate(0.7deg);
+    transition: transform 180ms var(--ease-out);
+  }
+
+  /* Nothing under reduced motion — the sheet simply stays where it is. */
+  @media (prefers-reduced-motion: reduce) {
+    .gamecardstack:hover .gamecardstack__sheet {
+      transform: none;
+    }
+  }
+}
