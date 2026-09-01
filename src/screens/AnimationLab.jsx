@@ -6,6 +6,7 @@ import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { PostponedBanner } from '../components/game/GameCardParts.jsx'
 import { CountBlink, Stat } from '../components/gamehud/StatBox.jsx'
 import { CLOSE_SEQUENCE_MS, INK_SET_MS, INK_SET_OVERSHOOT, TALLY_STAGGER_MS } from '../components/inning/focus/beats.js'
+import { Entry } from './animlab/Entry.jsx'
 import {
   AtMarkDemo,
   BreathDemo,
@@ -24,9 +25,16 @@ import {
 // check against). No score/reveal content anywhere — every demo below uses
 // made-up data, never a live game feed.
 //
+// NOTHING RUNS UNTIL YOU PRESS PLAY. Every live stage rests paused on its first
+// frame, because most of what this page demos is a one-shot: on a page that
+// started all fifteen at once, every one-shot below the fold had played and
+// been removed from its element before a reviewer could scroll to it. Play
+// remounts one stage and runs it alone. See animlab/Entry.jsx.
+//
 // Add a new entry here whenever a new animation ships, and a matching
 // `.animlab__frame …` override selector in index.css (search "ANIMATION LAB")
-// if the new animation needs its own class listed to be pausable.
+// if the new animation needs its own class listed to be pausable in the FROZEN
+// strips — the live stage needs no such list, it pauses everything.
 export function AnimationLab() {
   useDocumentTitle('Animation Lab')
   return (
@@ -36,19 +44,21 @@ export function AnimationLab() {
         <h1 className="topbar__title">Animation Lab</h1>
       </header>
       <p className="hint hint--prose">
-        Every decorative animation in the app, running live, with its stages frozen underneath for
-        review. Unlisted — not linked from anywhere else in the app.
+        Every decorative animation in the app, with its stages frozen underneath for review.
+        Each stage rests on its first frame &mdash; press <strong>Play</strong> to run that one on
+        its own, and again to replay it. Unlisted &mdash; not linked from anywhere else in the app.
       </p>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Box-score skeleton — rolling ball</h2>
-        <p className="hint hint--prose">
-          PastGameFlipCard&rsquo;s &ldquo;still fetching&rdquo; placeholder (src/components/BoxScoreSkeleton.jsx) —
-          grayscale blocks pulse together while a hand-drawn baseball tumbles across the card.
-        </p>
-        <div className="animlab__live">
-          <BoxScoreSkeleton />
-        </div>
+      <Entry
+        title="Box-score skeleton — rolling ball"
+        note={
+          <>
+            PastGameFlipCard&rsquo;s &ldquo;still fetching&rdquo; placeholder (src/components/BoxScoreSkeleton.jsx) —
+            grayscale blocks pulse together while a hand-drawn baseball tumbles across the card.
+          </>
+        }
+        live={<BoxScoreSkeleton />}
+      >
         <span className="animlab__stagelabel">Ball rotation, one 2.4s cycle</span>
         <div className="animlab__frozen">
           {[0, 400, 800, 1200, 1600, 2000].map((ms) => (
@@ -57,18 +67,19 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Scoreboard number flip</h2>
-        <p className="hint hint--prose">
-          The shared cold-load Loader (src/components/Loader.jsx) — a mini National League
-          linescore where Milwaukee&rsquo;s inning-2 cell cycles 1&ndash;9, each digit settling in
-          with a quick drop-and-catch.
-        </p>
-        <div className="animlab__live">
-          <Loader size="inline" />
-        </div>
+      <Entry
+        title="Scoreboard number flip"
+        note={
+          <>
+            The shared cold-load Loader (src/components/Loader.jsx) — a mini National League
+            linescore where Milwaukee&rsquo;s inning-2 cell cycles 1&ndash;9, each digit settling in
+            with a quick drop-and-catch.
+          </>
+        }
+        live={<Loader size="inline" />}
+      >
         <span className="animlab__stagelabel">Every digit it cycles through</span>
         <div className="animlab__frozen">
           {Array.from({ length: 9 }, (_, i) => i + 1).map((digit) => (
@@ -77,17 +88,18 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Weather delay — pop-in + rain loop</h2>
-        <p className="hint hint--prose">
-          A between-half-innings notice that play stopped (src/components/DelayCard.jsx) &mdash; the
-          card pops up on mount, and an unresolved delay keeps a small cloud dripping.
-        </p>
-        <div className="animlab__live">
-          <DelayCard delay={{ reason: 'Rain', durationMinutes: 42, resolved: false }} />
-        </div>
+      <Entry
+        title="Weather delay — pop-in + rain loop"
+        note={
+          <>
+            A between-half-innings notice that play stopped (src/components/DelayCard.jsx) &mdash; the
+            card pops up on mount, and an unresolved delay keeps a small cloud dripping.
+          </>
+        }
+        live={<DelayCard delay={{ reason: 'Rain', durationMinutes: 42, resolved: false }} />}
+      >
         <span className="animlab__stagelabel">Rain loop, one 1.7s cycle</span>
         <div className="animlab__frozen">
           {[0, 340, 680, 1020, 1360].map((ms) => (
@@ -96,17 +108,18 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Postponed rubber stamp</h2>
-        <p className="hint hint--prose">
-          A postponed game&rsquo;s banner (src/components/game/GameCardParts.jsx) — the kraft-tape strip rises in,
-          then the stamp presses down onto the paper.
-        </p>
-        <div className="animlab__live">
-          <PostponedGameCardDemo />
-        </div>
+      <Entry
+        title="Postponed rubber stamp"
+        note={
+          <>
+            A postponed game&rsquo;s banner (src/components/game/GameCardParts.jsx) — the kraft-tape strip rises in,
+            then the stamp presses down onto the paper.
+          </>
+        }
+        live={<PostponedGameCardDemo />}
+      >
         <span className="animlab__stagelabel">Stamp press, 300ms</span>
         <div className="animlab__frozen">
           {[0, 75, 150, 225, 300].map((ms) => (
@@ -115,18 +128,19 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Count blink (before → after)</h2>
-        <p className="hint hint--prose">
-          The Worst Call card&rsquo;s count change (src/components/StatBox.jsx) — the old count
-          fades/strikes through while the new one flashes highlighter-yellow, then settles to
-          plain ink.
-        </p>
-        <div className="animlab__live">
-          <CountBlink before="2–1" after="K" />
-        </div>
+      <Entry
+        title="Count blink (before → after)"
+        note={
+          <>
+            The Worst Call card&rsquo;s count change (src/components/StatBox.jsx) — the old count
+            fades/strikes through while the new one flashes highlighter-yellow, then settles to
+            plain ink.
+          </>
+        }
+        live={<CountBlink before="2–1" after="K" />}
+      >
         <span className="animlab__stagelabel">Old count fading, 360ms</span>
         <div className="animlab__frozen">
           {[0, 90, 180, 270, 360].map((ms) => (
@@ -143,20 +157,21 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Focus mode — the half-close tally</h2>
-        <p className="hint hint--prose">
-          The console band&rsquo;s finished-half tally
-          (src/components/gamehud/HalfTally.jsx, ADR-0046) &mdash; the half committed, so
-          its eight cells ink in one at a time, 90ms apart, instead of a separate
-          hairline-and-figures display drawn under the at-bat card (this entry&rsquo;s
-          old demo). Made-up figures; this page never reads a game.
-        </p>
-        <div className="animlab__live">
-          <TallyCloseDemo />
-        </div>
+      <Entry
+        title="Focus mode — the half-close tally"
+        note={
+          <>
+            The console band&rsquo;s finished-half tally
+            (src/components/gamehud/HalfTally.jsx, ADR-0046) &mdash; the half committed, so
+            its eight cells ink in one at a time, 90ms apart, instead of a separate
+            hairline-and-figures display drawn under the at-bat card (this entry&rsquo;s
+            old demo). Made-up figures; this page never reads a game.
+          </>
+        }
+        live={<TallyCloseDemo />}
+      >
         <span className="animlab__stagelabel">
           The whole ~{CLOSE_SEQUENCE_MS}ms sequence
         </span>
@@ -167,20 +182,21 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Focus mode — the denotation ink-set</h2>
-        <p className="hint hint--prose">
-          The at-bat card&rsquo;s scorebook denotation holds blank for a CONSTANT 180ms
-          (identical for a strikeout and a grand slam &mdash; see ADR-0046) and then lands
-          at {Math.round(INK_SET_OVERSHOOT * 100)}% and settles to rest over {INK_SET_MS}ms
-          &mdash; no colour change, no rebound. Only the landing is shown here; the hold is
-          a JS timer in useDenotationBeat.js, not an animation this page can scrub.
-        </p>
-        <div className="animlab__live">
-          <InkSetDemo />
-        </div>
+      <Entry
+        title="Focus mode — the denotation ink-set"
+        note={
+          <>
+            The at-bat card&rsquo;s scorebook denotation holds blank for a CONSTANT 180ms
+            (identical for a strikeout and a grand slam &mdash; see ADR-0046) and then lands
+            at {Math.round(INK_SET_OVERSHOOT * 100)}% and settles to rest over {INK_SET_MS}ms
+            &mdash; no colour change, no rebound. Only the landing is shown here; the hold is
+            a JS timer in useDenotationBeat.js, not an animation this page can scrub.
+          </>
+        }
+        live={<InkSetDemo />}
+      >
         <span className="animlab__stagelabel">Ink-set, {INK_SET_MS}ms</span>
         <div className="animlab__frozen">
           {[0, 55, 110, 165, 220].map((ms) => (
@@ -189,7 +205,7 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
       {/* ---------------------------------------------------------------
           THE MOTION STUDY (issues #976-#983, styles/motion/). Eight
@@ -200,19 +216,20 @@ export function AnimationLab() {
           frozen frame cannot hold a pointer; hover them instead.
           --------------------------------------------------------------- */}
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Live dot — the scorecard breath</h2>
-        <p className="hint hint--prose">
-          The slate card&rsquo;s LIVE pill and the innings bar&rsquo;s live-edge dot
-          (styles/motion/slate.css, motion/innings.css) &mdash; one 2.4s sigh on the beat the
-          scorecard&rsquo;s seal already runs. It replaced an outward ring pushed on{' '}
-          <code>box-shadow</code>, which repainted every frame and read as a notification. It
-          says <em>in progress</em> and nothing else &mdash; never the score, the inning, or how
-          late the game is.
-        </p>
-        <div className="animlab__live">
-          <BreathDemo />
-        </div>
+      <Entry
+        title="Live dot — the scorecard breath"
+        note={
+          <>
+            The slate card&rsquo;s LIVE pill and the innings bar&rsquo;s live-edge dot
+            (styles/motion/slate.css, motion/innings.css) &mdash; one 2.4s sigh on the beat the
+            scorecard&rsquo;s seal already runs. It replaced an outward ring pushed on{' '}
+            <code>box-shadow</code>, which repainted every frame and read as a notification. It
+            says <em>in progress</em> and nothing else &mdash; never the score, the inning, or how
+            late the game is.
+          </>
+        }
+        live={<BreathDemo />}
+      >
         <span className="animlab__stagelabel">One 2.4s breath, in and back</span>
         <div className="animlab__frozen">
           {[0, 600, 1200, 1800, 2400].map((ms) => (
@@ -221,20 +238,21 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Frontier seal — the same breath</h2>
-        <p className="hint hint--prose">
-          The innings bar&rsquo;s kraft reveal button (styles/motion/innings.css) breathing
-          <code> sc-seal-breathe</code>, byte for byte what the scorecard sheet&rsquo;s one
-          playable box runs. It stops under the thumb &mdash; hover, press or focus holds it at
-          full opacity, which is also what keeps the focus ring at a contrast anyone has
-          measured. It never survives the tap: the button is gone the moment the half opens.
-        </p>
-        <div className="animlab__live">
-          <button type="button" className="btn btn--reveal">Next at-bat</button>
-        </div>
+      <Entry
+        title="Frontier seal — the same breath"
+        note={
+          <>
+            The innings bar&rsquo;s kraft reveal button (styles/motion/innings.css) breathing
+            <code> sc-seal-breathe</code>, byte for byte what the scorecard sheet&rsquo;s one
+            playable box runs. It stops under the thumb &mdash; hover, press or focus holds it at
+            full opacity, which is also what keeps the focus ring at a contrast anyone has
+            measured. It never survives the tap: the button is gone the moment the half opens.
+          </>
+        }
+        live={<button type="button" className="btn btn--reveal">Next at-bat</button>}
+      >
         <span className="animlab__stagelabel">One 2.4s breath, in and back</span>
         <div className="animlab__frozen">
           {[0, 600, 1200, 1800, 2400].map((ms) => (
@@ -243,61 +261,68 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Slate card — the plates pull into register</h2>
-        <p className="hint hint--prose">
-          <strong>Hover it.</strong> The card&rsquo;s big &lsquo;@&rsquo; watermark is printed
-          twice, a kraft ghost two pixels off a navy plate &mdash; the misregistration a real
-          ballpark program has. Pointing at a card closes that gap and inks both plates up four
-          hundredths (styles/motion/slate.css). Two pixels of movement on decorative texture,
-          because a slate card is seen fifteen times a slate. Desktop only; touch fires a false
-          hover on tap.
-        </p>
-        <div className="animlab__live">
-          <AtMarkDemo />
-        </div>
-      </section>
+      <Entry
+        title="Slate card — the plates pull into register"
+        hover
+        note={
+          <>
+            <strong>Hover it.</strong> The card&rsquo;s big &lsquo;@&rsquo; watermark is printed
+            twice, a kraft ghost two pixels off a navy plate &mdash; the misregistration a real
+            ballpark program has. Pointing at a card closes that gap and inks both plates up four
+            hundredths (styles/motion/slate.css). Two pixels of movement on decorative texture,
+            because a slate card is seen fifteen times a slate. Desktop only; touch fires a false
+            hover on tap.
+          </>
+        }
+        live={<AtMarkDemo />}
+      >
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Slate card — the doubleheader riffle</h2>
-        <p className="hint hint--prose">
-          <strong>Hover it.</strong> A back-to-back twin bill paints game two as a sheet behind
-          game one&rsquo;s card; pointing at it thumbs that sheet five pixels down and out and
-          cants it under a degree (styles/motion/slate.css). The rarest card on the slate, and
-          the card itself never moves &mdash; only the sheet.
-        </p>
-        <div className="animlab__live">
-          <RiffleDemo />
-        </div>
-      </section>
+      <Entry
+        title="Slate card — the doubleheader riffle"
+        hover
+        note={
+          <>
+            <strong>Hover it.</strong> A back-to-back twin bill paints game two as a sheet behind
+            game one&rsquo;s card; pointing at it thumbs that sheet five pixels down and out and
+            cants it under a degree (styles/motion/slate.css). The rarest card on the slate, and
+            the card itself never moves &mdash; only the sheet.
+          </>
+        }
+        live={<RiffleDemo />}
+      >
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Lineup row — the straightedge</h2>
-        <p className="hint hint--prose">
-          <strong>Hover a row.</strong> The row draws its own hairline rule, left to right, the
-          way you run a card edge down a printed sheet to hold your place; the order number inks
-          up from graphite on the same 160ms (styles/motion/lineup.css). The one hover in the
-          set that does a job &mdash; row tracking on a four-column list is the actual task.
-          Under reduced motion the rule appears at full width instead of being removed.
-        </p>
-        <div className="animlab__live">
-          <LineupDemo />
-        </div>
-      </section>
+      <Entry
+        title="Lineup row — the straightedge"
+        hover
+        note={
+          <>
+            <strong>Hover a row.</strong> The row draws its own hairline rule, left to right, the
+            way you run a card edge down a printed sheet to hold your place; the order number inks
+            up from graphite on the same 160ms (styles/motion/lineup.css). The one hover in the
+            set that does a job &mdash; row tracking on a four-column list is the actual task.
+            Under reduced motion the rule appears at full width instead of being removed.
+          </>
+        }
+        live={<LineupDemo />}
+      >
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Lineup card — the order gets posted</h2>
-        <p className="hint hint--prose">
-          Nine rows ink in from the top, 30ms apart, about 420ms end to end
-          (styles/motion/lineup.css). They start at quarter ink rather than nothing, so every name
-          is readable in the first frame. Fires once per mount and never on a poll &mdash; rows
-          are keyed by player id, so a feed returning the same nine does not remount them.
-        </p>
-        <div className="animlab__live">
-          <LineupDemo />
-        </div>
+      <Entry
+        title="Lineup card — the order gets posted"
+        note={
+          <>
+            Nine rows ink in from the top, 30ms apart, about 420ms end to end
+            (styles/motion/lineup.css). They start at quarter ink rather than nothing, so every name
+            is readable in the first frame. Fires once per mount and never on a poll &mdash; rows
+            are keyed by player id, so a feed returning the same nine does not remount them.
+          </>
+        }
+        live={<LineupDemo />}
+      >
         <span className="animlab__stagelabel">The whole ~420ms cascade</span>
         <div className="animlab__frozen">
           {[0, 90, 180, 300, 420].map((ms) => (
@@ -306,20 +331,21 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">The cross-out draws itself</h2>
-        <p className="hint hint--prose">
-          A starter comes out and his line is struck through &mdash; drawn now, left to right in
-          220ms, rather than simply being there on the next render (styles/motion/strike.css).
-          The bar replaced <code>text-decoration</code> at all four strike sites, retiring the
-          fragility that made each rule name <code>.plink</code> twice. Only a substitution the
-          reader was here for draws itself; a reload shows the line already down.
-        </p>
-        <div className="animlab__live">
-          <StrikeDemo />
-        </div>
+      <Entry
+        title="The cross-out draws itself"
+        note={
+          <>
+            A starter comes out and his line is struck through &mdash; drawn now, left to right in
+            220ms, rather than simply being there on the next render (styles/motion/strike.css).
+            The bar replaced <code>text-decoration</code> at all four strike sites, retiring the
+            fragility that made each rule name <code>.plink</code> twice. Only a substitution the
+            reader was here for draws itself; a reload shows the line already down.
+          </>
+        }
+        live={<StrikeDemo />}
+      >
         <span className="animlab__stagelabel">The 220ms wipe</span>
         <div className="animlab__frozen">
           {[0, 40, 90, 150, 220].map((ms) => (
@@ -328,23 +354,28 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
 
-      <section className="animlab__entry">
-        <h2 className="animlab__title">Play-by-play — the card writes itself</h2>
-        <p className="hint hint--prose">
-          The flagship. On a half the reader unseals, its cards write themselves in the order a
-          scorer&rsquo;s hand makes the marks (styles/motion/playbyplay.css): pitch cells drop the
-          lanes (0ms, 35ms apart), the basepaths trace (280ms, 60ms apart), the result code inks
-          (480ms), and an out&rsquo;s circle presses like a stamp (560ms). A reach lands about
-          660ms, an out about 860ms. Capped at a half&rsquo;s first six cards &mdash; twenty at
-          once is a screensaver, and the basepath trace repaints rather than riding the
-          compositor.
-        </p>
-        <div className="animlab__live">
-          <WriteOnDemo />
-          <WriteOnDemo out />
-        </div>
+      <Entry
+        title="Play-by-play — the card writes itself"
+        note={
+          <>
+            The flagship. On a half the reader unseals, its cards write themselves in the order a
+            scorer&rsquo;s hand makes the marks (styles/motion/playbyplay.css): pitch cells drop the
+            lanes (0ms, 35ms apart), the basepaths trace (280ms, 60ms apart), the result code inks
+            (480ms), and an out&rsquo;s circle presses like a stamp (560ms). A reach lands about
+            660ms, an out about 860ms. Capped at a half&rsquo;s first six cards &mdash; twenty at
+            once is a screensaver, and the basepath trace repaints rather than riding the
+            compositor.
+          </>
+        }
+        live={
+          <>
+            <WriteOnDemo />
+            <WriteOnDemo out />
+          </>
+        }
+      >
         <span className="animlab__stagelabel">A reach: cells, then basepaths, then the code</span>
         <div className="animlab__frozen">
           {[0, 140, 300, 420, 560, 660].map((ms) => (
@@ -361,7 +392,7 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
-      </section>
+      </Entry>
     </div>
   )
 }

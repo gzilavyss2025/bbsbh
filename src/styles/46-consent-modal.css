@@ -122,16 +122,69 @@
 .animlab__entry:first-of-type {
   border-top: none;
 }
+/* Title on the left, its Play control hard right — one row, so the button is
+   read as belonging to the entry under it rather than to the page. */
+.animlab__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
 .animlab__title {
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
+.animlab__play {
+  flex: none;
+  min-width: 62px;
+  padding: 4px 12px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-body);
+  cursor: pointer;
+}
+.animlab__play:hover {
+  border-color: var(--ink-1);
+  color: var(--text-heading);
+}
 .animlab__live {
   padding: 14px;
   background: var(--surface-inset);
   border-radius: var(--radius-md);
+}
+
+/* NOTHING ON THIS PAGE RUNS UNTIL IT IS ASKED TO. Fifteen demos mount at once
+   and most of them are one-shots, so a page that started them all played every
+   one below the fold to nobody and left the element with no animation on it at
+   all — the entries this page exists for were the ones showing settled ink by
+   the time you reached them. A stage rests on its first frame instead, and
+   Entry.jsx's Play remounts the one you want (a finished animation is gone, so
+   there is nothing a resume could have restarted).
+
+   A BLANKET, NOT A LIST, and deliberately unlike the frozen-frame block below.
+   That one names selectors because each needs its own `animation-delay`, and a
+   new animation missing from it silently fails to freeze. This one needs no
+   per-animation knowledge, so it can afford to catch everything — including the
+   pseudo-elements the drawn cross-out and the live dot ride on.
+
+   `!important` because `animation` is a SHORTHAND: every rule in styles/motion/
+   resets `animation-play-state` to running, and those sheets import after this
+   one. Same reason and same shape as the `:root[data-motion='reduced']` blanket
+   in 01-base.css. It cannot reach a transition, which is why the hover entries
+   are unaffected by it — they stay live for their own reason, see Entry.jsx. */
+.animlab__live:not(.is-running),
+.animlab__live:not(.is-running) *,
+.animlab__live:not(.is-running) *::before,
+.animlab__live:not(.is-running) *::after {
+  animation-play-state: paused !important;
 }
 .animlab__stagelabel {
   font-family: var(--font-display);

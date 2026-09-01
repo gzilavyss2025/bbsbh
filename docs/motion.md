@@ -164,9 +164,23 @@ dot that breathed harder in a close game would spoil the game.
 
 ## Verifying a change here
 
-`/animation-lab` is the review surface: every animation running live, with its
+`/animation-lab` is the review surface: every animation on the page with its
 stages frozen underneath (`src/screens/animlab/motionDemos.jsx`). Add an entry
-and a pause-list selector whenever a new animation ships.
+whenever a new animation ships.
+
+**Nothing there runs until you press Play.** Most of what the Lab demos is a
+one-shot, and a CSS animation with no `forwards` fill is over — and removed from
+the element — about half a second after it mounts, so a page that started all
+fifteen at once had played every one-shot below the fold to nobody. Each stage
+rests paused on its first frame, and Play remounts that one and runs it alone
+(a finished animation is gone, so resuming it was never an option). The three
+hover entries have no button: you start a transition with the pointer.
+
+The **live** stage needs no pause-list entry — it blankets everything under
+`.animlab__live:not(.is-running)`. The **frozen strips** still do, because each
+needs its own `animation-delay`; a new animation missing from that list will not
+freeze, and a delayed one added to the wrong half of it freezes at the wrong
+moment. See the `.animlab__frame` block in `46-consent-modal.css`.
 
 `e2e/motion-study.spec.js` pins the gates the Lab cannot show — that a cascade
 fires once and not on a poll, that a strike renders already drawn on a cold
