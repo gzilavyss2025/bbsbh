@@ -341,6 +341,36 @@ don't run these by hand.
   linescore handling. Out of the PWA precache with no extra rule —
   `vite.config.js` opts `data/**.json` out unless a file is named.
   Backfill: `--since=YYYY-MM-DD [--until=…]`; `--sports=1` restricts the sweep.
+- `gen-schedule-shape.mjs` → `public/data/schedule-shape/{teamId}.json` — twelve
+  seasons (2015 → now, `EARLIEST_SEASON`) of each club's schedule SHAPE: one row
+  per game carrying date, opponent, side of the road and result, and nothing
+  else. The dataset behind the Team hub's **Last Time** card — "the last time
+  they won game 1 of a road trip was July 3rd" — a drought in a recurring slot,
+  which is a different question from the rate `gen-team-records.mjs` answers and
+  needs a ledger spanning more than one season to ask at all.
+  **The cheapest generator in this file**: ONE request per season covers all
+  thirty clubs (`/api/v1/schedule?sportId=1&season=Y&gameType=R`, `fields=`
+  -pruned to ~650 KB), so the full twelve-season rebuild is twelve requests and
+  ~6 seconds. It therefore has NO incremental mode and no scan table — it
+  rebuilds the whole range every run, deliberately unlike gen-team-records.mjs,
+  whose three-calls-per-game cost forces append-only. A season that fails throws
+  rather than writing, because `writeShards` rewrites the directory and a partial
+  result would ship as a truncated ledger that looks complete.
+  Stores FACTS, not flags: series / homestand / road-trip tags are all recomputed
+  by the reader, so a changed definition costs no regeneration. Segmentation
+  lives in `scripts/lib/schedule-shape.mjs` so `test/schedule-shape.test.js` can
+  import it. **Two traps, both real and both pinned by tests.** Each club's home
+  park is inferred PER SEASON as the venue it hosted most (clubs move — the A's
+  and Rays both did in 2025 — and resolving a decade against `teams.json`'s
+  current park files real home games as neutral ones). And a neutral-site game
+  is TRANSPARENT to every segmentation: MLB names one club "home" in London,
+  Seoul and at the Field of Dreams, and a Brewers home game relocated to Busch
+  Stadium on 2020-09-25 sat inside a four-game visit to St. Louis — split on its
+  own site it invented a series opener nobody played. Shards carry no
+  `generatedAt`, the same reason gen-milb-alumni.mjs's don't: thirty committed
+  files on a nightly cron must not churn on a timestamp. Catalog, gate
+  calibration and the rejected candidates: `docs/schedule-shape.md`. App reads it
+  via `src/api/scheduleShape.js`.
 - `gen-jerseys.mjs` → `public/data/jerseys.json` — what each MLB club wore in
   every game, from `/api/v1/uniforms/game` (`docs/uniforms-and-logos.md` — the
   live feed carries zero uniform data). SQLite-backed (`jerseys` group,

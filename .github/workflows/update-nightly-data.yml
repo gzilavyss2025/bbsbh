@@ -398,6 +398,17 @@ jobs:
         if: steps.teams.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-team-records.mjs
+      # The multi-season schedule-shape ledger behind the Team hub's Last Time
+      # card. Deliberately NOT gated on the teams step: it infers each club's
+      # home park per season from that season's own games rather than reading
+      # teams.json, so it depends on nothing this job writes. One statsapi
+      # request per season covers all thirty clubs, so the whole 2015-to-now
+      # rebuild is ~12 requests and a few seconds — there is no incremental
+      # mode to keep correct.
+      - name: Schedule shape
+        id: schedule-shape
+        continue-on-error: true
+        run: node scripts/gen-schedule-shape.mjs
       - name: Warm preview cache
         id: warm-previews
         continue-on-error: true
@@ -524,6 +535,7 @@ jobs:
           steps.farm-system.outcome == 'failure' ||
           steps.highlights.outcome == 'failure' ||
           steps.team-records.outcome == 'failure' ||
+          steps.schedule-shape.outcome == 'failure' ||
           steps.warm-previews.outcome == 'failure' ||
           steps.compress-logos.outcome == 'failure' ||
           steps.feed-shape-drift.outcome == 'failure'

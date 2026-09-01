@@ -2,6 +2,7 @@ import { fetchTeam, fetchStandings, fetchLeagueTeamStats, fetchTeamIL } from '..
 import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.js'
 import { fetchTeamRecords } from '../../../api/teamRecords.js'
+import { fetchScheduleShape } from '../../../api/scheduleShape.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
 import { fetchRunValue, clubRunValue, clubBoard } from '../../../api/around-the-game/runValue.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
@@ -58,6 +59,10 @@ export async function loadNumbers(id, asOf) {
     // every level. The card tallies it against `standingsDate` itself, so it
     // reads no further ahead than the standings and the day-of-week card.
     teamRecordsData,
+    // The decade-deep schedule-shape ledger behind the Last Time card. MLB
+    // only — gen-schedule-shape.mjs sweeps sportId 1, so an affiliate has no
+    // shard and the card simply doesn't render.
+    scheduleShapeData,
     schedule,
     ilRoster,
     uniformCatalog,
@@ -70,6 +75,7 @@ export async function loadNumbers(id, asOf) {
     sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
     sportId === 1 ? fetchRunValue() : Promise.resolve(null),
     fetchTeamRecords(id, season),
+    sportId === 1 ? fetchScheduleShape(id) : Promise.resolve(null),
     // Cutoff-gated rows only — `won` stays null past standingsDate (see
     // fetchTeamSchedule), which is what keeps the day-of-week record from
     // looking ahead. Don't re-derive it from Final status. Also feeds the
@@ -177,6 +183,7 @@ export async function loadNumbers(id, asOf) {
     leaderPool,
     comeback,
     teamRecords: teamRecordsData,
+    scheduleShape: scheduleShapeData,
     // The card tallies rows itself (it owns the pre/post-break lever), so the
     // cutoff travels with the data rather than being applied here.
     recordsCutoff: standingsDate,
