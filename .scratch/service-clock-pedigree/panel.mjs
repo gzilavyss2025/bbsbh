@@ -36,8 +36,22 @@ const here = dirname(fileURLToPath(import.meta.url))
 const j = async (p) => JSON.parse(await readFile(p, 'utf8'))
 
 const debuts = await j(join(here, '..', 'service-clock', 'panel.json'))
-const rankRows = await j(join(here, '..', 'top-prospects-history', 'rows.json'))
-const rankSeasons = await j(join(here, '..', 'top-prospects-history', 'seasons.json'))
+// rows.json/seasons.json now also carry 2005-2008 from a SECOND publication,
+// Baseball America (#946), alongside 2009-2024 from MLB Pipeline. This panel's
+// windowStatus is REUSED verbatim from prospect-value/panel.mjs, which is
+// pinned to MLB Pipeline rows only -- both reads here are pinned the same way
+// so the two panels' AVAILABLE/DEPTH sets, and therefore their windowStatus
+// per player, stay identical (the row-by-row check at the end of this file
+// depends on it). seasons.json's pre-#946 entries carry no `source` field at
+// all, so "MLB Pipeline only" reads as "not tagged baseball-america".
+const rankRows = (await j(join(here, '..', 'top-prospects-history', 'rows.json'))).filter(
+  (r) => r.source === 'mlb-pipeline',
+)
+// allRankSeasons keeps every entry (needed below to still report 2005-2008 as
+// unavailable to MLB Pipeline); rankSeasons is the MLB-Pipeline-only view
+// AVAILABLE/DEPTH are built from.
+const allRankSeasons = await j(join(here, '..', 'top-prospects-history', 'seasons.json'))
+const rankSeasons = allRankSeasons.filter((s) => s.source !== 'baseball-america')
 const valuePanel = await j(join(here, '..', 'prospect-value', 'panel.json'))
 
 // --- depth, read from the coverage file, never assumed ----------------------
@@ -50,7 +64,12 @@ for (const s of rankSeasons) {
   DEPTH.set(s.season, s.depth)
 }
 const DEEP = new Set([...AVAILABLE].filter((y) => DEPTH.get(y) >= 99))
-const UNAVAILABLE = rankSeasons.filter((s) => s.status !== 'ok').map((s) => s.season)
+// From allRankSeasons, not the MLB-Pipeline-only rankSeasons above: a
+// Baseball-America-sourced season is still MLB-Pipeline-unavailable, so it
+// belongs here even though its own `status` now reads 'ok'.
+const UNAVAILABLE = allRankSeasons
+  .filter((s) => s.status !== 'ok' || s.source === 'baseball-america')
+  .map((s) => s.season)
 
 // --- the ranking window, copied verbatim from prospect-value/panel.mjs ------
 

@@ -36,8 +36,29 @@ const j = async (p) => JSON.parse(await readFile(p, 'utf8'))
 
 // --- 1. the ranked lists ----------------------------------------------------
 
-const rankRows = await j(join(here, '..', 'top-prospects-history', 'rows.json'))
-const rankSeasons = await j(join(here, '..', 'top-prospects-history', 'seasons.json'))
+// rows.json and seasons.json now also carry 2005-2008 from a SECOND
+// publication -- Baseball America, added by #946 -- alongside 2009-2024 from
+// MLB Pipeline (rows.json's `source` field says which). This panel's whole
+// design -- the window logic below and every figure published in
+// docs/prospect-ranking-value.md -- is built and reproducible against MLB
+// Pipeline ALONE, and its own docstring above promises a 2005-2008 row never
+// enters a ranked-versus-unranked comparison. Both reads below are pinned to
+// MLB Pipeline rows so a rebuild neither pools two scouting staffs' ranks
+// under one mlbId nor lets a Baseball-America-only season read as
+// "available" for the window check. Extending this panel to Baseball
+// America is deliberately left as future work -- a research decision that
+// would move published figures, not a mechanical one to make here.
+const rankRows = (await j(join(here, '..', 'top-prospects-history', 'rows.json'))).filter(
+  (r) => r.source === 'mlb-pipeline',
+)
+// seasons.json's pre-#946 entries (2009-2024) never carried a `source` field
+// at all -- only the new Baseball America entries (2005-2008) do -- so "MLB
+// Pipeline only" here reads as "not tagged baseball-america" rather than an
+// inclusion match on 'mlb-pipeline'. allRankSeasons keeps every entry (needed
+// below to still report 2005-2008 as unavailable to MLB Pipeline); rankSeasons
+// is the MLB-Pipeline-only view AVAILABLE/DEPTH are built from.
+const allRankSeasons = await j(join(here, '..', 'top-prospects-history', 'seasons.json'))
+const rankSeasons = allRankSeasons.filter((s) => s.source !== 'baseball-america')
 const rankedBios = await j(join(here, 'bios.json'))
 
 // Depth per season, read from the coverage file rather than assumed. 2009-2011
@@ -346,7 +367,12 @@ for (const r of panel) windowCounts[r.windowStatus] = (windowCounts[r.windowStat
 const meta = {
   generatedAt: new Date().toISOString(),
   rankWindow: { first: RANK_MIN, last: RANK_MAX, depths: Object.fromEntries([...DEPTH].sort((a, b) => a[0] - b[0])) },
-  unavailableRankSeasons: rankSeasons.filter((s) => s.status !== 'ok').map((s) => s.season),
+  // From allRankSeasons, not the MLB-Pipeline-only rankSeasons above: a
+  // Baseball-America-sourced season is still MLB-Pipeline-unavailable, so it
+  // belongs in this list even though its own `status` now reads 'ok'.
+  unavailableRankSeasons: allRankSeasons
+    .filter((s) => s.status !== 'ok' || s.source === 'baseball-america')
+    .map((s) => s.season),
   rankingWindow: { lagBefore: LAG_BEFORE, lagAfter: LAG_AFTER, captureRate: capture, rankedWithDebut: withDebut },
   lastPaidSeason: LAST_PAID_SEASON,
   indexBaseYear: BASE_YEAR,
