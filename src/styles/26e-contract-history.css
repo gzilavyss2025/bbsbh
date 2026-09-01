@@ -85,9 +85,13 @@
   list-style: none;
 }
 /* Two columns and a full-width third line: what kind of record it is, the
-   figure, then everything the source also recorded. The figure column is
-   `auto` so it sizes to the longest money string on the card and every row's
-   figure ends on the same right edge. */
+   figure, then everything the source also recorded. EACH ROW IS ITS OWN GRID,
+   so `auto` sizes the figure column to that row's own string and nothing is
+   measured across the card. The right edges still line up, and the reason is
+   the other column: `1fr` on the label takes all the slack, which pushes every
+   figure to the same right edge whatever its width. Widths down the column are
+   therefore NOT equal — only their right edge is, which is all a reader
+   scanning a money column needs. */
 .cthist__row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -138,6 +142,23 @@
   line-height: var(--lh-ui);
   letter-spacing: var(--ls-text);
   color: var(--text-caption);
+}
+/* THE SUB-LINE IS PROSE, so it renders in the case it was written in. Every
+   other string on this card is a label, a figure or a badge and stays shouted
+   by the global ALL-CAPS invariant (01-base.css): the kind, the year, the club,
+   the value rail, the match badge. This one line is the sentence layer — "Per
+   year $17M · Covers 2025-2027 · club option", "from Boston Red Sox", "Terms
+   not recorded" — and shouting it flattens the very distinction the italic
+   below is drawing. Same shouted-heading / natural-case-body split as
+   .contractcard__sentence and .tscoremodal__body, and the `#root` prefix is
+   what lets it out-rank `#root *`. */
+/* The descendant half is not belt-and-braces: `#root *` matches the italic
+   `em` inside this line DIRECTLY, and a direct match beats an inherited value,
+   so exempting only the span leaves "Not recorded" shouting inside a sentence
+   that is not. */
+#root .cthist__sub,
+#root .cthist__sub * {
+  text-transform: none; /* caps-exempt: the card's one prose line, same idiom as .contractcard__foot */
 }
 /* "Terms not recorded" — the honest stand-in where a figure would be. Italic,
    so a sentence about missing data never reads as data. */

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import '../../styles/26e-contract-history.css'
 import { contractHistoryView } from '../../api/person/contract/history.js'
-import { SectionTitle } from '../../screens/player/parts.jsx'
 import { teamFullName } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 
@@ -49,7 +48,15 @@ export function ContractHistoryLedger({ rows }) {
 
   return (
     <section className="cthist">
-      <SectionTitle title="Contract history" note={tally(view)} />
+      {/* The heading is written out rather than borrowed from the history
+          tab's parts.jsx: a component reaching up into a screen is an
+          inversion nothing else in src/components does, and both neighbours
+          (CareerTimeline, TransactionTimeline) write this same three-line
+          heading inline. */}
+      <h3 className="section__title">
+        <span>Contract history</span>
+        <em>{tally(view)}</em>
+      </h3>
       <ol className="cthist__seasons">
         {seasons.map((season) => (
           <SeasonBlock key={season.season ?? 'undated'} season={season} />
@@ -111,7 +118,15 @@ function SeasonBlock({ season }) {
 function Row({ row }) {
   // A detail with no key is already a phrase ("club option", "opt-out") and
   // prints on its own; the rest read as label-then-value.
-  const supporting = row.details.map((d) => (d.k ? `${d.k} ${d.v}` : d.v)).join(' · ')
+  const parts = row.details.map((d) => (d.k ? `${d.k} ${d.v}` : d.v))
+  // The club a free-agency row carries is the one he LEFT, never the one he
+  // signed with (api/person/contract/history.js). That is real and worth
+  // saying, so it is said HERE, on the row, in words that can only mean what
+  // they say — and never up in the season's heading, where a mark and a name
+  // would read as the club that signed him.
+  const leftClub = row.fromTeamId ? teamFullName(row.fromTeamId) : null
+  if (leftClub) parts.unshift(`from ${leftClub}`)
+  const supporting = parts.join(' · ')
   return (
     <li className={`cthist__row cthist__row--${row.kind}`}>
       <span className="cthist__kind">{row.label}</span>

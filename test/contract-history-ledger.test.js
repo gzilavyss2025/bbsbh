@@ -164,13 +164,13 @@ test('an empty terms object renders an honest sentence, never a blank row', () =
 
   const salary = contractRowView(row({ terms: {} }))
   assert.equal(salary.headline, null)
-  assert.equal(salary.note, 'Salary not recorded')
+  assert.equal(salary.note, 'Not recorded')
 })
 
 test('a missing or non-object terms field is treated as an empty one', () => {
-  assert.equal(contractRowView(row({ terms: null })).note, 'Salary not recorded')
-  assert.equal(contractRowView(row({ terms: undefined })).note, 'Salary not recorded')
-  assert.equal(contractRowView(row({ terms: '1 yr $5M' })).note, 'Salary not recorded')
+  assert.equal(contractRowView(row({ terms: null })).note, 'Not recorded')
+  assert.equal(contractRowView(row({ terms: undefined })).note, 'Not recorded')
+  assert.equal(contractRowView(row({ terms: '1 yr $5M' })).note, 'Not recorded')
   assert.equal(contractRowView(null), null)
 })
 
@@ -196,7 +196,7 @@ test('a free-agency guarantee of 1 reads as the minor-league deal it marks, neve
   assert.equal(printed.includes('$1'), false)
 })
 
-test('the sentinel drops the per-year figure derived from it', () => {
+test('the sentinel drops a per-year figure that only repeats the sentinel', () => {
   // 39 of the 40 sentinel rows carrying an `aav` repeat the sentinel there too.
   const view = contractRowView(
     row({ rowKey: 'free_agency#1000', sourceFile: 'free_agency', season: 2021, teamId: 109, terms: { years: 0, guarantee: 1, aav: 1, term: 2021 } }),
@@ -204,6 +204,16 @@ test('the sentinel drops the per-year figure derived from it', () => {
   assert.equal(view.headline, 'Minor-league deal')
   assert.equal(view.details.some((d) => d.k === 'Per year'), false)
   assert.equal(JSON.stringify(view).includes('$1'), false)
+})
+
+test('the sentinel keeps a per-year figure that is real', () => {
+  // The fortieth: a $350K major-league rate on a split contract, the one true
+  // figure in the sentinel set, and it reaches a page.
+  const view = contractRowView(
+    row({ rowKey: 'free_agency#4868', sourceFile: 'free_agency', season: 1997, teamId: 158, terms: { years: 0, guarantee: 1, aav: 350000 } }),
+  )
+  assert.equal(view.headline, 'Minor-league deal')
+  assert.deepEqual(view.details, [{ k: 'Per year', v: '$350K' }])
 })
 
 test('the sentinel is read by its meaning, not by its size', () => {
@@ -225,7 +235,7 @@ test('the sentinel is read by its meaning, not by its size', () => {
 
 test('a money field holding a word prints the word, and a placeholder prints nothing', () => {
   assert.equal(contractRowView(row({ terms: { salary: 'forfeited' } })).headline, 'forfeited')
-  assert.equal(contractRowView(row({ terms: { salary: 'n/a' } })).note, 'Salary not recorded')
+  assert.equal(contractRowView(row({ terms: { salary: 'n/a' } })).note, 'Not recorded')
 })
 
 test('an unknown source file still renders its season and club', () => {
@@ -237,6 +247,110 @@ test('an unknown source file still renders its season and club', () => {
 })
 
 // ---- grouping --------------------------------------------------------------
+
+test('a free-agency row never names its season: its club is the one he LEFT', () => {
+  // gen-contracts-identity.mjs scopes a free-agency row to `old_club`, so
+  // Wacha's 2023 row carries Boston for a deal he signed with San Diego. A
+  // season whose only clubbed row is that one must render with NO club.
+  const view = contractHistoryView([
+    row({ rowKey: 'free_agency#550', sourceFile: 'free_agency', season: 2023, teamId: 111, terms: { years: 4, guarantee: 26000000, aav: 6500000, term: '2023-26' } }),
+    row({ rowKey: 'salaries#3953', season: 2023, teamId: null, terms: { salary: 7500000 } }),
+  ])
+  assert.equal(view.seasons.length, 1)
+  assert.equal(view.seasons[0].teamId, null)
+  // The club he left is kept, on the row, where it cannot be read as the club
+  // that signed him.
+  const [signing] = view.seasons[0].rows
+  assert.equal(signing.kind, 'freeAgency')
+  assert.equal(signing.teamId, null)
+  assert.equal(signing.fromTeamId, 111)
+})
+
+test('a clubbed non-free-agency row still names its season, beside a free-agency row', () => {
+  const view = contractHistoryView([
+    row({ rowKey: 'extensions#935', sourceFile: 'extensions', season: 2024, teamId: 118, terms: { years: 3, guarantee: 51000000, aav: 17000000, first_year: 2025, final_year: 2027 } }),
+    row({ rowKey: 'free_agency#366', sourceFile: 'free_agency', season: 2024, teamId: 135, terms: { years: 2, guarantee: 32000000, aav: 16000000, term: '2024-25' } }),
+  ])
+  assert.equal(view.seasons[0].teamId, 118)
+})
+
+test('an arbitration row may name a season, and a salaries row never can', () => {
+  const arb = contractHistoryView([
+    row({ sourceFile: 'arbitration', season: 2019, teamId: 138, terms: { prior_salary: 5300000, settled_salary: 6350000 } }),
+  ])
+  assert.equal(arb.seasons[0].teamId, 138)
+  const pay = contractHistoryView([row({ season: 2019, teamId: null, terms: { salary: 6350000 } })])
+  assert.equal(pay.seasons[0].teamId, null)
+})
+
+// ---- free text that hides a figure -----------------------------------------
+
+test('arbitration shorthand never puts an unlabelled figure in the money column', () => {
+  // "4 / $32.5 extn" reads as thirty-two dollars fifty, directly under the same
+  // deal printed properly as "$32.5M" by its extensions row.
+  const asExtension = contractRowView(
+    row({ sourceFile: 'arbitration', season: 2020, teamId: 158, terms: { prior_salary: 4000000, settled_salary: '4 / $32.5 extn' } }),
+  )
+  assert.equal(asExtension.headline, 'Settled as extension')
+
+  const asNewDeal = contractRowView(
+    row({ sourceFile: 'arbitration', terms: { settled_salary: '1 y/$2.325+opt' } }),
+  )
+  assert.equal(asNewDeal.headline, 'Settled on a new deal')
+
+  // A club offer written in shorthand may not become the outcome either. It
+  // stays on the sub-line, where its label says whose figure it is.
+  const clubShorthand = contractRowView(
+    row({ sourceFile: 'arbitration', terms: { club_offer: '5 y/$57M extn' } }),
+  )
+  assert.equal(clubShorthand.headline, null)
+  assert.equal(clubShorthand.note, 'Outcome not recorded')
+  assert.deepEqual(clubShorthand.details, [{ k: 'Club', v: '5 y/$57M extn' }])
+})
+
+test('a word outcome is still a word outcome', () => {
+  const view = contractRowView(row({ sourceFile: 'arbitration', terms: { club_offer: 'outrighted' } }))
+  assert.equal(view.headline, 'outrighted')
+  assert.deepEqual(view.details, [])
+})
+
+test('a guarantee the source wrote as a sentence leaves the money column', () => {
+  const view = contractRowView(
+    row({ rowKey: 'free_agency#4', sourceFile: 'free_agency', season: 2015, teamId: 120, terms: { guarantee: 'signed by Leones de Yucatán', term: 2015 } }),
+  )
+  assert.equal(view.headline, null)
+  assert.equal(view.amount, null)
+  assert.equal(view.note, null) // the terms ARE recorded, in prose
+  assert.deepEqual(view.details, [
+    { k: null, v: 'signed by Leones de Yucatán' },
+    { k: 'Covers', v: '2015' },
+  ])
+})
+
+test('a years figure still leads when only the guarantee is prose', () => {
+  const view = contractRowView(
+    row({ sourceFile: 'free_agency', terms: { years: 1, guarantee: 'Lotte Giants, 1 y/$1M', term: 2019 } }),
+  )
+  assert.equal(view.headline, '1 yr')
+  assert.deepEqual(view.details[0], { k: null, v: 'Lotte Giants, 1 y/$1M' })
+})
+
+// ---- a doubt marker glued to a figure --------------------------------------
+
+test('a figure written behind a doubt marker reads as money, in the card own form', () => {
+  const view = contractRowView(
+    row({ sourceFile: 'arbitration', terms: { prior_salary: '?  $700,000', settled_salary: 900000 } }),
+  )
+  assert.deepEqual(view.details, [{ k: 'Prior salary', v: '$700K' }])
+})
+
+test('a bare placeholder is still nothing, and a negative figure is not a marked one', () => {
+  assert.equal(contractRowView(row({ terms: { salary: '?' } })).note, 'Not recorded')
+  assert.equal(contractRowView(row({ terms: { salary: 'n/a' } })).note, 'Not recorded')
+  // A leading minus is a sign, not a mark: stripping it would print a debt as
+  // a payment, so the value stays text.
+  assert.equal(contractRowView(row({ terms: { salary: '-500000' } })).headline, '-500000')
+})
 
 test('seasons group newest first, deal above the salary it explains', () => {
   const view = contractHistoryView([
