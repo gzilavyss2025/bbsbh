@@ -407,10 +407,18 @@ export function compareArms(a, b) {
 // calendar columns, ending on asOfDate itself — which is TODAY and never spent,
 // exactly as dayStripFor draws it.
 //
+// EIGHT COLUMNS, NOT SEVEN, and the odd number is the point: the row prints
+// `last7dayPitches` beside the strip, and that window is the seven COMPLETED
+// days (asOf−7 … asOf−1). A seven-column strip ends on asOf, so it starts at
+// asOf−6 and silently drops the oldest day the total counts. Aroldis Chapman
+// on 2026-08-31 was exactly that: his 18 pitches landed on asOf−7, so the row
+// read a blank week beside a total of 18. Seven spent columns plus today's
+// dashed one makes the cells sum to the number printed next to them.
+//
 // Relievers only. availabilityFor answers 'fresh' for every starter by design
 // (a rotation is not a bullpen), so leaving them in would pad each club with
 // five names that were never available in relief.
-export function staffGridFor(data, teamId, asOfDate, days = 7) {
+export function staffGridFor(data, teamId, asOfDate, days = 8) {
   if (!data?.pitchers) return null
   const rows = []
   for (const [personId, p] of Object.entries(data.pitchers)) {

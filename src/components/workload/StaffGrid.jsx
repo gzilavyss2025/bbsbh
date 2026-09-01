@@ -6,7 +6,11 @@ import { PenDots } from './PenDots.jsx'
 
 // THE STAFF GRID — one club's whole bullpen over a week, on one board.
 //
-// Rows are the pen, columns are the last seven days, a cell is what he threw.
+// Rows are the pen, columns are the last seven days plus today (dashed, never
+// spent), a cell is what he threw. That eighth column is not decoration: the
+// row prints `last7dayPitches` in the total, and seven columns ending on today
+// would start a day late and drop an outing the total still counted — a blank
+// week beside a non-zero number (see staffGridFor's note).
 // It is the shape every reliever tracker in the sport arrived at independently
 // (Razzball's rolling usage matrix, The Hardball Times' bullpen usage chart,
 // Inside the Pen), and it is the one picture workload.json could always draw and

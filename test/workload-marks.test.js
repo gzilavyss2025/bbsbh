@@ -189,11 +189,53 @@ test('staffGridFor: relievers only, each row carrying its own strip and runs', (
   const rows = staffGridFor(data, 110, AS_OF)
   assert.ok(!rows.some((r) => r.name === 'Starter'), 'a rotation arm is not pen availability')
   const cano = rows.find((r) => r.name === 'Cano')
-  assert.equal(cano.cells.length, 7, 'seven calendar columns by default')
+  assert.equal(cano.cells.length, 8, 'seven spent columns, plus today')
   assert.equal(cano.cells.at(-1).today, true, 'today is the last cell and never spent')
   assert.equal(cano.cells.at(-1).pitches, null)
   assert.deepEqual(cano.runs, restRunsFor(cano.cells))
   assert.equal(cano.flags.length, TIRED_FLAGS.length)
+})
+
+// THE ROW'S CELLS MUST SUM TO THE NUMBER PRINTED BESIDE THEM. StaffGrid.jsx
+// draws the strip and then `last7dayPitches` in the total column, so the strip
+// has to span that metric's whole window — the seven COMPLETED days, asOf−7 to
+// asOf−1. A seven-column strip ends on asOf and therefore starts at asOf−6,
+// dropping the oldest day the total counts: Aroldis Chapman on 2026-08-31 drew
+// a blank week beside a total of 18, because his only outing in the window
+// landed on the day the strip had cut. Silent, and unarguable on screen —
+// every number shown was real.
+test('staffGridFor: the drawn cells sum to the total the row prints', () => {
+  // Ortiz worked on asOf−7 and nowhere else, which is the exact cell a
+  // seven-column strip loses.
+  const edge = {
+    asOf: AS_OF,
+    baselines: data.baselines,
+    pitchers: {
+      ortiz: {
+        name: 'Ortiz',
+        teamId: 110,
+        role: 'RP',
+        season: { g: 30, gs: 0, pitches: 400, outs: 90, bf: 120, strikes: 260 },
+        apps: [{ d: '2026-08-24', p: 18 }],
+      },
+    },
+  }
+  const [row] = staffGridFor(edge, 110, AS_OF)
+  assert.equal(row.last7dayPitches, 18, 'asOf−7 is inside the seven-day window')
+  assert.equal(
+    row.cells.reduce((a, c) => a + (c.pitches ?? 0), 0),
+    row.last7dayPitches,
+    'a blank strip beside a non-zero total is the bug this pins',
+  )
+
+  // And it holds for every arm on a normally worked staff, not just the edge.
+  for (const r of staffGridFor(data, 110, AS_OF)) {
+    assert.equal(
+      r.cells.reduce((a, c) => a + (c.pitches ?? 0), 0),
+      r.last7dayPitches,
+      `${r.name}'s strip must span the window his total counts`,
+    )
+  }
 })
 
 // THE MARK NAMES THE MAN IT DRAWS. The Pen prints the top row's threshold
@@ -214,6 +256,34 @@ test('staffGridFor: every row draws its OWN flags, through the sort', () => {
       `${r.name}'s row must carry ${r.name}'s own flags`,
     )
   }
+})
+
+// WHICH DATE A SURFACE ASKS ABOUT IS NOT COSMETIC. The file's appearances stop
+// the day before its own `asOf`, so a surface that asks about a LATER day is
+// asking about days the file holds nothing for — and "nothing" reads as rest.
+// Every arm's yesterday measures zero and the board publishes an all-clear.
+//
+// This is why The Pen and the team hub's Bullpen health card both read
+// `data.asOf` rather than the browser's today: on a night the cron ran the two
+// strings are equal and it costs nothing, and on a night it slipped they still
+// agree with each other instead of one saying limited and the other down.
+test('a stale file read at the wrong date reports a false all-clear', () => {
+  // Wilson threw 42 the day before AS_OF: two flags, so he is down.
+  assert.equal(availabilityFor(data, 'wilson', AS_OF).status, 'down')
+
+  // Asked about the day AFTER, that outing is no longer "yesterday" and the
+  // file has nothing newer to put in its place.
+  const dayLate = '2026-09-01'
+  const by = Object.fromEntries(tiredFlagsFor(data, 'wilson', dayLate).map((f) => [f.key, f]))
+  assert.equal(by.yesterday.value, 0, 'the file holds no appearance for that day')
+  assert.equal(availabilityFor(data, 'wilson', dayLate).status, 'limited')
+
+  // Same club, same file, one day apart: a different verdict on the board.
+  assert.notDeepEqual(
+    clubPenCounts(data, 110, AS_OF),
+    clubPenCounts(data, 110, dayLate),
+    'two surfaces reading this file at two dates would contradict each other',
+  )
 })
 
 test('staffGridFor: an unknown club is null so the caller can hide the surface', () => {

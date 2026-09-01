@@ -360,8 +360,16 @@
   padding-bottom: 2px;
 }
 
+/* The day-initial header is a SECOND grid drawn over the cells, so it has to
+   share the strip's column geometry — including .daystrip's 2px column gap.
+   Without it the header tracks are each a fraction wider than the cells below
+   and the initials fan out from the centre of the row: measured at ±0.9px on a
+   430px phone, which is under a pixel today but scales with the gap and the
+   column count. Two grids stacked to be read together should not be able to
+   disagree about their own tracks. */
 .staffgrid__days {
   display: grid;
+  column-gap: 2px;
 }
 
 .staffgrid__hlabel,

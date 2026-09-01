@@ -58,8 +58,13 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')
+// fileURLToPath, not `.pathname` — a URL path is percent-encoded, so a checkout
+// under a directory with a space in it reads back as `%20` and every readFileSync
+// below misses. It also handles the leading-slash-before-a-drive-letter shape on
+// Windows without a hand-rolled regex. Same call the contracts tests make.
+const ROOT = fileURLToPath(new URL('..', import.meta.url))
 
 function cssFilesUnder(dir, out = []) {
   for (const entry of readdirSync(dir)) {

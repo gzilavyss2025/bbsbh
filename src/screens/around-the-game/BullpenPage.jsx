@@ -84,8 +84,20 @@ export function BullpenPage() {
   const [openClub, setOpenClub] = useState(null)
   const { favoriteTeamId } = useFavoriteTeam()
 
-  const asOf = toApiDate()
   const { loading, error, data } = useAsync(() => fetchWorkload(), [])
+  // THE FILE'S OWN DATE, not the browser's. On any night the nightly cron ran,
+  // these are the same string and nothing here changes. They part only when the
+  // file is a day stale — and then asking it about TODAY is asking about a day
+  // it holds no appearances for, so every arm reads "0 pitches yesterday" and
+  // the page publishes a false all-clear on the one question it exists to
+  // answer. Read at the file's asOf it reports a day-old picture truthfully,
+  // which is also the date the masthead already stamps on the page.
+  //
+  // It is what the team hub's Bullpen health card reads too. That matters more
+  // than either choice on its own: the two surfaces draw the SAME seven-day
+  // grid off the SAME file, so a reader who opens one after the other must not
+  // be told 2 limited here and 2 down there.
+  const asOf = data?.asOf ?? toApiDate()
   const { data: clubs } = useAsync(() => loadClubs(), [])
 
   const teamIds = useMemo(() => (clubs ? [...clubs.keys()] : []), [clubs])
@@ -298,7 +310,6 @@ export function BullpenPage() {
               thirteen a club, and counts every appearance strictly before today.
             </p>
           </section>
-
         </>
       )}
 
