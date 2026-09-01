@@ -19,6 +19,7 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import { parseCsv } from '../scripts/lib/csv.mjs'
+import { parseServiceTime } from '../src/lib/contracts/parseServiceTime.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, '..', 'scripts', 'data', 'contracts')
@@ -436,4 +437,263 @@ test('deferred-money names carry an asterisk the join must strip', () => {
   const unstarred = salaries.filter((r) => !r.player.includes('*') && bare.has(r.player))
   assert.equal(unstarred.length, 259)
   assert.equal(new Set(unstarred.map((r) => r.player)).size, 30, 'every starred man also appears unstarred')
+})
+
+// ------------------------------------------------- the mls notation, and its
+// bare integers
+// The column lost its trailing zeros to a float round-trip, so a day part must
+// be reconstructed from the DECIMAL LENGTH. These tests pin the evidence for
+// that reading, because the reading is what parseServiceTime.js encodes and a
+// future export that changes the notation would otherwise ship a silently wrong
+// day count. The parser itself is covered in test/parse-service-time.test.js.
+
+const populatedMls = salaries.filter((r) => (r.mls ?? '').trim() !== '')
+const decimalOf = (cell) => cell.split('.')[1]
+
+test('19,308 mls cells split 16,382 dotted and 2,926 bare, with no third shape', () => {
+  assert.equal(populatedMls.length, 19308)
+  const dotted = populatedMls.filter((r) => /^\d+\.\d+$/.test(r.mls))
+  const bare = populatedMls.filter((r) => /^\d+$/.test(r.mls))
+  assert.equal(dotted.length, 16382)
+  assert.equal(bare.length, 2926)
+  assert.equal(dotted.length + bare.length, populatedMls.length, 'an mls cell in a shape nobody has read')
+  assert.equal(Math.round((1000 * bare.length) / populatedMls.length) / 10, 15.2)
+})
+
+test('no mls cell reads X.000 — which is where the bare integers came from', () => {
+  // The keystone of the trailing-zero reading. A float drops ".000" entirely,
+  // so if the mechanism is real there can be no surviving X.000 cell anywhere.
+  // There is none, and none whose decimal part is zeros at any length.
+  const zeros = populatedMls.filter((r) => r.mls.includes('.') && /^0+$/.test(decimalOf(r.mls)))
+  assert.deepEqual(zeros, [])
+})
+
+test('the decimal lengths are 1, 2, 3, 4 and 15, and each is explained', () => {
+  const histogram = {}
+  for (const row of populatedMls) {
+    if (!row.mls.includes('.')) continue
+    const length = decimalOf(row.mls).length
+    histogram[length] = (histogram[length] ?? 0) + 1
+  }
+  assert.deepEqual(histogram, { 1: 123, 2: 1569, 3: 14549, 4: 1, 15: 140 })
+
+  // A one-digit decimal can only be a stripped ".100": ".2" would be a 200-day
+  // season, which does not exist. All 123 are the digit 1, so the prediction
+  // holds with no exception.
+  const oneDigit = new Set(
+    populatedMls.filter((r) => r.mls.includes('.') && decimalOf(r.mls).length === 1).map((r) => decimalOf(r.mls)),
+  )
+  assert.deepEqual([...oneDigit], ['1'])
+
+  // The two-digit set is exactly the multiples of ten from 010 to 170, minus
+  // 100 (which strips to one digit). No "10", nothing above "17". Any other
+  // reading of this column would have to explain that missing 10.
+  const twoDigit = [
+    ...new Set(
+      populatedMls.filter((r) => r.mls.includes('.') && decimalOf(r.mls).length === 2).map((r) => decimalOf(r.mls)),
+    ),
+  ].sort()
+  assert.deepEqual(twoDigit, ['01', '02', '03', '04', '05', '06', '07', '08', '09', '11', '12', '13', '14', '15', '16', '17'])
+
+  // 172 days IS a service year, so a three-digit day part may not reach it.
+  const threeDigit = populatedMls
+    .filter((r) => r.mls.includes('.') && decimalOf(r.mls).length === 3)
+    .map((r) => Number(decimalOf(r.mls)))
+  assert.equal(Math.max(...threeDigit), 171)
+  assert.equal(threeDigit.filter((d) => d > 172).length, 0)
+})
+
+test('the one four-digit cell is Tim Beckham 2015, a typo and not a fourth notation', () => {
+  const four = populatedMls.filter((r) => r.mls.includes('.') && decimalOf(r.mls).length === 4)
+  assert.equal(four.length, 1)
+  assert.equal(four[0].player, 'Beckham, Tim')
+  assert.equal(four[0].year, '2015')
+  assert.equal(four[0].mls, '0.0145')
+  // His own next row is the proof: strip the stray leading zero and 2015 to
+  // 2016 is a gain of exactly one full service year.
+  const y2016 = salaries.find((r) => r.year === '2016' && r.player === 'Beckham, Tim')
+  assert.equal(y2016.mls, '1.145')
+  assert.equal(parseServiceTime(y2016.mls).totalDays - parseServiceTime(four[0].mls).totalDays, 172)
+})
+
+// The 15 names the duplicate table above already resolved as two different men.
+// Luis García appears under both spellings the file uses, so 15 men need 16
+// strings — and each is asserted present, because a typo here would silently
+// weaken the exclusion instead of failing.
+const TWO_MEN_ONE_NAME = [
+  'Young, Chris', 'Smith, Will', 'García, Luis', 'Garcia, Luis', 'Castillo, Diego',
+  'Muncy, Max', 'Ortiz, Luis', 'Gonzalez, Miguel', 'Nunez, Abraham', 'Carpenter, Chris',
+  'Thompson, Rich', 'Taylor, Michael', 'Castro, Ramon', 'Sanchez, Angel', 'Smith, Kevin',
+  'Duffy, Matt',
+]
+
+test('a year-over-year continuity test finds the bad cells without the transaction wire', () => {
+  for (const name of TWO_MEN_ONE_NAME) {
+    assert.ok(salaries.some((r) => r.player === name), `${name} is not a name in salaries.csv`)
+  }
+
+  // One value per (name, season), taking the last row in file order. That pick
+  // only matters for the duplicate names below — every other man has one row a
+  // season — which is exactly why the dup-excluded figure is the one the doc
+  // quotes.
+  const byName = new Map()
+  for (const row of populatedMls) {
+    if (!byName.has(row.player)) byName.set(row.player, new Map())
+    byName.get(row.player).set(Number(row.year), parseServiceTime(row.mls).totalDays)
+  }
+
+  // A violation is a gain above a realistic 200-day season, or a gain below
+  // zero. Service time never falls, and no season banks 200 days.
+  const excluded = new Set(TWO_MEN_ONE_NAME)
+  let pairs = 0
+  let violations = 0
+  let cleanPairs = 0
+  let cleanViolations = 0
+  for (const [name, seasons] of byName) {
+    for (const [year, before] of seasons) {
+      if (!seasons.has(year + 1)) continue
+      const gain = seasons.get(year + 1) - before
+      const bad = gain > 200 || gain < 0
+      pairs++
+      if (bad) violations++
+      if (!excluded.has(name)) {
+        cleanPairs++
+        if (bad) cleanViolations++
+      }
+    }
+  }
+  assert.equal(pairs, 13291)
+  assert.equal(violations, 38)
+  assert.equal(cleanPairs, 13229)
+  assert.equal(cleanViolations, 26)
+  assert.equal(Math.round((100000 * cleanViolations) / cleanPairs) / 1000, 0.197)
+})
+
+test('1,745 of the 2,926 bare cells have no earlier mls to check them against', () => {
+  // The at-risk population, and an UPPER BOUND rather than a count of wrong
+  // cells: it also holds every man whose earlier seasons predate 2010, when the
+  // column starts. At the other end, 62 bare cells follow a dotted history for
+  // the same man and are the highest-trust bare cells in the file.
+  const history = new Map()
+  for (const row of populatedMls) {
+    if (!history.has(row.player)) history.set(row.player, [])
+    history.get(row.player).push(row)
+  }
+  let noHistory = 0
+  let dottedHistory = 0
+  const bare = populatedMls.filter((r) => /^\d+$/.test(r.mls))
+  for (const row of bare) {
+    const earlier = history.get(row.player).filter((o) => o !== row && Number(o.year) <= Number(row.year))
+    if (earlier.length === 0) noHistory++
+    else if (earlier.some((o) => o.mls.includes('.'))) dottedHistory++
+  }
+  assert.equal(bare.length, 2926)
+  assert.equal(noHistory, 1745)
+  assert.equal(Math.round((1000 * noHistory) / bare.length) / 10, 59.6)
+  assert.equal(dottedHistory, 62)
+  assert.equal(Math.round((1000 * dottedHistory) / bare.length) / 10, 2.1)
+})
+
+// ----------------------------------------- arbitration.csv's `note` column
+// A pre-settlement projected figure, not the recorded outcome. These tests pin
+// the evidence for that reading, because the consequence of the other reading
+// is a backfill: an estimate entering a series of recorded facts.
+
+const noteOf = (row) => (row.note ?? '').trim()
+const moneyNote = arbitration.filter((r) => isNumber(noteOf(r)))
+
+test('note carries a bare dollar figure on 1,440 of 2,420 rows', () => {
+  assert.equal(arbitration.length, 2420)
+  assert.equal(arbitration.filter((r) => noteOf(r) !== '').length, 1442)
+  assert.equal(moneyNote.length, 1440)
+  // The only two non-money values in the whole column, so a caller that reads
+  // note as a number has exactly these to handle.
+  const prose = [...new Set(arbitration.map(noteOf).filter((n) => n !== '' && !isNumber(n)))].sort()
+  assert.deepEqual(prose, ['4-year extension', 'signed 4-year extension'])
+  // The money figure covers five of the file's nine seasons. The two prose
+  // values sit on the 2019 sheet, which carries no money note at all.
+  const sheets = [...new Set(moneyNote.map((r) => r.source_sheet))].sort()
+  assert.deepEqual(sheets, [
+    'MLB-2022 Arb by club',
+    'MLB-2023 Arb by club',
+    'MLB-2024 Arb by club',
+    'MLB-2025 Arb by club',
+    'MLB-2026 Arb by club',
+  ])
+})
+
+test('note disagrees with settled_salary on 1,002 of 1,058 rows', () => {
+  const both = moneyNote.filter((r) => isNumber((r.settled_salary ?? '').trim()))
+  assert.equal(both.length, 1058)
+  const equal = both.filter((r) => Number(r.note) === Number(r.settled_salary))
+  assert.equal(equal.length, 56)
+  assert.equal(both.length - equal.length, 1002)
+  assert.equal(Math.round((1000 * (both.length - equal.length)) / both.length) / 10, 94.7)
+  // Loosening the test does not rescue it. Half the rows still miss by more
+  // than a tenth, which no recorded figure does.
+  const within = (p) =>
+    both.filter((r) => Math.abs(Number(r.note) - Number(r.settled_salary)) <= p * Number(r.settled_salary)).length
+  assert.equal(within(0.01), 85)
+  assert.equal(within(0.05), 332)
+  assert.equal(within(0.1), 544)
+  // Nor is it another column wearing a different name.
+  const testableMidpoint = moneyNote.filter(
+    (r) => isNumber((r.player_request ?? '').trim()) && isNumber((r.club_offer ?? '').trim()),
+  )
+  assert.equal(testableMidpoint.length, 121)
+  assert.equal(
+    testableMidpoint.filter((r) => Number(r.note) === (Number(r.player_request) + Number(r.club_offer)) / 2).length,
+    4,
+  )
+  const testablePrior = moneyNote.filter((r) => isNumber((r.prior_salary ?? '').trim()))
+  assert.equal(testablePrior.length, 1336)
+  assert.equal(testablePrior.filter((r) => Number(r.note) === Number(r.prior_salary)).length, 42)
+})
+
+test('a money note never sits beside a non-dollar outcome — 0 of 1,440', () => {
+  // The tell. A settlement column records "outrighted", "non-tendered",
+  // "released" and the rest; a figure produced BEFORE the case closed has
+  // nothing to say about those, and sure enough it never appears next to one.
+  const shapes = { numeric: 0, blank: 0, extension: 0, outcome: 0 }
+  for (const row of moneyNote) {
+    const settled = (row.settled_salary ?? '').trim()
+    if (isNumber(settled)) shapes.numeric++
+    else if (settled === '') shapes.blank++
+    else if (/\d\s*(?:y|yr)?\s*[/+]|extn|ext\b|extension/i.test(settled)) shapes.extension++
+    else shapes.outcome++
+  }
+  assert.deepEqual(shapes, { numeric: 1058, blank: 359, extension: 23, outcome: 0 })
+  // 382 rows would be "filled" by a backfill, and 23 of them would have a
+  // multi-year deal restated as one settled season.
+  assert.equal(shapes.blank + shapes.extension, 382)
+})
+
+test('one arbitration row disagrees with its own source sheet, and only one', () => {
+  const mismatched = arbitration.filter((r) => {
+    const sheet = r.source_sheet.match(/MLB-(\d{4})/)
+    return sheet && sheet[1] !== r.season
+  })
+  assert.equal(mismatched.length, 1)
+  assert.equal(mismatched[0].player, 'Hutchison, Drew')
+  assert.equal(mismatched[0].club, 'DET')
+  assert.equal(mismatched[0].season, '2020')
+  assert.equal(mismatched[0].source_sheet, 'MLB-2022 Arb by club')
+})
+
+// ------------------------------------------------------- the 2020 salaries
+// This file's header says it does not pin per-season dollar totals, because a
+// source fix moves them. These two are the exception, and deliberately so: the
+// doc quotes both figures verbatim AS the evidence that 2020 records contracted
+// salary rather than what the 60-game season paid. If either number moves, the
+// doc's sentence is wrong and has to move with it.
+
+test('2020 records the contracted salary, not what the 60-game season paid', () => {
+  const total = (year) =>
+    salaries.filter((r) => r.year === year && isNumber(r.salary)).reduce((sum, r) => sum + Number(r.salary), 0)
+  assert.equal(total('2020'), 3987209077)
+  assert.equal(total('2019'), 3887858407)
+  // A season that paid about 37% of contracted salary cannot total MORE than
+  // the season before it. That relation is the finding; the two figures above
+  // are how it is read off the file.
+  assert.ok(total('2020') > total('2019'), '2020 no longer exceeds 2019 — re-read the doc before editing either')
 })

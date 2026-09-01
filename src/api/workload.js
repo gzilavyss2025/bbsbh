@@ -86,14 +86,62 @@ export function workloadFor(data, personId, asOfDate) {
   }
 }
 
-// The rule-based bullpen availability board (W5). ESPN "tired" thresholds:
-//   - pitched yesterday with 25+ pitches
-//   - 35+ pitches over the last 3 days (calendar window asOf−3 … asOf−1)
-//   - pitched both of the prior two days (back-to-back)
-// plus a HARD flag: pitched 3+ consecutive days ending yesterday.
-// Status: 'down' if 3+ consecutive days OR >= 2 tired-flags; 'limited' if exactly
-// one tired-flag; 'fresh' otherwise. Starters are not a bullpen concept — they
-// return 'fresh' with a "last start N days ago" note. Null for unknown pitchers.
+// The three tired-flags, as MEASURES against published thresholds rather than
+// as booleans. ESPN's are the first two; the third is the consecutive-day
+// count, which carries both a soft threshold (back-to-back, two days) and a
+// HARD one (three straight, which files an arm as down on its own).
+//
+// `hardAt` exists on that third flag alone. It is what makes the rule
+// asymmetric — two soft flags file a pitcher down, but three straight days
+// does it by itself — and a mark that draws these has to be able to say so.
+//
+// The order is the order every surface prints them in.
+export const TIRED_FLAGS = [
+  { key: 'yesterday', label: 'Yest.', threshold: 25, hardAt: null },
+  { key: 'threeDay', label: '3 days', threshold: 35, hardAt: null },
+  { key: 'inARow', label: 'In a row', threshold: 2, hardAt: 3 },
+]
+
+// Each flag's measured value for one pitcher, beside the threshold it is judged
+// against. `tripped` is the soft comparison, `hard` the standalone one. This is
+// the single place the rules are evaluated: availabilityFor's verdict and the
+// threshold-bullet mark both read it, so a bar drawn past its tick and a tag
+// reading "likely down" cannot come apart. Null for an unknown pitcher, and for
+// a starter, who is not a bullpen concept.
+export function tiredFlagsFor(data, personId, asOfDate) {
+  const w = workloadFor(data, personId, asOfDate)
+  if (!w || w.role === 'SP') return null
+  const ctx = priorApps(data, personId, asOfDate)
+
+  // Pitches over the last 3 calendar days (asOf−3 … asOf−1).
+  const last3dayPitches = ctx.apps
+    .filter((a) => a.idx >= ctx.asOfIdx - 3 && a.idx < ctx.asOfIdx)
+    .reduce((a, x) => a + (x.p ?? 0), 0)
+
+  const measured = {
+    // A pitch count from an outing before yesterday says nothing about
+    // yesterday, so a pitcher who did not work reads zero rather than his last
+    // outing's total.
+    yesterday: w.pitchedYesterday ? w.last1.pitches : 0,
+    threeDay: last3dayPitches,
+    inARow: w.consecDays,
+  }
+
+  return TIRED_FLAGS.map((f) => {
+    const value = measured[f.key]
+    return {
+      ...f,
+      value,
+      tripped: value >= f.threshold,
+      hard: f.hardAt != null && value >= f.hardAt,
+    }
+  })
+}
+
+// The rule-based bullpen availability board (W5), read off tiredFlagsFor above.
+// Status: 'down' on the hard flag (3+ straight days) OR >= 2 tripped flags;
+// 'limited' on exactly one; 'fresh' otherwise. Starters return 'fresh' with a
+// "last start N days ago" note. Null for unknown pitchers.
 export function availabilityFor(data, personId, asOfDate) {
   const w = workloadFor(data, personId, asOfDate)
   if (!w) return null
@@ -108,33 +156,26 @@ export function availabilityFor(data, personId, asOfDate) {
     return { status: 'fresh', reasons }
   }
 
-  // Pitches over the last 3 calendar days (asOf−3 … asOf−1).
-  const ctx = priorApps(data, personId, asOfDate)
-  const last3dayPitches = ctx.apps
-    .filter((a) => a.idx >= ctx.asOfIdx - 3 && a.idx < ctx.asOfIdx)
-    .reduce((a, x) => a + (x.p ?? 0), 0)
+  const flags = tiredFlagsFor(data, personId, asOfDate)
+  const tripped = flags.filter((f) => f.tripped)
+  const hard = flags.some((f) => f.hard)
 
-  const flags = []
-  if (w.pitchedYesterday && w.last1.pitches >= 25) {
-    flags.push(`${w.last1.pitches} pitches yesterday`)
+  // The reasons strings stay for the surfaces that still speak — the callout
+  // notes and the between-innings voice. The visual marks read `flags` instead.
+  const reasons = []
+  if (hard) reasons.push(`pitched ${flags.find((f) => f.key === 'inARow').value} straight days`)
+  for (const f of tripped) {
+    if (f.key === 'yesterday') reasons.push(`${f.value} pitches yesterday`)
+    if (f.key === 'threeDay') reasons.push(`${f.value} pitches over 3 days`)
+    if (f.key === 'inARow' && !hard) reasons.push('back-to-back days')
   }
-  if (last3dayPitches >= 35) {
-    flags.push(`${last3dayPitches} pitches over 3 days`)
-  }
-  if (w.backToBack) {
-    flags.push('back-to-back days')
-  }
-
-  const hard = w.consecDays >= 3
-  const reasons = [...flags]
-  if (hard) reasons.unshift(`pitched ${w.consecDays} straight days`)
 
   let status
-  if (hard || flags.length >= 2) status = 'down'
-  else if (flags.length === 1) status = 'limited'
+  if (hard || tripped.length >= 2) status = 'down'
+  else if (tripped.length === 1) status = 'limited'
   else status = 'fresh'
 
-  return { status, reasons }
+  return { status, reasons, flags }
 }
 
 // Tally a list of availability statuses into the summary-pill counts the
@@ -310,4 +351,152 @@ export function moundRateFor(data, personId) {
 
 function outsToIp(outs) {
   return `${Math.floor(outs / 3)}.${outs % 3}`
+}
+
+// ---------------------------------------------------------------------------
+// THE MARKS.
+//
+// Four small drawings that carry what this file knows without a sentence: the
+// rest rail (runs of days worked back to back), the threshold bullets
+// (tiredFlagsFor above), the staff grid (a club's whole pen over a week) and
+// the pen dots (one dot an arm). The readers are here, beside the rules they
+// draw, for the reason bullpenStatusCounts is: a mark and a verdict about the
+// same pitcher must not be able to disagree.
+// ---------------------------------------------------------------------------
+
+// Runs of CONSECUTIVE days worked inside a day strip (dayStripFor's cells),
+// as `{ start, len }` index spans. Only runs of two or more are returned — one
+// day is not a pattern, and the cell already draws it.
+//
+// This is the sharpest documented workload effect and the app draws none of it
+// today: three light outings on three straight days shade exactly like three
+// light outings across two weeks, while availabilityFor files the first man as
+// down and the second as fresh.
+export function restRunsFor(strip) {
+  const runs = []
+  let start = null
+  const cells = strip ?? []
+  for (let i = 0; i <= cells.length; i++) {
+    const worked = i < cells.length && cells[i].pitches != null
+    if (worked && start == null) start = i
+    if (!worked && start != null) {
+      if (i - start >= 2) runs.push({ start, len: i - start })
+      start = null
+    }
+  }
+  return runs
+}
+
+// The board's sort. STATUS FIRST, load second — and the order matters more than
+// it looks: an arm can be the least-worked man on a staff by pitch count and
+// still be the only one unavailable, because three straight short outings trip
+// the hard flag while no single count trips anything. Ranked on pitches alone
+// he sorts to the bottom of his own pen, which is the one row a reader opened
+// the board for.
+const STATUS_RANK = { down: 0, limited: 1, fresh: 2 }
+export function compareArms(a, b) {
+  return (
+    (STATUS_RANK[a.status] ?? 3) - (STATUS_RANK[b.status] ?? 3) ||
+    b.last7dayPitches - a.last7dayPitches ||
+    String(a.name).localeCompare(String(b.name))
+  )
+}
+
+// A club's bullpen as grid rows: one row an arm, each carrying its own day
+// strip, the runs inside it, its flags and its verdict. `days` is the number of
+// calendar columns, ending on asOfDate itself — which is TODAY and never spent,
+// exactly as dayStripFor draws it.
+//
+// EIGHT COLUMNS, NOT SEVEN, and the odd number is the point: the row prints
+// `last7dayPitches` beside the strip, and that window is the seven COMPLETED
+// days (asOf−7 … asOf−1). A seven-column strip ends on asOf, so it starts at
+// asOf−6 and silently drops the oldest day the total counts. Aroldis Chapman
+// on 2026-08-31 was exactly that: his 18 pitches landed on asOf−7, so the row
+// read a blank week beside a total of 18. Seven spent columns plus today's
+// dashed one makes the cells sum to the number printed next to them.
+//
+// Relievers only. availabilityFor answers 'fresh' for every starter by design
+// (a rotation is not a bullpen), so leaving them in would pad each club with
+// five names that were never available in relief.
+export function staffGridFor(data, teamId, asOfDate, days = 8) {
+  if (!data?.pitchers) return null
+  const rows = []
+  for (const [personId, p] of Object.entries(data.pitchers)) {
+    if (p.teamId !== teamId || p.role !== 'RP') continue
+    const load = workloadFor(data, personId, asOfDate)
+    const avail = availabilityFor(data, personId, asOfDate)
+    const cells = dayStripFor(data, personId, asOfDate, days)
+    if (!load || !avail || !cells) continue
+    rows.push({
+      personId: Number(personId),
+      name: p.name,
+      status: avail.status,
+      reasons: avail.reasons,
+      flags: avail.flags ?? [],
+      cells,
+      runs: restRunsFor(cells),
+      last7dayPitches: load.last7dayPitches,
+      last7dayApps: load.last7dayApps,
+    })
+  }
+  if (rows.length === 0) return null
+  return rows.sort(compareArms)
+}
+
+// One club's fresh/limited/down tally, straight off the full file — what the
+// pen dots draw where the whole file is already loaded (a game page). The slate
+// reads the summary file below instead, because 178 KB is not a price a
+// spoiler-free matchup card should pay.
+export function clubPenCounts(data, teamId, asOfDate) {
+  const rows = staffGridFor(data, teamId, asOfDate, 1)
+  if (!rows) return null
+  return bullpenStatusCounts(rows.map((r) => r.status))
+}
+
+// The slate's sidecar: the same tally for all thirty clubs, precomputed nightly
+// by scripts/gen-workload.mjs so a card costs one small file rather than the
+// whole workload store. Absent or unreadable resolves to null and every caller
+// hides its dots (the degrade convention).
+export const fetchWorkloadSummary = staticJson('/data/workload-summary.json')
+
+// How far behind the slate the sidecar may fall and still describe the pen a
+// card is about. The file is rebuilt nightly, so nought is the ordinary case
+// and one is the morning after a cron run GitHub dropped — which happens (see
+// the nightly workflow's dead-man's switch). A day-old tally is a true reading
+// of a day that is over; two is not worth defending on an unlabelled mark.
+const MAX_SUMMARY_AGE_DAYS = 1
+
+// The sidecar's club map, but ONLY when it describes the day the slate is
+// showing. Null hides every card's dots (the degrade convention).
+//
+// The window is one-sided on purpose, and the two ends fail for different
+// reasons. A slate day BEFORE the file's asOf is a past game: its dots would be
+// tonight's pen drawn on a game already played, which is the wrong answer, not
+// a stale one — so it is refused at any distance. A slate day AFTER it is
+// merely old, and refused only past MAX_SUMMARY_AGE_DAYS.
+//
+// Strict equality was the first rule here, and it made the dots vanish from
+// every card for a whole day whenever the nightly rebuild slipped — the app's
+// most-used screen silently losing a feature, with nothing to tell a reader
+// whether the pens were healthy or the file was late.
+export function penSummaryClubs(summary, officialDate) {
+  if (!summary?.clubs || !summary.asOf || !officialDate) return null
+  const age = dayIndex(officialDate) - dayIndex(summary.asOf)
+  if (!Number.isFinite(age) || age < 0 || age > MAX_SUMMARY_AGE_DAYS) return null
+  return summary.clubs
+}
+
+// A club's counts out of that summary, ordered for drawing: available arms
+// first, then limited, then down, so the length of the leading run IS the
+// reading. Null for a club with no arms on file — a gap in the file, not an
+// empty bullpen, and drawn as nothing rather than as seven dead dots.
+export function penDotsFrom(counts) {
+  if (!counts) return null
+  const total = counts.fresh + counts.limited + counts.down
+  if (total === 0) return null
+  return [
+    ...Array(counts.fresh).fill('fresh'),
+    ...Array(counts.limited).fill('limited'),
+    ...Array(counts.down).fill('down'),
+  ]
 }

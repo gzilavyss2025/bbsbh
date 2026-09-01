@@ -1,35 +1,39 @@
 [
   {
     "season": 2005,
-    "status": "unavailable",
-    "depth": null,
-    "rowCount": 0,
-    "fetchedAt": "2026-08-28T14:35:21.880Z",
-    "note": "HTTP 200, 625514 bytes, zero RankedPlayerEntity matches -- a real empty shell, confirmed live, not a fetch or parse failure. MLB Pipeline's Top Prospects page has no ranked list before 2009."
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 91,
+    "source": "baseball-america",
+    "fetchedAt": "2026-09-01T14:14:03.951Z",
+    "note": "MLB Pipeline still has no ranked list for this season (HTTP 200, real empty shell, confirmed live -- see the original note this replaces). Filled instead from a third-party CSV transcription of Baseball America's preseason top-100 list: github.com/feralad/rostercrunch, \"Final Datasets/ba_1990_2020_top_100_preseason_prospect_rankings_id_debut_updates_may_2024.csv\", retrieved 2026-09-01T14:14:03.951Z. That CSV declares NO licence (no LICENSE file, no terms in its README) -- these 91 rows are Baseball America editorial content used without a declared licence, by deliberate choice, not because it is public domain. BA ranked 100 players; 9 of them carry no Retrosheet id because they never reached the majors, and are excluded here but recorded in ba-non-debuts.json, not dropped silently. The other 91 joined to an MLBAM id via the Chadwick Bureau register (github.com/chadwickbureau/register, Open Data Commons Attribution License 1.0) at a 100% join rate (91 of 91)."
   },
   {
     "season": 2006,
-    "status": "unavailable",
-    "depth": null,
-    "rowCount": 0,
-    "fetchedAt": "2026-08-28T14:35:23.127Z",
-    "note": "HTTP 200, 625706 bytes, zero RankedPlayerEntity matches -- a real empty shell, confirmed live, not a fetch or parse failure. MLB Pipeline's Top Prospects page has no ranked list before 2009."
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 94,
+    "source": "baseball-america",
+    "fetchedAt": "2026-09-01T14:14:03.951Z",
+    "note": "MLB Pipeline still has no ranked list for this season (HTTP 200, real empty shell, confirmed live -- see the original note this replaces). Filled instead from a third-party CSV transcription of Baseball America's preseason top-100 list: github.com/feralad/rostercrunch, \"Final Datasets/ba_1990_2020_top_100_preseason_prospect_rankings_id_debut_updates_may_2024.csv\", retrieved 2026-09-01T14:14:03.951Z. That CSV declares NO licence (no LICENSE file, no terms in its README) -- these 94 rows are Baseball America editorial content used without a declared licence, by deliberate choice, not because it is public domain. BA ranked 100 players; 6 of them carry no Retrosheet id because they never reached the majors, and are excluded here but recorded in ba-non-debuts.json, not dropped silently. The other 94 joined to an MLBAM id via the Chadwick Bureau register (github.com/chadwickbureau/register, Open Data Commons Attribution License 1.0) at a 100% join rate (94 of 94)."
   },
   {
     "season": 2007,
-    "status": "unavailable",
-    "depth": null,
-    "rowCount": 0,
-    "fetchedAt": "2026-08-28T14:35:24.367Z",
-    "note": "HTTP 200, 625706 bytes, zero RankedPlayerEntity matches -- a real empty shell, confirmed live, not a fetch or parse failure. MLB Pipeline's Top Prospects page has no ranked list before 2009."
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 95,
+    "source": "baseball-america",
+    "fetchedAt": "2026-09-01T14:14:03.951Z",
+    "note": "MLB Pipeline still has no ranked list for this season (HTTP 200, real empty shell, confirmed live -- see the original note this replaces). Filled instead from a third-party CSV transcription of Baseball America's preseason top-100 list: github.com/feralad/rostercrunch, \"Final Datasets/ba_1990_2020_top_100_preseason_prospect_rankings_id_debut_updates_may_2024.csv\", retrieved 2026-09-01T14:14:03.951Z. That CSV declares NO licence (no LICENSE file, no terms in its README) -- these 95 rows are Baseball America editorial content used without a declared licence, by deliberate choice, not because it is public domain. BA ranked 100 players; 5 of them carry no Retrosheet id because they never reached the majors, and are excluded here but recorded in ba-non-debuts.json, not dropped silently. The other 95 joined to an MLBAM id via the Chadwick Bureau register (github.com/chadwickbureau/register, Open Data Commons Attribution License 1.0) at a 100% join rate (95 of 95)."
   },
   {
     "season": 2008,
-    "status": "unavailable",
-    "depth": null,
-    "rowCount": 0,
-    "fetchedAt": "2026-08-28T14:35:25.622Z",
-    "note": "HTTP 200, 625706 bytes, zero RankedPlayerEntity matches -- a real empty shell, confirmed live, not a fetch or parse failure. MLB Pipeline's Top Prospects page has no ranked list before 2009."
+    "status": "ok",
+    "depth": 100,
+    "rowCount": 95,
+    "source": "baseball-america",
+    "fetchedAt": "2026-09-01T14:14:03.951Z",
+    "note": "MLB Pipeline still has no ranked list for this season (HTTP 200, real empty shell, confirmed live -- see the original note this replaces). Filled instead from a third-party CSV transcription of Baseball America's preseason top-100 list: github.com/feralad/rostercrunch, \"Final Datasets/ba_1990_2020_top_100_preseason_prospect_rankings_id_debut_updates_may_2024.csv\", retrieved 2026-09-01T14:14:03.951Z. That CSV declares NO licence (no LICENSE file, no terms in its README) -- these 95 rows are Baseball America editorial content used without a declared licence, by deliberate choice, not because it is public domain. BA ranked 100 players; 5 of them carry no Retrosheet id because they never reached the majors, and are excluded here but recorded in ba-non-debuts.json, not dropped silently. The other 95 joined to an MLBAM id via the Chadwick Bureau register (github.com/chadwickbureau/register, Open Data Commons Attribution License 1.0) at a 100% join rate (95 of 95)."
   },
   {
     "season": 2009,

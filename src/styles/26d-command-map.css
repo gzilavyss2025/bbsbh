@@ -13,7 +13,7 @@
    ============================================================ */
 
 .cmdmap {
-  margin-block-start: var(--sp-4);
+  margin-block-start: var(--space-4);
 }
 
 /* --- the two control rows --- */
@@ -21,8 +21,8 @@
 .cmdmap__chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin-block-end: var(--sp-2);
+  gap: var(--space-2);
+  margin-block-end: var(--space-2);
 }
 
 .cmdmap__chip {
@@ -31,7 +31,7 @@
   gap: 6px;
   padding: 6px 12px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   background: var(--surface-inset);
   font-family: var(--font-display);
   font-size: var(--fs-compact);
@@ -63,7 +63,7 @@
 .cmdmap__chipn {
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
-  font-weight: var(--w-reg);
+  font-weight: var(--w-regular);
   color: var(--text-caption);
 }
 .cmdmap__chip--on .cmdmap__chipn {
@@ -139,8 +139,8 @@
 .cmdmap__key {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-3);
-  margin: var(--sp-2) 0 0;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
 }
 
 .cmdmap__keyitem {
@@ -149,7 +149,7 @@
   gap: 5px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
-  font-weight: var(--w-semi);
+  font-weight: var(--w-semibold);
   letter-spacing: var(--ls-wide);
   color: var(--text-caption);
 }
@@ -158,10 +158,10 @@
   content: '';
   width: 11px;
   height: 11px;
-  border-radius: var(--r-round);
+  border-radius: var(--radius-pill);
 }
 .cmdmap__keyitem--density::before {
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-xs);
   background: var(--clay);
   opacity: 0.35;
 }
@@ -175,7 +175,7 @@
   background: var(--accent-primary);
 }
 .cmdmap__keyitem--homer::before {
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-xs);
   background: var(--award-ink);
   transform: rotate(45deg);
   width: 9px;
@@ -183,9 +183,9 @@
 }
 
 .cmdmap__facts {
-  margin-block-start: var(--sp-3);
+  margin-block-start: var(--space-3);
 }
 
 .cmdmap__note {
-  margin-block-start: var(--sp-2);
+  margin-block-start: var(--space-2);
 }

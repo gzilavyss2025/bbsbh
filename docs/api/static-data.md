@@ -640,6 +640,35 @@ for each generator; the reader modules:
   `comebackWins.js` and the team-score aggregates) — no `SealBox`, and the
   nightly cron writes the file before the day's games. Degrades to null with no
   file, and the card hides.
+- `scheduleShape.js` — the Numbers tab's **Last Time** card, from
+  `public/data/schedule-shape/{teamId}.json` (`gen-schedule-shape.mjs`), MLB
+  only. Where `teamRecords.js` above answers a RATE over one season, this
+  answers a DROUGHT over twelve: not how often, but how long since, counted in
+  CHANCES rather than days — "the last time they won game 1 of a road trip was
+  July 3rd". The shipped row is a 4-element ARRAY (`[mmdd, opponentId, site,
+  result]`), not an object, because a club's decade is ~1,900 rows and the
+  object form spends over half its bytes re-printing four key names; the reader
+  carries its own copy of the site/result tables, since a browser module cannot
+  import a `scripts/` one, and `test/schedule-shape.test.js` is what keeps the
+  two from drifting. `ledgerOf(data, { cutoff })` decodes and tags every row
+  with its place in three segments (series, homestand, road trip), cut PER
+  SEASON and with the cutoff applied BEFORE segmentation — so a dated page sees
+  the trip in progress on its own date, not a finished trip with its tail
+  hidden. `SLOTS` is the declared table of recurring positions, each with an
+  `every` (how often a full season presents it, measured not guessed);
+  `droughtFor(ledger, slot, { opponentId })` returns `{ chances, wins, losses,
+  perSeason, lastWin, sinceWin, streakFrom }`, and narrowing by opponent is what
+  turns "game 1 of a road series" into "game 1 of a series in Chicago".
+  **`isNotable` is the load-bearing part and no caller may skip it**: 45% of
+  club-park pairs have fewer than six series openers on record, so an ungated
+  "since" prints schedule RARITY — nine chances in eleven years reads as a
+  decade of futility — far more often than it prints a drought. It requires four
+  chances (scaled by the rate in the drought's OWN scope, which is ~2.7 a season
+  for one park versus 26 league-wide) inside three years. `droughtsFor(data,
+  { cutoff })` is the whole card in one call, worst first. Cutoff-gated, same
+  class and argument as `teamRecords.js`. Degrades to null with no file (every
+  MiLB club), and the card hides. Catalog and calibration:
+  `docs/schedule-shape.md`.
 - `situationalRecordRankings.js` — the same ledgers, PIVOTED: one split, every club at
   one level, ranked — the standalone `/situational-records` page
   (`screens/SituationalRecordsPage.jsx`), which every row of the Records card links

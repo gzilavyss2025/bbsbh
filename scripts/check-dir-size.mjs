@@ -384,7 +384,22 @@ const BUDGETS = {
   // sharing its bar language. A new surface, not a split of an over-budget
   // partial, so it takes the next free integer rather than a lettered sibling
   // (same call as 59-stamp-in.css). Route-loaded, not from index.css.
-  'src/styles': 106,
+  // 106 -> 107 for 76-workload-marks.css: the four shared workload marks (the
+  // day strip and its rest rail, the threshold bullets, the pen dots, the staff
+  // grid). It is flat and GLOBAL, @imported from index.css, because those marks
+  // are drawn on six surfaces including the slate — a card's dots cannot wait
+  // on a route chunk, and putting the ink in any one surface's partial would
+  // make five others import a stranger's stylesheet. A new shared vocabulary
+  // rather than a split of an over-budget partial, so it takes the next free
+  // integer.
+  // 107 -> 108 for 26e-contract-history.css: the player page's historical
+  // contract ledger. A lettered sibling rather than the next free integer,
+  // because it belongs with its 26a/26b/26c/26d neighbours after
+  // 26-player-page.css — which is 1145 lines, already past
+  // check-file-size.mjs's ceiling and on a budget of its own, so growing that
+  // file is the one option this directory's own rules forbid. Route-loaded,
+  // imported by the card the lazy history tab mounts.
+  'src/styles': 108,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -471,7 +486,13 @@ const BUDGETS = {
   // data-layer module with no surface, and its spoiler class is the same
   // spoiler-FREE as its neighbours — historical contract records carry no
   // game, no linescore and no reveal state.
-  'src/api': 106,
+  // 106 -> 107 for scheduleShape.js — the reader over the multi-season
+  // schedule-shape ledger, which answers a DROUGHT ("the last time they won
+  // game 1 of a road trip was July 3") where teamRecords.js beside it answers
+  // a rate over one season. It belongs flat with the other src/api readers:
+  // a data-layer module with no surface of its own, and cutoff-gated for the
+  // same reason teamRecords.js is.
+  'src/api': 107,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -602,7 +623,12 @@ const BUDGETS = {
   // whose target no longer exports it. Flat beside the two dozen other
   // check-*.mjs files `npm run lint` runs in a row; scripts/lib/ holds shared
   // pure helpers, not runnable entry points.
-  scripts: 108,
+  // 108 -> 109 for gen-schedule-shape.mjs, the nightly multi-season schedule
+  // ledger behind the Team hub's Last Time card. Flat with every other
+  // gen-*.mjs: the nightly workflow runs this directory as a flat list, and
+  // scripts/lib/ is for helpers that do not run on import — which is exactly
+  // where its pure half (schedule-shape.mjs) went.
+  scripts: 109,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -741,7 +767,15 @@ const BUDGETS = {
   // without a live statsapi call (test/abs-challenges.test.js), which is the
   // testable-helper convention this directory exists for, and neither could be
   // tested inside a generator that does its work at import.
-  'scripts/lib': 32,
+  // +1 for schedule-shape.mjs — the pure half of gen-schedule-shape.mjs: a
+  // season of raw schedule rows to each club's ordered ledger, and that
+  // ledger cut into series, homestands and road trips. Same testable-helper
+  // reason as every entry above it — the generator does its work at import,
+  // so the segmentation would be untestable inside it, and
+  // test/schedule-shape.test.js pins the cases that make it hard (a neutral
+  // -site game inside a road series, a club that changed parks mid-range, a
+  // doubleheader that has to keep its order).
+  'scripts/lib': 33,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
@@ -794,7 +828,13 @@ const BUDGETS = {
   // CareerRegister is its own component) and GameLink.jsx (the boxscore link
   // GameLog.jsx needs, promoted out of PlayerPage.jsx so the two other
   // PlayerPage call sites and this one share one definition instead of three).
-  'src/components/player': 15,
+  // 15 -> 16 for ContractHistoryLedger.jsx — the history tab's contract ledger,
+  // a peer of AwardsLedger.jsx and CareerTimeline.jsx beside it and built the
+  // same way: one card that only draws, its view model pure in src/api. The
+  // guard's usual remedy of a subdirectory would put ONE of this bucket's
+  // player-page cards in a folder of its own and leave the other ten flat,
+  // which is not a subdivision, only a scattering.
+  'src/components/player': 16,
   // New entry: +1 for blockageCorrected.js — the diary's first `corrected`
   // entry that sits ABOVE the entry it corrects rather than replacing it
   // (the diary is append-only, see docs/agents/research-diary.md's second

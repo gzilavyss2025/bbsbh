@@ -5,6 +5,11 @@
 // winning- vs. losing-record team cohort split. The app reads it via
 // src/api/workload.js (workloadFor / availabilityFor / workloadVsBaseline).
 //
+// It also writes public/data/workload-summary.json — thirty rows of
+// fresh/limited/down counts, about a kilobyte, so the slate can draw pen dots
+// on every card without pulling the whole store. See the sidecar block at the
+// foot of this file.
+//
 // This is a nightly FULL REBUILD (no SQLite — everything re-derives from the
 // gameLog splits, which are cheap: one stats call per pitcher). Runs on the
 // cron in .github/workflows/update-nightly-data.yml, NOT at request time.
@@ -24,9 +29,12 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
+import { clubPenCounts } from '../src/api/workload.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'workload.json')
+// The slate's sidecar — thirty rows of counts, written beside the full store.
+const summaryOut = join(here, '..', 'public', 'data', 'workload-summary.json')
 const BASE = 'https://statsapi.mlb.com'
 const SEASON = 2026
 
@@ -227,11 +235,34 @@ const cohorts = {
   losing: computeBaselines(losers, asOf),
 }
 
-await writeJsonAtomic(out, { season: SEASON, asOf, pitchers, baselines, cohorts })
+const store = { season: SEASON, asOf, pitchers, baselines, cohorts }
+await writeJsonAtomic(out, store)
 
-const sizeKb = (JSON.stringify({ season: SEASON, asOf, pitchers, baselines, cohorts }).length / 1024).toFixed(1)
+// --- the slate's sidecar -----------------------------------------------------
+// One fresh/limited/down tally a club, and nothing else. The slate draws pen
+// dots on every card, and the full store above is ~180 KB — a price a
+// spoiler-free matchup card should not pay to show eight dots. So the same
+// rules run here, once, against the file just written.
+//
+// It imports the APP's reader rather than restating the thresholds, so the dots
+// on a game card and the board on that game's lineup page cannot come apart.
+// src/api/workload.js is safe to load in Node: its one fetch lives inside
+// staticJson's returned function, never at import (test/workload.test.js
+// imports it the same way).
+const summaryCounts = {}
+for (const teamId of teamIds) {
+  const counts = clubPenCounts(store, teamId, asOf)
+  if (counts) summaryCounts[teamId] = counts
+}
+await writeJsonAtomic(summaryOut, { asOf, clubs: summaryCounts })
+
+const sizeKb = (JSON.stringify(store).length / 1024).toFixed(1)
+const summaryKb = (JSON.stringify({ asOf, clubs: summaryCounts }).length / 1024).toFixed(1)
 console.log(
   `wrote ${out} (${Object.keys(pitchers).length} pitchers across ${teams.length} teams, ${sizeKb}KB)`,
+)
+console.log(
+  `wrote ${summaryOut} (${Object.keys(summaryCounts).length} clubs, ${summaryKb}KB)`,
 )
 console.log(
   `baselines RP last10 mean=${baselines.RP.last10.mean} sd=${baselines.RP.last10.sd} (n=${baselines.RP.last10.n}); SP last10 mean=${baselines.SP.last10.mean} sd=${baselines.SP.last10.sd} (n=${baselines.SP.last10.n})`,

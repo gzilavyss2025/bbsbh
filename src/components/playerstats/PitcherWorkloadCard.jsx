@@ -4,10 +4,13 @@ import {
   dayStripFor,
   fetchWorkload,
   moundRateFor,
+  restRunsFor,
   turnStripFor,
   workloadFor,
   workloadVsBaseline,
 } from '../../api/workload.js'
+import { DayStrip, DayStripKey } from '../workload/DayStrip.jsx'
+import { ThresholdBullets } from '../workload/ThresholdBullets.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 
 // THE MOUND CARD — the pitcher's counterpart to a hitter's Recent form.
@@ -82,7 +85,7 @@ export function PitcherWorkloadCard({ playerId, asOf, role = null, gameLog = nul
         <em>{word}</em>
       </h3>
 
-      {turn ? <TurnLead turn={turn} /> : <BullpenLead data={data} playerId={playerId} asOfDate={asOfDate} load={load} />}
+      {turn ? <TurnLead turn={turn} /> : <BullpenLead data={data} playerId={playerId} asOfDate={asOfDate} />}
 
       {outings.length > 0 && (
         <ul className="moundcard__outings">
@@ -97,7 +100,7 @@ export function PitcherWorkloadCard({ playerId, asOf, role = null, gameLog = nul
 
       {turn
         ? !turn.outOfTurn && <TurnStrip turn={turn} />
-        : <DayStrip data={data} playerId={playerId} asOfDate={asOfDate} />}
+        : <MoundDayStrip data={data} playerId={playerId} asOfDate={asOfDate} />}
 
       <dl className="factgrid moundcard__foot">
         <Fact label={`Last ${load.last10.apps}`} value={`${load.last10.pitches} pitches`} />
@@ -132,21 +135,23 @@ function TurnLead({ turn }) {
 }
 
 // A bullpen arm's lead: the app's OWN availability verdict, not a second
-// opinion. Same reasons string the Bullpen Board prints.
-function BullpenLead({ data, playerId, asOfDate, load }) {
+// opinion — then the rule that reached it, DRAWN.
+//
+// The reasons string used to sit here ("42 pitches yesterday · 42 pitches over
+// 3 days"), which handed the reader two numbers and no scale to read them
+// against. The threshold bullets are those same flags against the thresholds
+// they are judged by, so the bar past its tick is the flag tripping. Same call,
+// same file, no sentence.
+function BullpenLead({ data, playerId, asOfDate }) {
   const avail = availabilityFor(data, playerId, asOfDate)
   const status = avail?.status ?? 'fresh'
   return (
-    <p className="moundcard__lead">
-      <span className={`moundcard__avail moundcard__avail--${status}`}>{status}</span>
-      <span className="moundcard__leadsub">
-        {avail?.reasons?.length
-          ? avail.reasons.join(' · ')
-          : load.pitchedYesterday
-            ? `threw yesterday · ${load.last1.pitches} P`
-            : 'no flags'}
-      </span>
-    </p>
+    <div className="moundcard__verdict">
+      <p className="moundcard__lead">
+        <span className={`moundcard__avail moundcard__avail--${status}`}>{status}</span>
+      </p>
+      <ThresholdBullets flags={avail?.flags} />
+    </div>
   )
 }
 
@@ -189,9 +194,11 @@ function TurnStrip({ turn }) {
 }
 
 // The fourteen-day availability strip: one cell per day, shaded by what he
-// threw. The bands are the app's own tired thresholds (LOAD_BANDS), so a cell's
-// shade and the Bullpen Board's verdict can never disagree about one outing.
-function DayStrip({ data, playerId, asOfDate }) {
+// threw, with the REST RAIL under runs of days worked back to back. The bands
+// are the app's own tired thresholds (LOAD_BANDS) and the rail's solid weight
+// is the hard flag's three straight days, so nothing drawn here can disagree
+// with the verdict above it.
+function MoundDayStrip({ data, playerId, asOfDate }) {
   const strip = dayStripFor(data, playerId, asOfDate)
   if (!strip) return null
   return (
@@ -199,22 +206,10 @@ function DayStrip({ data, playerId, asOfDate }) {
       <p className="moundstrip__head">
         <span className="moundstrip__label">Last 14 days · dashed is today</span>
       </p>
-      <div className="moundstrip__row">
-        {strip.map((c) => (
-          <span
-            className={`moundstrip__day moundstrip__day--${c.band}${c.today ? ' moundstrip__day--today' : ''}`}
-            key={c.date}
-            title={c.pitches == null ? monthDay(c.date) : `${monthDay(c.date)} · ${c.pitches} pitches`}
-          >
-            {c.pitches ?? ''}
-          </span>
-        ))}
+      <DayStrip cells={strip} runs={restRunsFor(strip)} />
+      <div className="moundstrip__legend">
+        <DayStripKey />
       </div>
-      <p className="moundstrip__key">
-        <span className="moundstrip__keyitem moundstrip__keyitem--light">Light</span>
-        <span className="moundstrip__keyitem moundstrip__keyitem--moderate">Moderate</span>
-        <span className="moundstrip__keyitem moundstrip__keyitem--heavy">Heavy</span>
-      </p>
     </div>
   )
 }

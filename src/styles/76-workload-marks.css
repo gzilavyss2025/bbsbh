@@ -1,0 +1,531 @@
+/* ============================================================
+   WORKLOAD MARKS — components/workload/{DayStrip,ThresholdBullets,
+   PenDots,StaffGrid}.jsx
+
+   Four small drawings that carry what public/data/workload.json knows
+   without a sentence. They are shared across six surfaces — the slate, the
+   lineup page, the player page, The Pen, the team hub and the innings
+   viewer — so the ink lives here, once, rather than in each surface's own
+   partial.
+
+   ONE PALETTE, THE APP'S OWN TIRED THRESHOLDS. Light / 25+ / 35+ take the
+   field, award and clay families in exactly the pairings the Bullpen Board
+   already ships (44-pre-game-cards.css's .penboard__pill--*), so a cell
+   here and a tag there cannot tell different stories about one outing.
+   Every ink/fill pair is one the contrast guard already holds.
+
+   THE THREE STATES DIFFER BY SHAPE, NOT ONLY COLOUR: available is a solid
+   disc, limited a half-filled one, likely-down a hollow ring.
+   ============================================================ */
+
+/* ---------------------------------------------------------------- pen dots
+   A club's whole bullpen, one dot an arm, available first — so the length
+   of the leading run is the reading. */
+.pendots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pendots__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-pill);
+  flex: none;
+  box-sizing: border-box;
+}
+
+/* `gap` belongs to the FLEX CONTAINER. On .pendots__dot it parsed, inherited
+   nothing and did nothing — the dot is not a container — so the small variant
+   drew 7px dots still spaced 5px apart, and the slate card's row never
+   tightened the way the rule says it does. */
+.pendots--sm {
+  gap: 4px;
+}
+
+.pendots--sm .pendots__dot {
+  width: 7px;
+  height: 7px;
+}
+
+.pendots__dot--fresh {
+  background: var(--field);
+}
+
+/* Half-filled, so it is not read as a paler green at a glance or in
+   greyscale. */
+.pendots__dot--limited {
+  border: var(--bw-heavy) solid var(--award-ink);
+  background: linear-gradient(to top, var(--award-ink) 50%, transparent 50%);
+}
+
+.pendots__dot--down {
+  border: var(--bw-heavy) solid var(--clay-deep);
+}
+
+/* -------------------------------------------------------------- day strip
+   One cell a day, shaded by what he threw, with a rail under runs of days
+   worked back to back.
+
+   A GRID, NOT A FLEX ROW, and that is load-bearing: the rail is placed by
+   grid column (`grid-column: start / span len` in DayStrip.jsx), which
+   covers the cells AND the gaps between them with no pixel arithmetic, at
+   any cell width and any strip length. The second row is the rail's, and
+   holds its height whether or not a run exists, so strips stacked into the
+   staff grid stay on the same baseline. */
+.daystrip {
+  display: grid;
+  grid-template-rows: auto 3px;
+  column-gap: 2px;
+  row-gap: 2px;
+  align-items: stretch;
+}
+
+.daystrip__day {
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: 30px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-inset);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+
+.daystrip--sm .daystrip__day {
+  height: 26px;
+}
+
+.daystrip__day--light {
+  color: var(--field-deep);
+  background: var(--field-soft);
+  border-color: var(--field);
+}
+
+.daystrip__day--moderate {
+  color: var(--award-ink);
+  background: var(--award-soft);
+  border-color: var(--award-line);
+}
+
+.daystrip__day--heavy {
+  color: var(--clay-deep);
+  background: var(--clay-soft);
+  border-color: var(--clay);
+}
+
+/* Dashed means TODAY — the file holds completed appearances only and he may
+   still pitch tonight, so the cell is deliberately empty rather than a day
+   off. Same treatment the starter's turn strip uses (26c-mound-card.css). */
+.daystrip__day--today {
+  border-style: dashed;
+  border-color: var(--text-caption);
+  background: var(--bg-canvas);
+}
+
+/* The rest rail. Two days is a hairline; three or more is solid, which is
+   where the availability rule stops counting flags and files an arm as down
+   on its own (api/workload.js's TIRED_FLAGS hardAt). */
+.daystrip__rail {
+  grid-row: 2;
+  align-self: center;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--clay);
+}
+
+.daystrip__rail--hard {
+  height: 3px;
+  background: var(--clay-deep);
+}
+
+.daystrip-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.daystrip-key li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.daystrip-key__swatch {
+  width: 13px;
+  height: 13px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-inset);
+}
+
+.daystrip-key__swatch--light {
+  background: var(--field-soft);
+  border-color: var(--field);
+}
+
+.daystrip-key__swatch--moderate {
+  background: var(--award-soft);
+  border-color: var(--award-line);
+}
+
+.daystrip-key__swatch--heavy {
+  background: var(--clay-soft);
+  border-color: var(--clay);
+}
+
+.daystrip-key__rail {
+  width: 18px;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--clay-deep);
+}
+
+/* ------------------------------------------------------- threshold bullets
+   One bullet graph a flag: the bar is what he threw, the navy tick is the
+   published threshold it is judged against. Past the tick IS the flag
+   tripping — which is why this replaces the reasons sentence rather than
+   sitting beside it.
+
+   Every tick is at the same 62% whatever the flag measures (ThresholdBullets
+   .jsx's TICK_AT), so a stack of three reads down one column. */
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.bullets__row {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.bullets__label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* The flag that files an arm as down WITHOUT a partner. Marked, because a
+   drawing of a rule that hid its one asymmetry would be a drawing of a
+   different rule. */
+.bullets__hardmark {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  background: var(--clay-deep);
+}
+
+.bullets__row--tripped .bullets__label {
+  color: var(--clay-deep);
+}
+
+.bullets__value {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  min-width: 0;
+}
+
+.bullets__track {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-width: 140px;
+  height: 9px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: 2px;
+  background: var(--surface-inset);
+  overflow: visible;
+}
+
+/* The region short of the threshold, a shade of the page rather than a
+   colour — Few's spec keeps qualitative ranges to one hue so the measure is
+   the only thing carrying ink. */
+.bullets__band {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  background: var(--bg-page);
+}
+
+.bullets__bar {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 2px;
+  height: 5px;
+  background: var(--field-deep);
+}
+
+.bullets__row--tripped .bullets__bar {
+  background: var(--clay-deep);
+}
+
+.bullets__tick {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--accent-primary);
+}
+
+/* Navy like the soft tick, because a tick has to read against the BAR and the
+   bar under this one is clay whenever it matters — a clay-on-clay stop was
+   invisible in exactly the case it exists for. Heavier and taller is what
+   separates the two. */
+.bullets__hardtick {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  background: var(--accent-primary);
+}
+
+.bullets__num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  min-width: 22px;
+  text-align: end;
+}
+
+.bullets__row--tripped .bullets__num {
+  color: var(--clay-deep);
+}
+
+.bullets__of {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* -------------------------------------------------------------- staff grid
+   A club's whole pen over a week: rows are arms, columns are days, a cell is
+   what he threw. Three tracks — the arm, his strip, his week's total — and
+   the header's day initials share the strip's own column template so a
+   letter always sits over its cell. */
+.staffgrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.staffgrid__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.staffgrid__tally {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.staffgrid__head,
+.staffgrid__row {
+  display: grid;
+  grid-template-columns: minmax(72px, 1fr) minmax(0, 2fr) 32px;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.staffgrid__head {
+  padding-bottom: 2px;
+}
+
+/* The day-initial header is a SECOND grid drawn over the cells, so it has to
+   share the strip's column geometry — including .daystrip's 2px column gap.
+   Without it the header tracks are each a fraction wider than the cells below
+   and the initials fan out from the centre of the row: measured at ±0.9px on a
+   430px phone, which is under a pixel today but scales with the gap and the
+   column count. Two grids stacked to be read together should not be able to
+   disagree about their own tracks. */
+.staffgrid__days {
+  display: grid;
+  column-gap: 2px;
+}
+
+.staffgrid__hlabel,
+.staffgrid__dayname {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  text-align: center;
+}
+
+.staffgrid__hlabel {
+  text-align: start;
+}
+
+.staffgrid__hlabel--end {
+  text-align: end;
+}
+
+.staffgrid__dayname--today {
+  color: var(--seal);
+}
+
+.staffgrid__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.staffgrid__row {
+  padding-block: var(--space-1);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* The one row a reader opened the board for gets the clay wash — it sorts
+   first (api/workload.js's compareArms) and it reads first. */
+.staffgrid__row--down {
+  background: var(--clay-soft);
+  border-top-color: var(--clay);
+}
+
+.staffgrid__arm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.staffgrid__name {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.staffgrid__total {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  text-align: end;
+}
+
+.staffgrid__row--down .staffgrid__total {
+  color: var(--clay-deep);
+}
+
+.staffgrid__key {
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* The innings viewer's Arms tab: the dots ride the team heading, so the
+   running lines below them and "who is left" read as one block. The heading
+   was a plain block element, hence the flex. */
+.pitchers__teamname {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The slate card's dots. Its own row UNDER .gamecard__teams rather than a third
+   track inside it — that grid is two rows of marks and names with an absolutely
+   positioned watermark behind them (06-loader-and-cards.css), and this row only
+   needs to share its two columns so each club's dots land under its own name. */
+.gamecard__pens {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 4px;
+}
+
+.gamecard__pen {
+  display: flex;
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------ The Pen's frame
+   BullpenPage.jsx's "Arm by arm" wraps the staff grid above in the report
+   package's card frame. The two rules live HERE, with the grid they dress,
+   rather than in 68-around-the-game.css — that partial is at its own
+   file-size budget, and its guard asks for new code elsewhere first. */
+.penpage__grid {
+  padding: var(--space-4);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+}
+
+.penpage__gridclub {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* The rule, drawn under the staff grid (BullpenPage.jsx's PenRule). The grid
+   shows what an arm threw; this shows the lines those readings are judged
+   against, which is why it sits INSIDE the same card rather than beside it.
+   Ruled off the grid above so the two read as reading and rule, not as two
+   boards. */
+.penpage__rule {
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.penpage__rulehead {
+  margin-bottom: var(--space-3);
+  font-family: var(--font-read);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+
+/* The caption is a SENTENCE, and it names a man — the same reasoning that
+   exempts `.method p` above it (ALL-CAPS INVARIANT, 01-base.css): two lines of
+   explanation set in capitals is skipped, not read, and "BRYSE WILSON" shouts a
+   name the grid three rows up prints as a surname. The `#root` prefix is
+   required to out-rank the `#root *` blanket, and the `*` half carries the
+   PlayerLink button inside. */
+#root .penpage__rulehead,
+#root .penpage__rulehead * {
+  text-transform: none; /* caps-exempt: the rule's caption reads as a sentence */
+}
