@@ -4,6 +4,13 @@
 // candidate list and scripts/lib/contract-identity-match.mjs for the
 // name/position/service-time scoring.
 //
+// Every row is named by a CONTENT key that scripts/lib/contract-row-key.mjs
+// mints -- `salaries#3f0c7a1e58d4b269`, a hash over the row's own identifying
+// cells, never its position in the file (ADR-0069). Read that module's header
+// before changing which columns a key covers: the key is what an ADR-0067
+// admin override is stored against, so a change to it orphans live human
+// corrections and needs the migration script, not just a regenerate.
+//
 // A row with no confident match is written out `unresolved`/`ambiguous`,
 // never silently guessed -- see
 // docs/adr/0066-a-contract-row-with-no-confident-id-stays-unresolved.md.
@@ -31,6 +38,7 @@ import { readFile } from 'node:fs/promises'
 import { parseCsv } from './lib/csv.mjs'
 import { resolveClubCode } from './lib/retrosheet-teams.mjs'
 import { matchRow, normalizeName } from './lib/contract-identity-match.mjs'
+import { contractRowKeys } from './lib/contract-row-key.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -84,7 +92,7 @@ const SEASON_SEARCH_OFFSETS = [0, 1, 2, -1]
 // arbitration case is decided on the 2025 roster), so the two must never be
 // conflated: overwriting `season` with the lookup season would silently
 // mislabel every arbitration/free-agency record's actual contract year.
-async function resolve(sourceFile, index, { rawName, season, lookupSeason, teamId, position, mls }) {
+async function resolve(sourceFile, rowKey, { rawName, season, lookupSeason, teamId, position, mls }) {
   const baseSeason = lookupSeason ?? season
   let best = null
   let bestSeason = baseSeason
@@ -104,7 +112,7 @@ async function resolve(sourceFile, index, { rawName, season, lookupSeason, teamI
     }
   }
   return {
-    rowKey: `${sourceFile}#${index}`,
+    rowKey,
     sourceFile,
     season,
     matchedSeason: bestSeason,
@@ -116,18 +124,20 @@ async function resolve(sourceFile, index, { rawName, season, lookupSeason, teamI
 
 async function processExtensions() {
   const rows = parseCsv(await readFile(join(sourceDir, 'extensions.csv'), 'utf8'))
+  const keys = contractRowKeys('extensions', rows)
   const out = []
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
     const season = r.signed_date ? Number(r.signed_date.slice(0, 4)) : Number(r.first_year) - 1
     const teamId = requireTeamId(r.club, `extensions.csv row ${i}`)
-    out.push(await resolve('extensions', i, { rawName: r.player, season, teamId, position: r.position, mls: r.mls }))
+    out.push(await resolve('extensions', keys[i], { rawName: r.player, season, teamId, position: r.position, mls: r.mls }))
   }
   return out
 }
 
 async function processArbitration() {
   const rows = parseCsv(await readFile(join(sourceDir, 'arbitration.csv'), 'utf8'))
+  const keys = contractRowKeys('arbitration', rows)
   const out = []
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
@@ -135,7 +145,7 @@ async function processArbitration() {
     const lookupSeason = season - 1 // roster lookup at the season the "prior year" columns describe
     const teamId = requireTeamId(r.club, `arbitration.csv row ${i}`)
     out.push(
-      await resolve('arbitration', i, { rawName: r.player, season, lookupSeason, teamId, position: r.position, mls: r.mls }),
+      await resolve('arbitration', keys[i], { rawName: r.player, season, lookupSeason, teamId, position: r.position, mls: r.mls }),
     )
   }
   return out
@@ -143,6 +153,7 @@ async function processArbitration() {
 
 async function processFreeAgency() {
   const rows = parseCsv(await readFile(join(sourceDir, 'free_agency.csv'), 'utf8'))
+  const keys = contractRowKeys('free_agency', rows)
   const out = []
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
@@ -150,7 +161,7 @@ async function processFreeAgency() {
     const lookupSeason = season - 1 // last season on the OLD club, at signing time
     const teamId = requireTeamId(r.old_club, `free_agency.csv row ${i}`)
     out.push(
-      await resolve('free_agency', i, { rawName: r.player, season, lookupSeason, teamId, position: r.position, mls: null }),
+      await resolve('free_agency', keys[i], { rawName: r.player, season, lookupSeason, teamId, position: r.position, mls: null }),
     )
   }
   return out
@@ -179,6 +190,7 @@ function buildWarmStart(resolvedBatches) {
 
 async function processSalaries(warmStart) {
   const rows = parseCsv(await readFile(join(sourceDir, 'salaries.csv'), 'utf8'))
+  const keys = contractRowKeys('salaries', rows)
   const out = []
   let warmHits = 0
   for (let i = 0; i < rows.length; i++) {
@@ -188,7 +200,7 @@ async function processSalaries(warmStart) {
     if (warmStart.has(key)) {
       warmHits++
       out.push({
-        rowKey: `salaries#${i}`,
+        rowKey: keys[i],
         sourceFile: 'salaries',
         season,
         rawName: r.player,
@@ -201,7 +213,7 @@ async function processSalaries(warmStart) {
       })
       continue
     }
-    out.push(await resolve('salaries', i, { rawName: r.player, season, teamId: null, position: r.position, mls: r.mls }))
+    out.push(await resolve('salaries', keys[i], { rawName: r.player, season, teamId: null, position: r.position, mls: r.mls }))
   }
   console.log(`  salaries: ${warmHits}/${rows.length} rows resolved via warm-start from other files`)
   return out

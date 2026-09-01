@@ -40,7 +40,16 @@ import { getRedis } from './_lib/redis.js'
 export const config = { runtime: 'nodejs' }
 
 const OVERRIDES_KEY = 'contracts:identity:overrides'
-const ROW_KEY_RE = /^(extensions|arbitration|free_agency|salaries)#\d+$/
+// Two shapes, and both must pass for as long as an un-migrated override can
+// still sit in Redis. `#<16 hex>` is the content key a row carries now
+// (ADR-0069, scripts/lib/contract-row-key.mjs). `#<digits>` is the positional
+// key rows carried before it. The two can never be read as one another -- a
+// positional index is at most five digits across these four files, a content
+// hash is always sixteen hex characters -- so accepting both costs nothing in
+// precision. Rejecting the legacy shape WOULD cost something: sanitizeOverrides
+// drops what it does not match, so a stored correction would vanish from the
+// GET the migration script reads to find it.
+const ROW_KEY_RE = /^(extensions|arbitration|free_agency|salaries)#([0-9a-f]{16}|\d{1,7})$/
 const NOTE_MAX_LENGTH = 500
 const ORIGINAL_CONFIDENCE_VALUES = new Set(['fuzzy', 'ambiguous', 'unresolved'])
 

@@ -991,7 +991,9 @@ Re-run only to fold in a new season.
   historical contract CSVs (`scripts/data/contracts/*.csv`) and the row-to-player
   crosswalk `gen-contracts-identity.mjs` wrote to
   `public/data/contracts-history/identity/`, keyed on `rowKey`
-  (`${sourceFile}#${csvRowIndex}`). **RUN `gen-contracts-identity.mjs` FIRST** —
+  (`${sourceFile}#${contentHash}`, minted by `scripts/lib/contract-row-key.mjs`
+  from the row's own identifying cells — never its position in the file, ADR-0069).
+  **RUN `gen-contracts-identity.mjs` FIRST** —
   this script resolves no id of its own. The player shards bucket on
   `mlbId % 100` through `src/lib/shardKey.js`'s `shardKey100`, the same
   arithmetic `src/api/person/contracts.js` recomputes from the id alone, so a
@@ -999,8 +1001,11 @@ Re-run only to fold in a new season.
   COVER DIFFERENT ROWS: a player shard can only carry a row that HAS a player
   (confidence `exact` or `fuzzy` — fuzzy is trustworthy per ADR-0066, while
   `ambiguous`/`unresolved` stay out and stay in the review queue), so the
-  500-row `terms/` buckets carry every source row regardless, which is what the
-  review queue and the search index need. A bucket file IS the rowKey map —
+  `terms/` buckets carry every source row regardless, which is what the review
+  queue and the search index need. A bucket is a slice of the rowKey's own hash
+  modulo `src/lib/shardKey.js`'s `TERMS_BUCKET_COUNT` — divisors chosen to hold
+  each source near 500 rows a file, stated rather than derived because a content
+  key carries no position to divide. A bucket file IS the rowKey map —
   `{ [rowKey]: { season, teamId, terms } }`, no `meta` key and no wrapper, so a
   reader `Object.assign`s several buckets into one lookup. **`season` and
   `teamId` ride along there, duplicating the player shard's copy, because of the
@@ -1016,7 +1021,10 @@ Re-run only to fold in a new season.
   absent (ADR-0052 is a stated-figures rule). Arbitration's `note` column holds
   a dollar figure on most rows, one that differs from `settled_salary`; its
   meaning is undocumented by the source, so it is carried verbatim and a surface
-  must not label it. **`salaries.csv` has no club column at all** — every
+  must not label it. **A player's rows are ordered newest season first, then by
+  the deal's own stated figure** — the newer signing, the larger guarantee. That
+  order used to come free from the numeric rowKey; a content key carries none, so
+  it is computed from the row and pinned by `test/contract-row-key.test.js`. **`salaries.csv` has no club column at all** — every
   salaries row's `teamId` is null and none is inferred; team-keyed output is out
   of scope. The player shards' `meta` deliberately carries no
   source/attribution field, unlike `fever/gen-player-contracts.mjs`'s shards:
@@ -1035,6 +1043,15 @@ Re-run only to fold in a new season.
   the `terms/` buckets above, on the same `rowKey`.
 
 ## Assets / off-app
+
+- `migrate-contract-row-keys.mjs` — NOT a generator: a one-off migration of the
+  ADR-0067 contract-identity overrides from the old positional `rowKey` onto
+  ADR-0069's content key. Dry run unless given `--apply`; prints the old key, the
+  row it resolves to now, the new key and the row the new key resolves to, and
+  reports rather than guesses at anything it cannot map. Writes to Redis
+  directly, not through `PATCH /api/contract-identity`, so `correctedBy` and
+  `correctedAt` survive verbatim — the endpoint's merge would re-stamp both with
+  whoever ran the migration.
 
 - `audit-callouts.mjs` — NOT a generator and NOT a CI gate: a developer tool that
   replays every committed nightly callout bundle's game through the app's own five

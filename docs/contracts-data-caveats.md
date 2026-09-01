@@ -559,19 +559,29 @@ the two it means, and must not read the flat line as a market that held up.
 
 ## Never delete a row from these CSVs
 
-**A row's position in the file IS its identity.** `scripts/gen-contracts-identity.mjs`
-keys every row as `` `${sourceFile}#${index}` `` — `salaries#12345` is simply the
-12,345th row of `salaries.csv`. `gen-contracts-shards.mjs` reuses that `rowKey` for
-the terms buckets, for the player shards, and for the bucket a row lands in
-(`Math.floor(i / TERMS_BUCKET_SIZE)`). ADR-0067's stored admin corrections are keyed
-on it as well, in Upstash, outside the repository.
+**A row is named by its own content** (ADR-0069).
+`scripts/gen-contracts-identity.mjs` keys every row as
+`` `${sourceFile}#${contentHash}` `` — `salaries#3f0c7a1e58d4b269` is a hash over
+that row's year, player, position and salary, plus an ordinal that separates the
+27 verbatim-duplicate pairs. `gen-contracts-shards.mjs` reuses that `rowKey` for
+the terms buckets, for the player shards, and for the bucket a row lands in.
+ADR-0067's stored admin corrections are keyed on it as well, in Upstash, outside
+the repository.
 
-So deleting one row silently re-points **every later row** in that file. Row 12,346
-becomes `salaries#12345` and inherits the previous occupant's resolved `mlbId`, its
-terms, its place in a player's shard, and any correction a human already confirmed
-against it. Nothing fails. Nothing warns. The crosswalk stays green while it points
-at the wrong men, and the stored overrides — the one artifact a rebuild cannot
-repair — attach to strangers.
+That key was a POSITIONAL index until ADR-0069 — `salaries#12345` meant simply
+the 12,345th row — and deleting one row silently re-pointed **every later row**
+in the file at the previous occupant's resolved `mlbId`, terms, shard place and
+saved correction. That specific failure is gone. It is worth knowing it happened,
+because it is why the rule below exists and why it survived the fix.
+
+**Deleting a row is still not allowed, for two reasons that remain.** The row's
+key ceases to exist, so any ADR-0067 correction a human saved against it is
+orphaned with nothing to reattach it to. And `salaries_summary.csv` stops
+reconciling, which is the cheapest signal that a row moved at all.
+
+One residual coupling is worth naming: the 27 pairs of byte-identical rows are
+told apart by an occurrence ordinal, so removing the FIRST of such a pair
+re-keys the survivor. Nothing else in the file moves.
 
 **The rule: a row is flagged, never removed.** A row that does not belong in a
 result set is excluded at read time, on a field.
@@ -584,7 +594,9 @@ Cashman and the rest — as a VIEW over `salaries.csv`. **Those 23 rows stay in
 The deletion was tried first. It broke `salaries_summary.csv`'s reconciliation in
 five seasons — 2000, 2001, 2002, 2003 and 2004 — before anybody read a `rowKey`.
 The rows were restored, and `salaries.csv` is once again byte-identical to
-`origin/main` at 27,349 rows.
+`origin/main` at 27,349 rows. `test/contract-row-key.test.js` now asserts what
+nothing asserted then: the crosswalk holds exactly one row per CSV row, and every
+key in it is the key that row's own content mints.
 
 `salaries_summary.csv` is a mechanical rollup of `salaries.csv`, and that is the
 cheapest check that a deletion has happened: its `total_payroll`,

@@ -140,7 +140,12 @@ export async function fetchPlayerContractHistory(personId) {
     .filter(([, override]) => !override.dismissed && override.mlbId != null && String(override.mlbId) === id)
     .map(([rowKey]) => rowKey)
 
-  const bucketKeys = new Set(mineRowKeys.map(termsBucketKey))
+  // termsBucketKey answers null for a rowKey that is not a content key --
+  // an ADR-0067 override written under the old positional shape and not yet
+  // migrated. No bucket file holds it, so there is nothing to fetch; the row
+  // falls through mergeContractHistoryRows's `if (!joined) continue` exactly
+  // as a missing bucket does.
+  const bucketKeys = new Set(mineRowKeys.map(termsBucketKey).filter(Boolean))
   const termsByRowKey = {}
   await Promise.all(
     [...bucketKeys].map(async (key) => {

@@ -628,7 +628,12 @@ const BUDGETS = {
   // gen-*.mjs: the nightly workflow runs this directory as a flat list, and
   // scripts/lib/ is for helpers that do not run on import — which is exactly
   // where its pure half (schedule-shape.mjs) went.
-  scripts: 109,
+  // +1 for migrate-contract-row-keys.mjs — a one-off, dry-run-by-default
+  // migration of the ADR-0067 contract-identity overrides onto ADR-0069's
+  // content keys. It belongs beside the gen-contracts-* scripts it has to stay
+  // consistent with, not in lib/: it is an entry point, not a helper, and the
+  // only thing in the tree that may write to that Redis hash.
+  scripts: 110,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -775,7 +780,12 @@ const BUDGETS = {
   // test/schedule-shape.test.js pins the cases that make it hard (a neutral
   // -site game inside a road series, a club that changed parks mid-range, a
   // doubleheader that has to keep its order).
-  'scripts/lib': 33,
+  // +1 for contract-row-key.mjs — the key that names one historical-contract
+  // row (ADR-0069). It sits beside contract-identity-match.mjs and csv.mjs, the
+  // rest of that pipeline's pure, unit-tested halves, because three generators,
+  // the migration and test/contract-row-key.test.js all have to mint the same
+  // key: two copies that drift are a row whose money can never be found.
+  'scripts/lib': 34,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
