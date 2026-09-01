@@ -42,7 +42,7 @@ import { fileURLToPath } from 'node:url'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
-import { homeVenueByTeam, ledgerFor, encodeRow } from './lib/schedule-shape.mjs'
+import { homeVenueByTeam, ledgerFor, encodeRow, encodeDetailRow, detailFacts } from './lib/schedule-shape.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT_DIR = join(ROOT, 'public', 'data', 'schedule-shape')
@@ -55,6 +55,18 @@ const OUT_DIR = join(ROOT, 'public', 'data', 'schedule-shape')
 // two-league, six-division shape.
 const EARLIEST_SEASON = 2015
 
+// The most recent seasons also carry PER-GAME DETAIL — runs, hits, errors, the
+// lead into the 8th and 9th, and a flag word — for the event droughts ("have
+// not thrown a shutout since April 26"). Three, not twelve, and the asymmetry
+// is the point: an event comes around every twenty games or so, so the longest
+// drought a club can plausibly be carrying is a season or two, while the
+// opponent-narrowed SLOT droughts need a decade because a club visits any one
+// park twice a year. Detail costs `hydrate=linescore`, which is 2.3 MB a season
+// against 0.65 MB without it — affordable for all twelve, and still not taken,
+// because the bytes would land in every reader's download for facts no drought
+// could reach.
+const DETAIL_SEASONS = 3
+
 // The response is pruned to the eight facts the ledger needs. Without this the
 // same call returns ~4 MB per season of content links, broadcast lists and
 // record objects nothing here reads.
@@ -62,6 +74,14 @@ const FIELDS = [
   'dates', 'games', 'gamePk', 'officialDate', 'gameNumber', 'doubleHeader',
   'teams', 'away', 'home', 'team', 'id', 'score', 'isWinner',
   'venue', 'status', 'codedGameState',
+].join(',')
+
+// The same list plus what a linescore carries. Pruning matters more here, not
+// less: an unpruned `hydrate=linescore` season is 10.3 MB against 2.3 MB with
+// this, and the difference is entirely defense, offense, balls/strikes/outs and
+// per-inning leftOnBase that nothing reads.
+const DETAIL_FIELDS = [
+  FIELDS, 'linescore', 'scheduledInnings', 'innings', 'num', 'runs', 'hits', 'errors',
 ].join(',')
 
 // One season of finished regular-season games, flattened out of the feed's
@@ -72,15 +92,31 @@ const FIELDS = [
 // with a row and no runs; admitting one would put a null into a W/L ledger and
 // invent a loss. The score check is belt-and-braces against a Final game whose
 // linescore the feed has not caught up on.
-async function fetchSeason(season) {
-  const feed = await getJson(`/api/v1/schedule?sportId=1&season=${season}&gameType=R&fields=${FIELDS}`)
+async function fetchSeason(season, withDetail) {
+  const query = withDetail
+    ? `hydrate=linescore&fields=${DETAIL_FIELDS}`
+    : `fields=${FIELDS}`
+  const feed = await getJson(`/api/v1/schedule?sportId=1&season=${season}&gameType=R&${query}`)
   const games = []
+  // A season's schedule lists some games TWICE, under two different `dates[]`
+  // buckets — 37 of them across 2015-2026, every one byte-identical in date,
+  // teams and score. Left in, a duplicate lengthens the series it falls inside
+  // by a game and adds a chance to whatever slot it lands in, so a drought
+  // counted in chances comes out wrong. Deduplicated on gamePk and NOT on
+  // (date, teams): a doubleheader is two real games sharing all three, and
+  // the same San Francisco season carries both shapes on separate dates.
+  const seen = new Set()
   for (const day of feed?.dates ?? []) {
     for (const g of day?.games ?? []) {
       if (g?.status?.codedGameState !== 'F') continue
       const away = g?.teams?.away
       const home = g?.teams?.home
       if (away?.score == null || home?.score == null) continue
+      if (g.gamePk != null) {
+        if (seen.has(g.gamePk)) continue
+        seen.add(g.gamePk)
+      }
+      const ls = g.linescore
       games.push({
         date: g.officialDate,
         gameNumber: g.gameNumber ?? 1,
@@ -89,6 +125,22 @@ async function fetchSeason(season) {
         homeId: home.team?.id,
         awayScore: away.score,
         homeScore: home.score,
+        // Absent on a thin season, and absent on a detail season whose game
+        // has no linescore at all — a row that then ships thin rather than
+        // wide, which the reader already handles by row length.
+        linescore: ls
+          ? {
+              scheduledInnings: ls.scheduledInnings ?? 9,
+              innings: (ls.innings ?? []).map((i) => ({
+                a: Number(i?.away?.runs) || 0,
+                h: i?.home && i.home.runs != null ? Number(i.home.runs) || 0 : null,
+              })),
+              awayHits: ls.teams?.away?.hits ?? null,
+              homeHits: ls.teams?.home?.hits ?? null,
+              awayErrors: ls.teams?.away?.errors ?? null,
+              homeErrors: ls.teams?.home?.errors ?? null,
+            }
+          : null,
       })
     }
   }
@@ -108,10 +160,12 @@ async function main() {
   // built across the whole range would resolve one of those seasons wrong.
   const byTeam = new Map()
   let totalGames = 0
+  const detailFrom = Math.max(...seasons) - DETAIL_SEASONS + 1
   for (const season of seasons) {
+    const withDetail = season >= detailFrom
     let games
     try {
-      games = await fetchSeason(season)
+      games = await fetchSeason(season, withDetail)
     } catch (err) {
       // A single season's failure must not empty every shard: writeShards
       // rewrites the whole directory, so a partial in-memory result would ship
@@ -125,12 +179,35 @@ async function main() {
     const homeVenues = homeVenueByTeam(games)
     const teamIds = [...new Set(games.flatMap((g) => [g.awayId, g.homeId]))].filter(Boolean)
     for (const teamId of teamIds) {
-      const rows = ledgerFor(games, teamId, homeVenues).map(encodeRow)
+      const ledger = ledgerFor(games, teamId, homeVenues)
+      const rows = ledger.map((row) => {
+        if (!withDetail) return encodeRow(row)
+        const g = row.source
+        if (!g?.linescore?.innings?.length) return encodeRow(row)
+        const isHome = g.homeId === teamId
+        const d = detailFacts({
+          innings: g.linescore.innings,
+          scheduledInnings: g.linescore.scheduledInnings,
+          isHome,
+        })
+        return encodeDetailRow(
+          {
+            ...row,
+            runsFor: isHome ? g.homeScore : g.awayScore,
+            runsAgainst: isHome ? g.awayScore : g.homeScore,
+            hits: isHome ? g.linescore.homeHits : g.linescore.awayHits,
+            oppHits: isHome ? g.linescore.awayHits : g.linescore.homeHits,
+            errors: isHome ? g.linescore.homeErrors : g.linescore.awayErrors,
+            oppErrors: isHome ? g.linescore.awayErrors : g.linescore.homeErrors,
+          },
+          d,
+        )
+      })
       if (!byTeam.has(teamId)) byTeam.set(teamId, {})
       byTeam.get(teamId)[season] = rows
     }
     totalGames += games.length
-    console.log(`  ${season}: ${games.length} final games, ${teamIds.length} clubs`)
+    console.log(`  ${season}: ${games.length} final games, ${teamIds.length} clubs${withDetail ? ' (with detail)' : ''}`)
   }
 
   if (!byTeam.size) throw new Error('no seasons returned any games — no files written')

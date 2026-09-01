@@ -4,11 +4,19 @@ The dataset and the reasoning behind a stat that reads like this:
 
 > The last time the Brewers won Game 1 of a road trip was July 3rd.
 
-That sentence is not a rate. It is a **drought in a recurring slot**: a position
-in the schedule a club arrives at over and over — the first game of a road trip,
-the last game of a homestand, the opener of a series in one particular city —
-plus the date it last won one. The app could not answer it before, because
-answering it needs the *shape* of a schedule across more than one season.
+That sentence is not a rate. It is a **drought**: a thing a club keeps getting
+the chance to do and keeps not doing, plus the date it last did it. The app
+could not answer it before, because answering it needs the *shape* of a schedule
+across more than one season.
+
+Two kinds of drought live here, and they differ only in what counts as a chance:
+
+- **Slot** — a recurring position in the schedule. Game 1 of a road trip, the
+  last game of a homestand, the opener of a series in one particular city. The
+  chance comes around when the schedule brings it around.
+- **Event** — a thing a club either does in a game or does not. Throw a shutout,
+  score ten, hold a lead it carried into the ninth. The chance is the game — or,
+  for the conditional ones, only the games where the event was possible at all.
 
 This file is the catalog: what the shape supports, which candidates were
 measured and thrown out, and how the noteworthiness gate was calibrated.
@@ -37,6 +45,25 @@ So this is deliberately the *thin* ledger: four facts a row, a decade deep. Both
 follow the same rule — **store facts, never flags**. Every segment tag is
 recomputed at read time, so changing the definition of "road trip" costs a code
 change and no regeneration at all.
+
+### Two row widths, on purpose
+
+The three most recent seasons ship **wide** rows — runs, hits and errors both
+ways, the lead carried into the 8th and 9th, and a flag word — behind
+`hydrate=linescore` (2.3 MB a season pruned, against 0.65 MB without). The nine
+before them ship the thin four. A row is wide or thin by its **length**, which
+is what lets one seasons map hold both with no parallel array to keep aligned.
+
+The asymmetry is the point. Event droughts come around every twenty games or so,
+so the longest one a club can plausibly carry is a season or two; the
+opponent-narrowed *slot* droughts need a decade, because a club visits any one
+park twice a year. Detail for all twelve seasons would be affordable and is
+still not taken — the bytes would land in every reader's download for facts no
+drought could reach.
+
+`everTrailed` and `everLed` are stored; "came from behind" and "blew it" are the
+reader's definitions built from them. Storing the verdict would make "does a tie
+count as trailing?" a re-fetch instead of an edit.
 
 ## The three segments
 
@@ -98,7 +125,43 @@ it.
 Any slot can be narrowed to one opponent, which is what turns "game 1 of a road
 series" into "game 1 of a series in Chicago".
 
-## The gate, and the trap it exists for
+## The one rule: count chances, never the calendar
+
+Every gate in this file is the same rule wearing a different hat, and the rule
+was learned three separate times, each from a stat that looked good and was not.
+
+**1. A rare visit is not a drought.**
+
+> They have not won a series opener in Cleveland since 2016.
+
+That sounds like a decade of futility. It is **nine chances in eleven years**,
+because an interleague club visits once every two or three seasons.
+
+**2. A long calendar gap is not a long streak.**
+
+> The Dodgers have not lost an extra-inning game since September 15.
+
+149 games. It is **six extra-inning games**. The other 143 could not have
+produced the event at any price, and winning six coin flips is not a streak.
+This is why every event family names its own denominator: `when` says whether
+the club even got a try, and a game that fails it is *excluded* rather than
+counted as a miss.
+
+**3. A club's normal is not news about that club.**
+
+> Colorado have not thrown a shutout since April 26.
+
+109 games — and Colorado have thrown **five shutouts in 462 games**. Their
+expected gap is about ninety games, so this one is unremarkable *for them*
+(p = 31%). Measured against the league's 6.3% it looks like a 2.4% event, and
+the card would have printed a fact about Coors Field wearing a club's name. So
+the event gate uses each club's **own** rate, never the league's.
+
+The number is never wrong in any of the three. The *sentence* is — it claims a
+struggle where the truth is an absence of opportunity, a small sample, or a
+park.
+
+### The slot gate
 
 **A drought is two different facts wearing one sentence.**
 
@@ -140,6 +203,65 @@ Requiring the run to cross a season boundary was tested and **made no difference
 at all** — at 2.7 chances a season, every qualifying rival-scope run already
 crosses one — so it is not in the code.
 
+### The event gate
+
+`isNotableEvent` in `src/api/scheduleShape.js`. Three conditions, and each one
+throws out a different kind of impostor:
+
+| Condition | Value | Throws out |
+| --- | --- | --- |
+| `chances >= MIN_EVENT_CHANCES` | 20 | the Dodgers' six extra-inning games |
+| `sinceLast >= MIN_EVENT_STREAK` | 8 | a two-week lull |
+| `(1 - rate) ** sinceLast <= MAX_EVENT_P` | 0.05 | Colorado's ordinary shutout gap |
+
+`rate` is the club's own frequency in that family, which is what lets one
+threshold serve all nineteen: a family that fires every other game clears the
+bar at a length a family that fires every fiftieth never would. No per-family
+tuning, and none wanted — a hand-set floor per family is how a catalog this size
+drifts.
+
+### The event families
+
+Nineteen, in `EVENTS`. The `when` column is the one that matters, because it is
+the denominator:
+
+| Family | A chance is… |
+| --- | --- |
+| Threw a shutout / were shut out | every game |
+| Scored 10+ / allowed 10+ | every game |
+| Won by 8+ / lost by 8+ | every game |
+| Held them to two or fewer | every game |
+| Played errorless ball | every game |
+| Scored first / scored in the first | every game |
+| Won / lost in extra innings | **games that went to extras** |
+| Lost a lead taken into the 9th | **games led after 8** |
+| Won after trailing into the 7th | **games trailing after 6** |
+| Won on a walk-off | **home games** |
+| Lost on a walk-off | **road games** |
+| Won a one-run game | **one-run games** |
+| Won after trailing | **games it ever trailed** |
+| Won while being out-hit | **games it was out-hit** |
+
+A game that never reached the ninth — rain-shortened, or a seven-inning
+doubleheader — reports `leadAfter8: null` rather than a lead of zero, so it is
+excluded from the ninth-inning families instead of counting as a try the club
+never got.
+
+### What the league actually carries
+
+As of 2026-08-31, all thirty clubs, both kinds together: **42 notable droughts,
+a median of 1 per club, never more than 4, and 7 clubs carrying none.**
+A sample of what passes:
+
+| | | |
+| --- | --- | --- |
+| ARI | Lost a lead taken into the 9th | 72 chances, since Sep 1 2025 |
+| HOU | Were shut out | 54 games, since Jun 26 |
+| LAD | Won by 8 or more | 54 games, since Jun 27 |
+| TEX | Lost on a walk-off | 41 road games, since May 24 |
+| MIN | Allowed 10 or more | 37 games, since Jul 20 |
+| MIL | Road-trip opener | 4 chances, since Jul 3 |
+
 ## Measured and rejected
 
 The research pass that produced this catalog also killed several candidates.
@@ -173,9 +295,13 @@ Cheap, because the ledger already holds what they need — each is a predicate i
 - **Segment outcomes rather than positions.** "Their last winning road trip
   began May 12." Measured and genuinely notable: as of 2026-08-31 the Angels had
   won 1 of 12 road trips and the Athletics 1 of 11 homestands. Needs a segment-
-  level drought helper (a trip is a unit, not a game) — the reason it is not in
-  this PR rather than a doubt about the idea.
+  level drought helper (a trip is a unit, not a game) — the reason it is not
+  built yet rather than a doubt about the idea.
 - **Sweeps and series wins** in a slot, same shape.
+- **More event families.** The linescore already on file supports plenty more —
+  scoring in every inning of a game, a specific inning's scoring, hit totals.
+  Adding one is a row in `EVENTS`; it costs no regeneration, because the facts
+  are already stored and only the definition is new.
 - **Callout integration.** These are currently a Team-hub card. Getting them into
   the pre-half strip or the box-score Insights roll-up means a callout family
   with a `SCORE_BASE`, and a new callout kind touches five registries — see

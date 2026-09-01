@@ -91,6 +91,11 @@ export function ledgerFor(games, teamId, homeVenues) {
       opponentId: isHomeSide ? g.awayId : g.homeId,
       site: siteOf(g, teamId, homeVenues),
       result: runsFor > runsAgainst ? 'W' : runsFor < runsAgainst ? 'L' : 'T',
+      // The game this row came from, so a caller that wants more than the four
+      // shipped facts (the generator, reading a linescore) does not have to
+      // re-find it. Never encoded — encodeRow and encodeDetailRow both name the
+      // fields they ship.
+      source: g,
     }
   })
 }
@@ -196,4 +201,116 @@ export const RESULT = { L: 0, W: 1, T: 2 }
 
 export function encodeRow(row) {
   return [row.date.slice(5), row.opponentId, SITE[row.site], RESULT[row.result]]
+}
+
+// ---------------------------------------------------------------------------
+// Per-game detail (the recent seasons only)
+// ---------------------------------------------------------------------------
+
+// What a game DID, beyond who won it: runs, hits, errors, the lead carried into
+// the 8th and 9th, and the handful of one-bit facts a linescore settles.
+//
+// These ride on the SAME schedule request as everything else, behind
+// `hydrate=linescore` — which is why a decade of them would be affordable and
+// is still not stored. An event drought is counted in chances, and these events
+// come around every twenty games or so, so the longest one a club can plausibly
+// be carrying is a season or two; DETAIL_SEASONS in the generator keeps three.
+// The twelve-season depth exists for the opponent-narrowed SLOT droughts, where
+// a club visits one park twice a year and the question genuinely reaches back.
+//
+// FACTS, NOT VERDICTS, the same rule as everywhere else here. `everTrailed` and
+// `everLed` are stored; "came from behind" and "blew it" are the reader's
+// definitions, built from those two and the result. Storing the verdicts would
+// make "does a tie count as trailing?" a re-fetch instead of an edit.
+export const FLAG = {
+  extra: 1,
+  walkOffWin: 2,
+  walkOffLoss: 4,
+  scoredIn1st: 8,
+  scoredFirst: 16,
+  oppScoredFirst: 32,
+  everTrailed: 64,
+  everLed: 128,
+}
+
+// The cumulative score after each HALF inning, from this club's side. A home
+// side that did not bat carries its previous total forward rather than a null:
+// "we were still three up" is true whether or not the bottom half was played.
+function leadTrack(innings, isHome) {
+  const marks = []
+  let away = 0
+  let home = 0
+  let everTrailed = false
+  let everLed = false
+  const see = () => {
+    const me = isHome ? home : away
+    const them = isHome ? away : home
+    if (me < them) everTrailed = true
+    if (me > them) everLed = true
+  }
+  for (const inn of innings) {
+    away += inn.a
+    see()
+    if (inn.h != null) home += inn.h
+    see()
+    marks.push((isHome ? home : away) - (isHome ? away : home))
+  }
+  return { marks, everTrailed, everLed, awayTotal: away }
+}
+
+// `innings` is the `{ a, h }` shape per inning, `h` null when the home side did
+// not bat.
+export function detailFacts({ innings, scheduledInnings, isHome }) {
+  const { marks, everTrailed, everLed, awayTotal } = leadTrack(innings, isHome)
+
+  // A walk-off: the home side scored in the final half, was not already ahead
+  // when that half began, and finished in front. Read off the linescore because
+  // no feed field says so — and the "not already ahead" clause is what
+  // separates a walk-off from a home side adding runs in the bottom of the
+  // ninth of a game it was winning anyway.
+  const last = innings[innings.length - 1]
+  let homeBefore = 0
+  for (let i = 0; i < innings.length - 1; i++) homeBefore += innings[i].h ?? 0
+  const homeTotal = homeBefore + (last?.h ?? 0)
+  const walkOff = Boolean(last?.h > 0 && homeBefore <= awayTotal && homeTotal > awayTotal)
+
+  let first = 0
+  for (const inn of innings) {
+    if (inn.a > 0) { first = isHome ? -1 : 1; break }
+    if (inn.h > 0) { first = isHome ? 1 : -1; break }
+  }
+
+  let flags = 0
+  if (innings.length > (scheduledInnings ?? 9)) flags |= FLAG.extra
+  if (walkOff) flags |= isHome ? FLAG.walkOffWin : FLAG.walkOffLoss
+  if ((isHome ? innings[0]?.h : innings[0]?.a) > 0) flags |= FLAG.scoredIn1st
+  if (first === 1) flags |= FLAG.scoredFirst
+  if (first === -1) flags |= FLAG.oppScoredFirst
+  if (everTrailed) flags |= FLAG.everTrailed
+  if (everLed) flags |= FLAG.everLed
+
+  return {
+    // The margin carried INTO the 8th and INTO the 9th — i.e. after 7 and after
+    // 8 complete innings. Null when the game did not get there, which a
+    // rain-shortened game and a seven-inning doubleheader both do: a club
+    // cannot blow a ninth-inning lead in a game with no ninth inning, and the
+    // row must say "no chance" rather than "no lead".
+    leadAfter7: marks.length >= 7 ? marks[6] : null,
+    leadAfter8: marks.length >= 8 ? marks[7] : null,
+    flags,
+  }
+}
+
+// The wide shipped row: the thin four, then runs, hits and errors both ways,
+// the two lead marks, and the flag word. A season either ships all-thin rows or
+// all-wide ones, and the reader tells them apart by LENGTH — self-describing,
+// with no alignment to keep between two parallel arrays.
+export function encodeDetailRow(row, detail) {
+  return [
+    ...encodeRow(row),
+    row.runsFor, row.runsAgainst,
+    row.hits ?? null, row.oppHits ?? null,
+    row.errors ?? null, row.oppErrors ?? null,
+    detail.leadAfter7, detail.leadAfter8, detail.flags,
+  ]
 }

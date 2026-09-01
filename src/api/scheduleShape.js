@@ -39,6 +39,23 @@ export async function fetchScheduleShape(teamId) {
 const SITE = ['away', 'home', 'neutral']
 const RESULT = ['L', 'W', 'T']
 
+// The recent seasons ship WIDE rows — the thin four, then runs, hits and errors
+// both ways, the lead carried into the 8th and 9th, and a flag word. A row is
+// wide or thin by its LENGTH, which is what lets one seasons map hold both
+// without a parallel array to keep aligned. Mirrors FLAG in
+// scripts/lib/schedule-shape.mjs; test/schedule-shape.test.js pins them.
+const WIDE = 13
+const FLAG = {
+  extra: 1,
+  walkOffWin: 2,
+  walkOffLoss: 4,
+  scoredIn1st: 8,
+  scoredFirst: 16,
+  oppScoredFirst: 32,
+  everTrailed: 64,
+  everLed: 128,
+}
+
 // ---------------------------------------------------------------------------
 // Decoding and segmentation
 // ---------------------------------------------------------------------------
@@ -72,10 +89,28 @@ export function ledgerOf(data, { cutoff = null } = {}) {
   const out = []
   for (const season of Object.keys(data.seasons).sort()) {
     const rows = []
-    for (const [mmdd, opponentId, site, result] of data.seasons[season]) {
+    for (const row of data.seasons[season]) {
+      const [mmdd, opponentId, site, result] = row
       const date = `${season}-${mmdd}`
       if (cutoff && date > cutoff) continue
-      rows.push({ date, season: Number(season), opponentId, site: SITE[site], result: RESULT[result] })
+      const base = { date, season: Number(season), opponentId, site: SITE[site], result: RESULT[result] }
+      if (row.length >= WIDE) {
+        const [, , , , rs, ra, hits, oppHits, errors, oppErrors, leadAfter7, leadAfter8, flags] = row
+        Object.assign(base, {
+          detail: true,
+          runsFor: rs, runsAgainst: ra, hits, oppHits, errors, oppErrors,
+          leadAfter7, leadAfter8,
+          extra: Boolean(flags & FLAG.extra),
+          walkOffWin: Boolean(flags & FLAG.walkOffWin),
+          walkOffLoss: Boolean(flags & FLAG.walkOffLoss),
+          scoredIn1st: Boolean(flags & FLAG.scoredIn1st),
+          scoredFirst: Boolean(flags & FLAG.scoredFirst),
+          oppScoredFirst: Boolean(flags & FLAG.oppScoredFirst),
+          everTrailed: Boolean(flags & FLAG.everTrailed),
+          everLed: Boolean(flags & FLAG.everLed),
+        })
+      }
+      rows.push(base)
     }
     // Neutral-site games are transparent to BOTH segmentations — see the
     // generator's lib for the 2020 Brewers game at Busch Stadium that proved
@@ -250,6 +285,102 @@ export function isNotable(drought, slot, { asOfDate = null } = {}) {
   return years <= MAX_SPAN_YEARS
 }
 
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+// An EVENT family is a thing a club either does in a game or does not — throw a
+// shutout, score ten, blow a lead it carried into the ninth. Each one is a pair:
+// `when` says whether the club even got a try, and `did` says whether it came
+// off. The drought is counted in TRIES.
+//
+// That pairing is the whole design, and it exists because of a stat that looked
+// spectacular and was not. As of 2026-08-31 the Dodgers had not lost an
+// extra-inning game in 149 games, since September 15 — which is SIX extra-inning
+// games. The other 143 could not have produced the event at any price, and
+// winning six coin flips in a row is not a streak worth printing. Counted in
+// games it is a headline; counted in tries it is nothing. Every family below
+// therefore names its own denominator, and `when` returning false EXCLUDES the
+// game rather than scoring it a miss — the same distinction RECORD_GROUPS
+// draws in teamRecords.js.
+//
+// `when: ALL` marks the families where every game really is a try: a club can
+// always throw a shutout, and nothing about the other side changes that.
+const ALL = () => true
+
+export const EVENTS = [
+  { id: 'shutout-thrown', label: 'Threw a shutout', when: ALL, did: (r) => r.runsAgainst === 0 },
+  { id: 'shutout-suffered', label: 'Were shut out', when: ALL, did: (r) => r.runsFor === 0 },
+  { id: 'scored-10', label: 'Scored 10 or more', when: ALL, did: (r) => r.runsFor >= 10 },
+  { id: 'allowed-10', label: 'Allowed 10 or more', when: ALL, did: (r) => r.runsAgainst >= 10 },
+  { id: 'blowout-win', label: 'Won by 8 or more', when: ALL, did: (r) => r.result === 'W' && r.runsFor - r.runsAgainst >= 8 },
+  { id: 'blowout-loss', label: 'Lost by 8 or more', when: ALL, did: (r) => r.result === 'L' && r.runsAgainst - r.runsFor >= 8 },
+  { id: 'held-to-2', label: 'Held them to two or fewer', when: ALL, did: (r) => r.runsAgainst <= 2 },
+  { id: 'errorless', label: 'Played errorless ball', when: (r) => r.errors != null, did: (r) => r.errors === 0 },
+  { id: 'scored-first', label: 'Scored first', when: ALL, did: (r) => r.scoredFirst },
+  { id: 'scored-in-1st', label: 'Scored in the first', when: ALL, did: (r) => r.scoredIn1st },
+  // Conditional. Each `when` is the try this club actually got.
+  { id: 'extra-win', label: 'Won in extra innings', when: (r) => r.extra, did: (r) => r.result === 'W' },
+  { id: 'extra-loss', label: 'Lost in extra innings', when: (r) => r.extra, did: (r) => r.result === 'L' },
+  { id: 'blew-9th-lead', label: 'Lost a lead taken into the 9th', when: (r) => r.leadAfter8 > 0, did: (r) => r.result === 'L' },
+  { id: 'late-comeback', label: 'Won after trailing into the 7th', when: (r) => r.leadAfter7 < 0, did: (r) => r.result === 'W' },
+  { id: 'walkoff-win', label: 'Won on a walk-off', when: (r) => r.site === 'home', did: (r) => r.walkOffWin },
+  { id: 'walkoff-loss', label: 'Lost on a walk-off', when: (r) => r.site === 'away', did: (r) => r.walkOffLoss },
+  { id: 'one-run-win', label: 'Won a one-run game', when: (r) => Math.abs(r.runsFor - r.runsAgainst) === 1, did: (r) => r.result === 'W' },
+  { id: 'comeback-win', label: 'Won after trailing', when: (r) => r.everTrailed, did: (r) => r.result === 'W' },
+  { id: 'win-when-out-hit', label: 'Won while being out-hit', when: (r) => r.hits != null && r.hits < r.oppHits, did: (r) => r.result === 'W' },
+]
+
+export const EVENT_BY_ID = new Map(EVENTS.map((e) => [e.id, e]))
+
+// How long since this club last did one, counted in tries. Only the seasons
+// carrying detail can answer — `ledgerOf` marks those rows — so the window is
+// the three most recent seasons rather than the full twelve. That is enough:
+// these events come around every twenty games or so, and a drought older than
+// three seasons would have to be a club that has not thrown a shutout since
+// 2023.
+export function eventDroughtFor(ledger, event) {
+  const tries = ledger.filter((r) => r.detail && r.result !== 'T' && event.when(r))
+  if (!tries.length) return null
+  const hits = tries.map((r) => Boolean(event.did(r)))
+  const lastAt = hits.lastIndexOf(true)
+  // Never done inside the window. The drought is real but its date is not
+  // knowable from this file, and a "since" with no date to name is not worth
+  // printing — "if you cannot name the number, cut the note" (docs/callouts.md).
+  if (lastAt < 0) return null
+  const done = hits.filter(Boolean).length
+  return {
+    eventId: event.id,
+    chances: tries.length,
+    done,
+    rate: done / tries.length,
+    sinceLast: tries.length - 1 - lastAt,
+    last: tries[lastAt].date,
+  }
+}
+
+// The gate. `rate` is the club's OWN frequency in that family, so the threshold
+// needs no per-family tuning: a run of `sinceLast` misses has probability
+// `(1 - rate) ** sinceLast` under it, and a family that fires every other game
+// clears the bar at a length a family that fires every fiftieth never would.
+//
+// MIN_EVENT_CHANCES is the separate guard, and the Dodgers case above is why it
+// cannot be folded into the probability: six coin flips also come out near 1%,
+// and across twenty families and thirty clubs a threshold that admits six-try
+// samples fills the card with noise. A drought has to have been POSSIBLE often
+// enough to be about the club rather than about the sample.
+export const MIN_EVENT_CHANCES = 20
+export const MIN_EVENT_STREAK = 8
+export const MAX_EVENT_P = 0.05
+
+export function isNotableEvent(drought) {
+  if (!drought || !drought.last) return false
+  if (drought.chances < MIN_EVENT_CHANCES) return false
+  if (drought.sinceLast < MIN_EVENT_STREAK) return false
+  if (drought.rate <= 0 || drought.rate >= 1) return false
+  return Math.pow(1 - drought.rate, drought.sinceLast) <= MAX_EVENT_P
+}
+
 // Every notable drought this club is carrying, worst first — the whole card in
 // one call. Slots are counted over the current season alone; opponent-narrowed
 // series openers reach back the full file, because that is the only way the
@@ -267,6 +398,11 @@ export function droughtsFor(data, { cutoff = null, opponents = true } = {}) {
     if (isNotable(d, slot, { asOfDate })) out.push({ ...d, scope: 'season', season: asOfSeason })
   }
 
+  for (const event of EVENTS) {
+    const d = eventDroughtFor(ledger, event)
+    if (isNotableEvent(d)) out.push({ ...d, scope: 'event' })
+  }
+
   if (opponents) {
     const rivals = [...new Set(ledger.map((r) => r.opponentId))]
     for (const slot of SLOTS.filter((s) => s.id === 'series-opener-away' || s.id === 'series-opener-home')) {
@@ -277,7 +413,15 @@ export function droughtsFor(data, { cutoff = null, opponents = true } = {}) {
     }
   }
 
-  // Longest run first, then the one whose chances were most crowded together —
-  // five in two seasons is a sharper fact than five in three.
-  return out.sort((a, b) => b.sinceWin - a.sinceWin || (a.streakFrom < b.streakFrom ? 1 : -1))
+  // Slot and event droughts are not comparable by LENGTH — four road-trip
+  // openers and forty ninth-inning leads are both about a season's worth — so
+  // they are ranked by how unlikely each is under its own family's rate, the
+  // one scale both have. A slot drought has no stored rate, so it uses the
+  // club's own hit rate in that slot, which is the same quantity.
+  const oddsOf = (d) => {
+    if (d.scope === 'event') return Math.pow(1 - d.rate, d.sinceLast)
+    const rate = d.chances ? d.wins / d.chances : 0.5
+    return Math.pow(1 - rate, d.sinceWin)
+  }
+  return out.sort((a, b) => oddsOf(a) - oddsOf(b))
 }
