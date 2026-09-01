@@ -121,6 +121,7 @@
      17a-identity-lab-mark-panels  screens/identity-lab/index.jsx (DEV-only)
      26a-percentile-strip     components/charts/PercentileStrip.jsx
      26b-player-contract      components/playerstats/PlayerContractCard.jsx
+     26e-contract-history     components/player/ContractHistoryLedger.jsx
      30-standings             screens/StandingsPage.jsx
      32-milestone-watch       screens/MilestoneWatchPage.jsx
      34-postseason            screens/PostseasonHistoryPage.jsx

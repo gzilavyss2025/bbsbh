@@ -384,7 +384,14 @@ const BUDGETS = {
   // sharing its bar language. A new surface, not a split of an over-budget
   // partial, so it takes the next free integer rather than a lettered sibling
   // (same call as 59-stamp-in.css). Route-loaded, not from index.css.
-  'src/styles': 106,
+  // 106 -> 107 for 26e-contract-history.css: the player page's historical
+  // contract ledger. A lettered sibling rather than the next free integer,
+  // because it belongs with its 26a/26b/26c/26d neighbours after
+  // 26-player-page.css — which is 1145 lines, already past
+  // check-file-size.mjs's ceiling and on a budget of its own, so growing that
+  // file is the one option this directory's own rules forbid. Route-loaded,
+  // imported by the card the lazy history tab mounts.
+  'src/styles': 107,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -794,7 +801,13 @@ const BUDGETS = {
   // CareerRegister is its own component) and GameLink.jsx (the boxscore link
   // GameLog.jsx needs, promoted out of PlayerPage.jsx so the two other
   // PlayerPage call sites and this one share one definition instead of three).
-  'src/components/player': 15,
+  // 15 -> 16 for ContractHistoryLedger.jsx — the history tab's contract ledger,
+  // a peer of AwardsLedger.jsx and CareerTimeline.jsx beside it and built the
+  // same way: one card that only draws, its view model pure in src/api. The
+  // guard's usual remedy of a subdirectory would put ONE of this bucket's
+  // player-page cards in a folder of its own and leave the other ten flat,
+  // which is not a subdivision, only a scattering.
+  'src/components/player': 16,
   // New entry: +1 for blockageCorrected.js — the diary's first `corrected`
   // entry that sits ABOVE the entry it corrects rather than replacing it
   // (the diary is append-only, see docs/agents/research-diary.md's second
