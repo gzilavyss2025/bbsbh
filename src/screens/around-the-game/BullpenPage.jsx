@@ -1,6 +1,9 @@
 import '../../styles/68-around-the-game.css'
 import { useMemo, useState } from 'react'
 import { fetchWorkload, bullpenBoard, leagueBullpen, BULLPEN_SORTS } from '../../api/around-the-game/bullpen.js'
+import { staffGridFor } from '../../api/workload.js'
+import { StaffGrid } from '../../components/workload/StaffGrid.jsx'
+import { ThresholdBullets } from '../../components/workload/ThresholdBullets.jsx'
 import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
 import { toApiDate, humanDate } from '../../lib/dates.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -38,6 +41,34 @@ import { BarCell, StatusMeter } from '../../components/around-the-game/Broadcast
 // SPOILER-FREE, inherited from workload.js: completed appearances only, and
 // the as-of date excludes today, so no in-progress line can leak.
 
+// THE RULE, DRAWN. The staff grid above draws cells and rails — what each arm
+// threw and when — but never the thresholds those readings are judged against,
+// so this page had to spell them out in prose ("25 or more pitches yesterday,
+// 35 or more across three days…"). The bullets draw them instead, and the
+// paragraph keeps only the part no mark carries: how the flags COMBINE.
+//
+// Read off the arm the grid sorts to the top, which compareArms makes the row
+// this club's board most wants a reader to see (status first, then load) — not
+// a synthetic example. `flags` is the row's own availabilityFor evaluation,
+// i.e. the same single tiredFlagsFor call behind its status dot, so a bar short
+// of its tick can never sit under a "likely down" row.
+//
+// Renders nothing without flags, which keeps the degrade convention: a club
+// whose arms are missing from the file loses the mark, not the page.
+function PenRule({ row }) {
+  if (!row?.flags?.length) return null
+  return (
+    <figure className="penpage__rule">
+      <figcaption className="penpage__rulehead">
+        The rule, on{' '}
+        <PlayerLink id={row.personId}>{row.name}</PlayerLink>{' '}
+        — a tick is the published threshold, a bar past it is that flag tripped.
+      </figcaption>
+      <ThresholdBullets flags={row.flags} />
+    </figure>
+  )
+}
+
 // The reader-facing words for each status, and the order the legend prints
 // them in. Held here rather than inline so the meter, the legend and the arm
 // list cannot name the same state three ways.
@@ -53,8 +84,20 @@ export function BullpenPage() {
   const [openClub, setOpenClub] = useState(null)
   const { favoriteTeamId } = useFavoriteTeam()
 
-  const asOf = toApiDate()
   const { loading, error, data } = useAsync(() => fetchWorkload(), [])
+  // THE FILE'S OWN DATE, not the browser's. On any night the nightly cron ran,
+  // these are the same string and nothing here changes. They part only when the
+  // file is a day stale — and then asking it about TODAY is asking about a day
+  // it holds no appearances for, so every arm reads "0 pitches yesterday" and
+  // the page publishes a false all-clear on the one question it exists to
+  // answer. Read at the file's asOf it reports a day-old picture truthfully,
+  // which is also the date the masthead already stamps on the page.
+  //
+  // It is what the team hub's Bullpen health card reads too. That matters more
+  // than either choice on its own: the two surfaces draw the SAME seven-day
+  // grid off the SAME file, so a reader who opens one after the other must not
+  // be told 2 limited here and 2 down there.
+  const asOf = data?.asOf ?? toApiDate()
   const { data: clubs } = useAsync(() => loadClubs(), [])
 
   const teamIds = useMemo(() => (clubs ? [...clubs.keys()] : []), [clubs])
@@ -75,6 +118,12 @@ export function BullpenPage() {
     .filter(Boolean)
     .sort((a, b) => b.last7dayPitches - a.last7dayPitches)[0]
   const selected = rows.find((r) => r.teamId === (openClub ?? favoriteTeamId)) ?? rows[0]
+  // The selected club's pen as grid rows — the same seven-day board the lineup
+  // page draws, run here for whichever staff the chips have open.
+  const grid = useMemo(
+    () => (data && selected ? staffGridFor(data, selected.teamId, asOf) : null),
+    [data, selected, asOf],
+  )
 
   return (
     <div className="screen">
@@ -83,9 +132,9 @@ export function BullpenPage() {
       <BroadcastMasthead
         eyebrow="The Pen"
         title="Bullpen Availability"
-        dek="All thirty bullpens on one board, run through the same workload rules a broadcast
-             uses. Ranked on the share of each staff that is likely down rather than the count,
-             because four tired arms out of six is a different night than four out of eleven."
+        dek="All thirty bullpens on one board, ranked on the share of each staff that is likely
+             down rather than the count — four tired arms out of six is a different night than
+             four out of eleven."
         meta={[
           // The DATA's own stamp, not today's date. This used to read
           // humanDate(asOf) — i.e. toApiDate(), today, computed in the browser —
@@ -136,9 +185,7 @@ export function BullpenPage() {
 
           <BroadcastSection
             title="The board"
-            note="The meter is each staff split three ways — available, limited, likely down.
-                  A pen reading mostly red has usually had a week of one-run games, extra
-                  innings, or starters who did not get out of the fifth."
+            note="Each staff split three ways — available, limited, likely down."
           >
             <div className="rpt-controls" role="group" aria-label="Sort the board">
               {BULLPEN_SORTS.map((s) => (
@@ -221,9 +268,8 @@ export function BullpenPage() {
 
           <BroadcastSection
             title="Arm by arm"
-            note="One club’s pen in full, most-worked first, with the rule that flagged each
-                  name. Pick from the ten most-taxed staffs above, or your own club is opened
-                  by default."
+            note="One club’s pen over its last seven days — a cell is what he threw, a rail joins
+                  days worked back to back. Sorted on availability, then load."
           >
             <div className="rpt-controls" role="group" aria-label="Club">
               {rows.slice(0, 10).map((r) => (
@@ -239,76 +285,29 @@ export function BullpenPage() {
               ))}
             </div>
 
-            {selected && (
-              <BoardScroller label="Arm by arm for the selected club">
-                <table className="standings rpt">
-                  <thead>
-                    <tr>
-                      <th className="team">{clubName(clubs, selected.teamId)}</th>
-                      <th>Status</th>
-                      <th>7 days</th>
-                      <th>Last out</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selected.arms.map((a) => (
-                      <tr key={a.personId}>
-                        <th scope="row" className="team">
-                          <PlayerLink id={a.personId}>{a.name}</PlayerLink>
-                          {a.reasons.length > 0 && (
-                            <span className="rpt__sub">{a.reasons.join(' · ')}</span>
-                          )}
-                        </th>
-                        <td>{STATUS[a.status]?.label ?? a.status}</td>
-                        <td>
-                          {a.last7dayPitches}
-                          <span className="rpt__sub">
-                            {a.last7dayApps} app{a.last7dayApps === 1 ? '' : 's'}
-                          </span>
-                        </td>
-                        <td>
-                          {a.lastOuting ? humanDate(a.lastOuting) : '—'}
-                          <span className="rpt__sub">
-                            {a.lastOuting ? `${a.lastOutingPitches} pitches` : ''}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </BoardScroller>
+            {grid && (
+              <div className="penpage__grid">
+                <h3 className="penpage__gridclub">{clubName(clubs, selected.teamId)}</h3>
+                <StaffGrid rows={grid} />
+                <PenRule row={grid[0]} />
+              </div>
             )}
           </BroadcastSection>
 
           <section className="method">
             <h2>How availability is decided</h2>
             <p>
-              <strong>Three flags, counted in pitches and days.</strong> They are public
-              broadcast rules rather than anything this site invented: a reliever who threw 25 or
-              more pitches yesterday, one who has thrown 35 or more across the last three days,
-              and one who worked both of the previous two days. A pitcher carrying two of those,
-              or who has worked three straight days, is filed as likely down. One flag is
-              limited. None is available.
+              <strong>Two flags, or three straight days on its own, files an arm as likely
+              down.</strong> The bullets above draw each flag against the threshold that judges
+              it, so the numbers are on the page rather than in this paragraph. They are public
+              broadcast rules, not anything this site invented.
             </p>
             <p>
-              <strong>These are rules, not information.</strong> No club publishes who is
-              unavailable, and a manager’s own list will differ from this one on any given night —
-              a pitcher may be held back for a matchup two days away, or sent out on a fourth
-              straight day because the game demanded it. Read the board as workload, which is a
-              fact, rather than as availability, which is a decision.
-            </p>
-            <p>
-              <strong>Starters are excluded outright.</strong> A rotation is not a bullpen, and
-              counting five starters as available would flatter every club by the same five
-              names. The board is also ranked on the share of each staff rather than the count,
-              because four tired arms out of six is a different night than four out of eleven.
-            </p>
-            <p>
-              <strong>It is a board about the current staff, not the season.</strong> The file
-              behind this page carries the arms that have pitched recently — roughly thirteen a
-              club — so a reliever just up from Triple-A will not appear until he works. Every
-              appearance is counted strictly before today, which is why nothing in progress
-              reaches this page.
+              <strong>Read it as workload, which is a fact, rather than availability, which is a
+              decision.</strong> No club publishes who is unavailable, and a manager will differ
+              from this board on any night. Starters are excluded — a rotation is not a bullpen.
+              The file behind the page carries the arms that have pitched recently, roughly
+              thirteen a club, and counts every appearance strictly before today.
             </p>
           </section>
         </>

@@ -92,6 +92,10 @@
 @import './styles/64-milb-alumni.css';
 @import './styles/69-hit-chart.css';
 @import './styles/73-spray-map.css';
+/* The four workload marks. Global rather than component-imported because they
+   are drawn on six surfaces, the slate among them — a mark on a game card
+   cannot wait on a route chunk. */
+@import './styles/76-workload-marks.css';
 /* Motion — the animation layer (the motion study, issues #976-#983). A
    SUBDIRECTORY for the same reason focus/ below is one: src/styles is a flat
    directory at its own file ratchet (scripts/check-dir-size.mjs), the study

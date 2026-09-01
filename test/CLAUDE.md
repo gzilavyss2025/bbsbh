@@ -30,6 +30,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | contract-view.test.js | 21 | src/api/person/contract/view.js | The Contract card's reading of one shard record: which regime leads the card, the arbitration/free-agency years read off the out-year codes (Super Two included), who the terms say holds an option, and the salary schedule's cash-only bars |
 | copy-registry.test.js | 36 | src/copy/registry.js | Admin-editable consent copy (ADR-0025/0026), MLB + MiLB ballpark field derivation |
 | crawl-body.test.js | 18 | api/_lib/crawl.js, api/_lib/cards.js, api/preview.js, scripts/gen-sitemap.mjs | The readable body a rewritten deep link now carries (ADR-0059) — what a player and a club page say, that the layer cannot reach a game and a game route gets no body at all, where the markup sits relative to #root, and the sitemap's club listing |
+| css-tokens.test.js | 3 | src/styles/**, src/tokens/** | Every var(--token) resolves to a defined token |
 | dates.test.js | 10 | src/lib/dates.js | Date window/formatting helpers |
 | day-highlights.test.js | 46 | src/api/dayHighlights.js, src/lib/resultCards.js | Day Recap signals (multi-HR, game score, cycle, etc.) + the slate's four display tiers (favorite → live → national scheduled → rest) |
 | derive-live-state.test.js | 9 | src/api/playbyplay.js | Core spoiler-safe HUD state (cap, bases, batterDone) |
@@ -145,6 +146,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | winprob-atbat-step.test.js | 5 | src/api/playbyplay.js | lastVisibleAtBatIndex |
 | winprob.test.js | 17 | src/api/game.js, src/api/winprob.js | Win probability chart |
 | workload.test.js | 11 | src/api/workload.js | Rolling pitcher workload |
+| workload-marks.test.js | 20 | src/api/workload.js | The four workload marks — flags, rest runs, staff grid, pen dots |
 | worktrees.test.js | 15 | scripts/worktrees.mjs | Git-worktree staleness classification |
 | wpa-logo.test.js | 18 | src/lib/wpa/wpaLogo.js, teams.js, logoArt.js | WPA band logo resolver/recolor guard |
 

@@ -8,6 +8,7 @@ import { lineupDefenseFrom, hiddenTeamTabs } from './data/shared.js'
 import { RosterProjection } from './modules/RosterProjection.jsx'
 import { CurrentRosterCard } from './modules/CurrentRosterCard.jsx'
 import { InjuredListCard } from './modules/InjuredListCard.jsx'
+import { BullpenHealthCard } from './modules/BullpenHealthCard.jsx'
 
 // Roster tab: the season roster projection (full, at the top — this is the
 // tab's headline), then the 40-man Current Roster and the Injured List, each
@@ -96,6 +97,11 @@ export function RosterTab({ id, asOf, sportId }) {
           isMilb={isMilb}
         />
       )}
+
+      {/* The club's pen over its last seven days — self-fetching and
+          self-hiding, so a MiLB affiliate (absent from workload.json) and a
+          club with no recent relief work both simply render nothing. */}
+      <BullpenHealthCard teamId={teamId} />
 
       {(position.length > 0 || pitchers.length > 0) && (
         <CurrentRosterCard position={position} pitchers={pitchers} season={season} isMilb={isMilb} sportId={sportId} />

@@ -4,6 +4,8 @@ import { selectGameStatus } from '../../api/select.js'
 import { doubleHeaderLabel } from '../../lib/resultCards.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchJerseysData } from '../../api/jerseys.js'
+import { fetchWorkloadSummary, penSummaryClubs } from '../../api/workload.js'
+import { PenDots } from '../workload/PenDots.jsx'
 import { parkBackdrop } from '../../lib/ballpark/parkBackdrop.js'
 import { parkWashColorOverride } from '../../lib/ballpark/parkWash.js'
 import { useCopy } from '../../copy/copyContext.js'
@@ -89,6 +91,22 @@ export function GameCard({
   // cache" shape as every other public/data/*.json reader — this is not one
   // network request per card, just a cache hit after the first card mounts.
   const { data: jerseysData } = useAsync(fetchJerseysData, [])
+  // The thirty-row sidecar, not the whole workload store — a matchup card
+  // showing eight dots should not pull 180 KB to do it (scripts/gen-workload.mjs
+  // writes both). staticJson memoizes the REQUEST, so a fifteen-card slate
+  // costs one fetch, the same way jerseysData above does.
+  const { data: penSummary } = useAsync(fetchWorkloadSummary, [])
+  // penSummaryClubs holds the freshness rule (api/workload.js), not this card:
+  // the day the slate shows, or the morning after a nightly rebuild slipped,
+  // and never a past-day slate — those dots would be tonight's pen drawn on a
+  // game already played. Null hides them.
+  const penClubs = penSummaryClubs(penSummary, game.officialDate)
+  const penDots = penClubs
+    ? {
+        away: penClubs[game.away?.id] ?? null,
+        home: penClubs[game.home?.id] ?? null,
+      }
+    : null
   // The park this game is at, as a photo to wash in behind the '@' once the
   // card is on screen — null for every venue we hold no art for, which is
   // every MiLB park and every one-off neutral site (see
@@ -232,6 +250,22 @@ export function GameCard({
           <TeamName team={game.away} side="away" />
           <TeamName team={game.home} side="home" />
         </div>
+        {/* Each club's bullpen as one dot an arm, available first, so the
+            length of the green run is the reading. Spoiler-free — the summary
+            file stops at yesterday — and gated on the slate showing the day
+            that file describes: on a past day these dots would be about
+            tonight's pen, not that game's. MiLB clubs are absent from the file
+            and simply draw nothing (the degrade convention). */}
+        {penDots && (
+          <div className="gamecard__pens">
+            <span className="gamecard__pen">
+              <PenDots counts={penDots.away} size="sm" />
+            </span>
+            <span className="gamecard__pen">
+              <PenDots counts={penDots.home} size="sm" />
+            </span>
+          </div>
+        )}
         {/* Additive score line, present ONLY under an active Scores Unlocked
             pass (liveLine non-null). It renders BELOW the matchup — the team
             colors, cap/jersey marks, and names above are untouched — so a card

@@ -16,6 +16,7 @@ import { selectLiveEdge, selectLiveHalf, shouldFollowLiveEdge } from '../api/liv
 import { useCopy } from '../copy/copyContext.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
+import { clubPenCounts } from '../api/workload.js'
 import { buildMarginNotes } from '../api/pitcher-callouts.js'
 import { ordinal } from '../lib/format.js'
 import { RefreshButton } from './TeamInfo.jsx'
@@ -714,13 +715,34 @@ export function InningViewer({
 
   // PitchersSection's own prop, memoized rather than built inline: the section
   // is memoized, and an array literal rebuilt each render would defeat that.
-  const pitcherTeams = useMemo(
-    () => [
-      { name: rosters.away.name, side: 'away', rows: pitcherLines.away },
-      { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
-    ],
-    [rosters, pitcherLines],
-  )
+  //
+  // `penCounts` is each club's bullpen as fresh/limited/down, drawn as pen dots
+  // beside the team name — "who is left", which the running lines cannot say.
+  // It comes from the NIGHTLY FILE ONLY (clubPenCounts stops at yesterday) and
+  // must stay that way: crossed with tonight's used-pitcher list it would count
+  // pitching changes, which tracks the score. Gated on workloadGameDate for the
+  // same reason the callout notes are — on an archival game the flags would be
+  // about the wrong day.
+  const pitcherTeams = useMemo(() => {
+    const countsFor = (teamId) =>
+      workload && workloadGameDate && teamId != null
+        ? clubPenCounts(workload, Number(teamId), workloadGameDate)
+        : null
+    return [
+      {
+        name: rosters.away.name,
+        side: 'away',
+        rows: pitcherLines.away,
+        penCounts: countsFor(meta.away.id),
+      },
+      {
+        name: rosters.home.name,
+        side: 'home',
+        rows: pitcherLines.home,
+        penCounts: countsFor(meta.home.id),
+      },
+    ]
+  }, [rosters, pitcherLines, meta, workload, workloadGameDate])
 
   if (!firstPitchThrown) {
     return (

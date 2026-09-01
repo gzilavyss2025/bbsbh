@@ -64,7 +64,7 @@
 .posterstudio__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-section);
+  font-size: var(--fs-h3);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   line-height: var(--lh-solid);
