@@ -331,6 +331,186 @@ not carry it at all.
 zero by a fifth of its rows, and the 2024 convention change appears as a sudden
 rise in guarantees that no signing produced.
 
+## `mls` is a stripped decimal, and its bare integers come from somewhere else
+
+**Read the day part by its LENGTH, not as written.** Baseball writes service
+time as YEARS.DAYS, a full service year is 172 days, and the day part is
+normally padded to three digits — `4.078` is 4 years 78 days. This column lost
+that padding to a float round-trip, which drops trailing zeros. `.100` came out
+`.1`. `.120` came out `.12`. `.078` kept all three digits because its last digit
+is not a zero. And `.000` collapsed to a bare integer with no decimal point at
+all.
+
+Every observation follows from that one mechanism. 19,308 cells are populated:
+16,382 dotted, 2,926 bare integers (**15.2%**), and nothing in any other shape.
+**No cell anywhere reads `X.000`** — there is nowhere else for those cells to
+have gone. The decimal-part lengths are 1 (123 cells), 2 (1,569), 3 (14,549), 4
+(1) and 15 (140), and each length is explained rather than tolerated:
+
+| decimal length | n | reconstruction | why that is the only reading |
+| --- | --- | --- | --- |
+| 1 | 123 | `.1` is 100 days | all 123 are the digit `1`, never 2–9 — only `.100` can land in one digit |
+| 2 | 1,569 | `.DD` is `DD` × 10 | the values are exactly 01–09 and 11–17: the multiples of ten from 010 to 170, minus 100 |
+| 3 | 14,549 | `.DDD` as written | untouched, and the largest is 171 — none reaches 172 |
+| 15 | 140 | round to three places | `4.171000000000001` is the round-trip caught in the act |
+| 4 | 1 | strip the leading zero | one typo, named below |
+
+The four-digit cell is Tim Beckham 2015, `0.0145`. His own rows settle it: 2014
+`0.012`, 2015 `0.0145`, 2016 `1.145`, 2017 `2.134`. Read 2015 as 0 years 145
+days and 2015 to 2016 is a gain of exactly 172 days, a textbook full season. It
+is a stray leading zero over `145`, not a fourth notation.
+
+`src/lib/contracts/parseServiceTime.js` implements the table.
+`test/parse-service-time.test.js` sweeps the live file against it.
+
+### What the reconstruction does not buy you
+
+**Knowing what the string MEANS is not knowing that the value is RIGHT, and the
+bare integers are where those two part company.** A bare `N` denotes N years and
+0 days, unambiguously. It is still the least trustworthy cell in the column.
+
+`docs/service-time-debut-clock.md` compared these cells to wire-verified
+roster-add dates. Among the men who **provably** banked less than a full service
+year, **11 of 18** bare-integer cells wrongly read `1` or higher, against **12 of
+2,175** day-count cells (0.6%). Quote it as 11 of 18. The prevalence is solid;
+the rate is not, because 18 is the whole provable subset.
+
+A wrong bare `1` cannot come out of the trailing-zero mechanism at all — a true
+`0.138` has no trailing zero to strip. So those cells come from a different and
+cruder source, most plausibly a "springs since debut" count that happens to
+produce the same spelling a correct `1.000` produces.
+
+The transaction wire is not needed to see it. A year-over-year continuity test
+over the 13,291 consecutive-season same-name pairs — one row per name and season,
+a violation being a gain above a realistic 200-day season or a gain below zero —
+finds 38 violations, **0.29%**. Excluding the 15 names this document already
+lists as two different men sharing one name, it is **26 of 13,229 = 0.197%**.
+That second figure is the one to quote: it does not depend on which of a
+duplicate pair's rows you pick.
+
+**1,745 of the 2,926 bare cells (59.6%) have no earlier populated `mls` cell for
+that player at all.** That is the at-risk population, and it is an **upper bound,
+not a count of wrong cells** — it also holds every man whose earlier seasons
+simply predate the 2010 coverage window. At the other end, only **62 (2.1%)**
+follow an established dotted history for the same man. Those 62 are the
+highest-trust bare cells in the file.
+
+**Rule: never use a bare-integer `mls` cell to decide whether a man crossed a
+service threshold.** Use it as an approximation of years, or exclude it. A
+day-count cell answers a threshold question; a bare cell only looks as though it
+does.
+
+**Cost when wrong:** service-threshold work is exactly the work this column
+invites, and the errors point one way — a bare cell reads a man as further along
+than he was. Any "banked a full year" rate built on bare cells counts men who
+banked nothing, and excluding the bare cells does not rescue the test, because
+the confirmations are spelled identically to the errors.
+
+## `arbitration.csv`'s `note` is a projection, not an outcome
+
+**It must never backfill `settled_salary`.** `note` holds a bare dollar figure on
+**1,440 of 2,420 rows**; 1,442 rows carry any non-blank note. The only two
+non-money values in the whole column are `4-year extension` (Luis Severino 2019)
+and `signed 4-year extension` (Aaron Nola 2019). Read as a settled figure it
+looks helpful, and that is the trap.
+
+The money figure appears on the `MLB-2022 Arb by club` through `MLB-2026 Arb by
+club` sheets only. The 2018–2021 sheets state no money note at all; the two
+prose values above sit on the 2019 sheet. So the column covers five of the
+file's nine seasons.
+
+**It is not the settlement.** On the 1,058 rows where `note` and
+`settled_salary` are both numeric they are equal on **56**. They disagree on
+**1,002 = 94.7%**. Loosening the test does not rescue it: 85 rows agree within
+1%, 332 within 5%, and 544 within 10% — barely half. The ratio of `note` to
+`settled_salary` runs 0.787 at the 10th percentile, 0.900 at the 25th, 1.000 at
+the median, 1.091 at the 75th and 1.250 at the 90th. A figure that lands on the
+answer half the time and misses by a quarter at the tails is a forecast, not a
+record.
+
+Nor is it another column wearing a different name. It equals
+midpoint(`player_request`, `club_offer`) on **4 of 121** testable rows and
+`prior_salary` on **42 of 1,336**.
+
+Four more facts point the same way:
+
+- **It behaves like an estimate that gets easier.** The 10th-to-90th spread of
+  the note/settled ratio narrows as service time rises: 0.507, 0.544, 0.427 and
+  0.320 for service bands 2, 3, 4 and 5. A recorded outcome has no reason to be
+  more accurate for a fifth-year man.
+- **It tracks the settlement closely but not exactly.** corr(`note`,
+  `settled_salary`) is 0.981, and on the raise itself — corr(`note` minus
+  `prior_salary`, `settled_salary` minus `prior_salary`) — it is 0.909.
+- **It is rounder than the settlement.** Of the both-numeric rows, `note` is
+  divisible by $100,000 on 53.6% against 42.8% for `settled_salary`, and by
+  $10,000 on 88.2% against 74.7%. Models publish round numbers. Hearings do not.
+- **It never appears beside a non-dollar outcome.** On all 1,440 money-note rows
+  `settled_salary` is numeric (1,058), blank (359) or a multi-year extension
+  shape (23). It is **never** `outrighted`, `non-tendered`, `DFA`, `released`,
+  `retired` or `lost on waivers` — 0 of 1,440. A figure produced before the case
+  closed is exactly what has nothing to say about those outcomes.
+
+**The reading: `note` is a pre-settlement projected or estimated arbitration
+salary, most plausibly an industry model figure.** That is a moderate-to-high
+confidence conclusion drawn from the evidence above, not a documented fact about
+the source, and it should be quoted that way.
+
+**Rule: never merge `note` into `settled_salary`, and never use it to fill the
+382 rows that carry a money note and no numeric settlement.** If an approximate
+figure is wanted, it lives under a separate, clearly-named field that says it is
+an estimate. `src/lib/contracts/parseMoney.js` deliberately does not read this
+column: making `note` a tenth money column is the informal reading this section
+exists to prevent. The column is documented, not parsed.
+
+**Cost when wrong:** backfilling injects an estimate into a series of recorded
+facts, and it does it worst where the record is thinnest — 359 of those 382 rows
+carry no settled figure at all, so the estimate would meet no contradiction. For
+the other 23 the damage is worse than approximate: each pairs with a multi-year
+extension, so a backfill restates a whole deal as a single settled season.
+
+**One row's `season` is a typo.** Line 1229 — Drew Hutchison, Detroit — reads
+`season` 2020 with `source_sheet` `MLB-2022 Arb by club`, and the row sits in
+correct alphabetical order inside that sheet's Detroit block. It is the **only**
+season/source_sheet disagreement in all 2,420 rows. It is a season-column error,
+not a stray row. Group the file by `source_sheet` and 2020 gains a man it never
+had.
+
+## `salaries.csv` is a salary roster, not a payroll ledger
+
+**A missing row means "not in this roster file". It never means "not paid".**
+The file lists the 863 to 974 salaried men a season counted above, and a
+short-service player can miss it entirely. Test it against a population that
+indisputably drew major-league pay — `docs/prospect-ranking-value.md`'s 3,060-man
+debut cohort, every man of whom reached the majors — and **10.3% of them have no
+salary row at all**. Among men with three or more major-league seasons it is
+still **7.2%**.
+
+**And the miss is not even.** Inside that document's observed-deep group, 4.8% of
+ranked men (n=331) have no salary row against **12.8%** of unranked men
+(n=1,067). Part of that gap is real rather than a file artifact: an unranked man
+is more marginal, so he is genuinely likelier to be the short-service man a
+roster snapshot never lists. The rest is a file gap. Either way the men who are
+missing are disproportionately the ones who did less, so the gap biases a
+ranked-versus-unranked comparison in one consistent direction — a file gap coded
+as a zero pushes the unranked figure down and inflates every ratio above it.
+
+**Rule: quote a range, not a point estimate.** Run the statistic twice, once with
+the missing men carried as zeroes and once with them dropped from both sides, and
+report both. The source spike's six-season earnings ratio reads 2.40 with them
+kept and **2.14** with them dropped. The range is the honest answer; either end
+alone is a claim the file cannot support.
+
+**Cost when wrong:** "never earned a major-league salary" is not measurable from
+this file. Read as a ledger it turns a 10.3% coverage gap into a finding about
+players, and the gap is widest exactly where the comparison is most interesting.
+
+**A second, separate problem sits in 2020.** The 2020 rows record the
+**contracted** salary, not what the 60-game season actually paid — roughly 37% of
+it. The league totals prove it: **$3,987,209,077 in 2020 against $3,887,858,407
+in 2019**. That is a 2.6% rise, which is the wrong shape entirely for a season
+that paid about a third. Any dollar series that crosses 2020 must say which of
+the two it means, and must not read the flat line as a market that held up.
+
 ## Five more defects a consumer must handle
 
 1. **One salary cell is a word, not a number.** 2021 Robinson Cano reads
