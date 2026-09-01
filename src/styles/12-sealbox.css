@@ -1494,14 +1494,11 @@
 }
 
 /* A batter who's been replaced: struck through in pencil, same as the defense
-   diamond's --out name. Set on the .plink too — a <button> won't take an
-   ancestor's line-through (see the play-by-play's .pbp__replaced .plink). */
-.lineupcard__name--out,
-.lineupcard__name--out .plink {
+   diamond's --out name. The strike is a drawn bar now rather than
+   `text-decoration` — see styles/motion/strike.css, which took the `.plink`
+   half of this rule with it by covering the wrapper instead. */
+.lineupcard__name--out {
   color: var(--text-caption);
-  text-decoration: line-through;
-  text-decoration-color: var(--graphite-soft);
-  text-decoration-thickness: 1.5px;
 }
 
 /* The standing occupant of a slot that's seen a sub: inked seam-red, same as

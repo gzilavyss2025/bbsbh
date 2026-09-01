@@ -1,0 +1,87 @@
+/* -------------------------------------------------------- motion / strike */
+/* DRAW THE CROSS-OUT (issue #981).
+
+   A starter comes out and his line is struck through. It used to simply BE
+   there on the next render, because `text-decoration: line-through` cannot
+   animate. This draws it instead: a graphite bar of the same weight and
+   colour, wiped left to right in 220ms. It is the most literal scorekeeping
+   gesture in an app about keeping score, and it fires on a state change a
+   handful of times a game — exactly the case STANDARDS.md's frequency table
+   says motion may be spent on.
+
+   ROUTE A: THE BAR REPLACES THE DECORATION PERMANENTLY, at all four sites, and
+   that is a structural fix rather than a flourish. `.plink` is a <button>: it
+   does not inherit an ancestor's `text-decoration` and it zeroes its own, so
+   every one of those four rules had to name `.plink` a second time or the line
+   drew over an un-linked inning tag and skipped the name beside it. That is
+   the bug scripts/check-strike-links.mjs was written for, documented in its
+   header. A bar over the WRAPPER covers a link, a tag or plain text without
+   having to know which it got, so the rules could drop their second selector
+   because the hazard is gone, not because it stopped being checked. The guard
+   still has three line-through rules to hold — two exempt pills in
+   12-sealbox.css and the roster's own self-targeting row — and it walks
+   subdirectories as of this commit, so it reaches this file too.
+
+   THE SETTLED APPEARANCE IS UNCHANGED: 1.5px (--bw-rule), --graphite-soft,
+   with the name's own colour dropping to --text-caption, which each surface's
+   own partial still declares. Only the drawing is here.
+
+   EVERY WRAPPER CAN TAKE AN ABSOLUTE CHILD, which is what makes Route A safe
+   here rather than a gamble. `.defdiamond__name` is `white-space: nowrap` with
+   a max-width and an ellipsis, so it is one line by construction;
+   `.pbp__batline` is inline-flex and `.abhero__name`/`.abhero__pr`/
+   `.lineupcard__name` are flex boxes, so all four are blockified and the bar
+   spans the box the reader sees. A bar over a wrapper that could wrap onto two
+   lines would draw one rule through the gap between them — that case does not
+   exist at these four sites, and a fifth site must be checked before it joins
+   them.
+
+   ONLY A SUBSTITUTION THE READER WAS HERE FOR DRAWS ITSELF. `.is-drawing`
+   comes from StruckLine.jsx via useBecameTrue: a cold load, a poll and a
+   return visit all render the line already down. See that hook's header. */
+.pbp__replaced,
+.lineupcard__name--out,
+.defdiamond__name--out {
+  position: relative;
+}
+.pbp__replaced::after,
+.lineupcard__name--out::after,
+.defdiamond__name--out::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  /* 54%, not 50%: a line through the optical middle of lower-case text sits a
+     touch below the box's centre. */
+  top: 54%;
+  height: var(--bw-rule);
+  background: var(--graphite-soft);
+  /* The settled state IS the drawn bar, so the animation below runs 0 -> 1 and
+     lands on this. No `forwards` fill, and nothing to hand off to. */
+  transform: scaleX(1);
+  transform-origin: left center;
+  pointer-events: none;
+}
+.pbp__replaced.is-drawing::after,
+.lineupcard__name--out.is-drawing::after,
+.defdiamond__name--out.is-drawing::after {
+  animation: strike-draw var(--dur-med) var(--ease-out) backwards;
+}
+@keyframes strike-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Reduced motion renders the settled strike, drawn instantly. The mark still
+   has to be there — it says who is out of the game. */
+@media (prefers-reduced-motion: reduce) {
+  .pbp__replaced.is-drawing::after,
+  .lineupcard__name--out.is-drawing::after,
+  .defdiamond__name--out.is-drawing::after {
+    animation: none;
+  }
+}

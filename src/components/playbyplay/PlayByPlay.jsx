@@ -81,7 +81,11 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // newest, windowed only); `onFocusInfo(count)` says how many exist.
 // Presentation only — `stepCap` stays the single reveal boundary regardless
 // of `windowed`.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, halfInProgress = false, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo }) {
+// How many of a just-unsealed half's cards write themselves. See the comment
+// at `writingUpTo` below for why there is a cap at all, and why it is small.
+const WRITE_ON_CAP = 6
+
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, halfInProgress = false, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo, writing = false }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -303,6 +307,24 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   const firstRispPA = callouts ? firstRispPAIndexByBatter(feed) : null
   const progress = callouts ? computeCalloutProgress(feed) : null
 
+  // THE WRITE-ON IS CAPPED AT THE FIRST SIX CARDS (issue #982). A revealed
+  // half can be twenty plate appearances long, and twenty cards writing at once
+  // is a screensaver rather than a scorer's hand — the reader can only be
+  // looking at the top of the half anyway. Six is also the performance ceiling:
+  // beat 2 animates `stroke-dashoffset`, which repaints rather than riding the
+  // compositor, and that is fine for a handful of 108px diamonds and not for
+  // twenty. Notification cards (`kind === 'event'`) never write; they are
+  // announcements, not marks.
+  const writingUpTo = new Set()
+  if (writing) {
+    for (let i = 0, n = 0; i < visibleEntries.length && n < WRITE_ON_CAP; i += 1) {
+      if (visibleEntries[i].kind !== 'event') {
+        writingUpTo.add(i)
+        n += 1
+      }
+    }
+  }
+
   return (
     <div className="pbp">
       {visibleEntries.map((entry, i) => {
@@ -312,7 +334,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // he's a live baserunner whose trip is notated like everyone
           // else's — but not a plate appearance either, so it renders the
           // at-bat frame with the pitch ladder and RBI chip taken away.
-          node = <PlacedRunnerCard entry={entry} />
+          node = <PlacedRunnerCard entry={entry} writing={writingUpTo.has(i)} />
         } else if (entry.kind !== 'event') {
           node = (
             <AtBatCard
@@ -323,6 +345,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
               windowed={windowed}
               beatKey={beatKey}
+              writing={writingUpTo.has(i)}
             />
           )
         } else if (entry.eventType === 'pitching_substitution') {
@@ -503,7 +526,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 // have one home (see that file's TUNING note).
 const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
-function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, windowed = false, beatKey = null }) {
+function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, windowed = false, beatKey = null, writing = false }) {
   const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   const [highlightOpen, setHighlightOpen] = useState(false)
@@ -530,7 +553,11 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
   const prBase = replaced ? pinchRunners[pinchRunners.length - 1].base : null
   const prJersey = replaced ? pinchRunners[pinchRunners.length - 1].jersey : null
   return (
-    <div className={`pbp__atbat${hasZone ? '' : ' pbp__atbat--nozone'}`}>
+    <div
+      className={`pbp__atbat${hasZone ? '' : ' pbp__atbat--nozone'}${
+        writing ? ' pbp__atbat--writing' : ''
+      }`}
+    >
       {/* Unconditional now — see AtBatHero.jsx. It REPLACES the old .pbp__top
           name row outright (that row and its gate are gone; card identity is
           chrome now, not a mode). */}

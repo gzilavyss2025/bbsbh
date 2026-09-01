@@ -272,14 +272,11 @@
 
 /* A batter (or earlier runner) lifted for a pinch runner: crossed out in
    pencil, the same spent-row treatment the roster uses for a player who's
-   entered. Set on the .plink too — a <button> won't take an ancestor's
-   line-through. */
-.pbp__replaced,
-.pbp__replaced .plink {
+   entered. The strike is a drawn bar now rather than `text-decoration` — see
+   styles/motion/strike.css, which took the `.plink` half of this rule with it
+   by covering the wrapper instead. Only the colour is resting appearance. */
+.pbp__replaced {
   color: var(--text-caption);
-  text-decoration: line-through;
-  text-decoration-color: var(--graphite-soft);
-  text-decoration-thickness: 1.5px;
 }
 
 .pbp__pos {

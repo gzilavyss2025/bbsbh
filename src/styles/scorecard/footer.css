@@ -254,12 +254,12 @@
    replacement's own name and inning tag are already written in, so one change
    reads as one mark in one colour. Elsewhere — the innings viewer, the box
    score — the graphite strike stays.
-   The `.plink` half is not optional: a <button> will not take an ancestor's
-   line-through, and .plink zeroes text-decoration outright, so a rule that
-   names only the wrapper crosses out the tag and leaves the name standing.
-   scripts/check-strike-links.mjs is the guard. */
-.sc-footer__defense .defdiamond__name--out,
-.sc-footer__defense .defdiamond__name--out .plink {
-  text-decoration: line-through;
-  text-decoration-color: var(--accent-negative);
+
+   Only the INK is restated now. The strike itself is a bar drawn over the
+   wrapper (styles/motion/strike.css, issue #981), so this recolours that bar
+   rather than declaring a second `text-decoration` — and the `.plink` half
+   this rule used to need went with the decoration, since a bar over the
+   wrapper covers the link and the inning tag alike. */
+.sc-footer__defense .defdiamond__name--out::after {
+  background: var(--accent-negative);
 }

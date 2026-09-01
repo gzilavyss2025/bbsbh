@@ -1,5 +1,6 @@
 import { PlayDiamond } from './PlayDiamond.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { StruckLine } from './StruckLine.jsx'
 
 // The extra-innings automatic runner's card — the placed runner gets his own
 // row at the head of the half, above the leadoff batter, which is both where
@@ -28,7 +29,7 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 // the bases he was GIVEN and inks everything past them normally. His run, when
 // it comes, is unearned by rule and the feed says so, so the existing red
 // circled-run ring fires on its own.
-export function PlacedRunnerCard({ entry }) {
+export function PlacedRunnerCard({ entry, writing = false }) {
   const { runner, base, code, descSegments, reached, scored, earned, legNotations, outNumber, outAt, outCode, pinchRunners } = entry
   // Same strike-through-and-pencil-in as an at-bat card: a pinch runner for
   // the placed runner inherits this card (rootRunner/prAlias resolve to it),
@@ -36,12 +37,15 @@ export function PlacedRunnerCard({ entry }) {
   const replaced = pinchRunners && pinchRunners.length > 0
   const prBase = replaced ? pinchRunners[pinchRunners.length - 1].base : null
   return (
-    <div className="pbp__atbat">
+    <div className={`pbp__atbat${writing ? ' pbp__atbat--writing' : ''}`}>
       <div className="pbp__card pbp__card--placed">
         <div className="pbp__main">
           <div className="pbp__top">
             <span className="pbp__batter">
-              <span className={`pbp__batline ${replaced ? 'pbp__replaced' : ''}`}>
+              <StruckLine
+                struck={replaced}
+                className={`pbp__batline ${replaced ? 'pbp__replaced' : ''}`}
+              >
                 <PlayerLink
                   id={runner.id}
                   name={[runner.first, runner.last].filter(Boolean).join(' ')}
@@ -50,10 +54,11 @@ export function PlacedRunnerCard({ entry }) {
                   {runner.first ? `, ${runner.first}` : ''}
                 </PlayerLink>
                 {runner.pos && <span className="pbp__pos">{runner.pos}</span>}
-              </span>
+              </StruckLine>
               {pinchRunners?.map((pr, i) => (
-                <span
+                <StruckLine
                   key={pr.id}
+                  struck={i < pinchRunners.length - 1}
                   className={`pbp__batline ${i < pinchRunners.length - 1 ? 'pbp__replaced' : ''}`}
                 >
                   <PlayerLink id={pr.id} name={[pr.first, pr.last].filter(Boolean).join(' ')}>
@@ -61,7 +66,7 @@ export function PlacedRunnerCard({ entry }) {
                     {pr.first ? `, ${pr.first}` : ''}
                   </PlayerLink>
                   <span className="pbp__pos">PR</span>
-                </span>
+                </StruckLine>
               ))}
             </span>
             <span className="pbp__placed" title="Automatic runner">

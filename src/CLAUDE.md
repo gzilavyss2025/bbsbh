@@ -407,15 +407,15 @@ by that screen instead (a per-route chunk; 521 KB blocking → 368 KB). Files st
 `src/styles/`, guards unchanged; index.css says which left, who owns each, and the two rules for leaving.
 
 **Order is the contract.** The numeric prefix IS the cascade — later partials
-override earlier ones at equal specificity, exactly as later lines did in the
-old file. Never reorder the `@import` list to tidy it, and add a new partial at
-the position its rules belong in, not at the end. To find a rule, grep
-`src/styles/`; the file names say which surface each covers.
+override earlier ones at equal specificity. Never reorder the `@import` list to
+tidy it; add a new partial where its rules belong, not at the end. To find a rule,
+grep `src/styles/` — the names say which surface each covers, and `motion/` is the
+animation layer (motion only, before `focus/`; **`docs/motion.md`**).
 
-`check-typography.mjs` and `check-focus-ring.mjs` read the whole directory (not
-a fixed list), so a new partial is covered the moment it exists — and both fail
-loudly if they are ever pointed at something with no rules in it, which is what
-caught this split rather than letting it silently disable them.
+`check-typography.mjs`, `check-focus-ring.mjs` and `check-strike-links.mjs` walk
+the whole directory TREE (subdirectories included), so a new partial is covered the
+moment it exists — and each fails loudly if pointed at rules-free files, which is
+what caught the first split rather than letting it silently disable them.
 
 The tiers are layered Carbon-style
 (ADR-0023): a **primitive** tier of raw values — `spacing.css` is the generic 4px

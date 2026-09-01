@@ -18,17 +18,26 @@
 // same line (mirrors the caps-exempt convention). Run by `npm run lint`. Zero
 // deps, scans src/styles/*.css (where every component rule lives).
 
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 
-// Every component rule lives in src/styles/*.css — the partials src/index.css
-// @imports in order. Read the DIRECTORY rather than a fixed list so a new
-// partial is covered the moment it exists.
+// Every component rule lives under src/styles/ — the partials src/index.css
+// @imports in order. Read the DIRECTORY TREE rather than a fixed list so a new
+// partial is covered the moment it exists, SUBDIRECTORIES INCLUDED: the flat
+// directory sits at its own file ratchet (check-dir-size.mjs), so a partial
+// that outgrows the file cap subdivides instead of splitting sideways
+// (ADR-0038), and `focus/`, `scorecard/` and `motion/` are all real rules this
+// guard would otherwise walk straight past.
 const stylesDir = resolve('src/styles')
-const sheets = readdirSync(stylesDir)
-  .filter((f) => f.endsWith('.css'))
-  .sort()
-  .map((f) => ({ rel: `src/styles/${f}`, raw: readFileSync(join(stylesDir, f), 'utf8') }))
+const listSheets = (dir, prefix) =>
+  readdirSync(dir).flatMap((f) => {
+    const abs = join(dir, f)
+    if (statSync(abs).isDirectory()) return listSheets(abs, `${prefix}${f}/`)
+    return f.endsWith('.css')
+      ? [{ rel: `src/styles/${prefix}${f}`, raw: readFileSync(abs, 'utf8') }]
+      : []
+  })
+const sheets = listSheets(stylesDir, '').sort((a, b) => a.rel.localeCompare(b.rel))
 
 // Same hazard as check-typography.mjs: if the stylesheets move again, or a
 // refactor empties them, every assertion below becomes a no-op while still

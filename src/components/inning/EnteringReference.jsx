@@ -11,6 +11,7 @@ import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { RookiePill } from '../badges/RookiePill.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../../lib/headerTheme.js'
+import { StruckLine } from '../scoring/StruckLine.jsx'
 
 // The fielding team's defensive alignment ENTERING this half, drawn as the
 // scorebook diamond and captioned with the fielding side. Shows the state at
@@ -321,7 +322,8 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
 function LineupName({ entry }) {
   const entered = entry.inning != null && !entry.replaced
   return (
-    <span
+    <StruckLine
+      struck={entry.replaced}
       className={`lineupcard__name ${entry.replaced ? 'lineupcard__name--out' : ''} ${
         entered ? 'lineupcard__name--in' : ''
       }`}
@@ -336,6 +338,6 @@ function LineupName({ entry }) {
       {entry.inning != null && (
         <span className="lineupcard__enter">({ordinal(entry.inning)})</span>
       )}
-    </span>
+    </StruckLine>
   )
 }
