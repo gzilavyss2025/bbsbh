@@ -17,6 +17,20 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
 
 
 - `statsapi.js` — the one `getJson` fetch wrapper every topic file below calls.
+- `boxlines/` — **Box Lines** (ADR-0069), the game-by-game rows behind a summary
+  stat line, fetched LIVE on the tap that opens the sheet rather than from the
+  nightly file (264,770 rows league-wide was the alternative). `vsClub.js`
+  gathers: `yearByYear` for the seasons, one `gameLog` per season trimmed with
+  `fields=` (a pitcher's season ~7 KB, a hitter's ~25 KB), one
+  `schedule?gamePks=…&hydrate=team` call for the final score, venue, day/night,
+  Final status and abbreviations — the game log carries none of those, and its
+  own `game.dayNight` is wrong (verified). `rows.js` is the gate and the row:
+  `logRequestPlan` asks for the cutoff season only through the day BEFORE the
+  cutoff (`endDate`, inclusive) and never a later season, so the game being
+  scored is never fetched; `boxLineRows` keeps only games strictly before the
+  cutoff and reported Final. Both `cutoff-gated`. `test/boxlines-rows.test.js`
+  pins the gate. The line builders are `person/gameLog.js`'s `pitcherLine` /
+  `hitterLine`, reused, not copied.
 - `schedule.js` — slate/schedule (`hydrate=team` for the abbreviation +
   teamName the bare row lacks), `resolveGame`, `fetchGamesByPk`,
   `fetchHeadToHead`, `fetchTeamSchedule`. `fetchGameCardsByPk` is the

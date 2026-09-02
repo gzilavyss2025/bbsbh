@@ -1,3 +1,4 @@
+import '../../styles/boxlines/boxlines.css'
 import { PitchLadder } from '../../components/scoring/PitchLadder.jsx'
 import { PlayDiamond } from '../../components/scoring/PlayDiamond.jsx'
 
@@ -150,6 +151,57 @@ export function WriteOnDemo({ out = false }) {
           {out && <span className="pbp__code pbp__code--center pbp__code--out">6-3</span>}
           {out && <span className="pbp__outcircle">1</span>}
         </div>
+      </div>
+    </div>
+  )
+}
+
+// The Box Lines sheet's side entrance (ADR-0069): a cropped stand-in for the
+// sheet — its head, its headline, two ruled rows — carrying the wide
+// breakpoint's `boxlines-slidein` inline, so the lab runs it at any width and
+// the frozen strip can hold it mid-settle. Made-up line, no game feed.
+export function BoxLinesEntrance() {
+  return (
+    <div className="animlab-boxlines">
+      <div
+        className="sheet boxlines animlab-boxlines__sheet"
+        style={{ animation: 'boxlines-slidein var(--dur-slow) var(--ease-out)' }}
+      >
+        <div className="boxlines__head">
+          <div>
+            <p className="boxlines__kicker">Box lines · regular season</p>
+            <h2 className="sheet__title boxlines__title">Surname vs the Club</h2>
+          </div>
+        </div>
+        <p className="boxlines__headline">Career vs CLB: 2 G, 12.0 IP, 3.00 ERA, 9 K, 4 BB</p>
+        <ul className="boxlines__rows">
+          <li className="boxline">
+            <span className="boxline__link">
+              <span className="boxline__season">2026</span>
+              <span className="boxline__mark" />
+              <span className="boxline__meta">
+                <span className="boxline__date">6/1</span>
+                <span className="boxline__where">vs CLB</span>
+              </span>
+              <span className="boxline__score">OWN 4, CLB 2</span>
+              <span className="boxline__chev" />
+              <span className="boxline__line">GS, 6.0 IP, 4 H, 2 R, 2 ER, 2 BB, 5 K</span>
+            </span>
+          </li>
+          <li className="boxline boxline--band">
+            <span className="boxline__link">
+              <span className="boxline__season">2025</span>
+              <span className="boxline__mark" />
+              <span className="boxline__meta">
+                <span className="boxline__date">8/9</span>
+                <span className="boxline__where">@ CLB</span>
+              </span>
+              <span className="boxline__score">OWN 3, CLB 2</span>
+              <span className="boxline__chev" />
+              <span className="boxline__line">GS, 6.0 IP, 5 H, 2 R, 2 ER, 2 BB, 4 K</span>
+            </span>
+          </li>
+        </ul>
       </div>
     </div>
   )

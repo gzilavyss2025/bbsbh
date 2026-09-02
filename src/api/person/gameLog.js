@@ -32,7 +32,7 @@ function tag(n, label) {
 // A hitter's one-game line, TV-lower-third style: "2-4, 2B, HR, 2 RBI, K"
 // (hits-for-atBats, then extra-base hits, then RBI / walks / steals / strikeouts,
 // each shown only when it happened).
-function hitterLine(st) {
+export function hitterLine(st) {
   const parts = [`${num(st.hits)}-${num(st.atBats)}`]
   for (const t of [
     tag(st.doubles, '2B'),
@@ -51,7 +51,7 @@ function hitterLine(st) {
 // A pitcher's one-game line: "GS, 6.0 IP, 2 H, 1 R, 1 ER, 4 BB, 6 K" (leads
 // with GS when he started; the counting stats always show, zeros included, the
 // way a box-score pitching line reads).
-function pitcherLine(st) {
+export function pitcherLine(st) {
   const parts = []
   if (num(st.gamesStarted) > 0) parts.push('GS')
   // Non-breaking space within each token (see tag/NBSP) so the line wraps only

@@ -255,6 +255,10 @@
   border-top: var(--bw-hair) dashed var(--border-hairline);
 }
 
+/* The career line doubles as the door to its Box Lines (ADR-0069) —
+   components/boxlines/BoxLinesDoor.jsx, dressed by styles/boxlines/boxlines.css;
+   it wears .startercard__careervs above for the row look. */
+
 /* The pitch-mix bar (PitchArsenalMix.jsx) — hidden below the wide breakpoint
    (see the WIDE LAYOUT section), where the card has no spare width for it
    next to the headshot + info column. */
