@@ -205,7 +205,11 @@ for each generator; the reader modules:
   MLB game log season by season. `loadPlayer.js` (`vsTeamSplitsFor`) pre-selects the
   club's next opponent. The career totals are spoiler-free like "Season splits"; the
   one score-revealing element — the last-game line — is gated against the page's
-  `asOf` cutoff in `SplitsVsTeam.jsx`. **SHARDED BY THE PLAYER'S OWN CLUB**
+  `asOf` cutoff in `SplitsVsTeam.jsx`. It also words the career line for BOTH
+  doors into the game lines sheet (ADR-0069): `vsTeamDoorLabel(car, group, abbr)`
+  is pure and spoiler-free, and the lineup page's Starting pitcher card and this
+  card both call it, so the sheet — which quotes the door's label verbatim as
+  its headline — cannot word the same career two ways. **SHARDED BY THE PLAYER'S OWN CLUB**
   (~3 MB all told, so a single file made every game page parse 30 rosters to
   print a line about two): `index.json` carries the club catalog, each club's
   next opponent, and the `owner` map (`personId → teamId`) that says which

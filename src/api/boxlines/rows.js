@@ -1,18 +1,22 @@
 // BOX LINES — the pure half. Turns a player's game-log splits plus the
 // schedule records for those games into the rows the Box Lines sheet renders
-// (components/boxlines/BoxLinesSheet.jsx): one row per regular-season game,
-// newest first, each carrying his one-game line, the final score and the
-// box-score path. vsClub.js fetches; this file decides.
+// (components/boxlines/BoxLinesSheet.jsx): one row per game, newest first,
+// each carrying his one-game line, the final score and the box-score path.
+// fetch.js gathers and facets.js says which question is asked; this file
+// decides what a row is and which rows may exist.
 //
 // THE CUTOFF GATE LIVES HERE, and only here (ADR-0069). The sheet opens from
 // the lineup page — a SCORING surface — and every row carries a final score,
 // so a row for a game on or after the day being scored may not exist at all.
 // `boxLineRows` returns only games dated strictly BEFORE `cutoff` (a same-day
 // doubleheader game 1 is on the cutoff day and is out) and only games the
-// schedule reports Final (a live, suspended or postponed game has no row,
-// cutoff or not). The component holds no date logic; it renders what it is
-// handed. `logRequestPlan` is the other half of the same gate, upstream of the
-// fetch: the cutoff season is requested only through the day BEFORE the
+// schedule reports Final AND scored (a live or suspended game has no row; a
+// POSTPONED one calls itself Final and carries no score, so the gate asks for
+// the score rather than for the word). The component holds no date logic; it
+// renders what it is handed. A FACET's `keep` predicate (facets.js) is applied
+// AFTER both checks, never before, so narrowing is all a facet can do — the
+// rows it never sees do not exist. `logRequestPlan` is the other half of the
+// same gate, upstream of the fetch: the cutoff season is requested only through the day BEFORE the
 // cutoff (`endDate`, honoured inclusively by statsapi — verified 2026-09-02),
 // so the game being scored is never fetched, never mind dropped.
 //
@@ -58,12 +62,21 @@ export function logRequestPlan(seasons, cutoff) {
   return plan
 }
 
-// Regular-season splits against one club. `opponentId` null keeps every club
-// (a future facet filters differently — see the framework map in ADR-0069).
-export function matchingSplits(splits, { opponentId = null } = {}) {
+// The game types a row may come from unless a facet asks for others. Regular
+// season only, which is what every surface built on Box Lines so far shows;
+// the postseason facet passes ['F', 'D', 'L', 'W'] (gameType 'P' is dead on
+// statsapi — verified 2026-09-02).
+export const REGULAR_SEASON = ['R']
+
+// The splits a row may be built from: the right game types, dated, joinable by
+// gamePk, and — when `opponentId` is given — against one club. `opponentId`
+// null keeps every club, which is what every facet but 'club' wants; those
+// filter over the finished rows instead, through `keep` below.
+export function matchingSplits(splits, { opponentId = null, gameTypes = REGULAR_SEASON } = {}) {
+  const types = new Set(gameTypes?.length ? gameTypes : REGULAR_SEASON)
   return (splits ?? []).filter(
     (s) =>
-      s?.gameType === 'R' &&
+      types.has(s?.gameType) &&
       s.date &&
       s.game?.gamePk &&
       (opponentId == null || s.opponent?.id === opponentId),
@@ -72,14 +85,26 @@ export function matchingSplits(splits, { opponentId = null } = {}) {
 
 // The rows. `schedule` is the list of schedule game records for the splits'
 // gamePks (any order, extras ignored). Shape of a row:
-//   { season, date, gamePk, gameNumber, home, teamId, teamAbbr, opponentId,
-//     opponentAbbr, started, line, won, runs, oppRuns, venueId, venueName,
-//     dayNight, boxScorePath }
+//   { season, date, gamePk, gameNumber, gameType, home, teamId, teamAbbr,
+//     opponentId, opponentAbbr, started, line, won, runs, oppRuns, venueId,
+//     venueName, dayNight, boxScorePath }
 // `started` is null for hitters: the hitting game log carries no gamesStarted.
-export function boxLineRows({ splits, schedule, group, cutoff = null }) {
+//
+// `keep` is a facet's row predicate (api/boxlines/facets.js) and is applied
+// AFTER the gate, never before, so no facet can widen what the gate allows:
+// a row the cutoff or the Final check dropped is already gone by the time
+// `keep` is asked about anything. It narrows, or it does nothing.
+export function boxLineRows({
+  splits,
+  schedule,
+  group,
+  cutoff = null,
+  gameTypes = REGULAR_SEASON,
+  keep = null,
+}) {
   const byPk = new Map((schedule ?? []).filter((g) => g?.gamePk).map((g) => [g.gamePk, g]))
   const rows = []
-  for (const s of matchingSplits(splits)) {
+  for (const s of matchingSplits(splits, { gameTypes })) {
     // THE GATE. Strictly before the cutoff — a same-day game shares the date
     // — and only a game the schedule says is over. Both checks, always.
     if (cutoff && !(s.date < cutoff)) continue
@@ -95,11 +120,20 @@ export function boxLineRows({ splits, schedule, group, cutoff = null }) {
     const st = s.stat ?? {}
     const runs = mine?.score ?? null
     const oppRuns = theirs?.score ?? null
+    // AND A REAL SCORE. "Final" is not enough: a POSTPONED game reports
+    // `abstractGameState: 'Final'` with `detailedState: 'Postponed'` and no
+    // scores at all (verified 2026-09-02 — gamePks 776691, 777459, 632997 all
+    // reached the sheet as scoreless rows for games never played). Every row
+    // here is a game the player played and a score he may be shown, so the
+    // last check is for the score itself rather than for one more spelling of
+    // a status.
+    if (runs == null || oppRuns == null) continue
     rows.push({
       season: Number(s.date.slice(0, 4)),
       date: s.date,
       gamePk: s.game.gamePk,
       gameNumber: g.gameNumber ?? s.game.gameNumber ?? 1,
+      gameType: s.gameType,
       home: !awayIsHis,
       teamId,
       teamAbbr: mine?.team?.abbreviation ?? '',
@@ -120,5 +154,6 @@ export function boxLineRows({ splits, schedule, group, cutoff = null }) {
     })
   }
   rows.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.gamePk - a.gamePk))
-  return rows
+  // The facet, last. Everything it can see already passed the gate.
+  return keep ? rows.filter(keep) : rows
 }

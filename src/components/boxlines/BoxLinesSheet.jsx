@@ -1,6 +1,6 @@
 import '../../styles/boxlines/boxlines.css'
 import { useEffect, useRef } from 'react'
-import { fetchBoxLinesVsClub } from '../../api/boxlines/vsClub.js'
+import { fetchBoxLines } from '../../api/boxlines/fetch.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { BoxLineRow, BoxLineSkeleton } from './BoxLineRow.jsx'
@@ -13,6 +13,14 @@ import { humanDateWithYear } from '../../lib/dates.js'
 // lines open from X, showing Y." One shell for every facet (a club, a park,
 // day/night, a hand); v1 is a pitcher vs the club he is about to face, opened
 // from the lineup page's Starting pitcher card.
+//
+// ONE SHELL, ANY FACET. The sheet is handed a `facet` (api/boxlines/facets.js)
+// — a club, a park, a month, day or night — and titles itself from `kicker`
+// and `title`. Both default to the club case, which is what the two doors
+// shipped so far ask for, so a caller that only wants "him against the
+// Brewers" still passes opponentId/opponentName and nothing else. "Box Lines"
+// is the INTERNAL name for this drilldown and never renders: the kicker says
+// "Game lines · {facet}", the vocabulary the body copy under it already uses.
 //
 // SPOILER FOOTING. This opens from the lineup page, a scoring surface, and
 // every row carries a final score. The rule that keeps it honest lives in
@@ -47,13 +55,24 @@ export function BoxLinesSheet({
   group,
   opponentId,
   opponentName,
+  facet = null,
+  kicker = 'Game lines · regular season',
+  title,
   headline,
   cutoff = null,
   onClose,
 }) {
+  // A caller that named only an opponent is asking the club question; one that
+  // named a facet is asking its own. Serialised for the dependency list because
+  // an object literal is a new identity on every render, and useAsync would
+  // refetch each one.
+  const question = facet ?? (opponentId ? { kind: 'club', opponentId } : null)
+  const facetKey = JSON.stringify(question)
   const query = useAsync(
-    () => fetchBoxLinesVsClub({ personId, group, opponentId, cutoff }),
-    [personId, group, opponentId, cutoff],
+    () => fetchBoxLines({ personId, group, cutoff, facet: question }),
+    // facetKey IS question, by value — an object literal would be a new
+    // identity every render and refetch on each one.
+    [personId, group, cutoff, facetKey],
   )
 
   useEffect(() => {
@@ -73,7 +92,7 @@ export function BoxLinesSheet({
 
   const rows = query.data
   const failed = !query.loading && rows === null
-  const title = `${playerSurname} vs the ${opponentName}`
+  const heading = title ?? `${playerSurname} vs the ${opponentName}`
 
   return (
     <ModalPortal>
@@ -81,11 +100,11 @@ export function BoxLinesSheet({
         className="scrim scrim--boxlines"
         onClick={(e) => e.target.classList.contains('scrim') && onClose()}
       >
-        <div className="sheet boxlines" role="dialog" aria-modal="true" aria-label={title}>
+        <div className="sheet boxlines" role="dialog" aria-modal="true" aria-label={heading}>
           <div className="boxlines__head">
             <div>
-              <p className="boxlines__kicker">Box lines · regular season</p>
-              <h2 className="sheet__title boxlines__title">{title}</h2>
+              <p className="boxlines__kicker">{kicker}</p>
+              <h2 className="sheet__title boxlines__title">{heading}</h2>
             </div>
             <button ref={closeRef} type="button" className="sheet__close" onClick={onClose} aria-label="Close">
               ✕

@@ -19,6 +19,7 @@ import { POS_ORDER } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
+import { vsTeamDoorLabel } from '../api/vsTeamSplits.js'
 import { starterMatchupsFor, splitMatchupRows } from '../api/careerMatchups.js'
 import {
   useMatchupNotes,
@@ -851,11 +852,14 @@ function OpposingStarterCard({
             )}
             {/* His whole regular-season career against this club (see
                 api/vsTeamSplits.js) — omitted entirely on a first career
-                meeting, which is what the null careerVsOpp means. */}
+                meeting, which is what the null careerVsOpp means. The line is
+                worded by `vsTeamDoorLabel`, shared with the player page's
+                Splits vs team card so the two doors into the same sheet
+                cannot word the same career differently. */}
             {careerVsOpp && (
               <BoxLinesDoor
                 className="startercard__careervs"
-                label={careerVsOpponentLine(careerVsOpp, vsOpponentAbbr)}
+                label={vsTeamDoorLabel(careerVsOpp, 'pitching', vsOpponentAbbr)}
                 sheet={{
                   personId: pitcher.id,
                   playerSurname: splitDisplayName(pitcher.name).last,
@@ -923,16 +927,6 @@ function seasonVsOpponentLine(v, oppAbbr) {
     return `${monthDay(g.date)} ${g.home ? 'vs' : '@'} ${oppAbbr}: ${stat}`
   }
   return `${v.games.length} GS vs ${oppAbbr} this year: ${stat}`
-}
-
-// "Career vs MIL: 5 G, 32.1 IP, 3.20 ERA, 28 K, 10 BB" — his whole regular-
-// season history against tonight's opponent (see api/vsTeamSplits.js), never
-// shown on a first career meeting (the card omits the row entirely instead).
-// "G", not "GS": the generator sums gamesPlayed, and a relief outing counts —
-// the Box Lines behind this line (ADR-0069) show each one, so the label has
-// to say what the number is.
-function careerVsOpponentLine(car, oppAbbr) {
-  return `Career vs ${oppAbbr}: ${car.g} G, ${car.ip} IP, ${car.era} ERA, ${car.k} K, ${car.bb} BB`
 }
 
 // Show only the first handful up front — a heavy shared history (two rosters

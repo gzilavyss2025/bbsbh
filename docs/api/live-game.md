@@ -19,7 +19,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
 - `statsapi.js` — the one `getJson` fetch wrapper every topic file below calls.
 - `boxlines/` — **Box Lines** (ADR-0069), the game-by-game rows behind a summary
   stat line, fetched LIVE on the tap that opens the sheet rather than from the
-  nightly file (264,770 rows league-wide was the alternative). `vsClub.js`
+  nightly file (264,770 rows league-wide was the alternative). `fetch.js`
   gathers: `yearByYear` for the seasons, one `gameLog` per season trimmed with
   `fields=` (a pitcher's season ~7 KB, a hitter's ~25 KB), one
   `schedule?gamePks=…&hydrate=team` call for the final score, venue, day/night,
@@ -31,6 +31,26 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   cutoff and reported Final. Both `cutoff-gated`. `test/boxlines-rows.test.js`
   pins the gate. The line builders are `person/gameLog.js`'s `pitcherLine` /
   `hitterLine`, reused, not copied.
+  `facets.js` (spoiler-free) is the question: one tagged object — `club`,
+  `venue`, `month`, `dayNight`, `weekday`, `side`, `started`, `gameTypes` —
+  becomes the `opponentId`/`gameTypes`/`keep` triple `rows.js` applies, and
+  `keep` runs AFTER the gate, so a facet can only ever narrow a row set the
+  gate approved. An unknown facet keeps nothing, never everything.
+  `careerSplits.js` (spoiler-free) supplies the DOOR LABELS for the player
+  page's Game lines card: one `careerStatSplits&sitCodes=…` call answers every
+  door on the card. A career aggregate is open here (ADR-0034); only the rows
+  behind the door are gated. `test/boxlines-facets.test.js` pins the facet
+  layer, and `test/boxlines-rows.test.js` pins that `keep` cannot resurrect a
+  row the cutoff or the Final check dropped.
+  `vsClub.js` is now a one-line wrapper on `fetch.js` for the club facet, kept
+  so the two shipped doors did not have to change.
+  THE SCHEDULE IS ASKED BY gamePk FOR EVERY FACET, not per (club, season):
+  measured 2026-09-02, 162 gamePks answer in one 177 ms call, a club-season
+  carries all 164 of the club's games where a starter appeared in ~30, and a
+  date-bounded club-season call is both leaky (a rescheduled game came back
+  dated 2024-08-30 from a window ending 2024-06-30) and lossy (2 of 86 rows
+  lost their scores). Asking by gamePk needs no date bound to be safe — the
+  only gamePks that exist came from already-gated splits.
 - `schedule.js` — slate/schedule (`hydrate=team` for the abbreviation +
   teamName the bare row lacks), `resolveGame`, `fetchGamesByPk`,
   `fetchHeadToHead`, `fetchTeamSchedule`. `fetchGameCardsByPk` is the

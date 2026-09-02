@@ -299,19 +299,40 @@ a.boxline__link:focus-visible {
 
 /* THE DOOR (components/boxlines/BoxLinesDoor.jsx): the summary line as a real
    button, the label at its far end in the chevron-link voice, inset paper
-   under the press. The host adds its own row class for the line's dress. */
+   under the press. The host adds its own row class for the line's dress.
+
+   A FULL reset, padding included. A <button> carries the UA's own
+   `padding: 1px 6px`, which started this line's ink 6px right of the rows
+   above and below it (135px against their 129px, measured on the lineup
+   page) — the one thing a stat line stacked with its neighbours cannot do.
+   This partial loads after the host's, so the reset wins: a host that wants
+   its row's vertical dress back states it at `button.` specificity (see
+   .startercard__careervs in 10-lineup.css). */
 .boxlines-door {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
   width: 100%;
+  padding: 0;
   margin: 0;
   border: none;
   border-radius: 0;
   background: none;
   text-align: left;
   cursor: pointer;
+}
+
+/* Hover draws the door's box — the outline the design canvas scoped, standing
+   off the line so neither the dashed rule above nor the row below is crowded.
+   Pointer devices only: on a phone :hover sticks after the tap, and the press
+   already answers with inset paper. */
+@media (hover: hover) and (pointer: fine) {
+  .boxlines-door:hover {
+    outline: var(--bw-heavy) solid var(--accent-link);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
 }
 
 .boxlines-door:active {
@@ -324,6 +345,25 @@ a.boxline__link:focus-visible {
   border-radius: var(--radius-sm);
 }
 
+/* THE SECOND DOOR — the player page's Splits vs team card
+   (components/playerstats/SplitsVsTeam.jsx). Its one rule lives here beside
+   the door it dresses, not next to .vsteam in 26-player-page.css, which is
+   over its file cap. The card's own mono caption voice, ruled off from the
+   stat grid above the way that card's last-meeting block is, so the line
+   reads as the grid's sentence rather than a control bolted under it. Below
+   .boxlines-door in this file on purpose: same specificity, so the later rule
+   is what restores the padding the door's reset takes away. */
+.vsteam__door {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
 .boxlines-door__label {
   flex: 0 0 auto;
   font-family: var(--font-display);
@@ -332,4 +372,39 @@ a.boxline__link:focus-visible {
   letter-spacing: var(--ls-caps);
   color: var(--accent-link);
   white-space: nowrap;
+}
+
+/* THE LEDGER OF DOORS — the player page's Game lines card
+   (components/playerstats/GameLinesCard.jsx). A stack of facet doors, each a
+   career line that opens the games behind it. Dressed here beside the door it
+   repeats rather than in 26-player-page.css, which is over its file cap, and
+   for the same reason .vsteam__door above is here.
+
+   The rows are ruled, not boxed: this card sits under the splits tables on a
+   page already dense with bordered cards, and a hairline between lines reads
+   as a ledger the way the scorebook metaphor wants. The dashed rule is the
+   card's own — the door's reset owns no padding, so the vertical dress is
+   stated at `button.` specificity below, which is what beats the reset in a
+   file that loads after the host's partial. */
+.gamelines {
+  margin-top: var(--space-4);
+}
+
+.gamelines__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gamelines__row + .gamelines__row {
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+button.gamelines__door {
+  padding: 8px 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
 }
