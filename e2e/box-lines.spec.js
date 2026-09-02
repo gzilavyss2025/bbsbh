@@ -36,10 +36,13 @@ test('the career line opens Box Lines, and no row is dated on or after the score
   // Rows land (or the sheet says why not); either way every row that exists
   // is dated before the cutoff and links to a box score.
   const rows = sheet.locator('.boxline:not(.boxline--skel)')
+  // Wait for the fetch to FINISH, which is the skeletons going away — not for
+  // any .boxlines__hint, which is also the class on the "Pulling his game
+  // lines…" LOADING hint. Polling on the hint exits the wait while the sheet
+  // is still loading: a pitcher's 3 requests beat it, a hitter's 30 do not,
+  // so this read as a pass on the lineup page and a 0-row failure here.
   await expect
-    .poll(async () => (await rows.count()) > 0 || (await sheet.locator('.boxlines__hint').count()) > 0, {
-      timeout: 20_000,
-    })
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
     .toBe(true)
   const n = await rows.count()
   for (let i = 0; i < n; i++) {
@@ -97,10 +100,13 @@ test('the player page opens the same sheet, and the page cutoff trims its rows',
   await expect(sheet.locator('.boxlines__headline')).toHaveText(label)
 
   const rows = sheet.locator('.boxline:not(.boxline--skel)')
+  // Wait for the fetch to FINISH, which is the skeletons going away — not for
+  // any .boxlines__hint, which is also the class on the "Pulling his game
+  // lines…" LOADING hint. Polling on the hint exits the wait while the sheet
+  // is still loading: a pitcher's 3 requests beat it, a hitter's 30 do not,
+  // so this read as a pass on the lineup page and a 0-row failure here.
   await expect
-    .poll(async () => (await rows.count()) > 0 || (await sheet.locator('.boxlines__hint').count()) > 0, {
-      timeout: 20_000,
-    })
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
     .toBe(true)
   const n = await rows.count()
   expect(n).toBeGreaterThan(0)

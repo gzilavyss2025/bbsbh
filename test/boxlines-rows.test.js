@@ -11,7 +11,7 @@
 //     the box-score path from the schedule join).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { boxLineRows, dayBefore, logRequestPlan } from '../src/api/boxlines/rows.js'
+import { boxLineRows, dayBefore, logRequestPlan, matchingSplits } from '../src/api/boxlines/rows.js'
 
 // A pitching game-log split as statsapi returns it (trimmed to the fields the
 // module reads; shape verified live on personId 656849, 2026-09-02).
@@ -194,4 +194,146 @@ test('without a cutoff every season is requested whole', () => {
     { season: 2025, endDate: null },
     { season: 2026, endDate: null },
   ])
+})
+
+// ---------------------------------------------------------------------------
+// THE FACET LAYER (#997). A facet narrows; it must never widen. Everything
+// below pins that `keep` runs AFTER the cutoff and Final checks, so no facet
+// — present or future — can reach around the gate the sheet rests on.
+
+test('keep cannot resurrect a row the CUTOFF dropped', () => {
+  // Two games: one before the cutoff, one on it. A `keep` that says yes to
+  // everything must still not bring the on-cutoff game back.
+  const rows = boxLineRows({
+    splits: [split('2024-09-20', 1), split(CUTOFF, 2)],
+    schedule: [sched(1, '2024-09-20'), sched(2, CUTOFF)],
+    group: 'pitching',
+    cutoff: CUTOFF,
+    keep: () => true,
+  })
+  assert.deepEqual(
+    rows.map((r) => r.gamePk),
+    [1],
+  )
+})
+
+test('keep cannot resurrect a row the FINAL check dropped', () => {
+  const rows = boxLineRows({
+    splits: [split('2024-09-20', 1), split('2024-09-21', 2)],
+    schedule: [
+      sched(1, '2024-09-20'),
+      sched(2, '2024-09-21', { status: { abstractGameState: 'Live' } }),
+    ],
+    group: 'pitching',
+    cutoff: CUTOFF,
+    keep: () => true,
+  })
+  assert.deepEqual(
+    rows.map((r) => r.gamePk),
+    [1],
+  )
+})
+
+test('keep narrows the rows that DID pass the gate', () => {
+  const rows = boxLineRows({
+    splits: [split('2024-09-20', 1), split('2024-09-21', 2)],
+    schedule: [sched(1, '2024-09-20'), sched(2, '2024-09-21')],
+    group: 'pitching',
+    cutoff: CUTOFF,
+    keep: (r) => r.gamePk === 2,
+  })
+  assert.deepEqual(
+    rows.map((r) => r.gamePk),
+    [2],
+  )
+})
+
+test('the default is regular season only, and a facet may widen the GAME TYPES only by asking', () => {
+  const splits = [split('2024-09-20', 1), split('2024-10-05', 2, { gameType: 'D' })]
+  const schedule = [sched(1, '2024-09-20'), sched(2, '2024-10-05')]
+  // Default: the postseason split produces no row at all.
+  const regular = boxLineRows({ splits, schedule, group: 'pitching' })
+  assert.deepEqual(
+    regular.map((r) => r.gamePk),
+    [1],
+  )
+  assert.equal(regular[0].gameType, 'R')
+  // Asked for: both. The gate is unchanged — this widens the QUESTION, not the
+  // cutoff, and a cutoff still applies to whatever it lets through.
+  const withPost = boxLineRows({ splits, schedule, group: 'pitching', gameTypes: ['R', 'D'] })
+  assert.deepEqual(
+    withPost.map((r) => r.gamePk),
+    [2, 1],
+  )
+  const gated = boxLineRows({
+    splits,
+    schedule,
+    group: 'pitching',
+    gameTypes: ['R', 'D'],
+    cutoff: '2024-10-01',
+  })
+  assert.deepEqual(
+    gated.map((r) => r.gamePk),
+    [1],
+  )
+})
+
+test('matchingSplits keeps the asked-for game types and no others', () => {
+  const splits = [
+    split('2024-09-20', 1),
+    split('2024-10-05', 2, { gameType: 'D' }),
+    split('2024-03-01', 3, { gameType: 'S' }),
+  ]
+  assert.deepEqual(matchingSplits(splits).map((s) => s.game.gamePk), [1])
+  assert.deepEqual(
+    matchingSplits(splits, { gameTypes: ['R', 'D'] }).map((s) => s.game.gamePk),
+    [1, 2],
+  )
+  // An empty list is not "everything": it falls back to the regular season.
+  assert.deepEqual(matchingSplits(splits, { gameTypes: [] }).map((s) => s.game.gamePk), [1])
+})
+
+test('a POSTPONED game produces no row, though the schedule calls it Final', () => {
+  // Verified live 2026-09-02: a postponed game reports
+  // `abstractGameState: 'Final'` with `detailedState: 'Postponed'` and NO
+  // scores — gamePks 776691, 777459 and 632997 all reached Yelich's sheet as
+  // scoreless rows for games that were never played. Every row in this sheet
+  // is a game the player played and a score he can be shown, so the gate
+  // requires the score itself, not the word Final.
+  const rows = boxLineRows({
+    splits: [split('2024-09-20', 1), split('2024-09-21', 2)],
+    schedule: [
+      sched(1, '2024-09-20'),
+      {
+        gamePk: 2,
+        officialDate: '2024-09-21',
+        gameNumber: 1,
+        dayNight: 'day',
+        status: { abstractGameState: 'Final', detailedState: 'Postponed' },
+        venue: { id: 32, name: 'American Family Field' },
+        teams: {
+          away: { team: { id: 121, abbreviation: 'NYM' } },
+          home: { team: { id: 158, abbreviation: 'MIL' } },
+        },
+      },
+    ],
+    group: 'pitching',
+    cutoff: CUTOFF,
+  })
+  assert.deepEqual(
+    rows.map((r) => r.gamePk),
+    [1],
+  )
+})
+
+test('a row with only one side of the score is dropped too', () => {
+  const g = sched(2, '2024-09-21')
+  delete g.teams.home.score
+  const rows = boxLineRows({
+    splits: [split('2024-09-21', 2)],
+    schedule: [g],
+    group: 'pitching',
+    cutoff: CUTOFF,
+  })
+  assert.equal(rows.length, 0)
 })

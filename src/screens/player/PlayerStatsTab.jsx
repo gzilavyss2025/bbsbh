@@ -5,6 +5,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { CareerRegister } from '../../components/player/CareerRegister.jsx'
 import { GameLog } from '../../components/player/GameLog.jsx'
 import { SplitsSection, hasSplits } from '../../components/playerstats/SplitsSection.jsx'
+import { GameLinesCard } from '../../components/playerstats/GameLinesCard.jsx'
 import { PitcherWorkloadCard } from '../../components/playerstats/PitcherWorkloadCard.jsx'
 import { RecentFormCard } from '../../components/playerstats/RecentFormCard.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
@@ -87,6 +88,19 @@ export function PlayerStatsTab({ id, asOf, sportId }) {
               playerSurname={splitDisplayName(bio.fullName).last}
             />
           )}
+
+          {/* Game lines — the ledger of facet doors, under the splits whose
+              vocabulary its labels borrow (ADR-0069). It renders nothing until
+              a facet issue puts a row in its registry, and fetches nothing
+              while it renders nothing. Inside the block loop, so a two-way
+              player gets the card once per stat block, each asking its own
+              group's question. */}
+          <GameLinesCard
+            personId={bio.id}
+            playerSurname={splitDisplayName(bio.fullName).last}
+            group={block.group}
+            asOf={asOf}
+          />
 
           {block.register && <CareerRegister register={block.register} />}
         </section>

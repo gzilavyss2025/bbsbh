@@ -373,3 +373,38 @@ a.boxline__link:focus-visible {
   color: var(--accent-link);
   white-space: nowrap;
 }
+
+/* THE LEDGER OF DOORS — the player page's Game lines card
+   (components/playerstats/GameLinesCard.jsx). A stack of facet doors, each a
+   career line that opens the games behind it. Dressed here beside the door it
+   repeats rather than in 26-player-page.css, which is over its file cap, and
+   for the same reason .vsteam__door above is here.
+
+   The rows are ruled, not boxed: this card sits under the splits tables on a
+   page already dense with bordered cards, and a hairline between lines reads
+   as a ledger the way the scorebook metaphor wants. The dashed rule is the
+   card's own — the door's reset owns no padding, so the vertical dress is
+   stated at `button.` specificity below, which is what beats the reset in a
+   file that loads after the host's partial. */
+.gamelines {
+  margin-top: var(--space-4);
+}
+
+.gamelines__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gamelines__row + .gamelines__row {
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+button.gamelines__door {
+  padding: 8px 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
