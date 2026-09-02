@@ -65,7 +65,7 @@ export const EXCEPT = {
 // (src/components/seal/AsOfBanner.jsx, and the `cutoff-gated` class in
 // src/api/spoiler-manifest.json), and one word cannot carry both meanings.
 // New generators write `generatedAt`.
-// Two of these are DATE-ONLY ("2026-08-28"), which JS parses as midnight UTC.
+// Three of these are DATE-ONLY ("2026-08-28"), which JS parses as midnight UTC.
 // That makes their measured age the run's time of day, so a nightly run at
 // 07:00-11:30 leaves them 7-12h old — comfortably inside the budget — while a
 // hand dispatch after ~20:00 UTC would trip them for no real reason. The
@@ -77,6 +77,9 @@ export const EXCEPT = {
 export const STAMP_KEY = {
   'fouls.json': 'asOf',
   'workload.json': 'asOf',
+  // Sidecar written by the same gen-workload.mjs run, from the same `asOf`
+  // variable as workload.json above — not a new stamp convention, the same one.
+  'workload-summary.json': 'asOf',
   'doubleheaders.json': 'generated',
   'salaries.json': 'meta.generatedAt',
 }
@@ -87,10 +90,11 @@ const DEFAULT_KEYS = ['generatedAt']
 // cannot be checked, so this is a ratchet, not an alarm: it holds the line at
 // today's count so a NEW dataset has to either carry a stamp or be a deliberate
 // decision recorded here. Same budget idea as check-dir-size.mjs (ADR-0038).
-// Two of these are unstamped ON PURPOSE and must stay that way — team-records/
-// and milb-alumni/ write 120-150 committed shards each, and a per-shard
-// timestamp would rewrite every one of them nightly for no reader's benefit.
-export const UNSTAMPED_BUDGET = 22
+// Three of these are unstamped ON PURPOSE and must stay that way — team-records/,
+// milb-alumni/, and schedule-shape/ write 30-150 committed shards each, and a
+// per-shard timestamp would rewrite every one of them nightly for no reader's
+// benefit (gen-schedule-shape.mjs records the same trap at its own write site).
+export const UNSTAMPED_BUDGET = 23
 
 const dig = (obj, dotted) => dotted.split('.').reduce((o, k) => (o == null ? o : o[k]), obj)
 
