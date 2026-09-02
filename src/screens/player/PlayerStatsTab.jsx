@@ -1,4 +1,5 @@
 import { loadPlayerCore } from '../../api/player/core.js'
+import { splitDisplayName } from '../../api/person.js'
 import { loadPlayerStats } from '../../api/player/stats.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { CareerRegister } from '../../components/player/CareerRegister.jsx'
@@ -82,6 +83,8 @@ export function PlayerStatsTab({ id, asOf, sportId }) {
               vsTeam={data.vsTeam}
               season={data.season}
               asOf={asOf}
+              personId={bio.id}
+              playerSurname={splitDisplayName(bio.fullName).last}
             />
           )}
 

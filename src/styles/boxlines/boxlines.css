@@ -345,6 +345,25 @@ a.boxline__link:focus-visible {
   border-radius: var(--radius-sm);
 }
 
+/* THE SECOND DOOR — the player page's Splits vs team card
+   (components/playerstats/SplitsVsTeam.jsx). Its one rule lives here beside
+   the door it dresses, not next to .vsteam in 26-player-page.css, which is
+   over its file cap. The card's own mono caption voice, ruled off from the
+   stat grid above the way that card's last-meeting block is, so the line
+   reads as the grid's sentence rather than a control bolted under it. Below
+   .boxlines-door in this file on purpose: same specificity, so the later rule
+   is what restores the padding the door's reset takes away. */
+.vsteam__door {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
 .boxlines-door__label {
   flex: 0 0 auto;
   font-family: var(--font-display);

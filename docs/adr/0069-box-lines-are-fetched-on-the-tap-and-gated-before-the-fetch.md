@@ -166,13 +166,22 @@ Two dress bugs went with it, both from the door being a real `<button>`:
   belong in the nightly precompute or behind a cap. None of that is built;
   the map is recorded so the next facet extends `api/boxlines/` rather than
   starting over.
-- The player page's Splits vs team card should open the same sheet as a
-  second door (a hitter's rows use the same shell with the hitter chyron).
-  Not in this change.
+- The player page's Splits vs team card is the second door (issue #1007), and
+  a hitter's rows do use the same shell with the hitter chyron. It is an OPEN
+  surface: the career aggregate above the door is whole, and the page's own
+  `?d=` is passed through as the sheet's cutoff, so the card's last-meeting
+  line and the sheet's newest row stop on the same day. The door is keyed on
+  the club the strip has picked, so a new pick remounts it closed rather than
+  re-pointing an open sheet. Both doors word their line with one function,
+  `vsTeamDoorLabel` in `api/vsTeamSplits.js`: the sheet quotes the door's label
+  verbatim as its headline, so two spellings of the same career would show up
+  as the door and the sheet disagreeing.
 - `src/api/` and `src/hooks/` were at their file budgets, so the data went
   in a new `api/boxlines/` subdirectory and the sheet uses `useAsync`
   directly. `src/styles/` was at its budget too, so the skin is
   `styles/boxlines/boxlines.css`, component-imported.
 - Pinned by `test/boxlines-rows.test.js` (the gate, the request plan, the
-  row shape) and `e2e/box-lines.spec.js` (the door opens the sheet on a past
-  game, every row is dated before that game, and the sheet closes).
+  row shape), `test/vs-team-splits.test.js` (both doors' wording) and
+  `e2e/box-lines.spec.js` (each door opens the sheet — on a scored game and on
+  a player page carrying `?d=` — every row is dated before that day, and the
+  sheet closes).
