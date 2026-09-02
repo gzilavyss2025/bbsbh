@@ -71,10 +71,10 @@ export function AnimationLab() {
       </Entry>
 
       <Entry
-        title="Box Lines — the side entrance"
+        title="Game lines — the side entrance"
         note={
           <>
-            The Box Lines sheet (src/components/boxlines/BoxLinesSheet.jsx, ADR-0069) comes off the
+            The game lines sheet (src/components/boxlines/BoxLinesSheet.jsx, ADR-0069) comes off the
             right edge from the wide breakpoint: the same 24px settle as every sheet&rsquo;s slide-up,
             turned sideways (<code>boxlines-slidein</code>, styles/boxlines/boxlines.css). On a phone it
             is the shared bottom-sheet slide-up and needs no entry of its own.

@@ -299,19 +299,40 @@ a.boxline__link:focus-visible {
 
 /* THE DOOR (components/boxlines/BoxLinesDoor.jsx): the summary line as a real
    button, the label at its far end in the chevron-link voice, inset paper
-   under the press. The host adds its own row class for the line's dress. */
+   under the press. The host adds its own row class for the line's dress.
+
+   A FULL reset, padding included. A <button> carries the UA's own
+   `padding: 1px 6px`, which started this line's ink 6px right of the rows
+   above and below it (135px against their 129px, measured on the lineup
+   page) — the one thing a stat line stacked with its neighbours cannot do.
+   This partial loads after the host's, so the reset wins: a host that wants
+   its row's vertical dress back states it at `button.` specificity (see
+   .startercard__careervs in 10-lineup.css). */
 .boxlines-door {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
   width: 100%;
+  padding: 0;
   margin: 0;
   border: none;
   border-radius: 0;
   background: none;
   text-align: left;
   cursor: pointer;
+}
+
+/* Hover draws the door's box — the outline the design canvas scoped, standing
+   off the line so neither the dashed rule above nor the row below is crowded.
+   Pointer devices only: on a phone :hover sticks after the tap, and the press
+   already answers with inset paper. */
+@media (hover: hover) and (pointer: fine) {
+  .boxlines-door:hover {
+    outline: var(--bw-heavy) solid var(--accent-link);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
 }
 
 .boxlines-door:active {

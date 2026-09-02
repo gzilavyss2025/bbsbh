@@ -123,6 +123,37 @@ label now says "G". And the game log's own `game.dayNight` is unreliable —
 it reported "day" for two known night games (gamePks 717597 and 823770) —
 so day/night is read off the schedule record, never the log.
 
+### The name is internal; the page says "See all"
+
+"Box Lines" is what a prompt calls this thing, and what the module paths call
+it. It shipped as the door's LABEL too — "Box lines ›" at the far end of the
+career line, and "Box lines · regular season" as the sheet's kicker — which put
+an internal word on a page that never uses one. The reader has no way to know
+what a box line is; the app's own name for these rows, in the sheet's hints, is
+"game lines".
+
+So the label is now the house `See all ›` — the same words `ui/ChevronLink.jsx`
+gives every other "open the full list behind this summary" door, which is
+exactly what this is — and the kicker reads `Game lines · {facet}`. The internal
+name stays in `api/boxlines/`, `components/boxlines/`, this ADR and the issue
+tracker, where it is doing useful work: it is short, it is unambiguous in a
+prompt, and no reader ever sees it.
+
+Two dress bugs went with it, both from the door being a real `<button>`:
+
+- **The line sat 6px right of its neighbours.** A button carries the UA's own
+  `padding: 1px 6px`, and `.boxlines-door` reset the border but not the
+  padding, so the career line's ink started at 135px where every stat line
+  above it started at 129px. The reset now takes the padding too. That makes
+  `.boxlines-door` a FULL reset from a partial that loads after its host's, so
+  a host restates its row's own dress at `button.` specificity — which is also
+  what restored the dashed divider this line had silently lost.
+- **Hover said nothing.** The door had `:active` and `:focus-visible` and no
+  hover at all, so a mouse crossing it got no answer. It now draws the outline
+  the design canvas scoped for the press (`--bw-heavy` in `--accent-link`,
+  3px offset), inside `@media (hover: hover)` so a phone's sticky `:hover`
+  cannot leave it drawn after the tap.
+
 ## Consequences
 
 - One shell for every facet. A facet is a filter over the same game-log +

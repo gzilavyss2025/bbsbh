@@ -84,7 +84,7 @@ export function BoxLinesSheet({
         <div className="sheet boxlines" role="dialog" aria-modal="true" aria-label={title}>
           <div className="boxlines__head">
             <div>
-              <p className="boxlines__kicker">Box lines · regular season</p>
+              <p className="boxlines__kicker">Game lines · regular season</p>
               <h2 className="sheet__title boxlines__title">{title}</h2>
             </div>
             <button ref={closeRef} type="button" className="sheet__close" onClick={onClose} aria-label="Close">

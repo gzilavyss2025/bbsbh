@@ -257,7 +257,15 @@
 
 /* The career line doubles as the door to its Box Lines (ADR-0069) —
    components/boxlines/BoxLinesDoor.jsx, dressed by styles/boxlines/boxlines.css;
-   it wears .startercard__careervs above for the row look. */
+   it wears .startercard__careervs above for the row look. That door is a
+   <button>, and .boxlines-door resets a button whole — padding and border
+   both — from a partial that loads after this one. So the row's own dress is
+   restated here at `button.` specificity: without it the career line loses
+   the dashed divider every line above it wears, and the 4px of air under it. */
+button.startercard__careervs {
+  padding-top: 4px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+}
 
 /* The pitch-mix bar (PitchArsenalMix.jsx) — hidden below the wide breakpoint
    (see the WIDE LAYOUT section), where the card has no spare width for it
