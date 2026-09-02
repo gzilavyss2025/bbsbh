@@ -9,6 +9,7 @@ import { CLOSE_SEQUENCE_MS, INK_SET_MS, INK_SET_OVERSHOOT, TALLY_STAGGER_MS } fr
 import { Entry } from './animlab/Entry.jsx'
 import {
   AtMarkDemo,
+  BoxLinesEntrance,
   BreathDemo,
   LineupDemo,
   RiffleDemo,
@@ -64,6 +65,28 @@ export function AnimationLab() {
           {[0, 400, 800, 1200, 1600, 2000].map((ms) => (
             <Frame key={ms} label={`${(ms / 1000).toFixed(1)}s`} delayMs={ms}>
               <BoxScoreSkeleton />
+            </Frame>
+          ))}
+        </div>
+      </Entry>
+
+      <Entry
+        title="Box Lines — the side entrance"
+        note={
+          <>
+            The Box Lines sheet (src/components/boxlines/BoxLinesSheet.jsx, ADR-0069) comes off the
+            right edge from the wide breakpoint: the same 24px settle as every sheet&rsquo;s slide-up,
+            turned sideways (<code>boxlines-slidein</code>, styles/boxlines/boxlines.css). On a phone it
+            is the shared bottom-sheet slide-up and needs no entry of its own.
+          </>
+        }
+        live={<BoxLinesEntrance />}
+      >
+        <span className="animlab__stagelabel">The settle, 0 → 360ms</span>
+        <div className="animlab__frozen">
+          {[0, 90, 180, 360].map((ms) => (
+            <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
+              <BoxLinesEntrance />
             </Frame>
           ))}
         </div>
