@@ -107,24 +107,76 @@ opens. By 10pm everything is local and Express Lane steps instantly, offline.
 
 ### Budget per mode
 
-Measured, three games (Appendix A has the method):
+Clip sizes are **measured**, not derived from duration — 28 clips sampled from
+gamePk 824634 with Range requests:
 
-| Game | Mode | Clips | Video | Bytes | Stage time @2.1 Mbps |
+| Clip type | Avg | Median | Range |
+|---|---|---|---|
+| Terminal pitch (Result mode) | **6.50 MB** | 6.27 | 4.34 – 12.11 |
+| Ordinary mid-count pitch | **4.25 MB** | 4.02 | 3.43 – 6.13 |
+
+Applied to gamePk 824634 (84 PAs, 243 ordinary pitch clips, 6 non-pitch clips):
+
+| Mode | Clips | Video | Bytes | Stage @2.1 Mbps | Staging rate |
 |---|---|---|---|---|---|
-| MIL@CHC (84 PA) | Result | 84 | 15.3 min | 664 MB | 42 min |
-| | Full | 333 | 41.5 min | 1806 MB | 115 min |
-| MIL@STL (78 PA) | Result | 78 | 14.5 min | 632 MB | 40 min |
-| | Full | 283 | 37.4 min | 1628 MB | 103 min |
-| CHC@ATH (98 PA) | Result | 98 | 19.5 min | 848 MB | 54 min |
-| | Full | 375 | 51.0 min | 2220 MB | 141 min |
+| Result | 84 | 15.3 min | **546 MB** | **35 min** | 1 plate appearance / **25 s** |
+| Full | 333 | 41.5 min | **1604 MB** | **102 min** | 1 clip / **18 s** |
 
-Result mode is ~37% of Full mode's bytes on 25% of the clips, because terminal
+Result mode is ~34% of Full mode's bytes on 25% of the clips, because terminal
 pitches run longer (~11s vs ~7.5s) — they include the play developing.
 
 **Evict behind the cursor.** Once a plate appearance is scored, its clip can be
-dropped. Peak storage becomes the staging lead, not the whole game. Staging ~3
-innings ahead puts the ceiling near 200–300 MB instead of 664 MB, which matters
-because iOS Safari evicts origin storage under pressure and 848 MB invites it.
+dropped. Peak storage becomes the staging lead, not the whole game — roughly
+100–200 MB rather than 546 MB. WebKit gives a Home Screen web app the same quota
+as the browser (up to 60% of disk per origin, LRU eviction, and **no separate
+Cache API cap** — a widely repeated "50 MB Cache API limit" is contradicted by
+WebKit's own storage-policy post). Call `navigator.storage.estimate()` on the
+real device rather than trusting any published figure.
+
+## The staging trigger, resolved
+
+The trigger question answers itself differently per mode, because the staging
+*rate* differs — and the rate, not the total, is what matters.
+
+**Result mode needs no trigger at all. The trigger is opening Express Lane.**
+Staging delivers a plate appearance every ~25 seconds. Nobody scores one faster
+than that: you watch ~11 seconds of clip and then write the notation. So staging
+outruns the scorer from the start. A pre-roll of one half-inning (~2 minutes) is
+enough, and after that it stays ahead for the rest of the game.
+
+What makes that safe rather than optimistic is Tier 1. **The rail is free and
+instant, so it never blocks.** A fast stretch — three strikeouts scored in 40
+seconds — degrades to scoring from the pitch data while video catches up. The
+worst case is a degraded minute, never a stop. Build the "video catching up"
+state deliberately; it is the mechanism that makes the no-trigger design work.
+
+**Full mode cannot do this.** It needs a clip every ~18 seconds, and nobody
+spends 18 seconds on a mid-count ball. Full mode must be substantially
+pre-staged, which means committing ~102 minutes ahead of time. That is a
+different product with a different trigger, and it is deferred (Open decision 1).
+
+### Platform facts behind this, verified 2026-09-03
+
+- **Background Fetch does not work in Safari.** MDN lists it as limited
+  availability; Chrome and Edge only. So no downloading with the app closed on
+  iPhone, and no way around that.
+- **Screen Wake Lock DOES work on iOS Safari, 16.4+.** So "leave it on the
+  charger with the screen on" is a supported mechanism rather than a hope. This
+  is what would make a phone-side Full mode staging screen viable.
+- **Storage is not the blocker.** Home Screen web apps get the browser's quota:
+  up to 60% of disk per origin, LRU eviction, no separate Cache API cap.
+
+### Ruled out
+
+**Staging on the desktop and scoring on the phone does not work.** Cache and
+IndexedDB are per-origin *per device*; there is no sync path for 546 MB, and
+building one would mean re-serving MLB video — the exact thing the Terms of Use
+prohibit and the reason the proxy was dropped. Desktop staging only helps if the
+scoring also happens on the desktop.
+
+**The silent-audio background trick is rejected.** Keeping a page alive on iOS by
+looping silent audio would allow closed-app staging, but it abuses the platform
+and is precisely the kind of thing an OS update breaks silently.
 
 ## Data structure — three tiers, only the third is expensive
 
@@ -243,12 +295,15 @@ consenting to see the score of the pitch you are on.
 
 ## Open decisions
 
-1. **Staging trigger.** iOS Safari will not download with the app closed —
-   Background Fetch is Chrome-only. So staging runs only with the PWA open and
-   awake. Options: a "score this tonight" toggle on the game card that stages
-   while the phone sits on a charger; stage from the Windows desktop PWA; or
-   accept a pre-roll wait when Express Lane opens. **This is the weakest link in
-   the plan and wants a decision before build.**
+1. **Full mode's staging trigger** — the only one that still blocks build. See
+   "The staging trigger, resolved" above: Result mode needs no trigger, and Full
+   mode needs ~102 minutes of pre-staging that iOS cannot do with the app
+   closed. The fork is whether Full mode lives on the phone (a wake-lock staging
+   screen and a charger ritual) or only on the desktop PWA (where Background
+   Fetch works and nothing must stay awake). **Deferred deliberately, 2026-09-03:
+   Gary has not scored a game on the laptop, so there is no basis yet for
+   deciding whether desktop-only is acceptable.** Resolve it by trying a game on
+   the laptop first, not by argument.
 2. **Home or away booth.** Both feeds exist for every clip at no extra cost.
    Default to the Brewers' booth when they play, or ask once per game?
 3. **Result mode's expand.** Should a plate appearance open into its own pitches
