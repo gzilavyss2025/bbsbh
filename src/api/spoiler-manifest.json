@@ -128,6 +128,10 @@
       "class": "spoiler-free",
       "why": "The CAREER split lines that label the player page's Game lines doors (one `careerStatSplits` call for every code on the card). A career aggregate is open on every surface here — the same figure the Splits vs team card prints beside its own door, and ADR-0034 is explicit that a stat line is not a score. It takes no cutoff because a career line has none; only the game-by-game rows behind the door carry a result, and those go through boxlines/rows.js."
     },
+    "boxlines/cardFacets.js": {
+      "class": "spoiler-free",
+      "why": "The list of doors the player page's Game lines card draws — for each, a statsapi situation code, its wording, and the facet (boxlines/facets.js) the sheet behind it asks. Pure data: no score, no cutoff, no reveal mark, and no fetch of its own. It names questions; every answer goes through boxlines/rows.js's cutoff gate. It sits in api/ rather than beside the card because the card is .jsx and the test suite cannot import one — the failure it must pin (an unknown facet kind keeps NOTHING, so a typo opens an empty sheet in silence) is otherwise untestable."
+    },
     "boxlines/facets.js": {
       "class": "spoiler-free",
       "why": "Turns a facet — a club, a park, a month, a weekday, day/night, a side, a start, a set of game types — into the `opponentId`/`gameTypes`/`keep` triple boxlines/rows.js applies. It reads no score, no cutoff and no reveal mark: it describes a question, and `keep` runs AFTER the gate, so a facet can only ever narrow a row set the gate already approved."

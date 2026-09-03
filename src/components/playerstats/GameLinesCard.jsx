@@ -1,31 +1,20 @@
 import { BoxLinesDoor } from '../boxlines/BoxLinesDoor.jsx'
 import { SectionTitle } from '../ui/SectionTitle.jsx'
+import { cardFacetsFor } from '../../api/boxlines/cardFacets.js'
 import { careerSplitLine, fetchCareerSplits } from '../../api/boxlines/careerSplits.js'
 import { useAsync } from '../../hooks/useAsync.js'
 
 // GAME LINES — the player page's ledger of doors (ADR-0069, issue #997). Each
 // row is a career line under one FACET — at home, at night, in July, at one
 // park — and opens the game-by-game rows that add up to it. The card exists so
-// the nine queued facet issues (#998–#1006) are each one entry in the registry
-// below rather than nine cards with nine data paths.
+// each facet issue (#998–#1006) is one entry in a registry rather than nine
+// cards with nine data paths. Six of them are lit: Home and Road (#1004,
+// #1005), Day and Night (#1000), and a pitcher's Started and In relief
+// (#1003's pitcher half).
 //
-// HOW TO ADD A FACET. Push one entry onto FACET_ROWS:
-//
-//   { sitCode: 'h', label: 'Home', kicker: 'Game lines · home',
-//     facet: { kind: 'side', home: true }, groups: ['hitting', 'pitching'] }
-//
-// `sitCode` is the statsapi situation code whose CAREER row supplies the
-// label's figures (api/boxlines/careerSplits.js fetches every code on the card
-// in one call); `facet` is the question the sheet asks of the game log
-// (api/boxlines/facets.js). Nothing else changes: the fetch, the gate, the
-// sheet and this card's dress are already here. A facet whose code returns no
-// row, or a row of 0 games, drops out on its own — which is also how MiLB
-// degrades, since these codes answer for MLB service only.
-//
-// IT SHIPS EMPTY, AND THAT IS THE POINT. #997 is the foundation; every row
-// belongs to a facet issue of its own. With no entries the card fetches
-// nothing and renders nothing, so the player page is byte-for-byte unchanged
-// until the first facet lands.
+// THE DOORS ARE A REGISTRY, and it lives in api/boxlines/cardFacets.js — pure
+// data, so the suite can check every entry against the same facetPlan the
+// sheet uses. Add a door there, not here. This file only draws them.
 //
 // SPOILER FOOTING. The labels are CAREER aggregates, open on this page the way
 // the Splits vs team card's are (ADR-0034 — a stat line is not a score). The
@@ -35,12 +24,11 @@ import { useAsync } from '../../hooks/useAsync.js'
 //
 // "Box Lines" is the internal name for this drilldown and never renders: the
 // card is titled "Game lines", and each door says the house "See all ›".
-const FACET_ROWS = []
 
 export function GameLinesCard({ personId, playerSurname, group, asOf }) {
-  const rows = FACET_ROWS.filter((r) => r.groups.includes(group))
-  // One request for every door's label — and none at all while the registry is
-  // empty, so an unlit card costs the page nothing.
+  const rows = cardFacetsFor(group)
+  // ONE request for every door's label, whatever the count: careerStatSplits
+  // takes the whole sitCode list at once. A group with no doors asks nothing.
   const codes = rows.map((r) => r.sitCode)
   const key = codes.join(',')
   const { data } = useAsync(
@@ -70,7 +58,7 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
                 group,
                 facet: row.facet,
                 kicker: row.kicker,
-                title: `${playerSurname} — ${row.label}`,
+                title: row.title(playerSurname),
                 cutoff: asOf ?? null,
               }}
             />

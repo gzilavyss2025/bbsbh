@@ -62,6 +62,20 @@ export function facetPlan(facet) {
       // `isHome` is on the split too, but the row's `home` is derived from the
       // SCHEDULE's away/home clubs, which is the same fact checked against the
       // record that also supplied the score. One source, no way to disagree.
+      //
+      // THE DOOR'S FIGURE COMES FROM MLB'S AGGREGATE, THESE ROWS FROM MLB'S
+      // PER-GAME FLAG, AND THE TWO DIFFER ON A RELOCATED GAME. Both are stock:
+      // statsapi ignores `sitCodes` on the game log (verified 2026-09-03 — a
+      // season's log returns all 158 rows whether or not `h` is asked for), so
+      // there is no per-game situation list to adopt and the aggregate cannot
+      // be reconciled row by row. Measured over five careers, they agree
+      // season by season except where a home game was moved: Braun matches in
+      // 9 of his 10 seasons and differs by one in 2020. Career totals land 1
+      // to 5 games apart (Yelich 849 vs 853, Betts 818 vs 818, Peterson 78 vs
+      // 79). ADR-0069 records it. Do NOT try to close the gap with a third
+      // definition: deriving "his club's park that season" and counting that
+      // was tried, and it counts the 2020-21 Blue Jays' Buffalo and Dunedin
+      // home games as road games — 44 games wrong on Guerrero alone.
       return { ...plan, keep: (r) => r.home === Boolean(facet.home) }
     case 'started':
       // Pitchers only: the hitting game log carries no gamesStarted, so a

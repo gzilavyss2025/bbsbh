@@ -39,9 +39,21 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `careerSplits.js` (spoiler-free) supplies the DOOR LABELS for the player
   page's Game lines card: one `careerStatSplits&sitCodes=…` call answers every
   door on the card. A career aggregate is open here (ADR-0034); only the rows
-  behind the door are gated. `test/boxlines-facets.test.js` pins the facet
-  layer, and `test/boxlines-rows.test.js` pins that `keep` cannot resurrect a
-  row the cutoff or the Final check dropped.
+  behind the door are gated. `cardFacets.js` (spoiler-free) is the card's list
+  of doors — six of them since #1000/#1003/#1004/#1005 — kept in `api/` rather
+  than in the `.jsx` card so the suite can import it.
+  **A DOOR'S FIGURE AND ITS ROWS COME FROM DIFFERENT MLB PIPELINES AND DO NOT
+  RECONCILE.** The figure is MLB's aggregate for a situation code; the rows are
+  MLB's per-game flags in the game log and the schedule. `sitCodes` is IGNORED
+  on the game log (a season returns all its rows whether or not a code is
+  asked for), so there is no per-game situation list that would join them.
+  Measured over five careers 2026-09-03, they agree season by season except
+  where a home game was relocated, leaving career totals 1 to 5 games apart.
+  Do not "fix" it with a third definition — ADR-0069 records the one that was
+  tried and why it was worse. `test/boxlines-facets.test.js` pins the facet
+  layer, `test/boxlines-card-facets.test.js` pins every door against the same
+  `facetPlan` the sheet calls, and `test/boxlines-rows.test.js` pins that
+  `keep` cannot resurrect a row the cutoff or the Final check dropped.
   `vsClub.js` is now a one-line wrapper on `fetch.js` for the club facet, kept
   so the two shipped doors did not have to change.
   THE SCHEDULE IS ASKED BY gamePk FOR EVERY FACET, not per (club, season):
