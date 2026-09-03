@@ -130,3 +130,81 @@ test('the player page opens the same sheet, and the page cutoff trims its rows',
   await expect(door).not.toHaveText(label)
   await expect(page.locator('.boxlines')).toHaveCount(0)
 })
+
+// THE THIRD DOOR AND THE FIVE AFTER IT (#1000, #1003, #1004, #1005): the Game
+// lines card, which #997 shipped empty and this is the first thing it renders.
+// Six doors for a pitcher — Home, Road, Day, Night, Started, In relief — and
+// four for a hitter, who is offered no start/relief pair because the hitting
+// game log carries no gamesStarted and the facet would keep nothing.
+//
+// It is the same sheet, gated the same way, but the facet is a PREDICATE over
+// finished rows rather than a club filter on the log, so what this pins is
+// that the predicate actually discriminates: every row behind the Home door
+// says "vs", never "@". A facet whose kind were misspelled keeps nothing and
+// shows an empty ledger, which is why the count is asserted too.
+const PETERSON = '/player/david-peterson-656849/stats'
+
+test('the Game lines card opens a facet sheet, and the facet actually narrows', async ({ page }) => {
+  await page.goto(`${PETERSON}?d=${PLAYER_CUTOFF}`)
+  const card = page.locator('.gamelines')
+  await card.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await card.count()) === 0) {
+    test.skip(true, 'this player has no MLB situational splits on file today')
+    return
+  }
+  // A pitcher gets all six. MiLB service returns no rows for these codes, and
+  // a door with no career row drops out on its own, so this also says he is
+  // being read as a major leaguer.
+  const doors = card.locator('.gamelines__door')
+  await expect(doors).toHaveCount(6)
+
+  const home = doors.first()
+  const label = (await home.locator('span').first().textContent()).trim()
+  expect(label).toMatch(/^Home: \d+ G, /)
+  await home.click()
+
+  const sheet = page.getByRole('dialog', { name: /at home/ })
+  await expect(sheet).toBeVisible()
+  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · at home')
+  await expect(sheet.locator('.boxlines__headline')).toHaveText(label)
+
+  await expect
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
+    .toBe(true)
+  const rows = sheet.locator('.boxline:not(.boxline--skel)')
+  const n = await rows.count()
+  expect(n).toBeGreaterThan(0)
+  for (let i = 0; i < n; i++) {
+    // THE FACET. Home rows say "vs"; a road row would say "@". The door's
+    // figure and this count come from two different MLB pipelines and differ
+    // by a handful of relocated games (ADR-0069), so the COUNT is not asserted
+    // against the label — what every row is, is.
+    await expect(rows.nth(i).locator('.boxline__where')).toHaveText(/^vs /)
+    const href = await rows.nth(i).locator('a').getAttribute('href')
+    const [, mmddyyyy] = href.match(/^\/(\d{8})\//)
+    const iso = `${mmddyyyy.slice(4)}-${mmddyyyy.slice(0, 2)}-${mmddyyyy.slice(2, 4)}`
+    expect(iso < PLAYER_CUTOFF, `row ${i} is dated ${iso}, not before ${PLAYER_CUTOFF}`).toBe(true)
+  }
+
+  // The internal name never reaches the reader — not on the card, not in the
+  // sheet it opened. (Rendered text, not page HTML: the dev server serves
+  // boxlines.css with its own comments, and that file opens "BOX LINES".)
+  expect((await page.locator('body').innerText()).toLowerCase()).not.toContain('box line')
+
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
+  await expect(home).toBeFocused()
+
+  // The sibling door asks the opposite question of the SAME memoized join, so
+  // it costs no request and must come back with the other half of the games.
+  const road = doors.nth(1)
+  await road.click()
+  const roadSheet = page.getByRole('dialog', { name: /on the road/ })
+  await expect(roadSheet).toBeVisible()
+  await expect
+    .poll(async () => (await roadSheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
+    .toBe(true)
+  const roadRows = roadSheet.locator('.boxline:not(.boxline--skel)')
+  await expect(roadRows.first().locator('.boxline__where')).toHaveText(/^@ /)
+  expect(await roadRows.count()).toBeGreaterThan(0)
+})

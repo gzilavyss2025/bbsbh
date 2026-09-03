@@ -294,3 +294,87 @@ lineup page's pitcher (3 requests) beat it and read as a pass, the player
 page's hitter (30 requests) did not and failed at 0 rows. It now waits for the
 skeletons to clear, which is what "the fetch finished" actually looks like —
 and that is what surfaced the postponed rows.
+
+## Amendment (2026-09-03, issues #1000, #1003, #1004, #1005): the first six doors
+
+The Game lines card shipped with an empty registry. It now holds six doors, and
+they are the first thing that card has ever rendered: **Home** and **Road**
+(#1004, #1005), **Day** and **Night** (#1000), and a pitcher's **Started** and
+**In relief** (#1003's pitcher half). A hitter sees four, a pitcher six, a
+two-way player each set once. Nothing about the gate, the fetch or the sheet
+changed — every door is one registry entry, which is what #997 built the card
+for.
+
+The registry moved from the card to `api/boxlines/cardFacets.js`. The card is a
+`.jsx` file and this repo's `node --test` suite cannot import one, which left
+the facet layer's own documented failure untested: an unknown `kind` keeps
+NOTHING, so a typo ships as a door that opens, loads and renders an empty
+ledger with nothing anywhere saying why. `test/boxlines-card-facets.test.js`
+now checks every entry against the same `facetPlan` the sheet calls, and was
+watched failing on a deliberately misspelled `dayNight` before it was kept.
+
+### The situation trap, resolved: MLB's aggregate and MLB's per-game flags disagree
+
+The #997 amendment flagged that `careerStatSplits` (`h`/`a`) counts home games
+by the PARK while the rows count the club the schedule LISTED as home, and said
+#1004/#1005 must decide which the app means. Measured properly across five full
+careers on 2026-09-03, **there is nothing to decide, because there is no rule
+that reconciles them**:
+
+| player | MLB `h` | listed home | at his own park | not at the opponent's park |
+| --- | --- | --- | --- | --- |
+| Yelich | 849 | 853 | 848 | 850 |
+| Guerrero Jr | 550 | 555 | **506** | 550 |
+| Betts | 818 | 818 | 815 | 819 |
+| Peterson | 78 | 79 | 78 | 79 |
+| Braun | 688 | 687 | 687 | 681 |
+
+No column matches every row. The gap is small (1 to 5 games) and it is always a
+season with a relocated home game — Braun matches MLB in 9 of his 10 seasons and
+differs by one in 2020. And statsapi will not settle it: **`sitCodes` is ignored
+on the game log** (verified — Braun's 2013 log returns all 158 rows whether or
+not `h` is asked for), so MLB publishes an aggregate for a situation but never
+the list of games behind it.
+
+So the app uses stock on both sides and accepts the margin: the door prints
+MLB's official career figure, the rows use MLB's own per-game flags, and a
+career with a hurricane in it can have a door reading 849 above a sheet holding
+853 games. That is two MLB numbers disagreeing, not the app contradicting
+itself, and it is the honest state of the data.
+
+**The third definition must not be reinvented.** Deriving "his club's home park
+that season" from the games in hand and counting that was built first, on the
+strength of three careers where it matched MLB exactly. It is wrong: it counts
+the 2020–21 Blue Jays' Buffalo and Dunedin home games as road games, because
+those parks were not the club's usual one — 44 games wrong on Guerrero alone,
+and they were real home games. The `side` case in `facets.js` carries this
+warning where the next author will meet it.
+
+### Three corrections for the facets still queued
+
+Verified live 2026-09-03, against what the issues assume:
+
+- **`sitCodes=ven` returns nothing at all** (#998, a player at a ballpark). The
+  issue allowed for this and named summing the joined rows as the fallback;
+  that fallback is now the only path, and it changes the door's shape, because
+  the card labels its doors before the join exists.
+- **`stats=careerPlayoffs` does not return postseason stats** (#1006) <!-- word-choice-exempt: statsapi's own stat-type name, breaks the call if renamed -->
+  It
+  answers with the REGULAR-SEASON career — Yelich comes back 1,715 G and .282,
+  which is his whole career, not his 27 postseason games. The working source is
+  `stats=career&group={group}&gameType=P` (27 G, .218), or `gameType=F,D,L,W`
+  for one row per round.
+- **The game log does not carry postseason rows by default** (#1006 again). The
+  issue states it does and that no new call is needed. A 2018 game log returns
+  147 rows, all `gameType: 'R'`; the postseason rows appear only when the call
+  itself passes `gameType=`. `fetch.js` would have to pass it through, which is
+  real work rather than a registry entry. The schedule join needs no such
+  parameter: asked by gamePk it returns postseason games with their `gameType`
+  and a `seriesDescription` ("NL Division Series") worth more than a mapped
+  letter.
+
+`byMonth`, `byDayOfWeek` and `homeAndAway` exist as first-class stat types and
+look like better sources than the `sitCodes` list for #999 and #1001 — but they
+answer for ONE season (no `season` returns the current one, and a retired player
+gets nothing), so a career needs one call each and the sitCodes list stays the
+cheaper route.
