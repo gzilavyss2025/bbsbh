@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-03T12:02:19.115Z",
+  "generatedAt": "2026-09-04T12:04:11.653Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 94,
@@ -12,7 +12,7 @@
       "team": "mil",
       "position": "SS",
       "levelRaw": "AA",
-      "statLine": ".270, 13 HR, 84 RBI",
+      "statLine": ".267, 13 HR, 84 RBI",
       "age": 19,
       "number": null
     },
@@ -36,7 +36,7 @@
       "team": "bos",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".312, 23 HR, 76 RBI",
+      "statLine": ".313, 23 HR, 77 RBI",
       "age": 20,
       "number": null
     },
@@ -48,7 +48,7 @@
       "team": "was",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".263, 13 HR, 69 RBI",
+      "statLine": ".262, 13 HR, 69 RBI",
       "age": 18,
       "number": null
     },
@@ -60,7 +60,7 @@
       "team": "sea",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "103.1 IP, 1.39 ERA, 143 SO",
+      "statLine": "108.1 IP, 1.66 ERA, 146 SO",
       "age": 22,
       "number": "13"
     },
@@ -72,7 +72,7 @@
       "team": "la",
       "position": "OF",
       "levelRaw": "AA",
-      "statLine": ".303, 26 HR, 100 RBI",
+      "statLine": ".301, 26 HR, 100 RBI",
       "age": 21,
       "number": null
     },
@@ -108,7 +108,7 @@
       "team": "tex",
       "position": "DH",
       "levelRaw": "ALL (2)",
-      "statLine": ".325, 8 HR, 17 RBI",
+      "statLine": ".318, 8 HR, 18 RBI",
       "age": 20,
       "number": null
     },
@@ -144,7 +144,7 @@
       "team": "tb",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".314, 21 HR, 83 RBI",
+      "statLine": ".316, 21 HR, 84 RBI",
       "age": 20,
       "number": null
     },
@@ -192,7 +192,7 @@
       "team": "la",
       "position": "CF",
       "levelRaw": "ALL (2)",
-      "statLine": ".304, 17 HR, 62 RBI",
+      "statLine": ".306, 17 HR, 62 RBI",
       "age": 23,
       "number": "8"
     },
@@ -204,7 +204,7 @@
       "team": "sf",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".353, 4 HR, 54 RBI",
+      "statLine": ".355, 4 HR, 56 RBI",
       "age": 18,
       "number": null
     },
@@ -216,7 +216,7 @@
       "team": "stl",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".314, 24 HR, 77 RBI",
+      "statLine": ".314, 24 HR, 81 RBI",
       "age": 19,
       "number": null
     },
@@ -228,7 +228,7 @@
       "team": "min",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".228, 3 HR, 14 RBI",
+      "statLine": ".232, 3 HR, 15 RBI",
       "age": 21,
       "number": null
     },
@@ -252,7 +252,7 @@
       "team": "mil",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".303, 3 HR, 27 RBI",
+      "statLine": ".297, 3 HR, 27 RBI",
       "age": 19,
       "number": null
     },
@@ -264,7 +264,7 @@
       "team": "cin",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".274, 19 HR, 57 RBI",
+      "statLine": ".278, 19 HR, 59 RBI",
       "age": 20,
       "number": null
     },
@@ -312,7 +312,7 @@
       "team": "tor",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".270, 13 HR, 72 RBI",
+      "statLine": ".269, 13 HR, 72 RBI",
       "age": 20,
       "number": null
     },
@@ -348,7 +348,7 @@
       "team": "cle",
       "position": "2B",
       "levelRaw": "ALL (3)",
-      "statLine": ".291, 15 HR, 58 RBI",
+      "statLine": ".291, 15 HR, 59 RBI",
       "age": 22,
       "number": "17"
     },
@@ -372,7 +372,7 @@
       "team": "cle",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".294, 28 HR, 89 RBI",
+      "statLine": ".292, 28 HR, 89 RBI",
       "age": 21,
       "number": null
     },
@@ -384,7 +384,7 @@
       "team": "phi",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "86.0 IP, 4.40 ERA, 124 SO",
+      "statLine": "90.0 IP, 4.40 ERA, 134 SO",
       "age": 22,
       "number": null
     },
@@ -408,7 +408,7 @@
       "team": "pit",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".238, 26 HR, 81 RBI",
+      "statLine": ".235, 26 HR, 81 RBI",
       "age": 19,
       "number": null
     },
@@ -444,7 +444,7 @@
       "team": "ana",
       "position": "SS",
       "levelRaw": "ALL (5)",
-      "statLine": ".255, 10 HR, 43 RBI",
+      "statLine": ".256, 11 HR, 44 RBI",
       "age": 20,
       "number": null
     },
@@ -456,7 +456,7 @@
       "team": "chc",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".291, 23 HR, 107 RBI",
+      "statLine": ".290, 23 HR, 107 RBI",
       "age": 19,
       "number": null
     },
@@ -468,7 +468,7 @@
       "team": "bal",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".240, 0 HR, 9 RBI",
+      "statLine": ".241, 0 HR, 9 RBI",
       "age": 18,
       "number": null
     },
@@ -480,7 +480,7 @@
       "team": "oak",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".293, 7 HR, 16 RBI",
+      "statLine": ".309, 7 HR, 16 RBI",
       "age": 21,
       "number": null
     },
@@ -492,7 +492,7 @@
       "team": "atl",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".261, 26 HR, 72 RBI",
+      "statLine": ".261, 26 HR, 73 RBI",
       "age": 20,
       "number": null
     },
@@ -516,7 +516,7 @@
       "team": "stl",
       "position": "LHP",
       "levelRaw": "AA",
-      "statLine": "92.1 IP, 3.90 ERA, 121 SO",
+      "statLine": "98.0 IP, 3.77 ERA, 125 SO",
       "age": 22,
       "number": null
     },
@@ -528,7 +528,7 @@
       "team": "sea",
       "position": "LF",
       "levelRaw": "ALL (2)",
-      "statLine": ".280, 18 HR, 78 RBI",
+      "statLine": ".284, 18 HR, 79 RBI",
       "age": 21,
       "number": null
     },
@@ -564,7 +564,7 @@
       "team": "det",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".258, 19 HR, 72 RBI",
+      "statLine": ".260, 19 HR, 72 RBI",
       "age": 21,
       "number": null
     },
@@ -576,7 +576,7 @@
       "team": "bal",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "89.1 IP, 1.51 ERA, 126 SO",
+      "statLine": "95.1 IP, 1.51 ERA, 134 SO",
       "age": 21,
       "number": null
     },
@@ -600,7 +600,7 @@
       "team": "tb",
       "position": "C",
       "levelRaw": "ALL (4)",
-      "statLine": ".349, 16 HR, 95 RBI",
+      "statLine": ".349, 16 HR, 96 RBI",
       "age": 22,
       "number": "18"
     },
@@ -636,7 +636,7 @@
       "team": "col",
       "position": "CF",
       "levelRaw": "ALL (2)",
-      "statLine": ".310, 10 HR, 75 RBI",
+      "statLine": ".309, 10 HR, 75 RBI",
       "age": 19,
       "number": null
     },
@@ -648,7 +648,7 @@
       "team": "sea",
       "position": "RF",
       "levelRaw": "ALL (3)",
-      "statLine": ".252, 39 HR, 98 RBI",
+      "statLine": ".251, 39 HR, 99 RBI",
       "age": 21,
       "number": "99"
     },
@@ -684,7 +684,7 @@
       "team": "stl",
       "position": "LF",
       "levelRaw": "ALL (2)",
-      "statLine": ".249, 40 HR, 103 RBI",
+      "statLine": ".250, 40 HR, 104 RBI",
       "age": 23,
       "number": "22"
     },
@@ -720,7 +720,7 @@
       "team": "mia",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".261, 11 HR, 44 RBI",
+      "statLine": ".265, 11 HR, 44 RBI",
       "age": 22,
       "number": null
     },
@@ -732,7 +732,7 @@
       "team": "tb",
       "position": "C",
       "levelRaw": "A+",
-      "statLine": ".242, 21 HR, 66 RBI",
+      "statLine": ".245, 21 HR, 67 RBI",
       "age": 19,
       "number": null
     },
@@ -756,7 +756,7 @@
       "team": "mia",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".194, 3 HR, 13 RBI",
+      "statLine": ".213, 3 HR, 14 RBI",
       "age": 18,
       "number": null
     },
@@ -828,7 +828,7 @@
       "team": "sea",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".251, 15 HR, 60 RBI",
+      "statLine": ".249, 15 HR, 60 RBI",
       "age": 21,
       "number": null
     },
@@ -840,7 +840,7 @@
       "team": "min",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".305, 11 HR, 52 RBI",
+      "statLine": ".306, 11 HR, 52 RBI",
       "age": 22,
       "number": null
     },
@@ -852,7 +852,7 @@
       "team": "ari",
       "position": "2B",
       "levelRaw": "ALL (4)",
-      "statLine": ".292, 9 HR, 48 RBI",
+      "statLine": ".291, 9 HR, 48 RBI",
       "age": 21,
       "number": null
     },
@@ -864,7 +864,7 @@
       "team": "nym",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".271, 22 HR, 82 RBI",
+      "statLine": ".269, 22 HR, 82 RBI",
       "age": 21,
       "number": null
     },
@@ -900,7 +900,7 @@
       "team": "bos",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".276, 19 HR, 68 RBI",
+      "statLine": ".274, 19 HR, 69 RBI",
       "age": 19,
       "number": null
     },
@@ -948,7 +948,7 @@
       "team": "tb",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".298, 10 HR, 77 RBI",
+      "statLine": ".300, 11 HR, 79 RBI",
       "age": 20,
       "number": null
     },
@@ -972,7 +972,7 @@
       "team": "mia",
       "position": "OF",
       "levelRaw": "ALL (3)",
-      "statLine": ".331, 14 HR, 52 RBI",
+      "statLine": ".333, 15 HR, 53 RBI",
       "age": 22,
       "number": null
     },
@@ -984,7 +984,7 @@
       "team": "nyy",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".252, 4 HR, 25 RBI",
+      "statLine": ".252, 4 HR, 26 RBI",
       "age": 19,
       "number": null
     },
@@ -1008,7 +1008,7 @@
       "team": "mil",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".300, 17 HR, 68 RBI",
+      "statLine": ".299, 17 HR, 68 RBI",
       "age": 21,
       "number": null
     },
@@ -1032,7 +1032,7 @@
       "team": "cin",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".269, 11 HR, 54 RBI",
+      "statLine": ".265, 11 HR, 54 RBI",
       "age": 19,
       "number": null
     },
@@ -1044,7 +1044,7 @@
       "team": "chc",
       "position": "C",
       "levelRaw": "ALL (3)",
-      "statLine": ".300, 25 HR, 79 RBI",
+      "statLine": ".298, 25 HR, 79 RBI",
       "age": 25,
       "number": null
     },
@@ -1068,7 +1068,7 @@
       "team": "pit",
       "position": "3B",
       "levelRaw": "ALL (3)",
-      "statLine": ".300, 31 HR, 92 RBI",
+      "statLine": ".302, 31 HR, 94 RBI",
       "age": 22,
       "number": null
     },
@@ -1142,7 +1142,7 @@
       "team": "ana",
       "position": "SS",
       "levelRaw": "ALL (5)",
-      "statLine": ".255, 10 HR, 43 RBI",
+      "statLine": ".256, 11 HR, 44 RBI",
       "age": 20,
       "topRank": 38
     },
@@ -1166,7 +1166,7 @@
       "team": "ana",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".289, 12 HR, 60 RBI",
+      "statLine": ".290, 12 HR, 61 RBI",
       "age": 19,
       "topRank": null
     },
@@ -1190,7 +1190,7 @@
       "team": "ana",
       "position": "CF",
       "levelRaw": "AAA",
-      "statLine": ".274, 3 HR, 37 RBI",
+      "statLine": ".272, 3 HR, 37 RBI",
       "age": 21,
       "topRank": null
     },
@@ -1202,7 +1202,7 @@
       "team": "ana",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".257, 10 HR, 59 RBI",
+      "statLine": ".254, 10 HR, 60 RBI",
       "age": 19,
       "topRank": null
     },
@@ -1226,7 +1226,7 @@
       "team": "ana",
       "position": "1B",
       "levelRaw": "A",
-      "statLine": ".307, 8 HR, 18 RBI",
+      "statLine": ".304, 8 HR, 18 RBI",
       "age": 21,
       "topRank": null
     },
@@ -1274,7 +1274,7 @@
       "team": "ana",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".239, 16 HR, 58 RBI",
+      "statLine": ".240, 16 HR, 58 RBI",
       "age": 20,
       "topRank": null
     },
@@ -1370,7 +1370,7 @@
       "team": "ana",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".242, 16 HR, 61 RBI",
+      "statLine": ".240, 16 HR, 61 RBI",
       "age": 23,
       "topRank": null
     },
@@ -1382,7 +1382,7 @@
       "team": "ana",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".304, 3 HR, 12 RBI",
+      "statLine": ".305, 3 HR, 13 RBI",
       "age": 21,
       "topRank": null
     },
@@ -1454,7 +1454,7 @@
       "team": "ari",
       "position": "2B",
       "levelRaw": "ALL (4)",
-      "statLine": ".292, 9 HR, 48 RBI",
+      "statLine": ".291, 9 HR, 48 RBI",
       "age": 21,
       "topRank": 75
     },
@@ -1466,7 +1466,7 @@
       "team": "ari",
       "position": "C",
       "levelRaw": "A",
-      "statLine": ".277, 5 HR, 17 RBI",
+      "statLine": ".261, 5 HR, 17 RBI",
       "age": 21,
       "topRank": null
     },
@@ -1502,7 +1502,7 @@
       "team": "ari",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".279, 18 HR, 90 RBI",
+      "statLine": ".275, 18 HR, 90 RBI",
       "age": 20,
       "topRank": null
     },
@@ -1574,7 +1574,7 @@
       "team": "ari",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "96.1 IP, 3.46 ERA, 81 SO",
+      "statLine": "98.2 IP, 3.92 ERA, 82 SO",
       "age": 23,
       "topRank": null
     },
@@ -1586,7 +1586,7 @@
       "team": "ari",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "76.2 IP, 3.52 ERA, 73 SO",
+      "statLine": "81.2 IP, 3.31 ERA, 78 SO",
       "age": 19,
       "topRank": null
     },
@@ -1634,7 +1634,7 @@
       "team": "ari",
       "position": "SS",
       "levelRaw": "AA",
-      "statLine": ".283, 15 HR, 56 RBI",
+      "statLine": ".282, 15 HR, 56 RBI",
       "age": 21,
       "topRank": null
     },
@@ -1742,7 +1742,7 @@
       "team": "ari",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "106.1 IP, 4.06 ERA, 123 SO",
+      "statLine": "108.2 IP, 4.47 ERA, 126 SO",
       "age": 20,
       "topRank": null
     },
@@ -1766,7 +1766,7 @@
       "team": "ari",
       "position": "2B",
       "levelRaw": "ALL (2)",
-      "statLine": ".255, 7 HR, 57 RBI",
+      "statLine": ".253, 7 HR, 57 RBI",
       "age": 20,
       "topRank": null
     },
@@ -1778,7 +1778,7 @@
       "team": "bal",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".240, 0 HR, 9 RBI",
+      "statLine": ".241, 0 HR, 9 RBI",
       "age": 18,
       "topRank": 40
     },
@@ -1790,7 +1790,7 @@
       "team": "bal",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "89.1 IP, 1.51 ERA, 126 SO",
+      "statLine": "95.1 IP, 1.51 ERA, 134 SO",
       "age": 21,
       "topRank": 49
     },
@@ -1845,12 +1845,12 @@
     {
       "orgRank": 7,
       "playerId": 801725,
-      "name": "Luis De Leon",
+      "name": "Luis De León",
       "teamId": 110,
       "team": "bal",
       "position": "LHP",
       "levelRaw": "ALL (3)",
-      "statLine": "100.0 IP, 4.77 ERA, 122 SO",
+      "statLine": "100.2 IP, 4.83 ERA, 123 SO",
       "age": 23,
       "topRank": null
     },
@@ -1862,7 +1862,7 @@
       "team": "bal",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".292, 23 HR, 88 RBI",
+      "statLine": ".289, 23 HR, 88 RBI",
       "age": 22,
       "topRank": null
     },
@@ -1874,7 +1874,7 @@
       "team": "bal",
       "position": "CF",
       "levelRaw": "ALL (3)",
-      "statLine": ".295, 21 HR, 82 RBI",
+      "statLine": ".297, 21 HR, 83 RBI",
       "age": 19,
       "topRank": null
     },
@@ -1898,7 +1898,7 @@
       "team": "bal",
       "position": "LHP",
       "levelRaw": "A+",
-      "statLine": "83.1 IP, 3.46 ERA, 114 SO",
+      "statLine": "86.1 IP, 3.65 ERA, 117 SO",
       "age": 20,
       "topRank": null
     },
@@ -1922,7 +1922,7 @@
       "team": "bal",
       "position": "2B",
       "levelRaw": "AA",
-      "statLine": ".284, 23 HR, 72 RBI",
+      "statLine": ".283, 23 HR, 72 RBI",
       "age": 21,
       "topRank": null
     },
@@ -1958,7 +1958,7 @@
       "team": "bal",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".281, 20 HR, 43 RBI",
+      "statLine": ".284, 20 HR, 44 RBI",
       "age": 22,
       "topRank": null
     },
@@ -1982,7 +1982,7 @@
       "team": "bal",
       "position": "OF",
       "levelRaw": "ALL (3)",
-      "statLine": ".263, 4 HR, 35 RBI",
+      "statLine": ".266, 4 HR, 35 RBI",
       "age": 24,
       "topRank": null
     },
@@ -2066,7 +2066,7 @@
       "team": "bal",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".237, 8 HR, 51 RBI",
+      "statLine": ".240, 8 HR, 51 RBI",
       "age": 20,
       "topRank": null
     },
@@ -2090,7 +2090,7 @@
       "team": "bal",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".258, 18 HR, 60 RBI",
+      "statLine": ".257, 18 HR, 60 RBI",
       "age": 23,
       "topRank": null
     },
@@ -2114,7 +2114,7 @@
       "team": "bos",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".312, 23 HR, 76 RBI",
+      "statLine": ".313, 23 HR, 77 RBI",
       "age": 20,
       "topRank": 3
     },
@@ -2126,7 +2126,7 @@
       "team": "bos",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".276, 19 HR, 68 RBI",
+      "statLine": ".274, 19 HR, 69 RBI",
       "age": 19,
       "topRank": 79
     },
@@ -2150,7 +2150,7 @@
       "team": "bos",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".365, 12 HR, 51 RBI",
+      "statLine": ".367, 12 HR, 51 RBI",
       "age": 19,
       "topRank": null
     },
@@ -2174,7 +2174,7 @@
       "team": "bos",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".255, 12 HR, 29 RBI",
+      "statLine": ".264, 14 HR, 31 RBI",
       "age": 22,
       "topRank": null
     },
@@ -2246,7 +2246,7 @@
       "team": "bos",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".225, 1 HR, 7 RBI",
+      "statLine": ".227, 1 HR, 7 RBI",
       "age": 19,
       "topRank": null
     },
@@ -2282,7 +2282,7 @@
       "team": "bos",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "83.1 IP, 3.46 ERA, 91 SO",
+      "statLine": "89.1 IP, 3.32 ERA, 97 SO",
       "age": 25,
       "topRank": null
     },
@@ -2318,7 +2318,7 @@
       "team": "bos",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "101.1 IP, 3.38 ERA, 135 SO",
+      "statLine": "106.2 IP, 3.46 ERA, 143 SO",
       "age": 22,
       "topRank": null
     },
@@ -2330,7 +2330,7 @@
       "team": "bos",
       "position": "3B",
       "levelRaw": "AAA",
-      "statLine": ".237, 12 HR, 59 RBI",
+      "statLine": ".242, 12 HR, 60 RBI",
       "age": 22,
       "topRank": null
     },
@@ -2390,7 +2390,7 @@
       "team": "bos",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".236, 20 HR, 66 RBI",
+      "statLine": ".234, 20 HR, 66 RBI",
       "age": 23,
       "topRank": null
     },
@@ -2462,7 +2462,7 @@
       "team": "chc",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".291, 23 HR, 107 RBI",
+      "statLine": ".290, 23 HR, 107 RBI",
       "age": 19,
       "topRank": 39
     },
@@ -2474,7 +2474,7 @@
       "team": "chc",
       "position": "C",
       "levelRaw": "ALL (3)",
-      "statLine": ".300, 25 HR, 79 RBI",
+      "statLine": ".298, 25 HR, 79 RBI",
       "age": 25,
       "topRank": 92
     },
@@ -2498,7 +2498,7 @@
       "team": "chc",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".246, 10 HR, 67 RBI",
+      "statLine": ".245, 10 HR, 67 RBI",
       "age": 22,
       "topRank": null
     },
@@ -2510,7 +2510,7 @@
       "team": "chc",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "38.0 IP, 6.39 ERA, 46 SO",
+      "statLine": "39.1 IP, 6.18 ERA, 47 SO",
       "age": 24,
       "topRank": null
     },
@@ -2522,7 +2522,7 @@
       "team": "chc",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".298, 4 HR, 15 RBI",
+      "statLine": ".295, 5 HR, 18 RBI",
       "age": 21,
       "topRank": null
     },
@@ -2558,7 +2558,7 @@
       "team": "chc",
       "position": "2B",
       "levelRaw": "ALL (2)",
-      "statLine": ".303, 9 HR, 56 RBI",
+      "statLine": ".301, 9 HR, 56 RBI",
       "age": 23,
       "topRank": null
     },
@@ -2582,7 +2582,7 @@
       "team": "chc",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".246, 5 HR, 25 RBI",
+      "statLine": ".251, 5 HR, 25 RBI",
       "age": 18,
       "topRank": null
     },
@@ -2606,7 +2606,7 @@
       "team": "chc",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".298, 7 HR, 70 RBI",
+      "statLine": ".296, 7 HR, 70 RBI",
       "age": 21,
       "topRank": null
     },
@@ -2726,7 +2726,7 @@
       "team": "chc",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".269, 21 HR, 61 RBI",
+      "statLine": ".269, 21 HR, 62 RBI",
       "age": 22,
       "topRank": null
     },
@@ -2774,7 +2774,7 @@
       "team": "cin",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".274, 19 HR, 57 RBI",
+      "statLine": ".278, 19 HR, 59 RBI",
       "age": 20,
       "topRank": 22
     },
@@ -2786,7 +2786,7 @@
       "team": "cin",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".269, 11 HR, 54 RBI",
+      "statLine": ".265, 11 HR, 54 RBI",
       "age": 19,
       "topRank": 91
     },
@@ -2798,14 +2798,14 @@
       "team": "cin",
       "position": "SS",
       "levelRaw": "A+",
-      "statLine": ".301, 8 HR, 16 RBI",
+      "statLine": ".298, 8 HR, 16 RBI",
       "age": 21,
       "topRank": null
     },
     {
       "orgRank": 4,
       "playerId": 699302,
-      "name": "Hector Rodriguez",
+      "name": "Héctor Rodríguez",
       "teamId": 113,
       "team": "cin",
       "position": "RF",
@@ -2822,7 +2822,7 @@
       "team": "cin",
       "position": "3B",
       "levelRaw": "ALL (2)",
-      "statLine": ".257, 10 HR, 44 RBI",
+      "statLine": ".259, 11 HR, 45 RBI",
       "age": 20,
       "topRank": null
     },
@@ -2846,7 +2846,7 @@
       "team": "cin",
       "position": "SS",
       "levelRaw": "A+",
-      "statLine": ".219, 3 HR, 11 RBI",
+      "statLine": ".211, 3 HR, 11 RBI",
       "age": 21,
       "topRank": null
     },
@@ -2870,7 +2870,7 @@
       "team": "cin",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".301, 15 HR, 67 RBI",
+      "statLine": ".301, 15 HR, 68 RBI",
       "age": 19,
       "topRank": null
     },
@@ -2882,7 +2882,7 @@
       "team": "cin",
       "position": "1B",
       "levelRaw": "A",
-      "statLine": ".238, 2 HR, 12 RBI",
+      "statLine": ".235, 2 HR, 12 RBI",
       "age": 22,
       "topRank": null
     },
@@ -2942,7 +2942,7 @@
       "team": "cin",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".271, 14 HR, 47 RBI",
+      "statLine": ".269, 14 HR, 48 RBI",
       "age": 21,
       "topRank": null
     },
@@ -2966,7 +2966,7 @@
       "team": "cin",
       "position": "3B",
       "levelRaw": "AA",
-      "statLine": ".211, 17 HR, 78 RBI",
+      "statLine": ".211, 18 HR, 81 RBI",
       "age": 21,
       "topRank": null
     },
@@ -2978,7 +2978,7 @@
       "team": "cin",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".259, 12 HR, 69 RBI",
+      "statLine": ".262, 13 HR, 71 RBI",
       "age": 20,
       "topRank": null
     },
@@ -3002,7 +3002,7 @@
       "team": "cin",
       "position": "LHP",
       "levelRaw": "A",
-      "statLine": "2.0 IP, 0.00 ERA, 3 SO",
+      "statLine": "3.0 IP, 0.00 ERA, 6 SO",
       "age": 21,
       "topRank": null
     },
@@ -3026,7 +3026,7 @@
       "team": "cin",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".301, 28 HR, 89 RBI",
+      "statLine": ".298, 28 HR, 90 RBI",
       "age": 24,
       "topRank": null
     },
@@ -3062,7 +3062,7 @@
       "team": "cin",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".241, 11 HR, 62 RBI",
+      "statLine": ".239, 11 HR, 62 RBI",
       "age": 22,
       "topRank": null
     },
@@ -3122,7 +3122,7 @@
       "team": "cle",
       "position": "2B",
       "levelRaw": "ALL (3)",
-      "statLine": ".291, 15 HR, 58 RBI",
+      "statLine": ".291, 15 HR, 59 RBI",
       "age": 22,
       "topRank": 29
     },
@@ -3134,7 +3134,7 @@
       "team": "cle",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".294, 28 HR, 89 RBI",
+      "statLine": ".292, 28 HR, 89 RBI",
       "age": 21,
       "topRank": 32
     },
@@ -3170,7 +3170,7 @@
       "team": "cle",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".283, 18 HR, 65 RBI",
+      "statLine": ".281, 18 HR, 65 RBI",
       "age": 24,
       "topRank": null
     },
@@ -3218,7 +3218,7 @@
       "team": "cle",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "56.2 IP, 2.38 ERA, 72 SO",
+      "statLine": "61.1 IP, 2.20 ERA, 77 SO",
       "age": 25,
       "topRank": null
     },
@@ -3290,7 +3290,7 @@
       "team": "cle",
       "position": "RF",
       "levelRaw": "ALL (2)",
-      "statLine": ".239, 17 HR, 61 RBI",
+      "statLine": ".244, 18 HR, 62 RBI",
       "age": 23,
       "topRank": null
     },
@@ -3314,8 +3314,20 @@
       "team": "cle",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".241, 17 HR, 59 RBI",
+      "statLine": ".238, 17 HR, 59 RBI",
       "age": 22,
+      "topRank": null
+    },
+    {
+      "orgRank": 20,
+      "playerId": 821507,
+      "name": "Tre Broussard",
+      "teamId": 114,
+      "team": "cle",
+      "position": "OF",
+      "levelRaw": "A",
+      "statLine": ".333, 0 HR, 0 RBI",
+      "age": 20,
       "topRank": null
     },
     {
@@ -3350,7 +3362,7 @@
       "team": "cle",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".202, 3 HR, 30 RBI",
+      "statLine": ".204, 3 HR, 30 RBI",
       "age": 19,
       "topRank": null
     },
@@ -3422,7 +3434,7 @@
       "team": "cle",
       "position": "C",
       "levelRaw": "AAA",
-      "statLine": ".261, 19 HR, 72 RBI",
+      "statLine": ".264, 19 HR, 72 RBI",
       "age": 25,
       "topRank": null
     },
@@ -3446,7 +3458,7 @@
       "team": "col",
       "position": "CF",
       "levelRaw": "ALL (2)",
-      "statLine": ".310, 10 HR, 75 RBI",
+      "statLine": ".309, 10 HR, 75 RBI",
       "age": 19,
       "topRank": 55
     },
@@ -3470,7 +3482,7 @@
       "team": "col",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".351, 11 HR, 91 RBI",
+      "statLine": ".348, 11 HR, 91 RBI",
       "age": 19,
       "topRank": null
     },
@@ -3482,7 +3494,7 @@
       "team": "col",
       "position": "C",
       "levelRaw": "A",
-      "statLine": ".299, 4 HR, 16 RBI",
+      "statLine": ".310, 5 HR, 17 RBI",
       "age": 21,
       "topRank": null
     },
@@ -3494,7 +3506,7 @@
       "team": "col",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "92.1 IP, 4.09 ERA, 122 SO",
+      "statLine": "94.1 IP, 4.20 ERA, 125 SO",
       "age": 22,
       "topRank": null
     },
@@ -3506,7 +3518,7 @@
       "team": "col",
       "position": "C",
       "levelRaw": "A",
-      "statLine": ".289, 4 HR, 10 RBI",
+      "statLine": ".286, 4 HR, 10 RBI",
       "age": 21,
       "topRank": null
     },
@@ -3518,7 +3530,7 @@
       "team": "col",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".289, 2 HR, 9 RBI",
+      "statLine": ".274, 2 HR, 9 RBI",
       "age": 23,
       "topRank": null
     },
@@ -3542,7 +3554,7 @@
       "team": "col",
       "position": "RF",
       "levelRaw": "ALL (2)",
-      "statLine": ".298, 12 HR, 58 RBI",
+      "statLine": ".298, 12 HR, 61 RBI",
       "age": 25,
       "topRank": null
     },
@@ -3554,7 +3566,7 @@
       "team": "col",
       "position": "2B",
       "levelRaw": "ALL (2)",
-      "statLine": ".251, 19 HR, 62 RBI",
+      "statLine": ".255, 20 HR, 65 RBI",
       "age": 24,
       "topRank": null
     },
@@ -3566,7 +3578,7 @@
       "team": "col",
       "position": "OF",
       "levelRaw": "A+",
-      "statLine": ".246, 13 HR, 32 RBI",
+      "statLine": ".247, 13 HR, 33 RBI",
       "age": 22,
       "topRank": null
     },
@@ -3590,7 +3602,7 @@
       "team": "col",
       "position": "SS",
       "levelRaw": "AA",
-      "statLine": ".298, 9 HR, 59 RBI",
+      "statLine": ".297, 9 HR, 59 RBI",
       "age": 22,
       "topRank": null
     },
@@ -3602,7 +3614,7 @@
       "team": "col",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".298, 17 HR, 104 RBI",
+      "statLine": ".295, 17 HR, 104 RBI",
       "age": 22,
       "topRank": null
     },
@@ -3662,7 +3674,7 @@
       "team": "col",
       "position": "OF",
       "levelRaw": "A+",
-      "statLine": ".231, 10 HR, 43 RBI",
+      "statLine": ".231, 10 HR, 44 RBI",
       "age": 20,
       "topRank": null
     },
@@ -3686,7 +3698,7 @@
       "team": "col",
       "position": "3B",
       "levelRaw": "A+",
-      "statLine": ".255, 14 HR, 71 RBI",
+      "statLine": ".253, 14 HR, 71 RBI",
       "age": 22,
       "topRank": null
     },
@@ -3710,7 +3722,7 @@
       "team": "col",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".303, 18 HR, 77 RBI",
+      "statLine": ".299, 18 HR, 77 RBI",
       "age": 20,
       "topRank": null
     },
@@ -3746,7 +3758,7 @@
       "team": "col",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".239, 3 HR, 39 RBI",
+      "statLine": ".242, 3 HR, 41 RBI",
       "age": 19,
       "topRank": null
     },
@@ -3782,7 +3794,7 @@
       "team": "det",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".258, 19 HR, 72 RBI",
+      "statLine": ".260, 19 HR, 72 RBI",
       "age": 21,
       "topRank": 48
     },
@@ -3818,7 +3830,7 @@
       "team": "det",
       "position": "RHP",
       "levelRaw": "A",
-      "statLine": "6.1 IP, 0.00 ERA, 8 SO",
+      "statLine": "10.1 IP, 0.00 ERA, 14 SO",
       "age": 21,
       "topRank": null
     },
@@ -3854,7 +3866,7 @@
       "team": "det",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".245, 3 HR, 26 RBI",
+      "statLine": ".247, 3 HR, 26 RBI",
       "age": 19,
       "topRank": null
     },
@@ -3902,7 +3914,7 @@
       "team": "det",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".282, 11 HR, 38 RBI",
+      "statLine": ".286, 12 HR, 39 RBI",
       "age": 18,
       "topRank": null
     },
@@ -3938,7 +3950,7 @@
       "team": "det",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".083, 0 HR, 0 RBI",
+      "statLine": ".125, 0 HR, 0 RBI",
       "age": 21,
       "topRank": null
     },
@@ -3986,7 +3998,7 @@
       "team": "det",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".278, 8 HR, 36 RBI",
+      "statLine": ".278, 9 HR, 39 RBI",
       "age": 18,
       "topRank": null
     },
@@ -3997,8 +4009,8 @@
       "teamId": 116,
       "team": "det",
       "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "42.2 IP, 2.53 ERA, 48 SO",
+      "levelRaw": "ALL (3)",
+      "statLine": "46.0 IP, 2.74 ERA, 52 SO",
       "age": 21,
       "topRank": null
     },
@@ -4022,7 +4034,7 @@
       "team": "det",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".276, 6 HR, 48 RBI",
+      "statLine": ".273, 6 HR, 48 RBI",
       "age": 19,
       "topRank": null
     },
@@ -4059,7 +4071,7 @@
       "position": "C",
       "levelRaw": "ROK",
       "statLine": ".322, 9 HR, 23 RBI",
-      "age": 17,
+      "age": 18,
       "topRank": null
     },
     {
@@ -4118,7 +4130,7 @@
       "team": "hou",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".333, 3 HR, 26 RBI",
+      "statLine": ".333, 4 HR, 27 RBI",
       "age": 21,
       "topRank": null
     },
@@ -4142,7 +4154,7 @@
       "team": "hou",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".258, 31 HR, 84 RBI",
+      "statLine": ".256, 31 HR, 84 RBI",
       "age": 23,
       "topRank": null
     },
@@ -4190,7 +4202,7 @@
       "team": "hou",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".249, 22 HR, 72 RBI",
+      "statLine": ".248, 22 HR, 72 RBI",
       "age": 20,
       "topRank": null
     },
@@ -4202,7 +4214,7 @@
       "team": "hou",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".229, 8 HR, 56 RBI",
+      "statLine": ".228, 8 HR, 56 RBI",
       "age": 23,
       "topRank": null
     },
@@ -4238,7 +4250,7 @@
       "team": "hou",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "94.0 IP, 4.21 ERA, 112 SO",
+      "statLine": "95.0 IP, 4.17 ERA, 113 SO",
       "age": 24,
       "topRank": null
     },
@@ -4250,7 +4262,7 @@
       "team": "hou",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "54.0 IP, 3.33 ERA, 49 SO",
+      "statLine": "55.0 IP, 3.27 ERA, 50 SO",
       "age": 23,
       "topRank": null
     },
@@ -4286,7 +4298,7 @@
       "team": "hou",
       "position": "C",
       "levelRaw": "ALL (3)",
-      "statLine": ".259, 10 HR, 46 RBI",
+      "statLine": ".257, 10 HR, 47 RBI",
       "age": 23,
       "topRank": null
     },
@@ -4310,7 +4322,7 @@
       "team": "hou",
       "position": "C",
       "levelRaw": "AA",
-      "statLine": ".233, 12 HR, 40 RBI",
+      "statLine": ".231, 12 HR, 40 RBI",
       "age": 22,
       "topRank": null
     },
@@ -4322,7 +4334,7 @@
       "team": "hou",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".274, 2 HR, 10 RBI",
+      "statLine": ".258, 2 HR, 10 RBI",
       "age": 22,
       "topRank": null
     },
@@ -4370,7 +4382,7 @@
       "team": "hou",
       "position": "OF",
       "levelRaw": "A+",
-      "statLine": ".273, 16 HR, 62 RBI",
+      "statLine": ".275, 16 HR, 64 RBI",
       "age": 22,
       "topRank": null
     },
@@ -4442,7 +4454,7 @@
       "team": "kc",
       "position": "LHP",
       "levelRaw": "A+",
-      "statLine": "112.2 IP, 3.91 ERA, 134 SO",
+      "statLine": "116.2 IP, 4.01 ERA, 139 SO",
       "age": 19,
       "topRank": null
     },
@@ -4454,7 +4466,7 @@
       "team": "kc",
       "position": "C",
       "levelRaw": "A+",
-      "statLine": ".233, 22 HR, 72 RBI",
+      "statLine": ".232, 22 HR, 72 RBI",
       "age": 22,
       "topRank": null
     },
@@ -4478,7 +4490,7 @@
       "team": "kc",
       "position": "C",
       "levelRaw": "A+",
-      "statLine": ".286, 13 HR, 78 RBI",
+      "statLine": ".283, 13 HR, 78 RBI",
       "age": 21,
       "topRank": null
     },
@@ -4550,7 +4562,7 @@
       "team": "kc",
       "position": "OF",
       "levelRaw": "A+",
-      "statLine": ".265, 3 HR, 41 RBI",
+      "statLine": ".262, 3 HR, 41 RBI",
       "age": 20,
       "topRank": null
     },
@@ -4574,7 +4586,7 @@
       "team": "kc",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".253, 33 HR, 89 RBI",
+      "statLine": ".253, 34 HR, 90 RBI",
       "age": 24,
       "topRank": null
     },
@@ -4610,7 +4622,7 @@
       "team": "kc",
       "position": "RHP",
       "levelRaw": "AA",
-      "statLine": "115.0 IP, 6.97 ERA, 85 SO",
+      "statLine": "123.0 IP, 6.59 ERA, 94 SO",
       "age": 23,
       "topRank": null
     },
@@ -4634,7 +4646,7 @@
       "team": "kc",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".210, 1 HR, 13 RBI",
+      "statLine": ".203, 1 HR, 13 RBI",
       "age": 21,
       "topRank": null
     },
@@ -4670,7 +4682,7 @@
       "team": "kc",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".332, 4 HR, 67 RBI",
+      "statLine": ".333, 4 HR, 67 RBI",
       "age": 23,
       "topRank": null
     },
@@ -4706,7 +4718,7 @@
       "team": "la",
       "position": "OF",
       "levelRaw": "AA",
-      "statLine": ".303, 26 HR, 100 RBI",
+      "statLine": ".301, 26 HR, 100 RBI",
       "age": 21,
       "topRank": 6
     },
@@ -4718,7 +4730,7 @@
       "team": "la",
       "position": "CF",
       "levelRaw": "ALL (2)",
-      "statLine": ".304, 17 HR, 62 RBI",
+      "statLine": ".306, 17 HR, 62 RBI",
       "age": 23,
       "topRank": 16
     },
@@ -4778,7 +4790,7 @@
       "team": "la",
       "position": "RF",
       "levelRaw": "AAA",
-      "statLine": ".293, 27 HR, 97 RBI",
+      "statLine": ".294, 27 HR, 97 RBI",
       "age": 23,
       "topRank": null
     },
@@ -4826,7 +4838,7 @@
       "team": "la",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".265, 21 HR, 84 RBI",
+      "statLine": ".263, 21 HR, 84 RBI",
       "age": 20,
       "topRank": null
     },
@@ -4838,7 +4850,7 @@
       "team": "la",
       "position": "2B",
       "levelRaw": "ALL (2)",
-      "statLine": ".290, 11 HR, 28 RBI",
+      "statLine": ".295, 12 HR, 29 RBI",
       "age": 20,
       "topRank": null
     },
@@ -4862,7 +4874,7 @@
       "team": "la",
       "position": "OF",
       "levelRaw": "AAA",
-      "statLine": ".286, 19 HR, 86 RBI",
+      "statLine": ".283, 19 HR, 86 RBI",
       "age": 23,
       "topRank": null
     },
@@ -4886,7 +4898,7 @@
       "team": "la",
       "position": "LHP",
       "levelRaw": "AAA",
-      "statLine": "90.0 IP, 6.00 ERA, 91 SO",
+      "statLine": "95.1 IP, 5.76 ERA, 99 SO",
       "age": 22,
       "topRank": null
     },
@@ -4910,7 +4922,7 @@
       "team": "la",
       "position": "3B",
       "levelRaw": "ALL (3)",
-      "statLine": ".251, 19 HR, 58 RBI",
+      "statLine": ".248, 19 HR, 58 RBI",
       "age": 22,
       "topRank": null
     },
@@ -4922,7 +4934,7 @@
       "team": "la",
       "position": "LF",
       "levelRaw": "ALL (2)",
-      "statLine": ".251, 20 HR, 88 RBI",
+      "statLine": ".252, 20 HR, 88 RBI",
       "age": 28,
       "topRank": null
     },
@@ -4934,7 +4946,7 @@
       "team": "la",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "76.0 IP, 2.84 ERA, 91 SO",
+      "statLine": "81.0 IP, 2.78 ERA, 98 SO",
       "age": 24,
       "topRank": null
     },
@@ -4982,7 +4994,7 @@
       "team": "la",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "64.2 IP, 2.64 ERA, 89 SO",
+      "statLine": "66.2 IP, 2.70 ERA, 91 SO",
       "age": 23,
       "topRank": null
     },
@@ -5054,7 +5066,7 @@
       "team": "was",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".263, 13 HR, 69 RBI",
+      "statLine": ".262, 13 HR, 69 RBI",
       "age": 18,
       "topRank": 4
     },
@@ -5090,7 +5102,7 @@
       "team": "was",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".247, 16 HR, 60 RBI",
+      "statLine": ".249, 17 HR, 63 RBI",
       "age": 21,
       "topRank": null
     },
@@ -5162,7 +5174,7 @@
       "team": "was",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "38.0 IP, 1.42 ERA, 36 SO",
+      "statLine": "41.0 IP, 1.76 ERA, 39 SO",
       "age": 19,
       "topRank": null
     },
@@ -5186,7 +5198,7 @@
       "team": "was",
       "position": "RHP",
       "levelRaw": "ALL (4)",
-      "statLine": "95.2 IP, 3.86 ERA, 111 SO",
+      "statLine": "99.2 IP, 3.88 ERA, 115 SO",
       "age": 24,
       "topRank": null
     },
@@ -5222,7 +5234,7 @@
       "team": "was",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".260, 23 HR, 73 RBI",
+      "statLine": ".257, 23 HR, 73 RBI",
       "age": 22,
       "topRank": null
     },
@@ -5306,7 +5318,7 @@
       "team": "was",
       "position": "RHP",
       "levelRaw": "ALL (4)",
-      "statLine": "50.0 IP, 3.96 ERA, 66 SO",
+      "statLine": "51.0 IP, 3.88 ERA, 68 SO",
       "age": 27,
       "topRank": null
     },
@@ -5318,7 +5330,7 @@
       "team": "was",
       "position": "CF",
       "levelRaw": "ALL (2)",
-      "statLine": ".248, 12 HR, 61 RBI",
+      "statLine": ".251, 12 HR, 61 RBI",
       "age": 21,
       "topRank": null
     },
@@ -5342,7 +5354,7 @@
       "team": "was",
       "position": "C",
       "levelRaw": "AA",
-      "statLine": ".244, 14 HR, 50 RBI",
+      "statLine": ".244, 14 HR, 51 RBI",
       "age": 23,
       "topRank": null
     },
@@ -5354,7 +5366,7 @@
       "team": "nym",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".271, 22 HR, 82 RBI",
+      "statLine": ".269, 22 HR, 82 RBI",
       "age": 21,
       "topRank": 76
     },
@@ -5378,7 +5390,7 @@
       "team": "nym",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".261, 8 HR, 50 RBI",
+      "statLine": ".258, 8 HR, 50 RBI",
       "age": 18,
       "topRank": null
     },
@@ -5426,7 +5438,7 @@
       "team": "nym",
       "position": "3B",
       "levelRaw": "ALL (4)",
-      "statLine": ".248, 9 HR, 39 RBI",
+      "statLine": ".247, 9 HR, 39 RBI",
       "age": 22,
       "topRank": null
     },
@@ -5462,7 +5474,7 @@
       "team": "nym",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".286, 5 HR, 18 RBI",
+      "statLine": ".284, 5 HR, 18 RBI",
       "age": 21,
       "topRank": null
     },
@@ -5474,7 +5486,7 @@
       "team": "nym",
       "position": "SS",
       "levelRaw": "ALL (4)",
-      "statLine": ".315, 5 HR, 54 RBI",
+      "statLine": ".311, 5 HR, 54 RBI",
       "age": 23,
       "topRank": null
     },
@@ -5510,7 +5522,7 @@
       "team": "nym",
       "position": "1B",
       "levelRaw": "AAA",
-      "statLine": ".175, 16 HR, 51 RBI",
+      "statLine": ".176, 16 HR, 52 RBI",
       "age": 23,
       "topRank": null
     },
@@ -5522,7 +5534,7 @@
       "team": "nym",
       "position": "OF",
       "levelRaw": "ALL (4)",
-      "statLine": ".234, 15 HR, 50 RBI",
+      "statLine": ".236, 15 HR, 51 RBI",
       "age": 22,
       "topRank": null
     },
@@ -5546,7 +5558,7 @@
       "team": "nym",
       "position": "C",
       "levelRaw": "AA",
-      "statLine": ".207, 18 HR, 50 RBI",
+      "statLine": ".205, 18 HR, 50 RBI",
       "age": 22,
       "topRank": null
     },
@@ -5558,7 +5570,7 @@
       "team": "nym",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "31.1 IP, 6.61 ERA, 29 SO",
+      "statLine": "33.2 IP, 7.49 ERA, 32 SO",
       "age": 23,
       "topRank": null
     },
@@ -5618,7 +5630,7 @@
       "team": "nym",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".187, 5 HR, 26 RBI",
+      "statLine": ".188, 5 HR, 26 RBI",
       "age": 23,
       "topRank": null
     },
@@ -5666,7 +5678,7 @@
       "team": "nym",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".267, 0 HR, 6 RBI",
+      "statLine": ".265, 0 HR, 6 RBI",
       "age": 19,
       "topRank": null
     },
@@ -5702,7 +5714,7 @@
       "team": "oak",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".293, 7 HR, 16 RBI",
+      "statLine": ".309, 7 HR, 16 RBI",
       "age": 21,
       "topRank": 41
     },
@@ -5762,7 +5774,7 @@
       "team": "oak",
       "position": "OF",
       "levelRaw": "ALL (3)",
-      "statLine": ".316, 22 HR, 104 RBI",
+      "statLine": ".313, 22 HR, 104 RBI",
       "age": 22,
       "topRank": null
     },
@@ -5774,7 +5786,7 @@
       "team": "oak",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".302, 8 HR, 80 RBI",
+      "statLine": ".301, 8 HR, 82 RBI",
       "age": 18,
       "topRank": null
     },
@@ -5786,7 +5798,7 @@
       "team": "oak",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".224, 11 HR, 51 RBI",
+      "statLine": ".225, 11 HR, 51 RBI",
       "age": 19,
       "topRank": null
     },
@@ -5834,7 +5846,7 @@
       "team": "oak",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "106.2 IP, 5.57 ERA, 110 SO",
+      "statLine": "112.1 IP, 5.29 ERA, 117 SO",
       "age": 21,
       "topRank": null
     },
@@ -5846,7 +5858,7 @@
       "team": "oak",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".282, 0 HR, 12 RBI",
+      "statLine": ".273, 0 HR, 12 RBI",
       "age": 21,
       "topRank": null
     },
@@ -5894,7 +5906,7 @@
       "team": "oak",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".288, 9 HR, 48 RBI",
+      "statLine": ".287, 9 HR, 50 RBI",
       "age": 25,
       "topRank": null
     },
@@ -5954,7 +5966,7 @@
       "team": "oak",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".238, 15 HR, 50 RBI",
+      "statLine": ".236, 15 HR, 50 RBI",
       "age": 23,
       "topRank": null
     },
@@ -6014,7 +6026,7 @@
       "team": "pit",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".238, 26 HR, 81 RBI",
+      "statLine": ".235, 26 HR, 81 RBI",
       "age": 19,
       "topRank": 35
     },
@@ -6026,7 +6038,7 @@
       "team": "pit",
       "position": "3B",
       "levelRaw": "ALL (3)",
-      "statLine": ".300, 31 HR, 92 RBI",
+      "statLine": ".302, 31 HR, 94 RBI",
       "age": 22,
       "topRank": 94
     },
@@ -6050,7 +6062,7 @@
       "team": "pit",
       "position": "C",
       "levelRaw": "A+",
-      "statLine": ".301, 16 HR, 71 RBI",
+      "statLine": ".301, 17 HR, 72 RBI",
       "age": 21,
       "topRank": null
     },
@@ -6062,7 +6074,7 @@
       "team": "pit",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".293, 19 HR, 84 RBI",
+      "statLine": ".292, 19 HR, 84 RBI",
       "age": 22,
       "topRank": null
     },
@@ -6074,7 +6086,7 @@
       "team": "pit",
       "position": "2B",
       "levelRaw": "A",
-      "statLine": ".302, 0 HR, 3 RBI",
+      "statLine": ".286, 0 HR, 3 RBI",
       "age": 21,
       "topRank": null
     },
@@ -6146,7 +6158,7 @@
       "team": "pit",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "94.1 IP, 4.48 ERA, 113 SO",
+      "statLine": "97.1 IP, 4.53 ERA, 115 SO",
       "age": 24,
       "topRank": null
     },
@@ -6182,7 +6194,7 @@
       "team": "pit",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "95.0 IP, 4.55 ERA, 71 SO",
+      "statLine": "99.2 IP, 4.33 ERA, 76 SO",
       "age": 23,
       "topRank": null
     },
@@ -6194,7 +6206,7 @@
       "team": "pit",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "77.2 IP, 2.78 ERA, 132 SO",
+      "statLine": "79.0 IP, 2.96 ERA, 135 SO",
       "age": 19,
       "topRank": null
     },
@@ -6218,7 +6230,7 @@
       "team": "pit",
       "position": "3B",
       "levelRaw": "A",
-      "statLine": ".146, 1 HR, 5 RBI",
+      "statLine": ".174, 1 HR, 5 RBI",
       "age": 22,
       "topRank": null
     },
@@ -6242,7 +6254,7 @@
       "team": "pit",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".279, 25 HR, 63 RBI",
+      "statLine": ".278, 25 HR, 65 RBI",
       "age": 23,
       "topRank": null
     },
@@ -6254,7 +6266,7 @@
       "team": "pit",
       "position": "3B",
       "levelRaw": "ALL (2)",
-      "statLine": ".239, 9 HR, 51 RBI",
+      "statLine": ".236, 9 HR, 51 RBI",
       "age": 23,
       "topRank": null
     },
@@ -6266,7 +6278,7 @@
       "team": "pit",
       "position": "1B",
       "levelRaw": "ALL (3)",
-      "statLine": ".259, 25 HR, 58 RBI",
+      "statLine": ".256, 25 HR, 58 RBI",
       "age": 21,
       "topRank": null
     },
@@ -6278,7 +6290,7 @@
       "team": "pit",
       "position": "SS",
       "levelRaw": "A+",
-      "statLine": ".255, 31 HR, 94 RBI",
+      "statLine": ".257, 31 HR, 95 RBI",
       "age": 21,
       "topRank": null
     },
@@ -6350,7 +6362,7 @@
       "team": "sd",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".354, 0 HR, 5 RBI",
+      "statLine": ".346, 0 HR, 5 RBI",
       "age": 18,
       "topRank": null
     },
@@ -6362,7 +6374,7 @@
       "team": "sd",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "95.1 IP, 4.63 ERA, 98 SO",
+      "statLine": "98.2 IP, 4.74 ERA, 100 SO",
       "age": 21,
       "topRank": null
     },
@@ -6386,7 +6398,7 @@
       "team": "sd",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "43.0 IP, 5.23 ERA, 49 SO",
+      "statLine": "47.2 IP, 5.10 ERA, 58 SO",
       "age": 19,
       "topRank": null
     },
@@ -6506,7 +6518,7 @@
       "team": "sd",
       "position": "OF",
       "levelRaw": "AA",
-      "statLine": ".259, 17 HR, 69 RBI",
+      "statLine": ".261, 17 HR, 69 RBI",
       "age": 23,
       "topRank": null
     },
@@ -6518,7 +6530,7 @@
       "team": "sd",
       "position": "C",
       "levelRaw": "A+",
-      "statLine": ".235, 2 HR, 12 RBI",
+      "statLine": ".236, 2 HR, 12 RBI",
       "age": 21,
       "topRank": null
     },
@@ -6530,7 +6542,7 @@
       "team": "sd",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".269, 2 HR, 15 RBI",
+      "statLine": ".254, 2 HR, 15 RBI",
       "age": 21,
       "topRank": null
     },
@@ -6542,7 +6554,7 @@
       "team": "sd",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".263, 3 HR, 13 RBI",
+      "statLine": ".253, 3 HR, 13 RBI",
       "age": 22,
       "topRank": null
     },
@@ -6650,7 +6662,7 @@
       "team": "sea",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "103.1 IP, 1.39 ERA, 143 SO",
+      "statLine": "108.1 IP, 1.66 ERA, 146 SO",
       "age": 22,
       "topRank": 5
     },
@@ -6674,7 +6686,7 @@
       "team": "sea",
       "position": "LF",
       "levelRaw": "ALL (2)",
-      "statLine": ".280, 18 HR, 78 RBI",
+      "statLine": ".284, 18 HR, 79 RBI",
       "age": 21,
       "topRank": 45
     },
@@ -6698,7 +6710,7 @@
       "team": "sea",
       "position": "RF",
       "levelRaw": "ALL (3)",
-      "statLine": ".252, 39 HR, 98 RBI",
+      "statLine": ".251, 39 HR, 99 RBI",
       "age": 21,
       "topRank": 56
     },
@@ -6710,7 +6722,7 @@
       "team": "sea",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".251, 15 HR, 60 RBI",
+      "statLine": ".249, 15 HR, 60 RBI",
       "age": 21,
       "topRank": 73
     },
@@ -6722,7 +6734,7 @@
       "team": "sea",
       "position": "C",
       "levelRaw": "A+",
-      "statLine": ".237, 20 HR, 80 RBI",
+      "statLine": ".234, 20 HR, 80 RBI",
       "age": 22,
       "topRank": null
     },
@@ -6734,7 +6746,7 @@
       "team": "sea",
       "position": "3B",
       "levelRaw": "A",
-      "statLine": ".456, 3 HR, 17 RBI",
+      "statLine": ".425, 3 HR, 18 RBI",
       "age": 21,
       "topRank": null
     },
@@ -6746,7 +6758,7 @@
       "team": "sea",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".315, 2 HR, 11 RBI",
+      "statLine": ".305, 2 HR, 12 RBI",
       "age": 21,
       "topRank": null
     },
@@ -6758,7 +6770,7 @@
       "team": "sea",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".243, 5 HR, 34 RBI",
+      "statLine": ".243, 5 HR, 35 RBI",
       "age": 19,
       "topRank": null
     },
@@ -6770,7 +6782,7 @@
       "team": "sea",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "60.1 IP, 2.24 ERA, 81 SO",
+      "statLine": "64.1 IP, 2.10 ERA, 87 SO",
       "age": 22,
       "topRank": null
     },
@@ -6926,7 +6938,7 @@
       "team": "sea",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".286, 10 HR, 81 RBI",
+      "statLine": ".284, 10 HR, 81 RBI",
       "age": 22,
       "topRank": null
     },
@@ -6938,7 +6950,7 @@
       "team": "sea",
       "position": "RHP",
       "levelRaw": "A+",
-      "statLine": "52.0 IP, 4.50 ERA, 63 SO",
+      "statLine": "54.0 IP, 4.33 ERA, 67 SO",
       "age": 22,
       "topRank": null
     },
@@ -6974,7 +6986,7 @@
       "team": "sf",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".353, 4 HR, 54 RBI",
+      "statLine": ".355, 4 HR, 56 RBI",
       "age": 18,
       "topRank": 17
     },
@@ -7046,7 +7058,7 @@
       "team": "sf",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".279, 26 HR, 85 RBI",
+      "statLine": ".278, 26 HR, 85 RBI",
       "age": 24,
       "topRank": null
     },
@@ -7094,7 +7106,7 @@
       "team": "sf",
       "position": "3B",
       "levelRaw": "ALL (2)",
-      "statLine": ".277, 17 HR, 73 RBI",
+      "statLine": ".273, 17 HR, 73 RBI",
       "age": 24,
       "topRank": null
     },
@@ -7154,7 +7166,7 @@
       "team": "sf",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".272, 14 HR, 77 RBI",
+      "statLine": ".269, 14 HR, 77 RBI",
       "age": 22,
       "topRank": null
     },
@@ -7166,7 +7178,7 @@
       "team": "sf",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".300, 8 HR, 48 RBI",
+      "statLine": ".302, 8 HR, 48 RBI",
       "age": 23,
       "topRank": null
     },
@@ -7250,7 +7262,7 @@
       "team": "sf",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "52.1 IP, 3.27 ERA, 69 SO",
+      "statLine": "53.1 IP, 3.21 ERA, 70 SO",
       "age": 27,
       "topRank": null
     },
@@ -7298,7 +7310,7 @@
       "team": "stl",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".314, 24 HR, 77 RBI",
+      "statLine": ".314, 24 HR, 81 RBI",
       "age": 19,
       "topRank": 18
     },
@@ -7310,7 +7322,7 @@
       "team": "stl",
       "position": "LHP",
       "levelRaw": "AA",
-      "statLine": "92.1 IP, 3.90 ERA, 121 SO",
+      "statLine": "98.0 IP, 3.77 ERA, 125 SO",
       "age": 22,
       "topRank": 44
     },
@@ -7322,7 +7334,7 @@
       "team": "stl",
       "position": "LF",
       "levelRaw": "ALL (2)",
-      "statLine": ".249, 40 HR, 103 RBI",
+      "statLine": ".250, 40 HR, 104 RBI",
       "age": 23,
       "topRank": 59
     },
@@ -7358,7 +7370,7 @@
       "team": "stl",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".280, 1 HR, 3 RBI",
+      "statLine": ".321, 1 HR, 5 RBI",
       "age": 18,
       "topRank": null
     },
@@ -7370,7 +7382,7 @@
       "team": "stl",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".277, 17 HR, 81 RBI",
+      "statLine": ".279, 17 HR, 81 RBI",
       "age": 22,
       "topRank": null
     },
@@ -7382,7 +7394,7 @@
       "team": "stl",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "118.2 IP, 3.56 ERA, 140 SO",
+      "statLine": "123.2 IP, 3.49 ERA, 144 SO",
       "age": 25,
       "topRank": null
     },
@@ -7406,7 +7418,7 @@
       "team": "stl",
       "position": "OF",
       "levelRaw": "ALL (3)",
-      "statLine": ".306, 24 HR, 62 RBI",
+      "statLine": ".309, 24 HR, 64 RBI",
       "age": 22,
       "topRank": null
     },
@@ -7442,7 +7454,7 @@
       "team": "stl",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".274, 36 HR, 98 RBI",
+      "statLine": ".276, 36 HR, 100 RBI",
       "age": 21,
       "topRank": null
     },
@@ -7490,7 +7502,7 @@
       "team": "stl",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".244, 13 HR, 48 RBI",
+      "statLine": ".248, 14 HR, 50 RBI",
       "age": 18,
       "topRank": null
     },
@@ -7502,7 +7514,7 @@
       "team": "stl",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "91.0 IP, 3.16 ERA, 131 SO",
+      "statLine": "96.0 IP, 3.19 ERA, 143 SO",
       "age": 22,
       "topRank": null
     },
@@ -7550,7 +7562,7 @@
       "team": "stl",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".285, 11 HR, 46 RBI",
+      "statLine": ".286, 11 HR, 46 RBI",
       "age": 18,
       "topRank": null
     },
@@ -7574,7 +7586,7 @@
       "team": "stl",
       "position": "1B",
       "levelRaw": "ALL (3)",
-      "statLine": ".281, 27 HR, 84 RBI",
+      "statLine": ".280, 27 HR, 85 RBI",
       "age": 22,
       "topRank": null
     },
@@ -7598,7 +7610,7 @@
       "team": "stl",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".228, 13 HR, 51 RBI",
+      "statLine": ".229, 13 HR, 51 RBI",
       "age": 19,
       "topRank": null
     },
@@ -7634,7 +7646,7 @@
       "team": "tb",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".314, 21 HR, 83 RBI",
+      "statLine": ".316, 21 HR, 84 RBI",
       "age": 20,
       "topRank": 12
     },
@@ -7646,7 +7658,7 @@
       "team": "tb",
       "position": "C",
       "levelRaw": "ALL (4)",
-      "statLine": ".349, 16 HR, 95 RBI",
+      "statLine": ".349, 16 HR, 96 RBI",
       "age": 22,
       "topRank": 51
     },
@@ -7658,7 +7670,7 @@
       "team": "tb",
       "position": "C",
       "levelRaw": "A+",
-      "statLine": ".242, 21 HR, 66 RBI",
+      "statLine": ".245, 21 HR, 67 RBI",
       "age": 19,
       "topRank": 65
     },
@@ -7670,7 +7682,7 @@
       "team": "tb",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".298, 10 HR, 77 RBI",
+      "statLine": ".300, 11 HR, 79 RBI",
       "age": 20,
       "topRank": 83
     },
@@ -7706,7 +7718,7 @@
       "team": "tb",
       "position": "LF",
       "levelRaw": "ALL (2)",
-      "statLine": ".283, 7 HR, 28 RBI",
+      "statLine": ".280, 7 HR, 28 RBI",
       "age": 25,
       "topRank": null
     },
@@ -7730,7 +7742,7 @@
       "team": "tb",
       "position": "RHP",
       "levelRaw": "AAA",
-      "statLine": "61.0 IP, 2.80 ERA, 84 SO",
+      "statLine": "62.1 IP, 3.03 ERA, 84 SO",
       "age": 24,
       "topRank": null
     },
@@ -7766,7 +7778,7 @@
       "team": "tb",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".307, 0 HR, 7 RBI",
+      "statLine": ".295, 0 HR, 7 RBI",
       "age": 19,
       "topRank": null
     },
@@ -7790,7 +7802,7 @@
       "team": "tb",
       "position": "RHP",
       "levelRaw": "AA",
-      "statLine": "114.0 IP, 4.82 ERA, 91 SO",
+      "statLine": "120.0 IP, 4.65 ERA, 94 SO",
       "age": 21,
       "topRank": null
     },
@@ -7802,7 +7814,7 @@
       "team": "tb",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".263, 26 HR, 74 RBI",
+      "statLine": ".265, 27 HR, 75 RBI",
       "age": 22,
       "topRank": null
     },
@@ -7814,7 +7826,7 @@
       "team": "tb",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".253, 10 HR, 52 RBI",
+      "statLine": ".250, 10 HR, 53 RBI",
       "age": 19,
       "topRank": null
     },
@@ -7826,7 +7838,7 @@
       "team": "tb",
       "position": "2B",
       "levelRaw": "AA",
-      "statLine": ".255, 13 HR, 43 RBI",
+      "statLine": ".257, 13 HR, 44 RBI",
       "age": 22,
       "topRank": null
     },
@@ -7838,7 +7850,7 @@
       "team": "tb",
       "position": "RHP",
       "levelRaw": "A+",
-      "statLine": "92.2 IP, 5.15 ERA, 113 SO",
+      "statLine": "97.2 IP, 4.98 ERA, 122 SO",
       "age": 21,
       "topRank": null
     },
@@ -7946,7 +7958,7 @@
       "team": "tex",
       "position": "DH",
       "levelRaw": "ALL (2)",
-      "statLine": ".325, 8 HR, 17 RBI",
+      "statLine": ".318, 8 HR, 18 RBI",
       "age": 20,
       "topRank": 9
     },
@@ -7982,7 +7994,7 @@
       "team": "tex",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".286, 8 HR, 57 RBI",
+      "statLine": ".288, 8 HR, 57 RBI",
       "age": 19,
       "topRank": null
     },
@@ -7994,7 +8006,7 @@
       "team": "tex",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".259, 17 HR, 57 RBI",
+      "statLine": ".261, 18 HR, 60 RBI",
       "age": 23,
       "topRank": null
     },
@@ -8054,7 +8066,7 @@
       "team": "tex",
       "position": "OF",
       "levelRaw": "AA",
-      "statLine": ".318, 22 HR, 82 RBI",
+      "statLine": ".318, 22 HR, 83 RBI",
       "age": 23,
       "topRank": null
     },
@@ -8138,7 +8150,7 @@
       "team": "tex",
       "position": "OF",
       "levelRaw": "A+",
-      "statLine": ".237, 7 HR, 27 RBI",
+      "statLine": ".235, 7 HR, 27 RBI",
       "age": 23,
       "topRank": null
     },
@@ -8162,7 +8174,7 @@
       "team": "tex",
       "position": "3B",
       "levelRaw": "ALL (2)",
-      "statLine": ".275, 13 HR, 80 RBI",
+      "statLine": ".273, 13 HR, 80 RBI",
       "age": 25,
       "topRank": null
     },
@@ -8198,7 +8210,7 @@
       "team": "tex",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "55.2 IP, 4.20 ERA, 70 SO",
+      "statLine": "56.2 IP, 4.13 ERA, 71 SO",
       "age": 25,
       "topRank": null
     },
@@ -8246,7 +8258,7 @@
       "team": "tex",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".264, 15 HR, 64 RBI",
+      "statLine": ".261, 15 HR, 64 RBI",
       "age": 19,
       "topRank": null
     },
@@ -8270,7 +8282,7 @@
       "team": "tor",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".270, 13 HR, 72 RBI",
+      "statLine": ".269, 13 HR, 72 RBI",
       "age": 20,
       "topRank": 26
     },
@@ -8306,7 +8318,7 @@
       "team": "tor",
       "position": "DH",
       "levelRaw": "ALL (3)",
-      "statLine": ".284, 29 HR, 85 RBI",
+      "statLine": ".284, 29 HR, 86 RBI",
       "age": 23,
       "topRank": null
     },
@@ -8318,7 +8330,7 @@
       "team": "tor",
       "position": "3B",
       "levelRaw": "A",
-      "statLine": ".217, 7 HR, 43 RBI",
+      "statLine": ".215, 7 HR, 43 RBI",
       "age": 18,
       "topRank": null
     },
@@ -8342,7 +8354,7 @@
       "team": "tor",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".248, 8 HR, 63 RBI",
+      "statLine": ".246, 8 HR, 63 RBI",
       "age": 20,
       "topRank": null
     },
@@ -8402,7 +8414,7 @@
       "team": "tor",
       "position": "SS",
       "levelRaw": "AAA",
-      "statLine": ".290, 4 HR, 45 RBI",
+      "statLine": ".292, 4 HR, 45 RBI",
       "age": 25,
       "topRank": null
     },
@@ -8426,7 +8438,7 @@
       "team": "tor",
       "position": "CF",
       "levelRaw": "ALL (3)",
-      "statLine": ".311, 3 HR, 40 RBI",
+      "statLine": ".315, 3 HR, 40 RBI",
       "age": 24,
       "topRank": null
     },
@@ -8438,7 +8450,7 @@
       "team": "tor",
       "position": "RHP",
       "levelRaw": "ALL (5)",
-      "statLine": "71.0 IP, 3.17 ERA, 100 SO",
+      "statLine": "73.0 IP, 3.08 ERA, 100 SO",
       "age": 22,
       "topRank": null
     },
@@ -8450,7 +8462,7 @@
       "team": "tor",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".222, 2 HR, 9 RBI",
+      "statLine": ".206, 2 HR, 9 RBI",
       "age": 21,
       "topRank": null
     },
@@ -8498,7 +8510,7 @@
       "team": "tor",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".248, 5 HR, 42 RBI",
+      "statLine": ".246, 5 HR, 42 RBI",
       "age": 23,
       "topRank": null
     },
@@ -8510,7 +8522,7 @@
       "team": "tor",
       "position": "2B",
       "levelRaw": "ALL (3)",
-      "statLine": ".311, 13 HR, 72 RBI",
+      "statLine": ".313, 13 HR, 72 RBI",
       "age": 24,
       "topRank": null
     },
@@ -8522,7 +8534,7 @@
       "team": "tor",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "73.1 IP, 3.68 ERA, 75 SO",
+      "statLine": "75.1 IP, 3.58 ERA, 78 SO",
       "age": 26,
       "topRank": null
     },
@@ -8546,7 +8558,7 @@
       "team": "tor",
       "position": "CF",
       "levelRaw": "ALL (2)",
-      "statLine": ".220, 10 HR, 45 RBI",
+      "statLine": ".223, 10 HR, 46 RBI",
       "age": 23,
       "topRank": null
     },
@@ -8558,7 +8570,7 @@
       "team": "tor",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "53.2 IP, 3.35 ERA, 64 SO",
+      "statLine": "57.1 IP, 3.14 ERA, 68 SO",
       "age": 20,
       "topRank": null
     },
@@ -8582,7 +8594,7 @@
       "team": "tor",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".275, 18 HR, 54 RBI",
+      "statLine": ".278, 19 HR, 60 RBI",
       "age": 24,
       "topRank": null
     },
@@ -8594,7 +8606,7 @@
       "team": "tor",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "81.2 IP, 5.73 ERA, 89 SO",
+      "statLine": "84.2 IP, 5.85 ERA, 92 SO",
       "age": 24,
       "topRank": null
     },
@@ -8618,7 +8630,7 @@
       "team": "min",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".228, 3 HR, 14 RBI",
+      "statLine": ".232, 3 HR, 15 RBI",
       "age": 21,
       "topRank": 19
     },
@@ -8642,7 +8654,7 @@
       "team": "min",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".305, 11 HR, 52 RBI",
+      "statLine": ".306, 11 HR, 52 RBI",
       "age": 22,
       "topRank": 74
     },
@@ -8654,7 +8666,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (3)",
-      "statLine": ".281, 11 HR, 34 RBI",
+      "statLine": ".278, 11 HR, 34 RBI",
       "age": 23,
       "topRank": null
     },
@@ -8702,7 +8714,7 @@
       "team": "min",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".306, 7 HR, 43 RBI",
+      "statLine": ".310, 8 HR, 44 RBI",
       "age": 23,
       "topRank": null
     },
@@ -8714,7 +8726,7 @@
       "team": "min",
       "position": "C",
       "levelRaw": "A",
-      "statLine": ".227, 7 HR, 12 RBI",
+      "statLine": ".211, 7 HR, 12 RBI",
       "age": 21,
       "topRank": null
     },
@@ -8750,7 +8762,7 @@
       "team": "min",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".253, 21 HR, 75 RBI",
+      "statLine": ".257, 21 HR, 75 RBI",
       "age": 21,
       "topRank": null
     },
@@ -8774,7 +8786,7 @@
       "team": "min",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".249, 18 HR, 72 RBI",
+      "statLine": ".251, 18 HR, 72 RBI",
       "age": 21,
       "topRank": null
     },
@@ -8834,7 +8846,7 @@
       "team": "min",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".217, 15 HR, 52 RBI",
+      "statLine": ".216, 15 HR, 53 RBI",
       "age": 19,
       "topRank": null
     },
@@ -8870,7 +8882,7 @@
       "team": "min",
       "position": "OF",
       "levelRaw": "ALL (3)",
-      "statLine": ".311, 14 HR, 53 RBI",
+      "statLine": ".308, 14 HR, 53 RBI",
       "age": 19,
       "topRank": null
     },
@@ -8882,7 +8894,7 @@
       "team": "min",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".273, 5 HR, 38 RBI",
+      "statLine": ".270, 5 HR, 38 RBI",
       "age": 18,
       "topRank": null
     },
@@ -8918,7 +8930,7 @@
       "team": "phi",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "86.0 IP, 4.40 ERA, 124 SO",
+      "statLine": "90.0 IP, 4.40 ERA, 134 SO",
       "age": 22,
       "topRank": 33
     },
@@ -8942,7 +8954,7 @@
       "team": "phi",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".174, 0 HR, 5 RBI",
+      "statLine": ".192, 0 HR, 5 RBI",
       "age": 18,
       "topRank": null
     },
@@ -8954,7 +8966,7 @@
       "team": "phi",
       "position": "SS",
       "levelRaw": "AA",
-      "statLine": ".265, 22 HR, 58 RBI",
+      "statLine": ".262, 22 HR, 58 RBI",
       "age": 22,
       "topRank": null
     },
@@ -8966,7 +8978,7 @@
       "team": "phi",
       "position": "2B",
       "levelRaw": "AA",
-      "statLine": ".215, 9 HR, 61 RBI",
+      "statLine": ".218, 9 HR, 63 RBI",
       "age": 21,
       "topRank": null
     },
@@ -8978,7 +8990,7 @@
       "team": "phi",
       "position": "OF",
       "levelRaw": "ALL (3)",
-      "statLine": ".235, 3 HR, 24 RBI",
+      "statLine": ".239, 3 HR, 25 RBI",
       "age": 21,
       "topRank": null
     },
@@ -9062,7 +9074,7 @@
       "team": "phi",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".222, 8 HR, 30 RBI",
+      "statLine": ".220, 8 HR, 30 RBI",
       "age": 21,
       "topRank": null
     },
@@ -9086,7 +9098,7 @@
       "team": "phi",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".269, 2 HR, 8 RBI",
+      "statLine": ".279, 2 HR, 8 RBI",
       "age": 21,
       "topRank": null
     },
@@ -9134,7 +9146,7 @@
       "team": "phi",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".237, 13 HR, 47 RBI",
+      "statLine": ".241, 13 HR, 47 RBI",
       "age": 24,
       "topRank": null
     },
@@ -9146,7 +9158,7 @@
       "team": "phi",
       "position": "3B",
       "levelRaw": "ALL (2)",
-      "statLine": ".278, 7 HR, 22 RBI",
+      "statLine": ".273, 7 HR, 22 RBI",
       "age": 23,
       "topRank": null
     },
@@ -9170,7 +9182,7 @@
       "team": "phi",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".234, 6 HR, 59 RBI",
+      "statLine": ".240, 6 HR, 60 RBI",
       "age": 19,
       "topRank": null
     },
@@ -9194,7 +9206,7 @@
       "team": "atl",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".261, 26 HR, 72 RBI",
+      "statLine": ".261, 26 HR, 73 RBI",
       "age": 20,
       "topRank": 42
     },
@@ -9278,7 +9290,7 @@
       "team": "atl",
       "position": "OF",
       "levelRaw": "ALL (3)",
-      "statLine": ".262, 16 HR, 56 RBI",
+      "statLine": ".259, 16 HR, 56 RBI",
       "age": 19,
       "topRank": null
     },
@@ -9314,7 +9326,7 @@
       "team": "atl",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".296, 2 HR, 13 RBI",
+      "statLine": ".284, 2 HR, 13 RBI",
       "age": 21,
       "topRank": null
     },
@@ -9369,12 +9381,12 @@
     {
       "orgRank": 20,
       "playerId": 691548,
-      "name": "Rolddy Munoz",
+      "name": "Rolddy Muñoz",
       "teamId": 144,
       "team": "atl",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "50.0 IP, 4.32 ERA, 70 SO",
+      "statLine": "51.1 IP, 4.38 ERA, 71 SO",
       "age": 26,
       "topRank": null
     },
@@ -9386,7 +9398,7 @@
       "team": "atl",
       "position": "OF",
       "levelRaw": "ALL (3)",
-      "statLine": ".266, 10 HR, 53 RBI",
+      "statLine": ".264, 10 HR, 53 RBI",
       "age": 20,
       "topRank": null
     },
@@ -9398,7 +9410,7 @@
       "team": "atl",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".283, 14 HR, 87 RBI",
+      "statLine": ".282, 14 HR, 87 RBI",
       "age": 20,
       "topRank": null
     },
@@ -9518,7 +9530,7 @@
       "team": "cws",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "41.2 IP, 4.75 ERA, 47 SO",
+      "statLine": "43.2 IP, 4.53 ERA, 49 SO",
       "age": 23,
       "topRank": null
     },
@@ -9530,7 +9542,7 @@
       "team": "cws",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".249, 4 HR, 47 RBI",
+      "statLine": ".251, 4 HR, 48 RBI",
       "age": 19,
       "topRank": null
     },
@@ -9566,7 +9578,7 @@
       "team": "cws",
       "position": "2B",
       "levelRaw": "ALL (2)",
-      "statLine": ".261, 13 HR, 55 RBI",
+      "statLine": ".260, 14 HR, 57 RBI",
       "age": 20,
       "topRank": null
     },
@@ -9578,7 +9590,7 @@
       "team": "cws",
       "position": "SS",
       "levelRaw": "A+",
-      "statLine": ".236, 20 HR, 77 RBI",
+      "statLine": ".234, 20 HR, 77 RBI",
       "age": 22,
       "topRank": null
     },
@@ -9603,7 +9615,7 @@
       "position": "OF",
       "levelRaw": "ROK",
       "statLine": ".277, 11 HR, 54 RBI",
-      "age": 17,
+      "age": 18,
       "topRank": null
     },
     {
@@ -9650,7 +9662,7 @@
       "team": "cws",
       "position": "OF",
       "levelRaw": "A+",
-      "statLine": ".278, 5 HR, 65 RBI",
+      "statLine": ".275, 5 HR, 65 RBI",
       "age": 22,
       "topRank": null
     },
@@ -9662,7 +9674,7 @@
       "team": "cws",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".258, 24 HR, 80 RBI",
+      "statLine": ".261, 25 HR, 82 RBI",
       "age": 23,
       "topRank": null
     },
@@ -9674,7 +9686,7 @@
       "team": "cws",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".253, 11 HR, 60 RBI",
+      "statLine": ".251, 11 HR, 60 RBI",
       "age": 22,
       "topRank": null
     },
@@ -9686,7 +9698,7 @@
       "team": "cws",
       "position": "2B",
       "levelRaw": "ALL (2)",
-      "statLine": ".251, 23 HR, 80 RBI",
+      "statLine": ".248, 23 HR, 80 RBI",
       "age": 23,
       "topRank": null
     },
@@ -9710,7 +9722,7 @@
       "team": "cws",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".251, 5 HR, 36 RBI",
+      "statLine": ".260, 5 HR, 38 RBI",
       "age": 21,
       "topRank": null
     },
@@ -9758,7 +9770,7 @@
       "team": "mia",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".261, 11 HR, 44 RBI",
+      "statLine": ".265, 11 HR, 44 RBI",
       "age": 22,
       "topRank": 63
     },
@@ -9782,7 +9794,7 @@
       "team": "mia",
       "position": "SS",
       "levelRaw": "A",
-      "statLine": ".194, 3 HR, 13 RBI",
+      "statLine": ".213, 3 HR, 14 RBI",
       "age": 18,
       "topRank": 67
     },
@@ -9806,7 +9818,7 @@
       "team": "mia",
       "position": "OF",
       "levelRaw": "ALL (3)",
-      "statLine": ".331, 14 HR, 52 RBI",
+      "statLine": ".333, 15 HR, 53 RBI",
       "age": 22,
       "topRank": 85
     },
@@ -9854,7 +9866,7 @@
       "team": "mia",
       "position": "OF",
       "levelRaw": "AA",
-      "statLine": ".237, 17 HR, 45 RBI",
+      "statLine": ".234, 17 HR, 45 RBI",
       "age": 23,
       "topRank": null
     },
@@ -9866,7 +9878,7 @@
       "team": "mia",
       "position": "OF",
       "levelRaw": "ALL (3)",
-      "statLine": ".276, 34 HR, 95 RBI",
+      "statLine": ".279, 34 HR, 96 RBI",
       "age": 22,
       "topRank": null
     },
@@ -9890,7 +9902,7 @@
       "team": "mia",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "106.0 IP, 3.65 ERA, 140 SO",
+      "statLine": "111.0 IP, 3.49 ERA, 147 SO",
       "age": 21,
       "topRank": null
     },
@@ -9914,7 +9926,7 @@
       "team": "mia",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".214, 5 HR, 30 RBI",
+      "statLine": ".211, 5 HR, 30 RBI",
       "age": 19,
       "topRank": null
     },
@@ -9926,7 +9938,7 @@
       "team": "mia",
       "position": "3B",
       "levelRaw": "ALL (2)",
-      "statLine": ".274, 13 HR, 71 RBI",
+      "statLine": ".276, 13 HR, 73 RBI",
       "age": 24,
       "topRank": null
     },
@@ -9962,7 +9974,7 @@
       "team": "mia",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".309, 3 HR, 36 RBI",
+      "statLine": ".307, 3 HR, 36 RBI",
       "age": 21,
       "topRank": null
     },
@@ -9974,7 +9986,7 @@
       "team": "mia",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".273, 16 HR, 81 RBI",
+      "statLine": ".275, 16 HR, 81 RBI",
       "age": 22,
       "topRank": null
     },
@@ -9986,7 +9998,7 @@
       "team": "mia",
       "position": "SS",
       "levelRaw": "AA",
-      "statLine": ".244, 11 HR, 43 RBI",
+      "statLine": ".243, 11 HR, 43 RBI",
       "age": 22,
       "topRank": null
     },
@@ -10034,7 +10046,7 @@
       "team": "mia",
       "position": "CF",
       "levelRaw": "ALL (2)",
-      "statLine": ".238, 13 HR, 39 RBI",
+      "statLine": ".240, 14 HR, 41 RBI",
       "age": 24,
       "topRank": null
     },
@@ -10046,7 +10058,7 @@
       "team": "mia",
       "position": "CF",
       "levelRaw": "A+",
-      "statLine": ".252, 7 HR, 36 RBI",
+      "statLine": ".249, 7 HR, 36 RBI",
       "age": 21,
       "topRank": null
     },
@@ -10082,7 +10094,7 @@
       "team": "nyy",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".252, 4 HR, 25 RBI",
+      "statLine": ".252, 4 HR, 26 RBI",
       "age": 19,
       "topRank": 86
     },
@@ -10142,7 +10154,7 @@
       "team": "nyy",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "109.1 IP, 4.20 ERA, 141 SO",
+      "statLine": "114.1 IP, 4.01 ERA, 148 SO",
       "age": 24,
       "topRank": null
     },
@@ -10202,7 +10214,7 @@
       "team": "nyy",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".316, 20 HR, 77 RBI",
+      "statLine": ".315, 20 HR, 77 RBI",
       "age": 19,
       "topRank": null
     },
@@ -10346,7 +10358,7 @@
       "team": "nyy",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "128.2 IP, 3.08 ERA, 138 SO",
+      "statLine": "133.1 IP, 3.17 ERA, 145 SO",
       "age": 27,
       "topRank": null
     },
@@ -10382,7 +10394,7 @@
       "team": "mil",
       "position": "SS",
       "levelRaw": "AA",
-      "statLine": ".270, 13 HR, 84 RBI",
+      "statLine": ".267, 13 HR, 84 RBI",
       "age": 19,
       "topRank": 1
     },
@@ -10394,7 +10406,7 @@
       "team": "mil",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".303, 3 HR, 27 RBI",
+      "statLine": ".297, 3 HR, 27 RBI",
       "age": 19,
       "topRank": 21
     },
@@ -10406,7 +10418,7 @@
       "team": "mil",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".300, 17 HR, 68 RBI",
+      "statLine": ".299, 17 HR, 68 RBI",
       "age": 21,
       "topRank": 88
     },
@@ -10430,7 +10442,7 @@
       "team": "mil",
       "position": "3B",
       "levelRaw": "ALL (2)",
-      "statLine": ".270, 43 HR, 104 RBI",
+      "statLine": ".270, 44 HR, 106 RBI",
       "age": 22,
       "topRank": null
     },
@@ -10466,7 +10478,7 @@
       "team": "mil",
       "position": "RHP",
       "levelRaw": "AA",
-      "statLine": "83.2 IP, 5.16 ERA, 81 SO",
+      "statLine": "88.1 IP, 5.09 ERA, 90 SO",
       "age": 21,
       "topRank": null
     },
@@ -10514,7 +10526,7 @@
       "team": "mil",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".271, 32 HR, 94 RBI",
+      "statLine": ".272, 32 HR, 94 RBI",
       "age": 23,
       "topRank": null
     },
@@ -10562,7 +10574,7 @@
       "team": "mil",
       "position": "OF",
       "levelRaw": "A+",
-      "statLine": ".307, 2 HR, 13 RBI",
+      "statLine": ".288, 2 HR, 13 RBI",
       "age": 21,
       "topRank": null
     },
@@ -10658,7 +10670,7 @@
       "team": "mil",
       "position": "OF",
       "levelRaw": "A",
-      "statLine": ".303, 1 HR, 13 RBI",
+      "statLine": ".288, 1 HR, 13 RBI",
       "age": 21,
       "topRank": null
     },
@@ -10670,7 +10682,7 @@
       "team": "mil",
       "position": "1B",
       "levelRaw": "A+",
-      "statLine": ".273, 25 HR, 86 RBI",
+      "statLine": ".271, 25 HR, 86 RBI",
       "age": 20,
       "topRank": null
     },
