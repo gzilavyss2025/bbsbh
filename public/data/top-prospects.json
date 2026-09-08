@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T13:26:14.497Z",
+  "generatedAt": "2026-09-08T12:05:02.518Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -156,7 +156,7 @@
       "team": "det",
       "position": "CF",
       "levelRaw": "ALL (2)",
-      "statLine": ".271, 13 HR, 58 RBI",
+      "statLine": ".272, 13 HR, 58 RBI",
       "age": 21,
       "number": "15"
     },
@@ -180,7 +180,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".305, 15 HR, 34 RBI",
+      "statLine": ".305, 15 HR, 36 RBI",
       "age": 21,
       "number": "11"
     },
@@ -276,7 +276,7 @@
       "team": "sd",
       "position": "C",
       "levelRaw": "ALL (3)",
-      "statLine": ".289, 10 HR, 61 RBI",
+      "statLine": ".288, 10 HR, 61 RBI",
       "age": 20,
       "number": "8"
     },
@@ -348,7 +348,7 @@
       "team": "cle",
       "position": "2B",
       "levelRaw": "ALL (3)",
-      "statLine": ".288, 15 HR, 59 RBI",
+      "statLine": ".285, 15 HR, 59 RBI",
       "age": 22,
       "number": "17"
     },
@@ -408,7 +408,7 @@
       "team": "min",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".277, 17 HR, 56 RBI",
+      "statLine": ".279, 17 HR, 56 RBI",
       "age": 23,
       "number": "12"
     },
@@ -612,7 +612,7 @@
       "team": "tb",
       "position": "C",
       "levelRaw": "ALL (4)",
-      "statLine": ".348, 16 HR, 97 RBI",
+      "statLine": ".345, 16 HR, 97 RBI",
       "age": 22,
       "number": "18"
     },
@@ -691,12 +691,12 @@
     {
       "rank": 59,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
       "levelRaw": "ALL (2)",
-      "statLine": ".255, 41 HR, 106 RBI",
+      "statLine": ".254, 41 HR, 106 RBI",
       "age": 23,
       "number": "22"
     },
@@ -828,7 +828,7 @@
       "team": "was",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".310, 19 HR, 70 RBI",
+      "statLine": ".306, 19 HR, 70 RBI",
       "age": 23,
       "number": null
     },
@@ -1706,7 +1706,7 @@
       "team": "ari",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "114.0 IP, 4.74 ERA, 111 SO",
+      "statLine": "117.0 IP, 4.62 ERA, 112 SO",
       "age": 24,
       "topRank": null
     },
@@ -2283,7 +2283,7 @@
       "position": "SS",
       "levelRaw": "ALL (2)",
       "statLine": ".237, 20 HR, 66 RBI",
-      "age": 20,
+      "age": 21,
       "topRank": null
     },
     {
@@ -2654,7 +2654,7 @@
       "team": "chc",
       "position": "3B",
       "levelRaw": "ALL (2)",
-      "statLine": ".292, 16 HR, 68 RBI",
+      "statLine": ".290, 16 HR, 68 RBI",
       "age": 26,
       "topRank": null
     },
@@ -2834,7 +2834,7 @@
       "team": "cin",
       "position": "RF",
       "levelRaw": "ALL (2)",
-      "statLine": ".272, 32 HR, 81 RBI",
+      "statLine": ".274, 32 HR, 81 RBI",
       "age": 22,
       "topRank": null
     },
@@ -2978,7 +2978,7 @@
       "team": "cin",
       "position": "CF",
       "levelRaw": "ALL (3)",
-      "statLine": ".304, 8 HR, 43 RBI",
+      "statLine": ".306, 8 HR, 43 RBI",
       "age": 22,
       "topRank": null
     },
@@ -3146,7 +3146,7 @@
       "team": "cle",
       "position": "2B",
       "levelRaw": "ALL (3)",
-      "statLine": ".288, 15 HR, 59 RBI",
+      "statLine": ".285, 15 HR, 59 RBI",
       "age": 22,
       "topRank": 29
     },
@@ -3278,7 +3278,7 @@
       "team": "cle",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "44.2 IP, 3.63 ERA, 64 SO",
+      "statLine": "45.2 IP, 3.55 ERA, 66 SO",
       "age": 25,
       "topRank": null
     },
@@ -3422,7 +3422,7 @@
       "team": "cle",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "51.1 IP, 1.93 ERA, 71 SO",
+      "statLine": "52.0 IP, 1.90 ERA, 73 SO",
       "age": 26,
       "topRank": null
     },
@@ -3794,7 +3794,7 @@
       "team": "det",
       "position": "CF",
       "levelRaw": "ALL (2)",
-      "statLine": ".271, 13 HR, 58 RBI",
+      "statLine": ".272, 13 HR, 58 RBI",
       "age": 21,
       "topRank": 13
     },
@@ -5114,7 +5114,7 @@
       "team": "was",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".310, 19 HR, 70 RBI",
+      "statLine": ".306, 19 HR, 70 RBI",
       "age": 23,
       "topRank": 71
     },
@@ -5366,7 +5366,7 @@
       "team": "was",
       "position": "OF",
       "levelRaw": "ALL (2)",
-      "statLine": ".238, 16 HR, 64 RBI",
+      "statLine": ".241, 16 HR, 66 RBI",
       "age": 23,
       "topRank": null
     },
@@ -5438,7 +5438,7 @@
       "team": "nym",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "117.0 IP, 4.46 ERA, 133 SO",
+      "statLine": "122.0 IP, 4.57 ERA, 140 SO",
       "age": 23,
       "topRank": null
     },
@@ -5522,7 +5522,7 @@
       "team": "nym",
       "position": "LF",
       "levelRaw": "ALL (2)",
-      "statLine": ".248, 13 HR, 50 RBI",
+      "statLine": ".250, 13 HR, 51 RBI",
       "age": 23,
       "topRank": null
     },
@@ -6362,7 +6362,7 @@
       "team": "sd",
       "position": "C",
       "levelRaw": "ALL (3)",
-      "statLine": ".289, 10 HR, 61 RBI",
+      "statLine": ".288, 10 HR, 61 RBI",
       "age": 20,
       "topRank": 23
     },
@@ -7310,7 +7310,7 @@
       "team": "sf",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "54.1 IP, 3.15 ERA, 71 SO",
+      "statLine": "55.1 IP, 3.09 ERA, 73 SO",
       "age": 27,
       "topRank": null
     },
@@ -7377,12 +7377,12 @@
     {
       "orgRank": 3,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
       "levelRaw": "ALL (2)",
-      "statLine": ".255, 41 HR, 106 RBI",
+      "statLine": ".254, 41 HR, 106 RBI",
       "age": 23,
       "topRank": 59
     },
@@ -7430,7 +7430,7 @@
       "team": "stl",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".281, 17 HR, 83 RBI",
+      "statLine": ".280, 17 HR, 84 RBI",
       "age": 22,
       "topRank": null
     },
@@ -7706,7 +7706,7 @@
       "team": "tb",
       "position": "C",
       "levelRaw": "ALL (4)",
-      "statLine": ".348, 16 HR, 97 RBI",
+      "statLine": ".345, 16 HR, 97 RBI",
       "age": 22,
       "topRank": 51
     },
@@ -7862,7 +7862,7 @@
       "team": "tb",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".261, 27 HR, 75 RBI",
+      "statLine": ".259, 27 HR, 75 RBI",
       "age": 22,
       "topRank": null
     },
@@ -7886,7 +7886,7 @@
       "team": "tb",
       "position": "2B",
       "levelRaw": "ALL (2)",
-      "statLine": ".254, 13 HR, 44 RBI",
+      "statLine": ".252, 13 HR, 44 RBI",
       "age": 22,
       "topRank": null
     },
@@ -7946,7 +7946,7 @@
       "team": "tb",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "54.2 IP, 3.79 ERA, 68 SO",
+      "statLine": "55.2 IP, 3.72 ERA, 68 SO",
       "age": 24,
       "topRank": null
     },
@@ -8486,7 +8486,7 @@
       "team": "tor",
       "position": "CF",
       "levelRaw": "ALL (3)",
-      "statLine": ".320, 3 HR, 40 RBI",
+      "statLine": ".317, 3 HR, 40 RBI",
       "age": 24,
       "topRank": null
     },
@@ -8666,7 +8666,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".305, 15 HR, 34 RBI",
+      "statLine": ".305, 15 HR, 36 RBI",
       "age": 21,
       "topRank": 15
     },
@@ -8690,7 +8690,7 @@
       "team": "min",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".277, 17 HR, 56 RBI",
+      "statLine": ".279, 17 HR, 56 RBI",
       "age": 23,
       "topRank": 34
     },
@@ -9441,7 +9441,7 @@
     {
       "orgRank": 20,
       "playerId": 691548,
-      "name": "Rolddy Muñoz",
+      "name": "Rolddy Munoz",
       "teamId": 144,
       "team": "atl",
       "position": "RHP",
@@ -10161,7 +10161,7 @@
     {
       "orgRank": 3,
       "playerId": 695684,
-      "name": "Elmer Rodriguez",
+      "name": "Elmer Rodríguez",
       "teamId": 147,
       "team": "nyy",
       "position": "RHP",
@@ -10586,7 +10586,7 @@
       "team": "mil",
       "position": "1B",
       "levelRaw": "ALL (2)",
-      "statLine": ".270, 32 HR, 94 RBI",
+      "statLine": ".268, 32 HR, 94 RBI",
       "age": 23,
       "topRank": null
     },
