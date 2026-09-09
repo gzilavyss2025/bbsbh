@@ -100,10 +100,15 @@ falls further behind on every clip.
 relocates the stall rather than removing it. Half-inning is the right unit for
 the *index*. It is the wrong unit for the *bytes*.
 
-**2. Stage in advance; do not prefetch on demand.** This fits the evening
-exactly. Clips publish 8–26 minutes after each pitch, so a staging job started
-when the game starts naturally tracks the game and finishes before the scorebook
-opens. By 10pm everything is local and Express Lane steps instantly, offline.
+**2. Stage ahead of the cursor; do not fetch on tap.** The queue runs in game
+order and stays in front of where the scorer is, so the clip is already local when
+it is reached. This is a queueing rule, not a schedule. It does not promise that
+the whole game is downloaded before you sit down — on iPhone it cannot be, because
+Background Fetch is absent from Safari (see "The staging trigger, resolved").
+
+What makes staying ahead sufficient is the *rate*, not the total. Clips publish
+8–26 minutes after each pitch, so by 10pm every clip exists and the only limit
+left is the 2.1 Mbps ceiling.
 
 ### Budget per mode
 
@@ -279,11 +284,12 @@ consenting to see the score of the pitch you are on.
   distribute, modify, translate, rebroadcast, **transmit, stream**, perform or
   create derivative works of them." A function that fetches MLB video and serves
   it onward is transmitting and streaming it. The same document explicitly
-  carves out the design we are keeping: material "may be stored in a device
-  except for personal and non-commercial use." On-device staging is the
-  permitted case; re-serving is not. The proxy also existed only to spoof
-  `Referer: https://www.mlb.com` and defeat a hotlink guard MLB built on
-  purpose. Full reasoning in the memory note `mlb-video-proxy-crosses-tou`.
+  carves out the design we are keeping: "Neither these Third Party Materials nor
+  any portion thereof may be stored in a device except for personal and
+  non-commercial use." That is a prohibition with personal use carved back into
+  it. On-device staging is the permitted case; re-serving is not. The proxy
+  also existed only to spoof `Referer: https://www.mlb.com` and defeat a hotlink
+  guard MLB built on purpose. Full reasoning in the memory note `mlb-video-proxy-crosses-tou`.
 - **MiLB.** No pitch clips exist at all — sportIds 11–14 each had ~300 `playId`s
   and zero clips, on the default and the `MILB` forge instance, and Savant
   resolved none. Express Lane is MLB-only, degrading like every other MiLB
