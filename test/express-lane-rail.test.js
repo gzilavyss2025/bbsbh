@@ -389,3 +389,61 @@ test('a play with no atBatIndex still keys uniquely', () => {
   assert.equal(rows[0].key, '0:0')
   assert.deepEqual(rows[0].count, { balls: null, strikes: null })
 })
+
+// --- fallback 4: a play that has an outcome always lands it -----------------
+//
+// Swept 2026-09-09 over ~202 games and ~15,300 top-level plays. Two pitchless
+// top-level shapes exist and only two: `intent_walk` (about 1 game in 8, never
+// ends a half) and a pickoff (about 1 game in 40, and it ends the half every
+// time — the third out came on the throw). Every one carried a playId, so
+// fallback 2 already anchored it and the -1 branch was never reached.
+//
+// The shape below is the one the sweep could not rule out. MLB leaves a
+// `Pickoff Attempt 1B` unclipped about 6% of the time (16 of 268), and 2 of 3
+// attempts to third. A pitchless top-level pickoff that MLB also did not clip
+// is therefore possible at roughly one game in 500-700 — a few times a season
+// league-wide, and never yet observed here.
+test('an unclipped pitchless pickoff that ends a half still lands its result', () => {
+  const feed = play(
+    { atBatIndex: 42 },
+    {
+      type: 'atBat',
+      eventType: 'pickoff_1b',
+      event: 'Pickoff 1B',
+      description: 'Pitcher picks off the runner at 1st on throw to first baseman.',
+      isOut: true,
+      rbi: 0,
+    },
+    [{ index: 0, type: 'pickoff', details: { code: '1', description: 'Pickoff Attempt 1B' }, count: { balls: 0, strikes: 0 } }],
+  )
+  const rows = buildRail(feed, 1, 'top')
+  assert.equal(rows.length, 1)
+  // Without the guard the search returns -1, no row is terminal, and the
+  // outcome the scorer has to write is computed and then dropped.
+  assert.equal(rows[0].isTerminal, true)
+  assert.equal(rows[0].result.eventType, 'pickoff_1b')
+  assert.equal(rows[0].result.isOut, true)
+  // It is still honestly unclipped. The film gate must not wait on it.
+  assert.equal(rows[0].playId, null)
+  assert.equal(rows[0].kind, 'action')
+})
+
+// The other half of the invariant, and the reason the guard is keyed on the
+// RESULT rather than on "the last event of any kind". A paperwork-only play
+// has no outcome to land, so it must stay non-terminal — `resultModeRows`
+// filters on that flag, and the film gate reads it as "this row anchors a
+// play". The flag has to be honest.
+test('a paperwork-only play stays non-terminal even with the guard', () => {
+  const feed = play(
+    { atBatIndex: 8 },
+    { type: 'atBat', eventType: 'game_advisory', event: 'Game Advisory', description: 'Status Change - In Progress' },
+    [
+      { index: 0, type: 'action', details: { eventType: 'pitching_substitution', description: 'Pitching Change.' }, count: {} },
+      { index: 1, type: 'action', details: { eventType: 'mound_visit', description: 'Mound Visit.' }, count: {} },
+    ],
+  )
+  const rows = buildRail(feed, 1, 'top')
+  assert.equal(rows.length, 2)
+  assert.equal(rows.some((r) => r.isTerminal), false)
+  assert.equal(rows.every((r) => r.result === null), true)
+})
