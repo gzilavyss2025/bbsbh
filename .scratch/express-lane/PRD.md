@@ -15,8 +15,17 @@ tapping "skip 10 seconds" past commercial breaks and between-inning filler.
 clips on the left, the scoring notation stepping forward on the right. No
 commercials, no dead air, no scrubbing.
 
-The whole game, strung together with no gaps, is about **40 minutes** — measured,
-not estimated (see Appendix A). That is the feature in one number.
+**Corrected 2026-09-09.** Earlier drafts led with "the whole game is about 40
+minutes." That is Full mode's runtime, and Full mode is deferred. The mode that
+ships is Result: **15.3 minutes of picture, which takes about 35 minutes to
+arrive** — and under the film gate the arrival time, not the runtime, is what a
+scorer actually sits through. Lead with coverage instead, which is the honest
+claim and the real delta: **every pitch in the game has film, and you step to
+it**, against the 7% of plays the shipped highlights button can reach.
+
+Runtime figures belong in the mode chooser, per mode, where they inform the one
+choice that costs the evening. The 40-minute measurement is real and stands (see
+Appendix A); it is simply not this feature's headline.
 
 ## The two modes
 
@@ -77,6 +86,12 @@ sparse overlay on it.** A stolen base gets a rail row you can score, with no
 video of its own — the pitch it happened on carries the picture. Substitutions
 get rows too, because you write those on the card.
 
+**This section became load-bearing on 2026-09-09.** The film gate blocks the
+cursor until the picture arrives, so the list above is exactly the set of rows
+the gate must *never* block on: roughly 275 events a game that have no clip and
+never will. A gate keyed on "does this row have a clip" deadlocks at the first
+mound visit. It must key on the covering clip instead — see "The film gate".
+
 ## The hard constraint: ~2.1 Mbps, and no way around it
 
 This is the number that sets the design. Measured, not assumed:
@@ -85,6 +100,37 @@ This is the number that sets the design. Measured, not assumed:
   parallel downloads gave 2.0 Mbps *aggregate* — the same as one alone.
 - Same machine, same minute, the condensed-game host the app already uses:
   **134 Mbps.**
+
+**Re-tested and confirmed, 2026-09-09.** Review argued this was a measurement
+artefact: seven parallel downloads sharing one HTTP/2 connection also share one
+congestion window, which looks exactly like a server throttle. The objection does
+not survive. Re-run with clips drawn from seven *different* gamePks, so no single
+game's cache shard could confound it:
+
+| Test | Result |
+|---|---|
+| One clip, one socket | **2.06 Mbps** |
+| Seven clips, seven separate TCP sockets | **1.67 Mbps** aggregate |
+| Seven clips, six-socket pool (what a browser does) | **1.45 Mbps** aggregate |
+| Neutral CDN, same machine, same minute, sustained | 48.6 Mbps |
+| `img.mlbstatic.com`, same minute | 29.2 Mbps |
+
+The detail that settles it: **`sporty-clips.mlb.com` negotiates HTTP/1.1, not
+HTTP/2** (`Server: cloudflare`). So the shared-congestion-window story never
+applied — and on HTTP/1.1 a browser opens up to six connections per origin, which
+is the third row. More sockets do not merely fail to help; they are slightly
+*worse*, because the same ~2 Mbps is divided and each connection pays its own
+handshake. The ceiling is **per-client and specific to the clip host**.
+
+**Operational constraint discovered in the same session: the host blocks
+automated access.** After roughly 25 requests in a few minutes — including two
+bursts of seven parallel — `sporty-clips` began returning empty bodies and then a
+hard `403` to a bare HEAD. This is the risk shape the Terms of Use analysis
+predicted: not a lawsuit, a silent IP block that breaks the feature mid-game. It
+argues *for* the staging design already chosen. A single-threaded queue paced at
+about one clip per 25 seconds reads as a person watching clips; a parallel
+prefetcher reads as a scraper. **Never burst-fetch this host, in production or in
+a probe.**
 
 So the throttle belongs to MLB's per-pitch clip infrastructure. It is not the
 user's connection and not our loading strategy. Nothing we write improves it.
@@ -138,22 +184,108 @@ Cache API cap** — a widely repeated "50 MB Cache API limit" is contradicted by
 WebKit's own storage-policy post). Call `navigator.storage.estimate()` on the
 real device rather than trusting any published figure.
 
+## The film gate — you cannot score past the picture
+
+**Decided 2026-09-09. This reverses the previous design and it is the most
+consequential decision in this document.**
+
+Earlier drafts promised the opposite: the advance button never greys out, the
+Tier 1 rail is always available, and a scorer who outruns the queue keeps going
+on the pitch numbers while the film catches up. That is now withdrawn. **The
+cursor may not pass the film.** If the picture for the next row is not here, the
+scorer waits.
+
+### Why the reversal is right
+
+- **It makes Express Lane the thing it claims to be.** The app already ships
+  at-bat stepping over a sealed half (ADR-0016) driven by the same
+  `revealedThrough` mark. If a scorer can bypass the film, Express Lane collapses
+  into at-bat stepping with a video panel bolted on, and its honest delta —
+  100% clip coverage instead of the 7% the shipped highlights button gets, plus
+  prefetch — stops being the point.
+- **The bypass was load-bearing on an unmeasured claim.** "Staging outruns the
+  scorer" rested on an asserted 25s-per-plate-appearance scoring pace that was
+  never measured. Scoring pace is personal and varies by scorer, so no single
+  measurement could have settled it for everyone. Gating removes the dependency
+  entirely: the pace is the queue's, and it is the same for every scorer.
+- **It collapses two designs into one.** No dual path, no degraded mode, no
+  backlog of scored-but-unwatched plate appearances to return to, and no fourth
+  screen per concept explaining a state that no longer exists.
+
+### The rule, stated so it cannot block forever
+
+A naive reading — "no clip, no advance" — deadlocks on the first pitching change.
+Roughly 275 events in a nine-inning game carry no `playId` and never will (see
+"What neither mode can show"). The gate must therefore key on the **covering
+clip**, not on the row's own clip. Three kinds of row:
+
+| Row | Gates on |
+|---|---|
+| A pitch | its own clip |
+| An event *inside* a pitch — stolen base, wild pitch, caught stealing, pickoff | the clip of the pitch it happened on, which already shows it |
+| Paperwork — pitching change, mound visit, substitution, defensive switch, game advisory | **nothing. Never gates.** You write it on the card; there is nothing to watch |
+
+So the gate is: **advance is blocked only while a clip that is expected has not
+arrived.** It is never blocked when no clip is expected.
+
+### The reveal becomes atomic, and that is a real change
+
+Under the old design the rail carried `description` and `result` as reveal-only
+fields the scorer could fall back on. Under the gate they cannot be shown before
+the film, or the fallback simply returns by another door — a scorer who can read
+"grounds out, second baseman to first" has no reason to wait for the picture.
+
+**Advancing now reveals the play and its film together, or not at all.** This is
+cleaner than what it replaces, and it is the honest meaning of "the picture is
+the point". While waiting, the screen may show what was already true before the
+advance — the count, the batter, the base state — and nothing about the play.
+
+### The escape hatch, which must exist and must be consented
+
+A clip that is *expected* but never publishes cannot block forever. Clips lag
+8–26 minutes behind live, so a scorer who opens a game minutes after the last out
+will meet the publication frontier rather than the bandwidth ceiling — a
+different state with a different remedy, and the PRD previously conflated them.
+A 404 is the same shape.
+
+The escape is a deliberate act, not a silent fallback: after a clip has failed or
+stayed absent past a threshold, offer **"score this one without the film"**,
+once, for that row. It must read as a decision the scorer makes, or the gate
+erodes back into the old design within a week of use.
+
+### What this costs, stated plainly
+
+- **The session's pace is now the download's pace.** Result mode's ~35 minutes of
+  staging stops being a risk and becomes a floor: a 9-inning game cannot be
+  scored in Express Lane faster than the clips arrive. That is the trade.
+- **Pre-roll matters much more than it did.** It was a nicety when the scorer
+  could always proceed. It is now the difference between opening into a game and
+  opening into a wait. This merges with Open decision 4.
+- **Full mode gets worse, not better.** It needs a clip every ~18 seconds; gated,
+  it becomes a slideshow of waits. This reinforces the deferral.
+
 ## The staging trigger, resolved
 
 The trigger question answers itself differently per mode, because the staging
 *rate* differs — and the rate, not the total, is what matters.
 
-**Result mode needs no trigger at all. The trigger is opening Express Lane.**
-Staging delivers a plate appearance every ~25 seconds. Nobody scores one faster
-than that: you watch ~11 seconds of clip and then write the notation. So staging
-outruns the scorer from the start. A pre-roll of one half-inning (~2 minutes) is
-enough, and after that it stays ahead for the rest of the game.
+**Superseded in part by the film gate above, 2026-09-09.** The reasoning below
+was built to answer "must we pre-stage, or does the queue stay ahead of the
+scorer?" The gate dissolves that question: the queue no longer has to stay ahead
+of anyone, because nobody can get past it. What is left is not a trigger question
+but a **pre-roll question** — how much head start makes the opening feel like a
+game rather than a wait. Open decisions 1 and 4 merge accordingly.
 
-What makes that safe rather than optimistic is Tier 1. **The rail is free and
-instant, so it never blocks.** A fast stretch — three strikeouts scored in 40
-seconds — degrades to scoring from the pitch data while video catches up. The
-worst case is a degraded minute, never a stop. Build the "video catching up"
-state deliberately; it is the mechanism that makes the no-trigger design work.
+**Result mode still needs no trigger. The trigger is opening Express Lane.**
+Staging delivers a plate appearance every ~25 seconds, and under the gate that
+rate simply *is* the scoring rate. A pre-roll buys the opening innings their
+flow; after that the scorer and the queue move together by construction.
+
+What the Tier 1 rail is for has changed. It is no longer a bypass — under the
+gate it cannot be, or the gate leaks (see "The reveal becomes atomic"). It
+remains what it always was underneath: the complete event list the clips are a
+sparse overlay on, the thing that knows a substitution happened and needs a row
+even though there is nothing to watch.
 
 **Full mode cannot do this.** It needs a clip every ~18 seconds, and nobody
 spends 18 seconds on a mid-count ball. Full mode must be substantially
@@ -227,9 +359,43 @@ stale and staging is resumable across app restarts.
 
 ### Tier 3 — the byte store. The only hard part.
 
-Service worker plus Cache API, keyed by clip URL, filled by an **ordered staging
-queue**, single-threaded (concurrency buys nothing), rate-limited, resumable,
-and evicting behind the cursor.
+**Decided 2026-09-09: IndexedDB Blobs, not the Cache API, and the service worker
+comes out of the playback path.** Filled by an **ordered staging queue**,
+single-threaded (concurrency buys nothing — now confirmed, and bursts get the
+client blocked), rate-limited, resumable.
+
+Both options cost nothing. This is worth saying plainly because it was asked:
+the Cache API and IndexedDB are both browser-native and on-device, they share one
+per-origin quota, and neither touches this project's infrastructure. Game data is
+client-direct, so clips travel MLB → device without passing through a Vercel
+function. No function bandwidth, no Vercel Blob, no Upstash. The only design that
+would have cost money was the server-side proxy, which is already dropped on
+Terms of Use grounds — so dropping it removed the bill along with the exposure.
+
+The choice is therefore technical, and WebKit decides it:
+
+- **`Cache.put()` rejects a `206` response.** Spec-mandated, every browser. So
+  Range requests — the method used to measure clip sizes, and the natural way to
+  resume a partial fetch — cannot also be the method that stores them.
+- **Worse, WebKit issues Range requests whenever a `<video>` loads a URL a
+  service worker intercepts**, and expects a real `206` with `Content-Range`
+  back. Answering from a cached `200` is the classic "plays in Chrome, silently
+  fails on iPhone" bug. Synthesising the `206` means `arrayBuffer()` on a 6 MB
+  mp4 for every range request, inside a content process with a low memory
+  ceiling — the most likely cause of a mid-game tab kill.
+- **Blobs avoid all of it.** WebKit stores a Blob out-of-line, so reading one back
+  does not transit the JS heap, and `URL.createObjectURL(blob)` is served
+  natively with full range support. **Revoke every object URL on leaving a clip**
+  — 84 unrevoked 6 MB blobs is roughly 500 MB resident and a certain crash.
+
+Two storage cautions that survive either choice: `navigator.storage.estimate()`
+is padded and rounded on WebKit and will not warn that the disk is nearly full;
+and **WebKit evicts by origin, not by entry**, so pressure can drop the Cache
+API, IndexedDB *and* `localStorage` together. The staged bytes are disposable —
+clip URLs are deterministic and the index rebuilds — but `revealedThrough` lives
+in `localStorage`, so an eviction mid-game would re-seal a game being scored.
+Push the reveal mark to `reveal.js` on each advance, and call
+`navigator.storage.persist()`, which Safari grants a Home Screen web app.
 
 ```
 StagingJob {
@@ -237,8 +403,9 @@ StagingJob {
   mode           // 'result' | 'full'
   feed           // 'home' | 'away' — both exist for every clip
   queue          // ordered playIds, game order
-  staged         // playIds present in the cache
-  cursorKey      // where the scorer is; evict before this
+  staged         // playIds present in the store
+  cursorKey      // where the scorer is
+  filmKey        // furthest contiguous staged row — THE GATE. cursorKey may not pass it
   state          // 'idle' | 'running' | 'paused' | 'complete' | 'blocked'
 }
 ```
@@ -271,6 +438,17 @@ Three traps are new to Express Lane:
    `revealedThrough` high-water mark from it, so paper and screen stay in sync
    and it syncs across devices through `reveal.js` for free.
 
+4. **The waiting indicator must be indeterminate — no bar, no ETA, no byte
+   count.** This trap is *created* by the film gate and did not exist before it.
+   ADR-0046 holds that no timing before a reveal may be a function of the reveal.
+   Under the gate the scorer now sits watching a wait for a pitch they have not
+   reached, and terminal clips run 4.34–12.11 MB precisely *because* a longer one
+   contains more play developing. A determinate progress bar therefore tells you,
+   before you advance, that the next plate appearance is a long one — a called
+   strike three and a triple with a rundown do not take the same time to arrive.
+   Show that the film is coming. Never show how much of it is left. For the same
+   reason, do not print a clip's duration before it plays.
+
 A consequence to accept deliberately: because the scorebug is in the pixels,
 **Express Lane can never have an unrevealed preview mode.** Entering it is
 consenting to see the score of the pitch you are on.
@@ -299,23 +477,50 @@ consenting to see the score of the pitch you are on.
 - **Live scoring.** Clips lag 8–26 minutes, so Express Lane is for a game that is
   over or nearly over. That is the actual use case, not a limitation.
 
+## Decisions taken
+
+- **The film gate** (2026-09-09) — the cursor may not pass the picture. Its own
+  section above; it supersedes the "never blocks" design throughout.
+- **Concept A, Split Deck, is the spine** (2026-09-09) — video across the top,
+  one large scoring box beneath, primary action at the foot. Chosen from four
+  wireframed directions after review; the strongest single element of Concept D,
+  the strip of plate-appearance chips along the foot, is imported into it. B
+  survives only as the tablet layout. C is dropped: it has no way back three
+  batters, and its swipe-up collides with the iOS home gesture.
+- **No `needsFilm` predicate** (2026-09-09) — review proposed skipping clips for
+  strikeouts, walks and hit-by-pitches to cut ~170 MB and speed the queue.
+  Declined. Under the film gate it would also punch a hole straight through the
+  gate, since those rows would advance freely while the rest waited.
+- **Tier 3 is IndexedDB Blobs** (2026-09-09) — reasoning in Tier 3 above. Both
+  candidates were free; WebKit decided it.
+- **The 2.1 Mbps ceiling is real, per-client, and unfixable** (2026-09-09) —
+  re-tested against the review's objection and confirmed. Design for the film
+  being behind; do not design to outrun it.
+
 ## Open decisions
 
-1. **Full mode's staging trigger** — the only one that still blocks build. See
-   "The staging trigger, resolved" above: Result mode needs no trigger, and Full
-   mode needs ~102 minutes of pre-staging that iOS cannot do with the app
-   closed. The fork is whether Full mode lives on the phone (a wake-lock staging
-   screen and a charger ritual) or only on the desktop PWA (where Background
-   Fetch works and nothing must stay awake). **Deferred deliberately, 2026-09-03:
-   Gary has not scored a game on the laptop, so there is no basis yet for
-   deciding whether desktop-only is acceptable.** Resolve it by trying a game on
-   the laptop first, not by argument.
+1. **Full mode's trigger.** Unchanged and still deferred, and the film gate makes
+   it worse rather than better: at a clip every ~18 seconds, a gated Full mode is
+   a slideshow of waits. The fork remains phone-with-wake-lock versus
+   desktop-only. **Resolve it by trying a game on the laptop first, not by
+   argument.** It blocks nothing: Result mode is what ships.
 2. **Home or away booth.** Both feeds exist for every clip at no extra cost.
-   Default to the Brewers' booth when they play, or ask once per game?
+   Default to the club's own booth — the away booth when Milwaukee is away, the
+   home booth when they are at home — with a one-tap switch, or ask once per
+   game? Note that switching mid-game invalidates every staged byte ahead of the
+   cursor, so the choice should be locked for a session the way mode is. Use the
+   other booth as the first fallback for a 404, before "not posted yet".
 3. **Result mode's expand.** Should a plate appearance open into its own pitches
-   on demand? Cheap in Tier 1 and Tier 2; costs bytes in Tier 3.
-4. **Pre-roll depth.** How many clips must be staged before Express Lane will
-   open at all.
+   on demand? Cheap in Tier 1 and Tier 2; costs bytes in Tier 3. Review argued
+   this is not optional but the escape hatch for the cases a single terminal clip
+   cannot settle — a 6-4-3 pivot, or a runner going first to third — and should
+   be in v1.
+4. **Pre-roll depth**, now merged with the trigger question and promoted in
+   importance by the film gate. Under the gate this is the difference between
+   opening into a game and opening into a wait. Candidates: three clips (leaks
+   nothing about game length, opens in ~75 s), or one half-inning (~2 min). A
+   count of plate appearances must never be shown either way — it leaks how long
+   the game ran, and so whether it went to extras (ADR-0008).
 
 ## Edge cases to handle even though they did not fire
 
