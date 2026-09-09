@@ -37,6 +37,8 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | dev-custom-marks.test.js | 3 | scripts/lib/dev-custom-marks.mjs | Dev-only recolored-mark lab (ADR-0029) |
 | dev-data-stores.test.js | 30 | scripts/lib/dev-data-stores.mjs | Dev-lab data-store validators/allowlists |
 | due-up.test.js | 8 | src/api/dueup.js | "Due up" pre-pitch preview |
+| express-lane-clip-index.test.js | 23 | src/api/expresslane/clipIndex.js | Express Lane Tier 2 — the Savant playId-to-mp4 resolver (parse, request memoization, a miss never cached), the derived poster, and the sequential index queue with its stop-asking breaker; all offline through an injected fetcher |
+| express-lane-rail.test.js | 24 | src/api/expresslane/rail.js | Express Lane Tier 1 — the half-inning scoring rail over the captured real game (playIds stamped on): the terminal-pitch anchor, the paperwork rows that carry no clip, the pickoff/step-off codes that are not pitch calls, the two mode filters, and the three fallbacks no real game has fired |
 | fielders-choice-force-out.test.js | 2 | src/api/playbyplay.js | force_out eventType scorebook code |
 | focus-windows.test.js | 10 | src/api/playbyplay/entriesView.js | Focus mode's display windows: one per at-bat, each card in exactly one window, and the count never drops when a stoppage reaches the feed under an unchanged cap (replayed tap by tap on the captured game) |
 | foul-callouts.test.js | 15 | src/api/callout-notes.js | Marathon-AB / steal-streak / bullpen-thin callouts |
@@ -143,6 +145,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | uniforms.test.js | 31 | src/api/uniforms.js | Jersey treatment classification (PR #343) |
 | vs-team-splits.test.js | 7 | src/api/vsTeamSplits.js | SPLITS VS TEAM card + the per-club shard merge |
 | war.test.js | 6 | src/api/war.js | WAR reader |
+| watch-clip.test.js | 8 | src/components/highlights/watchClip.js | Which film a revealed play offers — the edited package wins where MLB cut one, a bare playId still opens the raw pitch clip, and a lookup that comes back empty degrades to one notice rather than a dead button |
 | winprob-atbat-step.test.js | 5 | src/api/playbyplay.js | lastVisibleAtBatIndex |
 | winprob.test.js | 17 | src/api/game.js, src/api/winprob.js | Win probability chart |
 | workload.test.js | 11 | src/api/workload.js | Rolling pitcher workload |

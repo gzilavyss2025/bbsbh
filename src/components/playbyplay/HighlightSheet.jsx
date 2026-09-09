@@ -22,12 +22,22 @@ import { SaveClipButton } from '../highlights/SaveClipButton.jsx'
 // so without the portal the floating Refresh pill and reveal bar paint over
 // the video (and eat taps aimed at it). See ModalPortal.jsx.
 //
+// TWO SOURCES, ONE PLAYER. `item` is an MLB `content` package — a produced cut
+// that names itself. `src` is a bare mp4 URL with NO title and no description:
+// the raw clip of one pitch, resolved from its playId on tap
+// (components/highlights/watchClip.js). That absence is a real state, not an
+// empty package, so the head simply carries no heading for it — an untitled
+// clip must never print a blank line where a title goes. The dialog still
+// takes an accessible name, which is a label rather than a heading.
+//
 // Spoiler note: by the time this is open, the play it belongs to is already
 // revealed prose on the card above it, so the clip's own title/description
 // carry no additional spoiler risk here — unlike the WATCH BUTTON itself,
 // which must stay generic (see PlayByPlay.jsx). No `poster` attribute is set
-// on the video, matching that same discipline.
-export function HighlightSheet({ item, loading = false, notice = '', title: fallbackTitle = '', onClose }) {
+// on the video, matching that same discipline — and a raw clip's poster frame
+// carries the broadcast scorebug burned into the pixels, so it stays off here
+// as well.
+export function HighlightSheet({ item, src = null, loading = false, notice = '', title: fallbackTitle = '', onClose }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
@@ -64,20 +74,28 @@ export function HighlightSheet({ item, loading = false, notice = '', title: fall
     silence()
     video.textTracks.addEventListener?.('addtrack', silence)
     return () => video.textTracks.removeEventListener?.('addtrack', silence)
-  }, [item])
+  }, [item, src])
 
   // Three ways to be open with no video in hand yet: `loading` (a caller that
   // fetches on tap — see WatchCondensedButton, which opens the dialog first so
   // the tap doesn't sit there looking dead through a 430 KB fetch), `notice`
   // (fetched, nothing to play, and a sentence explaining why), and neither, in
   // which case there is nothing to show at all.
-  if (!item && !loading && !notice) return null
-  const { hls, mp4 } = item ? highlightPlaybacks(item) : {}
-  const title = item?.title || item?.headline || fallbackTitle || 'Highlight'
+  if (!item && !src && !loading && !notice) return null
+  // A raw clip is one progressive mp4 and no manifest, so it fills the mp4
+  // slot the package's own rendition would take and the HLS source is simply
+  // absent — the <source> list below already handles either being null.
+  const { hls, mp4 } = item ? highlightPlaybacks(item) : { hls: null, mp4: src }
+  // Empty for a clip that has no name of its own. `label` is the dialog's
+  // accessible name and always says something; `title` is the heading and is
+  // rendered only when it exists.
+  const title = item?.title || item?.headline || fallbackTitle || ''
+  const label = title || 'Clip'
   // "condensed-game-mil-stl-7-7-26.mp4" — the content item's own readable slug
   // (see classifyHighlight's note on why `id` is the stable identity, not
-  // `guid`), so a saved file says what it is in the camera roll.
-  const filename = `${item?.id || 'highlight'}.mp4`
+  // `guid`), so a saved file says what it is in the camera roll. A raw clip
+  // has no slug, only an opaque token, so it falls back to the plain word.
+  const filename = `${item?.id || 'clip'}.mp4`
 
   return (
     <ModalPortal>
@@ -85,14 +103,14 @@ export function HighlightSheet({ item, loading = false, notice = '', title: fall
         className="scrim scrim--center"
         onClick={(e) => e.target.classList.contains('scrim') && onClose()}
       >
-        <div className="sheet hlsheet" role="dialog" aria-modal="true" aria-label={title}>
+        <div className="sheet hlsheet" role="dialog" aria-modal="true" aria-label={label}>
           <div className="hlsheet__head">
-            <h2 className="sheet__title">{title}</h2>
+            {title && <h2 className="sheet__title">{title}</h2>}
             <div className="hlsheet__actions">
               {/* Only ever the MP4: the HLS stream is a manifest of segments,
                   not a file anything can save. A clip with no MP4 rendition
                   simply gets no save button. */}
-              {mp4 && <SaveClipButton url={mp4} title={title} filename={filename} />}
+              {mp4 && <SaveClipButton url={mp4} title={label} filename={filename} />}
               <button ref={closeRef} className="hlsheet__close" onClick={onClose} aria-label="Close">
                 ✕
               </button>

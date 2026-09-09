@@ -300,6 +300,44 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   game the home team led entering it carries hits/errors/LOB and no `runs`, and
   testing the half object instead printed real-looking zeros for an inning that
   never happened.
+- **`expresslane/rail.js`** — reveal-only. Express Lane Tier 1: the ordered,
+  COMPLETE event list for ONE half-inning, which the two modes filter
+  (`resultModeRows` keeps each plate appearance's terminal row plus the
+  paperwork; `fullModeRows` keeps everything). It costs no new fetch — every
+  field comes off the `feed/live` payload already in hand — and it COMPOSES the
+  parse rather than repeating it: `pitchInfo.js` classifies the call code,
+  `eventTypes.js` names the event families. Three things to know before touching
+  it. (1) Clips are a SPARSE OVERLAY on the rail, not the rail: roughly 275
+  events a game carry no `playId` and never will — substitutions, mound visits,
+  batter timeouts, and the steals, wild pitches and caught stealings that happen
+  DURING a pitch — and every one still gets a row, because the film gate must
+  never block on a row that expects no film. (2) The terminal anchor is the last
+  `playEvents[]` element with `isPitch` AND a `playId` (570 of 570 plate
+  appearances over 7 games), with three fallbacks that have never fired, the
+  third of which is the MiLB / pre-2016 case: the last pitch, clip or no clip, so
+  the notation still gets written. (3) There is deliberately no whole-game
+  builder, because a game-wide rail states how many innings the game ran and so
+  whether it went to extras (ADR-0008). Under the film gate the reveal is
+  ATOMIC — `description` / `result` / `pitch` arrive with the picture or not at
+  all, since a scorer who can read the outcome has no reason to wait for it.
+- **`expresslane/clipIndex.js`** — spoiler-free. Express Lane Tier 2:
+  `playId → { mp4Url, posterUrl, durationSec }`, cached in IndexedDB by gamePk.
+  `resolveClipUrl(playId, { fetchImpl, signal, timeoutMs })` is the ONE place
+  that turns a playId into a playable clip — via
+  `baseballsavant.mlb.com/sporty-videos?playId=`, whose HTML carries a
+  `sporty-clips.mlb.com` mp4. Import it; do not write a second one. The
+  fetcher is injectable so every test runs offline. `fastball-clips.mlb.com` is
+  the same asset and is unusable: Referer-locked to mlb.com, browser-verified
+  `MEDIA_ERR_SRC_NOT_SUPPORTED` from this origin. The token is deterministic, so
+  a hit is memoized and persisted; a MISS never is, because clips lag the pitch
+  by 8 to 26 minutes and caching the miss would seal a game against its own film.
+  Nothing here ever bursts: `sporty-clips` blocks automated access (empty bodies,
+  then a hard 403, after roughly 25 requests in a few minutes), so the resolver is
+  one request on demand and `buildClipIndex` walks its list one at a time and
+  stops asking once the answers stop arriving. Two caller rules the module states
+  and cannot enforce: a poster carries the broadcast scorebug burned into the
+  pixels, so it may render only inside an already-revealed play and never as the
+  placeholder for the NEXT clip; and no surface may print a game-wide clip total.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
   `linescore.js` also holds `revealStampFacts`, the Logbook stamp's game blob
   (final score, clubs, venue, innings) in the exact shape `api/stamps.js` caches
