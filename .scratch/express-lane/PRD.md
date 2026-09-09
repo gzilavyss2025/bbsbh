@@ -260,7 +260,7 @@ erodes back into the old design within a week of use.
   scored in Express Lane faster than the clips arrive. That is the trade.
 - **Pre-roll matters much more than it did.** It was a nicety when the scorer
   could always proceed. It is now the difference between opening into a game and
-  opening into a wait. This merges with Open decision 4.
+  opening into a wait. This merges with Open decision 3.
 - **Full mode gets worse, not better.** It needs a clip every ~18 seconds; gated,
   it becomes a slideshow of waits. This reinforces the deferral.
 
@@ -274,7 +274,7 @@ was built to answer "must we pre-stage, or does the queue stay ahead of the
 scorer?" The gate dissolves that question: the queue no longer has to stay ahead
 of anyone, because nobody can get past it. What is left is not a trigger question
 but a **pre-roll question** — how much head start makes the opening feel like a
-game rather than a wait. Open decisions 1 and 4 merge accordingly.
+game rather than a wait. Open decisions 1 and 3 merge accordingly.
 
 **Result mode still needs no trigger. The trigger is opening Express Lane.**
 Staging delivers a plate appearance every ~25 seconds, and under the gate that
@@ -496,6 +496,28 @@ consenting to see the score of the pitch you are on.
 - **The 2.1 Mbps ceiling is real, per-client, and unfixable** (2026-09-09) —
   re-tested against the review's objection and confirmed. Design for the film
   being behind; do not design to outrun it.
+- **Result mode's expand is in v1** (2026-09-09) — a plate appearance opens into
+  its own pitches on demand. This was Open decision 3, and #1018 had already
+  recorded it as taken while this document still carried it as open; the two are
+  now reconciled here.
+
+  Review's argument carries it: the expand is not a nicety but the escape hatch
+  for the plays one terminal clip cannot settle — a 6-4-3 pivot, or a runner
+  going first to third. Under the film gate that matters more, not less, because
+  there is no other way to look again at a play you did not read the first time.
+
+  **It costs nothing in Tier 3, and that is the point.** The pitch DATA is free
+  in Tier 1 whether or not the pitch VIDEO is staged, so the expand always has
+  something real to show: count, pitch type, velocity and location, with video
+  only where Full mode has already staged it. So Result mode becomes a superset
+  of what the paper sheet's pitch tracker needs rather than a lossy summary of
+  it, and the 546 MB and the ~35-minute floor are both unchanged.
+
+  Two things follow for whoever builds the surface. An unstaged pitch inside an
+  opened plate appearance must not read as an error state — it has real data and
+  should look like it. And the expand must not become a second door around the
+  film gate: it opens a plate appearance the scorer has ALREADY reached, never
+  one ahead of the cursor.
 
 ## Open decisions
 
@@ -510,12 +532,7 @@ consenting to see the score of the pitch you are on.
    game? Note that switching mid-game invalidates every staged byte ahead of the
    cursor, so the choice should be locked for a session the way mode is. Use the
    other booth as the first fallback for a 404, before "not posted yet".
-3. **Result mode's expand.** Should a plate appearance open into its own pitches
-   on demand? Cheap in Tier 1 and Tier 2; costs bytes in Tier 3. Review argued
-   this is not optional but the escape hatch for the cases a single terminal clip
-   cannot settle — a 6-4-3 pivot, or a runner going first to third — and should
-   be in v1.
-4. **Pre-roll depth**, now merged with the trigger question and promoted in
+3. **Pre-roll depth**, now merged with the trigger question and promoted in
    importance by the film gate. Under the gate this is the difference between
    opening into a game and opening into a wait. Candidates: three clips (leaks
    nothing about game length, opens in ~75 s), or one half-inning (~2 min). A
