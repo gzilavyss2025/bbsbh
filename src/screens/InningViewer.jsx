@@ -38,6 +38,7 @@ import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { useStampUnseal } from '../hooks/useStamps.js'
 import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCalloutLedger.js'
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
+import { markAdvance } from '../lib/loopTiming.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -542,7 +543,12 @@ export function InningViewer({
 
   const revealNextAtBat = () => {
     focus.followLatest() // show the new at-bat even if the reader paged back
-    revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (curStepInfo?.nextCap ?? curAtBatCount + 1))
+    const nextCount = curAtBatCount === 0 ? 1 : (curStepInfo?.nextCap ?? curAtBatCount + 1)
+    revealAtBat(effInning, effHalf, nextCount)
+    // TEMPORARY (Express Lane): time the scoring loop. Position and clock only —
+    // never a result — and local to this device. See src/lib/loopTiming.js for
+    // why, and delete this line with the module when the question is answered.
+    markAdvance(feed?.gamePk, curIdx, nextCount)
   }
 
   // "Caught up to live" (ADR-0026): with the pass running on a game in progress,

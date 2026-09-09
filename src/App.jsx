@@ -251,6 +251,7 @@ const GameNotesDebugPage = lazyNamed(
 // unlike the two DEV-gated curation surfaces below it ships, reachable only by
 // direct URL (see lib/route.js).
 const AnimationLab = lazyNamed(() => import('./screens/AnimationLab.jsx'), 'AnimationLab')
+const LoopTimingPage = lazyNamed(() => import('./screens/LoopTimingPage.jsx'), 'LoopTimingPage')
 const BetweenInningsLab = lazyNamed(
   () => import('./screens/BetweenInningsLab.jsx'),
   'BetweenInningsLab',
@@ -453,6 +454,8 @@ export default function App() {
     content = <GameNotesDebugPage />
   } else if (route.name === 'animation-lab') {
     content = <AnimationLab />
+  } else if (route.name === 'loop-timing') {
+    content = <LoopTimingPage />
   } else if (route.name === 'between-innings-lab') {
     content = <BetweenInningsLab />
   } else if (route.name === 'wordmark-lab') {

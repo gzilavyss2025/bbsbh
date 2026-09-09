@@ -52,6 +52,7 @@
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
+//   '/loop-timing'                      -> { name: 'loop-timing' }    (unlisted QA page)
 //   '/between-innings-lab'              -> { name: 'between-innings-lab' }  (unlisted QA page)
 //   '/wordmark-lab'                     -> { name: 'wordmark-lab' }  (unlisted design study)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
@@ -402,6 +403,11 @@ export function parseRoute(url) {
   // frozen stage-by-stage — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'animation-lab')
     return { name: 'animation-lab' }
+  // Unlisted QA readout for the scoring-loop stopwatch — how long a plate
+  // appearance takes to score, against what the clip queue can deliver. Counts
+  // and durations only, no score or result. Temporary; see lib/loopTiming.js.
+  if (parts.length === 1 && parts[0] === 'loop-timing')
+    return { name: 'loop-timing' }
   // Unlisted QA page cataloging the post-half hold's card set against
   // synthetic fixtures — no score/reveal content, safe to ship.
   if (parts.length === 1 && parts[0] === 'between-innings-lab')

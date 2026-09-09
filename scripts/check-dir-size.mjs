@@ -800,7 +800,11 @@ const BUDGETS = {
   // same feature is a team-hub TAB and correctly went to src/screens/team/.
   // +1 for PostseasonRacePage.jsx — the current-season "if it ended today"
   // bracket + Wild Card standings, same one-route-one-screen shape.
-  'src/screens': 45,
+  // +1 for LoopTimingPage.jsx — the unlisted /loop-timing readout for the
+  // scoring-loop stopwatch, measuring the one unmeasured claim the Express Lane
+  // PRD rests on. TEMPORARY: this budget comes back to 45 in the commit that
+  // deletes the instrument (lib/loopTiming.js, its test, the route, the screen).
+  'src/screens': 46,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.
