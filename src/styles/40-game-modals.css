@@ -178,9 +178,14 @@
 }
 
 /* Save + ✕, top-right of the head row. Baseline-aligned with the title
-   through .hlsheet__head, so the pair reads as one trailing cluster. */
+   through .hlsheet__head, so the pair reads as one trailing cluster.
+   `margin-left: auto` is what holds it there for a clip that has NO title —
+   a raw pitch clip carries no words, so the heading is absent rather than
+   blank (HighlightSheet.jsx), and space-between alone would slide the pair
+   across to the left edge. */
 .hlsheet__actions {
   flex: none;
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: var(--space-2);

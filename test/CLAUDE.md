@@ -145,6 +145,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | uniforms.test.js | 31 | src/api/uniforms.js | Jersey treatment classification (PR #343) |
 | vs-team-splits.test.js | 7 | src/api/vsTeamSplits.js | SPLITS VS TEAM card + the per-club shard merge |
 | war.test.js | 6 | src/api/war.js | WAR reader |
+| watch-clip.test.js | 8 | src/components/highlights/watchClip.js | Which film a revealed play offers — the edited package wins where MLB cut one, a bare playId still opens the raw pitch clip, and a lookup that comes back empty degrades to one notice rather than a dead button |
 | winprob-atbat-step.test.js | 5 | src/api/playbyplay.js | lastVisibleAtBatIndex |
 | winprob.test.js | 17 | src/api/game.js, src/api/winprob.js | Win probability chart |
 | workload.test.js | 11 | src/api/workload.js | Rolling pitcher workload |
