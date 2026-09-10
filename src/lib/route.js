@@ -48,6 +48,7 @@
 //                                           not a live mirror of its controls — same as standings.)
 //   '/manager/{name-id}'                -> { name: 'manager', id }
 //   '/game/{gamePk}/express'            -> Express Lane (step 7), full screen
+//   '/game/{gamePk}/express-top5'       -> Express Lane opened on one half
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/identity-lab'                     -> { name: 'identity-lab' }  (dev-only curation lab)
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
@@ -613,7 +614,21 @@ export function sectionToStep(section) {
   // not walking the innings. Landing here shows the ENTRY STEP, never
   // film: the scorebug is burned into every clip frame, so the surface asks for
   // consent in words before it plays anything.
-  if (section === 'express') return { step: 7, inning: 1, half: 'top' }
+  //
+  // The half rides in the SECTION, the same slot and the same grammar the
+  // innings viewer's own `top5` uses, so a half of Express Lane is a real
+  // address you can send someone: `express-top5`. Bare `express` carries no
+  // half and means "open where I left off" — `expressHalfOf` below is what
+  // tells the two apart, since this function has to answer with SOME inning
+  // and cannot say "none".
+  const xl = /^express(?:-(top|bottom)(\d+))?$/.exec(section || '')
+  if (xl) {
+    return {
+      step: 7,
+      inning: xl[2] ? Math.max(1, Number(xl[2])) : 1,
+      half: xl[1] === 'bottom' ? 'bottom' : 'top',
+    }
+  }
   const m = /^(top|bottom)(\d+)$/.exec(section || '')
   if (m) return { step: 2, inning: Math.max(1, Number(m[2])), half: m[1] }
   const legacy = /^inning(\d+)$/.exec(section || '')
@@ -629,8 +644,21 @@ export function stepToSection(step, inning = 1, half = 'top') {
   if (step === 4) return 'preview'
   if (step === 5) return 'sheet'
   if (step === 6) return 'scorecard'
-  if (step === 7) return 'express'
+  // Step 7 with an explicit half addresses that half; `stepToSection(7)` with
+  // the default arguments is the bare door.
+  if (step === 7) return `express-${half === 'bottom' ? 'bottom' : 'top'}${inning}`
   return `${half === 'bottom' ? 'bottom' : 'top'}${inning}`
+}
+
+// The half named by an Express Lane section, or null when the section carries
+// none. `sectionToStep` cannot answer this — it must return an inning for every
+// section, so bare `express` and `express-top1` come back identical there — and
+// the difference matters: one means "open where I left off", the other means
+// "open exactly here".
+export function expressHalfOf(section) {
+  const m = /^express-(top|bottom)(\d+)$/.exec(section || '')
+  if (!m) return null
+  return { inning: Math.max(1, Number(m[2])), half: m[1] }
 }
 
 // A `?place=` gamePk, or null. Deliberately strict — a mangled value drops the

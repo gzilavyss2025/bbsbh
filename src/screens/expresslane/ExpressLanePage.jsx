@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { EntryChooser } from './EntryChooser.jsx'
 import { FilmPane } from './FilmPane.jsx'
 import { ScoringDeck } from './ScoringDeck.jsx'
@@ -7,6 +7,8 @@ import { useExpressLane } from '../../hooks/useExpressLane.js'
 import { RollingLine } from '../../components/gamehud/RollingLine.jsx'
 import { useRevealProgress } from '../../hooks/useRevealProgress.js'
 import { selectInningCount, selectRegulationInnings, selectTeamMeta } from '../../api/select.js'
+import { expressHalfOf, stepToSection } from '../../lib/route.js'
+import { halfIndex } from '../../api/select.js'
 
 // EXPRESS LANE — CONCEPT A, THE SPLIT DECK.
 //
@@ -41,8 +43,12 @@ function halfLabel(inning, half) {
   return `${half === 'bottom' ? 'Bottom' : 'Top'} ${ordinal}`
 }
 
-export function ExpressLanePage({ feed, gamePk, onLeave }) {
+export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
   const [booth, setBooth] = useState('home')
+  // Result mode is the default because it is the one that works at the film's
+  // own pace; every pitch is a deliberate pick, made with its cost on the
+  // button.
+  const [mode, setMode] = useState('result')
   const [started, setStarted] = useState(false)
   const [expanded, setExpanded] = useState(null)
 
@@ -58,10 +64,20 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
     actualCount,
   )
 
-  // Open on the first half the scorer has NOT finished — the sanctioned
+  // WHERE TO OPEN. A URL that names a half wins — `express-top5` is a real
+  // address, and someone who followed one meant to land there. Otherwise open
+  // on the first half the scorer has NOT finished, the sanctioned
   // `revealedThrough + 1` (ADR-0003/0010). Extras are reached one at a time by
   // the same walk, so nothing here has to know whether the game went long.
-  const [startHalfIdx] = useState(() => revealedThrough + 1)
+  //
+  // An addressed half is still CLAMPED to that frontier below, so a link cannot
+  // be a way past the seal: following `express-bottom9` on a game scored to the
+  // third opens the third.
+  const [startHalfIdx] = useState(() => {
+    const addressed = expressHalfOf(section)
+    const wanted = addressed ? halfIndex(addressed.inning, addressed.half) : revealedThrough + 1
+    return Math.max(0, Math.min(wanted, revealedThrough + 1))
+  })
 
   // Advancing IS the reveal act. Within a half it ratchets the at-bat mark;
   // finishing one ratchets the half mark, which is what unlocks the next.
@@ -76,7 +92,7 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
   const lane = useExpressLane({
     feed,
     gamePk,
-    mode: 'result',
+    mode,
     booth,
     startHalfIdx,
     // Live, not the value the surface opened on: as the scorer finishes a half
@@ -87,6 +103,15 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
 
   // Club identity, off the spoiler-free selector every lineup page already
   // uses. A club's name is not a score.
+  // The URL follows the cursor, so the half you are on is always the half you
+  // could send someone. Same shape the innings viewer keeps (`top5`), same slot
+  // in the address, so the two read alike.
+  useEffect(() => {
+    if (!started || !onSection) return
+    const want = stepToSection(7, lane.inning, lane.half)
+    if (want !== section) onSection(want, { replace: true })
+  }, [started, onSection, lane.inning, lane.half, section])
+
   const meta = useMemo(
     () => ({ away: selectTeamMeta(feed, 'away') ?? {}, home: selectTeamMeta(feed, 'home') ?? {} }),
     [feed],
@@ -104,6 +129,8 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
           homeName={names.home}
           booth={booth}
           onBooth={setBooth}
+          mode={mode}
+          onMode={setMode}
           onStart={() => setStarted(true)}
         />
       </div>

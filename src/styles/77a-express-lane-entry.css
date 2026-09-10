@@ -78,6 +78,27 @@
   background: rgb(181 130 74 / 0.16);
   color: var(--album-foil);
 }
+/* THE MODE CARDS stack instead of sitting side by side: each carries a line of
+   real figures, and two columns of that on a phone is two unreadable columns.
+   The booth pair above stays two-up, because a club name is two words. */
+.xl-entry__choices--modes {
+  grid-template-columns: 1fr;
+}
+/* What the choice costs, in minutes. Quieter than the label it explains, but
+   not hidden — it is the only fact that decides this choice. */
+.xl-entry__cost {
+  margin-top: 4px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--album-foil-soft);
+  /* No text-transform override: the whole app renders uppercase and a guard
+     enforces it (src/styles/01-base.css). This line is quieter by size and
+     colour instead. */
+  letter-spacing: var(--ls-none);
+}
+.xl-entry__choice.is-on .xl-entry__cost {
+  color: var(--album-foil);
+}
 .xl-entry__club {
   font-weight: var(--w-bold);
 }

@@ -205,7 +205,13 @@ export function GameView({ game, section, onSection }) {
   if (feed && step === 7) {
     return (
       <Suspense fallback={<Loader />}>
-        <ExpressLanePage feed={feed} gamePk={game.gamePk} onLeave={() => onSection('boxscore')} />
+        <ExpressLanePage
+          feed={feed}
+          gamePk={game.gamePk}
+          section={section}
+          onSection={onSection}
+          onLeave={() => onSection('boxscore')}
+        />
       </Suspense>
     )
   }
@@ -595,6 +601,7 @@ function gameTitle(game, step, inning, half) {
   if (step === 4) return `${matchup} · Preview card`
   if (step === 5) return `${matchup} · Print sheet`
   if (step === 6) return `${matchup} · Scorecard`
+  if (step === 7) return `${matchup} · Express Lane`
   return `${matchup} · ${half === 'bottom' ? 'Bot' : 'Top'} ${ordinal(inning)}`
 }
 
