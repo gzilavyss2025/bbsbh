@@ -351,6 +351,16 @@ jobs:
         id: target-command
         continue-on-error: true
         run: node scripts/gen-command.mjs
+      # GLOVE TARGET — the cloud behind those figures: one dot per pitch, at the
+      # offset it finished from the glove. Runs straight after the step above so
+      # it reuses that step's cached download rather than fetching its own, and
+      # it adds the per-pitch targets file (another ~47 MB) on top. Writes a
+      # DIRECTORY (public/data/glove-target/, one bucket per `personId % 100`),
+      # staged by the `git add -A -- public …` below like every other bucket set.
+      - name: Glove target
+        id: glove-target
+        continue-on-error: true
+        run: node scripts/gen-command-zone.mjs
       # The batter-side sibling of the pitch-arsenal step above, off the same two levels and
       # the same trailing window: where every ball in play landed. It writes a
       # DIRECTORY (public/data/spray/, one bucket per `personId % 100`) plus its

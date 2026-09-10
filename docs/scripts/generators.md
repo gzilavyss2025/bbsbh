@@ -464,6 +464,40 @@ don't run these by hand.
   of a pitch he throws better than anyone. Floors: `MIN_COMMAND_PITCHES` (50,
   deliberately the same figure `commandMap.js` uses) for a row to appear, and 20
   pitchers throwing a type before it is ranked at all.
+- `gen-command-zone.mjs` → `public/data/glove-target/{NN}.json` (per-pitcher
+  buckets on `personId % 100`) — GLOVE TARGET: the cloud behind the figures
+  `gen-command.mjs` writes. One dot per pitch, read by `src/api/gloveTarget.js`
+  for `GloveTarget.jsx` on the Analytics tab, directly under the Target Command
+  strip whose numbers it draws. Same OpenCommand source, same shared helper,
+  same licence and credit line.
+  **Each dot is a MISS VECTOR, not a location, and that is the whole design.**
+  Every pitch has its own target — the catcher sets up outside, then inside,
+  then low — so scattering absolute locations around one average target would
+  draw the catcher's movement and the pitcher's miss added together, with
+  nothing on the card saying which is which, and the median-miss ring would not
+  halve the cloud. Storing `actual - target` instead puts the glove at the
+  origin for every dot by construction, makes the ring genuinely bisect the
+  cloud, and shows a pitcher who consistently misses high or arm-side as an
+  off-centre cloud — the one thing no other card on that page can say. It also
+  avoids a trap the absolute version has to solve: a miss is a difference of two
+  heights, so the batter's own zone cancels and there is no zone normalisation
+  to get wrong (and no reason to reach for `lib/zone/zoneGeometry.js`, whose
+  projection maps a location into a strike zone a miss offset does not have).
+  **The dots are a quantile sample, not the first N and not a shuffle.** 48 per
+  pitch type, taken by striding over the DISTANCE-sorted season, so the drawn
+  cloud carries the season's real radial spread and the ring halves it —
+  measured, a season-order stride left a 7.78in ring over a drawn cloud whose
+  own median was 7.50in, and a reader counting dots inside the ring would have
+  been counting a sampling accident. Directions are untouched. Deterministic, so
+  a nightly rerun over unmoved data writes an identical file; there is no
+  `generatedAt` in a bucket for the same reason (the churn `gen-contracts-shards.mjs`
+  taught this repo about).
+  Also ships a per-row `bias` — the MEDIAN miss offset over **every** pitch, not
+  over the 48 drawn — which the card turns into "misses low and to the
+  catcher's right" above a 2in floor. Measured over the whole 2026 set only 3.6%
+  of rows clear that floor (median largest component 0.6in), so the card prints
+  the clause only when there is one and says nothing otherwise, rather than
+  reading "no consistent direction" on nineteen cards in twenty.
 - `gen-spray.mjs` → `public/data/spray/{NN}.json` (per-batter buckets on
   `personId % 100`) — the batter-side sibling of `gen-pitch-arsenal.mjs`: every
   ball in play this season, with the raw Gameday landing coordinate, the exit

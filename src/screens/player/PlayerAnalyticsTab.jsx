@@ -8,6 +8,7 @@ import { ProspectCard } from '../../components/playerstats/ProspectCard.jsx'
 import { PitchMix } from '../../components/charts/PitchMix.jsx'
 import { CommandMap } from '../../components/charts/CommandMap.jsx'
 import { TargetCommand } from '../../components/charts/TargetCommand.jsx'
+import { GloveTarget } from '../../components/charts/GloveTarget.jsx'
 import { BattedBallMix } from '../../components/charts/BattedBallMix.jsx'
 import { SimilarPitchers } from '../../components/playercard/SimilarPitchers.jsx'
 import { SimilarHitters } from '../../components/playercard/SimilarHitters.jsx'
@@ -146,6 +147,18 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
               reader to compare ranks that are taken against different
               populations (see TargetCommand.jsx). */}
           <TargetCommand entry={block.targetCommand} data={block.targetCommandData} />
+
+          {/* And directly under THAT, the cloud its figures summarise: the
+              strip says how far he finishes from the glove, this says which
+              way. Same data, same medians — the ring here is the number
+              printed in the row above it — so the two have to sit together or
+              a reader meets the same statistic twice without being told. */}
+          {block.gloveTarget && (
+            <>
+              <SectionTitle title="Glove target" note="every miss, from the catcher&#8217;s target" />
+              <GloveTarget entry={block.gloveTarget} data={block.targetCommandData} />
+            </>
+          )}
 
           {/* The hitter's counterpart to the pitch mix — what happens when
               he connects, in the same bar-over-rows dress (BattedBallMix

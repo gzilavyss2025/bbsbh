@@ -976,6 +976,10 @@
     "targetCommand.js": {
       "class": "spoiler-free",
       "why": "Static target-command.json — OpenCommand's season median distance between the catcher's target and where the pitch crossed, per pitch type, over games already final. A distance in inches carries no line, no running score and no per-game granularity; same footing as savantPercentiles.js and commandMap.js beside it on the player page, which is an open surface (ADR-0034)."
+    },
+    "gloveTarget.js": {
+      "class": "spoiler-free",
+      "why": "Static glove-target/{NN}.json — one dot per pitch giving the OFFSET, in inches, between the catcher's target and where the pitch crossed, over a season of games already final. A miss vector carries no location, no line, no score and no date: the dots are unordered and undated, so nothing here reads back to a particular game. Same footing as targetCommand.js and commandMap.js on the player page, an open surface (ADR-0034)."
     }
   }
 }

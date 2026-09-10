@@ -1,0 +1,174 @@
+/* ============================================================
+   GLOVE TARGET — components/charts/GloveTarget.jsx
+
+   Which way a pitcher misses, drawn as the thing it is: a target, with the
+   catcher's glove dead centre and one dot per pitch at the offset that
+   pitch finished from it (src/api/gloveTarget.js).
+
+   A SEPARATE SHEET from 26d-command-map.css, deliberately. That card plots
+   a location inside a strike zone; this one plots a miss, which has no zone
+   to sit in, so beyond the chip row the two share no geometry and no marks.
+   The chips themselves ARE shared — GloveTarget.jsx imports 26d for
+   .cmdmap__chip rather than restating those rules here, since a second copy
+   of a pill would drift from the first.
+
+   THE INK FOLLOWS THE PAGE'S EXISTING GRAMMAR, so a reader who has scrolled
+   past the Command Map and the percentile strip already knows how to read
+   it: navy is this player, pencil graphite is the league, and the ruled
+   references are the same faint pencil the scorebook's own lines are.
+   ============================================================ */
+
+.glovetarget {
+  margin-block-start: var(--space-4);
+}
+
+.glovetarget__plot {
+  display: block;
+  width: 100%;
+  /* The Command Map's own plot width, so the two cards stack as one column
+     down a phone rather than stepping in and out. */
+  max-width: 320px;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* --- the ruled references --- */
+
+/* Ten, twenty and thirty inches. Pencil-faint on purpose: they are the ruler,
+   not the reading, and every one of them is labelled in figures beside it. */
+.glovetarget__ring {
+  fill: none;
+  stroke: var(--border-rule);
+  stroke-width: 1;
+}
+
+.glovetarget__ringlabel {
+  font-family: var(--font-mono);
+  /* A real token, readable because the plot's viewBox is 1:1 with the
+     rendered pixel (see GloveTarget.jsx) — so this is 11px on screen, not
+     11 user units stretched by a viewBox scale. */
+  font-size: var(--fs-caption);
+  fill: var(--text-caption);
+  /* The label carries its OWN paper ground, because it sits inside the plot
+     and the innermost one lands exactly where the cloud is thickest. Same
+     move .cmdmap__whiff makes with its paper ring, and for the same reason: a
+     mark whose legibility depends on the data being thin somewhere is one
+     pitcher away from unreadable. `paint-order` puts the halo UNDER the
+     glyph rather than over it. */
+  stroke: var(--bg-page);
+  stroke-width: 3;
+  paint-order: stroke;
+  opacity: 0.85;
+}
+
+/* The cross-hairs. Without an axis, "he misses high and arm-side" is a
+   judgement about a cloud with nothing to judge it against. */
+.glovetarget__axis {
+  stroke: var(--border-rule);
+  stroke-width: 0.8;
+  opacity: 0.6;
+}
+
+/* --- the three marks that carry the reading --- */
+
+/* One pitch. Navy, at the opacity the Command Map gives its called strikes,
+   so forty-eight of them overlapping still read as a cloud with a density
+   rather than a solid blot. */
+.glovetarget__dot {
+  fill: var(--accent-primary);
+  opacity: 0.55;
+}
+
+/* A miss past the rim, drawn ON the rim. Hollowed rather than filled so it
+   cannot be mistaken for a pitch that actually landed there — it is a pitch
+   that went further, and the note under the plot says so. */
+.glovetarget__dot--rim {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 1.2;
+  opacity: 0.5;
+}
+
+/* HIS median miss — the ring that halves the cloud. Dashed, because a
+   circle at a median is a summary rather than a boundary, and solid it
+   would read as a wall the dots are inside or outside of. Drawn over the
+   dots for the reason the Command Map rules its zone frame over the
+   density: at the middle of the plot, where the cloud is thickest, is
+   exactly where this line has to survive. */
+.glovetarget__median {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: var(--bw-heavy);
+  stroke-dasharray: 5 4;
+}
+
+/* The league's median for the same pitch, in the graphite the percentile
+   strip already uses for a league baseline. Finer and more tightly dotted
+   than his own, so which ring is the player is never in question. */
+.glovetarget__league {
+  fill: none;
+  stroke: var(--graphite-soft);
+  stroke-width: var(--bw-rule);
+  stroke-dasharray: 2 3;
+}
+
+/* The glove. Solid navy at dead centre — the one thing on the card every
+   other mark is measured from, so it is drawn rather than implied by where
+   two rules happen to cross. */
+.glovetarget__glove {
+  fill: var(--accent-primary);
+}
+
+/* --- the key and the note --- */
+
+.glovetarget__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+}
+
+.glovetarget__keyitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-caption);
+}
+
+.glovetarget__keyitem::before {
+  content: '';
+  width: 11px;
+  height: 11px;
+  border-radius: var(--radius-pill);
+}
+.glovetarget__keyitem--glove::before {
+  width: 9px;
+  height: 9px;
+  background: var(--accent-primary);
+}
+.glovetarget__keyitem--dot::before {
+  width: 7px;
+  height: 7px;
+  background: var(--accent-primary);
+  opacity: 0.55;
+}
+.glovetarget__keyitem--median::before {
+  background: none;
+  border: var(--bw-heavy) dashed var(--accent-primary);
+}
+.glovetarget__keyitem--league::before {
+  background: none;
+  border: var(--bw-rule) dotted var(--graphite-soft);
+}
+
+.glovetarget__note {
+  margin-block-start: var(--space-2);
+}
+
+.glovetarget__source {
+  margin-block-start: var(--space-2);
+}

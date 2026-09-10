@@ -411,7 +411,12 @@ const BUDGETS = {
   // ORDERED, and a stylesheet's place in that order is what decides which rules
   // win. It is also the one partial here that paints a dark ground, which is
   // its own argument for not folding it into a neighbour.
-  'src/styles': 110,
+  // 110 -> 111 for 26f-glove-target.css — the Glove Target plot. A flat
+  // sibling for the same ordering reason, and deliberately NOT folded into
+  // 26d-command-map.css: that sheet draws a location inside a strike zone,
+  // this one draws a miss offset, and the two share only the chip pills, which
+  // GloveTarget.jsx gets by importing 26d rather than by a second copy.
+  'src/styles': 111,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -511,7 +516,12 @@ const BUDGETS = {
   // reader with no surface of its own, and every module the player page's
   // Analytics tab loads sits here together. A src/api/command/ holding it alone
   // would separate it from the two readers it is read alongside.
-  'src/api': 108,
+  //
+  // 109: gloveTarget.js, the bucket reader for the same dataset's per-pitch
+  // miss vectors. It sits beside targetCommand.js for the reason that entry
+  // gives, and beside commandMap.js, whose sharded-bucket reader it is built
+  // to match line for line.
+  'src/api': 109,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -657,7 +667,9 @@ const BUDGETS = {
   // gen-schedule-shape.mjs is: the nightly workflow runs this directory as a
   // flat list, and this file RUNS on import, which is what scripts/lib/ is not
   // for — its shared, testable half went to scripts/lib/opencommand.mjs.
-  scripts: 111,
+  // +1 for gen-command-zone.mjs, the Glove Target precompute off the same
+  // dataset, flat for the same reason and sharing the same scripts/lib helper.
+  scripts: 112,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -880,6 +892,20 @@ const BUDGETS = {
   // player-page cards in a folder of its own and leave the other ten flat,
   // which is not a subdivision, only a scattering.
   'src/components/player': 16,
+  // New entry: src/components/charts holds 13, one past the cap, for
+  // GloveTarget.jsx — the Glove Target plot, a peer of CommandMap.jsx and
+  // SprayMap.jsx beside it and built the same way (one component that only
+  // draws, its view model pure in src/api).
+  //
+  // A deliberate budget rather than a subdivision, which is the choice this
+  // guard's own header offers. The remedies available are both worse than the
+  // thirteenth file: a charts/command/ folder would take three of these and
+  // leave ten scattered flat, and a full pitching/hitting/game split would move
+  // twelve existing components and every import of them — a refactor with its
+  // own risks, landing inside a feature PR, while other agents hold files in
+  // this tree. Worth doing on its own; not worth doing here. If a fourteenth
+  // arrives, do the split instead of raising this again.
+  'src/components/charts': 13,
   // New entry: +1 for blockageCorrected.js — the diary's first `corrected`
   // entry that sits ABOVE the entry it corrects rather than replacing it
   // (the diary is append-only, see docs/agents/research-diary.md's second

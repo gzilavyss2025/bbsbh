@@ -36,6 +36,7 @@ import {
 } from '../person.js'
 import { fetchCommandFor } from '../commandMap.js'
 import { fetchTargetCommand, targetCommandFor } from '../targetCommand.js'
+import { fetchGloveTargetFor } from '../gloveTarget.js'
 import { currentSeasonFor, playerContext } from './context.js'
 
 export async function loadPlayerAnalytics(id, asOf) {
@@ -133,6 +134,10 @@ export async function loadPlayerAnalytics(id, asOf) {
       // the strip's league baseline and its credit line both live in it.
       block.targetCommand = group === 'pitching' ? targetCommandFor(targetCommandData, id, season) : null
       block.targetCommandData = targetCommandData
+      // WHICH WAY he misses — the cloud behind that strip's figures, in its own
+      // ~14 KB bucket (`personId % 100`) rather than the league in one file.
+      // Fetched only for a pitching block, like block.command beside it.
+      block.gloveTarget = group === 'pitching' ? await fetchGloveTargetFor(id, season) : null
       block.heat = arsenalShard ? heatView(arsenalShard, id, tileSportId === 1) : null
       block.arsenalTto = arsenalShard ? arsenalTtoView(arsenalShard, id, tileSportId === 1) : null
       // The same shard's other split — what he throws to each side of the
