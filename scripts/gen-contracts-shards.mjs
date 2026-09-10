@@ -10,7 +10,8 @@
 //                                     terms, confidence }, ... ] } }
 //
 //   public/data/contracts-history/terms/{sourceFile}-{bucket}.json
-//     bucket = Math.floor(csvRowIndex / 500). A flat
+//     bucket = src/lib/shardKey.js's termsBucketKey, a slice of the rowKey's
+//     own content hash. A flat
 //     { [rowKey]: { season, teamId, terms } } map covering EVERY source row,
 //     resolved or not -- the player shards can only carry a row that has a
 //     player, and the /admin review queue plus the search index both need the
@@ -60,17 +61,14 @@ import { fileURLToPath } from 'node:url'
 import { readFile } from 'node:fs/promises'
 import { parseCsv } from './lib/csv.mjs'
 import { readJsonOr, writeShards } from './lib/io.js'
-import { shardKey100, TERMS_BUCKET_SIZE } from '../src/lib/shardKey.js'
+import { shardKey100, termsBucketKey, TERMS_BUCKET_COUNT } from '../src/lib/shardKey.js'
+import { contractRowKeys, rowSortValue } from './lib/contract-row-key.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const sourceDir = join(here, 'data', 'contracts')
 const identityDir = join(here, '..', 'public', 'data', 'contracts-history', 'identity')
 const playerDir = join(here, '..', 'public', 'data', 'contracts-history', 'player')
 const termsDir = join(here, '..', 'public', 'data', 'contracts-history', 'terms')
-
-// 500 rows a bucket keeps salaries.csv's 27k rows at ~55 files instead of one
-// multi-megabyte map, while staying far from the per-row-file end where the
-// directory itself becomes the cost.
 
 // Which columns of each source carry the deal: its money, and the term span
 // that money is stated over (a guarantee with no year count is unreadable).
@@ -103,18 +101,26 @@ function termsFor(sourceFile, row) {
   return terms
 }
 
-// Newest deal first, which is the order every money surface wants. rowKey is
-// the last tie-break so a re-run is byte-identical: two rows of the same
-// source and season otherwise sort by whatever the join happened to yield.
-function rowIndex(rowKey) {
-  return Number(rowKey.slice(rowKey.indexOf('#') + 1))
-}
+// Newest deal first, which is the order every money surface wants, and the
+// order a reader inherits: src/api/contractsHistory.js re-sorts on season
+// alone, and a stable sort leaves everything below season exactly as this
+// comparator left it. So THIS is the display order.
+//
+// Below season sits the row's own content -- the newer signing, the larger
+// figure (contract-row-key.mjs's rowSortValue). It used to be the rowKey's
+// numeric index, which a content key does not have. Reaching for the index
+// anyway would not have failed loudly: `Number()` of a hash is NaN, and the
+// language reads a NaN comparator result as "these two are equal", so 220 rows
+// across 110 player-seasons would have quietly reordered with every test still
+// green. rowKey is the last tie-break, so a re-run stays byte-identical even
+// where two rows state the same figure.
 function compareRows(a, b) {
   const seasonA = Number.isFinite(a.season) ? a.season : -Infinity
   const seasonB = Number.isFinite(b.season) ? b.season : -Infinity
   if (seasonA !== seasonB) return seasonB - seasonA
   if (a.sourceFile !== b.sourceFile) return a.sourceFile < b.sourceFile ? -1 : 1
-  return rowIndex(a.rowKey) - rowIndex(b.rowKey)
+  if (a.sortValue !== b.sortValue) return b.sortValue - a.sortValue
+  return a.rowKey < b.rowKey ? -1 : a.rowKey > b.rowKey ? 1 : 0
 }
 
 async function loadIdentity(sourceFile) {
@@ -137,11 +143,16 @@ async function main() {
 
   for (const sourceFile of SOURCES) {
     const csvRows = parseCsv(await readFile(join(sourceDir, `${sourceFile}.csv`), 'utf8'))
+    // Recomputed from the CSV, never read off the crosswalk, so the two can
+    // never quietly disagree about which row is which: if the CSV changed
+    // since gen-contracts-identity.mjs last ran, the join misses and the
+    // orphan warning below names it.
+    const rowKeys = contractRowKeys(sourceFile, csvRows)
     const identity = await loadIdentity(sourceFile)
     const counts = { exact: 0, fuzzy: 0, ambiguous: 0, unresolved: 0 }
 
     for (let i = 0; i < csvRows.length; i++) {
-      const rowKey = `${sourceFile}#${i}`
+      const rowKey = rowKeys[i]
       const terms = termsFor(sourceFile, csvRows[i])
       const ident = identity.get(rowKey)
       if (!ident) orphans.push(rowKey)
@@ -155,7 +166,11 @@ async function main() {
       const season = ident?.season ?? null
       const teamId = ident?.rawTeamCode ?? null
 
-      const bucketName = `${sourceFile}-${Math.floor(i / TERMS_BUCKET_SIZE)}`
+      // A key this script just minted must always name a bucket. If it does
+      // not, the writer and the reader have drifted apart, and shipping the
+      // file anyway would hide a row's money behind a name no reader computes.
+      const bucketName = termsBucketKey(rowKey)
+      if (!bucketName) throw new Error(`No terms bucket for rowKey "${rowKey}" -- src/lib/shardKey.js and the key minter disagree`)
       if (!buckets.has(bucketName)) buckets.set(bucketName, {})
       buckets.get(bucketName)[rowKey] = { season, teamId, terms }
 
@@ -166,7 +181,9 @@ async function main() {
 
       const id = String(ident.mlbId)
       if (!players.has(id)) players.set(id, [])
-      players.get(id).push({ rowKey, sourceFile, season, teamId, terms, confidence: ident.confidence })
+      // `sortValue` orders the list below and is stripped before writing --
+      // it is derivable from the CSV and has no reader.
+      players.get(id).push({ rowKey, sourceFile, season, teamId, terms, confidence: ident.confidence, sortValue: rowSortValue(sourceFile, csvRows[i]) })
       filedRows++
     }
 
@@ -174,7 +191,10 @@ async function main() {
     perSource.push({ sourceFile, rows: csvRows.length, counts })
   }
 
-  for (const rows of players.values()) rows.sort(compareRows)
+  for (const rows of players.values()) {
+    rows.sort(compareRows)
+    for (const row of rows) delete row.sortValue
+  }
 
   const generatedAt = new Date().toISOString()
   const shards = new Map() // shardKey -> { [mlbId]: row[] }
@@ -219,9 +239,12 @@ async function main() {
     `\nWrote ${playerResult.written} player shards (swept ${playerResult.swept}): ` +
       `${players.size} players, ${filedRows} rows -> public/data/contracts-history/player/`,
   )
+  const bucketPlan = Object.entries(TERMS_BUCKET_COUNT)
+    .map(([source, count]) => `${source} ${count}`)
+    .join(', ')
   console.log(
     `Wrote ${termResult.written} term buckets (swept ${termResult.swept}): ` +
-      `${totalRows} rows, ${TERMS_BUCKET_SIZE} per bucket -> public/data/contracts-history/terms/`,
+      `${totalRows} rows over ${bucketPlan} -> public/data/contracts-history/terms/`,
   )
 }
 
