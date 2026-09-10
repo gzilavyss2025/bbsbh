@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { BoxLinesDoor } from '../boxlines/BoxLinesDoor.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { vsTeamDoorLabel } from '../../api/vsTeamSplits.js'
 import { teamLocationName, teamClubName } from '../../lib/teams.js'
 
 // SPLITS VS TEAM — a player's career line against a chosen opponent, with a
@@ -13,6 +15,14 @@ import { teamLocationName, teamClubName } from '../../lib/teams.js'
 // last-game line — a specific past game's result — so it's hidden whenever the
 // page is scoped to a game (`asOf` set) and that meeting is ON OR AFTER the day
 // being scored, exactly the cutoff the game log uses.
+//
+// The card is also the SECOND door into the game lines sheet (ADR-0069), after
+// the lineup page's Starting pitcher card: the cells say a career against one
+// club in figures, and the door under them opens the games those figures add
+// up to. `asOf` goes through as the sheet's cutoff, so the newest row the
+// sheet may hold and the last-game line above it stop on the same day — the
+// two can never disagree about what a scored day is allowed to show. The rows
+// carry the gate themselves (api/boxlines/rows.js); nothing is gated here.
 
 // A career stat cell: label + value, mono like the player page's tiles.
 function Cell({ k, v }) {
@@ -33,7 +43,7 @@ function gameDate(iso, season) {
   return Number(y) === season ? md : `${md}/${y.slice(2)}`
 }
 
-export function SplitsVsTeam({ vsTeam, season, asOf }) {
+export function SplitsVsTeam({ vsTeam, season, asOf, personId, playerSurname }) {
   const { teams, byOpp, preselectId } = vsTeam
   const [selId, setSelId] = useState(preselectId)
 
@@ -110,14 +120,39 @@ export function SplitsVsTeam({ vsTeam, season, asOf }) {
       </div>
 
       {cells ? (
-        <div
-          className="player__statgrid vsteam__grid"
-          style={{ gridTemplateColumns: `repeat(${cells.length}, 1fr)` }}
-        >
-          {cells.map(([k, v]) => (
-            <Cell key={k} k={k} v={v} />
-          ))}
-        </div>
+        <>
+          <div
+            className="player__statgrid vsteam__grid"
+            style={{ gridTemplateColumns: `repeat(${cells.length}, 1fr)` }}
+          >
+            {cells.map(([k, v]) => (
+              <Cell key={k} k={k} v={v} />
+            ))}
+          </div>
+
+          {/* The door to those games, worded by the same helper the lineup
+              page's door uses. Keyed on the picked club, so the door and the
+              sheet it owns are one object with the club they were built for:
+              a new pick remounts the door closed rather than leaving an open
+              sheet to be re-pointed, which is the only way a sheet could ever
+              carry one club's rows under another club's name. Nothing but the
+              key keeps the two in step — no effect, no reset. */}
+          {personId && playerSurname && (
+            <BoxLinesDoor
+              key={sel.id}
+              className="vsteam__door"
+              label={vsTeamDoorLabel(car, vsTeam.group, sel.abbr)}
+              sheet={{
+                personId,
+                playerSurname,
+                group: vsTeam.group,
+                opponentId: sel.id,
+                opponentName: teamClubName(sel.id) ?? sel.name,
+                cutoff: asOf ?? null,
+              }}
+            />
+          )}
+        </>
       ) : (
         <p className="hint vsteam__none">
           No career meetings{sel ? ` vs the ${sel.name}` : ''}.

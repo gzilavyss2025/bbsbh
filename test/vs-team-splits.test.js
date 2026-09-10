@@ -5,6 +5,7 @@ import test from 'node:test'
 import {
   fetchVsTeamSplitsForPlayer,
   fetchVsTeamSplitsForTeams,
+  vsTeamDoorLabel,
   vsTeamSplitsFor,
 } from '../src/api/vsTeamSplits.js'
 
@@ -13,6 +14,37 @@ const TEAMS = [
   { id: 112, abbr: 'CHC', name: 'Cubs' },
   { id: 138, abbr: 'STL', name: 'Cardinals' },
 ]
+
+// --------------------------------------------------------------------------
+// vsTeamDoorLabel — the one wording, shared by both doors into the game lines
+// sheet (ADR-0069). The sheet quotes the door's label verbatim as its
+// headline, so these two strings are a contract, not a preference: the lineup
+// page's Starting pitcher card and the player page's Splits vs team card must
+// word the same career the same way.
+// --------------------------------------------------------------------------
+test('vsTeamDoorLabel words a pitcher career as G, IP, ERA, K, BB', () => {
+  const car = { g: 7, ip: '34.0', era: '3.44', k: 28, bb: 17 }
+  assert.equal(
+    vsTeamDoorLabel(car, 'pitching', 'MIL'),
+    'Career vs MIL: 7 G, 34.0 IP, 3.44 ERA, 28 K, 17 BB',
+  )
+})
+
+test('vsTeamDoorLabel words a hitter career as G, PA, AVG, HR, OPS', () => {
+  const car = { g: 96, pa: 412, avg: '.284', hr: 14, ops: '.812' }
+  assert.equal(
+    vsTeamDoorLabel(car, 'hitting', 'CHC'),
+    'Career vs CHC: 96 G, 412 PA, .284, 14 HR, .812 OPS',
+  )
+})
+
+test('vsTeamDoorLabel counts games, never starts — a relief outing is in the total', () => {
+  // The generator sums gamesPlayed; "7 GS" was the bug the rows behind the
+  // line exposed (ADR-0069). The label says G, and nothing here may print GS.
+  const label = vsTeamDoorLabel({ g: 7, ip: '34.0', era: '3.44', k: 28, bb: 17 }, 'pitching', 'MIL')
+  assert.ok(label.includes('7 G,'))
+  assert.doesNotMatch(label, /GS/)
+})
 
 // --------------------------------------------------------------------------
 // vsTeamSplitsFor — pure

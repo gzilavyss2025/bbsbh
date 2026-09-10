@@ -153,6 +153,19 @@ about WHERE THE MATH LIVES: the generators ship FACTS, and every ranking, rate,
 league comparison and weighted index is computed here, where it is pure,
 unit-tested and arguable. `docs/farm-index.md` argues the one that needs it.
 
+`expresslane/` is the newest, and the spoiler line runs BETWEEN its two files
+rather than around them. `rail.js` is reveal-only: it is the ordered, complete
+event list for one half-inning, and its `description` / `result` / `pitch`
+fields narrate the play. `clipIndex.js` is spoiler-free: URLs, a poster and a
+duration, no prose and no result. Two rules that directory adds, both stated in
+those headers and neither enforceable by the manifest. The rail takes ONE
+half-inning per call and has no whole-game builder, because a game-wide rail
+states how many innings the game ran and so whether it went to extras
+(ADR-0008). And a poster URL is safe while the PICTURE is not — every frame
+carries the broadcast scorebug burned into the pixels — so a poster may render
+only inside an already-revealed play, and never as the placeholder for the next
+clip. `.scratch/express-lane/PRD.md` carries the reasoning and the measurements.
+
 The three older subdirectories — `person/`, `playbyplay/`, `callout-notes/` — carry
 their notes in each file's own header plus a barrel file that explains the split
 (`playbyplay.js`, `callout-notes.js`, `person.js`). Read the barrel first; it is

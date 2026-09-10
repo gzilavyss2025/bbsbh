@@ -72,6 +72,13 @@ reference:
   for months while its own header said "Normal nightly use appends yesterday's
   snapshot" — the Team hub's odds card served a twenty-three-day-old snapshot,
   quietly, because a date-keyed file has no way to look stale.
+- **A new nightly dataset needs a stamp in `check-data-freshness.mjs`, in the
+  same commit.** Write a top-level `generatedAt` (preferred); only a sharded
+  store where a per-shard stamp would rewrite every file nightly for no
+  reader's benefit gets `UNSTAMPED_BUDGET` bumped instead, with the reason
+  added beside `team-records/`'s. Never raise the budget as a reflex fix for a
+  guard failure — that unstamped count is a ratchet the guard checks against
+  itself, and widening it on request is exactly the drift it exists to catch.
 - **A generator that needs app logic imports it** rather than keeping a second
   copy (`gen-minors-leaders.mjs` imports `combineToPool`/`computeLeaders`;
   `gen-milestones.mjs` imports the projection math from `src/api/person.js`;

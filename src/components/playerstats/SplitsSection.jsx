@@ -110,7 +110,7 @@ export function hasSplits(block, vsTeam) {
   return Boolean(block.splits || block.situational || (vsTeam && block.group === vsTeam.group))
 }
 
-export function SplitsSection({ block, vsTeam, season, asOf }) {
+export function SplitsSection({ block, vsTeam, season, asOf, personId, playerSurname }) {
   return (
     <>
       {block.splits && (
@@ -159,9 +159,18 @@ export function SplitsSection({ block, vsTeam, season, asOf }) {
       {/* Career splits vs the club this player's team is next facing (a
           finger-scrollable strip picks a different opponent). Rendered in the
           primary stat block only, per the card's spec — and the ONLY card in
-          this section on a career scope, which is why its own heading says so. */}
+          this section on a career scope, which is why its own heading says so.
+          `personId` and `playerSurname` pass straight through: the card's line
+          is a door into the game lines behind it (ADR-0069), and the sheet
+          needs to know whose games to ask for and whose name to wear. */}
       {vsTeam && block.group === vsTeam.group && (
-        <SplitsVsTeam vsTeam={vsTeam} season={season} asOf={asOf} />
+        <SplitsVsTeam
+          vsTeam={vsTeam}
+          season={season}
+          asOf={asOf}
+          personId={personId}
+          playerSurname={playerSurname}
+        />
       )}
     </>
   )

@@ -300,7 +300,7 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   `InningPage.jsx`'s `presentationOnly` flag only mutes side-effecting
   callbacks (`onReveal`/`onStepInfo`) so the preview can't
   itself advance `revealedThrough` or double-report a step. Not a second
-  reveal boundary — see ADR-0024.
+  reveal boundary — see ADR-0024. **Box Lines** (`components/boxlines/`) carries final scores on the lineup page; its gate is `api/boxlines/rows.js`, not the sheet — ADR-0069.
 
 ## The Logbook's passport book (`src/components/passport/`, ADR-0036)
 

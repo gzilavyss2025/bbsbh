@@ -13,11 +13,13 @@ import {
 import { fetchTeam, fetchTeamRoster } from '../api/team.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { BallparkModal } from '../components/ballpark/BallparkModal.jsx'
+import { BoxLinesDoor } from '../components/boxlines/BoxLinesDoor.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
 import { POS_ORDER } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
+import { vsTeamDoorLabel } from '../api/vsTeamSplits.js'
 import { starterMatchupsFor, splitMatchupRows } from '../api/careerMatchups.js'
 import {
   useMatchupNotes,
@@ -545,6 +547,10 @@ function TeamSections({
         pitcherLine={oppPitcherLine}
         careerVsOpp={oppPitcherCareerVsOpp}
         vsOpponentAbbr={vsOpponentAbbr}
+        // The Box Lines sheet's query (ADR-0069): the club he faces, and the
+        // scored game's own date as the cutoff — the whole spoiler defense.
+        vsOpponent={{ id: meta.id, name: meta.teamName || meta.name }}
+        cutoff={info.officialDate ?? null}
         teamId={oppMeta.id}
         teamName={oppMeta.teamName}
         orgTeamId={oppOrgTeamId}
@@ -755,6 +761,8 @@ function OpposingStarterCard({
   pitcherLine,
   careerVsOpp,
   vsOpponentAbbr,
+  vsOpponent,
+  cutoff,
   teamId,
   teamName,
   orgTeamId,
@@ -844,11 +852,23 @@ function OpposingStarterCard({
             )}
             {/* His whole regular-season career against this club (see
                 api/vsTeamSplits.js) — omitted entirely on a first career
-                meeting, which is what the null careerVsOpp means. */}
+                meeting, which is what the null careerVsOpp means. The line is
+                worded by `vsTeamDoorLabel`, shared with the player page's
+                Splits vs team card so the two doors into the same sheet
+                cannot word the same career differently. */}
             {careerVsOpp && (
-              <span className="startercard__careervs">
-                {careerVsOpponentLine(careerVsOpp, vsOpponentAbbr)}
-              </span>
+              <BoxLinesDoor
+                className="startercard__careervs"
+                label={vsTeamDoorLabel(careerVsOpp, 'pitching', vsOpponentAbbr)}
+                sheet={{
+                  personId: pitcher.id,
+                  playerSurname: splitDisplayName(pitcher.name).last,
+                  group: 'pitching',
+                  opponentId: vsOpponent.id,
+                  opponentName: vsOpponent.name,
+                  cutoff,
+                }}
+              />
             )}
           </div>
           {/* Fills the wide layout's open right half (see .startercard__arsenal
@@ -907,14 +927,6 @@ function seasonVsOpponentLine(v, oppAbbr) {
     return `${monthDay(g.date)} ${g.home ? 'vs' : '@'} ${oppAbbr}: ${stat}`
   }
   return `${v.games.length} GS vs ${oppAbbr} this year: ${stat}`
-}
-
-// "Career vs MIL: 5 GS, 32.1 IP, 3.20 ERA, 28 K, 10 BB" — his whole regular-
-// season history against tonight's opponent (see api/vsTeamSplits.js), never
-// shown on a first career meeting (the card omits the row entirely instead).
-function careerVsOpponentLine(car, oppAbbr) {
-  const gs = car.g === 1 ? '1 GS' : `${car.g} GS`
-  return `Career vs ${oppAbbr}: ${gs}, ${car.ip} IP, ${car.era} ERA, ${car.k} K, ${car.bb} BB`
 }
 
 // Show only the first handful up front — a heavy shared history (two rosters

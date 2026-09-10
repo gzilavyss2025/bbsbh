@@ -17,6 +17,52 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
 
 
 - `statsapi.js` — the one `getJson` fetch wrapper every topic file below calls.
+- `boxlines/` — **Box Lines** (ADR-0069), the game-by-game rows behind a summary
+  stat line, fetched LIVE on the tap that opens the sheet rather than from the
+  nightly file (264,770 rows league-wide was the alternative). `fetch.js`
+  gathers: `yearByYear` for the seasons, one `gameLog` per season trimmed with
+  `fields=` (a pitcher's season ~7 KB, a hitter's ~25 KB), one
+  `schedule?gamePks=…&hydrate=team` call for the final score, venue, day/night,
+  Final status and abbreviations — the game log carries none of those, and its
+  own `game.dayNight` is wrong (verified). `rows.js` is the gate and the row:
+  `logRequestPlan` asks for the cutoff season only through the day BEFORE the
+  cutoff (`endDate`, inclusive) and never a later season, so the game being
+  scored is never fetched; `boxLineRows` keeps only games strictly before the
+  cutoff and reported Final. Both `cutoff-gated`. `test/boxlines-rows.test.js`
+  pins the gate. The line builders are `person/gameLog.js`'s `pitcherLine` /
+  `hitterLine`, reused, not copied.
+  `facets.js` (spoiler-free) is the question: one tagged object — `club`,
+  `venue`, `month`, `dayNight`, `weekday`, `side`, `started`, `gameTypes` —
+  becomes the `opponentId`/`gameTypes`/`keep` triple `rows.js` applies, and
+  `keep` runs AFTER the gate, so a facet can only ever narrow a row set the
+  gate approved. An unknown facet keeps nothing, never everything.
+  `careerSplits.js` (spoiler-free) supplies the DOOR LABELS for the player
+  page's Game lines card: one `careerStatSplits&sitCodes=…` call answers every
+  door on the card. A career aggregate is open here (ADR-0034); only the rows
+  behind the door are gated. `cardFacets.js` (spoiler-free) is the card's list
+  of doors — six of them since #1000/#1003/#1004/#1005 — kept in `api/` rather
+  than in the `.jsx` card so the suite can import it.
+  **A DOOR'S FIGURE AND ITS ROWS COME FROM DIFFERENT MLB PIPELINES AND DO NOT
+  RECONCILE.** The figure is MLB's aggregate for a situation code; the rows are
+  MLB's per-game flags in the game log and the schedule. `sitCodes` is IGNORED
+  on the game log (a season returns all its rows whether or not a code is
+  asked for), so there is no per-game situation list that would join them.
+  Measured over five careers 2026-09-03, they agree season by season except
+  where a home game was relocated, leaving career totals 1 to 5 games apart.
+  Do not "fix" it with a third definition — ADR-0069 records the one that was
+  tried and why it was worse. `test/boxlines-facets.test.js` pins the facet
+  layer, `test/boxlines-card-facets.test.js` pins every door against the same
+  `facetPlan` the sheet calls, and `test/boxlines-rows.test.js` pins that
+  `keep` cannot resurrect a row the cutoff or the Final check dropped.
+  `vsClub.js` is now a one-line wrapper on `fetch.js` for the club facet, kept
+  so the two shipped doors did not have to change.
+  THE SCHEDULE IS ASKED BY gamePk FOR EVERY FACET, not per (club, season):
+  measured 2026-09-02, 162 gamePks answer in one 177 ms call, a club-season
+  carries all 164 of the club's games where a starter appeared in ~30, and a
+  date-bounded club-season call is both leaky (a rescheduled game came back
+  dated 2024-08-30 from a window ending 2024-06-30) and lossy (2 of 86 rows
+  lost their scores). Asking by gamePk needs no date bound to be safe — the
+  only gamePks that exist came from already-gated splits.
 - `schedule.js` — slate/schedule (`hydrate=team` for the abbreviation +
   teamName the bare row lacks), `resolveGame`, `fetchGamesByPk`,
   `fetchHeadToHead`, `fetchTeamSchedule`. `fetchGameCardsByPk` is the
@@ -254,6 +300,44 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   game the home team led entering it carries hits/errors/LOB and no `runs`, and
   testing the half object instead printed real-looking zeros for an inning that
   never happened.
+- **`expresslane/rail.js`** — reveal-only. Express Lane Tier 1: the ordered,
+  COMPLETE event list for ONE half-inning, which the two modes filter
+  (`resultModeRows` keeps each plate appearance's terminal row plus the
+  paperwork; `fullModeRows` keeps everything). It costs no new fetch — every
+  field comes off the `feed/live` payload already in hand — and it COMPOSES the
+  parse rather than repeating it: `pitchInfo.js` classifies the call code,
+  `eventTypes.js` names the event families. Three things to know before touching
+  it. (1) Clips are a SPARSE OVERLAY on the rail, not the rail: roughly 275
+  events a game carry no `playId` and never will — substitutions, mound visits,
+  batter timeouts, and the steals, wild pitches and caught stealings that happen
+  DURING a pitch — and every one still gets a row, because the film gate must
+  never block on a row that expects no film. (2) The terminal anchor is the last
+  `playEvents[]` element with `isPitch` AND a `playId` (570 of 570 plate
+  appearances over 7 games), with three fallbacks that have never fired, the
+  third of which is the MiLB / pre-2016 case: the last pitch, clip or no clip, so
+  the notation still gets written. (3) There is deliberately no whole-game
+  builder, because a game-wide rail states how many innings the game ran and so
+  whether it went to extras (ADR-0008). Under the film gate the reveal is
+  ATOMIC — `description` / `result` / `pitch` arrive with the picture or not at
+  all, since a scorer who can read the outcome has no reason to wait for it.
+- **`expresslane/clipIndex.js`** — spoiler-free. Express Lane Tier 2:
+  `playId → { mp4Url, posterUrl, durationSec }`, cached in IndexedDB by gamePk.
+  `resolveClipUrl(playId, { fetchImpl, signal, timeoutMs })` is the ONE place
+  that turns a playId into a playable clip — via
+  `baseballsavant.mlb.com/sporty-videos?playId=`, whose HTML carries a
+  `sporty-clips.mlb.com` mp4. Import it; do not write a second one. The
+  fetcher is injectable so every test runs offline. `fastball-clips.mlb.com` is
+  the same asset and is unusable: Referer-locked to mlb.com, browser-verified
+  `MEDIA_ERR_SRC_NOT_SUPPORTED` from this origin. The token is deterministic, so
+  a hit is memoized and persisted; a MISS never is, because clips lag the pitch
+  by 8 to 26 minutes and caching the miss would seal a game against its own film.
+  Nothing here ever bursts: `sporty-clips` blocks automated access (empty bodies,
+  then a hard 403, after roughly 25 requests in a few minutes), so the resolver is
+  one request on demand and `buildClipIndex` walks its list one at a time and
+  stops asking once the answers stop arriving. Two caller rules the module states
+  and cannot enforce: a poster carries the broadcast scorebug burned into the
+  pixels, so it may render only inside an already-revealed play and never as the
+  placeholder for the NEXT clip; and no surface may print a game-wide clip total.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
   `linescore.js` also holds `revealStampFacts`, the Logbook stamp's game blob
   (final score, clubs, venue, innings) in the exact shape `api/stamps.js` caches

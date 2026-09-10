@@ -83,6 +83,28 @@ export async function fetchVsTeamSplitsForPlayer(personId) {
 //     preselectId,                                    // opponent to open on
 //     teams: [{ id, abbr, name, has }] }              // strip, own club dropped
 // The per-opponent stat rows stay in `byOpp` for the component to read on select.
+// The career line as ONE sentence — "Career vs MIL: 7 G, 34.0 IP, 3.44 ERA,
+// 28 K, 17 BB" for an arm, "Career vs CHC: 96 G, 412 PA, .284, 14 HR, .812
+// OPS" for a bat. Two surfaces print it and both open the same Box Lines sheet
+// behind it (ADR-0069): the lineup page's Starting pitcher card and the player
+// page's Splits vs team card, whose stat grid spells the same figures out in
+// cells. One function so the two can never word it differently — the sheet
+// quotes the door's label verbatim as its headline, so a drift would show up
+// as the door and the sheet disagreeing.
+//
+// "G", not "GS": the generator sums gamesPlayed, and a relief outing counts.
+// The rows behind the line show each one, so the label has to say what the
+// number is. The batting average carries no key of its own — a leading-dot
+// figure in a career line is read as an average everywhere in baseball, and
+// the grid above the door on the player page labels it AVG.
+export function vsTeamDoorLabel(car, group, oppAbbr) {
+  const stat =
+    group === 'pitching'
+      ? `${car.g} G, ${car.ip} IP, ${car.era} ERA, ${car.k} K, ${car.bb} BB`
+      : `${car.g} G, ${car.pa} PA, ${car.avg}, ${car.hr} HR, ${car.ops} OPS`
+  return `Career vs ${oppAbbr}: ${stat}`
+}
+
 export function vsTeamSplitsFor(data, personId) {
   const player = data?.players?.[personId]
   if (!player || !player.vs) return null

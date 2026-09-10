@@ -48,7 +48,8 @@ the top, and step a day forward or back. The Brewers sit pinned to the top. Each
 card gives you the start time and the game state, but never the score — not even
 for a game that ended last week. A readiness pill tells you which pieces your
 scorebook needs are posted yet: both lineups, the umpires, and the starting
-pitchers.
+pitchers. Alongside the slate, a live wire lists roster moves league-wide —
+trades, signings, injuries, call-ups — as they happen.
 
 **Check the teams.** Before first pitch, page through each club: the batting
 order with numbers and positions, the starting pitcher with a season line and
@@ -105,16 +106,21 @@ line, a pitcher's pitch mix, the game log, splits against lefties and righties,
 and a career register that blends major- and minor-league seasons. A "Path to
 the Majors" strip traces every level the player climbed, timelines list every
 club and every transaction, and "firsts" link to the game of a first hit or a
-first win. Prospects, All-Stars, rehab assignments, and Injured List stints are
-all flagged.
+first win. A contract history lists each arbitration case, extension, and
+free-agent deal by season, with what it paid. Prospects, All-Stars, rehab
+assignments, and Injured List stints are all flagged.
 
 **Team pages.** Tap a logo for the club hub: Overview, Roster, Games, Numbers,
 Contracts, and Minors. Each tab is its own address and loads only its own data.
 You get the record and division rank, a month of schedule, the division
 standings, league ranks in every hitting and pitching category, the roster with
-WAR, the Injured List, the payroll, and a leaders page for the club. A
+WAR, the Injured List, the payroll, and a leaders page for the club. A "Last
+Time" card tracks what the club has stopped doing and when it last did it —
+its last shutout, its last road-trip-opener win — across a decade of games. A
 minor-league club also shows its parent organization, its affiliation history,
-and the farm system.
+and the farm system. From the Games tab, two more pages open: the club's full
+season of professional game photos, and its whole season of roster moves as
+one scrollable ledger.
 
 **Standings** open *through yesterday*, so today's games cannot spoil you. One
 tap brings in today. You can also scrub back to any earlier date.
@@ -149,6 +155,10 @@ Standalone reference pages, all reachable from the menu and the slate footer:
 | Trade Deadline | Deadline moves, by season |
 | All Star Game / Legacy | Rosters for the current game, and the history behind it |
 | Logo Sheet | A grayscale sheet of every club at one level, to trace into your book |
+
+The menu's **Guides** section links to eleven how-to articles: scoring a game,
+reading a box score, a stats glossary, choosing and caring for a scorebook,
+and more.
 
 ---
 
