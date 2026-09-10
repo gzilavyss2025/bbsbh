@@ -972,6 +972,10 @@
     "workload.js": {
       "class": "spoiler-free",
       "why": "Static workload.json — completed appearances only. All bucket math is relative to a caller-supplied asOfDate."
+    },
+    "targetCommand.js": {
+      "class": "spoiler-free",
+      "why": "Static target-command.json — OpenCommand's season median distance between the catcher's target and where the pitch crossed, per pitch type, over games already final. A distance in inches carries no line, no running score and no per-game granularity; same footing as savantPercentiles.js and commandMap.js beside it on the player page, which is an open surface (ADR-0034)."
     }
   }
 }

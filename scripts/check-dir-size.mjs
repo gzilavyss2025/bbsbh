@@ -504,7 +504,14 @@ const BUDGETS = {
   // a rate over one season. It belongs flat with the other src/api readers:
   // a data-layer module with no surface of its own, and cutoff-gated for the
   // same reason teamRecords.js is.
-  'src/api': 107,
+  //
+  // 108: targetCommand.js, the reader for OpenCommand's per-pitch-type command
+  // figures (public/data/target-command.json). Flat for the same reason
+  // commandMap.js and savantPercentiles.js beside it are — it is a static-file
+  // reader with no surface of its own, and every module the player page's
+  // Analytics tab loads sits here together. A src/api/command/ holding it alone
+  // would separate it from the two readers it is read alongside.
+  'src/api': 108,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -645,7 +652,12 @@ const BUDGETS = {
   // content keys. It belongs beside the gen-contracts-* scripts it has to stay
   // consistent with, not in lib/: it is an entry point, not a helper, and the
   // only thing in the tree that may write to that Redis hash.
-  scripts: 110,
+  // +1 for gen-command.mjs, the Target Command precompute off the outside
+  // OpenCommand dataset. Flat with every other gen-*.mjs for the reason
+  // gen-schedule-shape.mjs is: the nightly workflow runs this directory as a
+  // flat list, and this file RUNS on import, which is what scripts/lib/ is not
+  // for — its shared, testable half went to scripts/lib/opencommand.mjs.
+  scripts: 111,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -797,7 +809,14 @@ const BUDGETS = {
   // rest of that pipeline's pure, unit-tested halves, because three generators,
   // the migration and test/contract-row-key.test.js all have to mint the same
   // key: two copies that drift are a row whose money can never be found.
-  'scripts/lib': 34,
+  //
+  // 35: opencommand.mjs, the download/cache/parse/join layer for the outside
+  // OpenCommand dataset. This is exactly what scripts/lib/ is for — it runs
+  // nothing on import, it is unit-tested (test/target-command.test.js), and
+  // THREE generators read it (gen-command.mjs, gen-command-zone.mjs,
+  // gen-command-received.mjs). Inlining it would put the same 170 MB download,
+  // the same two source-column guards and the same play_id join in three files.
+  'scripts/lib': 35,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

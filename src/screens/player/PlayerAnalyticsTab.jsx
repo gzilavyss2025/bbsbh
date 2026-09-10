@@ -7,6 +7,7 @@ import { AdvancedStatsCard } from '../../components/player/AdvancedStatsCard.jsx
 import { ProspectCard } from '../../components/playerstats/ProspectCard.jsx'
 import { PitchMix } from '../../components/charts/PitchMix.jsx'
 import { CommandMap } from '../../components/charts/CommandMap.jsx'
+import { TargetCommand } from '../../components/charts/TargetCommand.jsx'
 import { BattedBallMix } from '../../components/charts/BattedBallMix.jsx'
 import { SimilarPitchers } from '../../components/playercard/SimilarPitchers.jsx'
 import { SimilarHitters } from '../../components/playercard/SimilarHitters.jsx'
@@ -136,6 +137,15 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
               />
             </>
           )}
+
+          {/* Directly under the map, because it answers the question the map
+              raises and cannot settle: the grid above says WHERE the ball went,
+              this says how far that was from where the catcher asked for it.
+              Deliberately a scroll away from the Statcast strip at the top of
+              this shelf — two percentile lists running together would invite a
+              reader to compare ranks that are taken against different
+              populations (see TargetCommand.jsx). */}
+          <TargetCommand entry={block.targetCommand} data={block.targetCommandData} />
 
           {/* The hitter's counterpart to the pitch mix — what happens when
               he connects, in the same bar-over-rows dress (BattedBallMix

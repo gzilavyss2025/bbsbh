@@ -432,6 +432,38 @@ don't run these by hand.
   file, so a schema change like this needs an explicit `--since=` backfill
   covering the season to date, same as `gen-pitch-arsenal.mjs` needs for a
   new level.
+- `gen-command.mjs` → `public/data/target-command.json` — TARGET COMMAND: each
+  pitcher's median distance, in inches, between where the catcher set up and
+  where the pitch actually crossed, per pitch type, for one season. Read by
+  `src/api/targetCommand.js` for the player page's Analytics tab
+  (`TargetCommand.jsx`, the second percentile strip on that shelf, sitting under
+  the Command Map it deepens).
+  **The only generator here that reads an OUTSIDE dataset.** The source is
+  [OpenCommand](https://huggingface.co/datasets/tomdoyo/open-command) — catcher
+  targets inferred from broadcast video, `CC BY-NC-SA 4.0`, so every surface
+  rendering it carries a visible credit line and the non-commercial term is a
+  standing constraint on this app. Coverage starts at **2024** and there will
+  never be more history: no broadcast video, no glove to find. All download,
+  caching, parsing and joining lives once in `scripts/lib/opencommand.mjs`, the
+  helper `gen-command-zone.mjs` and `gen-command-received.mjs` share.
+  **The join is the interesting part.** The small rollup it reads
+  (`command_scores.csv`, ~270 KB) keys a pitcher by NAME and carries no id
+  column at all, so the id comes from the dataset's own per-pitch
+  `pbp_info.csv.gz` (~78 MB), which has both. Verified live: 2025 and 2026 map
+  cleanly (873/873 and 814/814 names to ids), 2024 collides on exactly two —
+  Luis Ortiz and Logan Allen — and those rows are **dropped, not guessed**,
+  because a rollup row keyed on a shared name is already two pitchers blended.
+  That 78 MB download is cached under `node_modules/.cache` and shared with the
+  other two OpenCommand generators, so a nightly run pays for it once.
+  **One season, the current one**, matching `gen-savant-percentiles.mjs` — the
+  Analytics tab reads a player's current season, so shipping three would send
+  two of them to every reader for nothing; `--season=` overrides. Each row is
+  ranked against **its own pitch type**, not a pooled league: a curveball misses
+  by about 1.8in more than a sinker league-wide (2026: 11.0in against 9.2in), so
+  one pooled distribution would tell a curveball specialist he has poor command
+  of a pitch he throws better than anyone. Floors: `MIN_COMMAND_PITCHES` (50,
+  deliberately the same figure `commandMap.js` uses) for a row to appear, and 20
+  pitchers throwing a type before it is ranked at all.
 - `gen-spray.mjs` → `public/data/spray/{NN}.json` (per-batter buckets on
   `personId % 100`) — the batter-side sibling of `gen-pitch-arsenal.mjs`: every
   ball in play this season, with the raw Gameday landing coordinate, the exit

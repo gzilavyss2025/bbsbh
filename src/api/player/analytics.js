@@ -35,6 +35,7 @@ import {
   pitcherRole,
 } from '../person.js'
 import { fetchCommandFor } from '../commandMap.js'
+import { fetchTargetCommand, targetCommandFor } from '../targetCommand.js'
 import { currentSeasonFor, playerContext } from './context.js'
 
 export async function loadPlayerAnalytics(id, asOf) {
@@ -44,10 +45,15 @@ export async function loadPlayerAnalytics(id, asOf) {
 
   // Statcast percentile ranks and the league-wide pitch mix are both same-origin
   // static files, session-cached after the first read anywhere in the app.
-  const [savantData, prospectTrend, levelTenure] = await Promise.all([
+  const [savantData, prospectTrend, levelTenure, targetCommandData] = await Promise.all([
     fetchSavantPercentiles(),
     fetchProspectTrend(),
     fetchLevelTenure(),
+    // OpenCommand's season rollup — one small same-origin file, session-cached
+    // like the three beside it. Fetched for every player rather than only for a
+    // pitcher: it is one read for the whole app, and a hitter's block simply
+    // finds nothing in it.
+    fetchTargetCommand(),
   ])
 
   const blocks = await Promise.all(
@@ -121,6 +127,12 @@ export async function loadPlayerAnalytics(id, asOf) {
       // WHERE he puts it — the same sweep's other half, its own shard. Fetched
       // only for a pitching block, like the arsenal beside it.
       block.command = group === 'pitching' ? await fetchCommandFor(id) : null
+      // DID HE MEAN TO — the same question one level deeper than block.command,
+      // off an outside dataset (see api/targetCommand.js). Pure lookups into the
+      // file already fetched above; the whole file rides the block too, because
+      // the strip's league baseline and its credit line both live in it.
+      block.targetCommand = group === 'pitching' ? targetCommandFor(targetCommandData, id, season) : null
+      block.targetCommandData = targetCommandData
       block.heat = arsenalShard ? heatView(arsenalShard, id, tileSportId === 1) : null
       block.arsenalTto = arsenalShard ? arsenalTtoView(arsenalShard, id, tileSportId === 1) : null
       // The same shard's other split — what he throws to each side of the
