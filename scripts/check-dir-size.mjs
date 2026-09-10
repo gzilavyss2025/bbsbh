@@ -399,6 +399,11 @@ const BUDGETS = {
   // check-file-size.mjs's ceiling and on a budget of its own, so growing that
   // file is the one option this directory's own rules forbid. Route-loaded,
   // imported by the card the lazy history tab mounts.
+  // 109 -> 110 for 77a-express-lane-entry.css — Express Lane's entry step and
+  // its plate-appearance expand, split out when 77 reached check-file-size's
+  // 600-line ceiling. A lettered sibling, the same split-for-budget move
+  // 26a/26b and 31a/31b already made, and the one this directory's own rules
+  // ask for rather than growing a partial that is already at its cap.
   // 108 -> 109 for 77-express-lane.css — the full-screen Express Lane surface.
   // A genuinely new UI rather than a split of an over-budget partial, so it
   // takes the next free integer, and it has to stay a flat sibling for the
@@ -406,7 +411,7 @@ const BUDGETS = {
   // ORDERED, and a stylesheet's place in that order is what decides which rules
   // win. It is also the one partial here that paints a dark ground, which is
   // its own argument for not folding it into a neighbour.
-  'src/styles': 109,
+  'src/styles': 110,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

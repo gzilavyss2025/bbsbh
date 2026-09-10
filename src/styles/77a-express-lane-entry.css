@@ -1,0 +1,202 @@
+/* ------------------------------------------------------------------
+   77a-express-lane-entry — Express Lane's two doorway surfaces:
+   the ENTRY STEP (booth + consent) and the PLATE-APPEARANCE EXPAND.
+   screens/expresslane/{EntryChooser,PitchExpand}.jsx
+
+   A lettered sibling of 77-express-lane.css rather than the next free integer,
+   because it belongs with it: both paint the same dark album board and share
+   its tokens, and the ordered @import chain in index.css means a sibling has
+   to sit immediately after the partial whose ground it borrows.
+
+   Split out because 77 reached check-file-size.mjs's 600-line ceiling. These
+   two were the clean cut: neither is part of the scoring deck's own band
+   stack, and both are surfaces you pass THROUGH rather than score in — one
+   before the game starts, one opened over the top of it.
+   ------------------------------------------------------------------ */
+
+/* --- the entry step ------------------------------------------------- */
+.xl-entry {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 20px calc(24px + env(safe-area-inset-bottom));
+  max-width: 34rem;
+  margin: 0 auto;
+  width: 100%;
+}
+.xl-entry__title {
+  margin: 0;
+  font-size: var(--fs-h1);
+  color: var(--album-foil);
+}
+.xl-entry__lede {
+  margin: 0;
+  line-height: var(--lh-body);
+  color: var(--album-foil-soft);
+}
+.xl-entry__group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.xl-entry__legend {
+  padding: 0;
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-bold);
+  color: var(--album-foil-soft);
+}
+.xl-entry__hint {
+  margin: 6px 0 10px;
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  color: var(--album-foil-soft);
+}
+.xl-entry__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.xl-entry__choice {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px;
+  border: 1px solid var(--album-board-line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--album-foil-soft);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.xl-entry__choice.is-on {
+  border-color: var(--seal);
+  background: rgb(181 130 74 / 0.16);
+  color: var(--album-foil);
+}
+.xl-entry__club {
+  font-weight: var(--w-bold);
+}
+.xl-entry__side {
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+}
+/* The consent, said plainly rather than buried: the scorebug is in every
+   frame, so there is no unrevealed way to watch a pitch. */
+.xl-entry__consent {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 3px solid var(--seal);
+  background: rgb(181 130 74 / 0.1);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--album-foil);
+}
+.xl-entry__go {
+  margin-top: auto;
+  min-height: 52px;
+  width: 100%;
+}
+
+/* --- the plate-appearance expand ------------------------------------ */
+.xl-expand {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: end stretch;
+  background: rgb(0 0 0 / 0.55);
+}
+.xl-expand__panel {
+  background: var(--album-board);
+  border-top: 1px solid var(--album-board-line);
+  border-radius: 12px 12px 0 0;
+  padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
+  max-height: 76dvh;
+  overflow-y: auto;
+}
+.xl-expand__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.xl-expand__title {
+  margin: 0;
+  font-size: var(--fs-title-sm);
+  color: var(--album-foil);
+}
+.xl-expand__close {
+  appearance: none;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: var(--album-foil-soft);
+  cursor: pointer;
+  padding: 6px 2px;
+}
+.xl-expand__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.xl-expand__none {
+  margin: 0;
+  color: var(--album-foil-soft);
+  font-size: var(--fs-ui);
+}
+/* An unstaged pitch is an ORDINARY row, not an error: it has a count, a type
+   and a velocity, and only its film is missing. So there is no warning colour
+   and no "missing" state in this list at all. */
+.xl-pitch {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr 1fr 4.4rem 2.6rem;
+  gap: 8px;
+  align-items: baseline;
+  padding: 7px 2px;
+  border-bottom: 1px solid var(--album-board-line);
+  font-size: var(--fs-small);
+}
+.xl-pitch__n {
+  color: var(--album-foil-soft);
+}
+.xl-pitch__call {
+  font-weight: var(--w-bold);
+  color: var(--album-foil);
+}
+.xl-pitch__type,
+.xl-pitch__mph,
+.xl-pitch__count {
+  color: var(--album-foil-soft);
+}
+.xl-pitch__count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.xl-pitch--strike .xl-pitch__call {
+  color: var(--clay);
+}
+.xl-pitch--ball .xl-pitch__call {
+  color: var(--field-soft);
+}
+
+/* --- tablet and up ---------------------------------------------------
+   The expand stops being a sheet rising from the foot and becomes a panel in
+   the middle, the same way every other dialog in this app does at width. */
+@media (min-width: 760px) {
+  .xl-expand {
+    place-items: center;
+    padding: 24px;
+  }
+  .xl-expand__panel {
+    width: min(38rem, 100%);
+    border-radius: 12px;
+    border: 1px solid var(--album-board-line);
+  }
+}

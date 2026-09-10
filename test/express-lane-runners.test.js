@@ -230,6 +230,26 @@ test('every card arrives with the three marks AtBatBox draws but does not comput
   assert.equal(walk.centerCode, 'BB')
 })
 
+test('a half that was never played has an empty rail, which is how a game ENDS', () => {
+  // THE SIGNAL THE SURFACE KEYS ON, and the bug it was found by. Express Lane
+  // opens on `revealedThrough + 1` — the first half not yet scored — so a game
+  // scored to its last out opens on a half that never happened. It rendered
+  // the ordinary deck over nothing: a dead button under a film pane promising
+  // film that was never coming, on a screen headed "Top 10th".
+  //
+  // Reading this half is the sanctioned lookahead (ADR-0003/0010) and it leaks
+  // nothing — an empty rail says only "you have reached the end of what has
+  // been played", which the scorer who reached it already knows. It is
+  // deliberately NOT a check against the game's inning count: that number
+  // states whether the game went to extras (ADR-0008).
+  //
+  // gamePk 823035 went nine innings, so the top of the 10th is that half.
+  assert.deepEqual(resultModeRows(buildRail(FEED, 10, 'top')), [])
+  assert.deepEqual(buildRail(FEED, 10, 'top'), [])
+  // And the half before it is not empty, so the signal really distinguishes.
+  assert.ok(resultModeRows(buildRail(FEED, 9, 'bottom')).length > 0)
+})
+
 test('an empty half yields an empty deck rather than throwing', () => {
   const deck = expressDeck(FEED, 11, 'top', { atBatIndex: 1 })
   assert.deepEqual(deck, { batter: null, runners: [], entries: [], cap: null })

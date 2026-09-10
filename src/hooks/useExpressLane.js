@@ -38,7 +38,20 @@ import { halfAt } from '../api/scorecard/alignment.js'
 // length (ADR-0008); the surface shows an indeterminate wait instead.
 const PREROLL_CLIPS = 3
 
-export function useExpressLane({ feed, gamePk, mode = 'result', booth = 'home', startHalfIdx = 0, onReveal }) {
+export function useExpressLane({
+  feed,
+  gamePk,
+  mode = 'result',
+  booth = 'home',
+  startHalfIdx = 0,
+  // The furthest half this scorer may look at: `revealedThrough + 1`, live, so
+  // it moves as they score. THE FORWARD ARROW IS CLAMPED TO IT, and that is not
+  // a nicety — walking forward two halves would build the rail for a half the
+  // scorer has not unlocked and stage its film, which is the sanctioned
+  // lookahead (ADR-0003/0010) broken by a button.
+  maxHalfIdx = Infinity,
+  onReveal,
+}) {
   const [halfIdx, setHalfIdx] = useState(startHalfIdx)
   const [job, setJob] = useState(() => createJob({ gamePk, mode, feed: booth }))
   const [cursorKey, setCursorKey] = useState(null)
@@ -91,6 +104,20 @@ export function useExpressLane({ feed, gamePk, mode = 'result', booth = 'home', 
     runnerRef.current.addHalf(rows)
   }, [rows])
 
+  // THE HALF THE SCORER HAS REACHED HAS NOTHING IN IT.
+  //
+  // Which is the ordinary way a game ENDS. The surface opens on
+  // `revealedThrough + 1` — the first half not yet finished — and for a game
+  // scored to its last out that half was never played. Reading it is the
+  // sanctioned lookahead (ADR-0003/0010) and it leaks nothing: an empty rail
+  // says only "you have reached the end of what has been played", which the
+  // scorer who reached it already knows.
+  //
+  // It is NOT clamped against the game's inning count, deliberately. That
+  // number states whether the game went to extras (ADR-0008), and the empty
+  // rail answers the same question without asking it.
+  const halfEmpty = rows.length === 0
+
   // Enough film to open on. Counted against the head of the queue, never shown.
   const status = useMemo(() => stagingStatus(job), [job])
   const preroll = useMemo(() => {
@@ -101,8 +128,15 @@ export function useExpressLane({ feed, gamePk, mode = 'result', booth = 'home', 
       ready += 1
       if (ready >= PREROLL_CLIPS) break
     }
-    return { ready: ready >= PREROLL_CLIPS || job.state === 'complete', state: job.state }
-  }, [job])
+    // `complete` counts as ready because a SHORT half can drain before three
+    // clips land. An EMPTY one drains too, and used to come through here as
+    // "ready" — which opened the surface onto a half with no rows, a dead
+    // button and a film pane promising film that was never coming.
+    return {
+      ready: !halfEmpty && (ready >= PREROLL_CLIPS || job.state === 'complete'),
+      state: job.state,
+    }
+  }, [job, halfEmpty])
 
   const cursorRow = useMemo(
     () => rows.find((row) => row.key === cursorKey) ?? null,
@@ -209,11 +243,38 @@ export function useExpressLane({ feed, gamePk, mode = 'result', booth = 'home', 
     [],
   )
 
+  // ONE PLAY BACK, the fine-grained partner to the half arrows.
+  //
+  // The app has no address finer than a half-inning — `/game/{pk}/top5` is as
+  // deep as a URL goes, and a play's position inside a half is state, not an
+  // address (ADR-0016). So within a half, stepping IS what navigation means,
+  // and it needs a control of its own rather than only the chips: the chips
+  // name plate appearances, and in Full mode a row can be a pitch.
+  //
+  // Never gated. It lands on a row already scored, and `setCursor` lets a
+  // backwards move through unconditionally for exactly that reason.
+  const canStepBack = cursorAt > 0
+  const stepBack = useCallback(async () => {
+    if (cursorAt <= 0 || !runnerRef.current) return
+    const landed = await runnerRef.current.moveCursor(rows[cursorAt - 1].key)
+    setCursorKey(landed)
+  }, [cursorAt, rows])
+
   // The half is done. Advancing the mark unlocks the next one, which is what
   // lets its rows join the queue — extras included, one at a time (ADR-0008).
+  const canGoForward = halfIdx < maxHalfIdx
   const nextHalf = useCallback(() => {
     setCursorKey(null)
-    setHalfIdx((idx) => idx + 1)
+    setHalfIdx((idx) => (idx < maxHalfIdx ? idx + 1 : idx))
+  }, [maxHalfIdx])
+
+  // Back a half. Always allowed and never gated: every half behind the cursor
+  // is one the scorer has already scored, and going back to look again is the
+  // whole reason the foot strip exists. It is also the way OUT of the empty
+  // half a finished game opens on.
+  const prevHalf = useCallback(() => {
+    setCursorKey(null)
+    setHalfIdx((idx) => Math.max(0, idx - 1))
   }, [])
 
   const skipFilm = useCallback(async () => {
@@ -243,9 +304,14 @@ export function useExpressLane({ feed, gamePk, mode = 'result', booth = 'home', 
     status,
     preroll,
     atHalfEnd: cursorAt >= 0 && !nextRow,
+    halfEmpty,
+    canGoForward,
     advance,
     goTo,
+    stepBack,
+    canStepBack,
     nextHalf,
+    prevHalf,
     skipFilm,
     retry,
   }

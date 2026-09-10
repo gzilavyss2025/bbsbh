@@ -78,6 +78,9 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
     mode: 'result',
     booth,
     startHalfIdx,
+    // Live, not the value the surface opened on: as the scorer finishes a half
+    // the mark ratchets and the next one becomes reachable.
+    maxHalfIdx: revealedThrough + 1,
     onReveal,
   })
 
@@ -105,9 +108,41 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
     )
   }
 
-  // The pre-roll. It is a wait with nothing to show yet, so it says so and
-  // shows no measure of itself — the same indeterminate rule the in-game wait
-  // follows, for the same reason.
+  // NOTHING WAS PLAYED IN THIS HALF, which is how a finished game ends: the
+  // surface opens on the first half not yet scored, and for a game scored to
+  // its last out that half never happened. It used to render the ordinary deck
+  // over an empty rail — a dead button under a film pane promising film that
+  // was never coming. It says so instead, and offers the way back.
+  if (lane.halfEmpty) {
+    return (
+      <div className="xl">
+        <header className="xl__bar">
+          <button type="button" className="xl__back" onClick={onLeave}>
+            Leave
+          </button>
+          <span className="xl__half">{halfLabel(lane.inning, lane.half)}</span>
+          <span className="xl__booth" />
+        </header>
+        <div className="xl__preroll">
+          <p className="xl__prerollmsg">Nothing was played here.</p>
+          <p className="xl__prerollsub">
+            You have scored to the end of what this game has. Step back to look at a half again.
+          </p>
+          <button type="button" className="btn btn--ghost" onClick={lane.prevHalf}>
+            Back a half-inning
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // The pre-roll, and it is checked AFTER the empty half above rather than
+  // before it. An empty half stages nothing, so it never reaches the pre-roll's
+  // threshold — asking "is the film here yet" first left a finished game
+  // waiting forever for film that was never coming.
+  //
+  // It is a wait with nothing to show yet, so it says so and shows no measure
+  // of itself — the same indeterminate rule the in-game wait follows.
   if (!lane.preroll.ready && !lane.cursorRow) {
     return (
       <div className="xl">
@@ -135,7 +170,32 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
         {/* The half and the outs. No score, no plate-appearance count, no
             position in the game — position within the current half is all any
             indicator on this surface may show. */}
-        <span className="xl__half">{halfLabel(lane.inning, lane.half)}</span>
+        {/* HALF NAVIGATION, always reachable rather than only at the end of a
+            half. Backwards is never gated: every half behind the cursor is one
+            already scored, and looking again is the point. Forwards is the same
+            act as finishing a half — it advances the reveal mark, which is what
+            unlocks the next one, extras one at a time (ADR-0008). */}
+        <span className="xl__nav">
+          <button
+            type="button"
+            className="xl__navbtn"
+            onClick={lane.prevHalf}
+            disabled={lane.halfIdx === 0}
+            aria-label="Back a half-inning"
+          >
+            ‹
+          </button>
+          <span className="xl__half">{halfLabel(lane.inning, lane.half)}</span>
+          <button
+            type="button"
+            className="xl__navbtn"
+            onClick={lane.nextHalf}
+            disabled={!lane.canGoForward}
+            aria-label="Forward a half-inning"
+          >
+            ›
+          </button>
+        </span>
         <span className="xl__booth">{booth === 'home' ? names.home : names.away}</span>
       </header>
 
@@ -182,6 +242,20 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
       )}
 
       <footer className="xl__foot">
+        {/* Back one play. Never gated, for the same reason the chips are not:
+            it moves onto a row already scored. It is the fine-grained partner
+            to the half arrows above — the app has no address finer than a
+            half-inning, so within one, stepping is what navigation means. */}
+        {lane.cursorRow && (
+          <button
+            type="button"
+            className="btn btn--ghost xl__backplay"
+            onClick={lane.stepBack}
+            disabled={!lane.canStepBack}
+          >
+            Back one play
+          </button>
+        )}
         {lane.atHalfEnd ? (
           <button type="button" className="btn btn--reveal xl__go" onClick={lane.nextHalf}>
             Next half-inning

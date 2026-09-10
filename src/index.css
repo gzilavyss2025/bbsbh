@@ -97,6 +97,7 @@
    cannot wait on a route chunk. */
 @import './styles/76-workload-marks.css';
 @import './styles/77-express-lane.css';
+@import './styles/77a-express-lane-entry.css';
 /* Motion — the animation layer (the motion study, issues #976-#983). A
    SUBDIRECTORY for the same reason focus/ below is one: src/styles is a flat
    directory at its own file ratchet (scripts/check-dir-size.mjs), the study
@@ -191,8 +192,9 @@
                               components/admin/contracts/{TierBar,ReviewQueue,
                               DecisionPane,CandidateList,RosterSearch}.jsx
      74a-contract-lookup      components/admin/contracts/LookupDeck.jsx
-     77-express-lane          screens/expresslane/{ExpressLanePage,EntryChooser,
-                              FilmPane,ScoringDeck,PitchExpand}.jsx
+     77-express-lane          screens/expresslane/{ExpressLanePage,FilmPane,
+                              ScoringDeck}.jsx
+     77a-express-lane-entry   screens/expresslane/{EntryChooser,PitchExpand}.jsx
      report/chrome            screens/around-the-game/RunValuePage.jsx,
                               screens/around-the-game/AbsChallengesPage.jsx
      research/diary           screens/research/ResearchDiaryPage.jsx
