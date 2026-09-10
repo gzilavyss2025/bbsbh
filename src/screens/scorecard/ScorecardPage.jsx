@@ -46,7 +46,7 @@ import { useStampUnseal } from '../../hooks/useStamps.js'
 // The sheet is EDITABLE: tapping a filled box opens the notation editor and
 // the override is stored per-cell on this device (lib/scorecardNotes.js) —
 // the pencil-over-ink layer, never a change to anything derived.
-export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onReload, loading, lastUpdated, onSection }) {
+export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onReload, loading, lastUpdated }) {
   const [side, setSide] = useState('top')
   const regulation = selectRegulationInnings(feed)
   const actualCount = selectInningCount(feed)
@@ -210,22 +210,6 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         the next at-bat right here, or a filled box to pencil over its
         notation.
       </p>
-
-      {/* THE DOOR INTO EXPRESS LANE, and it is a button rather than a tab on
-          purpose. The surface behind it can never have an unrevealed preview —
-          the broadcast scorebug is burned into every clip frame — so reaching
-          it has to be a deliberate act. What makes a link here safe is that it
-          opens the entry step, which asks for the booth and states the consent
-          in words before any film plays. A tab was also ruled out for a plainer
-          reason: `.stepnav__btn` is `flex: 1 1 0`, and a sixth stop divides a
-          phone's row too far (GameView.jsx's own note). */}
-      {onSection && (
-        <p className="hint">
-          <button type="button" className="btn btn--ghost" onClick={() => onSection('express')}>
-            Score this game from the film
-          </button>
-        </p>
-      )}
 
       <Scorecard
         side={side}

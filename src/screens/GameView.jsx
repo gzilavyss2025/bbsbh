@@ -447,7 +447,6 @@ export function GameView({ game, section, onSection }) {
             substitutes the render mark under the Scores Unlocked pass exactly
             as the innings viewer does, persisting nothing (ADR-0026). */}
         <ScorecardPage
-          onSection={onSection}
           feed={feed}
           managers={managers.data}
           uniformBrief={uniformBrief}

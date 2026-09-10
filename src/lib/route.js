@@ -608,7 +608,9 @@ export function sectionToStep(section) {
   // address like the three above it, and like them not one of the four steps
   // the "next" buttons walk. It owns no tab either, unlike 'scorecard' — the
   // tab row is already at the width a phone can divide (GameView.jsx) — so its
-  // door is a button on the scorecard. Landing here shows the ENTRY STEP, never
+  // door is a card on the LINEUP page, the staging page a scorer copies their
+  // header from, beside the other two things you can DO with a game that are
+  // not walking the innings. Landing here shows the ENTRY STEP, never
   // film: the scorebug is burned into every clip frame, so the surface asks for
   // consent in words before it plays anything.
   if (section === 'express') return { step: 7, inning: 1, half: 'top' }

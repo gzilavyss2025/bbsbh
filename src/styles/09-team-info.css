@@ -747,3 +747,53 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
+
+/* ---------------------------------------------------- the Express Lane door
+   The lineup page's third door (components/game/ExpressLaneDoor.jsx), under
+   the preview card and the blank sheet: score this game from the pitch clips
+   instead of the broadcast. A CARD rather than a chevron link, because the
+   surface behind it can never show a sealed preview — the scorebug is burned
+   into every clip frame — so opening it has to read as a decision.
+
+   IT IS DRAWN AS A STRIP OF FILM laid on the page. The ground is the dark
+   album board Express Lane itself paints (77-express-lane.css), so the door
+   looks like where it goes; the perforations along the top and bottom edges
+   are the manila page showing THROUGH the holes, which is what sits the strip
+   on the paper instead of floating it over. Film, never a frame of film — a
+   picture is the one thing this door may not show. The soft foil on the
+   caution line is the AA-checked quiet ink for this board (check-contrast). */
+.xldoor {
+  margin-top: var(--space-5);
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius-xs);
+  color: var(--album-foil);
+  background:
+    repeating-linear-gradient(90deg, var(--bg-canvas) 0 7px, transparent 7px 19px) 0 0 / 100% 6px
+      repeat-x,
+    repeating-linear-gradient(90deg, var(--bg-canvas) 0 7px, transparent 7px 19px) 0 100% / 100% 6px
+      repeat-x,
+    var(--album-board);
+}
+.xldoor__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+}
+.xldoor__lede {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+}
+.xldoor__note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  color: var(--album-foil-soft);
+}
+/* Overrides .btn--reveal's own 20px, which is spaced for the floating bar. */
+.xldoor__go {
+  margin-top: var(--space-4);
+}
