@@ -17,7 +17,8 @@ import {
   median,
   percentileLowerIsBetter,
 } from '../scripts/lib/opencommand.mjs'
-import { pitchLabel, targetCommandFor, targetCommandRows } from '../src/api/targetCommand.js'
+import { targetCommandFor, targetCommandRows } from '../src/api/targetCommand.js'
+import { pitchLabel } from '../src/api/pitchArsenal.js'
 
 // ---------------------------------------------------------------------------
 // median

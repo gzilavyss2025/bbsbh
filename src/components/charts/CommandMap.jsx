@@ -2,7 +2,7 @@ import '../../styles/26d-command-map.css'
 import { useState } from 'react'
 import { GRID, commandCell, normalizePitch } from '../../lib/zone/zoneGeometry.js'
 import { MIN_COMMAND_PITCHES, commandHandCounts, commandTypes, commandView } from '../../api/commandMap.js'
-import { pitchFamily } from '../../api/pitchArsenal.js'
+import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
 
 // THE COMMAND MAP — where a pitcher puts each pitch, over a season.
 //
@@ -82,7 +82,12 @@ export function CommandMap({ entry, level = 'mlb', throws = null }) {
             on={code === t.code}
             thin={t.thin}
             onSelect={() => setCode(t.code)}
-            label={t.code}
+            /* The pitch's NAME, never its code. "FF" is scorer's shorthand for
+               a fastball and belongs in a scorebook cell, not on a control you
+               tap — a filter chip has to say what it filters to. The table is
+               pitchArsenal.js's, shared with the two Target Command cards
+               further down this same tab so all three name a pitch alike. */
+            label={pitchLabel(t.code)}
             family={pitchFamily(t.code)}
             small
           />

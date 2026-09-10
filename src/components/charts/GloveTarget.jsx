@@ -8,8 +8,8 @@ import {
   gloveTargetTypes,
   gloveTargetView,
 } from '../../api/gloveTarget.js'
-import { attributionFor, pitchLabel } from '../../api/targetCommand.js'
-import { pitchFamily } from '../../api/pitchArsenal.js'
+import { attributionFor } from '../../api/targetCommand.js'
+import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
 
 // THE GLOVE TARGET — where a pitcher's misses actually land, relative to the
 // glove he was throwing at.
@@ -78,7 +78,14 @@ export function GloveTarget({ entry, data }) {
             aria-pressed={t.code === code}
             data-family={t.code === 'ALL' ? undefined : pitchFamily(t.code)}
           >
-            {t.code === 'ALL' ? 'All' : t.code}
+            {/* The pitch's NAME, not its code. "FF / FS / SL" is the scorer's
+                shorthand and it is the wrong register for a filter you tap:
+                the Target Command strip directly above this card already
+                spells them out, so a reader who has just read "Splitter" on a
+                row should not have to translate "FS" to find it here. The
+                chips wrap to a second line on a deep arsenal, which costs a
+                row of height and is worth it. */}
+            {t.code === 'ALL' ? 'All' : pitchLabel(t.code)}
           </button>
         ))}
       </div>

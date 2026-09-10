@@ -1,3 +1,4 @@
+import { pitchLabel } from './pitchArsenal.js'
 import { staticJson } from './staticJson.js'
 
 // TARGET COMMAND — how close a pitcher puts the ball to where his catcher asked
@@ -49,40 +50,6 @@ export function attributionFor(data) {
   }
 }
 
-// Pitch-type labels for the strip's left column.
-//
-// A SECOND COPY OF A CODE TABLE, which this repo is right to be wary of
-// (scripts/lib/command-grid.mjs's header makes the argument). It is deliberate
-// here: the arsenal card reads pitch NAMES off the live feed, which spells them
-// at full length and inconsistently ("Four-Seam Fastball" vs "Four-seam FB"),
-// and this file has no feed — only the codes its own nightly precompute wrote.
-// A strip row needs a short, stable label in a fixed column, so the short names
-// are named once, here, beside the only reader that uses them. A code absent
-// from this table falls back to the code itself, which is honest and legible.
-const PITCH_LABEL = {
-  ALL: 'All pitches',
-  FF: 'Fastball',
-  SI: 'Sinker',
-  FC: 'Cutter',
-  FA: 'Fastball',
-  SL: 'Slider',
-  ST: 'Sweeper',
-  SV: 'Slurve',
-  CU: 'Curveball',
-  KC: 'Knuckle curve',
-  CS: 'Slow curve',
-  CH: 'Changeup',
-  FS: 'Splitter',
-  FO: 'Forkball',
-  EP: 'Eephus',
-  KN: 'Knuckleball',
-  SC: 'Screwball',
-}
-
-export function pitchLabel(code) {
-  return PITCH_LABEL[code] ?? code
-}
-
 // Inches, one decimal. Bare, with no unit mark: the section note above the
 // strip says what the column is, the same way the Statcast strip prints "21.7"
 // under a heading rather than repeating a unit on every row.
@@ -118,7 +85,9 @@ export function targetCommandRows(entry, data) {
     })
     .map(([code, [n, value, percentile]]) => {
       const baseline = Number.isFinite(median[code]) ? inches(median[code]) : null
-      const label = pitchLabel(code)
+      // ALL is this file's own rollup row, not a pitch MLB has a code for, so
+      // it is named here rather than in the shared table.
+      const label = code === 'ALL' ? 'All pitches' : pitchLabel(code)
       const what = code === 'ALL'
         ? 'every pitch he threw'
         : `his ${label.toLowerCase()}`
