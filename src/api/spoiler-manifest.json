@@ -96,13 +96,13 @@
       "class": "spoiler-free",
       "why": "Static farm-system.json — minor-league affiliate season records and published prospect ranks, aggregates over completed games in another league (ADR-0034: a stat line is not a score). Computes the Farm Index; touches no MLB game. No SealBox."
     },
-    "around-the-game/runValue.js": {
-      "class": "spoiler-free",
-      "why": "Static run-value.json — a season aggregate of Baseball Savant run values (batting, fielding, baserunning, pitching), over completed games. Runs above average across a season carry no game's result, same footing as war.js and the other open season boards. No SealBox."
-    },
     "around-the-game/gate.js": {
       "class": "spoiler-free",
       "why": "Static gate.json — per-club home attendance and game DURATION, both season aggregates over Final games. A crowd count and a clock reading carry no result, same footing as the weather string and the umpire crew the app has always shown live. No SealBox."
+    },
+    "around-the-game/runValue.js": {
+      "class": "spoiler-free",
+      "why": "Static run-value.json — a season aggregate of Baseball Savant run values (batting, fielding, baserunning, pitching), over completed games. Runs above average across a season carry no game's result, same footing as war.js and the other open season boards. No SealBox."
     },
     "attendance.js": {
       "class": "spoiler-free",
@@ -120,17 +120,13 @@
       "class": "caller-gated",
       "why": "Focus mode's post-half card set (ConsoleBand.jsx/BetweenInnings.jsx) — up to 5 score-free facts, filtered through a hard kind allowlist that excludes every score-reading checkpoint family. Reads the batting side's previous halves' plays via the SAME caller-gated builders prehalf-callouts.js uses (foulVolume/pitchPace/tto/ttoPitches), computed for the half about to be entered next. This module owns that gate (halfIndex(next) <= revealedThrough + 1), same contract as prehalf-callouts.js."
     },
-    "boxlines/rows.js": {
-      "class": "cutoff-gated",
-      "why": "The Box Lines sheet's pure half (ADR-0069): a player's game-by-game rows behind a career line, each carrying a FINAL SCORE, opened from the lineup page — a scoring surface. The gate is here and nowhere else: `boxLineRows` returns only games dated strictly before `cutoff` (a same-day game 1 shares the date and is out) and only games the schedule reports Final; `logRequestPlan` applies the same cutoff upstream so the cutoff season is requested only through the day before. Same footing as person/gameLog.js: the safety is the date the caller asks for, and the sheet holds no date logic of its own."
+    "boxlines/cardFacets.js": {
+      "class": "spoiler-free",
+      "why": "The list of doors the player page's Game lines card draws — for each, a statsapi situation code, its wording, and the facet (boxlines/facets.js) the sheet behind it asks. Pure data: no score, no cutoff, no reveal mark, and no fetch of its own. It names questions; every answer goes through boxlines/rows.js's cutoff gate. It sits in api/ rather than beside the card because the card is .jsx and the test suite cannot import one — the failure it must pin (an unknown facet kind keeps NOTHING, so a typo opens an empty sheet in silence) is otherwise untestable."
     },
     "boxlines/careerSplits.js": {
       "class": "spoiler-free",
       "why": "The CAREER split lines that label the player page's Game lines doors (one `careerStatSplits` call for every code on the card). A career aggregate is open on every surface here — the same figure the Splits vs team card prints beside its own door, and ADR-0034 is explicit that a stat line is not a score. It takes no cutoff because a career line has none; only the game-by-game rows behind the door carry a result, and those go through boxlines/rows.js."
-    },
-    "boxlines/cardFacets.js": {
-      "class": "spoiler-free",
-      "why": "The list of doors the player page's Game lines card draws — for each, a statsapi situation code, its wording, and the facet (boxlines/facets.js) the sheet behind it asks. Pure data: no score, no cutoff, no reveal mark, and no fetch of its own. It names questions; every answer goes through boxlines/rows.js's cutoff gate. It sits in api/ rather than beside the card because the card is .jsx and the test suite cannot import one — the failure it must pin (an unknown facet kind keeps NOTHING, so a typo opens an empty sheet in silence) is otherwise untestable."
     },
     "boxlines/facets.js": {
       "class": "spoiler-free",
@@ -139,6 +135,10 @@
     "boxlines/fetch.js": {
       "class": "cutoff-gated",
       "why": "The Box Lines sheet's fetch half for every facet: yearByYear for the seasons, one trimmed game log per season (never past the cutoff's day-before, via rows.js's plan), one schedule call per chunk of the gamePks those splits named. Asking the schedule by gamePk is what keeps it safe without a date bound — the only gamePks that exist came from already-gated splits. Every row it returns went through boxLineRows, so it inherits rows.js's footing whole — it computes nothing rows.js does not."
+    },
+    "boxlines/rows.js": {
+      "class": "cutoff-gated",
+      "why": "The Box Lines sheet's pure half (ADR-0069): a player's game-by-game rows behind a career line, each carrying a FINAL SCORE, opened from the lineup page — a scoring surface. The gate is here and nowhere else: `boxLineRows` returns only games dated strictly before `cutoff` (a same-day game 1 shares the date and is out) and only games the schedule reports Final; `logRequestPlan` applies the same cutoff upstream so the cutoff season is requested only through the day before. Same footing as person/gameLog.js: the safety is the date the caller asks for, and the sheet holds no date logic of its own."
     },
     "boxlines/vsClub.js": {
       "class": "cutoff-gated",
@@ -299,8 +299,17 @@
     },
     "expresslane/rail.js": {
       "class": "reveal-only",
-      "why": "Express Lane Tier 1 — the ordered, complete event list for ONE half-inning. Its `description`, `result` and `pitch` fields narrate the play, so it is callable only from inside a SealBox's reveal render function, the same footing as linescore.js and derive.js (ADR-0001/0002). Express Lane tightens that rather than restating it: under the FILM GATE the cursor may not pass the picture, so the prose may not either — a scorer who can read 'grounds out, second baseman to first' has no reason to wait for the clip, and the gate erodes to nothing. The reveal is atomic: the narrating fields arrive WITH the film or not at all. Two further containments are structural rather than in this list. The builder takes one half-inning per call and there is deliberately no whole-game variant, because a game-wide rail states how many innings the game ran and so whether it went to extras (ADR-0008). And it drops nothing else: rows with no clip — substitutions, mound visits, stolen bases, wild pitches — survive into the rail, since the film gate must never block on a row that expects no film. The allowlist is EMPTY on purpose: the data tier ships ahead of its surface, and the first importer is a decision for whoever builds that surface.",
-      "importers": []
+      "why": "Express Lane Tier 1 — the ordered, complete event list for ONE half-inning. Its `description`, `result` and `pitch` fields narrate the play, so it is callable only from inside a SealBox's reveal render function, the same footing as linescore.js and derive.js (ADR-0001/0002). Express Lane tightens that rather than restating it: under the FILM GATE the cursor may not pass the picture, so the prose may not either — a scorer who can read 'grounds out, second baseman to first' has no reason to wait for the clip, and the gate erodes to nothing. The reveal is atomic: the narrating fields arrive WITH the film or not at all. Two further containments are structural rather than in this list. The builder takes one half-inning per call and there is deliberately no whole-game variant, because a game-wide rail states how many innings the game ran and so whether it went to extras (ADR-0008). And it drops nothing else: rows with no clip — substitutions, mound visits, stolen bases, wild pitches — survive into the rail, since the film gate must never block on a row that expects no film. Its one importer is hooks/useExpressLane.js, the surface's own hook, which calls it to build the half the cursor is in and hands the rows to the film gate. Nothing else may take it: the rail narrates the play, so a second caller would be a second place the prose could get out ahead of the picture.",
+      "importers": [
+        "hooks/useExpressLane.js"
+      ]
+    },
+    "expresslane/runners.js": {
+      "class": "reveal-only",
+      "why": "Express Lane's scoring deck — the batter's box and the boxes of the men standing on base, which is where a scorer writes a stolen base, a wild pitch and every hit that moves a runner already on. Every card carries its plate appearance's outcome, so this is callable only from inside a SealBox's reveal render function (ADR-0001/0002), the same footing as rail.js beside it. It re-derives nothing: computeHalfInningFeed already solved the hard half for at-bat stepping (ADR-0016), and this maps one rail row onto that function's own `stepCap` and reads the cards back out. THE CAP IS THE WHOLE POINT and is not optional. A runner's diamond shades the bases he legged out, so built from the finished half it would show his EVENTUAL fate — a man who reached first in the third would carry a fully shaded diamond the moment his own at-bat was revealed, telling the scorer the run came home before he had scored the play that drove it in. There is deliberately no variant of `expressDeck` that omits the cursor. Two containments ride along: the chip strip names only plate appearances already REACHED, since chips for ones still ahead would say how many batters are left to bat, and the deck is built one half-inning at a time for the same ADR-0008 reason the rail has no whole-game builder.",
+      "importers": [
+        "hooks/useExpressLane.js"
+      ]
     },
     "feverRadar.js": {
       "class": "spoiler-free",
@@ -595,7 +604,7 @@
     },
     "playbyplay.js": {
       "class": "reveal-only",
-      "why": "The per-plate-appearance feed barrel. Result descriptions give away outs, hits and runs. Its constant re-exports (event types, pitch call codes) are the spoiler-free part, shared with the Node generators; every whole-feed walk behind it is not.",
+      "why": "The per-plate-appearance feed barrel. Result descriptions give away outs, hits and runs. Its constant re-exports (event types, pitch call codes) are the spoiler-free part, shared with the Node generators; every whole-feed walk behind it is not. Widened 2026-09-10 for api/expresslane/runners.js, and the reason is that it is the OPPOSITE of a new reveal path: Express Lane needs a runner's diamond to be true as of the cursor and never past it, and computeHalfInningFeed's `stepCap` is the only thing in the app that does that. A second derivation would have been a second place for a later play to leak back onto an earlier card. The importer is reveal-only itself and renders nothing.",
       "importers": [
         "api/boxscore.js",
         "api/callout-notes/inningAndStarter.js",
@@ -605,6 +614,7 @@
         "api/callout-notes/tto.js",
         "api/derive.js",
         "api/dueup.js",
+        "api/expresslane/runners.js",
         "api/pitchers.js",
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",

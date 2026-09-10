@@ -47,6 +47,7 @@
 //                                           '?metric=' and '?half=' set the page's OPENING state only,
 //                                           not a live mirror of its controls — same as standings.)
 //   '/manager/{name-id}'                -> { name: 'manager', id }
+//   '/game/{gamePk}/express'            -> Express Lane (step 7), full screen
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/identity-lab'                     -> { name: 'identity-lab' }  (dev-only curation lab)
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
@@ -602,6 +603,15 @@ export function sectionToStep(section) {
   // page you keep coming back to during the game rather than a thing you
   // make once and share.
   if (section === 'scorecard') return { step: 6, inning: 1, half: 'top' }
+  // Express Lane (screens/expresslane/ExpressLanePage.jsx): the full-screen
+  // surface that scores a finished game from the pitch clips themselves. A real
+  // address like the three above it, and like them not one of the four steps
+  // the "next" buttons walk. It owns no tab either, unlike 'scorecard' — the
+  // tab row is already at the width a phone can divide (GameView.jsx) — so its
+  // door is a button on the scorecard. Landing here shows the ENTRY STEP, never
+  // film: the scorebug is burned into every clip frame, so the surface asks for
+  // consent in words before it plays anything.
+  if (section === 'express') return { step: 7, inning: 1, half: 'top' }
   const m = /^(top|bottom)(\d+)$/.exec(section || '')
   if (m) return { step: 2, inning: Math.max(1, Number(m[2])), half: m[1] }
   const legacy = /^inning(\d+)$/.exec(section || '')
@@ -617,6 +627,7 @@ export function stepToSection(step, inning = 1, half = 'top') {
   if (step === 4) return 'preview'
   if (step === 5) return 'sheet'
   if (step === 6) return 'scorecard'
+  if (step === 7) return 'express'
   return `${half === 'bottom' ? 'bottom' : 'top'}${inning}`
 }
 

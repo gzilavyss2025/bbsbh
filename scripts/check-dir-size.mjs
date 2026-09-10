@@ -399,7 +399,14 @@ const BUDGETS = {
   // check-file-size.mjs's ceiling and on a budget of its own, so growing that
   // file is the one option this directory's own rules forbid. Route-loaded,
   // imported by the card the lazy history tab mounts.
-  'src/styles': 108,
+  // 108 -> 109 for 77-express-lane.css — the full-screen Express Lane surface.
+  // A genuinely new UI rather than a split of an over-budget partial, so it
+  // takes the next free integer, and it has to stay a flat sibling for the
+  // reason every entry above it does: the @import chain in index.css is
+  // ORDERED, and a stylesheet's place in that order is what decides which rules
+  // win. It is also the one partial here that paints a dark ground, which is
+  // its own argument for not folding it into a neighbour.
+  'src/styles': 109,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -828,7 +835,11 @@ const BUDGETS = {
   // usePlayerHoverStats.js beside it.
   // 24 -> 25 for useMilestoneCelebration.js — one collection's one-shot
   // completion-animation state, same shape as usePromptDismiss.js beside it.
-  'src/hooks': 25,
+  // 25 -> 26 for useExpressLane.js — Express Lane's one stateful hook, the same
+  // React-wiring-over-pure-modules shape as every sibling here: it owns the
+  // cursor and the clip's object URL and holds no rule of its own, since the
+  // rail, the film gate and the byte store are all pure modules underneath it.
+  'src/hooks': 26,
   'src/screens/identity-lab': 15,
   // New entry: +1 for PlayerHoverCard.jsx — a player-identity primitive like
   // Headshot/PlayerLink beside it, not one of this bucket's ten player-PAGE cards.

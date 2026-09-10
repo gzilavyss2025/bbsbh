@@ -46,6 +46,13 @@ const ScorecardPage = lazy(() =>
   import('./scorecard/ScorecardPage.jsx').then((m) => ({ default: m.ScorecardPage })),
 )
 
+// Express Lane (step 7). Split hardest of all: three data tiers, an IndexedDB
+// byte store and its own stylesheet, and most visits never open it. It takes
+// the WHOLE screen, so it returns before the chrome below — its header says why.
+const ExpressLanePage = lazy(() =>
+  import('./expresslane/ExpressLanePage.jsx').then((m) => ({ default: m.ExpressLanePage })),
+)
+
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
 // The chrome is two grayscale team marks (away @ home) that open the sketch
@@ -194,6 +201,14 @@ export function GameView({ game, section, onSection }) {
       ))}
     </nav>
   ) : null
+
+  if (feed && step === 7) {
+    return (
+      <Suspense fallback={<Loader />}>
+        <ExpressLanePage feed={feed} gamePk={game.gamePk} onLeave={() => onSection('scorecard')} />
+      </Suspense>
+    )
+  }
 
   return (
     // A link out of a game carries the LEVEL hint and nothing else. It used to
@@ -432,6 +447,7 @@ export function GameView({ game, section, onSection }) {
             substitutes the render mark under the Scores Unlocked pass exactly
             as the innings viewer does, persisting nothing (ADR-0026). */}
         <ScorecardPage
+          onSection={onSection}
           feed={feed}
           managers={managers.data}
           uniformBrief={uniformBrief}

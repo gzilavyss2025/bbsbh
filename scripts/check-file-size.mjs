@@ -159,7 +159,14 @@ const BUDGETS = {
   // shared chrome out would move the section tabs into a 12th file in
   // src/components/chrome (at ITS own MAX_FILES) to save this one 45, which
   // trades a real limit for a nominal one.
-  'src/screens/GameView.jsx': 620, // 609
+  // 620 -> 700 for Express Lane's door (step 7). Fourteen lines, all of them
+  // routing: a lazy import and a short-circuit that returns the full-screen
+  // surface before the chrome this file otherwise wraps every section in. That
+  // is the same "a feature that adds a door lands here by construction" case
+  // the paragraph above already makes for the catch-up wiring, and the band is
+  // coarse — 100 lines granted for 14 used. The slack is not an invitation:
+  // the next door should trim this one rather than spend it.
+  'src/screens/GameView.jsx': 700, // 626
   // 1300 -> 1360: the starting-pitcher card's season-vs-opponent and
   // career-vs-opponent rows (see OpposingStarterCard). 1360 -> 1400 for the
   // pitch-mix card's batter-side split — one more arsenalSidesView memo beside
