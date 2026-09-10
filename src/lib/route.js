@@ -644,8 +644,12 @@ export function stepToSection(step, inning = 1, half = 'top') {
   if (step === 4) return 'preview'
   if (step === 5) return 'sheet'
   if (step === 6) return 'scorecard'
-  // Step 7 with an explicit half addresses that half; `stepToSection(7)` with
-  // the default arguments is the bare door.
+  // Step 7 always names a half, INCLUDING with the default arguments —
+  // `stepToSection(7)` is `express-top1`, which `expressHalfOf` reads as "open
+  // exactly here", not as the bare `express` door. There is deliberately no way
+  // to ask this function for that door: `express` means "open where I left
+  // off", which is the absence of an address rather than one this function
+  // could return.
   if (step === 7) return `express-${half === 'bottom' ? 'bottom' : 'top'}${inning}`
   return `${half === 'bottom' ? 'bottom' : 'top'}${inning}`
 }

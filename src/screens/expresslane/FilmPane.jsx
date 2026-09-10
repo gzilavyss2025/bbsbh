@@ -97,6 +97,22 @@ export function FilmPane({ clipUrl, gate, blockedReason, onSkipFilm, onRetry, au
     )
   }
 
+  // WATCHED, AND THE BYTES LET GO. The working set keeps a lookbehind of a
+  // dozen clips and reclaims what is further back, so a scorer who steps a long
+  // way back inside one half arrives at a play whose film is no longer on the
+  // device. That is not a wait and must not read as one: the play is scored and
+  // written, and "the film is coming" would be untrue about a clip nothing is
+  // fetching.
+  if (gate?.reason === 'evicted') {
+    return (
+      <div className="xl-film">
+        <Placeholder tone="none">
+          This film was let go to make room. What you wrote still stands.
+        </Placeholder>
+      </div>
+    )
+  }
+
   // The film was expected, its URL resolved, and the bytes will not come. This
   // is the ONE consented escape, and it has to read as a decision the scorer
   // makes rather than a fallback that happens to them — or the gate erodes

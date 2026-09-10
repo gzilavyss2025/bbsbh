@@ -71,6 +71,7 @@ export const GATE_REASONS = [
   'paperwork', // no clip expected — never waits
   'no-film', // a clip was claimed and resolved to nothing — never waits, never prompts
   'consented', // the scorer chose to score this one without the film
+  'evicted', // watched, and its bytes reclaimed behind the cursor — never waits
   'waiting', // expected, not here yet — BLOCKS
   'stalled', // expected, its bytes keep failing — BLOCKS, and offers the escape
 ]
@@ -108,6 +109,7 @@ function emptyJob(gamePk, mode, feed) {
     queue: [], // ordered { key, playId, halfIndex }, one half at a time
     staged: new Set(), // playIds whose bytes are on the disk
     unfilmed: new Set(), // playIds that resolved to nothing — paperwork now
+    evicted: new Set(), // playIds watched, then reclaimed behind the cursor
     consented: new Set(), // row keys the scorer chose to score without film
     resolveMisses: new Map(), // playId -> empty resolutions so far
     byteFailures: new Map(), // playId -> failed downloads so far
@@ -167,13 +169,31 @@ export function enqueueHalf(job, rows) {
 }
 
 // A row is COVERED when the cursor may pass it: its bytes are here, no clip
-// was ever expected, the clip resolved to nothing, or the scorer consented to
-// score it without film. Covered is not the same as watchable.
+// was ever expected, the clip resolved to nothing, the scorer consented to
+// score it without film, or it was watched and its bytes have since been
+// reclaimed. Covered is not the same as watchable.
+//
+// THE EVICTED CASE IS THE ONE THAT LOOKS WRONG AND IS NOT, and leaving it out
+// closed a loop that stopped the film for good. Every walk over the queue —
+// `nextToStage`, `filmFrontier`, `canAdvanceTo` — starts at the HEAD and asks
+// this one question of each row. Eviction takes the bytes off the disk BEHIND
+// the cursor, so a job that forgot them without recording why answered "not
+// covered" for a play the scorer had already watched: `nextToStage` handed the
+// runner the row it had just evicted, `sweep` evicted it again, and the queue
+// never reached ahead of the cursor after that. About a half-inning and a half
+// into a Result-mode session the loop closed and the surface sat on "The film
+// is coming." for the rest of the night.
+//
+// Covered is the honest answer in any case. The question this predicate asks is
+// "may the cursor pass this row", and a row the cursor has already passed is
+// settled — the play was watched and it was written down. Whether the bytes are
+// still on the disk is a storage fact, not a scoring one.
 export function isCovered(job, entry) {
   if (!entry) return false
   if (job.consented.has(entry.key)) return true
   if (!entry.playId) return true
   if (job.unfilmed.has(entry.playId)) return true
+  if (job.evicted.has(entry.playId)) return true
   return job.staged.has(entry.playId)
 }
 
@@ -189,6 +209,12 @@ export function gateFor(job, row) {
   if (!row.playId) return { blocked: false, reason: 'paperwork', escapable: false }
   if (job.staged.has(row.playId)) return { blocked: false, reason: 'ready', escapable: false }
   if (job.unfilmed.has(row.playId)) return { blocked: false, reason: 'no-film', escapable: false }
+  // Watched, and the bytes reclaimed behind the cursor. It must NOT block: a
+  // scorer who steps back past the lookbehind window is looking again at a play
+  // already written, and "the film is coming" for a play that is finished is
+  // both untrue and — because `gate` is read on the row AHEAD — a second way to
+  // deadlock the button.
+  if (job.evicted.has(row.playId)) return { blocked: false, reason: 'evicted', escapable: false }
   const failures = job.byteFailures.get(row.playId) ?? 0
   if (failures >= BYTE_FAILURES_BEFORE_ESCAPE) {
     return { blocked: true, reason: 'stalled', escapable: true }
@@ -241,12 +267,15 @@ export function nextToStage(job) {
 }
 
 // The bytes landed. Clears an earlier unfilmed mark, so a clip that published
-// late is picked up rather than written off.
+// late is picked up rather than written off — and an earlier eviction mark with
+// it, so a clip fetched a second time reads as `ready` rather than as one whose
+// bytes are still gone.
 export function markStaged(job, playId) {
   if (!playId) return job
   return next(job, {
     staged: copySet(job.staged, playId),
     unfilmed: copySet(job.unfilmed, undefined, playId),
+    evicted: copySet(job.evicted, undefined, playId),
     byteFailures: new Map(job.byteFailures),
     runFailures: 0,
     state: job.state === 'blocked' ? 'running' : job.state,
@@ -345,12 +374,21 @@ export function evictable(job, { lookbehind = DEFAULT_LOOKBEHIND } = {}) {
 // Eviction happened, so the job forgets those bytes. Kept separate from
 // `evictable` so a delete that fails does not leave the job lying about what
 // is on the disk.
+//
+// It REMEMBERS the eviction rather than only forgetting the bytes, and that is
+// the whole difference between a working queue and one that turns around and
+// re-downloads what it just deleted. See `isCovered` for what went wrong when
+// it did not.
 export function markEvicted(job, playIds) {
   const gone = [...(playIds ?? [])].filter(Boolean)
   if (!gone.length) return job
   const staged = new Set(job.staged)
-  for (const playId of gone) staged.delete(playId)
-  return next(job, { staged })
+  const evicted = new Set(job.evicted)
+  for (const playId of gone) {
+    staged.delete(playId)
+    evicted.add(playId)
+  }
+  return next(job, { staged, evicted })
 }
 
 export function pauseJob(job) {
@@ -381,7 +419,7 @@ export function markComplete(job) {
 // the mode DEFINES it, and the caller re-enqueues the halves the scorer has
 // reached from the newly filtered rows. What survives is everything learned
 // about clips rather than about modes: what is staged, what has no film, and
-// what the scorer already consented to.
+// what the scorer already consented to, and what has already been reclaimed.
 export function withMode(job, mode) {
   const wanted = mode === 'full' ? 'full' : 'result'
   if (wanted === job.mode) return job

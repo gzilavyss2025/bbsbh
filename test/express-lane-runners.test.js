@@ -9,12 +9,15 @@ import { readFileSync } from 'node:fs'
 import {
   battingSideOf,
   expressDeck,
+  railRevealCap,
   railStepCap,
   reachedPlateAppearances,
   runnersOnBase,
 } from '../src/api/expresslane/runners.js'
 import { computeHalfInningFeed } from '../src/api/playbyplay.js'
 import { buildRail, resultModeRows } from '../src/api/expresslane/rail.js'
+import { halfIndex } from '../src/api/select.js'
+import { halfAt } from '../src/api/scorecard/alignment.js'
 
 const FEED = JSON.parse(
   readFileSync(new URL('./fixtures/game-823035.trimmed.json', import.meta.url), 'utf8'),
@@ -255,4 +258,130 @@ test('an empty half yields an empty deck rather than throwing', () => {
   assert.deepEqual(deck, { batter: null, runners: [], entries: [], cap: null })
   assert.deepEqual(runnersOnBase(null), [])
   assert.deepEqual(reachedPlateAppearances(undefined), [])
+})
+
+// --- the at-bat reveal mark ------------------------------------------------
+//
+// Express Lane drives the app's OWN reveal mark, so the number it writes has
+// to be the number the innings viewer and the scorecard write: a count of
+// `computeHalfInningFeed` entries (ADR-0016). A count of RAIL rows is a
+// different unit — the rail carries a row per EVENT and the feed a card per
+// PLAY — and the two disagree over most of a real game.
+
+test('the reveal cap is the deck’s own cap, at every cursor in the game', () => {
+  for (const [inning, half] of playedHalves()) {
+    for (const row of resultModeRows(buildRail(FEED, inning, half))) {
+      assert.equal(
+        railRevealCap(FEED, inning, half, row),
+        expressDeck(FEED, inning, half, row).cap,
+        `${half} ${inning}, row ${row.key}`,
+      )
+    }
+  }
+})
+
+test('a rail row’s position is NOT that count, and writing it would over-reveal', () => {
+  let over = 0
+  let agree = 0
+  for (const [inning, half] of playedHalves()) {
+    const rows = resultModeRows(buildRail(FEED, inning, half))
+    rows.forEach((row, i) => {
+      const cap = railRevealCap(FEED, inning, half, row)
+      const ordinal = i + 1
+      if (ordinal === cap) agree += 1
+      else if (ordinal > cap) over += 1
+    })
+  }
+  // The two units are not interchangeable, and the majority of the difference
+  // runs the DANGEROUS way: a rail position larger than the feed cap opens
+  // entries in the innings viewer that Express Lane never showed.
+  assert.ok(over > 0, 'the rail position overstates the feed cap on real plays')
+  assert.ok(over > agree, 'they disagree more often than they agree')
+})
+
+test('a row with no plate appearance of its own has no cap to write', () => {
+  assert.equal(railRevealCap(FEED, 1, 'top', { atBatIndex: null, isTerminal: true }), null)
+  assert.equal(railRevealCap(FEED, 1, 'top', null), null)
+  assert.equal(railRevealCap(null, 1, 'top', { atBatIndex: 0, isTerminal: true }), null)
+})
+
+// --- the automatic runner’s chip -------------------------------------------
+//
+// `computeHalfInningFeed`'s `placed` card carries no `atBatIndex` — he took no
+// plate appearance, so there is no number for him to carry. A chip strip that
+// keyed on that number gave him `undefined`: an undefined React key shared with
+// every other placement, a tap that matched no rail row, and an `is-on`
+// comparison of `undefined === undefined` that lit him up on every cursor
+// position where the deck had no batter.
+
+const placedCard = {
+  kind: 'placed',
+  runnerId: 592885,
+  runner: { last: 'Yelich', first: 'Christian' },
+  base: 2,
+  code: 'AR',
+  reached: 2,
+  scored: false,
+}
+
+test('the automatic runner gets a chip with an identity of its own', () => {
+  const chips = reachedPlateAppearances([
+    placedCard,
+    { kind: 'atbat', atBatIndex: 7, batter: { last: 'Adames' }, code: '6-3' },
+  ])
+  assert.equal(chips.length, 2)
+  assert.ok(
+    chips.every((chip) => chip.id != null && chip.id !== ''),
+    'every chip can be keyed',
+  )
+  assert.notEqual(chips[0].id, chips[1].id, 'and no two chips share that key')
+})
+
+test('the automatic runner’s chip is not a way back to a play, and says so', () => {
+  const [chip] = reachedPlateAppearances([placedCard])
+  assert.equal(chip.kind, 'placed')
+  assert.equal(chip.atBatIndex, null, 'null rather than undefined — there is no number')
+  assert.equal(chip.last, 'Yelich')
+  assert.equal(chip.code, 'AR')
+})
+
+test('two placements in one game never collide on a key', () => {
+  const chips = reachedPlateAppearances([placedCard, { ...placedCard, runnerId: 668930 }])
+  assert.notEqual(chips[0].id, chips[1].id)
+})
+
+test('an ordinary plate appearance keeps its own number', () => {
+  const [chip] = reachedPlateAppearances([
+    { kind: 'atbat', atBatIndex: 12, batter: { last: 'Turang' }, code: 'K' },
+  ])
+  assert.equal(chip.atBatIndex, 12)
+  assert.equal(chip.kind, 'atbat')
+})
+
+// --- naming the half, rather than numbering it -----------------------------
+//
+// The other half of the same mistake. `revealTo(inning, half)` and
+// `revealAtBat(inning, half, count)` take the pair, and Express Lane works in
+// half-INDEXES — so the hook converts before it calls, through `halfAt`, the
+// same function `alignment.js` uses. These two tests pin why the conversion
+// cannot be skipped: the index is a valid inning number, so passing one lands
+// silently on a real and WRONG half rather than throwing.
+
+test('a half-index round-trips through the pair the reveal mark is named by', () => {
+  for (let idx = 0; idx < 24; idx += 1) {
+    const { inning, half } = halfAt(idx)
+    assert.equal(halfIndex(inning, half), idx, `half-index ${idx}`)
+  }
+})
+
+test('a half-index handed over in the inning slot names a different half', () => {
+  // Top of the 1st. The mark goes negative, the ratchet discards it, and the
+  // half can never be committed — so the surface can never leave it.
+  assert.equal(halfIndex(0, undefined), -1)
+  assert.notEqual(halfIndex(0, undefined), 0)
+  // Top of the 2nd, whose index is 2. Read as an inning it gives half-index 3,
+  // which is the BOTTOM of the 2nd: a half the scorer has not watched, unsealed
+  // on this page, in the innings viewer and on every synced device.
+  assert.equal(halfIndex(2, undefined), 3)
+  assert.deepEqual(halfAt(3), { inning: 2, half: 'bottom', side: 'bottom' })
 })

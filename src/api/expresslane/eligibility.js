@@ -7,11 +7,15 @@
 // "—", since the fact may still arrive, but a door into a surface that cannot
 // exist is a promise the app is unable to keep.
 //
-// SPOILER-FREE, and structurally so rather than by care. Everything here lives
-// under `gameData` — the level, the season, the game type, the status. It never
-// opens `liveData`, so no play, no linescore and no half-index is reachable
-// from it, and the answer says nothing about the game beyond facts the schedule
-// already published. It is safe at render top-level on any surface.
+// SPOILER-FREE, and it is worth being exact about WHY, because the near-miss
+// version of this sentence is "it never opens liveData" and that is not true.
+// `selectTeamMeta` falls back to `liveData.boxscore.teams[side].team` when
+// gameData carries no sport block, which is the whole reason the level is read
+// through the selector rather than off `gameData.teams` (see the note in
+// `filmCanExist`). What it takes from there is the club's IDENTITY — its id,
+// its name, its level. No play, no linescore, no half-index and no score is
+// read on any path, and every fact the answer rests on was published by the
+// schedule before the first pitch. Safe at render top-level on any surface.
 //
 // A SEPARATE MODULE FROM THE COMPONENT THAT ASKS IT, and that is the point of
 // this file existing. The five rules below are the whole of MLB's clip coverage

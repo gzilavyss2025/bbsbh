@@ -78,8 +78,16 @@ export function ScoringDeck({
               steal or an advance gets written in. */}
           <h2 className="xl-deck__label">On base — mark advances here</h2>
           <ul className="xl-deck__runners">
+            {/* Keyed on the card's own identity rather than on a plate-
+                appearance number: the extra-innings automatic runner never
+                took one, so `card.atBatIndex` is undefined for him and every
+                placement in a game would share that key. */}
             {runners.map(({ base, card }) => (
-              <RunnerBox key={card.atBatIndex} base={base} card={card} />
+              <RunnerBox
+                key={card.kind === 'placed' ? `placed:${card.runnerId}` : `pa:${card.atBatIndex}`}
+                base={base}
+                card={card}
+              />
             ))}
           </ul>
         </>

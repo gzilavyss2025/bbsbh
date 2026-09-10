@@ -1,10 +1,15 @@
-// THE ENTRY STEP — the booth, and the consent.
+// THE ENTRY STEP — the pace, and the consent.
 //
-// The broadcast is chosen HERE and not in a settings page, because it decides
-// what gets staged: switching booths after staging has begun throws away every
-// byte already paid for ahead of the cursor. It is a per-session choice, not a
-// setting — leaving and re-entering the same game with the other booth is
-// allowed and costs a re-stage.
+// THERE IS NO BOOTH CHOICE, and its absence is a fact about the film rather
+// than a simplification. Tier 2 resolves a playId through Savant, which answers
+// with ONE mp4 — whichever broadcast called that pitch. The only host
+// addressable by booth is `fastball-clips.mlb.com/{gamePk}/{home|away}/`, and
+// it is Referer-locked to mlb.com, so from this origin it gives
+// MEDIA_ERR_SRC_NOT_SUPPORTED (clipIndex.js records both). This screen asked
+// "Which booth?" and warned that changing it later meant fetching the film
+// again; neither the choice nor the cost was real, and the club name it put in
+// the header did not describe the picture on screen. A door may not claim a
+// decision the app cannot carry out.
 //
 // THE CONSENT IS THE OTHER HALF OF THIS SCREEN, and it cannot be skipped.
 // Every clip frame carries the broadcast scorebug burned into the pixels, so
@@ -13,9 +18,8 @@
 // constraint on how this door is allowed to be presented, so the door says it
 // plainly rather than burying it.
 //
-// MODE IS THE OTHER CHOICE, and it belongs beside the booth because the two are
-// staged together: each decides what gets downloaded, and changing either after
-// staging begins throws bytes away.
+// MODE IS THE CHOICE THAT IS LEFT, and it is a real one: it decides what gets
+// downloaded, and changing it after staging begins throws bytes away.
 //
 // THE FIGURES ARE ON THE BUTTONS ON PURPOSE. This is the one choice that costs
 // the evening — the difference between about 35 minutes of film arriving and
@@ -33,16 +37,7 @@
 // gate is closer to a slideshow than to scoring — but that is a judgement about
 // how someone wants to spend their night, and the measurement belongs to them.
 
-export function EntryChooser({
-  awayName,
-  homeName,
-  booth,
-  onBooth,
-  mode,
-  onMode,
-  onStart,
-  busy = false,
-}) {
+export function EntryChooser({ mode, onMode, onStart, busy = false }) {
   return (
     <section className="xl-entry" aria-label="Start Express Lane">
       <h1 className="xl-entry__title">Express Lane</h1>
@@ -82,34 +77,6 @@ export function EntryChooser({
               About 40 minutes of film, arriving over about 100 — a clip roughly every 18
               seconds, so expect to wait between them.
             </span>
-          </button>
-        </div>
-      </fieldset>
-
-      <fieldset className="xl-entry__group">
-        <legend className="xl-entry__legend">Which booth?</legend>
-        <p className="xl-entry__hint">
-          Both broadcasts carry every clip. Pick one now — changing it later means fetching the
-          film again.
-        </p>
-        <div className="xl-entry__choices">
-          <button
-            type="button"
-            className={`xl-entry__choice ${booth === 'away' ? 'is-on' : ''}`}
-            aria-pressed={booth === 'away'}
-            onClick={() => onBooth('away')}
-          >
-            <span className="xl-entry__club">{awayName}</span>
-            <span className="xl-entry__side">visitors’ booth</span>
-          </button>
-          <button
-            type="button"
-            className={`xl-entry__choice ${booth === 'home' ? 'is-on' : ''}`}
-            aria-pressed={booth === 'home'}
-            onClick={() => onBooth('home')}
-          >
-            <span className="xl-entry__club">{homeName}</span>
-            <span className="xl-entry__side">home booth</span>
           </button>
         </div>
       </fieldset>

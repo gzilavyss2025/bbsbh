@@ -44,7 +44,6 @@ function halfLabel(inning, half) {
 }
 
 export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
-  const [booth, setBooth] = useState('home')
   // Result mode is the default because it is the one that works at the film's
   // own pace; every pitch is a deliberate pick, made with its cost on the
   // button.
@@ -81,10 +80,19 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
 
   // Advancing IS the reveal act. Within a half it ratchets the at-bat mark;
   // finishing one ratchets the half mark, which is what unlocks the next.
+  //
+  // The two are EXCLUSIVE. `revealTo` clears the at-bat cursor as it commits —
+  // whatever was mid-step has just been fully committed — so writing both on
+  // the closing play would set a count and then throw it away.
+  //
+  // The hook names the half rather than numbering it, for the reason its own
+  // note at `advance` gives: these two functions take `(inning, half)`, a
+  // half-index passed in that slot reads as an inning number, and the reveal
+  // mark that comes out is a different half from the one that was scored.
   const onReveal = useCallback(
-    (halfIdx, reached, halfDone) => {
-      revealAtBat(halfIdx, reached)
-      if (halfDone) revealTo(halfIdx)
+    ({ inning, half, cap, halfDone }) => {
+      if (halfDone) revealTo(inning, half)
+      else if (cap != null) revealAtBat(inning, half, cap)
     },
     [revealAtBat, revealTo],
   )
@@ -93,7 +101,6 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
     feed,
     gamePk,
     mode,
-    booth,
     startHalfIdx,
     // Live, not the value the surface opened on: as the scorer finishes a half
     // the mark ratchets and the next one becomes reachable.
@@ -101,8 +108,6 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
     onReveal,
   })
 
-  // Club identity, off the spoiler-free selector every lineup page already
-  // uses. A club's name is not a score.
   // The URL follows the cursor, so the half you are on is always the half you
   // could send someone. Same shape the innings viewer keeps (`top5`), same slot
   // in the address, so the two read alike.
@@ -112,27 +117,18 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
     if (want !== section) onSection(want, { replace: true })
   }, [started, onSection, lane.inning, lane.half, section])
 
+  // Club identity, off the spoiler-free selector every lineup page already
+  // uses. A club's name is not a score. The running line reads it for its two
+  // row labels, and nothing else on this surface does.
   const meta = useMemo(
     () => ({ away: selectTeamMeta(feed, 'away') ?? {}, home: selectTeamMeta(feed, 'home') ?? {} }),
     [feed],
-  )
-  const names = useMemo(
-    () => ({ away: meta.away.name ?? 'Visitors', home: meta.home.name ?? 'Home' }),
-    [meta],
   )
 
   if (!started) {
     return (
       <div className="xl">
-        <EntryChooser
-          awayName={names.away}
-          homeName={names.home}
-          booth={booth}
-          onBooth={setBooth}
-          mode={mode}
-          onMode={setMode}
-          onStart={() => setStarted(true)}
-        />
+        <EntryChooser mode={mode} onMode={setMode} onStart={() => setStarted(true)} />
       </div>
     )
   }
@@ -172,16 +168,55 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
   //
   // It is a wait with nothing to show yet, so it says so and shows no measure
   // of itself — the same indeterminate rule the in-game wait follows.
+  //
+  // IT IS NOT A ROOM WITH ONE DOOR. Both ways a job blocks — a full disk and a
+  // host that has stopped answering — are terminal: `pump` breaks and does not
+  // come back on its own. Either can happen DURING the pre-roll, and this
+  // screen used to render the waiting message alone: no bar, no Leave, and no
+  // word of what had gone wrong. A scorer whose disk filled sat under "Getting
+  // the first few plays." with the browser's back button as the only way out.
+  //
+  // So the bar comes with it, and a block says which one it was in the same
+  // words FilmPane uses further down the page, with the same retry.
   if (!lane.preroll.ready && !lane.cursorRow) {
     return (
       <div className="xl">
-        <div className="xl__preroll">
-          <span className="xl__prerollmark" aria-hidden="true" />
-          <p className="xl__prerollmsg">Getting the first few plays.</p>
-          <p className="xl__prerollsub">
-            The film arrives about as fast as MLB will send it, which is slower than it sounds.
-          </p>
-        </div>
+        <header className="xl__bar">
+          <button type="button" className="xl__back" onClick={onLeave}>
+            Leave
+          </button>
+          <span className="xl__half">{halfLabel(lane.inning, lane.half)}</span>
+          <span className="xl__booth" />
+        </header>
+        {lane.job.blockedReason ? (
+          <div className="xl__preroll">
+            <p className="xl__prerollmsg">
+              {lane.job.blockedReason === 'quota'
+                ? 'This device is out of room for film.'
+                : lane.job.blockedReason === 'host'
+                  ? 'MLB has stopped serving clips to this device for now.'
+                  : 'The film stopped arriving.'}
+            </p>
+            <p className="xl__prerollsub">
+              {lane.job.blockedReason === 'quota'
+                ? 'Free some space, then pick it back up.'
+                : lane.job.blockedReason === 'host'
+                  ? 'Give it a few minutes, then try again.'
+                  : 'Try again, or come back to this game later.'}
+            </p>
+            <button type="button" className="btn btn--ghost" onClick={lane.retry}>
+              Try again
+            </button>
+          </div>
+        ) : (
+          <div className="xl__preroll">
+            <span className="xl__prerollmark" aria-hidden="true" />
+            <p className="xl__prerollmsg">Getting the first few plays.</p>
+            <p className="xl__prerollsub">
+              The film arrives about as fast as MLB will send it, which is slower than it sounds.
+            </p>
+          </div>
+        )}
       </div>
     )
   }
@@ -225,7 +260,10 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
             ›
           </button>
         </span>
-        <span className="xl__booth">{booth === 'home' ? names.home : names.away}</span>
+        {/* The right-hand balancer for the Leave button, and deliberately
+            empty. It used to name the booth; there is no booth to name, since
+            Tier 2 resolves one clip per play whichever broadcast called it. */}
+        <span className="xl__booth" />
       </header>
 
       {/* THE RUNNING LINE, and it is the same component the innings view puts
@@ -285,24 +323,46 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
           how many batters are left to bat this half. It is the way back to a
           play that was not read the first time, which is the thing Concept C
           could not do and the reason it was dropped. */}
+      {/* THE AUTOMATIC RUNNER IS A MARKER HERE, NOT A DOOR. He took no plate
+          appearance, so there is no play of his to go back to and no rail row
+          his chip could land on — see reachedPlateAppearances. He is drawn, so
+          the strip matches the boxes on the deck, and he is drawn as a `span`
+          so nothing offers a tap that would do nothing. Everything else keys on
+          `chip.id` rather than on a plate-appearance number, which a placement
+          does not have. */}
       {lane.chips.length > 1 && (
         <nav className="xl__chips" aria-label="Plate appearances so far this half">
-          {lane.chips.map((chip) => (
-            <button
-              key={chip.atBatIndex}
-              type="button"
-              className={`xl__chip ${
-                chip.atBatIndex === lane.deck.batter?.atBatIndex ? 'is-on' : ''
-              } ${chip.scored ? 'xl__chip--scored' : ''}`}
-              onClick={() => {
-                const row = lane.rows.find((r) => r.atBatIndex === chip.atBatIndex && r.isTerminal)
-                if (row) lane.goTo(row.key)
-              }}
-            >
-              <span className="xl__chipname">{chip.last}</span>
-              <span className="xl__chipcode">{chip.code}</span>
-            </button>
-          ))}
+          {lane.chips.map((chip) => {
+            const on =
+              chip.atBatIndex != null && chip.atBatIndex === lane.deck.batter?.atBatIndex
+            const cls = `xl__chip ${on ? 'is-on' : ''} ${chip.scored ? 'xl__chip--scored' : ''}`
+            const inner = (
+              <>
+                <span className="xl__chipname">{chip.last}</span>
+                <span className="xl__chipcode">{chip.code}</span>
+              </>
+            )
+            if (chip.kind === 'placed') {
+              return (
+                <span key={chip.id} className={`${cls} xl__chip--placed`}>
+                  {inner}
+                </span>
+              )
+            }
+            return (
+              <button
+                key={chip.id}
+                type="button"
+                className={cls}
+                onClick={() => {
+                  const row = lane.rows.find((r) => r.atBatIndex === chip.atBatIndex && r.isTerminal)
+                  if (row) lane.goTo(row.key)
+                }}
+              >
+                {inner}
+              </button>
+            )
+          })}
         </nav>
       )}
 
@@ -322,7 +382,16 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
           </button>
         )}
         {lane.atHalfEnd ? (
-          <button type="button" className="btn btn--reveal xl__go" onClick={lane.nextHalf}>
+          /* Gated on the same frontier the forward arrow is. Reaching the end
+             of a half commits it, so this is live by the time it is drawn — but
+             a button that silently does nothing is the shape the half-index bug
+             took, and a disabled one says so instead. */
+          <button
+            type="button"
+            className="btn btn--reveal xl__go"
+            onClick={lane.nextHalf}
+            disabled={!lane.canGoForward}
+          >
             Next half-inning
           </button>
         ) : (

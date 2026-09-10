@@ -354,6 +354,15 @@
 .xl__chip--scored {
   border-left: 3px solid var(--field);
 }
+/* The extra-innings automatic runner. He took no plate appearance, so there is
+   no play of his to go back to — the chip is a marker beside the boxes on the
+   deck, and it is a `span` rather than a button. Dashed, the way the sheet
+   draws his ghost path, and with no pointer, so it never invites a tap that
+   would do nothing. */
+.xl__chip--placed {
+  border-style: dashed;
+  cursor: default;
+}
 .xl__chipname {
   font-size: var(--fs-small);
   font-weight: var(--w-bold);

@@ -19,7 +19,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { buildRail, resultModeRows, fullModeRows } from '../api/expresslane/rail.js'
-import { expressDeck, reachedPlateAppearances } from '../api/expresslane/runners.js'
+import { expressDeck, railRevealCap, reachedPlateAppearances } from '../api/expresslane/runners.js'
 import { resolveClipUrl } from '../api/expresslane/clipIndex.js'
 import { createJob, gateFor, stagingStatus } from '../lib/expresslane/staging.js'
 import { createStagingRunner } from '../lib/expresslane/runner.js'
@@ -42,7 +42,6 @@ export function useExpressLane({
   feed,
   gamePk,
   mode = 'result',
-  booth = 'home',
   startHalfIdx = 0,
   // The furthest half this scorer may look at: `revealedThrough + 1`, live, so
   // it moves as they score. THE FORWARD ARROW IS CLAMPED TO IT, and that is not
@@ -53,7 +52,7 @@ export function useExpressLane({
   onReveal,
 }) {
   const [halfIdx, setHalfIdx] = useState(startHalfIdx)
-  const [job, setJob] = useState(() => createJob({ gamePk, mode, feed: booth }))
+  const [job, setJob] = useState(() => createJob({ gamePk, mode }))
   const [cursorKey, setCursorKey] = useState(null)
   const [clip, setClip] = useState({ url: null, playId: null })
   const runnerRef = useRef(null)
@@ -84,7 +83,14 @@ export function useExpressLane({
   useEffect(() => {
     if (!gamePk) return undefined
     const staging = createStagingRunner({
-      job: createJob({ gamePk, mode, feed: booth }),
+      // ONE CLIP PER PLAY, WHICHEVER BOOTH CALLED IT. Tier 2 resolves a playId
+      // through Savant, which answers with a single mp4 — there is no booth
+      // parameter to pass it, and the one host that IS addressable by booth
+      // (`fastball-clips.mlb.com/{gamePk}/{home|away}/{playId}.mp4`) is
+      // Referer-locked to mlb.com and unplayable from this origin. So the job's
+      // `feed` field describes the POSTER rendition and nothing else, and the
+      // surface does not offer a choice it cannot honour.
+      job: createJob({ gamePk, mode }),
       resolveClip: (playId) => resolveClipUrl(playId),
       onChange: setJob,
     })
@@ -95,7 +101,7 @@ export function useExpressLane({
       staging.stop()
       runnerRef.current = null
     }
-  }, [gamePk, mode, booth])
+  }, [gamePk, mode])
 
   // Each half's rows join the queue as the scorer reaches it. This is the only
   // way the queue grows.
@@ -227,10 +233,27 @@ export function useExpressLane({
     setCursorKey(landed)
     // Advancing IS the reveal act (ADR-0016's mark, driven from here so paper
     // and screen stay in step and reveal.js syncs it across devices for free).
-    const reached = rows.findIndex((row) => row.key === landed) + 1
-    onReveal?.(halfIdx, reached, reached >= rows.length)
+    //
+    // NAMED, NOT POSITIONAL, and the half is named the way the rest of the app
+    // names one. `revealTo` and `revealAtBat` take `(inning, half)` — every
+    // other caller passes that pair — and a half-INDEX handed to them in its
+    // place is silently read as an inning number: index 0 became half-index -1,
+    // which the ratchet discards, so the top of the 1st could never be
+    // committed and the surface could never leave it; index 2 became half-index
+    // 3, which is the BOTTOM of the 2nd, and unsealed a half the scorer had
+    // never watched on this page, in the innings viewer and on every synced
+    // device. `cap` is the feed-entry count `railRevealCap` measures, not a
+    // count of rail rows — see that function for why the two are not the same
+    // number.
+    const at = rows.findIndex((row) => row.key === landed)
+    onReveal?.({
+      inning,
+      half,
+      cap: railRevealCap(feed, inning, half, rows[at] ?? null),
+      halfDone: at >= 0 && at + 1 >= rows.length,
+    })
     return true
-  }, [nextRow, rows, halfIdx, onReveal])
+  }, [nextRow, rows, feed, inning, half, onReveal])
 
   // Back to a plate appearance already scored. Always allowed — those rows are
   // written, and the look-again is why the foot strip exists.

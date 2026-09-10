@@ -359,7 +359,7 @@ test('the status counts film AHEAD of the cursor and never the game', () => {
 test('every gate reason and every job state is one the catalogs name', () => {
   // The two exported lists are what a surface switches on. A reason or a state
   // that is not in them is one the screen has no wording for.
-  const rows = [pitch(1), pitch(2), pitch(3), pitch(4), paperwork(1)]
+  const rows = [pitch(1), pitch(2), pitch(3), pitch(4), pitch(5), paperwork(1)]
   let job = jobWith(rows)
   const seen = new Set()
   const record = () => {
@@ -375,6 +375,7 @@ test('every gate reason and every job state is one the catalogs name', () => {
   job = markUnfilmed(job, 'p2')
   job = consentToSkip(job, 'p3')
   for (let i = 0; i < 3; i += 1) job = markByteFailure(job, 'p4')
+  job = markEvicted(markStaged(job, 'p5'), ['p5'])
   record()
   job = pauseJob(job)
   record()
@@ -389,4 +390,55 @@ test('a drained queue reports complete and stops waiting', () => {
   const status = stagingStatus(job)
   assert.equal(status.state, 'complete')
   assert.equal(status.waiting, false)
+})
+
+// --- eviction is not a way back into the queue -----------------------------
+//
+// The queue is walked from the HEAD, and the whole engine — `nextToStage`,
+// `filmFrontier`, `canAdvanceTo` — asks one question about each row: is it
+// covered? Eviction takes the bytes off the disk behind the scorer, so a job
+// that forgot them without recording WHY answered "not covered" for a row the
+// cursor had already passed, and the runner turned around and fetched it
+// again. It then swept it again. About a half-inning and a half into a session
+// the loop closed and the film never moved forward again.
+
+function stagedThrough(count) {
+  const rows = []
+  for (let i = 0; i < count; i += 1) rows.push(pitch(i))
+  let job = jobWith(rows)
+  for (const row of rows) job = markStaged(job, row.playId)
+  return { job, rows }
+}
+
+test('a clip evicted behind the cursor is never queued for download again', () => {
+  const { job: staged } = stagedThrough(16)
+  let job = setCursor(staged, 'p15')
+  const gone = evictable(job)
+  assert.ok(gone.length > 0, 'the cursor has passed the lookbehind window')
+  job = markEvicted(job, gone)
+  assert.equal(nextToStage(job), null, 'the queue has nothing left to fetch')
+})
+
+test('eviction does not drag the film frontier back behind the scorer', () => {
+  const { job: staged } = stagedThrough(16)
+  let job = setCursor(staged, 'p15')
+  job = markEvicted(job, evictable(job))
+  assert.equal(filmFrontier(job), 'p15', 'every row up to the cursor is still covered')
+})
+
+test('a row whose film was evicted never blocks the cursor again', () => {
+  const { job: staged, rows } = stagedThrough(16)
+  let job = setCursor(staged, 'p15')
+  job = markEvicted(job, evictable(job))
+  const gate = gateFor(job, rows[0])
+  assert.equal(gate.blocked, false, 'a play already scored cannot start waiting again')
+  assert.equal(gate.reason, 'evicted')
+  assert.equal(gate.escapable, false, 'there is nothing for the scorer to consent to')
+})
+
+test('a clip fetched again is no longer evicted', () => {
+  const { job: staged } = stagedThrough(16)
+  let job = markEvicted(setCursor(staged, 'p15'), ['p0'])
+  job = markStaged(job, 'p0')
+  assert.equal(gateFor(job, { key: 'p0', playId: 'p0' }).reason, 'ready')
 })
