@@ -18,8 +18,16 @@
 // constraint on how this door is allowed to be presented, so the door says it
 // plainly rather than burying it.
 //
-// MODE IS THE CHOICE THAT IS LEFT, and it is a real one: it decides what gets
-// downloaded, and changing it after staging begins throws bytes away.
+// TWO CHOICES, AND THEY ARE ABOUT DIFFERENT THINGS. Mode decides WHAT gets
+// downloaded — one clip an at-bat, or every pitch. The plan decides WHEN. They
+// multiply, and the second one is the one people get wrong, so the buttons say
+// the quiet part: no plan makes the film arrive faster. MLB's clip hosts
+// throttle to about 2.1 Mbps per client and concurrency does not help, so a
+// nine-inning game in Result mode is about 470 MB and about half an hour
+// whichever plan asks for it. "Load it all first" is not a speed-up; it is the
+// same wait, taken all at once, in exchange for a session with no waiting in
+// it. A chooser that let someone believe otherwise would be selling something
+// that does not exist.
 //
 // THE FIGURES ARE ON THE BUTTONS ON PURPOSE. This is the one choice that costs
 // the evening — the difference between about 35 minutes of film arriving and
@@ -37,7 +45,7 @@
 // gate is closer to a slideshow than to scoring — but that is a judgement about
 // how someone wants to spend their night, and the measurement belongs to them.
 
-export function EntryChooser({ mode, onMode, onStart, busy = false }) {
+export function EntryChooser({ mode, onMode, plan, onPlan, onStart, busy = false }) {
   return (
     <section className="xl-entry" aria-label="Start Express Lane">
       <h1 className="xl-entry__title">Express Lane</h1>
@@ -52,7 +60,7 @@ export function EntryChooser({ mode, onMode, onStart, busy = false }) {
           The film arrives about as fast as MLB will send it, and you cannot get ahead of it.
           So this choice sets the pace of the whole session.
         </p>
-        <div className="xl-entry__choices xl-entry__choices--modes">
+        <div className="xl-entry__choices">
           <button
             type="button"
             className={`xl-entry__choice ${mode === 'result' ? 'is-on' : ''}`}
@@ -76,6 +84,55 @@ export function EntryChooser({ mode, onMode, onStart, busy = false }) {
             <span className="xl-entry__cost">
               About 40 minutes of film, arriving over about 100 — a clip roughly every 18
               seconds, so expect to wait between them.
+            </span>
+          </button>
+        </div>
+      </fieldset>
+
+      <fieldset className="xl-entry__group">
+        <legend className="xl-entry__legend">When should the film arrive?</legend>
+        <p className="xl-entry__hint">
+          None of these is faster than the others. MLB sends the film at one speed, so this
+          only decides when you do the waiting.
+        </p>
+        <div className="xl-entry__choices">
+          <button
+            type="button"
+            className={`xl-entry__choice ${plan === 'demand' ? 'is-on' : ''}`}
+            aria-pressed={plan === 'demand'}
+            onClick={() => onPlan('demand')}
+          >
+            <span className="xl-entry__club">On demand</span>
+            <span className="xl-entry__side">nothing until you ask for it</span>
+            <span className="xl-entry__cost">
+              Opens at once, then each play waits for its own clip. Downloads the least, so
+              it is the one for dipping into a game for a few plays.
+            </span>
+          </button>
+          <button
+            type="button"
+            className={`xl-entry__choice ${plan === 'ahead' ? 'is-on' : ''}`}
+            aria-pressed={plan === 'ahead'}
+            onClick={() => onPlan('ahead')}
+          >
+            <span className="xl-entry__club">Stay ahead of me</span>
+            <span className="xl-entry__side">a short head start, then it keeps up</span>
+            <span className="xl-entry__cost">
+              About 90 seconds to open, then it works a half-inning ahead of you. The usual
+              way to score a game.
+            </span>
+          </button>
+          <button
+            type="button"
+            className={`xl-entry__choice ${plan === 'all' ? 'is-on' : ''}`}
+            aria-pressed={plan === 'all'}
+            onClick={() => onPlan('all')}
+          >
+            <span className="xl-entry__club">All of it first</span>
+            <span className="xl-entry__side">the whole nine innings, then no waiting</span>
+            <span className="xl-entry__cost">
+              About half an hour and 470 MB before the first play, in one clip per at-bat.
+              Start it, leave it, come back to a game you can score straight through.
             </span>
           </button>
         </div>

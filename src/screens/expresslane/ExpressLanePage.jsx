@@ -8,6 +8,7 @@ import { RollingLine } from '../../components/gamehud/RollingLine.jsx'
 import { useRevealProgress } from '../../hooks/useRevealProgress.js'
 import { selectInningCount, selectRegulationInnings, selectTeamMeta } from '../../api/select.js'
 import { expressHalfOf, stepToSection } from '../../lib/route.js'
+import { DEFAULT_STAGING_PLAN } from '../../lib/expresslane/staging.js'
 import { halfIndex } from '../../api/select.js'
 
 // EXPRESS LANE — CONCEPT A, THE SPLIT DECK.
@@ -43,11 +44,40 @@ function halfLabel(inning, half) {
   return `${half === 'bottom' ? 'Bottom' : 'Top'} ${ordinal}`
 }
 
+// THE DEV-ONLY FILM SWITCH — `?nofilm`, and it is dev-only in the build rather
+// than by convention.
+//
+// `import.meta.env.DEV` is a compile-time constant, so in a production build
+// this whole branch is removed and the flag cannot be typed into a real
+// reader's URL bar. That matters more here than for the other dev routes: the
+// film gate is this feature's entire thesis — a scorer who can read "grounds
+// out, second baseman to first" has no reason to wait for the picture — and a
+// shipped way around it would erode the design within a week of use.
+//
+// What it does is make every row read as PAPERWORK (useExpressLane strips the
+// playIds), which is a state the gate already has and already handles. Nothing
+// downloads, nothing waits, and the whole surface — the deck, the chips, the
+// runners' diamonds, the reveal marks, the half handoffs — can be walked end to
+// end in seconds instead of an hour.
+function nofilmRequested() {
+  if (!import.meta.env.DEV) return false
+  try {
+    return new URLSearchParams(window.location.search).has('nofilm')
+  } catch {
+    return false
+  }
+}
+
 export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
   // Result mode is the default because it is the one that works at the film's
   // own pace; every pitch is a deliberate pick, made with its cost on the
   // button.
   const [mode, setMode] = useState('result')
+  // WHEN the film arrives, as against WHAT arrives. `ahead` is the default
+  // because it is the one that suits scoring a game: a short head start, then
+  // the queue works a half-inning in front of you. See STAGING_PLANS.
+  const [plan, setPlan] = useState(DEFAULT_STAGING_PLAN)
+  const [filmless] = useState(nofilmRequested)
   const [started, setStarted] = useState(false)
   const [expanded, setExpanded] = useState(null)
 
@@ -101,6 +131,9 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
     feed,
     gamePk,
     mode,
+    plan,
+    regulation,
+    filmless,
     startHalfIdx,
     // Live, not the value the surface opened on: as the scorer finishes a half
     // the mark ratchets and the next one becomes reachable.
@@ -128,7 +161,13 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
   if (!started) {
     return (
       <div className="xl">
-        <EntryChooser mode={mode} onMode={setMode} onStart={() => setStarted(true)} />
+        <EntryChooser
+          mode={mode}
+          onMode={setMode}
+          plan={plan}
+          onPlan={setPlan}
+          onStart={() => setStarted(true)}
+        />
       </div>
     )
   }
@@ -211,9 +250,20 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
         ) : (
           <div className="xl__preroll">
             <span className="xl__prerollmark" aria-hidden="true" />
-            <p className="xl__prerollmsg">Getting the first few plays.</p>
+            {/* Two waits, and they are different enough to need different
+                words: a minute and a half, and half an hour. Neither shows a
+                measure of itself — a count of clips against a game-wide total
+                would state the game's length (ADR-0008), and a bar over the
+                bytes would say the play ahead is a long one (ADR-0046). */}
+            <p className="xl__prerollmsg">
+              {lane.preroll.openWhen === 'drained'
+                ? 'Getting the whole game.'
+                : 'Getting the first few plays.'}
+            </p>
             <p className="xl__prerollsub">
-              The film arrives about as fast as MLB will send it, which is slower than it sounds.
+              {lane.preroll.openWhen === 'drained'
+                ? 'About half an hour, at the speed MLB sends film. Leave this open and come back to it — nothing is lost if you close it, and what has arrived stays on this device.'
+                : 'The film arrives about as fast as MLB will send it, which is slower than it sounds.'}
             </p>
           </div>
         )}

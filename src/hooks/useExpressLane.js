@@ -21,27 +21,45 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { buildRail, resultModeRows, fullModeRows } from '../api/expresslane/rail.js'
 import { expressDeck, railRevealCap, reachedPlateAppearances } from '../api/expresslane/runners.js'
 import { resolveClipUrl } from '../api/expresslane/clipIndex.js'
-import { createJob, gateFor, stagingStatus } from '../lib/expresslane/staging.js'
+import {
+  createJob,
+  gateFor,
+  stagingPlan,
+  stagingStatus,
+  DEFAULT_STAGING_PLAN,
+} from '../lib/expresslane/staging.js'
 import { createStagingRunner } from '../lib/expresslane/runner.js'
 import { checkoutClip, getClip, persistStorage } from '../lib/expresslane/byteStore.js'
 import { halfAt } from '../api/scorecard/alignment.js'
 
-// How much film has to be here before the surface will open.
+// The rows one mode keeps, and the one switch that empties them of film.
 //
-// Three clips, not one half-inning. Both were on the table and the gate
-// settles it: after the pre-roll the scorer moves at the queue's pace whatever
-// the head start was, so the only thing the pre-roll buys is the OPENING — and
-// three clips opens in about 75 seconds against a half-inning's two minutes.
-// A larger pre-roll would buy a longer wait for the same steady state.
-//
-// It is a count of CLIPS, never shown as one. "3 of 84" would state the game's
-// length (ADR-0008); the surface shows an indeterminate wait instead.
-const PREROLL_CLIPS = 3
+// `filmless` is the dev-only `?nofilm` escape (ExpressLanePage reads it, and
+// only under `import.meta.env.DEV`). Stripping the playId here rather than
+// teaching the gate a fourth state is what keeps it honest: a row with no
+// playId is ALREADY a row the gate understands — paperwork, the same as a mound
+// visit — so nothing downstream needs a special case, nothing downloads, and
+// the surface behaves exactly as it does on a game whose film never published.
+function modeRows(allRows, mode, filmless) {
+  const rows = mode === 'full' ? fullModeRows(allRows) : resultModeRows(allRows)
+  return filmless ? rows.map((row) => ({ ...row, playId: null })) : rows
+}
 
 export function useExpressLane({
   feed,
   gamePk,
   mode = 'result',
+  // WHEN THE BYTES ARE PAID FOR — 'demand' | 'ahead' | 'all' (STAGING_PLANS in
+  // staging.js). It changes nothing about the film gate and nothing about what
+  // the scorer may see; the same clips arrive down the same throttled pipe
+  // under all three.
+  plan = DEFAULT_STAGING_PLAN,
+  // Regulation innings, from the caller's `selectRegulationInnings`. Only the
+  // 'all' plan reads it, and it is the bound that keeps a filled queue from
+  // stating whether this game went to extras (ADR-0008).
+  regulation = 9,
+  // The dev-only `?nofilm` switch. See `modeRows`.
+  filmless = false,
   startHalfIdx = 0,
   // The furthest half this scorer may look at: `revealedThrough + 1`, live, so
   // it moves as they score. THE FORWARD ARROW IS CLAMPED TO IT, and that is not
@@ -72,10 +90,9 @@ export function useExpressLane({
     [feed, inning, half],
   )
 
-  const rows = useMemo(
-    () => (mode === 'full' ? fullModeRows(allRows) : resultModeRows(allRows)),
-    [allRows, mode],
-  )
+  const rows = useMemo(() => modeRows(allRows, mode, filmless), [allRows, mode, filmless])
+
+  const { horizon, prerollClips, openWhen, wholeGame } = useMemo(() => stagingPlan(plan), [plan])
 
   // The runner is built once per game and outlives a half change: the byte
   // store, the staged set and the frontier are all per GAME, and rebuilding it
@@ -93,6 +110,7 @@ export function useExpressLane({
       job: createJob({ gamePk, mode }),
       resolveClip: (playId) => resolveClipUrl(playId),
       onChange: setJob,
+      horizon,
     })
     runnerRef.current = staging
     persistStorage()
@@ -101,10 +119,48 @@ export function useExpressLane({
       staging.stop()
       runnerRef.current = null
     }
-  }, [gamePk, mode])
+    // The plan is in here because the horizon is baked into the runner, and
+    // changing it mid-flight would leave the queue half-walked under one rule
+    // and half under another. Rebuilding costs nothing that matters: `start`
+    // re-reads the byte store, so every clip already on the disk is picked back
+    // up rather than paid for twice.
+  }, [gamePk, mode, horizon])
 
-  // Each half's rows join the queue as the scorer reaches it. This is the only
-  // way the queue grows.
+  // THE WHOLE OF REGULATION, UP FRONT — the `all` plan, and the only place in
+  // the app that fills the queue past the half the scorer is in.
+  //
+  // REGULATION, NOT THE GAME, and that bound is the whole reason this is
+  // allowed to exist. Eighteen halves is the same queue for a game that ended
+  // in nine and one that ran to fifteen, so a filled queue says nothing about
+  // the game it belongs to (ADR-0008). Extras join one half at a time below,
+  // exactly as they do under the other two plans.
+  //
+  // THE PROSE NEVER LEAVES THIS LOOP. `buildRail` is reveal-only — its rows
+  // narrate the play — but `enqueueHalf` takes only `{ key, playId, halfIndex }`
+  // off each row, so what reaches the job is the same score-free triple it
+  // holds under every plan. The rails themselves are local to this effect and
+  // are never rendered, never held in state, and gone when it returns. Any
+  // future caller that wants them for anything else has to answer for it.
+  const preloadedRef = useRef(null)
+  useEffect(() => {
+    const runner = runnerRef.current
+    if (!runner || !wholeGame || !feed) return
+    const token = `${gamePk}:${mode}:${filmless}:${regulation}`
+    if (preloadedRef.current === token) return
+    preloadedRef.current = token
+    // In half order, because the queue IS the order: the frontier and every
+    // gate walk read it front to back, and an out-of-order append would put a
+    // staged clip beyond a gap the cursor cannot cross.
+    for (let idx = 0; idx < regulation * 2; idx += 1) {
+      const { inning, half } = halfAt(idx)
+      const queued = modeRows(buildRail(feed, inning, half), mode, filmless)
+      if (queued.length) runner.addHalf(queued)
+    }
+  }, [wholeGame, feed, gamePk, mode, filmless, regulation])
+
+  // Each half's rows join the queue as the scorer reaches it. Under `all` this
+  // is a no-op for regulation — `enqueueHalf` ignores a half it already holds —
+  // and it is what brings EXTRA innings in, one at a time, under every plan.
   useEffect(() => {
     if (!runnerRef.current || !rows.length) return
     runnerRef.current.addHalf(rows)
@@ -124,25 +180,38 @@ export function useExpressLane({
   // rail answers the same question without asking it.
   const halfEmpty = rows.length === 0
 
-  // Enough film to open on. Counted against the head of the queue, never shown.
-  const status = useMemo(() => stagingStatus(job), [job])
+  // Enough film to open on, which each plan answers differently.
+  const status = useMemo(() => stagingStatus(job, { horizon }), [job, horizon])
   const preroll = useMemo(() => {
     let ready = 0
     for (const entry of job.queue) {
       if (!entry.playId) continue
       if (!job.staged.has(entry.playId) && !job.unfilmed.has(entry.playId)) break
       ready += 1
-      if (ready >= PREROLL_CLIPS) break
+      if (ready >= prerollClips) break
     }
-    // `complete` counts as ready because a SHORT half can drain before three
-    // clips land. An EMPTY one drains too, and used to come through here as
-    // "ready" — which opened the surface onto a half with no rows, a dead
-    // button and a film pane promising film that was never coming.
-    return {
-      ready: !halfEmpty && (ready >= PREROLL_CLIPS || job.state === 'complete'),
-      state: job.state,
-    }
-  }, [job, halfEmpty])
+    // `complete` counts as ready under 'clips' because a SHORT half can drain
+    // before three land. An EMPTY one drains too, and used to come through here
+    // as "ready" — which opened the surface onto a half with no rows, a dead
+    // button and a film pane promising film that was never coming. The
+    // `halfEmpty` guard below is what closed that, and it holds for every plan.
+    //
+    // 'now'     — `demand`. Nothing is staged ahead, so there is nothing to
+    //             wait for: the surface opens and the first play waits on the
+    //             button, where the wait is at least legible.
+    // 'drained' — `all`. The queue is regulation, so this is the half-hour the
+    //             chooser warned about. It is still an INDETERMINATE wait: a
+    //             count of clips staged out of a game-wide total would state
+    //             the game's length (ADR-0008), and a byte bar would tell the
+    //             scorer that the play ahead is a long one (ADR-0046).
+    const open =
+      openWhen === 'now'
+        ? true
+        : openWhen === 'drained'
+          ? job.state === 'complete'
+          : ready >= prerollClips || job.state === 'complete'
+    return { ready: !halfEmpty && open, state: job.state, openWhen }
+  }, [job, halfEmpty, prerollClips, openWhen])
 
   const cursorRow = useMemo(
     () => rows.find((row) => row.key === cursorKey) ?? null,

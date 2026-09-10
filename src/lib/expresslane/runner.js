@@ -101,12 +101,51 @@ export function createStagingRunner({
   retryMs = DEFAULT_RETRY_MS,
   resweepMs = DEFAULT_RESWEEP_MS,
   lookbehind,
+  // The staging plan's one knob (STAGING_PLANS in staging.js): how many queue
+  // positions past the cursor this runner may fetch. `Infinity` runs the queue
+  // dry, which is what `ahead` and `all` both do; `1` fetches only the row the
+  // scorer is about to need, which is `demand`. It changes nothing about the
+  // gate — the cursor still may not pass the picture — only when the bytes are
+  // paid for.
+  horizon = Infinity,
 }) {
   let job = initialJob
   let pumping = false
   let stopped = false
   let started = false
   let controller = null
+
+  // A SLEEP THAT NEW WORK CAN CUT SHORT.
+  //
+  // The loop waits in two places — between retries, and before the re-sweep —
+  // and it holds `pumping` while it does, so a plain `sleep` made the runner
+  // deaf for as long as 90 seconds. That is not theoretical: a half whose film
+  // has finished staging drains, the loop settles into the re-sweep nap, and
+  // the scorer then finishes the half and steps into the next one. `addHalf`
+  // queues its rows and calls `pump`, which returns at once against the
+  // re-entry guard — so the new half sat there unstaged and the surface showed
+  // "Getting the first few plays." until the nap ran out. Found by walking a
+  // game under `?nofilm`, where every half drains instantly and the stall is the
+  // first thing that happens.
+  //
+  // Returns true when it was woken rather than timed out, which is the caller's
+  // cue to look at the queue again instead of carrying on to the re-sweep.
+  let wake = null
+  const wakeUp = () => {
+    const resume = wake
+    wake = null
+    resume?.(true)
+  }
+  const nap = async (ms) => {
+    const woken = await Promise.race([
+      sleep(ms).then(() => false),
+      new Promise((resolve) => {
+        wake = resolve
+      }),
+    ])
+    wake = null
+    return woken
+  }
 
   const update = (nextJob) => {
     if (nextJob === job) return
@@ -196,17 +235,27 @@ export function createStagingRunner({
     try {
       while (!stopped) {
         if (job.state === 'paused' || job.state === 'blocked') break
-        const entry = nextToStage(job)
+        const entry = nextToStage(job, { horizon })
         if (!entry) {
-          update(markComplete(job))
+          // OUT OF REACH IS NOT DRAINED, and conflating the two hangs the
+          // `demand` plan on its first play. Under a finite horizon the queue is
+          // normally full of rows the plan has not authorised yet: the loop has
+          // no work now, but the game is not over and there is nothing to
+          // re-sweep. It stops, and the next cursor move starts it again. Only a
+          // queue with nothing left ANYWHERE is complete.
+          if (nextToStage(job) !== null) break
+          if (job.state !== 'complete') update(markComplete(job))
           // The queue is drained. Wait, then ask once more for the rows that
           // were written off — a clip that had not published when the queue
           // passed it may have published since. `retryUnfilmedAhead` returns
           // the same job when there is nothing to re-ask, which ends the loop.
           if (resweptAt >= 1 || !job.queue.length) break
-          resweptAt += 1
-          await sleep(resweepMs)
+          // Woken instead of timed out means a half joined the queue while this
+          // was waiting. Look again rather than spending the one re-sweep on a
+          // question nothing has asked yet.
+          if (await nap(resweepMs)) continue
           if (stopped) break
+          resweptAt += 1
           const before = job
           update(retryUnfilmedAhead(job))
           if (job === before) break
@@ -214,7 +263,7 @@ export function createStagingRunner({
         }
         const step = await stageOne(entry)
         if (step === 'stop') break
-        await sleep(step === 'retry' ? retryMs : gapMs)
+        await nap(step === 'retry' ? retryMs : gapMs)
       }
     } finally {
       pumping = false
@@ -258,6 +307,7 @@ export function createStagingRunner({
     async resume() {
       update(resumeJob(job))
       stopped = false
+      wakeUp()
       await pump()
     },
 
@@ -273,7 +323,21 @@ export function createStagingRunner({
     async moveCursor(key) {
       update(setCursor(job, key))
       await sweep()
-      return job.cursorKey
+      // A CURSOR MOVE IS WORK UNDER A FINITE HORIZON, and forgetting that
+      // deadlocks `demand` on its first play. With `horizon: 1` the queue is
+      // "drained" as soon as the one reachable row is covered, so `pump` marks
+      // the job complete and stops. Moving the cursor is what brings the next
+      // row into reach — nothing else does — so it has to restart the loop.
+      // Under an infinite horizon the pump is already running or the queue is
+      // genuinely finished, and `pump`'s own re-entry guard makes this free.
+      const landed = job.cursorKey
+      // NOT AWAITED, deliberately. `pump` runs until the queue is out of work,
+      // which under `demand` means one whole ~25-second download — and the
+      // caller of this is the tap that moves the cursor. Awaiting it would hold
+      // the play on screen until its successor had finished arriving.
+      wakeUp()
+      if (started && Number.isFinite(horizon)) pump()
+      return landed
     },
 
     // The next half the scorer has reached is now readable, so its rows join
@@ -285,6 +349,10 @@ export function createStagingRunner({
     // clips that are already here.
     async addHalf(rows) {
       update(enqueueHalf(job, rows))
+      // Wake first, then pump: if the loop is napping it is holding the
+      // re-entry guard, so `pump` alone would return without ever seeing these
+      // rows.
+      wakeUp()
       if (started) await pump()
     },
 
@@ -293,6 +361,7 @@ export function createStagingRunner({
     // not come — never for a row that resolved to nothing.
     async skipFilm(key) {
       update(consentToSkip(job, key))
+      wakeUp()
       await pump()
     },
 

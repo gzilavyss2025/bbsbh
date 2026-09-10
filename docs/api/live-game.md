@@ -347,6 +347,12 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   second, first), the capped card list and the chips; `runnersOnBase` is the
   predicate — reached a base, has not scored, `outAt == null`, and dropping that
   last one leaves a man on first who was forced at second two pitches ago.
+  `railRevealCap(feed, inning, half, row)` is the same cap on its own, and it is
+  the number Express Lane writes into the app's at-bat reveal mark: a count of
+  `computeHalfInningFeed` ENTRIES, which is the unit `revealAtBat` stores and
+  PlayByPlay reads back. A count of rail ROWS is a different number — over gamePk
+  823035 the two disagree at 99 of 128 cursor positions — and writing that one
+  opens entries in the innings viewer the surface never showed.
   Three things to know. (1) IT RE-DERIVES NOTHING: `computeHalfInningFeed`'s
   `stepCap` already solved this for at-bat stepping (ADR-0016), and this maps a
   rail row onto that cap. The cap is not optional and there is no variant of

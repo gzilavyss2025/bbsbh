@@ -54,9 +54,14 @@
   line-height: var(--lh-body);
   color: var(--album-foil-soft);
 }
+/* One column, always. Every card here carries a line of real figures — minutes,
+   megabytes — and two columns of that on a phone is two unreadable columns.
+   (It used to be two-up, for a booth pair whose labels were two club names.
+   That choice is gone: Savant serves one clip per play whichever booth called
+   it, so there was nothing to choose between.) */
 .xl-entry__choices {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 .xl-entry__choice {
@@ -77,12 +82,6 @@
   border-color: var(--seal);
   background: rgb(181 130 74 / 0.16);
   color: var(--album-foil);
-}
-/* THE MODE CARDS stack instead of sitting side by side: each carries a line of
-   real figures, and two columns of that on a phone is two unreadable columns.
-   The booth pair above stays two-up, because a club name is two words. */
-.xl-entry__choices--modes {
-  grid-template-columns: 1fr;
 }
 /* What the choice costs, in minutes. Quieter than the label it explains, but
    not hidden — it is the only fact that decides this choice. */
