@@ -26,6 +26,7 @@
 // Class: spoiler-free (spoiler-manifest.json). Nothing here reads a score, a
 // date cutoff or a reveal mark: it is a description of a question, handed to
 // the module that already owns the answer's gate.
+import { askableGameTypes } from './rows.js'
 
 // "2024-09-29" -> 0 (Sunday) .. 6. Manual y/m/d at midday UTC, the same
 // timezone-proof construction dayBefore uses in rows.js: a local-midnight Date
@@ -86,7 +87,16 @@ export function facetPlan(facet) {
     case 'gameTypes':
       // No `keep`: the game types are applied where they belong, in
       // matchingSplits, so a non-regular row is never built in the first place.
-      return { ...plan, gameTypes: facet.types?.length ? facet.types : null }
+      // They also reach the fetch, which must ASK for them — a game log is
+      // regular-season-only until the call names the rounds (fetch.js).
+      //
+// The types a postseason door passes are rows.js's POSTSEASON, the four
+      // rounds. `askableGameTypes` rewrites the umbrella 'P' to them if a
+      // caller asks that way: 'P' selects the same games, but a PITCHING game
+      // log echoes it back as every row's type, which this filter then drops —
+      // an empty sheet for a pitcher and a full one for a hitter, off one door.
+      // The measurement is in rows.js.
+      return { ...plan, gameTypes: facet.types?.length ? askableGameTypes(facet.types) : null }
     default:
       // An unknown facet keeps nothing rather than everything. A typo in a
       // future facet issue shows as an empty sheet, never as a full one.

@@ -154,6 +154,26 @@ a.boxline__link:focus-visible {
   color: var(--text-body);
 }
 
+/* The postseason round — WC, DS, LCS, WS — on a postseason row only. A printed
+   tab on the ledger's own inset paper, not a colored badge: the amber chip a
+   round like this invites is the SEAL's vocabulary in this app (kraft tape over
+   a score not yet revealed), and a row that has already given up its score must
+   not wear it. --text-body on --surface-inset is a pairing check-contrast
+   already certifies. */
+.boxline__series {
+  flex: none;
+  padding: 0 5px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
 /* The one score-bearing cell on the row. Named totals, his club first. */
 .boxline__score {
   font-family: var(--font-mono);

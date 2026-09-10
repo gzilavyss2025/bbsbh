@@ -37,11 +37,28 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `keep` runs AFTER the gate, so a facet can only ever narrow a row set the
   gate approved. An unknown facet keeps nothing, never everything.
   `careerSplits.js` (spoiler-free) supplies the DOOR LABELS for the player
-  page's Game lines card: one `careerStatSplits&sitCodes=…` call answers every
-  door on the card. A career aggregate is open here (ADR-0034); only the rows
-  behind the door are gated. `cardFacets.js` (spoiler-free) is the card's list
-  of doors — six of them since #1000/#1003/#1004/#1005 — kept in `api/` rather
-  than in the `.jsx` card so the suite can import it.
+  page's Game lines card, through `fetchDoorLabels`, which reads whichever of
+  TWO sources each door names: a situation code (one `careerStatSplits&sitCodes=…`
+  call answers every such door at once) or a career under a game type
+  (`stats=career&gameType=P`, one call each — the postseason door's line).
+  The stat type named for October is not the second source: `careerPlayoffs` <!-- word-choice-exempt: statsapi's own stat-type name, quoted -->
+  returns the REGULAR-SEASON career. A career aggregate is open here
+  (ADR-0034); only the rows behind the door are gated. `cardFacets.js`
+  (spoiler-free) is the card's list of doors — seven since #1006 added the
+  postseason — kept in `api/` rather than in the `.jsx` card so the suite can
+  import it. An entry names exactly one label source, and the suite pins that.
+  **GAME TYPES ARE ASKED FOR, NOT FILTERED FOR.** Both of `fetch.js`'s stats
+  calls carry `gameType=`: a game log is regular-season-only until the call
+  names the rounds, and `yearByYear&gameType=F,D,L,W` returns just the Octobers
+  he played, so the postseason join reads five game logs for Yelich rather than
+  fourteen. **Never ask with the umbrella `P`.** It selects the right games, but
+  the PITCHING game log echoes the asked-for type into every row it returns
+  (`P`, `P`, `P`) while the hitting log reports the game's own — verified on
+  one player, one season, both groups, 2026-09-10. Since the row's `gameType`
+  is both the type filter and the round pill, `P` yields a full sheet for a
+  hitter and an EMPTY one for a pitcher. `rows.js`'s `askableGameTypes`
+  rewrites a requested `P` to `POSTSEASON` so a facet cannot ask the losing
+  way, and `seriesAbbr` leaves `P` unnamed on purpose.
   **A DOOR'S FIGURE AND ITS ROWS COME FROM DIFFERENT MLB PIPELINES AND DO NOT
   RECONCILE.** The figure is MLB's aggregate for a situation code; the rows are
   MLB's per-game flags in the game log and the schedule. `sitCodes` is IGNORED

@@ -63,10 +63,46 @@ export function logRequestPlan(seasons, cutoff) {
 }
 
 // The game types a row may come from unless a facet asks for others. Regular
-// season only, which is what every surface built on Box Lines so far shows;
-// the postseason facet passes ['F', 'D', 'L', 'W'] (gameType 'P' is dead on
-// statsapi — verified 2026-09-02).
+// season only, which is what most surfaces built on Box Lines show.
 export const REGULAR_SEASON = ['R']
+
+// The postseason, spelled out as its four rounds — never the umbrella 'P'
+// (#1006). Both spellings SELECT the same games, so this list is not about
+// which rows come back; it is about what those rows say they are:
+//
+//   Ohtani 2025, the same games, one call apart (verified 2026-09-10)
+//     group=pitching&gameType=P         -> every row's gameType is "P"
+//     group=pitching&gameType=F,D,L,W   -> "D", "L", "W"
+//     group=hitting &gameType=P         -> "F", "D", "L", "W"  (honest either way)
+//
+// The PITCHING game log echoes the type that was ASKED FOR into every row it
+// returns; the hitting log reports the game's own. So 'P' would cost a pitcher
+// two things at once: `seriesAbbr` below could not name his round, and
+// `matchingSplits` — which keeps only rows whose type is in the requested set
+// — would drop all of them. A full sheet for a hitter and an empty one for a
+// pitcher, off the same door. Ask for the rounds.
+export const POSTSEASON = ['F', 'D', 'L', 'W']
+
+// The game types a facet actually gets to ask for. Only one thing is
+// normalized: the umbrella 'P' becomes the four rounds. It is not a different
+// QUESTION — both spellings select the same games — but only one of them
+// survives the round trip through a pitching game log, and a facet that asked
+// with 'P' would otherwise get a full sheet for a hitter and an empty one for
+// a pitcher, with nothing on either to say why. Everything else passes
+// through: an unknown type is left alone and simply matches no row.
+export function askableGameTypes(types) {
+  const list = types?.length ? types : REGULAR_SEASON
+  return [...new Set(list.flatMap((t) => (t === 'P' ? POSTSEASON : [t])))]
+}
+
+// The pill a postseason row wears, from the game's own type. '' for the
+// regular season, which is every row on every other facet, so the pill is
+// absent there rather than empty. 'P' deliberately has no abbreviation: a row
+// that still says 'P' came from a call that asked the wrong question (above),
+// and a blank pill is the visible end of that, not a confident wrong answer.
+export function seriesAbbr(gameType) {
+  return { F: 'WC', D: 'DS', L: 'LCS', W: 'WS' }[gameType] ?? ''
+}
 
 // The splits a row may be built from: the right game types, dated, joinable by
 // gamePk, and — when `opponentId` is given — against one club. `opponentId`
@@ -85,9 +121,9 @@ export function matchingSplits(splits, { opponentId = null, gameTypes = REGULAR_
 
 // The rows. `schedule` is the list of schedule game records for the splits'
 // gamePks (any order, extras ignored). Shape of a row:
-//   { season, date, gamePk, gameNumber, gameType, home, teamId, teamAbbr,
-//     opponentId, opponentAbbr, started, line, won, runs, oppRuns, venueId,
-//     venueName, dayNight, boxScorePath }
+//   { season, date, gamePk, gameNumber, gameType, series, home, teamId,
+//     teamAbbr, opponentId, opponentAbbr, started, line, won, runs, oppRuns,
+//     venueId, venueName, dayNight, boxScorePath }
 // `started` is null for hitters: the hitting game log carries no gamesStarted.
 //
 // `keep` is a facet's row predicate (api/boxlines/facets.js) and is applied
@@ -134,6 +170,7 @@ export function boxLineRows({
       gamePk: s.game.gamePk,
       gameNumber: g.gameNumber ?? s.game.gameNumber ?? 1,
       gameType: s.gameType,
+      series: seriesAbbr(s.gameType),
       home: !awayIsHis,
       teamId,
       teamAbbr: mine?.team?.abbreviation ?? '',

@@ -1,10 +1,26 @@
-// BOX LINES — the door LABELS for the player page's Game lines card. One call
-// answers every door on the card: `careerStatSplits` takes a comma-separated
+// BOX LINES — the door LABELS for the player page's Game lines card. Almost
+// every door is answered by one call: `careerStatSplits` takes a comma-separated
 // `sitCodes` list and returns one career row per code, so nine doors cost one
 // request rather than nine (verified live 2026-09-02 on personId 656849
 // pitching and 592885 hitting — `h`, `a`, `d`, `n` all came back with
 // `split.code`, `stat.gamesPlayed`, and the rate stats each group's line
 // prints).
+//
+// A DOOR WHOSE LINE IS NOT A SITUATION. `careerStatSplits` answers a question
+// of the form "his career, in these situations", and most doors are exactly
+// that. The postseason is not: it is a career under a different GAME TYPE, and
+// statsapi keeps those two apart, and the stat type named for October is not
+// the answer: `stats=careerPlayoffs` returns the REGULAR-SEASON career. <!-- word-choice-exempt: statsapi's own stat-type name, quoted -->
+// Yelich comes back 1,715 G and .282 (verified 2026-09-03, ADR-0069). The working source is `stats=career` with
+// `gameType=P`, which returns one row and the right one (Yelich: 27 G, .218;
+// Scherzer pitching: 33 G, 157.1 IP, 3.78 ERA — verified 2026-09-10). 'P' is
+// safe HERE, where an aggregate has no per-row type to be poisoned; on the
+// game log it is not, and rows.js's POSTSEASON says why.
+//
+// So `fetchDoorLabels` below is the card's one entry point: it reads whichever
+// of the two sources each registry entry names, in parallel, and hands back
+// one Map the card can key by door. Two requests for a card with a postseason
+// door, one for a card without.
 //
 // Class: spoiler-free (spoiler-manifest.json). A CAREER aggregate is open on
 // every surface in this app — it is the same figure the Splits vs team card
@@ -36,6 +52,46 @@ export function careerSplitLine(stat, group) {
 // The career split rows for a set of situation codes, as a Map code -> stat.
 // Returns an empty Map on any failure: a missing label is one missing door,
 // not a broken card.
+// The career total under one game type, as a single stat, or null. Used for
+// the postseason door; `gameType` is statsapi's own parameter and 'P' is its
+// own spelling of the postseason.
+export async function fetchCareerTotal(personId, group, gameType) {
+  if (!personId || !gameType) return null
+  try {
+    const data = await getJson(
+      `/api/v1/people/${personId}/stats?stats=career&group=${group}&sportId=1` +
+        `&gameType=${gameType}&${FIELDS}`,
+    )
+    // One split, no `split.code` — this is a total, not a situation.
+    return data.stats?.[0]?.splits?.[0]?.stat ?? null
+  } catch {
+    return null
+  }
+}
+
+// Every door's line for one card, as a Map keyed by the registry entry's
+// `key`. An entry names its source: `sitCode` for a situation (all of them
+// share ONE careerStatSplits call, whatever the count) or `careerGameType`
+// for a career under a game type (one call each). A source that fails leaves
+// its door out; the rest of the card is unaffected.
+export async function fetchDoorLabels(personId, group, entries) {
+  const list = entries ?? []
+  if (!personId || !list.length) return new Map()
+  const codes = list.map((e) => e.sitCode).filter(Boolean)
+  const types = [...new Set(list.map((e) => e.careerGameType).filter(Boolean))]
+  const [bySitCode, ...totals] = await Promise.all([
+    fetchCareerSplits(personId, group, codes),
+    ...types.map((t) => fetchCareerTotal(personId, group, t)),
+  ])
+  const byGameType = new Map(types.map((t, i) => [t, totals[i]]))
+  const out = new Map()
+  for (const e of list) {
+    const stat = e.careerGameType ? byGameType.get(e.careerGameType) : bySitCode.get(e.sitCode)
+    if (stat) out.set(e.key, stat)
+  }
+  return out
+}
+
 export async function fetchCareerSplits(personId, group, sitCodes) {
   const codes = [...new Set(sitCodes ?? [])].filter(Boolean)
   if (!personId || !codes.length) return new Map()

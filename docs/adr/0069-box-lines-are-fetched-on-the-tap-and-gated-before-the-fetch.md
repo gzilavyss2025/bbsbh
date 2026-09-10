@@ -378,3 +378,118 @@ look like better sources than the `sitCodes` list for #999 and #1001 — but the
 answer for ONE season (no `season` returns the current one, and a retired player
 gets nothing), so a career needs one call each and the sitCodes list stays the
 cheaper route.
+
+## Amendment (2026-09-10, issue #1006): the postseason door
+
+The seventh door on the Game lines card, and the first whose rows are not the
+regular season. It is also the first that changes what the fetch ASKS FOR
+rather than only what the gate keeps, so it is worth saying where the line now
+falls.
+
+### The game types are asked for, not filtered for
+
+`fetch.js` now passes `gameType=` on both of its stats calls. The 2026-09-03
+correction above — a game log carries no October unless the call names it —
+turned out to have a second half: the same is true of `yearByYear`, and that is
+a saving rather than a cost. `yearByYear&gameType=F,D,L,W` returns the five
+Octobers Yelich has played, not his fourteen seasons, so the postseason join
+fetches five game logs instead of fourteen and never asks about a summer he
+spent at home. `gameType=R` returns exactly what the bare call did on both
+endpoints (verified 2026-09-10 on 453286 and 592885), so the club door's fetch
+is unchanged by being made explicit.
+
+This door does not share the six others' join, and cannot: the memo key carries
+the game types, and a regular-season join does not contain an October game to
+filter for. That is one extra fetch on a card, paid only by a reader who opens
+the door.
+
+### `gameType=P` is not dead — it is worse than dead, on one group
+
+The 2026-09-02 note above says `P` is dead on statsapi and the live types are
+`F`, `D`, `L`, `W`. The first half is wrong and the correction matters, because
+`P` *works*: it selects exactly the right games. What it does not do is survive
+the round trip. Ohtani's 2025, the same games, one call apart (2026-09-10):
+
+| call | rows | each row's `gameType` |
+| --- | --- | --- |
+| `group=pitching&gameType=P` | 4 | `P`, `P`, `P`, `P` |
+| `group=pitching&gameType=F,D,L,W` | 4 | `D`, `L`, `W` |
+| `group=hitting&gameType=P` | 17 | `F`, `D`, `L`, `W` |
+| `group=hitting&gameType=F,D,L,W` | 17 | `F`, `D`, `L`, `W` |
+
+**The pitching game log echoes the type that was asked for into every row it
+returns; the hitting log reports the game's own.** Confirmed on one player, one
+season, both groups, so it is the group that differs and not the era or the
+career. Verlander and Kershaw reproduce the pitching half back to 2006; Ortiz
+and Pujols the hitting half back to 2001.
+
+That would have cost a pitcher two things at once. The row's `gameType` is both
+the filter (`matchingSplits` keeps only rows whose type was asked for) and the
+pill, so a door asking with `P` renders a full sheet for a hitter and an empty
+one for a pitcher, with nothing on either to say why — the exact silent,
+asymmetric failure the registry's own test file exists to prevent. So:
+
+- `rows.js` exports `POSTSEASON = ['F', 'D', 'L', 'W']`, and the measurement
+  sits beside it rather than in a commit message.
+- `askableGameTypes` rewrites a requested `P` to those four. It is not a
+  different question — both spellings select the same games — only the spelling
+  that survives. A facet cannot ask the losing way.
+- `seriesAbbr('P')` is `''` on purpose. A row still carrying `P` came from a
+  call that asked the wrong question, and a blank pill is the visible end of
+  that rather than a confident wrong `WC`.
+
+### The pill is the letter, not `seriesDescription`
+
+The 2026-09-03 note called the schedule's `seriesDescription` ("NL Division
+Series") worth more than a mapped letter. It is worth more, and it is still not
+what the row wears. The pill sits in a ledger row's meta cell beside the date
+and `@ LAD`, on a phone; `DS` fits there and `NL Division Series` does not. It
+would also cost bytes on every facet's schedule call, since `SCHEDULE_FIELDS`
+is shared with the six regular-season doors that have no use for it. The league
+is the one thing the letter drops, and the row already names both clubs.
+
+### The label comes from a career total, not a situation
+
+`careerStatSplits` answers "his career, in these situations", which is what the
+other six doors are. The postseason is a career under a different GAME TYPE,
+and statsapi keeps the two apart. So `careerSplits.js` grew a second source —
+`stats=career&gameType=P`, which returns one row and the right one (Yelich 27 G
+/ .218; Scherzer pitching 33 G / 157.1 IP / 3.78 ERA, 2026-09-10) — and
+`fetchDoorLabels` became the card's one entry point: it reads whichever source
+each registry entry names, in parallel, and returns one Map keyed by door.
+`P` is safe there, where an aggregate has no per-row type to poison.
+
+A registry entry therefore names exactly one label source, `sitCode` or
+`careerGameType`, and `test/boxlines-card-facets.test.js` pins that — an entry
+naming neither would render no label and so never render at all.
+
+### The door/rows margin has a second cause, and this one is not reconcilable either
+
+Yelich's postseason door says 27 games and his sheet renders 27. Scherzer's says
+33 and renders 31. The two missing are gamePks 317054 (2011 ALCS) and 345619
+(2012 ALCS) — games he really pitched, whose boxscores still carry his line
+(6.0 IP / 6 K and 5.2 IP / 10 K). Both were rained out, replayed the same day
+under the SAME gamePk, and MLB left the schedule row at `detailedState:
+'Postponed'` with no score on it.
+
+The gate drops them, correctly: it asks for the score itself rather than for
+one more spelling of a status, which is what keeps the three never-played
+postponements out (776691, 777459, 632997). And on the schedule endpoint a
+played-but-stuck game is INDISTINGUISHABLE from a never-played one — verified
+2026-09-10 that `hydrate=linescore` returns nulls for all five. The only source
+that separates them is the game's own boxscore, one call per suspect row, which
+is the cost this whole design exists to avoid.
+
+So the margin stands, for the same reason the home/road margin stands: the door
+prints MLB's aggregate and the rows print what MLB will confirm game by game.
+Do not close it by loosening the gate. If it is ever worth closing, the fix is
+a boxscore read for the handful of rows the gate dropped for want of a score —
+which is #1002's machinery, not this door's.
+
+### What did not change
+
+The gate. A postseason game on or after the cutoff has no row, an unfinished
+one has no row, and a facet still cannot reach around either — `keep` runs last
+where it always did, and this facet does not even use it. Pinned by four new
+cases in `test/boxlines-rows.test.js`, including that a split still tagged `P`
+is dropped by the default AND by the postseason facet.

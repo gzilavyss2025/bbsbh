@@ -9,6 +9,9 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // out who won. The whole row is one anchor to that game's box score
 // (useRouteLink, so middle-click and cmd-click still reach the browser).
 //
+// A postseason row also wears its round — WC, DS, LCS, WS — because "@ LAD"
+// in October says nothing about which October it was.
+//
 // Every value here arrived already gated (api/boxlines/rows.js); this row
 // decides nothing about what may show.
 //
@@ -32,6 +35,10 @@ export function BoxLineRow({ row, showSeason, band }) {
       <span className="boxline__meta">
         <span className="boxline__date">{monthDay(row.date)}</span>
         <span className="boxline__where">{where}</span>
+        {/* The round, on a postseason row only (api/boxlines/rows.js's
+            seriesAbbr). A regular-season row has no pill rather than an empty
+            one, which is every row on every other facet. */}
+        {row.series ? <span className="boxline__series">{row.series}</span> : null}
       </span>
       <span className="boxline__score">{score}</span>
       <span className="boxline__chev" aria-hidden="true">
@@ -44,7 +51,7 @@ export function BoxLineRow({ row, showSeason, band }) {
   return (
     <li className={cls}>
       {row.boxScorePath ? (
-        <a className="boxline__link" {...link(row.boxScorePath)} aria-label={`${monthDay(row.date)} ${where}, ${score}: box score`}>
+        <a className="boxline__link" {...link(row.boxScorePath)} aria-label={`${monthDay(row.date)} ${where}${row.series ? `, ${row.series}` : ''}, ${score}: box score`}>
           {inner}
         </a>
       ) : (

@@ -152,11 +152,11 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
     test.skip(true, 'this player has no MLB situational splits on file today')
     return
   }
-  // A pitcher gets all six. MiLB service returns no rows for these codes, and
-  // a door with no career row drops out on its own, so this also says he is
-  // being read as a major leaguer.
+  // A pitcher who has reached October gets all seven. MiLB service returns no
+  // rows for these codes, and a door with no career row drops out on its own,
+  // so this also says he is being read as a major leaguer.
   const doors = card.locator('.gamelines__door')
-  await expect(doors).toHaveCount(6)
+  await expect(doors).toHaveCount(7)
 
   const home = doors.first()
   const label = (await home.locator('span').first().textContent()).trim()
@@ -207,4 +207,29 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
   const roadRows = roadSheet.locator('.boxline:not(.boxline--skel)')
   await expect(roadRows.first().locator('.boxline__where')).toHaveText(/^@ /)
   expect(await roadRows.count()).toBeGreaterThan(0)
+
+  await page.keyboard.press('Escape')
+
+  // THE POSTSEASON DOOR (#1006) is the one that does not share that join: its
+  // rows are not the regular season, so it asks statsapi a question of its own.
+  // What this pins is the half a unit test cannot reach — that the live call
+  // comes back with rounds rather than the umbrella 'P'. Asked the wrong way a
+  // PITCHING log labels every row 'P', the type filter drops all of them, and
+  // this door opens on an empty ledger while the six beside it stay full.
+  const postseason = doors.nth(6)
+  expect((await postseason.locator('span').first().textContent()).trim()).toMatch(/^Postseason: \d+ G, /)
+  await postseason.click()
+  const postSheet = page.getByRole('dialog', { name: /in the postseason/ })
+  await expect(postSheet).toBeVisible()
+  await expect(postSheet.locator('.boxlines__kicker')).toHaveText('Game lines · postseason')
+  await expect
+    .poll(async () => (await postSheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
+    .toBe(true)
+  const postRows = postSheet.locator('.boxline:not(.boxline--skel)')
+  const postN = await postRows.count()
+  expect(postN).toBeGreaterThan(0)
+  for (let i = 0; i < postN; i++) {
+    // Every row wears its round, and only the four real ones exist.
+    await expect(postRows.nth(i).locator('.boxline__series')).toHaveText(/^(WC|DS|LCS|WS)$/)
+  }
 })
