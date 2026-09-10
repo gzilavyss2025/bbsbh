@@ -4,6 +4,7 @@ import { FilmPane } from './FilmPane.jsx'
 import { ScoringDeck } from './ScoringDeck.jsx'
 import { PitchExpand } from './PitchExpand.jsx'
 import { useExpressLane } from '../../hooks/useExpressLane.js'
+import { RollingLine } from '../../components/gamehud/RollingLine.jsx'
 import { useRevealProgress } from '../../hooks/useRevealProgress.js'
 import { selectInningCount, selectRegulationInnings, selectTeamMeta } from '../../api/select.js'
 
@@ -51,7 +52,7 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
   // in the innings viewer and on every other device (reveal.js, ADR-0022).
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
-  const { revealedThrough, revealTo, revealAtBat } = useRevealProgress(
+  const { revealedThrough, revealTo, revealAtBat, unlocked } = useRevealProgress(
     feed,
     regulation,
     actualCount,
@@ -86,12 +87,13 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
 
   // Club identity, off the spoiler-free selector every lineup page already
   // uses. A club's name is not a score.
-  const names = useMemo(
-    () => ({
-      away: selectTeamMeta(feed, 'away')?.name ?? 'Visitors',
-      home: selectTeamMeta(feed, 'home')?.name ?? 'Home',
-    }),
+  const meta = useMemo(
+    () => ({ away: selectTeamMeta(feed, 'away') ?? {}, home: selectTeamMeta(feed, 'home') ?? {} }),
     [feed],
+  )
+  const names = useMemo(
+    () => ({ away: meta.away.name ?? 'Visitors', home: meta.home.name ?? 'Home' }),
+    [meta],
   )
 
   if (!started) {
@@ -199,9 +201,45 @@ export function ExpressLanePage({ feed, gamePk, onLeave }) {
         <span className="xl__booth">{booth === 'home' ? names.home : names.away}</span>
       </header>
 
+      {/* THE RUNNING LINE, and it is the same component the innings view puts
+          at its top — not a version of it. Every run cell is a button that
+          jumps to that half, so choosing where to go reads like reading a line
+          score rather than hunting through a chip strip, and a scorer who works
+          in the innings view already knows how it behaves.
+
+          Reusing it also inherits its seal: a cell is READ only when its
+          half-index is at or below `revealedThrough`, so nothing sealed is ever
+          computed into the grid, and the extra-innings window scroll that
+          ADR-0008 requires comes along for free.
+
+          `runsInProgress` is deliberately NOT passed. In the innings view that
+          prop builds the current half's cell as you step through it; here the
+          reveal is atomic with the film, and a half being scored right now has
+          a total the scorer is still deriving from the picture. It stays blank
+          until the half commits.
+
+          The arrows in the bar stay, for the reason the innings view keeps its
+          own Back/Next beside this grid: once extras unlock, the visible window
+          scrolls and a half can slide off the end of it. */}
+      <RollingLine
+        feed={feed}
+        regulation={regulation}
+        unlocked={unlocked}
+        revealedThrough={revealedThrough}
+        awayAbbr={meta.away.abbreviation}
+        homeAbbr={meta.home.abbreviation}
+        awayName={meta.away.clubName}
+        homeName={meta.home.clubName}
+        curIdx={lane.halfIdx}
+        onSelect={lane.goToHalf}
+      />
+
+      {/* The film pane reads the gate for the row the cursor is ON — never the
+          row ahead, and never a fallback to it. Before the first advance there
+          is no row at all, and it says so rather than describing one. */}
       <FilmPane
         clipUrl={lane.clip.url}
-        gate={lane.currentGate ?? gate}
+        gate={lane.currentGate}
         blockedReason={lane.job.blockedReason}
         onSkipFilm={lane.skipFilm}
         onRetry={lane.retry}

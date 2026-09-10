@@ -268,6 +268,22 @@ export function useExpressLane({
     setHalfIdx((idx) => (idx < maxHalfIdx ? idx + 1 : idx))
   }, [maxHalfIdx])
 
+  // Jump to a half by index — what the running line's run cells call.
+  //
+  // Clamped forward to the same frontier the arrow is, and for the same reason:
+  // every cell in that grid is a live button, including the blank one for the
+  // half not yet reached, so without this a tap two columns along would build
+  // the rail for a half the scorer has not unlocked and stage its film.
+  // Backwards is unrestricted, because those halves are already scored.
+  const goToHalf = useCallback(
+    (idx) => {
+      const target = Math.max(0, Math.min(idx, maxHalfIdx))
+      setCursorKey(null)
+      setHalfIdx(target)
+    },
+    [maxHalfIdx],
+  )
+
   // Back a half. Always allowed and never gated: every half behind the cursor
   // is one the scorer has already scored, and going back to look again is the
   // whole reason the foot strip exists. It is also the way OUT of the empty
@@ -312,6 +328,7 @@ export function useExpressLane({
     canStepBack,
     nextHalf,
     prevHalf,
+    goToHalf,
     skipFilm,
     retry,
   }

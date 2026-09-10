@@ -205,7 +205,7 @@ export function GameView({ game, section, onSection }) {
   if (feed && step === 7) {
     return (
       <Suspense fallback={<Loader />}>
-        <ExpressLanePage feed={feed} gamePk={game.gamePk} onLeave={() => onSection('scorecard')} />
+        <ExpressLanePage feed={feed} gamePk={game.gamePk} onLeave={() => onSection('boxscore')} />
       </Suspense>
     )
   }
