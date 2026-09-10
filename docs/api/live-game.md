@@ -338,6 +338,26 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   and cannot enforce: a poster carries the broadcast scorebug burned into the
   pixels, so it may render only inside an already-revealed play and never as the
   placeholder for the NEXT clip; and no surface may print a game-wide clip total.
+- **Tier 3 is not in `src/api/`** — `src/lib/expresslane/` holds it, because it
+  reads no baseball at all: `staging.js` is the queue and THE FILM GATE (a pure
+  state machine over playIds), `byteStore.js` is the on-device IndexedDB Blob
+  store, and `runner.js` is the single-threaded download loop that joins them to
+  `clipIndex.js`. Four things a caller of Tier 1 or 2 should know about it. (1)
+  The gate blocks the cursor ONLY while a clip that is EXPECTED has not arrived,
+  and an empty resolution counts as no clip expected — MLB mints playIds by
+  formula for every intentional walk and most pitch-timer violations, about 1.2 a
+  game, and a gate that waits on one deadlocks (#1024). Never pattern-match the id
+  string. (2) The queue is filled ONE HALF AT A TIME, for the same ADR-0008 reason
+  the rail has no whole-game builder; the sanctioned `revealedThrough + 1`
+  lookahead also happens to be the right staging lead, so nothing else caps it.
+  (3) Staging is SINGLE-THREADED by measurement — 7 parallel downloads gave the
+  same 2.1 Mbps aggregate as one — and a 403 stops the job rather than being
+  retried. (4) Bytes are IndexedDB Blobs and the service worker stays out of the
+  playback path; `checkoutClip` hands back the call that revokes the object URL,
+  and a caller that leaves a clip without calling it leaks about 6 MB each time.
+  Verified 2026-09-10: the byte host answers cross-origin with
+  `access-control-allow-origin: *` and a real 206, so a plain `fetch()` reaches it
+  with no proxy, no service worker and no Referer spoofing.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
   `linescore.js` also holds `revealStampFacts`, the Logbook stamp's game blob
   (final score, clubs, venue, innings) in the exact shape `api/stamps.js` caches
