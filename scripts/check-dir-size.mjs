@@ -629,7 +629,7 @@ const BUDGETS = {
   // scripts/lib/ is for helpers that do not run on import — which is exactly
   // where its pure half (schedule-shape.mjs) went.
   // +1 for migrate-contract-row-keys.mjs — a one-off, dry-run-by-default
-  // migration of the ADR-0067 contract-identity overrides onto ADR-0069's
+  // migration of the ADR-0067 contract-identity overrides onto ADR-0070's
   // content keys. It belongs beside the gen-contracts-* scripts it has to stay
   // consistent with, not in lib/: it is an entry point, not a helper, and the
   // only thing in the tree that may write to that Redis hash.
@@ -781,7 +781,7 @@ const BUDGETS = {
   // -site game inside a road series, a club that changed parks mid-range, a
   // doubleheader that has to keep its order).
   // +1 for contract-row-key.mjs — the key that names one historical-contract
-  // row (ADR-0069). It sits beside contract-identity-match.mjs and csv.mjs, the
+  // row (ADR-0070). It sits beside contract-identity-match.mjs and csv.mjs, the
   // rest of that pipeline's pure, unit-tested halves, because three generators,
   // the migration and test/contract-row-key.test.js all have to mint the same
   // key: two copies that drift are a row whose money can never be found.

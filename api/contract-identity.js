@@ -42,7 +42,7 @@ export const config = { runtime: 'nodejs' }
 const OVERRIDES_KEY = 'contracts:identity:overrides'
 // Two shapes, and both must pass for as long as an un-migrated override can
 // still sit in Redis. `#<16 hex>` is the content key a row carries now
-// (ADR-0069, scripts/lib/contract-row-key.mjs). `#<digits>` is the positional
+// (ADR-0070, scripts/lib/contract-row-key.mjs). `#<digits>` is the positional
 // key rows carried before it. The two can never be read as one another -- a
 // positional index is at most five digits across these four files, a content
 // hash is always sixteen hex characters -- so accepting both costs nothing in

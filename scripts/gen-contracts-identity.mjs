@@ -6,7 +6,7 @@
 //
 // Every row is named by a CONTENT key that scripts/lib/contract-row-key.mjs
 // mints -- `salaries#3f0c7a1e58d4b269`, a hash over the row's own identifying
-// cells, never its position in the file (ADR-0069). Read that module's header
+// cells, never its position in the file (ADR-0070). Read that module's header
 // before changing which columns a key covers: the key is what an ADR-0067
 // admin override is stored against, so a change to it orphans live human
 // corrections and needs the migration script, not just a regenerate.

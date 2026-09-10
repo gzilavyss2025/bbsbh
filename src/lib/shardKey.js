@@ -23,7 +23,7 @@ export function shardKey100(personId) {
 //
 // A rowKey used to carry the row's position in its source file, so the bucket
 // was arithmetic on that position and grew with the file for free. A content
-// key carries no position (ADR-0069), so the bucket is a slice of the key's own
+// key carries no position (ADR-0070), so the bucket is a slice of the key's own
 // hash instead, and the DIVISOR has to be stated rather than derived. These
 // counts are picked to hold each source at roughly 500 rows a bucket, which is
 // where the positional scheme sat: one 1.5 MB download for salaries.csv is the

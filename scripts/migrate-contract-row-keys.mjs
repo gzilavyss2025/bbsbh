@@ -1,6 +1,6 @@
 // Moves the ADR-0067 contract-identity overrides from the old POSITIONAL rowKey
 // (`salaries#24340` — row 24340 of salaries.csv) to the CONTENT key a row
-// carries now (`salaries#3f0c7a1e58d4b269`, ADR-0069).
+// carries now (`salaries#3f0c7a1e58d4b269`, ADR-0070).
 //
 // These are live, human-made decisions. A reviewer sat down and said "this row
 // is Vicente Padilla, not whoever the matcher picked". There is no rebuild that
@@ -31,7 +31,7 @@
 // the CSV row and the name of the corrected player should be recognisably the
 // same man. A reviewer correcting a misspelling ("Padillia, Vicente" ->
 // Vicente Padilla) leaves a near match. A shifted key leaves an unrelated name,
-// which is exactly the shape the incident behind ADR-0069 produced: the probe
+// which is exactly the shape the incident behind ADR-0070 produced: the probe
 // that found it read `salaries#24340` as "Giles, Marcus" against a CSV row for
 // "Hernandez, Adrian". Every override whose two names do not resemble each
 // other is flagged for a human, not migrated on this script's say-so.
