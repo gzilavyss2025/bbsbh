@@ -164,7 +164,10 @@ states how many innings the game ran and so whether it went to extras
 (ADR-0008). And a poster URL is safe while the PICTURE is not — every frame
 carries the broadcast scorebug burned into the pixels — so a poster may render
 only inside an already-revealed play, and never as the placeholder for the next
-clip. `.scratch/express-lane/PRD.md` carries the reasoning and the measurements.
+clip. Tier 3 — the staging queue, the film gate and the on-device byte store —
+is NOT here: it holds no baseball, only playIds and Blobs, so it lives in
+`src/lib/expresslane/` (`staging.js`, `byteStore.js`, `runner.js`).
+`.scratch/express-lane/PRD.md` carries the reasoning and the measurements.
 
 The three older subdirectories — `person/`, `playbyplay/`, `callout-notes/` — carry
 their notes in each file's own header plus a barrel file that explains the split
