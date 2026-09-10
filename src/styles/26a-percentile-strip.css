@@ -225,3 +225,27 @@
   line-height: var(--lh-ui);
   color: var(--text-body);
 }
+
+/* ---- the credit line under a strip fed by an OUTSIDE dataset ----
+   Only the Target Command strip (components/charts/TargetCommand.jsx) carries
+   one: its data is OpenCommand's, under CC BY-NC-SA 4.0, and that licence
+   requires the credit wherever the data is shown. So this is a term of use
+   rendered as text, not a caption someone may tidy away — the same standing
+   .paysource has on the salaries board.
+
+   Pencil-graphite caption ink, subordinate to the rows above it, and a real
+   visible link rather than a hover title: a title attribute is invisible on
+   the phone this app is built for. */
+.pctstrip__source {
+  max-width: 620px;
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-caption);
+}
+.pctstrip__source a {
+  color: inherit;
+  text-decoration-thickness: var(--bw-hair);
+  text-underline-offset: 2px;
+}

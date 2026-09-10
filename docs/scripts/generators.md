@@ -432,6 +432,100 @@ don't run these by hand.
   file, so a schema change like this needs an explicit `--since=` backfill
   covering the season to date, same as `gen-pitch-arsenal.mjs` needs for a
   new level.
+- `gen-command.mjs` → `public/data/target-command.json` — TARGET COMMAND: each
+  pitcher's median distance, in inches, between where the catcher set up and
+  where the pitch actually crossed, per pitch type, for one season. Read by
+  `src/api/targetCommand.js` for the player page's Analytics tab
+  (`TargetCommand.jsx`, the second percentile strip on that shelf, sitting under
+  the Command Map it deepens).
+  **The only generator here that reads an OUTSIDE dataset.** The source is
+  [OpenCommand](https://huggingface.co/datasets/tomdoyo/open-command) — catcher
+  targets inferred from broadcast video, `CC BY-NC-SA 4.0`, so every surface
+  rendering it carries a visible credit line and the non-commercial term is a
+  standing constraint on this app. Coverage starts at **2024** and there will
+  never be more history: no broadcast video, no glove to find. All download,
+  caching, parsing and joining lives once in `scripts/lib/opencommand.mjs`, the
+  helper `gen-command-zone.mjs` and `gen-command-received.mjs` share.
+  **The join is the interesting part.** The small rollup it reads
+  (`command_scores.csv`, ~270 KB) keys a pitcher by NAME and carries no id
+  column at all, so the id comes from the dataset's own per-pitch
+  `pbp_info.csv.gz` (~78 MB), which has both. Verified live: 2025 and 2026 map
+  cleanly (873/873 and 814/814 names to ids), 2024 collides on exactly two —
+  Luis Ortiz and Logan Allen — and those rows are **dropped, not guessed**,
+  because a rollup row keyed on a shared name is already two pitchers blended.
+  That 78 MB download is cached under `node_modules/.cache` and shared with the
+  other two OpenCommand generators, so a nightly run pays for it once.
+  **One season, the current one**, matching `gen-savant-percentiles.mjs` — the
+  Analytics tab reads a player's current season, so shipping three would send
+  two of them to every reader for nothing; `--season=` overrides. Each row is
+  ranked against **its own pitch type**, not a pooled league: a curveball misses
+  by about 1.8in more than a sinker league-wide (2026: 11.0in against 9.2in), so
+  one pooled distribution would tell a curveball specialist he has poor command
+  of a pitch he throws better than anyone. Floors: `MIN_COMMAND_PITCHES` (50,
+  deliberately the same figure `commandMap.js` uses) for a row to appear, and 20
+  pitchers throwing a type before it is ranked at all.
+- `gen-command-zone.mjs` → `public/data/glove-target/{NN}.json` (per-pitcher
+  buckets on `personId % 100`) — GLOVE TARGET: the cloud behind the figures
+  `gen-command.mjs` writes. One dot per pitch, read by `src/api/gloveTarget.js`
+  for `GloveTarget.jsx` on the Analytics tab, directly under the Target Command
+  strip whose numbers it draws. Same OpenCommand source, same shared helper,
+  same licence and credit line.
+  **Each dot is a MISS VECTOR, not a location, and that is the whole design.**
+  Every pitch has its own target — the catcher sets up outside, then inside,
+  then low — so scattering absolute locations around one average target would
+  draw the catcher's movement and the pitcher's miss added together, with
+  nothing on the card saying which is which, and the median-miss ring would not
+  halve the cloud. Storing `actual - target` instead puts the glove at the
+  origin for every dot by construction, makes the ring genuinely bisect the
+  cloud, and shows a pitcher who consistently misses high or arm-side as an
+  off-centre cloud — the one thing no other card on that page can say. It also
+  avoids a trap the absolute version has to solve: a miss is a difference of two
+  heights, so the batter's own zone cancels and there is no zone normalisation
+  to get wrong (and no reason to reach for `lib/zone/zoneGeometry.js`, whose
+  projection maps a location into a strike zone a miss offset does not have).
+  **The dots are a quantile sample, not the first N and not a shuffle.** 48 per
+  pitch type, taken by striding over the DISTANCE-sorted season, so the drawn
+  cloud carries the season's real radial spread and the ring halves it —
+  measured, a season-order stride left a 7.78in ring over a drawn cloud whose
+  own median was 7.50in, and a reader counting dots inside the ring would have
+  been counting a sampling accident. Directions are untouched. Deterministic, so
+  a nightly rerun over unmoved data writes an identical file; there is no
+  `generatedAt` in a bucket for the same reason (the churn `gen-contracts-shards.mjs`
+  taught this repo about).
+  Also ships a per-row `bias` — the MEDIAN miss offset over **every** pitch, not
+  over the 48 drawn — which the card turns into "misses low and to the
+  catcher's right" above a 2in floor. Measured over the whole 2026 set only 3.6%
+  of rows clear that floor (median largest component 0.6in), so the card prints
+  the clause only when there is one and says nothing otherwise, rather than
+  reading "no consistent direction" on nineteen cards in twenty.
+- `gen-command-received.mjs` → `public/data/command-received.json` — COMMAND
+  RECEIVED: per catcher, the pitchers who threw to him this season ranked by
+  median miss from his target. Read by `src/api/commandReceived.js` for
+  `CommandReceivedCard.jsx`, which renders in its own **Catching** section on the
+  Analytics tab — added ALONGSIDE a catcher's hitting block, never replacing it.
+  **The catcher is entirely bbsbh's own join.** OpenCommand carries no catcher
+  identity anywhere: its method detects an anonymous glove per pitcher per game
+  and was never told, and never infers, whose it was. So this generator fetches
+  one feed per game in the season's coverage (1,865 for 2026) and replays each
+  one's defensive substitutions through `src/api/catcherOfRecord.js`, which asks
+  `defense.js`'s existing chain a narrower question rather than re-implementing
+  the walk. Attribution is at HALF granularity — `defenseEntering` stops at a
+  half's first pitch, so a catcher who enters mid-half is credited from the next
+  one. Rare, accepted, and written down rather than papered over.
+  **The `play_id` join was verified, not assumed**: OpenCommand's `play_id` is
+  the same UUID as the feed's `playEvents[].playId`, checked against real game
+  822696. The 2026 run attributed **492,984 of 492,984 pitches, none unmatched,
+  with no feed failures** — which is the number that says both halves of the
+  join hold. Feeds are field-pruned to the dozen paths `defenseEntering` reads
+  (46 KB against 697 KB, verified to produce a byte-identical catcher chart),
+  fetched eight at a time.
+  Current season only for now — prove the pipeline on one before spending three
+  times the fetching on history; `--season=` overrides, `--limit=` runs a
+  handful of games end to end. Same `MIN_COMMAND_PITCHES` floor before a pitcher
+  earns a row. The card's causation footer (`CAUSATION_NOTE`) is REQUIRED copy
+  and lives in the data layer for that reason: the figure is mostly each
+  PITCHER's own command, and a ranked list under a catcher's name reads as a
+  catcher's skill unless something says otherwise.
 - `gen-spray.mjs` → `public/data/spray/{NN}.json` (per-batter buckets on
   `personId % 100`) — the batter-side sibling of `gen-pitch-arsenal.mjs`: every
   ball in play this season, with the raw Gameday landing coordinate, the exit

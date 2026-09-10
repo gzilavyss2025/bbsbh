@@ -35,6 +35,9 @@ import {
   pitcherRole,
 } from '../person.js'
 import { fetchCommandFor } from '../commandMap.js'
+import { fetchTargetCommand, targetCommandFor } from '../targetCommand.js'
+import { fetchGloveTargetFor } from '../gloveTarget.js'
+import { fetchCommandReceived, commandReceivedFor } from '../commandReceived.js'
 import { currentSeasonFor, playerContext } from './context.js'
 
 export async function loadPlayerAnalytics(id, asOf) {
@@ -44,10 +47,17 @@ export async function loadPlayerAnalytics(id, asOf) {
 
   // Statcast percentile ranks and the league-wide pitch mix are both same-origin
   // static files, session-cached after the first read anywhere in the app.
-  const [savantData, prospectTrend, levelTenure] = await Promise.all([
+  const [savantData, prospectTrend, levelTenure, targetCommandData, commandReceivedData] = await Promise.all([
     fetchSavantPercentiles(),
     fetchProspectTrend(),
     fetchLevelTenure(),
+    // OpenCommand's season rollup — one small same-origin file, session-cached
+    // like the three beside it. Fetched for every player rather than only for a
+    // pitcher: it is one read for the whole app, and a hitter's block simply
+    // finds nothing in it.
+    fetchTargetCommand(),
+    // The catcher-side cut of the same dataset, ~50 KB and read the same way.
+    fetchCommandReceived(),
   ])
 
   const blocks = await Promise.all(
@@ -121,6 +131,16 @@ export async function loadPlayerAnalytics(id, asOf) {
       // WHERE he puts it — the same sweep's other half, its own shard. Fetched
       // only for a pitching block, like the arsenal beside it.
       block.command = group === 'pitching' ? await fetchCommandFor(id) : null
+      // DID HE MEAN TO — the same question one level deeper than block.command,
+      // off an outside dataset (see api/targetCommand.js). Pure lookups into the
+      // file already fetched above; the whole file rides the block too, because
+      // the strip's league baseline and its credit line both live in it.
+      block.targetCommand = group === 'pitching' ? targetCommandFor(targetCommandData, id, season) : null
+      block.targetCommandData = targetCommandData
+      // WHICH WAY he misses — the cloud behind that strip's figures, in its own
+      // ~14 KB bucket (`personId % 100`) rather than the league in one file.
+      // Fetched only for a pitching block, like block.command beside it.
+      block.gloveTarget = group === 'pitching' ? await fetchGloveTargetFor(id, season) : null
       block.heat = arsenalShard ? heatView(arsenalShard, id, tileSportId === 1) : null
       block.arsenalTto = arsenalShard ? arsenalTtoView(arsenalShard, id, tileSportId === 1) : null
       // The same shard's other split — what he throws to each side of the
@@ -155,11 +175,24 @@ export async function loadPlayerAnalytics(id, asOf) {
         )
       : null
 
+  // CATCHING — its own card, not a stat block, and not a swap for anything.
+  //
+  // The obvious build was a third `group` beside hitting and pitching, and it
+  // is the wrong one: `groups` comes from the stat groups statsapi itself
+  // reports, and every consumer of a block (the tiles, the splits, the
+  // "hits like" neighbours) is built to shape one of those. Inventing a
+  // synthetic group would push an empty stat block through all of that
+  // machinery to render one list. This rides alongside instead — a catcher
+  // keeps his hitting block exactly as it was, and gains a card.
+  const commandReceived = commandReceivedFor(commandReceivedData, bio.id, season)
+
   return {
     bio,
     blocks,
     season,
     asOf,
+    commandReceived,
+    commandReceivedData,
     sportId: currentActivitySportId,
     prospectCard,
     prospectCardGroup: trendEntry?.group ?? primaryGroup,

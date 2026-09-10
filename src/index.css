@@ -149,6 +149,9 @@
      26a-percentile-strip     components/charts/PercentileStrip.jsx
      26b-player-contract      components/playerstats/PlayerContractCard.jsx
      26e-contract-history     components/player/ContractHistoryLedger.jsx
+     26f-glove-target         components/charts/GloveTarget.jsx (which also
+                              imports 26d-command-map.css directly, reusing its
+                              .cmdmap__chip pills rather than restating them)
      30-standings             screens/StandingsPage.jsx
      32-milestone-watch       screens/MilestoneWatchPage.jsx
      34-postseason            screens/PostseasonHistoryPage.jsx

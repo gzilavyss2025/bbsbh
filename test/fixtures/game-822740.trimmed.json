@@ -1,0 +1,3593 @@
+{
+ "gameData": {
+  "teams": {
+   "away": {
+    "id": 142,
+    "abbreviation": "MIN"
+   },
+   "home": {
+    "id": 120,
+    "abbreviation": "WSH"
+   }
+  },
+  "players": {
+   "ID691781": {
+    "id": 691781,
+    "fullName": "Brady House",
+    "firstName": "Brady",
+    "lastName": "House",
+    "useName": "Brady",
+    "useLastName": "House",
+    "boxscoreName": "House"
+   },
+   "ID683083": {
+    "id": 683083,
+    "fullName": "Nasim Nuñez",
+    "firstName": "Nasim",
+    "lastName": "Nuñez",
+    "useName": "Nasim",
+    "useLastName": "Nuñez",
+    "boxscoreName": "Nuñez, N"
+   },
+   "ID665019": {
+    "id": 665019,
+    "fullName": "Kody Clemens",
+    "firstName": "Kody",
+    "lastName": "Clemens",
+    "useName": "Kody",
+    "useLastName": "Clemens",
+    "boxscoreName": "Clemens"
+   },
+   "ID686797": {
+    "id": 686797,
+    "fullName": "Brooks Lee",
+    "firstName": "Brooks",
+    "lastName": "Lee",
+    "useName": "Brooks",
+    "useLastName": "Lee",
+    "boxscoreName": "Lee, B"
+   },
+   "ID668885": {
+    "id": 668885,
+    "fullName": "Austin Martin",
+    "firstName": "Christopher",
+    "lastName": "Martin",
+    "useName": "Austin",
+    "useLastName": "Martin",
+    "boxscoreName": "Martin"
+   },
+   "ID663992": {
+    "id": 663992,
+    "fullName": "Richard Lovelady",
+    "firstName": "Richard",
+    "lastName": "Lovelady",
+    "useName": "Richard",
+    "useLastName": "Lovelady",
+    "boxscoreName": "Lovelady"
+   },
+   "ID680573": {
+    "id": 680573,
+    "fullName": "Simeon Woods Richardson",
+    "firstName": "Simeon",
+    "lastName": "Woods Richardson",
+    "useName": "Simeon",
+    "useLastName": "Woods Richardson",
+    "boxscoreName": "Woods Richardson"
+   },
+   "ID607455": {
+    "id": 607455,
+    "fullName": "Anthony Banda",
+    "firstName": "Frank",
+    "lastName": "Banda",
+    "useName": "Anthony",
+    "useLastName": "Banda",
+    "boxscoreName": "Banda"
+   },
+   "ID695418": {
+    "id": 695418,
+    "fullName": "Brad Lord",
+    "firstName": "Bradley",
+    "lastName": "Lord",
+    "useName": "Brad",
+    "useLastName": "Lord",
+    "boxscoreName": "Lord"
+   },
+   "ID695734": {
+    "id": 695734,
+    "fullName": "Daylen Lile",
+    "firstName": "Daylen",
+    "lastName": "Lile",
+    "useName": "Daylen",
+    "useLastName": "Lile",
+    "boxscoreName": "Lile"
+   },
+   "ID695578": {
+    "id": 695578,
+    "fullName": "James Wood",
+    "firstName": "James",
+    "lastName": "Wood",
+    "useName": "James",
+    "useLastName": "Wood",
+    "boxscoreName": "Wood"
+   },
+   "ID681402": {
+    "id": 681402,
+    "fullName": "Gus Varland",
+    "firstName": "Augustus",
+    "lastName": "Varland",
+    "useName": "Gus",
+    "useLastName": "Varland",
+    "boxscoreName": "Varland, G"
+   },
+   "ID641793": {
+    "id": 641793,
+    "fullName": "Zack Littell",
+    "firstName": "Zack",
+    "lastName": "Littell",
+    "useName": "Zack",
+    "useLastName": "Littell",
+    "boxscoreName": "Littell"
+   },
+   "ID681892": {
+    "id": 681892,
+    "fullName": "Kody Funderburk",
+    "firstName": "Kody",
+    "lastName": "Funderburk",
+    "useName": "Kody",
+    "useLastName": "Funderburk",
+    "boxscoreName": "Funderburk"
+   },
+   "ID660688": {
+    "id": 660688,
+    "fullName": "Keibert Ruiz",
+    "firstName": "Keibert",
+    "lastName": "Ruiz",
+    "useName": "Keibert",
+    "useLastName": "Ruiz",
+    "boxscoreName": "Ruiz, K"
+   },
+   "ID621439": {
+    "id": 621439,
+    "fullName": "Byron Buxton",
+    "firstName": "Byron",
+    "lastName": "Buxton",
+    "useName": "Byron",
+    "useLastName": "Buxton",
+    "boxscoreName": "Buxton"
+   },
+   "ID670242": {
+    "id": 670242,
+    "fullName": "Matt Wallner",
+    "firstName": "Matthew",
+    "lastName": "Wallner",
+    "useName": "Matt",
+    "useLastName": "Wallner",
+    "boxscoreName": "Wallner"
+   },
+   "ID702193": {
+    "id": 702193,
+    "fullName": "Andrew Morris",
+    "firstName": "Andrew",
+    "lastName": "Morris",
+    "useName": "Andrew",
+    "useLastName": "Morris",
+    "boxscoreName": "Morris"
+   },
+   "ID682928": {
+    "id": 682928,
+    "fullName": "CJ Abrams",
+    "firstName": "Paul",
+    "lastName": "Abrams",
+    "useName": "CJ",
+    "useLastName": "Abrams",
+    "boxscoreName": "Abrams"
+   },
+   "ID623437": {
+    "id": 623437,
+    "fullName": "Justin Topa",
+    "firstName": "Justin",
+    "lastName": "Topa",
+    "useName": "Justin",
+    "useLastName": "Topa",
+    "boxscoreName": "Topa"
+   },
+   "ID686452": {
+    "id": 686452,
+    "fullName": "Drew Millas",
+    "firstName": "Andrew",
+    "lastName": "Millas",
+    "useName": "Drew",
+    "useLastName": "Millas",
+    "boxscoreName": "Millas"
+   },
+   "ID605170": {
+    "id": 605170,
+    "fullName": "Victor Caratini",
+    "firstName": "Victor",
+    "lastName": "Caratini",
+    "useName": "Victor",
+    "useLastName": "Caratini",
+    "boxscoreName": "Caratini"
+   },
+   "ID571945": {
+    "id": 571945,
+    "fullName": "Miles Mikolas",
+    "firstName": "Miles",
+    "lastName": "Mikolas",
+    "useName": "Miles",
+    "useLastName": "Mikolas",
+    "boxscoreName": "Mikolas"
+   },
+   "ID686894": {
+    "id": 686894,
+    "fullName": "Joey Wiemer",
+    "firstName": "Joseph",
+    "lastName": "Wiemer",
+    "useName": "Joey",
+    "useLastName": "Wiemer",
+    "boxscoreName": "Wiemer"
+   },
+   "ID678391": {
+    "id": 678391,
+    "fullName": "Jorbit Vivas",
+    "firstName": "Jorbit",
+    "lastName": "Vivas",
+    "useName": "Jorbit",
+    "useLastName": "Vivas",
+    "boxscoreName": "Vivas"
+   },
+   "ID656484": {
+    "id": 656484,
+    "fullName": "Tristan Gray",
+    "firstName": "Tristan",
+    "lastName": "Gray",
+    "useName": "Tristan",
+    "useLastName": "Gray",
+    "boxscoreName": "Gray, T"
+   },
+   "ID804619": {
+    "id": 804619,
+    "fullName": "John Klein",
+    "firstName": "John",
+    "lastName": "Klein",
+    "useName": "John",
+    "useLastName": "Klein",
+    "boxscoreName": "Klein"
+   },
+   "ID605137": {
+    "id": 605137,
+    "fullName": "Josh Bell",
+    "firstName": "Joshua",
+    "lastName": "Bell",
+    "useName": "Josh",
+    "useLastName": "Bell",
+    "boxscoreName": "Bell"
+   },
+   "ID676571": {
+    "id": 676571,
+    "fullName": "PJ Poulin",
+    "firstName": "Peter",
+    "lastName": "Poulin",
+    "useName": "PJ",
+    "useLastName": "Poulin",
+    "boxscoreName": "Poulin"
+   },
+   "ID678554": {
+    "id": 678554,
+    "fullName": "Curtis Mead",
+    "firstName": "Curtis",
+    "lastName": "Mead",
+    "useName": "Curtis",
+    "useLastName": "Mead",
+    "boxscoreName": "Mead"
+   },
+   "ID677588": {
+    "id": 677588,
+    "fullName": "José Tena",
+    "firstName": "José",
+    "lastName": "Tena",
+    "useName": "José",
+    "useLastName": "Tena",
+    "boxscoreName": "Tena"
+   },
+   "ID687570": {
+    "id": 687570,
+    "fullName": "Connor Prielipp",
+    "firstName": "Connor",
+    "lastName": "Prielipp",
+    "useName": "Connor",
+    "useLastName": "Prielipp",
+    "boxscoreName": "Prielipp"
+   },
+   "ID676917": {
+    "id": 676917,
+    "fullName": "Cade Cavalli",
+    "firstName": "Steven",
+    "lastName": "Cavalli",
+    "useName": "Cade",
+    "useLastName": "Cavalli",
+    "boxscoreName": "Cavalli"
+   },
+   "ID696285": {
+    "id": 696285,
+    "fullName": "Jacob Young",
+    "firstName": "Jacob",
+    "lastName": "Young",
+    "useName": "Jacob",
+    "useLastName": "Young",
+    "boxscoreName": "Young"
+   },
+   "ID680777": {
+    "id": 680777,
+    "fullName": "Ryan Jeffers",
+    "firstName": "Ryan",
+    "lastName": "Jeffers",
+    "useName": "Ryan",
+    "useLastName": "Jeffers",
+    "boxscoreName": "Jeffers"
+   },
+   "ID663623": {
+    "id": 663623,
+    "fullName": "Jake Irvin",
+    "firstName": "Jacob",
+    "lastName": "Irvin",
+    "useName": "Jake",
+    "useLastName": "Irvin",
+    "boxscoreName": "Irvin, J"
+   },
+   "ID687377": {
+    "id": 687377,
+    "fullName": "Orlando Ribalta",
+    "firstName": "Orlando",
+    "lastName": "Ribalta",
+    "useName": "Orlando",
+    "useLastName": "Ribalta",
+    "boxscoreName": "Ribalta"
+   },
+   "ID681546": {
+    "id": 681546,
+    "fullName": "James Outman",
+    "firstName": "James",
+    "lastName": "Outman",
+    "useName": "James",
+    "useLastName": "Outman",
+    "boxscoreName": "Outman"
+   },
+   "ID680730": {
+    "id": 680730,
+    "fullName": "Mitchell Parker",
+    "firstName": "Mitchell",
+    "lastName": "Parker",
+    "useName": "Mitchell",
+    "useLastName": "Parker",
+    "boxscoreName": "Parker"
+   },
+   "ID573124": {
+    "id": 573124,
+    "fullName": "Taylor Rogers",
+    "firstName": "Taylor",
+    "lastName": "Rogers",
+    "useName": "Taylor",
+    "useLastName": "Rogers",
+    "boxscoreName": "Rogers, Ta"
+   },
+   "ID687606": {
+    "id": 687606,
+    "fullName": "Paxton Schultz",
+    "firstName": "Paxton",
+    "lastName": "Schultz",
+    "useName": "Paxton",
+    "useLastName": "Schultz",
+    "boxscoreName": "Schultz"
+   },
+   "ID641927": {
+    "id": 641927,
+    "fullName": "Bailey Ober",
+    "firstName": "John",
+    "lastName": "Ober",
+    "useName": "Bailey",
+    "useLastName": "Ober",
+    "boxscoreName": "Ober"
+   },
+   "ID687849": {
+    "id": 687849,
+    "fullName": "Zak Kent",
+    "firstName": "Zachary",
+    "lastName": "Kent",
+    "useName": "Zak",
+    "useLastName": "Kent",
+    "boxscoreName": "Kent, Z"
+   },
+   "ID668904": {
+    "id": 668904,
+    "fullName": "Royce Lewis",
+    "firstName": "Royce",
+    "lastName": "Lewis",
+    "useName": "Royce",
+    "useLastName": "Lewis",
+    "boxscoreName": "Lewis, R"
+   },
+   "ID656492": {
+    "id": 656492,
+    "fullName": "Foster Griffin",
+    "firstName": "Fred",
+    "lastName": "Griffin",
+    "useName": "Foster",
+    "useLastName": "Griffin",
+    "boxscoreName": "Griffin"
+   },
+   "ID663616": {
+    "id": 663616,
+    "fullName": "Trevor Larnach",
+    "firstName": "Trevor",
+    "lastName": "Larnach",
+    "useName": "Trevor",
+    "useLastName": "Larnach",
+    "boxscoreName": "Larnach"
+   },
+   "ID472610": {
+    "id": 472610,
+    "fullName": "Luis García",
+    "firstName": "Luis",
+    "lastName": "García",
+    "useName": "Luis",
+    "useLastName": "García",
+    "boxscoreName": "García, L"
+   },
+   "ID657746": {
+    "id": 657746,
+    "fullName": "Joe Ryan",
+    "firstName": "Joseph",
+    "lastName": "Ryan",
+    "useName": "Joe",
+    "useLastName": "Ryan",
+    "boxscoreName": "Ryan"
+   },
+   "ID671277": {
+    "id": 671277,
+    "fullName": "Luis García Jr.",
+    "firstName": "Luis",
+    "lastName": "García",
+    "useName": "Luis",
+    "useLastName": "García Jr.",
+    "boxscoreName": "García Jr., L"
+   },
+   "ID679358": {
+    "id": 679358,
+    "fullName": "Eric Orze",
+    "firstName": "Eric",
+    "lastName": "Orze",
+    "useName": "Eric",
+    "useLastName": "Orze",
+    "boxscoreName": "Orze"
+   },
+   "ID807712": {
+    "id": 807712,
+    "fullName": "Luke Keaschall",
+    "firstName": "Luke",
+    "lastName": "Keaschall",
+    "useName": "Luke",
+    "useLastName": "Keaschall",
+    "boxscoreName": "Keaschall"
+   }
+  }
+ },
+ "liveData": {
+  "plays": {
+   "allPlays": [
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 1
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "game_advisory"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 621439
+       }
+      },
+      {
+       "details": {
+        "eventType": "game_advisory"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 621439
+       }
+      },
+      {
+       "details": {
+        "eventType": "game_advisory"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 621439
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 1
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 1
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "game_advisory"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 663616
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 663616
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 1
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 1
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 1
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 2
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 2
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 665019
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 2
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 605170
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 2
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 2
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 2
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 3
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 3
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 670242
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 3
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "wild_pitch"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 670242
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 3
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 3
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": false
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 3
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 696285
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 3
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 3
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 4
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 663616
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 4
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 4
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 665019
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 4
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 4
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 695734
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 4
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "stolen_base_2b"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 695578
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 4
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "mound_visit"
+       },
+       "isPitch": false
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 4
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 4
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 5
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 605170
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 5
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 5
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 5
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 5
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 5
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 5
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 5
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 5
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "mound_visit"
+       },
+       "isPitch": false
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 5
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": false
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "stolen_base_2b"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 695578
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 6
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 6
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "mound_visit"
+       },
+       "isPitch": false
+      },
+      {
+       "details": {
+        "eventType": "pitching_substitution"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 680730
+       },
+       "position": {
+        "abbreviation": "P"
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 6
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 6
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 6
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 6
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "mound_visit"
+       },
+       "isPitch": false
+      },
+      {
+       "details": {
+        "eventType": "pitching_substitution"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 702193
+       },
+       "position": {
+        "abbreviation": "P"
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 6
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 6
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 6
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 6
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "mound_visit"
+       },
+       "isPitch": false
+      },
+      {
+       "details": {
+        "eventType": "pitching_substitution"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 681892
+       },
+       "position": {
+        "abbreviation": "P"
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 7
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 605137
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 7
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "offensive_substitution"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 680777
+       },
+       "position": {
+        "abbreviation": "PH"
+       },
+       "battingOrder": "501"
+      },
+      {
+       "details": {
+        "eventType": "mound_visit"
+       },
+       "isPitch": false
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 7
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 605170
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 7
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "defensive_switch"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 680777
+       },
+       "position": {
+        "abbreviation": "C"
+       },
+       "battingOrder": "501"
+      },
+      {
+       "details": {
+        "eventType": "defensive_switch"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 605170
+       },
+       "position": {
+        "abbreviation": "1B"
+       },
+       "battingOrder": "600"
+      },
+      {
+       "details": {
+        "eventType": "mound_visit"
+       },
+       "isPitch": false
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 7
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": false
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 7
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 7
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "mound_visit"
+       },
+       "isPitch": false
+      },
+      {
+       "details": {
+        "eventType": "pitching_substitution"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 623437
+       },
+       "position": {
+        "abbreviation": "P"
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 7
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 656484
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 695734
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {
+        "eventType": "batter_timeout"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 678554
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "mound_visit"
+       },
+       "isPitch": false
+      },
+      {
+       "details": {
+        "eventType": "pitching_substitution"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 472610
+       },
+       "position": {
+        "abbreviation": "P"
+       }
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "bottom",
+      "inning": 8
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 9
+     },
+     "playEvents": [
+      {
+       "details": {
+        "eventType": "pitching_substitution"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 687849
+       },
+       "position": {
+        "abbreviation": "P"
+       }
+      },
+      {
+       "details": {
+        "eventType": "offensive_substitution"
+       },
+       "isPitch": false,
+       "player": {
+        "id": 681546
+       },
+       "position": {
+        "abbreviation": "PH"
+       },
+       "battingOrder": "101"
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 9
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 9
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    },
+    {
+     "about": {
+      "halfInning": "top",
+      "inning": 9
+     },
+     "playEvents": [
+      {
+       "details": {},
+       "isPitch": true
+      },
+      {
+       "details": {},
+       "isPitch": true
+      }
+     ]
+    }
+   ]
+  },
+  "boxscore": {
+   "teams": {
+    "away": {
+     "team": {
+      "id": 142
+     },
+     "teamStats": {},
+     "players": {
+      "ID623437": {
+       "person": {
+        "id": 623437,
+        "fullName": "Justin Topa"
+       },
+       "jerseyNumber": "48",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "P"
+        }
+       ]
+      },
+      "ID605170": {
+       "person": {
+        "id": 605170,
+        "fullName": "Victor Caratini"
+       },
+       "jerseyNumber": "37",
+       "position": {
+        "abbreviation": "1B"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "600",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "C"
+        },
+        {
+         "abbreviation": "1B"
+        }
+       ]
+      },
+      "ID665019": {
+       "person": {
+        "id": 665019,
+        "fullName": "Kody Clemens"
+       },
+       "jerseyNumber": "2",
+       "position": {
+        "abbreviation": "1B"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "500",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "1B"
+        }
+       ]
+      },
+      "ID686797": {
+       "person": {
+        "id": 686797,
+        "fullName": "Brooks Lee"
+       },
+       "jerseyNumber": "22",
+       "position": {
+        "abbreviation": "SS"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "200",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "SS"
+        }
+       ]
+      },
+      "ID668885": {
+       "person": {
+        "id": 668885,
+        "fullName": "Austin Martin"
+       },
+       "jerseyNumber": "16",
+       "position": {
+        "abbreviation": "RF"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID680573": {
+       "person": {
+        "id": 680573,
+        "fullName": "Simeon Woods Richardson"
+       },
+       "jerseyNumber": "24",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID607455": {
+       "person": {
+        "id": 607455,
+        "fullName": "Anthony Banda"
+       },
+       "jerseyNumber": "43",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID656484": {
+       "person": {
+        "id": 656484,
+        "fullName": "Tristan Gray"
+       },
+       "jerseyNumber": "4",
+       "position": {
+        "abbreviation": "3B"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "900",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "3B"
+        }
+       ]
+      },
+      "ID804619": {
+       "person": {
+        "id": 804619,
+        "fullName": "John Klein"
+       },
+       "jerseyNumber": "71",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID605137": {
+       "person": {
+        "id": 605137,
+        "fullName": "Josh Bell"
+       },
+       "jerseyNumber": "56",
+       "position": {
+        "abbreviation": "DH"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "400",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "DH"
+        }
+       ]
+      },
+      "ID687570": {
+       "person": {
+        "id": 687570,
+        "fullName": "Connor Prielipp"
+       },
+       "jerseyNumber": "61",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID680777": {
+       "person": {
+        "id": 680777,
+        "fullName": "Ryan Jeffers"
+       },
+       "jerseyNumber": "27",
+       "position": {
+        "abbreviation": "C"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "501",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "PH"
+        },
+        {
+         "abbreviation": "C"
+        }
+       ]
+      },
+      "ID681546": {
+       "person": {
+        "id": 681546,
+        "fullName": "James Outman"
+       },
+       "jerseyNumber": "30",
+       "position": {
+        "abbreviation": "PH"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "101",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "PH"
+        }
+       ]
+      },
+      "ID573124": {
+       "person": {
+        "id": 573124,
+        "fullName": "Taylor Rogers"
+       },
+       "jerseyNumber": "55",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID641927": {
+       "person": {
+        "id": 641927,
+        "fullName": "Bailey Ober"
+       },
+       "jerseyNumber": "17",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "P"
+        }
+       ]
+      },
+      "ID681892": {
+       "person": {
+        "id": 681892,
+        "fullName": "Kody Funderburk"
+       },
+       "jerseyNumber": "57",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "P"
+        }
+       ]
+      },
+      "ID668904": {
+       "person": {
+        "id": 668904,
+        "fullName": "Royce Lewis"
+       },
+       "jerseyNumber": "23",
+       "position": {
+        "abbreviation": "3B"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID663616": {
+       "person": {
+        "id": 663616,
+        "fullName": "Trevor Larnach"
+       },
+       "jerseyNumber": "9",
+       "position": {
+        "abbreviation": "LF"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "300",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "LF"
+        }
+       ]
+      },
+      "ID472610": {
+       "person": {
+        "id": 472610,
+        "fullName": "Luis García"
+       },
+       "jerseyNumber": "40",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "P"
+        }
+       ]
+      },
+      "ID621439": {
+       "person": {
+        "id": 621439,
+        "fullName": "Byron Buxton"
+       },
+       "jerseyNumber": "25",
+       "position": {
+        "abbreviation": "CF"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "100",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "CF"
+        }
+       ]
+      },
+      "ID657746": {
+       "person": {
+        "id": 657746,
+        "fullName": "Joe Ryan"
+       },
+       "jerseyNumber": "41",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID670242": {
+       "person": {
+        "id": 670242,
+        "fullName": "Matt Wallner"
+       },
+       "jerseyNumber": "38",
+       "position": {
+        "abbreviation": "RF"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "800",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "RF"
+        }
+       ]
+      },
+      "ID679358": {
+       "person": {
+        "id": 679358,
+        "fullName": "Eric Orze"
+       },
+       "jerseyNumber": "19",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID702193": {
+       "person": {
+        "id": 702193,
+        "fullName": "Andrew Morris"
+       },
+       "jerseyNumber": "78",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "P"
+        }
+       ]
+      },
+      "ID807712": {
+       "person": {
+        "id": 807712,
+        "fullName": "Luke Keaschall"
+       },
+       "jerseyNumber": "15",
+       "position": {
+        "abbreviation": "2B"
+       },
+       "status": {},
+       "parentTeamId": 142,
+       "battingOrder": "700",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "2B"
+        }
+       ]
+      }
+     },
+     "batters": [
+      621439,
+      681546,
+      686797,
+      663616,
+      605137,
+      665019,
+      680777,
+      605170,
+      807712,
+      670242,
+      656484,
+      641927,
+      702193,
+      681892,
+      623437,
+      472610
+     ],
+     "pitchers": [
+      641927,
+      702193,
+      681892,
+      623437,
+      472610
+     ],
+     "bench": [
+      668904,
+      668885
+     ],
+     "bullpen": [
+      607455,
+      804619,
+      679358,
+      687570,
+      573124,
+      657746,
+      680573
+     ],
+     "battingOrder": [
+      681546,
+      686797,
+      663616,
+      605137,
+      680777,
+      605170,
+      807712,
+      670242,
+      656484
+     ],
+     "info": [
+      {}
+     ],
+     "note": [
+      {},
+      {}
+     ]
+    },
+    "home": {
+     "team": {
+      "id": 120
+     },
+     "teamStats": {},
+     "players": {
+      "ID691781": {
+       "person": {
+        "id": 691781,
+        "fullName": "Brady House"
+       },
+       "jerseyNumber": "12",
+       "position": {
+        "abbreviation": "3B"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "battingOrder": "500",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "3B"
+        }
+       ]
+      },
+      "ID682928": {
+       "person": {
+        "id": 682928,
+        "fullName": "CJ Abrams"
+       },
+       "jerseyNumber": "5",
+       "position": {
+        "abbreviation": "SS"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "battingOrder": "400",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "SS"
+        }
+       ]
+      },
+      "ID683083": {
+       "person": {
+        "id": 683083,
+        "fullName": "Nasim Nuñez"
+       },
+       "jerseyNumber": "26",
+       "position": {
+        "abbreviation": "2B"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "battingOrder": "900",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "2B"
+        }
+       ]
+      },
+      "ID686452": {
+       "person": {
+        "id": 686452,
+        "fullName": "Drew Millas"
+       },
+       "jerseyNumber": "14",
+       "position": {
+        "abbreviation": "C"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "battingOrder": "800",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "C"
+        }
+       ]
+      },
+      "ID571945": {
+       "person": {
+        "id": 571945,
+        "fullName": "Miles Mikolas"
+       },
+       "jerseyNumber": "36",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "P"
+        }
+       ]
+      },
+      "ID678391": {
+       "person": {
+        "id": 678391,
+        "fullName": "Jorbit Vivas"
+       },
+       "jerseyNumber": "84",
+       "position": {
+        "abbreviation": "3B"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID686894": {
+       "person": {
+        "id": 686894,
+        "fullName": "Joey Wiemer"
+       },
+       "jerseyNumber": "21",
+       "position": {
+        "abbreviation": "RF"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID663992": {
+       "person": {
+        "id": 663992,
+        "fullName": "Richard Lovelady"
+       },
+       "jerseyNumber": "55",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID676571": {
+       "person": {
+        "id": 676571,
+        "fullName": "PJ Poulin"
+       },
+       "jerseyNumber": "50",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID695418": {
+       "person": {
+        "id": 695418,
+        "fullName": "Brad Lord"
+       },
+       "jerseyNumber": "41",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID678554": {
+       "person": {
+        "id": 678554,
+        "fullName": "Curtis Mead"
+       },
+       "jerseyNumber": "45",
+       "position": {
+        "abbreviation": "1B"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "battingOrder": "300",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "1B"
+        }
+       ]
+      },
+      "ID695734": {
+       "person": {
+        "id": 695734,
+        "fullName": "Daylen Lile"
+       },
+       "jerseyNumber": "4",
+       "position": {
+        "abbreviation": "LF"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "battingOrder": "200",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "LF"
+        }
+       ]
+      },
+      "ID677588": {
+       "person": {
+        "id": 677588,
+        "fullName": "José Tena"
+       },
+       "jerseyNumber": "8",
+       "position": {
+        "abbreviation": "DH"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "battingOrder": "600",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "DH"
+        }
+       ]
+      },
+      "ID695578": {
+       "person": {
+        "id": 695578,
+        "fullName": "James Wood"
+       },
+       "jerseyNumber": "29",
+       "position": {
+        "abbreviation": "RF"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "battingOrder": "100",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "RF"
+        }
+       ]
+      },
+      "ID676917": {
+       "person": {
+        "id": 676917,
+        "fullName": "Cade Cavalli"
+       },
+       "jerseyNumber": "24",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID696285": {
+       "person": {
+        "id": 696285,
+        "fullName": "Jacob Young"
+       },
+       "jerseyNumber": "30",
+       "position": {
+        "abbreviation": "CF"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "battingOrder": "700",
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "CF"
+        }
+       ]
+      },
+      "ID663623": {
+       "person": {
+        "id": 663623,
+        "fullName": "Jake Irvin"
+       },
+       "jerseyNumber": "27",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID687377": {
+       "person": {
+        "id": 687377,
+        "fullName": "Orlando Ribalta"
+       },
+       "jerseyNumber": "64",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID681402": {
+       "person": {
+        "id": 681402,
+        "fullName": "Gus Varland"
+       },
+       "jerseyNumber": "47",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID641793": {
+       "person": {
+        "id": 641793,
+        "fullName": "Zack Littell"
+       },
+       "jerseyNumber": "18",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID680730": {
+       "person": {
+        "id": 680730,
+        "fullName": "Mitchell Parker"
+       },
+       "jerseyNumber": "70",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "P"
+        }
+       ]
+      },
+      "ID687606": {
+       "person": {
+        "id": 687606,
+        "fullName": "Paxton Schultz"
+       },
+       "jerseyNumber": "75",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID687849": {
+       "person": {
+        "id": 687849,
+        "fullName": "Zak Kent"
+       },
+       "jerseyNumber": "57",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {},
+       "allPositions": [
+        {
+         "abbreviation": "P"
+        }
+       ]
+      },
+      "ID660688": {
+       "person": {
+        "id": 660688,
+        "fullName": "Keibert Ruiz"
+       },
+       "jerseyNumber": "20",
+       "position": {
+        "abbreviation": "C"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID656492": {
+       "person": {
+        "id": 656492,
+        "fullName": "Foster Griffin"
+       },
+       "jerseyNumber": "22",
+       "position": {
+        "abbreviation": "P"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      },
+      "ID671277": {
+       "person": {
+        "id": 671277,
+        "fullName": "Luis García Jr."
+       },
+       "jerseyNumber": "2",
+       "position": {
+        "abbreviation": "1B"
+       },
+       "status": {},
+       "parentTeamId": 120,
+       "stats": {},
+       "seasonStats": {},
+       "gameStatus": {}
+      }
+     },
+     "batters": [
+      695578,
+      695734,
+      678554,
+      682928,
+      691781,
+      677588,
+      696285,
+      686452,
+      683083,
+      571945,
+      680730,
+      687849
+     ],
+     "pitchers": [
+      571945,
+      680730,
+      687849
+     ],
+     "bench": [
+      671277,
+      660688,
+      678391,
+      686894
+     ],
+     "bullpen": [
+      676917,
+      656492,
+      663623,
+      641793,
+      695418,
+      663992,
+      676571,
+      687377,
+      687606,
+      681402
+     ],
+     "battingOrder": [
+      695578,
+      695734,
+      678554,
+      682928,
+      691781,
+      677588,
+      696285,
+      686452,
+      683083
+     ],
+     "info": [
+      {},
+      {},
+      {}
+     ],
+     "note": []
+    }
+   }
+  }
+ }
+}

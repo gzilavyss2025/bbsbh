@@ -72,6 +72,10 @@
        `.wire__cutline`, and its club-name link `.wire__cutline .plink`
        (a player's `.wire__namelink` stays uppercase)
      - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc`
+     - the Command Received card's causation sentence — `.cmdrecv__note` (the
+       card's title, ranked names and figures all stay shouted; this line has to
+       be read rather than skimmed, because it is what stops the ranking above
+       it being taken for a catcher's own skill)
      - the spoiler-consent modal's explainer prose — `.consent__body`,
        `.consent__changes`, `.consent__reset`, `.consent__humor` (the title +
        buttons stay uppercase, same shouted-heading/natural-case-body split

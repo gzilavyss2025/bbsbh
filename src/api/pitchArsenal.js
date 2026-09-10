@@ -325,3 +325,49 @@ const PITCH_FAMILY = {
 export function pitchFamily(code) {
   return PITCH_FAMILY[code] ?? 'other'
 }
+
+// The pitch's NAME, from the same MLB code table PITCH_FAMILY above keys on.
+//
+// NEVER SHOW A READER THE CODE. "FF" is the scorer's shorthand for a fastball
+// and it belongs in a scorebook cell, not on a control someone taps: a filter
+// chip has to say what it filters to. (The scorebook's own notation — F8, 6-3,
+// K — is a different thing entirely and stays exactly as it is; that is the
+// app's whole point.)
+//
+// It lives HERE, beside pitchFamily, because three cards need it and they are
+// not otherwise related: the Command Map's chips, the Glove Target's chips, and
+// the Target Command strip's row labels. A copy per card is the drift
+// scripts/lib/command-grid.mjs's header warns about, and the arsenal cards
+// cannot help — those read their names off the live feed, which spells the same
+// pitch inconsistently ("Four-Seam Fastball" vs "Four-seam FB") and is not
+// available to a card built on a nightly precompute.
+//
+// Short forms on purpose: these sit in a pill and in a fixed-width strip
+// column, where "Four-Seam Fastball" wraps and "Fastball" does not. A code with
+// no entry falls back to itself, which is honest and legible rather than blank.
+const PITCH_LABEL = {
+  FF: 'Fastball',
+  FA: 'Fastball',
+  SI: 'Sinker',
+  FC: 'Cutter',
+  FT: 'Two-seam',
+  SL: 'Slider',
+  ST: 'Sweeper',
+  SV: 'Slurve',
+  CU: 'Curveball',
+  KC: 'Knuckle curve',
+  CS: 'Slow curve',
+  SC: 'Screwball',
+  CH: 'Changeup',
+  FS: 'Splitter',
+  FO: 'Forkball',
+  SF: 'Split-finger',
+  EP: 'Eephus',
+  KN: 'Knuckleball',
+  IN: 'Intentional ball',
+  PO: 'Pitchout',
+}
+
+export function pitchLabel(code) {
+  return PITCH_LABEL[code] ?? code
+}

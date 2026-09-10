@@ -7,6 +7,9 @@ import { AdvancedStatsCard } from '../../components/player/AdvancedStatsCard.jsx
 import { ProspectCard } from '../../components/playerstats/ProspectCard.jsx'
 import { PitchMix } from '../../components/charts/PitchMix.jsx'
 import { CommandMap } from '../../components/charts/CommandMap.jsx'
+import { TargetCommand } from '../../components/charts/TargetCommand.jsx'
+import { GloveTarget } from '../../components/charts/GloveTarget.jsx'
+import { CommandReceivedCard } from '../../components/playerstats/CommandReceivedCard.jsx'
 import { BattedBallMix } from '../../components/charts/BattedBallMix.jsx'
 import { SimilarPitchers } from '../../components/playercard/SimilarPitchers.jsx'
 import { SimilarHitters } from '../../components/playercard/SimilarHitters.jsx'
@@ -137,6 +140,27 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
             </>
           )}
 
+          {/* Directly under the map, because it answers the question the map
+              raises and cannot settle: the grid above says WHERE the ball went,
+              this says how far that was from where the catcher asked for it.
+              Deliberately a scroll away from the Statcast strip at the top of
+              this shelf — two percentile lists running together would invite a
+              reader to compare ranks that are taken against different
+              populations (see TargetCommand.jsx). */}
+          <TargetCommand entry={block.targetCommand} data={block.targetCommandData} />
+
+          {/* And directly under THAT, the cloud its figures summarise: the
+              strip says how far he finishes from the glove, this says which
+              way. Same data, same medians — the ring here is the number
+              printed in the row above it — so the two have to sit together or
+              a reader meets the same statistic twice without being told. */}
+          {block.gloveTarget && (
+            <>
+              <SectionTitle title="Glove target" note="every miss, from the catcher&#8217;s target" />
+              <GloveTarget entry={block.gloveTarget} data={block.targetCommandData} />
+            </>
+          )}
+
           {/* The hitter's counterpart to the pitch mix — what happens when
               he connects, in the same bar-over-rows dress (BattedBallMix
               reuses the pitchmix classes on purpose). Shares the Advanced
@@ -180,6 +204,25 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
           )}
         </section>
       ))}
+
+      {/* CATCHING — its own section, outside the blocks loop on purpose.
+          A catcher's stat blocks are hitting (and, for a two-way arm,
+          pitching); what he did behind the plate is neither, so folding this
+          into one of them would file it under the wrong heading, and printing
+          it once per block would repeat one list on a two-way player. It sits
+          last because it is a read on the STAFF rather than on the man whose
+          page this is. Renders nothing for anyone who never caught — see
+          api/commandReceived.js. */}
+      {data.commandReceived && (
+        <section>
+          <h2 className="player__blocktitle">Catching</h2>
+          <CommandReceivedCard
+            data={data.commandReceivedData}
+            personId={bio.id}
+            season={data.season}
+          />
+        </section>
+      )}
     </PlayerHubShell>
   )
 }
