@@ -58,6 +58,7 @@ export function BoxLinesSheet({
   facet = null,
   kicker = 'Game lines · regular season',
   title,
+  footNote = null,
   headline,
   cutoff = null,
   onClose,
@@ -153,8 +154,11 @@ export function BoxLinesSheet({
                 ))}
               </ul>
               <p className="boxlines__foot">
-                Newest first. The mark is the club he {group === 'pitching' ? 'pitched' : 'played'} for that
-                day; his club’s runs come first. Tap a game for its box score.
+                {/* A facet says its own word first, when it has one — the
+                    postseason door names the round its pill abbreviates. */}
+                {footNote ? `${footNote} ` : ''}Newest first. The mark is the club he{' '}
+                {group === 'pitching' ? 'pitched' : 'played'} for that day; his club’s runs come first.
+                Tap a game for its box score.
               </p>
             </>
           )}

@@ -58,6 +58,19 @@
 // `keep` through boxLineRows over the shared result. The second door on a card
 // costs no requests at all.
 //
+// THE GAME TYPES ARE ASKED FOR, NOT FILTERED FOR (#1006). Both calls below
+// carry `gameType=`, because statsapi answers a game-log question about the
+// regular season unless it is told otherwise: a 2018 log for a player who
+// played that October is 147 rows, all `R`, until the call names the rounds
+// (verified 2026-09-10). Passing the list on the SEASONS call as well is what
+// makes the postseason door cheap — `yearByYear&gameType=F,D,L,W` returns the
+// five Octobers Yelich played, not his fourteen seasons, so the join fetches
+// five game logs instead of fourteen and never asks about a summer he spent at
+// home. `gameType=R` returns exactly what the bare call did on both endpoints
+// (verified 2026-09-10 on 453286 and 592885), so the club door's fetch is
+// unchanged by being made explicit. Which types a facet may ask for, and why
+// the umbrella 'P' is never one of them, is rows.js's POSTSEASON.
+//
 // Class: cutoff-gated (spoiler-manifest.json). Degrades to `null` on any
 // failure so the sheet shows its retry state rather than an empty ledger.
 import { getJson } from '../statsapi.js'
@@ -83,17 +96,22 @@ const SCHEDULE_FIELDS =
 const SCHEDULE_CHUNK = 120
 const LOG_CONCURRENCY = 4
 
-async function fetchSeasons(personId, group) {
+// The seasons he appeared in UNDER THESE GAME TYPES — for the postseason
+// facet, only the Octobers. A traded season comes back once per club stint
+// (Scherzer's 2021 three times); logRequestPlan dedupes.
+async function fetchSeasons(personId, group, gameTypes) {
   const data = await getJson(
-    `/api/v1/people/${personId}/stats?stats=yearByYear&group=${group}&sportId=1&fields=stats,splits,season`,
+    `/api/v1/people/${personId}/stats?stats=yearByYear&group=${group}&sportId=1` +
+      `&gameType=${gameTypes.join(',')}&fields=stats,splits,season`,
   )
   return (data.stats?.[0]?.splits ?? []).map((s) => Number(s.season)).filter(Boolean)
 }
 
-async function fetchLog(personId, group, { season, endDate }) {
+async function fetchLog(personId, group, { season, endDate }, gameTypes) {
   const end = endDate ? `&endDate=${endDate}` : ''
   const data = await getJson(
-    `/api/v1/people/${personId}/stats?stats=gameLog&group=${group}&season=${season}&sportId=1${end}&${LOG_FIELDS[group]}`,
+    `/api/v1/people/${personId}/stats?stats=gameLog&group=${group}&season=${season}&sportId=1` +
+      `&gameType=${gameTypes.join(',')}${end}&${LOG_FIELDS[group]}`,
   )
   return data.stats?.[0]?.splits ?? []
 }
@@ -138,10 +156,10 @@ async function mapPool(items, limit, fn) {
 // The two sources, joined and ready for the gate: every split that could
 // produce a row, and the schedule record for each one's game.
 async function loadJoin({ personId, group, opponentId, gameTypes, cutoff }) {
-  const seasons = await fetchSeasons(personId, group)
+  const seasons = await fetchSeasons(personId, group, gameTypes)
   const plan = logRequestPlan(seasons, cutoff)
   if (!plan.length) return { splits: [], schedule: [] }
-  const logs = await mapPool(plan, LOG_CONCURRENCY, (p) => fetchLog(personId, group, p))
+  const logs = await mapPool(plan, LOG_CONCURRENCY, (p) => fetchLog(personId, group, p, gameTypes))
   const splits = matchingSplits(logs.flat(), { opponentId, gameTypes })
   if (!splits.length) return { splits: [], schedule: [] }
   const schedule = await fetchSchedule([...new Set(splits.map((s) => s.game.gamePk))])

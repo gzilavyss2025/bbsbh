@@ -210,6 +210,28 @@ Historical `stats_streaks` values, kept for reference only (endpoint no longer l
 
 **`standings` supports `date`** — standings as they stood on any given day, which is exactly
 what a spoiler-safe pregame callout wants (standings *entering* the game, not today's).
+**`gameType` on a player's `gameLog` is not optional, and `P` is a trap on one group.**
+A game log is REGULAR SEASON unless the call names the type: a 2018 log for a player who
+played that October returns 147 rows, all `R`. Ask for `gameType=F,D,L,W` (Wild Card,
+Division, League Championship, World Series) and the October rows appear. Do NOT ask with the
+umbrella `P`: it selects the same games, but the **pitching** game log echoes the type that
+was asked for into every row it returns, while the **hitting** log reports each game's own.
+Ohtani's 2025, the same games, one call apart (verified 2026-09-10):
+
+| call | rows | each row's `gameType` |
+|---|---|---|
+| `group=pitching&gameType=P` | 4 | `P`, `P`, `P`, `P` |
+| `group=pitching&gameType=F,D,L,W` | 4 | `D`, `L`, `W` |
+| `group=hitting&gameType=P` | 17 | `F`, `D`, `L`, `W` |
+| `group=hitting&gameType=F,D,L,W` | 17 | `F`, `D`, `L`, `W` |
+
+Anything keyed on a row's round therefore silently loses every pitcher. `yearByYear` takes
+`gameType=` the same way and is worth passing: `gameType=F,D,L,W` names only the seasons he
+reached October, so a career walk fetches those logs and no others. `gameType=R` returns
+exactly what the bare call does on both endpoints. On an AGGREGATE there is no per-row type to
+poison, so `stats=career&gameType=P` is both safe and the working source for a career
+postseason line — the stat type actually named for October returns the regular-season career
+instead. See ADR-0069.
 
 ---
 

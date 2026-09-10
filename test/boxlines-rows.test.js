@@ -11,7 +11,15 @@
 //     the box-score path from the schedule join).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { boxLineRows, dayBefore, logRequestPlan, matchingSplits } from '../src/api/boxlines/rows.js'
+import {
+  askableGameTypes,
+  boxLineRows,
+  dayBefore,
+  logRequestPlan,
+  matchingSplits,
+  POSTSEASON,
+  seriesAbbr,
+} from '../src/api/boxlines/rows.js'
 
 // A pitching game-log split as statsapi returns it (trimmed to the fields the
 // module reads; shape verified live on personId 656849, 2026-09-02).
@@ -336,4 +344,99 @@ test('a row with only one side of the score is dropped too', () => {
     cutoff: CUTOFF,
   })
   assert.equal(rows.length, 0)
+})
+
+// ---------------------------------------------------------------------------
+// The postseason facet (#1006). Its rows are the only ones on the card that are
+// not regular season, and the game type they carry is both the filter and the
+// pill — which is why the umbrella 'P' is a trap rather than a synonym.
+// ---------------------------------------------------------------------------
+
+test('seriesAbbr names the round, and a regular-season row has no pill', () => {
+  assert.equal(seriesAbbr('F'), 'WC')
+  assert.equal(seriesAbbr('D'), 'DS')
+  assert.equal(seriesAbbr('L'), 'LCS')
+  assert.equal(seriesAbbr('W'), 'WS')
+  // Not a round: no pill, rather than a confident wrong one.
+  assert.equal(seriesAbbr('R'), '')
+  assert.equal(seriesAbbr('S'), '')
+  assert.equal(seriesAbbr('A'), '')
+  // 'P' is deliberately unnamed — a row still carrying it came from a call that
+  // asked the wrong question, and a blank pill is the visible end of that.
+  assert.equal(seriesAbbr('P'), '')
+  assert.equal(seriesAbbr(undefined), '')
+})
+
+test('a split from each round is kept under the postseason facet and dropped under the default', () => {
+  const splits = [
+    split('2024-09-20', 1),
+    split('2024-10-01', 2, { gameType: 'F' }),
+    split('2024-10-05', 3, { gameType: 'D' }),
+    split('2024-10-14', 4, { gameType: 'L' }),
+    split('2024-10-26', 5, { gameType: 'W' }),
+  ]
+  const schedule = [
+    sched(1, '2024-09-20'),
+    sched(2, '2024-10-01'),
+    sched(3, '2024-10-05'),
+    sched(4, '2024-10-14'),
+    sched(5, '2024-10-26'),
+  ]
+  // The default keeps the regular-season game and none of the four rounds.
+  assert.deepEqual(boxLineRows({ splits, schedule, group: 'pitching' }).map((r) => r.gamePk), [1])
+  // The postseason facet keeps the four rounds and not the regular-season game.
+  const post = boxLineRows({ splits, schedule, group: 'pitching', gameTypes: POSTSEASON })
+  assert.deepEqual(
+    post.map((r) => r.gamePk),
+    [5, 4, 3, 2],
+  )
+  // Newest first, each wearing its own round.
+  assert.deepEqual(
+    post.map((r) => r.series),
+    ['WS', 'LCS', 'DS', 'WC'],
+  )
+})
+
+test("a split still tagged 'P' is dropped by BOTH the default and the postseason facet", () => {
+  // A pitching game log asked with `gameType=P` returns the right games and
+  // labels every one of them 'P' (verified 2026-09-10 on 660271). Nothing
+  // downstream can name that row's round, so nothing downstream shows it.
+  const splits = [split('2024-10-05', 9, { gameType: 'P' })]
+  const schedule = [sched(9, '2024-10-05')]
+  assert.deepEqual(boxLineRows({ splits, schedule, group: 'pitching' }), [])
+  assert.deepEqual(boxLineRows({ splits, schedule, group: 'pitching', gameTypes: POSTSEASON }), [])
+})
+
+test("askableGameTypes rewrites the umbrella 'P' to the four rounds, and leaves everything else alone", () => {
+  assert.deepEqual(askableGameTypes(['P']), ['F', 'D', 'L', 'W'])
+  // Already spelled out: unchanged, and not duplicated when both are asked.
+  assert.deepEqual(askableGameTypes(POSTSEASON), ['F', 'D', 'L', 'W'])
+  assert.deepEqual(askableGameTypes(['P', 'D']), ['F', 'D', 'L', 'W'])
+  assert.deepEqual(askableGameTypes(['R']), ['R'])
+  assert.deepEqual(askableGameTypes(['R', 'P']), ['R', 'F', 'D', 'L', 'W'])
+  // Empty is not "everything": the regular season, as everywhere else.
+  assert.deepEqual(askableGameTypes([]), ['R'])
+  assert.deepEqual(askableGameTypes(undefined), ['R'])
+})
+
+test('the cutoff gate applies to a postseason row exactly as it does to any other', () => {
+  const splits = [split('2024-10-05', 3, { gameType: 'D' }), split('2024-10-14', 4, { gameType: 'L' })]
+  const schedule = [sched(3, '2024-10-05'), sched(4, '2024-10-14')]
+  // The October being scored is out; the one before it is in.
+  const rows = boxLineRows({ splits, schedule, group: 'pitching', gameTypes: POSTSEASON, cutoff: '2024-10-14' })
+  assert.deepEqual(
+    rows.map((r) => r.gamePk),
+    [3],
+  )
+  // And a postseason game the schedule has not finished has no row either.
+  const live = boxLineRows({
+    splits,
+    schedule: [sched(3, '2024-10-05', { status: { abstractGameState: 'Live' } }), sched(4, '2024-10-14')],
+    group: 'pitching',
+    gameTypes: POSTSEASON,
+  })
+  assert.deepEqual(
+    live.map((r) => r.gamePk),
+    [4],
+  )
 })
