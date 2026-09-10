@@ -1,0 +1,166 @@
+/* ============================================================
+   COMMAND RECEIVED — components/playerstats/CommandReceivedCard.jsx
+
+   The staff that threw to one catcher, ranked by how close they finished
+   to his target (src/api/commandReceived.js).
+
+   A RULED LIST, in the scorebook's own hand — the same grammar the
+   percentile strip uses one card up: rank at the left, the name, a track,
+   the figure, the sample. Not a chart: this is a roster read, and the
+   honest form for a ranked list of names is a ranked list of names.
+
+   The bar is scaled to THIS CATCHER's own staff, never the league — see
+   the component's header for why that distinction is load-bearing.
+   ============================================================ */
+
+.cmdrecv {
+  margin-block-start: var(--space-4);
+}
+
+/* The catcher's own season, printed above the list as the line every row is
+   read against. */
+.cmdrecv__season {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+}
+.cmdrecv__season strong {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md);
+  color: var(--text-heading);
+}
+
+/* ONE grid for the whole list, not one per row — the load-bearing rule, and
+   the same one .pctstrip makes: give each row its own tracks and the columns
+   size to that row's longest name, so the figures no longer line up down the
+   page and the list stops reading as a ledger. Rows are `subgrid`. */
+.cmdrecv__list {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(48px, 88px) auto auto;
+  column-gap: var(--space-2);
+  max-width: 620px;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.cmdrecv__row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  padding-block: 7px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.cmdrecv__rank {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  min-width: 1.6em;
+  text-align: right;
+}
+
+.cmdrecv__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The track. Bars grow rightward from the sharp end, so a SHORT bar is good
+   command — which is the same direction the figures run, and the reason the
+   column header says "inches from his target" rather than leaving a reader to
+   work out which way is better. */
+.cmdrecv__track {
+  display: block;
+  height: 7px;
+  background: var(--surface-inset);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.cmdrecv__bar {
+  display: block;
+  /* Set inline, per row (CommandReceivedCard.jsx). It carries a FALLBACK
+     rather than joining css-tokens.test.js's KNOWN_UNDEFINED list: a bare
+     var() that fails to resolve drops the whole declaration, and a bar with no
+     width rule inherits `display: block`'s full width — every row would draw a
+     FULL track, which reads as every pitcher missing by the most on the staff.
+     0% degrades to an empty track instead, which is the honest nothing. */
+  width: var(--bar-width, 0%);
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--graphite-soft);
+}
+
+/* Sharper than the catcher's own season median. Navy — the ink this app gives
+   the subject of a card — against graphite for the rest, so "who beat the
+   staff's middle" is one glance rather than four comparisons. */
+.cmdrecv__bar--better {
+  background: var(--accent-primary);
+}
+
+.cmdrecv__miss {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  justify-self: end;
+  min-width: 2.6em;
+  text-align: right;
+}
+
+/* The sample behind the figure, in the caption ink — subordinate, but never
+   dropped: a 9.0in over 60 pitches and a 9.0in over 900 are not the same
+   claim, and the column is what says so. */
+.cmdrecv__n {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  justify-self: end;
+  min-width: 3em;
+  text-align: right;
+}
+
+.cmdrecv__more {
+  margin-block-start: var(--space-2);
+}
+
+/* REQUIRED COPY, not a footnote to trim. A list of pitchers under a catcher's
+   name reads as a catcher's skill unless something says otherwise, and this
+   figure is mostly the pitcher's own aim. Body ink rather than caption, so it
+   is read rather than skimmed past. */
+#root .cmdrecv__note {
+  /* Natural case, under the ALL-CAPS INVARIANT's sanctioned exemption
+     (01-base.css). Two full sentences of qualifying prose is exactly the split
+     that list already draws — a shouted heading over a natural-case body —
+     and it applies with more force here than anywhere: this sentence exists to
+     stop a reader taking the ranking above it for a catcher's skill, so it has
+     to be READ, not skimmed past as another line of app chrome. The card's
+     own title and figures stay shouted. Prefixed with #root, without which the
+     rule loses to `#root *` and is a silent no-op. */
+  text-transform: none; /* caps-exempt: the causation sentence reads as prose */
+}
+.cmdrecv__note {
+  max-width: 620px;
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+}
+
+.cmdrecv__source {
+  margin-block-start: var(--space-2);
+}

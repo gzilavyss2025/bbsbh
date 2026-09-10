@@ -9,6 +9,7 @@ import { PitchMix } from '../../components/charts/PitchMix.jsx'
 import { CommandMap } from '../../components/charts/CommandMap.jsx'
 import { TargetCommand } from '../../components/charts/TargetCommand.jsx'
 import { GloveTarget } from '../../components/charts/GloveTarget.jsx'
+import { CommandReceivedCard } from '../../components/playerstats/CommandReceivedCard.jsx'
 import { BattedBallMix } from '../../components/charts/BattedBallMix.jsx'
 import { SimilarPitchers } from '../../components/playercard/SimilarPitchers.jsx'
 import { SimilarHitters } from '../../components/playercard/SimilarHitters.jsx'
@@ -203,6 +204,25 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
           )}
         </section>
       ))}
+
+      {/* CATCHING — its own section, outside the blocks loop on purpose.
+          A catcher's stat blocks are hitting (and, for a two-way arm,
+          pitching); what he did behind the plate is neither, so folding this
+          into one of them would file it under the wrong heading, and printing
+          it once per block would repeat one list on a two-way player. It sits
+          last because it is a read on the STAFF rather than on the man whose
+          page this is. Renders nothing for anyone who never caught — see
+          api/commandReceived.js. */}
+      {data.commandReceived && (
+        <section>
+          <h2 className="player__blocktitle">Catching</h2>
+          <CommandReceivedCard
+            data={data.commandReceivedData}
+            personId={bio.id}
+            season={data.season}
+          />
+        </section>
+      )}
     </PlayerHubShell>
   )
 }

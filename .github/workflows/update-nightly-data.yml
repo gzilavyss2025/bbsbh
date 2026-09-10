@@ -361,6 +361,18 @@ jobs:
         id: glove-target
         continue-on-error: true
         run: node scripts/gen-command-zone.mjs
+      # COMMAND RECEIVED — the catcher-side cut, and the heaviest of the three.
+      # OpenCommand carries no catcher identity at all, so who was crouching is
+      # bbsbh's own join: this fetches ONE FEED PER GAME in the season's coverage
+      # (1,865 for 2026) and replays each one's defensive substitutions. The
+      # feeds are field-pruned to what defenseEntering reads — 46 KB against 697
+      # KB — so the sweep is tens of megabytes and a couple of minutes, not
+      # gigabytes; it still belongs last of the three, after the two cheap steps
+      # have already banked their files.
+      - name: Command received
+        id: command-received
+        continue-on-error: true
+        run: node scripts/gen-command-received.mjs
       # The batter-side sibling of the pitch-arsenal step above, off the same two levels and
       # the same trailing window: where every ball in play landed. It writes a
       # DIRECTORY (public/data/spray/, one bucket per `personId % 100`) plus its

@@ -498,6 +498,34 @@ don't run these by hand.
   of rows clear that floor (median largest component 0.6in), so the card prints
   the clause only when there is one and says nothing otherwise, rather than
   reading "no consistent direction" on nineteen cards in twenty.
+- `gen-command-received.mjs` → `public/data/command-received.json` — COMMAND
+  RECEIVED: per catcher, the pitchers who threw to him this season ranked by
+  median miss from his target. Read by `src/api/commandReceived.js` for
+  `CommandReceivedCard.jsx`, which renders in its own **Catching** section on the
+  Analytics tab — added ALONGSIDE a catcher's hitting block, never replacing it.
+  **The catcher is entirely bbsbh's own join.** OpenCommand carries no catcher
+  identity anywhere: its method detects an anonymous glove per pitcher per game
+  and was never told, and never infers, whose it was. So this generator fetches
+  one feed per game in the season's coverage (1,865 for 2026) and replays each
+  one's defensive substitutions through `src/api/catcherOfRecord.js`, which asks
+  `defense.js`'s existing chain a narrower question rather than re-implementing
+  the walk. Attribution is at HALF granularity — `defenseEntering` stops at a
+  half's first pitch, so a catcher who enters mid-half is credited from the next
+  one. Rare, accepted, and written down rather than papered over.
+  **The `play_id` join was verified, not assumed**: OpenCommand's `play_id` is
+  the same UUID as the feed's `playEvents[].playId`, checked against real game
+  822696. The 2026 run attributed **492,984 of 492,984 pitches, none unmatched,
+  with no feed failures** — which is the number that says both halves of the
+  join hold. Feeds are field-pruned to the dozen paths `defenseEntering` reads
+  (46 KB against 697 KB, verified to produce a byte-identical catcher chart),
+  fetched eight at a time.
+  Current season only for now — prove the pipeline on one before spending three
+  times the fetching on history; `--season=` overrides, `--limit=` runs a
+  handful of games end to end. Same `MIN_COMMAND_PITCHES` floor before a pitcher
+  earns a row. The card's causation footer (`CAUSATION_NOTE`) is REQUIRED copy
+  and lives in the data layer for that reason: the figure is mostly each
+  PITCHER's own command, and a ranked list under a catcher's name reads as a
+  catcher's skill unless something says otherwise.
 - `gen-spray.mjs` → `public/data/spray/{NN}.json` (per-batter buckets on
   `personId % 100`) — the batter-side sibling of `gen-pitch-arsenal.mjs`: every
   ball in play this season, with the raw Gameday landing coordinate, the exit

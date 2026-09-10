@@ -37,6 +37,7 @@ import {
 import { fetchCommandFor } from '../commandMap.js'
 import { fetchTargetCommand, targetCommandFor } from '../targetCommand.js'
 import { fetchGloveTargetFor } from '../gloveTarget.js'
+import { fetchCommandReceived, commandReceivedFor } from '../commandReceived.js'
 import { currentSeasonFor, playerContext } from './context.js'
 
 export async function loadPlayerAnalytics(id, asOf) {
@@ -46,7 +47,7 @@ export async function loadPlayerAnalytics(id, asOf) {
 
   // Statcast percentile ranks and the league-wide pitch mix are both same-origin
   // static files, session-cached after the first read anywhere in the app.
-  const [savantData, prospectTrend, levelTenure, targetCommandData] = await Promise.all([
+  const [savantData, prospectTrend, levelTenure, targetCommandData, commandReceivedData] = await Promise.all([
     fetchSavantPercentiles(),
     fetchProspectTrend(),
     fetchLevelTenure(),
@@ -55,6 +56,8 @@ export async function loadPlayerAnalytics(id, asOf) {
     // pitcher: it is one read for the whole app, and a hitter's block simply
     // finds nothing in it.
     fetchTargetCommand(),
+    // The catcher-side cut of the same dataset, ~50 KB and read the same way.
+    fetchCommandReceived(),
   ])
 
   const blocks = await Promise.all(
@@ -172,11 +175,24 @@ export async function loadPlayerAnalytics(id, asOf) {
         )
       : null
 
+  // CATCHING — its own card, not a stat block, and not a swap for anything.
+  //
+  // The obvious build was a third `group` beside hitting and pitching, and it
+  // is the wrong one: `groups` comes from the stat groups statsapi itself
+  // reports, and every consumer of a block (the tiles, the splits, the
+  // "hits like" neighbours) is built to shape one of those. Inventing a
+  // synthetic group would push an empty stat block through all of that
+  // machinery to render one list. This rides alongside instead — a catcher
+  // keeps his hitting block exactly as it was, and gains a card.
+  const commandReceived = commandReceivedFor(commandReceivedData, bio.id, season)
+
   return {
     bio,
     blocks,
     season,
     asOf,
+    commandReceived,
+    commandReceivedData,
     sportId: currentActivitySportId,
     prospectCard,
     prospectCardGroup: trendEntry?.group ?? primaryGroup,

@@ -980,6 +980,14 @@
     "gloveTarget.js": {
       "class": "spoiler-free",
       "why": "Static glove-target/{NN}.json — one dot per pitch giving the OFFSET, in inches, between the catcher's target and where the pitch crossed, over a season of games already final. A miss vector carries no location, no line, no score and no date: the dots are unordered and undated, so nothing here reads back to a particular game. Same footing as targetCommand.js and commandMap.js on the player page, an open surface (ADR-0034)."
+    },
+    "catcherOfRecord.js": {
+      "class": "caller-gated",
+      "why": "Who was catching as a half begins — asks defense.js's own chain a narrower question and inherits its gate whole, passing revealedThrough straight through (ADR-0003/0010). Substitution TIMING is the risk, exactly as for defenseEntering. Its only consumer today is the nightly precompute (scripts/gen-command-received.mjs) over games already final, which reads the whole game the way BoxScore.jsx does from inside its own seal; a live surface must gate it as it would gate defenseEntering."
+    },
+    "commandReceived.js": {
+      "class": "spoiler-free",
+      "why": "Static command-received.json — per catcher, a season median distance from his target for each pitcher who threw to him, over games already final. The substitution replay that BUILT it is caller-gated where it lives (catcherOfRecord.js); what survives into this reader is an aggregate with the timing washed out — no line, no score, no per-game granularity. Same footing as targetCommand.js on the player page, an open surface (ADR-0034)."
     }
   }
 }

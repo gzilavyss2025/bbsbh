@@ -273,9 +273,14 @@ export async function playIndex(season) {
 export const INCHES_PER_FOOT = 12
 
 // Stream every USABLE pitch of a season, already joined to its pitcher and
-// pitch type, as { playId, pitcherId, pitchType, plateX, plateZ, targetX,
-// targetZ, missX, missZ, miss } — inches throughout, `miss` the Euclidean
-// distance between target and actual.
+// pitch type, as { gamePk, playId, pitcherId, pitchType, plateX, plateZ,
+// targetX, targetZ, missX, missZ, miss } — inches throughout, `miss` the
+// Euclidean distance between target and actual.
+//
+// `gamePk` rides along for the catcher-side generator, which has to group a
+// season's pitches by the game they were thrown in before it can ask a feed who
+// was catching. It comes off the targets row itself; the play index carries no
+// game column.
 //
 // THE TWO FILTERS ARE THE SOURCE'S OWN, and they are not optional: `status`
 // must be 'ok' (a pitch where no glove target was found reads 'no target') and
@@ -299,7 +304,7 @@ export async function* streamPitches(season, index) {
     if (row.header) {
       idx = columns(
         row.header,
-        ['play_id', 'plate_x_in', 'plate_z_in', 'status', 'plausible', 'inferred_x_in', 'inferred_z_in'],
+        ['game_pk', 'play_id', 'plate_x_in', 'plate_z_in', 'status', 'plausible', 'inferred_x_in', 'inferred_z_in'],
         file,
       )
       continue
@@ -319,6 +324,7 @@ export async function* streamPitches(season, index) {
     const missX = plateX - targetX
     const missZ = plateZ - targetZ
     yield {
+      gamePk: Number(c[idx.game_pk]),
       playId: c[idx.play_id],
       pitcherId: Number(packed.slice(0, bar)),
       pitchType,

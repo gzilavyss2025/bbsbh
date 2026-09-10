@@ -416,7 +416,9 @@ const BUDGETS = {
   // 26d-command-map.css: that sheet draws a location inside a strike zone,
   // this one draws a miss offset, and the two share only the chip pills, which
   // GloveTarget.jsx gets by importing 26d rather than by a second copy.
-  'src/styles': 111,
+  // 111 -> 112 for 26g-command-received.css — the catcher-side ranked list.
+  // A flat sibling for the same ordering reason as every entry above it.
+  'src/styles': 112,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -521,7 +523,16 @@ const BUDGETS = {
   // miss vectors. It sits beside targetCommand.js for the reason that entry
   // gives, and beside commandMap.js, whose sharded-bucket reader it is built
   // to match line for line.
-  'src/api': 109,
+  //
+  // 111: catcherOfRecord.js and commandReceived.js. The first is the whole
+  // reason the catcher-side card is possible — OpenCommand carries no catcher
+  // identity, so who was crouching is bbsbh's own join — and it belongs
+  // literally BESIDE defense.js, whose chain it asks a narrower question of and
+  // whose spoiler gate it inherits whole; a subdirectory would put it away from
+  // the one module it is defined against. The second is its static-file reader,
+  // flat with targetCommand.js and gloveTarget.js for the reason those entries
+  // give.
+  'src/api': 111,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -669,7 +680,9 @@ const BUDGETS = {
   // for — its shared, testable half went to scripts/lib/opencommand.mjs.
   // +1 for gen-command-zone.mjs, the Glove Target precompute off the same
   // dataset, flat for the same reason and sharing the same scripts/lib helper.
-  scripts: 112,
+  // +1 for gen-command-received.mjs, the catcher-side cut — the third and last
+  // generator off that dataset, flat for the same reason as the other two.
+  scripts: 113,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
