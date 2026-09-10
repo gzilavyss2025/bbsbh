@@ -65,7 +65,15 @@ function fakeStore({ putOutcome = () => 'stored', staged = [] } = {}) {
 
 // Build a runner over one half of rows. The clock is a no-op, so a test never
 // waits for the politeness gap or the retry backoff.
-function harness({ rows, resolve, outcomes, store = fakeStore(), lookbehind } = {}) {
+function harness({
+  rows,
+  resolve,
+  outcomes,
+  store = fakeStore(),
+  lookbehind,
+  horizon,
+  sleep = async () => {},
+} = {}) {
   const clips = fakeClips(outcomes)
   const resolveClip = resolve ?? (async (playId) => `https://clip/${playId}`)
   const runner = createStagingRunner({
@@ -73,10 +81,16 @@ function harness({ rows, resolve, outcomes, store = fakeStore(), lookbehind } = 
     resolveClip,
     fetchClip: clips.fetchClip,
     store,
-    sleep: async () => {},
+    sleep,
     lookbehind,
+    horizon,
   })
   return { runner, clips, store, rows }
+}
+
+// Let the loop run to wherever it parks.
+const settle = async () => {
+  for (let i = 0; i < 8; i += 1) await new Promise((r) => setTimeout(r, 0))
 }
 
 // --- the ordinary pass ----------------------------------------------------
@@ -280,4 +294,68 @@ test('nothing is fetched before start, so the resume read comes first', async ()
   assert.deepEqual(h.clips.asked, [], 'the queue is filled, and it waits')
   await h.runner.start()
   assert.deepEqual(h.clips.asked, ['https://clip/p2'])
+})
+
+// --- the loop can be woken ------------------------------------------------
+
+test('a half arriving while the loop naps does not have to wait the nap out', async () => {
+  // The clock here answers the politeness gap and hangs on the long waits, which
+  // is what a real 90-second re-sweep looks like from inside the loop.
+  //
+  // THIS IS THE STALL `?nofilm` FOUND. A half whose film has finished staging
+  // drains; the loop settles into the re-sweep nap holding its re-entry guard;
+  // the scorer finishes the half and steps into the next one. `addHalf` queued
+  // the rows and called `pump`, which returned at once against that guard — so
+  // the new half sat unstaged and the surface showed "Getting the first few
+  // plays." for up to a minute and a half.
+  const h = harness({ sleep: async (ms) => (ms >= 5000 ? new Promise(() => {}) : undefined) })
+  await h.runner.addHalf([pitch(1)])
+  h.runner.start()
+  await settle()
+  assert.deepEqual(h.clips.asked, ['https://clip/p1'], 'the first half staged and drained')
+  assert.equal(h.runner.getJob().state, 'complete', 'the loop is parked in the re-sweep nap')
+
+  await h.runner.addHalf([pitch(2)])
+  await settle()
+  assert.deepEqual(
+    h.clips.asked,
+    ['https://clip/p1', 'https://clip/p2'],
+    'the next half is staged without waiting the nap out',
+  )
+  h.runner.stop()
+})
+
+// --- the staging plans, driven end to end ---------------------------------
+
+test('on demand fetches one row, then waits for the scorer', async () => {
+  const h = harness({ horizon: 1 })
+  await h.runner.addHalf([pitch(1), pitch(2), pitch(3)])
+  await h.runner.start()
+  assert.deepEqual(h.clips.asked, ['https://clip/p1'], 'only the row about to be needed')
+
+  await h.runner.moveCursor('p1')
+  await settle()
+  assert.deepEqual(h.clips.asked, ['https://clip/p1', 'https://clip/p2'], 'the tap brings the next')
+
+  await h.runner.moveCursor('p2')
+  await settle()
+  assert.equal(h.clips.asked.length, 3, 'and so on, one play at a time')
+  h.runner.stop()
+})
+
+test('on demand still refuses to let the cursor pass the picture', async () => {
+  const h = harness({ horizon: 1 })
+  await h.runner.addHalf([pitch(1), pitch(2)])
+  await h.runner.start()
+  // p2 has not been fetched, because nothing has asked for it yet.
+  assert.equal(await h.runner.moveCursor('p2'), null, 'the gate holds under every plan')
+  assert.equal(gateFor(h.runner.getJob(), pitch(2)).blocked, true)
+  h.runner.stop()
+})
+
+test('staying ahead runs the whole half without being asked', async () => {
+  const h = harness()
+  await h.runner.addHalf([pitch(1), pitch(2), pitch(3)])
+  await h.runner.start()
+  assert.equal(h.clips.asked.length, 3, 'the default plan does not wait to be prompted')
 })

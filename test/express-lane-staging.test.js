@@ -9,6 +9,7 @@ import {
   canAdvanceTo,
   consentToSkip,
   createJob,
+  DEFAULT_STAGING_PLAN,
   enqueueHalf,
   evictable,
   filmFrontier,
@@ -27,6 +28,8 @@ import {
   resumeJob,
   retryUnfilmedAhead,
   setCursor,
+  STAGING_PLANS,
+  stagingPlan,
   stagingStatus,
   withMode,
 } from '../src/lib/expresslane/staging.js'
@@ -359,7 +362,7 @@ test('the status counts film AHEAD of the cursor and never the game', () => {
 test('every gate reason and every job state is one the catalogs name', () => {
   // The two exported lists are what a surface switches on. A reason or a state
   // that is not in them is one the screen has no wording for.
-  const rows = [pitch(1), pitch(2), pitch(3), pitch(4), paperwork(1)]
+  const rows = [pitch(1), pitch(2), pitch(3), pitch(4), pitch(5), paperwork(1)]
   let job = jobWith(rows)
   const seen = new Set()
   const record = () => {
@@ -375,6 +378,7 @@ test('every gate reason and every job state is one the catalogs name', () => {
   job = markUnfilmed(job, 'p2')
   job = consentToSkip(job, 'p3')
   for (let i = 0; i < 3; i += 1) job = markByteFailure(job, 'p4')
+  job = markEvicted(markStaged(job, 'p5'), ['p5'])
   record()
   job = pauseJob(job)
   record()
@@ -389,4 +393,151 @@ test('a drained queue reports complete and stops waiting', () => {
   const status = stagingStatus(job)
   assert.equal(status.state, 'complete')
   assert.equal(status.waiting, false)
+})
+
+// --- eviction is not a way back into the queue -----------------------------
+//
+// The queue is walked from the HEAD, and the whole engine — `nextToStage`,
+// `filmFrontier`, `canAdvanceTo` — asks one question about each row: is it
+// covered? Eviction takes the bytes off the disk behind the scorer, so a job
+// that forgot them without recording WHY answered "not covered" for a row the
+// cursor had already passed, and the runner turned around and fetched it
+// again. It then swept it again. About a half-inning and a half into a session
+// the loop closed and the film never moved forward again.
+
+function stagedThrough(count) {
+  const rows = []
+  for (let i = 0; i < count; i += 1) rows.push(pitch(i))
+  let job = jobWith(rows)
+  for (const row of rows) job = markStaged(job, row.playId)
+  return { job, rows }
+}
+
+test('a clip evicted behind the cursor is never queued for download again', () => {
+  const { job: staged } = stagedThrough(16)
+  let job = setCursor(staged, 'p15')
+  const gone = evictable(job)
+  assert.ok(gone.length > 0, 'the cursor has passed the lookbehind window')
+  job = markEvicted(job, gone)
+  assert.equal(nextToStage(job), null, 'the queue has nothing left to fetch')
+})
+
+test('eviction does not drag the film frontier back behind the scorer', () => {
+  const { job: staged } = stagedThrough(16)
+  let job = setCursor(staged, 'p15')
+  job = markEvicted(job, evictable(job))
+  assert.equal(filmFrontier(job), 'p15', 'every row up to the cursor is still covered')
+})
+
+test('a row whose film was evicted never blocks the cursor again', () => {
+  const { job: staged, rows } = stagedThrough(16)
+  let job = setCursor(staged, 'p15')
+  job = markEvicted(job, evictable(job))
+  const gate = gateFor(job, rows[0])
+  assert.equal(gate.blocked, false, 'a play already scored cannot start waiting again')
+  assert.equal(gate.reason, 'evicted')
+  assert.equal(gate.escapable, false, 'there is nothing for the scorer to consent to')
+})
+
+test('a clip fetched again is no longer evicted', () => {
+  const { job: staged } = stagedThrough(16)
+  let job = markEvicted(setCursor(staged, 'p15'), ['p0'])
+  job = markStaged(job, 'p0')
+  assert.equal(gateFor(job, { key: 'p0', playId: 'p0' }).reason, 'ready')
+})
+
+// --- the staging plans -----------------------------------------------------
+//
+// One knob, the HORIZON, decides all three. None of them changes the film gate
+// and none of them makes the film arrive faster — the bytes come down the same
+// throttled pipe whichever plan asks for them. What a plan changes is only when
+// they are paid for.
+
+test('every plan names a horizon, a pre-roll and a way to open', () => {
+  for (const [name, plan] of Object.entries(STAGING_PLANS)) {
+    assert.ok(plan.horizon >= 1, `${name} reaches at least the next row`)
+    assert.ok(['now', 'clips', 'drained'].includes(plan.openWhen), `${name} openWhen`)
+    assert.equal(typeof plan.wholeGame, 'boolean', `${name} wholeGame`)
+  }
+  assert.ok(STAGING_PLANS[DEFAULT_STAGING_PLAN], 'the default names a real plan')
+  assert.equal(stagingPlan('nonsense'), STAGING_PLANS[DEFAULT_STAGING_PLAN], 'unknown falls back')
+})
+
+test('on demand fetches the first row and then stops', () => {
+  const job = jobWith([pitch(1), pitch(2), pitch(3)])
+  const { horizon } = stagingPlan('demand')
+  assert.equal(nextToStage(job, { horizon })?.key, 'p1', 'the row the scorer is about to need')
+  // Once it is here, nothing else is in reach until the cursor moves.
+  const staged = markStaged(job, 'p1')
+  assert.equal(nextToStage(staged, { horizon }), null, 'it does not run on by itself')
+  // And the queue is NOT drained — the runner has to tell those apart, or it
+  // marks the job complete and sits through a re-sweep instead of waiting for
+  // the scorer.
+  assert.equal(nextToStage(staged)?.key, 'p2', 'there is still work, just not authorised')
+})
+
+test('a cursor move is what brings the next row into reach', () => {
+  const { horizon } = stagingPlan('demand')
+  let job = markStaged(jobWith([pitch(1), pitch(2), pitch(3)]), 'p1')
+  job = setCursor(job, 'p1')
+  assert.equal(nextToStage(job, { horizon })?.key, 'p2')
+  job = setCursor(markStaged(job, 'p2'), 'p2')
+  assert.equal(nextToStage(job, { horizon })?.key, 'p3')
+})
+
+test('the horizon counts queue positions, so paperwork costs it nothing', () => {
+  const { horizon } = stagingPlan('demand')
+  // A substitution and a mound visit between two pitches. Both are covered, so
+  // the cursor walks them for free and the fetch happens when the next row that
+  // wants a clip comes into reach.
+  let job = markStaged(jobWith([pitch(1), paperwork(1), paperwork(2), pitch(2)]), 'p1')
+  job = setCursor(job, 'p1')
+  assert.equal(nextToStage(job, { horizon }), null, 'a1 is covered; nothing to fetch')
+  job = setCursor(job, 'a1')
+  assert.equal(nextToStage(job, { horizon }), null, 'a2 is covered too')
+  job = setCursor(job, 'a2')
+  assert.equal(nextToStage(job, { horizon })?.key, 'p2', 'now the clip is worth fetching')
+})
+
+test('staying ahead runs the queue dry, which is what it is for', () => {
+  const { horizon } = stagingPlan('ahead')
+  const job = markStaged(jobWith([pitch(1), pitch(2), pitch(3)]), 'p1')
+  assert.equal(nextToStage(job, { horizon })?.key, 'p2', 'no cursor needed')
+  assert.equal(stagingPlan('all').horizon, Infinity)
+})
+
+test('only the all plan fills the queue past the half the scorer is in', () => {
+  assert.equal(stagingPlan('demand').wholeGame, false)
+  assert.equal(stagingPlan('ahead').wholeGame, false)
+  assert.equal(stagingPlan('all').wholeGame, true)
+})
+
+test('the status says whether the runner is fetching, not whether work exists', () => {
+  const { horizon } = stagingPlan('demand')
+  const job = markStaged(jobWith([pitch(1), pitch(2), pitch(3)]), 'p1')
+  assert.equal(stagingStatus(job, { horizon }).waiting, false, 'demand is idle between plays')
+  assert.equal(stagingStatus(job).waiting, true, 'though the queue still holds work')
+})
+
+// --- the gate holds WITHIN a half, and a half change is navigation ----------
+
+test('entering a different half does not ask about the half you left', () => {
+  // Half 1 abandoned two rows in; half 2 enqueued behind it. Under `demand` the
+  // tail of half 1 is never fetched, so a gate that walked it would make the
+  // next half permanently unreachable.
+  let job = createJob({ gamePk: 823035 })
+  job = enqueueHalf(job, [pitch(1, 1), pitch(2, 1), pitch(3, 1), pitch(4, 1)])
+  job = enqueueHalf(job, [pitch(5, 2), pitch(6, 2)])
+  job = setCursor(markStaged(markStaged(job, 'p1'), 'p2'), 'p2')
+  assert.equal(canAdvanceTo(job, 'p5'), false, 'the new half still needs its OWN first clip')
+  job = markStaged(job, 'p5')
+  assert.equal(canAdvanceTo(job, 'p5'), true, 'and with it, the half opens')
+})
+
+test('inside a half nothing is loosened — a gap still holds the cursor', () => {
+  let job = createJob({ gamePk: 823035 })
+  job = enqueueHalf(job, [pitch(1, 1), pitch(2, 1), pitch(3, 1)])
+  job = setCursor(markStaged(job, 'p1'), 'p1')
+  job = markStaged(job, 'p3')
+  assert.equal(canAdvanceTo(job, 'p3'), false, 'p2 has no film, so p3 cannot be jumped to')
 })

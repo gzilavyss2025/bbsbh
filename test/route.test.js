@@ -17,6 +17,7 @@ import {
   entitySegment,
   teamSegment,
   managerPath,
+  expressHalfOf,
   sectionToStep,
   stepToSection,
   urlDateToApi,
@@ -575,6 +576,42 @@ test('a 3-segment path is a game section, matchup and section lowercased', () =>
 // --------------------------------------------------------------------------
 // sectionToStep / stepToSection — the innings-viewer paging
 // --------------------------------------------------------------------------
+test('Express Lane addresses a half in the section slot, like the innings viewer', () => {
+  // A half of Express Lane is a real address you can send someone. It uses the
+  // SAME slot and the same grammar the innings viewer's own `top5` uses, so the
+  // two read alike and neither needs a second rule to learn.
+  assert.deepEqual(sectionToStep('express'), { step: 7, inning: 1, half: 'top' })
+  assert.deepEqual(sectionToStep('express-top5'), { step: 7, inning: 5, half: 'top' })
+  assert.deepEqual(sectionToStep('express-bottom3'), { step: 7, inning: 3, half: 'bottom' })
+  assert.deepEqual(sectionToStep('express-top12'), { step: 7, inning: 12, half: 'top' })
+  assert.equal(stepToSection(7, 5, 'top'), 'express-top5')
+  assert.equal(stepToSection(7, 9, 'bottom'), 'express-bottom9')
+})
+
+test('a malformed Express Lane section is not an Express Lane section', () => {
+  // It must fall through to the lineup default rather than opening the film
+  // surface on a guessed half.
+  for (const bad of ['express-', 'express-top', 'express-sideways2', 'expressly']) {
+    assert.notEqual(sectionToStep(bad).step, 7, bad)
+  }
+  // A well-formed section naming inning 0 is Express Lane with the inning
+  // clamped, NOT a rejection — which is exactly what the innings viewer does
+  // with `top0`, and the whole reason these two share a grammar.
+  assert.deepEqual(sectionToStep('express-top0'), { step: 7, inning: 1, half: 'top' })
+  assert.deepEqual(sectionToStep('top0'), { step: 2, inning: 1, half: 'top' })
+})
+
+test('expressHalfOf tells "open where I left off" from "open exactly here"', () => {
+  // sectionToStep cannot answer this: it must return an inning for every
+  // section, so bare `express` and `express-top1` are identical there.
+  assert.equal(expressHalfOf('express'), null)
+  assert.equal(expressHalfOf('top5'), null)
+  assert.equal(expressHalfOf(''), null)
+  assert.equal(expressHalfOf(undefined), null)
+  assert.deepEqual(expressHalfOf('express-bottom9'), { inning: 9, half: 'bottom' })
+  assert.deepEqual(expressHalfOf('express-top1'), { inning: 1, half: 'top' })
+})
+
 test('sectionToStep maps each section form to its step/inning/half', () => {
   assert.deepEqual(sectionToStep('lineup1'), { step: 0, inning: 1, half: 'top' })
   assert.deepEqual(sectionToStep('lineup2'), { step: 1, inning: 1, half: 'top' })

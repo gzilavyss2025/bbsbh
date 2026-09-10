@@ -7,19 +7,27 @@
 //
 // SPOILER-FREE, and one rule keeps it that way. The job holds playIds, not
 // plays: no description, no result, no count, no score. The one thing it could
-// leak is SHAPE — a queue that held the whole game would state how many plate
+// leak is SHAPE — a queue built to the last out would state how many plate
 // appearances the game has, which states whether it went to extra innings
-// (ADR-0008). So the queue is filled ONE HALF AT A TIME, by `enqueueHalf`, and
-// there is no whole-game builder to call.
+// (ADR-0008). `enqueueHalf` is the only way in, and it takes ONE HALF at a
+// time.
 //
-// That constraint turned out to be the right engineering too, which is worth
-// saying because it looks like a tax. The sanctioned lookahead is
+// THE `all` PLAN FILLS IT AHEAD OF THE SCORER, and it is bounded by REGULATION
+// rather than by the game for exactly that reason. Eighteen halves is the same
+// answer for a game that ended in nine and one that ran to fifteen, so a full
+// queue says nothing about the game it belongs to. Extras join it one half at a
+// time under every plan. There is still no whole-GAME builder to call, and
+// there must not be one.
+//
+// The one-half default turned out to be the right engineering too, which is
+// worth saying because it looks like a tax. The sanctioned lookahead is
 // `halfIndex <= revealedThrough + 1` (ADR-0003/0010) — one half ahead of the
 // scorer. One half of Result-mode film is about 30 MB, which is about two
 // minutes at the measured 2.1 Mbps ceiling. So THE SPOILER WINDOW AND THE
 // RIGHT STAGING LEAD ARE THE SAME WINDOW: the queue cannot run away from the
 // scorer, the working set cannot run away from the disk, and neither needed a
-// separate cap to hold it.
+// separate cap to hold it. A scorer who asks for `all` is trading that second
+// property away on purpose, and pays about 470 MB for it.
 //
 // THE FILM GATE — the cursor may not pass the picture.
 //
@@ -71,6 +79,7 @@ export const GATE_REASONS = [
   'paperwork', // no clip expected — never waits
   'no-film', // a clip was claimed and resolved to nothing — never waits, never prompts
   'consented', // the scorer chose to score this one without the film
+  'evicted', // watched, and its bytes reclaimed behind the cursor — never waits
   'waiting', // expected, not here yet — BLOCKS
   'stalled', // expected, its bytes keep failing — BLOCKS, and offers the escape
 ]
@@ -100,6 +109,61 @@ const RUN_FAILURES_BEFORE_BLOCKED = 4
 // can carry.
 const DEFAULT_LOOKBEHIND = 12
 
+// HOW FAR THE QUEUE RUNS AHEAD OF THE SCORER — the three staging plans.
+//
+// One knob decides all of it: the HORIZON, a count of queue positions past the
+// cursor that the runner may fetch. Everything else follows from it, and none
+// of it changes the film gate — the cursor still may not pass the picture under
+// any plan. What a plan changes is only WHEN the bytes are paid for.
+//
+// THE BYTES ARE THE SAME BYTES. MLB's clip hosts throttle to about 2.1 Mbps per
+// client and concurrency does not help (see runner.js), so a whole game in
+// Result mode is about 470 MB and about half an hour of downloading whichever
+// plan asks for it. No plan makes the film arrive faster. `all` moves the whole
+// wait to the front, `demand` spreads it across the session, `ahead` overlaps
+// it with the scoring. Any button offering these has to say so, or it is
+// selling a speed-up that does not exist.
+//
+//   demand   Nothing is fetched until the scorer needs it. The surface opens at
+//            once, and each play waits for its own clip. It downloads the least
+//            of the three, which is what makes it the one to test on and the
+//            one to pick for dipping into a game for three plays.
+//   ahead    The default. A short pre-roll, then the queue keeps a half-inning
+//            ahead of the scorer — which is also the sanctioned spoiler
+//            lookahead (ADR-0003/0010), so the window that protects the game
+//            and the window that hides the bandwidth are the same window.
+//   all      Regulation is downloaded before the first play. REGULATION, not
+//            the game: a queue built to the last out would state whether the
+//            game went to extras before the scorer got near the 9th (ADR-0008).
+//            Extras keep joining one half at a time, exactly as under the other
+//            two plans, so the queue says the same thing about every game.
+//
+// `openWhen` is what the pre-roll asks:
+//   'now'      open immediately
+//   'clips'    open once `prerollClips` are ready at the head of the queue
+//   'drained'  open once the queue has nothing left to fetch
+export const STAGING_PLANS = {
+  demand: { horizon: 1, prerollClips: 0, openWhen: 'now', wholeGame: false },
+  // Three clips, not one half-inning. Both were on the table and the gate
+  // settles it: after the pre-roll the scorer moves at the queue's pace
+  // whatever the head start was, so the only thing a pre-roll buys is the
+  // OPENING — and three clips opens in about 75 seconds against a half-inning's
+  // two minutes. A larger one would buy a longer wait for the same steady
+  // state. It is a count of CLIPS and is never shown as one: "3 of 84" would
+  // state the game's length (ADR-0008).
+  ahead: { horizon: Infinity, prerollClips: 3, openWhen: 'clips', wholeGame: false },
+  all: { horizon: Infinity, prerollClips: 0, openWhen: 'drained', wholeGame: true },
+}
+
+export const DEFAULT_STAGING_PLAN = 'ahead'
+
+// An unknown plan falls back rather than riding on, the same shrug `createJob`
+// gives an unknown mode: a hand-mangled value must not put the queue into a
+// state no screen has wording for.
+export function stagingPlan(name) {
+  return STAGING_PLANS[name] ?? STAGING_PLANS[DEFAULT_STAGING_PLAN]
+}
+
 function emptyJob(gamePk, mode, feed) {
   return {
     gamePk: Number(gamePk),
@@ -108,6 +172,7 @@ function emptyJob(gamePk, mode, feed) {
     queue: [], // ordered { key, playId, halfIndex }, one half at a time
     staged: new Set(), // playIds whose bytes are on the disk
     unfilmed: new Set(), // playIds that resolved to nothing — paperwork now
+    evicted: new Set(), // playIds watched, then reclaimed behind the cursor
     consented: new Set(), // row keys the scorer chose to score without film
     resolveMisses: new Map(), // playId -> empty resolutions so far
     byteFailures: new Map(), // playId -> failed downloads so far
@@ -167,13 +232,31 @@ export function enqueueHalf(job, rows) {
 }
 
 // A row is COVERED when the cursor may pass it: its bytes are here, no clip
-// was ever expected, the clip resolved to nothing, or the scorer consented to
-// score it without film. Covered is not the same as watchable.
+// was ever expected, the clip resolved to nothing, the scorer consented to
+// score it without film, or it was watched and its bytes have since been
+// reclaimed. Covered is not the same as watchable.
+//
+// THE EVICTED CASE IS THE ONE THAT LOOKS WRONG AND IS NOT, and leaving it out
+// closed a loop that stopped the film for good. Every walk over the queue —
+// `nextToStage`, `filmFrontier`, `canAdvanceTo` — starts at the HEAD and asks
+// this one question of each row. Eviction takes the bytes off the disk BEHIND
+// the cursor, so a job that forgot them without recording why answered "not
+// covered" for a play the scorer had already watched: `nextToStage` handed the
+// runner the row it had just evicted, `sweep` evicted it again, and the queue
+// never reached ahead of the cursor after that. About a half-inning and a half
+// into a Result-mode session the loop closed and the surface sat on "The film
+// is coming." for the rest of the night.
+//
+// Covered is the honest answer in any case. The question this predicate asks is
+// "may the cursor pass this row", and a row the cursor has already passed is
+// settled — the play was watched and it was written down. Whether the bytes are
+// still on the disk is a storage fact, not a scoring one.
 export function isCovered(job, entry) {
   if (!entry) return false
   if (job.consented.has(entry.key)) return true
   if (!entry.playId) return true
   if (job.unfilmed.has(entry.playId)) return true
+  if (job.evicted.has(entry.playId)) return true
   return job.staged.has(entry.playId)
 }
 
@@ -189,6 +272,12 @@ export function gateFor(job, row) {
   if (!row.playId) return { blocked: false, reason: 'paperwork', escapable: false }
   if (job.staged.has(row.playId)) return { blocked: false, reason: 'ready', escapable: false }
   if (job.unfilmed.has(row.playId)) return { blocked: false, reason: 'no-film', escapable: false }
+  // Watched, and the bytes reclaimed behind the cursor. It must NOT block: a
+  // scorer who steps back past the lookbehind window is looking again at a play
+  // already written, and "the film is coming" for a play that is finished is
+  // both untrue and — because `gate` is read on the row AHEAD — a second way to
+  // deadlock the button.
+  if (job.evicted.has(row.playId)) return { blocked: false, reason: 'evicted', escapable: false }
   const failures = job.byteFailures.get(row.playId) ?? 0
   if (failures >= BYTE_FAILURES_BEFORE_ESCAPE) {
     return { blocked: true, reason: 'stalled', escapable: true }
@@ -214,12 +303,34 @@ export function filmFrontier(job) {
 // Can the cursor move from where it is to `key`? The gate is per row, so this
 // only has to check the rows in between — a scorer who taps a chip three plate
 // appearances ahead must not jump the frontier.
+//
+// THE FILM GATE HOLDS WITHIN A HALF-INNING, WHICH IS THE UNIT IT IS ABOUT.
+// Moving to a DIFFERENT half is not a play the scorer is skipping the picture
+// of — it is navigation, and the app already gates it somewhere else and
+// better: the surface clamps every half change to `revealedThrough + 1`
+// (ADR-0003/0010), so a half you can reach is one you are entitled to. Walking
+// the rows in between would ask a second, wrong question — "have you watched the
+// rest of the half you just left?" — and answer it by refusing to move. Under
+// the `demand` plan, where the tail of an abandoned half is never fetched, that
+// refusal is permanent: step one play into the 3rd, take the forward arrow, and
+// the 4th can never be entered.
+//
+// So a cross-half move starts its walk at the first row of the half being
+// entered. Nothing is loosened inside a half, which is where the gate means
+// something.
 export function canAdvanceTo(job, key) {
   const from = job.cursorKey ? job.queue.findIndex((entry) => entry.key === job.cursorKey) : -1
   const to = job.queue.findIndex((entry) => entry.key === key)
   if (to < 0) return false
   if (to <= from) return true // backwards is always allowed; it is already scored
-  for (let i = from + 1; i <= to; i += 1) {
+  const target = job.queue[to]
+  const cursor = from >= 0 ? job.queue[from] : null
+  let start = from + 1
+  if (cursor && target?.halfIndex !== cursor.halfIndex) {
+    const head = job.queue.findIndex((entry) => entry.halfIndex === target?.halfIndex)
+    if (head >= 0) start = head
+  }
+  for (let i = start; i <= to; i += 1) {
     if (!isCovered(job, job.queue[i])) return false
   }
   return true
@@ -233,20 +344,41 @@ export function canAdvanceTo(job, key) {
 // while the condensed-game host ran at 134 Mbps on the same connection in the
 // same minute. So a pool buys nothing, and out-of-order fetching buys less
 // than nothing: it puts staged clips beyond a gap the frontier cannot cross.
-export function nextToStage(job) {
-  for (const entry of job.queue) {
-    if (!isCovered(job, entry)) return entry
+//
+// `horizon` is the staging plan's one knob (STAGING_PLANS): how many queue
+// positions past the cursor the runner may reach. `Infinity` is "as far as the
+// queue goes", which is what `ahead` and `all` both want; `1` is "only the row
+// the scorer is about to need", which is `demand`.
+//
+// IT COUNTS QUEUE POSITIONS, NOT CLIPS, and that is the right unit even though
+// it looks like the loose one. Paperwork is covered, so a run of substitutions
+// and mound visits costs the horizon nothing to walk past — the cursor moves
+// through them freely and the next fetch happens when the next row that wants a
+// clip comes into reach. Counting clips instead would fetch ahead across
+// paperwork, which is the behaviour `demand` exists to not have.
+export function nextToStage(job, { horizon = Infinity } = {}) {
+  const at = job.cursorKey ? job.queue.findIndex((entry) => entry.key === job.cursorKey) : -1
+  // Before the cursor is placed, `at` is -1, so a horizon of 1 reaches position
+  // 0 — the first row of the game, which is exactly the one row `demand` should
+  // be fetching while the surface opens.
+  const limit = Number.isFinite(horizon) ? at + horizon : Infinity
+  for (let i = 0; i < job.queue.length; i += 1) {
+    if (i > limit) return null
+    if (!isCovered(job, job.queue[i])) return job.queue[i]
   }
   return null
 }
 
 // The bytes landed. Clears an earlier unfilmed mark, so a clip that published
-// late is picked up rather than written off.
+// late is picked up rather than written off — and an earlier eviction mark with
+// it, so a clip fetched a second time reads as `ready` rather than as one whose
+// bytes are still gone.
 export function markStaged(job, playId) {
   if (!playId) return job
   return next(job, {
     staged: copySet(job.staged, playId),
     unfilmed: copySet(job.unfilmed, undefined, playId),
+    evicted: copySet(job.evicted, undefined, playId),
     byteFailures: new Map(job.byteFailures),
     runFailures: 0,
     state: job.state === 'blocked' ? 'running' : job.state,
@@ -345,12 +477,21 @@ export function evictable(job, { lookbehind = DEFAULT_LOOKBEHIND } = {}) {
 // Eviction happened, so the job forgets those bytes. Kept separate from
 // `evictable` so a delete that fails does not leave the job lying about what
 // is on the disk.
+//
+// It REMEMBERS the eviction rather than only forgetting the bytes, and that is
+// the whole difference between a working queue and one that turns around and
+// re-downloads what it just deleted. See `isCovered` for what went wrong when
+// it did not.
 export function markEvicted(job, playIds) {
   const gone = [...(playIds ?? [])].filter(Boolean)
   if (!gone.length) return job
   const staged = new Set(job.staged)
-  for (const playId of gone) staged.delete(playId)
-  return next(job, { staged })
+  const evicted = new Set(job.evicted)
+  for (const playId of gone) {
+    staged.delete(playId)
+    evicted.add(playId)
+  }
+  return next(job, { staged, evicted })
 }
 
 export function pauseJob(job) {
@@ -381,7 +522,7 @@ export function markComplete(job) {
 // the mode DEFINES it, and the caller re-enqueues the halves the scorer has
 // reached from the newly filtered rows. What survives is everything learned
 // about clips rather than about modes: what is staged, what has no film, and
-// what the scorer already consented to.
+// what the scorer already consented to, and what has already been reclaimed.
 export function withMode(job, mode) {
   const wanted = mode === 'full' ? 'full' : 'result'
   if (wanted === job.mode) return job
@@ -398,7 +539,7 @@ export function withMode(job, mode) {
 // is a function of the reveal, which ADR-0046 forbids. The waiting indicator
 // is indeterminate. This returns what is behind the cursor and what state the
 // job is in, and nothing that counts forward.
-export function stagingStatus(job) {
+export function stagingStatus(job, { horizon = Infinity } = {}) {
   const at = job.queue.findIndex((entry) => entry.key === job.cursorKey)
   const frontier = filmFrontier(job)
   const ahead = job.queue.findIndex((entry) => entry.key === frontier)
@@ -406,8 +547,14 @@ export function stagingStatus(job) {
     state: job.state,
     blockedReason: job.blockedReason,
     // How many rows of film are ready in front of the scorer. Bounded by the
-    // one-half enqueue window, so it never states the game's length.
+    // one-half enqueue window under `demand` and `ahead`; under `all` it is
+    // bounded by REGULATION, which is the same bound for every game and so
+    // still states nothing about this one (ADR-0008).
     filmAhead: at >= 0 && ahead >= at ? ahead - at : 0,
-    waiting: job.state !== 'blocked' && nextToStage(job) !== null,
+    // Takes the plan's horizon, so this answers "is the runner fetching
+    // something" rather than "does the queue still hold work". Under `demand`
+    // those are different questions: there is always more queue, and nothing is
+    // being fetched until the scorer asks for it.
+    waiting: job.state !== 'blocked' && nextToStage(job, { horizon }) !== null,
   }
 }

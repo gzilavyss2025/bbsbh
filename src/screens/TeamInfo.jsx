@@ -14,6 +14,7 @@ import { fetchTeam, fetchTeamRoster } from '../api/team.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { BallparkModal } from '../components/ballpark/BallparkModal.jsx'
 import { BoxLinesDoor } from '../components/boxlines/BoxLinesDoor.jsx'
+import { ExpressLaneDoor } from '../components/game/ExpressLaneDoor.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
 import { POS_ORDER } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
@@ -213,6 +214,13 @@ export function TeamInfo({
               <ChevronLink onClick={onPrintSheet}>Print blank scorecard</ChevronLink>
             </div>
           )}
+
+          {/* The third thing you can do with a game that is not "walk the
+              innings": score it from the pitch clips. It joins the two doors
+              above rather than the foot of the page, and it draws itself or
+              nothing at all — a game with no film has no door. Its own header
+              carries the placement argument and the suppression rules. */}
+          <ExpressLaneDoor feed={feed} />
 
           <SeasonSeriesStrip
             viewingTeamId={meta.id}

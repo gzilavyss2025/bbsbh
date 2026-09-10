@@ -176,6 +176,35 @@ routing parses the pathname only — so use it everywhere by habit.
   and a `Bash` PreToolUse advisory hook (`.claude/hooks/remind-nointro.mjs`)
   nudges if a slate URL slips through without it.
 
+## Testing Express Lane: `?nofilm`
+
+Express Lane (`/game/{gamePk}/express`) is gated on real MLB film, and the film
+arrives at MLB's pace: about 90 seconds before the surface opens, then about 25
+seconds a play. Walking a nine-inning game honestly takes half an hour and about
+470 MB, and `sporty-clips.mlb.com` starts refusing a client after roughly 25
+requests in a few minutes — so **never** loop a test over it.
+
+Append **`?nofilm`** instead. Every rail row is stripped of its `playId`, so the
+gate reads the whole game as paperwork: nothing downloads, nothing waits, and the
+deck, the chips, the runners' diamonds, the reveal marks and the half handoffs
+can all be walked end to end. A verified full-game walk of gamePk 823035 ran all
+18 halves with **zero** requests to either clip host and left the reveal mark at
+17, one per half in order.
+
+    http://localhost:5173/07072026/milstl-2/express?nointro&nofilm
+
+It is **dev-only in the build**: the flag is read behind `import.meta.env.DEV`
+(`ExpressLanePage.jsx`), a compile-time constant, so the branch is removed from a
+production bundle and a real reader cannot type their way past the film gate.
+That gate is the feature's whole thesis — a scorer who can read "grounds out,
+second baseman to first" has no reason to wait for the picture — so keep it that
+way.
+
+It does not replace a run with real film. Anything about the CLIP itself — the
+pane, the gate's waiting and stalled states, the pre-roll — needs one, and the
+**On demand** staging plan on the entry screen is the cheapest way to get it: the
+surface opens at once and only the play you are on is ever fetched.
+
 ## Don't read the precompute output whole
 
 `public/data/` is ~28 MB of generated JSON and `scripts/data/` ~6.7 MB of SQLite

@@ -338,6 +338,37 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   and cannot enforce: a poster carries the broadcast scorebug burned into the
   pixels, so it may render only inside an already-revealed play and never as the
   placeholder for the NEXT clip; and no surface may print a game-wide clip total.
+- **`expresslane/runners.js`** — reveal-only. Express Lane's SCORING DECK: which
+  men are standing on base at a given cursor, and whose box a steal gets written
+  on. It exists because a scorer does not write a stolen base on the batter's
+  box — he writes it on the RUNNER's box, the plate appearance in which that man
+  reached, which on the #22 sheet is a row further up. `expressDeck(feed,
+  inning, half, row)` returns the finished box, the men on (ordered third,
+  second, first), the capped card list and the chips; `runnersOnBase` is the
+  predicate — reached a base, has not scored, `outAt == null`, and dropping that
+  last one leaves a man on first who was forced at second two pitches ago.
+  `railRevealCap(feed, inning, half, row)` is the same cap on its own, and it is
+  the number Express Lane writes into the app's at-bat reveal mark: a count of
+  `computeHalfInningFeed` ENTRIES, which is the unit `revealAtBat` stores and
+  PlayByPlay reads back. A count of rail ROWS is a different number — over gamePk
+  823035 the two disagree at 99 of 128 cursor positions — and writing that one
+  opens entries in the innings viewer the surface never showed.
+  Three things to know. (1) IT RE-DERIVES NOTHING: `computeHalfInningFeed`'s
+  `stepCap` already solved this for at-bat stepping (ADR-0016), and this maps a
+  rail row onto that cap. The cap is not optional and there is no variant of
+  `expressDeck` without the cursor — built off the finished half, a man who
+  reached first in the third carries a fully shaded diamond the moment his own
+  at-bat is revealed, telling the scorer the run came home before he scored the
+  play that drove it in. (2) THE JOIN INCLUDES `isTerminal`, not just
+  `atBatIndex`. Result mode keeps `action` rows, and an action row sits INSIDE a
+  plate appearance carrying that plate appearance's number; joined on the number
+  alone the cursor on a batter timeout drew the finished box of an at-bat whose
+  pitch had not been watched. A terminal row includes its own card; every other
+  row stops short of it, and the deck reports `pending` — the batter's name
+  only, identity and never result. (3) The cards come back with the three marks
+  `AtBatBox` draws but does not compute (`outType`, `centerCode`, `ladder`),
+  composed from the sheet's own two modules so one plate appearance draws the
+  same box here and on paper.
 - **Tier 3 is not in `src/api/`** — `src/lib/expresslane/` holds it, because it
   reads no baseball at all: `staging.js` is the queue and THE FILM GATE (a pure
   state machine over playIds), `byteStore.js` is the on-device IndexedDB Blob
