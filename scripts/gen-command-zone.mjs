@@ -43,7 +43,7 @@
 // and its caching. Run by hand: node scripts/gen-command-zone.mjs [--season=2026]
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { writeShards } from './lib/io.js'
+import { writeShardsWithStamp } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import {
   MIN_COMMAND_PITCHES,
@@ -69,7 +69,11 @@ const DOT_CAP = 48
 
 const season = await latestSeason(preferred)
 if (!season) {
-  await writeShards(outDir, [])
+  // Stamped even with nothing to write. The sweep leaves the directory bare,
+  // and a bare directory with no index is one the freshness guard cannot check
+  // — the exact blind spot this stamp exists to close. `buckets: 0` keeps the
+  // empty result visible to anyone reading the file.
+  await writeShardsWithStamp(outDir, [], { season: null, buckets: 0 })
   console.log(`no OpenCommand season at or below ${preferred} — swept ${outDir}`)
   process.exit(0)
 }
@@ -178,12 +182,17 @@ for (const [pitcherId, types] of byPitcher) {
   // NO generatedAt in a shard. These files are rewritten in full every night,
   // and a timestamp in each would dirty all 100 of them on a night when not one
   // pitch changed — the churn gen-contracts-shards.mjs already taught this repo
-  // to avoid. The season is the only header a reader needs.
+  // to avoid. The season is the only header a reader needs; the run's
+  // timestamp goes once, in this directory's index.json (writeShardsWithStamp).
   if (!shard) entries.set(key, (shard = { season, pit: {} }))
   shard.pit[pitcherId] = out
 }
 
-const { written, swept } = await writeShards(outDir, [...entries].map(([k, v]) => [k, v]))
+const { written, swept } = await writeShardsWithStamp(
+  outDir,
+  [...entries].map(([k, v]) => [k, v]),
+  { season, buckets: entries.size },
+)
 
 console.log(
   `wrote ${written} bucket(s) to ${outDir} (swept ${swept}) — ${season}: ` +
