@@ -1,0 +1,263 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Big+Shoulders+Display:wght@900&family=JetBrains+Mono:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap">
+  <style>
+    :root {
+      --f-disp:"Barlow Condensed","Arial Narrow",sans-serif;
+      --f-body:"Source Sans 3",system-ui,sans-serif;
+      --f-mono:"JetBrains Mono",ui-monospace,monospace;
+      --shadow-card:0 1px 2px rgba(22,34,47,0.08),0 4px 12px rgba(22,34,47,0.06);
+      --inset-cell:inset 0 1px 2px rgba(22,34,47,0.10);
+      --seal-texture:repeating-linear-gradient(-45deg,#B5824A 0px,#B5824A 6px,#A9743C 6px,#A9743C 8px);
+    }
+    body { margin:0; font-family:var(--f-body); background:#F6EFDC; color:#1B2A3A; }
+    a { color:#2F6E4F; text-decoration:none; }
+    a:hover { color:#255740; }
+    .lbl { font-family:var(--f-disp); font-size:12px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; }
+    .lvl { min-height:34px; padding:0 14px; display:flex; align-items:center; justify-content:center;
+           font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.09em;
+           text-transform:uppercase; color:#3C4A5A; border-right:1px solid #CBC1A7; }
+    .lvl.on { color:#FBF6E9; background:#1B2A3A; border-radius:6px; border-right-color:transparent; }
+    .tile { width:50px; height:38px; display:flex; align-items:center; justify-content:center;
+            border:1px solid #CBC1A7; border-radius:8px; background:#F3ECD8;
+            box-shadow:var(--inset-cell); font-family:var(--f-disp); font-size:13px;
+            font-weight:700; letter-spacing:0.05em; color:#3C4A5A; }
+    .chip { min-height:36px; padding:0 14px; display:flex; align-items:center; justify-content:center;
+            border:1px solid #CBC1A7; border-radius:999px; background:#F3ECD8; color:#16222F;
+            font-family:var(--f-disp); font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; }
+    .chip.on { background:#1B2A3A; color:#FBF6E9; border-color:#1B2A3A; }
+    .num { font-family:var(--f-mono); font-weight:700; letter-spacing:0.01em; font-variant-numeric:tabular-nums; color:#16222F; }
+    .wire { display:grid; grid-template-columns:76px 30px 1fr; align-items:start; gap:14px;
+            padding:12px 0; border-bottom:1px solid #EDE6D1; }
+    .mark { width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+            border:1px solid #CBC1A7; border-radius:6px; background:#F3ECD8; box-shadow:var(--inset-cell);
+            font-family:var(--f-disp); font-size:10px; font-weight:700; color:#1B2A3A; }
+  </style>
+</helmet>
+
+<div style="width:1272px; box-sizing:border-box; padding:18px 16px 40px; background:#F6EFDC;">
+
+  <!-- SHELL: byte-for-byte the same as every other level -->
+  <div style="display:flex; align-items:center; gap:16px; padding-bottom:10px;">
+    <div style="font-family:var(--f-disp); font-size:26px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Tally</div>
+    <div style="display:flex; align-items:center;">
+      <div class="lvl on">MLB</div>
+      <div class="lvl">AAA</div>
+      <div class="lvl">AA</div>
+      <div class="lvl">A+</div>
+      <div class="lvl" style="border-right:none;">A</div>
+    </div>
+    <div style="flex-grow:1;"></div>
+    <div style="display:flex; align-items:center; gap:14px; font-family:var(--f-disp); font-size:13px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#3C4A5A;">
+      <div>Search</div>
+      <div>Log</div>
+      <div>Menu</div>
+    </div>
+  </div>
+
+  <!-- CLUB STRIP: shell position, between the level tabs and the date banner -->
+  <div style="margin:10px 0 12px;">
+    <div class="lbl" style="color:#6B6558; margin-bottom:8px;">Browse MLB clubs</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <div class="tile">MIL</div>
+      <div class="tile">CHC</div>
+      <div class="tile">STL</div>
+      <div class="tile">PIT</div>
+      <div class="tile">CIN</div>
+      <div class="tile">LAD</div>
+      <div class="tile">SD</div>
+      <div class="tile">SF</div>
+      <div class="tile">ARI</div>
+      <div class="tile">COL</div>
+      <div class="tile">NYM</div>
+      <div class="tile">PHI</div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:10px; border-bottom:1px solid #CBC1A7;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div style="min-width:30px; min-height:30px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; box-shadow:var(--shadow-card); font-size:18px; color:#1B2A3A;">&lsaquo;</div>
+      <div style="font-size:14px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:#1B2A3A;">Thu, Dec 10, 2026</div>
+      <div style="min-width:30px; min-height:30px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; box-shadow:var(--shadow-card); font-size:18px; color:#1B2A3A;">&rsaquo;</div>
+    </div>
+    <div class="lbl" style="min-height:20px; padding:3px 9px; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; color:#1B2A3A; font-size:11px;">Browse any season</div>
+  </div>
+
+  <!-- HEAD: same shape as the MiLB board -->
+  <div style="margin:22px 0 18px;">
+    <h1 style="margin:0; font-family:var(--f-disp); font-size:40px; font-weight:700; line-height:0.9; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">MLB offseason</h1>
+  </div>
+
+  <div style="display:flex; gap:24px; align-items:flex-start;">
+    <div style="flex-grow:1; min-width:0; display:flex; flex-direction:column; gap:20px;">
+
+      <!-- LEAD: the wire, promoted out of the rail -->
+      <div>
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px;">
+          <div style="font-family:var(--f-disp); font-size:26px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Roster moves</div>
+          <div style="font-size:14px; color:#6B6558;">Since the season ended</div>
+        </div>
+        <div style="padding:2px 16px 12px; border:1px solid #6E7475; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+          <div class="wire">
+            <div class="num" style="font-size:12px; color:#6B6558; padding-top:8px;">DEC 10</div>
+            <div class="mark">SD</div>
+            <div>
+              <div style="font-size:15px; line-height:1.4; color:#1B2A3A;"><strong style="font-weight:600;"><a href="#">Padres</a></strong> select <a href="#">RHP Marco Salgado</a> from the <a href="#">Guardians</a> in the Rule 5 draft.</div>
+              <div class="lbl" style="margin-top:3px; font-size:10px; color:#6B6558;">Rule 5 draft</div>
+            </div>
+          </div>
+          <div class="wire">
+            <div class="num" style="font-size:12px; color:#6B6558; padding-top:8px;">DEC 9</div>
+            <div class="mark">MIL</div>
+            <div>
+              <div style="font-size:15px; line-height:1.4; color:#1B2A3A;"><strong style="font-weight:600;"><a href="#">Brewers</a></strong> sign <a href="#">1B Teoscar Rivas</a> to a three-year contract.</div>
+              <div class="lbl" style="margin-top:3px; font-size:10px; color:#6B6558;">Free agent signing</div>
+            </div>
+          </div>
+          <div class="wire">
+            <div class="num" style="font-size:12px; color:#6B6558; padding-top:8px;">DEC 9</div>
+            <div class="mark">NYY</div>
+            <div>
+              <div style="font-size:15px; line-height:1.4; color:#1B2A3A;"><strong style="font-weight:600;"><a href="#">Yankees</a></strong> trade <a href="#">OF Spencer Jones</a> and two minor leaguers to the <a href="#">Tigers</a> for <a href="#">LHP Tarik Skubal</a>.</div>
+              <div class="lbl" style="margin-top:3px; font-size:10px; color:#6B6558;">Trade</div>
+            </div>
+          </div>
+          <div class="wire" style="border-bottom:none;">
+            <div class="num" style="font-size:12px; color:#6B6558; padding-top:8px;">DEC 8</div>
+            <div class="mark">LAD</div>
+            <div>
+              <div style="font-size:15px; line-height:1.4; color:#1B2A3A;"><strong style="font-weight:600;"><a href="#">Dodgers</a></strong> non-tender <a href="#">C Dalton Rushing</a>.</div>
+              <div class="lbl" style="margin-top:3px; font-size:10px; color:#6B6558;">Non-tender</div>
+            </div>
+          </div>
+          <div style="margin-top:10px; display:flex; align-items:center; gap:18px;">
+            <a href="#" style="font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">All 214 moves &rarr;</a>
+            <a href="#" style="font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:#3C4A5A;">Only my clubs &rsaquo;</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECOND: dated calendar -->
+      <div style="display:flex; align-items:stretch; border:1px solid #CBC1A7; border-radius:10px; background:#F3ECD8; overflow:hidden;">
+        <div style="flex-grow:1; padding:11px 16px; border-right:1px solid #CBC1A7;">
+          <div class="num" style="font-size:13px; color:#6B6558;">DEC 10</div>
+          <div style="margin-top:3px; font-size:14px; color:#16222F;">Rule 5 draft</div>
+          <div class="lbl" style="margin-top:2px; font-size:10px; color:#2F6E4F;">Today</div>
+        </div>
+        <div style="flex-grow:1; padding:11px 16px; border-right:1px solid #CBC1A7;">
+          <div class="num" style="font-size:13px; color:#6B6558;">JAN 9</div>
+          <div style="margin-top:3px; font-size:14px; color:#16222F;">Arbitration filing</div>
+        </div>
+        <div style="flex-grow:1; padding:11px 16px; border-right:1px solid #CBC1A7;">
+          <div class="num" style="font-size:13px; color:#6B6558;">JAN 20</div>
+          <div style="margin-top:3px; font-size:14px; color:#16222F;">Hall of Fame vote</div>
+        </div>
+        <div style="flex-grow:1; padding:11px 16px;">
+          <div class="num" style="font-size:13px; color:#6B6558;">FEB 12</div>
+          <div style="margin-top:3px; font-size:14px; color:#16222F;">Pitchers and catchers</div>
+        </div>
+      </div>
+
+      <!-- THIRD: the archive card, every season open -->
+      <div style="position:relative; display:flex; flex-direction:column; gap:12px; padding:14px 16px; border:1px solid #6E7475; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+
+        <div style="position:relative; overflow:hidden; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); column-gap:12px; row-gap:8px; align-items:center;">
+          <div style="position:absolute; top:50%; left:50%; z-index:0; font-family:'Big Shoulders Display',var(--f-disp); font-weight:900; font-size:158px; line-height:1; color:#B5824A; opacity:0.10; transform:translate(calc(-50% + 2px), calc(-50% - 11px)) skewX(-8deg) rotate(-2deg); pointer-events:none;">@</div>
+          <div style="position:absolute; top:50%; left:50%; z-index:0; font-family:'Big Shoulders Display',var(--f-disp); font-weight:900; font-size:158px; line-height:1; color:#1B2A3A; opacity:0.07; transform:translate(-50%, calc(-50% - 12px)) skewX(-8deg) rotate(-2deg); pointer-events:none;">@</div>
+
+          <div style="position:relative; z-index:1; width:100%; max-width:130px; aspect-ratio:1/1; justify-self:center; display:flex; align-items:center; justify-content:center; padding:2px; border:1px solid #CBC1A7; border-radius:10px; background:#F3ECD8; box-shadow:var(--inset-cell); font-family:var(--f-disp); font-size:34px; font-weight:700; letter-spacing:0.05em; color:#1B2A3A;">MIL</div>
+          <div style="position:relative; z-index:1; width:100%; max-width:130px; aspect-ratio:1/1; justify-self:center; display:flex; align-items:center; justify-content:center; padding:2px; border:1px solid #CBC1A7; border-radius:10px; background:#F3ECD8; box-shadow:var(--inset-cell); font-family:var(--f-disp); font-size:34px; font-weight:700; letter-spacing:0.05em; color:#1B2A3A;">CHC</div>
+
+          <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; line-height:1.15;">
+            <div style="font-size:15px; color:#3C4A5A;">Milwaukee</div>
+            <div style="font-family:var(--f-disp); font-size:20px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Brewers</div>
+          </div>
+          <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; line-height:1.15;">
+            <div style="font-size:15px; color:#3C4A5A;">Chicago</div>
+            <div style="font-family:var(--f-disp); font-size:20px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Cubs</div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:center; min-height:40px; margin:0 -16px; padding:0 16px; background:var(--seal-texture); color:#1E1405;">
+          <div class="lbl" style="font-size:13px;">Score sealed</div>
+        </div>
+
+        <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-left:2px solid #B5824A; background:#F3ECD8;">
+          <div style="font-size:15px; line-height:1.4; color:#1B2A3A; text-wrap:pretty;">Both starting pitchers later won a Cy Young Award.</div>
+        </div>
+
+        <div style="display:flex; align-items:baseline; gap:8px; font-size:13px; color:#6B6558;">
+          <span class="num" style="font-size:13px; color:#3C4A5A;">SAT AUG 2, 2021</span>
+          <span>&middot;</span>
+          <span>Wrigley Field</span>
+          <span>&middot;</span>
+          <span style="color:#2F6E4F; font-weight:600;">Pitch data &amp; video</span>
+        </div>
+
+        <div style="min-height:48px; display:flex; align-items:center; justify-content:center; border-radius:6px; background:#1B2A3A; color:#FBF6E9; font-family:var(--f-disp); font-size:17px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">Score this game</div>
+
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div class="lbl" style="font-size:11px; color:#6B6558; margin-right:2px;">Another game</div>
+          <div class="chip on">Any season</div>
+          <div class="chip">My clubs</div>
+          <div class="chip">October</div>
+          <div class="chip">A debut</div>
+        </div>
+      </div>
+
+      <!-- FOURTH: two quiet rows -->
+      <div style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px;">
+        <div style="padding:14px 16px; border:1px solid #CBC1A7; border-radius:10px; background:#FFFDF6; box-shadow:var(--shadow-card);">
+          <div class="lbl" style="font-size:11px; color:#6B6558;">The notebook &middot; 2026 American League</div>
+          <div style="margin-top:6px; font-family:var(--f-disp); font-size:24px; font-weight:700; line-height:1.0; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">The twelve-pitch at-bats</div>
+          <div style="display:flex; align-items:flex-end; gap:12px; margin:10px 0;">
+            <div class="num" style="font-size:40px; line-height:0.85; letter-spacing:-0.045em;">38</div>
+            <div style="padding-bottom:4px; font-size:13px; color:#6B6558; line-height:1.35;">of <span class="num" style="font-size:13px;">181,204</span><br>plate appearances</div>
+          </div>
+          <div style="font-size:14px; color:#3C4A5A; line-height:1.45; text-wrap:pretty;">Pitch coverage is complete at MLB, so the count is exact. Each row opens its game.</div>
+          <a href="#" style="display:inline-block; margin-top:10px; font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">Read the note &rarr;</a>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; align-items:stretch; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card); overflow:hidden;">
+            <div style="width:56px; flex-shrink:0; background:var(--seal-texture);"></div>
+            <div style="flex-grow:1; min-width:0; padding:12px 14px;">
+              <div style="font-family:var(--f-disp); font-size:20px; font-weight:700; line-height:1.05; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Season record &rarr;</div>
+              <div style="margin-top:3px; font-size:13px; color:#3C4A5A; text-wrap:pretty;">Standings and October. <strong style="font-weight:600;">Opening this shows results.</strong></div>
+            </div>
+          </div>
+          <div style="flex-grow:1; padding:12px 14px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+            <div style="font-family:var(--f-disp); font-size:20px; font-weight:700; line-height:1.05; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Awards &amp; the ballot &rarr;</div>
+            <div style="margin-top:3px; font-size:13px; color:#3C4A5A; text-wrap:pretty;">MVP, Cy Young, Rookie of the Year. Hall of Fame vote January 20. No seal: an award is not a score.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex-shrink:0; width:288px; display:flex; flex-direction:column; gap:14px;">
+      <div style="padding:16px; border:1.5px solid #16222F; border-radius:10px; background:#FFFDF6; box-shadow:var(--shadow-card); text-align:center;">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Pitchers and catchers</div>
+        <div class="num" style="margin-top:6px; font-size:52px; line-height:0.85; letter-spacing:-0.045em;">64</div>
+        <div style="margin-top:4px; font-size:14px; color:#3C4A5A;">days &mdash; February 12</div>
+      </div>
+      <div style="padding:14px 16px; border:1px solid #CBC1A7; border-radius:10px; background:#F3ECD8;">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Note</div>
+        <div style="margin-top:8px; font-size:14px; color:#3C4A5A; line-height:1.45; text-wrap:pretty;">Roster moves lead this page while the season is over. When games resume, they return to the rail and the slate takes the top back.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:26px; padding-top:14px; border-top:1px solid #DED6C0; font-size:13px; color:#6B6558; text-wrap:pretty;">
+    Illustrative rows, dates and counts. Player and club names are placeholders, not real transactions. Club marks stand in as paper tiles.
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

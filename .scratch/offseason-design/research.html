@@ -1,0 +1,535 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tally offseason research</title><style>body{max-width:1000px;margin:40px auto;padding:0 24px;background:#F6EFDC;color:#16222F;font:17px/1.65 system-ui}a{color:#16222F;text-underline-offset:3px}h1,h2,h3{line-height:1.2;margin-top:2em}table{width:100%;border-collapse:collapse;font-size:14px;display:block;overflow:auto}td,th{padding:12px;border:1px solid #CBC1A7;vertical-align:top;text-align:left}code{overflow-wrap:anywhere}a:focus-visible{outline:3px solid #16222F;outline-offset:4px}</style><main><a href="index.html">Back to the six wireframes</a><h1>Tally Baseball: an offseason home page</h1>
+<p>Design study, 14 September 2026. Recommendation: <strong>Concept A, One more game</strong>.
+This document separates repository findings, external facts and proposed behavior.
+All content in the six wireframe images is illustrative, including player affiliation,
+records, dates, pairings and report values. The drawings are not implemented screens.</p>
+<h2>1. Current product and opportunity</h2>
+<p>Tally is a read-only companion to a paper scorebook. Its best offseason asset is
+the game flow it already has. A useful visit can end with a person scoring an
+archived game, rather than reading another general baseball news page.</p>
+<p>The home page shows <strong>one level at a time</strong>, not five stacked level sections.
+<code>GameSelect.jsx</code> has MLB, AAA, AA, A+ and A navigation; the minor levels use sport
+IDs 11, 12, 13 and 14. The level and date live in the URL. Bare <code>/</code> is today's MLB
+slate; <code>/aaa</code> and <code>/aa/08152026</code> are existing examples. The club strip opens team
+pages; it is not a filter of the daily slate. Favorite clubs and their affiliates
+can receive priority in the game list. Do not replace that navigation with a new
+offseason dashboard shell.</p>
+<p>The current slate has date arrows, game cards, result reveals, search, a Game Log
+entry, and a roster wire. On wide screens the wire sits beside the games; on
+phones it docks below. Off-day and All-Star break messages can include the next
+game date. The next-game search has a ten-day default horizon. An empty return
+from that search cannot establish that a season ended.</p>
+<p>Team hubs lead to roster, games, numbers and affiliate information. Player hubs
+have Overview, Stats, Analytics and History routes. The Stats tab has a game log
+with level context. Season-level discovery therefore has real destinations;
+it does not need a new player-detail page.</p>
+<p>The existing scoring path is <code>GameSelect → GameView → TeamInfo → InningViewer</code>.
+Game sections have real URLs for away/home lineups, top/bottom halves and box
+score. Within a half, <strong>Next at-bat</strong> reveals a plate appearance and its associated
+notes; <strong>Rest of half</strong> completes the half. The transient at-bat cursor ultimately
+commits the existing half-inning high-water mark. It is not a separate permanent
+replay save. In a live half, the flow stops at <strong>Caught up</strong>. Extra innings emerge
+only as the reader reaches them. Express Lane is a separate film-oriented flow;
+do not promise that its video coverage exists for a random minor-league game.</p>
+<p><strong>Opportunity:</strong> replace the empty current-day games area with a small, dated
+archive invitation. Keep a clear path to past daily slates and current club news.
+Avoid a new content operation that needs daily manual writing.</p>
+<p>Repository evidence: <code>src/screens/GameSelect.jsx</code>, <code>src/components/team/OffDaySection.jsx</code>,
+<code>src/api/schedule.js</code>, <code>src/api/statsLevels.js</code>, <code>src/api/minorsLeaders.js</code>,
+<code>src/api/team.js</code>, <code>src/api/standings.js</code>, <code>src/screens/StandingsPage.jsx</code>,
+<code>src/api/postseasonHistory.js</code>, <code>src/api/postseasonSeries.js</code>, <code>src/lib/route.js</code>,
+<code>docs/player-hub.md</code>, <code>CONTEXT.md</code>, root and nested <code>CLAUDE.md</code>, and ADRs 0016,
+0021, 0026, 0034 and 0056. This is source inspection and endpoint verification.
+Browser page inspection remained blocked by the browser runtime, despite Chrome
+being discoverable. No claim of a completed visual audit of the existing app is made.</p>
+<h2>2. Research and product fit</h2>
+<table>
+<thead>
+<tr>
+  <th>Observed external pattern</th>
+  <th>What suits Tally</th>
+  <th>What to avoid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MiLB separates standings by league and half.</td>
+  <td>A league selector followed by Full season / First half / Second half. Explain qualification separately from overall record.</td>
+  <td>One level-wide ranking that implies the top teams all qualify.</td>
+</tr>
+<tr>
+  <td>MiLB's postseason page groups competitions by level, league and round, with series state and game links.</td>
+  <td>Small league-specific series cards; on phones use a vertical round order.</td>
+  <td>Copying the result-heavy home headlines or one enormous tournament tree.</td>
+</tr>
+<tr>
+  <td>Louisville's season review combines team trends, individual performances and paths to MLB.</td>
+  <td>One concise fact, its denominator, and a player/game destination.</td>
+  <td>A long recap requiring an editor to maintain every club.</td>
+</tr>
+<tr>
+  <td>Northwest Arkansas's review includes modest but distinctive achievements such as triples, walks and appearances.</td>
+  <td>Broaden discovery beyond the top prospects and home-run leaders.</td>
+  <td>Calling something a franchise record without a complete historical comparison.</td>
+</tr>
+<tr>
+  <td>Baseball Savant's replay archive organizes a specific event type by date, game and a link to evidence.</td>
+  <td>Give each report a defined question and a route back to the source game.</td>
+  <td>A generic feed of attractive but unexplained highlights.</td>
+</tr>
+</tbody>
+</table>
+<p>Sources: <a href="https://www.milb.com/standings/midwest-league">MiLB standings</a>,
+<a href="https://www.milb.com/events/playoffs">MiLB postseason presentation</a>,
+<a href="https://www.milb.com/news/2025-bats-season-in-review">Louisville season review</a>,
+<a href="https://www.milb.com/news/2025-in-review-history">Northwest Arkansas records review</a>,
+<a href="https://baseballsavant.mlb.com/replay">Baseball Savant replay archive</a>.
+These are baseball publishers' own surfaces. The recommendations in the middle
+column are design judgments, not evidence that a pattern increases retention.</p>
+<h3>Supported leagues and season structure</h3>
+<p>The following league membership, planned game counts and regular-season end
+dates were checked against the MLB Stats API on 14 September 2026. Counts are
+scheduled lengths, not promises that every club played every game.</p>
+<table>
+<thead>
+<tr>
+  <th>Home level</th>
+  <th>Leagues (API ID; clubs)</th>
+  <th>Planned games per club</th>
+  <th>2026 regular-season end</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>AAA</td>
+  <td>International (117; 20), Pacific Coast (112; 10)</td>
+  <td>150</td>
+  <td>September 20</td>
+</tr>
+<tr>
+  <td>AA</td>
+  <td>Eastern (113; 12), Southern (111; 8), Texas (109; 10)</td>
+  <td>138</td>
+  <td>September 13</td>
+</tr>
+<tr>
+  <td>A+</td>
+  <td>Midwest (118; 12), South Atlantic (116; 12), Northwest (126; 6)</td>
+  <td>132</td>
+  <td>September 6</td>
+</tr>
+<tr>
+  <td>A</td>
+  <td>California (110; 8), Carolina (122; 12), Florida State (123; 10)</td>
+  <td>132</td>
+  <td>September 6</td>
+</tr>
+</tbody>
+</table>
+<p>Primary endpoint examples: <a href="https://statsapi.mlb.com/api/v1/leagues?sportId=11&amp;season=2026">AAA leagues</a>,
+<a href="https://statsapi.mlb.com/api/v1/leagues?sportId=12&amp;season=2026">AA leagues</a>,
+<a href="https://statsapi.mlb.com/api/v1/leagues?sportId=13&amp;season=2026">High-A leagues</a>,
+<a href="https://statsapi.mlb.com/api/v1/leagues?sportId=14&amp;season=2026">Single-A leagues</a>,
+<a href="https://statsapi.mlb.com/api/v1/seasons/2026?sportId=11">AAA season</a>,
+<a href="https://statsapi.mlb.com/api/v1/seasons/2026?sportId=12">AA season</a>,
+<a href="https://statsapi.mlb.com/api/v1/seasons/2026?sportId=13">High-A season</a>,
+<a href="https://statsapi.mlb.com/api/v1/seasons/2026?sportId=14">Single-A season</a>.</p>
+<p>For 2026, AAA has two halves. Each league's half winners meet in a best-of-three
+league final; the first-half winner hosts. League champions meet in one national
+championship game. AA and both A levels normally send each division's half
+winners into best-of-three division series, then a best-of-three league final.
+If a club wins both halves, the next-best second-half club qualifies. Northwest
+is the exception: its six clubs produce two half qualifiers and one best-of-five
+final. No cross-league national final is specified for AA or the A levels.
+The published tiebreakers start with head-to-head play in the half, then the last
+20 games, then progressively larger windows. Do not derive qualifiers by sorting
+full-season wins. <a href="https://www.milb.com/events/playoffs/procedures">Official 2026 procedures</a>.</p>
+<p>The procedures page does not explicitly settle AAA's repeated-half-winner
+replacement in its AAA section. Before implementing automatic AAA qualification,
+confirm that case from the league, or ingest the officially named participants.
+Do not transfer an older year's replacement rule without checking it.</p>
+<p>The API's AAA <code>postSeasonEndDate</code> is September 27; the official national final is
+listed for September 26. The postseason page also contains a September 21 summary
+beside September 22 series listings. These are concrete reasons to treat schedule
+metadata as a planning aid, not as proof of completion. Ingest actual scheduled
+games and final competition status; allow a small reviewed season configuration.</p>
+<h2>3. Three wireframe concepts</h2>
+<p>All six boards appear in <code>index.html</code>. Desktop boards use a 1200-pixel canvas;
+mobile boards use 390 pixels. They use Tally's manila, navy, thin rules and card
+language, with simplified type and club initials. Production should use the real
+tokens and Barlow Condensed / Source Sans 3 / JetBrains Mono font roles. The
+existing Game Log name remains unchanged; its content and stamp surfaces are
+outside this proposal.</p>
+<h3>A. One more game — recommended</h3>
+<p><strong>Hierarchy:</strong> season state → one strong game action → player discovery → season
+record link. Desktop puts player and record cards side by side beneath the game
+invitation, with the existing wire at right. Mobile stacks the same order.</p>
+<p><strong>Primary action:</strong> “Open a random game.” It opens the selected game's first
+lineup page. From there, the existing navigation leads to the first half and
+Next at-bat. If progress exists, show “Resume game” rather than promise a fresh
+sealed replay. Do not silently reset progress. A later direct “Start scoring”
+shortcut can land at top 1 after lineups remain accessible.</p>
+<p><strong>Player action:</strong> an illustrative Andrew Fischer card says why he is in the
+pool: played at this level in the selected season. “Open player” goes to Overview;
+“Another player” replaces the choice only on request. It is exploration of a
+person, not a promise of a prospect ranking or a particular great game.</p>
+<p><strong>Repeat value:</strong> enough eligible games for many scoring sessions; a second route
+to players who are not household names. Low editorial burden. The weakness is
+that a uniform random game can be ordinary. That is an acceptable first-version
+tradeoff for an outcome-neutral scoring companion.</p>
+<h3>B. Season record</h3>
+<p><strong>Hierarchy:</strong> season state → league choice → season record → optional game
+discovery. The home card opens the record page. The lower portion of each board
+shows that destination, explicitly marked “after opening”; those result rows
+are not present under the home invitation.</p>
+<p>Desktop uses a compact standings table and connected round cards. Mobile uses
+Club / W / L / PCT, then vertical series cards. A “View all clubs” link is required
+where the wireframe shows an excerpt. A full table must not silently omit clubs.
+Each division needs its own caption. Standings and series dates open team/game
+destinations. Include season and data-through labels.</p>
+<p>For AAA, show separate IL and PCL finals leading to one national game. For
+Northwest, show one series. For the other leagues, show two division series
+feeding one league final. Keep rounds and games separate: a series win count is
+not a game's score. A completed record shows the named finalists and champion;
+an active record uses “TBD” only for genuinely undecided slots. Illustrative
+wireframe pairings are not real 2026 qualifiers.</p>
+<p><strong>Repeat value:</strong> strong during postseason, modest after results settle. More
+useful as a permanent archive destination than as the main offseason invitation.
+It costs more because competition structure and qualification need validation.</p>
+<h3>C. Season notebook</h3>
+<p><strong>Hierarchy:</strong> one report question → manual previous/next → player/game links →
+season record. Desktop can pair the two discovery actions; mobile gives each a
+full-width row. The lower sample panel sketches the report after opening it.</p>
+<p>The sample “patient hitters” report gives a plain denominator: 72 walks in 400
+plate appearances equals 18 walks per 100. It links to the player Stats tab.
+Game-specific reports get neutral home invitations and explicit result-bearing
+destinations. The report title must not expose a team's no-hitter or comeback
+on a sealed daily slate.</p>
+<p><strong>Repeat value:</strong> strongest potential for a short daily visit. It also requires
+the most selection logic and quality checks. A dozen weak rewordings of the
+leaderboard will feel repetitive. Start with a few distinct, deterministic
+questions; do not add generated prose just to fill a rotation.</p>
+<h3>Comparison</h3>
+<table>
+<thead>
+<tr>
+  <th>Criterion</th>
+  <th>A: One more game</th>
+  <th>B: Season record</th>
+  <th>C: Season notebook</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Usefulness</td>
+  <td>Directly supports paper scoring</td>
+  <td>Explains the season and qualification</td>
+  <td>Finds unusual people and games</td>
+</tr>
+<tr>
+  <td>Repeat visits</td>
+  <td>Many distinct scoring sessions; user-driven</td>
+  <td>High while series run; then mostly reference</td>
+  <td>Fresh questions support short visits</td>
+</tr>
+<tr>
+  <td>Accessibility</td>
+  <td>Few actions; simple reading order</td>
+  <td>Needs table captions, visible round labels and mobile list order</td>
+  <td>Needs stable focus and plain definitions; no timed carousel</td>
+</tr>
+<tr>
+  <td>Spoilers</td>
+  <td>Neutral pool; existing game reveals apply</td>
+  <td>Result-bearing destination clearly labeled</td>
+  <td>Separate season aggregates from game-result reports</td>
+</tr>
+<tr>
+  <td>Existing data</td>
+  <td>Game feed and player stats exist; pools do not</td>
+  <td>Standings endpoints exist; current UI is MLB-specific</td>
+  <td>Some season facts exist; broad outlier coverage is not stored</td>
+</tr>
+<tr>
+  <td>Relative effort</td>
+  <td>Small to medium</td>
+  <td>Medium to large</td>
+  <td>Medium for 2 aggregate reports; large for event reports</td>
+</tr>
+<tr>
+  <td>Maintenance</td>
+  <td>Refresh and validate eligibility</td>
+  <td>Verify rules each season and resolve exceptions</td>
+  <td>Audit thresholds, coverage and prose</td>
+</tr>
+</tbody>
+</table>
+<p>Effort includes the common phase/season logic. It is a scope comparison, not a
+time estimate. It excludes authentication, new video hosting and a new replay engine.</p>
+<h2>4. Transition and season rules</h2>
+<p>Use a state keyed by <strong>season + league</strong>, then summarize it for the selected
+level. A finished club is not a finished league. A finished league is not always
+a finished level. The transition is independent of MLB and other level tabs.</p>
+<table>
+<thead>
+<tr>
+  <th>State</th>
+  <th>Home behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Regular season, games scheduled</td>
+  <td>Existing daily slate first.</td>
+</tr>
+<tr>
+  <td>Regular season, no games today</td>
+  <td>Existing off-day message. Show next verified game; no offseason replacement.</td>
+</tr>
+<tr>
+  <td>Regular season over, postseason upcoming/active</td>
+  <td>Keep postseason game cards first. On idle days show the next scheduled date and a neutral postseason link. Put archive invitation below.</td>
+</tr>
+<tr>
+  <td>Some leagues at a level finished</td>
+  <td>Keep remaining live/scheduled games above archive cards. Label the finished league specifically. Do not mark the level complete.</td>
+</tr>
+<tr>
+  <td>Every competition finished</td>
+  <td>Replace today's empty games area with the selected offseason concept. AAA completion includes the national final.</td>
+</tr>
+<tr>
+  <td>Postponed, suspended, unresolved or missing data</td>
+  <td>Preserve schedule/status messaging. “Schedule unavailable” is not “Season complete.” Do not guess next season's opener.</td>
+</tr>
+<tr>
+  <td>Next season published but not started</td>
+  <td>Keep the completed-season archive prominent, plus a dated next-season schedule link.</td>
+</tr>
+<tr>
+  <td>Next season begins</td>
+  <td>Current daily games regain priority for that level. Keep the archive as a secondary link.</td>
+</tr>
+</tbody>
+</table>
+<p>Historical date navigation always shows that date's slate, including an honest
+empty state. Do not replace a July off-day viewed in December with December's
+offseason page. A small “Browse the 2026 season” link can remain available.</p>
+<p><strong>Calendar rollover:</strong> use “2026 season,” not an unqualified “previous season.”
+Define the default archive as the latest <strong>verified completed competition season</strong>
+for the chosen level. In October–December 2026 and January–March 2027 that can
+remain 2026. It does not switch to an empty 2027 archive on January 1. When 2027
+starts, 2026 remains the archive; while the 2027 postseason is active, label 2027
+“postseason” rather than complete. An older year is an explicit selector choice.
+If using “previous season” internally, this is its precise meaning. Do not use
+<code>new Date().getFullYear() - 1</code> or infer a finished season from the absence of games.</p>
+<p>For a small first version, a reviewed completion flag for each league/season is
+reasonable. Validate it against schedules and official competition results.
+Later automate it with fail-closed handling for stale or conflicting evidence.</p>
+<h2>5. Spoiler contract</h2>
+<p>The repository intentionally limits seals to scoring surfaces. Standalone team,
+player, standings and historical postseason pages are open surfaces. Some current
+standings code still has date-view behavior; do not remove its controls or assume
+all comments reflect the latest ADR. A new minor-league archive needs an explicit
+season, not an accidental live-current-year request.</p>
+<p>Proposed home behavior respects that boundary:</p>
+<ol>
+<li>Keep invitations neutral. Standings order, clinch badges, champion marks,
+advancing teams, scores, extra-inning counts, result thumbnails and outcome
+adjectives do not appear in an unsolicited archive invitation.</li>
+<li>“Open season record — standings and postseason results” opens an ordinary,
+result-bearing record page. This does not mark every game or date revealed.
+A season-report link similarly states what will open. No new global preference
+or blanket season-consent bit is needed in version one.</li>
+<li>If results are later embedded on the home slate, mount them only after a
+deliberate reveal. Do not render-and-blur. Protect accessible names, image
+alt text, metadata, tooltips and offscreen DOM too. An active day pass does
+not mean consent to display a whole season's results.</li>
+<li>Archived scoring pages use the existing effective reveal logic: saved
+<code>revealedThrough</code>, the active Scores Unlocked override, consented dates,
+stamped games, and persisted box-score consent. A random selection does not
+overwrite or revoke any of these. Labels must not promise “spoiler-free” when
+one of these sources already opens that game's results.</li>
+<li>Prefer an unstarted, unconsented game when local state can establish one.
+If none remain, offer a game with “Existing progress applies” and a separate
+resume path. Do not build a second resettable replay store in version one.</li>
+<li>A report about a specific result changes expectations even if its game later
+opens sealed. Say “Open game — this report includes its result.” A neutral
+random-game pool must not be secretly ranked by drama, close scores or extras.</li>
+</ol>
+<p>Standings can reveal outcomes by elimination; bracket participants can reveal
+earlier-round winners. That is why all three concepts keep them behind a clearly
+labeled destination instead of placing a champion banner above the game action.</p>
+<h2>6. Data support and gaps</h2>
+<table>
+<thead>
+<tr>
+  <th>Feature</th>
+  <th>Existing support verified</th>
+  <th>New work required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Phase detection</td>
+  <td>Schedule fetches; season endpoint supplies date bounds</td>
+  <td>Per-league competition state, freshness, exception handling and a completion manifest. The existing ten-day next-game search is insufficient.</td>
+</tr>
+<tr>
+  <td>Final standings</td>
+  <td>Stats API returned firstHalf, secondHalf and regularSeason rows for all 11 supported leagues for 2025</td>
+  <td>Parameterize league/year, preserve historical team identity, final snapshots and half labels; reconcile qualifications. Current <code>fetchLeagueStandings</code> only requests 103/104 (MLB).</td>
+</tr>
+<tr>
+  <td>Postseason brackets</td>
+  <td>Existing MLB history/series components and finished-game data patterns</td>
+  <td>MiLB season-specific series map, participants, game IDs, format, series state and national final. Do not pass MiLB into the MLB bracket unchanged.</td>
+</tr>
+<tr>
+  <td>Random completed game</td>
+  <td>Date schedules and per-game feed; sampled High-A game 784185 returned 83 plays and both boxscore teams</td>
+  <td>Compact season/level game index; validate completed usable feeds, canonical dates/slugs/doubleheaders; local recent-pick history; failover for unavailable feeds.</td>
+</tr>
+<tr>
+  <td>Random player</td>
+  <td><code>fetchLevelSeasonStats</code> is roster-independent and includes promoted/released players; player pages exist</td>
+  <td>Preserve unique season-level IDs, historical club context, adequate-page eligibility; deduplicate batting/pitching identities. A top-25 leaderboard is not a fair player pool.</td>
+</tr>
+<tr>
+  <td>Aggregate reports</td>
+  <td>Level season stats include PA, BB, SO, extra-base hits, SB and CS; pitching lines can support innings and strikeout rates</td>
+  <td>Freeze raw component summaries by season/league; thresholds and denominators; quality flags and deterministic report selection.</td>
+</tr>
+<tr>
+  <td>Event reports</td>
+  <td>Per-game play feeds support at-bats and outcomes for covered games</td>
+  <td>Season scan or post-game ingestion, feed-completeness audit and compact event index. Existing callout fuel is pruned, not a full-season archive.</td>
+</tr>
+</tbody>
+</table>
+<p><code>standings-probe.json</code> records row-count checks for all 11 leagues. Each returned
+the expected club count in all three periods. This verifies endpoint shape and
+coverage for one year, not the correctness of every record or historical season.
+<a href="https://statsapi.mlb.com/api/v1/standings?leagueId=118&amp;season=2025&amp;standingsTypes=firstHalf,secondHalf,regularSeason">Example standings request</a>.
+The sampled <a href="https://statsapi.mlb.com/api/v1.1/game/784185/feed/live">High-A feed</a>
+does not establish complete MiLB pitch coverage. Missing feeds must be skipped or
+reported, never described as ready to score.</p>
+<p>For game eligibility, start with final regular-season games with chronological
+completed at-bats, resolvable teams/date and enough lineup/boxscore data for the
+existing flow. Validate completeness against official final outs and game status;
+do not assume nine innings or reject legitimate seven-inning games. Do not
+require a bottom ninth or pitch-location tracking. Suspended games qualify only
+after final resolution; deduplicate by gamePk. Keep a small checked pool at first
+rather than promise every game in a season. Postseason can be an explicit later pool.</p>
+<p>For player eligibility, propose at least <strong>50 PA or 10 IP at the selected level</strong>.
+This is a discovery threshold, not statistical qualification. Sample unique IDs
+uniformly; do not choose current rosters, which omit people who moved. Explain
+“Played at High-A in 2026” rather than imply the player still belongs to that club.
+Open Overview with clear current-context wording. A later season-specific Stats
+link must retain the selected year through the existing supported route/query
+contract; do not invent a query parameter and assume the page supports it.</p>
+<p>Keep indices small and season-addressed. Reuse the repository's static-data
+reader and generator conventions. Extend existing callout machinery when the
+same family already exists; do not create a parallel rule set. New cross-file
+joins should follow ADR-0021's SQLite/text-dump pattern where needed. Store
+facts, sources and selection versions; use fixed templates for readable notes.
+Freeze completed-season outputs rather than let a January generator overwrite
+them with empty current-year data. Recheck corrections periodically, not on
+every home-page load. No new Vercel function is necessary for basic discovery.</p>
+<h2>7. Concrete report proposals</h2>
+<p>The following thresholds are proposed editorial rules, not official qualifiers.
+Use regular-season data only, compare within one league and year, include tied
+values, and identify the coverage date. For percentile claims require at least
+20 eligible players; otherwise show raw counts without a league percentile.
+Never average rates across clubs: combine numerators and denominators first.</p>
+<table>
+<thead>
+<tr>
+  <th>Report</th>
+  <th>Selection and sample rule</th>
+  <th>Why it belongs / limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>The patient hitters</td>
+  <td>BB / PA &gt;= 15%, at least 250 PA in that league. Sort by rate, then PA; display BB and PA.</td>
+  <td>Easy-to-understand season profile. Includes intentional walks unless explicitly excluded. Not a talent forecast.</td>
+</tr>
+<tr>
+  <td>Fewer strikeouts</td>
+  <td>SO / PA in the lowest 10% of hitters with at least 250 PA; show the actual rate and comparison pool.</td>
+  <td>Finds contact-oriented players beyond slugging leaders. No “best contact” claim without batted-ball evidence.</td>
+</tr>
+<tr>
+  <td>Picking their spots</td>
+  <td>At least 25 steal attempts and success &gt;= 85%; attempts = SB + CS.</td>
+  <td>Combines volume and efficiency. This is a chosen reporting floor, not proof of stable future skill.</td>
+</tr>
+<tr>
+  <td>Strikeouts without many walks</td>
+  <td>At least 60 IP and 250 batters faced; K% minus BB% &gt;= 20 percentage points. Show both rates and BF.</td>
+  <td>A pitching profile without unstable tiny ERA samples. Convert IP to outs; never treat 60.2 as decimal innings.</td>
+</tr>
+<tr>
+  <td>A busy scorebook</td>
+  <td>Completed player-games with &gt;= 4 hits and &gt;= 4 PA. Rank by hits, then total bases. One event qualifies; no season-rate inference.</td>
+  <td>A direct reason to revisit a game. Requires complete boxscores and an outcome-bearing report destination.</td>
+</tr>
+<tr>
+  <td>Working through an at-bat</td>
+  <td>A completed PA with &gt;= 12 recorded pitches; require complete pitch-event coverage for that PA.</td>
+  <td>Closely tied to scorekeeping. Call it “12-pitch at-bats in covered games,” not “the season's longest” without a full audit.</td>
+</tr>
+</tbody>
+</table>
+<p>Do not rank raw OPS or ERA across the IL and PCL as though their environments
+were identical. Do not call a within-season outlier a historical record. Exclude
+missing denominators instead of filling them with zero. Display “No qualifying
+performances in the available data” rather than lower thresholds silently.</p>
+<p><strong>Rotation:</strong> A's random actions change on request. Preserve the visible choice
+on Back and ordinary re-renders; avoid a recent repeat until the pool is exhausted.
+C may suggest a new note on the next calendar day's visit, keyed by level,
+season and local date. Never replace a card while the user reads. Supply Previous,
+Next and “Browse all notes”; daily scheduling is an aid to discovery, not a lock.
+Do not rotate per visit: it makes returning to a note unpredictable. No autoplay,
+scroll animation or timer is needed. A tiny report pool should use manual browsing
+until it has enough distinct notes to support meaningful daily rotation.</p>
+<h2>8. Focused first version and decisions</h2>
+<p>Ship A for the current-day slate of a completed minor-league level. Include a
+clear season label, one random-game action over a modest verified pool, one
+player action, and clearly labeled links to official season records where the
+app has no MiLB record page yet. External links must say they open MiLB results.
+Keep historical daily slates, the club strip, search and roster wire intact.
+Use a reviewed per-league completion manifest. Archive the season pool before
+calendar rollover. No video requirement, automated recap writing, new account
+setting or replay-reset system.</p>
+<p>Then add final standings inside Tally if use justifies it. Add correct league
+series cards next, including Northwest and the AAA national final. Add two season
+aggregate reports after the data can be frozen and checked. Add game-event
+reports only after feed coverage can be stated honestly.</p>
+<p>Accessibility acceptance criteria for implementation: native buttons and links,
+44-pixel action targets, visible focus, no color-only status, table headers and
+captions, full club names available, DOM reading order matching mobile order,
+200% zoom and 320-pixel checks, and a polite announcement when a requested pick
+changes. Keep focus on the requesting control. Wire-dock padding must leave the
+last action reachable. Empty/loading/error states need explicit text and retry.</p>
+<p>Validate the eventual implementation with phase fixtures for a normal off-day,
+mixed leagues, postponed final, stale data, December 31/January 1, and next-season
+opening. Add spoiler DOM checks for sealed home invitations, reports, archived
+games with existing progress, and each consent override. Test canonical links,
+doubleheaders, missing feeds and player moves. Run relevant unit, lint and E2E
+checks when production code is written; these wireframes do not change that code.</p>
+<p>Decisions before implementation:</p>
+<ol>
+<li>Choose A as the home default, or make B/C the primary purpose.</li>
+<li>Accept neutral home invitations with clearly labeled result-bearing destinations,
+rather than adding a new season-wide spoiler preference.</li>
+<li>Start with regular-season games and one completed season per level; confirm
+whether a small verified pool is sufficient for launch.</li>
+<li>Accept a reviewed completion manifest and external MiLB record links for version
+one, or fund internal standings/series pages immediately.</li>
+<li>Choose manual-only notes initially, or add daily suggestions after enough
+distinct reports exist. My recommendation is manual-only until then.</li>
+</ol>
+</main></html>

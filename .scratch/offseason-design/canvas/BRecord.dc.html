@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=JetBrains+Mono:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap">
+  <style>
+    :root {
+      --f-disp:"Barlow Condensed","Arial Narrow",sans-serif;
+      --f-body:"Source Sans 3",system-ui,sans-serif;
+      --f-mono:"JetBrains Mono",ui-monospace,monospace;
+      --shadow-card:0 1px 2px rgba(22,34,47,0.08),0 4px 12px rgba(22,34,47,0.06);
+      --inset-cell:inset 0 1px 2px rgba(22,34,47,0.10);
+      --seal-texture:repeating-linear-gradient(-45deg,#B5824A 0px,#B5824A 6px,#A9743C 6px,#A9743C 8px);
+    }
+    body { margin:0; font-family:var(--f-body); background:#F6EFDC; color:#1B2A3A; }
+    a { color:#2F6E4F; text-decoration:none; }
+    a:hover { color:#255740; }
+    .lbl { font-family:var(--f-disp); font-size:12px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; }
+    .lvl { min-height:34px; padding:0 14px; display:flex; align-items:center; justify-content:center;
+           font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.09em;
+           text-transform:uppercase; color:#3C4A5A; border-right:1px solid #CBC1A7; }
+    .lvl.on { color:#FBF6E9; background:#1B2A3A; border-radius:6px; border-right-color:transparent; }
+    .tile { width:56px; height:44px; display:flex; align-items:center; justify-content:center;
+            border:1px solid #CBC1A7; border-radius:10px; background:#F3ECD8;
+            box-shadow:var(--inset-cell); font-family:var(--f-disp); font-size:14px;
+            font-weight:700; letter-spacing:0.05em; color:#1B2A3A; }
+    .num { font-family:var(--f-mono); font-size:14px; font-weight:700; letter-spacing:0.01em;
+           font-variant-numeric:tabular-nums; color:#16222F; text-align:right; }
+    .stand-row { display:grid; grid-template-columns:28px 1fr 52px 52px 62px; align-items:center;
+                 gap:8px; padding:9px 12px; border-bottom:1px solid #DED6C0; }
+  </style>
+</helmet>
+
+<div style="width:1272px; box-sizing:border-box; padding:18px 16px 40px; background:#F6EFDC;">
+
+  <div style="display:flex; align-items:center; gap:16px; padding-bottom:8px;">
+    <div style="font-family:var(--f-disp); font-size:26px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Tally</div>
+    <div style="display:flex; align-items:center;">
+      <div class="lvl">MLB</div>
+      <div class="lvl">AAA</div>
+      <div class="lvl">AA</div>
+      <div class="lvl on">A+</div>
+      <div class="lvl" style="border-right:none;">A</div>
+    </div>
+    <div style="flex-grow:1;"></div>
+    <div style="display:flex; align-items:center; gap:14px; font-family:var(--f-disp); font-size:13px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#3C4A5A;">
+      <div>Search</div>
+      <div>Log</div>
+      <div>Menu</div>
+    </div>
+  </div>
+
+  <div style="margin:10px 0 12px;">
+    <div class="lbl" style="color:#6B6558; margin-bottom:8px;">Browse High-A clubs</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <div class="tile">WIS</div>
+      <div class="tile">BEL</div>
+      <div class="tile">CR</div>
+      <div class="tile">SB</div>
+      <div class="tile">QC</div>
+      <div class="tile">PEO</div>
+      <div class="tile">WM</div>
+      <div class="tile">LAN</div>
+      <div class="tile">DAY</div>
+      <div class="tile">GL</div>
+      <div class="tile">FW</div>
+      <div class="tile">LC</div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:10px; border-bottom:1px solid #CBC1A7;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div style="min-width:30px; min-height:30px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; box-shadow:var(--shadow-card); font-size:18px; color:#1B2A3A;">&lsaquo;</div>
+      <div style="font-size:14px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:#1B2A3A;">Mon, Oct 12, 2026</div>
+      <div style="min-width:30px; min-height:30px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; box-shadow:var(--shadow-card); font-size:18px; color:#1B2A3A;">&rsaquo;</div>
+    </div>
+    <div class="lbl" style="min-height:20px; padding:2px 8px; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; color:#1B2A3A; font-size:11px;">Browse a date</div>
+  </div>
+
+  <div style="margin:22px 0 18px;">
+    <div class="lbl" style="color:#6B6558;">High-A &middot; Season complete</div>
+    <h1 style="margin:6px 0 0; font-family:var(--f-disp); font-size:40px; font-weight:700; line-height:0.9; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">The 2026 season is in the books</h1>
+  </div>
+
+  <div style="display:flex; gap:24px; align-items:flex-start;">
+    <div style="flex-grow:1; min-width:0; display:flex; flex-direction:column; gap:16px;">
+
+      <div style="display:flex; align-items:baseline; gap:12px;">
+        <div style="font-family:var(--f-disp); font-size:26px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Midwest League</div>
+        <div style="font-size:14px; color:#3C4A5A;">Also at High-A: <a href="#">Northwest</a> &middot; <a href="#">South Atlantic</a></div>
+      </div>
+
+      <!-- the home invitation: sealed, and it says what it opens -->
+      <div style="display:flex; align-items:center; gap:16px; padding:0; border:1px solid #6E7475; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card); overflow:hidden;">
+        <div style="width:96px; align-self:stretch; display:flex; align-items:center; justify-content:center; background:var(--seal-texture); color:#1E1405;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="4" y="10" width="16" height="11" rx="2"></rect>
+            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+          </svg>
+        </div>
+        <div style="flex-grow:1; min-width:0; padding:16px 0;">
+          <div style="font-family:var(--f-disp); font-size:26px; font-weight:700; line-height:1.05; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Season record</div>
+          <div style="margin-top:4px; font-size:15px; color:#3C4A5A; text-wrap:pretty;">Final standings, both halves, and every postseason series. <strong style="font-weight:600;">Opening this shows results.</strong></div>
+        </div>
+        <div style="padding:16px 16px 16px 0;">
+          <div style="min-height:44px; padding:0 22px; display:flex; align-items:center; justify-content:center; border-radius:6px; background:#1B2A3A; color:#FBF6E9; font-family:var(--f-disp); font-size:16px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">Open the record</div>
+        </div>
+      </div>
+
+      <div class="lbl" style="color:#6B6558; margin-top:6px;">After opening the season record</div>
+
+      <!-- standings -->
+      <div style="border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card); overflow:hidden;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 12px 10px; border-bottom:1px solid #CBC1A7;">
+          <div style="font-family:var(--f-disp); font-size:20px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Final standings &middot; West</div>
+          <div style="display:flex; align-items:center; gap:0; border:1px solid #CBC1A7; border-radius:6px; overflow:hidden;">
+            <div class="lbl" style="padding:5px 10px; font-size:11px; color:#FBF6E9; background:#1B2A3A;">Full season</div>
+            <div class="lbl" style="padding:5px 10px; font-size:11px; color:#3C4A5A; border-left:1px solid #CBC1A7;">First half</div>
+            <div class="lbl" style="padding:5px 10px; font-size:11px; color:#3C4A5A; border-left:1px solid #CBC1A7;">Second half</div>
+          </div>
+        </div>
+
+        <div class="stand-row" style="padding-top:7px; padding-bottom:7px; background:#F3ECD8;">
+          <div class="lbl" style="font-size:11px; color:#6B6558;"></div>
+          <div class="lbl" style="font-size:11px; color:#6B6558;">Club</div>
+          <div class="lbl" style="font-size:11px; color:#6B6558; text-align:right;">W</div>
+          <div class="lbl" style="font-size:11px; color:#6B6558; text-align:right;">L</div>
+          <div class="lbl" style="font-size:11px; color:#6B6558; text-align:right;">PCT</div>
+        </div>
+
+        <div class="stand-row">
+          <div style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:4px; background:#F3ECD8; font-family:var(--f-disp); font-size:10px; font-weight:700; color:#1B2A3A;">CR</div>
+          <div style="font-size:15px; color:#16222F;">Cedar Rapids <span class="lbl" style="margin-left:6px; padding:2px 6px; font-size:10px; color:#2F6E4F; border:1px solid #2F6E4F; border-radius:999px;">2nd half</span></div>
+          <div class="num">78</div>
+          <div class="num">54</div>
+          <div class="num">.591</div>
+        </div>
+        <div class="stand-row">
+          <div style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:4px; background:#F3ECD8; font-family:var(--f-disp); font-size:10px; font-weight:700; color:#1B2A3A;">WIS</div>
+          <div style="font-size:15px; color:#16222F;">Wisconsin <span class="lbl" style="margin-left:6px; padding:2px 6px; font-size:10px; color:#2F6E4F; border:1px solid #2F6E4F; border-radius:999px;">1st half</span></div>
+          <div class="num">74</div>
+          <div class="num">58</div>
+          <div class="num">.561</div>
+        </div>
+        <div class="stand-row">
+          <div style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:4px; background:#F3ECD8; font-family:var(--f-disp); font-size:10px; font-weight:700; color:#1B2A3A;">QC</div>
+          <div style="font-size:15px; color:#16222F;">Quad Cities</div>
+          <div class="num">70</div>
+          <div class="num">62</div>
+          <div class="num">.530</div>
+        </div>
+        <div class="stand-row" style="border-bottom:none;">
+          <div style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:4px; background:#F3ECD8; font-family:var(--f-disp); font-size:10px; font-weight:700; color:#1B2A3A;">PEO</div>
+          <div style="font-size:15px; color:#16222F;">Peoria</div>
+          <div class="num">65</div>
+          <div class="num">67</div>
+          <div class="num">.492</div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; background:#F3ECD8; border-top:1px solid #CBC1A7;">
+          <div style="font-size:13px; color:#6B6558; text-wrap:pretty;">A half winner qualifies, not the best full-season record. Ties break on head-to-head play within that half.</div>
+          <a href="#" style="flex-shrink:0; font-family:var(--f-disp); font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">All six clubs &rarr;</a>
+        </div>
+      </div>
+
+      <!-- postseason -->
+      <div>
+        <div class="lbl" style="font-size:13px; color:#16222F; margin-bottom:10px;">Postseason &middot; Midwest League</div>
+        <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; align-items:stretch;">
+
+          <div style="display:flex; flex-direction:column; gap:8px; padding:12px 14px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px;">
+              <div class="lbl" style="font-size:11px; color:#6B6558;">West division</div>
+              <div class="lbl" style="font-size:10px; color:#6B6558;">Best of 3</div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+              <div style="font-size:15px; color:#16222F;">Wisconsin</div>
+              <div class="num" style="font-size:17px;">2</div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; color:#6B6558;">
+              <div style="font-size:15px;">Cedar Rapids</div>
+              <div class="num" style="font-size:17px; color:#6B6558;">1</div>
+            </div>
+            <a href="#" style="margin-top:2px; font-size:13px;">Game dates &rarr;</a>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px; padding:12px 14px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px;">
+              <div class="lbl" style="font-size:11px; color:#6B6558;">East division</div>
+              <div class="lbl" style="font-size:10px; color:#6B6558;">Best of 3</div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+              <div style="font-size:15px; color:#16222F;">West Michigan</div>
+              <div class="num" style="font-size:17px;">2</div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; color:#6B6558;">
+              <div style="font-size:15px;">Lake County</div>
+              <div class="num" style="font-size:17px; color:#6B6558;">0</div>
+            </div>
+            <a href="#" style="margin-top:2px; font-size:13px;">Game dates &rarr;</a>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px; padding:12px 14px; border:1.5px solid #16222F; border-radius:10px; background:#FFFDF6; box-shadow:0 2px 4px rgba(22,34,47,0.10),0 8px 24px rgba(22,34,47,0.10);">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px;">
+              <div class="lbl" style="font-size:11px; color:#16222F;">League final</div>
+              <div class="lbl" style="font-size:10px; color:#6B6558;">Best of 3</div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+              <div style="font-size:15px; font-weight:600; color:#16222F;">West Michigan</div>
+              <div class="num" style="font-size:17px;">2</div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; color:#6B6558;">
+              <div style="font-size:15px;">Wisconsin</div>
+              <div class="num" style="font-size:17px; color:#6B6558;">1</div>
+            </div>
+            <a href="#" style="margin-top:2px; font-size:13px;">Game dates &rarr;</a>
+          </div>
+        </div>
+        <div style="margin-top:10px; font-size:13px; color:#6B6558; text-wrap:pretty;">A series win count is not a game score. Northwest runs one best-of-five final instead of this shape; AAA adds a national championship game after both league finals.</div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px; margin-top:4px; padding:12px 16px; border:1px solid #CBC1A7; border-radius:10px; background:#F3ECD8;">
+        <div style="font-size:14px; color:#3C4A5A; flex-grow:1; text-wrap:pretty;">Still want to score one? The archive is one tap away and stays sealed.</div>
+        <div style="min-height:44px; padding:0 18px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; color:#16222F; font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">Score a game</div>
+      </div>
+    </div>
+
+    <div style="flex-shrink:0; width:288px; margin-top:14px; padding:14px 16px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+      <div class="lbl" style="font-size:13px; color:#16222F;">Roster wire</div>
+      <div style="margin-top:10px; font-size:14px; color:#3C4A5A; line-height:1.45; text-wrap:pretty;">Unchanged. The rail is the same component the slate already renders.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px; padding-top:14px; border-top:1px solid #DED6C0; font-size:13px; color:#6B6558; text-wrap:pretty;">
+    Illustrative records and pairings &mdash; not real 2026 qualifiers. Everything below &ldquo;After opening&rdquo; sits on its own page, never on the slate.
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

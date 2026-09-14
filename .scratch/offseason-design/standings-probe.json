@@ -1,0 +1,105 @@
+{
+  "checked": "2026-09-14",
+  "note": "Endpoint shape and row-count check only. Not a result-accuracy audit.",
+  "checks": [
+    {
+      "leagueId": 117,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=117&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 20,
+        "regularSeason": 20,
+        "secondHalf": 20
+      }
+    },
+    {
+      "leagueId": 112,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=112&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 10,
+        "regularSeason": 10,
+        "secondHalf": 10
+      }
+    },
+    {
+      "leagueId": 113,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=113&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 12,
+        "regularSeason": 12,
+        "secondHalf": 12
+      }
+    },
+    {
+      "leagueId": 111,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=111&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 8,
+        "regularSeason": 8,
+        "secondHalf": 8
+      }
+    },
+    {
+      "leagueId": 109,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=109&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 10,
+        "regularSeason": 10,
+        "secondHalf": 10
+      }
+    },
+    {
+      "leagueId": 116,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=116&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 12,
+        "regularSeason": 12,
+        "secondHalf": 12
+      }
+    },
+    {
+      "leagueId": 118,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=118&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 12,
+        "regularSeason": 12,
+        "secondHalf": 12
+      }
+    },
+    {
+      "leagueId": 126,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=126&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 6,
+        "regularSeason": 6,
+        "secondHalf": 6
+      }
+    },
+    {
+      "leagueId": 122,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=122&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 12,
+        "regularSeason": 12,
+        "secondHalf": 12
+      }
+    },
+    {
+      "leagueId": 123,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=123&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 10,
+        "regularSeason": 10,
+        "secondHalf": 10
+      }
+    },
+    {
+      "leagueId": 110,
+      "url": "https://statsapi.mlb.com/api/v1/standings?leagueId=110&season=2025&standingsTypes=firstHalf,secondHalf,regularSeason",
+      "types": {
+        "firstHalf": 8,
+        "regularSeason": 8,
+        "secondHalf": 8
+      }
+    }
+  ]
+}
