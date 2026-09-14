@@ -28,19 +28,42 @@
 // is safe inside a half the reader has revealed and a leak outside one.
 //
 // DEGRADES, NEVER FAILS LOUDLY. Clips publish 8 to 26 minutes after the pitch,
-// so a just-played at-bat has a playId and no clip. There are no clips at all
-// before 2016, none for MiLB, and none for All-Star or exhibition games. Each
-// of those reaches the same polite notice by the same path, because there is
-// no cheap per-play signal that would let the button suppress itself instead.
+// so a just-played at-bat has a playId and no clip. That WAIT is what the
+// notice below is for, and it is the only miss the notice is honest about.
+//
+// A PLAYID IS NOT A PROMISE OF FILM, and that is what this gate is for. Whole
+// CLASSES of game carry playIds and no clips at all: every MiLB level (sportIds
+// 11-14, verified zero across all four), everything before 2016, the All-Star
+// game. On one of those, EVERY at-bat drew a button and EVERY tap answered
+// "hasn't posted yet — clips usually land 8 to 26 minutes after the play", on a
+// game that finished days ago. The sentence was not just unhelpful, it was
+// false: nothing was coming.
+//
+// The signal to suppress the button is per-GAME and already exists —
+// `filmCanExist` (api/expresslane/eligibility.js), the same five structural
+// rules that decide whether Express Lane draws a door at all, pinned by
+// test/express-lane-eligibility.test.js. It rides in as `filmEligible` rather
+// than being imported here, so this module stays a pure pair of functions over
+// values its caller already holds and needs no feed to test.
+//
+// IT GATES THE RAW CLIP ONLY. An edited package is a different archive: MLB
+// cuts highlights for MiLB games and for seasons long before 2016, and one is
+// in hand — already fetched, already joined — by the time this is asked. A game
+// with no raw film can still have a package, and that button must still draw.
 import { resolveClipUrl } from '../../api/expresslane/clipIndex.js'
 
 export const CLIP_PACKAGE = 'package'
 export const CLIP_RAW = 'raw'
 
 // The film one play offers: CLIP_PACKAGE, CLIP_RAW, or null for neither.
-export function watchClipSource(highlight, playId) {
+//
+// `filmEligible` is `filmCanExist(feed)` — whether raw pitch clips can exist
+// for this GAME. It defaults true so a caller that genuinely cannot answer
+// keeps the old behaviour (a button, and a notice on the tap) rather than
+// silently losing film on a game that has it.
+export function watchClipSource(highlight, playId, { filmEligible = true } = {}) {
   if (highlight) return CLIP_PACKAGE
-  if (playId) return CLIP_RAW
+  if (playId && filmEligible) return CLIP_RAW
   return null
 }
 
