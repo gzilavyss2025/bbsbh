@@ -64,3 +64,28 @@ export async function writeShards(dir, entries) {
   }
   return { written: kept.size, swept }
 }
+
+// writeShards, plus an index.json in `dir` that carries the run's timestamp.
+//
+// A DIRECTORY dataset is invisible to the data-freshness guard unless it stamps
+// itself this way: check-data-freshness.mjs reads a directory's index.json and
+// nothing else, so a bucket set without one cannot be checked for age at all,
+// and counts against that script's UNSTAMPED_BUDGET instead. glove-target/
+// landed with no index on 2026-09-10, put the count one over the budget, and
+// turned the nightly job red for three nights while every generator inside it
+// kept working correctly.
+//
+// The stamp goes in ONE file, never in each shard. A per-shard `generatedAt`
+// dirties all 30-150 committed shards on a night when not one record changed —
+// the churn team-records/, milb-alumni/ and schedule-shape/ stay unstamped to
+// avoid, recorded at UNSTAMPED_BUDGET.
+//
+// The index is written as an ENTRY of the same run, not after it. Written
+// after, the NEXT run's sweep finds a *.json it did not write, deletes it and
+// reports a phantom swept shard every night; written as an entry, it is in
+// `kept` and the swept count stays true. `written` still counts shards only.
+export async function writeShardsWithStamp(dir, entries, meta = {}) {
+  const stamp = ['index', { generatedAt: new Date().toISOString(), ...meta }]
+  const { written, swept } = await writeShards(dir, [...entries, stamp])
+  return { written: written - 1, swept }
+}
