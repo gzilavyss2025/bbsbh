@@ -314,6 +314,44 @@
   font-style: italic;
 }
 
+/* THE HELD PLAY — the film is running above and the box below is still the
+   empty template, because the play has not been watched yet. This line is the
+   only thing the hold adds to the band; the emptiness is real, not a cover over
+   something drawn underneath.
+
+   It takes the SEAL amber, which is this app's one colour for "sealed, and
+   yours to open" everywhere else. */
+.xl-deck__hold {
+  margin: 8px 0 0;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--seal);
+}
+/* The keyboard hint, drawn only where a keyboard is plausible. This surface is
+   written for a phone held one-handed, where "press space" is an instruction
+   nobody can follow and a line of noise beside the one that matters. */
+.xl-deck__holdkey {
+  display: none;
+  font-weight: var(--w-regular);
+  color: var(--album-foil-soft);
+}
+@media (hover: hover) and (pointer: fine) {
+  .xl-deck__holdkey {
+    display: inline;
+  }
+}
+
+/* THE PLAY'S OWN SENTENCE, under the box it explains. The picture shows the
+   ball hit to the second baseman; this says he threw across to third and who
+   was covering. Revealed with the box and never before it. */
+.xl-deck__story {
+  margin: 8px 0 0;
+  max-width: 46ch;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--album-foil);
+}
+
 /* --- the foot strip ------------------------------------------------
    Plate appearances ALREADY SCORED, newest last. Reached ones only: chips for
    plate appearances still ahead would say how many batters are left to bat
