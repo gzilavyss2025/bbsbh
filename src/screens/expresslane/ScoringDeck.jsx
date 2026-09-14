@@ -51,6 +51,15 @@ export function ScoringDeck({
   pending = null,
   runners = [],
   waiting = false,
+  // THE PLAY IS HELD: its film is on the screen and none of it is written yet.
+  // The deck above is already the pre-pitch one — the hook caps it short of
+  // this plate appearance — so all this flag adds is the line that says why the
+  // box is empty. See lib/expresslane/hold.js.
+  held = false,
+  // The play's own play-by-play sentence, which the hook empties while the play
+  // is held. Not rendered and then covered: it is not in the DOM until the
+  // scorer has watched the play (ADR-0001).
+  story = '',
   onExpand = null,
 }) {
   if (!batter && !pending && !runners.length) {
@@ -117,6 +126,20 @@ export function ScoringDeck({
             <AtBatBox atbat={batter} onEdit={batter ? onExpand : null} />
           </div>
         </div>
+
+        {/* One line under the box, and which one is the whole of the hold on
+            this band. Held: why the box is empty and how to fill it. Written:
+            the play's own sentence, which is the thing that settles a play the
+            picture leaves ambiguous — who covered the bag, which runner the
+            throw went after. Never both, and never the sentence early. */}
+        {held ? (
+          <p className="xl-deck__hold">
+            Watch it, then show the play.
+            <span className="xl-deck__holdkey"> Press space.</span>
+          </p>
+        ) : story ? (
+          <p className="xl-deck__story">{story}</p>
+        ) : null}
       </div>
 
       {/* While the next clip is still coming, the deck may show only what was

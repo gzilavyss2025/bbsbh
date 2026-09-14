@@ -193,6 +193,13 @@ can all be walked end to end. A verified full-game walk of gamePk 823035 ran all
 
     http://localhost:5173/07072026/milstl-2/express?nointro&nofilm
 
+**It cannot walk the HELD play, and that is not a gap in the flag.** A play
+arrives held only when its clip is on the screen (ADR-0071), and `?nofilm`
+leaves no clip anywhere, so every row lands written — which is exactly why the
+full-game walk stays fast. Verifying the hold needs real film: open the same
+route WITHOUT `?nofilm`, wait out the pre-roll, and score three or four plays by
+hand. Never loop it.
+
 It is **dev-only in the build**: the flag is read behind `import.meta.env.DEV`
 (`ExpressLanePage.jsx`), a compile-time constant, so the branch is removed from a
 production bundle and a real reader cannot type their way past the film gate.

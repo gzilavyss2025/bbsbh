@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EntryChooser } from './EntryChooser.jsx'
 import { FilmPane } from './FilmPane.jsx'
 import { ScoringDeck } from './ScoringDeck.jsx'
@@ -37,6 +37,13 @@ import { halfIndex } from '../../api/select.js'
 // film arrive together or not at all — a scorer who could read "grounds out,
 // second baseman to first" would have no reason to wait for the picture, and
 // the gate would be decoration.
+//
+// AND THE PLAY ARRIVES HELD. Atomic was not enough on its own: the film and the
+// notation landed in the SAME frame, so the outcome box was readable before the
+// pitch was thrown on the screen. A play with film lands with its box empty and
+// its sentence unwritten, and one tap on the foot button — or one press of the
+// space bar, which is that button — writes it. lib/expresslane/hold.js holds
+// the rules; the hook holds the cursor; this page draws the two states.
 
 function halfLabel(inning, half) {
   const ordinal =
@@ -149,6 +156,34 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
     const want = stepToSection(7, lane.inning, lane.half)
     if (want !== section) onSection(want, { replace: true })
   }, [started, onSection, lane.inning, lane.half, section])
+
+  // THE SPACE BAR IS THE FOOT BUTTON, and it is wired as exactly that rather
+  // than as a second copy of what the button does. `goRef` is the button; the
+  // key presses it. So the reveal, the advance and the half handoff each get
+  // their keystroke for free, and there is no way for the two paths to drift
+  // into meaning different things.
+  //
+  // IT YIELDS TO ANYTHING THAT ALREADY OWNS THE KEY. A focused control gets
+  // space and enter natively — the video's own play/pause above all, since this
+  // surface is half video player — so a key event that started inside one is
+  // left alone. Everywhere else the default is stopped, which also keeps space
+  // from scrolling the board out from under the deck.
+  const goRef = useRef(null)
+  useEffect(() => {
+    function onKey(event) {
+      if (event.key !== ' ' && event.key !== 'Enter') return
+      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return
+      const target = event.target
+      if (typeof target?.closest === 'function') {
+        if (target.closest('button, a, input, select, textarea, video')) return
+      }
+      if (!goRef.current) return
+      event.preventDefault()
+      goRef.current.click()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   // Club identity, off the spoiler-free selector every lineup page already
   // uses. A club's name is not a score. The running line reads it for its two
@@ -275,6 +310,32 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
   const waiting = Boolean(gate?.blocked) && !lane.job.blockedReason
   const canAdvance = Boolean(lane.nextRow) && !gate?.blocked
 
+  // ONE BUTTON IN THE FOOT, three things it can be, and it is one ELEMENT
+  // rather than three branches of JSX. A thumb finds the same target every
+  // time, a keyboard keeps its focus across the reveal, and the space bar above
+  // has one node to press instead of a guess about which state it is in.
+  //
+  // The held state comes FIRST, and the order is the spoiler rule rather than
+  // taste: a play still under its cover must not be offered "Next half-inning",
+  // which would say the out being watched was the third one.
+  const primary = lane.held
+    ? { label: 'Show the play', onClick: lane.reveal, disabled: false }
+    : lane.atHalfEnd
+      ? /* Gated on the same frontier the forward arrow is. Reaching the end of
+           a half commits it, so this is live by the time it is drawn — but a
+           button that silently does nothing is the shape the half-index bug
+           took, and a disabled one says so instead. */
+        { label: 'Next half-inning', onClick: lane.nextHalf, disabled: !lane.canGoForward }
+      : {
+          label: !lane.cursorRow
+            ? 'Score the first play'
+            : gate?.blocked
+              ? 'Waiting for the film'
+              : 'Next play',
+          onClick: lane.advance,
+          disabled: !canAdvance,
+        }
+
   return (
     <div className="xl">
       <header className="xl__bar">
@@ -365,6 +426,8 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
         pending={lane.deck.pending}
         runners={lane.deck.runners}
         waiting={waiting}
+        held={lane.held}
+        story={lane.story}
         onExpand={lane.deck.batter ? () => setExpanded(lane.deck.batter) : null}
       />
 
@@ -431,33 +494,15 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
             Back one play
           </button>
         )}
-        {lane.atHalfEnd ? (
-          /* Gated on the same frontier the forward arrow is. Reaching the end
-             of a half commits it, so this is live by the time it is drawn — but
-             a button that silently does nothing is the shape the half-index bug
-             took, and a disabled one says so instead. */
-          <button
-            type="button"
-            className="btn btn--reveal xl__go"
-            onClick={lane.nextHalf}
-            disabled={!lane.canGoForward}
-          >
-            Next half-inning
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="btn btn--reveal xl__go"
-            onClick={lane.advance}
-            disabled={!canAdvance}
-          >
-            {!lane.cursorRow
-              ? 'Score the first play'
-              : gate?.blocked
-                ? 'Waiting for the film'
-                : 'Next play'}
-          </button>
-        )}
+        <button
+          ref={goRef}
+          type="button"
+          className="btn btn--reveal xl__go"
+          onClick={primary.onClick}
+          disabled={primary.disabled}
+        >
+          {primary.label}
+        </button>
       </footer>
 
       {expanded && (

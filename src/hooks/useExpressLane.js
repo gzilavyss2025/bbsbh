@@ -30,6 +30,7 @@ import {
 } from '../lib/expresslane/staging.js'
 import { createStagingRunner } from '../lib/expresslane/runner.js'
 import { checkoutClip, getClip, persistStorage } from '../lib/expresslane/byteStore.js'
+import { holdsForFilm, playStory, unwrittenRow } from '../lib/expresslane/hold.js'
 import { halfAt } from '../api/scorecard/alignment.js'
 
 // The rows one mode keeps, and the one switch that empties them of film.
@@ -72,6 +73,16 @@ export function useExpressLane({
   const [halfIdx, setHalfIdx] = useState(startHalfIdx)
   const [job, setJob] = useState(() => createJob({ gamePk, mode }))
   const [cursorKey, setCursorKey] = useState(null)
+  // THE HELD PLAY — the row the cursor has landed on whose film is playing and
+  // whose notation is not written yet. Null the rest of the time. See
+  // lib/expresslane/hold.js for why the hold exists and what it covers.
+  const [heldKey, setHeldKey] = useState(null)
+  // Rows already revealed on this visit. A scorer who steps back to look again
+  // and then comes forward lands on a play he has watched and written, so it
+  // opens written — the hold is for a play arriving for the first time, and
+  // re-covering an old one would read as the surface forgetting.
+  const revealedRef = useRef(null)
+  if (revealedRef.current === null) revealedRef.current = new Set()
   const [clip, setClip] = useState({ url: null, playId: null })
   const runnerRef = useRef(null)
   const releaseRef = useRef(null)
@@ -236,13 +247,23 @@ export function useExpressLane({
     [job, cursorRow],
   )
 
+  // The play on the deck is held only while the cursor is still standing on it.
+  // Keyed rather than a bare flag, so a navigation that forgets to clear the
+  // hold cannot leave the NEXT play covered with no way to open it.
+  const held = heldKey != null && heldKey === cursorKey
+
   // The deck: the box being written in, the boxes of the men on base, and the
   // chips. Capped at the cursor, so no diamond shows a base its runner has not
   // reached yet.
   const deck = useMemo(() => {
     if (!feed || !cursorRow) return { batter: null, runners: [], entries: [], cap: null }
-    return expressDeck(feed, inning, half, cursorRow)
-  }, [feed, inning, half, cursorRow])
+    // HELD, AND THE CAP IS WHAT HOLDS IT. `unwrittenRow` asks `expressDeck` for
+    // the state SHORT of this plate appearance, which is the cap it already
+    // applies to a cursor sitting inside one. So the box is the empty template,
+    // the men on base stand where they stood before the pitch, and the chip for
+    // this play is not in `entries` yet — nothing is drawn and then hidden.
+    return expressDeck(feed, inning, half, held ? unwrittenRow(cursorRow) : cursorRow)
+  }, [feed, inning, half, cursorRow, held])
 
   const chips = useMemo(() => reachedPlateAppearances(deck.entries), [deck.entries])
 
@@ -292,37 +313,67 @@ export function useExpressLane({
     [],
   )
 
+  // WRITING THE PLAY DOWN — the app's own reveal mark, moved for one row.
+  //
+  // It used to happen inside `advance`, on the landing. It happens on the
+  // REVEAL now, and the difference is load-bearing rather than tidy: a play
+  // whose film is playing is still held, and a mark moved early puts the half's
+  // run total in the running line overhead while the scorer is watching the out
+  // that ended it. Held in one band and open in another is not held.
+  //
+  // NAMED, NOT POSITIONAL, and the half is named the way the rest of the app
+  // names one. `revealTo` and `revealAtBat` take `(inning, half)` — every
+  // other caller passes that pair — and a half-INDEX handed to them in its
+  // place is silently read as an inning number: index 0 became half-index -1,
+  // which the ratchet discards, so the top of the 1st could never be
+  // committed and the surface could never leave it; index 2 became half-index
+  // 3, which is the BOTTOM of the 2nd, and unsealed a half the scorer had
+  // never watched on this page, in the innings viewer and on every synced
+  // device. `cap` is the feed-entry count `railRevealCap` measures, not a
+  // count of rail rows — see that function for why the two are not the same
+  // number.
+  const commitReveal = useCallback(
+    (key) => {
+      const at = rows.findIndex((row) => row.key === key)
+      if (at < 0) return
+      revealedRef.current.add(key)
+      onReveal?.({
+        inning,
+        half,
+        cap: railRevealCap(feed, inning, half, rows[at]),
+        halfDone: at + 1 >= rows.length,
+      })
+    },
+    [rows, feed, inning, half, onReveal],
+  )
+
   // Move forward one row. The gate is enforced inside the runner, so a cursor
   // that would pass the film simply does not move and the surface keeps
   // showing the wait.
+  //
+  // Landing is no longer the same act as writing the play down. A row with film
+  // on the screen lands HELD — the clip plays over an empty box — and the two
+  // acts are a tap apart. A row with nothing to watch has nothing to hold back
+  // from, so it lands written, exactly as it always did.
   const advance = useCallback(async () => {
     if (!nextRow || !runnerRef.current) return false
+    const wantHold = holdsForFilm(gate) && !revealedRef.current.has(nextRow.key)
     const landed = await runnerRef.current.moveCursor(nextRow.key)
     if (landed !== nextRow.key) return false
     setCursorKey(landed)
-    // Advancing IS the reveal act (ADR-0016's mark, driven from here so paper
-    // and screen stay in step and reveal.js syncs it across devices for free).
-    //
-    // NAMED, NOT POSITIONAL, and the half is named the way the rest of the app
-    // names one. `revealTo` and `revealAtBat` take `(inning, half)` — every
-    // other caller passes that pair — and a half-INDEX handed to them in its
-    // place is silently read as an inning number: index 0 became half-index -1,
-    // which the ratchet discards, so the top of the 1st could never be
-    // committed and the surface could never leave it; index 2 became half-index
-    // 3, which is the BOTTOM of the 2nd, and unsealed a half the scorer had
-    // never watched on this page, in the innings viewer and on every synced
-    // device. `cap` is the feed-entry count `railRevealCap` measures, not a
-    // count of rail rows — see that function for why the two are not the same
-    // number.
-    const at = rows.findIndex((row) => row.key === landed)
-    onReveal?.({
-      inning,
-      half,
-      cap: railRevealCap(feed, inning, half, rows[at] ?? null),
-      halfDone: at >= 0 && at + 1 >= rows.length,
-    })
+    if (wantHold) setHeldKey(landed)
+    else commitReveal(landed)
     return true
-  }, [nextRow, rows, feed, inning, half, onReveal])
+  }, [nextRow, gate, commitReveal])
+
+  // "I have watched it." The one act the hold exists for: the box fills, the
+  // men on base take the bases this play sent them to, the chip joins the
+  // strip, the play's sentence appears, and the mark moves.
+  const reveal = useCallback(() => {
+    if (!heldKey) return
+    setHeldKey(null)
+    commitReveal(heldKey)
+  }, [heldKey, commitReveal])
 
   // Back to a plate appearance already scored. Always allowed — those rows are
   // written, and the look-again is why the foot strip exists.
@@ -330,6 +381,7 @@ export function useExpressLane({
     async (key) => {
       if (!runnerRef.current) return
       const landed = await runnerRef.current.moveCursor(key)
+      setHeldKey(null)
       setCursorKey(landed)
     },
     [],
@@ -349,6 +401,7 @@ export function useExpressLane({
   const stepBack = useCallback(async () => {
     if (cursorAt <= 0 || !runnerRef.current) return
     const landed = await runnerRef.current.moveCursor(rows[cursorAt - 1].key)
+    setHeldKey(null)
     setCursorKey(landed)
   }, [cursorAt, rows])
 
@@ -356,6 +409,7 @@ export function useExpressLane({
   // lets its rows join the queue — extras included, one at a time (ADR-0008).
   const canGoForward = halfIdx < maxHalfIdx
   const nextHalf = useCallback(() => {
+    setHeldKey(null)
     setCursorKey(null)
     setHalfIdx((idx) => (idx < maxHalfIdx ? idx + 1 : idx))
   }, [maxHalfIdx])
@@ -370,6 +424,7 @@ export function useExpressLane({
   const goToHalf = useCallback(
     (idx) => {
       const target = Math.max(0, Math.min(idx, maxHalfIdx))
+      setHeldKey(null)
       setCursorKey(null)
       setHalfIdx(target)
     },
@@ -381,6 +436,7 @@ export function useExpressLane({
   // whole reason the foot strip exists. It is also the way OUT of the empty
   // half a finished game opens on.
   const prevHalf = useCallback(() => {
+    setHeldKey(null)
     setCursorKey(null)
     setHalfIdx((idx) => Math.max(0, idx - 1))
   }, [])
@@ -407,14 +463,23 @@ export function useExpressLane({
     currentGate,
     deck,
     chips,
+    // The play's own play-by-play sentence, empty while the play is held. The
+    // one string on this surface that narrates an outcome, so it is gated the
+    // same way the box is and by the same flag.
+    story: held ? '' : playStory(cursorRow),
+    held,
     clip: clipForCursor,
     job,
     status,
     preroll,
-    atHalfEnd: cursorAt >= 0 && !nextRow,
+    // FALSE WHILE HELD, and that is a spoiler fix rather than a tidy-up. The
+    // foot reads this to offer "Next half-inning", and that label on a play
+    // still under its cover says the out just watched was the third one.
+    atHalfEnd: cursorAt >= 0 && !nextRow && !held,
     halfEmpty,
     canGoForward,
     advance,
+    reveal,
     goTo,
     stepBack,
     canStepBack,

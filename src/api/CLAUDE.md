@@ -166,7 +166,11 @@ carries the broadcast scorebug burned into the pixels — so a poster may render
 only inside an already-revealed play, and never as the placeholder for the next
 clip. Tier 3 — the staging queue, the film gate and the on-device byte store —
 is NOT here: it holds no baseball, only playIds and Blobs, so it lives in
-`src/lib/expresslane/` (`staging.js`, `byteStore.js`, `runner.js`).
+`src/lib/expresslane/` (`staging.js`, `byteStore.js`, `runner.js`, `hold.js`).
+`hold.js` is the one to read before touching the deck: a play with film on the
+screen arrives HELD, and the hold is a CAP rather than a cover — it hands
+`expressDeck` the cursor row with `isTerminal: false`, so the box, the chip and
+the runners' diamonds are never computed (ADR-0071).
 `.scratch/express-lane/PRD.md` carries the reasoning and the measurements.
 
 The three older subdirectories — `person/`, `playbyplay/`, `callout-notes/` — carry

@@ -389,8 +389,15 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
 - **Tier 3 is not in `src/api/`** — `src/lib/expresslane/` holds it, because it
   reads no baseball at all: `staging.js` is the queue and THE FILM GATE (a pure
   state machine over playIds), `byteStore.js` is the on-device IndexedDB Blob
-  store, and `runner.js` is the single-threaded download loop that joins them to
-  `clipIndex.js`. Four things a caller of Tier 1 or 2 should know about it. (1)
+  store, `runner.js` is the single-threaded download loop that joins them to
+  `clipIndex.js`, and `hold.js` is THE HELD PLAY. That last one is the rule to
+  read before touching `expressDeck`: a row whose clip is on the screen arrives
+  held, and the hold asks for the deck through `unwrittenRow(row)` — the same
+  row with `isTerminal: false` — so the cap above does the covering and the box,
+  the chip and the runners' diamonds are never computed at all. The reveal mark
+  moves on the REVEAL rather than on the landing, or the last out of a half
+  prints its run total in the running line while the out is still being watched
+  (ADR-0071). Four things a caller of Tier 1 or 2 should know about it. (1)
   The gate blocks the cursor ONLY while a clip that is EXPECTED has not arrived,
   and an empty resolution counts as no clip expected — MLB mints playIds by
   formula for every intentional walk and most pitch-timer violations, about 1.2 a
