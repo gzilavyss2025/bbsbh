@@ -49,6 +49,7 @@ import {
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from '../scoring/StrikeZone.jsx'
 import { HighlightSheet } from './HighlightSheet.jsx'
 import { CLIP_PACKAGE, CLIP_RAW, watchClipSource, resolveRawClip } from '../highlights/watchClip.js'
+import { filmCanExist } from '../../api/expresslane/eligibility.js'
 
 // Renders the play-by-play feed for one half-inning: one card per plate
 // appearance (pitch-dot sequence, scorebook-style out notation, RBI tag, and
@@ -88,6 +89,11 @@ const WRITE_ON_CAP = 6
 
 export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, halfInProgress = false, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo, writing = false }) {
   const stepping = stepCap != null
+  // Whether RAW pitch clips can exist for this game at all — the same rules
+  // that decide whether Express Lane draws a door, and what keeps a MiLB or
+  // pre-2016 game from drawing a Watch button that can only ever say "not yet".
+  // Spoiler-free and safe at render top-level (eligibility.js says why).
+  const filmEligible = useMemo(() => filmCanExist(feed), [feed])
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
   // card's diamond (see computeHalfInningFeed's stepCap doc).
@@ -344,6 +350,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               pitchingTeamId={pitchingTeamId}
               calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress }}
               highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
+              filmEligible={filmEligible}
               windowed={windowed}
               beatKey={beatKey}
               writing={writingUpTo.has(i)}
@@ -527,7 +534,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 // have one home (see that file's TUNING note).
 const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
-function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, windowed = false, beatKey = null, writing = false }) {
+function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false }) {
   const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   const [highlightOpen, setHighlightOpen] = useState(false)
@@ -578,8 +585,9 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
   const prJersey = replaced ? pinchRunners[pinchRunners.length - 1].jersey : null
   // Which film this play offers, decided from what the card already holds —
   // MLB's edited package if it cut one, else the raw clip of the terminal
-  // pitch. See watchClip.js: the button costs no network, only the tap does.
-  const clipSource = watchClipSource(highlight, entry.playId)
+  // pitch, and then only where raw clips exist for this game at all. See
+  // watchClip.js: the button costs no network, only the tap does.
+  const clipSource = watchClipSource(highlight, entry.playId, { filmEligible })
   // ONE TAP, ONE REQUEST, and the sheet opens FIRST. The lookup is a few
   // hundred milliseconds, and a tap that does nothing visible reads as broken,
   // so the dialog takes the tap and then fills. A package needs no request at

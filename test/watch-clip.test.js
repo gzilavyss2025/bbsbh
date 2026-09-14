@@ -5,7 +5,14 @@
 // is about 7% of plays — 23 clips against 327 pitches on gamePk 824634. Every
 // pitch has a raw clip keyed on the same playId the card already holds, so the
 // widened condition is what these tests pin: the package still wins when there
-// is one, and a bare playId is enough on its own.
+// is one, and a bare playId is enough on its own — on a game that HAS raw film.
+//
+// That last clause is the correction. A playId is not a promise: MiLB games,
+// anything before 2016 and the All-Star game all carry playIds and no clips at
+// all, so the widened button drew on every at-bat of those games and answered
+// every tap with "hasn't posted yet — clips usually land 8 to 26 minutes after
+// the play", days after the final out. The per-game answer rides in as
+// `filmEligible` (filmCanExist, api/expresslane/eligibility.js).
 //
 // Offline, like every test in this suite. The resolver takes an injected
 // fetcher, so nothing here touches a host that blocks automated access.
@@ -52,6 +59,31 @@ test('no package and no playId offers nothing', () => {
   assert.equal(watchClipSource(null, null), null)
   assert.equal(watchClipSource(null, undefined), null)
   assert.equal(watchClipSource(null, ''), null)
+})
+
+test('a playId on a game with no raw film offers nothing', () => {
+  // THE MiLB / pre-2016 / All-Star case. Every at-bat of a Triple-A game
+  // carries a playId — 239 of them on gamePk 816825, a Buffalo-Charlotte game
+  // that was two days finished — and not one of them resolves to a clip. A
+  // button that can only ever say "not posted yet" is worse than no button, so
+  // there is no button.
+  assert.equal(watchClipSource(null, 'play-3', { filmEligible: false }), null)
+})
+
+test('an edited package still draws where raw film cannot exist', () => {
+  // MLB cuts highlights for MiLB games and for seasons long before 2016, and
+  // the package is already in hand by the time this is asked — fetched, and
+  // joined to the play on its guid. The per-game rule is about RAW clips, so
+  // gating the package on it too would throw away film that plays.
+  const item = { guid: 'play-4', title: 'A produced cut' }
+  assert.equal(watchClipSource(item, 'play-4', { filmEligible: false }), CLIP_PACKAGE)
+})
+
+test('a caller that says nothing about the game still gets the raw clip', () => {
+  // The default is permissive on purpose: losing a working clip because a
+  // caller could not answer is the worse failure of the two.
+  assert.equal(watchClipSource(null, 'play-5'), CLIP_RAW)
+  assert.equal(watchClipSource(null, 'play-5', {}), CLIP_RAW)
 })
 
 // --- the tap --------------------------------------------------------------
