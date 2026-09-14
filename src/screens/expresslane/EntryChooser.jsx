@@ -5,35 +5,29 @@
 // with ONE mp4 — whichever broadcast called that pitch. The only host
 // addressable by booth is `fastball-clips.mlb.com/{gamePk}/{home|away}/`, and
 // it is Referer-locked to mlb.com, so from this origin it gives
-// MEDIA_ERR_SRC_NOT_SUPPORTED (clipIndex.js records both). This screen asked
-// "Which booth?" and warned that changing it later meant fetching the film
-// again; neither the choice nor the cost was real, and the club name it put in
-// the header did not describe the picture on screen. A door may not claim a
-// decision the app cannot carry out.
+// MEDIA_ERR_SRC_NOT_SUPPORTED (clipIndex.js records both). A door may not claim
+// a decision the app cannot carry out.
 //
 // THE CONSENT IS THE OTHER HALF OF THIS SCREEN, and it cannot be skipped.
 // Every clip frame carries the broadcast scorebug burned into the pixels, so
 // Express Lane can never have an unrevealed preview mode: opening it is
-// agreeing to see the score of the pitch you are on. That is a real
-// constraint on how this door is allowed to be presented, so the door says it
-// plainly rather than burying it.
+// agreeing to see the score of the pitch you are on. The door says it plainly
+// rather than burying it, and "Start scoring" is the act of agreeing.
 //
 // TWO CHOICES, AND THEY ARE ABOUT DIFFERENT THINGS. Mode decides WHAT gets
 // downloaded — one clip an at-bat, or every pitch. The plan decides WHEN. They
-// multiply, and the second one is the one people get wrong, so the buttons say
-// the quiet part: no plan makes the film arrive faster. MLB's clip hosts
-// throttle to about 2.1 Mbps per client and concurrency does not help, so a
-// nine-inning game in Result mode is about 470 MB and about half an hour
-// whichever plan asks for it. "Load it all first" is not a speed-up; it is the
-// same wait, taken all at once, in exchange for a session with no waiting in
-// it. A chooser that let someone believe otherwise would be selling something
-// that does not exist.
+// multiply, and the second one is the one people get wrong, so its own line
+// says the quiet part: no plan makes the film arrive faster. MLB's clip hosts
+// throttle to about 2.1 Mbps per client and concurrency does not help.
 //
-// THE FIGURES ARE ON THE BUTTONS ON PURPOSE. This is the one choice that costs
-// the evening — the difference between about 35 minutes of film arriving and
-// about 100 — and under the film gate the arrival time IS the session's pace,
-// because the cursor cannot pass the picture. A chooser that hid that would be
-// asking for a decision while withholding the only fact that decides it.
+// THE FIGURES ARE THE CHOICE, so they are drawn as figures rather than written
+// into sentences. This is the one decision that costs the evening — 35 minutes
+// of film arriving against 100 — and under the film gate the arrival time IS
+// the session's pace, because the cursor cannot pass the picture. Set as a
+// ledger column, the five cards compare down the page at a glance: 15 against
+// 40 minutes of film, at once against 90 seconds against half an hour to open.
+// The prose that used to carry those numbers said the same thing at more than
+// twice the length, and could not be compared at all.
 //
 // They are figures for a TYPICAL nine-inning game, and they have to stay that
 // way. A count taken from THIS game's own feed would state how many plate
@@ -41,111 +35,121 @@
 // the numbers here describe the MODE and never the game in front of you.
 //
 // Every pitch is offered rather than withheld, and the honest warning rides on
-// the button instead. It needs a clip roughly every 18 seconds, which under the
-// gate is closer to a slideshow than to scoring — but that is a judgement about
-// how someone wants to spend their night, and the measurement belongs to them.
+// the card instead: "with waits between". It needs a clip roughly every 18
+// seconds, which under the gate is closer to a slideshow than to scoring — but
+// that is a judgement about how someone wants to spend their night, and the
+// measurement belongs to them.
+
+// One card. Name, what it is, then the figures that decide it.
+function Choice({ on, onClick, name, side, figures }) {
+  return (
+    <button
+      type="button"
+      className={`xl-entry__choice ${on ? 'is-on' : ''}`}
+      aria-pressed={on}
+      onClick={onClick}
+    >
+      <span className="xl-entry__name">{name}</span>
+      <span className="xl-entry__side">{side}</span>
+      {/* The deciding numbers, in the app's ledger face. A figure and the word
+          that says what it measures — never a sentence with a number in it. */}
+      <span className="xl-entry__figs">
+        {figures.map(([value, label]) => (
+          <span key={label} className="xl-entry__fig">
+            <b className="xl-entry__figval">{value}</b>
+            <span className="xl-entry__figlabel">{label}</span>
+          </span>
+        ))}
+      </span>
+    </button>
+  )
+}
 
 export function EntryChooser({ mode, onMode, plan, onPlan, onStart, busy = false }) {
   return (
     <section className="xl-entry" aria-label="Start Express Lane">
-      <h1 className="xl-entry__title">Express Lane</h1>
-      <p className="xl-entry__lede">
-        The pitches instead of the broadcast. Every pitch in this game has film, and you step
-        to it — no commercials, no dead air, no scrubbing.
-      </p>
+      <header className="xl-entry__head">
+        <h1 className="xl-entry__title">Express Lane</h1>
+        <p className="xl-entry__lede">
+          The pitches, not the broadcast. One play at a time.
+        </p>
+      </header>
 
       <fieldset className="xl-entry__group">
-        <legend className="xl-entry__legend">How much of each at-bat?</legend>
-        <p className="xl-entry__hint">
-          The film arrives about as fast as MLB will send it, and you cannot get ahead of it.
-          So this choice sets the pace of the whole session.
-        </p>
+        <legend className="xl-entry__legend">How much film</legend>
+        <p className="xl-entry__hint">You cannot get ahead of it, so this sets the pace.</p>
         <div className="xl-entry__choices">
-          <button
-            type="button"
-            className={`xl-entry__choice ${mode === 'result' ? 'is-on' : ''}`}
-            aria-pressed={mode === 'result'}
+          <Choice
+            on={mode === 'result'}
             onClick={() => onMode('result')}
-          >
-            <span className="xl-entry__club">The decision pitch</span>
-            <span className="xl-entry__side">one clip per at-bat</span>
-            <span className="xl-entry__cost">
-              About 15 minutes of film in a nine-inning game, arriving over about 35 minutes.
-            </span>
-          </button>
-          <button
-            type="button"
-            className={`xl-entry__choice ${mode === 'full' ? 'is-on' : ''}`}
-            aria-pressed={mode === 'full'}
+            name="The decision pitch"
+            side="one clip an at-bat"
+            figures={[
+              ['15 min', 'of film'],
+              ['35 min', 'to arrive'],
+            ]}
+          />
+          <Choice
+            on={mode === 'full'}
             onClick={() => onMode('full')}
-          >
-            <span className="xl-entry__club">Every pitch</span>
-            <span className="xl-entry__side">the whole at-bat</span>
-            <span className="xl-entry__cost">
-              About 40 minutes of film, arriving over about 100 — a clip roughly every 18
-              seconds, so expect to wait between them.
-            </span>
-          </button>
+            name="Every pitch"
+            side="the whole at-bat, with waits between"
+            figures={[
+              ['40 min', 'of film'],
+              ['100 min', 'to arrive'],
+            ]}
+          />
         </div>
       </fieldset>
 
       <fieldset className="xl-entry__group">
-        <legend className="xl-entry__legend">When should the film arrive?</legend>
-        <p className="xl-entry__hint">
-          None of these is faster than the others. MLB sends the film at one speed, so this
-          only decides when you do the waiting.
-        </p>
+        <legend className="xl-entry__legend">When it arrives</legend>
+        <p className="xl-entry__hint">None is faster. They only move the waiting.</p>
         <div className="xl-entry__choices">
-          <button
-            type="button"
-            className={`xl-entry__choice ${plan === 'demand' ? 'is-on' : ''}`}
-            aria-pressed={plan === 'demand'}
+          <Choice
+            on={plan === 'demand'}
             onClick={() => onPlan('demand')}
-          >
-            <span className="xl-entry__club">On demand</span>
-            <span className="xl-entry__side">nothing until you ask for it</span>
-            <span className="xl-entry__cost">
-              Opens at once, then each play waits for its own clip. Downloads the least, so
-              it is the one for dipping into a game for a few plays.
-            </span>
-          </button>
-          <button
-            type="button"
-            className={`xl-entry__choice ${plan === 'ahead' ? 'is-on' : ''}`}
-            aria-pressed={plan === 'ahead'}
+            name="On demand"
+            side="nothing until you ask for it"
+            figures={[['At once', 'to open']]}
+          />
+          <Choice
+            on={plan === 'ahead'}
             onClick={() => onPlan('ahead')}
-          >
-            <span className="xl-entry__club">Stay ahead of me</span>
-            <span className="xl-entry__side">a short head start, then it keeps up</span>
-            <span className="xl-entry__cost">
-              About 90 seconds to open, then it works a half-inning ahead of you. The usual
-              way to score a game.
-            </span>
-          </button>
-          <button
-            type="button"
-            className={`xl-entry__choice ${plan === 'all' ? 'is-on' : ''}`}
-            aria-pressed={plan === 'all'}
+            name="Stay ahead of me"
+            side="keeps a half-inning in front"
+            figures={[['90 sec', 'to open']]}
+          />
+          <Choice
+            on={plan === 'all'}
             onClick={() => onPlan('all')}
-          >
-            <span className="xl-entry__club">All of it first</span>
-            <span className="xl-entry__side">the whole nine innings, then no waiting</span>
-            <span className="xl-entry__cost">
-              About half an hour and 470 MB before the first play, in one clip per at-bat.
-              Start it, leave it, come back to a game you can score straight through.
-            </span>
-          </button>
+            name="All of it first"
+            side="then nothing to wait for"
+            figures={[
+              ['30 min', 'to open'],
+              ['470 MB', 'up front'],
+            ]}
+          />
         </div>
       </fieldset>
 
       <p className="xl-entry__consent">
-        The broadcast burns the score into every frame, so there is no way to watch a pitch
-        without seeing where the game stood at that pitch. Going in means agreeing to that.
+        Every frame carries the broadcast scorebug. You cannot watch a pitch here without
+        seeing the score at that pitch.
       </p>
 
-      <button type="button" className="btn btn--reveal xl-entry__go" onClick={onStart} disabled={busy}>
-        {busy ? 'Getting the film…' : 'Start scoring'}
-      </button>
+      {/* Pinned to the foot, where the scoring surface behind this door keeps
+          its own primary action. Tapping it IS the consent stated above it. */}
+      <div className="xl-entry__foot">
+        <button
+          type="button"
+          className="btn btn--reveal xl-entry__go"
+          onClick={onStart}
+          disabled={busy}
+        >
+          {busy ? 'Getting the film…' : 'Start scoring'}
+        </button>
+      </div>
     </section>
   )
 }

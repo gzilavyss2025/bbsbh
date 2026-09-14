@@ -65,7 +65,7 @@ export function ScoringDeck({
   if (!batter && !pending && !runners.length) {
     return (
       <section className="xl-deck xl-deck--empty">
-        <p className="xl-deck__empty">Tap start to score the first plate appearance.</p>
+        <p className="xl-deck__empty">Nothing written yet.</p>
       </section>
     )
   }
@@ -83,9 +83,12 @@ export function ScoringDeck({
     <section className="xl-deck" aria-label="Scoring deck">
       {runners.length > 0 && (
         <>
-          {/* Named for the scorer, not for the screen: these are the boxes a
-              steal or an advance gets written in. */}
-          <h2 className="xl-deck__label">On base — mark advances here</h2>
+          {/* Two words, because the boxes under them are the whole
+              explanation: these are the plate appearances those men reached
+              on, which is where a steal or an advance gets written. A label
+              that spelled the instruction out as well was teaching the
+              paper's own rule to someone already holding the paper. */}
+          <h2 className="xl-deck__label">On base</h2>
           <ul className="xl-deck__runners">
             {/* Keyed on the card's own identity rather than on a plate-
                 appearance number: the extra-innings automatic runner never
@@ -147,7 +150,7 @@ export function ScoringDeck({
           this line says the screen is holding, and nothing about the play. */}
       {waiting && (
         <p className="xl-deck__holding" role="status">
-          Holding here until the film arrives.
+          Holding for the film.
         </p>
       )}
     </section>
