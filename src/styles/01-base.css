@@ -103,11 +103,12 @@
        the same split one more time)
      - Express Lane's sentences — the entry step's lede, section notes and
        consent (`.xl-entry__lede`, `.xl-entry__hint`, `.xl-entry__consent`, in
-       77a) and, on the scoring surface itself (77), the film band's messages
-       `.xl-film__msg`, the pre-roll's sub-line `.xl__prerollsub`, the deck's
-       empty/held/holding lines `.xl-deck__empty`, `.xl-deck__hold` (and its
-       `.xl-deck__holdkey` child, which `#root *` would otherwise still shout),
-       `.xl-deck__holding`, and the play's own description `.xl-deck__story`
+       77a); the film band's messages `.xl-film__msg` and the pre-roll's
+       sub-line `.xl__prerollsub` (in 77); and, in 77c beside the rules that
+       draw them, the scoring deck's empty/held/holding lines
+       `.xl-deck__empty`, `.xl-deck__hold` (and its `.xl-deck__holdkey` child,
+       which `#root *` would otherwise still shout), `.xl-deck__holding`, and
+       the play's own description `.xl-deck__story`
        (the SAME feed sentence `.pbp__desc` draws natural-case in Lora above —
        it is set in Lora here for that reason). Express Lane's title, legends,
        card names, figures, half label, batter name, chips and buttons all stay

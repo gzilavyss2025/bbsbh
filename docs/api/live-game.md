@@ -388,9 +388,16 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   box — he writes it on the RUNNER's box, the plate appearance in which that man
   reached, which on the #22 sheet is a row further up. `expressDeck(feed,
   inning, half, row)` returns the finished box, the men on (ordered third,
-  second, first), the capped card list and the chips; `runnersOnBase` is the
-  predicate — reached a base, has not scored, `outAt == null`, and dropping that
-  last one leaves a man on first who was forced at second two pitches ago.
+  second, first), the men this play took OFF the bases, the capped card list and
+  the chips; `runnersOnBase` is the predicate — reached a base, has not scored,
+  `outAt == null`, and dropping that last one leaves a man on first who was
+  forced at second two pitches ago. `runnersDeparted(prev, entries)` is the
+  second question beside it (ADR-0072): a man on base at `cap - 1` and gone at
+  `cap` left on the cursor's OWN play, so his box stays for that one cursor
+  position — the run he brought home and the `FC 6-4` that erased him both get
+  written on HIS box, and taking it away in the same frame takes the diamond
+  with it. Its list is `departed` and its field is `from`, the base he left,
+  never `base`: he is not standing anywhere.
   `railRevealCap(feed, inning, half, row)` is the same cap on its own, and it is
   the number Express Lane writes into the app's at-bat reveal mark: a count of
   `computeHalfInningFeed` ENTRIES, which is the unit `revealAtBat` stores and

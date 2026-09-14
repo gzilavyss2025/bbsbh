@@ -12,6 +12,7 @@ import {
   railRevealCap,
   railStepCap,
   reachedPlateAppearances,
+  runnersDeparted,
   runnersOnBase,
 } from '../src/api/expresslane/runners.js'
 import { computeHalfInningFeed } from '../src/api/playbyplay.js'
@@ -160,6 +161,114 @@ test('over every cursor in the game, no base holds two men and none holds four',
   assert.ok(cursors > 60, `the sweep really walked the game (${cursors} cursors)`)
 })
 
+// --- the man the play took off the bases ------------------------------------
+//
+// THE GAP THESE PIN. `runnersOnBase` answers "who is standing on a base", and
+// on the play that scores a man or cuts him down the honest answer stops
+// including him. His CARD left with the answer — and that card is the diamond
+// the scorer has to write this very play on: the run he brought home, or the
+// force that erased him. The box went away in the same frame the thing that
+// has to be written on it happened.
+//
+// So the deck keeps him for ONE cursor position, the play that changed him,
+// and lets him go when the cursor moves on. `departed` is its own list rather
+// than more entries in `runners`, because "standing on second" and "scored a
+// moment ago" are different answers and only the first has a base to be on.
+
+test('a runner who scores on the cursor play keeps his box for that one cursor', () => {
+  // Top of the 3rd: Pratt triples, Ortiz strikes out, then Yelich grounds out
+  // 6-3 and Pratt scores from third. Card 2 is that groundout.
+  const before = expressDeck(FEED, 3, 'top', rowAt(3, 'top', 1))
+  assert.deepEqual(
+    before.runners.map((r) => r.base),
+    [3],
+    'Pratt is standing on third before the play',
+  )
+  assert.deepEqual(before.departed, [], 'and nobody has left yet')
+
+  const on = expressDeck(FEED, 3, 'top', rowAt(3, 'top', 2))
+  assert.deepEqual(on.runners, [], 'he is not on a base any more, which is true')
+  assert.equal(on.departed.length, 1, 'but his box is still on the deck')
+  assert.equal(on.departed[0].fate, 'scored')
+  assert.equal(on.departed[0].from, 3, 'drawn where he was standing when it happened')
+  assert.equal(on.departed[0].card.batter.last, 'Pratt')
+  assert.equal(on.departed[0].card.scored, true, 'and his diamond is filled, to be marked')
+
+  const after = expressDeck(FEED, 3, 'top', rowAt(3, 'top', 3))
+  assert.deepEqual(after.departed, [], 'gone once the cursor moves to the next play')
+})
+
+test('a runner erased on a fielder choice keeps his box, with the base he was cut down at', () => {
+  // Bottom of the 2nd: Fermín is on first, Jordan hits into a fielder's choice
+  // and Fermín is forced at second, 6-4. Card 3 is that play.
+  const on = expressDeck(FEED, 2, 'bottom', rowAt(2, 'bottom', 3))
+  assert.equal(on.departed.length, 1)
+  assert.equal(on.departed[0].fate, 'out')
+  assert.equal(on.departed[0].outAt, 2, 'the base he was put out at, for the label')
+  assert.equal(on.departed[0].from, 1, 'the base he was standing on before the play')
+  assert.equal(on.departed[0].card.batter.last, 'Fermín')
+  // The batter reached on the same play and IS the deck's main box, so he is
+  // never also drawn as one of the runners beside it.
+  assert.equal(on.batter.batter.last, 'Jordan')
+  assert.ok(!on.departed.some((r) => r.card.atBatIndex === on.batter.atBatIndex))
+})
+
+test('two men scoring on one play both keep their boxes', () => {
+  // Top of the 5th: Lara singles with Sánchez and Pratt aboard, and both score.
+  const on = expressDeck(FEED, 5, 'top', rowAt(5, 'top', 5))
+  assert.equal(on.departed.length, 2)
+  assert.ok(on.departed.every((r) => r.fate === 'scored'))
+  assert.deepEqual(
+    on.departed.map((r) => r.from),
+    [...on.departed.map((r) => r.from)].sort((a, b) => b - a),
+    'ordered by the base they left, the way the men on base are ordered',
+  )
+})
+
+test('a held play has nobody departed, because nothing has been written yet', () => {
+  // `unwrittenRow`'s shape: the cursor is standing on the play with its film
+  // running, and the deck is still the pre-pitch one. The man who is about to
+  // score is still shown standing on third, which is what the paper says at
+  // that moment — and no box is marked as having left.
+  const card = computeHalfInningFeed(FEED, 3, 'top', 'away')[2]
+  const held = expressDeck(FEED, 3, 'top', { atBatIndex: card.atBatIndex, isTerminal: false })
+  assert.deepEqual(
+    held.runners.map((r) => r.base),
+    [3],
+  )
+  assert.deepEqual(held.departed, [])
+})
+
+test('over the whole game, a departed man is never also standing on a base', () => {
+  let departures = 0
+  for (const [inning, half] of playedHalves()) {
+    const cards = computeHalfInningFeed(FEED, inning, half, battingSideOf(half))
+    for (let i = 0; i < cards.length; i += 1) {
+      const row = rowAt(inning, half, i)
+      if (!row) continue
+      const { runners, departed, batter } = expressDeck(FEED, inning, half, row)
+      departures += departed.length
+      for (const d of departed) {
+        // Every departure is one of the two the deck claims to draw, and the
+        // card says so itself rather than being taken on trust.
+        assert.ok(d.fate === 'scored' || d.fate === 'out', `a departure with no fate at ${half}${inning} #${i}`)
+        if (d.fate === 'scored') assert.equal(d.card.scored, true)
+        else assert.ok(d.card.outAt != null)
+        assert.ok(d.from >= 1 && d.from <= 3, 'he left a base that exists')
+        assert.ok(
+          !runners.some((r) => r.card === d.card),
+          `a man both gone and standing at ${half}${inning} #${i}`,
+        )
+        if (batter) assert.notEqual(d.card.atBatIndex, batter.atBatIndex)
+      }
+      // One man can only leave a given base once on one play.
+      const froms = departed.map((d) => d.from)
+      assert.equal(new Set(froms).size, froms.length, `two men left one base at ${half}${inning} #${i}`)
+    }
+  }
+  assert.ok(departures > 8, `the sweep really found departures (${departures})`)
+})
+
 // --- the foot strip ---------------------------------------------------------
 
 test('a row INSIDE a plate appearance does not reveal that plate appearance', () => {
@@ -255,8 +364,9 @@ test('a half that was never played has an empty rail, which is how a game ENDS',
 
 test('an empty half yields an empty deck rather than throwing', () => {
   const deck = expressDeck(FEED, 11, 'top', { atBatIndex: 1 })
-  assert.deepEqual(deck, { batter: null, runners: [], entries: [], cap: null })
+  assert.deepEqual(deck, { batter: null, runners: [], departed: [], entries: [], cap: null })
   assert.deepEqual(runnersOnBase(null), [])
+  assert.deepEqual(runnersDeparted(null, null), [])
   assert.deepEqual(reachedPlateAppearances(undefined), [])
 })
 

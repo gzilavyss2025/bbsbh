@@ -1,0 +1,257 @@
+/* ------------------------------------------------------------------
+   77c-express-lane-deck — Express Lane's SCORING DECK: the band of paper
+   boxes between the film and the foot, and the half of this surface that is
+   about paper rather than video.
+   screens/expresslane/ScoringDeck.jsx
+
+   The third lettered sibling of 77-express-lane.css, and split out for the
+   same reason 77a was: 77 reached check-file-size.mjs's 600-line ceiling
+   again. The deck was the clean cut this time. It is one self-contained band
+   with its own vocabulary — the scrap of paper under each box, the runners'
+   row, the batter's scaled box, the play's own sentence — and nothing outside
+   it reads those rules. The @import sits with its siblings after 77b, and the
+   selectors here share no class with 77a's doorway surfaces, so the ordered
+   chain in index.css is unchanged in effect.
+
+   WHY THE BOXES SIT ON PAPER is the one thing to read before touching
+   anything here: the ground behind this band is the dark album board, and
+   AtBatBox is drawn for manila. See the note above `.xl-deck__paper`.
+   ------------------------------------------------------------------ */
+
+/* --- the scoring deck ----------------------------------------------
+   The only band that scrolls. */
+.xl-deck {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px 14px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.xl-deck--empty {
+  justify-content: center;
+  text-align: center;
+}
+.xl-deck__empty {
+  margin: 0;
+  color: var(--album-foil-soft);
+}
+
+.xl-deck__label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--album-foil-soft);
+  font-weight: var(--w-bold);
+}
+
+/* THE BOXES SIT ON PAPER, and that is not decoration.
+   AtBatBox is the #22 sheet's own cell: pencil grey, seam red, a white balls
+   column and two darker strike columns, all of it drawn for manila. Dropped
+   straight onto the dark board its ladder columns read as bare white bars and
+   its graphite marks vanish. So each box gets a scrap of paper under it — which
+   is also the truer metaphor, since a scorer's card IS paper on a dark desk.
+
+   `.sc-ab` is width:100%/height:100% and takes its size from its cell, so every
+   box here needs an explicit one. The natural cell is 112 x 90; the batter's is
+   the same box SCALED, never a differently-proportioned one, so the marks stay
+   where the paper puts them. */
+:root {
+  --xl-box-w: 112px;
+  --xl-box-h: 90px;
+  --xl-batter-scale: 1.34;
+}
+
+.xl-deck__paper {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 4px;
+  width: var(--xl-box-w);
+  height: var(--xl-box-h);
+  box-sizing: content-box;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+}
+
+/* THE RUNNERS' BOXES — the reason this deck is not one box.
+   A steal, a wild pitch and every hit that moves a man already on get written
+   on the RUNNER's box, not the batter's. They ride at the sheet's natural size,
+   which keeps them legible; the batter's box is made primary by scale below,
+   not by shrinking these into illegibility. */
+.xl-deck__runners {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 4px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.xl-deck__runners::-webkit-scrollbar {
+  display: none;
+}
+.xl-deck__runner {
+  flex: 0 0 auto;
+}
+.xl-deck__runnerhead {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 4px;
+  line-height: var(--lh-title);
+}
+.xl-deck__runnername {
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--album-foil);
+}
+.xl-deck__base {
+  font-size: var(--fs-caption);
+  color: var(--seal);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+}
+
+/* THE MAN THIS PLAY TOOK OFF THE BASES — he scored, or he was cut down on
+   them, and his box stays on the deck for this one cursor position because
+   this play is the one that gets written on it: the run he brought home, the
+   force at second that ended the double play, the fielder's choice that erased
+   him. api/expresslane/runners.js decides who; this only draws him.
+
+   CALLED OUT ON THE PAPER, NOT ON THE BOARD. The mark goes on the card, so the
+   card is what carries the colour — a ring on its own cream ground, where both
+   the green and the clay sit well clear of AA. Tinting the label on the dark
+   album board instead would have put --clay at 2.6:1 against it. The label
+   goes bright and bold rather than coloured, and says which of the two
+   happened in words. */
+.xl-deck__runner--scored .xl-deck__base,
+.xl-deck__runner--out .xl-deck__base {
+  color: var(--album-foil);
+  font-weight: var(--w-bold);
+}
+.xl-deck__runner--scored .xl-deck__paper {
+  border-color: var(--field);
+  box-shadow:
+    0 0 0 1px var(--field),
+    0 2px 6px rgb(0 0 0 / 0.35);
+}
+.xl-deck__runner--out .xl-deck__paper {
+  border-color: var(--clay);
+  box-shadow:
+    0 0 0 1px var(--clay),
+    0 2px 6px rgb(0 0 0 / 0.35);
+}
+
+.xl-deck__batter {
+  margin-top: 4px;
+}
+.xl-deck__batterhead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+.xl-deck__battername {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  color: var(--album-foil);
+}
+.xl-deck__atbat {
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--album-foil-soft);
+}
+
+/* The batter's box is the deck's main box. Scaled from the same 112 x 90 cell
+   rather than re-laid-out at a bigger size, so nothing inside moves relative to
+   anything else — the outcome box, the diamond and the ladder keep the
+   positions a scorer's eye already knows. The wrapper reserves the scaled
+   height, since a transform takes no space of its own. */
+.xl-deck__box {
+  height: calc((var(--xl-box-h) + 10px) * var(--xl-batter-scale));
+}
+.xl-deck__box .xl-deck__paper {
+  transform: scale(var(--xl-batter-scale));
+  transform-origin: top left;
+}
+
+.xl-deck__holding {
+  margin: 8px 0 0;
+  font-size: var(--fs-small);
+  color: var(--album-foil-soft);
+  font-style: italic;
+}
+
+/* THE HELD PLAY — the film is running above and the box below is still the
+   empty template, because the play has not been watched yet. This line is the
+   only thing the hold adds to the band; the emptiness is real, not a cover over
+   something drawn underneath.
+
+   It takes the SEAL amber, which is this app's one colour for "sealed, and
+   yours to open" everywhere else. */
+.xl-deck__hold {
+  margin: 8px 0 0;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--seal);
+}
+/* The keyboard hint, drawn only where a keyboard is plausible. This surface is
+   written for a phone held one-handed, where "press space" is an instruction
+   nobody can follow and a line of noise beside the one that matters. */
+.xl-deck__holdkey {
+  display: none;
+  font-weight: var(--w-regular);
+  color: var(--album-foil-soft);
+}
+@media (hover: hover) and (pointer: fine) {
+  .xl-deck__holdkey {
+    display: inline;
+  }
+}
+
+/* THE PLAY'S OWN SENTENCE, under the box it explains. The picture shows the
+   ball hit to the second baseman; this says he threw across to third and who
+   was covering. Revealed with the box and never before it. */
+.xl-deck__story {
+  margin: 8px 0 0;
+  max-width: 46ch;
+  /* THE SAME SENTENCE THE INNINGS VIEWER DRAWS, so it is set the same way:
+     `.pbp__desc` reads this feed string in Lora, natural case. Shouted here in
+     the UI sans, one line looked like two different kinds of thing on the two
+     surfaces a scorer moves between. */
+  font-family: var(--font-read);
+  /* One step above `.pbp__desc`'s caption size, because there it is one line in
+     a dense list and here it is the only prose on the surface — the sentence
+     that settles what the picture left ambiguous. Same face, same tracking,
+     same leading. */
+  font-size: var(--fs-small);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-text);
+  line-height: var(--lh-prose);
+  color: var(--album-foil);
+}
+
+/* --- the deck's sentences --------------------------------------------
+   The four lines in this band that are SENTENCES rather than chrome labels.
+   Same shouted-heading/natural-case-body split as the rest of the app, which
+   01-base.css's ALL-CAPS INVARIANT registers; the section label, the runners'
+   names and their base labels all stay shouted.
+
+   `.xl-deck__story` is the SAME feed description `.pbp__desc` draws in the
+   innings viewer, which is why it is also set in Lora above. A CHILD IS NOT
+   CARRIED THROUGH by an exempt parent — `#root *` reaches it on its own — so
+   the keyboard hint inside the held line is named here as well. Keep the list
+   uninterrupted: a comment between two selectors hides the ones above it from
+   check-caps.mjs's specificity check. */
+#root .xl-deck__empty,
+#root .xl-deck__hold,
+#root .xl-deck__hold .xl-deck__holdkey,
+#root .xl-deck__holding,
+#root .xl-deck__story {
+  text-transform: none; /* caps-exempt: the scoring deck's prose reads as natural sentences; .xl-deck__story is the same feed description .pbp__desc already draws natural-case in Lora */
+}

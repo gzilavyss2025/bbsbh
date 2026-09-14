@@ -427,7 +427,16 @@ const BUDGETS = {
   // the next letter after 77a and stays a flat sibling for the same
   // ordering reason every entry above it does, and it sits beside the
   // surface it opens rather than beside the page it is printed on.
-  'src/styles': 113,
+  // 113 -> 114 for 77c-express-lane-deck.css — Express Lane's scoring deck.
+  // 77-express-lane.css reached check-file-size.mjs's 600-line ceiling a
+  // SECOND time (77a was the first cut), and the guard's own advice is to
+  // split rather than widen a file budget. The deck was the clean cut: one
+  // self-contained band with its own vocabulary — the scrap of paper under
+  // each box, the runners' row, the batter's scaled box — that nothing
+  // outside it reads. A flat lettered sibling for the same ordering reason
+  // every entry above it gives, and it shares no class with 77a or 77b, so
+  // its place after them changes nothing in the cascade.
+  'src/styles': 114,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

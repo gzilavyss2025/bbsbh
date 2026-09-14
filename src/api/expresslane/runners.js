@@ -129,6 +129,72 @@ export function runnersOnBase(entries, { excludeAtBatIndex = null } = {}) {
   return out.sort((a, b) => b.base - a.base)
 }
 
+// ONE RUNNER'S IDENTITY, which is not his plate-appearance number for all of
+// them: the extra-innings automatic runner never took a plate appearance, so
+// `atBatIndex` is undefined for him and every placement in a game would share
+// it. Same shape the foot strip and the deck already key their cards on.
+function cardKey(card) {
+  return card.kind === 'placed' ? `placed:${card.runnerId}` : `pa:${card.atBatIndex}`
+}
+
+// THE MAN THE CURSOR'S PLAY TOOK OFF THE BASES, and why the deck keeps drawing
+// him after it has stopped calling him a runner.
+//
+// `runnersOnBase` above answers "who is standing on a base", and on the play
+// that scores a man or cuts him down the honest answer stops including him.
+// His CARD went with the answer — and that card is the diamond the scorer has
+// to write this very play on: the run he brought home, the force at second
+// that ended the double play, the fielder's choice that erased him. Taking the
+// box away in the same frame as the thing that has to be written on it is the
+// one moment a scoring surface must not do that.
+//
+// So he is kept for ONE cursor position — the play that changed him — and let
+// go when the cursor moves on. A scorer who wants him back steps back a play,
+// the same way he gets any other box back.
+//
+// WHICH PLAY CHANGED HIM is a question the card cannot answer alone: it
+// carries `scored` and `outAt`, never the play that set them. The CAP answers
+// it. `computeHalfInningFeed`'s `stepCap` gates each play's write-back, so a
+// man on base at `cap - 1` and gone at `cap` left on the cursor's own play and
+// on no other. That is the whole derivation, and it is why this takes the two
+// entry lists rather than one.
+//
+// NOTHING HERE OUTRUNS THE FILM. Both lists are capped at or behind the
+// cursor, so a departure is only ever one the scorer has just watched — and a
+// HELD play caps short of its own card (`unwrittenRow`), so the two lists are
+// identical and nobody has left yet. That is the correct answer while the clip
+// is still running: the paper says he is still standing on third.
+//
+// `from` rather than `base`, deliberately. He is not on a base — that is the
+// whole point — so the field says which one he LEFT, and no caller can read
+// this list as men standing somewhere.
+export function runnersDeparted(prevEntries, entries, { excludeAtBatIndex = null } = {}) {
+  const before = new Map()
+  for (const { base, card } of runnersOnBase(prevEntries, { excludeAtBatIndex })) {
+    before.set(cardKey(card), base)
+  }
+  if (before.size === 0) return []
+  for (const { card } of runnersOnBase(entries, { excludeAtBatIndex })) before.delete(cardKey(card))
+  if (before.size === 0) return []
+
+  const out = []
+  for (const card of entries ?? []) {
+    if (card?.kind !== 'atbat' && card?.kind !== 'placed') continue
+    if (excludeAtBatIndex != null && card.atBatIndex === excludeAtBatIndex) continue
+    const from = before.get(cardKey(card))
+    if (from == null) continue
+    // The two ways off the bases, read off the same two fields `runnersOnBase`
+    // drops him for. Anything else is a card that changed for a reason this
+    // does not understand, and it is left alone rather than guessed at.
+    const fate = card.scored ? 'scored' : card.outAt != null ? 'out' : null
+    if (!fate) continue
+    out.push({ from, card, fate, outAt: card.outAt ?? null })
+  }
+  // Ordered by the base they left, so a departed box sits where the eye last
+  // saw the man standing.
+  return out.sort((a, b) => b.from - a.from)
+}
+
 // The three derived marks `AtBatBox` draws but does not compute: the outcome
 // box's out CATEGORY, the fielding chain penciled mid-diamond, and the pitch
 // ladder down the right edge.
@@ -177,7 +243,7 @@ export function expressDeck(feed, inningNum, half, row) {
   const side = battingSideOf(half)
   const uncapped = computeHalfInningFeed(feed, inningNum, half, side)
   const cap = railStepCap(uncapped, row)
-  if (cap == null) return { batter: null, runners: [], entries: [], cap: null }
+  if (cap == null) return { batter: null, runners: [], departed: [], entries: [], cap: null }
   // Built a second time, this time capped. The first pass exists only to find
   // where the cursor's plate appearance sits; nothing off it is rendered.
   const descByAtBat = descriptionsByAtBat(feed)
@@ -209,10 +275,26 @@ export function expressDeck(feed, inningNum, half, row) {
     : (uncapped.find((card) => card?.atBatIndex === row.atBatIndex) ?? null)
   const who = inProgress?.batter ?? inProgress?.runner ?? null
 
+  // THE CURSOR'S PLAY, ONE STEP BACK — built only to ask who was standing on a
+  // base before it. A third walk of the half rather than a clever read of the
+  // first two, because the cap is the only thing that knows WHICH play changed
+  // a man's card (see runnersDeparted). A half-inning is a handful of plays and
+  // this sits inside the hook's own memo, so the cost is one extra pass per
+  // cursor move. Nothing off it is rendered, so it skips `withBoxMarks`.
+  const exclude = batter?.atBatIndex ?? null
+  const prevCap = cap - 1
+  const prevEntries =
+    prevCap > 0 ? computeHalfInningFeed(feed, inningNum, half, side, prevCap).slice(0, prevCap) : []
+
   return {
     batter,
     pending: who ? { last: who.last ?? '', first: who.first ?? '' } : null,
-    runners: runnersOnBase(entries, { excludeAtBatIndex: batter?.atBatIndex ?? null }),
+    runners: runnersOnBase(entries, { excludeAtBatIndex: exclude }),
+    // Men this play took off the bases, kept for this one cursor position so
+    // the scorer has the box to write the play on. Its own list, because
+    // "standing on second" and "scored a moment ago" are different answers and
+    // only one of them has a base to be on.
+    departed: runnersDeparted(prevEntries, entries, { excludeAtBatIndex: exclude }),
     entries,
     cap,
   }
