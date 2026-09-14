@@ -83,8 +83,16 @@ const LOG_FIELDS = {
   pitching:
     'fields=stats,splits,date,gameType,isHome,isWin,opponent,id,team,game,gamePk,gameNumber,' +
     'stat,gamesStarted,inningsPitched,hits,runs,earnedRuns,strikeOuts,baseOnBalls',
+  // `positionsPlayed` is the hitting log's own list of the positions he played
+  // that day, in the order he played them, and it is what answers the pinch-hit
+  // facet (#1002) without a single boxscore. It costs 3 KB on a 19 KB season
+  // log (Yelich 2024, verified 2026-09-14) and it is asked for on every hitting
+  // join, not just the pinch-hit one, because all of a card's doors share ONE
+  // join — a second, differently-shaped join for one door would cost far more
+  // than the 16%.
   hitting:
     'fields=stats,splits,date,gameType,isHome,isWin,opponent,id,team,game,gamePk,gameNumber,' +
+    'positionsPlayed,abbreviation,' +
     'stat,hits,atBats,doubles,triples,homeRuns,rbi,baseOnBalls,stolenBases,strikeOuts',
 }
 const SCHEDULE_FIELDS =

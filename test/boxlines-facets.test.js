@@ -18,6 +18,7 @@ function row(over = {}) {
     started: true,
     venueId: 32,
     dayNight: 'night',
+    positions: ['LF'],
     ...over,
   }
 }
@@ -36,7 +37,7 @@ test('the club facet is the only one that narrows the game log', () => {
   assert.equal(plan.narrowsSplits, true)
   // It filters splits by opponent, so it needs no row predicate on top.
   assert.equal(plan.keep, null)
-  for (const kind of ['venue', 'month', 'dayNight', 'weekday', 'side', 'started']) {
+  for (const kind of ['venue', 'month', 'dayNight', 'weekday', 'side', 'started', 'pinchHit']) {
     assert.equal(facetPlan({ kind }).narrowsSplits, false, `${kind} must not narrow the log`)
   }
 })
@@ -50,6 +51,7 @@ test('each facet keeps the rows it names and drops the rest', () => {
     [{ kind: 'weekday', day: 4 }, row({ date: '2024-07-04' }), row({ date: '2024-07-05' })],
     [{ kind: 'side', home: true }, row({ home: true }), row({ home: false })],
     [{ kind: 'started', value: true }, row({ started: true }), row({ started: false })],
+    [{ kind: 'pinchHit' }, row({ positions: ['PH'] }), row({ positions: ['LF'] })],
   ]
   for (const [facet, hit, miss] of cases) {
     const { keep } = facetPlan(facet)
@@ -79,10 +81,46 @@ test("a hitter's null `started` is not a start, and not a crash", () => {
   assert.equal(keep(row({ started: null })), false)
 })
 
+test('a pinch hitter is how he ENTERED, not what he played later', () => {
+  // The hitting game log's `positionsPlayed` is ordered by when he played each
+  // position, so the FIRST entry is the answer. ['PH', 'LF'] pinch hit and
+  // stayed in the field; ['LF', 'PH'] cannot happen, and if MLB ever emits it
+  // this reads it as the start it was rather than as a pinch-hit game.
+  const { keep } = facetPlan({ kind: 'pinchHit' })
+  assert.equal(keep(row({ positions: ['PH'] })), true)
+  assert.equal(keep(row({ positions: ['PH', 'LF'] })), true)
+  assert.equal(keep(row({ positions: ['LF', 'PH'] })), false)
+  // A pinch RUNNER who later batted is not a pinch hitter, and MLB's own pH
+  // split does not count him either.
+  assert.equal(keep(row({ positions: ['PR', 'LF'] })), false)
+  // A pitcher's row carries no positions at all. Not a start, and not a crash.
+  assert.equal(keep(row({ positions: null })), false)
+  assert.equal(keep(row({ positions: [] })), false)
+})
+
+test('a month reads the date, not a Date: the last day of April is April', () => {
+  // #999's own case. April 30 and May 1 are one day apart and must not land in
+  // the same month, which a UTC-vs-local slip is exactly what would do.
+  const april = facetPlan({ kind: 'month', month: 4 }).keep
+  assert.equal(april(row({ date: '2024-04-30' })), true)
+  assert.equal(april(row({ date: '2024-05-01' })), false)
+  const may = facetPlan({ kind: 'month', month: 5 }).keep
+  assert.equal(may(row({ date: '2024-05-01' })), true)
+  assert.equal(may(row({ date: '2024-04-30' })), false)
+})
+
 test('the date helpers read the string, so no timezone can move a game a day', () => {
   // A local-midnight Date would put a west-coast night game on the day before.
   assert.equal(weekdayOf('2024-07-04'), 4)
   assert.equal(weekdayOf('2024-07-07'), 0)
   assert.equal(monthOf('2024-07-04'), 7)
   assert.equal(monthOf('2024-10-31'), 10)
+  // #1001's own case: 2026-09-02 is a Wednesday wherever the suite runs.
+  assert.equal(weekdayOf('2026-09-02'), 3)
+  assert.equal(weekdayOf('2026-08-30'), 0)
+  // March 1 and October 31 bracket the season, and both sit at a DST edge in
+  // one hemisphere or the other.
+  assert.equal(monthOf('2024-03-01'), 3)
+  assert.equal(weekdayOf('2024-03-10'), 0)
+  assert.equal(weekdayOf('2024-11-03'), 0)
 })

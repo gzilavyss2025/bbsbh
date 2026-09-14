@@ -84,6 +84,27 @@ export function facetPlan(facet) {
       // right answer rather than a crash — the substitute facet (#1003) reads
       // the box score, not this flag.
       return { ...plan, keep: (r) => r.started === Boolean(facet.value) }
+    case 'pinchHit':
+      // HE CAME UP OFF THE BENCH. The hitting game log's `positionsPlayed`
+      // lists the positions he played in the ORDER he played them, so the
+      // first entry is how he ENTERED: ['PH'] is a pinch hitter who was then
+      // lifted, ['PH', 'LF'] one who stayed in the field.
+      //
+      // #1002 specified this facet as one boxscore per candidate game —
+      // `battingOrder` and `gameStatus.isSubstitute` — capped at 40 with a
+      // "Show older", because ADR-0069's framework map costed it that way. It
+      // does not cost that. The game log already carries the answer, so there
+      // is no cap, no paging and no per-game fetch: this is a `keep` over the
+      // join every other door on the card is already paying for.
+      //
+      // Measured against MLB's own `pH` career split, 2026-09-14: Vazquez 55
+      // rows against a door of 55, Yelich 46 against 45. The one extra is a
+      // game he was announced for and never completed a plate appearance in —
+      // MLB's aggregate counts appearances, these rows count entrances. Over
+      // three careers, 'PH' never appeared anywhere but first in the list, so
+      // reading [0] and asking `includes` are the same question here; [0] is
+      // the one that stays right if a fourth career disagrees.
+      return { ...plan, keep: (r) => r.positions?.[0] === 'PH' }
     case 'gameTypes':
       // No `keep`: the game types are applied where they belong, in
       // matchingSplits, so a non-regular row is never built in the first place.

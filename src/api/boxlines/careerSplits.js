@@ -49,6 +49,19 @@ export function careerSplitLine(stat, group) {
     : `${stat.gamesPlayed} G, ${stat.plateAppearances} PA, ${stat.avg}, ${stat.homeRuns} HR, ${stat.ops} OPS`
 }
 
+// The same career, short enough for a CHIP. The weekday doors are seven
+// controls on one row (#1001) and the full line does not fit in any of them, so
+// they print the two figures that carry the question — how often, and how well.
+// It is the SAME stat object `careerSplitLine` reads, so a chip and the sheet's
+// headline above its rows cannot disagree about the career; only about how much
+// of it they have room to say.
+export function chipLine(stat, group) {
+  if (!stat) return null
+  return group === 'pitching'
+    ? `${stat.gamesPlayed} G, ${stat.era} ERA`
+    : `${stat.gamesPlayed} G, ${stat.avg}`
+}
+
 // The career split rows for a set of situation codes, as a Map code -> stat.
 // Returns an empty Map on any failure: a missing label is one missing door,
 // not a broken card.

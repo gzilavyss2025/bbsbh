@@ -32,10 +32,26 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   pins the gate. The line builders are `person/gameLog.js`'s `pitcherLine` /
   `hitterLine`, reused, not copied.
   `facets.js` (spoiler-free) is the question: one tagged object — `club`,
-  `venue`, `month`, `dayNight`, `weekday`, `side`, `started`, `gameTypes` —
+  `venue`, `month`, `dayNight`, `weekday`, `side`, `started`, `pinchHit`,
+  `gameTypes` —
   becomes the `opponentId`/`gameTypes`/`keep` triple `rows.js` applies, and
   `keep` runs AFTER the gate, so a facet can only ever narrow a row set the
   gate approved. An unknown facet keeps nothing, never everything.
+  **`pinchHit` READS THE GAME LOG, NOT A BOXSCORE.** The hitting game log
+  carries `positionsPlayed` — the positions he played that day IN THE ORDER he
+  played them — and `fields=` keeps it for 3 KB on a 19 KB season log, so
+  `positions[0] === 'PH'` is the whole facet: no cap, no paging, no per-game
+  fetch, whatever #1002 specifies. It is asked for on every hitting join, not
+  just this one, because all of a card's doors share ONE join. Checked against
+  MLB's own `pH` aggregate (2026-09-14): Vazquez 55/55, Castro 44, Yelich 46
+  against 45 — the extra is a game he was announced for and never completed a
+  plate appearance in. **`positionsPlayed` does NOT answer "did he start".** A
+  pure defensive replacement enters and reads `['C']`, exactly like a start:
+  63 games wrong on Vazquez, 25 on Castro. For that question use the schedule's
+  `hydrate=lineups` (nine starters a side; with `fields=…,lineups,homePlayers,
+  awayPlayers,id` it costs +34 KB on a 53 KB call for 120 games, and every
+  PLAYED game back to 2008 carries a full eighteen names — the only games
+  missing one are the games with no score, which the gate already drops).
   `careerSplits.js` (spoiler-free) supplies the DOOR LABELS for the player
   page's Game lines card, through `fetchDoorLabels`, which reads whichever of
   TWO sources each door names: a situation code (one `careerStatSplits&sitCodes=…`
@@ -44,9 +60,17 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   The stat type named for October is not the second source: `careerPlayoffs` <!-- word-choice-exempt: statsapi's own stat-type name, quoted -->
   returns the REGULAR-SEASON career. A career aggregate is open here
   (ADR-0034); only the rows behind the door are gated. `cardFacets.js`
-  (spoiler-free) is the card's list of doors — seven since #1006 added the
-  postseason — kept in `api/` rather than in the `.jsx` card so the suite can
+  (spoiler-free) is the card's list of doors — twenty-odd since #999, #1001 and
+  #1002 added the eight months, the seven weekdays and a hitter's pinch hitting
+  — kept in `api/` rather than in the `.jsx` card so the suite can
   import it. An entry names exactly one label source, and the suite pins that.
+  It also carries `SECTIONS`, the card's four headings (Where / When / How he
+  got in / When it counted); the card groups by that list, not by the
+  registry's order. A family that differs only in one number — the months, the
+  weekdays — is built from a small table rather than written out eight times,
+  and the suite pins that each month door's `sitCode` names the same month its
+  facet filters for. `chip: true` makes a door one of a compact row instead of
+  a ledger line; only the weekdays use it.
   **GAME TYPES ARE ASKED FOR, NOT FILTERED FOR.** Both of `fetch.js`'s stats
   calls carry `gameType=`: a game log is regular-season-only until the call
   names the rounds, and `yearByYear&gameType=F,D,L,W` returns just the Octobers
@@ -67,7 +91,10 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   Measured over five careers 2026-09-03, they agree season by season except
   where a home game was relocated, leaving career totals 1 to 5 games apart.
   Do not "fix" it with a third definition — ADR-0069 records the one that was
-  tried and why it was worse. `test/boxlines-facets.test.js` pins the facet
+  tried and why it was worse. **The calendar doors are the exception and agree
+  EXACTLY**: measured over three careers 2026-09-14, MLB's monthly and weekday
+  aggregates matched the joined rows for every month and every weekday. A
+  relocated home game moves a park; it does not move a Tuesday. `test/boxlines-facets.test.js` pins the facet
   layer, `test/boxlines-card-facets.test.js` pins every door against the same
   `facetPlan` the sheet calls, and `test/boxlines-rows.test.js` pins that
   `keep` cannot resurrect a row the cutoff or the Final check dropped.

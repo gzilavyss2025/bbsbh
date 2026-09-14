@@ -122,9 +122,10 @@ export function matchingSplits(splits, { opponentId = null, gameTypes = REGULAR_
 // The rows. `schedule` is the list of schedule game records for the splits'
 // gamePks (any order, extras ignored). Shape of a row:
 //   { season, date, gamePk, gameNumber, gameType, series, home, teamId,
-//     teamAbbr, opponentId, opponentAbbr, started, line, won, runs, oppRuns,
-//     venueId, venueName, dayNight, boxScorePath }
+//     teamAbbr, opponentId, opponentAbbr, started, positions, line, won, runs,
+//     oppRuns, venueId, venueName, dayNight, boxScorePath }
 // `started` is null for hitters: the hitting game log carries no gamesStarted.
+// `positions` is null for pitchers, for the same reason in reverse.
 //
 // `keep` is a facet's row predicate (api/boxlines/facets.js) and is applied
 // AFTER the gate, never before, so no facet can widen what the gate allows:
@@ -177,6 +178,16 @@ export function boxLineRows({
       opponentId: s.opponent?.id ?? null,
       opponentAbbr: theirs?.team?.abbreviation ?? '',
       started: group === 'pitching' ? Number(st.gamesStarted) > 0 : null,
+      // THE POSITIONS HE PLAYED THAT DAY, in the order he played them —
+      // ['PH'], ['PH', 'LF'], ['DH', 'LF'] — off the HITTING game log's own
+      // `positionsPlayed`, which no other source in this app reads. Null for a
+      // pitcher, whose log does not carry it. It answers the pinch-hit facet
+      // for free, which is what made #1002's per-game boxscore read
+      // unnecessary; facets.js has the measurement.
+      positions:
+        group === 'hitting'
+          ? (s.positionsPlayed ?? []).map((p) => p?.abbreviation).filter(Boolean)
+          : null,
       line: group === 'pitching' ? pitcherLine(st) : hitterLine(st),
       won: runs != null && oppRuns != null ? runs > oppRuns : Boolean(s.isWin),
       runs,
