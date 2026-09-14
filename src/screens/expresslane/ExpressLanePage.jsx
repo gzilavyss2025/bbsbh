@@ -428,6 +428,7 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
         batter={lane.deck.batter}
         pending={lane.deck.pending}
         runners={lane.deck.runners}
+        departed={lane.deck.departed}
         waiting={waiting}
         held={lane.held}
         story={lane.story}

@@ -103,6 +103,10 @@
    lineup page because it is drawn from Express Lane vocabulary — a cut
    length of film — and because 09-team-info.css was at its file cap. */
 @import './styles/77b-express-lane-door.css';
+/* The SCORING DECK band of that surface (screens/expresslane/ScoringDeck.jsx),
+   split off when 77 reached its file cap a second time. It shares no class with
+   77a or 77b, so its place after them changes nothing in the cascade. */
+@import './styles/77c-express-lane-deck.css';
 /* Motion — the animation layer (the motion study, issues #976-#983). A
    SUBDIRECTORY for the same reason focus/ below is one: src/styles is a flat
    directory at its own file ratchet (scripts/check-dir-size.mjs), the study
@@ -200,10 +204,10 @@
                               components/admin/contracts/{TierBar,ReviewQueue,
                               DecisionPane,CandidateList,RosterSearch}.jsx
      74a-contract-lookup      components/admin/contracts/LookupDeck.jsx
-     77-express-lane          screens/expresslane/{ExpressLanePage,FilmPane,
-                              ScoringDeck}.jsx
+     77-express-lane          screens/expresslane/{ExpressLanePage,FilmPane}.jsx
      77a-express-lane-entry   screens/expresslane/{EntryChooser,PitchExpand}.jsx
      77b-express-lane-door    components/game/ExpressLaneDoor.jsx
+     77c-express-lane-deck    screens/expresslane/ScoringDeck.jsx
      report/chrome            screens/around-the-game/RunValuePage.jsx,
                               screens/around-the-game/AbsChallengesPage.jsx
      research/diary           screens/research/ResearchDiaryPage.jsx

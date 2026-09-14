@@ -29,15 +29,31 @@ import { AtBatBox } from '../../components/scoring/AtBatBox.jsx'
 // primary action, where the box being written in most often belongs.
 
 const BASE_LABEL = { 1: 'on first', 2: 'on second', 3: 'on third' }
+// Where he was put out, which is not always where he was standing: a man on
+// first forced at second on a fielder's choice left first and was cut down at
+// second, and the scorer writes the out at the bag it happened on.
+const OUT_LABEL = { 1: 'out at first', 2: 'out at second', 3: 'out at third', 4: 'out at home' }
 
-// One man on base: his name, the base he stands on, and his own box.
-function RunnerBox({ base, card }) {
+function runnerKey(card) {
+  return card.kind === 'placed' ? `placed:${card.runnerId}` : `pa:${card.atBatIndex}`
+}
+
+// One man's box: his name, what he is doing, and his own plate appearance.
+//
+// `fate` is set only for a man the cursor's play took OFF the bases — see
+// runnersDeparted in api/expresslane/runners.js. He keeps his box for this one
+// cursor position because this play is the one that gets written on it, and
+// the label says which of the two happened rather than naming a base he is no
+// longer standing on.
+function RunnerBox({ at, card, fate = null, outAt = null }) {
   const name = card.batter?.last ?? card.runner?.last ?? ''
+  const label =
+    fate === 'scored' ? 'scored' : fate === 'out' ? (OUT_LABEL[outAt] ?? 'out') : (BASE_LABEL[at] ?? '')
   return (
-    <li className="xl-deck__runner">
+    <li className={`xl-deck__runner ${fate ? `xl-deck__runner--${fate}` : ''}`}>
       <p className="xl-deck__runnerhead">
         <span className="xl-deck__runnername">{name}</span>
-        <span className="xl-deck__base">{BASE_LABEL[base] ?? ''}</span>
+        <span className="xl-deck__base">{label}</span>
       </p>
       <div className="xl-deck__paper">
         <AtBatBox atbat={card} />
@@ -50,6 +66,11 @@ export function ScoringDeck({
   batter,
   pending = null,
   runners = [],
+  // Men the cursor's play took off the bases — scored, or put out on them.
+  // Drawn beside the men still standing, for this one cursor position only,
+  // because the play the scorer is writing is the play that has to go on THEIR
+  // box (api/expresslane/runners.js). They carry `from` rather than a base.
+  departed = [],
   waiting = false,
   // THE PLAY IS HELD: its film is on the screen and none of it is written yet.
   // The deck above is already the pre-pitch one — the hook caps it short of
@@ -62,7 +83,7 @@ export function ScoringDeck({
   story = '',
   onExpand = null,
 }) {
-  if (!batter && !pending && !runners.length) {
+  if (!batter && !pending && !runners.length && !departed.length) {
     return (
       <section className="xl-deck xl-deck--empty">
         <p className="xl-deck__empty">Nothing written yet.</p>
@@ -79,27 +100,40 @@ export function ScoringDeck({
   const name = who.last ?? ''
   const first = who.first ?? ''
 
+  // The men still standing and the men this play just took off the bases, laid
+  // out together and ordered by the base each one is on or left — so a box that
+  // is about to go stays where the eye last saw the man standing. They are two
+  // lists upstream because they are two different answers; they are one row
+  // here because they are one row of paper.
+  //
+  // A card is in exactly one of the two, so the keys stay unique.
+  const boxes = [
+    ...runners.map((r) => ({ at: r.base, card: r.card, fate: null, outAt: null })),
+    ...departed.map((d) => ({ at: d.from, card: d.card, fate: d.fate, outAt: d.outAt })),
+    // Two men never share a base, so the tie-break is only ever reached by a
+    // departed man and a live one meeting at the base one of them just left —
+    // a runner scoring from second while the man behind him takes it. The one
+    // on his way out goes first, because his box is the one with a mark still
+    // owed on it. Written as a total order rather than `a.fate ? -1 : 1`, which
+    // would claim each of two departed men came before the other.
+  ].sort((a, b) => b.at - a.at || Number(Boolean(b.fate)) - Number(Boolean(a.fate)))
+
   return (
     <section className="xl-deck" aria-label="Scoring deck">
-      {runners.length > 0 && (
+      {boxes.length > 0 && (
         <>
-          {/* Two words, because the boxes under them are the whole
-              explanation: these are the plate appearances those men reached
-              on, which is where a steal or an advance gets written. A label
-              that spelled the instruction out as well was teaching the
-              paper's own rule to someone already holding the paper. */}
-          <h2 className="xl-deck__label">On base</h2>
+          {/* One word, because the boxes under it are the whole explanation.
+              "On base" was the older label and it stops being true the moment
+              a man scores or is cut down and keeps his box for the play that
+              did it — which is precisely when the scorer most needs the band. */}
+          <h2 className="xl-deck__label">Runners</h2>
           <ul className="xl-deck__runners">
             {/* Keyed on the card's own identity rather than on a plate-
                 appearance number: the extra-innings automatic runner never
                 took one, so `card.atBatIndex` is undefined for him and every
                 placement in a game would share that key. */}
-            {runners.map(({ base, card }) => (
-              <RunnerBox
-                key={card.kind === 'placed' ? `placed:${card.runnerId}` : `pa:${card.atBatIndex}`}
-                base={base}
-                card={card}
-              />
+            {boxes.map((box) => (
+              <RunnerBox key={runnerKey(box.card)} {...box} />
             ))}
           </ul>
         </>
