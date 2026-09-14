@@ -195,7 +195,10 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
 
   if (!started) {
     return (
-      <div className="xl">
+      // `xl--entry` holds this screen to exactly one viewport, so the chooser
+      // scrolls inside itself and the Start button stays pinned to the foot.
+      // The scoring surface below grows instead, so it takes no such cap.
+      <div className="xl xl--entry">
         <EntryChooser
           mode={mode}
           onMode={setMode}
@@ -225,7 +228,7 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
         <div className="xl__preroll">
           <p className="xl__prerollmsg">Nothing was played here.</p>
           <p className="xl__prerollsub">
-            You have scored to the end of what this game has. Step back to look at a half again.
+            You have scored to the end of this game.
           </p>
           <button type="button" className="btn btn--ghost" onClick={lane.prevHalf}>
             Back a half-inning
@@ -266,14 +269,14 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
           <div className="xl__preroll">
             <p className="xl__prerollmsg">
               {lane.job.blockedReason === 'quota'
-                ? 'This device is out of room for film.'
+                ? 'No room left for film.'
                 : lane.job.blockedReason === 'host'
-                  ? 'MLB has stopped serving clips to this device for now.'
+                  ? 'MLB has stopped sending clips.'
                   : 'The film stopped arriving.'}
             </p>
             <p className="xl__prerollsub">
               {lane.job.blockedReason === 'quota'
-                ? 'Free some space, then pick it back up.'
+                ? 'Free some space on this device, then try again.'
                 : lane.job.blockedReason === 'host'
                   ? 'Give it a few minutes, then try again.'
                   : 'Try again, or come back to this game later.'}
@@ -297,8 +300,8 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
             </p>
             <p className="xl__prerollsub">
               {lane.preroll.openWhen === 'drained'
-                ? 'About half an hour, at the speed MLB sends film. Leave this open and come back to it — nothing is lost if you close it, and what has arrived stays on this device.'
-                : 'The film arrives about as fast as MLB will send it, which is slower than it sounds.'}
+                ? 'About half an hour. Leave it open — what has arrived stays on this device.'
+                : 'It arrives as fast as MLB will send it, which is slower than it sounds.'}
             </p>
           </div>
         )}

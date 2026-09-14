@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------
    77a-express-lane-entry — Express Lane's two doorway surfaces:
-   the ENTRY STEP (booth + consent) and the PLATE-APPEARANCE EXPAND.
+   the ENTRY STEP (pace + consent) and the PLATE-APPEARANCE EXPAND.
    screens/expresslane/{EntryChooser,PitchExpand}.jsx
 
    A lettered sibling of 77-express-lane.css rather than the next free integer,
@@ -14,24 +14,70 @@
    before the game starts, one opened over the top of it.
    ------------------------------------------------------------------ */
 
-/* --- the entry step ------------------------------------------------- */
+/* --- the entry step -------------------------------------------------
+   A DOORWAY, NOT A FORM. The reader reached this screen by tapping a cut strip
+   of 35mm film on the lineup page (77b), so the title is set in the same
+   condensed display face that strip carries — one lettering, scaled up, so the
+   door and the room behind it read as one object rather than as two screens
+   that happen to be adjacent.
+
+   THE COPY IS SHORT ON PURPOSE. This step ran to 279 words and 1,153px on an
+   844px phone: a lede, two explanatory paragraphs, and five cards each carrying
+   a full sentence of cost, so the start button sat below the fold behind an
+   essay. It is 131 words now. What actually decides the choice is a NUMBER, so
+   the numbers are drawn as numbers — a mono ledger row that compares down the
+   page — and the sentences that used to carry them are gone.
+
+   AND ITS PROSE READS IN NATURAL CASE. That is this app's own rule for anything
+   longer than a chrome label: 01-base.css's ALL-CAPS INVARIANT, and the
+   shouted-heading/natural-case-body split its exemption list records over and
+   over (the spoiler-consent modal, the Team Score modal, the About page,
+   play-by-play). Express Lane was the one surface that never opted in and
+   shouted its paragraphs instead. The title, the legends, the card names, the
+   figures and the button all stay shouted, which is where the split falls
+   everywhere else in the app. */
+/* THE SAME BAND STRUCTURE THE SCORING SURFACE USES: one scrolling middle and a
+   foot that does not move. `.xl` is `overflow: hidden` (77), which makes it the
+   scrollport and would leave a `position: sticky` foot inside it pinned to the
+   bottom of the CONTENT rather than of the screen. So this band scrolls itself
+   — `min-height: 0` is what lets a flex child shrink below its content and
+   actually do that — exactly as `.xl-deck` does behind the door. */
 .xl-entry {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 28px 20px calc(24px + env(safe-area-inset-bottom));
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-5) 0;
   max-width: 34rem;
   margin: 0 auto;
   width: 100%;
 }
+/* Title and lede are one block, so they sit tight against each other rather
+   than at the section gap the two groups below use. */
+.xl-entry__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
 .xl-entry__title {
   margin: 0;
-  font-size: var(--fs-h1);
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
   color: var(--album-foil);
 }
 .xl-entry__lede {
   margin: 0;
+  /* Wide enough to hold both sentences on one line where there is room, and
+     balanced so that where there is not — a phone — the break falls at the
+     full stop rather than three words into the second sentence. */
+  max-width: 52ch;
+  text-wrap: balance;
+  font-size: var(--fs-body);
   line-height: var(--lh-body);
   color: var(--album-foil-soft);
 }
@@ -40,21 +86,22 @@
   margin: 0;
   padding: 0;
 }
+/* A section header in the app's athletic condensed face, not a form legend. */
 .xl-entry__legend {
   padding: 0;
-  font-size: var(--fs-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
   font-weight: var(--w-bold);
-  color: var(--album-foil-soft);
+  letter-spacing: var(--ls-label);
+  color: var(--album-foil);
 }
 .xl-entry__hint {
-  margin: 6px 0 10px;
+  margin: 3px 0 var(--space-2);
   font-size: var(--fs-small);
-  line-height: var(--lh-body);
+  line-height: var(--lh-ui);
   color: var(--album-foil-soft);
 }
-/* One column, always. Every card here carries a line of real figures — minutes,
+/* One column, always. Every card carries a row of real figures — minutes,
    megabytes — and two columns of that on a phone is two unreadable columns.
    (It used to be two-up, for a booth pair whose labels were two club names.
    That choice is gone: Savant serves one clip per play whichever booth called
@@ -62,65 +109,169 @@
 .xl-entry__choices {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: var(--space-2);
 }
 .xl-entry__choice {
   appearance: none;
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 12px;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3) var(--space-3) var(--space-4);
   border: 1px solid var(--album-board-line);
-  border-radius: 8px;
-  background: transparent;
+  border-radius: var(--radius-sm);
+  /* A hair of lift off the board, so a card reads as an object sitting on the
+     page rather than as an outline drawn onto it. */
+  background: rgb(251 246 233 / 0.03);
   color: var(--album-foil-soft);
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard);
+}
+@media (prefers-reduced-motion: reduce) {
+  .xl-entry__choice {
+    transition: none;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .xl-entry__choice:hover {
+    border-color: var(--album-foil-soft);
+  }
+}
+.xl-entry__choice:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* THE CHOSEN CARD TAKES THE KRAFT AMBER, which is this app's one colour for
+   "sealed, and yours to open" everywhere else. It arrives as the same 3px rail
+   the consent block below carries, so the two read as one family rather than as
+   two unrelated accents on the same screen. The rail is a pseudo-element and
+   not a border, so choosing a card never reflows the text beside it. */
+.xl-entry__choice::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  background: transparent;
 }
 .xl-entry__choice.is-on {
-  border-color: var(--seal);
-  background: rgb(181 130 74 / 0.16);
+  border-color: var(--seal-deep);
+  background: rgb(181 130 74 / 0.12);
   color: var(--album-foil);
 }
-/* What the choice costs, in minutes. Quieter than the label it explains, but
-   not hidden — it is the only fact that decides this choice. */
-.xl-entry__cost {
-  margin-top: 4px;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-ui);
-  color: var(--album-foil-soft);
-  /* No text-transform override: the whole app renders uppercase and a guard
-     enforces it (src/styles/01-base.css). This line is quieter by size and
-     colour instead. */
-  letter-spacing: var(--ls-none);
+.xl-entry__choice.is-on::before {
+  background: var(--seal);
 }
-.xl-entry__choice.is-on .xl-entry__cost {
-  color: var(--album-foil);
-}
-.xl-entry__club {
+.xl-entry__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  color: var(--album-foil);
 }
 .xl-entry__side {
   font-size: var(--fs-caption);
-  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+}
+/* THE DECIDING NUMBERS, in the ledger face this app sets every figure in. A
+   figure and the word that says what it measures — never a sentence with a
+   number buried in it. Ruled off from the label above, so the five cards
+   compare DOWN the page at a glance: 15 against 40 minutes of film; at once,
+   90 seconds, half an hour before the first play. That comparison is the whole
+   decision, and five prose sentences could not carry it. */
+.xl-entry__figs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--space-4);
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--album-board-line);
+}
+.xl-entry__choice.is-on .xl-entry__figs {
+  border-top-color: var(--seal-deep);
+}
+.xl-entry__fig {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.xl-entry__figval {
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-none);
+  color: var(--album-foil);
+}
+.xl-entry__figlabel {
+  font-size: var(--fs-caption);
   letter-spacing: var(--ls-wide);
 }
 /* The consent, said plainly rather than buried: the scorebug is in every
-   frame, so there is no unrevealed way to watch a pitch. */
+   frame, so there is no unrevealed way to watch a pitch. "Start scoring" below
+   it IS the act of agreeing, which is why this block needs no third sentence
+   asking the reader to agree to it. */
 .xl-entry__consent {
   margin: 0;
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-4);
   border-left: 3px solid var(--seal);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   background: rgb(181 130 74 / 0.1);
   font-size: var(--fs-ui);
   line-height: var(--lh-body);
   color: var(--album-foil);
 }
-.xl-entry__go {
+/* THE PRIMARY ACTION STAYS UNDER THE THUMB, exactly as it does on the scoring
+   surface behind this door (.xl__foot in 77). Five cards, a consent and a title
+   do not fit one phone screen however hard the copy is cut, so the button is
+   pinned to the foot rather than left to sit wherever the last card ends. It
+   carries the board behind it and a hairline above, so the cards scroll UNDER
+   it instead of through it. */
+.xl-entry__foot {
+  position: sticky;
+  bottom: 0;
   margin-top: auto;
+  /* For the fade below, which says there is more list under the button. */
+  z-index: 1;
+  /* Pulled out to the band's own edges and padded back in, so the board
+     behind the button reaches the gutters and cards scroll UNDER it rather
+     than past it in the two side margins. */
+  margin-inline: calc(var(--space-5) * -1);
+  padding: var(--space-3) var(--space-5) calc(var(--space-3) + env(safe-area-inset-bottom));
+  background: var(--album-board);
+  box-shadow: 0 -1px 0 var(--album-board-line);
+}
+/* The card under the button fades out rather than being sheared off at the
+   hairline, which is the difference between "the list continues" and "the list
+   is broken here". */
+.xl-entry__foot::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: var(--space-5);
+  background: linear-gradient(to top, var(--album-board), rgb(31 44 57 / 0));
+  pointer-events: none;
+}
+.xl-entry__go {
   min-height: 52px;
   width: 100%;
+}
+
+/* The three lines on this screen that are SENTENCES rather than labels. Same
+   split as every other explainer surface in the app — see the ALL-CAPS
+   INVARIANT's exemption list in 01-base.css. The `#root` prefix is required,
+   or the rule loses to `#root *` and the marker reads as deliberate while the
+   cascade shouts anyway. */
+#root .xl-entry__lede,
+#root .xl-entry__hint,
+#root .xl-entry__consent {
+  text-transform: none; /* caps-exempt: the entry step's lede, section notes and consent read as natural sentences, same shouted-heading/natural-case-body split as the spoiler-consent modal */
 }
 
 /* --- the plate-appearance expand ------------------------------------ */
@@ -149,7 +300,9 @@
 }
 .xl-expand__title {
   margin: 0;
-  font-size: var(--fs-title-sm);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  letter-spacing: var(--ls-caps);
   color: var(--album-foil);
 }
 .xl-expand__close {
@@ -176,15 +329,26 @@
    and no "missing" state in this list at all. */
 .xl-pitch {
   display: grid;
-  grid-template-columns: 1.6rem 1fr 1fr 4.4rem 2.6rem;
+  grid-template-columns: 1.6rem minmax(0, 1fr) 4.2rem 2.6rem;
   gap: 8px;
   align-items: baseline;
   padding: 7px 2px;
   border-bottom: 1px solid var(--album-board-line);
   font-size: var(--fs-small);
 }
+/* The call over the pitch it was thrown on — see PitchExpand.jsx. */
+.xl-pitch__what {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.xl-pitch__type {
+  font-size: var(--fs-caption);
+}
 .xl-pitch__n {
   color: var(--album-foil-soft);
+  font-family: var(--font-mono);
 }
 .xl-pitch__call {
   font-weight: var(--w-bold);
@@ -194,6 +358,12 @@
 .xl-pitch__mph,
 .xl-pitch__count {
   color: var(--album-foil-soft);
+}
+/* Velocity and the count are figures, so they take the ledger face the rest of
+   the app sets its figures in. */
+.xl-pitch__mph,
+.xl-pitch__count {
+  font-family: var(--font-mono);
 }
 .xl-pitch__count {
   text-align: right;

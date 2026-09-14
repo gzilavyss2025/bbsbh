@@ -43,9 +43,9 @@ export function FilmPane({ clipUrl, gate, blockedReason, onSkipFilm, onRetry, au
       <div className="xl-film">
         <Placeholder tone="stop">
           {blockedReason === 'quota'
-            ? 'This device is out of room for film. Free some space, then pick it back up.'
+            ? 'No room left for film on this device. Free some space first.'
             : blockedReason === 'host'
-              ? 'MLB has stopped serving clips to this device for now. Give it a few minutes.'
+              ? 'MLB has stopped sending clips for now. Give it a few minutes.'
               : 'The film stopped arriving.'}
           <button type="button" className="btn xl-film__btn" onClick={onRetry}>
             Try again
@@ -92,7 +92,7 @@ export function FilmPane({ clipUrl, gate, blockedReason, onSkipFilm, onRetry, au
   if (gate?.reason === 'paperwork' || gate?.reason === 'no-film') {
     return (
       <div className="xl-film">
-        <Placeholder tone="none">Nothing to watch here — write it on the card.</Placeholder>
+        <Placeholder tone="none">No film for this play.</Placeholder>
       </div>
     )
   }
@@ -106,9 +106,7 @@ export function FilmPane({ clipUrl, gate, blockedReason, onSkipFilm, onRetry, au
   if (gate?.reason === 'evicted') {
     return (
       <div className="xl-film">
-        <Placeholder tone="none">
-          This film was let go to make room. What you wrote still stands.
-        </Placeholder>
+        <Placeholder tone="none">This clip was let go to make room — what you wrote stands.</Placeholder>
       </div>
     )
   }
@@ -123,7 +121,7 @@ export function FilmPane({ clipUrl, gate, blockedReason, onSkipFilm, onRetry, au
         <Placeholder tone="stop">
           This clip is not coming.
           <button type="button" className="btn xl-film__btn" onClick={onSkipFilm}>
-            Score this one without the film
+            Score it without the film
           </button>
         </Placeholder>
       </div>

@@ -47,8 +47,16 @@ function pitchLine(row, index) {
   return (
     <li key={row.key} className={`xl-pitch xl-pitch--${detail.dot ?? 'other'}`}>
       <span className="xl-pitch__n">{index + 1}</span>
-      <span className="xl-pitch__call">{call}</span>
-      <span className="xl-pitch__type">{detail.type || '—'}</span>
+      {/* The call and the pitch it was thrown on are ONE cell, stacked. Given a
+          column each they wrapped against the figures beside them — "four-seam
+          fastball" is eighteen characters on a phone — and every other row came
+          out a different height, which is the opposite of what a ledger is
+          for. Stacked, the two figure columns to the right stay a true
+          column. */}
+      <span className="xl-pitch__what">
+        <span className="xl-pitch__call">{call}</span>
+        <span className="xl-pitch__type">{detail.type || '—'}</span>
+      </span>
       <span className="xl-pitch__mph">{detail.mph ? `${Math.round(detail.mph)} mph` : '—'}</span>
       <span className="xl-pitch__count">
         {count.balls == null ? '' : `${count.balls}-${count.strikes}`}
@@ -79,7 +87,7 @@ export function PitchExpand({ card, rows = [], onClose }) {
           // No pitches on the card is a real state, not a failure: the
           // extra-innings automatic runner took no plate appearance, and a
           // pitchless intentional walk has none either.
-          <p className="xl-expand__none">No pitches were thrown in this plate appearance.</p>
+          <p className="xl-expand__none">No pitches in this one.</p>
         )}
       </div>
     </div>

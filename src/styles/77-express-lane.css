@@ -26,6 +26,14 @@
   /* The bar and the foot are fixed ends; only the deck between them scrolls. */
   overflow: hidden;
 }
+/* THE ENTRY STEP IS HELD TO ONE VIEWPORT, which the scoring surface is not.
+   `min-height` lets this element grow past the screen, and a screen that grows
+   cannot hold a sticky foot at the bottom of the viewport. The chooser scrolls
+   inside itself instead (77a). Scoped, because the scoring surface's own bands
+   size themselves and must keep growing. */
+.xl--entry {
+  height: 100dvh;
+}
 
 /* --- the bar -------------------------------------------------------
    The half-inning and the booth. NO SCORE, no plate-appearance count and no
@@ -95,8 +103,10 @@
 }
 .xl__half {
   text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
-  letter-spacing: var(--ls-title);
+  letter-spacing: var(--ls-label);
 }
 .xl__booth {
   font-size: var(--fs-small);
@@ -140,7 +150,7 @@
 .xl-film__msg {
   margin: 0;
   font-size: var(--fs-ui);
-  max-width: 34ch;
+  max-width: 30ch;
   line-height: var(--lh-prose);
 }
 
@@ -200,7 +210,8 @@
 
 .xl-deck__label {
   margin: 0;
-  font-size: var(--fs-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--album-foil-soft);
@@ -283,8 +294,11 @@
   margin: 0 0 6px;
 }
 .xl-deck__battername {
-  font-size: var(--fs-title-sm);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
   color: var(--album-foil);
 }
 .xl-deck__atbat {
@@ -347,8 +361,19 @@
 .xl-deck__story {
   margin: 8px 0 0;
   max-width: 46ch;
-  font-size: var(--fs-ui);
-  line-height: var(--lh-body);
+  /* THE SAME SENTENCE THE INNINGS VIEWER DRAWS, so it is set the same way:
+     `.pbp__desc` reads this feed string in Lora, natural case. Shouted here in
+     the UI sans, one line looked like two different kinds of thing on the two
+     surfaces a scorer moves between. */
+  font-family: var(--font-read);
+  /* One step above `.pbp__desc`'s caption size, because there it is one line in
+     a dense list and here it is the only prose on the surface — the sentence
+     that settles what the picture left ambiguous. Same face, same tracking,
+     same leading. */
+  font-size: var(--fs-small);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-text);
+  line-height: var(--lh-prose);
   color: var(--album-foil);
 }
 
@@ -405,7 +430,10 @@
   font-size: var(--fs-small);
   font-weight: var(--w-bold);
 }
+/* A scorekeeping code — 2B, 6-3, K — which is a ledger figure, so it takes the
+   ledger face the rest of the app sets its figures in. */
 .xl__chipcode {
+  font-family: var(--font-mono);
   font-size: var(--fs-caption);
 }
 
@@ -462,8 +490,10 @@
 }
 .xl__prerollmsg {
   margin: 0;
-  font-size: var(--fs-h3);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
 }
 .xl__prerollsub {
   margin: 0;
@@ -471,6 +501,31 @@
   font-size: var(--fs-ui);
   color: var(--album-foil-soft);
   line-height: var(--lh-body);
+}
+
+/* --- the sentences on this surface ---------------------------------
+   Everything above that is a SENTENCE rather than a chrome label reads in
+   natural case — this app's own shouted-heading/natural-case-body split, which
+   01-base.css's ALL-CAPS INVARIANT records on twenty-odd other surfaces and
+   which Express Lane alone never opted into. Chrome stays shouted: the half
+   label, the deck's section labels, the batter's name, the chips, the codes and
+   every button. Each selector needs its `#root` prefix or it loses to `#root *`
+   and the marker lies (check-caps.mjs enforces that).
+
+   A CHILD IS NOT CARRIED THROUGH by an exempt parent, so the keyboard hint
+   inside the held line is named as well — without it a desktop reader got
+   "Watch it, then show the play. PRESS SPACE." The buttons inside
+   `.xl-film__msg` are left out for the same reason: a button stays shouted.
+   Keep the list uninterrupted; a comment between two selectors hides the ones
+   above it from check-caps.mjs's specificity check. */
+#root .xl-film__msg,
+#root .xl__prerollsub,
+#root .xl-deck__empty,
+#root .xl-deck__hold,
+#root .xl-deck__hold .xl-deck__holdkey,
+#root .xl-deck__holding,
+#root .xl-deck__story {
+  text-transform: none; /* caps-exempt: Express Lane's prose reads as natural sentences; .xl-deck__story is the same feed description .pbp__desc already draws natural-case in Lora */
 }
 
 /* --- tablet and up: Concept B, side by side -------------------------
@@ -490,6 +545,13 @@
     grid-template-rows: auto 1fr auto auto;
     column-gap: 18px;
     padding-inline: 8px;
+  }
+  /* THE ENTRY STEP IS NOT A TWO-COLUMN LAYOUT. It has no film pane and no
+     deck to set beside one. Taking the grid above, it was placed in the FILM
+     column and sat jammed against the left edge, 530px of a 1024px screen. */
+  .xl--entry {
+    display: flex;
+    padding-inline: 0;
   }
   .xl__bar {
     grid-column: 1 / -1;
