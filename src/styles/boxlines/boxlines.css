@@ -410,6 +410,34 @@ a.boxline__link:focus-visible {
   margin-top: var(--space-4);
 }
 
+/* The four headings (api/boxlines/cardFacets.js's SECTIONS). Twenty doors is a
+   wall without them and seven did not need them, which is why they arrived with
+   the month and weekday doors rather than with the card. Quieter than the
+   card's own .section__title above — this is a divider inside one card, not a
+   second card — so it is the label voice in the hatch ink the sheet's kicker
+   already uses, over the same dashed rule the rows are ruled with. */
+.gamelines__section + .gamelines__section {
+  margin-top: var(--space-3);
+}
+
+.gamelines__heading {
+  margin: 0 0 2px;
+  padding-top: 8px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--seal-hatch);
+}
+
+/* The first heading sits directly under the card title, which already rules
+   itself off; a second rule 2px under the first is a double line. */
+.gamelines__section:first-of-type .gamelines__heading {
+  padding-top: 0;
+  border-top: none;
+}
+
 .gamelines__rows {
   margin: 0;
   padding: 0;
@@ -427,4 +455,78 @@ button.gamelines__door {
   letter-spacing: var(--ls-num);
   font-size: var(--fs-compact);
   color: var(--text-caption);
+}
+
+/* THE CHIP ROW — the seven weekday doors (#1001). A weekday split is a
+   comparison ("is he worse on getaway day?"), and a comparison wants its
+   answers side by side; seven ledger rows would stack seven versions of one
+   sentence and bury the differences. So they are a grid of small cards that
+   fills the card's width at any size — three across a phone, seven across a
+   desktop column — rather than a scrolling row, which would hide the last of
+   them behind an edge and make the comparison impossible.
+
+   auto-fit with a 92px floor is what makes that true without a breakpoint:
+   the track count follows the width, and the chips never fall below the width
+   the longest line ("288 G, .299") needs. */
+.gamelines__chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: var(--space-2);
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The chip itself. Inset paper under a hairline, the ledger's own surface — a
+   pencilled box on the scorebook, not a button in a toolbar. The door's reset
+   owns no padding or border, so all of this is stated at `button.` specificity
+   the way .gamelines__door above is. */
+button.gamelines__chip {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 1px;
+  padding: 6px 8px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+}
+
+/* The weekday, with the house chevron pushed to the far end. It is the whole
+   of "See all ›" that fits here, and the chip is small enough to read as one
+   control. */
+.boxlines-door__chipname {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+}
+
+.boxlines-door__chipname > span {
+  color: var(--accent-link);
+}
+
+.boxlines-door__chipline {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+/* The chip already stands in a box, so the door's hover outline would draw a
+   second one 3px outside the first. It answers by lifting its own paper
+   instead. */
+@media (hover: hover) and (pointer: fine) {
+  .boxlines-door--chip:hover {
+    outline: none;
+    border-color: var(--accent-link);
+    background: var(--surface-card);
+  }
 }

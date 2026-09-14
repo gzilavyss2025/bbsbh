@@ -10,7 +10,7 @@
 // against the same facetPlan the sheet will call.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { CARD_FACETS, cardFacetsFor } from '../src/api/boxlines/cardFacets.js'
+import { CARD_FACETS, cardFacetsFor, SECTIONS } from '../src/api/boxlines/cardFacets.js'
 import { facetPlan } from '../src/api/boxlines/facets.js'
 import { POSTSEASON } from '../src/api/boxlines/rows.js'
 
@@ -48,6 +48,31 @@ test('each row-filtering door keeps a matching row and drops its opposite', () =
     night: [{ dayNight: 'night' }, { dayNight: 'day' }],
     started: [{ started: true }, { started: false }],
     relief: [{ started: false }, { started: true }],
+    // The eight months (#999). A door keyed m4 must keep an April game and
+    // drop a May one, which is also what catches an entry whose `sitCode` and
+    // `facet.month` drifted apart -- the one way a table-built family can go
+    // wrong that a hand-written entry cannot.
+    m3: [{ date: '2024-03-28' }, { date: '2024-04-01' }],
+    m4: [{ date: '2024-04-30' }, { date: '2024-05-01' }],
+    m5: [{ date: '2024-05-01' }, { date: '2024-04-30' }],
+    m6: [{ date: '2024-06-15' }, { date: '2024-07-15' }],
+    m7: [{ date: '2024-07-04' }, { date: '2024-08-04' }],
+    m8: [{ date: '2024-08-04' }, { date: '2024-07-04' }],
+    m9: [{ date: '2024-09-15' }, { date: '2024-10-01' }],
+    m10: [{ date: '2024-10-01' }, { date: '2024-09-30' }],
+    // The seven weekdays (#1001). 2026-09-02 is a Wednesday and 2026-08-30 a
+    // Sunday, in every timezone the suite may run in: the helpers read the
+    // string rather than building a local-midnight Date.
+    w0: [{ date: '2026-08-30' }, { date: '2026-09-02' }],
+    w1: [{ date: '2026-08-31' }, { date: '2026-09-02' }],
+    w2: [{ date: '2026-09-01' }, { date: '2026-09-02' }],
+    w3: [{ date: '2026-09-02' }, { date: '2026-09-03' }],
+    w4: [{ date: '2026-09-03' }, { date: '2026-09-02' }],
+    w5: [{ date: '2026-09-04' }, { date: '2026-09-02' }],
+    w6: [{ date: '2026-09-05' }, { date: '2026-09-02' }],
+    // Off the bench (#1002): the positions he played, in the order he played
+    // them. A start that later moved to left field is not a pinch-hit game.
+    pinchHit: [{ positions: ['PH'] }, { positions: ['DH', 'LF'] }],
   }
   for (const entry of CARD_FACETS) {
     const { keep } = facetPlan(entry.facet)
@@ -110,24 +135,94 @@ test('"Box Lines" is the internal name and never reaches a reader', () => {
 
 test('a hitter is offered no started/relief door, which would keep nothing', () => {
   // The hitting game log carries no gamesStarted, so `started` is null on
-  // every hitter row and the facet would open an empty sheet.
+  // every hitter row and the facet would open an empty sheet. A hitter's
+  // started/entered reads the schedule's lineups instead, and is #1003's other
+  // half, not shipped here.
   const hitting = cardFacetsFor('hitting')
   assert.equal(
     hitting.some((r) => r.facet.kind === 'started'),
     false,
   )
+  const CALENDAR = ['m3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'w0', 'w1', 'w2', 'w3', 'w4', 'w5', 'w6']
   assert.deepEqual(
     hitting.map((r) => r.key),
-    ['home', 'road', 'day', 'night', 'postseason'],
+    ['home', 'road', 'day', 'night', ...CALENDAR, 'pinchHit', 'postseason'],
   )
   assert.deepEqual(
     cardFacetsFor('pitching').map((r) => r.key),
-    ['home', 'road', 'day', 'night', 'started', 'relief', 'postseason'],
+    ['home', 'road', 'day', 'night', ...CALENDAR, 'started', 'relief', 'postseason'],
   )
   assert.deepEqual(cardFacetsFor('fielding'), [])
 })
 
+test('a pitcher is offered no pinch-hitting door', () => {
+  // `positions` is null on a pitcher's rows -- the hitting game log is the only
+  // one that carries positionsPlayed -- so the facet would keep nothing.
+  assert.equal(
+    cardFacetsFor('pitching').some((r) => r.facet.kind === 'pinchHit'),
+    false,
+  )
+})
+
+test('every door files under a heading the card draws', () => {
+  // The card groups by SECTIONS, not by the registry's order, so a door with an
+  // unknown section would simply never render -- silently, the way an unknown
+  // facet kind would open an empty sheet.
+  const known = new Set(SECTIONS.map((s) => s.key))
+  for (const entry of CARD_FACETS) {
+    assert.ok(known.has(entry.section), `${entry.key} files under "${entry.section}"`)
+  }
+  // And every heading earns its place: a section with no door would draw a rule
+  // and a word over nothing.
+  for (const section of SECTIONS) {
+    assert.ok(
+      CARD_FACETS.some((r) => r.section === section.key),
+      `the "${section.title}" heading has no doors`,
+    )
+    assert.ok(section.title, `${section.key} needs a title`)
+  }
+})
+
+test('a chip names itself short, and only the weekdays are chips', () => {
+  // A chip's visible text is `short`; `label` stops being visible and goes on
+  // being the sheet's headline. One without a `short` would render an empty
+  // chip rather than fail.
+  for (const entry of CARD_FACETS) {
+    if (!entry.chip) {
+      assert.equal(entry.short, undefined, `${entry.key} is not a chip but names a short form`)
+      continue
+    }
+    assert.ok(entry.short, `${entry.key} is a chip and needs a short name`)
+    assert.ok(entry.short.length <= 4, `${entry.key} short name "${entry.short}" will not fit a chip`)
+    assert.equal(entry.facet.kind, 'weekday', `${entry.key} is a chip but is not a weekday`)
+  }
+  assert.equal(CARD_FACETS.filter((r) => r.chip).length, 7)
+})
+
+test('the month and weekday doors are a complete set, each numbered once', () => {
+  // Built from a table rather than written out fifteen times, so the thing to
+  // pin is that the table is whole: March through October, Sunday through
+  // Saturday, no number twice and none missing.
+  const months = CARD_FACETS.filter((r) => r.facet.kind === 'month').map((r) => r.facet.month)
+  assert.deepEqual(months, [3, 4, 5, 6, 7, 8, 9, 10])
+  const days = CARD_FACETS.filter((r) => r.facet.kind === 'weekday').map((r) => r.facet.day)
+  assert.deepEqual(days, [0, 1, 2, 3, 4, 5, 6])
+  // The situation code and the facet must name the SAME month. They come from
+  // one table row, and this is what says the row was read in the right order.
+  for (const entry of CARD_FACETS.filter((r) => r.facet.kind === 'month')) {
+    assert.equal(entry.sitCode, String(entry.facet.month), `${entry.key} asks MLB for a different month`)
+  }
+})
+
 // A gated row as boxLineRows builds it, trimmed to what a facet reads.
 function anyRow(over = {}) {
-  return { date: '2024-07-04', gamePk: 1, home: true, started: true, dayNight: 'day', ...over }
+  return {
+    date: '2024-07-04',
+    gamePk: 1,
+    home: true,
+    started: true,
+    dayNight: 'day',
+    positions: ['LF'],
+    ...over,
+  }
 }

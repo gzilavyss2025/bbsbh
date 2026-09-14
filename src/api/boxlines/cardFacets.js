@@ -20,8 +20,17 @@
 // `key` names the door — the card's React key and the key its label lands
 // under. `facet` is the question the sheet asks of the game log (facets.js).
 // `groups` is which of a two-way player's stat blocks the door belongs to.
+// `section` is which of the card's four headings it files under (SECTIONS
+// below), and it is what keeps a card of two dozen doors readable.
 // `footNote` is optional and prefixes the sheet's foot when this facet needs
 // a word the others do not.
+//
+// `chip: true` makes it one of a compact row of controls instead of a full
+// ledger row. Only the seven weekdays use it: a ledger row each would be
+// seven lines saying nearly the same thing, and the question ("does he hit on
+// getaway day?") is a comparison, which wants them side by side. A chip prints
+// `chipLine` rather than `careerSplitLine` — the same stat object, shortened —
+// and names itself with `short`.
 //
 // THE LABEL'S FIGURES COME FROM ONE OF TWO SOURCES, and an entry names which:
 //
@@ -38,10 +47,52 @@
 // Every answer goes through boxlines/rows.js's cutoff gate.
 import { POSTSEASON } from './rows.js'
 
+// The card's four headings, in the order it draws them. A door files under one
+// of these and the card groups by THIS list, not by the registry's order, so
+// adding a door in the wrong place cannot silently reorder the card.
+//
+// The headings arrived with the month, weekday and pinch-hit doors (#999,
+// #1001, #1002), which took the card from seven doors to twenty. Seven needed
+// no heading; twenty undifferentiated ledger rows are a wall, and the four
+// groups were already there as comments in this file — they were just not
+// reaching the reader.
+export const SECTIONS = [
+  { key: 'where', title: 'Where' },
+  { key: 'when', title: 'When' },
+  { key: 'how', title: 'How he got in' },
+  { key: 'counted', title: 'When it counted' },
+]
+
 // The six doors shipped by #1000, #1003 (its pitcher half), #1004 and #1005,
 // and the postseason door #1006 added. Each source was checked against a real
 // career before it was added, which is how `ven` (#998) was found to return
 // nothing at all and, for #1006, `careerPlayoffs` to answer with the wrong career. <!-- word-choice-exempt: statsapi's own stat-type name, quoted -->
+// The month doors' numbers, names and statsapi situation codes. A family of
+// doors that differ only in one number is built from a table rather than
+// written out eight times — the entries below are the same shape as every
+// hand-written one, and the suite checks them the same way.
+const MONTHS = [
+  [3, '3', 'March'],
+  [4, '4', 'April'],
+  [5, '5', 'May'],
+  [6, '6', 'June'],
+  [7, '7', 'July'],
+  [8, '8', 'August'],
+  [9, '9', 'September'],
+  [10, '10', 'October'],
+]
+
+// Sunday 0, matching `weekdayOf` in facets.js and the printed week.
+const WEEKDAYS = [
+  [0, 'dsu', 'Sun', 'Sunday'],
+  [1, 'dmo', 'Mon', 'Monday'],
+  [2, 'dtu', 'Tue', 'Tuesday'],
+  [3, 'dwe', 'Wed', 'Wednesday'],
+  [4, 'dth', 'Thu', 'Thursday'],
+  [5, 'dfr', 'Fri', 'Friday'],
+  [6, 'dsa', 'Sat', 'Saturday'],
+]
+
 export const CARD_FACETS = [
   // WHERE HE PLAYED. `h`/`a` count games at the park; the rows count the club
   // the schedule listed as home. Both are MLB's own, and they differ only on a
@@ -54,6 +105,7 @@ export const CARD_FACETS = [
     kicker: 'Game lines · at home',
     title: (name) => `${name} at home`,
     facet: { kind: 'side', home: true },
+    section: 'where',
     groups: ['hitting', 'pitching'],
   },
   {
@@ -63,6 +115,7 @@ export const CARD_FACETS = [
     kicker: 'Game lines · on the road',
     title: (name) => `${name} on the road`,
     facet: { kind: 'side', home: false },
+    section: 'where',
     groups: ['hitting', 'pitching'],
   },
   // WHEN HE PLAYED. The rows read day/night off the SCHEDULE record, never the
@@ -74,6 +127,7 @@ export const CARD_FACETS = [
     kicker: 'Game lines · day games',
     title: (name) => `${name} by day`,
     facet: { kind: 'dayNight', value: 'day' },
+    section: 'when',
     groups: ['hitting', 'pitching'],
   },
   {
@@ -83,8 +137,54 @@ export const CARD_FACETS = [
     kicker: 'Game lines · night games',
     title: (name) => `${name} at night`,
     facet: { kind: 'dayNight', value: 'night' },
+    section: 'when',
     groups: ['hitting', 'pitching'],
   },
+  // WHICH MONTH (#999). Eight doors, and the eight are the whole regular
+  // season: statsapi's situation codes number the months, '3' March through
+  // '10' October, and a career row came back for every one of them on both
+  // groups (verified 2026-09-14 on 592885 hitting and 656849 pitching). A
+  // month with no games renders no door, so April through September is what
+  // most careers show and March and October belong to the long ones.
+  //
+  // THE DOOR AND THE ROWS AGREE EXACTLY HERE, which is worth saying because
+  // the home/road doors above them do not. Measured over three careers, MLB's
+  // monthly aggregate matched the rows month for month, all eight, every time
+  // — Yelich 21/221/272/292/290/326/287/16 on both sides. A month is a fact
+  // about the date, and the date is the one thing the game log and the
+  // schedule cannot disagree about.
+  ...MONTHS.map(([month, sitCode, name]) => ({
+    key: `m${month}`,
+    sitCode,
+    label: name,
+    kicker: `Game lines · in ${name}`,
+    title: (surname) => `${surname} in ${name}`,
+    facet: { kind: 'month', month },
+    section: 'when',
+    groups: ['hitting', 'pitching'],
+  })),
+  // WHICH DAY OF THE WEEK (#1001). Seven CHIPS, not seven ledger rows. The
+  // question a weekday split answers is a comparison — is he worse on getaway
+  // day? — and a comparison wants its seven answers side by side, where a
+  // stack of seven near-identical lines buries it. They match exactly too:
+  // 277/198/267/257/161/277/288 on Yelich, door and rows, and the same on
+  // Peterson and Vazquez.
+  //
+  // Sunday first, the way a calendar is printed, which is also `weekdayOf`'s
+  // own numbering in facets.js — so the chip row reads left to right in the
+  // order the facet numbers them and no reader has to translate.
+  ...WEEKDAYS.map(([day, sitCode, short, name]) => ({
+    key: `w${day}`,
+    sitCode,
+    chip: true,
+    short,
+    label: `${name}s`,
+    kicker: `Game lines · on ${name}s`,
+    title: (surname) => `${surname} on ${name}s`,
+    facet: { kind: 'weekday', day },
+    section: 'when',
+    groups: ['hitting', 'pitching'],
+  })),
   // HOW HE GOT INTO THE GAME. Pitchers only: the hitting game log carries no
   // gamesStarted, so a hitter's `started` is null and the facet would keep
   // nothing. A hitter's started/entered reads the box score and is #1003's
@@ -96,6 +196,7 @@ export const CARD_FACETS = [
     kicker: 'Game lines · as a starter',
     title: (name) => `${name}, starts`,
     facet: { kind: 'started', value: true },
+    section: 'how',
     groups: ['pitching'],
   },
   {
@@ -105,7 +206,25 @@ export const CARD_FACETS = [
     kicker: 'Game lines · in relief',
     title: (name) => `${name}, in relief`,
     facet: { kind: 'started', value: false },
+    section: 'how',
     groups: ['pitching'],
+  },
+  // OFF THE BENCH, BAT IN HAND (#1002). Hitters only, and the one door on this
+  // card whose rows MLB publishes no per-game list for: `pH` gives the career
+  // aggregate, and the rows come from the game log's own `positionsPlayed`
+  // (facets.js). The issue costed this at one boxscore per candidate game,
+  // capped at 40 with a "Show older"; it costs nothing of the sort, and the
+  // cap and the paging were never built because there is nothing to page.
+  {
+    key: 'pinchHit',
+    sitCode: 'pH',
+    label: 'Pinch hitting',
+    kicker: 'Game lines · pinch hitting',
+    title: (surname) => `${surname} as a pinch hitter`,
+    footNote: 'Games he came to the plate as a pinch hitter.',
+    facet: { kind: 'pinchHit' },
+    section: 'how',
+    groups: ['hitting'],
   },
   // WHEN IT COUNTED (#1006). The only door so far whose rows are not regular
   // season, which is why it is the only one that changes what the FETCH asks
@@ -121,6 +240,7 @@ export const CARD_FACETS = [
     title: (name) => `${name} in the postseason`,
     footNote: 'Postseason only; the pill names the round.',
     facet: { kind: 'gameTypes', types: POSTSEASON },
+    section: 'counted',
     groups: ['hitting', 'pitching'],
   },
 ]

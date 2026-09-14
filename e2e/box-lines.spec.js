@@ -131,17 +131,19 @@ test('the player page opens the same sheet, and the page cutoff trims its rows',
   await expect(page.locator('.boxlines')).toHaveCount(0)
 })
 
-// THE THIRD DOOR AND THE FIVE AFTER IT (#1000, #1003, #1004, #1005): the Game
-// lines card, which #997 shipped empty and this is the first thing it renders.
-// Six doors for a pitcher — Home, Road, Day, Night, Started, In relief — and
-// four for a hitter, who is offered no start/relief pair because the hitting
-// game log carries no gamesStarted and the facet would keep nothing.
+// THE GAME LINES CARD and its twenty-odd doors (#1000, #1003, #1004, #1005,
+// #1006, and #999/#1001/#1002 for the calendar and the bench). #997 shipped the
+// card empty; every door since is one registry entry.
 //
-// It is the same sheet, gated the same way, but the facet is a PREDICATE over
-// finished rows rather than a club filter on the log, so what this pins is
-// that the predicate actually discriminates: every row behind the Home door
-// says "vs", never "@". A facet whose kind were misspelled keeps nothing and
-// shows an empty ledger, which is why the count is asserted too.
+// It is the same sheet, gated the same way, but a facet is a PREDICATE over
+// finished rows rather than a club filter on the log, so what this pins is that
+// the predicate actually discriminates: every row behind the Home door says
+// "vs", never "@". A facet whose kind were misspelled keeps nothing and shows
+// an empty ledger in silence, which is why a row count is asserted every time.
+//
+// Doors are found by their LABEL, never by index: they are grouped under four
+// headings now, so an index says nothing about which door it is and a new door
+// in an earlier section would silently move every assertion below it.
 const PETERSON = '/player/david-peterson-656849/stats'
 
 test('the Game lines card opens a facet sheet, and the facet actually narrows', async ({ page }) => {
@@ -152,13 +154,26 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
     test.skip(true, 'this player has no MLB situational splits on file today')
     return
   }
-  // A pitcher who has reached October gets all seven. MiLB service returns no
-  // rows for these codes, and a door with no career row drops out on its own,
-  // so this also says he is being read as a major leaguer.
-  const doors = card.locator('.gamelines__door')
-  await expect(doors).toHaveCount(7)
+  // The four headings, in the card's own order. A heading with no door under it
+  // does not render, so their presence also says every section has doors.
+  await expect(card.locator('.gamelines__heading')).toHaveText([
+    'Where',
+    'When',
+    'How he got in',
+    'When it counted',
+  ])
 
-  const home = doors.first()
+  // A pitcher who has reached October and pitched in every month gets fifteen
+  // ledger doors — Home, Road, Day, Night, eight months, Started, In relief,
+  // Postseason — plus seven weekday CHIPS, which are a separate class because
+  // they are a comparison rather than a stack of lines. MiLB service returns no
+  // rows for these codes and a door with no career row drops out on its own, so
+  // this also says he is being read as a major leaguer.
+  const doors = card.locator('.gamelines__door')
+  await expect(doors).toHaveCount(15)
+  await expect(card.locator('.gamelines__chip')).toHaveCount(7)
+
+  const home = card.getByRole('button', { name: /^Home: / })
   const label = (await home.locator('span').first().textContent()).trim()
   expect(label).toMatch(/^Home: \d+ G, /)
   await home.click()
@@ -197,7 +212,7 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
 
   // The sibling door asks the opposite question of the SAME memoized join, so
   // it costs no request and must come back with the other half of the games.
-  const road = doors.nth(1)
+  const road = card.getByRole('button', { name: /^Road: / })
   await road.click()
   const roadSheet = page.getByRole('dialog', { name: /on the road/ })
   await expect(roadSheet).toBeVisible()
@@ -216,7 +231,7 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
   // comes back with rounds rather than the umbrella 'P'. Asked the wrong way a
   // PITCHING log labels every row 'P', the type filter drops all of them, and
   // this door opens on an empty ledger while the six beside it stay full.
-  const postseason = doors.nth(6)
+  const postseason = card.getByRole('button', { name: /^Postseason: / })
   expect((await postseason.locator('span').first().textContent()).trim()).toMatch(/^Postseason: \d+ G, /)
   await postseason.click()
   const postSheet = page.getByRole('dialog', { name: /in the postseason/ })
@@ -232,4 +247,121 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
     // Every row wears its round, and only the four real ones exist.
     await expect(postRows.nth(i).locator('.boxline__series')).toHaveText(/^(WC|DS|LCS|WS)$/)
   }
+})
+
+
+// THE CALENDAR DOORS (#999, #1001). A month and a weekday are the only facets
+// whose door figure and row count agree EXACTLY — a relocated home game moves a
+// park, it does not move a Tuesday — but what this pins is the half a unit test
+// cannot reach: that the predicate lands on the same date the LABEL claims. A
+// month door whose sitCode and facet drifted apart (asks MLB about August,
+// filters rows for September) still renders a plausible-looking sheet, and only
+// a live row's date says otherwise.
+test('a month door and a weekday chip each keep only their own dates', async ({ page }) => {
+  await page.goto(`${PETERSON}?d=${PLAYER_CUTOFF}`)
+  const card = page.locator('.gamelines')
+  await card.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await card.count()) === 0) {
+    test.skip(true, 'this player has no MLB situational splits on file today')
+    return
+  }
+
+  // JULY. Every row behind it is dated in month 07, whatever the year.
+  const july = card.getByRole('button', { name: /^July: / })
+  await july.click()
+  const julySheet = page.getByRole('dialog', { name: /in July/ })
+  await expect(julySheet.locator('.boxlines__kicker')).toHaveText('Game lines · in July')
+  await expect
+    .poll(async () => (await julySheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
+    .toBe(true)
+  const julyRows = julySheet.locator('.boxline:not(.boxline--skel)')
+  const julyN = await julyRows.count()
+  expect(julyN).toBeGreaterThan(0)
+  for (let i = 0; i < julyN; i++) {
+    const href = await julyRows.nth(i).locator('a').getAttribute('href')
+    expect(href.slice(1, 3), `row ${i} is not a July game`).toBe('07')
+  }
+  await page.keyboard.press('Escape')
+
+  // SUNDAY, as a chip. Its visible text is short; its accessible name is the
+  // whole career line, which is also the sheet's headline — the chip and the
+  // sheet read one stat object two ways and cannot disagree about the career.
+  const sunday = card.getByRole('button', { name: /^Sundays: / })
+  await expect(sunday).toHaveClass(/gamelines__chip/)
+  await expect(sunday.locator('.boxlines-door__chipname')).toHaveText(/^Sun/)
+  const sundayLabel = await sunday.getAttribute('aria-label')
+  await sunday.click()
+  const sundaySheet = page.getByRole('dialog', { name: /on Sundays/ })
+  await expect(sundaySheet.locator('.boxlines__kicker')).toHaveText('Game lines · on Sundays')
+  await expect(sundaySheet.locator('.boxlines__headline')).toHaveText(sundayLabel)
+  await expect
+    .poll(async () => (await sundaySheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
+    .toBe(true)
+  const sundayRows = sundaySheet.locator('.boxline:not(.boxline--skel)')
+  const sundayN = await sundayRows.count()
+  expect(sundayN).toBeGreaterThan(0)
+  for (let i = 0; i < sundayN; i++) {
+    const href = await sundayRows.nth(i).locator('a').getAttribute('href')
+    // MMDDYYYY in the path. Parsed at midday UTC, the same construction the
+    // facet uses, so no timezone can move a game a day in either place.
+    const [, mm, dd, yyyy] = href.match(/^\/(\d{2})(\d{2})(\d{4})\//)
+    const day = new Date(Date.UTC(Number(yyyy), Number(mm) - 1, Number(dd), 12)).getUTCDay()
+    expect(day, `row ${i} (${yyyy}-${mm}-${dd}) is not a Sunday`).toBe(0)
+  }
+})
+
+// THE PINCH-HIT DOOR (#1002). A hitter only, and the one door on the card whose
+// rows MLB publishes no per-game list for: the label is MLB's `pH` career
+// aggregate, the rows are the hitting game log's own `positionsPlayed`. The
+// issue costed this at one boxscore per candidate game behind a 40-row cap;
+// it costs neither, so what this pins is that the free path really does answer
+// — a door that opened on an empty ledger would be the silent failure.
+test('a hitter gets a pinch-hitting door, and a pitcher does not', async ({ page }) => {
+  await page.goto(`${YELICH}?d=${PLAYER_CUTOFF}`)
+  const card = page.locator('.gamelines')
+  await card.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await card.count()) === 0) {
+    test.skip(true, 'this player has no MLB situational splits on file today')
+    return
+  }
+  // No start/relief pair for a hitter: the hitting game log carries no
+  // gamesStarted, so those facets would keep nothing (#1003's hitter half
+  // reads the schedule's lineups instead, and is not shipped).
+  await expect(card.getByRole('button', { name: /^Started: / })).toHaveCount(0)
+  await expect(card.getByRole('button', { name: /^In relief: / })).toHaveCount(0)
+
+  const pinch = card.getByRole('button', { name: /^Pinch hitting: / })
+  const label = (await pinch.locator('span').first().textContent()).trim()
+  expect(label).toMatch(/^Pinch hitting: \d+ G, /)
+  await pinch.click()
+
+  const sheet = page.getByRole('dialog', { name: /as a pinch hitter/ })
+  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · pinch hitting')
+  await expect(sheet.locator('.boxlines__headline')).toHaveText(label)
+  await expect
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
+    .toBe(true)
+  const rows = sheet.locator('.boxline:not(.boxline--skel)')
+  const n = await rows.count()
+  expect(n).toBeGreaterThan(0)
+  // The foot says what a row here is, because this facet's rule is not obvious
+  // from the rows themselves.
+  await expect(sheet.locator('.boxlines__foot')).toContainText('pinch hitter')
+  for (let i = 0; i < n; i++) {
+    const href = await rows.nth(i).locator('a').getAttribute('href')
+    const [, mmddyyyy] = href.match(/^\/(\d{8})\//)
+    const iso = `${mmddyyyy.slice(4)}-${mmddyyyy.slice(0, 2)}-${mmddyyyy.slice(2, 4)}`
+    expect(iso < PLAYER_CUTOFF, `row ${i} is dated ${iso}, not before ${PLAYER_CUTOFF}`).toBe(true)
+  }
+
+  // A pinch-hit sheet is a SUBSET of his games, and a facet that quietly kept
+  // everything would be invisible otherwise: his Home door alone holds more.
+  await page.keyboard.press('Escape')
+  const home = card.getByRole('button', { name: /^Home: / })
+  await home.click()
+  const homeSheet = page.getByRole('dialog', { name: /at home/ })
+  await expect
+    .poll(async () => (await homeSheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
+    .toBe(true)
+  expect(await homeSheet.locator('.boxline:not(.boxline--skel)').count()).toBeGreaterThan(n)
 })

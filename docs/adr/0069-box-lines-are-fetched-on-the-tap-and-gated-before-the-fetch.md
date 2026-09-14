@@ -493,3 +493,123 @@ one has no row, and a facet still cannot reach around either — `keep` runs las
 where it always did, and this facet does not even use it. Pinned by four new
 cases in `test/boxlines-rows.test.js`, including that a split still tagged `P`
 is dropped by the default AND by the postseason facet.
+## Amendment (2026-09-14, issues #999, #1001, #1002): the calendar, the bench, and four headings
+
+Sixteen more doors, and not one of them needed a new data path: eight months
+(#999), seven weekdays (#1001) and a hitter's pinch hitting (#1002). What they
+did need was a card that can hold twenty doors, which the flat list could not.
+
+### Two facets MLB publishes, verified before they were built
+
+The 2026-09-03 correction above found `sitCodes=ven` returning nothing and
+warned that `byMonth` and `byDayOfWeek` answer for one season only. Both of the
+remaining calendar codes were therefore checked the same way before a line was
+written (2026-09-14, personId 592885 hitting and 656849 pitching):
+
+| source | result |
+| --- | --- |
+| `careerStatSplits&sitCodes=3,4,5,6,7,8,9,10` | one career row per month, both groups, March through October |
+| `careerStatSplits&sitCodes=dmo,dtu,dwe,dth,dfr,dsa,dsu` | one career row per weekday, both groups |
+| `careerStatSplits&sitCodes=pH` | one career row; `ph` lower-case returns nothing |
+
+**And, for once, the door and the rows agree exactly.** The home/road doors
+carry a margin nothing can reconcile; the calendar doors carry none. Measured
+over three careers, MLB's aggregate matched the joined rows for every month and
+every weekday, with no exceptions — Yelich 21/221/272/292/290/326/287/16 by
+month and 277/198/267/257/161/277/288 by weekday, door and rows, and the same on
+Peterson and Vazquez. That is not luck: a month and a weekday are facts about
+the date, and the date is the one field the game log and the schedule record
+cannot disagree about. A relocated home game moves a park; it does not move a
+Tuesday.
+
+### The pinch-hit facet costs nothing, and the issue said it would cost the most
+
+#1002 was the expensive one on this ADR's own framework map: "pinch-hit
+appearances need a boxscore per game row, so they belong in the nightly
+precompute or behind a cap." The issue specified that literally — one
+`/game/{gamePk}/boxscore` per candidate, `battingOrder` and
+`gameStatus.isSubstitute`, capped at 40 newest-first with a "Show older", a
+memo per gamePk, and a loading hint that counts the boxscores out loud.
+
+None of it was built, because the answer is already in hand. **The hitting game
+log carries `positionsPlayed`** — the positions he played that day, in the order
+he played them — on every split, and `fields=` keeps it. `['PH']` is a pinch
+hitter who was then lifted, `['PH', 'LF']` one who stayed in the field, `['DH',
+'LF']` a start. So the facet is a `keep` over the join every other door on the
+card already pays for: no cap, no paging, no per-game fetch, nothing to memoize.
+It costs 3 KB on a 19 KB season log (Yelich 2024), asked for on every hitting
+join rather than only the pinch-hit one, because all of a card's doors share ONE
+join and a second differently-shaped join would cost far more than the 16%.
+
+Checked against MLB's own `pH` aggregate: Vazquez 55 rows against a door of 55,
+Castro 44, Yelich 46 against 45. The one extra is a game he was announced for
+and never completed a plate appearance in — MLB's aggregate counts appearances,
+these rows count entrances. Over three careers `PH` never appeared anywhere but
+first in the list, so reading `[0]` and asking `includes` are the same question
+today; `[0]` is the one that stays right if a fourth career disagrees.
+
+### The card grew four headings, and takes their order from the registry
+
+Seven doors needed no headings. Twenty do: a flat list of twenty ledger rows is
+a wall, and the four groups were already in `cardFacets.js` as comments —
+**Where**, **When**, **How he got in**, **When it counted** — doing nothing for
+the reader. They are now `SECTIONS`, and the card groups by that list rather
+than by the registry's order, so a door added in the wrong place files itself
+correctly instead of silently reordering the card. A heading with no door under
+it does not render.
+
+### The weekdays are chips, because a weekday split is a comparison
+
+The other nineteen doors are ledger rows carrying the whole career line. The
+seven weekdays are a compact grid instead. A weekday split is not seven separate
+questions; it is one comparison — is he worse on getaway day? — and a comparison
+wants its answers side by side, where seven stacked near-identical sentences
+bury the differences. The grid is `auto-fit` on a 92px floor, so the track count
+follows the width (three across a phone, seven across a desktop column) and no
+chip falls below the width its longest line needs. Not a scrolling row: that
+would hide the last weekdays behind an edge, which is the one thing a comparison
+cannot survive.
+
+A chip prints `chipLine` — games and one rate stat — where a ledger row prints
+`careerSplitLine`. Both read the SAME career stat object, so a chip and the
+sheet it opens cannot disagree about the career, only about how much of it they
+have room to say. `label` therefore stops being the chip's visible text and goes
+on being the one thing it was always for: the sheet's headline, verbatim, and
+the button's accessible name. The chip keeps the house chevron and drops the
+words "See all" — seven of them on one row is noise where one on a line is a
+plain promise.
+
+### What did not change
+
+The gate, again. `keep` runs last where it always did; none of these sixteen
+doors touches the fetch, the cutoff or the game types; and
+`test/boxlines-rows.test.js` pins that a pinch-hit appearance in a game on the
+cutoff day still has no row. The registry's own test file grew the case that
+matters for a family built from a table rather than written out fifteen times:
+each month door's `sitCode` must name the same month its facet does, so an entry
+that asks MLB about August and filters rows for September is a failure rather
+than a quiet wrong answer.
+
+### #998 and #1003's hitter half are still open, and one of them got cheaper
+
+Neither shipped here. Both want a door whose figures do not exist until the
+sheet's fetch has run — `ven` returns nothing, and there is no started/sub
+situation code for a hitter — so both are the same open design question: what a
+door with no figures on it should look like. That is a decision, not a registry
+entry.
+
+**But #1003's hitter half no longer needs a boxscore either.** The schedule
+endpoint takes `hydrate=lineups`, which returns the nine starters a side, and
+with `fields=…,lineups,homePlayers,awayPlayers,id` it trims to bare ids: +34 KB
+on a 53 KB call for 120 games, on the schedule call the join already makes.
+Measured 2026-09-14 across six seasons of a club's schedule, **every game that
+was actually played carries a full eighteen-name lineup** back to 2008; the only
+games missing one are the games with no score, which the gate already drops. So
+"did this hitter start?" is answerable for free, and the 40-row cap and paging
+that issue specifies are as unnecessary as #1002's were.
+
+`positionsPlayed` alone will NOT answer it, and this is the trap to record: a
+hitter's first position is `PH`/`PR` only when he entered as a pinch hitter or
+runner. A pure defensive replacement enters and his list reads `['C']`, exactly
+like a start. Measured over three careers, that is 63 games wrong on Vazquez, 25
+on Castro, 3 on Yelich. Use the lineups.

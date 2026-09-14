@@ -286,6 +286,88 @@ test('the default is regular season only, and a facet may widen the GAME TYPES o
   )
 })
 
+// THE POSITIONS HE PLAYED (#1002). The hitting game log carries
+// `positionsPlayed`, ordered by when he played each one, and the row carries it
+// through so the pinch-hit facet can read it. A pitcher's log does not have it,
+// and a row that claimed ['LF'] for a pitcher would put him in the outfield.
+test('a hitter row carries the positions he played, in order', () => {
+  const rows = boxLineRows({
+    splits: [
+      {
+        date: '2024-07-04',
+        gameType: 'R',
+        team: { id: 121 },
+        opponent: { id: 158 },
+        game: { gamePk: 1, gameNumber: 1 },
+        positionsPlayed: [{ code: '11', abbreviation: 'PH' }, { code: '7', abbreviation: 'LF' }],
+        stat: { hits: 1, atBats: 2 },
+      },
+    ],
+    schedule: [sched(1, '2024-07-04')],
+    group: 'hitting',
+  })
+  assert.equal(rows.length, 1)
+  assert.deepEqual(rows[0].positions, ['PH', 'LF'])
+  // And `started` stays null: the hitting log has no gamesStarted, and a
+  // position list is not one.
+  assert.equal(rows[0].started, null)
+})
+
+test('a hitter row with no positions is an empty list, never null or a crash', () => {
+  // MiLB feeds drop fields MLB's carry (src/CLAUDE.md's degradation rule), and
+  // a null here would throw in the facet rather than keep nothing.
+  const rows = boxLineRows({
+    splits: [
+      {
+        date: '2024-07-04',
+        gameType: 'R',
+        team: { id: 121 },
+        opponent: { id: 158 },
+        game: { gamePk: 1, gameNumber: 1 },
+        stat: { hits: 1, atBats: 2 },
+      },
+    ],
+    schedule: [sched(1, '2024-07-04')],
+    group: 'hitting',
+  })
+  assert.deepEqual(rows[0].positions, [])
+})
+
+test('a pitcher row carries no positions at all', () => {
+  const rows = boxLineRows({
+    splits: [split('2024-07-04', 1)],
+    schedule: [sched(1, '2024-07-04')],
+    group: 'pitching',
+  })
+  assert.equal(rows[0].positions, null)
+})
+
+test('the pinch-hit facet cannot resurrect a game the gate dropped', () => {
+  // The same invariant the other facets are held to, for the one facet whose
+  // rows MLB publishes no list of. A pinch-hit appearance in a game on the
+  // cutoff day is still a game on the cutoff day.
+  const hitterSplit = (date, gamePk) => ({
+    date,
+    gameType: 'R',
+    team: { id: 121 },
+    opponent: { id: 158 },
+    game: { gamePk, gameNumber: 1 },
+    positionsPlayed: [{ abbreviation: 'PH' }],
+    stat: { hits: 1, atBats: 1 },
+  })
+  const rows = boxLineRows({
+    splits: [hitterSplit('2024-09-28', 1), hitterSplit('2024-09-29', 2)],
+    schedule: [sched(1, '2024-09-28'), sched(2, '2024-09-29')],
+    group: 'hitting',
+    cutoff: CUTOFF,
+    keep: (r) => r.positions?.[0] === 'PH',
+  })
+  assert.deepEqual(
+    rows.map((r) => r.gamePk),
+    [1],
+  )
+})
+
 test('matchingSplits keeps the asked-for game types and no others', () => {
   const splits = [
     split('2024-09-20', 1),
