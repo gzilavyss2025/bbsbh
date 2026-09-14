@@ -1,0 +1,142 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "The merged page"
+    },
+    {
+      "id": "page-2",
+      "name": "Superseded — B and C"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "page": "page-1",
+      "x": 0,
+      "y": 0,
+      "w": 1272,
+      "h": 1660,
+      "title": "MiLB — desktop (High-A, October)"
+    },
+    {
+      "file": "MilbPhone.dc.html",
+      "page": "page-1",
+      "x": 1400,
+      "y": 0,
+      "w": 390,
+      "h": 1740,
+      "title": "MiLB — phone"
+    },
+    {
+      "file": "MlbDesktop.dc.html",
+      "page": "page-1",
+      "x": 1920,
+      "y": 0,
+      "w": 1272,
+      "h": 1590,
+      "title": "MLB — desktop (December)"
+    },
+    {
+      "file": "MlbPhone.dc.html",
+      "page": "page-1",
+      "x": 3320,
+      "y": 0,
+      "w": 390,
+      "h": 1690,
+      "title": "MLB — phone"
+    },
+    {
+      "file": "Review.dc.html",
+      "page": "page-1",
+      "x": 3840,
+      "y": 0,
+      "w": 860,
+      "h": 2000,
+      "title": "What the two reviews changed"
+    },
+    {
+      "file": "BRecord.dc.html",
+      "page": "page-2",
+      "x": 0,
+      "y": 0,
+      "w": 1272,
+      "h": 1420,
+      "title": "B / Season record — desktop"
+    },
+    {
+      "file": "BMobile.dc.html",
+      "page": "page-2",
+      "x": 1400,
+      "y": 0,
+      "w": 390,
+      "h": 1620,
+      "title": "B / Season record — phone"
+    },
+    {
+      "file": "CNotebook.dc.html",
+      "page": "page-2",
+      "x": 1920,
+      "y": 0,
+      "w": 1272,
+      "h": 1180,
+      "title": "C / Season notebook — desktop"
+    },
+    {
+      "file": "CMobile.dc.html",
+      "page": "page-2",
+      "x": 3320,
+      "y": 0,
+      "w": 390,
+      "h": 1300,
+      "title": "C / Season notebook — phone"
+    },
+    {
+      "file": "Changes.dc.html",
+      "page": "page-2",
+      "x": 3840,
+      "y": 0,
+      "w": 760,
+      "h": 1560,
+      "title": "First pass — notes on A / B / C"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "lead-milb",
+      "page": "page-1",
+      "x": -360,
+      "y": 0,
+      "w": 300,
+      "text": "THE MINOR LEVELS\n\nNo games, and almost no news, from September to April.\n\nThe page leads with a sealed game that carries its own reason. Players who moved up runs second."
+    },
+    {
+      "id": "lead-mlb",
+      "page": "page-1",
+      "x": 1920,
+      "y": -230,
+      "w": 400,
+      "text": "MLB\n\nSame shell, opposite situation: the winter is the busiest news period of the year.\n\nRoster moves lead. The wire already ships in the rail, so this is the smallest build in the study. The game card moves to third."
+    },
+    {
+      "id": "fold-note",
+      "page": "page-1",
+      "x": 1400,
+      "y": -230,
+      "w": 400,
+      "text": "THE FOLD\n\nOn all three original phone boards the primary action sat below 844px.\n\nThe club strip stays where it is today, so the eyebrow and the deck came out instead. Score this game now lands near 650px."
+    },
+    {
+      "id": "superseded",
+      "page": "page-2",
+      "x": -360,
+      "y": 0,
+      "w": 300,
+      "text": "SUPERSEDED\n\nB and C as full pages, kept for reference. Both are single rows on the merged page.\n\nThis is the shape the follow-up work takes if either is built out."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
+}

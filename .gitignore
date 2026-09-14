@@ -101,3 +101,8 @@ undefined/
 # cached. The derived panel and every findings file ARE committed.
 .scratch/service-clock/transactions.json
 .scratch/service-clock/schedule-days.json
+
+# the offseason design canvas's seeded output (2.6 MB of editor payload).
+# Regenerate from the .dc.html artboards + canvas.json — see
+# .scratch/offseason-design/canvas/README.md.
+.scratch/offseason-design/canvas/tally-offseason-home.html

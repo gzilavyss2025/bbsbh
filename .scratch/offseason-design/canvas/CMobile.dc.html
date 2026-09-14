@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=JetBrains+Mono:wght@700&family=Lora:wght@400;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+  <style>
+    :root {
+      --f-disp:"Barlow Condensed","Arial Narrow",sans-serif;
+      --f-body:"Source Sans 3",system-ui,sans-serif;
+      --f-mono:"JetBrains Mono",ui-monospace,monospace;
+      --f-read:"Lora",Georgia,serif;
+      --shadow-card:0 1px 2px rgba(22,34,47,0.08),0 4px 12px rgba(22,34,47,0.06);
+      --inset-cell:inset 0 1px 2px rgba(22,34,47,0.10);
+    }
+    body { margin:0; font-family:var(--f-body); background:#F6EFDC; color:#1B2A3A; }
+    a { color:#2F6E4F; text-decoration:none; }
+    a:hover { color:#255740; }
+    .lbl { font-family:var(--f-disp); font-size:12px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; }
+    .lvl { min-height:34px; flex-grow:1; display:flex; align-items:center; justify-content:center;
+           font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.09em;
+           text-transform:uppercase; color:#3C4A5A; border-right:1px solid #CBC1A7; }
+    .lvl.on { color:#FBF6E9; background:#1B2A3A; border-radius:6px; border-right-color:transparent; }
+    .num { font-family:var(--f-mono); font-weight:700; letter-spacing:0.01em;
+           font-variant-numeric:tabular-nums; color:#16222F; }
+    .nrow { display:grid; grid-template-columns:1fr 54px; align-items:center; gap:10px;
+            padding:9px 0; border-bottom:1px solid #EDE6D1; }
+  </style>
+</helmet>
+
+<div style="width:390px; box-sizing:border-box; padding:14px 16px 32px; background:#F6EFDC;">
+
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding-bottom:8px;">
+    <div style="font-family:var(--f-disp); font-size:24px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Tally</div>
+    <div style="display:flex; align-items:center; gap:12px; font-family:var(--f-disp); font-size:12px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#3C4A5A;">
+      <div>Search</div>
+      <div>Log</div>
+      <div>Menu</div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; margin-bottom:12px;">
+    <div class="lvl">MLB</div>
+    <div class="lvl">AAA</div>
+    <div class="lvl">AA</div>
+    <div class="lvl on">A+</div>
+    <div class="lvl" style="border-right:none;">A</div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:center; gap:8px; padding-bottom:10px; border-bottom:1px solid #CBC1A7;">
+    <div style="min-width:30px; min-height:30px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; box-shadow:var(--shadow-card); font-size:18px; color:#1B2A3A;">&lsaquo;</div>
+    <div style="font-size:14px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:#1B2A3A;">Mon, Oct 12, 2026</div>
+    <div style="min-width:30px; min-height:30px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; box-shadow:var(--shadow-card); font-size:18px; color:#1B2A3A;">&rsaquo;</div>
+  </div>
+
+  <div style="margin:18px 0 14px;">
+    <div class="lbl" style="color:#6B6558;">High-A &middot; Season complete</div>
+    <h1 style="margin:6px 0 0; font-family:var(--f-disp); font-size:32px; font-weight:700; line-height:0.9; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">The 2026 season is in the books</h1>
+  </div>
+
+  <div style="border:1px solid #CBC1A7; border-radius:10px; background:#FFFDF6; box-shadow:var(--shadow-card); overflow:hidden;">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 14px; background:#F3ECD8; border-bottom:1px solid #CBC1A7;">
+      <div class="lbl" style="font-size:10px; color:#6B6558;">Season notebook</div>
+      <div class="lbl" style="font-size:10px; color:#6B6558;">Note 01 of 12</div>
+    </div>
+
+    <div style="padding:16px 14px;">
+      <h2 style="margin:0; font-family:var(--f-disp); font-size:28px; font-weight:700; line-height:0.95; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">The patient hitters</h2>
+
+      <div style="display:flex; align-items:flex-end; gap:14px; margin:14px 0; padding-bottom:14px; border-bottom:1px solid #CBC1A7;">
+        <div class="num" style="font-size:52px; line-height:0.85; letter-spacing:-0.045em;">18.0%</div>
+        <div style="padding-bottom:4px;">
+          <div class="num" style="font-size:14px; color:#3C4A5A;">72 BB / 400 PA</div>
+          <div style="font-size:12px; color:#6B6558; margin-top:2px;">League rate: 9.8%</div>
+        </div>
+      </div>
+
+      <p style="margin:0; font-family:var(--f-read); font-size:15px; line-height:1.5; color:#1B2A3A; text-wrap:pretty;">Who walked in at least 15 per cent of their plate appearances? Nine hitters cleared it with 250 trips or more.</p>
+
+      <div style="margin-top:14px;">
+        <div class="nrow" style="padding-top:0; border-bottom:1px solid #CBC1A7;">
+          <div class="lbl" style="font-size:10px; color:#6B6558;">Hitter</div>
+          <div class="lbl" style="font-size:10px; color:#6B6558; text-align:right;">BB%</div>
+        </div>
+        <div class="nrow">
+          <div style="font-size:15px;"><a href="#">Andrew Fischer</a> <span style="color:#6B6558; font-size:13px;">&middot; WIS</span></div>
+          <div class="num" style="font-size:15px; text-align:right;">18.0</div>
+        </div>
+        <div class="nrow">
+          <div style="font-size:15px;"><a href="#">Marcus Vela</a> <span style="color:#6B6558; font-size:13px;">&middot; QC</span></div>
+          <div class="num" style="font-size:15px; text-align:right;">17.2</div>
+        </div>
+        <div class="nrow" style="border-bottom:none;">
+          <div style="font-size:15px;"><a href="#">Eli Sandoval</a> <span style="color:#6B6558; font-size:13px;">&middot; LC</span></div>
+          <div class="num" style="font-size:15px; text-align:right;">16.4</div>
+        </div>
+      </div>
+
+      <a href="#" style="display:inline-block; margin-top:12px; font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">All nine hitters &rarr;</a>
+    </div>
+
+    <div style="display:flex; align-items:stretch; gap:8px; padding:10px 14px; background:#F3ECD8; border-top:1px solid #CBC1A7;">
+      <div style="flex-grow:1; min-height:44px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; font-family:var(--f-disp); font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:#3C4A5A;">&lsaquo; Previous</div>
+      <div style="flex-grow:1; min-height:44px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; font-family:var(--f-disp); font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:#16222F;">Next &rsaquo;</div>
+    </div>
+  </div>
+
+  <div style="margin-top:10px; text-align:center;">
+    <a href="#" style="font-family:var(--f-disp); font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">Browse all notes</a>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:12px; margin-top:16px; padding:12px 16px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+    <div style="width:40px; height:40px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#F3ECD8; box-shadow:var(--inset-cell);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2A3A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13"></path>
+        <path d="M4 19h16"></path>
+        <path d="M9 9h6M9 13h4"></path>
+      </svg>
+    </div>
+    <div style="min-width:0;">
+      <div style="font-family:var(--f-disp); font-size:19px; font-weight:700; line-height:1.05; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Put pencil to paper</div>
+      <div style="margin-top:2px; font-size:13px; color:#3C4A5A;">A sealed game from the archive.</div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:12px; margin-top:10px; padding:12px 16px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+    <div style="width:40px; height:40px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#F3ECD8; box-shadow:var(--inset-cell);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2A3A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="8" r="3.5"></circle>
+        <path d="M5 20a7 7 0 0 1 14 0"></path>
+      </svg>
+    </div>
+    <div style="min-width:0;">
+      <div style="font-family:var(--f-disp); font-size:19px; font-weight:700; line-height:1.05; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Season record</div>
+      <div style="margin-top:2px; font-size:13px; color:#3C4A5A;">Standings and results, on its own page.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:22px; padding-top:12px; border-top:1px solid #DED6C0; font-size:13px; color:#6B6558; text-wrap:pretty;">
+    Illustrative names and figures. The note never changes while you are reading it.
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

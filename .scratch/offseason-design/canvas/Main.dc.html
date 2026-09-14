@@ -1,0 +1,266 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Big+Shoulders+Display:wght@900&family=JetBrains+Mono:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap">
+  <style>
+    :root {
+      --f-disp:"Barlow Condensed","Arial Narrow",sans-serif;
+      --f-body:"Source Sans 3",system-ui,sans-serif;
+      --f-mono:"JetBrains Mono",ui-monospace,monospace;
+      --shadow-card:0 1px 2px rgba(22,34,47,0.08),0 4px 12px rgba(22,34,47,0.06);
+      --inset-cell:inset 0 1px 2px rgba(22,34,47,0.10);
+      --seal-texture:repeating-linear-gradient(-45deg,#B5824A 0px,#B5824A 6px,#A9743C 6px,#A9743C 8px);
+    }
+    body { margin:0; font-family:var(--f-body); background:#F6EFDC; color:#1B2A3A; }
+    a { color:#2F6E4F; text-decoration:none; }
+    a:hover { color:#255740; }
+    .lbl { font-family:var(--f-disp); font-size:12px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; }
+    .lvl { min-height:34px; padding:0 14px; display:flex; align-items:center; justify-content:center;
+           font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.09em;
+           text-transform:uppercase; color:#3C4A5A; border-right:1px solid #CBC1A7; }
+    .lvl.on { color:#FBF6E9; background:#1B2A3A; border-radius:6px; border-right-color:transparent; }
+    .tile { width:50px; height:38px; display:flex; align-items:center; justify-content:center;
+            border:1px solid #CBC1A7; border-radius:8px; background:#F3ECD8;
+            box-shadow:var(--inset-cell); font-family:var(--f-disp); font-size:13px;
+            font-weight:700; letter-spacing:0.05em; color:#3C4A5A; }
+    .chip { min-height:36px; padding:0 14px; display:flex; align-items:center; justify-content:center;
+            border:1px solid #CBC1A7; border-radius:999px; background:#F3ECD8; color:#16222F;
+            font-family:var(--f-disp); font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; }
+    .chip.on { background:#1B2A3A; color:#FBF6E9; border-color:#1B2A3A; }
+    .num { font-family:var(--f-mono); font-weight:700; letter-spacing:0.01em; font-variant-numeric:tabular-nums; color:#16222F; }
+    .wtw { display:grid; grid-template-columns:1fr 120px 92px; align-items:center; gap:12px;
+           padding:9px 0; border-bottom:1px solid #EDE6D1; }
+  </style>
+</helmet>
+
+<div style="width:1272px; box-sizing:border-box; padding:18px 16px 40px; background:#F6EFDC;">
+
+  <!-- SHELL: identical at every level -->
+  <div style="display:flex; align-items:center; gap:16px; padding-bottom:10px;">
+    <div style="font-family:var(--f-disp); font-size:26px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Tally</div>
+    <div style="display:flex; align-items:center;">
+      <div class="lvl">MLB</div>
+      <div class="lvl">AAA</div>
+      <div class="lvl">AA</div>
+      <div class="lvl on">A+</div>
+      <div class="lvl" style="border-right:none;">A</div>
+    </div>
+    <div style="flex-grow:1;"></div>
+    <div style="display:flex; align-items:center; gap:14px; font-family:var(--f-disp); font-size:13px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#3C4A5A;">
+      <div>Search</div>
+      <div>Log</div>
+      <div>Menu</div>
+    </div>
+  </div>
+
+  <!-- CLUB STRIP: shell position, between the level tabs and the date banner -->
+  <div style="margin:10px 0 12px;">
+    <div class="lbl" style="color:#6B6558; margin-bottom:8px;">Browse High-A clubs</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <div class="tile">WIS</div>
+      <div class="tile">BEL</div>
+      <div class="tile">CR</div>
+      <div class="tile">SB</div>
+      <div class="tile">QC</div>
+      <div class="tile">PEO</div>
+      <div class="tile">WM</div>
+      <div class="tile">LAN</div>
+      <div class="tile">DAY</div>
+      <div class="tile">GL</div>
+      <div class="tile">FW</div>
+      <div class="tile">LC</div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:10px; border-bottom:1px solid #CBC1A7;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div style="min-width:30px; min-height:30px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; box-shadow:var(--shadow-card); font-size:18px; color:#1B2A3A;">&lsaquo;</div>
+      <div style="font-size:14px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:#1B2A3A;">Mon, Oct 12, 2026</div>
+      <div style="min-width:30px; min-height:30px; display:flex; align-items:center; justify-content:center; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; box-shadow:var(--shadow-card); font-size:18px; color:#1B2A3A;">&rsaquo;</div>
+    </div>
+    <div class="lbl" style="min-height:20px; padding:3px 9px; border:1px solid #CBC1A7; border-radius:6px; background:#FBF6E9; color:#1B2A3A; font-size:11px;">Browse the 2026 season</div>
+  </div>
+
+  <!-- HEAD -->
+  <div style="margin:22px 0 18px;">
+    <h1 style="margin:0; font-family:var(--f-disp); font-size:40px; font-weight:700; line-height:0.9; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">A+ offseason</h1>
+  </div>
+
+  <div style="display:flex; gap:24px; align-items:flex-start;">
+    <div style="flex-grow:1; min-width:0; display:flex; flex-direction:column; gap:20px;">
+
+      <!-- LEAD: the game card, carrying its reason -->
+      <div style="position:relative; display:flex; flex-direction:column; gap:12px; padding:14px 16px; border:1px solid #6E7475; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+
+        <div style="position:relative; overflow:hidden; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); column-gap:12px; row-gap:8px; align-items:center;">
+          <div style="position:absolute; top:50%; left:50%; z-index:0; font-family:'Big Shoulders Display',var(--f-disp); font-weight:900; font-size:158px; line-height:1; color:#B5824A; opacity:0.10; transform:translate(calc(-50% + 2px), calc(-50% - 11px)) skewX(-8deg) rotate(-2deg); pointer-events:none;">@</div>
+          <div style="position:absolute; top:50%; left:50%; z-index:0; font-family:'Big Shoulders Display',var(--f-disp); font-weight:900; font-size:158px; line-height:1; color:#1B2A3A; opacity:0.07; transform:translate(-50%, calc(-50% - 12px)) skewX(-8deg) rotate(-2deg); pointer-events:none;">@</div>
+
+          <div style="position:relative; z-index:1; width:100%; max-width:130px; aspect-ratio:1/1; justify-self:center; display:flex; align-items:center; justify-content:center; padding:2px; border:1px solid #CBC1A7; border-radius:10px; background:#F3ECD8; box-shadow:var(--inset-cell); font-family:var(--f-disp); font-size:34px; font-weight:700; letter-spacing:0.05em; color:#1B2A3A;">WIS</div>
+          <div style="position:relative; z-index:1; width:100%; max-width:130px; aspect-ratio:1/1; justify-self:center; display:flex; align-items:center; justify-content:center; padding:2px; border:1px solid #CBC1A7; border-radius:10px; background:#F3ECD8; box-shadow:var(--inset-cell); font-family:var(--f-disp); font-size:34px; font-weight:700; letter-spacing:0.05em; color:#1B2A3A;">LAN</div>
+
+          <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; line-height:1.15;">
+            <div style="font-size:15px; color:#3C4A5A;">Wisconsin</div>
+            <div style="font-family:var(--f-disp); font-size:20px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Timber Rattlers</div>
+            <div class="lbl" style="margin-top:3px; font-size:10px; color:#6B6558;">Brewers &middot; 2026</div>
+          </div>
+          <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; line-height:1.15;">
+            <div style="font-size:15px; color:#3C4A5A;">Lansing</div>
+            <div style="font-family:var(--f-disp); font-size:20px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Lugnuts</div>
+            <div class="lbl" style="margin-top:3px; font-size:10px; color:#6B6558;">Athletics &middot; 2026</div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:center; min-height:40px; margin:0 -16px; padding:0 16px; background:var(--seal-texture); color:#1E1405;">
+          <div class="lbl" style="font-size:13px;">Score sealed</div>
+        </div>
+
+        <!-- the reason: a fact about careers, never about this game -->
+        <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-left:2px solid #B5824A; background:#F3ECD8;">
+          <div style="font-size:15px; line-height:1.4; color:#1B2A3A; text-wrap:pretty;"><span class="num" style="font-size:15px;">7</span> players in this game reached the majors.</div>
+        </div>
+
+        <div style="display:flex; align-items:baseline; gap:8px; font-size:13px; color:#6B6558;">
+          <span class="num" style="font-size:13px; color:#3C4A5A;">TUE JUN 16, 2026</span>
+          <span>&middot;</span>
+          <span>Jackson Field</span>
+          <span>&middot;</span>
+          <span style="color:#2F6E4F; font-weight:600;">Lineups posted</span>
+        </div>
+
+        <div style="min-height:48px; display:flex; align-items:center; justify-content:center; border-radius:6px; background:#1B2A3A; color:#FBF6E9; font-family:var(--f-disp); font-size:17px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">Score this game</div>
+
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div class="lbl" style="font-size:11px; color:#6B6558; margin-right:2px;">Another game</div>
+          <div class="chip on">Any</div>
+          <div class="chip">My clubs</div>
+          <div class="chip">Ranked prospect</div>
+          <div class="chip">Reached the majors</div>
+        </div>
+      </div>
+
+      <!-- SECOND: the thing that is true of THIS level, right now -->
+      <div>
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px;">
+          <div style="font-family:var(--f-disp); font-size:26px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Players who moved up</div>
+          <div style="font-size:14px; color:#6B6558;">Appeared at High-A in 2026</div>
+        </div>
+        <div style="padding:4px 16px 12px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+          <div class="wtw" style="border-bottom:1px solid #CBC1A7;">
+            <div class="lbl" style="font-size:10px; color:#6B6558;">Player</div>
+            <div class="lbl" style="font-size:10px; color:#6B6558;">Finished at</div>
+            <div class="lbl" style="font-size:10px; color:#6B6558; text-align:right;">Org</div>
+          </div>
+          <div class="wtw">
+            <div style="font-size:15px;"><a href="#">Caden Bodine</a> <span style="color:#6B6558; font-size:13px;">&middot; C &middot; age 22</span></div>
+            <div class="num" style="font-size:14px;">A &rarr; AAA</div>
+            <div class="lbl" style="font-size:11px; color:#3C4A5A; text-align:right;">Rays</div>
+          </div>
+          <div class="wtw">
+            <div style="font-size:15px;"><a href="#">Cam Cannarella</a> <span style="color:#6B6558; font-size:13px;">&middot; CF &middot; age 22</span></div>
+            <div class="num" style="font-size:14px;">A+ &rarr; AAA</div>
+            <div class="lbl" style="font-size:11px; color:#3C4A5A; text-align:right;">Marlins</div>
+          </div>
+          <div class="wtw" style="border-bottom:none;">
+            <div style="font-size:15px;"><a href="#">Luke Pelzer</a> <span style="color:#6B6558; font-size:13px;">&middot; RHP &middot; age 23</span></div>
+            <div class="num" style="font-size:14px;">A+ &rarr; AA</div>
+            <div class="lbl" style="font-size:11px; color:#3C4A5A; text-align:right;">Royals</div>
+          </div>
+          <div style="margin-top:10px;">
+            <a href="#" style="font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">All 40 who moved up &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- THIRD: one note -->
+      <div style="border:1px solid #CBC1A7; border-radius:10px; background:#FFFDF6; box-shadow:var(--shadow-card); overflow:hidden;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:9px 18px; background:#F3ECD8; border-bottom:1px solid #CBC1A7;">
+          <div class="lbl" style="font-size:11px; color:#6B6558;">The notebook &middot; 2026 Midwest League</div>
+          <div class="lbl" style="font-size:11px; color:#3C4A5A;">Change league &rsaquo;</div>
+        </div>
+        <div style="display:flex; gap:26px; padding:18px 18px 16px;">
+          <div style="flex-shrink:0; width:196px;">
+            <div class="num" style="font-size:58px; line-height:0.85; letter-spacing:-0.045em;">14</div>
+            <div style="margin-top:6px; font-size:14px; color:#3C4A5A; line-height:1.35;">of <span class="num" style="font-size:14px;">187</span> regulars<br>were 20 or younger</div>
+            <div style="margin-top:10px; padding-top:10px; border-top:1px solid #CBC1A7; font-size:13px; color:#6B6558; line-height:1.4; text-wrap:pretty;">League average age: <span class="num" style="font-size:13px; color:#3C4A5A;">21.9</span>. Regular = 250+ PA in the Midwest League.</div>
+          </div>
+          <div style="flex-grow:1; min-width:0;">
+            <h2 style="margin:0; font-family:var(--f-disp); font-size:32px; font-weight:700; line-height:0.95; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Youngest regulars</h2>
+            <p style="margin:8px 0 0; font-size:15px; line-height:1.5; color:#3C4A5A; max-width:520px; text-wrap:pretty;">Age on June 30, against the league average for the same season. Hitters only.</p>
+            <div style="margin-top:14px;">
+              <div style="display:grid; grid-template-columns:1fr 64px 76px; gap:12px; padding:8px 0; border-bottom:1px solid #CBC1A7;">
+                <div class="lbl" style="font-size:10px; color:#6B6558;">Hitter</div>
+                <div class="lbl" style="font-size:10px; color:#6B6558; text-align:right;">Age</div>
+                <div class="lbl" style="font-size:10px; color:#6B6558; text-align:right;">vs level</div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 64px 76px; gap:12px; padding:9px 0; border-bottom:1px solid #EDE6D1;">
+                <div style="font-size:15px;"><a href="#">Jes&uacute;s Made</a> <span style="color:#6B6558; font-size:13px;">&middot; Brewers</span></div>
+                <div class="num" style="font-size:15px; text-align:right;">19.2</div>
+                <div class="num" style="font-size:15px; text-align:right; color:#2F6E4F;">&minus;2.7</div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 64px 76px; gap:12px; padding:9px 0; border-bottom:1px solid #EDE6D1;">
+                <div style="font-size:15px;"><a href="#">Elian Pe&ntilde;a</a> <span style="color:#6B6558; font-size:13px;">&middot; Mets</span></div>
+                <div class="num" style="font-size:15px; text-align:right;">19.8</div>
+                <div class="num" style="font-size:15px; text-align:right; color:#2F6E4F;">&minus;2.1</div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 64px 76px; gap:12px; padding:9px 0;">
+                <div style="font-size:15px;"><a href="#">Theo Gillen</a> <span style="color:#6B6558; font-size:13px;">&middot; Rays</span></div>
+                <div class="num" style="font-size:15px; text-align:right;">20.1</div>
+                <div class="num" style="font-size:15px; text-align:right; color:#2F6E4F;">&minus;1.8</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:18px; margin-top:12px;">
+              <a href="#" style="font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;">All fourteen &rarr;</a>
+              <a href="#" style="font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:#3C4A5A;">More from the notebook &rsaquo;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOURTH: the record, one row -->
+      <div style="display:flex; align-items:stretch; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card); overflow:hidden;">
+        <div style="width:72px; flex-shrink:0; background:var(--seal-texture);"></div>
+        <div style="flex-grow:1; min-width:0; display:flex; align-items:center; gap:16px; padding:14px 16px;">
+          <div style="flex-grow:1; min-width:0;">
+            <div style="font-family:var(--f-disp); font-size:22px; font-weight:700; line-height:1.05; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Season record</div>
+            <div style="margin-top:3px; font-size:14px; color:#3C4A5A; text-wrap:pretty;">Final standings, both halves, and every postseason series. <strong style="font-weight:600;">Opening this shows results.</strong></div>
+          </div>
+          <div class="lbl" style="flex-shrink:0; min-height:44px; padding:0 18px; display:flex; align-items:center; border:1px solid #CBC1A7; border-radius:6px; background:#F3ECD8; color:#16222F; font-size:14px;">Open &rarr;</div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px; padding-top:14px; border-top:1px solid #DED6C0;">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Next season</div>
+        <div style="font-size:15px; color:#1B2A3A;">Wisconsin opens <span class="num" style="font-size:15px;">April 3</span> at Peoria.</div>
+      </div>
+    </div>
+
+    <div style="flex-shrink:0; width:288px; display:flex; flex-direction:column; gap:14px;">
+      <div style="padding:14px 16px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9; box-shadow:var(--shadow-card);">
+        <div class="lbl" style="font-size:13px; color:#16222F;">Roster wire</div>
+        <div style="margin-top:8px; font-size:14px; color:#3C4A5A; line-height:1.45; text-wrap:pretty;">The wire is quiet at High-A in winter. The existing 48-hour rule drops the rail when it is.</div>
+      </div>
+      <div style="padding:14px 16px; border:1px solid #CBC1A7; border-radius:10px; background:#F3ECD8;">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Dates ahead</div>
+        <div style="margin-top:8px; display:flex; flex-direction:column; gap:7px; font-size:14px; color:#1B2A3A;">
+          <div><span class="num" style="font-size:13px; color:#3C4A5A;">NOV 6</span> &middot; Minor-league free agency</div>
+          <div><span class="num" style="font-size:13px; color:#3C4A5A;">NOV 18</span> &middot; 40-man roster deadline</div>
+          <div><span class="num" style="font-size:13px; color:#3C4A5A;">DEC 10</span> &middot; Rule 5 draft</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:26px; padding-top:14px; border-top:1px solid #DED6C0; font-size:13px; color:#6B6558; text-wrap:pretty;">
+    Illustrative figures. Player names and level paths are real rows from <span class="num" style="font-size:12px;">minors-leaders.json</span>. Ages, counts and dates are placeholders. Club marks stand in as paper tiles.
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

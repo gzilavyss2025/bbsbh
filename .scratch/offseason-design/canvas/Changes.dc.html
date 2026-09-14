@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=JetBrains+Mono:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap">
+  <style>
+    :root {
+      --f-disp:"Barlow Condensed","Arial Narrow",sans-serif;
+      --f-body:"Source Sans 3",system-ui,sans-serif;
+      --f-mono:"JetBrains Mono",ui-monospace,monospace;
+      --shadow-card:0 1px 2px rgba(22,34,47,0.08),0 4px 12px rgba(22,34,47,0.06);
+    }
+    body { margin:0; font-family:var(--f-body); background:#F6EFDC; color:#1B2A3A; }
+    a { color:#2F6E4F; text-decoration:none; }
+    a:hover { color:#255740; }
+    .lbl { font-family:var(--f-disp); font-size:12px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; }
+    .chg { display:grid; grid-template-columns:30px 1fr; gap:14px; padding:14px 0; border-bottom:1px solid #DED6C0; }
+    .chg-n { font-family:var(--f-mono); font-size:15px; font-weight:700; color:#B5824A; padding-top:1px; }
+    .chg-h { font-family:var(--f-disp); font-size:19px; font-weight:700; line-height:1.1;
+             letter-spacing:0.02em; text-transform:uppercase; color:#16222F; }
+    .chg-b { margin-top:4px; font-size:14px; line-height:1.5; color:#3C4A5A; text-wrap:pretty; }
+  </style>
+</helmet>
+
+<div style="width:760px; box-sizing:border-box; padding:28px 32px 36px; background:#F6EFDC;">
+
+  <div class="lbl" style="color:#6B6558;">Offseason home &middot; What changed</div>
+  <h1 style="margin:6px 0 0; font-family:var(--f-disp); font-size:38px; font-weight:700; line-height:0.92; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Same research, redrawn in the app</h1>
+  <p style="margin:10px 0 0; font-size:15px; line-height:1.5; color:#3C4A5A; text-wrap:pretty;">The concepts, the spoiler contract, the season-state rules and the report thresholds are Codex's and they hold up &mdash; read <span style="font-family:var(--f-mono); font-size:13px;">research.md</span> for the evidence. What follows is what the drawings needed.</p>
+
+  <div style="margin-top:22px; border-top:1px solid #CBC1A7;">
+
+    <div class="chg">
+      <div class="chg-n">01</div>
+      <div>
+        <div class="chg-h">The invitation is a game card, not a button</div>
+        <div class="chg-b">The old hero was a text card with a navy button &mdash; a form control standing where this app's signature object belongs. Now it is a slate game card: two club tiles, the skewed <span style="font-family:var(--f-mono);">@</span> watermark, the meta line, and kraft tape across the place a score would sit. The offseason page reads as the same app rather than a second mode.</div>
+      </div>
+    </div>
+
+    <div class="chg">
+      <div class="chg-n">02</div>
+      <div>
+        <div class="chg-h">You see the game before you accept it</div>
+        <div class="chg-b">&ldquo;Open a random game&rdquo; asked for a blind yes. The card now names Wisconsin at Lansing on June 16, and the primary action is <strong style="font-weight:600;">Score this game</strong>. The randomness moves to a quieter <strong style="font-weight:600;">Deal another</strong>. Same pool, same logic &mdash; a concrete offer instead of a lottery ticket.</div>
+      </div>
+    </div>
+
+    <div class="chg">
+      <div class="chg-n">03</div>
+      <div>
+        <div class="chg-h">Real tokens, real faces</div>
+        <div class="chg-b">The wireframes were Arial and Consolas on flat cream. These carry the shipped palette &mdash; manila <span style="font-family:var(--f-mono); font-size:13px;">#F6EFDC</span>, card <span style="font-family:var(--f-mono); font-size:13px;">#FBF6E9</span>, navy ink, kraft <span style="font-family:var(--f-mono); font-size:13px;">#B5824A</span> &mdash; and all four real faces: Barlow Condensed, Source Sans 3, JetBrains Mono, Lora. Level tabs, club strip and date stepper are copied from the live rules, not approximated.</div>
+      </div>
+    </div>
+
+    <div class="chg">
+      <div class="chg-n">04</div>
+      <div>
+        <div class="chg-h">The tape does the talking</div>
+        <div class="chg-b">Both boards said &ldquo;results open on a separate page&rdquo; in body copy. The kraft seal already means exactly that in this app, so it now sits on the Season record card and across B's invitation. A reader who knows the app knows what is behind it before reading a word.</div>
+      </div>
+    </div>
+
+    <div class="chg">
+      <div class="chg-n">05</div>
+      <div>
+        <div class="chg-h">B shows how a club actually qualifies</div>
+        <div class="chg-b">The research says a half winner qualifies, never the best full-season record &mdash; but the old table showed a plain ranked list, which implies the opposite. Now: Full season / First half / Second half across the top, a half-winner pill on the clubs that got in, and one plain line under the table. The drawn bracket became three sibling cards, because a tree does not survive a phone.</div>
+      </div>
+    </div>
+
+    <div class="chg" style="border-bottom:none;">
+      <div class="chg-n">06</div>
+      <div>
+        <div class="chg-h">C became a page you can actually read</div>
+        <div class="chg-b">One sample line is not a report. The note is now a ruled page: the rate as a large mono figure with its denominator stacked beneath it, the league rate beside it for comparison, and three real rows. Ten seconds to read is the whole reason to come back tomorrow.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:26px; padding:18px 20px; border:1.5px solid #16222F; border-radius:10px; background:#FFFDF6; box-shadow:var(--shadow-card);">
+    <div class="lbl" style="font-size:11px; color:#6B6558;">Recommendation</div>
+    <div style="margin-top:6px; font-family:var(--f-disp); font-size:24px; font-weight:700; line-height:1.05; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Ship A. Fold C in later. Link out for B.</div>
+    <div style="margin-top:8px; font-size:15px; line-height:1.5; color:#3C4A5A; text-wrap:pretty;">A is the only one that ends with a reader scoring a game, which is what the app is for, and it needs the least new data &mdash; a verified game pool and a player pool. C's note becomes one row under the archive card once a few distinct reports exist. B stays a labelled link to MiLB until the half-season and qualification rules are worth building in Tally.</div>
+  </div>
+
+  <div style="margin-top:22px;">
+    <div class="lbl" style="color:#6B6558; margin-bottom:10px;">Four calls that are yours</div>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; gap:12px; padding:12px 14px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9;">
+        <div style="font-family:var(--f-mono); font-size:14px; font-weight:700; color:#B5824A; flex-shrink:0;">1</div>
+        <div style="font-size:14px; line-height:1.45; color:#1B2A3A; text-wrap:pretty;"><strong style="font-weight:600;">A as the default offseason page?</strong> If yes, B and C become follow-ups and nothing else on the slate changes.</div>
+      </div>
+      <div style="display:flex; gap:12px; padding:12px 14px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9;">
+        <div style="font-family:var(--f-mono); font-size:14px; font-weight:700; color:#B5824A; flex-shrink:0;">2</div>
+        <div style="font-size:14px; line-height:1.45; color:#1B2A3A; text-wrap:pretty;"><strong style="font-weight:600;">Does the ledger strip earn its place?</strong> The three counts under the card &mdash; games, clubs, closing date. They prove the archive is deep, but they are the one thing here I would cut first if they read as filler.</div>
+      </div>
+      <div style="display:flex; gap:12px; padding:12px 14px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9;">
+        <div style="font-family:var(--f-mono); font-size:14px; font-weight:700; color:#B5824A; flex-shrink:0;">3</div>
+        <div style="font-size:14px; line-height:1.45; color:#1B2A3A; text-wrap:pretty;"><strong style="font-weight:600;">Link out to MiLB for the season record, or build it?</strong> Linking out ships A in one pass. Building B means validating half-season qualification and the AAA national final first.</div>
+      </div>
+      <div style="display:flex; gap:12px; padding:12px 14px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9;">
+        <div style="font-family:var(--f-mono); font-size:14px; font-weight:700; color:#B5824A; flex-shrink:0;">4</div>
+        <div style="font-size:14px; line-height:1.45; color:#1B2A3A; text-wrap:pretty;"><strong style="font-weight:600;">A reviewed completion flag per league and season?</strong> Codex's recommendation, and I agree: no calendar arithmetic, no inferring a finished season from an empty schedule.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px; padding-top:14px; border-top:1px solid #DED6C0; font-size:13px; line-height:1.5; color:#6B6558; text-wrap:pretty;">
+    Every board is static and every value on them is illustrative. Club marks stand in as paper tiles &mdash; the real ones come from the logo CDN keyed on <span style="font-family:var(--f-mono); font-size:12px;">teamId</span>. Nothing in the app has been changed.
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

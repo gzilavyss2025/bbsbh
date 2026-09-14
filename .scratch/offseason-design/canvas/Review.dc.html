@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=JetBrains+Mono:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap">
+  <style>
+    :root {
+      --f-disp:"Barlow Condensed","Arial Narrow",sans-serif;
+      --f-body:"Source Sans 3",system-ui,sans-serif;
+      --f-mono:"JetBrains Mono",ui-monospace,monospace;
+      --shadow-card:0 1px 2px rgba(22,34,47,0.08),0 4px 12px rgba(22,34,47,0.06);
+    }
+    body { margin:0; font-family:var(--f-body); background:#F6EFDC; color:#1B2A3A; }
+    a { color:#2F6E4F; text-decoration:none; }
+    a:hover { color:#255740; }
+    .lbl { font-family:var(--f-disp); font-size:12px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; }
+    .num { font-family:var(--f-mono); font-weight:700; letter-spacing:0.01em; color:#16222F; }
+    .h2 { font-family:var(--f-disp); font-size:24px; font-weight:700; letter-spacing:0.02em;
+          text-transform:uppercase; color:#16222F; }
+    .row { display:grid; grid-template-columns:150px 1fr; gap:16px; padding:11px 0; border-bottom:1px solid #EDE6D1; }
+    .was { font-size:14px; line-height:1.4; color:#6B6558; text-decoration:line-through; }
+    .now { font-size:14px; line-height:1.4; color:#1B2A3A; }
+  </style>
+</helmet>
+
+<div style="width:860px; box-sizing:border-box; padding:28px 32px 36px; background:#F6EFDC;">
+
+  <div class="lbl" style="color:#6B6558;">Offseason home</div>
+  <h1 style="margin:6px 0 0; font-family:var(--f-disp); font-size:40px; font-weight:700; line-height:0.9; letter-spacing:0.02em; text-transform:uppercase; color:#16222F;">Review notes</h1>
+  <p style="margin:10px 0 0; font-size:15px; line-height:1.5; color:#3C4A5A; max-width:660px;">Two reviewers read concepts A, B and C. One read for hierarchy and wording. One read for whether the numbers were sound. Both reviews are applied on page 1.</p>
+
+  <!-- what changed -->
+  <div style="margin-top:26px;">
+    <div class="h2">What changed</div>
+    <div style="margin-top:10px; border-top:1px solid #CBC1A7;">
+
+      <div class="row" style="padding-top:9px;">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Headline</div>
+        <div>
+          <div class="was">The 2026 season is in the books</div>
+          <div class="now" style="margin-top:3px;"><strong style="font-weight:600;">A+ OFFSEASON.</strong> MLB OFFSEASON at MLB. The head names the level and the state, and stops. The deck that followed it is cut: the level tabs, the date banner and the card below already carry everything it said.</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Ledger strip</div>
+        <div>
+          <div class="was">1,980 games &middot; 30 clubs &middot; SEP 6</div>
+          <div class="now" style="margin-top:3px;"><span class="num" style="font-size:14px;">1,980</span> was 30 clubs &times; 132 scheduled games &divide; 2. It was the schedule multiplied out, not a count of games that exist. Seasons lose games to weather, to seven-inning doubleheaders, and to feeds too thin to score. The strip is cut and no count is shown.</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Phone layout</div>
+        <div class="now">On all three original phone boards the primary action sat below <span class="num" style="font-size:14px;">844px</span>. The club strip stays where it is today, so the eyebrow and the deck came out instead. <strong style="font-weight:600;">Score this game</strong> now lands near <span class="num" style="font-size:14px;">650px</span>, above the fold.</div>
+      </div>
+
+      <div class="row">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Notebook figure</div>
+        <div class="now">The largest number on the note was one player&rsquo;s rate, on a page about nine players. It is now the report&rsquo;s own count over its pool: <span class="num" style="font-size:14px;">14</span> of <span class="num" style="font-size:14px;">187</span>.</div>
+      </div>
+
+      <div class="row">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Which note</div>
+        <div class="now">&ldquo;The patient hitters&rdquo; is replaced by youngest regulars. A 250-PA floor at one level excludes the players who were promoted in June, so the old note selected for players who stayed. Age against the level has no such bias.</div>
+      </div>
+
+      <div class="row">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Standings</div>
+        <div class="now">The table and the bracket come off the home page. The table showed 3 of 6 clubs on a phone, which hid every club below .500. The series counts were set in the same type as W-L and needed a footnote to say they were not scores.</div>
+      </div>
+
+      <div class="row" style="border-bottom:none;">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">Cut</div>
+        <div class="now">&ldquo;A player to meet&rdquo; (a name and a sentence, with no line, age or org). &ldquo;Note 01 of 12&rdquo; (12 notes do not exist). The three-control note footer. &ldquo;Deal another&rdquo;, replaced by filter chips. The padlock glyph on the seal band: the tape already means sealed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- the disagreement -->
+  <div style="margin-top:26px; padding:20px 22px; border:1.5px solid #16222F; border-radius:10px; background:#FFFDF6; box-shadow:var(--shadow-card);">
+    <div class="lbl" style="font-size:11px; color:#6B6558;">The one disagreement</div>
+    <div style="margin-top:6px;" class="h2">What leads the minor-league page</div>
+
+    <div style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:20px; margin-top:12px;">
+      <div>
+        <div class="lbl" style="font-size:10px; color:#6B6558; margin-bottom:5px;">Reviewer 1</div>
+        <div style="font-size:14px; line-height:1.5; color:#3C4A5A;">The game card. It is the only concept that ends with the reader scoring a game, which is what the app is for.</div>
+      </div>
+      <div>
+        <div class="lbl" style="font-size:10px; color:#6B6558; margin-bottom:5px;">Reviewer 2</div>
+        <div style="font-size:14px; line-height:1.5; color:#3C4A5A;">A random game from June is not a reason to open the app in December. A minor-league follower follows players moving between levels.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; padding:14px 16px; border-left:3px solid #B5824A; background:#F3ECD8;">
+      <div class="lbl" style="font-size:10px; color:#6B6558;">Resolved</div>
+      <div style="margin-top:5px; font-size:15px; line-height:1.5; color:#1B2A3A;">The game card leads and carries a reason line: <strong style="font-weight:600;">7 players in this game reached the majors.</strong> That is a fact about careers, not about this game, so it spoils nothing. Players who moved up runs second. Both use data the app already ships: <span class="num" style="font-size:13px;">milb-alumni/</span> records who reached the majors, and <span class="num" style="font-size:13px;">minors-leaders.json</span> carries each player&rsquo;s level path and parent club.</div>
+    </div>
+  </div>
+
+  <!-- the two variants -->
+  <div style="margin-top:26px;">
+    <div class="h2">Two versions</div>
+    <p style="margin:6px 0 14px; font-size:15px; line-height:1.5; color:#3C4A5A; max-width:660px;">Both reviewers reached the same split. At the minor levels there is almost no news in winter, so the page offers a game. At MLB the winter is the busiest news period of the year, so the page reports it.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px;">
+      <div style="padding:16px 18px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9;">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">AAA &middot; AA &middot; A+ &middot; A</div>
+        <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px; font-size:14px; color:#3C4A5A; line-height:1.4;">
+          <div><span class="num" style="font-size:12px; color:#B5824A;">1</span> &nbsp;A sealed game, with its reason</div>
+          <div><span class="num" style="font-size:12px; color:#B5824A;">2</span> &nbsp;Players who moved up</div>
+          <div><span class="num" style="font-size:12px; color:#B5824A;">3</span> &nbsp;One note</div>
+          <div><span class="num" style="font-size:12px; color:#B5824A;">4</span> &nbsp;Season record, one sealed row</div>
+          <div><span class="num" style="font-size:12px; color:#B5824A;">5</span> &nbsp;Next season&rsquo;s opener</div>
+        </div>
+        <div style="margin-top:12px; padding-top:10px; border-top:1px solid #DED6C0; font-size:13px; color:#6B6558; line-height:1.45;">Parent club on every mark, stamped with the season. Three dates ride the rail: minor-league free agency, the 40-man deadline, the Rule 5 draft.</div>
+      </div>
+
+      <div style="padding:16px 18px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9;">
+        <div class="lbl" style="font-size:11px; color:#6B6558;">MLB</div>
+        <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px; font-size:14px; color:#3C4A5A; line-height:1.4;">
+          <div><span class="num" style="font-size:12px; color:#B5824A;">1</span> &nbsp;Roster moves, full width</div>
+          <div><span class="num" style="font-size:12px; color:#B5824A;">2</span> &nbsp;Dated calendar</div>
+          <div><span class="num" style="font-size:12px; color:#B5824A;">3</span> &nbsp;A sealed game, any season</div>
+          <div><span class="num" style="font-size:12px; color:#B5824A;">4</span> &nbsp;One note, record, awards</div>
+        </div>
+        <div style="margin-top:12px; padding-top:10px; border-top:1px solid #DED6C0; font-size:13px; color:#6B6558; line-height:1.45;">The roster wire already ships, in the rail. Moving it to the lead is the smallest build in this study. The countdown takes the rail slot it leaves.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px; padding:14px 16px; border:1px solid #CBC1A7; border-radius:10px; background:#F3ECD8;">
+      <div class="lbl" style="font-size:11px; color:#6B6558;">Identical at every level</div>
+      <div style="margin-top:6px; font-size:14px; line-height:1.5; color:#1B2A3A;">The shell and its behaviour. The archive invitation drawn as a slate game card, not a button. Kraft tape means one thing everywhere: results are behind it. The gate line: <strong style="font-weight:600;">Opening this shows results.</strong> The scoring label: <strong style="font-weight:600;">Score this game.</strong></div>
+    </div>
+  </div>
+
+  <!-- open decisions -->
+  <div style="margin-top:26px;">
+    <div class="h2">Open decisions</div>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+      <div style="display:flex; gap:12px; padding:13px 15px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9;">
+        <div class="num" style="font-size:14px; color:#B5824A; flex-shrink:0;">1</div>
+        <div style="font-size:14px; line-height:1.45; color:#1B2A3A;"><strong style="font-weight:600;">When does this page replace the slate?</strong> A level holds three leagues that finish on different dates, and the postseason runs on after them. Per league, or only when every league at the level is done? A finished club is not a finished league.</div>
+      </div>
+      <div style="display:flex; gap:12px; padding:13px 15px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9;">
+        <div class="num" style="font-size:14px; color:#B5824A; flex-shrink:0;">2</div>
+        <div style="font-size:14px; line-height:1.45; color:#1B2A3A;"><strong style="font-weight:600;">Is October part of the offseason?</strong> The Arizona Fall League plays through October and November with players from these levels. Probe statsapi for it before building the empty state.</div>
+      </div>
+      <div style="display:flex; gap:12px; padding:13px 15px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9;">
+        <div class="num" style="font-size:14px; color:#B5824A; flex-shrink:0;">3</div>
+        <div style="font-size:14px; line-height:1.45; color:#1B2A3A;"><strong style="font-weight:600;">Build the season record for MLB and link out for the minors?</strong> MLB standings and postseason pages already exist. The minors need half-season qualification rules that are not validated, including whether AAA runs two halves in 2026.</div>
+      </div>
+      <div style="display:flex; gap:12px; padding:13px 15px; border:1px solid #CBC1A7; border-radius:10px; background:#FBF6E9;">
+        <div class="num" style="font-size:14px; color:#B5824A; flex-shrink:0;">4</div>
+        <div style="font-size:14px; line-height:1.45; color:#1B2A3A;"><strong style="font-weight:600;">How is the game pool checked?</strong> No count is shown any more, but every game dealt still has to be scoreable. A game with a thin feed and no lineups is a dead end at the one moment the page asked for a tap.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px; padding-top:14px; border-top:1px solid #DED6C0; font-size:13px; line-height:1.5; color:#6B6558;">
+    Concepts B and C are on page 2 of this canvas, unchanged. Every board is static and every figure illustrative. Nothing in the app has been changed.
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
