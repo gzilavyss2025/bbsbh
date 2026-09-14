@@ -27,6 +27,16 @@ import { teamAbbr } from '../../lib/teams.js'
 // entry step, which asks which booth and states the consent in words before any
 // film plays — so the door opens a chooser, never a frame.
 //
+// AND WHY THE CARD SAYS TWO WORDS. It used to carry a lede and a caution as
+// well, and both were wrong here. The lede explained a surface the reader had
+// not opened yet, which is an instruction ahead of the act it describes. The
+// caution belongs to the entry step, which states it in full at the moment it
+// can be acted on and holds the film behind it — printing it twice buys no
+// safety and costs the card its shape. What is left is where the door goes.
+// The WHOLE STRIP is the control, so there is no button under the name
+// repeating it, and nothing here restates the matchup or the date the page
+// above has already printed.
+//
 // WHY IT NAVIGATES ITSELF. Its two neighbours take an `onSection` callback from
 // GameView, which is the ordinary way a game section is reached. This one asks
 // the router directly (useNav + gamePath, the same pair the season-series
@@ -55,44 +65,22 @@ export function ExpressLaneDoor({ feed }) {
 
   const gameData = feed?.gameData ?? {}
   const teams = gameData.teams ?? {}
-  const away = teamAbbr(teams.away)
-  const home = teamAbbr(teams.home)
-  const date = gameData.datetime?.officialDate ?? ''
-  const path = gamePath(date, away, home, 'express', gameData.game?.gameNumber ?? 1)
+  const path = gamePath(
+    gameData.datetime?.officialDate ?? '',
+    teamAbbr(teams.away),
+    teamAbbr(teams.home),
+    'express',
+    gameData.game?.gameNumber ?? 1,
+  )
 
   return (
-    <section className="xldoor" aria-label="Express Lane">
-      {/* The edge print. Real stock carries the maker and the roll along
-          its edge, outside the picture; this strip carries the two clubs
-          and the date. It repeats what the page above it already says,
-          which is exactly what edge print does — so it is hidden from a
-          screen reader, which would otherwise hear the matchup twice. It
-          is dropped rather than half-printed when a feed is missing an
-          abbreviation or a date, the same graceful fallback every other
-          selector on this page takes. */}
-      {away && home && date && (
-        <p className="xldoor__edge" aria-hidden="true">
-          {away} at {home} · {date}
-        </p>
-      )}
-      <h3 className="xldoor__title">Express Lane</h3>
-      <p className="xldoor__lede">
-        Score this game from the pitch clips, not the broadcast. Film on top, the
-        scoring box under it, one play at a time.
-      </p>
-      {/* The consent belongs to the entry step, which states it in full. This
-          line only makes sure the tap is not a surprise — the reader is told
-          what the film carries before they are asked to agree to it. */}
-      <p className="xldoor__note">
-        Every clip carries the broadcast score. Nothing plays until you say so.
-      </p>
-      <button
-        type="button"
-        className="btn btn--reveal xldoor__go"
-        onClick={() => navigate(path)}
-      >
-        Open Express Lane ›
-      </button>
-    </section>
+    <button type="button" className="xldoor" onClick={() => navigate(path)}>
+      Express Lane
+      {/* Decoration, not the name — the accessible name is the two words
+          beside it, and a screen reader gains nothing from a chevron. */}
+      <span className="xldoor__go" aria-hidden="true">
+        ›
+      </span>
+    </button>
   )
 }
