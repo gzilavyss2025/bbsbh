@@ -29,7 +29,7 @@ innings viewer, and the box score. Everything else about baseball opens live —
 season and career stats, player and team pages, leaderboards, and standings. A
 stat line is not a score.
 
-Two opt-in switches lift the seal, and you have to ask for both:
+Three opt-in doors lift the seal, and you have to ask for each one:
 
 - **Scores Unlocked** — a site-wide pass for the day you agree to spoil. Use it
   when you are not scoring and just want to glance at the numbers. It never
@@ -37,6 +37,10 @@ Two opt-in switches lift the seal, and you have to ask for both:
 - **Stamp In** (`/team/{id}/stamp-in`) — one club's played season with every
   result showing, so you can stamp the games you watched. Nothing on the page
   loads until you agree to see it.
+- **Express Lane** — scoring a game you missed from its own pitch clips. The
+  broadcast burns the score into every frame, so there is no way to watch a
+  pitch without seeing where the game stood at it. The page says so, and plays
+  nothing until you agree.
 
 ---
 
@@ -67,6 +71,8 @@ screen. When your book is caught up, tap once and the whole half opens:
 - whiffs (swinging strikes) and first-pitch strikes
 - the full play-by-play — every plate appearance, the pitch sequence, how each
   out was made, and where the runners finished
+- a **Watch** button on each play you have opened: MLB's own highlight cut when
+  there is one, and otherwise the pitch itself, about seven seconds of it
 - Statcast bests for the half: fastest pitch, hardest-hit ball, and longest fly,
   where the ballpark tracks them
 
@@ -96,6 +102,18 @@ pitch, the same game gives you a printable pre-pitch scorecard for filling in
 by hand, and a shareable preview card with both lineups and the day's matchup —
 neither one carries a score.
 
+**Score a game you missed, from the film.** Every pitch of a major-league game
+has a clip of its own, back to 2016, and **Express Lane** turns them into a
+scoring surface: film across the top, the scoring box under it, one play at a
+time, with no commercials and no scrubbing. The door is a card on the lineup
+page, and it only appears for a game that has film. Before it starts, it asks
+how much of each at-bat you want — the decision pitch only, or every pitch —
+and when the film should arrive: on demand, a half-inning ahead of you, or the
+whole game downloaded first. It tells you what each choice costs in time and
+data before you pick. You cannot read a play before its clip has arrived, which
+is the point: knowing the batter grounded out would leave you no reason to
+watch it happen.
+
 ---
 
 ## Exploring the rest of baseball
@@ -103,11 +121,15 @@ neither one carries a score.
 **Player pages.** Tap any name — in a lineup, a box score, or a leaderboard. You
 get the headshot, bio, handedness, draft info, and MLB debut, then this season's
 line, a pitcher's pitch mix, the game log, splits against lefties and righties,
-and a career register that blends major- and minor-league seasons. A "Path to
-the Majors" strip traces every level the player climbed, timelines list every
-club and every transaction, and "firsts" link to the game of a first hit or a
-first win. A contract history lists each arbitration case, extension, and
-free-agent deal by season, with what it paid. Prospects, All-Stars, rehab
+and a career register that blends major- and minor-league seasons. A pitcher
+gets two more cards on how well he hits the mitt: the distance his pitches
+finish from the catcher's target, and a plot of where they actually landed
+around it. A catcher gets the other side of the same question — how close the
+pitchers he caught came to the target he set. A "Path to the Majors" strip
+traces every level the player climbed, timelines list every club and every
+transaction, and "firsts" link to the game of a first hit or a first win. A
+contract history lists each arbitration case, extension, and free-agent deal by
+season, with what it paid. Prospects, All-Stars, rehab
 assignments, and Injured List stints are all flagged.
 
 **Team pages.** Tap a logo for the club hub: Overview, Roster, Games, Numbers,
