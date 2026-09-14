@@ -55,16 +55,26 @@ export function ExpressLaneDoor({ feed }) {
 
   const gameData = feed?.gameData ?? {}
   const teams = gameData.teams ?? {}
-  const path = gamePath(
-    gameData.datetime?.officialDate ?? '',
-    teamAbbr(teams.away),
-    teamAbbr(teams.home),
-    'express',
-    gameData.game?.gameNumber ?? 1,
-  )
+  const away = teamAbbr(teams.away)
+  const home = teamAbbr(teams.home)
+  const date = gameData.datetime?.officialDate ?? ''
+  const path = gamePath(date, away, home, 'express', gameData.game?.gameNumber ?? 1)
 
   return (
     <section className="xldoor" aria-label="Express Lane">
+      {/* The edge print. Real stock carries the maker and the roll along
+          its edge, outside the picture; this strip carries the two clubs
+          and the date. It repeats what the page above it already says,
+          which is exactly what edge print does — so it is hidden from a
+          screen reader, which would otherwise hear the matchup twice. It
+          is dropped rather than half-printed when a feed is missing an
+          abbreviation or a date, the same graceful fallback every other
+          selector on this page takes. */}
+      {away && home && date && (
+        <p className="xldoor__edge" aria-hidden="true">
+          {away} at {home} · {date}
+        </p>
+      )}
       <h3 className="xldoor__title">Express Lane</h3>
       <p className="xldoor__lede">
         Score this game from the pitch clips, not the broadcast. Film on top, the

@@ -98,6 +98,11 @@
 @import './styles/76-workload-marks.css';
 @import './styles/77-express-lane.css';
 @import './styles/77a-express-lane-entry.css';
+/* The DOOR into that surface, on the lineup page (components/game/
+   ExpressLaneDoor.jsx). It sits with Express Lane rather than with the
+   lineup page because it is drawn from Express Lane vocabulary — a cut
+   length of film — and because 09-team-info.css was at its file cap. */
+@import './styles/77b-express-lane-door.css';
 /* Motion — the animation layer (the motion study, issues #976-#983). A
    SUBDIRECTORY for the same reason focus/ below is one: src/styles is a flat
    directory at its own file ratchet (scripts/check-dir-size.mjs), the study
@@ -198,6 +203,7 @@
      77-express-lane          screens/expresslane/{ExpressLanePage,FilmPane,
                               ScoringDeck}.jsx
      77a-express-lane-entry   screens/expresslane/{EntryChooser,PitchExpand}.jsx
+     77b-express-lane-door    components/game/ExpressLaneDoor.jsx
      report/chrome            screens/around-the-game/RunValuePage.jsx,
                               screens/around-the-game/AbsChallengesPage.jsx
      research/diary           screens/research/ResearchDiaryPage.jsx

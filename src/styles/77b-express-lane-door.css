@@ -1,0 +1,162 @@
+/* ------------------------------------------------------------------
+   77b-express-lane-door — the door into Express Lane, drawn as a cut
+   length of 35mm film. components/game/ExpressLaneDoor.jsx, which sits
+   in the lineup page's left column under the preview card and the blank
+   sheet. Its own header carries WHY it is there and why it is a card.
+
+   IT LIVES HERE, BESIDE 77 AND 77a, AND NOT IN 09-team-info.css with the
+   rest of the lineup page. Three reasons, in order of weight. The film
+   vocabulary below — the perforation pitch, the frame pitch, the rail —
+   is Express Lane's, and the surface behind the door paints the same
+   dark board (77-express-lane.css), so a later change to one wants the
+   other in view. 09-team-info.css was at its file cap with the door
+   inside it, so the door could not grow there at all. And the door is
+   the only thing on that page with no lineup, umpire or roster in it.
+   Taking the next free letter after 77a costs src/styles one file, which
+   check-dir-size.mjs records; the @import sits right after 77a so the
+   ordering argument in index.css still reads top to bottom.
+
+   WHAT MAKES IT READ AS FILM, and why each piece is drawn the way it is.
+   A strip of film is four things at once and the old door had only a
+   sketch of one: a dark base, a perforated rail at each edge, frame
+   lines across the base, and edge print. The rails here are the real
+   work. Their holes are PUNCHED with a mask rather than painted in the
+   page colour, so the manila page — grid rule, header theme, whatever a
+   later page puts behind it — shows through an actual hole instead of
+   through a patch that has to be kept in sync with the ground. Everything
+   else is a background layer on the card itself.
+
+   THE GEOMETRY IS 35mm's, SCALED. A Kodak-standard perforation is 2.79mm
+   wide on a 4.75mm pitch, which is the 0.59 ratio --xldoor-perf and the
+   mask tile keep, and a frame is four perforations long, which is why
+   --xldoor-frame is exactly four times the pitch: every frame line lands
+   on a hole rather than floating between them. That one alignment is
+   what the eye reads as "film" rather than "dashes near an edge".
+
+   IT STILL SHOWS NO FRAME. A picture of the destination is the one thing
+   this door may never carry — the broadcast scorebug is burned into every
+   clip — so the frames drawn here are empty base, and the sheen over them
+   is a gradient, never an image.
+   ------------------------------------------------------------------ */
+
+.xldoor {
+  /* One perforation pitch, the rail that holds it, and the frame it
+     measures. The mask tile below is authored at 22x16 and scales with
+     these, so the pair moves together if either is retuned. */
+  --xldoor-perf: 22px;
+  --xldoor-rail: 16px;
+  --xldoor-frame: 88px;
+
+  position: relative;
+  margin-top: var(--space-5);
+  /* The rail is not padding — the text has to clear it as well. */
+  padding: calc(var(--xldoor-rail) + var(--space-4)) var(--space-4);
+  color: var(--album-foil);
+
+  /* Five layers, top to bottom: the two rules where each rail meets the
+     base, the frame lines, the surface sheen, and the base itself. All
+     five are held OFF the rails by their position and size, so the holes
+     punched in the rails open onto the page and not onto a second copy
+     of the film. Film is cut square, so there is no radius to clip them. */
+  background-image:
+    linear-gradient(var(--album-board-line), var(--album-board-line)),
+    linear-gradient(var(--album-board-line), var(--album-board-line)),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(var(--xldoor-frame) - 1px),
+      var(--album-board-line) calc(var(--xldoor-frame) - 1px) var(--xldoor-frame)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(251, 246, 233, 0.07) 0 14%,
+      rgba(251, 246, 233, 0) 46%,
+      rgba(22, 34, 47, 0) 64%,
+      rgba(22, 34, 47, 0.22) 100%
+    ),
+    linear-gradient(var(--album-board), var(--album-board));
+  background-repeat: no-repeat, no-repeat, repeat, no-repeat, no-repeat;
+  background-position:
+    0 var(--xldoor-rail),
+    0 calc(100% - var(--xldoor-rail)),
+    0 var(--xldoor-rail),
+    0 var(--xldoor-rail),
+    0 var(--xldoor-rail);
+  background-size:
+    100% 1px,
+    100% 1px,
+    100% calc(100% - var(--xldoor-rail) * 2),
+    100% calc(100% - var(--xldoor-rail) * 2),
+    100% calc(100% - var(--xldoor-rail) * 2);
+}
+
+/* THE TWO PERFORATED RAILS. One tile is one pitch: an opaque field with a
+   rounded rectangle cut out of it by fill-rule, used as a MASK, so the
+   hole is real transparency. Both rails tile from x=0, which is what puts
+   the top and bottom holes in line the way a sprocket needs them. The
+   inset hairline is the cut edge of the strip catching the light. */
+.xldoor::before,
+.xldoor::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--xldoor-rail);
+  /* The rail is the same base as the picture area, one shade denser. On
+     real stock the rebate outside the image is the darkest part of the
+     strip, and that third tone is most of what separates a strip of film
+     from a dark card with holes in it. It carries no text, so the extra
+     density costs no contrast. */
+  background: linear-gradient(rgba(10, 16, 23, 0.34), rgba(10, 16, 23, 0.34)), var(--album-board);
+  -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='16'><path fill='white' fill-rule='evenodd' d='M0 0h22v16H0Z M6.5 4h9a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z'/></svg>");
+  mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='16'><path fill='white' fill-rule='evenodd' d='M0 0h22v16H0Z M6.5 4h9a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z'/></svg>");
+  -webkit-mask-size: var(--xldoor-perf) var(--xldoor-rail);
+  mask-size: var(--xldoor-perf) var(--xldoor-rail);
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+}
+.xldoor::before {
+  top: 0;
+  box-shadow: inset 0 1px 0 rgba(251, 246, 233, 0.07);
+}
+.xldoor::after {
+  bottom: 0;
+  box-shadow: inset 0 -1px 0 rgba(251, 246, 233, 0.07);
+}
+
+/* THE EDGE PRINT — the maker's mark exposed along the edge of real stock,
+   here the two clubs and the date. It says nothing the page has not said
+   already, which is the point: edge print is stamped for the projectionist,
+   not the audience, and it is what makes the strip read as an object that
+   was cut from a roll. It is hidden from screen readers for the same
+   reason — a reader who cannot see it gains a repeat and nothing else. */
+.xldoor__edge {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-wide);
+  line-height: var(--lh-solid);
+  color: var(--album-foil-soft);
+}
+.xldoor__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+}
+.xldoor__lede {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+}
+.xldoor__note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  color: var(--album-foil-soft);
+}
+/* Overrides .btn--reveal's own 20px, which is spaced for the floating bar. */
+.xldoor__go {
+  margin-top: var(--space-4);
+}

@@ -418,7 +418,16 @@ const BUDGETS = {
   // GloveTarget.jsx gets by importing 26d rather than by a second copy.
   // 111 -> 112 for 26g-command-received.css — the catcher-side ranked list.
   // A flat sibling for the same ordering reason as every entry above it.
-  'src/styles': 112,
+  // 112 -> 113 for 77b-express-lane-door.css — the Express Lane door on the
+  // lineup page, redrawn as a cut length of 35mm film (perforated rails
+  // masked open to the page, frame lines on the base, edge print). It is a
+  // FILE MOVE that pays for itself: the rules left 09-team-info.css, which
+  // was at 799 of its 800-line cap and could not hold the redraw, so this
+  // entry buys the room instead of a second band on that sheet. It takes
+  // the next letter after 77a and stays a flat sibling for the same
+  // ordering reason every entry above it does, and it sits beside the
+  // surface it opens rather than beside the page it is printed on.
+  'src/styles': 113,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
