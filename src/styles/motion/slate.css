@@ -70,26 +70,11 @@
 }
 
 /* ---------------------------------------------------------------- #976 */
-/* Pointing at a card pulls its two '@' plates into register: the ghost closes
-   the 2px horizontal slip AND the 1px vertical one (both are the same
-   misregistration, so they close together — the -12px/-11px pair is print
-   slop, not a layout fix, see 06-loader-and-cards.css), and both plates ink up
-   a few hundredths. The card snaps into print under the cursor and drifts back
-   out when it leaves.
-
-   Deliberately about the smallest hover that still registers. A slate card is
-   seen fifteen times a slate, which STANDARDS.md's frequency table puts in the
-   "remove or drastically reduce" band, so this buys its place by being nearly
-   nothing: two pixels and a darker sign, on `transform` and
-   `opacity` only, over texture that is aria-hidden and that nobody is reading.
-   The longer leg is the exit (300ms out against 240ms in) so a card settles
-   back rather than snapping away.
-
-   Both spans keep the `backface-visibility: hidden` the past-day flip card
-   needs; nothing here touches it.
-
-   Keep colour transitions for the park's on-screen reveal. Hover increases
-   both layers to 70% opacity so the sign stays clear over the photograph. */
+/* Pointing at a card aligns the two '@' plates. The longer exit lets the
+   plates settle back into their resting offset. Opacity and ink colour belong
+   to 06a-gamecard-parkart.css: hover makes the ink fully opaque, including on
+   cards without a park photo. Keep those values out of this motion layer so
+   it cannot fade the sign when the pointer enters the matchup button. */
 @media (hover: hover) and (pointer: fine) {
   .gamecard__atmark-ghost,
   .gamecard__atmark-ink {
@@ -106,11 +91,7 @@
       color 240ms var(--ease-out);
   }
   .gamecard__open:hover .gamecard__atmark-ghost {
-    opacity: 0.7;
     transform: translate(-50%, calc(-50% - 12px)) skewX(-8deg) rotate(-2deg);
-  }
-  .gamecard__open:hover .gamecard__atmark-ink {
-    opacity: 0.7;
   }
 
   /* Reduced motion keeps the ink-up and drops the slide — the plates stay out

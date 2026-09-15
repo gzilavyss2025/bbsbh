@@ -209,9 +209,10 @@
   }
   /* Increase the sign's contrast when the club's colour wash appears.
      Keep the dark ink so pale club colours cannot lighten the sign. */
-  .gamecard--parkinview:hover .gamecard__atmark-ink,
-  .gamecard--parkinview:focus-within .gamecard__atmark-ink {
-    opacity: 0.7;
+  .gamecard:hover .gamecard__atmark-ink,
+  .gamecard:focus-within .gamecard__atmark-ink {
+    color: var(--ink-0);
+    opacity: 1;
   }
 }
 

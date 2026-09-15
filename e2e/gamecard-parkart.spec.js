@@ -68,8 +68,12 @@ test('an on-screen card arms its own mobile thumbnail, with no hover needed', as
     await expect(ink).toHaveCSS('opacity', '0.38')
     const restingColor = await ink.evaluate((el) => getComputedStyle(el).color)
     await card.locator('.gamecard__open').hover()
-    await expect(ink).toHaveCSS('opacity', '0.7')
+    await expect(ink).toHaveCSS('opacity', '1')
     await expect(ink).toHaveCSS('color', restingColor)
+    await page.mouse.move(0, 0)
+    await expect(ink).toHaveCSS('opacity', '0.38')
+    await card.locator('.gamecard__open').focus()
+    await expect(ink).toHaveCSS('opacity', '1')
   }
 })
 
