@@ -31,6 +31,22 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   cutoff and reported Final. Both `cutoff-gated`. `test/boxlines-rows.test.js`
   pins the gate. The line builders are `person/gameLog.js`'s `pitcherLine` /
   `hitterLine`, reused, not copied.
+  **A STUCK `Postponed` ROW GETS ITS SCORE BACK, and the gate is not loosened**
+  (#1031). A postponed game reports `abstractGameState: 'Final'` with no score,
+  which is why the gate asks for the score and not for the word — but most such
+  games were PLAYED: rained out, replayed the same day under the same gamePk,
+  and the schedule row never updated. Over nine seasons' 406 scoreless-Final
+  rows, 400 had a real linescore and 6 did not, and the 6 are the games that
+  were genuinely never played (no plays either) — so `/api/v1/game/{pk}/
+  linescore?fields=teams,home,away,runs` (47 bytes) separates them and fails
+  closed on its own. `rows.js`'s `scorelessGamePks` runs the SAME gate and names
+  only the rows dropped for want of a score; `fetch.js` re-scores those and
+  passes `recoveredScores` back. It can only ADD a row already approved on date
+  and status — ~1% of a career (2 of Scherzer's 33 postseason starts, 69 of
+  Cabrera's 2,797 games, the worst measured), capped at 150 against a broken
+  source. It rides in the memoized join, not behind a facet, because a door that
+  counts a game its own sheet hides must close for every door at once.
+  `test/boxlines-score-recovery.test.js` pins both halves.
   `facets.js` (spoiler-free) is the question: one tagged object — `club`,
   `venue`, `month`, `dayNight`, `weekday`, `side`, `started`, `pinchHit`,
   `gameTypes` —
