@@ -207,21 +207,11 @@
   .gamecard:focus-within .gamecard__parkart::after {
     opacity: 1;
   }
-  /* The ink layer follows the wash it now sits over, instead of staying a flat
-     navy regardless of which club's colour just arrived — undertoned by the
-     SAME `--park-tint` the wash paints with, so the sign reads as tied to the
-     photo underneath it rather than merely printed on top. Anchored on
-     `--ink-0` rather than mixed straight into black: a club's tint can itself
-     be very pale (a cream alternate's tile colour, say), and mixing THAT with
-     black lands lighter than plain navy — the opposite of "darker." Majority
-     `--ink-0` keeps the result close to the already-proven-dark base for any
-     tint, pale or saturated, while the tint's minority share still bends the
-     hue toward the club. Falls back to `--ink-0` alone when the team carries
-     no curated tint, so a hover changes nothing for a club this wash already
-     paints plain. */
+  /* Increase the sign's contrast when the club's colour wash appears.
+     Keep the dark ink so pale club colours cannot lighten the sign. */
   .gamecard--parkinview:hover .gamecard__atmark-ink,
   .gamecard--parkinview:focus-within .gamecard__atmark-ink {
-    color: color-mix(in srgb, var(--ink-0) 70%, var(--park-tint, var(--ink-0)) 30%);
+    opacity: 0.7;
   }
 }
 

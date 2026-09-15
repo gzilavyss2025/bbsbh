@@ -80,7 +80,7 @@
    Deliberately about the smallest hover that still registers. A slate card is
    seen fifteen times a slate, which STANDARDS.md's frequency table puts in the
    "remove or drastically reduce" band, so this buys its place by being nearly
-   nothing: two pixels and four hundredths of opacity, on `transform` and
+   nothing: two pixels and a darker sign, on `transform` and
    `opacity` only, over texture that is aria-hidden and that nobody is reading.
    The longer leg is the exit (300ms out against 240ms in) so a card settles
    back rather than snapping away.
@@ -88,14 +88,8 @@
    Both spans keep the `backface-visibility: hidden` the past-day flip card
    needs; nothing here touches it.
 
-   `color` IS IN BOTH LISTS BECAUSE 06a-gamecard-parkart.css ALREADY PUT IT
-   THERE. Over a ballpark photo the ink plate is undertoned by the club's own
-   `--park-tint` on hover, and that partial transitions `color` alongside
-   `opacity` so the sign follows the wash arriving under it. `transition` is a
-   shorthand: it resets every `transition-*` longhand, and these rules are
-   later in the cascade than that file, so a list of `transform, opacity` alone
-   silently dropped the colour leg and made the park-art hover snap. Any future
-   edit to these two lines has to carry `color` with it. */
+   Keep colour transitions for the park's on-screen reveal. Hover increases
+   both layers to 70% opacity so the sign stays clear over the photograph. */
 @media (hover: hover) and (pointer: fine) {
   .gamecard__atmark-ghost,
   .gamecard__atmark-ink {
@@ -112,11 +106,11 @@
       color 240ms var(--ease-out);
   }
   .gamecard__open:hover .gamecard__atmark-ghost {
-    opacity: 0.14;
+    opacity: 0.7;
     transform: translate(-50%, calc(-50% - 12px)) skewX(-8deg) rotate(-2deg);
   }
   .gamecard__open:hover .gamecard__atmark-ink {
-    opacity: 0.11;
+    opacity: 0.7;
   }
 
   /* Reduced motion keeps the ink-up and drops the slide — the plates stay out

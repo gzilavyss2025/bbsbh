@@ -62,6 +62,15 @@ test('an on-screen card arms its own mobile thumbnail, with no hover needed', as
   const opacity = Number(await backdrop.evaluate((el) => getComputedStyle(el).opacity))
   expect(opacity).toBeGreaterThan(0)
   expect(opacity).toBeLessThan(0.4)
+  if (await page.evaluate(() => matchMedia('(hover: hover) and (pointer: fine)').matches)) {
+    const ink = card.locator('.gamecard__atmark-ink')
+    await page.mouse.move(0, 0)
+    await expect(ink).toHaveCSS('opacity', '0.38')
+    const restingColor = await ink.evaluate((el) => getComputedStyle(el).color)
+    await card.locator('.gamecard__open').hover()
+    await expect(ink).toHaveCSS('opacity', '0.7')
+    await expect(ink).toHaveCSS('color', restingColor)
+  }
 })
 
 test('a card off screen fetches nothing until it scrolls into view', async ({ page }) => {
