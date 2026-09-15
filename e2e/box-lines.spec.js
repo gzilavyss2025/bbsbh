@@ -333,6 +333,56 @@ test('a month door and a weekday door each keep only their own dates', async ({ 
   }
 })
 
+// OCTOBER MEANS OCTOBER (ADR-0073). A month is a fact about the date, and a
+// date does not stop being October because the game was a division series — so
+// the calendar doors span both, in the label AND in the rows. Two halves have
+// to move together and each fails silently on its own: widen only the rows and
+// the door states 16 games over a sheet of 42; widen only the label and it
+// states 42 over a sheet of 16. What a unit test cannot reach is that MLB's
+// combined aggregate and the joined postseason rows actually land on the same
+// number, which is what the count assertion here is.
+test('the October door counts postseason games, and its figure still matches its rows', async ({ page }) => {
+  await page.goto(`${YELICH}?d=${PLAYER_CUTOFF}`)
+  const card = page.locator('.gamelines')
+  await card.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await card.count()) === 0) {
+    test.skip(true, 'this player has no MLB situational splits on file today')
+    return
+  }
+  await openFamily(card, 'By month')
+  const october = card.getByRole('button', { name: /^October: / })
+  const label = await october.getAttribute('aria-label')
+  const doorGames = Number(label.match(/^October: (\d+) G/)[1])
+  await october.click()
+
+  const sheet = page.getByRole('dialog', { name: /in October/ })
+  await expect(sheet).toBeVisible()
+  await expect
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+  const rows = sheet.locator('.boxline:not(.boxline--skel)')
+  const n = await rows.count()
+  expect(n).toBeGreaterThan(0)
+
+  // Every row is still an October game, whatever kind of game it was.
+  for (let i = 0; i < n; i++) {
+    const href = await rows.nth(i).locator('a').getAttribute('href')
+    expect(href.slice(1, 3), `row ${i} is not an October game`).toBe('10')
+  }
+
+  // POSTSEASON ROWS ARE IN THERE, wearing the round they were played in — the
+  // whole point of the change. He has reached October in several years, so this
+  // is career data that only ever grows.
+  const pills = await sheet.locator('.boxline__series').allTextContents()
+  expect(pills.length, 'no postseason row reached the October sheet').toBeGreaterThan(0)
+  for (const pill of pills) expect(pill).toMatch(/^(WC|DS|LCS|WS)$/)
+
+  // AND THE TWO HALVES AGREE TO THE GAME. Unlike Home and Road, a calendar door
+  // reconciles exactly (ADR-0069) — a relocated game moves a park, it does not
+  // move a date — and that holds across the sum of two MLB aggregates too.
+  expect(n, `the door says ${doorGames} G and the sheet holds ${n} rows`).toBe(doorGames)
+})
+
 // THE PINCH-HIT DOOR (#1002). A hitter only, and the one door on the card whose
 // rows MLB publishes no per-game list for: the label is MLB's `pH` career
 // aggregate, the rows are the hitting game log's own `positionsPlayed`. The

@@ -64,11 +64,19 @@ those names.
    could say, and readable down a column, which is what the weekday question
    wanted in the first place.
 
+6. **A calendar door counts every kind of game played on that date.** A month
+   and a weekday are facts about the DATE, and a date does not stop being
+   October — or a Sunday — because the game was a division series. The month and
+   weekday doors therefore span the regular season and the four postseason
+   rounds, in the label and in the rows alike. No other door moved: "Home" is
+   not a question about the date, and its aggregate stays the regular season's.
+
 `BoxLinesDoor` grew a `face` prop and lost `chip`. A door on a line of its own
 still says its whole career and "See all ›"; a door that is one row of a table
 wears the host's columns. Both are the same control, so the host dresses it and
 the door goes on owning the only two things it has ever owned — the open bit and
 the sheet.
+
 
 ## Consequences
 
@@ -106,6 +114,42 @@ the sheet.
   stat; their last four cells draw a quiet rule-coloured dot. A `0` would be a
   claim about a career MLB never made, and an em-dash reads as a figure MLB
   failed to send.
+- **Two halves have to move together, and each fails silently alone.**
+  `spansPostseason` on the registry entry widens the LABEL's fetch;
+  `facet.postseason` widens the ROWS'. Widen only the rows and the door states
+  16 games over a sheet of 42; widen only the label and it states 42 over a
+  sheet of 16. A test requires the pair on every entry.
+- **MLB publishes no combined aggregate**, so the label adds two.
+  `careerStatSplits` answers for one `gameType` at a time, and asking for `R,P`
+  returns the two rows separately — and twice over — never a combined one. So a
+  spanning door costs one extra request for the whole family, and
+  `mergeCareerSplits` adds the counting stats and divides once.
+- **Rates are recomputed, never averaged.** Yelich in October is .444 over 16
+  regular-season games and .208 over 26 postseason ones; his October is neither
+  and not the midpoint — it is 44 hits in 150 at-bats, .293. And the arithmetic
+  copies MLB's, *including its rounding*: OPS is not OBP + SLG at full
+  precision, it is each half rounded to three places and then added (.559 + .630
+  = 1.189, where the unrounded sum prints 1.188). The suite checks the formula
+  by feeding one real MLB split back through the merge and requiring MLB's own
+  published string out the other side — the only available check, since there is
+  no combined figure to compare against.
+- **The exact agreement survives.** Calendar doors reconcile to the game where
+  Home and Road cannot (ADR-0069), and that held across the sum: Yelich's
+  October reads 42 G on the label against 42 rows in the sheet, 26 of them
+  wearing a round pill. An e2e test asserts the two.
+- **There is no November door.** statsapi's month situation codes stop at
+  October — sitCode `11` returns nothing at all — so a World Series that runs
+  into November has no month of its own. Those games are still on the Postseason
+  door; they simply land in no month. Adding a November door would be one entry
+  in the `MONTHS` table.
+- **The calendar doors no longer share the other doors' fetch.** The join is
+  keyed by game types, so month and weekday doors share one R+P join with each
+  other and the remaining doors keep their R-only one. Opening a month door
+  after a Home door costs a second pass; both are memoized for the session.
+- **A postseason night game is in October and on its weekday, but not under
+  "Night" or "Home".** Those doors were deliberately left on the regular season
+  — they are not questions about the date. If that asymmetry ever reads as a
+  bug, the fix is to give them `spansPostseason` too, not to narrow the calendar.
 - The card runs 701px on a phone against 1,093px, and 659px against 1,108px for
   a pitcher, with every figure aligned under a name.
 

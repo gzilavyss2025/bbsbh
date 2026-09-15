@@ -138,7 +138,16 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   tried and why it was worse. **The calendar doors are the exception and agree
   EXACTLY**: measured over three careers 2026-09-14, MLB's monthly and weekday
   aggregates matched the joined rows for every month and every weekday. A
-  relocated home game moves a park; it does not move a Tuesday. `test/boxlines-facets.test.js` pins the facet
+  relocated home game moves a park; it does not move a Tuesday. Those doors also
+  **span the postseason** (ADR-0073): a date does not stop being October because
+  the game was a division series, so `spansPostseason` widens the LABEL (a second
+  `careerStatSplits` call at `gameType=P`, summed by `mergeCareerSplits` — rates
+  recomputed from components, since two rates cannot be averaged) and
+  `facet.postseason` widens the ROWS, and the pair is pinned by test because
+  either half alone states a career it does not open. The exact agreement
+  survives the sum: Yelich's October reads 42 G against 42 rows. There is no
+  November door (sitCode '11' returns nothing), so a World Series running into
+  November lands in no month. `test/boxlines-facets.test.js` pins the facet
   layer, `test/boxlines-card-facets.test.js` pins every door against the same
   `facetPlan` the sheet calls, and `test/boxlines-rows.test.js` pins that
   `keep` cannot resurrect a row the cutoff or the Final check dropped.

@@ -17,6 +17,7 @@ import {
   careerSplitLine,
   doorCells,
   doorLine,
+  mergeCareerSplits,
 } from '../src/api/boxlines/careerSplits.js'
 import { facetPlan } from '../src/api/boxlines/facets.js'
 import { POSTSEASON } from '../src/api/boxlines/rows.js'
@@ -34,15 +35,28 @@ test('no door narrows the game log or pins an opponent', () => {
   }
 })
 
-test('a door either filters rows or moves the game types — never neither', () => {
-  // Two shapes, and a door must resolve to exactly one of them. A typo in a
-  // `kind` resolves to a keep-nothing predicate, which reads as the first shape
-  // here and is caught by the discrimination test below instead.
+test('every door filters rows or moves the game types, and the calendar does both', () => {
+  // A door that does NEITHER asks for the whole regular-season log and keeps
+  // all of it, which is a sheet of every game he ever played under a label that
+  // promised a split. That is the failure this pins. (A typo in a `kind`
+  // resolves to a keep-nothing predicate, which reads as "filters" here and is
+  // caught by the discrimination test below instead.)
+  //
+  // It used to pin "never BOTH" as well, and that half is gone on purpose: the
+  // calendar doors now widen the fetch to the four postseason rounds AND filter
+  // the result down to their own month or weekday, which is exactly both
+  // (ADR-0073). Doing both was never a fault — it was just a shape the card had
+  // no use for until October had to mean October.
   for (const entry of CARD_FACETS) {
     const plan = facetPlan(entry.facet)
     const filters = typeof plan.keep === 'function'
     const moves = Array.isArray(plan.gameTypes)
-    assert.notEqual(filters, moves, `${entry.key} must do one of the two, not both or neither`)
+    assert.ok(filters || moves, `${entry.key} neither filters rows nor moves the game types`)
+    assert.equal(
+      filters && moves,
+      Boolean(entry.spansPostseason),
+      `${entry.key} does both, and only a door spanning the postseason should`,
+    )
   }
 })
 
@@ -363,6 +377,110 @@ test('a games-only door fills one cell and leaves the rest empty', () => {
   assert.equal(doorLine(entry, { gamesPlayed: 1672 }, 'hitting'), '1672 G')
   // And no stat at all is no cells, not five nulls — the card drops the door.
   assert.equal(doorCells(entry, null, 'hitting'), null)
+})
+
+// Yelich's October and Scherzer's, as MLB returns them: one row per game type,
+// never a combined one. Real, fetched 2026-09-15 (personId 592885 / 453286,
+// `careerStatSplits&sitCodes=10`).
+const OCT_REG = {
+  gamesPlayed: 16, plateAppearances: 68, atBats: 54, hits: 24, homeRuns: 2,
+  baseOnBalls: 13, hitByPitch: 1, sacFlies: 0, totalBases: 34,
+  avg: '.444', obp: '.559', slg: '.630', ops: '1.189',
+}
+const OCT_POST = {
+  gamesPlayed: 26, plateAppearances: 116, atBats: 96, hits: 20, homeRuns: 2,
+  baseOnBalls: 20, hitByPitch: 0, sacFlies: 0, totalBases: 29,
+  avg: '.208', obp: '.345', slg: '.302', ops: '.647',
+}
+const OCT_REG_P = { gamesPlayed: 4, outs: 71, earnedRuns: 9, strikeOuts: 31, baseOnBalls: 4, era: '3.42', inningsPitched: '23.2' }
+const OCT_POST_P = { gamesPlayed: 32, outs: 459, earnedRuns: 65, strikeOuts: 179, baseOnBalls: 61, era: '3.82', inningsPitched: '153.0' }
+
+test('merging one split with an empty one reproduces the rates MLB published', () => {
+  // THE FORMULA IS CHECKED AGAINST MLB, NOT AGAINST ITSELF. Add nothing to a
+  // real aggregate and the merge must hand back the very strings MLB printed on
+  // it — which is the only way to know the arithmetic behind a COMBINED rate
+  // (where MLB publishes no answer to check) is the arithmetic MLB uses.
+  //
+  // It catches the OPS rounding in particular: OPS is not OBP + SLG at full
+  // precision. MLB rounds each half to three places and adds those — Yelich's
+  // October is .559 + .630 = 1.189, where the unrounded sum is 1.1884 and
+  // prints 1.188.
+  const bat = mergeCareerSplits(OCT_REG, { gamesPlayed: 0 }, 'hitting')
+  assert.equal(bat.avg, OCT_REG.avg)
+  assert.equal(bat.ops, OCT_REG.ops, 'the OPS halves are not being rounded before they are added')
+  const post = mergeCareerSplits(OCT_POST, { gamesPlayed: 0 }, 'hitting')
+  assert.equal(post.avg, OCT_POST.avg)
+  assert.equal(post.ops, OCT_POST.ops)
+  const arm = mergeCareerSplits(OCT_REG_P, { outs: 0 }, 'pitching')
+  assert.equal(arm.era, OCT_REG_P.era)
+  assert.equal(arm.inningsPitched, OCT_REG_P.inningsPitched, 'innings are rebuilt from `outs`, in thirds')
+})
+
+test('a combined October adds the counting stats and divides once', () => {
+  // A RATE CANNOT BE AVERAGED. .444 over 16 games and .208 over 26 is not .326
+  // and not .293 by any blend of the two — it is 44 hits in 150 at-bats.
+  const bat = mergeCareerSplits(OCT_REG, OCT_POST, 'hitting')
+  assert.equal(bat.gamesPlayed, 42)
+  assert.equal(bat.plateAppearances, 184)
+  assert.equal(bat.homeRuns, 4)
+  assert.equal(bat.avg, '.293')
+  assert.equal(bat.ops, '.844')
+  // And it is neither input and not their midpoint, which is the whole point.
+  assert.ok(bat.avg !== OCT_REG.avg && bat.avg !== OCT_POST.avg)
+
+  const arm = mergeCareerSplits(OCT_REG_P, OCT_POST_P, 'pitching')
+  assert.equal(arm.gamesPlayed, 36)
+  assert.equal(arm.inningsPitched, '176.2', '530 outs is 176 innings and two thirds')
+  assert.equal(arm.era, '3.77')
+  assert.equal(arm.strikeOuts, 210)
+})
+
+test('a merge with nothing on one side is the other side, untouched', () => {
+  // A March door has no postseason row to add, and a career with no October at
+  // all has none for any month. Neither is a reason to recompute anything.
+  assert.equal(mergeCareerSplits(OCT_REG, null, 'hitting'), OCT_REG)
+  assert.equal(mergeCareerSplits(null, OCT_POST, 'hitting'), OCT_POST)
+  assert.equal(mergeCareerSplits(null, null, 'hitting'), null)
+})
+
+test('a door that spans the postseason says so on BOTH halves', () => {
+  // `spansPostseason` widens the LABEL's fetch and `facet.postseason` widens the
+  // ROWS'. Set one without the other and the door states a career it does not
+  // open — 42 October games on the line, 16 behind it, and nothing on the page
+  // to say why.
+  for (const entry of CARD_FACETS) {
+    assert.equal(
+      Boolean(entry.spansPostseason),
+      Boolean(entry.facet.postseason),
+      `${entry.key} spans the postseason on one half only`,
+    )
+  }
+  // The calendar doors, and only those: a home game in October is still a home
+  // game, but "Home" is not a question about the date and its aggregate is the
+  // regular season's.
+  const spanning = CARD_FACETS.filter((r) => r.spansPostseason).map((r) => r.facet.kind)
+  assert.deepEqual([...new Set(spanning)].sort(), ['month', 'weekday'])
+  assert.equal(spanning.length, 15, 'eight months and seven weekdays')
+})
+
+test('a spanning calendar facet asks the log for the four rounds as well', () => {
+  // The umbrella 'P' must never reach the game log: a pitching log answers it
+  // for every row and the sheet comes back empty (rows.js's POSTSEASON).
+  for (const entry of CARD_FACETS.filter((r) => r.spansPostseason)) {
+    const { gameTypes } = facetPlan(entry.facet)
+    assert.deepEqual(gameTypes, ['R', 'F', 'D', 'L', 'W'], `${entry.key} asks for the wrong game types`)
+  }
+  // Every other door still reads the regular season alone, which is what lets
+  // them go on sharing one join. The Postseason door is the exception and the
+  // opposite case: it MOVES the game types rather than widening them, because
+  // it is not a question about the regular season at all.
+  for (const entry of CARD_FACETS.filter((r) => !r.spansPostseason && r.key !== 'postseason')) {
+    const { gameTypes } = facetPlan(entry.facet)
+    assert.ok(gameTypes == null, `${entry.key} widened the fetch without asking`)
+  }
+  assert.deepEqual(facetPlan(CARD_FACETS.find((r) => r.key === 'postseason').facet).gameTypes, [
+    'F', 'D', 'L', 'W',
+  ])
 })
 
 test('the month and weekday doors are a complete set, each numbered once', () => {

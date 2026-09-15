@@ -28,6 +28,13 @@
 // `family` files an entry into one of the FAMILIES below — a run of doors the
 // card folds behind a single row. Only the months and the weekdays have one.
 //
+// `spansPostseason` says this door counts October games of EVERY kind, and it
+// must be set together with `postseason: true` on the entry's own `facet` — one
+// is the LABEL's game types and the other is the ROWS', and a door with only
+// one of them states a career it does not open (a test pins the pair). Only the
+// calendar doors have it: a month and a weekday are facts about the DATE, and a
+// date does not stop being a Sunday because the game was a division series.
+//
 // THE LABEL'S FIGURES COME FROM ONE OF TWO SOURCES, and an entry names which:
 //
 //   sitCode         a statsapi SITUATION code ('h', 'd', 'sp'). Every code on
@@ -194,27 +201,39 @@ export const CARD_FACETS = [
     section: 'when',
     groups: ['hitting', 'pitching'],
   },
-  // WHICH MONTH (#999). Eight doors, and the eight are the whole regular
-  // season: statsapi's situation codes number the months, '3' March through
-  // '10' October, and a career row came back for every one of them on both
-  // groups (verified 2026-09-14 on 592885 hitting and 656849 pitching). A
-  // month with no games renders no door, so April through September is what
-  // most careers show and March and October belong to the long ones.
+  // WHICH MONTH (#999). Eight doors: statsapi's situation codes number the
+  // months, '3' March through '10' October, and a career row came back for
+  // every one of them on both groups (verified 2026-09-14 on 592885 hitting and
+  // 656849 pitching). A month with no games renders no door, so April through
+  // September is what most careers show and March and October belong to the
+  // long ones.
   //
-  // THE DOOR AND THE ROWS AGREE EXACTLY HERE, which is worth saying because
-  // the home/road doors above them do not. Measured over three careers, MLB's
-  // monthly aggregate matched the rows month for month, all eight, every time
-  // — Yelich 21/221/272/292/290/326/287/16 on both sides. A month is a fact
-  // about the date, and the date is the one thing the game log and the
-  // schedule cannot disagree about.
+  // OCTOBER COUNTS EVERY KIND OF OCTOBER GAME (`spansPostseason`, ADR-0073).
+  // A month is a fact about the DATE, so a division series in October is an
+  // October game — Yelich reads 42 G / .293 there, his 16 regular-season games
+  // and his 26 postseason ones, not the 16 this door used to show. MLB keeps
+  // the two apart and publishes no combined row, so `mergeCareerSplits` adds
+  // them (rates are recomputed from components, never averaged).
+  //
+  // THERE IS NO NOVEMBER DOOR and sitCode '11' returns nothing at all (checked
+  // 2026-09-15), so a World Series that runs into November has no month of its
+  // own. Those games are still on the Postseason door; they simply land in no
+  // month. Adding a November door would be an entry in the table above.
+  //
+  // THE DOOR AND THE ROWS AGREE EXACTLY HERE, which is worth saying because the
+  // home/road doors above them do not — and it survived the postseason widening
+  // on both sides at once: 42 on the label and 42 rows in the sheet (verified
+  // 2026-09-15). A month is a fact about the date, and the date is the one thing
+  // the game log and the schedule cannot disagree about.
   ...MONTHS.map(([month, sitCode, name]) => ({
     key: `m${month}`,
     sitCode,
     family: 'month',
+    spansPostseason: true,
     label: name,
     kicker: `Game lines · in ${name}`,
     title: (surname) => `${surname} in ${name}`,
-    facet: { kind: 'month', month },
+    facet: { kind: 'month', month, postseason: true },
     section: 'when',
     groups: ['hitting', 'pitching'],
   })),
@@ -232,10 +251,11 @@ export const CARD_FACETS = [
     key: `w${day}`,
     sitCode,
     family: 'weekday',
+    spansPostseason: true,
     label: `${name}s`,
     kicker: `Game lines · on ${name}s`,
     title: (surname) => `${surname} on ${name}s`,
-    facet: { kind: 'weekday', day },
+    facet: { kind: 'weekday', day, postseason: true },
     section: 'when',
     groups: ['hitting', 'pitching'],
   })),
