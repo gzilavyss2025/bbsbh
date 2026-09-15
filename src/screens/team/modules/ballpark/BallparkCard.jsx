@@ -1,6 +1,12 @@
-import { Suspense, lazy, useCallback } from 'react'
+import { Suspense, lazy, useCallback, useState } from 'react'
 import { ordinal, rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
-import { fieldIds, resolveParkName, resolvePhoto, venueKey } from '../../../../lib/ballpark/ballparkArt.js'
+import {
+  fieldIds,
+  resolveParkName,
+  resolvePhoto,
+  venueKey,
+  withoutBrokenArt,
+} from '../../../../lib/ballpark/ballparkArt.js'
 import { isClerkEnabled } from '../../../../lib/clerkConfig.js'
 import { useCopy } from '../../../../copy/copyContext.js'
 import { BallparkDiagram } from '../../../../components/ballpark/BallparkDiagram.jsx'
@@ -88,7 +94,11 @@ const BallparkEditFields = lazy(() =>
 // the wrapper becomes the focal-point target instead. A tap has to mean one
 // thing: leaving the Commons link live would send the owner off to Wikimedia
 // mid-edit, which is both the wrong action and one that loses the draft.
-function ParkPhoto({ name, photo, onPickFocus }) {
+// A module-level constant so the initial state is not a fresh Set on every
+// render of every card.
+const EMPTY_SET = new Set()
+
+function ParkPhoto({ name, photo, onPickFocus, onBroken }) {
   const alt = photo.creditText ? `${name}. ${photo.creditText}` : `${name}, seen from the stands`
   const img = (
     <img
@@ -99,6 +109,10 @@ function ParkPhoto({ name, photo, onPickFocus }) {
       style={{ objectPosition: photo.focus }}
       loading="lazy"
       decoding="async"
+      // Only an OVERRIDE is worth reporting. A bundled photo that failed has
+      // nothing further to fall back to, and reporting it would re-render the
+      // card to the same src -- a loop rather than a recovery.
+      onError={photo.isOverride ? () => onBroken(photo.src) : undefined}
     />
   )
   if (onPickFocus) {
@@ -205,6 +219,15 @@ export function BallparkCard({ team, attendance }) {
   }
   const draft = useBallparkDraft(saved)
   const { setValue } = draft
+
+  // Every override image this card has watched fail to load. Held BY URL rather
+  // than as a flag, so a fresh upload -- which always gets a fresh URL, see
+  // api/ballpark-photo.js -- is tried on its own instead of staying fallen back
+  // for the rest of the session.
+  const [brokenArt, setBrokenArt] = useState(EMPTY_SET)
+  const noteBroken = useCallback((url) => {
+    setBrokenArt((prev) => (prev.has(url) ? prev : new Set(prev).add(url)))
+  }, [])
   const pickFocus = useFocalPick(useCallback((focus) => setValue('focus', focus), [setValue]))
 
   if (!name) return null
@@ -217,7 +240,7 @@ export function BallparkCard({ team, attendance }) {
   // What to paint: the saved values normally, the draft while editing (with a
   // local object URL standing in for an image not yet uploaded). One render
   // path either way, so there is no second layout only the owner ever sees.
-  const shown = draft.shown
+  const shown = withoutBrokenArt(draft.shown, brokenArt)
   const title = resolveParkName(name, { name: shown.name, wordmark: shown.wordmark })
   // The bundled photo, or the owner's replacement, with the crop and credit
   // that belong to whichever won. All of these come from the copy store already
@@ -245,11 +268,25 @@ export function BallparkCard({ team, attendance }) {
       <div className="thub-card__body">
         <div className="ballparkcard__hero">
           {photo && (
-            <ParkPhoto name={name} photo={photo} onPickFocus={draft.editing ? pickFocus : null} />
+            <ParkPhoto
+              name={name}
+              photo={photo}
+              onPickFocus={draft.editing ? pickFocus : null}
+              onBroken={noteBroken}
+            />
           )}
           <div className="ballparkcard__title">
             {title.wordmark ? (
-              <img className="ballparkcard__logo" src={title.wordmark} alt={title.text} loading="lazy" />
+              // Unguarded, unlike the photo: `text` is always behind a wordmark
+              // (resolveParkName), so a bundled mark that fails falls back to the
+              // typeset name just as an override does, and neither can loop.
+              <img
+                className="ballparkcard__logo"
+                src={title.wordmark}
+                alt={title.text}
+                loading="lazy"
+                onError={() => noteBroken(title.wordmark)}
+              />
             ) : (
               <p className="ballparkcard__name">{title.text}</p>
             )}

@@ -19,7 +19,13 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { FIELD_IDS, mergeOverrides } from '../src/copy/registry.js'
-import { fieldIds, resolveParkName, venueKey } from '../src/lib/ballpark/ballparkArt.js'
+import {
+  fieldIds,
+  resolveParkName,
+  resolvePhoto,
+  venueKey,
+  withoutBrokenArt,
+} from '../src/lib/ballpark/ballparkArt.js'
 import { isOwnBlobUrl, isOwnBlobUrlUnder, sniffImage } from '../api/ballpark-photo.js'
 
 const FENWAY = venueKey('Fenway Park')
@@ -195,4 +201,65 @@ test('isOwnBlobUrlUnder keeps a delete inside the folder that wrote it', () => {
   // A folder name must not match by prefix alone.
   const sneaky = 'https://abc123.public.blob.vercel-storage.com/ballparks-evil/x.jpg'
   assert.equal(isOwnBlobUrlUnder(sneaky, 'ballparks/'), false)
+})
+
+
+// --- an override image that fails to load ------------------------------------
+//
+// Property 4. resolvePhoto returns an override unconditionally and the card
+// rendered it with no onError, so an override that 404s, 403s or was mistyped
+// left a broken image where the park was -- 176 parks at once on 2026-09-15,
+// when the Blob store passed its storage cap and answered 403 to every read.
+//
+// withoutBrokenArt drops a failed URL in FRONT of both resolvers, so the card
+// falls back down the same path as a park that never had an override.
+
+const GONE = 'https://p6soal2x5kpgb0ll.public.blob.vercel-storage.com/ballparks/fenwaypark-photo-gone.jpg'
+
+test('a photo that failed to load falls back to the bundled photograph', () => {
+  const live = withoutBrokenArt({ photo: GONE, credit: 'Shot by the owner' }, new Set([GONE]))
+  const photo = resolvePhoto('Fenway Park', live)
+  assert.equal(photo.src, '/ballparks/fenwaypark.jpg')
+  assert.equal(photo.isOverride, false)
+})
+
+// The rule worth a test of its own. An admin's typed credit describes THEIR
+// image; leaving it on the bundled photograph would put the wrong name under
+// Rick Berry's work.
+test('the typed credit falls away with the photo it described', () => {
+  const live = withoutBrokenArt({ photo: GONE, credit: 'Shot by the owner' }, new Set([GONE]))
+  assert.equal(live.credit, '')
+  const photo = resolvePhoto('Fenway Park', live)
+  assert.equal(photo.creditText, 'Photo: Rick Berry')
+  assert.ok(!photo.creditText.includes('owner'), 'the admin credit must not survive its photo')
+})
+
+test('a wordmark that failed to load leaves the park readable', () => {
+  const mark = 'https://p6soal2x5kpgb0ll.public.blob.vercel-storage.com/ballparks/fenwaypark-wordmark-gone.png'
+  const live = withoutBrokenArt({ name: 'The Fens', wordmark: mark }, new Set([mark]))
+  const title = resolveParkName('Fenway Park', live)
+  assert.equal(title.wordmark, null, 'no image is drawn')
+  assert.equal(title.text, 'The Fens', 'and the typed name still names it')
+})
+
+test('a working override is left exactly as it was', () => {
+  const ok = 'https://p6soal2x5kpgb0ll.public.blob.vercel-storage.com/ballparks/fenwaypark-photo-ok.jpg'
+  const live = withoutBrokenArt({ photo: ok, credit: 'Shot by the owner' }, new Set([GONE]))
+  assert.equal(live.photo, ok)
+  assert.equal(live.credit, 'Shot by the owner')
+  assert.equal(resolvePhoto('Fenway Park', live).isOverride, true)
+})
+
+test('one broken image does not take the other down with it', () => {
+  const mark = 'https://p6soal2x5kpgb0ll.public.blob.vercel-storage.com/ballparks/fenwaypark-wordmark-ok.png'
+  const live = withoutBrokenArt({ photo: GONE, credit: 'c', wordmark: mark }, new Set([GONE]))
+  assert.equal(live.photo, '')
+  assert.equal(live.wordmark, mark, 'the wordmark loaded fine and stays')
+})
+
+test('nothing broken means nothing is touched', () => {
+  const overrides = { photo: GONE, credit: 'Shot by the owner' }
+  assert.equal(withoutBrokenArt(overrides, new Set()), overrides, 'the same object, not a copy')
+  assert.equal(withoutBrokenArt(overrides, null), overrides)
+  assert.deepEqual(withoutBrokenArt(undefined, new Set([GONE])), {})
 })

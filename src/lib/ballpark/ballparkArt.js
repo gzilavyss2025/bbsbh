@@ -240,6 +240,38 @@ export function resolveParkName(parkName, overrides = {}) {
   return { text, wordmark: overrides.wordmark || ballparkLogoUrl(parkName) || null }
 }
 
+// An override image that fails to LOAD has to fall back the same way an absent
+// one does. Until this, nothing made it: resolvePhoto returned the override
+// unconditionally and the card rendered it with no onError, so a Blob object
+// that had been deleted, mistyped or blocked left a broken image where the park
+// was. On 2026-09-15 that was 176 parks at once, when the store passed the
+// plan's storage cap and started answering 403 to every read.
+//
+// `broken` is the set of URLs one card has already watched fail. Dropping them
+// HERE, in front of both resolvers, is what makes a failed override take the
+// same path as an override that was never set -- rather than a second path that
+// would have to re-learn the bundled art's rules and could disagree with them.
+//
+// THE CREDIT FALLS WITH THE PHOTOGRAPH, which is the one rule worth stating
+// twice. resolvePhoto attaches a bundled park's CC BY / CC BY-SA line itself,
+// and the admin's typed credit describes the admin's image alone. Carrying that
+// credit onto Carol M. Highsmith's photograph would misattribute her work --
+// the exact failure the PHOTOS note at the top of this file exists to prevent,
+// and worse than showing no credit at all.
+//
+// A wordmark needs no such care: resolveParkName always leaves `text` behind,
+// which its own header already promised a failed wordmark would fall back to.
+export function withoutBrokenArt(overrides = {}, broken = null) {
+  if (!broken || broken.size === 0) return overrides
+  const out = { ...overrides }
+  if (out.photo && broken.has(out.photo)) {
+    out.photo = ''
+    out.credit = ''
+  }
+  if (out.wordmark && broken.has(out.wordmark)) out.wordmark = ''
+  return out
+}
+
 // "50 20" -> "50% 20%". The registry already guaranteed the shape; anything
 // else falls back to centre rather than emitting a broken CSS value.
 function toObjectPosition(focus) {
