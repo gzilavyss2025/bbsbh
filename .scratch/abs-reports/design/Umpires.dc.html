@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@700&display=swap">
+  <style>
+    body { margin: 0; background: #F3ECD8; }
+    a { color: #2F6E4F; text-decoration: none; } a:hover { color: #255740; text-decoration: underline; }
+    .cap { font-family: "Barlow Condensed","Arial Narrow",sans-serif; text-transform: uppercase; letter-spacing: 0.09em; }
+    .mono { font-family: "JetBrains Mono",ui-monospace,monospace; font-variant-numeric: tabular-nums; }
+    .prose { font-family: "Source Sans 3",system-ui,sans-serif; text-transform: none; }
+    .chip { min-height: 44px; padding: 8px 12px; border: 1px solid #CBC1A7; border-radius: 3px;
+            background: #FBF6E9; font-family: "Barlow Condensed",sans-serif; font-size: 12px;
+            letter-spacing: 0.09em; color: #3C4A5A; cursor: pointer; text-transform: uppercase; }
+    .chip.is-on { background: #1B2A3A; border-color: #1B2A3A; color: #FBF6E9; }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #F3ECD8; padding: 0 16px 28px; box-sizing: border-box; color: #1B2A3A;">
+
+  <!-- NOT A SEVENTH SECTION. The page already ships "The plate umpires" with a
+       six-column .rpt board, a UMPIRE_SORTS chip row and the 15-game floor in
+       its column head. What is new here is the PER-GAME COLUMN drawn as a bar
+       measured from the league rate instead of from zero, and a fourth sort
+       that opens the quiet end. This artboard is that board, revised. -->
+  <div style="display: flex; align-items: center; gap: 12px; margin: 32px 0 12px;">
+    <h2 class="cap" style="margin: 0; font-size: 21px; letter-spacing: 0.05em; color: #16222F;">The plate umpires</h2>
+    <span style="flex: 1 1 auto; height: 2px; background: #B4453A; opacity: 0.5;"></span>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px;">
+    <button class="chip">Overturned most</button>
+    <button class="chip">Overturned least</button>
+    <button class="chip is-on">Challenges drawn</button>
+    <button class="chip">Drawn fewest</button>
+  </div>
+
+  <div style="background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px; padding: 4px 12px 12px;">
+
+    <div style="display: grid; grid-template-columns: 22px 1fr 96px 40px; gap: 8px; align-items: end; padding: 10px 0 6px; border-bottom: 2px solid #1B2A3A;">
+      <span></span>
+      <span>
+        <span class="cap" style="display: block; font-size: 11px; color: #6B6558;">Umpire</span>
+        <span class="prose" style="display: block; font-size: 11px; line-height: 1.25; color: #6B6558;">Minimum 15 games &middot; 87 of 91 qualify</span>
+      </span>
+      <span class="cap" style="font-size: 11px; color: #6B6558; text-align: center;">Against 4.18</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558; text-align: right;">Per game</span>
+    </div>
+
+    <!-- BOTH TAILS ON ONE BOARD. A diverging bar whose view only ever shows one
+         end leaves half of every track permanently empty and buys nothing over
+         a plain bar. -->
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="7">
+      <div style="{{ r.rowStyle }}">
+        <span class="mono" style="font-size: 11px; color: #6B6558; text-align: right;">{{ r.rank }}</span>
+        <span style="min-width: 0;">
+          <a class="cap" href="#" style="display: block; font-size: 13px; letter-spacing: 0.05em; color: #16222F;">{{ r.name }}</a>
+          <span class="mono" style="display: block; font-size: 11px; color: #6B6558;">{{ r.games }} games</span>
+        </span>
+        <span style="position: relative; height: 22px; background: #EDE6D1; border-radius: 3px; overflow: hidden;">
+          <span style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #CBC1A7;"></span>
+          <span style="{{ r.fill }}"></span>
+        </span>
+        <span class="mono" style="font-size: 14px; text-align: right; color: #16222F;">{{ r.perGame }}</span>
+      </div>
+    </sc-for>
+
+    <div style="display: grid; grid-template-columns: 22px 1fr 96px 40px; gap: 8px; padding: 8px 0 0; border-top: 1px solid #DED6C0;">
+      <span></span>
+      <span class="cap" style="font-size: 11px; color: #6B6558;">75 more between them</span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 16px 0 0;">
+    <div style="padding: 12px; background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px;">
+      <!-- 5.40 minus 3.13. An earlier draft printed 1.3 here, which is neither
+           the spread nor either man's margin on the league. -->
+      <p class="mono" style="margin: 0; font-size: 28px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">2.27</p>
+      <p class="cap" style="margin: 8px 0 0; font-size: 12px; color: #6B6558;">Most to least, per game</p>
+      <p class="prose" style="margin: 4px 0 0; font-size: 11px; line-height: 1.25; color: #6B6558;">3.13 to 5.40</p>
+    </div>
+    <div style="padding: 12px; background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #B4453A; border-radius: 3px;">
+      <p class="mono" style="margin: 0; font-size: 28px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">70.2%</p>
+      <p class="cap" style="margin: 8px 0 0; font-size: 12px; color: #6B6558;">Most overturned &middot; challenged pitches only</p>
+      <p class="prose" style="margin: 4px 0 0; font-size: 11px; line-height: 1.25; color: #6B6558;">Andy Fletcher &middot; 38.9% for Steven Jaschinski</p>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":390,"height":700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const LEAGUE = 4.18
+    const SPAN = 1.5
+
+    const TOP = [
+      { rank: 1, name: 'John Bacon', games: 15, perGame: 5.40 },
+      { rank: 2, name: 'Adrian Johnson', games: 21, perGame: 5.24 },
+      { rank: 3, name: 'Hunter Wendelstedt', games: 30, perGame: 5.23 }
+    ]
+    const BOTTOM = [
+      { rank: 85, name: 'Austin Jones', games: 19, perGame: 3.37 },
+      { rank: 86, name: 'Erich Bacchus', games: 27, perGame: 3.15 },
+      { rank: 87, name: 'Adam Hamari', games: 30, perGame: 3.13 }
+    ]
+
+    function row(u, last) {
+      const d = u.perGame - LEAGUE
+      const w = Math.min(50, (50 * Math.abs(d)) / SPAN)
+      const fill = d >= 0
+        ? 'position: absolute; top: 4px; bottom: 4px; left: 50%; width: ' + w + '%; background: #1B2A3A; border-radius: 0 3px 3px 0;'
+        : 'position: absolute; top: 4px; bottom: 4px; right: 50%; width: ' + w + '%; background: #B4453A; border-radius: 3px 0 0 3px;'
+      return {
+        rank: String(u.rank), name: u.name, games: String(u.games),
+        perGame: u.perGame.toFixed(2), fill: fill,
+        rowStyle: 'display: grid; grid-template-columns: 22px 1fr 96px 40px; gap: 8px; align-items: center; padding: 9px 0; border-top: 1px solid ' + (last ? '#CBC1A7' : '#DED6C0') + ';'
+      }
+    }
+
+    const rows = TOP.map(function (u) { return row(u, false) })
+      .concat(BOTTOM.map(function (u, i) { return row(u, i === 0) }))
+
+    return { rows: rows }
+  }
+}
+</script>
+</body>
+</html>
