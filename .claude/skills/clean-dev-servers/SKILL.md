@@ -12,10 +12,15 @@ actually kills processes, and only with your confirmation each time.
    verbatim (PID, port, worktree path, branch, status for every running vite
    process it finds). If it reports none running, say so and stop — nothing
    to do.
-2. For any entry whose status is `merged into origin/<branch>` or
-   `orphaned (worktree deleted)`, it's safe to suggest killing. For any entry
-   still `active (unmerged work)`, call it out as likely still in use by
-   another concurrent agent/worktree — don't suggest killing it by default.
+2. The script's own summary line names how many it considers stale, and it
+   reaches that verdict through `worktrees.mjs`'s classifier, so it matches
+   what `/clean-worktrees` would say about the same folder. Those entries —
+   `merged into origin/<branch>`, `upstream branch deleted (PR merged or
+   closed)`, or `orphaned (worktree deleted)` — are safe to suggest killing.
+   Anything else (`active (unmerged work)`, `active (never pushed)`, `fresh`,
+   an uncommitted-changes worktree, or `main (primary checkout)`) is likely
+   still in use by another concurrent agent, or is the maintainer's own
+   server — call those out, don't suggest killing them by default.
 3. Use `AskUserQuestion` (multiSelect) listing each stale entry (label it with
    port + worktree name) so the user picks which ones to actually kill. Always
    let them select from the full list, including active ones, in case they
