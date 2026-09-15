@@ -111,6 +111,61 @@ export function isOwnBlobUrlUnder(raw, prefix) {
   }
 }
 
+// --- reclaiming the upload a save replaced -----------------------------------
+//
+// Every upload lands on a UNIQUE pathname (`addRandomSuffix` below), and that
+// stays: overwriting a stable one would leave the old bytes cached hard at the
+// CDN, so "I replaced the photo" would keep showing the previous one. The price
+// of that choice is that the bytes a save REPLACES stay in the store with
+// nothing pointing at them.
+//
+// The upload endpoints already reclaim ONE case: a draft abandoned by
+// re-uploading before saving, which the drawer names in `?replaces=`. They
+// cannot reclaim the other, and deliberately do not try -- at upload time the
+// old URL is still the live one, so deleting it and then failing the save would
+// break the page it is still rendering on.
+//
+// The SAVE is where it becomes dead, and where both maps are already in hand.
+
+// Every URL in our own store, under `prefix`, that a store map's values name.
+// Both stores hold flat string values (sanitizeOverrides and
+// sanitizeIdentityOverrides each drop anything else), so this does not recurse.
+function blobUrlsIn(map, prefix) {
+  const found = new Set()
+  for (const value of Object.values(map ?? {})) {
+    if (typeof value === 'string' && isOwnBlobUrlUnder(value, prefix)) found.add(value)
+  }
+  return found
+}
+
+// What a save orphaned: named by `prev`, named by nothing in `keep`.
+//
+// `keep` is a LIST of maps rather than one, because "still referenced" is wider
+// than "in the new map" wherever a store keeps an undo history -- an entry that
+// can still be restored is still a reference. Two clubs sharing one mark also
+// keep it when only one of them is re-pointed, which falls out of the same set.
+export function reclaimableBlobUrls(prev, keep, prefix) {
+  const kept = new Set()
+  for (const map of keep ?? []) for (const url of blobUrlsIn(map, prefix)) kept.add(url)
+  return [...blobUrlsIn(prev, prefix)].filter((url) => !kept.has(url))
+}
+
+// Best-effort, and deliberately so: the write this follows has already
+// succeeded, so a failed delete must leave an orphan rather than turn a good
+// save into an error the admin cannot act on. Lazy import for the same reason
+// the endpoints use one -- the module still loads where the dependency is
+// absent. No token means the store is not configured, so there is nothing to
+// reclaim and nothing to report.
+export async function reclaimBlobs(urls, token) {
+  if (!urls?.length || !token) return
+  try {
+    const { del } = await import('@vercel/blob')
+    await del(urls, { token })
+  } catch {
+    // Orphans left behind. Nothing the admin did was wrong.
+  }
+}
+
 export default async function handler(req, res) {
   const reply = (body, status = 200) =>
     jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
