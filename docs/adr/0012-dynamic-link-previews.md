@@ -95,3 +95,47 @@ which is shared across every inning section) — the open-ended in-game
 `top{n}`/`bottom{n}` sections aren't precomputable, which is why the
 reliability fix above is the piece that actually covers an arbitrary
 mid-game share.
+
+## Amendment (2026-09-15) — the image is static for now; the card is not
+
+Every card's `og:image` now points at the static `public/og-image.png` instead
+of a per-route `api/og.js` render. `ogUrl()` in `api/_lib/cards.js` is the
+whole change, and reverting that one function restores per-route art.
+
+**What forced it.** Drawing one card costs about 400ms of CPU: Satori lays the
+card out, then resvg rasterises a 1200x630 PNG. That price is fine for a link
+somebody actually shared. It is not fine multiplied by the warm pass this ADR
+added above, which asks for roughly 855 cards a night — three sections per
+game, both clubs, and every player on all thirty active rosters.
+
+Measured in Vercel Observability on 2026-09-15, over twelve hours:
+
+| route          | invocations | CPU  |
+|----------------|-------------|------|
+| `/api/og`      | 885         | 6m   |
+| `/api/preview` | 921         | 51s  |
+| all 12 Node functions combined | ~180 | ~8s |
+
+Six minutes of CPU per twelve hours is about six hours a month, against the
+Hobby plan's four-hour Active CPU allowance. `/api/og` alone was the entire
+overage, and the near 1:1 ratio with `/api/preview` shows what it was spent
+on: the warm pass drawing cards for links nobody had shared yet, every night.
+
+Raising `s-maxage` does not fix this. The edge cache is keyed per deployment
+and this project deploys about three times a day — nightly data plus merges —
+so no function cache survives more than about eight hours regardless of the
+header. The warm pass then repopulates it from cold.
+
+**What a shared link keeps.** Its own `<title>`, description, `og:image:alt`
+and canonical, all still built per route by the builders above. Only the
+picture is shared between them. A player link previews with the Tally card
+rather than his headshot — a real step back from what this ADR set out to do,
+taken deliberately and cheaply reversible.
+
+`api/og.js` is untouched and still correct. Nothing calls it. The warm pass
+still runs and still warms `/api/preview`, which costs ~55ms a route; its
+`seenImages` set now collapses to a single image fetch, for free.
+
+`test/cards.test.js` pins the invariant ("no card points at the dynamic
+/api/og renderer"), so restoring per-route art means changing that test on
+purpose rather than letting the cost drift back in.
