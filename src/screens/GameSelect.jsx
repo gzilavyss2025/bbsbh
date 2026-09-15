@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useNav } from '../lib/nav.js'
 import { apiDateToUrl, slatePath, teamPath } from '../lib/route.js'
 import { fetchDayVideos } from '../api/gamehighlights.js'
-import { fetchSchedule, fetchSlateScores, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
+import { fetchSchedule, fetchSlateScores, allStarInfoFrom, fetchSeasonMeta, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchGameJerseys } from '../api/uniforms.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
@@ -30,6 +30,9 @@ import { FavoriteTeamModal } from '../components/account/FavoriteTeamModal.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
 import { WireDock } from '../components/transactions/WireDock.jsx'
 import { WireRail } from '../components/transactions/WireRail.jsx'
+import { OffseasonLead } from '../components/offseason/OffseasonLead.jsx'
+import { SpringCountdown } from '../components/offseason/WinterCalendar.jsx'
+import { useOffseason } from '../hooks/useOffseason.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
@@ -311,19 +314,26 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // goes dark the same week — so the lookup is gated on ANY level's slate
   // coming back empty, not just MLB's.
   const isEmptyDay = !loading && !error && sorted.length === 0
-  const allStarInfo = useAsync(
-    () => (isEmptyDay ? fetchAllStarInfo(season) : Promise.resolve(null)),
+  // ONE fetch, two questions: this row carries the break bounds AND the dates
+  // that say whether the season is over, so the offseason gate below costs an
+  // empty day nothing it was not already spending.
+  const seasonMeta = useAsync(
+    () => (isEmptyDay ? fetchSeasonMeta(season) : Promise.resolve(null)),
     [isEmptyDay, season],
   )
   const breakWindow = useMemo(
-    () => allStarBreakWindow(allStarInfo.data, dateStr),
-    [allStarInfo.data, dateStr],
+    () => allStarBreakWindow(allStarInfoFrom(seasonMeta.data), dateStr),
+    [seasonMeta.data, dateStr],
   )
   // The Derby itself is an MLB-only event (DerbyCard below) — a MiLB slate on
   // that same date still gets the plain All-Star Break banner, not the card.
   const isDerbyDay = sportId === SPORT_IDS.MLB && Boolean(breakWindow?.isDerbyDay)
   const isBreakWindow = Boolean(breakWindow) && !isDerbyDay
-  const allStarPending = isEmptyDay && allStarInfo.loading
+  const allStarPending = isEmptyDay && seasonMeta.loading
+
+  // Is the slate looking at a winter? Read off the dates statsapi publishes for
+  // the season, never off the games coming back empty (hooks/useOffseason.js).
+  const { phase: offseason, winter } = useOffseason(dateStr, sportId, seasonMeta.data)
 
   // The banner's date always comes from an actual forward schedule scan
   // (fetchNextGameDate), never straight from statsapi's firstDate2ndHalf —
@@ -332,7 +342,9 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // slate is back the 17th), so it only bounds the break WINDOW here, never
   // supplies the date text. Same lookup covers the generic "Off Day" case
   // (a level's own single day off, e.g. a MiLB Monday) outside any break.
-  const needsResumeLookup = isEmptyDay && !isDerbyDay && !allStarPending
+  // `!offseason` spares a winter morning the scan entirely: it reaches ten days
+  // and the next game is a hundred away, so it can only ever answer null.
+  const needsResumeLookup = isEmptyDay && !isDerbyDay && !allStarPending && !offseason
   const resumeLookup = useAsync(
     () => (needsResumeLookup ? fetchNextGameDate(sportId, dateStr) : Promise.resolve(null)),
     [needsResumeLookup, sportId, dateStr],
@@ -791,11 +803,22 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
             // (below) — briefly while either lookup is still in flight too, so
             // neither flashes "No games scheduled." before the fetch resolves.
             emptyMessage={
-              allStarInfo.loading || breakWindow || resumeLookupPending || showOffDayBanner
+              seasonMeta.loading || breakWindow || resumeLookupPending ||
+              showOffDayBanner || offseason
                 ? null
                 : 'No games scheduled.'
             }
           />
+
+          {/* THE OFFSEASON PAGE (issue #1038). It moves nothing: the club strip,
+              the level tabs and the date banner all stay where they are in
+              season. The empty games area holds the wire at full width instead
+              of the words "No games scheduled." — see OffseasonLead.jsx. */}
+          {winter && (
+            <OffseasonLead endDate={dateStr} sportId={sportId} winter={winter}>
+              {!wide && <SpringCountdown winter={winter} />}
+            </OffseasonLead>
+          )}
 
           {showBreakBanner && (
             <div className="break-banner" role="note">
@@ -908,7 +931,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
             reports which back so the shell can give the reserved width up.
             WIDE ONLY: the phone's copy of this feed is the dock at the foot
             of this screen. See WireRail.jsx. */}
-        {showWire && wide && (
+        {showWire && wide && !winter && (
           <WireRail
             endDate={dateStr}
             sportId={sportId}
@@ -917,6 +940,10 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
             singleDay={!isToday}
           />
         )}
+
+        {/* The slot the wire left. `railed` stays true through the offseason, so
+            the countdown inherits a column the shell already reserves. */}
+        {wide && winter && <SpringCountdown winter={winter} />}
       </div>
 
       <SiteFooter onShowLogos={onShowLogos} />
@@ -963,7 +990,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
           which keeps the slate's own content ahead of it for a screen reader.
           It publishes --wire-rail-h and reports whether it rendered at all;
           `docked` above turns that into the screen's bottom padding. */}
-      {showWire && !wide && (
+      {showWire && !wide && !winter && (
         <WireDock
           endDate={dateStr}
           sportId={sportId}

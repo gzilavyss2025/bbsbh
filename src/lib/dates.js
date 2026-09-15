@@ -68,6 +68,16 @@ export function weekdayAbbr(apiDate) {
   return dt.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 3).toUpperCase() // caps-js-exempt
 }
 
+// "Dec 10" — month and day, no weekday and no year, for a strip whose whole
+// row is one winter (the offseason page's calendar). monthDay's "12/10" reads
+// as a fraction in a line of short labels; the year is carried by the page.
+export function monthDayShort(apiDate) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return ''
+  const [y, m, d] = apiDate.split('-').map(Number)
+  const dt = new Date(y, m - 1, d)
+  return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
 // "Fri, Jul 5" style label for the slate header.
 export function humanDate(apiDate) {
   const [y, m, d] = apiDate.split('-').map(Number)

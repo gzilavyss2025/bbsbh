@@ -34,11 +34,38 @@ test('every field has a string default within its own maxLength', () => {
 // paragraph only `&& note`, so an empty default means "no note yet", which is
 // the correct shipped state for a park nobody has written about. Same story
 // for every MiLB park field (`ballparksMilb`) — BallparkCard renders each of
-// them only when the owner has set one. Splitting the assertion keeps the
-// strong guarantee exactly where it protects something.
+// them only when the owner has set one. The offseason page's winter calendar is
+// the third case, and the same shape: WinterCalendar.jsx renders the strip only
+// once it has rows, and an empty default parses to no rows. Its own test below
+// pins that it ships empty, which is a stronger statement than this one's
+// exemption. Splitting the assertion keeps the strong guarantee exactly where
+// it protects something.
+const SHIPS_EMPTY = new Set(['offseason.calendar'])
+
 test('every unconditionally-rendered field has a non-empty default', () => {
   for (const f of FIELDS) {
     if (f.group === 'ballparks' || f.group === 'ballparksMilb') continue
+    if (SHIPS_EMPTY.has(f.id)) continue
+    assert.ok(f.default.length > 0, `${f.id} default is non-empty`)
+  }
+})
+
+// The winter calendar ships EMPTY on purpose, and that is worth pinning rather
+// than merely permitting. Every date on it — the GM meetings, the 40-man
+// deadline, the Rule 5 draft, arbitration filing, the Hall of Fame vote, report
+// day — moves from winter to winter, and none of the six is in statsapi. A
+// shipped default would therefore be the registry asserting a Rule 5 date it
+// has no way to check, and it would go quietly wrong every November. The two
+// dates the app CAN check (spring training, Opening Day) are appended by the
+// strip off the schedule, so an unedited calendar is short rather than wrong.
+test('the winter calendar ships empty, so no date is claimed without a source', () => {
+  const field = FIELDS.find((f) => f.id === 'offseason.calendar')
+  assert.ok(field, 'the winter calendar field exists')
+  assert.equal(field.default, '')
+  assert.equal(field.multiline, true)
+  // The other two offseason fields are ordinary copy and must NOT ship empty:
+  // they are rendered unconditionally beside the wire and the countdown.
+  for (const f of FIELDS.filter((x) => x.group === 'offseason' && x.id !== 'offseason.calendar')) {
     assert.ok(f.default.length > 0, `${f.id} default is non-empty`)
   }
 })

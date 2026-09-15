@@ -436,7 +436,18 @@ const BUDGETS = {
   // outside it reads. A flat lettered sibling for the same ordering reason
   // every entry above it gives, and it shares no class with 77a or 77b, so
   // its place after them changes nothing in the cascade.
-  'src/styles': 114,
+  // 114 -> 115 for 78-offseason.css — the offseason home page (issue #1038).
+  // A flat sibling for the same ordering reason every entry above it gives,
+  // and it is a genuinely new PAGE STATE rather than another component on an
+  // existing one: from November to February the slate's games area holds the
+  // roster wire at full width, a dated winter calendar and a countdown, none
+  // of which exist on any in-season screen. Folding it into a sheet that does
+  // was considered and rejected twice over — 29-team-transactions.css is at
+  // 946 of its 950-line cap, and 04a-wire-dock.css draws the phone's SECOND
+  // presentation of the wire, not the page the wire leads. This sheet will
+  // also grow: steps 3 and 4 of that issue add the picked-game card and the
+  // season notebook to the same page.
+  'src/styles': 115,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -906,7 +917,13 @@ const BUDGETS = {
   // React-wiring-over-pure-modules shape as every sibling here: it owns the
   // cursor and the clip's object URL and holds no rule of its own, since the
   // rail, the film gate and the byte store are all pure modules underneath it.
-  'src/hooks': 26,
+  // 26 -> 27 for useOffseason.js — the offseason home page's gate (issue
+  // #1038). It is a hook rather than lines in GameSelect for the reason
+  // check-file-size.mjs states beside that screen's own budget: it owns a
+  // derivation and a conditional second fetch, and the screen it serves was at
+  // its cap. It is a hook rather than a pure module because the pure half
+  // already exists separately, in src/lib/time/seasonPhase.js.
+  'src/hooks': 27,
   'src/screens/identity-lab': 15,
   // New entry: +1 for PlayerHoverCard.jsx — a player-identity primitive like
   // Headshot/PlayerLink beside it, not one of this bucket's ten player-PAGE cards.

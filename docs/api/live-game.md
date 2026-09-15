@@ -167,6 +167,14 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   (+ `officialDate`) for a gamePk list spanning many dates/levels, e.g. the
   All-Star Rosters page, where each card needs its own team identity rather
   than inheriting one date's sportId like the ordinary slate.
+  `fetchSeasonMeta(season)` is the whole `/api/v1/seasons/{y}?sportId=1` row —
+  the endpoint that STATES where a season starts, breaks and ends rather than
+  leaving it to be inferred. `fetchAllStarInfo` is now a narrow reading of it,
+  and the offseason gate (`hooks/useOffseason.js`, ADR-0074) reads the same row,
+  so an empty day pays for one fetch and gets both answers. Note the winter
+  needs TWO rows to describe: `offSeasonEndDate` is December 31 and
+  `preSeasonStartDate` is January 1 of the same row, so the offseason a reader
+  lives through is season Y's `offseasonStartDate` to Y+1's `springStartDate`.
 - `uniforms.js` — `/api/v1/uniforms/game` for what each club is wearing (not in
   the live feed; spoiler-free but empty until ~first pitch, so it rides the
   feed's fetch/reload in `GameView` and renders on the lineup pages + box
