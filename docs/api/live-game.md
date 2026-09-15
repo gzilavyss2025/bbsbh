@@ -109,8 +109,12 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   registry's order. A family that differs only in one number — the months, the
   weekdays — is built from a small table rather than written out eight times,
   and the suite pins that each month door's `sitCode` names the same month its
-  facet filters for. `chip: true` makes a door one of a compact row instead of
-  a ledger line; only the weekdays use it.
+  facet filters for. `family` files a door into one of the runs the card folds
+  behind a single row (`FAMILIES`, `FOLD_FROM`) — the months and the weekdays,
+  and nothing else. `doorCells` renders one door's career as the five cells the
+  card's table draws, `DOOR_COLUMNS` names them and `DOOR_EMPHASIS` says which
+  one carries the question; all three sit beside `careerSplitLine`, which
+  quotes the same five figures as the sheet's headline (ADR-0073).
   **GAME TYPES ARE ASKED FOR, NOT FILTERED FOR.** Both of `fetch.js`'s stats
   calls carry `gameType=`: a game log is regular-season-only until the call
   names the rounds, and `yearByYear&gameType=F,D,L,W` returns just the Octobers
@@ -134,7 +138,16 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   tried and why it was worse. **The calendar doors are the exception and agree
   EXACTLY**: measured over three careers 2026-09-14, MLB's monthly and weekday
   aggregates matched the joined rows for every month and every weekday. A
-  relocated home game moves a park; it does not move a Tuesday. `test/boxlines-facets.test.js` pins the facet
+  relocated home game moves a park; it does not move a Tuesday. Those doors also
+  **span the postseason** (ADR-0073): a date does not stop being October because
+  the game was a division series, so `spansPostseason` widens the LABEL (a second
+  `careerStatSplits` call at `gameType=P`, summed by `mergeCareerSplits` — rates
+  recomputed from components, since two rates cannot be averaged) and
+  `facet.postseason` widens the ROWS, and the pair is pinned by test because
+  either half alone states a career it does not open. The exact agreement
+  survives the sum: Yelich's October reads 42 G against 42 rows. There is no
+  November door (sitCode '11' returns nothing), so a World Series running into
+  November lands in no month. `test/boxlines-facets.test.js` pins the facet
   layer, `test/boxlines-card-facets.test.js` pins every door against the same
   `facetPlan` the sheet calls, and `test/boxlines-rows.test.js` pins that
   `keep` cannot resurrect a row the cutoff or the Final check dropped.

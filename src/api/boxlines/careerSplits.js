@@ -45,7 +45,13 @@ import { getJson } from '../statsapi.js'
 // names that do not apply to the group asked for.
 const FIELDS =
   'fields=stats,splits,split,code,stat,gamesPlayed,era,inningsPitched,strikeOuts,baseOnBalls,' +
-  'plateAppearances,avg,homeRuns,ops'
+  'plateAppearances,avg,homeRuns,ops,' +
+  // The COMPONENTS, for the calendar doors alone. A door that spans the
+  // postseason gets two aggregates from MLB and one line on the card, and two
+  // rates cannot be averaged — .444 over 16 games and .208 over 26 is not
+  // .326 of anything. `mergeCareerSplits` adds the counting stats these name
+  // and divides once, which is what a combined rate IS.
+  'atBats,hits,hitByPitch,sacFlies,totalBases,earnedRuns,outs'
 
 // The career line one door prints, in the vocabulary the Splits vs team door
 // beside it already uses (api/vsTeamSplits.js's `vsTeamDoorLabel`), so two
@@ -58,6 +64,71 @@ export function careerSplitLine(stat, group) {
   return group === 'pitching'
     ? `${stat.gamesPlayed} G, ${stat.inningsPitched} IP, ${stat.era} ERA, ${stat.strikeOuts} K, ${stat.baseOnBalls} BB`
     : `${stat.gamesPlayed} G, ${stat.plateAppearances} PA, ${stat.avg}, ${stat.homeRuns} HR, ${stat.ops} OPS`
+}
+
+// ONE CAREER OUT OF TWO, for the doors that span the postseason. MLB keeps the
+// regular season and October apart — `careerStatSplits` answers for one
+// `gameType` at a time, and asking for `R,P` returns the two rows separately
+// (and twice over), never a combined one — so a calendar door that means to
+// count both has to add them here.
+//
+// RATES CANNOT BE AVERAGED. Yelich in October is .444 over 16 regular-season
+// games and .208 over 26 postseason ones, and his October is neither of those
+// nor the midpoint: it is 44 hits in 150 at-bats, .293. So this adds the
+// COUNTING stats and divides once, which is the definition of the combined
+// rate rather than an approximation of it.
+//
+// IT COPIES MLB'S OWN ARITHMETIC, INCLUDING ITS ROUNDING. OPS is not
+// OBP + SLG at full precision: MLB rounds each half to three places and adds
+// THOSE. Yelich's October reads .559 + .630 = 1.189 on MLB's own card, where
+// the unrounded sum is 1.1884 and would print 1.188. The suite pins this by
+// feeding one real split back through the merge and requiring MLB's own
+// published string out the other side.
+function num(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+// A three-place rate the way a scorebook writes one: ".293", "1.189".
+function rate3(v) {
+  const s = v.toFixed(3)
+  return s.startsWith('0.') ? s.slice(1) : s
+}
+
+const round3 = (v) => Math.round(v * 1000) / 1000
+
+export function mergeCareerSplits(a, b, group) {
+  if (!a || !b) return a ?? b ?? null
+  const sum = (k) => num(a[k]) + num(b[k])
+  if (group === 'pitching') {
+    // `outs` is MLB's own exact count, so the innings never go through
+    // "153.0" and back. Printed the way statsapi prints them: whole innings,
+    // then the leftover third.
+    const outs = sum('outs')
+    const earned = sum('earnedRuns')
+    return {
+      gamesPlayed: sum('gamesPlayed'),
+      inningsPitched: `${Math.floor(outs / 3)}.${outs % 3}`,
+      era: outs ? ((earned * 27) / outs).toFixed(2) : '-.--',
+      strikeOuts: sum('strikeOuts'),
+      baseOnBalls: sum('baseOnBalls'),
+    }
+  }
+  const atBats = sum('atBats')
+  const hits = sum('hits')
+  const walks = sum('baseOnBalls')
+  const hbp = sum('hitByPitch')
+  const flies = sum('sacFlies')
+  const reached = atBats + walks + hbp + flies
+  const obp = reached ? (hits + walks + hbp) / reached : 0
+  const slugging = atBats ? sum('totalBases') / atBats : 0
+  return {
+    gamesPlayed: sum('gamesPlayed'),
+    plateAppearances: sum('plateAppearances'),
+    avg: rate3(atBats ? hits / atBats : 0),
+    homeRuns: sum('homeRuns'),
+    ops: rate3(round3(obp) + round3(slugging)),
+  }
 }
 
 // A door that counts GAMES and says nothing else — the two lineup doors. The
@@ -76,17 +147,46 @@ export function doorLine(entry, stat, group) {
   return entry?.lineKind === 'games' ? gamesLine(stat) : careerSplitLine(stat, group)
 }
 
-// The same career, short enough for a CHIP. The weekday doors are seven
-// controls on one row (#1001) and the full line does not fit in any of them, so
-// they print the two figures that carry the question — how often, and how well.
-// It is the SAME stat object `careerSplitLine` reads, so a chip and the sheet's
-// headline above its rows cannot disagree about the career; only about how much
-// of it they have room to say.
-export function chipLine(stat, group) {
+// THE SAME CAREER AS FIVE CELLS, for a card that names its columns once at the
+// top instead of on every line. `careerSplitLine` above prints one door's
+// career as a sentence; this prints the identical five figures in the identical
+// order, for the sheet's headline and the card's table to stay in step. They
+// are two renderings of one stat object and the suite pins them to each other.
+//
+// A cell is null where the figure does not exist — the two lineup doors count
+// GAMES off a fielding career and it carries no rate stat, so their last four
+// cells are empty rather than zero. The card draws a quiet mark there; a zero
+// would be a lie and a dash reads as data MLB failed to send.
+export function doorCells(entry, stat, group) {
   if (!stat) return null
-  return group === 'pitching'
-    ? `${stat.gamesPlayed} G, ${stat.era} ERA`
-    : `${stat.gamesPlayed} G, ${stat.avg}`
+  const text = (v) => (v == null ? null : String(v))
+  if (entry?.lineKind === 'games') return [text(stat.gamesPlayed), null, null, null, null]
+  return (
+    group === 'pitching'
+      ? [stat.gamesPlayed, stat.inningsPitched, stat.era, stat.strikeOuts, stat.baseOnBalls]
+      : [stat.gamesPlayed, stat.plateAppearances, stat.avg, stat.homeRuns, stat.ops]
+  ).map(text)
+}
+
+// What those five cells are CALLED, in the order `doorCells` returns them and
+// the vocabulary the Splits vs team card's own stat grid already prints on the
+// same page (26-player-page.css's .player__statgrid). The card heads each of
+// its sections with this row, so a reader who scrolls past one heading meets
+// the names again at the next.
+export const DOOR_COLUMNS = {
+  hitting: ['G', 'PA', 'AVG', 'HR', 'OPS'],
+  pitching: ['G', 'IP', 'ERA', 'K', 'BB'],
+}
+
+// WHICH CELL CARRIES THE QUESTION. A split is asked to answer "how well", and
+// four of the five figures are context for the one that does — so the rate
+// stats take the page's darkest ink and the counting stats step back. It is
+// not the same cell for both groups: a bat is read on OPS with AVG beside it,
+// an arm on ERA alone, and the column that sits under OPS on a pitcher's card
+// is BB, which carries nothing.
+export const DOOR_EMPHASIS = {
+  hitting: [null, null, 'mid', null, 'key'],
+  pitching: [null, null, 'key', null, null],
 }
 
 // The career split rows for a set of situation codes, as a Map code -> stat.
@@ -151,12 +251,21 @@ export async function fetchDoorLabels(personId, group, entries) {
   const list = entries ?? []
   if (!personId || !list.length) return new Map()
   const codes = list.map((e) => e.sitCode).filter(Boolean)
+  // THE CALENDAR DOORS COUNT OCTOBER TWICE OVER. A month or a weekday is a
+  // fact about the DATE, and a date does not stop being a Sunday because the
+  // game was a division series — so those doors span both, and MLB answers for
+  // one game type at a time. One extra request for the whole family, and only
+  // for a card that has one.
+  const spanCodes = list.filter((e) => e.spansPostseason && e.sitCode).map((e) => e.sitCode)
   const types = [...new Set(list.map((e) => e.careerGameType).filter(Boolean))]
   // The two lineup doors share ONE pair of calls — his starts and his career
   // games — and a card without them asks neither.
   const wantsLineup = list.some((e) => e.fielding)
-  const [bySitCode, starts, whole, ...totals] = await Promise.all([
+  const [bySitCode, byPostseason, starts, whole, ...totals] = await Promise.all([
     fetchCareerSplits(personId, group, codes),
+    spanCodes.length
+      ? fetchCareerSplits(personId, group, spanCodes, 'P')
+      : Promise.resolve(new Map()),
     wantsLineup ? fetchFieldingStarts(personId) : Promise.resolve(null),
     wantsLineup ? fetchCareerTotal(personId, group, 'R') : Promise.resolve(null),
     ...types.map((t) => fetchCareerTotal(personId, group, t)),
@@ -176,20 +285,22 @@ export async function fetchDoorLabels(personId, group, entries) {
       ? byFielding.get(e.fielding)
       : e.careerGameType
         ? byGameType.get(e.careerGameType)
-        : bySitCode.get(e.sitCode)
+        : e.spansPostseason
+          ? mergeCareerSplits(bySitCode.get(e.sitCode), byPostseason.get(e.sitCode), group)
+          : bySitCode.get(e.sitCode)
     if (stat) out.set(e.key, stat)
   }
   return out
 }
 
-export async function fetchCareerSplits(personId, group, sitCodes) {
+export async function fetchCareerSplits(personId, group, sitCodes, gameType = 'R') {
   const codes = [...new Set(sitCodes ?? [])].filter(Boolean)
   if (!personId || !codes.length) return new Map()
   let splits = []
   try {
     const data = await getJson(
       `/api/v1/people/${personId}/stats?stats=careerStatSplits&group=${group}&sportId=1` +
-        `&sitCodes=${codes.join(',')}&${FIELDS}`,
+        `&gameType=${gameType}&sitCodes=${codes.join(',')}&${FIELDS}`,
     )
     splits = data.stats?.[0]?.splits ?? []
   } catch {

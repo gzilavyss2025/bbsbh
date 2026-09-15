@@ -25,12 +25,15 @@
 // `footNote` is optional and prefixes the sheet's foot when this facet needs
 // a word the others do not.
 //
-// `chip: true` makes it one of a compact row of controls instead of a full
-// ledger row. Only the seven weekdays use it: a ledger row each would be
-// seven lines saying nearly the same thing, and the question ("does he hit on
-// getaway day?") is a comparison, which wants them side by side. A chip prints
-// `chipLine` rather than `careerSplitLine` — the same stat object, shortened —
-// and names itself with `short`.
+// `family` files an entry into one of the FAMILIES below — a run of doors the
+// card folds behind a single row. Only the months and the weekdays have one.
+//
+// `spansPostseason` says this door counts October games of EVERY kind, and it
+// must be set together with `postseason: true` on the entry's own `facet` — one
+// is the LABEL's game types and the other is the ROWS', and a door with only
+// one of them states a career it does not open (a test pins the pair). Only the
+// calendar doors have it: a month and a weekday are facts about the DATE, and a
+// date does not stop being a Sunday because the game was a division series.
 //
 // THE LABEL'S FIGURES COME FROM ONE OF TWO SOURCES, and an entry names which:
 //
@@ -67,8 +70,30 @@ export const SECTIONS = [
   { key: 'where', title: 'Where' },
   { key: 'when', title: 'When' },
   { key: 'how', title: 'How he got in' },
-  { key: 'counted', title: 'When it counted' },
+  { key: 'counted', title: 'Stakes' },
 ]
+
+// THE FAMILIES — a run of doors under one heading that differ in exactly one
+// number: the eight months, the seven weekdays. The card folds each behind a
+// single row it can open, because fifteen of the card's twenty-five doors are
+// these two runs and undifferentiated they are the wall the SECTIONS above
+// were already fighting. The order here is the order the card draws them in,
+// under whichever section their own entries name.
+//
+// A family is a fold, not a different KIND of door: open it and its members
+// are ordinary rows in the same five columns as everything else. That is the
+// whole change from the chips that used to stand in for the weekdays — a chip
+// could hold two figures of the five, so a comparison across the week could
+// not be read in the same columns as a comparison across the season.
+export const FAMILIES = [
+  { key: 'month', title: 'By month' },
+  { key: 'weekday', title: 'By day of the week' },
+]
+
+// A family with fewer doors than this stands loose instead of folding: one
+// row hiding two is a row spent to save a row. A September call-up's card
+// shows his one or two months outright.
+export const FOLD_FROM = 3
 
 // The six doors shipped by #1000, #1003 (its pitcher half), #1004 and #1005,
 // and the postseason door #1006 added. Each source was checked against a real
@@ -91,13 +116,13 @@ const MONTHS = [
 
 // Sunday 0, matching `weekdayOf` in facets.js and the printed week.
 const WEEKDAYS = [
-  [0, 'dsu', 'Sun', 'Sunday'],
-  [1, 'dmo', 'Mon', 'Monday'],
-  [2, 'dtu', 'Tue', 'Tuesday'],
-  [3, 'dwe', 'Wed', 'Wednesday'],
-  [4, 'dth', 'Thu', 'Thursday'],
-  [5, 'dfr', 'Fri', 'Friday'],
-  [6, 'dsa', 'Sat', 'Saturday'],
+  [0, 'dsu', 'Sunday'],
+  [1, 'dmo', 'Monday'],
+  [2, 'dtu', 'Tuesday'],
+  [3, 'dwe', 'Wednesday'],
+  [4, 'dth', 'Thursday'],
+  [5, 'dfr', 'Friday'],
+  [6, 'dsa', 'Saturday'],
 ]
 
 export const CARD_FACETS = [
@@ -176,48 +201,61 @@ export const CARD_FACETS = [
     section: 'when',
     groups: ['hitting', 'pitching'],
   },
-  // WHICH MONTH (#999). Eight doors, and the eight are the whole regular
-  // season: statsapi's situation codes number the months, '3' March through
-  // '10' October, and a career row came back for every one of them on both
-  // groups (verified 2026-09-14 on 592885 hitting and 656849 pitching). A
-  // month with no games renders no door, so April through September is what
-  // most careers show and March and October belong to the long ones.
+  // WHICH MONTH (#999). Eight doors: statsapi's situation codes number the
+  // months, '3' March through '10' October, and a career row came back for
+  // every one of them on both groups (verified 2026-09-14 on 592885 hitting and
+  // 656849 pitching). A month with no games renders no door, so April through
+  // September is what most careers show and March and October belong to the
+  // long ones.
   //
-  // THE DOOR AND THE ROWS AGREE EXACTLY HERE, which is worth saying because
-  // the home/road doors above them do not. Measured over three careers, MLB's
-  // monthly aggregate matched the rows month for month, all eight, every time
-  // — Yelich 21/221/272/292/290/326/287/16 on both sides. A month is a fact
-  // about the date, and the date is the one thing the game log and the
-  // schedule cannot disagree about.
+  // OCTOBER COUNTS EVERY KIND OF OCTOBER GAME (`spansPostseason`, ADR-0073).
+  // A month is a fact about the DATE, so a division series in October is an
+  // October game — Yelich reads 42 G / .293 there, his 16 regular-season games
+  // and his 26 postseason ones, not the 16 this door used to show. MLB keeps
+  // the two apart and publishes no combined row, so `mergeCareerSplits` adds
+  // them (rates are recomputed from components, never averaged).
+  //
+  // THERE IS NO NOVEMBER DOOR and sitCode '11' returns nothing at all (checked
+  // 2026-09-15), so a World Series that runs into November has no month of its
+  // own. Those games are still on the Postseason door; they simply land in no
+  // month. Adding a November door would be an entry in the table above.
+  //
+  // THE DOOR AND THE ROWS AGREE EXACTLY HERE, which is worth saying because the
+  // home/road doors above them do not — and it survived the postseason widening
+  // on both sides at once: 42 on the label and 42 rows in the sheet (verified
+  // 2026-09-15). A month is a fact about the date, and the date is the one thing
+  // the game log and the schedule cannot disagree about.
   ...MONTHS.map(([month, sitCode, name]) => ({
     key: `m${month}`,
     sitCode,
+    family: 'month',
+    spansPostseason: true,
     label: name,
     kicker: `Game lines · in ${name}`,
     title: (surname) => `${surname} in ${name}`,
-    facet: { kind: 'month', month },
+    facet: { kind: 'month', month, postseason: true },
     section: 'when',
     groups: ['hitting', 'pitching'],
   })),
-  // WHICH DAY OF THE WEEK (#1001). Seven CHIPS, not seven ledger rows. The
+  // WHICH DAY OF THE WEEK (#1001). Seven doors, folded as a family. The
   // question a weekday split answers is a comparison — is he worse on getaway
-  // day? — and a comparison wants its seven answers side by side, where a
-  // stack of seven near-identical lines buries it. They match exactly too:
+  // day? — and a comparison is read DOWN a column, which is what the card's
+  // five columns now give it and what the two-figure chips these doors used to
+  // wear could not. They match the rows exactly too:
   // 277/198/267/257/161/277/288 on Yelich, door and rows, and the same on
   // Peterson and Vazquez.
   //
   // Sunday first, the way a calendar is printed, which is also `weekdayOf`'s
-  // own numbering in facets.js — so the chip row reads left to right in the
-  // order the facet numbers them and no reader has to translate.
-  ...WEEKDAYS.map(([day, sitCode, short, name]) => ({
+  // own numbering in facets.js, so no reader has to translate.
+  ...WEEKDAYS.map(([day, sitCode, name]) => ({
     key: `w${day}`,
     sitCode,
-    chip: true,
-    short,
+    family: 'weekday',
+    spansPostseason: true,
     label: `${name}s`,
     kicker: `Game lines · on ${name}s`,
     title: (surname) => `${surname} on ${name}s`,
-    facet: { kind: 'weekday', day },
+    facet: { kind: 'weekday', day, postseason: true },
     section: 'when',
     groups: ['hitting', 'pitching'],
   })),
@@ -273,7 +311,7 @@ export const CARD_FACETS = [
     key: 'cameIn',
     fielding: 'bench',
     lineKind: 'games',
-    label: 'Came in',
+    label: 'Substitution',
     kicker: 'Game lines · off the bench',
     title: (surname) => `${surname} off the bench`,
     footNote: 'Games he entered after the first pitch.',

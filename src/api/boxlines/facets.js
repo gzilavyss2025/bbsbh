@@ -28,7 +28,7 @@
 // Class: spoiler-free (spoiler-manifest.json). Nothing here reads a score, a
 // date cutoff or a reveal mark: it is a description of a question, handed to
 // the module that already owns the answer's gate.
-import { askableGameTypes } from './rows.js'
+import { askableGameTypes, POSTSEASON, REGULAR_SEASON } from './rows.js'
 
 // "2024-09-29" -> 0 (Sunday) .. 6. Manual y/m/d at midday UTC, the same
 // timezone-proof construction dayBefore uses in rows.js: a local-midnight Date
@@ -46,6 +46,13 @@ export function monthOf(iso) {
 // The plan for one facet, or the everything-plan when `facet` is null.
 // `narrowsSplits` tells fetch.js which of its two paths this facet earns: the
 // club path filters the game log first, everything else joins the career once.
+// The game types a calendar door asks the log for. Already normalized to the
+// four rounds rather than the umbrella 'P', which a pitching log answers for
+// every row and so empties the sheet (rows.js's POSTSEASON).
+function calendarTypes(facet) {
+  return facet.postseason ? [...REGULAR_SEASON, ...POSTSEASON] : null
+}
+
 export function facetPlan(facet) {
   const plan = { opponentId: null, gameTypes: null, keep: null, narrowsSplits: false, needsLineups: false }
   if (!facet) return plan
@@ -64,18 +71,26 @@ export function facetPlan(facet) {
       // surface table would have called every one of those 2016 games turf.
       //
       // THE DOOR AND THE ROWS AGREE, and for once exactly: MLB's `g`/`t`
-      // career aggregate matched the joined rows on Yelich to the game —
+      // career aggregate matched the joined rows on Yelich to the game (this is
+      // the SURFACE pair, which reads the regular season only — the calendar
+      // doors above span the postseason too) —
       // 1,671 grass and 54 turf on both sides — and Frelick by one. That puts
       // this pair with the calendar doors rather than with home/road, and the
       // reason is the same: a park's surface in a given season is a fact both
       // sides read off the same venue record.
       return { ...plan, keep: (r) => r.surface === facet.value }
     case 'month':
-      return { ...plan, keep: (r) => monthOf(r.date) === Number(facet.month) }
+      // OCTOBER IS THE MONTH THIS EXISTS FOR. A month is a fact about the date,
+      // and a date does not stop being October because the game was a division
+      // series — so a calendar door marked `postseason` widens the FETCH to
+      // both and keeps whatever lands in its month. The predicate is unchanged;
+      // it never asked what kind of game it was.
+      return { ...plan, gameTypes: calendarTypes(facet), keep: (r) => monthOf(r.date) === Number(facet.month) }
     case 'dayNight':
       return { ...plan, keep: (r) => r.dayNight === facet.value }
     case 'weekday':
-      return { ...plan, keep: (r) => weekdayOf(r.date) === Number(facet.day) }
+      // Same for a Sunday in the World Series (see 'month' above).
+      return { ...plan, gameTypes: calendarTypes(facet), keep: (r) => weekdayOf(r.date) === Number(facet.day) }
     case 'side':
       // `isHome` is on the split too, but the row's `home` is derived from the
       // SCHEDULE's away/home clubs, which is the same fact checked against the
