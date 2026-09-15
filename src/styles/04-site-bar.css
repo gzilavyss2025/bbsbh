@@ -1,9 +1,28 @@
 /* --------------------------------------------------------------- site bar
    A slim row on every in-game page: the site mark, top-left, taps back to the
-   slate from wherever you are. Its own row so it never crowds the masthead. */
+   slate from wherever you are. Its own row so it never crowds the masthead.
+
+   The row WRAPS instead of overflowing. Nothing in it can give up width: the
+   lockup is one drawing, and each control in .sitebar__actions holds either a
+   44px tap target or a label set to nowrap. So on a phone too narrow for all
+   of it, the row used to push the whole document past the viewport (12px at
+   320px in a build with no account control, 59px in one with it) on every
+   screen that renders SiteHeader -- that is, everything but the slate, which
+   builds its own topbar.
+
+   The wrap is content-driven, not a breakpoint, because the width to beat is
+   not a constant: the account control only exists on a deploy that configures
+   Clerk (lib/clerkConfig.js), and its signed-out "Sign in" pill is wider than
+   its signed-in avatar. A media query would have to guess one of those three
+   widths; flex-wrap measures whichever one is really there, and covers a large
+   text size the same way. .sitebar__actions keeps its margin-left: auto, so
+   the cluster stays right-aligned whether it shares row one or holds row two
+   alone. */
 .sitebar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  row-gap: var(--space-1);
   padding: calc(10px + env(safe-area-inset-top)) 0 6px;
 }
 
