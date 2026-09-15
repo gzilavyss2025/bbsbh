@@ -2,8 +2,8 @@
 
 Run 2026-09-15 against live `statsapi.mlb.com`, for issue #1038 step 1. Both
 probes were asked before any code because both could change the design. Both
-did. Scripts and raw output are in this session's scratchpad; every number below
-is reproducible from the endpoints cited.
+did. **Every script is in `probes/`** — each number below can be re-run rather
+than believed. `probes/README.md` maps script to question to answer.
 
 ---
 
@@ -30,7 +30,14 @@ existing `GameSelect → GameView → TeamInfo → InningViewer` flow.
 > every winter league together, and the Caribbean Series runs into February. The
 > AFL's own bounds have to come from its schedule, filtered by `leagueId=119`.
 
-### The rest of sportId 17 is complete too
+### The rest of sportId 17 is complete too — with one exception found later
+
+> **Correction, same day.** The check below asks whether a play carries ANY
+> pitch event. Asking how MANY is a different question, and the Puerto Rican
+> league (leagueId 133) answers it very differently: **1.69 pitches per play
+> against ~3.9 for every other winter league and for MLB itself**, on 8 of 8
+> games. It records the terminal pitch of most at-bats and drops the rest. It is
+> excluded from #1055 for that reason. See `probes/pitchdepth.mjs`.
 
 The same probe over the other six leagues, Nov 15 2025 – Feb 28 2026:
 
