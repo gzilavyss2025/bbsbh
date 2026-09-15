@@ -231,13 +231,23 @@ errors. Suggestive at most, and it must be reported as that.
 
 ## 4. Things that will bite
 
-- **A club gets another challenge in extra innings, and the lib does not know
-  it.** `ranOutByTeam` treats the second failure as the end of a club's night.
-  52 club-games on file carry a THIRD failure and every one of them came in
-  extras — confirmed against `gameData.absChallenges`, where one club shows
-  1 success and 3 failures against a two-challenge bank. See **#1074**. It
-  affects the chances denominator (#1058), the after-a-win control (#1061), both
-  streak boards (#1060, #1065) and the shipped "Ran out" column
+- **A club is topped back up to one challenge at the start of EVERY inning from
+  the 10th, and the lib does not model it.** `ranOutByTeam` treats the second
+  failure as the end of a club's night. Not once, per inning: `824312` failed in
+  the 10th and the 11th, `815625` in the 10th, 12th and 13th for five failures
+  in a game, and the feed's bank agrees (`usedFailed: 5`). It is a top-up to
+  one, not `+1` on what you hold — the most any club ever lost inside a single
+  extra inning is exactly what it held entering it, across 822 club-games that
+  reached extras. Replaying the rule over all 8,069 club-games leaves **2
+  violations**, both Triple-A, both in regulation. See **#1074**;
+  `diag-bank-violations.mjs` exports the eight-line `bankWalk()` that #1058 and
+  #1061 should lift rather than rewrite. It also affects both streak boards
+  (#1060, #1065) and the shipped "Ran out" column
+- **984 club-games carry two challenges in the same half-inning**, and their
+  order comes from a sort on inning and half alone. It is chronological only
+  because `Array.sort` is stable over `allPlays` order — incidentally, not by
+  design, and not at all for the leftover rows `challengeRowsForGame` appends
+  after its walk. Give any within-half derivation an explicit tiebreak
 - **`abs_ingested_games` counts games that were never played.** 23 Triple-A rows
   are `Cancelled: Rain` with zero innings, and one (`815811`) is
   `Suspended: Rain` and still unfinished. See **#1073**. The published Triple-A
