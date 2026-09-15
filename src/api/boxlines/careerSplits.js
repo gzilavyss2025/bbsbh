@@ -76,17 +76,46 @@ export function doorLine(entry, stat, group) {
   return entry?.lineKind === 'games' ? gamesLine(stat) : careerSplitLine(stat, group)
 }
 
-// The same career, short enough for a CHIP. The weekday doors are seven
-// controls on one row (#1001) and the full line does not fit in any of them, so
-// they print the two figures that carry the question — how often, and how well.
-// It is the SAME stat object `careerSplitLine` reads, so a chip and the sheet's
-// headline above its rows cannot disagree about the career; only about how much
-// of it they have room to say.
-export function chipLine(stat, group) {
+// THE SAME CAREER AS FIVE CELLS, for a card that names its columns once at the
+// top instead of on every line. `careerSplitLine` above prints one door's
+// career as a sentence; this prints the identical five figures in the identical
+// order, for the sheet's headline and the card's table to stay in step. They
+// are two renderings of one stat object and the suite pins them to each other.
+//
+// A cell is null where the figure does not exist — the two lineup doors count
+// GAMES off a fielding career and it carries no rate stat, so their last four
+// cells are empty rather than zero. The card draws a quiet mark there; a zero
+// would be a lie and a dash reads as data MLB failed to send.
+export function doorCells(entry, stat, group) {
   if (!stat) return null
-  return group === 'pitching'
-    ? `${stat.gamesPlayed} G, ${stat.era} ERA`
-    : `${stat.gamesPlayed} G, ${stat.avg}`
+  const text = (v) => (v == null ? null : String(v))
+  if (entry?.lineKind === 'games') return [text(stat.gamesPlayed), null, null, null, null]
+  return (
+    group === 'pitching'
+      ? [stat.gamesPlayed, stat.inningsPitched, stat.era, stat.strikeOuts, stat.baseOnBalls]
+      : [stat.gamesPlayed, stat.plateAppearances, stat.avg, stat.homeRuns, stat.ops]
+  ).map(text)
+}
+
+// What those five cells are CALLED, in the order `doorCells` returns them and
+// the vocabulary the Splits vs team card's own stat grid already prints on the
+// same page (26-player-page.css's .player__statgrid). The card heads each of
+// its sections with this row, so a reader who scrolls past one heading meets
+// the names again at the next.
+export const DOOR_COLUMNS = {
+  hitting: ['G', 'PA', 'AVG', 'HR', 'OPS'],
+  pitching: ['G', 'IP', 'ERA', 'K', 'BB'],
+}
+
+// WHICH CELL CARRIES THE QUESTION. A split is asked to answer "how well", and
+// four of the five figures are context for the one that does — so the rate
+// stats take the page's darkest ink and the counting stats step back. It is
+// not the same cell for both groups: a bat is read on OPS with AVG beside it,
+// an arm on ERA alone, and the column that sits under OPS on a pitcher's card
+// is BB, which carries nothing.
+export const DOOR_EMPHASIS = {
+  hitting: [null, null, 'mid', null, 'key'],
+  pitching: [null, null, 'key', null, null],
 }
 
 // The career split rows for a set of situation codes, as a Map code -> stat.

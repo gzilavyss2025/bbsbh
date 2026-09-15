@@ -10,7 +10,14 @@
 // against the same facetPlan the sheet will call.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { CARD_FACETS, cardFacetsFor, SECTIONS } from '../src/api/boxlines/cardFacets.js'
+import { CARD_FACETS, cardFacetsFor, FAMILIES, FOLD_FROM, SECTIONS } from '../src/api/boxlines/cardFacets.js'
+import {
+  DOOR_COLUMNS,
+  DOOR_EMPHASIS,
+  careerSplitLine,
+  doorCells,
+  doorLine,
+} from '../src/api/boxlines/careerSplits.js'
 import { facetPlan } from '../src/api/boxlines/facets.js'
 import { POSTSEASON } from '../src/api/boxlines/rows.js'
 
@@ -260,20 +267,102 @@ test('every door files under a heading the card draws', () => {
   }
 })
 
-test('a chip names itself short, and only the weekdays are chips', () => {
-  // A chip's visible text is `short`; `label` stops being visible and goes on
-  // being the sheet's headline. One without a `short` would render an empty
-  // chip rather than fail.
+test('a folded family is a whole run, under one heading, long enough to fold', () => {
+  // A family is a run of doors the card hides behind one row. Three ways it can
+  // go wrong silently: a member naming a family the card does not draw (its
+  // doors vanish), a family whose members straddle two sections (the card draws
+  // the fold in the first and the members under it, in the wrong section), and
+  // a family too short for FOLD_FROM (it would never fold, so the fold row is
+  // dead code).
+  const known = new Set(FAMILIES.map((f) => f.key))
   for (const entry of CARD_FACETS) {
-    if (!entry.chip) {
-      assert.equal(entry.short, undefined, `${entry.key} is not a chip but names a short form`)
-      continue
-    }
-    assert.ok(entry.short, `${entry.key} is a chip and needs a short name`)
-    assert.ok(entry.short.length <= 4, `${entry.key} short name "${entry.short}" will not fit a chip`)
-    assert.equal(entry.facet.kind, 'weekday', `${entry.key} is a chip but is not a weekday`)
+    if (!entry.family) continue
+    assert.ok(known.has(entry.family), `${entry.key} files under family "${entry.family}"`)
   }
-  assert.equal(CARD_FACETS.filter((r) => r.chip).length, 7)
+  for (const fam of FAMILIES) {
+    const members = CARD_FACETS.filter((r) => r.family === fam.key)
+    assert.ok(fam.title, `${fam.key} needs a title`)
+    assert.ok(
+      members.length >= FOLD_FROM,
+      `the "${fam.title}" family holds ${members.length} and would never fold`,
+    )
+    assert.equal(
+      new Set(members.map((r) => r.section)).size,
+      1,
+      `the "${fam.title}" family spans two headings`,
+    )
+  }
+  // The months and the weekdays, and nothing else.
+  assert.deepEqual([...known].sort(), ['month', 'weekday'])
+})
+
+test('no entry still wears the retired chip fields', () => {
+  // The weekdays were seven two-figure chips before the card became a table
+  // (ADR-0073). `chip` and `short` are read by nothing now, so an entry
+  // copy-pasted from that era would carry dead fields and, worse, read as
+  // though it had asked for a treatment that no longer exists.
+  for (const entry of CARD_FACETS) {
+    assert.equal(entry.chip, undefined, `${entry.key} still asks to be a chip`)
+    assert.equal(entry.short, undefined, `${entry.key} still names a chip's short form`)
+  }
+})
+
+// A career stat as MLB returns one, per group.
+const HIT = { gamesPlayed: 855, plateAppearances: 3616, avg: '.281', homeRuns: 119, ops: '.837' }
+const PIT = { gamesPlayed: 247, inningsPitched: '1506.2', era: '3.29', strikeOuts: 1749, baseOnBalls: 391 }
+
+test('a door prints the same five figures, in the same order, as its sheet headline', () => {
+  // THE CARD AND THE SHEET ARE TWO RENDERINGS OF ONE STAT OBJECT: the table
+  // cells the door shows, and the sentence the sheet heads its rows with. They
+  // are built by two functions, so nothing but this stops them drifting — a
+  // card reading OPS where its own headline reads SLG would be wrong in a way
+  // no reader could catch, because the door is the only place the two meet.
+  for (const [group, stat] of [
+    ['hitting', HIT],
+    ['pitching', PIT],
+  ]) {
+    const cells = doorCells(null, stat, group)
+    assert.equal(cells.length, 5, `${group} does not fill its five columns`)
+    assert.equal(DOOR_COLUMNS[group].length, 5, `${group} does not name five columns`)
+    assert.equal(DOOR_EMPHASIS[group].length, 5, `${group} does not weight five columns`)
+    const line = careerSplitLine(stat, group)
+    let at = -1
+    for (const cell of cells) {
+      const found = line.indexOf(cell, at + 1)
+      assert.ok(found > at, `${group}: the headline does not quote "${cell}" after "${cells[0]}"`)
+      at = found
+    }
+  }
+})
+
+test('the emphasised column is a rate, never a count', () => {
+  // A split is asked "how well", and the card inks the cell that answers.
+  // The two groups do NOT answer in the same column — a bat is read on AVG and
+  // OPS, an arm on ERA — and the column sitting where a hitter's OPS sits is a
+  // pitcher's BB, which answers nothing. Ink it there and the card quietly
+  // points at a walk total as though it were the headline figure.
+  const RATES = { hitting: ['AVG', 'OPS'], pitching: ['ERA'] }
+  for (const group of Object.keys(DOOR_EMPHASIS)) {
+    const lit = DOOR_EMPHASIS[group]
+      .map((weight, i) => (weight ? DOOR_COLUMNS[group][i] : null))
+      .filter(Boolean)
+    assert.ok(lit.length > 0, `${group} emphasises nothing`)
+    for (const column of lit) {
+      assert.ok(RATES[group].includes(column), `${group} emphasises ${column}, which is a count`)
+    }
+  }
+})
+
+test('a games-only door fills one cell and leaves the rest empty', () => {
+  // The two lineup doors count games off a FIELDING career, which carries no
+  // rate stat. Their four empty cells must be null and not zero: the card draws
+  // a quiet mark for null, and a 0 would read as ".000 and none", which is a
+  // claim about a career MLB never made.
+  const entry = { lineKind: 'games' }
+  assert.deepEqual(doorCells(entry, { gamesPlayed: 1672 }, 'hitting'), ['1672', null, null, null, null])
+  assert.equal(doorLine(entry, { gamesPlayed: 1672 }, 'hitting'), '1672 G')
+  // And no stat at all is no cells, not five nulls — the card drops the door.
+  assert.equal(doorCells(entry, null, 'hitting'), null)
 })
 
 test('the month and weekday doors are a complete set, each numbered once', () => {

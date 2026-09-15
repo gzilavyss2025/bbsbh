@@ -109,8 +109,12 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   registry's order. A family that differs only in one number — the months, the
   weekdays — is built from a small table rather than written out eight times,
   and the suite pins that each month door's `sitCode` names the same month its
-  facet filters for. `chip: true` makes a door one of a compact row instead of
-  a ledger line; only the weekdays use it.
+  facet filters for. `family` files a door into one of the runs the card folds
+  behind a single row (`FAMILIES`, `FOLD_FROM`) — the months and the weekdays,
+  and nothing else. `doorCells` renders one door's career as the five cells the
+  card's table draws, `DOOR_COLUMNS` names them and `DOOR_EMPHASIS` says which
+  one carries the question; all three sit beside `careerSplitLine`, which
+  quotes the same five figures as the sheet's headline (ADR-0073).
   **GAME TYPES ARE ASKED FOR, NOT FILTERED FOR.** Both of `fetch.js`'s stats
   calls carry `gameType=`: a game log is regular-season-only until the call
   names the rounds, and `yearByYear&gameType=F,D,L,W` returns just the Octobers

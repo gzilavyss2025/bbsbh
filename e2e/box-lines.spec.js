@@ -146,6 +146,18 @@ test('the player page opens the same sheet, and the page cutoff trims its rows',
 // in an earlier section would silently move every assertion below it.
 const PETERSON = '/player/david-peterson-656849/stats'
 
+// A FAMILY IS FOLDED SHUT when the card loads: the eight month doors and the
+// seven weekday doors are not in the DOM until the reader opens the run they
+// belong to (GameLinesCard.jsx). Every assertion about one of those doors goes
+// through here, and the `aria-expanded` on both sides is what stops this
+// quietly becoming a no-op if the default ever flips to open.
+async function openFamily(card, title) {
+  const fold = card.getByRole('button', { name: new RegExp(`^${title}`) })
+  await expect(fold).toHaveAttribute('aria-expanded', 'false')
+  await fold.click()
+  await expect(fold).toHaveAttribute('aria-expanded', 'true')
+}
+
 test('the Game lines card opens a facet sheet, and the facet actually narrows', async ({ page }) => {
   await page.goto(`${PETERSON}?d=${PLAYER_CUTOFF}`)
   const card = page.locator('.gamelines')
@@ -160,22 +172,27 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
     'Where',
     'When',
     'How he got in',
-    'When it counted',
+    'Stakes',
   ])
 
-  // A pitcher who has reached October and pitched in every month gets seventeen
-  // ledger doors — Home, Road, On grass, On turf, Day, Night, eight months,
-  // Started, In relief, Postseason — plus seven weekday CHIPS, which are a
-  // separate class because they are a comparison rather than a stack of lines.
-  // MiLB service returns no rows for these codes and a door with no career row
-  // drops out on its own, so this also says he is being read as a major
-  // leaguer. He gets no lineup pair: a pitcher is never on the batting card.
+  // A pitcher who has reached October and pitched in every month gets nine
+  // doors STANDING — Home, Road, On grass, On turf, Day, Night, Started, In
+  // relief, Postseason — and fifteen more folded into two families, the eight
+  // months and the seven weekdays (GameLinesCard.jsx). A folded door is not in
+  // the DOM at all, which is what the second count says. MiLB service returns
+  // no rows for these codes and a door with no career row drops out on its own,
+  // so this also says he is being read as a major leaguer. He gets no lineup
+  // pair: a pitcher is never on the batting card.
   const doors = card.locator('.gamelines__door')
+  await expect(doors).toHaveCount(9)
+  await expect(card.locator('.gamelines__fam')).toHaveCount(2)
+  await openFamily(card, 'By month')
   await expect(doors).toHaveCount(17)
-  await expect(card.locator('.gamelines__chip')).toHaveCount(7)
+  await openFamily(card, 'By day of the week')
+  await expect(doors).toHaveCount(24)
 
   const home = card.getByRole('button', { name: /^Home: / })
-  const label = (await home.locator('span').first().textContent()).trim()
+  const label = await home.getAttribute('aria-label')
   expect(label).toMatch(/^Home: \d+ G, /)
   await home.click()
 
@@ -233,7 +250,7 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
   // PITCHING log labels every row 'P', the type filter drops all of them, and
   // this door opens on an empty ledger while the six beside it stay full.
   const postseason = card.getByRole('button', { name: /^Postseason: / })
-  expect((await postseason.locator('span').first().textContent()).trim()).toMatch(/^Postseason: \d+ G, /)
+  expect(await postseason.getAttribute('aria-label')).toMatch(/^Postseason: \d+ G, /)
   await postseason.click()
   const postSheet = page.getByRole('dialog', { name: /in the postseason/ })
   await expect(postSheet).toBeVisible()
@@ -258,7 +275,7 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
 // month door whose sitCode and facet drifted apart (asks MLB about August,
 // filters rows for September) still renders a plausible-looking sheet, and only
 // a live row's date says otherwise.
-test('a month door and a weekday chip each keep only their own dates', async ({ page }) => {
+test('a month door and a weekday door each keep only their own dates', async ({ page }) => {
   await page.goto(`${PETERSON}?d=${PLAYER_CUTOFF}`)
   const card = page.locator('.gamelines')
   await card.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
@@ -267,7 +284,10 @@ test('a month door and a weekday chip each keep only their own dates', async ({ 
     return
   }
 
-  // JULY. Every row behind it is dated in month 07, whatever the year.
+  // JULY. Every row behind it is dated in month 07, whatever the year. Both
+  // doors this test opens are members of a folded family, so both folds have
+  // to be asked for first.
+  await openFamily(card, 'By month')
   const july = card.getByRole('button', { name: /^July: / })
   await july.click()
   const julySheet = page.getByRole('dialog', { name: /in July/ })
@@ -284,12 +304,14 @@ test('a month door and a weekday chip each keep only their own dates', async ({ 
   }
   await page.keyboard.press('Escape')
 
-  // SUNDAY, as a chip. Its visible text is short; its accessible name is the
-  // whole career line, which is also the sheet's headline — the chip and the
-  // sheet read one stat object two ways and cannot disagree about the career.
+  // SUNDAY. Its visible face is the table's five columns; its accessible name
+  // is the whole career line, which is also the sheet's headline — the row and
+  // the sheet read one stat object two ways and cannot disagree about the
+  // career.
+  await openFamily(card, 'By day of the week')
   const sunday = card.getByRole('button', { name: /^Sundays: / })
-  await expect(sunday).toHaveClass(/gamelines__chip/)
-  await expect(sunday.locator('.boxlines-door__chipname')).toHaveText(/^Sun/)
+  await expect(sunday.locator('.gamelines__name')).toHaveText('Sundays')
+  await expect(sunday.locator('.gamelines__fig')).toHaveCount(5)
   const sundayLabel = await sunday.getAttribute('aria-label')
   await sunday.click()
   const sundaySheet = page.getByRole('dialog', { name: /on Sundays/ })
@@ -331,7 +353,7 @@ test('a hitter gets a pinch-hitting door, and a pitcher does not', async ({ page
   await expect(card.getByRole('button', { name: /^In relief: / })).toHaveCount(0)
 
   const pinch = card.getByRole('button', { name: /^Pinch hitting: / })
-  const label = (await pinch.locator('span').first().textContent()).trim()
+  const label = await pinch.getAttribute('aria-label')
   expect(label).toMatch(/^Pinch hitting: \d+ G, /)
   await pinch.click()
 
@@ -386,11 +408,11 @@ test('a hitter gets lineup doors that count games, and a pitcher gets none', asy
   // two read "1,672 G" where every neighbour reads five figures. A door that
   // printed the usual line here would be printing four `undefined`s.
   const started = card.getByRole('button', { name: /^Started: / })
-  const cameIn = card.getByRole('button', { name: /^Came in: / })
-  const startedLabel = (await started.locator('span').first().textContent()).trim()
-  const cameInLabel = (await cameIn.locator('span').first().textContent()).trim()
+  const cameIn = card.getByRole('button', { name: /^Substitution: / })
+  const startedLabel = await started.getAttribute('aria-label')
+  const cameInLabel = await cameIn.getAttribute('aria-label')
   expect(startedLabel).toMatch(/^Started: \d+ G$/)
-  expect(cameInLabel).toMatch(/^Came in: \d+ G$/)
+  expect(cameInLabel).toMatch(/^Substitution: \d+ G$/)
 
   await cameIn.click()
   const sheet = page.getByRole('dialog', { name: /off the bench/ })
@@ -426,11 +448,11 @@ test('a hitter gets lineup doors that count games, and a pitcher gets none', asy
   const pitcherCard = page.locator('.gamelines')
   await pitcherCard.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
   if ((await pitcherCard.count()) > 0) {
-    await expect(pitcherCard.getByRole('button', { name: /^Came in: / })).toHaveCount(0)
+    await expect(pitcherCard.getByRole('button', { name: /^Substitution: / })).toHaveCount(0)
     // His Started door is the PITCHING one, and it carries a full line.
     const pitcherStarted = pitcherCard.getByRole('button', { name: /^Started: / })
     if ((await pitcherStarted.count()) > 0) {
-      expect((await pitcherStarted.locator('span').first().textContent()).trim()).toMatch(
+      expect(await pitcherStarted.getAttribute('aria-label')).toMatch(
         /^Started: \d+ G, .*IP/,
       )
     }
@@ -451,7 +473,7 @@ test('the surface doors split a career, and the rows never exceed the door', asy
     const turf = card.getByRole('button', { name: /^On turf: / })
     const grass = card.getByRole('button', { name: /^On grass: / })
     if ((await turf.count()) === 0 || (await grass.count()) === 0) continue
-    const turfLabel = (await turf.locator('span').first().textContent()).trim()
+    const turfLabel = await turf.getAttribute('aria-label')
     const doorGames = Number(turfLabel.match(/^On turf: (\d+) G/)[1])
 
     await turf.click()

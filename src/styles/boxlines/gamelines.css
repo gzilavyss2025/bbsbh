@@ -1,0 +1,325 @@
+/* THE GAME LINES CARD — the player page's table of facet doors
+   (components/playerstats/GameLinesCard.jsx, ADR-0069/ADR-0073). Its own
+   partial rather than more of boxlines.css beside it, because that file
+   dresses the SHEET and the door's reset, which three other surfaces use, and
+   this dresses one card. Component-imported (GameLinesCard.jsx), never added
+   to index.css's @import chain — a card most visits never scroll to should
+   not ship its dress to every page.
+
+   THE CARD IS A TABLE and that is the whole design. Every door prints the same
+   five figures, so the figures are NAMED ONCE at the head of each section and
+   every door is five cells under those names. What it replaced spent a whole
+   sentence on each of twenty-five doors — "Home: 855 G, 3616 PA, .281, 119 HR,
+   .837 OPS" — so nothing lined up, almost every line wrapped on a phone, and
+   "See all ›" was said twenty-five times down the right edge. Read down a
+   column, Home stands against Road at a glance, which is the only reason to
+   print a split.
+
+   Four panels, not one ruled column: the sections were a word over a dashed
+   rule and a reader scrolling could not see where one stopped. A panel has an
+   edge. Inside it the rows BAND rather than rule — alternating paper carries
+   the eye across five columns, and it removes twenty-five hairlines from a
+   card whose complaint was noise. */
+
+.gamelines {
+  margin-top: var(--space-4);
+
+  /* THE COLUMN TRACKS, in `ch` of the mono face the rows are set in (the door
+     below states that font on the grid element itself, so 1ch is one figure
+     wide whatever the type scale does). Widths are the longest real value each
+     column has to hold: a career's games reach four digits, a hitter's OPS
+     five characters with the leading 1, a pitcher's innings six with the
+     decimal. Stated once here and inherited by both the head row and every
+     door, so the names cannot drift off the figures they name. */
+  --gl-cols: minmax(0, 1fr) 4ch 4ch 4ch 3ch 5ch 16px;
+  --gl-gap: 6px;
+  --gl-pad: 10px;
+}
+
+/* An arm's five figures are not a bat's, and neither are their widths.
+   G · IP · ERA · K · BB against G · PA · AVG · HR · OPS. */
+.gamelines--pitching {
+  --gl-cols: minmax(0, 1fr) 4ch 6ch 5ch 4ch 4ch 16px;
+}
+
+.gamelines__hint {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  color: var(--graphite-soft);
+}
+
+.gamelines__section + .gamelines__section {
+  margin-top: var(--space-3);
+}
+
+/* THE PANEL. The card sits under the splits tables on a page whose vocabulary
+   for a bordered figure block is .player__statgrid (26-player-page.css) — the
+   same hairline, the same radius — so this reads as one of the page's objects
+   rather than a list bolted under a heading. No shadow: four of these stack,
+   and four raised cards is a heavier page than the one figure grid above. */
+.gamelines__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* THE HEAD ROW — the section's name and its five column names, on the same
+   grid as the rows so each name sits over its own figures. It carries the
+   heading, which is why the heading is no longer a rule with a word on it. */
+.gamelines__head {
+  min-height: 28px;
+  background: var(--bg-page);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* ONE GRID, STATED ONCE, for the head row and every door under it — and stated
+   in the MONO FACE AT THE FIGURES' OWN SIZE, which is the whole reason the
+   column names sit over the columns they name. `ch` resolves against the grid
+   ELEMENT's font, not its cells': set the head row in the body face and its
+   `4ch` is four Source Sans zeroes wide while the door's is four JetBrains
+   ones, and the names drift a few pixels off their figures at every width.
+   It also makes the narrow-phone rule below one line long — shrink the type
+   and the tracks follow it, because the tracks are measured in it. */
+button.gamelines__door,
+.gamelines__head {
+  display: grid;
+  grid-template-columns: var(--gl-cols);
+  column-gap: var(--gl-gap);
+  align-items: center;
+  padding: 0 var(--gl-pad);
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+}
+
+.gamelines__heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--seal-hatch);
+}
+
+.gamelines__col {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+  text-align: right;
+}
+
+/* THE DOOR AS A ROW. The door's own reset owns no padding (boxlines.css), so
+   the whole of the vertical dress is stated at `button.` specificity, the way
+   the card's rows have always been. `min-height` rather than padding: the row
+   is a hit target first and a line of a table second. */
+button.gamelines__door {
+  min-height: 42px;
+}
+
+/* The band. The panel is already --surface-card, so only every other row says
+   anything. */
+.gamelines__row:nth-child(odd) .gamelines__door {
+  background: var(--surface-inset);
+}
+
+.gamelines__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+  /* The one column that can outgrow its track — "Wednesdays" on a pitcher's
+     card at 320px. It gives way rather than pushing the figures off the row. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A member of an opened family, stepped in so a reader can see where the run
+   starts and where it stops. */
+.gamelines__name--sub {
+  padding-left: var(--space-3);
+}
+
+/* THE FIGURES. Three steps of ink, and no step of WEIGHT: JetBrains Mono ships
+   one registered weight here (tokens/fonts.css), so every figure renders at
+   700 whatever a rule asks for, and a bold cell beside a regular one would be
+   two cells that look the same. Colour is the only lever, and it is enough —
+   graphite for context, slate for the rate beside the answer, near-black for
+   the answer itself. */
+.gamelines__fig {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  text-align: right;
+}
+
+.gamelines__fig--mid {
+  color: var(--text-muted);
+}
+
+.gamelines__fig--key {
+  color: var(--text-heading);
+}
+
+/* A cell the source cannot answer — the four rate columns on the two lineup
+   doors, which count games off a fielding career (careerSplits.js). A rule-
+   coloured dot says "nothing to print here"; a zero would be false and an
+   em-dash reads as a figure MLB failed to send. */
+.gamelines__fig--nil {
+  color: var(--border-rule);
+}
+
+.gamelines__chev {
+  color: var(--graphite-soft);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  text-align: right;
+}
+
+/* THE FOLD over one family of doors — the eight months, the seven weekdays.
+   Closed, one row naming the run and counting it; open, those doors as
+   ordinary rows of this same table. Dressed as structure, not as data: the
+   head row's paper, a dashed rule above it, and no figures. */
+.gamelines__famrow {
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+button.gamelines__fam {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 38px;
+  padding: 0 var(--gl-pad);
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: var(--bg-page);
+  text-align: left;
+  cursor: pointer;
+}
+
+.gamelines__famname {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+}
+
+.gamelines__famcount {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--graphite-soft);
+}
+
+.gamelines__famchev {
+  display: inline-block;
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  color: var(--graphite-soft);
+  transition: transform var(--dur-snappy) var(--ease-standard);
+}
+
+.gamelines__famchev--open {
+  transform: rotate(90deg);
+}
+
+.gamelines__fam:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* A row already stands in a banded panel, so the door's hover OUTLINE
+   (boxlines.css) would draw a box 3px outside the panel's own edge and clip.
+   It answers by lifting its paper instead, the way the chips this card used to
+   carry did. Stated inside .gamelines__rows so it beats the band above, which
+   it has to override. */
+@media (hover: hover) and (pointer: fine) {
+  .gamelines__rows .gamelines__door:hover {
+    outline: none;
+    background: var(--rule-grid);
+  }
+
+  .gamelines__rows .gamelines__door:hover .gamelines__chev {
+    color: var(--accent-link);
+  }
+
+  .gamelines__fam:hover {
+    background: var(--rule-grid);
+  }
+
+  .gamelines__fam:hover .gamelines__famchev {
+    color: var(--accent-link);
+  }
+}
+
+/* The press, which on a phone is the whole of the feedback. */
+.gamelines__rows .gamelines__door:active,
+.gamelines__fam:active {
+  background: var(--rule-grid);
+}
+
+/* A narrow phone (the 320px class) cannot spare the gutters: the figures keep
+   their tracks, which are the values themselves, and the row gives back its
+   padding and its gaps instead. */
+@media (max-width: 359px) {
+  .gamelines {
+    --gl-gap: 4px;
+    --gl-pad: 6px;
+  }
+
+  /* The tracks are measured in `ch` of this, so one step down the type scale
+     takes the five columns down with it and hands the width back to the name,
+     which is the column that was truncating ("Substitution", "Pinch hitting"). */
+  button.gamelines__door,
+  .gamelines__head {
+    font-size: var(--fs-caption);
+  }
+
+  .gamelines__name {
+    font-size: var(--fs-small);
+  }
+
+  /* And the longest heading, "How he got in", stops wrapping the head row to
+     two lines. */
+  .gamelines__heading {
+    font-size: var(--fs-caption);
+  }
+}
+
+/* Past the wide-layout breakpoint (25-wide-layout.css) the panels PAIR UP. One
+   column of four, at a desktop width, is a table whose name sits 700px from the
+   figures it names — the same hole the old card left "See all ›" marooned in.
+   Two panels abreast halve that reach and put twice as much of the card above
+   the fold, which is the whole argument for a wide layout.
+
+   `align-items: start` so a panel keeps its own height: open the months and the
+   When panel grows down, leaving space under its neighbour rather than
+   stretching it. The sections' own stacking margin gives way to the gap. */
+@media (min-width: 740px) {
+  .gamelines {
+    --gl-gap: var(--space-2);
+    --gl-pad: var(--space-3);
+  }
+
+  .gamelines__panels {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    align-items: start;
+  }
+
+  .gamelines__section + .gamelines__section {
+    margin-top: 0;
+  }
+}

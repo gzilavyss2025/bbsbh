@@ -14,42 +14,33 @@ import { BoxLinesSheet } from './BoxLinesSheet.jsx'
 // `sheet` is everything BoxLinesSheet needs except the headline, which is
 // always this label, verbatim, so the door and the sheet cannot disagree.
 //
-// `chip` MAKES IT ONE OF A ROW instead of a line of its own. The Game lines
-// card's seven weekday doors (#1001) are a comparison, and a comparison wants
-// its answers side by side; seven full ledger rows would be seven lines of
-// nearly the same sentence. A chip prints its own short name and a shortened
-// line, so `label` stops being the visible text and goes on being the ONE
-// thing it was always for: the sheet's headline, verbatim. Both come from the
-// same career stat (careerSplits.js's `chipLine` and `careerSplitLine`), so a
-// chip and the sheet it opens cannot disagree about the career — only about
-// how much of it they have room to say.
+// `face` REPLACES THE VISIBLE TEXT and leaves everything else alone. A door on
+// a line of its own says its whole career and "See all ›"; a door that is one
+// ROW OF A TABLE says the same career in the table's columns, and the words
+// "See all" on twenty-five of them is noise where one of them on a line is the
+// house's plain promise. Both are the same control in different clothes, so
+// the host dresses it and this file goes on owning the only two things a door
+// has ever owned: the open bit and the sheet.
 //
-// The chip drops the words "See all" and keeps the chevron. Seven of them on
-// one row is noise where one of them on a line is the house's plain promise,
-// and the chip is small enough that the whole of it reads as the control.
-export function BoxLinesDoor({ className = '', label, chip = null, sheet }) {
+// `label` then stops being the visible text and goes on being the ONE thing it
+// was always for — the sheet's headline, verbatim — and becomes the button's
+// accessible name, because a face is columns and a screen reader should hear
+// the sentence.
+export function BoxLinesDoor({ className = '', label, face = null, sheet }) {
   const [open, setOpen] = useState(false)
   return (
     <>
       <button
         type="button"
-        className={`boxlines-door ${chip ? 'boxlines-door--chip ' : ''}${className}`.trim()}
+        className={`boxlines-door ${face ? 'boxlines-door--face ' : ''}${className}`.trim()}
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        // A chip's visible text is an abbreviation; the full line is what it
-        // stands for, and it is what a screen reader should read out.
-        aria-label={chip ? label : undefined}
+        // A face is a row of columns; the full line is what it says, and it is
+        // what a screen reader should read out.
+        aria-label={face ? label : undefined}
       >
-        {chip ? (
-          <>
-            <span className="boxlines-door__chipname">
-              {chip.name}
-              <span aria-hidden="true">›</span>
-            </span>
-            <span className="boxlines-door__chipline">{chip.line}</span>
-          </>
-        ) : (
+        {face ?? (
           <>
             <span>{label}</span>
             <span className="boxlines-door__label">See all ›</span>
