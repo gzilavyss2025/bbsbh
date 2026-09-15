@@ -6,7 +6,6 @@ import { fetchLeagueStandings } from '../api/team.js'
 import { shapeWildCard } from '../api/standings.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { useRouteLink } from '../lib/nav.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
@@ -92,7 +91,7 @@ function seedField(lg) {
 // card its Wild Card winner feeds (dsLanesFor). Ordered 4v5 THEN 3v6 to line
 // up row-for-row with dsLanesFor's own order (seed 1's card, then seed 2's),
 // so the connector line drawn between a matchup and the DS card beside it
-// (`.psrace__col--connect`, 70-postseason-race.css) points at the right one.
+// (70-postseason-race.css) points at the right one.
 function wcLanesFor(lg) {
   const bySeed = new Map(seedField(lg).map((t) => [t.seed, t]))
   return [
@@ -147,12 +146,13 @@ const CS_LANE = [{ type: 'tbd', key: 'cs' }]
 // that tab and in the wild-card table beneath this bracket, and printing it
 // on a ~150px-wide card was what pushed longer club names (Yankees,
 // Guardians) into ellipsis.
-function SeedRow({ t }) {
+function SeedRow({ t, bye = false }) {
   return (
     <TeamLink id={t.id} tab="numbers" className="seedrow">
       <span className="seedrow__seed">{t.seed}</span>
       <TeamLogo teamId={t.id} name={t.name} size={18} />
       <span className="seedrow__name">{t.name}</span>
+      {bye && <span className="psrace__bye">Bye</span>}
     </TeamLink>
   )
 }
@@ -193,31 +193,25 @@ function PendingRow({ candidates }) {
 function DivisionSeriesCard({ bye, candidates }) {
   return (
     <div className="seedcard psrace__ds">
-      <SeedRow t={bye} />
+      <SeedRow t={bye} bye />
       <PendingRow candidates={candidates} />
     </div>
   )
 }
 
-// A round where NEITHER side traces to a real team yet — the Championship
-// Series, where even the known-vs-unknown shape a Division Series slot has
-// doesn't apply, since both sides still run through an undetermined round.
-// Same `.seedcard` shell as a real matchup, so the connector line and column
-// rhythm stay unbroken; the muted dashed treatment (`--tbd`,
-// 70-postseason-race.css) is what tells the two apart at a glance.
-function TbdRow() {
+// Each Championship slot names the Division Series path that feeds it.
+function TbdRow({ seed }) {
   return (
     <span className="seedrow seedrow--tbd">
-      <span className="seedrow__seed">—</span>
-      <span className="seedrow__name">TBD</span>
+      <span className="seedrow__name">{seed === 1 ? 'Upper' : 'Lower'} DS winner</span>
     </span>
   )
 }
 function TbdCard() {
   return (
     <div className="seedcard seedcard--tbd">
-      <TbdRow />
-      <TbdRow />
+      <TbdRow seed={1} />
+      <TbdRow seed={2} />
     </div>
   )
 }
@@ -228,19 +222,13 @@ function Lane({ lane }) {
   return <TbdCard />
 }
 
-// One column of one league's OWN bracket (Wild Card / Division Series /
-// Championship — no shared World Series column; the two leagues are two
-// independent, self-contained brackets now, each short enough to read
-// without scrolling). The connector stub always points right
-// (`.psrace__col--connect`, 70-postseason-race.css) since a column here only
-// ever feeds the one immediately to its right — unlike Postseason History's
-// combined 7-column grid, nothing here converges from two sides, so there's
-// no AL/NL-flavored connector direction to reuse. `labelSide` only tints the
-// label red/green (LEAGUE_SIDE) to keep that league cue.
-function BracketColumn({ label, labelSide, lanes, connect = true }) {
+// Each round owns its heading and vertically aligned matchup slots.
+function BracketColumn({ label, labelSide, lanes, round, format }) {
   return (
-    <div className={`psbracket__col${connect ? ' psrace__col--connect' : ''}`}>
-      <p className={`psbracket__collabel psbracket__collabel--${labelSide}`}>{label}</p>
+    <div className={`psbracket__col psrace__round psrace__round--${round}`}>
+      <h3 className={`psbracket__collabel psbracket__collabel--${labelSide}`}>
+        {label}<span className="psrace__format">{format}</span>
+      </h3>
       <div className="psbracket__lanes">
         {lanes.map((lane) => (
           <Lane key={lane.key} lane={lane} />
@@ -250,38 +238,23 @@ function BracketColumn({ label, labelSide, lanes, connect = true }) {
   )
 }
 
-function StackRound({ labelSide, label, lanes }) {
-  return (
-    <>
-      <p className={`psstack__roundlabel psstack__roundlabel--${labelSide}`}>{label}</p>
-      {lanes.map((lane) => (
-        <Lane key={lane.key} lane={lane} />
-      ))}
-    </>
-  )
-}
-
-// One league's own 3-column mini-bracket (wide) or 3-round stack (narrow) —
-// the counterpart to Postseason History's BracketGrid/BracketStack, scaled
-// down to what's actually knowable before the Wild Card round is played.
-function LeagueBracket({ lg, side, wide }) {
+// Keep the connected rounds on phones, with scrolling inside the bracket.
+function LeagueBracket({ lg, side }) {
   const wc = wcLanesFor(lg)
   const ds = dsLanesFor(lg)
-  if (!wide) {
-    return (
-      <div className="psstack psrace__ministack">
-        <StackRound labelSide={side} label="Wild Card" lanes={wc} />
-        <StackRound labelSide={side} label="Division Series" lanes={ds} />
-        <StackRound labelSide={side} label="Championship" lanes={CS_LANE} />
-      </div>
-    )
-  }
   return (
-    <div className="psrace__miniboard">
-      <BracketColumn labelSide={side} label="Wild Card" lanes={wc} />
-      <BracketColumn labelSide={side} label="Division Series" lanes={ds} />
-      <BracketColumn labelSide={side} label="Championship" lanes={CS_LANE} connect={false} />
-    </div>
+    <>
+      <p className="psrace__guide">If the season ended today · Seeds 1 & 2 receive a bye</p>
+      <p className="psrace__scrollhint">Scroll to follow the bracket →</p>
+      <div className="psrace__scroll" role="region" aria-label={`${lg.name} bracket`} tabIndex={0}>
+        <div className="psrace__miniboard">
+          <BracketColumn labelSide={side} label="Wild Card" lanes={wc} round="wc" format="Best of 3" />
+          <BracketColumn labelSide={side} label="Division Series" lanes={ds} round="ds" format="Best of 5" />
+          <BracketColumn labelSide={side} label="Championship" lanes={CS_LANE} round="cs" format="Best of 7" />
+        </div>
+      </div>
+      <p className="psrace__destination">League champion advances to the World Series →</p>
+    </>
   )
 }
 
@@ -327,40 +300,21 @@ function WildCardMiniTable({ lg }) {
   )
 }
 
-function LeagueBlock({ lg, wide }) {
+function LeagueBlock({ lg }) {
   const side = LEAGUE_SIDE[lg.id] ?? 'al'
   return (
     <section className="psrace__league">
       <LeagueBar league={lg} />
-      <LeagueBracket lg={lg} side={side} wide={wide} />
+      <LeagueBracket lg={lg} side={side} />
       <WildCardMiniTable lg={lg} />
     </section>
   )
 }
 
-// Postseason Race: "if the season ended today," as two self-contained,
-// full-width brackets — American League, then National League — rather than
-// Postseason History's single 7-column grid converging on a shared World
-// Series (that shape fits a FINISHED bracket; nothing here has been played,
-// so there's no World Series slot worth drawing yet, and the wide combined
-// grid didn't leave either league enough width to stay readable without
-// truncating a team name). Each league's Wild Card round is fully real (real
-// teams, real matchups) and carries no separate bye placeholder — a bye seed
-// appears one column over instead, as the known half of the Division Series
-// card its Wild Card winner feeds (dsLanesFor), with a connector line
-// pointing at it directly. MLB's bracket is fixed, not reseeded, so that
-// pairing is already set even though neither team has played yet; only the
-// Championship Series is genuine TBD, where both sides still trace through
-// an undetermined round. Directly under each league's own bracket, a
-// wild-card table lists every team still mathematically alive for the field
-// (WildCardMiniTable) — not just the ones closest to the cutoff. Standings
-// are an open surface (root CLAUDE.md), not a reveal-gated one, so this page
-// needs no SealBox; it still reads "entering today" (through yesterday), the
-// same stance StandingsPage takes, so that a game which went final today
-// doesn't leak into a seed before its own box score has been opened.
+// Standings remain dated through yesterday. Each league shows its fixed
+// paths from the current Wild Card field through the Championship Series.
 export function PostseasonRacePage() {
   useDocumentTitle('Postseason Race')
-  const wide = useMediaQuery(WIDE_QUERY)
   const linkProps = useRouteLink()
 
   const today = useMemo(() => baseballToday(), [])
@@ -398,8 +352,8 @@ export function PostseasonRacePage() {
       {al && nl && (
         <>
           <div className="psrace__leagues">
-            <LeagueBlock lg={al} wide={wide} />
-            <LeagueBlock lg={nl} wide={wide} />
+            <LeagueBlock lg={al} />
+            <LeagueBlock lg={nl} />
           </div>
           <p className="psrace__tbdcaption">
             The bracket isn’t reseeded after the Wild Card round, so each Division Series pairing
