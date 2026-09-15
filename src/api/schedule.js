@@ -128,6 +128,23 @@ export async function fetchSchedule(
   return games.map((g) => normalizeGame(g, sportId))
 }
 
+// A season's own date row — the endpoint that states, rather than implies,
+// where a season starts, breaks, ends and gives way to the winter. The slate
+// already asks for this on any empty day (see fetchAllStarInfo below, which is
+// now a reading OF this row rather than a second call for it), and the
+// offseason gate reads the same row, so an offseason day costs no extra fetch.
+// Degrades to null on failure or a missing row — every caller treats null as
+// "cannot say", never as a fact about the calendar.
+export async function fetchSeasonMeta(season) {
+  if (!season) return null
+  try {
+    const data = await getJson(`/api/v1/seasons/${season}?sportId=1`)
+    return data.seasons?.[0] ?? null
+  } catch {
+    return null
+  }
+}
+
 // The season's All-Star break bounds, for the slate's empty-day treatment
 // (GameSelect): `allStarDate` is the All-Star Game's own date (which DOES show
 // up as a normal-looking schedule row, teams "AL/NL All-Stars" — real logos,
@@ -139,15 +156,15 @@ export async function fetchSchedule(
 // event), so this only supports a static "Derby's tonight" pointer, never a
 // live score. MLB-only; degrades to null on failure or a lean/missing season row.
 export async function fetchAllStarInfo(season) {
-  if (!season) return null
-  try {
-    const data = await getJson(`/api/v1/seasons/${season}?sportId=1`)
-    const s = data.seasons?.[0]
-    if (!s?.allStarDate || !s?.firstDate2ndHalf) return null
-    return { allStarDate: s.allStarDate, firstDate2ndHalf: s.firstDate2ndHalf }
-  } catch {
-    return null
-  }
+  return allStarInfoFrom(await fetchSeasonMeta(season))
+}
+
+// The break bounds read off an ALREADY-FETCHED row. GameSelect takes this path
+// so that one fetch answers both the All-Star question and the offseason one;
+// fetchAllStarInfo above is the same reading for callers that hold no row.
+export function allStarInfoFrom(row) {
+  if (!row?.allStarDate || !row?.firstDate2ndHalf) return null
+  return { allStarDate: row.allStarDate, firstDate2ndHalf: row.firstDate2ndHalf }
 }
 
 // The All-Star Game itself, for the team page's season schedule strip: a real,
