@@ -12,6 +12,12 @@ db.close()
 const H = (h) => (h === 'top' ? 0 : 1)
 
 // The rule, as one function. This is the thing #1058 and #1061 need.
+// TOLERATES an over-spend rather than assuming one cannot happen: two Triple-A
+// club-games on file spend a challenge from an empty bank, and both are MLB's
+// own data, not a derivation error (diag-verify-faithful.mjs proves it row by
+// row). So the bank floors at zero, the impossible challenge is COUNTED and
+// kept — it really was called, and it belongs in every figure on the page — and
+// the walk carries on. Never throw, never go negative, never drop the row.
 export function bankWalk(challenges) {
   let bank = 2
   let inning = 0
@@ -23,9 +29,14 @@ export function bankWalk(challenges) {
     }
     if (bank <= 0) bad.push(c)
     else if (c.outcome === 'fail') bank -= 1
+    if (bank < 0) bank = 0
   }
   return bad
 }
+
+// The two club-games that break the rule in MLB's own feed. A reconciliation
+// test should REPORT these and fail on a third, never fail on these.
+export const KNOWN_OVERSPEND = new Set(['815094:102', '816599:416'])
 
 let checked = 0
 const violations = []

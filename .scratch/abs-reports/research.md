@@ -243,6 +243,15 @@ errors. Suggestive at most, and it must be reported as that.
   `diag-bank-violations.mjs` exports the eight-line `bankWalk()` that #1058 and
   #1061 should lift rather than rewrite. It also affects both streak boards
   (#1060, #1065) and the shipped "Ran out" column
+- **Those 2 violations are upstream, not ours.** Every stored row matches the
+  feed exactly (5 of 5 and 6 of 6), and in each game the OTHER club goes through
+  the same code and comes out legal. `816599` is the clean control: both clubs
+  finish 1 successful and 2 failed, and only the order differs — `WLL` is
+  spendable from a bank of two, `LLW` is not. MLB's bank agrees with our counts
+  and disagrees with its own ordering. So `bankWalk()` must **tolerate** an
+  over-spend: floor at zero, count it, carry on. Never throw, never go negative,
+  never drop the row — the challenge was called and belongs in every count.
+  Tolerated set: `815094` team 102, `816599` team 416
 - **984 club-games carry two challenges in the same half-inning**, and their
   order comes from a sort on inning and half alone. It is chronological only
   because `Array.sort` is stable over `allPlays` order — incidentally, not by
