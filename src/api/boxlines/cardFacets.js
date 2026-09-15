@@ -37,6 +37,13 @@
 //   sitCode         a statsapi SITUATION code ('h', 'd', 'sp'). Every code on
 //                   the card is fetched in ONE call, whatever the count.
 //   careerGameType  a career under a statsapi GAME TYPE ('P'). One call each.
+//   fielding        'starts' or 'bench', off the FIELDING career's own
+//                   gamesStarted (careerSplits.js). Only the two lineup doors,
+//                   and they share one pair of calls.
+//
+// `lineKind: 'games'` goes with a fielding source: that figure is a game count
+// with no rate stat behind it, so the door prints "1,674 G" rather than the
+// five-figure line its neighbours print.
 //
 // Most doors are situations. The postseason is not — it is the same career
 // under a different game type, and careerSplits.js explains why the stat type
@@ -115,6 +122,35 @@ export const CARD_FACETS = [
     kicker: 'Game lines · on the road',
     title: (name) => `${name} on the road`,
     facet: { kind: 'side', home: false },
+    section: 'where',
+    groups: ['hitting', 'pitching'],
+  },
+  // WHAT HE PLAYED ON. `g`/`t` are real career aggregates on both groups
+  // (Yelich 1,671 grass / 54 turf; Peterson 148 / 13, each pair summing to his
+  // exact career total), and the rows read the park's surface off the same
+  // schedule record that supplied the score — season-correct, so Chase Field
+  // is grass through 2018 and turf from 2019 rather than turf all the way back.
+  //
+  // THE DOOR AND THE ROWS AGREE TO THE GAME here, which puts this pair with
+  // the calendar doors rather than with Home and Road above them: 1,671 and 54
+  // on both sides of Yelich's career, and one game apart on Frelick's.
+  {
+    key: 'grass',
+    sitCode: 'g',
+    label: 'On grass',
+    kicker: 'Game lines · on grass',
+    title: (name) => `${name} on grass`,
+    facet: { kind: 'surface', value: 'grass' },
+    section: 'where',
+    groups: ['hitting', 'pitching'],
+  },
+  {
+    key: 'turf',
+    sitCode: 't',
+    label: 'On turf',
+    kicker: 'Game lines · on turf',
+    title: (name) => `${name} on turf`,
+    facet: { kind: 'surface', value: 'turf' },
     section: 'where',
     groups: ['hitting', 'pitching'],
   },
@@ -208,6 +244,42 @@ export const CARD_FACETS = [
     facet: { kind: 'started', value: false },
     section: 'how',
     groups: ['pitching'],
+  },
+  // WAS HIS NAME ON THE CARD (#1003's hitter half). Hitters only; the pitcher
+  // pair above it is the same question answered by `sp`/`rp`, which do not
+  // apply to a bat.
+  //
+  // THE ISSUE WAS BLOCKED ON A SOURCE THAT EXISTS. It was left open because
+  // "there is no started/sub situation code for a hitter" — true of all 602
+  // situation codes, and not true of the FIELDING career, which carries
+  // `gamesStarted` per position and sums to his career starts in one call.
+  // Measured over eleven hitters, the bench figure lands within 2 games of the
+  // lineups themselves. careerSplits.js has the measurement and the margin.
+  //
+  // The ROWS come from the schedule's `hydrate=lineups`, fetched by a second
+  // narrow pass that only these two doors trigger (facets.js, fetch.js).
+  {
+    key: 'lineupStart',
+    fielding: 'starts',
+    lineKind: 'games',
+    label: 'Started',
+    kicker: 'Game lines · in the starting lineup',
+    title: (surname) => `${surname} in the starting lineup`,
+    facet: { kind: 'lineupStart', value: true },
+    section: 'how',
+    groups: ['hitting'],
+  },
+  {
+    key: 'cameIn',
+    fielding: 'bench',
+    lineKind: 'games',
+    label: 'Came in',
+    kicker: 'Game lines · off the bench',
+    title: (surname) => `${surname} off the bench`,
+    footNote: 'Games he entered after the first pitch.',
+    facet: { kind: 'lineupStart', value: false },
+    section: 'how',
+    groups: ['hitting'],
   },
   // OFF THE BENCH, BAT IN HAND (#1002). Hitters only, and the one door on this
   // card whose rows MLB publishes no per-game list for: `pH` gives the career

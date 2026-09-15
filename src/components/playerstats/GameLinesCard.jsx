@@ -1,7 +1,7 @@
 import { BoxLinesDoor } from '../boxlines/BoxLinesDoor.jsx'
 import { SectionTitle } from '../ui/SectionTitle.jsx'
 import { cardFacetsFor, SECTIONS } from '../../api/boxlines/cardFacets.js'
-import { careerSplitLine, chipLine, fetchDoorLabels } from '../../api/boxlines/careerSplits.js'
+import { chipLine, doorLine, fetchDoorLabels } from '../../api/boxlines/careerSplits.js'
 import { useAsync } from '../../hooks/useAsync.js'
 
 // GAME LINES — the player page's ledger of doors (ADR-0069, issue #997). Each
@@ -28,6 +28,11 @@ import { useAsync } from '../../hooks/useAsync.js'
 // TWO SHAPES OF DOOR. A ledger row carries the whole career line; a chip
 // carries a short one and sits in a row with its siblings. Only the weekdays
 // are chips, because only they are a comparison — see BoxLinesDoor.
+//
+// AND TWO KINDS OF FIGURE. Most doors print a five-figure career line; a
+// hitter's Started and Came in print a game count alone, because the source
+// that knows how often he was on the card is a FIELDING career and it carries
+// no batting average. `doorLine` picks, so this file does not have to.
 //
 // SPOILER FOOTING. The labels are CAREER aggregates, open on this page the way
 // the Splits vs team card's are (ADR-0034 — a stat line is not a score). The
@@ -87,7 +92,7 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
                   <li className="gamelines__row" key={row.key}>
                     <BoxLinesDoor
                       className="gamelines__door"
-                      label={`${row.label}: ${careerSplitLine(stat, group)}`}
+                      label={`${row.label}: ${doorLine(row, stat, group)}`}
                       sheet={sheetFor(row)}
                     />
                   </li>
@@ -102,7 +107,7 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
                       className="gamelines__chip"
                       // The full line, for the sheet's headline and the
                       // button's accessible name; the chip shows the short one.
-                      label={`${row.label}: ${careerSplitLine(stat, group)}`}
+                      label={`${row.label}: ${doorLine(row, stat, group)}`}
                       chip={{ name: row.short, line: chipLine(stat, group) }}
                       sheet={sheetFor(row)}
                     />

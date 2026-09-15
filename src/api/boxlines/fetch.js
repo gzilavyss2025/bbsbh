@@ -97,7 +97,22 @@ const LOG_FIELDS = {
 }
 const SCHEDULE_FIELDS =
   'fields=dates,games,gamePk,officialDate,gameNumber,dayNight,status,abstractGameState,' +
-  'teams,away,home,score,team,id,abbreviation,venue,name'
+  'teams,away,home,score,team,id,abbreviation,venue,name,fieldInfo,turfType'
+// `venue(fieldInfo)` is what puts the park's SURFACE on the row, and it is
+// season-correct — Chase Field comes back Grass through 2018 and Artificial
+// Turf from 2019, the season it was relaid (verified 2026-09-15). It costs 7%
+// on this call (32.3 KB -> 34.7 KB over 73 gamePks), which is why it rides
+// along on every facet's join rather than being fetched for the two surface
+// doors alone: at that price a second, differently-shaped join would cost far
+// more than carrying it, the same trade `positionsPlayed` made for #1002.
+const SCHEDULE_HYDRATE = 'team,venue(fieldInfo)'
+// The lineups pass asks for NOTHING but the nine names a side. It is a second
+// call over the same gamePks rather than a hydrate on the one above, because
+// folding `lineups` into the shared call costs +65% (32.3 KB -> 53.4 KB over
+// 73 gamePks) on EVERY hitter's join, where two of a card's twenty-odd doors
+// need it. Asked on its own it is 23.3 KB over the same games — the same bytes
+// — and only the reader who opens one of those two doors ever pays them.
+const LINEUP_FIELDS = 'fields=dates,games,gamePk,lineups,homePlayers,awayPlayers,id'
 // 162 gamePks answered in one call (1,193-char URL, 177 ms) — verified
 // 2026-09-02. Chunked at 120 anyway, ~900 chars, so a fifteen-year hitter's
 // request can never build a URL some proxy refuses.
@@ -129,7 +144,9 @@ async function fetchSchedule(gamePks) {
   for (let i = 0; i < gamePks.length; i += SCHEDULE_CHUNK) chunks.push(gamePks.slice(i, i + SCHEDULE_CHUNK))
   const pages = await Promise.all(
     chunks.map((pks) =>
-      getJson(`/api/v1/schedule?sportId=1&gamePks=${pks.join(',')}&hydrate=team&${SCHEDULE_FIELDS}`),
+      getJson(
+        `/api/v1/schedule?sportId=1&gamePks=${pks.join(',')}&hydrate=${SCHEDULE_HYDRATE}&${SCHEDULE_FIELDS}`,
+      ),
     ),
   )
   // statsapi repeats a game across `dates` entries (162 gamePks came back as
@@ -144,6 +161,37 @@ async function fetchSchedule(gamePks) {
     games.push(g)
   }
   return games
+}
+
+// WAS HE IN THE STARTING LINEUP, game by game — a Map gamePk -> boolean over
+// the same gamePks the join already holds. The schedule's `hydrate=lineups`
+// returns nine names a side, in BATTING ORDER (index 0 is the leadoff man,
+// checked against the boxscore's own `battingOrder` on gamePk 747043), and
+// `fields=` trims them to bare ids.
+//
+// Coverage was measured across six full club seasons before this was built:
+// every game that was actually PLAYED carries a full eighteen names back to
+// 2008, and the only games without one are the games with no score, which the
+// gate has already dropped. A game that still answers with no lineup is left
+// OUT of the map rather than answered `false`, so rows.js can tell "he came
+// off the bench" from "nobody posted a card".
+async function fetchLineupStarts(personId, gamePks) {
+  const chunks = []
+  for (let i = 0; i < gamePks.length; i += SCHEDULE_CHUNK) chunks.push(gamePks.slice(i, i + SCHEDULE_CHUNK))
+  const pages = await Promise.all(
+    chunks.map((pks) =>
+      getJson(`/api/v1/schedule?sportId=1&gamePks=${pks.join(',')}&hydrate=lineups&${LINEUP_FIELDS}`),
+    ),
+  )
+  const starts = new Map()
+  for (const g of pages.flatMap((p) => (p.dates ?? []).flatMap((d) => d.games ?? []))) {
+    if (!g?.gamePk || starts.has(g.gamePk)) continue
+    const home = g.lineups?.homePlayers ?? []
+    const away = g.lineups?.awayPlayers ?? []
+    if (!home.length || !away.length) continue
+    starts.set(g.gamePk, [...home, ...away].some((p) => p?.id === personId))
+  }
+  return starts
 }
 
 // A small in-order pool: statsapi is public and shared, and a veteran's
@@ -177,6 +225,9 @@ async function loadJoin({ personId, group, opponentId, gameTypes, cutoff }) {
 // Memoize the REQUEST, not the result (see staticJson.js for why): the sheet
 // and a second door on the same page may ask on the same tick.
 const inFlight = new Map()
+// The lineups pass is memoized on the SAME key as the join it belongs to, so
+// the two doors that need it share one pass and every other door pays nothing.
+const lineupsInFlight = new Map()
 
 function joinFor(key, args) {
   if (!inFlight.has(key)) {
@@ -192,12 +243,28 @@ function joinFor(key, args) {
   return inFlight.get(key)
 }
 
+function lineupStartsFor(key, personId, gamePks) {
+  if (!lineupsInFlight.has(key)) {
+    lineupsInFlight.set(
+      key,
+      fetchLineupStarts(personId, gamePks).catch(() => {
+        // Not memoized on failure, same as the join: Try again should try.
+        lineupsInFlight.delete(key)
+        // An empty map leaves every row's `lineupStart` null, so the two doors
+        // that asked render an empty sheet rather than a confidently wrong one.
+        return new Map()
+      }),
+    )
+  }
+  return lineupsInFlight.get(key)
+}
+
 // The rows for one player under one facet, or null when the fetch failed.
 // `cutoff` is YYYY-MM-DD or null; `group` is 'pitching' | 'hitting'; `facet`
 // is one of the tagged objects facets.js knows, or null for every game.
 export async function fetchBoxLines({ personId, group, cutoff = null, facet = null }) {
   if (!personId || !LOG_FIELDS[group]) return []
-  const { opponentId, gameTypes, keep, narrowsSplits } = facetPlan(facet)
+  const { opponentId, gameTypes, keep, narrowsSplits, needsLineups } = facetPlan(facet)
   if (narrowsSplits && !opponentId) return []
   const types = gameTypes ?? REGULAR_SEASON
   // Only a facet that narrows the game log itself belongs in the join key:
@@ -206,5 +273,9 @@ export async function fetchBoxLines({ personId, group, cutoff = null, facet = nu
   const key = [personId, group, cutoff ?? '', types.join('+'), narrowsSplits ? opponentId : ''].join('|')
   const join = await joinFor(key, { personId, group, opponentId, gameTypes: types, cutoff })
   if (!join) return null
-  return boxLineRows({ ...join, group, cutoff, gameTypes: types, keep })
+  // Only the two lineup doors go back for a second pass, and only once a card.
+  const lineupStarts = needsLineups
+    ? await lineupStartsFor(key, personId, [...new Set(join.splits.map((s) => s.game.gamePk))])
+    : null
+  return boxLineRows({ ...join, group, cutoff, gameTypes: types, keep, lineupStarts })
 }

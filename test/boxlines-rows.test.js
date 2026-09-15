@@ -19,6 +19,7 @@ import {
   matchingSplits,
   POSTSEASON,
   seriesAbbr,
+  surfaceOf,
 } from '../src/api/boxlines/rows.js'
 
 // A pitching game-log split as statsapi returns it (trimmed to the fields the
@@ -520,5 +521,96 @@ test('the cutoff gate applies to a postseason row exactly as it does to any othe
   assert.deepEqual(
     live.map((r) => r.gamePk),
     [4],
+  )
+})
+
+test('the row carries the park surface the schedule reported for that game', () => {
+  // Read off the game, never off a table of parks: the schedule's fieldInfo is
+  // season-correct, so a park that was relaid mid-career reads grass before
+  // and turf after. A static map of today's surfaces would call every game at
+  // Chase Field before 2019 turf.
+  const rows = boxLineRows({
+    splits: [split('2024-07-04', 1), split('2024-07-05', 2), split('2024-07-06', 3)],
+    schedule: [
+      sched(1, '2024-07-04', { venue: { id: 15, name: 'Chase Field', fieldInfo: { turfType: 'Grass' } } }),
+      sched(2, '2024-07-05', {
+        venue: { id: 15, name: 'Chase Field', fieldInfo: { turfType: 'Artificial Turf' } },
+      }),
+      sched(3, '2024-07-06', { venue: { id: 15, name: 'Chase Field' } }),
+    ],
+    group: 'pitching',
+  })
+  assert.deepEqual(
+    rows.map((r) => r.surface),
+    ['', 'turf', 'grass'],
+  )
+})
+
+test('grass and turf are the only two answers, and "" means nobody said', () => {
+  assert.equal(surfaceOf('Grass'), 'grass')
+  assert.equal(surfaceOf('Artificial Turf'), 'turf')
+  // A spelling nobody predicted is turf rather than nothing: every park that
+  // is not grass is some kind of artificial surface, so an unknown name lands
+  // on the right side instead of vanishing from both doors.
+  assert.equal(surfaceOf('AstroTurf'), 'turf')
+  assert.equal(surfaceOf('Synthetic'), 'turf')
+  assert.equal(surfaceOf(''), '')
+  assert.equal(surfaceOf(null), '')
+  assert.equal(surfaceOf(undefined), '')
+})
+
+test('lineupStart is null unless the caller handed over the lineups', () => {
+  // The second pass costs a request, so most sheets never make it. A row from
+  // a sheet that did not ask must say "unknown", not "he came off the bench".
+  const rows = boxLineRows({
+    splits: [split('2024-07-04', 1)],
+    schedule: [sched(1, '2024-07-04')],
+    group: 'hitting',
+  })
+  assert.equal(rows[0].lineupStart, null)
+})
+
+test('lineupStart follows the map, and a game the map never saw stays null', () => {
+  // `has` rather than `get`: a game with no lineup posted is absent from the
+  // map, and absent must not read as false. This is the whole reason the map
+  // is a Map and not a Set of the games he started.
+  const rows = boxLineRows({
+    splits: [split('2024-07-04', 1), split('2024-07-05', 2), split('2024-07-06', 3)],
+    schedule: [sched(1, '2024-07-04'), sched(2, '2024-07-05'), sched(3, '2024-07-06')],
+    group: 'hitting',
+    lineupStarts: new Map([
+      [1, true],
+      [2, false],
+    ]),
+  })
+  assert.deepEqual(
+    rows.map((r) => ({ pk: r.gamePk, start: r.lineupStart })),
+    [
+      { pk: 3, start: null },
+      { pk: 2, start: false },
+      { pk: 1, start: true },
+    ],
+  )
+})
+
+test('the gate still runs first: a lineup start on the cutoff day has no row', () => {
+  // The invariant the whole feature rests on, re-pinned for the two facets
+  // that arrived with a fetch of their own. A facet may narrow; it may never
+  // reach around the cutoff, and a second pass over the same gamePks cannot
+  // introduce a game the splits did not already name.
+  const rows = boxLineRows({
+    splits: [split('2024-07-04', 1), split('2024-07-05', 2)],
+    schedule: [sched(1, '2024-07-04'), sched(2, '2024-07-05')],
+    group: 'hitting',
+    cutoff: '2024-07-05',
+    lineupStarts: new Map([
+      [1, true],
+      [2, true],
+    ]),
+    keep: (r) => r.lineupStart === true,
+  })
+  assert.deepEqual(
+    rows.map((r) => r.gamePk),
+    [1],
   )
 })

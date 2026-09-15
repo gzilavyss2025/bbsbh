@@ -18,6 +18,8 @@ function row(over = {}) {
     started: true,
     venueId: 32,
     dayNight: 'night',
+    surface: 'grass',
+    lineupStart: true,
     positions: ['LF'],
     ...over,
   }
@@ -37,7 +39,17 @@ test('the club facet is the only one that narrows the game log', () => {
   assert.equal(plan.narrowsSplits, true)
   // It filters splits by opponent, so it needs no row predicate on top.
   assert.equal(plan.keep, null)
-  for (const kind of ['venue', 'month', 'dayNight', 'weekday', 'side', 'started', 'pinchHit']) {
+  for (const kind of [
+    'venue',
+    'month',
+    'dayNight',
+    'weekday',
+    'side',
+    'started',
+    'pinchHit',
+    'surface',
+    'lineupStart',
+  ]) {
     assert.equal(facetPlan({ kind }).narrowsSplits, false, `${kind} must not narrow the log`)
   }
 })
@@ -123,4 +135,58 @@ test('the date helpers read the string, so no timezone can move a game a day', (
   assert.equal(monthOf('2024-03-01'), 3)
   assert.equal(weekdayOf('2024-03-10'), 0)
   assert.equal(weekdayOf('2024-11-03'), 0)
+})
+
+test('the surface facet reads the park as it was THAT season', () => {
+  // The row's `surface` comes off the schedule record's own fieldInfo, which
+  // is season-correct — Chase Field is grass through 2018 and turf from 2019.
+  // A facet that matched on a park id against a table of today's surfaces
+  // would put eighty-one 2016 games on the wrong side.
+  const grass = facetPlan({ kind: 'surface', value: 'grass' }).keep
+  const turf = facetPlan({ kind: 'surface', value: 'turf' }).keep
+  assert.equal(grass(row({ surface: 'grass' })), true)
+  assert.equal(grass(row({ surface: 'turf' })), false)
+  assert.equal(turf(row({ surface: 'turf' })), true)
+  assert.equal(turf(row({ surface: 'grass' })), false)
+  // A record with no surface on it is on neither side, the same as a game with
+  // no lineup: '' is missing information, not a third kind of field.
+  assert.equal(grass(row({ surface: '' })), false)
+  assert.equal(turf(row({ surface: '' })), false)
+})
+
+test('the lineup facet asks for a second pass, and only it does', () => {
+  // `needsLineups` is what sends fetch.js back for the schedule's lineups. It
+  // is the one flag that costs a request, so no other facet may set it.
+  assert.equal(facetPlan({ kind: 'lineupStart', value: true }).needsLineups, true)
+  assert.equal(facetPlan({ kind: 'lineupStart', value: false }).needsLineups, true)
+  for (const facet of [
+    null,
+    { kind: 'club', opponentId: 158 },
+    { kind: 'venue', venueId: 32 },
+    { kind: 'month', month: 7 },
+    { kind: 'weekday', day: 3 },
+    { kind: 'dayNight', value: 'day' },
+    { kind: 'side', home: true },
+    { kind: 'started', value: true },
+    { kind: 'pinchHit' },
+    { kind: 'surface', value: 'grass' },
+  ]) {
+    assert.equal(facetPlan(facet).needsLineups, false, `${facet?.kind ?? 'null'} must not cost a pass`)
+  }
+})
+
+test('a game with no lineup is on neither side of the lineup facet', () => {
+  // null is "nobody posted a card", not "he came off the bench". Counting it
+  // as a bench game is the one wrong answer this facet could give quietly.
+  const started = facetPlan({ kind: 'lineupStart', value: true }).keep
+  const bench = facetPlan({ kind: 'lineupStart', value: false }).keep
+  assert.equal(started(row({ lineupStart: true })), true)
+  assert.equal(started(row({ lineupStart: false })), false)
+  assert.equal(bench(row({ lineupStart: false })), true)
+  assert.equal(bench(row({ lineupStart: true })), false)
+  assert.equal(started(row({ lineupStart: null })), false)
+  assert.equal(bench(row({ lineupStart: null })), false)
+  // A pitcher's row never carries one at all — the same shape as unknown.
+  assert.equal(started(row({ lineupStart: undefined })), false)
+  assert.equal(bench(row({ lineupStart: undefined })), false)
 })

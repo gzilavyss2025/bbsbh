@@ -17,8 +17,19 @@
 // safe HERE, where an aggregate has no per-row type to be poisoned; on the
 // game log it is not, and rows.js's POSTSEASON says why.
 //
+// A DOOR WHOSE LINE IS NOT A STAT LINE AT ALL. A hitter's Started and Came in
+// doors (#1003) count GAMES and nothing else, because the source that knows
+// how often he was in the starting lineup is the FIELDING career — one row per
+// position, each carrying `gamesStarted` — and a fielding row holds no batting
+// average to print. So those two doors print "1,674 G" where their neighbours
+// print a five-figure line, and `doorLine` below is what lets one card hold
+// both. That source is the whole reason #1003's hitter half was ever blocked:
+// it was read as "MLB publishes no started/substitute split for a hitter",
+// which is true of `situationCodes` — all 602 of them — and not true of the
+// fielding group, which nobody had asked.
+//
 // So `fetchDoorLabels` below is the card's one entry point: it reads whichever
-// of the two sources each registry entry names, in parallel, and hands back
+// of the three sources each registry entry names, in parallel, and hands back
 // one Map the card can key by door. Two requests for a card with a postseason
 // door, one for a card without.
 //
@@ -47,6 +58,22 @@ export function careerSplitLine(stat, group) {
   return group === 'pitching'
     ? `${stat.gamesPlayed} G, ${stat.inningsPitched} IP, ${stat.era} ERA, ${stat.strikeOuts} K, ${stat.baseOnBalls} BB`
     : `${stat.gamesPlayed} G, ${stat.plateAppearances} PA, ${stat.avg}, ${stat.homeRuns} HR, ${stat.ops} OPS`
+}
+
+// A door that counts GAMES and says nothing else — the two lineup doors. The
+// figure comes from a fielding career, which carries no rate stat, and the
+// count IS the question those doors ask ("how often did he come off the
+// bench?"), so there is nothing missing from this line.
+export function gamesLine(stat) {
+  if (!stat) return null
+  return `${stat.gamesPlayed} G`
+}
+
+// The line ONE registry entry prints, whichever kind of figure it has. The
+// card asks for this rather than choosing, so a new kind of source is one case
+// here instead of a branch on every surface that draws a door.
+export function doorLine(entry, stat, group) {
+  return entry?.lineKind === 'games' ? gamesLine(stat) : careerSplitLine(stat, group)
 }
 
 // The same career, short enough for a CHIP. The weekday doors are seven
@@ -82,6 +109,39 @@ export async function fetchCareerTotal(personId, group, gameType) {
   }
 }
 
+// HOW OFTEN HE WAS IN THE STARTING LINEUP, over a career, in one call.
+// `stats=career&group=fielding` returns a row per position he has played, and
+// every row carries `gamesStarted`; one game contributes one start, to the
+// position he STARTED at, so the sum over positions is his career starts.
+//
+// Measured against the truth — the schedule's own `hydrate=lineups`, game by
+// game — over eleven hitters on 2026-09-15: the starts figure lands within 5
+// and the BENCH figure, which is the small one and the one a reader looks at,
+// within 2 every time. Cain 11 against 11, Soto 15 against 15, Yelich 53
+// against 51, Turang 136 against 138, Taylor 158 against 159. It reaches back
+// as far as the app will ever ask: Bonds (debut 1986) returns 2,848 starts of
+// 2,986 games.
+//
+// That margin is the same KIND as the one the Home and Road doors carry
+// (ADR-0069): MLB's aggregate on the door, MLB's per-game record in the rows,
+// and no rule that reconciles them. It is not a bug to be closed by loosening
+// the gate or by counting the rows instead — the rows stop at the page's
+// cutoff and the door states a whole career.
+export async function fetchFieldingStarts(personId) {
+  if (!personId) return null
+  try {
+    const data = await getJson(
+      `/api/v1/people/${personId}/stats?stats=career&group=fielding&sportId=1&gameType=R` +
+        `&fields=stats,splits,stat,gamesStarted`,
+    )
+    const splits = data.stats?.[0]?.splits ?? []
+    if (!splits.length) return null
+    return splits.reduce((a, s) => a + (Number(s.stat?.gamesStarted) || 0), 0)
+  } catch {
+    return null
+  }
+}
+
 // Every door's line for one card, as a Map keyed by the registry entry's
 // `key`. An entry names its source: `sitCode` for a situation (all of them
 // share ONE careerStatSplits call, whatever the count) or `careerGameType`
@@ -92,14 +152,31 @@ export async function fetchDoorLabels(personId, group, entries) {
   if (!personId || !list.length) return new Map()
   const codes = list.map((e) => e.sitCode).filter(Boolean)
   const types = [...new Set(list.map((e) => e.careerGameType).filter(Boolean))]
-  const [bySitCode, ...totals] = await Promise.all([
+  // The two lineup doors share ONE pair of calls — his starts and his career
+  // games — and a card without them asks neither.
+  const wantsLineup = list.some((e) => e.fielding)
+  const [bySitCode, starts, whole, ...totals] = await Promise.all([
     fetchCareerSplits(personId, group, codes),
+    wantsLineup ? fetchFieldingStarts(personId) : Promise.resolve(null),
+    wantsLineup ? fetchCareerTotal(personId, group, 'R') : Promise.resolve(null),
     ...types.map((t) => fetchCareerTotal(personId, group, t)),
   ])
   const byGameType = new Map(types.map((t, i) => [t, totals[i]]))
+  const games = Number(whole?.gamesPlayed)
+  const byFielding = new Map()
+  if (starts != null && Number.isFinite(games) && games > 0) {
+    byFielding.set('starts', { gamesPlayed: starts })
+    // He played, and he did not start: the bench count is a subtraction, so
+    // the two doors can never add up to more than the career they came from.
+    byFielding.set('bench', { gamesPlayed: Math.max(0, games - starts) })
+  }
   const out = new Map()
   for (const e of list) {
-    const stat = e.careerGameType ? byGameType.get(e.careerGameType) : bySitCode.get(e.sitCode)
+    const stat = e.fielding
+      ? byFielding.get(e.fielding)
+      : e.careerGameType
+        ? byGameType.get(e.careerGameType)
+        : bySitCode.get(e.sitCode)
     if (stat) out.set(e.key, stat)
   }
   return out

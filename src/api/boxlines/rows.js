@@ -100,6 +100,23 @@ export function askableGameTypes(types) {
 // absent there rather than empty. 'P' deliberately has no abbreviation: a row
 // that still says 'P' came from a call that asked the wrong question (above),
 // and a blank pill is the visible end of that, not a confident wrong answer.
+// The park's surface that season, from the schedule record's own
+// `venue.fieldInfo.turfType` (`hydrate=venue(fieldInfo)`): 'grass', 'turf', or
+// '' when the record does not carry one. MLB spells it "Grass" or "Artificial
+// Turf"; anything else that is not grass is turf, so a future spelling lands
+// on the right side rather than vanishing.
+//
+// IT IS SEASON-CORRECT, which is the whole reason this is read off the game
+// rather than off a table of parks: Chase Field comes back Grass for 2016 and
+// 2018 and Artificial Turf from 2019 (verified 2026-09-15), which is when it
+// was relaid. A static map of today's surfaces would have called eighty-one
+// 2016 games turf.
+export function surfaceOf(turfType) {
+  const t = String(turfType ?? '').trim().toLowerCase()
+  if (!t) return ''
+  return t.includes('grass') ? 'grass' : 'turf'
+}
+
 export function seriesAbbr(gameType) {
   return { F: 'WC', D: 'DS', L: 'LCS', W: 'WS' }[gameType] ?? ''
 }
@@ -122,10 +139,17 @@ export function matchingSplits(splits, { opponentId = null, gameTypes = REGULAR_
 // The rows. `schedule` is the list of schedule game records for the splits'
 // gamePks (any order, extras ignored). Shape of a row:
 //   { season, date, gamePk, gameNumber, gameType, series, home, teamId,
-//     teamAbbr, opponentId, opponentAbbr, started, positions, line, won, runs,
-//     oppRuns, venueId, venueName, dayNight, boxScorePath }
+//     teamAbbr, opponentId, opponentAbbr, started, lineupStart, positions,
+//     line, won, runs, oppRuns, venueId, venueName, surface, dayNight,
+//     boxScorePath }
 // `started` is null for hitters: the hitting game log carries no gamesStarted.
 // `positions` is null for pitchers, for the same reason in reverse.
+//
+// `lineupStart` answers the same question for a HITTER — was he on the card —
+// and it is null unless the caller handed over `lineupStarts`, the second,
+// narrow schedule pass fetch.js makes only for the two doors that need it. A
+// game the lineups could not answer for stays null and belongs to neither
+// side of that facet, rather than being counted as a bench appearance.
 //
 // `keep` is a facet's row predicate (api/boxlines/facets.js) and is applied
 // AFTER the gate, never before, so no facet can widen what the gate allows:
@@ -138,6 +162,7 @@ export function boxLineRows({
   cutoff = null,
   gameTypes = REGULAR_SEASON,
   keep = null,
+  lineupStarts = null,
 }) {
   const byPk = new Map((schedule ?? []).filter((g) => g?.gamePk).map((g) => [g.gamePk, g]))
   const rows = []
@@ -188,12 +213,18 @@ export function boxLineRows({
         group === 'hitting'
           ? (s.positionsPlayed ?? []).map((p) => p?.abbreviation).filter(Boolean)
           : null,
+      // WAS HE ON THE CARD? A Map gamePk -> boolean, built by fetch.js from
+      // the schedule's `hydrate=lineups`, or null when no door on this sheet
+      // asked. `has` rather than `get`, so a game the lineups did not cover is
+      // null (unknown) and not false (came off the bench).
+      lineupStart: lineupStarts?.has(s.game.gamePk) ? lineupStarts.get(s.game.gamePk) : null,
       line: group === 'pitching' ? pitcherLine(st) : hitterLine(st),
       won: runs != null && oppRuns != null ? runs > oppRuns : Boolean(s.isWin),
       runs,
       oppRuns,
       venueId: g.venue?.id ?? null,
       venueName: g.venue?.name ?? '',
+      surface: surfaceOf(g.venue?.fieldInfo?.turfType),
       dayNight: g.dayNight ?? '',
       boxScorePath:
         awayAbbr && homeAbbr

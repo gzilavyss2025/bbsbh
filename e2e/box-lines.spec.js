@@ -163,14 +163,15 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
     'When it counted',
   ])
 
-  // A pitcher who has reached October and pitched in every month gets fifteen
-  // ledger doors — Home, Road, Day, Night, eight months, Started, In relief,
-  // Postseason — plus seven weekday CHIPS, which are a separate class because
-  // they are a comparison rather than a stack of lines. MiLB service returns no
-  // rows for these codes and a door with no career row drops out on its own, so
-  // this also says he is being read as a major leaguer.
+  // A pitcher who has reached October and pitched in every month gets seventeen
+  // ledger doors — Home, Road, On grass, On turf, Day, Night, eight months,
+  // Started, In relief, Postseason — plus seven weekday CHIPS, which are a
+  // separate class because they are a comparison rather than a stack of lines.
+  // MiLB service returns no rows for these codes and a door with no career row
+  // drops out on its own, so this also says he is being read as a major
+  // leaguer. He gets no lineup pair: a pitcher is never on the batting card.
   const doors = card.locator('.gamelines__door')
-  await expect(doors).toHaveCount(15)
+  await expect(doors).toHaveCount(17)
   await expect(card.locator('.gamelines__chip')).toHaveCount(7)
 
   const home = card.getByRole('button', { name: /^Home: / })
@@ -324,10 +325,9 @@ test('a hitter gets a pinch-hitting door, and a pitcher does not', async ({ page
     test.skip(true, 'this player has no MLB situational splits on file today')
     return
   }
-  // No start/relief pair for a hitter: the hitting game log carries no
-  // gamesStarted, so those facets would keep nothing (#1003's hitter half
-  // reads the schedule's lineups instead, and is not shipped).
-  await expect(card.getByRole('button', { name: /^Started: / })).toHaveCount(0)
+  // No RELIEF door for a hitter: `rp` is a pitching situation. He does get a
+  // Started door, but it is the lineup one (#1003) and it prints a games-only
+  // line, which the lineup test below pins.
   await expect(card.getByRole('button', { name: /^In relief: / })).toHaveCount(0)
 
   const pinch = card.getByRole('button', { name: /^Pinch hitting: / })
@@ -364,4 +364,118 @@ test('a hitter gets a pinch-hitting door, and a pitcher does not', async ({ page
     .poll(async () => (await homeSheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
     .toBe(true)
   expect(await homeSheet.locator('.boxline:not(.boxline--skel)').count()).toBeGreaterThan(n)
+})
+
+// THE LINEUP DOORS (#1003's hitter half). The issue sat open on the belief that
+// MLB publishes no started/substitute split for a hitter. That is true of all
+// 602 SITUATION codes and not true of the fielding career, whose rows carry
+// `gamesStarted` — so these two doors print a game count and nothing else,
+// which is the one thing on this card that does not look like every other door.
+// Their rows come from the schedule's own lineups, fetched by a second pass
+// that only these two doors trigger.
+test('a hitter gets lineup doors that count games, and a pitcher gets none', async ({ page }) => {
+  await page.goto(`${YELICH}?d=${PLAYER_CUTOFF}`)
+  const card = page.locator('.gamelines')
+  await card.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await card.count()) === 0) {
+    test.skip(true, 'this player has no MLB situational splits on file today')
+    return
+  }
+
+  // A GAMES-ONLY LINE. The fielding career carries no batting average, so these
+  // two read "1,672 G" where every neighbour reads five figures. A door that
+  // printed the usual line here would be printing four `undefined`s.
+  const started = card.getByRole('button', { name: /^Started: / })
+  const cameIn = card.getByRole('button', { name: /^Came in: / })
+  const startedLabel = (await started.locator('span').first().textContent()).trim()
+  const cameInLabel = (await cameIn.locator('span').first().textContent()).trim()
+  expect(startedLabel).toMatch(/^Started: \d+ G$/)
+  expect(cameInLabel).toMatch(/^Came in: \d+ G$/)
+
+  await cameIn.click()
+  const sheet = page.getByRole('dialog', { name: /off the bench/ })
+  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · off the bench')
+  await expect(sheet.locator('.boxlines__headline')).toHaveText(cameInLabel)
+  await expect
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+  const benchRows = sheet.locator('.boxline:not(.boxline--skel)')
+  const bench = await benchRows.count()
+  expect(bench).toBeGreaterThan(0)
+  await expect(sheet.locator('.boxlines__foot')).toContainText('after the first pitch')
+  for (let i = 0; i < bench; i++) {
+    const href = await benchRows.nth(i).locator('a').getAttribute('href')
+    const [, mmddyyyy] = href.match(/^\/(\d{8})\//)
+    const iso = `${mmddyyyy.slice(4)}-${mmddyyyy.slice(0, 2)}-${mmddyyyy.slice(2, 4)}`
+    expect(iso < PLAYER_CUTOFF, `row ${i} is dated ${iso}, not before ${PLAYER_CUTOFF}`).toBe(true)
+  }
+
+  // The two doors partition his career, so a regular's bench sheet is the small
+  // one. A facet that kept everything, or nothing, fails here rather than
+  // rendering a plausible-looking ledger.
+  await page.keyboard.press('Escape')
+  await started.click()
+  const startSheet = page.getByRole('dialog', { name: /in the starting lineup/ })
+  await expect
+    .poll(async () => (await startSheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+  expect(await startSheet.locator('.boxline:not(.boxline--skel)').count()).toBeGreaterThan(bench)
+
+  // A pitcher is never on the batting card, so he is offered neither door.
+  await page.goto(`${PETERSON}?d=${PLAYER_CUTOFF}`)
+  const pitcherCard = page.locator('.gamelines')
+  await pitcherCard.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await pitcherCard.count()) > 0) {
+    await expect(pitcherCard.getByRole('button', { name: /^Came in: / })).toHaveCount(0)
+    // His Started door is the PITCHING one, and it carries a full line.
+    const pitcherStarted = pitcherCard.getByRole('button', { name: /^Started: / })
+    if ((await pitcherStarted.count()) > 0) {
+      expect((await pitcherStarted.locator('span').first().textContent()).trim()).toMatch(
+        /^Started: \d+ G, .*IP/,
+      )
+    }
+  }
+})
+
+// THE SURFACE DOORS. The park as it was THAT SEASON, off the schedule record's
+// own fieldInfo — a table of today's parks would put every pre-2019 game at
+// Chase Field on the wrong side. Both groups, and the door and the rows agree
+// to the game, so this pins the rows against the door's own figure.
+test('the surface doors split a career, and the rows never exceed the door', async ({ page }) => {
+  for (const who of [YELICH, PETERSON]) {
+    await page.goto(`${who}?d=${PLAYER_CUTOFF}`)
+    const card = page.locator('.gamelines')
+    await card.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+    if ((await card.count()) === 0) continue
+
+    const turf = card.getByRole('button', { name: /^On turf: / })
+    const grass = card.getByRole('button', { name: /^On grass: / })
+    if ((await turf.count()) === 0 || (await grass.count()) === 0) continue
+    const turfLabel = (await turf.locator('span').first().textContent()).trim()
+    const doorGames = Number(turfLabel.match(/^On turf: (\d+) G/)[1])
+
+    await turf.click()
+    const sheet = page.getByRole('dialog', { name: /on turf/ })
+    await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · on turf')
+    await expect
+      .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+      .toBe(true)
+    const turfRows = await sheet.locator('.boxline:not(.boxline--skel)').count()
+    expect(turfRows).toBeGreaterThan(0)
+    // The gate can drop a row the career aggregate counted (a played game whose
+    // schedule row is stuck on Postponed), so the rows may come in under the
+    // door. They may never come in OVER it: that would mean the facet kept a
+    // game MLB does not count as turf.
+    expect(turfRows, `${who}: ${turfRows} turf rows against a door of ${doorGames}`).toBeLessThanOrEqual(doorGames)
+
+    // And turf is the small half of a career spent mostly on grass.
+    await page.keyboard.press('Escape')
+    await grass.click()
+    const grassSheet = page.getByRole('dialog', { name: /on grass/ })
+    await expect
+      .poll(async () => (await grassSheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+      .toBe(true)
+    expect(await grassSheet.locator('.boxline:not(.boxline--skel)').count()).toBeGreaterThan(turfRows)
+    await page.keyboard.press('Escape')
+  }
 })
