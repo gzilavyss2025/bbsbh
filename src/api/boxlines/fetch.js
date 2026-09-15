@@ -19,7 +19,11 @@
 //      day/night, the abbreviations the box-score path needs, and the Final
 //      status the gate requires. `opposingTeamId=` is IGNORED on the game log
 //      (same rows with and without it — verified 2026-09-02), which is why
-//      step 2 filters client-side.
+//      step 2 filters client-side;
+//   4. one linescore call for each of the handful of schedule rows that came
+//      back with no score — the games MLB left stuck at `Postponed` after they
+//      were played (#1031). ~1% of a career, 47 bytes each, and a miss leaves
+//      the row dropped exactly as before. SCORE_FIELDS below has the numbers.
 //
 // THE SCHEDULE IS FETCHED BY gamePk, FOR EVERY FACET. Issue #997 first
 // specified a schedule call per (club, season) instead, to spare a long career
@@ -54,9 +58,10 @@
 // doors on one player, and it is the SAME join behind all of them — the same
 // seasons, the same game logs, the same schedule records — differing only in
 // which finished rows each keeps. So the memo below caches the JOIN (the
-// splits and the schedule records), not the rows, and each facet runs its own
-// `keep` through boxLineRows over the shared result. The second door on a card
-// costs no requests at all.
+// splits, the schedule records, and the scores recovered for the records that
+// carry none), not the rows, and each facet runs its own `keep` through
+// boxLineRows over the shared result. The second door on a card costs no
+// requests at all.
 //
 // THE GAME TYPES ARE ASKED FOR, NOT FILTERED FOR (#1006). Both calls below
 // carry `gameType=`, because statsapi answers a game-log question about the
@@ -75,7 +80,13 @@
 // failure so the sheet shows its retry state rather than an empty ledger.
 import { getJson } from '../statsapi.js'
 import { facetPlan } from './facets.js'
-import { boxLineRows, logRequestPlan, matchingSplits, REGULAR_SEASON } from './rows.js'
+import {
+  boxLineRows,
+  logRequestPlan,
+  matchingSplits,
+  REGULAR_SEASON,
+  scorelessGamePks,
+} from './rows.js'
 
 // The fields each game-log split must keep for rows.js. `id` reaches both
 // `opponent.id` and `team.id`; `gamePk`/`gameNumber` reach `game.*`.
@@ -113,6 +124,30 @@ const SCHEDULE_HYDRATE = 'team,venue(fieldInfo)'
 // need it. Asked on its own it is 23.3 KB over the same games — the same bytes
 // — and only the reader who opens one of those two doors ever pays them.
 const LINEUP_FIELDS = 'fields=dates,games,gamePk,lineups,homePlayers,awayPlayers,id'
+// THE SCORE A STUCK SCHEDULE ROW WILL NOT GIVE UP (#1031). Some games MLB left
+// at `Postponed` were played: rained out, replayed the SAME DAY under the SAME
+// gamePk, and the schedule row never updated. It still says Final with no score,
+// so rows.js drops it — and a door then counts a game the sheet does not show.
+//
+// The schedule endpoint cannot tell such a game from one that was truly never
+// played: `hydrate=linescore` answers `runs: null` on both (verified
+// 2026-09-10). The game's OWN linescore can, and that is the whole fix. Over
+// nine seasons' 406 scoreless-Final rows (2011, 2014, 2017, 2019–21, 2023,
+// 2025, 2026), 400 came back with real runs and 6 with none — and the 6 are
+// exactly the games that were never played (no plays either). So the recovery
+// FAILS CLOSED by itself: no runs, no row, the same answer as before.
+//
+// It is one call per stuck row, `fields=`-trimmed to 47 bytes, and stuck rows
+// are ~1% of a career: 2 on Scherzer's 33 postseason games, 22 on Yelich's
+// 1,725, 33 on Freeman's 2,321, 69 on Cabrera's 2,797 — the worst measured.
+// At six at a time that is 180–280 ms on the careers above (2026-09-15).
+const SCORE_FIELDS = 'fields=teams,home,away,runs'
+const SCORE_CONCURRENCY = 6
+// A ceiling on the SOURCE going wrong, not on a long career: the worst career
+// measured is 69, so nothing real approaches this. If the schedule endpoint
+// ever stopped scoring games wholesale, this is what keeps a sheet from firing
+// a request per game — and the gate simply stays as closed as it is today.
+const SCORE_RECOVERY_CAP = 150
 // 162 gamePks answered in one call (1,193-char URL, 177 ms) — verified
 // 2026-09-02. Chunked at 120 anyway, ~900 chars, so a fifteen-year hitter's
 // request can never build a URL some proxy refuses.
@@ -209,17 +244,48 @@ async function mapPool(items, limit, fn) {
   return out
 }
 
+// THE SCORE OF A GAME THE SCHEDULE LEFT STUCK, off the game's own linescore —
+// a Map gamePk -> { away, home } holding only the games that answered with
+// both. Anything else, a miss or a throw, leaves the gamePk OUT of the map, and
+// rows.js drops that row exactly as it does today: the recovery can put a
+// played game back on the sheet, and it can do nothing else.
+//
+// `mapPool` and not `Promise.all`: statsapi is public and shared, and the worst
+// career measured asks it 69 questions here.
+async function fetchRecoveredScores(gamePks) {
+  const found = await mapPool(gamePks, SCORE_CONCURRENCY, async (pk) => {
+    try {
+      const d = await getJson(`/api/v1/game/${pk}/linescore?${SCORE_FIELDS}`)
+      const away = d.teams?.away?.runs ?? null
+      const home = d.teams?.home?.runs ?? null
+      return away == null || home == null ? null : [pk, { away, home }]
+    } catch {
+      return null
+    }
+  })
+  return new Map(found.filter(Boolean))
+}
+
 // The two sources, joined and ready for the gate: every split that could
-// produce a row, and the schedule record for each one's game.
+// produce a row, the schedule record for each one's game, and the scores
+// recovered for the handful of records that carry none.
 async function loadJoin({ personId, group, opponentId, gameTypes, cutoff }) {
   const seasons = await fetchSeasons(personId, group, gameTypes)
   const plan = logRequestPlan(seasons, cutoff)
-  if (!plan.length) return { splits: [], schedule: [] }
+  if (!plan.length) return { splits: [], schedule: [], recoveredScores: null }
   const logs = await mapPool(plan, LOG_CONCURRENCY, (p) => fetchLog(personId, group, p, gameTypes))
   const splits = matchingSplits(logs.flat(), { opponentId, gameTypes })
-  if (!splits.length) return { splits: [], schedule: [] }
+  if (!splits.length) return { splits: [], schedule: [], recoveredScores: null }
   const schedule = await fetchSchedule([...new Set(splits.map((s) => s.game.gamePk))])
-  return { splits, schedule }
+  // Only the rows the gate turned away FOR WANT OF A SCORE, named by the gate
+  // itself (rows.js), so nothing at or after the cutoff can be asked about.
+  // It rides in the join rather than behind a facet, the way the lineups pass
+  // does, because every door reads these rows — a door that counted a game its
+  // own sheet then hid is the bug, and it must close for all of them at once.
+  const stuck = scorelessGamePks({ splits, schedule, cutoff, gameTypes })
+  const recoveredScores =
+    stuck.length && stuck.length <= SCORE_RECOVERY_CAP ? await fetchRecoveredScores(stuck) : null
+  return { splits, schedule, recoveredScores }
 }
 
 // Memoize the REQUEST, not the result (see staticJson.js for why): the sheet

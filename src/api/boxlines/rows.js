@@ -10,15 +10,25 @@
 // so a row for a game on or after the day being scored may not exist at all.
 // `boxLineRows` returns only games dated strictly BEFORE `cutoff` (a same-day
 // doubleheader game 1 is on the cutoff day and is out) and only games the
-// schedule reports Final AND scored (a live or suspended game has no row; a
-// POSTPONED one calls itself Final and carries no score, so the gate asks for
-// the score rather than for the word). The component holds no date logic; it
+// schedule reports Final AND scored (a live or suspended game has no row, and
+// the gate asks for the score rather than for the word Final, because a
+// postponed game calls itself Final too). The component holds no date logic; it
 // renders what it is handed. A FACET's `keep` predicate (facets.js) is applied
 // AFTER both checks, never before, so narrowing is all a facet can do — the
 // rows it never sees do not exist. `logRequestPlan` is the other half of the
 // same gate, upstream of the fetch: the cutoff season is requested only through the day BEFORE the
 // cutoff (`endDate`, honoured inclusively by statsapi — verified 2026-09-02),
 // so the game being scored is never fetched, never mind dropped.
+//
+// AND THE SCORE MAY BE RECOVERED, WITHOUT LOOSENING THE GATE (#1031). Some
+// games MLB left stuck at `Postponed` were PLAYED — rained out, replayed the
+// same day under the same gamePk, and the schedule row never updated. The gate
+// dropped them, so a door counted them and the sheet did not. `scorelessGamePks`
+// names exactly the games the gate turned away FOR WANT OF A SCORE, fetch.js
+// reads each one's own linescore, and `recoveredScores` hands the answer back
+// here. The gate itself is unchanged: a game with no score on either source
+// still has no row, and a game that failed the cutoff or the Final check is
+// never asked about. See ADR-0069's 2026-09-15 amendment for the measurement.
 //
 // Class: cutoff-gated (spoiler-manifest.json), same footing as
 // person/gameLog.js and vsTeamSplits.js — the safety is the date the caller
@@ -136,6 +146,53 @@ export function matchingSplits(splits, { opponentId = null, gameTypes = REGULAR_
   )
 }
 
+// THE GATE's first two checks, shared by its two readers. A split reaches here
+// only if it is dated strictly before the cutoff — a same-day doubleheader game
+// 1 shares the date and is out — and matches a schedule record the endpoint
+// reports Final. The SCORE check is deliberately not here: it is the one
+// question the two readers answer differently. `boxLineRows` needs a score to
+// build a row; `scorelessGamePks` wants exactly the games that have none.
+function* gatedPairs({ splits, schedule, cutoff, gameTypes }) {
+  const byPk = new Map((schedule ?? []).filter((g) => g?.gamePk).map((g) => [g.gamePk, g]))
+  for (const s of matchingSplits(splits, { gameTypes })) {
+    if (cutoff && !(s.date < cutoff)) continue
+    const g = byPk.get(s.game.gamePk)
+    if (!g || g.status?.abstractGameState !== 'Final') continue
+    yield [s, g]
+  }
+}
+
+// The games that cleared the cutoff and the Final check and were dropped ONLY
+// because the schedule record carries no score — the stuck `Postponed` rows of
+// #1031, and nothing else. fetch.js reads each one's own linescore and hands
+// what it finds back to `boxLineRows` as `recoveredScores`.
+//
+// This is the narrowest possible list, and that is the point: it is built from
+// the SAME gate, so a game at or after the cutoff and a game the schedule does
+// not call Final are never named here, never mind fetched.
+export function scorelessGamePks({
+  splits,
+  schedule,
+  cutoff = null,
+  gameTypes = REGULAR_SEASON,
+} = {}) {
+  const pks = new Set()
+  for (const [s, g] of gatedPairs({ splits, schedule, cutoff, gameTypes })) {
+    if (g.teams?.away?.score == null || g.teams?.home?.score == null) pks.add(s.game.gamePk)
+  }
+  return [...pks]
+}
+
+// The final score of one gated game, from the schedule record or — when that
+// record is a stuck `Postponed` one — from the linescore fetch.js recovered for
+// it. `??` and not `||`, so a shutout's 0 is a score and not a miss. Nulls when
+// neither source has one, which is what keeps the gate closed.
+function scoreOf(g, awayIsHis, recovered) {
+  const away = g.teams?.away?.score ?? recovered?.away ?? null
+  const home = g.teams?.home?.score ?? recovered?.home ?? null
+  return awayIsHis ? { runs: away, oppRuns: home } : { runs: home, oppRuns: away }
+}
+
 // The rows. `schedule` is the list of schedule game records for the splits'
 // gamePks (any order, extras ignored). Shape of a row:
 //   { season, date, gamePk, gameNumber, gameType, series, home, teamId,
@@ -163,15 +220,12 @@ export function boxLineRows({
   gameTypes = REGULAR_SEASON,
   keep = null,
   lineupStarts = null,
+  recoveredScores = null,
 }) {
-  const byPk = new Map((schedule ?? []).filter((g) => g?.gamePk).map((g) => [g.gamePk, g]))
   const rows = []
-  for (const s of matchingSplits(splits, { gameTypes })) {
-    // THE GATE. Strictly before the cutoff — a same-day game shares the date
-    // — and only a game the schedule says is over. Both checks, always.
-    if (cutoff && !(s.date < cutoff)) continue
-    const g = byPk.get(s.game.gamePk)
-    if (!g || g.status?.abstractGameState !== 'Final') continue
+  // THE GATE, first two checks in `gatedPairs`: strictly before the cutoff — a
+  // same-day game shares the date — and only a game the schedule says is over.
+  for (const [s, g] of gatedPairs({ splits, schedule, cutoff, gameTypes })) {
     const teamId = s.team?.id ?? null
     const awayIsHis = g.teams?.away?.team?.id === teamId
     const mine = awayIsHis ? g.teams?.away : g.teams?.home
@@ -180,15 +234,17 @@ export function boxLineRows({
     const homeAbbr = g.teams?.home?.team?.abbreviation ?? ''
     const officialDate = g.officialDate ?? s.date
     const st = s.stat ?? {}
-    const runs = mine?.score ?? null
-    const oppRuns = theirs?.score ?? null
     // AND A REAL SCORE. "Final" is not enough: a POSTPONED game reports
     // `abstractGameState: 'Final'` with `detailedState: 'Postponed'` and no
-    // scores at all (verified 2026-09-02 — gamePks 776691, 777459, 632997 all
-    // reached the sheet as scoreless rows for games never played). Every row
-    // here is a game the player played and a score he may be shown, so the
-    // last check is for the score itself rather than for one more spelling of
-    // a status.
+    // scores at all (verified 2026-09-02 — gamePks 776691, 777459 and 632997
+    // all reached the sheet as scoreless rows). Every row here is a game the
+    // player played and a score he may be shown, so the last check is for the
+    // score itself rather than for one more spelling of a status.
+    //
+    // A stuck row's score may have been RECOVERED off the game's own linescore
+    // (#1031) and handed in through `recoveredScores`; a game neither source
+    // scored still has no row, which is the same fail-closed answer as before.
+    const { runs, oppRuns } = scoreOf(g, awayIsHis, recoveredScores?.get(s.game.gamePk))
     if (runs == null || oppRuns == null) continue
     rows.push({
       season: Number(s.date.slice(0, 4)),

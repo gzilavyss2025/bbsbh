@@ -388,9 +388,15 @@ test('a POSTPONED game produces no row, though the schedule calls it Final', () 
   // Verified live 2026-09-02: a postponed game reports
   // `abstractGameState: 'Final'` with `detailedState: 'Postponed'` and NO
   // scores — gamePks 776691, 777459 and 632997 all reached Yelich's sheet as
-  // scoreless rows for games that were never played. Every row in this sheet
-  // is a game the player played and a score he can be shown, so the gate
-  // requires the score itself, not the word Final.
+  // scoreless rows. Every row in this sheet is a game the player played and a
+  // score he can be shown, so the gate requires the score itself, not the word
+  // Final.
+  //
+  // Those three were in fact PLAYED, under a schedule row MLB left stuck
+  // (#1031, re-checked 2026-09-15) — which is why the score may be recovered
+  // from the game's own linescore. That is `recoveredScores`, and it is pinned
+  // in test/boxlines-score-recovery.test.js. Without one, as here, the gate is
+  // closed and the row does not exist.
   const rows = boxLineRows({
     splits: [split('2024-09-20', 1), split('2024-09-21', 2)],
     schedule: [
