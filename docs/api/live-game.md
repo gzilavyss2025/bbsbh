@@ -48,15 +48,39 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   plate appearance in. **`positionsPlayed` does NOT answer "did he start".** A
   pure defensive replacement enters and reads `['C']`, exactly like a start:
   63 games wrong on Vazquez, 25 on Castro. For that question use the schedule's
-  `hydrate=lineups` (nine starters a side; with `fields=…,lineups,homePlayers,
-  awayPlayers,id` it costs +34 KB on a 53 KB call for 120 games, and every
-  PLAYED game back to 2008 carries a full eighteen names — the only games
-  missing one are the games with no score, which the gate already drops).
+  `hydrate=lineups` (nine starters a side, IN BATTING ORDER — index 0 is the
+  leadoff man, checked against a boxscore's own `battingOrder`; every PLAYED
+  game back to 2008 carries a full eighteen names, and the only games missing
+  one are the games with no score, which the gate already drops). Those lineups
+  are a SECOND, narrow pass rather than a hydrate on the shared schedule call:
+  folded in they cost +65% (32.3 KB → 53.4 KB over 73 gamePks) on every hitter's
+  join, where two of twenty-five doors want them; asked alone they cost 23.3 KB
+  over the same games, paid only by the reader who opens one of those two doors.
+  `facetPlan`'s `needsLineups` is the flag that triggers it, and `fetch.js`
+  memoizes the pass on the same key as the join, so a card makes it once. A game
+  the lineups did not answer for stays `null` — "nobody posted a card" is not
+  evidence that he came off the bench, so it belongs to neither door.
+- **The park's SURFACE rides on the shared call**, because that one is cheap:
+  `hydrate=venue(fieldInfo)` puts `turfType` on the schedule record for +7%
+  (32.3 KB → 34.7 KB over 73 gamePks), and `surfaceOf` in `rows.js` folds it to
+  `'grass'`/`'turf'`/`''`. It is SEASON-correct — Chase Field comes back Grass
+  for 2016 and 2018 and Artificial Turf from 2019, the season it was relaid —
+  so never answer this from a table of today's parks, which would put eighty-one
+  2016 games on the wrong side. MLB's `g`/`t` career aggregate and these rows
+  agree to the game (Yelich 1,671/54 on both sides).
   `careerSplits.js` (spoiler-free) supplies the DOOR LABELS for the player
   page's Game lines card, through `fetchDoorLabels`, which reads whichever of
-  TWO sources each door names: a situation code (one `careerStatSplits&sitCodes=…`
-  call answers every such door at once) or a career under a game type
-  (`stats=career&gameType=P`, one call each — the postseason door's line).
+  THREE sources each door names: a situation code (one `careerStatSplits&sitCodes=…`
+  call answers every such door at once), a career under a game type
+  (`stats=career&gameType=P`, one call each — the postseason door's line), or
+  `fielding` — `stats=career&group=fielding`, whose rows carry `gamesStarted`
+  per position and sum to a HITTER's career starts, with his career games minus
+  that as the bench count (#1003). That third source is the one nobody had
+  asked: statsapi publishes no started/substitute SITUATION code for a hitter —
+  all 602 were re-read — which is why the issue sat open, but the fielding group
+  answers it in one call, within 2 games of the lineups themselves over eleven
+  careers, and as far back as a 1986 debut. It carries no rate stat, so those
+  two doors set `lineKind: 'games'` and print "1,672 G" through `doorLine`.
   The stat type named for October is not the second source: `careerPlayoffs` <!-- word-choice-exempt: statsapi's own stat-type name, quoted -->
   returns the REGULAR-SEASON career. A career aggregate is open here
   (ADR-0034); only the rows behind the door are gated. `cardFacets.js`

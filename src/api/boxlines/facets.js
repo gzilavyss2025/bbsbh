@@ -6,6 +6,8 @@
 //   gameTypes     — which game types may produce a row at all
 //   keep(row)     — a predicate over FINISHED rows, applied by boxLineRows
 //                   AFTER its cutoff and Final checks
+//   needsLineups  — whether the row needs to know if he was in the starting
+//                   lineup, which costs a second, narrow schedule pass
 //
 // WHY A PREDICATE OVER ROWS, NOT A SECOND FILTER OVER SPLITS. The gate in
 // rows.js is the whole spoiler defense, and a facet must not be able to reach
@@ -45,7 +47,7 @@ export function monthOf(iso) {
 // `narrowsSplits` tells fetch.js which of its two paths this facet earns: the
 // club path filters the game log first, everything else joins the career once.
 export function facetPlan(facet) {
-  const plan = { opponentId: null, gameTypes: null, keep: null, narrowsSplits: false }
+  const plan = { opponentId: null, gameTypes: null, keep: null, narrowsSplits: false, needsLineups: false }
   if (!facet) return plan
   switch (facet.kind) {
     case 'club':
@@ -53,6 +55,21 @@ export function facetPlan(facet) {
       return { ...plan, opponentId: facet.opponentId ?? null, narrowsSplits: true }
     case 'venue':
       return { ...plan, keep: (r) => r.venueId === facet.venueId }
+    case 'surface':
+      // GRASS OR ARTIFICIAL TURF, as the park was THAT SEASON. The schedule
+      // record carries it under `hydrate=venue(fieldInfo)` and it is
+      // season-correct, not today's answer: Chase Field reads Grass for 2016
+      // and 2018 and Artificial Turf from 2019, which is exactly when it was
+      // relaid (verified 2026-09-15 on real gamePks at that park). A static
+      // surface table would have called every one of those 2016 games turf.
+      //
+      // THE DOOR AND THE ROWS AGREE, and for once exactly: MLB's `g`/`t`
+      // career aggregate matched the joined rows on Yelich to the game —
+      // 1,671 grass and 54 turf on both sides — and Frelick by one. That puts
+      // this pair with the calendar doors rather than with home/road, and the
+      // reason is the same: a park's surface in a given season is a fact both
+      // sides read off the same venue record.
+      return { ...plan, keep: (r) => r.surface === facet.value }
     case 'month':
       return { ...plan, keep: (r) => monthOf(r.date) === Number(facet.month) }
     case 'dayNight':
@@ -84,6 +101,24 @@ export function facetPlan(facet) {
       // right answer rather than a crash — the substitute facet (#1003) reads
       // the box score, not this flag.
       return { ...plan, keep: (r) => r.started === Boolean(facet.value) }
+    case 'lineupStart':
+      // WAS HIS NAME ON THE CARD? A hitter's game log carries no gamesStarted
+      // (the `started` case above is pitchers only), and statsapi publishes no
+      // started/substitute situation code for a hitter — `situationCodes` has
+      // 602 entries and not one of them is it (verified 2026-09-15). The
+      // answer is the SCHEDULE's own `hydrate=lineups`, the nine names a side,
+      // and `needsLineups` is what makes fetch.js go and get them.
+      //
+      // `positionsPlayed` will NOT answer this, and that is the trap worth
+      // recording twice: a hitter's first position is 'PH' or 'PR' only when
+      // he entered as a pinch hitter or runner. A pure defensive replacement
+      // enters and his list reads ['C'], indistinguishable from a start — 63
+      // games wrong on one career, 25 on another. Use the lineups.
+      //
+      // A row the lineups could not answer for is `null` and belongs to
+      // NEITHER door, which is the app's degrade-gracefully rule: a game with
+      // no lineup posted is not evidence that he came off the bench.
+      return { ...plan, needsLineups: true, keep: (r) => r.lineupStart === Boolean(facet.value) }
     case 'pinchHit':
       // HE CAME UP OFF THE BENCH. The hitting game log's `positionsPlayed`
       // lists the positions he played in the ORDER he played them, so the

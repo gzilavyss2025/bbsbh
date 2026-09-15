@@ -73,6 +73,14 @@ test('each row-filtering door keeps a matching row and drops its opposite', () =
     // Off the bench (#1002): the positions he played, in the order he played
     // them. A start that later moved to left field is not a pinch-hit game.
     pinchHit: [{ positions: ['PH'] }, { positions: ['DH', 'LF'] }],
+    // The park's surface THAT SEASON, off the schedule record's fieldInfo.
+    grass: [{ surface: 'grass' }, { surface: 'turf' }],
+    turf: [{ surface: 'turf' }, { surface: 'grass' }],
+    // Was his name on the card (#1003's hitter half), off the schedule's own
+    // lineups. Not `positions`: a defensive replacement reads ['C'], exactly
+    // like a start.
+    lineupStart: [{ lineupStart: true }, { lineupStart: false }],
+    cameIn: [{ lineupStart: false }, { lineupStart: true }],
   }
   for (const entry of CARD_FACETS) {
     const { keep } = facetPlan(entry.facet)
@@ -109,8 +117,38 @@ test('every door names exactly one source for its label', () => {
   // renders no label and so never renders at all; one naming both would take
   // whichever the reader happened to write first.
   for (const entry of CARD_FACETS) {
-    const sources = [entry.sitCode, entry.careerGameType].filter(Boolean)
+    const sources = [entry.sitCode, entry.careerGameType, entry.fielding].filter(Boolean)
     assert.equal(sources.length, 1, `${entry.key} names ${sources.length} label sources`)
+  }
+})
+
+test('a fielding-sourced door prints games and only games', () => {
+  // The fielding career carries gamesStarted and no rate stat, so its two
+  // doors print "1,674 G" where their neighbours print a five-figure line.
+  // The two must travel together: a fielding source without `lineKind` would
+  // print "1674 G, undefined PA, undefined, undefined HR, undefined OPS", and
+  // a `lineKind` without a fielding source would throw away four real figures.
+  for (const entry of CARD_FACETS) {
+    assert.equal(
+      Boolean(entry.fielding),
+      entry.lineKind === 'games',
+      `${entry.key}: a fielding source and lineKind 'games' go together`,
+    )
+    if (entry.fielding) {
+      assert.ok(['starts', 'bench'].includes(entry.fielding), `${entry.key} names ${entry.fielding}`)
+    }
+  }
+})
+
+test('a game with no lineup posted belongs to NEITHER lineup door', () => {
+  // The app's degrade-gracefully rule, where it matters most: a game the
+  // schedule could not answer for leaves `lineupStart` null, and null is not
+  // evidence that he came off the bench. Both doors must drop it, or a MiLB
+  // game or an old game with no card would quietly become a bench appearance.
+  const unknown = anyRow({ lineupStart: null })
+  for (const key of ['lineupStart', 'cameIn']) {
+    const { keep } = facetPlan(CARD_FACETS.find((r) => r.key === key).facet)
+    assert.equal(keep(unknown), false, `${key} kept a game with no lineup`)
   }
 })
 
@@ -135,9 +173,9 @@ test('"Box Lines" is the internal name and never reaches a reader', () => {
 
 test('a hitter is offered no started/relief door, which would keep nothing', () => {
   // The hitting game log carries no gamesStarted, so `started` is null on
-  // every hitter row and the facet would open an empty sheet. A hitter's
-  // started/entered reads the schedule's lineups instead, and is #1003's other
-  // half, not shipped here.
+  // every hitter row and THAT facet would open an empty sheet. A hitter asks
+  // the same question through `lineupStart`, which reads the schedule's own
+  // lineups — so the two kinds must not be confused for one another.
   const hitting = cardFacetsFor('hitting')
   assert.equal(
     hitting.some((r) => r.facet.kind === 'started'),
@@ -146,13 +184,52 @@ test('a hitter is offered no started/relief door, which would keep nothing', () 
   const CALENDAR = ['m3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'w0', 'w1', 'w2', 'w3', 'w4', 'w5', 'w6']
   assert.deepEqual(
     hitting.map((r) => r.key),
-    ['home', 'road', 'day', 'night', ...CALENDAR, 'pinchHit', 'postseason'],
+    [
+      'home',
+      'road',
+      'grass',
+      'turf',
+      'day',
+      'night',
+      ...CALENDAR,
+      'lineupStart',
+      'cameIn',
+      'pinchHit',
+      'postseason',
+    ],
   )
   assert.deepEqual(
     cardFacetsFor('pitching').map((r) => r.key),
-    ['home', 'road', 'day', 'night', ...CALENDAR, 'started', 'relief', 'postseason'],
+    [
+      'home',
+      'road',
+      'grass',
+      'turf',
+      'day',
+      'night',
+      ...CALENDAR,
+      'started',
+      'relief',
+      'postseason',
+    ],
   )
   assert.deepEqual(cardFacetsFor('fielding'), [])
+})
+
+test('a pitcher is offered no lineup door: he is never on the card', () => {
+  // A starting pitcher's name is not in `lineups.homePlayers` at all (those
+  // are the nine bats), so the facet would report every start as a bench
+  // appearance. MLB's fielding gamesStarted is no help either: for a reliever
+  // it counts the games he STARTED on the mound, which is a different question
+  // from the one this door asks. Pitchers keep `sp`/`rp`.
+  assert.equal(
+    cardFacetsFor('pitching').some((r) => r.facet.kind === 'lineupStart'),
+    false,
+  )
+  assert.equal(
+    cardFacetsFor('hitting').some((r) => r.facet.kind === 'lineupStart'),
+    true,
+  )
 })
 
 test('a pitcher is offered no pinch-hitting door', () => {
@@ -221,7 +298,9 @@ function anyRow(over = {}) {
     gamePk: 1,
     home: true,
     started: true,
+    lineupStart: true,
     dayNight: 'day',
+    surface: 'grass',
     positions: ['LF'],
     ...over,
   }

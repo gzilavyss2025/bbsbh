@@ -613,3 +613,130 @@ hitter's first position is `PH`/`PR` only when he entered as a pinch hitter or
 runner. A pure defensive replacement enters and his list reads `['C']`, exactly
 like a start. Measured over three careers, that is 63 games wrong on Vazquez, 25
 on Castro, 3 on Yelich. Use the lineups.
+
+## Amendment (2026-09-15, issue #1003): the bench, the surface, and a source nobody had asked
+
+Four more doors: a hitter's **Started** and **Came in** (#1003's hitter half, the
+last piece of that issue), and **On grass** and **On turf** on both groups. One of
+them closes a question this ADR had recorded as a design decision. It was not one.
+
+### #1003 was blocked on a claim that is true of the wrong endpoint
+
+The 2026-09-14 amendment above left this issue open because "there is no
+started/sub situation code for a hitter", so its door "cannot print figures at
+page load either" — the same open question as #998. That is true, and it is only
+true of `situationCodes`. All 602 of them were re-read on 2026-09-15 and there is
+no such code; there is also no `Order`-menu or `Position`-menu combination that
+makes one, because a pinch hitter occupies a batting slot and a defensive
+replacement occupies a position.
+
+**The fielding career carries it.** `stats=career&group=fielding` returns a row
+per position a player has played, and every row carries `gamesStarted`. One game
+contributes one start, at the position he STARTED at, so the sum over positions
+is his career starts; his career games minus that is the bench. One request.
+
+Measured against the truth — the schedule's own lineups, game by game — over
+eleven hitters:
+
+| | career G | starts, fielding | starts, lineups | bench, fielding | bench, truth |
+| --- | --- | --- | --- | --- | --- |
+| Peralta | 2,174 | 2,086 | 2,090 | 88 | 88 |
+| Yelich | 1,725 | 1,672 | 1,674 | 53 | 51 |
+| Semien | 1,758 | 1,732 | 1,735 | 26 | 25 |
+| Soto | 1,195 | 1,180 | 1,185 | 15 | 15 |
+| Turang | 608 | 472 | 471 | 136 | 138 |
+| Taylor | 646 | 488 | 490 | 158 | 159 |
+
+The starts figure lands within 5 and the BENCH figure — the small one, and the
+one a reader looks at — within 2, every time. It reaches as far back as the app
+will ever ask: Bonds (debut 1986) returns 2,848 starts of 2,986 games.
+
+So these two doors need no new door SHAPE and no reversal of the fetch-on-tap
+rule. They need one new label source, and `careerSplits.js` now names three
+rather than two. What they do not carry is a rate stat — a fielding row holds no
+batting average — so they print `1,672 G` where their neighbours print five
+figures, and `doorLine` is the one function that lets one card hold both.
+
+**The rows come from `hydrate=lineups`, and `positionsPlayed` still will not do
+it.** A hitter's first position is `PH` or `PR` only when he entered as a pinch
+hitter or runner; a pure defensive replacement enters and his list reads `['C']`,
+exactly like a start — 63 games wrong on one career. The lineup array is also in
+BATTING ORDER (index 0 is the leadoff man, checked against the boxscore's own
+`battingOrder` on gamePk 747043), which is a fact the next facet will want.
+
+### The lineups are a second pass, not a hydrate on the shared call
+
+#1040 assumed `lineups` would ride along on the schedule call the join already
+makes. Measured over 73 gamePks, that costs **+65%** — 32.3 KB to 53.4 KB — on
+every hitter's join, where two of a card's twenty-five doors need it. Asked on
+its own, with `fields=` trimmed to bare ids, the same games cost **23.3 KB**: the
+same bytes, and only the reader who opens one of those two doors ever pays them.
+So `facetPlan` returns `needsLineups`, `fetch.js` memoizes that pass on the same
+key as the join, and the other twenty-three doors are untouched.
+
+`positionsPlayed` went the other way for #1002 (16% on the log, carried by
+everyone) and that was right for 16%. This is 65%. The rule the two cases make
+together: ride along when it is cheap, go back for it when it is not.
+
+### The surface rides along, because it IS cheap
+
+`hydrate=venue(fieldInfo)` puts `turfType` on the schedule record for **+7%**
+(32.3 KB to 34.7 KB over the same 73 gamePks), so it is carried on every facet's
+join and the row gains a `surface`.
+
+**It is season-correct, which is the whole reason it is read off the game.**
+Chase Field comes back `Grass` for 2016 and 2018 and `Artificial Turf` from 2019
+— which is exactly when it was relaid (verified 2026-09-15 on real gamePks at
+that park). A static table of today's surfaces, which is how anyone would build
+this without checking, would have called eighty-one 2016 games turf.
+
+**And the door and the rows agree to the game**, which puts this pair with the
+calendar doors rather than with Home and Road:
+
+| | door (`g`/`t`) | rows |
+| --- | --- | --- |
+| Yelich | 1,671 / 54 | 1,671 / 54 |
+| Frelick | 562 / 67 | 563 / 68 |
+| Peterson (pitching) | 148 / 13 | 13 turf rendered against a door of 13 |
+
+### The Came in door's margin has TWO causes, and both are already documented
+
+Yelich's Came in door says 53 and his sheet renders 49. Read that gap as one
+number and it looks like a broken facet. It is two known margins stacked:
+
+- **4 of it is the source margin** above — MLB's fielding aggregate against
+  MLB's own lineups, the same kind of disagreement Home and Road carry.
+- **the rest is the gate**, which drops 22 of Yelich's 1,725 regular-season games
+  for want of a score. That is the same arithmetic that makes Scherzer's
+  postseason door say 33 over a sheet of 31, and this ADR already says why:
+  a played-but-stuck `Postponed` row is indistinguishable from a never-played one
+  on the schedule endpoint, and the gate asks for the score rather than for one
+  more spelling of a status.
+
+Every one of the 1,703 gated rows got an answer from the lineups — no game came
+back without one — so none of the gap is missing lineup data. A game that ever
+does come back without one is `null` and belongs to NEITHER door, because "nobody
+posted a card" is not evidence that he came off the bench.
+
+### Why the batting order is not here, though it looked free
+
+`sitCodes=b1…b9` return real career rows on both groups, and the lineup array is
+already in batting order, so nine more doors look like a table away. They are
+not, and the reason is worth recording before someone tries:
+
+**MLB's `bN` counts games with a plate appearance in slot N; a lineup counts who
+STARTED there.** A pinch hitter bats in the slot he hit for, and that is usually
+the bottom of the order. Measured on 2026-09-15:
+
+| | b1 | b3 | b5 | b7 | b9 |
+| --- | --- | --- | --- | --- | --- |
+| Yelich, MLB | 451 | 696 | 31 | 13 | **18** |
+| Yelich, lineups | 447 | 695 | 24 | 6 | **0** |
+| Frelick, MLB | — | 85 | 92 | 105 | **68** |
+| Frelick, lineups | — | 85 | 89 | 101 | **42** |
+
+A door reading "Batting ninth: 18 G" over an EMPTY sheet is the exact failure
+this ADR's registry test file exists to prevent. So the batting order is not a
+registry entry. It wants a door that opens a LIST — the nine slots with his line
+at each, folded from the gated rows, each opening its own rows — which is the
+same shape #998's 36 ballparks want, and it should be built once for both.
