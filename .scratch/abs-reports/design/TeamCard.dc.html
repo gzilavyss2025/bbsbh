@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@700&display=swap">
+  <style>
+    body { margin: 0; background: #F3ECD8; }
+    a { color: #2F6E4F; text-decoration: none; } a:hover { color: #255740; text-decoration: underline; }
+    .cap { font-family: "Barlow Condensed","Arial Narrow",sans-serif; text-transform: uppercase; letter-spacing: 0.09em; }
+    .mono { font-family: "JetBrains Mono",ui-monospace,monospace; font-variant-numeric: tabular-nums; }
+    .prose { font-family: "Source Sans 3",system-ui,sans-serif; text-transform: none; }
+    .chip { min-height: 44px; padding: 8px 12px; border: 1px solid #CBC1A7; border-radius: 3px;
+            background: #FBF6E9; font-family: "Barlow Condensed",sans-serif; font-size: 12px;
+            letter-spacing: 0.09em; color: #3C4A5A; cursor: pointer; text-transform: uppercase; }
+    .chip.is-on { background: #1B2A3A; border-color: #1B2A3A; color: #FBF6E9; }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #F3ECD8; padding: 20px 16px 28px; box-sizing: border-box; color: #1B2A3A;">
+
+  <!-- .thub-card: --radius-md, --shadow-card, .thub-card__head, .thub-door -->
+  <div style="background: #FBF6E9; border: 1px solid #CBC1A7; border-radius: 10px; box-shadow: 0 1px 2px rgba(22,34,47,0.08), 0 4px 12px rgba(22,34,47,0.06); overflow: hidden;">
+
+    <div style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; padding: 12px 12px 0;">
+      <h3 class="cap" style="margin: 0; font-size: 17px; letter-spacing: 0.05em; color: #16222F;">Who challenges</h3>
+      <em class="cap" style="font-style: normal; font-size: 11px; color: #938C7C;">against what they see</em>
+    </div>
+
+    <div style="padding: 0 12px 12px;">
+      <!-- The headline follows the toggle. It used to lead with the batter rate
+           on both views. The rank sits on its own line from the figure it ranks. -->
+      <p class="mono" style="margin: 10px 0 0; font-size: 28px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">{{ headline }}</p>
+      <p class="cap" style="margin: 6px 0 0; font-size: 12px; color: #6B6558;">{{ headLabel }}</p>
+      <p class="mono" style="margin: 2px 0 0; font-size: 13px; color: #6B6558;">{{ rank }}</p>
+      <p class="cap" style="margin: 2px 0 0; font-size: 11px; color: #6B6558;">{{ leagueLine }}</p>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 10px;">
+        <button class="{{ batChip }}" onClick="{{ pickBat }}">At the plate</button>
+        <button class="{{ catChip }}" onClick="{{ pickCat }}">Behind it</button>
+      </div>
+
+      <sc-if value="{{ isBat }}" hint-placeholder-val="{{ true }}">
+        <svg viewBox="0 0 334 224" width="100%" role="img" aria-label="Batter challenges against pitches seen, one dot per player, with the league rate drawn as a diagonal">
+          <!-- gridlines first, the axis rules last, so a pale line never paints
+               over the navy baseline -->
+          <sc-for list="{{ yTicks }}" as="t" hint-placeholder-count="4">
+            <line x1="34" y1="{{ t.y }}" x2="330" y2="{{ t.y }}" stroke="#EDE6D1" stroke-width="1"></line>
+            <text x="30" y="{{ t.ty }}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#6B6558">{{ t.label }}</text>
+          </sc-for>
+
+          <line x1="34" y1="192" x2="330" y2="192" stroke="#1B2A3A" stroke-width="1.5"></line>
+          <line x1="34" y1="10" x2="34" y2="192" stroke="#CBC1A7" stroke-width="1"></line>
+
+          <line x1="34" y1="186" x2="330" y2="93.1" stroke="#B4453A" stroke-width="1.5" stroke-dasharray="4 3"></line>
+          <text x="328" y="89" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#B4453A">LEAGUE 6.41 PER 1,000</text>
+          <text x="326" y="106" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">ASKS LESS BELOW</text>
+
+          <sc-for list="{{ dots }}" as="d" hint-placeholder-count="16">
+            <circle cx="{{ d.x }}" cy="{{ d.y }}" r="4" fill="{{ d.fill }}" stroke="#FBF6E9" stroke-width="2"></circle>
+          </sc-for>
+
+          <!-- ONE direct label, on the one dot that is the story. An earlier
+               draft labelled three, and two of the labels ran straight through
+               other players' dots. The list below names every man instead. -->
+          <text x="158" y="24" text-anchor="start" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#B4453A">GARY S&#193;NCHEZ &middot; 32</text>
+
+          <sc-for list="{{ xTicks }}" as="t" hint-placeholder-count="3">
+            <text x="{{ t.x }}" y="207" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#6B6558">{{ t.label }}</text>
+          </sc-for>
+          <text x="330" y="221" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">PITCHES SEEN</text>
+          <text x="10" y="100" text-anchor="middle" transform="rotate(-90 10 100)" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">CHALLENGES</text>
+        </svg>
+      </sc-if>
+
+      <!-- THE TABLE TWIN. It carries every value the chart plots, gives the
+           thirteen unlabelled dots their names, and is the only way to reach a
+           player page from here — an SVG text node cannot be a link. -->
+      <div style="margin: 10px 0 0;">
+        <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px; padding: 0 0 6px; border-bottom: 2px solid #1B2A3A;">
+          <span class="cap" style="font-size: 11px; color: #6B6558;">{{ colPlayer }}</span>
+          <span class="cap" style="font-size: 11px; color: #6B6558; text-align: right;">{{ colExposure }}</span>
+          <span class="cap" style="font-size: 11px; color: #6B6558; text-align: right;">{{ colRate }}</span>
+        </div>
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid #DED6C0;">
+            <a class="cap" href="#" style="font-size: 13px; letter-spacing: 0.05em; color: {{ r.ink }};">{{ r.name }}</a>
+            <span class="mono" style="font-size: 12px; text-align: right; color: #3C4A5A;">{{ r.exposure }}</span>
+            <span class="mono" style="font-size: 12px; text-align: right; color: #16222F;">{{ r.rate }}</span>
+          </div>
+        </sc-for>
+        <p class="cap" style="margin: 8px 0 0; font-size: 11px; color: #6B6558;">{{ moreNote }}</p>
+      </div>
+
+      <p class="prose" style="{{ caveatStyle }}">Innings caught, not pitches received &mdash; no feed counts those.</p>
+
+      <div style="margin: 12px 0 0; padding-top: 10px; border-top: 1px solid #DED6C0;">
+        <a class="cap" href="#" style="font-size: 12px;">League challenge board &rsaquo;</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":390,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const self = this
+    const bat = ((this.state && this.state.view) || 'bat') === 'bat'
+
+    // Brewers, MLB 2026. Batter challenges against pitches seen with the club;
+    // catcher challenges against innings caught.
+    const BAT = [
+      { n: 'Brice Turang', x: 2665, y: 4 }, { n: 'Jake Bauers', x: 2233, y: 13 },
+      { n: 'William Contreras', x: 2140, y: 8 }, { n: 'Jackson Chourio', x: 2009, y: 3 },
+      { n: 'Garrett Mitchell', x: 1962, y: 8 }, { n: 'Christian Yelich', x: 1938, y: 7 },
+      { n: 'Joey Ortiz', x: 1459, y: 6 }, { n: 'David Hamilton', x: 1435, y: 2 },
+      { n: 'Sal Frelick', x: 1376, y: 7 }, { n: 'Andrew Vaughn', x: 1308, y: 0 },
+      { n: 'Gary Sánchez', x: 1085, y: 32 }, { n: 'Cooper Pratt', x: 913, y: 3 },
+      { n: 'Luis Rengifo', x: 789, y: 2 }, { n: 'Luis Lara', x: 752, y: 7 },
+      { n: 'Brandon Lockridge', x: 462, y: 2 }, { n: 'Blake Perkins', x: 419, y: 0 }
+    ]
+    const CAT = [
+      { n: 'William Contreras', inn: 1011.7, ch: 163 },
+      { n: 'Gary Sánchez', inn: 314.0, ch: 59 },
+      { n: 'Jeferson Quero', inn: 6.0, ch: 2 },
+      { n: 'Bo Naylor', inn: 8.0, ch: 1 }
+    ]
+
+    const L = 34, R = 330, T = 10
+    const BASE = 186   // y = 0 sits 6px above the axis rule, so a dot at zero is whole
+    const AXIS = 192
+    const xMax = 2800, yMax = 34
+    function px(v) { return L + ((R - L) * v) / xMax }
+    function py(v) { return BASE - ((BASE - T) * v) / yMax }
+
+    const RATE = 6.41 / 1000
+    const dots = BAT.map(function (p) {
+      return { x: px(p.x), y: py(p.y), fill: p.y > RATE * p.x * 2 ? '#B4453A' : '#1B2A3A' }
+    })
+    const yTicks = [0, 8, 16, 24, 32].map(function (v) {
+      return { y: py(v), ty: py(v) + 4, label: String(v) }
+    })
+    const xTicks = [0, 1000, 2000].map(function (v) {
+      return { x: px(v), label: v === 0 ? '0' : (v / 1000) + 'k' }
+    })
+
+    // Fourteen of the sixteen sit under the line, not thirteen: Luis Lara is
+    // over it as well as Sanchez, by 7 against a predicted 4.8.
+    const batRows = BAT.slice().sort(function (a, b) { return (b.y / b.x) - (a.y / a.x) }).slice(0, 6)
+      .map(function (p) {
+        return {
+          name: p.n, ink: p.n.indexOf('Sánchez') >= 0 ? '#B4453A' : '#16222F',
+          exposure: p.x.toLocaleString('en-US'),
+          rate: ((1000 * p.y) / p.x).toFixed(1)
+        }
+      })
+    const catRows = CAT.slice().sort(function (a, b) { return b.inn - a.inn }).map(function (p) {
+      return {
+        name: p.n, ink: '#16222F',
+        exposure: p.inn.toFixed(0),
+        rate: ((9 * p.ch) / p.inn).toFixed(2)
+      }
+    })
+
+    return {
+      isBat: bat,
+      dots: dots, yTicks: yTicks, xTicks: xTicks,
+      headline: bat ? '4.51' : '1.51',
+      headLabel: bat ? 'Per 1,000 pitches seen' : 'Per 9 innings caught',
+      rank: bat ? '29 of 30' : '',
+      leagueLine: bat ? 'League 6.41' : 'League 1.12',
+      rows: bat ? batRows : catRows,
+      colPlayer: bat ? 'Most per pitch seen' : 'Catcher',
+      colExposure: bat ? 'Pitches' : 'Innings',
+      colRate: bat ? 'Per 1,000' : 'Per 9',
+      moreNote: bat ? '16 hitters in all · 14 of them under the line' : '',
+      caveatStyle: bat
+        ? 'display: none;'
+        : 'margin: 10px 0 0; font-size: 13px; line-height: 1.45; color: #3C4A5A;',
+      batChip: bat ? 'chip is-on' : 'chip',
+      catChip: bat ? 'chip' : 'chip is-on',
+      pickBat: function () { self.setState({ view: 'bat' }) },
+      pickCat: function () { self.setState({ view: 'cat' }) }
+    }
+  }
+}
+</script>
+</body>
+</html>

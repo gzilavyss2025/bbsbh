@@ -107,6 +107,13 @@
    split off when 77 reached its file cap a second time. It shares no class with
    77a or 77b, so its place after them changes nothing in the cascade. */
 @import './styles/77c-express-lane-deck.css';
+/* The offseason home page (issue #1038): the roster wire promoted to the lead
+   of the slate's games area from November to February, the winter's dated
+   calendar under it, and the countdown standing in the rail slot the wire
+   left. A new PAGE STATE rather than a component on an existing screen, which
+   is why it is its own partial — scripts/check-dir-size.mjs records the
+   directory budget that bought it. */
+@import './styles/78-offseason.css';
 /* Motion — the animation layer (the motion study, issues #976-#983). A
    SUBDIRECTORY for the same reason focus/ below is one: src/styles is a flat
    directory at its own file ratchet (scripts/check-dir-size.mjs), the study
@@ -208,6 +215,8 @@
      77a-express-lane-entry   screens/expresslane/{EntryChooser,PitchExpand}.jsx
      77b-express-lane-door    components/game/ExpressLaneDoor.jsx
      77c-express-lane-deck    screens/expresslane/ScoringDeck.jsx
+     78-offseason             components/offseason/{OffseasonLead,
+                              WinterCalendar}.jsx
      report/chrome            screens/around-the-game/RunValuePage.jsx,
                               screens/around-the-game/AbsChallengesPage.jsx
      research/diary           screens/research/ResearchDiaryPage.jsx

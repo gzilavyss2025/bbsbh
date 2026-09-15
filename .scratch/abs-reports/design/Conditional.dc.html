@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@700&display=swap">
+  <style>
+    body { margin: 0; background: #F3ECD8; }
+    a { color: #2F6E4F; } a:hover { color: #255740; }
+    .cap { font-family: "Barlow Condensed","Arial Narrow",sans-serif; text-transform: uppercase; letter-spacing: 0.09em; }
+    .mono { font-family: "JetBrains Mono",ui-monospace,monospace; font-variant-numeric: tabular-nums; }
+    .prose { font-family: "Source Sans 3",system-ui,sans-serif; text-transform: none; }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #F3ECD8; padding: 0 16px 28px; box-sizing: border-box; color: #1B2A3A;">
+
+  <div style="display: flex; align-items: center; gap: 12px; margin: 32px 0 12px;">
+    <h2 class="cap" style="margin: 0; font-size: 21px; letter-spacing: 0.05em; color: #16222F;">After a win, after a loss</h2>
+    <span style="flex: 1 1 auto; height: 2px; background: #B4453A; opacity: 0.5;"></span>
+  </div>
+
+  <!-- TWO SHADES OF ONE HUE, not navy against clay. Clay is this palette's
+       alarm token (an out, an alert, the seam-red rule); "after a loss" is a
+       neutral category, not a status. Every bar prints its own figure, so
+       identity never rests on the shade alone. -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <sc-for list="{{ panels }}" as="p" hint-placeholder-count="3">
+      <div style="{{ p.frame }}">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+          <span class="cap" style="font-size: 12px; color: {{ p.ink }};">{{ p.kicker }}</span>
+          <span class="cap" style="font-size: 11px; color: #6B6558;">{{ p.n }}</span>
+        </div>
+        <p class="cap" style="margin: 6px 0 12px; font-size: 17px; letter-spacing: 0.05em; color: #16222F;">{{ p.title }}</p>
+
+        <sc-for list="{{ p.bars }}" as="b" hint-placeholder-count="2">
+          <div style="display: flex; align-items: center; gap: 10px; margin: 0 0 8px;">
+            <span class="cap" style="flex: 0 0 92px; font-size: 12px; color: #3C4A5A;">{{ b.label }}</span>
+            <span style="flex: 1 1 auto; height: 22px; background: #EDE6D1; border-radius: 3px; position: relative; overflow: hidden;">
+              <span style="{{ b.fill }}"></span>
+            </span>
+            <span class="mono" style="flex: 0 0 38px; font-size: 16px; text-align: right; color: #16222F;">{{ b.value }}</span>
+          </div>
+        </sc-for>
+
+        <!-- one shared zero-to-ten rule, so the reader can see the bars are
+             zero-based rather than having to trust it -->
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="flex: 0 0 92px;"></span>
+          <span style="flex: 1 1 auto; display: flex; justify-content: space-between; border-top: 1px solid #CBC1A7; padding-top: 2px;">
+            <span class="mono" style="font-size: 11px; color: #6B6558;">0</span>
+            <span class="mono" style="font-size: 11px; color: #6B6558;">5</span>
+            <span class="mono" style="font-size: 11px; color: #6B6558;">10</span>
+          </span>
+          <span style="flex: 0 0 38px;"></span>
+        </div>
+
+        <p class="prose" style="{{ p.noteStyle }}">{{ p.note }}</p>
+      </div>
+    </sc-for>
+  </div>
+
+  <p class="cap" style="margin: 14px 0 0; font-size: 11px; color: #6B6558;">Per 100 half-innings left in the game</p>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":390,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const SCALE = 10
+
+    function bar(label, v, deep) {
+      return {
+        label: label,
+        value: v.toFixed(2),
+        fill: 'position: absolute; inset: 0 auto 0 0; display: block; border-radius: 0 3px 3px 0; width: ' +
+          ((100 * v) / SCALE).toFixed(1) + '%; background: ' + (deep ? '#1B2A3A' : '#6B6558') + ';'
+      }
+    }
+    const hidden = 'display: none;'
+    const shown = 'margin: 8px 0 0; font-size: 13px; line-height: 1.45; color: #3C4A5A;'
+
+    const panels = [
+      {
+        frame: 'background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px; padding: 12px;',
+        ink: '#6B6558',
+        kicker: 'Counted straight',
+        n: 'MLB &middot; 7,615 reviews',
+        title: 'Looks like a club goes quiet',
+        bars: [bar('After a win', 8.20, true), bar('After a loss', 7.08, false)],
+        noteStyle: shown,
+        // THE CONFOUND, under the number it explains. No bar can carry a causal
+        // claim, and this is the one sentence the section cannot be read without.
+        note: 'It challenges less afterwards because it is allowed to less, not because it lost its nerve.'
+      },
+      {
+        frame: 'background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px; padding: 12px;',
+        ink: '#1B2A3A',
+        kicker: 'Held equal &middot; both called two, hold one',
+        n: 'MLB &middot; 1,291 reviews',
+        title: 'It does not',
+        bars: [bar('After a win', 8.30, true), bar('After a loss', 8.63, false)],
+        noteStyle: hidden,
+        note: ''
+      },
+      {
+        // THE SECOND LEAGUE, DRAWN. It used to be a sentence carrying two
+        // numbers on an artboard whose whole method is two bars.
+        frame: 'background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px; padding: 12px;',
+        ink: '#1B2A3A',
+        kicker: 'Held equal &middot; both called two, hold one',
+        n: 'Triple-A &middot; 1,373 reviews',
+        title: 'And tips back again',
+        bars: [bar('After a win', 9.51, true), bar('After a loss', 8.91, false)],
+        noteStyle: hidden,
+        note: ''
+      }
+    ]
+
+    return { panels: panels }
+  }
+}
+</script>
+</body>
+</html>

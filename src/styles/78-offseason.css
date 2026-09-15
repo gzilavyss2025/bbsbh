@@ -1,0 +1,226 @@
+/* ============================================================================
+   THE OFFSEASON HOME PAGE — issue #1038, step 2
+
+   From the day after the World Series to the first spring game, the MLB tab's
+   games area has no games in it. In season that area carries the fold and the
+   roster wire is pushed into the margin beside it (25-wide-layout.css says why
+   at length). With no games to protect, the argument reverses: the wire is the
+   most-read thing in baseball from November to February, and here it takes the
+   width the game cards are not using.
+
+   So this sheet draws three things and only three: the wire at full width, the
+   winter's dated calendar under it, and the countdown standing in the rail slot
+   the wire left. Everything else on the screen — the club strip, the level
+   tabs, the date banner, the footer — is untouched and stays where it is.
+
+   The rows inside the ledger are NOT drawn here. They are MoveRow's, exactly as
+   the rail and the dock get them (29-team-transactions.css), because they are
+   the same rows off the same feed; the offseason changes where the wire sits,
+   not what a move looks like.
+   ============================================================================ */
+
+.oseason {
+  margin: var(--space-4) 0 var(--space-8);
+}
+
+/* The head takes the RAIL's head, not a page title's: a hairline rule under a
+   small condensed label. The wire has been promoted, not renamed, and a reader
+   who has seen it in the margin all season should recognise it at full width. */
+.oseason__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  padding-bottom: 6px;
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+}
+.oseason__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+/* The window the ledger below actually covers. It sits beside the title rather
+   than under it so the two read as one line of chrome. */
+.oseason__note {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite-soft);
+}
+
+.oseason__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* The rest of the window, behind one control — the rail's door, widened. It
+   keeps the rail's quiet treatment rather than becoming a call to action: the
+   page's action is reading the wire, not opening more of it. */
+.oseason__door {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: var(--space-3);
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-link);
+}
+.oseason__door:hover,
+.oseason__door:active {
+  background: var(--surface-inset);
+}
+
+/* The wire is silent while it loads and on a failure — a habit that suits a
+   margin and not a lead, where it would leave a bare heading over nothing. */
+.oseason__quiet {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--text-caption);
+}
+
+/* ---------------------------------------------------------------------------
+   THE WINTER CALENDAR — the dated strip under the ledger.
+
+   A row of tick marks on one line of the winter, scrolled sideways on a phone.
+   Each is a date and a short label, and the first one that has not happened yet
+   takes the ink. Nothing here is a control: the strip says where in the winter
+   the reader is standing, and the dates it shows are the ones the app can
+   either check (spring training, Opening Day) or was told (the admin's own
+   calendar) — see WinterCalendar.jsx.
+   --------------------------------------------------------------------------- */
+.wintercal {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: var(--bw-hair) solid var(--rule-soft);
+}
+.wintercal__list {
+  display: flex;
+  gap: var(--space-5);
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.wintercal__list::-webkit-scrollbar {
+  display: none;
+}
+/* A tick must never be split across the scroll edge, so each one refuses to
+   shrink and refuses to wrap inside itself. */
+.wintercal__item {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: var(--space-3);
+  border-left: var(--bw-rule) solid var(--rule);
+  white-space: nowrap;
+}
+.wintercal__date {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.wintercal__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+/* The one the reader is heading for. Ink and a heavier tick, never colour
+   alone — and it carries aria-current in the markup, so the distinction
+   survives with no styling at all. */
+.wintercal__item--next {
+  border-left-color: var(--accent-primary);
+  border-left-width: var(--bw-heavy);
+}
+.wintercal__item--next .wintercal__date,
+.wintercal__item--next .wintercal__label {
+  color: var(--text-heading);
+}
+/* Behind them. Lightened, but still legible — the shape of the winter includes
+   the part already served. */
+.wintercal__item--past .wintercal__date,
+.wintercal__item--past .wintercal__label {
+  color: var(--graphite-soft);
+}
+
+/* ---------------------------------------------------------------------------
+   THE COUNTDOWN — what stands in the rail slot the wire left.
+
+   Wide, this is a sibling of .slatebody__main inside .slatebody, so it inherits
+   the 288px column the shell is already reserving for the rail (the slate keeps
+   .screen--wirerail through the offseason for exactly this reason). On a phone
+   there is no such column and it follows the calendar inside the lead instead,
+   which is why nothing here is inside a media query.
+   --------------------------------------------------------------------------- */
+.springcount {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  text-align: center;
+}
+.springcount__label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+/* The number is the point, so it takes the score face. Mono, because it is a
+   figure that changes by one every morning and a proportional face would move
+   the digits beside it when it crosses a hundred. */
+.springcount__n {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-xl);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+.springcount__day {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* 740px is WIDE_QUERY (src/hooks/useMediaQuery.js) — the app's one breakpoint,
+   and the same one 25-wide-layout.css turns .slatebody into a two-column flex
+   row at. Below it the countdown is a block inside the lead and takes the
+   width it is given. */
+@media (min-width: 740px) {
+  .springcount {
+    width: 288px;
+    /* Level with the top of the ledger beside it, the same 14px .gamelist and
+       .wirerail both answer to (25-wide-layout.css). */
+    margin-top: 14px;
+  }
+}

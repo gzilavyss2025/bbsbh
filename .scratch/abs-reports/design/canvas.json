@@ -1,0 +1,59 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "Phone" },
+    { "id": "page-2", "name": "Wide" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 1120, "page": "page-1", "title": "Q2 · When they call for one", "is_interactive": true },
+    { "file": "RanOut.dc.html", "x": 490, "y": 0, "w": 390, "h": 940, "page": "page-1", "title": "Q3 · Out of challenges" },
+    { "file": "Streaks.dc.html", "x": 980, "y": 0, "w": 390, "h": 820, "page": "page-1", "title": "Q4 · Longest runs", "is_interactive": true },
+    { "file": "Baselines.dc.html", "x": 1470, "y": 0, "w": 390, "h": 700, "page": "page-1", "title": "Q6 · How often is normal" },
+    { "file": "Conditional.dc.html", "x": 1960, "y": 0, "w": 390, "h": 760, "page": "page-1", "title": "Q7 · After a win, after a loss" },
+    { "file": "TeamCard.dc.html", "x": 2450, "y": 0, "w": 390, "h": 760, "page": "page-1", "title": "Q5 · Team hub card", "is_interactive": true },
+    { "file": "Umpires.dc.html", "x": 2940, "y": 0, "w": 390, "h": 700, "page": "page-1", "title": "Q1 · The plate umpires, revised", "is_interactive": false },
+    { "file": "WideLayout.dc.html", "x": 0, "y": 0, "w": 960, "h": 1620, "page": "page-2", "title": "960 px · the same sections reflowed" }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -320,
+      "w": 880,
+      "page": "page-1",
+      "text": "ABS CHALLENGE REPORT — second pass\n\nSix new sections on /abs-challenges plus one card on the team hub, drawn at iPhone width. The 960 px reflow is on the Wide page.\n\nThis version is after four reviews — site consistency, glance, prose, and the charts against the dataviz rules. What changed is listed on the notes below each artboard.\n\nThe app's own vocabulary throughout: manila #F3ECD8, navy #1B2A3A, clay #B4453A, graphite #6B6558, the broadcast section rule, the slab, the square .rpt-chip. No new colour."
+    },
+    {
+      "id": "fixed",
+      "x": 940,
+      "y": -320,
+      "w": 440,
+      "page": "page-1",
+      "text": "FIXED SINCE THE FIRST PASS\n\n· The role panels were on a denominator exactly 2× the chart above them — batter + catcher + pitcher summed to twice the club rate while carrying the same label. They now share the club denominator and add up to the headline.\n· The median rule on the baselines pointed at 5.11 under a label reading 5.90. Its position now derives from the value.\n· Umpires said 1.3 for a spread of 2.27. Conditional said four tenths for 0.33.\n· The team card led with the batter rate on both views.\n· Clay against graphite fails the colourblind check (ΔE 4.8 protan) and they shared one series. Thin-evidence bars are hollow now, not grey.\n· Every axis label was --graphite-soft at 9–10px: 3.1:1, under AA. Now --graphite at 11px.\n· The pitcher panel drew nine identical 1.5px bars. It is a stat line."
+    },
+    {
+      "id": "spoiler",
+      "x": 490,
+      "y": 980,
+      "w": 420,
+      "page": "page-1",
+      "text": "SPOILER RULE — this board names games\n\nClub, opponent, date, inning, the call and how far off the edge it was. No score, no winner, no run total, nothing a result can be read back out of.\n\nEvery name here is a link — player, club and game — which the first pass had as plain text."
+    },
+    {
+      "id": "caveat-q2",
+      "x": 0,
+      "y": 1160,
+      "w": 420,
+      "page": "page-1",
+      "text": "THE DENOMINATOR\n\nA raw count by inning misleads twice: not every game reaches the ninth, and a club with two failed challenges cannot call for one at all. Tap \"Raw count\" to see the difference the correction makes.\n\nIt needs a final inning per game, which the ledger does not store. Plan: two columns filled from the game feed's own linescore at sweep time, backfilled from one schedule call per week per level. No feed is refetched."
+    },
+    {
+      "id": "open-1",
+      "x": 1470,
+      "y": 740,
+      "w": 440,
+      "page": "page-1",
+      "text": "STILL OPEN — your call\n\n1. CAPS. The page today ships its sentences SHOUTING (.hint carries no exemption). These artboards show natural-case prose, which needs a registered caps-exempt. Precedent exists — Game Notes took it for the same reason — but it changes this page's convention.\n\n2. THE LEVEL CHIP. The page already has MLB / Triple-A. Every section here is hard-coded to MLB. Wiring it through is cheap and makes six sections into twelve.\n\n3. MONO HERO FIGURES. The dataviz standard says a big standalone number should not be monospaced or tabular. The house scorebook voice says otherwise, and the shipped slabs already do it. Kept as-is deliberately."
+    }
+  ],
+  "launch": { "view": "canvas", "page": "page-1" }
+}

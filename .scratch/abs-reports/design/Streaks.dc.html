@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@700&display=swap">
+  <style>
+    body { margin: 0; background: #F3ECD8; }
+    a { color: #2F6E4F; text-decoration: none; } a:hover { color: #255740; text-decoration: underline; }
+    .cap { font-family: "Barlow Condensed","Arial Narrow",sans-serif; text-transform: uppercase; letter-spacing: 0.09em; }
+    .mono { font-family: "JetBrains Mono",ui-monospace,monospace; font-variant-numeric: tabular-nums; }
+    .prose { font-family: "Source Sans 3",system-ui,sans-serif; text-transform: none; }
+    /* ONE chip scale, .rpt-chip's. An earlier draft had a second, smaller one
+       whose on-state was a paper fill, so a reader who learned "navy = on" from
+       the row above had to relearn it on the row below. */
+    .chip { min-height: 44px; padding: 8px 12px; border: 1px solid #CBC1A7; border-radius: 3px;
+            background: #FBF6E9; font-family: "Barlow Condensed",sans-serif; font-size: 12px;
+            letter-spacing: 0.09em; color: #3C4A5A; cursor: pointer; text-transform: uppercase; }
+    .chip.is-on { background: #1B2A3A; border-color: #1B2A3A; color: #FBF6E9; }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #F3ECD8; padding: 0 16px 28px; box-sizing: border-box; color: #1B2A3A;">
+
+  <div style="display: flex; align-items: center; gap: 12px; margin: 32px 0 12px;">
+    <h2 class="cap" style="margin: 0; font-size: 21px; letter-spacing: 0.05em; color: #16222F;">Longest runs</h2>
+    <span style="flex: 1 1 auto; height: 2px; background: #B4453A; opacity: 0.5;"></span>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px;">
+    <button class="{{ wonChip }}" onClick="{{ pickWon }}">Won in a row</button>
+    <button class="{{ lostChip }}" onClick="{{ pickLost }}">Lost in a row</button>
+  </div>
+  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px;">
+    <sc-for list="{{ roleChips }}" as="c" hint-placeholder-count="4">
+      <button class="{{ c.cls }}" onClick="{{ c.pick }}">{{ c.label }}</button>
+    </sc-for>
+  </div>
+
+  <div style="background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px; padding: 4px 12px 12px;">
+    <div style="display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; padding: 10px 0 6px; border-bottom: 2px solid #1B2A3A;">
+      <span class="cap" style="font-size: 11px; color: #6B6558;">Run</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558;">Player</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558; text-align: right;">Won of called, all season</span>
+    </div>
+
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+      <div style="display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid #DED6C0;">
+        <span class="mono" style="font-size: 20px; line-height: 1; color: {{ r.ink }};">{{ r.len }}</span>
+        <span style="min-width: 0;">
+          <a class="cap" href="#" style="display: block; font-size: 14px; letter-spacing: 0.05em; color: #16222F;">{{ r.name }}</a>
+          <span style="display: flex; align-items: center; gap: 3px; margin-top: 4px;">
+            <sc-for list="{{ r.pips }}" as="p" hint-placeholder-count="8">
+              <span style="{{ p.style }}"></span>
+            </sc-for>
+          </span>
+        </span>
+        <span style="text-align: right;">
+          <span class="mono" style="display: block; font-size: 14px; color: #1B2A3A;">{{ r.season }}</span>
+          <a class="cap" href="#" style="display: block; font-size: 11px; color: #6B6558;">{{ r.club }}</a>
+        </span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px; margin: 26px 0 10px;">
+    <h3 class="cap" style="margin: 0; font-size: 17px; letter-spacing: 0.05em; color: #16222F;">Inside one game</h3>
+    <span style="flex: 1 1 auto; height: 1px; background: #CBC1A7;"></span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+    <div style="padding: 12px; background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px;">
+      <p class="mono" style="margin: 0; font-size: 28px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">5</p>
+      <p class="cap" style="margin: 8px 0 0; font-size: 12px; color: #6B6558;">Longest run of wins</p>
+      <p class="prose" style="margin: 4px 0 0; font-size: 11px; line-height: 1.25; color: #6B6558;">Tyler Stephenson, Edgar Quero</p>
+    </div>
+    <div style="padding: 12px; background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #B4453A; border-radius: 3px;">
+      <p class="mono" style="margin: 0; font-size: 28px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">2</p>
+      <p class="cap" style="margin: 8px 0 0; font-size: 12px; color: #6B6558;">Longest run of losses, nine innings</p>
+      <!-- THE ONE SENTENCE THAT STAYS on this artboard: a 2 beside a 5 reads as
+           a record, and only the rulebook stops that. Stated here and nowhere
+           else in the six sections.
+           IT IS A REGULATION RULE, and an earlier draft said it flat. A club
+           that reaches extra innings is topped back up to one challenge at the
+           start of every inning from the 10th, so a long night can carry more:
+           Triple-A's in-game run of losses reaches three (#1074). Both figures
+           must come from the data per level, never be hard-coded. -->
+      <p class="prose" style="margin: 4px 0 0; font-size: 12px; line-height: 1.4; color: #3C4A5A;">The rule, not a record: the second loss takes the club&rsquo;s last challenge. Extra innings hand it another one each inning.</p>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":390,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const self = this
+    const st = this.state || {}
+    const kind = st.kind || 'won'
+    const role = st.role || 'all'
+
+    const DATA = [
+      { name: 'Carson Kelly', club: 'CHC', role: 'catcher', won: 16, lost: 4, s: 62, n: 88 },
+      { name: 'Drake Baldwin', club: 'ATL', role: 'catcher', won: 13, lost: 3, s: 34, n: 51 },
+      { name: 'Salvador Perez', club: 'KC', role: 'catcher', won: 12, lost: 4, s: 52, n: 72 },
+      { name: 'Dillon Dingler', club: 'DET', role: 'catcher', won: 10, lost: 5, s: 74, n: 114 },
+      { name: 'Isaac Paredes', club: 'HOU', role: 'batter', won: 10, lost: 2, s: 10, n: 14 },
+      { name: 'Joe Mack', club: 'MIA', role: 'catcher', won: 10, lost: 5, s: 69, n: 109 },
+      { name: 'Bryce Eldridge', club: 'SF', role: 'batter', won: 9, lost: 3, s: 13, n: 21 },
+      { name: 'Zack Gelof', club: 'ATH', role: 'batter', won: 8, lost: 2, s: 10, n: 13 },
+      { name: 'Esteury Ruiz', club: 'LAD', role: 'batter', won: 7, lost: 4, s: 11, n: 17 },
+      { name: 'Drew Anderson', club: 'SEA', role: 'pitcher', won: 3, lost: 1, s: 5, n: 8 },
+      { name: 'Freddy Peralta', club: 'MIL', role: 'pitcher', won: 3, lost: 3, s: 4, n: 7 },
+      { name: 'Kyle Freeland', club: 'COL', role: 'pitcher', won: 3, lost: 1, s: 3, n: 4 },
+      { name: 'Jimmy Crooks', club: 'STL', role: 'catcher', won: 1, lost: 9, s: 2, n: 15 },
+      { name: 'Henry Davis', club: 'PIT', role: 'catcher', won: 5, lost: 8, s: 50, n: 92 },
+      { name: 'Kyle Schwarber', club: 'PHI', role: 'batter', won: 3, lost: 7, s: 13, n: 26 },
+      { name: 'Josh Naylor', club: 'SEA', role: 'batter', won: 2, lost: 7, s: 5, n: 24 },
+      { name: 'Ceddanne Rafaela', club: 'BOS', role: 'batter', won: 2, lost: 7, s: 6, n: 24 },
+      { name: 'William Contreras', club: 'MIL', role: 'catcher', won: 9, lost: 7, s: 93, n: 171 },
+      { name: 'Cristopher Sánchez', club: 'PHI', role: 'pitcher', won: 0, lost: 5, s: 0, n: 5 },
+      { name: 'Gregory Soto', club: 'BAL', role: 'pitcher', won: 1, lost: 4, s: 1, n: 5 }
+    ]
+
+    const won = kind === 'won'
+    const ink = won ? '#1B2A3A' : '#B4453A'
+    const pool = DATA
+      .filter(function (d) { return role === 'all' || d.role === role })
+      .slice()
+      .sort(function (a, b) { return (won ? b.won - a.won : b.lost - a.lost) || b.n - a.n })
+      .slice(0, 6)
+
+    // The pip row shows the run's SHAPE beside the figure that states it. The
+    // cap is 20 rather than 16, which the longest run in the file sat exactly on.
+    const PIP_CAP = 20
+    const rows = pool.map(function (d) {
+      const len = won ? d.won : d.lost
+      const pips = []
+      for (let i = 0; i < Math.min(len, PIP_CAP); i++) {
+        pips.push({ style: 'width: 6px; height: 6px; border-radius: 2px; background: ' + ink + '; display: inline-block;' })
+      }
+      return { len: len, name: d.name, club: d.club, ink: ink, pips: pips, season: d.s + ' of ' + d.n }
+    })
+
+    const roleChips = [
+      { key: 'all', label: 'Everyone' },
+      { key: 'catcher', label: 'Catchers' },
+      { key: 'batter', label: 'Batters' },
+      // 172 of MLB's 9,413 challenges came from a pitcher — thin, but a real
+      // population and the only one where a man went 0 for 5.
+      { key: 'pitcher', label: 'Pitchers' }
+    ].map(function (c) {
+      return {
+        label: c.label,
+        cls: role === c.key ? 'chip is-on' : 'chip',
+        pick: function () { self.setState({ role: c.key }) }
+      }
+    })
+
+    return {
+      rows: rows,
+      roleChips: roleChips,
+      wonChip: won ? 'chip is-on' : 'chip',
+      lostChip: won ? 'chip' : 'chip is-on',
+      pickWon: function () { self.setState({ kind: 'won' }) },
+      pickLost: function () { self.setState({ kind: 'lost' }) }
+    }
+  }
+}
+</script>
+</body>
+</html>

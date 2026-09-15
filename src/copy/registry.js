@@ -30,6 +30,7 @@
 
 import { landingFields } from './landing/fields.js'
 import { awardFields } from './awardFields.js'
+import { offseasonFields } from './offseasonFields.js'
 import { BALLPARKS } from '../lib/ballpark/ballparkData.js'
 import { venueKey } from '../lib/ballpark/ballparkArt.js'
 import MILB_BALLPARKS from '../lib/data/milb-ballparks.json' with { type: 'json' }
@@ -48,6 +49,7 @@ export const GROUPS = [
   { id: 'ballparksMilb', label: 'Ballparks — Minor League (team hub → Overview)' },
   { id: 'learn', label: 'Guides (/learn — the server-rendered landing pages)' },
   { id: 'awards', label: 'Award weight (player page → Awards)', editor: 'awardOrder' },
+  { id: 'offseason', label: 'Offseason home (the winter slate)' },
 ]
 
 // Each field: a dotted id (`group.slot`), the group it renders under, a short
@@ -441,6 +443,7 @@ export const FIELDS = [
     multiline: false,
     default: 'Back to the schedule',
   },
+  ...offseasonFields(),
   ...awardFields(),
   ...parkFields(),
   ...milbParkFields(),

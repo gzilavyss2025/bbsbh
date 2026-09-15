@@ -1,0 +1,285 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@700&display=swap">
+  <style>
+    body { margin: 0; background: #F3ECD8; }
+    a { color: #2F6E4F; text-decoration: none; } a:hover { color: #255740; text-decoration: underline; }
+    .cap { font-family: "Barlow Condensed","Arial Narrow",sans-serif; text-transform: uppercase; letter-spacing: 0.09em; }
+    .mono { font-family: "JetBrains Mono",ui-monospace,monospace; font-variant-numeric: tabular-nums; }
+    .prose { font-family: "Source Sans 3",system-ui,sans-serif; text-transform: none; }
+    .sec { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
+    .sec h2 { margin: 0; font-size: 21px; letter-spacing: 0.05em; color: #16222F; }
+    .sec span { flex: 1 1 auto; height: 2px; background: #B4453A; opacity: 0.5; }
+    .card { background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px; padding: 14px; }
+  </style>
+</helmet>
+
+<div style="width: 960px; background: #F3ECD8; padding: 28px 16px 32px; box-sizing: border-box; color: #1B2A3A;">
+
+  <div class="sec"><h2 class="cap">When they call for one</h2><span></span></div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 0 12px;">
+    <div class="card">
+      <p class="cap" style="margin: 0 0 2px; font-size: 11px; color: #6B6558;">Challenges per 100 chances</p>
+      <p class="mono" style="margin: 0 0 10px; font-size: 30px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">10.2 to 21.4</p>
+      <svg viewBox="0 0 430 190" width="100%" role="img" aria-label="Challenges per 100 chances, by inning">
+        <sc-for list="{{ grid }}" as="g" hint-placeholder-count="5">
+          <line x1="30" y1="{{ g.y }}" x2="430" y2="{{ g.y }}" stroke="#EDE6D1" stroke-width="1"></line>
+          <text x="26" y="{{ g.ty }}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#6B6558">{{ g.label }}</text>
+        </sc-for>
+        <sc-for list="{{ bars }}" as="b" hint-placeholder-count="10">
+          <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="{{ b.fill }}" stroke="{{ b.stroke }}" stroke-width="{{ b.sw }}"></rect>
+          <text x="{{ b.cx }}" y="172" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">{{ b.label }}</text>
+          <text x="{{ b.cx }}" y="{{ b.vy }}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#16222F">{{ b.value }}</text>
+        </sc-for>
+        <line x1="30" y1="154" x2="430" y2="154" stroke="#1B2A3A" stroke-width="1.5"></line>
+        <text x="430" y="188" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">10+ FROM 683 CHANCES</text>
+      </svg>
+      <p class="prose" style="margin: 8px 0 0; font-size: 13px; line-height: 1.45; color: #3C4A5A;">A chance is one half-inning a club played while it still held a challenge.</p>
+    </div>
+
+    <div class="card">
+      <p class="cap" style="margin: 0 0 2px; font-size: 11px; color: #6B6558;">Share of them won</p>
+      <p class="mono" style="margin: 0 0 10px; font-size: 30px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">60.9% to 40.5%</p>
+      <svg viewBox="0 0 430 190" width="100%" role="img" aria-label="Share of challenges won, by inning, 36 to 66 per cent">
+        <sc-for list="{{ wonTicks }}" as="t" hint-placeholder-count="3">
+          <line x1="30" y1="{{ t.y }}" x2="430" y2="{{ t.y }}" stroke="#EDE6D1" stroke-width="1"></line>
+          <text x="26" y="{{ t.ty }}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#6B6558">{{ t.label }}</text>
+        </sc-for>
+        <line x1="30" y1="{{ leagueY }}" x2="430" y2="{{ leagueY }}" stroke="#B4453A" stroke-width="1.5" stroke-dasharray="4 3"></line>
+        <text x="428" y="{{ leagueLabelY }}" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#B4453A">LEAGUE 53.9</text>
+        <polyline points="{{ winPoints }}" fill="none" stroke="#1B2A3A" stroke-width="2" stroke-linejoin="round"></polyline>
+        <sc-for list="{{ winDots }}" as="d" hint-placeholder-count="9">
+          <circle cx="{{ d.x }}" cy="{{ d.y }}" r="5" fill="#1B2A3A" stroke="#FBF6E9" stroke-width="2"></circle>
+          <text x="{{ d.x }}" y="172" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">{{ d.label }}</text>
+        </sc-for>
+      </svg>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 32px;">
+    <sc-for list="{{ panels }}" as="p" hint-placeholder-count="2">
+      <div style="background: #FBF6E9; border: 1px solid #DED6C0; border-radius: 3px; padding: 12px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px;">
+          <span class="cap" style="font-size: 13px; color: #1B2A3A;">{{ p.name }}</span>
+          <span class="mono" style="font-size: 11px; color: #6B6558;">{{ p.note }}</span>
+        </div>
+        <svg viewBox="0 0 276 78" width="100%" role="img" aria-label="{{ p.aria }}">
+          <line x1="0" y1="64" x2="276" y2="64" stroke="#CBC1A7" stroke-width="1"></line>
+          <sc-for list="{{ p.bars }}" as="b" hint-placeholder-count="9">
+            <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="#1B2A3A"></rect>
+            <text x="{{ b.cx }}" y="76" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">{{ b.label }}</text>
+          </sc-for>
+        </svg>
+      </div>
+    </sc-for>
+    <div style="display: flex; flex-direction: column; justify-content: center; gap: 4px; background: #FBF6E9; border: 1px solid #DED6C0; border-radius: 3px; padding: 12px;">
+      <span class="cap" style="font-size: 13px; color: #1B2A3A;">Pitcher</span>
+      <span class="mono" style="font-size: 20px; color: #16222F;">172 of 9,413</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558;">Flat all game &middot; 0.17 to 0.32</span>
+    </div>
+  </div>
+
+  <div class="sec"><h2 class="cap">Out of challenges</h2><span></span></div>
+
+  <div style="background: #FBF6E9; border: 1px solid #CBC1A7; border-radius: 3px; padding: 4px 14px 14px; margin: 0 0 32px;">
+    <div style="display: grid; grid-template-columns: 44px 160px 1fr 1fr 80px; gap: 12px; padding: 10px 0 6px; border-bottom: 2px solid #1B2A3A;">
+      <span class="cap" style="font-size: 11px; color: #6B6558;">Out</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558;">Club</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558;">First loss</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558;">Second</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558; text-align: right;">Date</span>
+    </div>
+    <sc-for list="{{ games }}" as="g" hint-placeholder-count="9">
+      <div style="display: grid; grid-template-columns: 44px 160px 1fr 1fr 80px; gap: 12px; align-items: baseline; padding: 9px 0; border-top: 1px solid #DED6C0;">
+        <span class="mono" style="font-size: 15px; color: #B4453A;">{{ g.half }}1</span>
+        <span>
+          <a class="cap" href="#" style="font-size: 14px; letter-spacing: 0.05em; color: #16222F;">{{ g.club }}</a>
+          <span class="cap" style="font-size: 12px; color: #6B6558;"> vs </span>
+          <a class="cap" href="#" style="font-size: 12px; color: #6B6558;">{{ g.opp }}</a>
+        </span>
+        <span>
+          <a class="prose" href="#" style="font-size: 12px; color: #2F6E4F;">{{ g.a.who }}</a>
+          <span class="cap" style="font-size: 11px; color: #6B6558;"> {{ g.a.call }} </span>
+          <span class="mono" style="font-size: 11px; color: #3C4A5A;">{{ g.a.miss }}</span>
+        </span>
+        <span>
+          <a class="prose" href="#" style="font-size: 12px; color: #2F6E4F;">{{ g.b.who }}</a>
+          <span class="cap" style="font-size: 11px; color: #6B6558;"> {{ g.b.call }} </span>
+          <span class="mono" style="font-size: 11px; color: #3C4A5A;">{{ g.b.miss }}</span>
+        </span>
+        <span style="text-align: right;"><a class="mono" href="#" style="font-size: 11px; color: #2F6E4F;">{{ g.date }}</a></span>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- .rptpair: two independent short boards side by side from 760px up -->
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;">
+    <div>
+      <div class="sec"><h2 class="cap">Longest runs</h2><span></span></div>
+      <div style="background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px; padding: 4px 14px 14px;">
+        <div style="display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; padding: 10px 0 6px; border-bottom: 2px solid #1B2A3A;">
+          <span class="cap" style="font-size: 11px; color: #6B6558;">Run</span>
+          <span class="cap" style="font-size: 11px; color: #6B6558;">Player</span>
+          <span class="cap" style="font-size: 11px; color: #6B6558; text-align: right;">Won of called, all season</span>
+        </div>
+        <sc-for list="{{ streaks }}" as="r" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid #DED6C0;">
+            <span class="mono" style="font-size: 20px; line-height: 1; color: #1B2A3A;">{{ r.len }}</span>
+            <span style="min-width: 0;">
+              <a class="cap" href="#" style="display: block; font-size: 14px; letter-spacing: 0.05em; color: #16222F;">{{ r.name }}</a>
+              <span style="display: flex; align-items: center; gap: 3px; margin-top: 4px;">
+                <sc-for list="{{ r.pips }}" as="p" hint-placeholder-count="10">
+                  <span style="width: 6px; height: 6px; border-radius: 2px; background: #1B2A3A; display: inline-block;"></span>
+                </sc-for>
+              </span>
+            </span>
+            <span class="mono" style="font-size: 14px; color: #1B2A3A;">{{ r.season }}</span>
+          </div>
+        </sc-for>
+        <p class="prose" style="margin: 10px 0 0; font-size: 12px; line-height: 1.4; color: #3C4A5A;">Inside nine innings the longest run of losses is two &mdash; the rule, not a record: the second loss takes the club&rsquo;s last challenge. Extra innings hand it another one each inning.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec"><h2 class="cap">After a win, after a loss</h2><span></span></div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <sc-for list="{{ cond }}" as="p" hint-placeholder-count="3">
+          <div style="background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px; padding: 12px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+              <span class="cap" style="font-size: 12px; color: #6B6558;">{{ p.kicker }}</span>
+              <span class="cap" style="font-size: 11px; color: #6B6558;">{{ p.n }}</span>
+            </div>
+            <p class="cap" style="margin: 6px 0 12px; font-size: 17px; letter-spacing: 0.05em; color: #16222F;">{{ p.title }}</p>
+            <sc-for list="{{ p.bars }}" as="b" hint-placeholder-count="2">
+              <div style="display: flex; align-items: center; gap: 10px; margin: 0 0 8px;">
+                <span class="cap" style="flex: 0 0 92px; font-size: 12px; color: #3C4A5A;">{{ b.label }}</span>
+                <span style="flex: 1 1 auto; height: 22px; background: #EDE6D1; border-radius: 3px; position: relative; overflow: hidden;">
+                  <span style="{{ b.fill }}"></span>
+                </span>
+                <span class="mono" style="flex: 0 0 38px; font-size: 16px; text-align: right; color: #16222F;">{{ b.value }}</span>
+              </div>
+            </sc-for>
+            <p class="prose" style="{{ p.noteStyle }}">{{ p.note }}</p>
+          </div>
+        </sc-for>
+        <p class="cap" style="margin: 0; font-size: 11px; color: #6B6558;">Per 100 half-innings left in the game</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":960,"height":1620}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const INN = [
+      { label: '1',   n: 919,  armed: 9013, bat: 4.25,  cat: 5.77 },
+      { label: '2',   n: 838,  armed: 8992, bat: 3.85,  cat: 5.17 },
+      { label: '3',   n: 917,  armed: 8941, bat: 4.29,  cat: 5.80 },
+      { label: '4',   n: 945,  armed: 8845, bat: 4.67,  cat: 5.75 },
+      { label: '5',   n: 1005, armed: 8706, bat: 5.43,  cat: 5.91 },
+      { label: '6',   n: 1098, armed: 8476, bat: 5.59,  cat: 7.15 },
+      { label: '7',   n: 1146, armed: 8192, bat: 6.77,  cat: 6.98 },
+      { label: '8',   n: 1151, armed: 7816, bat: 7.05,  cat: 7.50 },
+      { label: '9',   n: 1216, armed: 5694, bat: 10.15, cat: 10.90 },
+      { label: '10+', n: 178,  armed: 683,  bat: null,  cat: null, thin: true }
+    ]
+    const top = 28, PLOT_TOP = 16, BASE = 154, x0 = 34, gap = 5
+    const bw = Math.floor((430 - x0 - gap * (INN.length - 1)) / INN.length)
+    const bars = INN.map(function (d, i) {
+      const v = (100 * d.n) / d.armed
+      const h = Math.max(2, Math.round(((BASE - PLOT_TOP) * v) / top))
+      const x = x0 + i * (bw + gap)
+      const show = i === 0 || i === 8 || i === 9
+      return { x: x, w: bw, y: BASE - h, h: h, cx: x + bw / 2, label: d.label,
+        fill: d.thin ? 'none' : '#1B2A3A', stroke: d.thin ? '#1B2A3A' : 'none', sw: d.thin ? 1.5 : 0,
+        value: show ? v.toFixed(1) : '', vy: BASE - h - 5 }
+    })
+    const grid = [0, 7, 14, 21, 28].map(function (s) {
+      const y = BASE - Math.round(((BASE - PLOT_TOP) * s) / top)
+      return { y: y, ty: y + 4, label: String(s) }
+    })
+
+    const ROLE_TOP = 11.5
+    function panel(key, name, note) {
+      const rows = INN.filter(function (d) { return d[key] != null })
+      const pw = 26, pgap = 4
+      return { name: name, note: note, aria: name + ' challenges per 100 chances, by inning',
+        bars: rows.map(function (d, i) {
+          const h = Math.max(2, Math.round((52 * d[key]) / ROLE_TOP))
+          const x = i * (pw + pgap)
+          return { x: x, w: pw, y: 64 - h, h: h, cx: x + pw / 2, label: d.label }
+        }) }
+    }
+    const panels = [panel('cat', 'Catcher', '5.8 to 10.9'), panel('bat', 'Batter', '3.9 to 10.2')]
+
+    const WON = [60.9, 62.9, 59.3, 56.9, 56.4, 53.5, 56.3, 46.8, 40.5]
+    function wy(p) { return 156 - ((p - 36) / 30) * 136 }
+    function wx(i) { return 56 + i * 42 }
+    const winDots = WON.map(function (p, i) { return { x: wx(i), y: wy(p), label: String(i + 1) } })
+    const winPoints = WON.map(function (p, i) { return wx(i) + ',' + wy(p) }).join(' ')
+    const wonTicks = [40, 50, 60].map(function (p) { return { y: wy(p), ty: wy(p) + 4, label: String(p) } })
+
+    function c(who, call, miss) { return { who: who, call: call, miss: miss } }
+    const games = [
+      { half: 'T', club: 'Nationals', opp: 'Royals', date: 'Jun 15', a: c('Keibert Ruiz', 'ball', '1.0 in'), b: c('Keibert Ruiz', 'ball', '0.8 in') },
+      { half: 'T', club: 'Brewers', opp: 'Mariners', date: 'Aug 19', a: c('William Contreras', 'ball', '2.2 in'), b: c('William Contreras', 'ball', '1.0 in') },
+      { half: 'T', club: 'Giants', opp: 'Rockies', date: 'Jul 4', a: c('Heliot Ramos', 'strike', '0.8 in'), b: c('Victor Bericoto', 'strike', '2.0 in') },
+      { half: 'B', club: 'Braves', opp: 'Royals', date: 'Mar 28', a: c('Drake Baldwin', 'ball', '0.9 in'), b: c('Ronald Acuña Jr.', 'strike', '2.8 in') },
+      { half: 'B', club: 'Braves', opp: 'Mariners', date: 'May 4', a: c('Sean Murphy', 'ball', '0.0 in'), b: c('Sean Murphy', 'ball', '0.5 in') },
+      { half: 'B', club: 'Guardians', opp: 'Nationals', date: 'May 27', a: c('Austin Hedges', 'ball', '2.9 in'), b: c('Travis Bazzana', 'strike', '0.3 in') },
+      { half: 'B', club: 'Guardians', opp: 'White Sox', date: 'Jul 5', a: c('Patrick Bailey', 'ball', '0.3 in'), b: c('Travis Bazzana', 'strike', '0.4 in') },
+      { half: 'B', club: 'Giants', opp: 'Mariners', date: 'Jul 17', a: c('Casey Schmitt', 'strike', '1.2 in'), b: c('Drew Cavanaugh', 'ball', '0.7 in') },
+      { half: 'B', club: 'White Sox', opp: 'Astros', date: 'Jul 26', a: c('Sam Antonacci', 'strike', '2.9 in'), b: c('Munetaka Murakami', 'strike', '2.0 in') }
+    ]
+
+    const STREAK = [
+      { name: 'Carson Kelly', len: 16, season: '62 of 88' },
+      { name: 'Drake Baldwin', len: 13, season: '34 of 51' },
+      { name: 'Salvador Perez', len: 12, season: '52 of 72' },
+      { name: 'Dillon Dingler', len: 10, season: '74 of 114' },
+      { name: 'Isaac Paredes', len: 10, season: '10 of 14' },
+      { name: 'Joe Mack', len: 10, season: '69 of 109' }
+    ]
+    const streaks = STREAK.map(function (s) {
+      const pips = []
+      for (let i = 0; i < s.len; i++) pips.push({})
+      return { name: s.name, len: s.len, season: s.season, pips: pips }
+    })
+
+    const SCALE = 10
+    function bar(label, v, deep) {
+      return { label: label, value: v.toFixed(2),
+        fill: 'position: absolute; inset: 0 auto 0 0; display: block; border-radius: 0 3px 3px 0; width: ' +
+          ((100 * v) / SCALE).toFixed(1) + '%; background: ' + (deep ? '#1B2A3A' : '#6B6558') + ';' }
+    }
+    const hidden = 'display: none;'
+    const shown = 'margin: 8px 0 0; font-size: 13px; line-height: 1.45; color: #3C4A5A;'
+    const cond = [
+      { kicker: 'Counted straight', n: 'MLB · 7,615 reviews', title: 'Looks like a club goes quiet',
+        bars: [bar('After a win', 8.20, true), bar('After a loss', 7.08, false)],
+        noteStyle: shown,
+        note: 'It challenges less afterwards because it is allowed to less, not because it lost its nerve.' },
+      { kicker: 'Held equal · both called two, hold one', n: 'MLB · 1,291 reviews', title: 'It does not',
+        bars: [bar('After a win', 8.30, true), bar('After a loss', 8.63, false)], noteStyle: hidden, note: '' },
+      { kicker: 'Held equal · both called two, hold one', n: 'Triple-A · 1,373 reviews', title: 'And tips back again',
+        bars: [bar('After a win', 9.51, true), bar('After a loss', 8.91, false)], noteStyle: hidden, note: '' }
+    ]
+
+    return { grid: grid, bars: bars, panels: panels, winDots: winDots, winPoints: winPoints,
+      wonTicks: wonTicks, leagueY: wy(53.9), leagueLabelY: wy(53.9) - 4,
+      games: games, streaks: streaks, cond: cond }
+  }
+}
+</script>
+</body>
+</html>

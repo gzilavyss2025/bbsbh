@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@700&display=swap">
+  <style>
+    body { margin: 0; background: #F3ECD8; }
+    a { color: #2F6E4F; text-decoration: none; } a:hover { color: #255740; text-decoration: underline; }
+    .cap { font-family: "Barlow Condensed","Arial Narrow",sans-serif; text-transform: uppercase; letter-spacing: 0.09em; }
+    .mono { font-family: "JetBrains Mono",ui-monospace,monospace; font-variant-numeric: tabular-nums; }
+    .prose { font-family: "Source Sans 3",system-ui,sans-serif; text-transform: none; }
+    .chip { min-height: 44px; padding: 8px 12px; border: 1px solid #CBC1A7; border-radius: 3px;
+            background: #FBF6E9; font-family: "Barlow Condensed",sans-serif; font-size: 12px;
+            letter-spacing: 0.09em; color: #3C4A5A; cursor: pointer; text-transform: uppercase; }
+    .chip.is-on { background: #1B2A3A; border-color: #1B2A3A; color: #FBF6E9; }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #F3ECD8; padding: 0 16px 28px; box-sizing: border-box; color: #1B2A3A;">
+
+  <div style="display: flex; align-items: center; gap: 12px; margin: 32px 0 12px;">
+    <h2 class="cap" style="margin: 0; font-size: 21px; letter-spacing: 0.05em; color: #16222F;">Out of challenges</h2>
+    <span style="flex: 1 1 auto; height: 2px; background: #B4453A; opacity: 0.5;"></span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px;">
+    <div style="padding: 12px; background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #B4453A; border-radius: 3px;">
+      <p class="mono" style="margin: 0; font-size: 28px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">9</p>
+      <p class="cap" style="margin: 8px 0 0; font-size: 12px; color: #6B6558;">Emptied in the first</p>
+    </div>
+    <div style="padding: 12px; background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px;">
+      <p class="mono" style="margin: 0; font-size: 28px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">1 in 4</p>
+      <p class="cap" style="margin: 8px 0 0; font-size: 12px; color: #6B6558;">Emptied at all</p>
+      <p class="prose" style="margin: 4px 0 0; font-size: 11px; line-height: 1.25; color: #6B6558;">1,140 of 4,508 club-games</p>
+    </div>
+  </div>
+
+  <div style="background: #FBF6E9; border: 1px solid #DED6C0; border-radius: 3px; padding: 12px; margin: 0 0 18px;">
+    <p class="cap" style="margin: 0 0 8px; font-size: 11px; color: #6B6558;">Inning the second loss came in</p>
+    <svg viewBox="0 0 334 96" width="100%" role="img" aria-label="Clubs left with no challenges, by inning">
+      <line x1="0" y1="72" x2="334" y2="72" stroke="#1B2A3A" stroke-width="1.5"></line>
+      <sc-for list="{{ dist }}" as="d" hint-placeholder-count="10">
+        <rect x="{{ d.x }}" y="{{ d.y }}" width="{{ d.w }}" height="{{ d.h }}" fill="{{ d.fill }}" stroke="{{ d.stroke }}" stroke-width="{{ d.sw }}"></rect>
+        <text x="{{ d.cx }}" y="88" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">{{ d.label }}</text>
+        <text x="{{ d.cx }}" y="{{ d.vy }}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#16222F">{{ d.value }}</text>
+      </sc-for>
+    </svg>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px; margin: 0 0 10px;">
+    <h3 class="cap" style="margin: 0; font-size: 17px; letter-spacing: 0.05em; color: #16222F;">The first-inning nine</h3>
+    <span style="flex: 1 1 auto; height: 1px; background: #CBC1A7;"></span>
+  </div>
+
+  <!-- NO SCORE ANYWHERE: club, opponent, date, inning, the call and how far off
+       the edge it was. Nothing a result can be read back out of.
+       Every name is a link — PlayerLink, ClubCell and a game route, the way the
+       shipped boards on this page already do it. -->
+  <div style="display: flex; flex-direction: column;">
+    <div style="display: grid; grid-template-columns: 34px 1fr 62px; gap: 8px; padding: 0 2px 6px; border-bottom: 2px solid #1B2A3A;">
+      <span class="cap" style="font-size: 11px; color: #6B6558;">Out</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558;">Club &middot; the two that did it</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558; text-align: right;">Date</span>
+    </div>
+    <sc-for list="{{ games }}" as="g" hint-placeholder-count="9">
+      <div style="display: grid; grid-template-columns: 34px 1fr 62px; gap: 8px; padding: 10px 2px; border-top: 1px solid #DED6C0;">
+        <span class="mono" style="font-size: 16px; color: #B4453A; line-height: 1.1;">{{ g.half }}1</span>
+        <span style="min-width: 0;">
+          <span style="display: block;">
+            <a class="cap" href="#" style="font-size: 15px; letter-spacing: 0.05em; color: #16222F;">{{ g.club }}</a>
+            <span class="cap" style="font-size: 12px; color: #6B6558;"> vs </span>
+            <a class="cap" href="#" style="font-size: 12px; color: #6B6558;">{{ g.opp }}</a>
+            <span class="cap" style="font-size: 11px; color: #B4453A;">{{ g.tag }}</span>
+          </span>
+          <span style="display: block; margin-top: 3px;">
+            <sc-for list="{{ g.calls }}" as="c" hint-placeholder-count="2">
+              <span style="display: flex; align-items: baseline; gap: 6px;">
+                <a class="prose" href="#" style="font-size: 12px; color: #2F6E4F;">{{ c.who }}</a>
+                <span class="cap" style="font-size: 11px; color: #6B6558;">{{ c.call }}</span>
+                <span class="mono" style="font-size: 11px; color: #3C4A5A;">{{ c.miss }}</span>
+              </span>
+            </sc-for>
+          </span>
+        </span>
+        <span style="text-align: right;">
+          <a class="mono" href="#" style="font-size: 11px; color: #2F6E4F;">{{ g.date }}</a>
+        </span>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":390,"height":940}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const DIST = [
+      { label: '1', n: 9 }, { label: '2', n: 18 }, { label: '3', n: 47 },
+      { label: '4', n: 54 }, { label: '5', n: 112 }, { label: '6', n: 131 },
+      { label: '7', n: 170 }, { label: '8', n: 238 }, { label: '9', n: 320 },
+      { label: '10+', n: 41, thin: true }
+    ]
+    const top = 340
+    const gap = 4
+    // 10 bars at 29 + 9 gaps at 5 came to 335 against a 334 viewBox, so the
+    // last bar lost a pixel off its right edge.
+    const bw = Math.floor((334 - gap * (DIST.length - 1)) / DIST.length)
+    const dist = DIST.map(function (d, i) {
+      const h = Math.max(2, Math.round((56 * d.n) / top))
+      const x = i * (bw + gap)
+      return {
+        x: x, w: bw, y: 72 - h, h: h, cx: x + bw / 2, label: d.label,
+        // Clay for the band the board is about, navy for the rest, and the
+        // extras bucket HOLLOW rather than graphite: clay against graphite
+        // fails the colourblind check (delta-E 4.8 protan), and an outline
+        // carries "a pooled bucket" on a channel colour vision cannot take away.
+        fill: d.thin ? 'none' : (i === 0 ? '#B4453A' : '#1B2A3A'),
+        stroke: d.thin ? '#1B2A3A' : 'none',
+        sw: d.thin ? 1.5 : 0,
+        value: (i === 0 || i === 8) ? String(d.n) : '',
+        vy: 72 - h - 4
+      }
+    })
+
+    function g(half, club, opp, date, tag, a, b) {
+      return { half: half, club: club, opp: opp, date: date, tag: tag, calls: [a, b] }
+    }
+    function c(who, call, miss) { return { who: who, call: call, miss: miss } }
+
+    const games = [
+      g('T', 'Nationals', 'Royals', 'Jun 15', ' · one man twice',
+        c('Keibert Ruiz', 'ball', '1.0 in'), c('Keibert Ruiz', 'ball', '0.8 in')),
+      g('T', 'Brewers', 'Mariners', 'Aug 19', ' · one man twice',
+        c('William Contreras', 'ball', '2.2 in'), c('William Contreras', 'ball', '1.0 in')),
+      g('T', 'Giants', 'Rockies', 'Jul 4', '',
+        c('Heliot Ramos', 'strike', '0.8 in'), c('Victor Bericoto', 'strike', '2.0 in')),
+      g('B', 'Braves', 'Royals', 'Mar 28', '',
+        c('Drake Baldwin', 'ball', '0.9 in'), c('Ronald Acuña Jr.', 'strike', '2.8 in')),
+      g('B', 'Braves', 'Mariners', 'May 4', ' · one man twice',
+        c('Sean Murphy', 'ball', '0.0 in'), c('Sean Murphy', 'ball', '0.5 in')),
+      g('B', 'Guardians', 'Nationals', 'May 27', '',
+        c('Austin Hedges', 'ball', '2.9 in'), c('Travis Bazzana', 'strike', '0.3 in')),
+      g('B', 'Guardians', 'White Sox', 'Jul 5', '',
+        c('Patrick Bailey', 'ball', '0.3 in'), c('Travis Bazzana', 'strike', '0.4 in')),
+      g('B', 'Giants', 'Mariners', 'Jul 17', '',
+        c('Casey Schmitt', 'strike', '1.2 in'), c('Drew Cavanaugh', 'ball', '0.7 in')),
+      g('B', 'White Sox', 'Astros', 'Jul 26', '',
+        c('Sam Antonacci', 'strike', '2.9 in'), c('Munetaka Murakami', 'strike', '2.0 in'))
+    ]
+
+    return { dist: dist, games: games }
+  }
+}
+</script>
+</body>
+</html>

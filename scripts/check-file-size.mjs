@@ -208,7 +208,22 @@ const BUDGETS = {
   // screen that legitimately owns first-visit and slate-level onboarding
   // hooks — splitting three small pieces of state out would scatter the
   // slate's own logic rather than shrink it.
-  'src/screens/GameSelect.jsx': 1100, // 1008
+  // 1100 -> 1200: the offseason home page (issue #1038). The slate gains a
+  // whole page STATE — from November to February its games area holds the
+  // roster wire at full width instead of "No games scheduled." — and this
+  // screen is where a page state for the slate has to be decided, because it
+  // is the file that owns the empty day, the break window and the off-day
+  // banner already. The growth was kept to ~28 lines by moving both halves
+  // out first: the gate into hooks/useOffseason.js and the surface into
+  // components/offseason/. What is left here is the branch itself.
+  'src/screens/GameSelect.jsx': 1200, // 1115
+  // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's
+  // one new reader tipped it. fetchSeasonMeta belongs here and nowhere else:
+  // this module already owned the seasons endpoint (fetchAllStarInfo was a
+  // narrow read of the same row, and now delegates to it), and the whole point
+  // of the change is that one fetch answers both questions. A new src/api file
+  // for a nine-line fetcher would cost that directory's budget to buy less.
+  'src/api/schedule.js': 700, // 617
   // 800 -> 900: selectFinalHalfIndex — the cloud scorebook index's
   // auto-drop-once-fully-revealed check needs the SAME structural, isFinal-
   // gated reasoning selectSkippedBottomHalf right above it already has, so it
