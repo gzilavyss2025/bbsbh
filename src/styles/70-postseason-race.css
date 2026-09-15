@@ -1,14 +1,4 @@
-/* ---------------------------------------------------------- Postseason
-   Race (PostseasonRacePage.jsx) — "if the season ended today," as two
-   self-contained AL/NL brackets (Wild Card → Division Series →
-   Championship — see the screen's own header for why there's no shared
-   World Series column), each followed directly by its own wild-card table.
-   Reuses Postseason History's `.seedcard`/`.seedrow` card family and
-   `.psbracket__col`/`.psbracket__collabel`/`.psbracket__lanes` pieces
-   (34-postseason.css) and the `.standings`/`.lgstand` table family
-   (30-standings.css) — this file holds only what's new: the per-league
-   3-column mini-board, the DS/CS pending/TBD treatments, and the page
-   furniture. */
+/* Postseason Race: connected league brackets and wild-card standings. */
 
 .psrace__asof {
   margin: 4px 0 var(--space-3);
@@ -38,30 +28,6 @@
   gap: 0 var(--space-2);
   margin-top: 4px;
 }
-.psrace__ministack {
-  margin-top: 4px;
-}
-
-/* A column's connector stub — always right-pointing, since within one
-   league's own bracket a column only ever feeds the one to its right (no
-   converging-from-two-sides shape here to borrow 34-postseason.css's
-   `--al`/`--nl` connector direction from). Deliberately a new modifier
-   rather than reusing `.psbracket__col--al` for this: that class ALSO
-   drives the AL/NL label color there, and here label color and connector
-   direction are independent (an NL column still reads left-to-right). */
-.psrace__col--connect {
-  position: relative;
-}
-.psrace__col--connect .seedcard::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: -9px;
-  width: 8px;
-  height: var(--bw-hair);
-  background: var(--border-rule);
-}
-
 /* A real Wild Card matchup card holds two independently-tappable SeedRow
    links rather than opening a series (there's no series yet) — the card
    itself carries no affordance of its own. */
@@ -101,24 +67,6 @@
   color: var(--text-caption);
 }
 
-/* A round nothing has been played for yet: dashed and muted, same visual
-   family as .seedcard--bye's "nothing to tap" treatment, but its own
-   modifier — a bye is a known team waiting out a round, while a TBD slot is
-   an unknown team. */
-.seedcard--tbd {
-  border-style: dashed;
-  opacity: 0.55;
-  cursor: default;
-}
-.seedrow--tbd {
-  justify-content: center;
-  color: var(--text-caption);
-  font-style: italic;
-}
-.seedrow--tbd .seedrow__seed {
-  color: var(--text-caption);
-}
-
 .psrace__tbdcaption {
   margin: var(--space-3) 0 0;
   font-family: var(--font-body);
@@ -133,4 +81,83 @@
    the bracket above it, not its own page section. */
 .psrace__minitable {
   margin-top: var(--space-2);
+}
+
+/* Connected rounds keep their geometry on phones inside a local scroller. */
+.psrace__guide, .psrace__scrollhint, .psrace__destination {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.psrace__guide { margin: var(--space-3) 0; }
+.psrace__scrollhint { display: none; }
+.psrace__scroll { overflow-x: auto; padding: 2px; }
+.psrace__scroll:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.psrace__miniboard {
+  --bracket-gap: 40px;
+  column-gap: var(--bracket-gap);
+  min-width: 660px;
+}
+.psrace__round .psbracket__collabel {
+  margin: 0;
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  text-align: left;
+}
+.psrace__format {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-caption);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+}
+.psrace__round .psbracket__lanes {
+  position: relative;
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  height: 248px;
+  flex: none;
+  align-items: center;
+}
+.psrace__round--cs .psbracket__lanes { grid-template-rows: 1fr; }
+.psrace__miniboard .seedcard { padding: 0; gap: 0; border-radius: 0; cursor: default; }
+.psrace__miniboard .seedrow { min-height: 44px; padding: var(--space-2); color: var(--text-body); }
+.psrace__miniboard .seedrow + .seedrow { border-top: var(--bw-hair) solid var(--border-rule); }
+.psrace__miniboard .seedrow__name { font-weight: var(--w-semibold); }
+.psrace__miniboard .seedrow__seed { color: var(--text-body); }
+.psrace__miniboard .seedrow:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.psrace__bye { font-family: var(--font-display); font-size: var(--fs-caption); color: var(--text-caption); }
+/* The two Division Series paths join midway before the Championship. */
+.psrace__round--wc .seedcard::after,
+.psrace__round--ds .seedcard::after,
+.psrace__round--cs .seedcard::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: var(--bracket-gap);
+  border-top: var(--bw-hair) solid var(--text-caption);
+  pointer-events: none;
+}
+.psrace__round--ds .seedcard::after { width: calc(var(--bracket-gap) / 2); }
+.psrace__round--ds .psbracket__lanes::after {
+  content: '';
+  position: absolute;
+  left: calc(100% + var(--bracket-gap) / 2);
+  top: 25%;
+  height: 50%;
+  border-left: var(--bw-hair) solid var(--text-caption);
+}
+.psrace__round--cs .seedcard::before { left: auto; right: 100%; width: calc(var(--bracket-gap) / 2); }
+.psrace__miniboard .seedcard--tbd { opacity: 1; border-style: solid; }
+.psrace__miniboard .seedrow--pending,
+.psrace__miniboard .seedrow--tbd { color: var(--text-caption); background: var(--bg-canvas); font-style: normal; }
+.psrace__destination { margin: 0 0 var(--space-4); text-align: right; }
+@media (max-width: 739px) {
+  .psrace__scrollhint { display: block; margin: 0 0 var(--space-2); }
+  .psrace__destination { margin-top: var(--space-2); text-align: left; }
 }
