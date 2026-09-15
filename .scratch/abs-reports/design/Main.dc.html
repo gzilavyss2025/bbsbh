@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@700&display=swap">
+  <style>
+    body { margin: 0; background: #F3ECD8; }
+    a { color: #2F6E4F; } a:hover { color: #255740; }
+    .cap { font-family: "Barlow Condensed","Arial Narrow",sans-serif; text-transform: uppercase; letter-spacing: 0.09em; }
+    .mono { font-family: "JetBrains Mono",ui-monospace,monospace; font-variant-numeric: tabular-nums; }
+    .prose { font-family: "Source Sans 3",system-ui,sans-serif; text-transform: none; }
+    /* .rpt-chip, copied from 68-around-the-game.css:478 */
+    .chip { min-height: 44px; padding: 8px 12px; border: 1px solid #CBC1A7; border-radius: 3px;
+            background: #FBF6E9; font-family: "Barlow Condensed",sans-serif; font-size: 12px;
+            letter-spacing: 0.09em; color: #3C4A5A; cursor: pointer; text-transform: uppercase; }
+    .chip.is-on { background: #1B2A3A; border-color: #1B2A3A; color: #FBF6E9; }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #F3ECD8; padding: 0 16px 28px; box-sizing: border-box; color: #1B2A3A;">
+
+  <div style="display: flex; align-items: center; gap: 12px; margin: 32px 0 12px;">
+    <h2 class="cap" style="margin: 0; font-size: 21px; letter-spacing: 0.05em; color: #16222F;">When they call for one</h2>
+    <span style="flex: 1 1 auto; height: 2px; background: #B4453A; opacity: 0.5;"></span>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px;">
+    <button class="{{ rateChip }}" onClick="{{ pickRate }}">Per 100 chances</button>
+    <button class="{{ rawChip }}" onClick="{{ pickRaw }}">Raw count</button>
+  </div>
+
+  <div style="background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px; padding: 12px;">
+    <p class="cap" style="margin: 0 0 2px; font-size: 11px; color: #6B6558;">{{ chartLabel }}</p>
+    <p class="mono" style="margin: 0 0 10px; font-size: 28px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">{{ headline }}</p>
+
+    <svg viewBox="0 0 334 200" width="100%" role="img" aria-label="{{ chartAria }}">
+      <sc-for list="{{ grid }}" as="g" hint-placeholder-count="5">
+        <line x1="30" y1="{{ g.y }}" x2="334" y2="{{ g.y }}" stroke="#EDE6D1" stroke-width="1"></line>
+        <text x="26" y="{{ g.ty }}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#6B6558">{{ g.label }}</text>
+      </sc-for>
+      <sc-for list="{{ bars }}" as="b" hint-placeholder-count="10">
+        <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="{{ b.fill }}" stroke="{{ b.stroke }}" stroke-width="{{ b.sw }}"></rect>
+        <text x="{{ b.cx }}" y="184" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">{{ b.label }}</text>
+        <text x="{{ b.cx }}" y="{{ b.vy }}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#16222F">{{ b.value }}</text>
+      </sc-for>
+      <line x1="30" y1="166" x2="334" y2="166" stroke="#1B2A3A" stroke-width="1.5"></line>
+      <text x="334" y="197" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">{{ extrasNote }}</text>
+    </svg>
+
+    <p class="prose" style="margin: 8px 0 0; font-size: 13px; line-height: 1.45; color: #3C4A5A;">A chance is one half-inning a club played while it still held a challenge.</p>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px; margin: 26px 0 10px;">
+    <h3 class="cap" style="margin: 0; font-size: 17px; letter-spacing: 0.05em; color: #16222F;">By job</h3>
+    <span style="flex: 1 1 auto; height: 1px; background: #CBC1A7;"></span>
+  </div>
+
+  <!-- SAME DENOMINATOR AS THE CHART ABOVE, so the two panels add up to it. An
+       earlier draft divided a batter's challenges by his club's BATTING halves
+       only, which is his real opportunity but is half the denominator the
+       headline uses — the panels then summed to exactly twice the club rate and
+       read as though catchers alone out-asked the whole club. -->
+  <div style="display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 10px;">
+    <sc-for list="{{ panels }}" as="p" hint-placeholder-count="2">
+      <div style="background: #FBF6E9; border: 1px solid #DED6C0; border-radius: 3px; padding: 10px 12px 8px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+          <span class="cap" style="font-size: 12px; color: #1B2A3A;">{{ p.name }}</span>
+          <span class="mono" style="font-size: 11px; color: #6B6558;">{{ p.note }}</span>
+        </div>
+        <svg viewBox="0 0 310 76" width="100%" role="img" aria-label="{{ p.aria }}">
+          <line x1="0" y1="62" x2="310" y2="62" stroke="#CBC1A7" stroke-width="1"></line>
+          <sc-for list="{{ p.bars }}" as="b" hint-placeholder-count="9">
+            <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="#1B2A3A"></rect>
+            <text x="{{ b.cx }}" y="74" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">{{ b.label }}</text>
+          </sc-for>
+        </svg>
+      </div>
+    </sc-for>
+
+    <!-- A PITCHER GETS A STAT LINE, NOT A PANEL. On the shared scale his nine
+         values span 0.17 to 0.32, which rounds to the same 1.5px bar nine times:
+         a panel that draws a thicker axis rule and calls it a chart. -->
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px; background: #FBF6E9; border: 1px solid #DED6C0; border-radius: 3px; padding: 12px;">
+      <span class="cap" style="font-size: 12px; color: #1B2A3A;">Pitcher</span>
+      <span class="mono" style="font-size: 16px; color: #16222F;">172 of 9,413</span>
+      <span class="cap" style="font-size: 11px; color: #6B6558;">Flat all game &middot; 0.17 to 0.32</span>
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px; margin: 26px 0 10px;">
+    <h3 class="cap" style="margin: 0; font-size: 17px; letter-spacing: 0.05em; color: #16222F;">Share won</h3>
+    <span style="flex: 1 1 auto; height: 1px; background: #CBC1A7;"></span>
+  </div>
+
+  <div style="background: #FBF6E9; border: 1px solid #DED6C0; border-radius: 3px; padding: 12px;">
+    <svg viewBox="0 0 310 100" width="100%" role="img" aria-label="Share of challenges won, by inning, 36 to 66 per cent">
+      <!-- REAL TICKS. Two corner figures reading 60.9% and 40.5% sat where an
+           axis bound sits, named the first and last data points instead, and
+           hid that the scale is cut at 36. -->
+      <sc-for list="{{ wonTicks }}" as="t" hint-placeholder-count="3">
+        <line x1="30" y1="{{ t.y }}" x2="310" y2="{{ t.y }}" stroke="#EDE6D1" stroke-width="1"></line>
+        <text x="26" y="{{ t.ty }}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#6B6558">{{ t.label }}</text>
+      </sc-for>
+      <line x1="30" y1="{{ leagueY }}" x2="310" y2="{{ leagueY }}" stroke="#B4453A" stroke-width="1.5" stroke-dasharray="4 3"></line>
+      <text x="308" y="{{ leagueLabelY }}" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#B4453A">LEAGUE 53.9</text>
+      <polyline points="{{ winPoints }}" fill="none" stroke="#1B2A3A" stroke-width="2" stroke-linejoin="round"></polyline>
+      <sc-for list="{{ winDots }}" as="d" hint-placeholder-count="9">
+        <circle cx="{{ d.x }}" cy="{{ d.y }}" r="4" fill="#1B2A3A" stroke="#FBF6E9" stroke-width="2"></circle>
+        <text x="{{ d.x }}" y="96" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">{{ d.label }}</text>
+      </sc-for>
+    </svg>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":390,"height":1120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const self = this
+    const mode = (this.state && this.state.mode) || 'rate'
+
+    // MLB 2026, 2,254 swept games. `armed` is club-half-innings the club played
+    // while it still held a challenge. `bat`/`cat`/`pit` are that same
+    // denominator, so the three add to the club rate.
+    const INN = [
+      { label: '1',   n: 919,  armed: 9013, bat: 4.25,  cat: 5.77 },
+      { label: '2',   n: 838,  armed: 8992, bat: 3.85,  cat: 5.17 },
+      { label: '3',   n: 917,  armed: 8941, bat: 4.29,  cat: 5.80 },
+      { label: '4',   n: 945,  armed: 8845, bat: 4.67,  cat: 5.75 },
+      { label: '5',   n: 1005, armed: 8706, bat: 5.43,  cat: 5.91 },
+      { label: '6',   n: 1098, armed: 8476, bat: 5.59,  cat: 7.15 },
+      { label: '7',   n: 1146, armed: 8192, bat: 6.77,  cat: 6.98 },
+      { label: '8',   n: 1151, armed: 7816, bat: 7.05,  cat: 7.50 },
+      { label: '9',   n: 1216, armed: 5694, bat: 10.15, cat: 10.90 },
+      { label: '10+', n: 178,  armed: 683,  bat: null,  cat: null, thin: true }
+    ]
+
+    const isRate = mode === 'rate'
+    const top = isRate ? 28 : 1300
+    const PLOT_TOP = 16
+    const BASE = 166
+    const x0 = 34
+    const gap = 4
+    const bw = Math.floor((334 - x0 - gap * (INN.length - 1)) / INN.length)
+
+    const bars = INN.map(function (d, i) {
+      const v = isRate ? (100 * d.n) / d.armed : d.n
+      const h = Math.max(2, Math.round(((BASE - PLOT_TOP) * v) / top))
+      const x = x0 + i * (bw + gap)
+      const show = i === 0 || i === 8 || i === 9
+      return {
+        x: x, w: bw, y: BASE - h, h: h, cx: x + bw / 2,
+        label: d.label,
+        // THIN EVIDENCE IS DRAWN HOLLOW, not in a second colour. Clay against
+        // graphite fails the colourblind check outright (delta-E 4.8 protan),
+        // and an outline says "fewer of these" on a channel that survives it.
+        fill: d.thin ? 'none' : '#1B2A3A',
+        stroke: d.thin ? '#1B2A3A' : 'none',
+        sw: d.thin ? 1.5 : 0,
+        value: show ? (isRate ? v.toFixed(1) : v.toLocaleString('en-US')) : '',
+        vy: BASE - h - 5
+      }
+    })
+
+    const steps = isRate ? [0, 7, 14, 21, 28] : [0, 325, 650, 975, 1300]
+    const grid = steps.map(function (s) {
+      const y = BASE - Math.round(((BASE - PLOT_TOP) * s) / top)
+      return { y: y, ty: y + 4, label: isRate ? String(s) : (s >= 1000 ? (s / 1000).toFixed(1) + 'k' : String(s)) }
+    })
+
+    const ROLE_TOP = 11.5
+    function panel(key, name, note) {
+      const rows = INN.filter(function (d) { return d[key] != null })
+      const pw = 30
+      const pgap = 4
+      return {
+        name: name, note: note,
+        aria: name + ' challenges per 100 chances, by inning',
+        bars: rows.map(function (d, i) {
+          const h = Math.max(2, Math.round((50 * d[key]) / ROLE_TOP))
+          const x = i * (pw + pgap)
+          return { x: x, w: pw, y: 62 - h, h: h, cx: x + pw / 2, label: d.label }
+        })
+      }
+    }
+    const panels = [
+      panel('cat', 'Catcher', '5.8 to 10.9'),
+      panel('bat', 'Batter', '3.9 to 10.2')
+    ]
+
+    const WON = [60.9, 62.9, 59.3, 56.9, 56.4, 53.5, 56.3, 46.8, 40.5]
+    function wy(p) { return 82 - ((p - 36) / 30) * 68 }
+    function wx(i) { return 48 + i * 29 }
+    const winDots = WON.map(function (p, i) { return { x: wx(i), y: wy(p), label: String(i + 1) } })
+    const winPoints = WON.map(function (p, i) { return wx(i) + ',' + wy(p) }).join(' ')
+    const wonTicks = [40, 50, 60].map(function (p) { return { y: wy(p), ty: wy(p) + 4, label: String(p) } })
+
+    return {
+      grid: grid, bars: bars, panels: panels,
+      winDots: winDots, winPoints: winPoints, wonTicks: wonTicks,
+      leagueY: wy(53.9), leagueLabelY: wy(53.9) - 4,
+      chartLabel: isRate ? 'Challenges per 100 chances' : 'Challenges called',
+      chartAria: isRate
+        ? 'Challenges per 100 chances, by inning'
+        : 'Challenges called, by inning',
+      headline: isRate ? '10.2 to 21.4' : '919 to 1,216',
+      extrasNote: '10+ FROM 683 CHANCES',
+      rateChip: isRate ? 'chip is-on' : 'chip',
+      rawChip: isRate ? 'chip' : 'chip is-on',
+      pickRate: function () { self.setState({ mode: 'rate' }) },
+      pickRaw: function () { self.setState({ mode: 'raw' }) }
+    }
+  }
+}
+</script>
+</body>
+</html>

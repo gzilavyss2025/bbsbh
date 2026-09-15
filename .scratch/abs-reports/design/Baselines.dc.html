@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@700&display=swap">
+  <style>
+    body { margin: 0; background: #F3ECD8; }
+    a { color: #2F6E4F; } a:hover { color: #255740; }
+    .cap { font-family: "Barlow Condensed","Arial Narrow",sans-serif; text-transform: uppercase; letter-spacing: 0.09em; }
+    .mono { font-family: "JetBrains Mono",ui-monospace,monospace; font-variant-numeric: tabular-nums; }
+    .prose { font-family: "Source Sans 3",system-ui,sans-serif; text-transform: none; }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #F3ECD8; padding: 0 16px 28px; box-sizing: border-box; color: #1B2A3A;">
+
+  <div style="display: flex; align-items: center; gap: 12px; margin: 32px 0 12px;">
+    <h2 class="cap" style="margin: 0; font-size: 21px; letter-spacing: 0.05em; color: #16222F;">How often is normal</h2>
+    <span style="flex: 1 1 auto; height: 2px; background: #B4453A; opacity: 0.5;"></span>
+  </div>
+
+  <!-- .slabrow / .slab, with .slab__note at --fs-caption / --lh-snug -->
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 0 20px;">
+    <div style="padding: 12px; background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #B4453A; border-radius: 3px;">
+      <p class="mono" style="margin: 0; font-size: 28px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">1 in 40</p>
+      <p class="cap" style="margin: 8px 0 0; font-size: 12px; color: #6B6558;">Batter, per plate appearance</p>
+      <p class="prose" style="margin: 4px 0 0; font-size: 11px; line-height: 1.25; color: #6B6558;">6.41 per 1,000 pitches seen</p>
+    </div>
+    <div style="padding: 12px; background: #FBF6E9; border: 1px solid #CBC1A7; border-top: 2px solid #1B2A3A; border-radius: 3px;">
+      <p class="mono" style="margin: 0; font-size: 28px; line-height: 1; letter-spacing: -0.06em; color: #16222F;">1 in 8</p>
+      <p class="cap" style="margin: 8px 0 0; font-size: 12px; color: #6B6558;">Catcher, per inning caught</p>
+      <p class="prose" style="margin: 4px 0 0; font-size: 11px; line-height: 1.25; color: #6B6558;">1.12 per 9 innings caught</p>
+    </div>
+  </div>
+
+  <sc-for list="{{ charts }}" as="c" hint-placeholder-count="2">
+    <div style="background: #FBF6E9; border: 1px solid #DED6C0; border-radius: 3px; padding: 12px; margin: 0 0 14px;">
+      <p class="cap" style="margin: 0 0 2px; font-size: 12px; color: #1B2A3A;">{{ c.title }}</p>
+      <p class="cap" style="margin: 0 0 10px; font-size: 11px; color: #6B6558;">{{ c.sub }}</p>
+
+      <svg viewBox="0 0 334 130" width="100%" role="img" aria-label="{{ c.aria }}">
+        <!-- A COUNT AXIS. Both histograms plot players, and without ticks the
+             reader cannot learn that one peak is 79 men and the other 21. -->
+        <sc-for list="{{ c.yTicks }}" as="t" hint-placeholder-count="3">
+          <line x1="26" y1="{{ t.y }}" x2="334" y2="{{ t.y }}" stroke="#EDE6D1" stroke-width="1"></line>
+          <text x="22" y="{{ t.ty }}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#6B6558">{{ t.label }}</text>
+        </sc-for>
+        <sc-for list="{{ c.bars }}" as="b" hint-placeholder-count="9">
+          <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="#1B2A3A"></rect>
+          <text x="{{ b.cx }}" y="120" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#6B6558">{{ b.label }}</text>
+        </sc-for>
+        <line x1="26" y1="100" x2="334" y2="100" stroke="#1B2A3A" stroke-width="1.5"></line>
+
+        <!-- MEDIAN AND MEAN BOTH DRAWN. The gap between them IS the artboard's
+             point, and an earlier draft asserted it in a sentence instead.
+             Positions derive from the values, not from a hand-entered index —
+             the median rule used to point at 5.11 under a label reading 5.90. -->
+        <line x1="{{ c.medX }}" y1="20" x2="{{ c.medX }}" y2="100" stroke="#B4453A" stroke-width="2"></line>
+        <text x="{{ c.medLabelX }}" y="17" text-anchor="{{ c.medAnchor }}" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#B4453A">MEDIAN {{ c.med }}</text>
+        <line x1="{{ c.meanX }}" y1="30" x2="{{ c.meanX }}" y2="100" stroke="#6B6558" stroke-width="1.5" stroke-dasharray="3 3"></line>
+        <text x="{{ c.meanLabelX }}" y="42" text-anchor="{{ c.meanAnchor }}" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">MEAN {{ c.mean }}</text>
+
+        <text x="{{ c.zeroX }}" y="{{ c.zeroY }}" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#16222F">{{ c.zeroTag }}</text>
+        <text x="334" y="130" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-size="11" fill="#6B6558">{{ c.xUnit }}</text>
+      </svg>
+    </div>
+  </sc-for>
+
+  <p class="prose" style="margin: 0; font-size: 13px; line-height: 1.45; color: #3C4A5A;">Innings caught, not pitches received &mdash; no feed counts those.</p>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":390,"height":700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // `edges` are the bin lower bounds; `step` is the bin width. A rule's x is
+    // derived from its VALUE through the same mapping the tick labels use, so
+    // the mark and its label can never drift apart.
+    function hist(title, sub, aria, xUnit, edges, step, counts, med, mean, zeroTag) {
+      const n = counts.length
+      const gap = 4
+      const bw = Math.floor((334 - 26 - gap * (n - 1)) / n)
+      const top = Math.ceil(Math.max.apply(null, counts) / 20) * 20
+      const x = function (i) { return 26 + i * (bw + gap) }
+      const cx = function (i) { return x(i) + bw / 2 }
+      // value -> x, reading the bin CENTRES the labels sit on
+      const vx = function (v) { return cx(0) + ((v - edges[0]) / step) * (bw + gap) }
+      const bars = counts.map(function (c, i) {
+        const h = Math.max(2, Math.round((80 * c) / top))
+        return { x: x(i), w: bw, y: 100 - h, h: h, cx: cx(i), label: edges[i] }
+      })
+      const yTicks = [0, top / 2, top].map(function (v) {
+        const y = 100 - Math.round((80 * v) / top)
+        return { y: y, ty: y + 4, label: String(v) }
+      })
+      const medX = vx(med)
+      const meanX = vx(mean)
+      return {
+        title: title, sub: sub, aria: aria, xUnit: xUnit, bars: bars, yTicks: yTicks,
+        med: String(med), mean: String(mean),
+        medX: medX, medLabelX: medX < 200 ? medX + 5 : medX - 5, medAnchor: medX < 200 ? 'start' : 'end',
+        meanX: meanX, meanLabelX: meanX < 200 ? meanX + 5 : meanX - 5, meanAnchor: meanX < 200 ? 'start' : 'end',
+        zeroTag: zeroTag, zeroX: cx(0), zeroY: bars[0].y - 5
+      }
+    }
+
+    const batter = hist(
+      'Batters, per 1,000 pitches seen',
+      '338 hitters with 200 or more plate appearances',
+      'Distribution of batter challenge rates per 1,000 pitches seen',
+      'PER 1,000 PITCHES',
+      ['0', '2', '4', '6', '8', '10', '12', '14', '16+'], 2,
+      [34, 64, 79, 61, 41, 23, 18, 7, 11],
+      5.9, 6.58,
+      '7 AT ZERO'
+    )
+
+    const catcher = hist(
+      'Catchers, per 9 innings caught',
+      '72 catchers with 200 or more innings behind the plate',
+      'Distribution of catcher challenge rates per 9 innings caught',
+      'PER 9 INNINGS',
+      ['0.4', '0.6', '0.8', '1.0', '1.2', '1.4', '1.6', '1.8+'], 0.2,
+      [4, 7, 13, 21, 11, 9, 5, 2],
+      1.10, 1.13,
+      ''
+    )
+
+    return { charts: [batter, catcher] }
+  }
+}
+</script>
+</body>
+</html>

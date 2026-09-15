@@ -1,0 +1,726 @@
+{
+  "note": "Captured by .scratch/abs-reports/build-fixture.mjs. Re-run to refresh.",
+  "capturedAt": "2026-09-15",
+  "linescores": [
+    {
+      "gamePk": 824872,
+      "why": "home club did not bat in the 9th — last inning home object has no runs key",
+      "status": {
+        "abstractGameState": "Final",
+        "detailedState": "Final"
+      },
+      "linescore": {
+        "currentInning": 9,
+        "scheduledInnings": 9,
+        "isTopInning": true,
+        "innings": [
+          {
+            "num": 8,
+            "away": {
+              "runs": 0
+            },
+            "home": {
+              "runs": 3
+            }
+          },
+          {
+            "num": 9,
+            "away": {
+              "runs": 1
+            },
+            "home": {}
+          }
+        ],
+        "inningCount": 9
+      }
+    },
+    {
+      "gamePk": 823413,
+      "why": "regulation, bottom of the 9th played out",
+      "status": {
+        "abstractGameState": "Final",
+        "detailedState": "Final"
+      },
+      "linescore": {
+        "currentInning": 9,
+        "scheduledInnings": 9,
+        "isTopInning": false,
+        "innings": [
+          {
+            "num": 8,
+            "away": {
+              "runs": 0
+            },
+            "home": {
+              "runs": 0
+            }
+          },
+          {
+            "num": 9,
+            "away": {
+              "runs": 1
+            },
+            "home": {
+              "runs": 0
+            }
+          }
+        ],
+        "inningCount": 9
+      }
+    },
+    {
+      "gamePk": 814842,
+      "why": "Cancelled: Rain — abstractGameState Final, zero innings, zero challenges (#1073)",
+      "status": {
+        "abstractGameState": "Final",
+        "detailedState": "Cancelled: Rain"
+      },
+      "linescore": {
+        "currentInning": null,
+        "scheduledInnings": 9,
+        "isTopInning": null,
+        "innings": [],
+        "inningCount": 0
+      }
+    },
+    {
+      "gamePk": 815811,
+      "why": "Suspended: Rain — abstractGameState Live, swept anyway, permanently incomplete (#1073)",
+      "status": {
+        "abstractGameState": "Live",
+        "detailedState": "Suspended: Rain"
+      },
+      "linescore": {
+        "currentInning": 2,
+        "scheduledInnings": 7,
+        "isTopInning": false,
+        "innings": [
+          {
+            "num": 1,
+            "away": {
+              "runs": 0
+            },
+            "home": {
+              "runs": 1
+            }
+          },
+          {
+            "num": 2,
+            "away": {
+              "runs": 0
+            },
+            "home": {}
+          }
+        ],
+        "inningCount": 2
+      }
+    }
+  ],
+  "roster": {
+    "teamId": 114,
+    "url": "https://statsapi.mlb.com/api/v1/teams/114/roster?rosterType=fullSeason&season=2026&hydrate=person(stats(type=season,group=[hitting,fielding],season=2026,sportId=1))",
+    "why": "fullSeason hydrate; a traded player carries one split per club plus an aggregate with no team",
+    "players": [
+      {
+        "id": 666176,
+        "name": "Jo Adell",
+        "position": "RF",
+        "hitting": [
+          {
+            "teamId": null,
+            "position": null,
+            "numberOfPitches": 2405,
+            "plateAppearances": 612,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 108,
+            "position": null,
+            "numberOfPitches": 1775,
+            "plateAppearances": 456,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 114,
+            "position": null,
+            "numberOfPitches": 630,
+            "plateAppearances": 156,
+            "innings": null,
+            "gamesStarted": null
+          }
+        ],
+        "fielding": [
+          {
+            "teamId": null,
+            "position": "LF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "96.0",
+            "gamesStarted": 12
+          },
+          {
+            "teamId": 108,
+            "position": "LF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "41.0",
+            "gamesStarted": 5
+          },
+          {
+            "teamId": 114,
+            "position": "LF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "55.0",
+            "gamesStarted": 7
+          },
+          {
+            "teamId": 108,
+            "position": "CF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "10.0",
+            "gamesStarted": 1
+          },
+          {
+            "teamId": null,
+            "position": "RF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "1044.1",
+            "gamesStarted": 118
+          },
+          {
+            "teamId": 108,
+            "position": "RF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "869.1",
+            "gamesStarted": 98
+          },
+          {
+            "teamId": 114,
+            "position": "RF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "175.0",
+            "gamesStarted": 20
+          },
+          {
+            "teamId": null,
+            "position": "DH",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "0.0",
+            "gamesStarted": 12
+          },
+          {
+            "teamId": 108,
+            "position": "DH",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "0.0",
+            "gamesStarted": 5
+          },
+          {
+            "teamId": 114,
+            "position": "DH",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "0.0",
+            "gamesStarted": 7
+          }
+        ]
+      },
+      {
+        "id": 672356,
+        "name": "Gabriel Arias",
+        "position": "3B",
+        "hitting": [
+          {
+            "teamId": null,
+            "position": null,
+            "numberOfPitches": 555,
+            "plateAppearances": 147,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 112,
+            "position": null,
+            "numberOfPitches": 33,
+            "plateAppearances": 8,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 114,
+            "position": null,
+            "numberOfPitches": 508,
+            "plateAppearances": 134,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 121,
+            "position": null,
+            "numberOfPitches": 14,
+            "plateAppearances": 5,
+            "innings": null,
+            "gamesStarted": null
+          }
+        ],
+        "fielding": [
+          {
+            "teamId": null,
+            "position": "1B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "11.0",
+            "gamesStarted": 1
+          },
+          {
+            "teamId": 112,
+            "position": "1B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "1.0",
+            "gamesStarted": 0
+          },
+          {
+            "teamId": 114,
+            "position": "1B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "2.0",
+            "gamesStarted": 0
+          },
+          {
+            "teamId": 121,
+            "position": "1B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "8.0",
+            "gamesStarted": 1
+          },
+          {
+            "teamId": null,
+            "position": "2B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "25.0",
+            "gamesStarted": 3
+          },
+          {
+            "teamId": 112,
+            "position": "2B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "8.0",
+            "gamesStarted": 1
+          },
+          {
+            "teamId": 114,
+            "position": "2B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "17.0",
+            "gamesStarted": 2
+          },
+          {
+            "teamId": null,
+            "position": "SS",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "94.0",
+            "gamesStarted": 10
+          },
+          {
+            "teamId": 112,
+            "position": "SS",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "7.0",
+            "gamesStarted": 0
+          },
+          {
+            "teamId": 114,
+            "position": "SS",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "83.0",
+            "gamesStarted": 10
+          },
+          {
+            "teamId": 121,
+            "position": "SS",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "4.0",
+            "gamesStarted": 0
+          },
+          {
+            "teamId": 114,
+            "position": "3B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "207.2",
+            "gamesStarted": 24
+          }
+        ]
+      },
+      {
+        "id": 672275,
+        "name": "Patrick Bailey",
+        "position": "C",
+        "hitting": [
+          {
+            "teamId": null,
+            "position": null,
+            "numberOfPitches": 1266,
+            "plateAppearances": 320,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 114,
+            "position": null,
+            "numberOfPitches": 907,
+            "plateAppearances": 231,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 137,
+            "position": null,
+            "numberOfPitches": 359,
+            "plateAppearances": 89,
+            "innings": null,
+            "gamesStarted": null
+          }
+        ],
+        "fielding": [
+          {
+            "teamId": null,
+            "position": "C",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "774.0",
+            "gamesStarted": 86
+          },
+          {
+            "teamId": 114,
+            "position": "C",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "535.2",
+            "gamesStarted": 59
+          },
+          {
+            "teamId": 137,
+            "position": "C",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "238.1",
+            "gamesStarted": 27
+          }
+        ]
+      },
+      {
+        "id": 656413,
+        "name": "Stuart Fairchild",
+        "position": "RF",
+        "hitting": [
+          {
+            "teamId": null,
+            "position": null,
+            "numberOfPitches": 110,
+            "plateAppearances": 27,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 114,
+            "position": null,
+            "numberOfPitches": 110,
+            "plateAppearances": 27,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 136,
+            "position": null,
+            "numberOfPitches": 0,
+            "plateAppearances": 0,
+            "innings": null,
+            "gamesStarted": null
+          }
+        ],
+        "fielding": [
+          {
+            "teamId": 114,
+            "position": "LF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "5.0",
+            "gamesStarted": 0
+          },
+          {
+            "teamId": 114,
+            "position": "CF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "42.0",
+            "gamesStarted": 6
+          },
+          {
+            "teamId": 114,
+            "position": "RF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "19.0",
+            "gamesStarted": 1
+          },
+          {
+            "teamId": 114,
+            "position": "DH",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "0.0",
+            "gamesStarted": 0
+          }
+        ]
+      },
+      {
+        "id": 681807,
+        "name": "David Fry",
+        "position": "RF",
+        "hitting": [
+          {
+            "teamId": 114,
+            "position": null,
+            "numberOfPitches": 831,
+            "plateAppearances": 190,
+            "innings": null,
+            "gamesStarted": null
+          }
+        ],
+        "fielding": [
+          {
+            "teamId": 114,
+            "position": "C",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "35.1",
+            "gamesStarted": 3
+          },
+          {
+            "teamId": 114,
+            "position": "1B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "46.0",
+            "gamesStarted": 6
+          },
+          {
+            "teamId": 114,
+            "position": "3B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "5.0",
+            "gamesStarted": 0
+          },
+          {
+            "teamId": 114,
+            "position": "LF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "113.0",
+            "gamesStarted": 14
+          },
+          {
+            "teamId": 114,
+            "position": "RF",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "95.0",
+            "gamesStarted": 12
+          },
+          {
+            "teamId": 114,
+            "position": "DH",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "0.0",
+            "gamesStarted": 11
+          }
+        ]
+      },
+      {
+        "id": 595978,
+        "name": "Austin Hedges",
+        "position": "C",
+        "hitting": [
+          {
+            "teamId": 114,
+            "position": null,
+            "numberOfPitches": 869,
+            "plateAppearances": 228,
+            "innings": null,
+            "gamesStarted": null
+          }
+        ],
+        "fielding": [
+          {
+            "teamId": 114,
+            "position": "P",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "4.1",
+            "gamesStarted": 0
+          },
+          {
+            "teamId": 114,
+            "position": "C",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "566.2",
+            "gamesStarted": 66
+          }
+        ]
+      },
+      {
+        "id": 663993,
+        "name": "Nathaniel Lowe",
+        "position": "1B",
+        "hitting": [
+          {
+            "teamId": null,
+            "position": null,
+            "numberOfPitches": 1681,
+            "plateAppearances": 404,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 113,
+            "position": null,
+            "numberOfPitches": 1167,
+            "plateAppearances": 276,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 114,
+            "position": null,
+            "numberOfPitches": 514,
+            "plateAppearances": 128,
+            "innings": null,
+            "gamesStarted": null
+          }
+        ],
+        "fielding": [
+          {
+            "teamId": null,
+            "position": "1B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "436.0",
+            "gamesStarted": 49
+          },
+          {
+            "teamId": 113,
+            "position": "1B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "179.0",
+            "gamesStarted": 21
+          },
+          {
+            "teamId": 114,
+            "position": "1B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "257.0",
+            "gamesStarted": 28
+          },
+          {
+            "teamId": 113,
+            "position": "DH",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "0.0",
+            "gamesStarted": 46
+          }
+        ]
+      },
+      {
+        "id": 666310,
+        "name": "Bo Naylor",
+        "position": "C",
+        "hitting": [
+          {
+            "teamId": null,
+            "position": null,
+            "numberOfPitches": 403,
+            "plateAppearances": 94,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 114,
+            "position": null,
+            "numberOfPitches": 389,
+            "plateAppearances": 90,
+            "innings": null,
+            "gamesStarted": null
+          },
+          {
+            "teamId": 158,
+            "position": null,
+            "numberOfPitches": 14,
+            "plateAppearances": 4,
+            "innings": null,
+            "gamesStarted": null
+          }
+        ],
+        "fielding": [
+          {
+            "teamId": null,
+            "position": "C",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "211.0",
+            "gamesStarted": 24
+          },
+          {
+            "teamId": 114,
+            "position": "C",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "203.0",
+            "gamesStarted": 23
+          },
+          {
+            "teamId": 158,
+            "position": "C",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "8.0",
+            "gamesStarted": 1
+          },
+          {
+            "teamId": 158,
+            "position": "1B",
+            "numberOfPitches": null,
+            "plateAppearances": null,
+            "innings": "2.0",
+            "gamesStarted": 0
+          }
+        ]
+      }
+    ]
+  }
+}
