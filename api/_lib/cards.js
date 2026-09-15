@@ -113,12 +113,28 @@ async function resolveGame(apiDate, matchup) {
 // --- per-route card builders -----------------------------------------------
 //
 // Each returns { title, description, image, alt } or null. `image` is an
-// absolute /api/og URL; `origin` is the live host (so previews work on any
-// deploy/preview URL, not just the pinned production domain).
+// absolute URL on `origin` -- the live host, so previews work on any
+// deploy/preview URL, not just the pinned production domain.
 
-function ogUrl(origin, params) {
-  const q = new URLSearchParams(params)
-  return `${origin}/api/og?${q}`
+// TEMPORARY: every card points at the STATIC default image rather than a
+// per-route api/og.js render. That function is untouched and still correct;
+// nothing calls it any more. See docs/adr/0012-dynamic-link-previews.md.
+//
+// WHY. One card costs ~400ms of CPU -- Satori laying the card out, then resvg
+// rasterising a 1200x630 PNG. Nothing about a shared link makes that worth
+// paying, but scripts/warm-previews.mjs pays it ~855 times a night, warming
+// today's slate: three sections per game, both clubs, and every player on all
+// thirty active rosters. Measured on 2026-09-15, /api/og was 885 invocations
+// and 6 minutes of CPU in twelve hours, against ~8 seconds for all twelve Node
+// functions put together -- by itself ~6 CPU-hours a month, on a 4-hour budget.
+// The cards were being drawn for links nobody had shared yet.
+//
+// What a shared link KEEPS is the part that carries the information: its own
+// title, description, alt text and canonical, all built per route below. Only
+// the picture is now shared between them. Revert this one function to restore
+// per-route art.
+function ogUrl(origin, _params) {
+  return `${origin}/og-image.png`
 }
 
 // The one wider hydrate this work added, and the reason the request COUNT for a

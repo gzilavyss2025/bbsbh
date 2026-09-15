@@ -100,9 +100,35 @@ for (const route of STATIC_REPORT_ROUTES) {
     const card = await buildCard(new URLSearchParams({ route }), 'https://example.test')
     assert.ok(card, `expected a card for route=${route}`)
     assert.ok(card.title.includes('Tally Baseball'), `title should be branded: ${card.title}`)
-    assert.ok(card.image.startsWith('https://example.test/api/og?'), `image should be a same-origin /api/og URL: ${card.image}`)
+    assert.equal(
+      card.image,
+      'https://example.test/og-image.png',
+      `image should be the static default card on the request origin: ${card.image}`,
+    )
   })
 }
+
+// The invariant that protects the CPU budget: NO card builds a per-route
+// api/og.js render. One 1200x630 Satori/resvg raster costs ~400ms of CPU, and
+// scripts/warm-previews.mjs asks for ~855 of them a night, which on its own
+// outran the whole Hobby Active-CPU allowance. See ogUrl() in api/_lib/cards.js.
+//
+// Restoring per-route art means deliberately changing this test, which is the
+// point of it -- the cost has to be taken on purpose, not drift back in.
+test('no card points at the dynamic /api/og renderer', async () => {
+  const images = new Set()
+  for (const route of STATIC_REPORT_ROUTES) {
+    const card = await buildCard(new URLSearchParams({ route }), 'https://example.test')
+    assert.ok(card, `expected a card for route=${route}`)
+    assert.ok(
+      !card.image.includes('/api/og'),
+      `route=${route} still renders a dynamic card: ${card.image}`,
+    )
+    images.add(card.image)
+  }
+  // And they all share the one static file, so warming the slate warms it once.
+  assert.equal(images.size, 1, `expected one shared image, got: ${[...images].join(', ')}`)
+})
 
 test('buildCard still falls back to null for an unrecognized route', async () => {
   const card = await buildCard(new URLSearchParams({ route: 'not-a-real-route' }), 'https://example.test')
@@ -214,7 +240,7 @@ test('the injected head carries a rel=canonical, and it agrees with og:url', () 
   const card = {
     title: 'Christian Yelich | Tally Baseball',
     description: 'Season line, splits and recent form.',
-    image: 'https://deploy-abc123.vercel.app/api/og?card=player',
+    image: 'https://deploy-abc123.vercel.app/og-image.png',
     alt: 'Christian Yelich',
   }
   const url = canonicalUrl(new URLSearchParams({ route: 'player', id: '592885' }))
