@@ -97,3 +97,49 @@ gains an editor, and this ADR is not a licence to put one there.
 wordmark is usually a sponsor's registered trademark. The upload route does not
 change that; it only makes the slot reachable in seconds instead of a deploy.
 What goes in it is the owner's call and the owner's licence to hold.
+
+## Amendment (2026-09-15) — a save now reclaims the upload it replaced
+
+The Blob store above had a write path and no delete path worth the name, and
+on 2026-09-15 it hit the Hobby plan's 1 GB ceiling.
+
+**Why an upload is never overwritten, which is not the bug.** Every upload
+lands on a unique pathname (`addRandomSuffix: true`, `cacheControlMaxAge` one
+year). Writing a stable pathname instead would leave the old bytes cached hard
+at the CDN, so "I replaced the photo" would keep showing the previous one. That
+choice stays. Its price is that the bytes a save replaces survive it.
+
+**What was reclaimed before: one case.** `api/ballpark-photo.js` and
+`api/identity-logo.js` both delete a `?replaces=` URL after a successful upload,
+and the drawer passes one only for a draft it is abandoning by re-uploading
+before saving. They cannot reclaim anything else, and must not try: at upload
+time the URL a saved override points at is still the live one, so deleting it
+and then failing the save would break the page still rendering it.
+
+**What is reclaimed now.** The SAVE is where an object becomes dead, and where
+both the stored map and the new one are already in hand. `reclaimableBlobUrls`
+(in `api/ballpark-photo.js`, beside the URL checks it reuses) returns what the
+old map named and the new one does not; `reclaimBlobs` deletes them, awaited so
+a function that stops at its response does not drop the delete, and swallowing
+its own errors so a good save is never turned into an error by cleanup.
+
+`api/identity.js` calls it on `identity-logos/`, unconditionally. That store has
+no history, so a mark that fell out of the map cannot be reached again.
+
+**`api/copy.js` deliberately does NOT, and this is the interesting half.** It
+keeps twenty restorable snapshots (`copy:history`), so a ballpark photo that
+left the live map is still reachable by undo — deleting it would leave a
+restorable snapshot pointing at nothing. Worse, the write pushes the old map
+into history in the same transaction, so at save time the URL is always still
+referenced and a naive reclaim would correctly find nothing anyway.
+
+Reclaiming there means watching what `ltrim` EVICTS, not what the save replaced:
+read the entry about to fall off the end, and after the write delete whatever it
+named that neither the live map nor any surviving snapshot does. That is left
+unbuilt. Ballpark photos are bounded by the park list and edited rarely; club
+marks are curated across thirty clubs and every treatment, repeatedly, which is
+the growth that actually filled the store. `reclaimableBlobUrls` already takes a
+LIST of maps to keep so the history case drops straight in when it is wanted.
+
+Neither endpoint reclaims what leaked before this landed; that needs a sweep
+against the live maps, also unbuilt.

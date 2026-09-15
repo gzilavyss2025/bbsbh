@@ -41,6 +41,7 @@ import {
   mergeIdentityOverrides,
   sanitizeIdentityOverrides,
 } from '../src/lib/identity/fields.js'
+import { reclaimableBlobUrls, reclaimBlobs } from './ballpark-photo.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
@@ -224,6 +225,21 @@ export default async function handler(req, res) {
   } catch {
     return reply(res, { error: 'write failed' }, 502)
   }
+
+  // The marks this save just replaced. AFTER the write and never before: until
+  // the new map is stored, the old URL is the one every page still renders.
+  //
+  // Unconditional here in a way it could not be in api/copy.js, which keeps
+  // twenty restorable snapshots -- this store has no history, so a mark that
+  // fell out of `clean` cannot be reached again by anything.
+  //
+  // Awaited rather than fired and forgotten, because a Vercel function may stop
+  // executing the moment it responds; an unawaited delete is a delete that
+  // sometimes does not happen. It cannot throw (see reclaimBlobs).
+  await reclaimBlobs(
+    reclaimableBlobUrls(prev, [clean], 'identity-logos/'),
+    process.env.BLOB_READ_WRITE_TOKEN,
+  )
 
   return reply(res, { identity: clean }, 200, { 'cache-control': 'no-store' })
 }

@@ -740,3 +740,105 @@ this ADR's registry test file exists to prevent. So the batting order is not a
 registry entry. It wants a door that opens a LIST — the nine slots with his line
 at each, folded from the gated rows, each opening its own rows — which is the
 same shape #998's 36 ballparks want, and it should be built once for both.
+
+## Amendment (2026-09-15, issue #1031): the stuck rows were played, and the score is recoverable
+
+The 2026-09-02 note above says a postponed game is "a game that was never
+played". **That is wrong for almost every such game, and it cost the sheet
+rows.** Some games MLB left at `Postponed` were rained out, replayed the SAME
+DAY under the SAME gamePk, and the schedule row was never updated. It still
+answers `abstractGameState: 'Final'` with no score on either side, so the gate
+dropped it — and a door on the Game lines card then counted a game its own sheet
+never showed. Scherzer's Postseason door said 33 over a sheet of 31; the two
+missing rows are his 2011 and 2012 ALCS starts (gamePks 317054 and 345619).
+
+### How many, and which
+
+Every "Final with no score" row on nine full seasons' schedules — 2011, 2014,
+2017, 2019, 2020, 2021, 2023, 2025 and 2026 — measured against the game's own
+linescore and play-by-play on 2026-09-15:
+
+| | |
+| --- | --- |
+| Scoreless `Final` rows | 406 |
+| Of those, really played (runs AND plays) | **400** |
+| Never played (no runs, no plays) | 6 |
+
+The only other scoreless shape on those schedules is `Preview`/`Scheduled` — a
+future game, which the Final check already drops. So the gate was throwing away
+one real game for every fifteen it was built to catch, and the three gamePks
+this ADR named as "never played" (776691, 777459, 632997) are all in the 400.
+
+Per career, the drop is about 1% of the games: 2 of Scherzer's 33 postseason
+starts, 10 of his 498 regular-season ones, 22 of Yelich's 1,725, 33 of Freeman's
+2,321, 36 of Jeter's 2,747, and 69 of Cabrera's 2,797 — the worst measured.
+Careers that ended before the mid-1970s have none at all: Aaron's 3,298 games,
+Rose's 1,419 and Ryan's 807 return no stuck rows, so this is an artifact of the
+modern schedule record and not of old data.
+
+### The fix, and why it does not loosen the gate
+
+**The gate still asks for the score.** What changed is where the score may come
+from. The schedule endpoint cannot separate a played-but-stuck game from a
+never-played one — `hydrate=linescore` answers `runs: null` on both — but the
+game's OWN linescore can, and it is the cheapest call in the app:
+
+```
+/api/v1/game/{gamePk}/linescore?fields=teams,home,away,runs   ->   47 bytes
+```
+
+`rows.js` gained `scorelessGamePks`, which runs the SAME gate and returns only
+the games it turned away for want of a score. `fetch.js` reads each one's
+linescore and hands the answers back as `recoveredScores`. Three properties make
+that safe, and all three are pinned in `test/boxlines-score-recovery.test.js`:
+
+- **Nothing new is asked about.** The recovery list comes out of the gate, so a
+  game at or after the cutoff and a game the schedule does not call Final are
+  never named, never mind fetched.
+- **It fails closed by itself.** A game that was really never played has no runs
+  on its linescore either, so it is absent from the map and stays dropped — the
+  same answer as today. So does a call that errors.
+- **It can only add a row.** A schedule record that has a score keeps it; the
+  recovered map is consulted only where the record is empty.
+
+It rides in the memoized JOIN rather than behind a facet, the way
+`positionsPlayed` does and the lineups pass does not. The reason is the bug
+itself: a door that counts a game its own sheet hides has to close for every
+door at once, and the join is the only place all of them share. The cost is one
+call per stuck row on the first door opened and nothing after that — 180–280 ms
+at six at a time for the careers above.
+
+`SCORE_RECOVERY_CAP` is 150, which no real career approaches. It is a ceiling on
+the SOURCE going wrong, not on a long career: if the schedule endpoint ever
+stopped scoring games wholesale, the cap is what stops a sheet firing a request
+per game, and the gate simply stays as closed as it is today.
+
+### What it closes, measured on the page
+
+Yelich's Game lines card, 2026-09-15, after the fix: Day renders 591 rows and
+Night 1,134, which is 1,725 — every regular-season game he has played, where the
+two sheets held 1,703 between them before. The 22 linescore calls are made on
+the FIRST door opened and none after it, because the recovery rides in the
+shared join. Scherzer's Postseason door and its sheet now both say 33.
+
+**And the Came in margin above was mis-split.** That amendment reads the 53-vs-49
+gap as "4 of it is the source margin… the rest is the gate", which cannot be
+right: 4 and 22 do not fit inside a gap of 4. The true split, now visible: of the
+22 games the gate was dropping, 20 were starts and 2 were bench appearances. So
+the doors now read
+
+| | door | sheet |
+| --- | --- | --- |
+| Started | 1,672 | 1,674 |
+| Came in | 53 | 51 |
+
+— 1,725 between them, and the residual ±2 is the source margin alone, MLB's
+fielding aggregate against MLB's own lineups. It is the same margin Home and
+Road carry, it is not this fix's to close, and it can now be read straight off
+the card instead of being inferred.
+
+### Scope
+
+Not postseason-specific, and not a facet's problem. Any facet, any era: a
+rain-postponed regular-season game replayed the same day under the same gamePk
+has the same shape. The postseason door just made it countable.

@@ -462,10 +462,13 @@ test('the surface doors split a career, and the rows never exceed the door', asy
       .toBe(true)
     const turfRows = await sheet.locator('.boxline:not(.boxline--skel)').count()
     expect(turfRows).toBeGreaterThan(0)
-    // The gate can drop a row the career aggregate counted (a played game whose
-    // schedule row is stuck on Postponed), so the rows may come in under the
-    // door. They may never come in OVER it: that would mean the facet kept a
-    // game MLB does not count as turf.
+    // The rows may come in under the door: MLB's career aggregate and MLB's own
+    // per-game records disagree by a game or two on some careers, which
+    // ADR-0069 records and neither side can settle. (Until #1031 the gate was
+    // the bigger reason — a played game whose schedule row is stuck on
+    // Postponed had no score and so no row. Those rows are back.) They may
+    // never come in OVER the door: that would mean the facet kept a game MLB
+    // does not count as turf.
     expect(turfRows, `${who}: ${turfRows} turf rows against a door of ${doorGames}`).toBeLessThanOrEqual(doorGames)
 
     // And turf is the small half of a career spent mostly on grass.

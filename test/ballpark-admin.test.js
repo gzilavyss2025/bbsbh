@@ -26,7 +26,12 @@ import {
   venueKey,
   withoutBrokenArt,
 } from '../src/lib/ballpark/ballparkArt.js'
-import { isOwnBlobUrl, isOwnBlobUrlUnder, sniffImage } from '../api/ballpark-photo.js'
+import {
+  isOwnBlobUrl,
+  isOwnBlobUrlUnder,
+  reclaimableBlobUrls,
+  sniffImage,
+} from '../api/ballpark-photo.js'
 
 const FENWAY = venueKey('Fenway Park')
 
@@ -204,9 +209,81 @@ test('isOwnBlobUrlUnder keeps a delete inside the folder that wrote it', () => {
 })
 
 
+// --- reclaiming a replaced upload -------------------------------------------
+//
+// Property 4, added with the reclaim-on-save in api/identity.js. An upload lands
+// on a unique pathname on purpose, so the bytes a save replaces survive it. The
+// endpoints reclaim only an abandoned DRAFT (`?replaces=`); everything actually
+// replaced by a save was leaking, one object per re-upload, forever.
+//
+// Every property below is a way of deleting SOMETHING STILL IN USE, which is the
+// only failure mode that matters here -- an orphan left behind costs storage, a
+// wrong delete costs an image nobody can get back.
+
+const BLOB = 'https://abc123.public.blob.vercel-storage.com'
+
+test('a mark a save replaced is reclaimed', () => {
+  const prev = { 'identity.logo.158.main': `${BLOB}/identity-logos/158-main-old.png` }
+  const clean = { 'identity.logo.158.main': `${BLOB}/identity-logos/158-main-new.png` }
+  assert.deepEqual(reclaimableBlobUrls(prev, [clean], 'identity-logos/'), [
+    `${BLOB}/identity-logos/158-main-old.png`,
+  ])
+})
+
+test('a save that changes nothing reclaims nothing', () => {
+  const map = { 'identity.logo.158.main': `${BLOB}/identity-logos/158-main-a.png` }
+  assert.deepEqual(reclaimableBlobUrls(map, [map], 'identity-logos/'), [])
+})
+
+// The case a naive "was it in prev, is it in clean" diff gets wrong: re-pointing
+// one club does not orphan a mark a second club still names.
+test('a mark two fields share survives one of them being re-pointed', () => {
+  const shared = `${BLOB}/identity-logos/shared.png`
+  const prev = { 'identity.logo.158.main': shared, 'identity.logo.159.main': shared }
+  const clean = {
+    'identity.logo.158.main': `${BLOB}/identity-logos/158-new.png`,
+    'identity.logo.159.main': shared,
+  }
+  assert.deepEqual(reclaimableBlobUrls(prev, [clean], 'identity-logos/'), [])
+})
+
+// Why `keep` is a list. api/copy.js keeps twenty restorable snapshots, so a
+// photo that fell out of the live map is still reachable by undo and must not be
+// deleted. api/identity.js has no history and passes [clean] alone.
+test('a URL any kept map still names is not reclaimable', () => {
+  const old = `${BLOB}/ballparks/fenwaypark-photo-old.jpg`
+  const prev = { 'ballparks.fenwaypark.photo': old }
+  const clean = { 'ballparks.fenwaypark.photo': `${BLOB}/ballparks/fenwaypark-photo-new.jpg` }
+  const undoSnapshot = { 'ballparks.fenwaypark.photo': old }
+  assert.deepEqual(reclaimableBlobUrls(prev, [clean], 'ballparks/'), [old])
+  assert.deepEqual(reclaimableBlobUrls(prev, [clean, undoSnapshot], 'ballparks/'), [])
+})
+
+// An admin may type ANY https URL into a field. A delete must never leave our
+// own store, whatever the map says.
+test('a foreign URL an admin typed is never reclaimed', () => {
+  const prev = { 'identity.logo.158.main': 'https://example.com/somebody-elses-mark.png' }
+  assert.deepEqual(reclaimableBlobUrls(prev, [{}], 'identity-logos/'), [])
+})
+
+// Our store holds ballpark photos AND club marks. A save to one must not reach
+// into the other's folder.
+test('reclaiming stays inside the folder it was asked for', () => {
+  const photo = `${BLOB}/ballparks/fenwaypark-photo-a.jpg`
+  const prev = { 'ballparks.fenwaypark.photo': photo }
+  assert.deepEqual(reclaimableBlobUrls(prev, [{}], 'identity-logos/'), [])
+  assert.deepEqual(reclaimableBlobUrls(prev, [{}], 'ballparks/'), [photo])
+})
+
+test('a non-string or absent map reclaims nothing rather than throwing', () => {
+  assert.deepEqual(reclaimableBlobUrls(null, [null], 'identity-logos/'), [])
+  assert.deepEqual(reclaimableBlobUrls({ a: 42, b: null }, [{}], 'identity-logos/'), [])
+  assert.deepEqual(reclaimableBlobUrls({}, undefined, 'identity-logos/'), [])
+})
+
 // --- an override image that fails to load ------------------------------------
 //
-// Property 4. resolvePhoto returns an override unconditionally and the card
+// Property 5. resolvePhoto returns an override unconditionally and the card
 // rendered it with no onError, so an override that 404s, 403s or was mistyped
 // left a broken image where the park was -- 176 parks at once on 2026-09-15,
 // when the Blob store passed its storage cap and answered 403 to every read.
