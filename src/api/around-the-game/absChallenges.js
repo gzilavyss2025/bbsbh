@@ -397,6 +397,77 @@ export function inGameLossCap(summary) {
   return { max, players }
 }
 
+// AFTER A WIN, AFTER A LOSS — read as the page has to print it, which is both
+// cuts at once.
+//
+// COUNTED STRAIGHT a club asks 15.21 times per 100 armed half-innings after a
+// win and 11.31 after a loss, and that 26% drop is the RULEBOOK: a club that
+// has just lost one holds one fewer, so it asks less afterwards by rule and
+// not by nerve.
+//
+// HELD EQUAL — the club's second call of the night, with exactly one still in
+// hand, so the only difference between two clubs is how the last call went —
+// it is 12.71 after a win against 12.81 after a loss. The gap all but vanishes
+// and tips the other way. Triple-A, held the same way, gives 14.61 against
+// 14.06: the same size, the opposite sign. TWO INDEPENDENT LEAGUES THAT
+// DISAGREE ON THE SIGN HAVE NOT FOUND AN EFFECT.
+//
+// So this returns BOTH, always, and the caveat is not a sentence a page can
+// leave off: `errors` says how many standard errors the gap is worth, and it
+// is under one on both club cuts.
+//
+// THAT STANDARD ERROR IS A FLOOR, NOT A MEASUREMENT. It treats every armed
+// half-inning as an independent trial, which they are not — the half-innings of
+// one game share a club, an umpire and a night — so the true error is wider
+// than this and the gap is even less than it looks. It is shipped to keep a
+// small gap from being read as a result, which is the only job it has here.
+//
+// Rates ship as SHARES, the way successRate and perChance already do, and the
+// page multiplies by 100 to print them.
+function gapOf(win, loss) {
+  if (win?.rate == null || loss?.rate == null) return { gap: null, errors: null }
+  const gap = win.rate - loss.rate
+  const variance =
+    (win.rate * (1 - win.rate)) / win.chances + (loss.rate * (1 - loss.rate)) / loss.chances
+  const se = variance > 0 ? Math.sqrt(variance) : null
+  return { gap, errors: se ? Math.abs(gap) / se : null }
+}
+
+function cutOf(cut) {
+  return { win: cut?.win ?? null, loss: cut?.loss ?? null, ...gapOf(cut?.win, cut?.loss) }
+}
+
+// Both cuts for one unit — `club` for the club's next challenge, `player` for
+// the same man's next one.
+//
+// The player cut is measured over the CLUB's armed half-innings, because a man
+// cannot ask unless his club is holding one and nothing in the rows says which
+// inning he left the game in. It is the same denominator, so the two units are
+// on the same scale and a reader can hold them side by side.
+export function momentum(summary, unit = 'club') {
+  const src = summary?.momentum?.[unit]
+  if (!src) return null
+  return { unit, naive: cutOf(src.naive), strict: cutOf(src.strict) }
+}
+
+// THE CONTROLLED GAP AT EVERY LEVEL THE FILE CARRIES, which is the check that
+// stops the page reporting an effect.
+//
+// One league's small gap is a small gap. Two leagues whose small gaps point in
+// OPPOSITE directions is the answer to the question: there is nothing there.
+// `agree` is false when the signs differ, and a page that prints the strict cut
+// prints this beside it.
+export function momentumLevels(data, unit = 'club') {
+  const levels = LEVELS.filter((l) => data?.levels?.[l.key]?.momentum)
+  const rows = levels.map((l) => ({
+    level: l.key,
+    label: l.label,
+    ...momentum(data.levels[l.key], unit).strict,
+  }))
+  const signs = new Set(rows.filter((r) => r.gap != null).map((r) => Math.sign(r.gap)))
+  return { rows, agree: signs.size <= 1 }
+}
+
 // Percentage of the season's challenges that fell in each distance band, so
 // the page can draw the shape of the distribution rather than five raw counts.
 export function missBands(summary) {

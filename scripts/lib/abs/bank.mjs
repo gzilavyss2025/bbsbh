@@ -151,8 +151,17 @@ function lastInning(challenges, innings) {
 // held at the end (`held`), how many times it was armed again in extras
 // (`toppedUp`), the inning of each emptying (`emptiedIn`, in order), the
 // challenge that CAUSED each of those emptyings (`emptiedBy`, the same order
-// and the same length), and how many challenges the model could not pay for
-// (`overdrawn`).
+// and the same length), the whole night call by call (`calls`), and how many
+// challenges the model could not pay for (`overdrawn`).
+//
+// `calls` IS ONE ENTRY PER CHALLENGE, in the order the club spent them:
+// `{ at, called, held }` — the row itself, how many the club had called by
+// then counting this one, and what it held once the call had been settled and
+// any overturn refunded. It is what the after-a-win control is built on
+// (momentum.mjs), which has to hold the RULEBOOK constant before it compares
+// two nights: the club's second call, with exactly one still in hand, is the
+// only cell where the sole difference between two clubs is how the last one
+// went.
 //
 // `emptiedBy` IS THE ROW, not a copy of it, so a caller reads the player, the
 // half, the call and the miss distance off the one the club really spent. The
@@ -199,6 +208,7 @@ export function replayBank(challenges, innings = null, scheduledInnings = null) 
   const atHalf = new Map()
   const emptiedIn = []
   const emptiedBy = []
+  const calls = []
   let toppedUp = 0
   let overdrawn = 0
 
@@ -226,6 +236,7 @@ export function replayBank(challenges, innings = null, scheduledInnings = null) 
           held += 1
           emptiedHere = null
         }
+        calls.push({ at: c, called: calls.length + 1, held })
       }
     }
     // AN EMPTYING IS STILL DATED TO THE INNING, not to the half. "Ran out in
@@ -237,7 +248,7 @@ export function replayBank(challenges, innings = null, scheduledInnings = null) 
       emptiedBy.push(emptiedHere)
     }
   }
-  return { held, atStart, atHalf, toppedUp, emptiedIn, emptiedBy, overdrawn, innings: last }
+  return { held, atStart, atHalf, toppedUp, emptiedIn, emptiedBy, calls, overdrawn, innings: last }
 }
 
 // Did this club's challenges fit the rule? True when the replay never had to

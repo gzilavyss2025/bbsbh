@@ -41,6 +41,7 @@ import {
   exposureRates,
   hasExposure,
   ranOutBoard,
+  momentumCuts,
   streaksByPlayer,
   streakBoards,
   STREAK_TOP,
@@ -67,6 +68,8 @@ import {
   streakBoard,
   streakRoles,
   inGameLossCap,
+  momentum,
+  momentumLevels,
   RAN_OUT_EARLY_THROUGH,
   ROLE_CALL,
   MIN_PLAYER_CHALLENGES,
@@ -1812,4 +1815,193 @@ test('inGameLossCap: the cap is READ, never stated as the rulebook', () => {
   // asserting a rulebook the extra-inning top-up already breaks in Triple-A.
   assert.deepEqual(inGameLossCap(summaryFor(streakData, 'MLB')), { max: 1, players: 1 })
   assert.equal(inGameLossCap(null), null)
+})
+
+// --------------------------------------------------------------------------
+// momentumCuts — after a win, after a loss, and the control that is the point.
+// --------------------------------------------------------------------------
+// The naive cut answers a question nobody asked: a club that has just lost one
+// holds one fewer, so it asks less afterwards BY RULE. The strict cut holds
+// the rulebook still — the club's second call, with exactly one left in hand —
+// so the only thing separating two clubs is how the last call went. These pin
+// the cell selection, the censoring, and the two ways the numerator and the
+// denominator can stop describing the same half-innings.
+
+// One club's night. `at` is [inning, half, outcome] per call.
+const night = (calls, { gamePk = 1, teamId = 100, playerId = 11 } = {}) =>
+  calls.map(([inning, half, outcome], i) =>
+    row({
+      game_pk: gamePk,
+      seq: i,
+      team_id: teamId,
+      player_id: playerId,
+      inning,
+      half,
+      outcome: outcome === 'W' ? 'success' : 'fail',
+    }),
+  )
+
+test('momentumCuts: the chances run from the NEXT half, not from the one he stood in', () => {
+  // One call, in the top of the eighth of a nine-inning game the home club
+  // batted in. What is left is the bottom of the eighth and both halves of the
+  // ninth — three, and not the four an inning-level count would give.
+  const out = momentumCuts(night([[8, 'top', 'W']]), [game({})])
+  assert.equal(out.club.naive.win.chances, 3)
+  assert.equal(out.club.naive.win.next, 0)
+  assert.equal(out.club.naive.win.rate, 0)
+})
+
+test('momentumCuts: a club emptied by the call itself is left out by the arithmetic', () => {
+  // Two losses in the ninth of a nine-inning game. The first still had the
+  // bottom of the ninth in front of it, and the club was armed for it — one
+  // chance. The second emptied the club with nothing left to play, so it
+  // offers nothing and enters neither side of the rate.
+  //
+  // THAT IS THE CENSORING THE QUESTION NEEDS, and it falls out of the rate
+  // rather than out of a rule that drops rows: nobody has to decide which
+  // events to exclude, because an event with no chances after it adds nought
+  // to both the top and the bottom.
+  const out = momentumCuts(night([[9, 'top', 'L'], [9, 'bottom', 'L']]), [game({ challenges: 2 })])
+  assert.equal(out.club.naive.loss.events, 2)
+  assert.equal(out.club.naive.loss.chances, 1)
+  // And the club did ask again in that one half — the second loss itself.
+  assert.equal(out.club.naive.loss.next, 1)
+
+  // A club emptied with a whole game still to play has no chances either, all
+  // the way to the ninth — which is the rulebook the naive cut mistakes for
+  // nerve.
+  const early = momentumCuts(night([[1, 'top', 'L'], [1, 'bottom', 'L']]), [game({ challenges: 2 })])
+  assert.equal(early.club.naive.loss.chances, 1)
+})
+
+test('momentumCuts: an emptied club is armed again in extras, and those halves count', () => {
+  // Out in the second of a game that went to the eleventh. The tenth and the
+  // eleventh arm it again, so it really did have chances — a model that
+  // stopped at the emptying would call the rest of the night unavailable.
+  const out = momentumCuts(
+    night([[2, 'top', 'L'], [2, 'bottom', 'L']]),
+    [game({ challenges: 2, final_inning: 11 })],
+  )
+  assert.ok(out.club.naive.loss.chances >= 4)
+})
+
+test('momentumCuts: a second call in the same half is counted by neither side', () => {
+  // Two calls in the top of the first. The denominator for the first starts at
+  // the bottom of the first, so the second call cannot be in the numerator —
+  // or the rate exceeds what the club was ever offered.
+  const out = momentumCuts(
+    night([[1, 'top', 'W'], [1, 'top', 'W']]),
+    [game({ challenges: 2 })],
+  )
+  assert.equal(out.club.naive.win.next, 0)
+})
+
+test('momentumCuts: the strict cell is the SECOND call with exactly one in hand', () => {
+  // W then L leaves the club holding one, and the last call went against it.
+  const wl = momentumCuts(night([[1, 'top', 'W'], [3, 'top', 'L']]), [game({ challenges: 2 })])
+  assert.equal(wl.club.strict.loss.events, 1)
+  assert.equal(wl.club.strict.win.events, 0)
+
+  // L then W leaves the club holding one as well, and the last call went its
+  // way. Same rulebook position, opposite news — which is the whole control.
+  const lw = momentumCuts(night([[1, 'top', 'L'], [3, 'top', 'W']]), [game({ challenges: 2 })])
+  assert.equal(lw.club.strict.win.events, 1)
+  assert.equal(lw.club.strict.loss.events, 0)
+})
+
+test('momentumCuts: a club that spent both, or kept both, is not in the control at all', () => {
+  // L L leaves nothing in hand and W W leaves two. Neither is comparable with
+  // a club holding one, so neither reaches the strict cell.
+  const ll = momentumCuts(night([[1, 'top', 'L'], [3, 'top', 'L']]), [game({ challenges: 2 })])
+  assert.equal(ll.club.strict.win.events + ll.club.strict.loss.events, 0)
+  const ww = momentumCuts(night([[1, 'top', 'W'], [3, 'top', 'W']]), [game({ challenges: 2 })])
+  assert.equal(ww.club.strict.win.events + ww.club.strict.loss.events, 0)
+})
+
+test('momentumCuts: the player cut counts the same MAN, over his club’s chances', () => {
+  const rows = [
+    ...night([[1, 'top', 'W']], { playerId: 11 }),
+    ...night([[5, 'top', 'W']], { playerId: 11, gamePk: 1 }).map((r) => ({ ...r, seq: 1 })),
+    ...night([[7, 'top', 'W']], { playerId: 22, gamePk: 1 }).map((r) => ({ ...r, seq: 2 })),
+  ]
+  const out = momentumCuts(rows, [game({ challenges: 3 })])
+  // The first call is followed by two more from the club and one more from the
+  // man who made it.
+  assert.equal(out.club.naive.win.next, 2 + 1 + 0)
+  assert.equal(out.player.naive.win.next, 1 + 0 + 0)
+  // Both units divide by the same club half-innings, so they sit on one scale.
+  assert.equal(out.player.naive.win.chances, out.club.naive.win.chances)
+})
+
+test('momentumCuts: a game with no length on file is skipped, never counted short', () => {
+  const out = momentumCuts(night([[1, 'top', 'W']]), [game({ final_inning: null })])
+  assert.equal(out.club.naive.win.events, 0)
+})
+
+// --------------------------------------------------------------------------
+// momentum / momentumLevels — the reader's half.
+// --------------------------------------------------------------------------
+
+test('momentum: both cuts come back together, because showing one alone is the error', () => {
+  const data = buildExport(
+    [
+      ...night([[1, 'top', 'W'], [3, 'top', 'L']]),
+      ...night([[1, 'top', 'L'], [3, 'top', 'W']], { gamePk: 2, teamId: 200 }),
+    ],
+    [game({ challenges: 2 }), game({ game_pk: 2, challenges: 2 })],
+    { season: 2026, generatedAt: 'now' },
+  )
+  const out = momentum(summaryFor(data, 'MLB'))
+  assert.equal(out.unit, 'club')
+  assert.ok(out.naive.win)
+  assert.ok(out.strict.loss)
+  assert.equal(out.strict.win.events, 1)
+  assert.equal(out.strict.loss.events, 1)
+  // Neither side called again, so the gap is nothing and says so.
+  assert.equal(out.strict.gap, 0)
+  assert.equal(momentum(null), null)
+  assert.equal(momentum(summaryFor(data, 'MLB'), 'player').unit, 'player')
+})
+
+test('momentumLevels: two leagues that disagree on the sign have not found an effect', () => {
+  const data = buildExport(
+    [
+      // MLB: the club that lost its second call goes on to ask again.
+      ...night([[1, 'top', 'W'], [2, 'top', 'L'], [5, 'top', 'W']]),
+      ...night([[1, 'top', 'L'], [2, 'top', 'W']], { gamePk: 2, teamId: 200 }),
+      // Triple-A: the other way round.
+      ...night([[1, 'top', 'W'], [2, 'top', 'L']], { gamePk: 3 }).map((r) => ({ ...r, level: 'AAA' })),
+      ...night([[1, 'top', 'L'], [2, 'top', 'W'], [5, 'top', 'W']], { gamePk: 4, teamId: 200 }).map(
+        (r) => ({ ...r, level: 'AAA' }),
+      ),
+    ],
+    [
+      game({ challenges: 3 }),
+      game({ game_pk: 2, challenges: 2 }),
+      game({ game_pk: 3, level: 'AAA', challenges: 2 }),
+      game({ game_pk: 4, level: 'AAA', challenges: 3 }),
+    ],
+    { season: 2026, generatedAt: 'now' },
+  )
+  const out = momentumLevels(data)
+  assert.deepEqual(out.rows.map((r) => r.level), ['MLB', 'AAA'])
+  assert.ok(out.rows[0].gap < 0) // MLB: busier after a loss
+  assert.ok(out.rows[1].gap > 0) // Triple-A: busier after a win
+  assert.equal(out.agree, false)
+})
+
+test('momentum: the standard errors ship with the gap, not under it', () => {
+  // A gap worth less than one standard error is not a result, and the page
+  // cannot print the number without the thing that says so.
+  const data = buildExport(
+    [
+      ...night([[1, 'top', 'W'], [2, 'top', 'L'], [5, 'top', 'W']]),
+      ...night([[1, 'top', 'L'], [2, 'top', 'W'], [5, 'top', 'W']], { gamePk: 2, teamId: 200 }),
+    ],
+    [game({ challenges: 3 }), game({ game_pk: 2, challenges: 3 })],
+    { season: 2026, generatedAt: 'now' },
+  )
+  const out = momentum(summaryFor(data, 'MLB'))
+  assert.equal(typeof out.strict.errors, 'number')
+  assert.ok(Number.isFinite(out.strict.errors))
 })

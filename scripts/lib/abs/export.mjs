@@ -28,6 +28,7 @@ import { replayBank } from './bank.mjs'
 import { chancesByInning, challengesByInningRole } from './chances.mjs'
 import { exposureByPlayer, exposureRates, hasExposure } from './exposure.mjs'
 import { ranOutBoard } from './ranout.mjs'
+import { momentumCuts } from './momentum.mjs'
 import { streakBoards } from './streaks.mjs'
 import { ROLES } from './rows.mjs'
 
@@ -394,6 +395,10 @@ export function summarizeLevel(rows, games) {
     // Runs of being right, and runs of being wrong, by role — across the
     // season and inside one game (streaks.mjs).
     streaks: streakBoards(rows),
+    // After a win, after a loss — counted straight AND held against the
+    // challenges the rule leaves a club holding. Both, because showing them
+    // side by side is the point (momentum.mjs).
+    momentum: momentumCuts(rows, games),
   }
 }
 
