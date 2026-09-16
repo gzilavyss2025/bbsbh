@@ -40,6 +40,11 @@ import {
   exposureByPlayer,
   exposureRates,
   hasExposure,
+  ranOutBoard,
+  momentumCuts,
+  streaksByPlayer,
+  streakBoards,
+  STREAK_TOP,
   summarizeLevel,
   buildExport,
   buildExposureExport,
@@ -59,6 +64,13 @@ import {
   callSplitAnomalies,
   callSplitOffBy,
   missBands,
+  ranOutNights,
+  streakBoard,
+  streakRoles,
+  inGameLossCap,
+  momentum,
+  momentumLevels,
+  RAN_OUT_EARLY_THROUGH,
   ROLE_CALL,
   MIN_PLAYER_CHALLENGES,
 } from '../src/api/around-the-game/absChallenges.js'
@@ -1461,4 +1473,535 @@ test('missBands: shares add to one over the challenges that carry a distance', (
   const bands = missBands(summaryFor(data, 'MLB'))
   const total = bands.reduce((n, b) => n + (b.share ?? 0), 0)
   assert.ok(Math.abs(total - 1) < 1e-9)
+})
+
+// --------------------------------------------------------------------------
+// ranOutBoard — the nights a club was left with nothing to argue with.
+// --------------------------------------------------------------------------
+// The per-club `ranOut` column counts HOW MANY nights; this is the nights
+// themselves, and the band is every club-game that emptied in the earliest
+// inning any did. Four of these pin cases the count could not see: a club that
+// lost only one, a club emptied in an extra inning, both losses inside one
+// half, and the tiebreak that decides which of nine equal nights prints first.
+
+test('ranOutBoard: one loss is not an emptying', () => {
+  const board = ranOutBoard([row({ seq: 0, outcome: 'fail' })], [game({})])
+  assert.equal(board.emptied, 0)
+  assert.equal(board.earliest, null)
+  assert.deepEqual(board.band, [])
+  // Both sides of the game are still a denominator, challenged or not.
+  assert.equal(board.clubGames, 2)
+})
+
+test('ranOutBoard: both losses inside one half, and the half is recorded', () => {
+  const board = ranOutBoard(
+    [
+      row({ seq: 0, outcome: 'fail', inning: 1, half: 'top' }),
+      row({ seq: 1, outcome: 'fail', inning: 1, half: 'top', player_id: 12, player_name: 'B Hitter' }),
+    ],
+    [game({ challenges: 2 })],
+  )
+  assert.equal(board.earliest, 1)
+  assert.equal(board.emptied, 1)
+  assert.equal(board.band.length, 1)
+  assert.equal(board.band[0].inning, 1)
+  assert.equal(board.band[0].half, 'top')
+  // Both losses are on the row, in the order they were spent — a board that
+  // named only the second would hide the man who asked twice.
+  assert.deepEqual(board.band[0].fails.map((f) => f.playerName), ['A Hitter', 'B Hitter'])
+})
+
+test('ranOutBoard: an overturn between two losses is not an emptying', () => {
+  // L W L leaves the club empty at the THIRD call, not the first loss: the
+  // overturn handed the challenge straight back. A board counting losses would
+  // date this night to the fifth.
+  const board = ranOutBoard(
+    [
+      row({ seq: 0, outcome: 'fail', inning: 2 }),
+      row({ seq: 1, outcome: 'success', inning: 5 }),
+      row({ seq: 2, outcome: 'fail', inning: 8 }),
+    ],
+    [game({ challenges: 3 })],
+  )
+  assert.equal(board.earliest, 8)
+  assert.deepEqual(board.byInning, [{ inning: 8, n: 1 }])
+})
+
+test('ranOutBoard: a club emptied in extras, and only the FIRST emptying counts', () => {
+  // Out in the tenth, armed again in the eleventh by the extra-inning top-up,
+  // and out again at once. The night is dated to the tenth: it is "games it
+  // ran out in", not "times it ran out".
+  const board = ranOutBoard(
+    [
+      row({ seq: 0, outcome: 'fail', inning: 3 }),
+      row({ seq: 1, outcome: 'fail', inning: 10 }),
+      row({ seq: 2, outcome: 'fail', inning: 11 }),
+    ],
+    [game({ challenges: 3, final_inning: 11 })],
+  )
+  assert.equal(board.emptied, 1)
+  assert.equal(board.earliest, 10)
+  assert.equal(board.band[0].inning, 10)
+  // Every loss up to the emptying, which is two — the third belongs to the
+  // top-up the eleventh handed back.
+  assert.equal(board.band[0].fails.length, 2)
+})
+
+test('ranOutBoard: the band ties break on the half, then the sequence, then the date', () => {
+  const rows = [
+    // Three club-games all emptied in the first. Written out of order on
+    // purpose, so the sort is doing the work rather than the input.
+    ...[0, 1].map((i) => row({ game_pk: 3, seq: 40 + i, date: '2026-05-02', outcome: 'fail', inning: 1, half: 'top' })),
+    ...[0, 1].map((i) => row({ game_pk: 1, seq: i, outcome: 'fail', inning: 1, half: 'bottom', team_id: 200, side: 'home' })),
+    ...[0, 1].map((i) => row({ game_pk: 2, seq: 40 + i, date: '2026-04-30', outcome: 'fail', inning: 1, half: 'top' })),
+  ]
+  const games = [
+    game({ challenges: 2 }),
+    game({ game_pk: 2, date: '2026-04-30', challenges: 2 }),
+    game({ game_pk: 3, date: '2026-05-02', challenges: 2 }),
+  ]
+  const board = ranOutBoard(rows, games)
+  assert.equal(board.band.length, 3)
+  // The bottom-of-the-first night sorts last however early its sequence is;
+  // the two tops share a sequence, so the earlier date prints first.
+  assert.deepEqual(board.band.map((b) => [b.gamePk, b.half]), [
+    [2, 'top'],
+    [3, 'top'],
+    [1, 'bottom'],
+  ])
+})
+
+test('ranOutBoard: the rows carry nothing a score could be read from', () => {
+  const board = ranOutBoard(
+    [
+      row({ seq: 0, outcome: 'fail', inning: 1 }),
+      row({ seq: 1, outcome: 'fail', inning: 1, half: 'bottom' }),
+    ],
+    [game({ challenges: 2 })],
+  )
+  // The exact key set, asserted rather than scanned: /abs-challenges is
+  // spoiler-free, this is the only board on it that names a night, and a field
+  // added later without thought is how that classification would quietly stop
+  // being true.
+  assert.deepEqual(Object.keys(board.band[0]).sort(), [
+    'date', 'fails', 'gamePk', 'half', 'inning', 'oppId', 'seq', 'side', 'teamId',
+  ])
+  assert.deepEqual(Object.keys(board.band[0].fails[0]).sort(), [
+    'callType', 'half', 'inning', 'missInches', 'playerId', 'playerName', 'role',
+  ])
+})
+
+test('ranOutBoard: the distribution counts every emptied club-game, band or not', () => {
+  const rows = [
+    row({ seq: 0, outcome: 'fail', inning: 2 }),
+    row({ seq: 1, outcome: 'fail', inning: 2 }),
+    row({ game_pk: 2, seq: 0, outcome: 'fail', inning: 8 }),
+    row({ game_pk: 2, seq: 1, outcome: 'fail', inning: 9 }),
+  ]
+  const board = ranOutBoard(rows, [game({ challenges: 2 }), game({ game_pk: 2, challenges: 2 })])
+  assert.deepEqual(board.byInning, [{ inning: 2, n: 1 }, { inning: 9, n: 1 }])
+  assert.equal(board.emptied, 2)
+  assert.equal(board.band.length, 1) // only the second-inning night
+  assert.equal(board.clubGames, 4)
+})
+
+// --------------------------------------------------------------------------
+// ranOutNights — the reader's half.
+// --------------------------------------------------------------------------
+
+// The fixture the reader tests share: one club out in the second, one out in
+// the ninth, over two games.
+const ranOutData = buildExport(
+  [
+    row({ seq: 0, outcome: 'fail', inning: 2 }),
+    row({ seq: 1, outcome: 'fail', inning: 2 }),
+    row({ game_pk: 2, date: '2026-04-02', seq: 0, outcome: 'fail', inning: 8 }),
+    row({ game_pk: 2, date: '2026-04-02', seq: 1, outcome: 'fail', inning: 9 }),
+  ],
+  [game({ challenges: 2 }), game({ game_pk: 2, date: '2026-04-02', challenges: 2 })],
+  { season: 2026, generatedAt: 'now' },
+)
+
+test('ranOutNights: the early and late split is where the band gets its context', () => {
+  const out = ranOutNights(summaryFor(ranOutData, 'MLB'))
+  assert.equal(out.earliest, 2)
+  assert.equal(out.emptied, 2)
+  assert.equal(out.clubGames, 4)
+  assert.equal(out.share, 0.5)
+  assert.equal(out.early, 1)
+  assert.equal(out.late, 1)
+  assert.deepEqual(out.byInning.map((b) => b.share), [0.5, 0.5])
+  assert.equal(out.band.length, 1)
+})
+
+test('ranOutNights: a level nobody ran out in draws no board at all', () => {
+  const quiet = buildExport([row({ seq: 0, outcome: 'fail' })], [game({})], { season: 2026 })
+  assert.equal(ranOutNights(summaryFor(quiet, 'MLB')), null)
+  assert.equal(ranOutNights(null), null)
+})
+
+test('RAN_OUT_EARLY_THROUGH: the reader and the export agree on what "early" is', () => {
+  // The constant is held twice — LAST_EARLY_INNING runs in Node, this one runs
+  // in the browser — so the two are pinned to each other here. Every club's
+  // `ranOutEarly` added up is the same set of nights this constant admits.
+  const summary = summaryFor(ranOutData, 'MLB')
+  const perClub = summary.byTeam.reduce((n, t) => n + t.ranOutEarly, 0)
+  const perNight = summary.ranOutNights.byInning
+    .filter((b) => b.inning <= RAN_OUT_EARLY_THROUGH)
+    .reduce((n, b) => n + b.n, 0)
+  assert.equal(perClub, perNight)
+  assert.equal(perClub, 1)
+})
+
+// --------------------------------------------------------------------------
+// streaksByPlayer / streakBoards — runs of being right, and runs of being wrong.
+// --------------------------------------------------------------------------
+// Four of these pin the cases a naive walk gets wrong: a run that crosses two
+// games, a man with a single challenge, a quiet game in the middle of a run,
+// and the role a two-way man is grouped under.
+
+// One man's calls, in the order given, as rows. `at` is [gamePk, date].
+const calls = (outcomes, { playerId = 11, name = 'A Hitter', role = 'batter', gamePk = 1, date = '2026-04-01' } = {}) =>
+  outcomes.map((o, i) =>
+    row({
+      game_pk: gamePk,
+      date,
+      seq: i,
+      player_id: playerId,
+      player_name: name,
+      role,
+      outcome: o === 'W' ? 'success' : 'fail',
+    }),
+  )
+
+test('streaksByPlayer: a run crosses two games, because the season does not stop at one', () => {
+  const rows = [
+    ...calls(['W', 'W'], { gamePk: 1, date: '2026-04-01' }),
+    ...calls(['W', 'L'], { gamePk: 2, date: '2026-04-02' }),
+  ]
+  const [p] = streaksByPlayer(rows)
+  assert.equal(p.n, 4)
+  assert.equal(p.success, 3)
+  assert.equal(p.seasonWin, 3)
+  // Inside one game he never got past two.
+  assert.equal(p.gameWin, 2)
+  assert.equal(p.seasonLoss, 1)
+})
+
+test('streaksByPlayer: a game he did not challenge in does not break the run', () => {
+  // He wins one in April, says nothing for a month, and wins two more. That is
+  // a run of three: he did nothing in between to be wrong about.
+  const rows = [
+    ...calls(['W'], { gamePk: 1, date: '2026-04-01' }),
+    // Another man's night, in between.
+    ...calls(['L', 'L'], { gamePk: 2, date: '2026-05-01', playerId: 22, name: 'B Hitter' }),
+    ...calls(['W', 'W'], { gamePk: 3, date: '2026-06-01' }),
+  ]
+  const mine = streaksByPlayer(rows).find((p) => p.playerId === 11)
+  assert.equal(mine.seasonWin, 3)
+})
+
+test('streaksByPlayer: one challenge is a run of one, and nothing in the other column', () => {
+  const [p] = streaksByPlayer(calls(['L']))
+  assert.equal(p.n, 1)
+  assert.equal(p.seasonLoss, 1)
+  assert.equal(p.seasonWin, 0)
+  assert.equal(p.gameLoss, 1)
+  assert.equal(p.gameWin, 0)
+})
+
+test('streaksByPlayer: a man is grouped by the job he MOSTLY did, not the one he did first', () => {
+  // He opens the season behind the plate once and spends the rest of it at
+  // bat. The board that groups him has to call him a batter.
+  const rows = [
+    ...calls(['W'], { gamePk: 1, date: '2026-04-01', role: 'catcher' }),
+    ...calls(['W', 'L'], { gamePk: 2, date: '2026-04-02', role: 'batter' }),
+  ]
+  const [p] = streaksByPlayer(rows)
+  assert.equal(p.role, 'batter')
+})
+
+test('streaksByPlayer: the order is the DATE, not the order the rows arrive in', () => {
+  // September written first, April second. Read in row order his season is
+  // L W W; read by date it is W W L, and only the second is his year.
+  const rows = [
+    ...calls(['L'], { gamePk: 9, date: '2026-09-01' }),
+    ...calls(['W', 'W'], { gamePk: 1, date: '2026-04-01' }),
+  ]
+  const [p] = streaksByPlayer(rows)
+  assert.equal(p.seasonWin, 2)
+})
+
+test('streakBoards: each board ranks on its own run, with the season total beside it', () => {
+  const rows = [
+    ...calls(['W', 'W', 'W'], { gamePk: 1, playerId: 11, name: 'Long Run' }),
+    ...calls(['W', 'L', 'W', 'W'], { gamePk: 2, date: '2026-04-02', playerId: 22, name: 'More Calls' }),
+  ]
+  const board = streakBoards(rows).boards.seasonWin.batter
+  assert.equal(board.max, 3)
+  assert.deepEqual(board.rows.map((r) => [r.name, r.run, r.n]), [
+    ['Long Run', 3, 3],
+    ['More Calls', 2, 4],
+  ])
+})
+
+test('streakBoards: the distribution counts every man, including the ones no row names', () => {
+  const rows = []
+  // Thirteen men with a run of two apiece, which is one more than a board shows.
+  for (let i = 0; i < 13; i += 1) {
+    rows.push(...calls(['W', 'W'], { gamePk: i + 1, date: `2026-04-0${(i % 9) + 1}`, playerId: 100 + i, name: `Man ${i}` }))
+  }
+  const board = streakBoards(rows).boards.seasonWin.batter
+  assert.equal(board.rows.length, STREAK_TOP)
+  assert.equal(board.players, 13)
+  assert.deepEqual(board.reached, [{ run: 2, n: 13 }])
+})
+
+test('streakBoards: a role nobody challenged from is left off rather than shipped empty', () => {
+  const board = streakBoards(calls(['W', 'W'])).boards.seasonWin
+  assert.deepEqual(Object.keys(board), ['batter'])
+})
+
+test('streaksByPlayer: three losses in one night are REPORTED, not clamped at the rulebook', () => {
+  // Two issued and one spent per call caps a run of losses at two — in
+  // REGULATION. A club that has run out is armed again in each extra inning,
+  // and three Triple-A catchers lost three in a row on the season because of
+  // it. A walk that stopped at two to match the rule would erase them, so this
+  // fixture spends three and expects three back.
+  //
+  // What the rule does constrain is the BANK, and bank.mjs is where that is
+  // checked — auditBank replays every club-game on file against it.
+  const [p] = streaksByPlayer(calls(['L', 'L', 'L']))
+  assert.equal(p.gameLoss, 3)
+  assert.equal(p.seasonLoss, 3)
+})
+
+// --------------------------------------------------------------------------
+// streakBoard / inGameLossCap — the reader's half.
+// --------------------------------------------------------------------------
+
+const streakData = buildExport(
+  [
+    ...calls(['W', 'W', 'W'], { gamePk: 1, playerId: 11, name: 'Long Run' }),
+    ...calls(['W', 'W'], { gamePk: 2, date: '2026-04-02', playerId: 22, name: 'Short Run' }),
+    ...calls(['W', 'W'], { gamePk: 3, date: '2026-04-03', playerId: 33, name: 'Also Short' }),
+    ...calls(['L'], { gamePk: 4, date: '2026-04-04', playerId: 44, name: 'One Loss', role: 'pitcher' }),
+  ],
+  [1, 2, 3, 4].map((pk) => game({ game_pk: pk, date: `2026-04-0${pk}`, challenges: 3 })),
+  { season: 2026, generatedAt: 'now' },
+)
+
+test('streakBoard: the rows come with how many men tie below them', () => {
+  const board = streakBoard(summaryFor(streakData, 'MLB'), 'seasonWin', 'batter')
+  assert.equal(board.max, 3)
+  assert.equal(board.cut, 2)
+  // Both two-run men are on screen, so nobody is tied below them.
+  assert.equal(board.tiedBelow, 0)
+  assert.equal(board.unshown, 0)
+})
+
+test('streakBoard: a board that cannot reach a run of two is not a board', () => {
+  // One pitcher, one loss, no run. STREAK_MIN_RUN keeps it off the page rather
+  // than drawing a list of everybody who was ever wrong once.
+  const summary = summaryFor(streakData, 'MLB')
+  assert.equal(streakBoard(summary, 'seasonLoss', 'pitcher'), null)
+  assert.deepEqual(streakRoles(summary, 'seasonWin'), ['batter'])
+  assert.equal(streakBoard(null, 'seasonWin', 'batter'), null)
+})
+
+test('inGameLossCap: the cap is READ, never stated as the rulebook', () => {
+  // The fixture's longest run of losses inside one game is one, by one man —
+  // so the page says one. A page that printed "two is the rule" would be
+  // asserting a rulebook the extra-inning top-up already breaks in Triple-A.
+  assert.deepEqual(inGameLossCap(summaryFor(streakData, 'MLB')), { max: 1, players: 1 })
+  assert.equal(inGameLossCap(null), null)
+})
+
+// --------------------------------------------------------------------------
+// momentumCuts — after a win, after a loss, and the control that is the point.
+// --------------------------------------------------------------------------
+// The naive cut answers a question nobody asked: a club that has just lost one
+// holds one fewer, so it asks less afterwards BY RULE. The strict cut holds
+// the rulebook still — the club's second call, with exactly one left in hand —
+// so the only thing separating two clubs is how the last call went. These pin
+// the cell selection, the censoring, and the two ways the numerator and the
+// denominator can stop describing the same half-innings.
+
+// One club's night. `at` is [inning, half, outcome] per call.
+const night = (calls, { gamePk = 1, teamId = 100, playerId = 11 } = {}) =>
+  calls.map(([inning, half, outcome], i) =>
+    row({
+      game_pk: gamePk,
+      seq: i,
+      team_id: teamId,
+      player_id: playerId,
+      inning,
+      half,
+      outcome: outcome === 'W' ? 'success' : 'fail',
+    }),
+  )
+
+test('momentumCuts: the chances run from the NEXT half, not from the one he stood in', () => {
+  // One call, in the top of the eighth of a nine-inning game the home club
+  // batted in. What is left is the bottom of the eighth and both halves of the
+  // ninth — three, and not the four an inning-level count would give.
+  const out = momentumCuts(night([[8, 'top', 'W']]), [game({})])
+  assert.equal(out.club.naive.win.chances, 3)
+  assert.equal(out.club.naive.win.next, 0)
+  assert.equal(out.club.naive.win.rate, 0)
+})
+
+test('momentumCuts: a club emptied by the call itself is left out by the arithmetic', () => {
+  // Two losses in the ninth of a nine-inning game. The first still had the
+  // bottom of the ninth in front of it, and the club was armed for it — one
+  // chance. The second emptied the club with nothing left to play, so it
+  // offers nothing and enters neither side of the rate.
+  //
+  // THAT IS THE CENSORING THE QUESTION NEEDS, and it falls out of the rate
+  // rather than out of a rule that drops rows: nobody has to decide which
+  // events to exclude, because an event with no chances after it adds nought
+  // to both the top and the bottom.
+  const out = momentumCuts(night([[9, 'top', 'L'], [9, 'bottom', 'L']]), [game({ challenges: 2 })])
+  assert.equal(out.club.naive.loss.events, 2)
+  assert.equal(out.club.naive.loss.chances, 1)
+  // And the club did ask again in that one half — the second loss itself.
+  assert.equal(out.club.naive.loss.next, 1)
+
+  // A club emptied with a whole game still to play has no chances either, all
+  // the way to the ninth — which is the rulebook the naive cut mistakes for
+  // nerve.
+  const early = momentumCuts(night([[1, 'top', 'L'], [1, 'bottom', 'L']]), [game({ challenges: 2 })])
+  assert.equal(early.club.naive.loss.chances, 1)
+})
+
+test('momentumCuts: an emptied club is armed again in extras, and those halves count', () => {
+  // Out in the second of a game that went to the eleventh. The tenth and the
+  // eleventh arm it again, so it really did have chances — a model that
+  // stopped at the emptying would call the rest of the night unavailable.
+  const out = momentumCuts(
+    night([[2, 'top', 'L'], [2, 'bottom', 'L']]),
+    [game({ challenges: 2, final_inning: 11 })],
+  )
+  assert.ok(out.club.naive.loss.chances >= 4)
+})
+
+test('momentumCuts: a second call in the same half is counted by neither side', () => {
+  // Two calls in the top of the first. The denominator for the first starts at
+  // the bottom of the first, so the second call cannot be in the numerator —
+  // or the rate exceeds what the club was ever offered.
+  const out = momentumCuts(
+    night([[1, 'top', 'W'], [1, 'top', 'W']]),
+    [game({ challenges: 2 })],
+  )
+  assert.equal(out.club.naive.win.next, 0)
+})
+
+test('momentumCuts: the strict cell is the SECOND call with exactly one in hand', () => {
+  // W then L leaves the club holding one, and the last call went against it.
+  const wl = momentumCuts(night([[1, 'top', 'W'], [3, 'top', 'L']]), [game({ challenges: 2 })])
+  assert.equal(wl.club.strict.loss.events, 1)
+  assert.equal(wl.club.strict.win.events, 0)
+
+  // L then W leaves the club holding one as well, and the last call went its
+  // way. Same rulebook position, opposite news — which is the whole control.
+  const lw = momentumCuts(night([[1, 'top', 'L'], [3, 'top', 'W']]), [game({ challenges: 2 })])
+  assert.equal(lw.club.strict.win.events, 1)
+  assert.equal(lw.club.strict.loss.events, 0)
+})
+
+test('momentumCuts: a club that spent both, or kept both, is not in the control at all', () => {
+  // L L leaves nothing in hand and W W leaves two. Neither is comparable with
+  // a club holding one, so neither reaches the strict cell.
+  const ll = momentumCuts(night([[1, 'top', 'L'], [3, 'top', 'L']]), [game({ challenges: 2 })])
+  assert.equal(ll.club.strict.win.events + ll.club.strict.loss.events, 0)
+  const ww = momentumCuts(night([[1, 'top', 'W'], [3, 'top', 'W']]), [game({ challenges: 2 })])
+  assert.equal(ww.club.strict.win.events + ww.club.strict.loss.events, 0)
+})
+
+test('momentumCuts: the player cut counts the same MAN, over his club’s chances', () => {
+  const rows = [
+    ...night([[1, 'top', 'W']], { playerId: 11 }),
+    ...night([[5, 'top', 'W']], { playerId: 11, gamePk: 1 }).map((r) => ({ ...r, seq: 1 })),
+    ...night([[7, 'top', 'W']], { playerId: 22, gamePk: 1 }).map((r) => ({ ...r, seq: 2 })),
+  ]
+  const out = momentumCuts(rows, [game({ challenges: 3 })])
+  // The first call is followed by two more from the club and one more from the
+  // man who made it.
+  assert.equal(out.club.naive.win.next, 2 + 1 + 0)
+  assert.equal(out.player.naive.win.next, 1 + 0 + 0)
+  // Both units divide by the same club half-innings, so they sit on one scale.
+  assert.equal(out.player.naive.win.chances, out.club.naive.win.chances)
+})
+
+test('momentumCuts: a game with no length on file is skipped, never counted short', () => {
+  const out = momentumCuts(night([[1, 'top', 'W']]), [game({ final_inning: null })])
+  assert.equal(out.club.naive.win.events, 0)
+})
+
+// --------------------------------------------------------------------------
+// momentum / momentumLevels — the reader's half.
+// --------------------------------------------------------------------------
+
+test('momentum: both cuts come back together, because showing one alone is the error', () => {
+  const data = buildExport(
+    [
+      ...night([[1, 'top', 'W'], [3, 'top', 'L']]),
+      ...night([[1, 'top', 'L'], [3, 'top', 'W']], { gamePk: 2, teamId: 200 }),
+    ],
+    [game({ challenges: 2 }), game({ game_pk: 2, challenges: 2 })],
+    { season: 2026, generatedAt: 'now' },
+  )
+  const out = momentum(summaryFor(data, 'MLB'))
+  assert.equal(out.unit, 'club')
+  assert.ok(out.naive.win)
+  assert.ok(out.strict.loss)
+  assert.equal(out.strict.win.events, 1)
+  assert.equal(out.strict.loss.events, 1)
+  // Neither side called again, so the gap is nothing and says so.
+  assert.equal(out.strict.gap, 0)
+  assert.equal(momentum(null), null)
+  assert.equal(momentum(summaryFor(data, 'MLB'), 'player').unit, 'player')
+})
+
+test('momentumLevels: two leagues that disagree on the sign have not found an effect', () => {
+  const data = buildExport(
+    [
+      // MLB: the club that lost its second call goes on to ask again.
+      ...night([[1, 'top', 'W'], [2, 'top', 'L'], [5, 'top', 'W']]),
+      ...night([[1, 'top', 'L'], [2, 'top', 'W']], { gamePk: 2, teamId: 200 }),
+      // Triple-A: the other way round.
+      ...night([[1, 'top', 'W'], [2, 'top', 'L']], { gamePk: 3 }).map((r) => ({ ...r, level: 'AAA' })),
+      ...night([[1, 'top', 'L'], [2, 'top', 'W'], [5, 'top', 'W']], { gamePk: 4, teamId: 200 }).map(
+        (r) => ({ ...r, level: 'AAA' }),
+      ),
+    ],
+    [
+      game({ challenges: 3 }),
+      game({ game_pk: 2, challenges: 2 }),
+      game({ game_pk: 3, level: 'AAA', challenges: 2 }),
+      game({ game_pk: 4, level: 'AAA', challenges: 3 }),
+    ],
+    { season: 2026, generatedAt: 'now' },
+  )
+  const out = momentumLevels(data)
+  assert.deepEqual(out.rows.map((r) => r.level), ['MLB', 'AAA'])
+  assert.ok(out.rows[0].gap < 0) // MLB: busier after a loss
+  assert.ok(out.rows[1].gap > 0) // Triple-A: busier after a win
+  assert.equal(out.agree, false)
+})
+
+test('momentum: the standard errors ship with the gap, not under it', () => {
+  // A gap worth less than one standard error is not a result, and the page
+  // cannot print the number without the thing that says so.
+  const data = buildExport(
+    [
+      ...night([[1, 'top', 'W'], [2, 'top', 'L'], [5, 'top', 'W']]),
+      ...night([[1, 'top', 'L'], [2, 'top', 'W'], [5, 'top', 'W']], { gamePk: 2, teamId: 200 }),
+    ],
+    [game({ challenges: 3 }), game({ game_pk: 2, challenges: 3 })],
+    { season: 2026, generatedAt: 'now' },
+  )
+  const out = momentum(summaryFor(data, 'MLB'))
+  assert.equal(typeof out.strict.errors, 'number')
+  assert.ok(Number.isFinite(out.strict.errors))
 })

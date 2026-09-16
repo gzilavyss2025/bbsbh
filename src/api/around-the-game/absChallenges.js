@@ -271,6 +271,203 @@ export function callSplitOffBy(anomalies) {
   return Math.max(over, under)
 }
 
+// THE LAST INNING IN WHICH RUNNING OUT IS STILL "EARLY". A club is issued two
+// challenges, so a second loss in the sixth is a club that enters the seventh
+// unable to argue a pitch — which is the strategic cost the club board's
+// `ranOutEarly` column counts.
+//
+// IT IS THE SAME NUMBER AS LAST_EARLY_INNING in scripts/lib/abs/export.mjs,
+// held twice because the export half runs in Node and this half runs in the
+// browser, and nothing can be imported across that line. The two are pinned
+// together by a test rather than by a comment: every club's `ranOutEarly`
+// added up equals the nights this constant admits, so the day one moves
+// without the other, the suite says so (test/abs-challenges.test.js).
+export const RAN_OUT_EARLY_THROUGH = 6
+
+// OUT OF CHALLENGES — the nights, read as the page shows them.
+//
+// The file ships the whole distribution of first emptyings and the rows of the
+// earliest inning that has any (ranout.mjs). This turns that into shares, and
+// splits the season into the clubs that emptied early and the ones that
+// emptied late, which is the context the band needs: nine first-inning nights
+// read as a scandal until you see that most clubs which run out do it in the
+// eighth or the ninth, having spent their challenges on a game still in front
+// of them.
+//
+// A BAND, NOT A TOP TEN, and the reason is in ranout.mjs: eighteen club-games
+// tie for tenth. Nothing here re-cuts the band, because a cut applied twice is
+// a cut nobody can find.
+//
+// Null when the level has no emptied club-game at all, which is what a page
+// draws nothing for rather than an empty board.
+export function ranOutNights(summary) {
+  const src = summary?.ranOutNights
+  if (!src || src.earliest == null) return null
+  const emptied = src.emptied ?? 0
+  const early = (src.byInning ?? [])
+    .filter((b) => b.inning <= RAN_OUT_EARLY_THROUGH)
+    .reduce((n, b) => n + b.n, 0)
+  return {
+    earliest: src.earliest,
+    band: src.band ?? [],
+    emptied,
+    clubGames: src.clubGames ?? 0,
+    share: src.clubGames > 0 ? emptied / src.clubGames : null,
+    byInning: (src.byInning ?? []).map((b) => ({
+      ...b,
+      share: emptied > 0 ? b.n / emptied : null,
+    })),
+    early,
+    late: emptied - early,
+  }
+}
+
+// A RUN OF ONE IS NOT A RUN. Every man who ever won a challenge has a "run"
+// of at least one, so a board whose longest is one is a list of everybody who
+// was ever right, sorted by nothing. Two is the shortest thing worth printing,
+// and a board that cannot reach it is not offered at all — which is what
+// happens to the pitchers' in-game loss board, where the rulebook allows one
+// loss per pitcher and no more.
+export const STREAK_MIN_RUN = 2
+
+// The roles a streak board can be grouped by, in the order the page offers
+// them. `other` is the bucket for a challenger the box score put at no
+// recognisable position and is expected to stay empty here; it is listed so
+// that the day it fills, the board shows it rather than silently dropping men.
+const STREAK_ROLE_ORDER = ['batter', 'catcher', 'pitcher', 'other']
+
+// ONE STREAK BOARD — one outcome, one scope, one role.
+//
+// The file ships the twelve longest runs and the FULL distribution behind them
+// (streaks.mjs), because the names below the cut cost a hundred kilobytes and
+// the shape does not. So this reads the shape back: `tiedBelow` is how many men
+// share the shortest run on screen without appearing, and `unshown` is
+// everybody the board does not name. A reader looking at four men tied at three
+// has to know whether forty more are tied with them.
+//
+// Null when the board cannot reach STREAK_MIN_RUN, which is a board with
+// nothing to rank rather than an empty one to draw.
+export function streakBoard(summary, key, role) {
+  const board = summary?.streaks?.boards?.[key]?.[role]
+  if (!board || (board.max ?? 0) < STREAK_MIN_RUN) return null
+  const rows = board.rows ?? []
+  const cut = rows.length ? rows[rows.length - 1].run : 0
+  const shownAtCut = rows.filter((r) => r.run === cut).length
+  const atCut = board.reached?.find((r) => r.run === cut)?.n ?? 0
+  return {
+    key,
+    role,
+    rows,
+    max: board.max,
+    cut,
+    tiedBelow: Math.max(atCut - shownAtCut, 0),
+    unshown: Math.max((board.players ?? 0) - rows.length, 0),
+    reached: board.reached ?? [],
+  }
+}
+
+// Which roles have a board worth drawing for this cut, in page order.
+export function streakRoles(summary, key) {
+  return STREAK_ROLE_ORDER.filter((role) => streakBoard(summary, key, role) !== null)
+}
+
+// HOW LONG A RUN OF LOSSES INSIDE ONE GAME CAN GET — read off the season, never
+// stated as a rule.
+//
+// The rulebook looks like it settles this: a club is issued two challenges and
+// loses one each time the call stands, so two in a row ends the night. That is
+// true in regulation and false after it. A club that has run out is armed again
+// in every extra inning, and Triple-A's rows carry catchers who lost three in a
+// row because of it. A page that printed "two is the rule, not a record" would
+// be wrong the moment its own level chip moved.
+//
+// So it returns what the season did: the longest such run, and how many men
+// reached it.
+export function inGameLossCap(summary) {
+  const boards = summary?.streaks?.boards?.gameLoss ?? {}
+  let max = 0
+  for (const board of Object.values(boards)) {
+    if ((board.max ?? 0) > max) max = board.max
+  }
+  if (max === 0) return null
+  let players = 0
+  for (const board of Object.values(boards)) {
+    players += board.reached?.find((r) => r.run === max)?.n ?? 0
+  }
+  return { max, players }
+}
+
+// AFTER A WIN, AFTER A LOSS — read as the page has to print it, which is both
+// cuts at once.
+//
+// COUNTED STRAIGHT a club asks 15.21 times per 100 armed half-innings after a
+// win and 11.31 after a loss, and that 26% drop is the RULEBOOK: a club that
+// has just lost one holds one fewer, so it asks less afterwards by rule and
+// not by nerve.
+//
+// HELD EQUAL — the club's second call of the night, with exactly one still in
+// hand, so the only difference between two clubs is how the last call went —
+// it is 12.71 after a win against 12.81 after a loss. The gap all but vanishes
+// and tips the other way. Triple-A, held the same way, gives 14.61 against
+// 14.06: the same size, the opposite sign. TWO INDEPENDENT LEAGUES THAT
+// DISAGREE ON THE SIGN HAVE NOT FOUND AN EFFECT.
+//
+// So this returns BOTH, always, and the caveat is not a sentence a page can
+// leave off: `errors` says how many standard errors the gap is worth, and it
+// is under one on both club cuts.
+//
+// THAT STANDARD ERROR IS A FLOOR, NOT A MEASUREMENT. It treats every armed
+// half-inning as an independent trial, which they are not — the half-innings of
+// one game share a club, an umpire and a night — so the true error is wider
+// than this and the gap is even less than it looks. It is shipped to keep a
+// small gap from being read as a result, which is the only job it has here.
+//
+// Rates ship as SHARES, the way successRate and perChance already do, and the
+// page multiplies by 100 to print them.
+function gapOf(win, loss) {
+  if (win?.rate == null || loss?.rate == null) return { gap: null, errors: null }
+  const gap = win.rate - loss.rate
+  const variance =
+    (win.rate * (1 - win.rate)) / win.chances + (loss.rate * (1 - loss.rate)) / loss.chances
+  const se = variance > 0 ? Math.sqrt(variance) : null
+  return { gap, errors: se ? Math.abs(gap) / se : null }
+}
+
+function cutOf(cut) {
+  return { win: cut?.win ?? null, loss: cut?.loss ?? null, ...gapOf(cut?.win, cut?.loss) }
+}
+
+// Both cuts for one unit — `club` for the club's next challenge, `player` for
+// the same man's next one.
+//
+// The player cut is measured over the CLUB's armed half-innings, because a man
+// cannot ask unless his club is holding one and nothing in the rows says which
+// inning he left the game in. It is the same denominator, so the two units are
+// on the same scale and a reader can hold them side by side.
+export function momentum(summary, unit = 'club') {
+  const src = summary?.momentum?.[unit]
+  if (!src) return null
+  return { unit, naive: cutOf(src.naive), strict: cutOf(src.strict) }
+}
+
+// THE CONTROLLED GAP AT EVERY LEVEL THE FILE CARRIES, which is the check that
+// stops the page reporting an effect.
+//
+// One league's small gap is a small gap. Two leagues whose small gaps point in
+// OPPOSITE directions is the answer to the question: there is nothing there.
+// `agree` is false when the signs differ, and a page that prints the strict cut
+// prints this beside it.
+export function momentumLevels(data, unit = 'club') {
+  const levels = LEVELS.filter((l) => data?.levels?.[l.key]?.momentum)
+  const rows = levels.map((l) => ({
+    level: l.key,
+    label: l.label,
+    ...momentum(data.levels[l.key], unit).strict,
+  }))
+  const signs = new Set(rows.filter((r) => r.gap != null).map((r) => Math.sign(r.gap)))
+  return { rows, agree: signs.size <= 1 }
+}
+
 // Percentage of the season's challenges that fell in each distance band, so
 // the page can draw the shape of the distribution rather than five raw counts.
 export function missBands(summary) {

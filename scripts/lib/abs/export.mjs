@@ -27,6 +27,9 @@
 import { replayBank } from './bank.mjs'
 import { chancesByInning, challengesByInningRole } from './chances.mjs'
 import { exposureByPlayer, exposureRates, hasExposure } from './exposure.mjs'
+import { ranOutBoard } from './ranout.mjs'
+import { momentumCuts } from './momentum.mjs'
+import { streakBoards } from './streaks.mjs'
 import { ROLES } from './rows.mjs'
 
 // The four roles a challenge can come from. A batter challenges a called
@@ -122,12 +125,14 @@ export function challengerGain(row) {
 // `W L L` are the same failure count and different nights, and only the replay
 // can tell them apart.
 //
-// The replay runs only as far as the last inning a challenge was lost in,
-// because the ledger does not carry the game's length yet. That is enough for
-// every emptying the rows can see. A club that emptied in the fifth of a game
-// that went to the twelfth and never challenged again is still counted here —
-// it did run out — and how long it then played re-armed is a question for the
-// chances denominator, which is where the game's length belongs.
+// THE REPLAY IS NOT GIVEN THE GAME'S LENGTH, and since #1058 that is a choice
+// rather than a limit — `final_inning` and `scheduled_innings` are on the
+// ledger now. Without a length the replay runs to the last inning the club
+// challenged in, which is every emptying the rows can see: a top-up in an
+// extra inning the club never challenged in cannot produce one. Checked rather
+// than argued — passing both lengths changes `emptiedIn` on 0 of the 8,123
+// club-games on file. The board that DOES pass them is ranout.mjs, which needs
+// the emptying's half and not only its inning.
 function ranOutByTeam(rows) {
   const byGameTeam = new Map()
   for (const r of rows) {
@@ -286,6 +291,10 @@ export function summarizeLevel(rows, games) {
   const chances = chancesByInning(rows, games)
   const inningRoles = challengesByInningRole(rows)
 
+  // THE NIGHTS, not the per-club count — which clubs emptied earliest, and the
+  // shape of the whole season behind them (ranout.mjs).
+  const ranOutNights = ranOutBoard(rows, games)
+
   return {
     games: games.length,
     gamesWithChallenge: games.filter((g) => (g.challenges ?? 0) > 0).length,
@@ -378,6 +387,18 @@ export function summarizeLevel(rows, games) {
       }))
       .sort((a, b) => a.playerId - b.playerId),
     biggest: best ? overturnCard(best.row, best.swing) : null,
+    // Out of challenges, per GAME. `byTeam.ranOut` above is the same fact
+    // counted per club; this is the band of nights that reached zero soonest,
+    // with the distribution they sit in. Rows only for the earliest inning —
+    // see ranout.mjs for why that cut is made here and not in the reader.
+    ranOutNights,
+    // Runs of being right, and runs of being wrong, by role — across the
+    // season and inside one game (streaks.mjs).
+    streaks: streakBoards(rows),
+    // After a win, after a loss — counted straight AND held against the
+    // challenges the rule leaves a club holding. Both, because showing them
+    // side by side is the point (momentum.mjs).
+    momentum: momentumCuts(rows, games),
   }
 }
 

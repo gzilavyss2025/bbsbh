@@ -278,7 +278,7 @@ don't run these by hand.
   checked row by row against their feeds, with the other club in each game
   coming out legal — so they are named in `TOLERATED` rather than floored away.
   TWO FILES COME OUT OF EVERY RUN, and the split is a size decision.
-  `abs-challenges.json` (206 KB) is what `/abs-challenges` fetches;
+  `abs-challenges.json` (250 KB) is what `/abs-challenges` fetches;
   `abs-exposure.json` (418 KB) is the per-player DENOMINATOR list, which no
   surface reads yet. Folded into the report file they took it from 198 KB to
   895 KB — 369 KB for the list itself and 321 KB for ten exposure fields on
@@ -318,12 +318,25 @@ don't run these by hand.
   challenged still has a games figure. FACTS ONLY in the row table (who
   challenged, what the umpire called, outcome, inning, umpire, run value,
   zone-edge distance); every split — per club, per role, per umpire, call type,
-  miss distance, the biggest overturn, the chances denominator — is derived at
+  miss distance, the biggest overturn, the chances denominator, the nights a
+  club ran out, the streak boards, the after-a-win control — is derived at
   export time in `scripts/lib/abs/export.mjs`, with the per-game row derivation
   beside it in `scripts/lib/abs/rows.mjs`, the bank replay in `bank.mjs`, the
-  chances denominator in `chances.mjs`, and `scripts/lib/abs/index.mjs` as the
+  chances denominator in `chances.mjs`, the out-of-challenges board in
+  `ranout.mjs`, the runs of one outcome in `streaks.mjs`, the after-a-win cuts
+  in `momentum.mjs`, and `scripts/lib/abs/index.mjs` as the
   door every caller imports, since a generator does its work at import and
   nothing inside one can be unit-tested (`test/abs-challenges.test.js`).
+  THREE OF THOSE CUT THEIR OWN ROWS IN THE EXPORT rather than in the reader,
+  which is the one place this pipeline departs from its usual split. The band
+  of earliest emptyings, the twelve longest runs a board shows and the biggest
+  overturn are all picked here, because shipping all 2,526 emptied club-games
+  and all 1,553 men's run lengths costs about 200 KB on a file every visitor to
+  `/abs-challenges` downloads whole, to show a few dozen rows. What is NOT cut
+  is the shape behind them: the whole distribution of emptying innings and the
+  whole distribution of run lengths both ship, for about a kilobyte each, so
+  the page can say how many clubs and men tie below the rows on screen. Same
+  trade as ADR-0076, one file down.
   Imports rather than re-derives: `selectChallengeState` (`src/api/challenges.js`,
   which knows an ABS review can sit at either the play or the pitch-event level
   and that MLB's older manager's-replay reviews must be excluded on

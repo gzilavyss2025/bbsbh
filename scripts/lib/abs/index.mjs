@@ -1,9 +1,12 @@
-// The pure half of gen-abs-challenges.mjs, in five parts: turn ONE Final
+// The pure half of gen-abs-challenges.mjs, in eight parts: turn ONE Final
 // game's feed into challenge rows (rows.mjs), replay a club's challenge bank
 // inning by inning (bank.mjs), count the half-innings a club played still
-// holding one (chances.mjs), turn one club's roster into how much baseball
-// each man saw (exposure.mjs), and turn the accumulated rows plus the
-// swept-games ledger into public/data/abs-challenges.json (export.mjs).
+// holding one (chances.mjs), find the nights a club emptied that bank earliest
+// (ranout.mjs), walk a man's calls for runs of the same outcome (streaks.mjs),
+// hold the rulebook still and ask what a win or a loss changed (momentum.mjs),
+// turn one club's roster into how much baseball each man saw
+// (exposure.mjs), and turn the accumulated rows plus the swept-games ledger
+// into public/data/abs-challenges.json (export.mjs).
 //
 // THE SEAM BETWEEN THEM IS THE DISCIPLINE THE WHOLE JOB RESTS ON. The database
 // stores FACTS — one row per challenge, one row per game — and every split the
@@ -19,7 +22,7 @@
 // (src/api/around-the-game/absChallenges.js).
 //
 // This file is the door. gen-abs-challenges.mjs and test/abs-challenges.test.js
-// import from here, so moving a function between the five files costs no
+// import from here, so moving a function between the eight files costs no
 // caller an edit.
 
 export {
@@ -50,6 +53,9 @@ export {
   chancesByInning,
   challengesByInningRole,
 } from './chances.mjs'
+export { ranOutBoard } from './ranout.mjs'
+export { momentumCuts } from './momentum.mjs'
+export { streaksByPlayer, streakBoards, STREAK_TOP } from './streaks.mjs'
 export {
   inningsFromOuts,
   exposureRowsFor,
