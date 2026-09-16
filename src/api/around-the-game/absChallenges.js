@@ -322,6 +322,81 @@ export function ranOutNights(summary) {
   }
 }
 
+// A RUN OF ONE IS NOT A RUN. Every man who ever won a challenge has a "run"
+// of at least one, so a board whose longest is one is a list of everybody who
+// was ever right, sorted by nothing. Two is the shortest thing worth printing,
+// and a board that cannot reach it is not offered at all — which is what
+// happens to the pitchers' in-game loss board, where the rulebook allows one
+// loss per pitcher and no more.
+export const STREAK_MIN_RUN = 2
+
+// The roles a streak board can be grouped by, in the order the page offers
+// them. `other` is the bucket for a challenger the box score put at no
+// recognisable position and is expected to stay empty here; it is listed so
+// that the day it fills, the board shows it rather than silently dropping men.
+const STREAK_ROLE_ORDER = ['batter', 'catcher', 'pitcher', 'other']
+
+// ONE STREAK BOARD — one outcome, one scope, one role.
+//
+// The file ships the twelve longest runs and the FULL distribution behind them
+// (streaks.mjs), because the names below the cut cost a hundred kilobytes and
+// the shape does not. So this reads the shape back: `tiedBelow` is how many men
+// share the shortest run on screen without appearing, and `unshown` is
+// everybody the board does not name. A reader looking at four men tied at three
+// has to know whether forty more are tied with them.
+//
+// Null when the board cannot reach STREAK_MIN_RUN, which is a board with
+// nothing to rank rather than an empty one to draw.
+export function streakBoard(summary, key, role) {
+  const board = summary?.streaks?.boards?.[key]?.[role]
+  if (!board || (board.max ?? 0) < STREAK_MIN_RUN) return null
+  const rows = board.rows ?? []
+  const cut = rows.length ? rows[rows.length - 1].run : 0
+  const shownAtCut = rows.filter((r) => r.run === cut).length
+  const atCut = board.reached?.find((r) => r.run === cut)?.n ?? 0
+  return {
+    key,
+    role,
+    rows,
+    max: board.max,
+    cut,
+    tiedBelow: Math.max(atCut - shownAtCut, 0),
+    unshown: Math.max((board.players ?? 0) - rows.length, 0),
+    reached: board.reached ?? [],
+  }
+}
+
+// Which roles have a board worth drawing for this cut, in page order.
+export function streakRoles(summary, key) {
+  return STREAK_ROLE_ORDER.filter((role) => streakBoard(summary, key, role) !== null)
+}
+
+// HOW LONG A RUN OF LOSSES INSIDE ONE GAME CAN GET — read off the season, never
+// stated as a rule.
+//
+// The rulebook looks like it settles this: a club is issued two challenges and
+// loses one each time the call stands, so two in a row ends the night. That is
+// true in regulation and false after it. A club that has run out is armed again
+// in every extra inning, and Triple-A's rows carry catchers who lost three in a
+// row because of it. A page that printed "two is the rule, not a record" would
+// be wrong the moment its own level chip moved.
+//
+// So it returns what the season did: the longest such run, and how many men
+// reached it.
+export function inGameLossCap(summary) {
+  const boards = summary?.streaks?.boards?.gameLoss ?? {}
+  let max = 0
+  for (const board of Object.values(boards)) {
+    if ((board.max ?? 0) > max) max = board.max
+  }
+  if (max === 0) return null
+  let players = 0
+  for (const board of Object.values(boards)) {
+    players += board.reached?.find((r) => r.run === max)?.n ?? 0
+  }
+  return { max, players }
+}
+
 // Percentage of the season's challenges that fell in each distance band, so
 // the page can draw the shape of the distribution rather than five raw counts.
 export function missBands(summary) {

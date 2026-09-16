@@ -41,6 +41,9 @@ import {
   exposureRates,
   hasExposure,
   ranOutBoard,
+  streaksByPlayer,
+  streakBoards,
+  STREAK_TOP,
   summarizeLevel,
   buildExport,
   buildExposureExport,
@@ -61,6 +64,9 @@ import {
   callSplitOffBy,
   missBands,
   ranOutNights,
+  streakBoard,
+  streakRoles,
+  inGameLossCap,
   RAN_OUT_EARLY_THROUGH,
   ROLE_CALL,
   MIN_PLAYER_CHALLENGES,
@@ -1642,4 +1648,168 @@ test('RAN_OUT_EARLY_THROUGH: the reader and the export agree on what "early" is'
     .reduce((n, b) => n + b.n, 0)
   assert.equal(perClub, perNight)
   assert.equal(perClub, 1)
+})
+
+// --------------------------------------------------------------------------
+// streaksByPlayer / streakBoards — runs of being right, and runs of being wrong.
+// --------------------------------------------------------------------------
+// Four of these pin the cases a naive walk gets wrong: a run that crosses two
+// games, a man with a single challenge, a quiet game in the middle of a run,
+// and the role a two-way man is grouped under.
+
+// One man's calls, in the order given, as rows. `at` is [gamePk, date].
+const calls = (outcomes, { playerId = 11, name = 'A Hitter', role = 'batter', gamePk = 1, date = '2026-04-01' } = {}) =>
+  outcomes.map((o, i) =>
+    row({
+      game_pk: gamePk,
+      date,
+      seq: i,
+      player_id: playerId,
+      player_name: name,
+      role,
+      outcome: o === 'W' ? 'success' : 'fail',
+    }),
+  )
+
+test('streaksByPlayer: a run crosses two games, because the season does not stop at one', () => {
+  const rows = [
+    ...calls(['W', 'W'], { gamePk: 1, date: '2026-04-01' }),
+    ...calls(['W', 'L'], { gamePk: 2, date: '2026-04-02' }),
+  ]
+  const [p] = streaksByPlayer(rows)
+  assert.equal(p.n, 4)
+  assert.equal(p.success, 3)
+  assert.equal(p.seasonWin, 3)
+  // Inside one game he never got past two.
+  assert.equal(p.gameWin, 2)
+  assert.equal(p.seasonLoss, 1)
+})
+
+test('streaksByPlayer: a game he did not challenge in does not break the run', () => {
+  // He wins one in April, says nothing for a month, and wins two more. That is
+  // a run of three: he did nothing in between to be wrong about.
+  const rows = [
+    ...calls(['W'], { gamePk: 1, date: '2026-04-01' }),
+    // Another man's night, in between.
+    ...calls(['L', 'L'], { gamePk: 2, date: '2026-05-01', playerId: 22, name: 'B Hitter' }),
+    ...calls(['W', 'W'], { gamePk: 3, date: '2026-06-01' }),
+  ]
+  const mine = streaksByPlayer(rows).find((p) => p.playerId === 11)
+  assert.equal(mine.seasonWin, 3)
+})
+
+test('streaksByPlayer: one challenge is a run of one, and nothing in the other column', () => {
+  const [p] = streaksByPlayer(calls(['L']))
+  assert.equal(p.n, 1)
+  assert.equal(p.seasonLoss, 1)
+  assert.equal(p.seasonWin, 0)
+  assert.equal(p.gameLoss, 1)
+  assert.equal(p.gameWin, 0)
+})
+
+test('streaksByPlayer: a man is grouped by the job he MOSTLY did, not the one he did first', () => {
+  // He opens the season behind the plate once and spends the rest of it at
+  // bat. The board that groups him has to call him a batter.
+  const rows = [
+    ...calls(['W'], { gamePk: 1, date: '2026-04-01', role: 'catcher' }),
+    ...calls(['W', 'L'], { gamePk: 2, date: '2026-04-02', role: 'batter' }),
+  ]
+  const [p] = streaksByPlayer(rows)
+  assert.equal(p.role, 'batter')
+})
+
+test('streaksByPlayer: the order is the DATE, not the order the rows arrive in', () => {
+  // September written first, April second. Read in row order his season is
+  // L W W; read by date it is W W L, and only the second is his year.
+  const rows = [
+    ...calls(['L'], { gamePk: 9, date: '2026-09-01' }),
+    ...calls(['W', 'W'], { gamePk: 1, date: '2026-04-01' }),
+  ]
+  const [p] = streaksByPlayer(rows)
+  assert.equal(p.seasonWin, 2)
+})
+
+test('streakBoards: each board ranks on its own run, with the season total beside it', () => {
+  const rows = [
+    ...calls(['W', 'W', 'W'], { gamePk: 1, playerId: 11, name: 'Long Run' }),
+    ...calls(['W', 'L', 'W', 'W'], { gamePk: 2, date: '2026-04-02', playerId: 22, name: 'More Calls' }),
+  ]
+  const board = streakBoards(rows).boards.seasonWin.batter
+  assert.equal(board.max, 3)
+  assert.deepEqual(board.rows.map((r) => [r.name, r.run, r.n]), [
+    ['Long Run', 3, 3],
+    ['More Calls', 2, 4],
+  ])
+})
+
+test('streakBoards: the distribution counts every man, including the ones no row names', () => {
+  const rows = []
+  // Thirteen men with a run of two apiece, which is one more than a board shows.
+  for (let i = 0; i < 13; i += 1) {
+    rows.push(...calls(['W', 'W'], { gamePk: i + 1, date: `2026-04-0${(i % 9) + 1}`, playerId: 100 + i, name: `Man ${i}` }))
+  }
+  const board = streakBoards(rows).boards.seasonWin.batter
+  assert.equal(board.rows.length, STREAK_TOP)
+  assert.equal(board.players, 13)
+  assert.deepEqual(board.reached, [{ run: 2, n: 13 }])
+})
+
+test('streakBoards: a role nobody challenged from is left off rather than shipped empty', () => {
+  const board = streakBoards(calls(['W', 'W'])).boards.seasonWin
+  assert.deepEqual(Object.keys(board), ['batter'])
+})
+
+test('streaksByPlayer: three losses in one night are REPORTED, not clamped at the rulebook', () => {
+  // Two issued and one spent per call caps a run of losses at two — in
+  // REGULATION. A club that has run out is armed again in each extra inning,
+  // and three Triple-A catchers lost three in a row on the season because of
+  // it. A walk that stopped at two to match the rule would erase them, so this
+  // fixture spends three and expects three back.
+  //
+  // What the rule does constrain is the BANK, and bank.mjs is where that is
+  // checked — auditBank replays every club-game on file against it.
+  const [p] = streaksByPlayer(calls(['L', 'L', 'L']))
+  assert.equal(p.gameLoss, 3)
+  assert.equal(p.seasonLoss, 3)
+})
+
+// --------------------------------------------------------------------------
+// streakBoard / inGameLossCap — the reader's half.
+// --------------------------------------------------------------------------
+
+const streakData = buildExport(
+  [
+    ...calls(['W', 'W', 'W'], { gamePk: 1, playerId: 11, name: 'Long Run' }),
+    ...calls(['W', 'W'], { gamePk: 2, date: '2026-04-02', playerId: 22, name: 'Short Run' }),
+    ...calls(['W', 'W'], { gamePk: 3, date: '2026-04-03', playerId: 33, name: 'Also Short' }),
+    ...calls(['L'], { gamePk: 4, date: '2026-04-04', playerId: 44, name: 'One Loss', role: 'pitcher' }),
+  ],
+  [1, 2, 3, 4].map((pk) => game({ game_pk: pk, date: `2026-04-0${pk}`, challenges: 3 })),
+  { season: 2026, generatedAt: 'now' },
+)
+
+test('streakBoard: the rows come with how many men tie below them', () => {
+  const board = streakBoard(summaryFor(streakData, 'MLB'), 'seasonWin', 'batter')
+  assert.equal(board.max, 3)
+  assert.equal(board.cut, 2)
+  // Both two-run men are on screen, so nobody is tied below them.
+  assert.equal(board.tiedBelow, 0)
+  assert.equal(board.unshown, 0)
+})
+
+test('streakBoard: a board that cannot reach a run of two is not a board', () => {
+  // One pitcher, one loss, no run. STREAK_MIN_RUN keeps it off the page rather
+  // than drawing a list of everybody who was ever wrong once.
+  const summary = summaryFor(streakData, 'MLB')
+  assert.equal(streakBoard(summary, 'seasonLoss', 'pitcher'), null)
+  assert.deepEqual(streakRoles(summary, 'seasonWin'), ['batter'])
+  assert.equal(streakBoard(null, 'seasonWin', 'batter'), null)
+})
+
+test('inGameLossCap: the cap is READ, never stated as the rulebook', () => {
+  // The fixture's longest run of losses inside one game is one, by one man —
+  // so the page says one. A page that printed "two is the rule" would be
+  // asserting a rulebook the extra-inning top-up already breaks in Triple-A.
+  assert.deepEqual(inGameLossCap(summaryFor(streakData, 'MLB')), { max: 1, players: 1 })
+  assert.equal(inGameLossCap(null), null)
 })

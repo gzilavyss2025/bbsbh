@@ -28,6 +28,7 @@ import { replayBank } from './bank.mjs'
 import { chancesByInning, challengesByInningRole } from './chances.mjs'
 import { exposureByPlayer, exposureRates, hasExposure } from './exposure.mjs'
 import { ranOutBoard } from './ranout.mjs'
+import { streakBoards } from './streaks.mjs'
 import { ROLES } from './rows.mjs'
 
 // The four roles a challenge can come from. A batter challenges a called
@@ -390,6 +391,9 @@ export function summarizeLevel(rows, games) {
     // with the distribution they sit in. Rows only for the earliest inning —
     // see ranout.mjs for why that cut is made here and not in the reader.
     ranOutNights,
+    // Runs of being right, and runs of being wrong, by role — across the
+    // season and inside one game (streaks.mjs).
+    streaks: streakBoards(rows),
   }
 }
 
