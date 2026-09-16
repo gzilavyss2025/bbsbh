@@ -64,6 +64,40 @@
   color: var(--text-caption);
 }
 
+/* ---- the sentences a board cannot carry -------------------- */
+
+/* THE FEW REAL SENTENCES ON A REPORT PAGE, IN NATURAL CASE. These pages make
+   their argument in figures and have almost no prose left — but the handful
+   that survived did so because a figure genuinely cannot be read without them,
+   and those are the ones a reader has to READ rather than skim. `#root *`
+   shouts every word in this app, and shouted caps cost a real paragraph much
+   more than they cost a three-word chrome label: /abs-challenges's
+   biggest-overturn line, which names a player and an umpire in a sentence,
+   shipped in capitals.
+
+   Same argument and same precedent as the Game Notes blurb prose
+   (`#root .brewblurb__body`, 11-innings.css) and the Identity Lab's hint
+   paragraphs (`#root .screen--identitylab .hint`, 05-masthead-nav.css). Every
+   heading, column head, chip and figure on these pages keeps shouting; this is
+   only for the sentences.
+
+   `.rptsource` at the foot is deliberately NOT included. It is a credit line —
+   middot-separated fields, set as a caption, the same shape a photo credit
+   takes — so it reads as chrome rather than as a paragraph, and it is shared
+   by every report page, which makes changing it a decision for all of them
+   rather than for this one. */
+#root .rptprose,
+/* THE NAME LINKS INSIDE THE SENTENCE NEED THEIR OWN LINE. `.plink` takes
+   `text-transform: inherit` (26-player-page.css) so a name follows whatever it
+   sits in — but `#root *` sets uppercase on the link ELEMENT, which beats an
+   inherited value, so a man's name shouts inside a natural-case sentence:
+   "IVÁN HERRERA, the catcher, asked for the review". Naming the child is how
+   `#root .flipback__potg .plink` (22-box-score-tables.css) and
+   `.xl-deck__holdkey` already fix the same thing. */
+#root .rptprose .plink {
+  text-transform: none; /* caps-exempt: the few real sentences left on a report page are paragraphs, not chrome labels — shouted caps make them much harder to scan, and the headings, column heads, chips and figures around them all stay uppercase */
+}
+
 /* ---- a pair of boards side by side ------------------------- */
 
 /* Two independent short boards, one under the next on a phone and side by side

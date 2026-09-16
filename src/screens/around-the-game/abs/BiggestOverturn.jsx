@@ -46,7 +46,7 @@ export function BiggestOverturn({ summary, clubs }) {
       </SlabRow>
       {/* The space before the comma was a stray {' '} after the player
           link, and it printed: "Iván Herrera , the catcher, asked…". */}
-      <p className="hint">
+      <p className="hint rptprose">
         <PlayerLink id={big.playerId} name={big.playerName}>
           {big.playerName}
         </PlayerLink>

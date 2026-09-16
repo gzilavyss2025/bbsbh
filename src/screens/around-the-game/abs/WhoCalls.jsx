@@ -79,7 +79,7 @@ export function WhoCalls({ summary }) {
           board a single miscoded challenge printed as 4,813 of them.
           callSplitOffBy takes the real figure. */}
       {offBy > 0 && (
-        <p className="hint">
+        <p className="hint rptprose">
           {commas(offBy)} {offBy === 1 ? 'challenge does' : 'challenges do'} not fit these
           rows — the feed put the challenger at no position it recognises, or recorded a
           call his job cannot ask for: a batter can only challenge a called strike, a
