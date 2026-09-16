@@ -27,6 +27,10 @@ import {
   bankHolds,
   armedAt,
   auditBank,
+  firstExtraInning,
+  gameShape,
+  halvesPlayed,
+  chancesByInning,
   challengeRowsForGame,
   challengerGain,
   summarizeLevel,
@@ -205,6 +209,166 @@ test('armedAt: the question the chances denominator asks of a half-inning', () =
   assert.equal(armedAt(cs, 4, 10), false)
   assert.equal(armedAt(cs, 9, 10), false)
   assert.equal(armedAt(cs, 10, 10), true) // armed again
+})
+
+// --------------------------------------------------------------------------
+// firstExtraInning — extras do not start at the tenth everywhere.
+// --------------------------------------------------------------------------
+// 171 Triple-A games on file are seven-inning doubleheader games, and in those
+// the eighth IS the extra inning. Nothing shipped was wrong while the bank was
+// replayed without a length; the chances denominator passes one on every game,
+// which is what makes this matter.
+test('firstExtraInning: the tenth in a nine-inning game, the eighth in a seven', () => {
+  assert.equal(firstExtraInning(9), 10)
+  assert.equal(firstExtraInning(7), 8)
+  // A caller that does not know gets the nine-inning answer.
+  assert.equal(firstExtraInning(null), 10)
+  assert.equal(firstExtraInning(undefined), 10)
+})
+
+test('firstExtraInning: a club that emptied in the 7th of a SEVEN-inning game is armed in the 8th', () => {
+  // gamePk 816247 is the real shape: scheduledInnings 7, currentInning 8.
+  const spent = [
+    { inning: 3, half: 'top', outcome: 'fail' },
+    { inning: 7, half: 'top', outcome: 'fail' },
+  ]
+  // Told the game's real length, the rule re-arms it — this is the answer that
+  // was wrong 15 times on the season before scheduled_innings was stored.
+  assert.equal(armedAt(spent, 8, 8, 7), true)
+  // Left to assume nine innings, the model calls it unarmed.
+  assert.equal(armedAt(spent, 8, 8, null), false)
+})
+
+// --------------------------------------------------------------------------
+// gameShape — the three columns, read off a linescore.
+// --------------------------------------------------------------------------
+// The same object arrives from a game feed (liveData.linescore) and from a
+// schedule row hydrated with `linescore`. Each fixture below is the real shape
+// the API returns for the gamePk named beside it.
+test('gameShape: a home club that never batted in the ninth has no `runs` KEY', () => {
+  // gamePk 824872 — the home club led after the top of the ninth.
+  const shape = gameShape({
+    currentInning: 9,
+    scheduledInnings: 9,
+    isTopInning: true,
+    innings: [{ num: 9, home: { hits: 0, errors: 0, leftOnBase: 0 } }],
+  })
+  assert.deepEqual(shape, { finalInning: 9, bottomPlayed: 0, scheduledInnings: 9 })
+})
+
+test('gameShape: a home club retired in order carries `runs: 0`, and DID bat', () => {
+  // gamePk 823413. This is the pair the rule turns on: a reader that tested
+  // `home.runs > 0` would drop every scoreless home half in the season.
+  const shape = gameShape({
+    currentInning: 9,
+    scheduledInnings: 9,
+    isTopInning: false,
+    innings: [{ num: 9, home: { runs: 0, hits: 0, errors: 0, leftOnBase: 0 } }],
+  })
+  assert.equal(shape.bottomPlayed, 1)
+})
+
+test('gameShape: a seven-inning game that went to the eighth keeps both lengths', () => {
+  // gamePk 816247 — a Triple-A doubleheader game, scheduled for seven.
+  const shape = gameShape({
+    currentInning: 8,
+    scheduledInnings: 7,
+    innings: [{ num: 8, home: { runs: 1 } }],
+  })
+  assert.deepEqual(shape, { finalInning: 8, bottomPlayed: 1, scheduledInnings: 7 })
+})
+
+test('gameShape: a game that was never played has no shape at all', () => {
+  // gamePk 815811 (cancelled) and 816704 (postponed) both carry an empty
+  // linescore. isPlayedGame already keeps them off the ledger; this is the
+  // belt to that brace.
+  assert.deepEqual(gameShape({}), {
+    finalInning: null, bottomPlayed: null, scheduledInnings: null,
+  })
+  assert.deepEqual(gameShape(undefined), {
+    finalInning: null, bottomPlayed: null, scheduledInnings: null,
+  })
+})
+
+// --------------------------------------------------------------------------
+// halvesPlayed / chancesByInning — the denominator itself.
+// --------------------------------------------------------------------------
+test('halvesPlayed: the bottom of the last inning is the only one in doubt', () => {
+  // A game the home club never batted the ninth of: eight full innings, then
+  // a single half.
+  assert.equal(halvesPlayed(8, 9, 0), 2)
+  assert.equal(halvesPlayed(9, 9, 0), 1)
+  // A walk-off: the home club batted, so the half counts even though it was
+  // cut short. The club was exposed in it, which is what a chance is.
+  assert.equal(halvesPlayed(9, 9, 1), 2)
+  // An inning the game never reached offers nothing.
+  assert.equal(halvesPlayed(10, 9, 1), 0)
+})
+
+const shaped = (over) => ({
+  game_pk: 1, away_team_id: 100, home_team_id: 200,
+  final_inning: 9, bottom_played: 1, scheduled_innings: 9, ...over,
+})
+
+test('chancesByInning: both clubs are exposed in every half-inning played', () => {
+  // Nobody challenged, so both clubs are armed throughout: two halves times
+  // two clubs is four chances an inning.
+  const { byInning, total, dropped } = chancesByInning([], [shaped({})])
+  assert.equal(byInning.get(1), 4)
+  assert.equal(byInning.get(9), 4)
+  assert.equal(total, 36)
+  assert.equal(dropped, 0)
+})
+
+test('chancesByInning: a home club that never batted the ninth offers half of it', () => {
+  const { byInning, total } = chancesByInning([], [shaped({ bottom_played: 0 })])
+  assert.equal(byInning.get(8), 4)
+  // One half-inning, both clubs exposed in it.
+  assert.equal(byInning.get(9), 2)
+  assert.equal(total, 34)
+})
+
+test('chancesByInning: a club that emptied in the third stops offering chances', () => {
+  const lost = (inning) => ({
+    game_pk: 1, team_id: 100, inning, half: 'top', outcome: 'fail',
+  })
+  const { byInning } = chancesByInning([lost(2), lost(3)], [shaped({})])
+  // Through the third the away club still held one entering the inning.
+  assert.equal(byInning.get(3), 4)
+  // From the fourth only the home club is armed, so an inning offers two.
+  assert.equal(byInning.get(4), 2)
+  assert.equal(byInning.get(9), 2)
+})
+
+test('chancesByInning: a SEVEN-inning game re-arms an empty club in the eighth', () => {
+  // The trap scheduled_innings exists to close. Without it the away club reads
+  // as unarmed in the 8th, and the inning offers two chances instead of four.
+  const lost = (inning) => ({
+    game_pk: 1, team_id: 100, inning, half: 'top', outcome: 'fail',
+  })
+  const rows = [lost(3), lost(7)]
+  const seven = chancesByInning(rows, [
+    shaped({ final_inning: 8, scheduled_innings: 7 }),
+  ])
+  assert.equal(seven.byInning.get(8), 4)
+  // Told nothing, the model assumes nine and leaves the club out of it.
+  const assumedNine = chancesByInning(rows, [
+    shaped({ final_inning: 8, scheduled_innings: null }),
+  ])
+  assert.equal(assumedNine.byInning.get(8), 2)
+})
+
+test('chancesByInning: a game with no length is DROPPED, never counted as nought innings', () => {
+  // The guard for a game swept before the columns existed. Counting a NULL as
+  // a short game would shrink every denominator and inflate every rate.
+  const { byInning, total, dropped, games } = chancesByInning([], [
+    shaped({}),
+    shaped({ game_pk: 2, final_inning: null, bottom_played: null, scheduled_innings: null }),
+  ])
+  assert.equal(dropped, 1)
+  assert.equal(games, 1)
+  assert.equal(total, 36)
+  assert.equal(byInning.get(1), 4)
 })
 
 // --------------------------------------------------------------------------
@@ -509,7 +673,10 @@ const row = (over) => ({
 })
 const game = (over) => ({
   game_pk: 1, date: '2026-04-01', season: 2026, level: 'MLB',
-  away_team_id: 100, home_team_id: 200, umpire_id: 7, challenges: 1, ...over,
+  away_team_id: 100, home_team_id: 200, umpire_id: 7, challenges: 1,
+  // An ordinary nine-inning game the home club batted in. The three shape
+  // columns are on every row --recheck has seen, so the fixture carries them.
+  final_inning: 9, bottom_played: 1, scheduled_innings: 9, ...over,
 })
 
 test('summarizeLevel: totals, rate and the run figures', () => {
@@ -553,6 +720,61 @@ test('summarizeLevel: a club is out of challenges after its SECOND loss, and ear
   // One loss is not running out.
   const one = summarizeLevel([lost(0, 2)], [game({})])
   assert.equal(one.byTeam.find((t) => t.teamId === 100).ranOut, 0)
+})
+
+test('summarizeLevel: an inning carries the chances its count sat against', () => {
+  // One challenge in the third of one nine-inning game the home club batted
+  // in. Both clubs are armed all night, so every inning offered four chances.
+  const s = summarizeLevel([row({})], [game({})])
+  const third = s.byInning.find((i) => i.inning === 3)
+  assert.equal(third.n, 1)
+  assert.equal(third.chances, 4)
+  assert.equal(third.perChance, 0.25)
+  assert.equal(s.chances, 36)
+  assert.equal(s.chancesGames, 1)
+  // The guard for a game with no length fires on nothing, which is the point.
+  assert.equal(s.chancesGamesDropped, 0)
+})
+
+test('summarizeLevel: a game swept before the columns existed is dropped, and says so', () => {
+  const s = summarizeLevel([row({})], [game({ final_inning: null, scheduled_innings: null })])
+  assert.equal(s.chancesGamesDropped, 1)
+  assert.equal(s.chancesGames, 0)
+  assert.equal(s.chances, 0)
+  // A dropped game leaves the rate null rather than dividing by nought.
+  assert.equal(s.byInning.find((i) => i.inning === 3).perChance, null)
+})
+
+test('summarizeLevel: the role rates add back up to the club rate, in every inning', () => {
+  // THE INVARIANT THE ONE-DENOMINATOR RULE EXISTS FOR. A batter can only
+  // challenge in his club's batting half, so a role drawn on its own half of
+  // the chances sums to twice the club figure and reads as though catchers
+  // alone out-ask the club they play for. Counted on the club denominator the
+  // three add up, which is the only way the panel can be read.
+  const s = summarizeLevel(
+    [
+      row({ seq: 0, role: 'batter', inning: 3 }),
+      row({ seq: 1, role: 'catcher', inning: 3, outcome: 'fail', favor: null }),
+      row({ seq: 2, role: 'pitcher', inning: 5, outcome: 'fail', favor: null }),
+    ],
+    [game({ challenges: 3 })],
+  )
+  for (const inning of s.byInning) {
+    const roles = s.byInningRole.filter((r) => r.inning === inning.inning)
+    assert.equal(
+      roles.reduce((n, r) => n + r.n, 0),
+      inning.n,
+      `counts disagree in inning ${inning.inning}`,
+    )
+    assert.equal(
+      roles.reduce((n, r) => n + r.perChance, 0),
+      inning.perChance,
+      `rates disagree in inning ${inning.inning}`,
+    )
+    // Every role gets a row in every inning that saw a challenge, so a panel
+    // draws a flat line rather than a gap where a role was quiet.
+    assert.deepEqual(roles.map((r) => r.role), ['batter', 'catcher', 'pitcher', 'other'])
+  }
 })
 
 test('summarizeLevel: distance bands are read from the edge outward', () => {

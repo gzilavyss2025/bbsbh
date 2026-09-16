@@ -80,6 +80,12 @@ const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
 // challenge the feed attributes to nobody, or to a batting-side player who was
 // not the batter. It is expected to stay near zero, and a report that hid it
 // would hide the day it stops being near zero.
+// The closed set roleFor can return, in the order every board reads them. It
+// lives beside the function that produces it rather than beside the boards
+// that consume it, so a fifth role could never be emitted here and go
+// unlisted there.
+export const ROLES = ['batter', 'catcher', 'pitcher', 'other']
+
 export function roleFor(feed, play, side, half, playerId) {
   if (playerId == null) return 'other'
   if (play?.matchup?.batter?.id === playerId) return 'batter'

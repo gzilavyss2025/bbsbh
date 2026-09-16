@@ -48,6 +48,16 @@
 // coded F, so the next ordinary run either re-ingests it properly or leaves it
 // out. It is the only mode that removes anything short of --rebuild.
 //
+// --recheck DOES A SECOND JOB off the same call. Its schedule request carries
+// `&hydrate=linescore`, so the row that settles codedGameState also carries
+// the game's LENGTH — currentInning, whether the home club batted the last
+// inning, and how many innings it was scheduled for. Those are the three
+// columns the chances denominator divides by (scripts/lib/abs/chances.mjs,
+// docs/adr/0075), and they cost no extra request and no refetched feed. The
+// ordinary sweep writes them off the feed it already holds. There is
+// deliberately no --backfill-innings mode: it would be a second pass over the
+// same rows.
+//
 //   node scripts/gen-abs-challenges.mjs                    # trailing 3 days
 //   node scripts/gen-abs-challenges.mjs --days=7
 //   node scripts/gen-abs-challenges.mjs --since=2026-03-26 [--until=2026-07-10]
@@ -65,10 +75,11 @@
 // scripts/lib/abs/ derives everything else. --rebuild clears both tables
 // first, for a schema change that makes old rows unusable.
 //
-// Every pure part of this job — the per-game row derivation and every export
-// split — lives in scripts/lib/abs/ (rows.mjs and export.mjs, behind
-// index.mjs), because this file does its work at import and so nothing inside
-// it could be unit-tested. This file is the sweep: dates in, feeds fetched,
+// Every pure part of this job — the per-game row derivation, the bank replay,
+// the chances denominator and every export split — lives in scripts/lib/abs/
+// (rows.mjs, bank.mjs, chances.mjs and export.mjs, behind index.mjs), because
+// this file does its work at import and so nothing inside it could be
+// unit-tested. This file is the sweep: dates in, feeds fetched,
 // rows written, JSON out.
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -76,7 +87,13 @@ import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
-import { auditBank, buildExport, challengeRowsForGame, isPlayedGame } from './lib/abs/index.mjs'
+import {
+  auditBank,
+  buildExport,
+  challengeRowsForGame,
+  gameShape,
+  isPlayedGame,
+} from './lib/abs/index.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'abs-challenges.json')
@@ -142,8 +159,16 @@ const insertRow = db.prepare(
 )
 const markIngested = db.prepare(
   `INSERT OR REPLACE INTO abs_ingested_games
-     (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges)
-   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+     (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges,
+      final_inning, bottom_played, scheduled_innings)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+)
+// THE GAME'S SHAPE, WRITTEN WITHOUT TOUCHING THE CHALLENGE ROWS. --recheck
+// fills these on a game already on file; the sweep writes them with the rest.
+const setShape = db.prepare(
+  `UPDATE abs_ingested_games
+      SET final_inning = ?, bottom_played = ?, scheduled_innings = ?
+    WHERE game_pk = ?`,
 )
 
 async function writeOut() {
@@ -161,7 +186,7 @@ async function writeOut() {
   if (overdrawn.length) {
     console.log(`BANK RULE: ${overdrawn.length} club-game(s) the model cannot pay for:`)
     for (const b of overdrawn.slice(0, 10)) {
-      console.log(`  gamePk ${b.gamePk} team ${b.teamId}: lost at [${b.failInnings}] (${b.overdrawn} over)`)
+      console.log(`  gamePk ${b.gamePk} team ${b.teamId}: spent ${b.order} (${b.overdrawn} over)`)
     }
   }
   return { rows: rows.length, games: games.length }
@@ -196,10 +221,17 @@ if (args['export-only']) {
     .prepare('SELECT game_pk, level, date, challenges FROM abs_ingested_games')
     .all()
   const seen = new Map()
+  const shapes = new Map()
   for (const { sportId } of activeLevels) {
+    // `&hydrate=linescore` is what makes this one call do two jobs. The same
+    // row that carries `codedGameState` then also carries `currentInning`,
+    // `innings[].home.runs` and `scheduledInnings` — the three columns the
+    // chances denominator needs — at no extra call and no refetched feed. So
+    // the nightly self-heals the game's shape the same way it already
+    // self-heals a game that stopped being Final (docs/adr/0075).
     const schedule = await getJson(
       `/api/v1/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}` +
-        `&gameType=${GAME_TYPES}`,
+        `&gameType=${GAME_TYPES}&hydrate=linescore`,
     )
     for (const d of schedule.dates ?? []) {
       for (const g of d.games ?? []) {
@@ -208,6 +240,7 @@ if (args['export-only']) {
         // under both dates, and the original row still reads Postponed.
         if (d.date !== g.officialDate) continue
         seen.set(String(g.gamePk), g.status)
+        shapes.set(String(g.gamePk), gameShape(g.linescore))
       }
     }
   }
@@ -230,11 +263,30 @@ if (args['export-only']) {
     dropGame.run(r.game_pk)
   }
 
+  // THE SECOND JOB. Every game still on file gets its length written from the
+  // row just read. It is an UPDATE rather than a re-ingest, so a game's
+  // challenge rows are never touched, and it is idempotent — a game whose
+  // shape is already right is written the same values again.
+  const evicted = new Set(evict.map((r) => String(r.game_pk)))
+  let shaped = 0
+  for (const r of onFile) {
+    const key = String(r.game_pk)
+    if (evicted.has(key)) continue
+    const shape = shapes.get(key)
+    if (!shape || shape.finalInning == null) continue
+    setShape.run(shape.finalInning, shape.bottomPlayed, shape.scheduledInnings, r.game_pk)
+    shaped += 1
+  }
+
   const { rows, games } = await writeOut()
+  const unshaped = db
+    .prepare('SELECT COUNT(*) AS n FROM abs_ingested_games WHERE final_inning IS NULL')
+    .get().n
   console.log(
     `--recheck ${startDate}..${endDate}: ${seen.size} scheduled game(s) read, ` +
-      `${evict.length} evicted (-${lostChallenges} challenges) — ` +
-      `${rows} challenges over ${games} games on file`,
+      `${evict.length} evicted (-${lostChallenges} challenges), ${shaped} shaped — ` +
+      `${rows} challenges over ${games} games on file ` +
+      `(${unshaped} still without a length)`,
   )
   db.close()
 } else {
@@ -314,8 +366,11 @@ if (args['export-only']) {
           umpId, umpName, r.call_type, r.favor, r.miss_inches,
         )
       }
+      // The game's length, off the feed already in hand — no extra call.
+      const shape = gameShape(feed?.liveData?.linescore)
       markIngested.run(
         t.gamePk, t.date, seasonOf, t.level, t.awayTeamId, t.homeTeamId, umpId, rows.length,
+        shape.finalInning, shape.bottomPlayed, shape.scheduledInnings,
       )
       ingested++
       sinceCheckpoint++

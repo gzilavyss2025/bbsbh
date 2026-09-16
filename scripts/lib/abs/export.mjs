@@ -25,14 +25,18 @@
 // split gate.js and gen-gate.mjs already use.
 
 import { replayBank } from './bank.mjs'
+import { chancesByInning, challengesByInningRole } from './chances.mjs'
+import { ROLES } from './rows.mjs'
 
 // The four roles a challenge can come from. A batter challenges a called
 // strike against him; a catcher or a pitcher challenges a called ball. `other`
 // is the honest bucket for a challenger the feed named but the box score put
 // at no recognisable position — it is expected to stay near zero, and a report
 // that hid it would hide the day it stops being near zero.
-
-export const ROLES = ['batter', 'catcher', 'pitcher', 'other']
+//
+// The list itself lives in rows.mjs beside roleFor, which is what produces it.
+// Re-exported here because every board reads it from this file.
+export { ROLES }
 
 // How far the challenged pitch sat from the nearest edge of the buffered
 // strike zone, in inches. The bands are read from the edge outward, because
@@ -265,6 +269,12 @@ export function summarizeLevel(rows, games) {
   const dates = games.map((g) => g.date).filter(Boolean).sort()
   const best = biggestOverturn(rows)
 
+  // THE CHANCES DENOMINATOR — half-innings a club played still holding a
+  // challenge, which is what "challenges by inning" has to be divided by
+  // before it says anything (chances.mjs, docs/adr/0075).
+  const chances = chancesByInning(rows, games)
+  const inningRoles = challengesByInningRole(rows)
+
   return {
     games: games.length,
     gamesWithChallenge: games.filter((g) => (g.challenges ?? 0) > 0).length,
@@ -283,9 +293,36 @@ export function summarizeLevel(rows, games) {
     scoredOverturns,
     byRole: ROLES.map((role) => ({ role, ...sealed(byRole.get(role)) })),
     byCall: [...byCall].map(([callType, t]) => ({ callType, ...sealed(t) })),
+    // Per inning: the raw count, the chances that count sat against, and the
+    // rate between them. `perChance` is a SHARE — challenges per chance — and
+    // the page multiplies by 100 to print it, the same way successRate is
+    // shipped as a share rather than as a percentage.
     byInning: [...byInning]
       .sort((a, b) => a[0] - b[0])
-      .map(([inning, t]) => ({ inning, ...sealed(t) })),
+      .map(([inning, t]) => {
+        const c = chances.byInning.get(inning) ?? 0
+        return { inning, ...sealed(t), chances: c, perChance: rate(t.n, c) }
+      }),
+    // The same cut crossed with role, on the SAME club denominator so the
+    // roles add back up to the club figure. See chances.mjs for why a role's
+    // own half of the chances is the wrong divisor.
+    byInningRole: [...inningRoles]
+      .sort((a, b) => a[0] - b[0])
+      .flatMap(([inning, roles]) => {
+        const c = chances.byInning.get(inning) ?? 0
+        return ROLES.map((role) => {
+          const t = roles.get(role)
+          return { inning, role, ...sealed(t), chances: c, perChance: rate(t.n, c) }
+        })
+      }),
+    // What the denominator was built from. `chancesGamesDropped` is games with
+    // no length on file, which --recheck backfills — it is expected to be
+    // zero, and is shipped so the page can say every game counted rather than
+    // print a drop count that reads as data loss.
+    chances: chances.total,
+    chancesGames: chances.games,
+    chancesGamesDropped: chances.dropped,
+    perChance: rate(total, chances.total),
     byMiss: MISS_BANDS.map((b) => ({
       key: b.key,
       label: b.label,
