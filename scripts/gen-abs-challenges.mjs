@@ -46,13 +46,14 @@
 // level is added to a file that already holds the other. --export-only
 // re-derives every split from the rows already on file and writes the JSON: it
 // is what a new cut of the data costs, because the database stores FACTS and
-// scripts/lib/abs/ derives everything else. --rebuild clears
-// both tables first, for a schema change that makes old rows unusable.
+// scripts/lib/abs/ derives everything else. --rebuild clears both tables
+// first, for a schema change that makes old rows unusable.
 //
 // Every pure part of this job — the per-game row derivation and every export
-// split — lives in scripts/lib/abs/, because this file does its
-// work at import and so nothing inside it could be unit-tested. This file is
-// the sweep: dates in, feeds fetched, rows written, JSON out.
+// split — lives in scripts/lib/abs/ (rows.mjs and export.mjs, behind
+// index.mjs), because this file does its work at import and so nothing inside
+// it could be unit-tested. This file is the sweep: dates in, feeds fetched,
+// rows written, JSON out.
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
