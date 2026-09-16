@@ -1,11 +1,14 @@
 import { useMemo, useState } from 'react'
 import {
   umpireBoard,
+  umpireSpread,
+  umpireTails,
   UMPIRE_SORTS,
   MIN_UMPIRE_GAMES,
 } from '../../../api/around-the-game/absChallenges.js'
 import { BroadcastSection } from '../../../components/around-the-game/BroadcastMasthead.jsx'
 import { BoardScroller } from '../../../components/around-the-game/BoardScroller.jsx'
+import { DivergingBarCell } from '../../../components/around-the-game/BroadcastBar.jsx'
 import { UmpireLink } from '../../../components/umpire/UmpireLink.jsx'
 import { commas, num2, pct1 } from './format.js'
 
@@ -14,10 +17,58 @@ import { commas, num2, pct1 } from './format.js'
 //
 // The sort chips live here for the same reason the club board's do: the chip,
 // the ranking and the column are one mechanism.
+//
+// TWO THINGS MAKE THIS BOARD DIFFERENT FROM THE CLUB BOARD BESIDE IT.
+//
+// The per-game column is a bar measured from the LEAGUE RATE, not from zero.
+// Drawn from zero, thirty-odd umpires between 3.13 and 5.40 are thirty near
+// identical bars; drawn from 4.18, the same column says "more" or "less" in
+// one glance. That is the whole spread — 2.27 challenges a game between the
+// most argued-with man and the least — and it is a fact about umpires worth
+// seeing rather than reading off.
+//
+// And the board shows BOTH ENDS rather than one. A diverging bar whose view
+// only ever reaches the loud end leaves the left half of every track
+// permanently empty, which buys nothing over a plain bar. So the head and the
+// tail sit on one board with the count of everybody between them
+// (`umpireTails`), and that middle is by construction the part with nothing to
+// say: a man near the league rate draws a stub whichever way he leans.
 
 export function UmpireBoard({ summary }) {
   const [umpSort, setUmpSort] = useState('rate')
   const umps = useMemo(() => (summary ? umpireBoard(summary, umpSort) : []), [summary, umpSort])
+
+  // The league's own rate is the baseline every bar is measured from, and the
+  // widest margin on it is the scale. Both come off the whole qualifying
+  // board, so changing the sort re-orders the rows without re-scaling them.
+  const league = summary?.perGame ?? null
+  const spread = useMemo(() => umpireSpread(umps, league), [umps, league])
+  const { head, tail, between } = useMemo(() => umpireTails(umps), [umps])
+
+  const Row = (u) => (
+    <tr key={u.umpireId}>
+      <th scope="row" className="team">
+        <span className="rpt__club">
+          <span className="rpt__rank">
+            {u.tied ? 'T' : ''}
+            {u.rank ?? '—'}
+          </span>
+          <UmpireLink id={u.umpireId} name={u.name}>
+            {u.name}
+          </UmpireLink>
+        </span>
+      </th>
+      <td>{commas(u.games)}</td>
+      <td>{commas(u.n)}</td>
+      <td>
+        <DivergingBarCell value={u.perGame} center={league} span={spread}>
+          {num2(u.perGame)}
+        </DivergingBarCell>
+      </td>
+      <td>{commas(u.success)}</td>
+      <td>{pct1(u.rate)}</td>
+    </tr>
+  )
 
   return (
     <BroadcastSection title="The plate umpires">
@@ -59,32 +110,28 @@ export function UmpireBoard({ summary }) {
               </th>
               <th>Games</th>
               <th>Challenged</th>
-              <th>Per game</th>
+              {/* The baseline the bar is drawn from, named in the head it
+                  belongs to. A diverging bar with an unlabelled centre is a
+                  chart a reader has to guess the middle of. */}
+              <th>
+                Per game
+                {league != null && <span className="rpt__sub">Against {num2(league)}</span>}
+              </th>
               <th>Overturned</th>
               <th>Overturn rate</th>
             </tr>
           </thead>
           <tbody>
-            {umps.map((u) => (
-              <tr key={u.umpireId}>
+            {head.map(Row)}
+            {between > 0 && (
+              <tr className="rpt__between">
                 <th scope="row" className="team">
-                  <span className="rpt__club">
-                    <span className="rpt__rank">
-                      {u.tied ? 'T' : ''}
-                      {u.rank ?? '—'}
-                    </span>
-                    <UmpireLink id={u.umpireId} name={u.name}>
-                      {u.name}
-                    </UmpireLink>
-                  </span>
+                  {commas(between)} more between them
                 </th>
-                <td>{commas(u.games)}</td>
-                <td>{commas(u.n)}</td>
-                <td>{num2(u.perGame)}</td>
-                <td>{commas(u.success)}</td>
-                <td>{pct1(u.rate)}</td>
+                <td colSpan={5} />
               </tr>
-            ))}
+            )}
+            {tail.map(Row)}
           </tbody>
         </table>
       </BoardScroller>

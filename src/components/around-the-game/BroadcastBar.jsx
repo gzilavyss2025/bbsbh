@@ -27,6 +27,46 @@ export function BarCell({ value, min = 0, max, tone, children }) {
   )
 }
 
+// A BAR MEASURED FROM A BASELINE RATHER THAN FROM ZERO, drawn from the middle
+// of the track outward: right in navy when the value is above the line, left in
+// clay when it is below.
+//
+// WHY, AND WHEN IT IS WORTH IT. A plain bar answers "how big"; this one answers
+// "more or less than usual", which is the only question some columns are asked.
+// A plate umpire at 5.40 challenges a game means nothing until a reader holds
+// 4.18 beside it, and a bar that starts at the league line says it in one
+// glance. It earns the extra ink ONLY where both sides get used — a board whose
+// view shows one end alone leaves half of every track empty and buys nothing
+// over BarCell.
+//
+// `span` is the half-width: the distance from `center` that fills the track to
+// its end. It is the caller's, for the same reason BarCell's `min` is — the
+// judgement about which range matters belongs to the page that knows the data.
+//
+// NAVY AND CLAY, NOT A THREE-WAY HUE SPLIT. Clay against field green fails the
+// colourblind check (delta-E 4.4 under protanopia) and clay against graphite is
+// no better at 4.8. Navy against clay is the pair that survives it, and the
+// direction is carried by the SIDE of the centre line as well as by the colour,
+// so the bar still reads with no colour at all.
+export function DivergingBarCell({ value, center, span, children }) {
+  const off = value != null && center != null && span > 0 ? value - center : null
+  const pct = off == null ? 0 : Math.min(50, (Math.abs(off) / span) * 50)
+  const side = off != null && off < 0 ? 'under' : 'over'
+  return (
+    <span className="barcell barcell--diverge">
+      <span className="barcell__axis" aria-hidden="true" />
+      {off != null && (
+        <span
+          className={`barcell__fill barcell__fill--${side}`}
+          style={{ width: `${pct}%` }}
+          aria-hidden="true"
+        />
+      )}
+      <span className="barcell__text">{children}</span>
+    </span>
+  )
+}
+
 // A club's month-by-month figures as a row of columns, scaled across the
 // LEAGUE's range rather than its own — so two clubs' strips can be compared
 // down the page, which is the whole reason the strip is on a table row instead

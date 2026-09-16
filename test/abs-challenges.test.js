@@ -38,6 +38,10 @@ import {
   summaryFor,
   teamBoard,
   umpireBoard,
+  umpireTails,
+  umpireSpread,
+  UMPIRE_SORTS,
+  UMPIRE_TAIL,
   playerBoards,
   roleRows,
   callSplitAnomalies,
@@ -630,6 +634,109 @@ test('umpireBoard: the games floor keeps a thin sample off the board', () => {
   const summary = summaryFor(data, 'MLB')
   assert.deepEqual(umpireBoard(summary), []) // one game worked, floor is 15
   assert.equal(umpireBoard(summary, 'rate', 1).length, 1)
+})
+
+// --------------------------------------------------------------------------
+// The plate-umpire board's fourth sort, and its two ends.
+// --------------------------------------------------------------------------
+// A board of umpires, each worked enough games to clear the floor, built
+// straight rather than through buildExport — the cut under test is the
+// ordering and the tails, not the export.
+const umpSummary = (n) => ({
+  perGame: 4.18,
+  byUmpire: Array.from({ length: n }, (_, i) => ({
+    umpireId: 100 + i,
+    name: `Umpire ${i}`,
+    games: 20,
+    // Spread evenly from 3.13 to 5.40, the season's real range.
+    n: 80 + i,
+    success: 40,
+    rate: 0.5,
+    perGame: 3.13 + (i * (5.4 - 3.13)) / Math.max(1, n - 1),
+  })),
+})
+
+test('UMPIRE_SORTS: the quiet end of each question has a chip of its own', () => {
+  assert.deepEqual(
+    UMPIRE_SORTS.map((s) => s.key),
+    ['rate', 'rateLow', 'perGame', 'perGameLow'],
+  )
+  // Both low sorts rank on the same field their loud twin does.
+  assert.equal(UMPIRE_SORTS.find((s) => s.key === 'rateLow').field, 'rate')
+  assert.equal(UMPIRE_SORTS.find((s) => s.key === 'perGameLow').field, 'perGame')
+})
+
+test('umpireBoard: "Drawn fewest" opens the end the board had no way to ask for', () => {
+  const summary = umpSummary(10)
+  const most = umpireBoard(summary, 'perGame')
+  const fewest = umpireBoard(summary, 'perGameLow')
+  assert.equal(most[0].perGame, 5.4)
+  assert.equal(fewest[0].perGame, 3.13)
+  // It is the same board read backwards, not a shorter one: the floor is the
+  // floor whichever end is asked for.
+  assert.equal(fewest.length, most.length)
+  assert.deepEqual(fewest.map((u) => u.umpireId), [...most].reverse().map((u) => u.umpireId))
+})
+
+test('umpireBoard: the new sort still ranks, and ranks from ITS own end', () => {
+  const fewest = umpireBoard(umpSummary(10), 'perGameLow')
+  assert.equal(fewest[0].rank, 1) // the least argued-with man leads it
+  assert.equal(fewest[fewest.length - 1].rank, 10)
+})
+
+test('umpireTails: both ends on one board, with the middle counted not hidden', () => {
+  const rows = umpireBoard(umpSummary(30), 'perGame')
+  const { head, tail, between } = umpireTails(rows)
+  assert.equal(head.length, UMPIRE_TAIL)
+  assert.equal(tail.length, UMPIRE_TAIL)
+  assert.equal(between, 30 - UMPIRE_TAIL * 2)
+  // The two ends are the real ends, and nothing is shown twice.
+  assert.equal(head[0].umpireId, rows[0].umpireId)
+  assert.equal(tail[tail.length - 1].umpireId, rows[rows.length - 1].umpireId)
+  assert.equal(new Set([...head, ...tail].map((u) => u.umpireId)).size, UMPIRE_TAIL * 2)
+})
+
+test('umpireTails: a board too short to have two ends is returned whole', () => {
+  // Triple-A on a thin sample, and the degenerate cases either side of it.
+  const rows = umpireBoard(umpSummary(8), 'perGame')
+  const { head, tail, between } = umpireTails(rows)
+  assert.equal(head.length, 8)
+  assert.deepEqual(tail, [])
+  assert.equal(between, 0)
+  assert.deepEqual(umpireTails([]), { head: [], tail: [], between: 0 })
+  assert.deepEqual(umpireTails(null), { head: [], tail: [], between: 0 })
+})
+
+test('umpireTails: one row past twice the tail is where the middle starts', () => {
+  const whole = umpireTails(umpireBoard(umpSummary(UMPIRE_TAIL * 2), 'perGame'))
+  assert.equal(whole.between, 0)
+  assert.equal(whole.tail.length, 0)
+  const split = umpireTails(umpireBoard(umpSummary(UMPIRE_TAIL * 2 + 1), 'perGame'))
+  assert.equal(split.between, 1)
+  assert.equal(split.tail.length, UMPIRE_TAIL)
+})
+
+test('umpireSpread: the scale is the widest margin on the league rate', () => {
+  const rows = umpireBoard(umpSummary(10), 'perGame')
+  // 5.40 is 1.22 above 4.18; 3.13 is 1.05 below it. The wider side wins, so
+  // the longest bar reaches the end of its track and none overflows.
+  assert.equal(umpireSpread(rows, 4.18).toFixed(2), '1.22')
+  // It does not move with the sort, only with the board.
+  assert.equal(
+    umpireSpread(umpireBoard(umpSummary(10), 'perGameLow'), 4.18),
+    umpireSpread(rows, 4.18),
+  )
+})
+
+test('umpireSpread: nothing to scale against returns null rather than zero', () => {
+  // A caller draws no bar on null; a zero would divide the width by nought.
+  assert.equal(umpireSpread([], 4.18), null)
+  assert.equal(umpireSpread(null, 4.18), null)
+  assert.equal(umpireSpread([{ perGame: 4.18 }], 4.18), null)
+  // No league rate is no baseline, whatever the rows say.
+  assert.equal(umpireSpread([{ perGame: 5.4 }], null), null)
+  // A row with no rate of its own is skipped, not counted as nought.
+  assert.equal(umpireSpread([{ perGame: null }, { perGame: 5.18 }], 4.18).toFixed(2), '1.00')
 })
 
 test('playerBoards: the rate board takes a floor, the count board does not', () => {

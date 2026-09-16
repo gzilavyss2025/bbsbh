@@ -270,6 +270,61 @@
   color: var(--text-heading);
 }
 
+/* ---- the diverging bar ------------------------------------- */
+/* A bar measured from a BASELINE rather than from zero, drawn out of the
+   middle of the track: right in navy above the line, left in clay below it.
+   The plate-umpire board uses it for challenges drawn a game, where 5.40
+   means nothing until the league's 4.18 is beside it.
+
+   THE DIRECTION IS IN THE GEOMETRY, NOT ONLY THE HUE. Which side of the
+   centre rule the fill sits on says more or less on its own, so the column
+   still reads with no colour vision at all. Navy against clay is also the
+   one pair that survives the check: clay against field green is delta-E 4.4
+   under protanopia and clay against graphite 4.8, both too close to trust.
+
+   THE TWO OPACITIES DIFFER ON PURPOSE, and by the same amounts the shipped
+   .barcell__fill and .barcell--hot already use. Clay is the lighter, warmer
+   ink: at equal alpha it reads weaker than navy, so a below-the-line bar would
+   look shorter than an above-the-line bar of the same length. The extra four
+   points put the two back at equal visual weight. */
+/* No min-width of its own: it inherits .barcell's 84px so the revised column
+   is exactly as wide as the plain number it replaced. This board already
+   scrolls sideways on a phone (BoardScroller), and a wider bar would push one
+   more column off the edge to buy nothing. */
+.barcell__axis {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--border-rule);
+}
+.barcell__fill--over {
+  inset: 3px auto 3px 50%;
+  background: var(--navy);
+  opacity: 0.2;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+}
+.barcell__fill--under {
+  inset: 3px 50% 3px auto;
+  background: var(--clay);
+  opacity: 0.24;
+  border-radius: var(--radius-xs) 0 0 var(--radius-xs);
+}
+
+/* The row that stands for everybody between the two ends. It is a COUNT, not
+   an ellipsis: the middle of this board is the part that says nothing, and
+   saying how many are in it is more honest than three dots. */
+.rpt__between th,
+.rpt__between td {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  background: var(--paper-2);
+}
+
 /* ---- month trend strip ------------------------------------- */
 
 .trendstrip {
