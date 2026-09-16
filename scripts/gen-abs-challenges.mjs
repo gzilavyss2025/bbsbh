@@ -29,15 +29,31 @@
 // this one included.
 //
 // APPEND-ONLY, same shape as gen-comeback-wins.mjs / gen-fouls.mjs: each run
-// sweeps a small trailing window of newly-Final games and ingests only the
-// gamePks the ledger has not seen. A Final game's challenges are immutable, so
-// a swept game is never refetched.
+// sweeps a small trailing window of newly-played games and ingests only the
+// gamePks the ledger has not seen. A finished game's challenges are immutable,
+// so a swept game is never refetched.
+//
+// WHICH GAMES ARE ADMITTED, and the exception append-only needs. A game is
+// swept when its `codedGameState` is F — see isPlayedGame in
+// scripts/lib/abs/rows.mjs for the evidence, and for why the detailed state's
+// string is the wrong thing to match. The ledger is the DENOMINATOR every
+// per-game figure divides by, so a game that was never played does not sit
+// there harmlessly.
+//
+// A status can also change AFTER a sweep, and append-only alone would never
+// notice: gamePk 815811 was taken in, then suspended by rain and cancelled
+// outright, and its two innings sat in the ledger as a whole game. --recheck
+// is the way back out. It re-reads the schedule over a window, compares every
+// gamePk already on file, and DELETES the rows of any game that is no longer
+// coded F, so the next ordinary run either re-ingests it properly or leaves it
+// out. It is the only mode that removes anything short of --rebuild.
 //
 //   node scripts/gen-abs-challenges.mjs                    # trailing 3 days
 //   node scripts/gen-abs-challenges.mjs --days=7
 //   node scripts/gen-abs-challenges.mjs --since=2026-03-26 [--until=2026-07-10]
 //   node scripts/gen-abs-challenges.mjs --since=2026-03-26 --sports=11
 //   node scripts/gen-abs-challenges.mjs --export-only
+//   node scripts/gen-abs-challenges.mjs --recheck [--since=2026-03-26]
 //   node scripts/gen-abs-challenges.mjs --rebuild --since=2026-03-26
 //
 // The --since form is the one-time backfill (2026-03-26 is Opening Day, and
@@ -60,7 +76,7 @@ import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
-import { buildExport, challengeRowsForGame } from './lib/abs/index.mjs'
+import { buildExport, challengeRowsForGame, isPlayedGame } from './lib/abs/index.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'abs-challenges.json')
@@ -139,15 +155,78 @@ async function writeOut() {
   return { rows: rows.length, games: games.length }
 }
 
+// --sports, shared by the sweep and --recheck.
+const sportsFilter = args.sports
+  ? new Set(String(args.sports).split(',').map((s) => Number(s.trim())))
+  : null
+const activeLevels = sportsFilter ? ALL_LEVELS.filter((l) => sportsFilter.has(l.sportId)) : ALL_LEVELS
+
 if (args['export-only']) {
   const { rows, games } = await writeOut()
   console.log(`wrote ${out} — export only (${rows} challenges over ${games} games on file)`)
   db.close()
+} else if (args.recheck) {
+  // THE WAY BACK OUT OF AN APPEND-ONLY LEDGER. A game's status can change
+  // after it was swept — 815811 was taken in, then suspended by rain and
+  // cancelled — and nothing else in this job would ever look at it again.
+  //
+  // It re-reads the SCHEDULE rather than each game's feed: one call a month a
+  // level answers for every gamePk at once, where a feed apiece would be a few
+  // thousand. The two disagree for exactly this class of game — 815811's feed
+  // still says `Suspended: Rain` while its schedule row says Cancelled — and
+  // the schedule is the one that decides whether a game counts as played, so
+  // it is also the right source, not only the cheap one.
+  //
+  // A gamePk the window does not carry is left alone. Absence from a schedule
+  // slice is not evidence about a game; only a row that is present and no
+  // longer coded F is.
+  const onFile = db
+    .prepare('SELECT game_pk, level, date, challenges FROM abs_ingested_games')
+    .all()
+  const seen = new Map()
+  for (const { sportId } of activeLevels) {
+    const schedule = await getJson(
+      `/api/v1/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}` +
+        `&gameType=${GAME_TYPES}`,
+    )
+    for (const d of schedule.dates ?? []) {
+      for (const g of d.games ?? []) {
+        // Kept only for the row whose date IS the official one, the same
+        // postponed-replay dedup the sweep uses: a replayed game is listed
+        // under both dates, and the original row still reads Postponed.
+        if (d.date !== g.officialDate) continue
+        seen.set(String(g.gamePk), g.status)
+      }
+    }
+  }
+
+  const evict = onFile.filter((r) => {
+    const status = seen.get(String(r.game_pk))
+    return status && !isPlayedGame(status)
+  })
+  const dropGame = db.prepare('DELETE FROM abs_ingested_games WHERE game_pk = ?')
+  const dropRows = db.prepare('DELETE FROM abs_challenges WHERE game_pk = ?')
+  let lostChallenges = 0
+  for (const r of evict) {
+    const status = seen.get(String(r.game_pk))
+    console.log(
+      `evict ${r.game_pk} (${r.level} ${r.date}, ${r.challenges} challenge(s)) — ` +
+        `${status.codedGameState} / ${status.detailedState}`,
+    )
+    lostChallenges += r.challenges
+    dropRows.run(r.game_pk)
+    dropGame.run(r.game_pk)
+  }
+
+  const { rows, games } = await writeOut()
+  console.log(
+    `--recheck ${startDate}..${endDate}: ${seen.size} scheduled game(s) read, ` +
+      `${evict.length} evicted (-${lostChallenges} challenges) — ` +
+      `${rows} challenges over ${games} games on file`,
+  )
+  db.close()
 } else {
-  const sportsFilter = args.sports
-    ? new Set(String(args.sports).split(',').map((s) => Number(s.trim())))
-    : null
-  const levels = sportsFilter ? ALL_LEVELS.filter((l) => sportsFilter.has(l.sportId)) : ALL_LEVELS
+  const levels = activeLevels
 
   const existing = new Set(
     db.prepare('SELECT game_pk FROM abs_ingested_games').all().map((r) => String(r.game_pk)),
@@ -165,8 +244,13 @@ if (args['export-only']) {
     )
     for (const d of schedule.dates ?? []) {
       for (const g of d.games ?? []) {
-        if (g.status?.abstractGameState !== 'Final') continue
-        if (g.status?.detailedState === 'Postponed') continue
+        // WHICH GAMES COUNT — isPlayedGame, on codedGameState alone. A
+        // cancelled game carries an abstract state of Final and no innings at
+        // all, so the old abstract-Final-minus-Postponed rule put 23 non-games
+        // on the Triple-A ledger and moved every per-game figure the page
+        // prints. The rule and the evidence behind it are in
+        // scripts/lib/abs/rows.mjs, where they can be unit-tested.
+        if (!isPlayedGame(g.status)) continue
         if (d.date !== g.officialDate) continue
         if (existing.has(String(g.gamePk))) continue
         const hp = (g.officials ?? []).find((o) => o.officialType === 'Home Plate')

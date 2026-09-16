@@ -19,7 +19,14 @@
 // import from here, so moving a function between the two halves costs no
 // caller an edit.
 
-export { roleFor, umpireCallFor, buildRow, challengeRowsForGame } from './rows.mjs'
+export {
+  roleFor,
+  umpireCallFor,
+  buildRow,
+  challengeRowsForGame,
+  isPlayedGame,
+  PLAYED_CODE,
+} from './rows.mjs'
 export {
   ROLES,
   MISS_BANDS,

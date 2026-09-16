@@ -321,13 +321,23 @@ jobs:
         continue-on-error: true
         run: node scripts/gen-comeback-wins.mjs
       # Every ABS challenge of the season, MLB and Triple-A, for
-      # /abs-challenges. Append-only over newly-Final games, so the trailing
+      # /abs-challenges. Append-only over newly-played games, so the trailing
       # window is all it ever needs; the one-time season backfill is
       # `--since=2026-03-26`, run by hand.
+      #
+      # --recheck runs FIRST, over a wider window than the sweep. A game's
+      # status can change after it was taken in — one Triple-A game was swept,
+      # then suspended by rain and cancelled outright, and its two innings sat
+      # in the denominator as a whole game. --recheck re-reads the schedule and
+      # evicts anything no longer coded F; the sweep behind it re-ingests a
+      # game that has since finished properly. It costs one schedule call a
+      # level, so the window is a fortnight rather than the sweep's three days.
       - name: ABS challenges
         id: abs-challenges
         continue-on-error: true
-        run: node scripts/gen-abs-challenges.mjs
+        run: |
+          node scripts/gen-abs-challenges.mjs --recheck --days=14
+          node scripts/gen-abs-challenges.mjs
       - name: Jerseys
         id: jerseys
         continue-on-error: true

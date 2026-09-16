@@ -22,6 +22,7 @@ import test from 'node:test'
 import {
   roleFor,
   umpireCallFor,
+  isPlayedGame,
   challengeRowsForGame,
   challengerGain,
   summarizeLevel,
@@ -41,6 +42,117 @@ import {
   ROLE_CALL,
   MIN_PLAYER_CHALLENGES,
 } from '../src/api/around-the-game/absChallenges.js'
+
+// --------------------------------------------------------------------------
+// isPlayedGame — which games are allowed onto the denominator.
+// --------------------------------------------------------------------------
+// The ledger is what every per-game figure divides by, so a game that was
+// never played does not sit there harmlessly. These five are the ONLY
+// `codedGameState` values the whole 2026 MLB and Triple-A schedule takes, and
+// each object below is the real status the schedule returns for the gamePk
+// named beside it, field for field.
+const STATUS = {
+  // gamePk 824940 — an ordinary game, played and played out.
+  final: {
+    abstractGameState: 'Final',
+    codedGameState: 'F',
+    detailedState: 'Final',
+    statusCode: 'F',
+    startTimeTBD: false,
+    abstractGameCode: 'F',
+  },
+  // gamePk 824295 — rain stopped it after nine half-innings. A REAL game: it
+  // carries four challenges, and they belong on the board.
+  completedEarly: {
+    abstractGameState: 'Final',
+    codedGameState: 'F',
+    detailedState: 'Completed Early',
+    statusCode: 'FR',
+    startTimeTBD: false,
+    reason: 'Rain',
+    abstractGameCode: 'F',
+  },
+  // gamePk 814842 — called off for weather. Zero innings, zero plays, and an
+  // abstract state of Final, which is how 23 of these reached the Triple-A
+  // ledger under the old abstract-Final rule.
+  cancelled: {
+    abstractGameState: 'Final',
+    codedGameState: 'C',
+    detailedState: 'Cancelled',
+    statusCode: 'CR',
+    startTimeTBD: false,
+    reason: 'Rain',
+    abstractGameCode: 'F',
+  },
+  // gamePk 815811 — the one that changed its mind after being swept. It was
+  // postponed, replayed the next day, suspended by rain after two innings, and
+  // then cancelled outright. Its FEED still reads `Suspended: Rain` with an
+  // abstract state of Live; its schedule row reads this. Two innings and one
+  // challenge sat in the ledger as a whole game until --recheck evicted it.
+  suspendedThenCancelled: {
+    abstractGameState: 'Final',
+    codedGameState: 'C',
+    detailedState: 'Cancelled',
+    statusCode: 'CR',
+    startTimeTBD: true,
+    reason: 'Rain',
+    abstractGameCode: 'F',
+  },
+  // gamePk 824621 — never played on that date.
+  postponed: {
+    abstractGameState: 'Final',
+    codedGameState: 'D',
+    detailedState: 'Postponed',
+    statusCode: 'DI',
+    startTimeTBD: false,
+    reason: 'Inclement Weather',
+    abstractGameCode: 'F',
+  },
+  // gamePk 824382 — not played yet.
+  scheduled: {
+    abstractGameState: 'Preview',
+    codedGameState: 'S',
+    detailedState: 'Scheduled',
+    statusCode: 'S',
+    startTimeTBD: false,
+    abstractGameCode: 'P',
+  },
+}
+
+test('isPlayedGame: a game that happened is admitted, shortened by rain or not', () => {
+  assert.equal(isPlayedGame(STATUS.final), true)
+  assert.equal(isPlayedGame(STATUS.completedEarly), true)
+})
+
+test('isPlayedGame: a cancelled game is not a game, whatever its abstract state says', () => {
+  // Both of these read `abstractGameState: 'Final'`. That is the trap the old
+  // rule fell into, and the reason the test asserts it here rather than only
+  // asserting the result.
+  assert.equal(STATUS.cancelled.abstractGameState, 'Final')
+  assert.equal(STATUS.suspendedThenCancelled.abstractGameState, 'Final')
+  assert.equal(isPlayedGame(STATUS.cancelled), false)
+  assert.equal(isPlayedGame(STATUS.suspendedThenCancelled), false)
+})
+
+test('isPlayedGame: postponed and not-yet-played stay out', () => {
+  assert.equal(isPlayedGame(STATUS.postponed), false)
+  assert.equal(isPlayedGame(STATUS.scheduled), false)
+})
+
+test('isPlayedGame: the detailed string is never read, so a new reason cannot leak in', () => {
+  // Every detailed state carries its reason — `Cancelled: Rain`,
+  // `Completed Early: Rain` — so matching on it means every new reason is a
+  // new string nobody knew to exclude. A reason MLB has not invented yet,
+  // against a coded state that is not F, still stays out.
+  assert.equal(isPlayedGame({ ...STATUS.cancelled, detailedState: 'Cancelled: Locusts' }), false)
+  assert.equal(isPlayedGame({ codedGameState: 'F', detailedState: 'Something New' }), true)
+})
+
+test('isPlayedGame: a missing status is not a played game', () => {
+  assert.equal(isPlayedGame(undefined), false)
+  assert.equal(isPlayedGame(null), false)
+  assert.equal(isPlayedGame({}), false)
+})
 
 // --------------------------------------------------------------------------
 // umpireCallFor — the printed call is his only when the challenge failed.

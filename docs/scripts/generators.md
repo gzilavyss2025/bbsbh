@@ -218,11 +218,19 @@ don't run these by hand.
   (Automated Ball-Strike) CHALLENGE of the season, at both levels that run the
   system: MLB (sportId 1, 2026 is its first season) and Triple-A (sportId 11,
   which has run it for several). SQLite-backed (`abs-challenges` group,
-  ADR-0021), APPEND-ONLY incremental sweep of newly-Final games like
+  ADR-0021), APPEND-ONLY incremental sweep of newly-played games like
   `gen-comeback-wins.mjs`: `--days` trailing window nightly,
   `--since=2026-03-26` for the one-time backfill (Opening Day — there is no
   history before it), `--sports=1,11` to restrict a level, `--export-only` to
   re-derive every split with no re-sweep, `--rebuild` for a schema change.
+  A game is admitted on `codedGameState === 'F'` alone (`isPlayedGame` in
+  `scripts/lib/abs/rows.mjs`), which takes a game shortened by rain and leaves
+  out a cancelled one — the old abstract-Final rule put 23 never-played
+  Triple-A games on the denominator. `--recheck` is the one mode short of
+  `--rebuild` that REMOVES anything: it re-reads the schedule over a window and
+  evicts games already on file that are no longer coded F, which is how a
+  swept game that is later suspended or cancelled gets back out. The nightly
+  job runs it over a fortnight before each sweep.
   `abs_ingested_games` is both the idempotency guard AND the denominator table:
   it carries the two club ids and the plate umpire, so a club or umpire nobody
   challenged still has a games figure. FACTS ONLY in the row table (who
