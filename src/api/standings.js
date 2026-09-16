@@ -75,13 +75,84 @@ export function expectedRecord(t) {
   return `${xWins}-${gamesPlayed - xWins}`
 }
 
+// MLB's own clinch marks — the single letters every published standings table
+// prints beside a club name. Four of the five come straight off the record's
+// `clinchIndicator` (z, y, x, w); the feed has no 'e' and never sends one, so
+// elimination is the one mark derived here (isEliminated below). Ordered as the
+// race is won, best state first, so the key under a board reads top-down.
+// Verified live against 2024, 2025 and 2026 standings pulls.
+export const CLINCH_ORDER = ['z', 'y', 'x', 'w', 'e']
+const CLINCH_LABEL = {
+  z: 'Clinched best record in the league',
+  y: 'Clinched the division',
+  x: 'Clinched a postseason berth',
+  w: 'Clinched a wild card',
+  e: 'Eliminated from the postseason',
+}
+
+export function clinchLabel(mark) {
+  return CLINCH_LABEL[mark] ?? ''
+}
+
+// Out of the race: MLB's own elimination numbers say the club can no longer
+// win its division AND can no longer reach a wild card. BOTH halves are
+// required — a club eliminated from its division alone is the ordinary
+// mid-September case and is still playing for a wild card (the 2026 Marlins:
+// `eliminationNumberDivision` 'E', `wildCardEliminationNumber` '3').
+//
+// KNOWN EDGE, and why it is left alone: these numbers stop moving the moment
+// the regular season ends rather than resolving, so the LAST club out keeps
+// whatever number it held on the final day (the 2025 Astros finished 87-75 and
+// missed the field, still carrying `wildCardEliminationNumber` '1'). Both
+// callers only ever scrub dates INSIDE the running season, where the numbers
+// are live; inferring elimination from a games-played count instead would
+// guess at a season length a rain-shortened schedule does not honour.
+const ELIMINATED = 'E'
+function isEliminated(t) {
+  if (t.clinched === true) return false
+  const division = t.eliminationNumberDivision ?? t.eliminationNumber
+  return division === ELIMINATED && t.wildCardEliminationNumber === ELIMINATED
+}
+
+// The one letter a club's row wears, or null while it is still simply playing.
+// The feed omits `clinchIndicator` entirely until it has a letter to give, so
+// the two states it can still be certain of are read off the booleans beside
+// it: `divisionChamp` for a division already won, `clinched` for a berth held
+// by a route the feed has not named yet.
+export function clinchMark(t) {
+  const indicator = String(t?.clinchIndicator ?? '').toLowerCase()
+  if (CLINCH_LABEL[indicator]) return indicator
+  if (t?.divisionChamp === true) return 'y'
+  if (t?.clinched === true) return 'x'
+  if (isEliminated(t)) return 'e'
+  return null
+}
+
+// A division WON, which is a narrower claim than `clinched` — see
+// formatMagicNumber.
+function wonDivision(t) {
+  const mark = clinchMark(t)
+  return mark === 'y' || mark === 'z'
+}
+
 // Division-leader-only "Magic#": MLB's own clinch math straight off the same
 // dated record — no games-remaining assumption to get wrong. Every OTHER team
 // in the division carries `eliminationNumberDivision` instead of `magicNumber`
 // (the two keys are mutually exclusive on the feed), so DASH is also the
 // correct answer for a non-leader here without any rank check needed.
+//
+// 'Clinched' answers the DIVISION race this column tracks, so it is gated on
+// winning the division and NOT on `clinched` — that flag means a postseason
+// berth by any route, and a wild-card club carries it while still sitting
+// behind a division leader it may yet be eliminated by.
+//
+// A club that has clinched a berth but not the division reads DASH here, and
+// that is the feed's own answer rather than a gap: MLB stops publishing
+// `magicNumber` the moment `clinchIndicator` turns 'x', leaving no number to
+// print until the division itself is settled. The row's clinch mark is what
+// carries the state through that window.
 export function formatMagicNumber(t) {
-  if (t.clinched === true) return 'Clinched'
+  if (wonDivision(t)) return 'Clinched'
   if (t.magicNumber != null && t.magicNumber !== '') return `${t.magicNumber}`
   return DASH
 }
@@ -107,6 +178,7 @@ function shapeTeam(t, pinnedTeamId) {
     l10: splitWL(t, 'lastTen'),
     expWL: expectedRecord(t),
     magic: formatMagicNumber(t),
+    clinch: clinchMark(t),
     pinned: pinnedTeamId != null && t.team?.id === pinnedTeamId,
   }
 }
@@ -238,6 +310,19 @@ function eachTeam(leagues, fn) {
     }
   }
   return leagues
+}
+
+// Every clinch mark actually present on a shaped board — Division or Wild
+// Card — so the key printed under it names only letters a reader can
+// actually see on the page. An April board carries none and prints no key at
+// all, which is the point: the key is an explanation of what is there, not a
+// standing list of everything MLB could one day send.
+export function clinchMarksInPlay(leagues) {
+  const marks = new Set()
+  eachTeam(leagues, (t) => {
+    if (t.clinch) marks.add(t.clinch)
+  })
+  return marks
 }
 
 // Stamps a value from a SECOND data source (e.g. Season Grade, keyed by team

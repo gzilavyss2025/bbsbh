@@ -858,7 +858,7 @@
     },
     "standings.js": {
       "class": "cutoff-gated",
-      "why": "Standings W/L and runs ARE score-revealing, but a standings row is a league-wide aggregate, not one game's line, so it is not sealed. Safety comes entirely from the `date` the CALLER requests."
+      "why": "Standings W/L and runs ARE score-revealing, but a standings row is a league-wide aggregate, not one game's line, so it is not sealed. Safety comes entirely from the `date` the CALLER requests. The clinch marks (`clinchMark`) ride that same gate and add no surface of their own: `clinchIndicator` and the elimination numbers are stamped AS OF the requested date, not as of now — checked against dated 2024, 2025 and 2026 pulls, where an Aug 1 query carries no marks and a Sep 23 query carries exactly the ones that were true that morning. A mark is also strictly less than the W-L already printed beside it."
     },
     "staticJson.js": {
       "class": "spoiler-free",

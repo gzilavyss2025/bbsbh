@@ -139,6 +139,13 @@ const PAIRINGS = [
   // nothing else would catch.
   { fg: 'text-body', bg: 'surface-inset', min: TEXT, note: 'Stamp In row action, unpressed' },
   { fg: 'text-on-ink', bg: 'accent-positive', min: TEXT, note: 'Stamp In row action, stamped' },
+  // The standings clinch mark (ClinchMark.jsx): a one-character chip, filled
+  // green for the four letters MLB ships and clay for a club that is out.
+  // Asserted on its own rather than leaning on the pairs above, because it is
+  // the smallest text this palette carries — one mono character at 11px — so a
+  // later nudge to either accent has less margin here than anywhere else.
+  { fg: 'text-on-ink', bg: 'accent-positive', min: TEXT, note: 'standings clinch mark' },
+  { fg: 'text-on-ink', bg: 'accent-negative', min: TEXT, note: 'standings eliminated mark' },
   // The slate's Scores Unlocked live band: run totals (heading ink) and the
   // centered state token (muted ink) over the field-green wash.
   { fg: 'text-heading', bg: 'field-soft', min: TEXT, note: 'live score band numerals' },

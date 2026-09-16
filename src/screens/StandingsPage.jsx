@@ -9,6 +9,7 @@ import {
   attachTeamField,
   extractRanks,
   attachRankTrend,
+  clinchMarksInPlay,
   DASH,
 } from '../api/standings.js'
 import { favoriteAccentColor } from '../lib/teams.js'
@@ -20,6 +21,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
+import { ClinchMark, ClinchKey } from '../components/team/ClinchMark.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
@@ -270,6 +272,8 @@ export function StandingsPage() {
     return shaped
   }, [shown, favoriteTeamId, boardMode, gradeByTeamId, gradeTierByTeamId, prevRankByTeamId])
 
+  const clinchMarks = useMemo(() => clinchMarksInPlay(leagues), [leagues])
+
   const refreshing = loading && shown.length > 0
 
   // The favorite team's own accent color for its highlighted row (falls back
@@ -277,7 +281,7 @@ export function StandingsPage() {
   // known accent — MiLB affiliates aren't in that color map).
   function rowProps(t) {
     return {
-      className: t.pinned ? 'is-me' : '',
+      className: `${t.pinned ? 'is-me' : ''} ${t.clinch === 'e' ? 'is-eliminated' : ''}`.trim(),
       style: t.pinned ? { '--fav-accent': favoriteAccentColor(t.id) } : undefined,
     }
   }
@@ -417,6 +421,7 @@ export function StandingsPage() {
                             <TeamLink id={t.id} tab="numbers">
                               <TeamLogo teamId={t.id} name={t.name} size={18} />
                               {t.name}
+                              <ClinchMark mark={t.clinch} />
                               <span className="wc-div">{t.division}</span>
                             </TeamLink>
                           </td>
@@ -449,6 +454,7 @@ export function StandingsPage() {
                               <TeamLink id={t.id} tab="numbers">
                                 <TeamLogo teamId={t.id} name={t.name} size={18} />
                                 {t.name}
+                                <ClinchMark mark={t.clinch} />
                                 <span className="wc-div">{t.division}</span>
                               </TeamLink>
                             </td>
@@ -508,6 +514,7 @@ export function StandingsPage() {
                                 <TeamLink id={t.id} tab="numbers">
                                   <TeamLogo teamId={t.id} name={t.name} size={18} />
                                   {t.name}
+                                  <ClinchMark mark={t.clinch} />
                                 </TeamLink>
                               </td>
                               <td>{t.w}</td>
@@ -540,6 +547,8 @@ export function StandingsPage() {
               </section>
             ))}
       </div>
+
+      <ClinchKey marks={clinchMarks} />
 
       <nav className="standings-daynav" aria-label="Standings date stepper">
         <button
