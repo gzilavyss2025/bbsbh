@@ -33,6 +33,10 @@ import {
   chancesByInning,
   challengeRowsForGame,
   challengerGain,
+  inningsFromOuts,
+  exposureRowsFor,
+  exposureByPlayer,
+  exposureRates,
   summarizeLevel,
   buildExport,
   MISS_BANDS,
@@ -660,6 +664,199 @@ test('challengerGain: favor is signed toward the batting side, so a batting chal
 
 test('challengerGain: null when the call was never scored', () => {
   assert.equal(challengerGain({ half: 'top', side: 'away', favor: null }), null)
+})
+
+// --------------------------------------------------------------------------
+// exposure — how much baseball a man saw.
+// --------------------------------------------------------------------------
+// The denominator questions 5 and 6 need, and the one new fetch in the whole
+// job. Every fixture below is the real shape returned by
+//   /api/v1/teams/{id}/roster?rosterType=fullSeason&season=2026
+//     &hydrate=person(stats(type=season,group=[hitting,fielding],season=2026,sportId=1))
+// for the player named beside it, checked against the live API before any of
+// this was relied on.
+
+test('inningsFromOuts: MLB writes innings in OUTS, not in decimals', () => {
+  // William Contreras caught "1020.2" — that is 1020 and TWO THIRDS. Across a
+  // whole Brewers roster the only fractional parts that appear are 0, 1 and 2,
+  // which is what proves the notation.
+  assert.equal(inningsFromOuts('1020.2'), 1020 + 2 / 3)
+  assert.equal(inningsFromOuts('28.0'), 28)
+  assert.equal(inningsFromOuts('7.1'), 7 + 1 / 3)
+  assert.equal(inningsFromOuts('0.0'), 0)
+  assert.equal(inningsFromOuts('45'), 45)
+  // parseFloat would have said 1020.2 — half an inning light on one catcher.
+  assert.notEqual(inningsFromOuts('1020.2'), 1020.2)
+})
+
+test('inningsFromOuts: anything that is not outs notation is null, not a guess', () => {
+  // A third of an inning written as .3 would mean the notation had changed
+  // under us, and a silent parseFloat would carry the change through.
+  assert.equal(inningsFromOuts('7.3'), null)
+  assert.equal(inningsFromOuts('7.9'), null)
+  assert.equal(inningsFromOuts(''), null)
+  assert.equal(inningsFromOuts(null), null)
+  assert.equal(inningsFromOuts(undefined), null)
+  assert.equal(inningsFromOuts('-3.1'), null)
+})
+
+// A roster entry, shaped like the live response.
+const person = (id, name, pos, groups) => ({
+  position: { abbreviation: pos },
+  person: { id, fullName: name, stats: groups },
+})
+const hitting = (splits) => ({ group: { displayName: 'hitting' }, splits })
+const fielding = (splits) => ({ group: { displayName: 'fielding' }, splits })
+
+test('exposureRowsFor: a catcher who also hits carries BOTH denominators', () => {
+  // William Contreras, Brewers (158): 2,152 pitches seen at the plate, and
+  // 1020.2 innings caught plus 18 games at DH that are not catching.
+  const rows = exposureRowsFor(
+    {
+      roster: [
+        person(1, 'William Contreras', 'C', [
+          hitting([{ team: { id: 158 }, stat: { numberOfPitches: 2152, plateAppearances: 602 } }]),
+          fielding([
+            { team: { id: 158 }, position: { abbreviation: 'C' }, stat: { gamesStarted: 114, innings: '1020.2', games: 120 } },
+            { team: { id: 158 }, position: { abbreviation: 'DH' }, stat: { gamesStarted: 18, innings: '0.0', games: 18 } },
+          ]),
+        ]),
+      ],
+    },
+    { season: 2026, level: 'MLB', teamId: 158 },
+  )
+  assert.equal(rows.length, 1)
+  assert.equal(rows[0].pitches, 2152)
+  assert.equal(rows[0].plate_appearances, 602)
+  assert.equal(rows[0].catcher_innings, 1020 + 2 / 3)
+  // The DH split is not catching, so it adds nothing to either catcher column.
+  assert.equal(rows[0].catcher_starts, 114)
+})
+
+test('exposureRowsFor: a traded player is credited to the right club, never the aggregate', () => {
+  // Bo Naylor's hitting group reads 94 PA with NO `team` key at all — the
+  // aggregate, listed FIRST — then 90 for Cleveland (114) and 4 for Milwaukee
+  // (158). Reading the first split would credit Milwaukee with all 94.
+  const roster = {
+    roster: [
+      person(2, 'Bo Naylor', 'C', [
+        hitting([
+          { stat: { numberOfPitches: 400, plateAppearances: 94 } },
+          { team: { id: 114 }, stat: { numberOfPitches: 380, plateAppearances: 90 } },
+          { team: { id: 158 }, stat: { numberOfPitches: 20, plateAppearances: 4 } },
+        ]),
+      ]),
+    ],
+  }
+  const brewers = exposureRowsFor(roster, { season: 2026, level: 'MLB', teamId: 158 })
+  assert.equal(brewers[0].plate_appearances, 4)
+  assert.equal(brewers[0].pitches, 20)
+  // The same response read as Cleveland's gives Cleveland's half, so each
+  // club's own call writes only its own rows.
+  const guardians = exposureRowsFor(roster, { season: 2026, level: 'MLB', teamId: 114 })
+  assert.equal(guardians[0].plate_appearances, 90)
+  // And the two halves are the aggregate, which is the check that nothing was
+  // double-counted or dropped.
+  assert.equal(brewers[0].plate_appearances + guardians[0].plate_appearances, 94)
+})
+
+test('exposureRowsFor: a pitcher with no hitting split is null, never zero', () => {
+  // Null divides to "no rate"; zero divides to Infinity. 93 of 102 MLB
+  // pitchers who challenged have neither denominator, and that is correct.
+  const rows = exposureRowsFor(
+    {
+      roster: [
+        person(3, 'A Reliever', 'P', [
+          fielding([{ team: { id: 158 }, position: { abbreviation: 'P' }, stat: { gamesStarted: 0, innings: '64.1' } }]),
+        ]),
+      ],
+    },
+    { season: 2026, level: 'MLB', teamId: 158 },
+  )
+  assert.equal(rows[0].pitches, null)
+  assert.equal(rows[0].plate_appearances, null)
+  // He pitched, but he did not CATCH, so the catcher columns stay empty too.
+  assert.equal(rows[0].catcher_innings, null)
+  assert.equal(rows[0].catcher_starts, null)
+})
+
+test('exposureRowsFor: a man who never challenged still gets a row', () => {
+  // Half of question 5 is "how many qualified hitters never asked at all", and
+  // a table built from the challenge rows cannot see them — they leave no row
+  // there. Four qualified MLB hitters are in this position.
+  const rows = exposureRowsFor(
+    {
+      roster: [
+        person(4, 'A Quiet Hitter', '1B', [
+          hitting([{ team: { id: 158 }, stat: { numberOfPitches: 2000, plateAppearances: 500 } }]),
+        ]),
+      ],
+    },
+    { season: 2026, level: 'MLB', teamId: 158 },
+  )
+  assert.equal(rows.length, 1)
+  assert.equal(rows[0].plate_appearances, 500)
+  assert.equal(rows[0].name, 'A Quiet Hitter')
+})
+
+test('exposureRowsFor: an empty or malformed roster yields nothing rather than throwing', () => {
+  const opts = { season: 2026, level: 'MLB', teamId: 158 }
+  assert.deepEqual(exposureRowsFor({ roster: [] }, opts), [])
+  assert.deepEqual(exposureRowsFor({}, opts), [])
+  assert.deepEqual(exposureRowsFor(null, opts), [])
+  // An entry with no person id is skipped, not written with a null key.
+  assert.deepEqual(exposureRowsFor({ roster: [{ person: {} }] }, opts), [])
+})
+
+test('exposureByPlayer: a traded man is asked how often HE argues, so his clubs add up', () => {
+  const total = exposureByPlayer([
+    { player_id: 2, pitches: 380, plate_appearances: 90, catcher_innings: 600, catcher_starts: 70 },
+    { player_id: 2, pitches: 20, plate_appearances: 4, catcher_innings: 30, catcher_starts: 3 },
+  ])
+  assert.deepEqual(total.get(2), {
+    pitches: 400, plateAppearances: 94, catcherInnings: 630, catcherStarts: 73,
+  })
+})
+
+test('exposureByPlayer: a null column stays null rather than becoming a zero', () => {
+  const total = exposureByPlayer([
+    { player_id: 3, pitches: null, plate_appearances: null, catcher_innings: null, catcher_starts: null },
+  ])
+  assert.deepEqual(total.get(3), {
+    pitches: null, plateAppearances: null, catcherInnings: null, catcherStarts: null,
+  })
+})
+
+test('exposureRates: each rate takes ONLY the challenges its own denominator explains', () => {
+  // THE TRAP THIS MODULE EXISTS FOR. Francisco Alvarez called for 102 reviews
+  // — 22 at the plate and 80 behind it. Dividing all 102 by the pitches he saw
+  // as a BATTER invents a man who argues with every other pitch he sees, and
+  // it is what put a catcher at the top of the "most eager hitter" board.
+  const r = exposureRates(
+    { batter: 22, catcher: 80 },
+    { pitches: 1635, plateAppearances: 400, catcherInnings: 674, catcherStarts: 74 },
+  )
+  assert.equal(r.asBatter, 22)
+  assert.equal(r.asCatcher, 80)
+  assert.equal(r.per1000Pitches.toFixed(2), '13.46') // not 62.39
+  assert.equal(r.per9Caught.toFixed(3), '1.068')
+  // Neither rate borrows the other's numerator.
+  assert.notEqual(r.per1000Pitches, (102 / 1635) * 1000)
+})
+
+test('exposureRates: no denominator is null, which is not the same as no challenges', () => {
+  // "He never batted" and "he batted and never asked" are different facts, and
+  // a board that printed both as 0.0 would lose the more interesting one.
+  const none = exposureRates({ batter: 4 }, { pitches: null, catcherInnings: null })
+  assert.equal(none.per1000Pitches, null)
+  assert.equal(none.per9Caught, null)
+  // A denominator of nought is no opportunity, so it is no number either —
+  // never Infinity.
+  assert.equal(exposureRates({ batter: 1 }, { pitches: 0 }).per1000Pitches, null)
+  // A man with a denominator and no challenges of that kind is a real zero.
+  assert.equal(exposureRates({ catcher: 9 }, { pitches: 1000 }).per1000Pitches, 0)
+  // And nothing at all does not throw.
+  assert.equal(exposureRates(null, null).per1000Pitches, null)
 })
 
 // --------------------------------------------------------------------------
