@@ -601,6 +601,7 @@ for each generator; the reader modules:
   of number — `per1000Pitches` is a real count of pitches a batter stood in
   against, `per9Caught` a stand-in, because nothing in statsapi counts pitches
   RECEIVED. They are named apart so no surface can sort them into one list.
+  Why it is a second file rather than a key in the first: ADR-0076.
 - `around-the-game/clubs.js` — the one club-identity lookup those boards share,
   off the static `teams.json`. `clubShort` (Padres) is what a board ROW uses
   and `clubName` (San Diego Padres) what prose uses; the full name in a row

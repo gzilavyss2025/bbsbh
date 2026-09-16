@@ -289,7 +289,7 @@ don't run these by hand.
   file. A man with no opportunity at all is dropped rather than shipped as
   nulls: 1,963 of the 3,521 on a fullSeason roster are pitchers who never
   batted and never caught, and a nought divides to no rate exactly as a null
-  does.
+  does. The rule and the reasoning are ADR-0076.
   `--exposure` IS THE ONE FETCH THIS JOB MAKES THAT IS NOT A GAME, and it
   fills the third table, `abs_player_exposure`: one row per player per club,
   from one `rosterType=fullSeason` call a club a level (~60 calls) with the

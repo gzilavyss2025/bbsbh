@@ -449,6 +449,8 @@ export function buildExport(rows, games, { season, generatedAt } = {}) {
 // (`hasExposure`): a pitcher who never batted and never caught supports no
 // rate, and cannot answer the never-challenged question either, because there
 // is nothing he had the opportunity to do.
+//
+// The whole split, and the rule it generalises to, is docs/adr/0076.
 export function buildExposureExport(rows, exposure, { season, generatedAt } = {}) {
   const levels = {}
   for (const level of [...new Set((exposure ?? []).map((e) => e.level))].sort()) {
