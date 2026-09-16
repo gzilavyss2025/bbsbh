@@ -5,36 +5,24 @@ import {
   fetchAbsChallenges,
   levelsIn,
   summaryFor,
-  teamBoard,
-  umpireBoard,
-  playerBoards,
-  roleRows,
-  callSplitAnomalies,
-  callSplitOffBy,
-  missBands,
-  TEAM_SORTS,
-  UMPIRE_SORTS,
-  ROLE_CALL,
-  ROLE_LABEL,
-  ROLE_IN_PROSE,
-  MIN_UMPIRE_GAMES,
 } from '../../api/around-the-game/absChallenges.js'
-import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
+import { loadClubs } from '../../api/around-the-game/clubs.js'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { groupLabelFor } from '../../lib/reportPages.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
-import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
-import { PlayerLink } from '../../components/player/PlayerLink.jsx'
-import { UmpireLink } from '../../components/umpire/UmpireLink.jsx'
-import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
+import { BroadcastMasthead } from '../../components/around-the-game/BroadcastMasthead.jsx'
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
-import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
-import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
-import { BarCell } from '../../components/around-the-game/BroadcastBar.jsx'
+import { commas, num1, num2, pct1 } from './abs/format.js'
+import { WhoCalls } from './abs/WhoCalls.jsx'
+import { ClubBoard } from './abs/ClubBoard.jsx'
+import { PlayerBoards } from './abs/PlayerBoards.jsx'
+import { UmpireBoard } from './abs/UmpireBoard.jsx'
+import { MissBands } from './abs/MissBands.jsx'
+import { BiggestOverturn } from './abs/BiggestOverturn.jsx'
 
 // THE CHALLENGE SYSTEM — the first season anybody could argue with the plate
 // umpire and win on the spot.
@@ -63,6 +51,16 @@ import { BarCell } from '../../components/around-the-game/BroadcastBar.jsx'
 // one source line at the foot. Anything longer belongs in this comment, in
 // scripts/gen-abs-challenges.mjs, or in docs/. Not on the page.
 //
+// EACH SECTION IS ITS OWN COMPONENT, in src/screens/around-the-game/abs/, and
+// every one of them reads the `summary` it is HANDED rather than the file. That
+// one rule is what makes the level chip below work: flipping to Triple-A hands
+// every section a different summary and the whole page follows, with no section
+// needing to know the chip exists. A section that reached back to
+// fetchAbsChallenges for itself would keep showing MLB, and nobody would notice
+// until a reader did. What is left in this file is the chrome the sections sit
+// in — the masthead, the level chips, the slab row, the two fetches and the
+// source line.
+//
 // SPOILER-FREE. A challenge is a ball-strike judgment, not a run
 // (api/around-the-game/absChallenges.js). Nothing on this page reads a score,
 // and no game's result can be read back out of it.
@@ -74,28 +72,9 @@ import { BarCell } from '../../components/around-the-game/BroadcastBar.jsx'
 
 const ABS_PATH = '/abs-challenges'
 
-const pct1 = (x) => (x == null ? '—' : `${(x * 100).toFixed(1)}%`)
-const num1 = (x) => (x == null ? '—' : x.toFixed(1))
-const num2 = (x) => (x == null ? '—' : x.toFixed(2))
-const commas = (n) => (n == null ? '—' : n.toLocaleString('en-US'))
-const inches = (x) => (x == null ? '—' : `${x.toFixed(1)} in`)
-
-// The club board's numeric columns, held as data so the header row and the
-// body cannot fall out of step.
-const TEAM_COLUMNS = [
-  { key: 'n', label: 'Called', render: (r) => commas(r.n) },
-  { key: 'perGame', label: 'Per game', render: (r) => num2(r.perGame) },
-  { key: 'success', label: 'Won', render: (r) => commas(r.success) },
-  { key: 'rate', label: 'Success', render: (r) => pct1(r.rate) },
-  { key: 'ranOut', label: 'Ran out', render: (r) => commas(r.ranOut) },
-]
-
 export function AbsChallengesPage() {
   useDocumentTitle('ABS Challenges')
   const [level, setLevel] = useState('MLB')
-  const [teamSort, setTeamSort] = useState('rate')
-  const [umpSort, setUmpSort] = useState('rate')
-  const { favoriteTeamId } = useFavoriteTeam()
 
   const { loading, error, data } = useAsync(() => fetchAbsChallenges(), [])
   // MLB and Triple-A both, because both run the system and both are on the
@@ -106,20 +85,6 @@ export function AbsChallengesPage() {
   const shown = levels.some((l) => l.key === level) ? level : (levels[0]?.key ?? 'MLB')
   const summary = summaryFor(data, shown)
 
-  const teams = useMemo(() => (summary ? teamBoard(summary, teamSort) : []), [summary, teamSort])
-  const umps = useMemo(() => (summary ? umpireBoard(summary, umpSort) : []), [summary, umpSort])
-  const players = useMemo(() => (summary ? playerBoards(summary) : null), [summary])
-  const roles = useMemo(() => (summary ? roleRows(summary) : []), [summary])
-  const bands = useMemo(() => (summary ? missBands(summary) : []), [summary])
-  const anomalies = useMemo(() => (summary ? callSplitAnomalies(summary) : []), [summary])
-  const offBy = useMemo(() => callSplitOffBy(anomalies), [anomalies])
-
-  const teamSortKey = TEAM_SORTS.find((s) => s.key === teamSort)?.key ?? 'rate'
-  const teamValues = teams.map((r) => r[teamSortKey]).filter((v) => v != null)
-  const teamMin = teamValues.length ? Math.min(...teamValues) * 0.9 : 0
-  const teamMax = teamValues.length ? Math.max(...teamValues) : 1
-  const roleMax = roles.reduce((m, r) => (r.rate != null && r.rate > m ? r.rate : m), 0)
-  const bandMax = bands.reduce((m, b) => (b.share != null && b.share > m ? b.share : m), 0)
   const big = summary?.biggest ?? null
 
   return (
@@ -194,363 +159,14 @@ export function AbsChallengesPage() {
             />
           </SlabRow>
 
-          <BroadcastSection title="Who calls for one">
-            {/* WHAT IS UNDER REVIEW RIDES WITH WHO ASKED, in the row header,
-                rather than in a column of its own. The two are one fact: a
-                batter can only challenge a called strike, a catcher or a
-                pitcher only a called ball. As a column it was three rows of
-                repeated words set right-aligned in mono like a figure, and it
-                took 233px — a quarter of the board — to say what the row label
-                already implies. As a sub-line it costs nothing and the three
-                numbers move left into the space it gave back. */}
-            <BoardScroller label="Challenge success rate by who called for it">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Called by</th>
-                    <th>Called</th>
-                    <th>Won</th>
-                    <th>Success</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {roles.map((r) => (
-                    <tr key={r.role}>
-                      <th scope="row" className="team">
-                        {ROLE_LABEL[r.role] ?? r.role}
-                        {ROLE_CALL[r.role] ? (
-                          <span className="rpt__sub">
-                            on a called {ROLE_CALL[r.role]}
-                          </span>
-                        ) : null}
-                      </th>
-                      <td>{commas(r.n)}</td>
-                      <td>{commas(r.success)}</td>
-                      <td>
-                        <BarCell value={r.rate} min={0} max={roleMax || 1}>
-                          {pct1(r.rate)}
-                        </BarCell>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
-            {/* The anomaly line has to carry its own antecedent, its own rule
-                and its own arithmetic.
-
-                THE ANTECEDENT. It used to read "do not follow that rule", where
-                "that rule" lived in the section note above it. The note is
-                gone, and the rows now say only "on a called strike" / "on a
-                called ball" — which states the rule but never names what breaks
-                it. So the line says both itself.
-
-                THE ARITHMETIC. It used to add the disagreeing rows' `n`, which
-                is each whole bucket rather than what disagrees: on the Triple-A
-                board a single miscoded challenge printed as 4,813 of them.
-                callSplitOffBy takes the real figure. */}
-            {offBy > 0 && (
-              <p className="hint">
-                {commas(offBy)} {offBy === 1 ? 'challenge does' : 'challenges do'} not fit these
-                rows — the feed put the challenger at no position it recognises, or recorded a
-                call his job cannot ask for: a batter can only challenge a called strike, a
-                catcher or a pitcher a called ball.
-              </p>
-            )}
-          </BroadcastSection>
-
-          <BroadcastSection title="The clubs">
-            <div className="rpt-controls" role="group" aria-label="Sort the club board">
-              {TEAM_SORTS.map((s) => (
-                <button
-                  key={s.key}
-                  type="button"
-                  className={`rpt-chip${s.key === teamSort ? ' is-on' : ''}`}
-                  aria-pressed={s.key === teamSort}
-                  onClick={() => setTeamSort(s.key)}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-
-            <BoardScroller label="Challenge board, every club">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Club</th>
-                    {TEAM_COLUMNS.map((c) => (
-                      <th key={c.key}>{c.label}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {teams.map((r) => (
-                    <tr
-                      key={r.teamId}
-                      className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
-                    >
-                      <ClubCell
-                        teamId={r.teamId}
-                        name={clubShort(clubs, r.teamId)}
-                        rank={r.rank}
-                        tied={r.tied}
-                        sub={`${commas(r.games)} games`}
-                      />
-                      {TEAM_COLUMNS.map((c) =>
-                        c.key === teamSortKey ? (
-                          <td key={c.key}>
-                            <BarCell value={r[c.key]} min={teamMin} max={teamMax}>
-                              {c.render(r)}
-                            </BarCell>
-                          </td>
-                        ) : (
-                          <td key={c.key}>{c.render(r)}</td>
-                        ),
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
-          </BroadcastSection>
-
-          {/* TWO BOARDS, TWO TABLES. These are two independent rankings, and
-              they used to be zipped into ONE table by row index — row 3 of the
-              count board sharing a <tr> with row 3 of the rate board, which
-              relates two men who have nothing to do with each other, and puts
-              the first board's Won/Called columns BETWEEN the two names.
-
-              It also broke the sticky column outright. `.rpt th.team` pins the
-              row-header cell to left:0 so the figures scroll under it; with a
-              second `.team` cell in the same row BOTH pinned to left:0, the
-              right-hand board's name column slid on top of the left-hand one on
-              any horizontal scroll — at 390px, 146px in, "Best success rate"
-              painted over "Most calls overturned" and clipped every name on the
-              left board mid-word, with the Won/Called columns hidden underneath.
-              One sticky column per table is the invariant; two tables keep it. */}
-          {players && (
-            <BroadcastSection title="The players">
-              <div className="rptpair">
-                <BoardScroller label="Most overturned calls won">
-                  <table className="standings rpt">
-                    <thead>
-                      <tr>
-                        {/* Both heads carry a sub-line, and the left one says
-                            "no minimum" rather than saying nothing: it keeps
-                            the two headers the same height, so the two boards'
-                            rows line up across the pair, and it answers the
-                            question the right-hand floor raises about it. */}
-                        <th className="team">
-                          Most calls overturned
-                          <span className="rpt__sub">No minimum</span>
-                        </th>
-                        <th>Won</th>
-                        <th>Called</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {players.byCount.map((p) => (
-                        <tr key={p.playerId}>
-                          <th scope="row" className="team">
-                            <PlayerLink id={p.playerId} name={p.name}>
-                              {p.name}
-                            </PlayerLink>
-                            <span className="rpt__sub">
-                              {clubShort(clubs, p.teamId)} — {ROLE_LABEL[p.role] ?? p.role}
-                            </span>
-                          </th>
-                          <td>{commas(p.success)}</td>
-                          <td>{commas(p.n)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </BoardScroller>
-
-                <BoardScroller label="Best challenge success rate">
-                  <table className="standings rpt">
-                    <thead>
-                      <tr>
-                        <th className="team">
-                          Best success rate
-                          <span className="rpt__sub">
-                            Minimum {players.minChallenges} called · {commas(players.qualified)}{' '}
-                            qualify
-                          </span>
-                        </th>
-                        <th>Success</th>
-                        <th>Called</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {players.byRate.map((q) => (
-                        <tr key={q.playerId}>
-                          <th scope="row" className="team">
-                            <PlayerLink id={q.playerId} name={q.name}>
-                              {q.name}
-                            </PlayerLink>
-                            <span className="rpt__sub">
-                              {clubShort(clubs, q.teamId)} — {ROLE_LABEL[q.role] ?? q.role}
-                            </span>
-                          </th>
-                          <td>{pct1(q.rate)}</td>
-                          <td>{commas(q.n)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </BoardScroller>
-              </div>
-            </BroadcastSection>
-          )}
-
-          <BroadcastSection title="The plate umpires">
-            <div className="rpt-controls" role="group" aria-label="Sort the umpire board">
-              {UMPIRE_SORTS.map((s) => (
-                <button
-                  key={s.key}
-                  type="button"
-                  className={`rpt-chip${s.key === umpSort ? ' is-on' : ''}`}
-                  aria-pressed={s.key === umpSort}
-                  onClick={() => setUmpSort(s.key)}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-
-            <BoardScroller label="Challenges against each plate umpire">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    {/* The floor rides in the column head it qualifies, where a
-                        reader meets it while reading the column, instead of in
-                        a paragraph above the board.
-
-                        SO DOES THE DENOMINATOR, in three words. This board is
-                        the one thing on the page that can be misread against
-                        another page — /umpire-rankings scores every called
-                        pitch of a man's season, this scores only the pitches
-                        somebody thought were wrong — and a reader who takes
-                        one for the other has the wrong idea of an umpire, not
-                        just a wrong figure. The source line at the foot says it
-                        in full; the head says enough to stop the mistake. */}
-                    <th className="team">
-                      Umpire
-                      <span className="rpt__sub">
-                        Minimum {MIN_UMPIRE_GAMES} games · challenged pitches only
-                      </span>
-                    </th>
-                    <th>Games</th>
-                    <th>Challenged</th>
-                    <th>Per game</th>
-                    <th>Overturned</th>
-                    <th>Overturn rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {umps.map((u) => (
-                    <tr key={u.umpireId}>
-                      <th scope="row" className="team">
-                        <span className="rpt__club">
-                          <span className="rpt__rank">
-                            {u.tied ? 'T' : ''}
-                            {u.rank ?? '—'}
-                          </span>
-                          <UmpireLink id={u.umpireId} name={u.name}>
-                            {u.name}
-                          </UmpireLink>
-                        </span>
-                      </th>
-                      <td>{commas(u.games)}</td>
-                      <td>{commas(u.n)}</td>
-                      <td>{num2(u.perGame)}</td>
-                      <td>{commas(u.success)}</td>
-                      <td>{pct1(u.rate)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
-          </BroadcastSection>
-
-          <BroadcastSection title="How close was the call">
-            <BoardScroller label="Challenges by distance from the zone edge">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Off the edge</th>
-                    <th>Challenges</th>
-                    <th>Share</th>
-                    <th>Won</th>
-                    <th>Success</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bands.map((b) => (
-                    <tr key={b.key}>
-                      <th scope="row" className="team">
-                        {b.label}
-                      </th>
-                      <td>{commas(b.n)}</td>
-                      <td>
-                        <BarCell value={b.share} min={0} max={bandMax || 1}>
-                          {pct1(b.share)}
-                        </BarCell>
-                      </td>
-                      <td>{commas(b.success)}</td>
-                      <td>{pct1(b.rate)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
-          </BroadcastSection>
-
-          {big && (
-            <BroadcastSection title="The biggest overturn of the season">
-              <SlabRow>
-                <Slab
-                  tone="lead"
-                  value={num2(big.runs)}
-                  label="Runs on one pitch"
-                  note={`${inches(big.missInches)} off the edge`}
-                />
-                <Slab
-                  value={`${big.half === 'top' ? 'Top' : 'Bottom'} ${big.inning}`}
-                  label="When"
-                  note={humanDateWithYear(big.date)}
-                />
-                <Slab
-                  value={clubShort(clubs, big.teamId)}
-                  label="Challenged"
-                  note={`Against ${clubName(clubs, big.oppId)}`}
-                />
-                <Slab
-                  value={big.callType === 'strike' ? 'Strike' : 'Ball'}
-                  label="What was called"
-                  note="Overturned"
-                />
-              </SlabRow>
-              {/* The space before the comma was a stray {' '} after the player
-                  link, and it printed: "Iván Herrera , the catcher, asked…". */}
-              <p className="hint">
-                <PlayerLink id={big.playerId} name={big.playerName}>
-                  {big.playerName}
-                </PlayerLink>
-                , {ROLE_IN_PROSE[big.role] ?? 'the club'}, asked for the review, and{' '}
-                {big.umpireId ? (
-                  <UmpireLink id={big.umpireId} name={big.umpireName}>
-                    {big.umpireName}
-                  </UmpireLink>
-                ) : (
-                  'the plate umpire'
-                )}
-                ’s call did not stand.
-              </p>
-            </BroadcastSection>
-          )}
+          {/* THE SIX BOARDS. Each one is handed the summary the level chip
+              chose; none of them reads the file. See the header. */}
+          <WhoCalls summary={summary} />
+          <ClubBoard summary={summary} clubs={clubs} />
+          <PlayerBoards summary={summary} clubs={clubs} />
+          <UmpireBoard summary={summary} />
+          <MissBands summary={summary} />
+          <BiggestOverturn summary={summary} clubs={clubs} />
 
           {/* THE SOURCE LINE, not a method essay — see RunValuePage for the
               argument. What survives here is the provenance, the scope, and the
