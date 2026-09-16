@@ -96,14 +96,22 @@ export function teamBoard(summary, sortBy = 'rate') {
   return sortOn(ranked(rows, sort.key, sort), sort.key, sort.lowIsBest)
 }
 
-// FOUR SORTS, IN TWO PAIRS. Each question has a quiet end as well as a loud
-// one, and the board shipped with only three: there was no way to ask which
-// man is argued with LEAST often. "Drawn fewest" opens it.
+// ONE CHIP PER QUESTION, AND IT NAMES A COLUMN RATHER THAN AN END OF ONE.
+//
+// The board used to sort one way at a time, so "Overturned most" and
+// "Overturned least" were two different views and both were worth a chip. They
+// stopped being two views the day the board grew a second tail: umpireTails
+// shows the head AND the tail of whichever column is on, so the low chip
+// returns the identical twelve men with the two ends swapped over. A control
+// that promises a new view and re-prints the old one is worse than no control,
+// because a reader who taps it concludes the data is broken.
+//
+// So the chip picks the COLUMN — the two ends of it come free — and the labels
+// say so. Both ends of both questions are still reachable; nothing was
+// removed from the board but the duplicate route to it.
 export const UMPIRE_SORTS = [
-  { key: 'rate', label: 'Overturned most', lowIsBest: false },
-  { key: 'rateLow', label: 'Overturned least', lowIsBest: true, field: 'rate' },
+  { key: 'rate', label: 'Overturn rate', lowIsBest: false },
   { key: 'perGame', label: 'Challenges drawn', lowIsBest: false },
-  { key: 'perGameLow', label: 'Drawn fewest', lowIsBest: true, field: 'perGame' },
 ]
 
 // How many rows each end of the board shows.
@@ -126,6 +134,15 @@ export const UMPIRE_TAIL = 6
 //
 // A board too short to have two ends is returned whole, which is what the
 // Triple-A level does on a thin sample.
+//
+// THE MIDDLE IS COUNTED, AND IT IS ALSO ONE TAP AWAY. The count alone was not
+// enough: 75 of MLB's 87 qualifying umpires had no row, no rank and no link,
+// and looking up the man working tonight's plate is the ordinary use of this
+// board — a reader whose umpire is not in the twelve could not reach him at
+// all. The page keeps the two-ended view as its default and offers the whole
+// board behind a control under it (UmpireBoard.jsx), so the shape that makes
+// the diverging bar readable is what a reader meets first, without walling off
+// the other 75 men.
 export function umpireTails(rows, tail = UMPIRE_TAIL) {
   const all = rows ?? []
   if (all.length <= tail * 2) return { head: all, tail: [], between: 0 }
@@ -162,9 +179,8 @@ export function umpireSpread(rows, league) {
 // being wrong.
 export function umpireBoard(summary, sortBy = 'rate', minGames = MIN_UMPIRE_GAMES) {
   const sort = UMPIRE_SORTS.find((s) => s.key === sortBy) ?? UMPIRE_SORTS[0]
-  const field = sort.field ?? sort.key
   const rows = (summary?.byUmpire ?? []).filter((u) => u.games >= minGames && u.n > 0)
-  return sortOn(ranked(rows, field, sort), field, sort.lowIsBest)
+  return sortOn(ranked(rows, sort.key, sort), sort.key, sort.lowIsBest)
 }
 
 // The players who call for the most reviews, and the ones who are right most

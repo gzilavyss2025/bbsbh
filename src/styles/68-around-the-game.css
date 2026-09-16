@@ -550,6 +550,32 @@
   color: var(--text-on-ink);
 }
 
+/* The umpire board's expander. Full width and under the board, because it
+   belongs to the whole table rather than to one column of it, and because the
+   table is inside a scroller — a control that lives in a scrolling box moves
+   out from under the finger reaching for it. It is the chip's family with the
+   chip's box, so the board reads as one set of controls. */
+.rpt-expand {
+  display: block;
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.rpt-expand:hover {
+  border-color: var(--navy);
+  color: var(--text-body);
+}
+
 /* ---- the farm index's pillar bars -------------------------- */
 
 .pillars {

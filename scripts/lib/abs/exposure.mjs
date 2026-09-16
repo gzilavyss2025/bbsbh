@@ -7,9 +7,9 @@
 // how often he argues. Divided by the pitches he saw it becomes a habit: a
 // batter challenges about once every 40 plate appearances, a catcher about
 // once every 8 innings caught. THE SPREAD IS SO WIDE THAT THE MEAN DESCRIBES
-// NOBODY — seven qualified hitters never challenged once all season, and one
-// called for 32 in 1,085 pitches — which is the finding, and it needs the
-// denominator to exist at all.
+// NOBODY — four qualified MLB hitters (300 plate appearances and up) never
+// challenged once all season, and Gary Sánchez called for 32 in 1,085 pitches
+// — which is the finding, and it needs the denominator to exist at all.
 //
 // THE ONE NEW FETCH IN THE WHOLE JOB. Everything else on this report costs
 // `--export-only`; this costs one roster call a club a level, about 60 in
@@ -80,8 +80,9 @@ function splitsForTeam(group, teamId) {
 //
 // EVERY MAN ON THE ROSTER GETS A ROW, including one who never challenged and
 // one who never batted. A board built only from the players who challenged
-// cannot answer "how many never did", and the answer — seven qualified hitters
-// — is half of what question 5 is asking.
+// cannot answer "how many never did", and the answer — four qualified MLB
+// hitters, three of whom leave no challenge row at all — is half of what
+// question 5 is asking.
 //
 // A pitcher with no hitting split is not an error: he has no `numberOfPitches`
 // and no `plateAppearances`, and those stay null rather than becoming zero,
@@ -133,13 +134,28 @@ export function exposureRowsFor(roster, { season, level, teamId }) {
 // board divides by. A man traded midseason has his two clubs added together:
 // the board asks how often HE calls for a review, not how often he did it in
 // one uniform.
+//
+// THE NAME COMES WITH HIM, and it is not decoration. This fold is the ONLY
+// place the exposure rows and the challenge rows meet, and 115 of the 659 MLB
+// men it ships leave no challenge row anywhere, so a board built on the fold
+// alone has nothing else to print them by. That is the population the whole
+// table exists to serve (the qualified hitters who never once argued: three of
+// the four are in those 115), and shipping them as bare player ids would make
+// them unprintable.
+//
+// The first non-empty name and position win, which for a traded man is his
+// alphabetically-first club's. Both are the same on every row in practice; the
+// rule is here so the fold is deterministic rather than last-club-wins.
 export function exposureByPlayer(rows) {
   const out = new Map()
   for (const r of rows ?? []) {
     const cur = out.get(r.player_id) ?? {
+      name: '', position: '',
       pitches: null, plateAppearances: null, catcherInnings: null, catcherStarts: null,
     }
     const add = (a, b) => (b == null ? a : (a ?? 0) + Number(b))
+    cur.name = cur.name || r.name || ''
+    cur.position = cur.position || r.position || ''
     cur.pitches = add(cur.pitches, r.pitches)
     cur.plateAppearances = add(cur.plateAppearances, r.plate_appearances)
     cur.catcherInnings = add(cur.catcherInnings, r.catcher_innings)
@@ -147,6 +163,29 @@ export function exposureByPlayer(rows) {
     out.set(r.player_id, cur)
   }
   return out
+}
+
+// Does this man have a denominator at all? A pitcher who never batted and
+// never caught has all four columns null, and there is no pitcher denominator
+// in this table — nothing in statsapi counts pitches THROWN at a challengeable
+// call the way it counts pitches seen.
+//
+// So his row supports no rate and cannot answer "he had the opportunity and
+// never took it" either, which is the only question the list is for. 1,963 of
+// the 3,521 men on a fullSeason roster are that shape, leaving 1,558 shipped;
+// the rest are dropped at export rather than carried as ballast a reader has
+// to filter back out.
+//
+// A NOUGHT IS NOT A DENOMINATOR EITHER, which is why this asks for more than
+// null. A pitcher who never came to the plate carries a hitting split reading
+// `0` rather than no split at all — Kenley Jansen's is 0 pitches and 0 plate
+// appearances — and a zero divides to no rate exactly as a null does
+// (exposureRates). 102 rows are that shape and they are ballast of the same
+// kind, so the test is a REAL OPPORTUNITY: at least one column above nought.
+export function hasExposure(e) {
+  return ['pitches', 'plateAppearances', 'catcherInnings', 'catcherStarts'].some(
+    (f) => (e?.[f] ?? 0) > 0,
+  )
 }
 
 // THE TWO RATES, AND THEY ARE NOT THE SAME KIND OF NUMBER.

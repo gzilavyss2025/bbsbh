@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import {
   umpireBoard,
   umpireSpread,
@@ -33,9 +33,23 @@ import { commas, num2, pct1 } from './format.js'
 // tail sit on one board with the count of everybody between them
 // (`umpireTails`), and that middle is by construction the part with nothing to
 // say: a man near the league rate draws a stub whichever way he leans.
+//
+// NOTHING TO SAY IS NOT NOTHING TO LOOK UP, which the two-ended board forgot.
+// It reached 12 of MLB's 87 qualifying umpires, and the ordinary use of this
+// page is a reader checking the man working tonight's plate — who is in the
+// middle 75 six times out of seven, with no row, no rank and no link to his
+// page. So the whole board is one tap away. The two ends stay the default,
+// because that is the view the bar is drawn for; `showAll` swaps in every
+// qualifying man, in the same order, with the same ranks.
 
 export function UmpireBoard({ summary }) {
   const [umpSort, setUmpSort] = useState('rate')
+  const [showAll, setShowAll] = useState(false)
+  // The control names the table it opens, and the id is generated rather than
+  // written down: a page that ever renders two of these boards would otherwise
+  // give both the same one, and `aria-controls` would point at whichever came
+  // first.
+  const boardId = useId()
   const umps = useMemo(() => (summary ? umpireBoard(summary, umpSort) : []), [summary, umpSort])
 
   // The league's own rate is the baseline every bar is measured from, and the
@@ -87,7 +101,7 @@ export function UmpireBoard({ summary }) {
       </div>
 
       <BoardScroller label="Challenges against each plate umpire">
-        <table className="standings rpt">
+        <table className="standings rpt" id={boardId}>
           <thead>
             <tr>
               {/* The floor rides in the column head it qualifies, where a
@@ -122,19 +136,42 @@ export function UmpireBoard({ summary }) {
             </tr>
           </thead>
           <tbody>
-            {head.map(Row)}
-            {between > 0 && (
-              <tr className="rpt__between">
-                <th scope="row" className="team">
-                  {commas(between)} more between them
-                </th>
-                <td colSpan={5} />
-              </tr>
+            {showAll ? (
+              umps.map(Row)
+            ) : (
+              <>
+                {head.map(Row)}
+                {between > 0 && (
+                  <tr className="rpt__between">
+                    <th scope="row" className="team">
+                      {commas(between)} more between them
+                    </th>
+                    <td colSpan={5} />
+                  </tr>
+                )}
+                {tail.map(Row)}
+              </>
             )}
-            {tail.map(Row)}
           </tbody>
         </table>
       </BoardScroller>
+
+      {/* UNDER THE BOARD, NOT IN IT. The table sits inside a BoardScroller, and
+          a control placed in a scrolling box travels out from under the finger
+          reaching for it. It appears only when there is a middle to open —
+          a Triple-A board thin enough to be returned whole has nothing to
+          show that is not already on screen. */}
+      {between > 0 && (
+        <button
+          type="button"
+          className="rpt-expand"
+          aria-expanded={showAll}
+          aria-controls={boardId}
+          onClick={() => setShowAll((v) => !v)}
+        >
+          {showAll ? 'Show the two ends' : `Show all ${commas(umps.length)}`}
+        </button>
+      )}
     </BroadcastSection>
   )
 }

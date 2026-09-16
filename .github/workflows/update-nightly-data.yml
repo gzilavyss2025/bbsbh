@@ -332,12 +332,23 @@ jobs:
       # evicts anything no longer coded F; the sweep behind it re-ingests a
       # game that has since finished properly. It costs one schedule call a
       # level, so the window is a fortnight rather than the sweep's three days.
+      #
+      # --exposure runs LAST, and it is the only one of the three that is not a
+      # sweep. It re-reads one fullSeason roster a club a level (~60 calls) for
+      # how many pitches each man saw and how many innings he caught — the
+      # denominator behind every per-player rate. It is a SEASON SNAPSHOT, not
+      # an append-only ledger: those totals grow every night, so a run that
+      # skipped it would hold yesterday's denominators against today's
+      # challenge counts and drift further from the truth every day, with
+      # nothing on the page to say so. Left out of this step at first, which is
+      # the same class of miss as the postseason-odds one above.
       - name: ABS challenges
         id: abs-challenges
         continue-on-error: true
         run: |
           node scripts/gen-abs-challenges.mjs --recheck --days=14
           node scripts/gen-abs-challenges.mjs
+          node scripts/gen-abs-challenges.mjs --exposure
       - name: Jerseys
         id: jerseys
         continue-on-error: true

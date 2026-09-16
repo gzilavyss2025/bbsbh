@@ -85,6 +85,16 @@
 // table here works. It touches neither challenge rows nor the game ledger, so
 // it can be run at any time and re-run at no cost but the calls.
 //
+// BECAUSE IT IS A SNAPSHOT, IT HAS TO BE RE-RUN. Left to one manual run the
+// denominators freeze at whatever that night held while the numerators go on
+// growing, and nothing on the page would say so — a rate that drifts quietly is
+// worse than one that is missing. It rides the nightly job for that reason
+// (.github/workflows/update-nightly-data.yml).
+//
+// TWO FILES COME OUT OF THIS JOB. public/data/abs-challenges.json is the report
+// page's; public/data/abs-exposure.json is the per-player denominator list,
+// kept separate because the report page reads none of it.
+//
 // Every pure part of this job — the per-game row derivation, the bank replay,
 // the chances denominator, the roster-to-exposure fold and every export split
 // — lives in scripts/lib/abs/ (rows.mjs, bank.mjs, chances.mjs, exposure.mjs
@@ -101,6 +111,7 @@ import { parseArgs, dateRange } from './lib/args.mjs'
 import {
   auditBank,
   buildExport,
+  buildExposureExport,
   challengeRowsForGame,
   exposureRowsFor,
   gameShape,
@@ -109,6 +120,12 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'abs-challenges.json')
+// THE DENOMINATOR LIST IS A SECOND FILE, not a key in the first. The report
+// page reads none of it, and folding 1,558 players plus their rates into
+// abs-challenges.json took that file from 198 KB to 895 KB — seven hundred
+// kilobytes on every visit to /abs-challenges for data nothing on screen
+// shows. See buildExposureExport in scripts/lib/abs/export.mjs.
+const exposureOut = join(here, '..', 'public', 'data', 'abs-exposure.json')
 const reTablePath = join(here, '..', 'public', 'data', 'run-expectancy.json')
 
 const DEFAULT_DAYS = 3
@@ -206,7 +223,14 @@ async function writeOut() {
     .prepare('SELECT * FROM abs_player_exposure ORDER BY level, team_id, player_id')
     .all()
   const latest = games.reduce((m, g) => (g.season > m ? g.season : m), 0)
-  await writeJsonAtomic(out, buildExport(rows, games, { season: latest || season, exposure }))
+  // BOTH FILES, EVERY RUN. They are cut from the same tables, so writing one
+  // without the other is how a season ends up with a report and a denominator
+  // list that disagree about who played.
+  await writeJsonAtomic(out, buildExport(rows, games, { season: latest || season }))
+  await writeJsonAtomic(
+    exposureOut,
+    buildExposureExport(rows, exposure, { season: latest || season }),
+  )
   // THE CHALLENGE BANK, CHECKED AGAINST EVERY ROW ON FILE. A club cannot spend
   // a challenge it does not hold, so a club-game the model cannot pay for
   // means the REPLENISHMENT RULE has moved, not that a club overdrew. It is

@@ -214,7 +214,8 @@ don't run these by hand.
   `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
   old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
-- `gen-abs-challenges.mjs` → `public/data/abs-challenges.json` — every ABS
+- `gen-abs-challenges.mjs` → `public/data/abs-challenges.json` **and
+  `public/data/abs-exposure.json`** — every ABS
   (Automated Ball-Strike) CHALLENGE of the season, at both levels that run the
   system: MLB (sportId 1, 2026 is its first season) and Triple-A (sportId 11,
   which has run it for several). SQLite-backed (`abs-challenges` group,
@@ -243,10 +244,15 @@ don't run these by hand.
   because it would be a second pass over identical rows (ADR-0075).
   A CHANCE is one half-inning a club played while it still held a challenge,
   derived in `scripts/lib/abs/chances.mjs`. Both clubs are exposed in every
-  half-inning, so a played half offers two. It matters because the raw count
+  half-inning, so a played half offers two. THE HALF IS THE UNIT, not the
+  inning: `replayBank` records what a club holds entering each half (`atHalf`),
+  because a club that spends its last challenge in the top of the seventh could
+  not have argued in the bottom of it. Read per inning the denominator
+  over-counts by 0.62% at MLB and 0.80% at Triple-A, concentrated in the late
+  innings the finding is measured across. It matters because the raw count
   by inning misleads twice — not every game reaches the ninth, and a club that
   has lost two cannot ask at all — and correcting for both INVERTS the answer:
-  MLB runs 10.20 challenges per 100 chances in the first against 21.04 in the
+  MLB runs 10.21 challenges per 100 chances in the first against 21.35 in the
   ninth, while the share won falls 61.2% to 40.5%. The role cut rides the same
   CLUB denominator so the three roles add back up to the club figure; a role's
   own half of the chances would sum to twice it.
@@ -271,6 +277,19 @@ don't run these by hand.
   the first shape and cannot be paid for — 815094 team 102 and 816599 team 416,
   checked row by row against their feeds, with the other club in each game
   coming out legal — so they are named in `TOLERATED` rather than floored away.
+  TWO FILES COME OUT OF EVERY RUN, and the split is a size decision.
+  `abs-challenges.json` (206 KB) is what `/abs-challenges` fetches;
+  `abs-exposure.json` (418 KB) is the per-player DENOMINATOR list, which no
+  surface reads yet. Folded into the report file they took it from 198 KB to
+  895 KB — 369 KB for the list itself and 321 KB for ten exposure fields on
+  every one of 1,553 `byPlayer` rows — on a file every visitor downloads whole
+  and shows none of it on. So `byPlayer` carries a player's CHALLENGE totals
+  only, `abs-exposure.json` carries every denominator and every rate, and the
+  board that comes to need them (issues #1063, #1066, #1069) fetches its own
+  file. A man with no opportunity at all is dropped rather than shipped as
+  nulls: 1,963 of the 3,521 on a fullSeason roster are pitchers who never
+  batted and never caught, and a nought divides to no rate exactly as a null
+  does.
   `--exposure` IS THE ONE FETCH THIS JOB MAKES THAT IS NOT A GAME, and it
   fills the third table, `abs_player_exposure`: one row per player per club,
   from one `rosterType=fullSeason` call a club a level (~60 calls) with the
@@ -280,7 +299,10 @@ don't run these by hand.
   nothing in statsapi counts pitches RECEIVED, and the two rates are named
   separately (`per1000Pitches`, `per9Caught`) so no surface can sort them into
   one list. It is a SEASON SNAPSHOT, not an append-only ledger — a player's
-  totals grow all year, so a re-run REPLACES a club's rows.
+  totals grow all year, so a re-run REPLACES a club's rows — **which is why
+  the nightly runs it**, after the recheck and the sweep. Left to one manual
+  run the denominators freeze while the numerators keep growing, and a rate
+  that drifts quietly is worse than one that is missing.
   Three traps, each verified live. A traded player carries one split per club
   PLUS an aggregate that has **no `team` key at all** and is listed FIRST, so
   rows are matched on `split.team.id`. `innings` is written in OUTS — "1020.2"

@@ -15,19 +15,19 @@ That reading is an artefact of the denominator, in two separate ways.
 **Not every game reaches the ninth, and in half of the ones that do the home
 club never bats.** A count that divides by "games" treats the ninth as though it
 were offered as often as the first. It is not. The season's own ledger says the
-ninth offers about 64% of the half-innings the first does.
+ninth offers about 63% of the half-innings the first does.
 
 **A club that has lost two challenges cannot ask at all.** By the ninth a large
 share of the league is holding nothing, so its silence is the rulebook rather
 than a decision. Counting those clubs in the denominator scores them as having
 declined an opportunity they never had.
 
-Correct for both and the answer inverts. Per hundred chances MLB runs **10.20 in
-the first against 21.04 in the ninth** — the appetite MORE THAN DOUBLES, and the
+Correct for both and the answer inverts. Per hundred chances MLB runs **10.21 in
+the first against 21.35 in the ninth** — the appetite MORE THAN DOUBLES, and the
 raw count hides half of that rise because the chances disappear at the same time
 the asking climbs. The share won falls the other way over the same span, **61.2%
 to 40.5%**. Clubs ask more as the game gets late, and are right less often when
-they do. Triple-A gives the same shape: 10.44 to 23.10, won 58.3% to 41.5%.
+they do. Triple-A gives the same shape: 10.44 to 23.50, won 58.3% to 41.5%.
 
 ## Decision
 
@@ -36,7 +36,16 @@ they do. Triple-A gives the same shape: 10.44 to 23.10, won 58.3% to 41.5%.
 Both clubs are exposed in every half-inning — the batting club through its
 batter, the fielding club through its catcher or its pitcher — so a played
 half-inning offers two chances, one to each club, and only to a club that is
-still armed. The derivation is pure, in `scripts/lib/abs/chances.mjs`, and is
+still armed.
+
+**The half is the unit, and the inning is too coarse for it.** A club that spends
+its last challenge in the top of the seventh holds nothing in the bottom of it,
+so the bottom was never a chance. `replayBank` records what a club holds
+entering each *half* (`atHalf`) rather than each inning, and the denominator
+asks per half. Read per inning it over-counts by roughly one half-inning per
+emptying — 0.62% of MLB chances and 0.80% of Triple-A's — and that error is
+concentrated in the late innings the finding is measured across, where it works
+*against* the rise it is measuring. The derivation is pure, in `scripts/lib/abs/chances.mjs`, and is
 computed at export time like every other split (ADR-0021's rule: the database
 stores facts).
 

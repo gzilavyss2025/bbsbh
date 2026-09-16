@@ -587,6 +587,20 @@ for each generator; the reader modules:
   table — `callSplitAnomalies` exists to surface the day that stops holding
   rather than to assert it silently. Spoiler-free: a challenge is a ball-strike
   judgment, not a run.
+  THE GENERATOR WRITES A SECOND FILE THIS MODULE DOES NOT READ:
+  `public/data/abs-exposure.json`, one row per player per level carrying how
+  much baseball he saw (pitches, plate appearances, innings caught, starts
+  behind the plate), his challenges split by the job he was doing, and the
+  rates those make. It is separate because the report page shows none of it and
+  the file is twice the size of the one the page fetches — folded in, every
+  visitor downloaded 895 KB instead of 206 KB. A board that comes to need the
+  rates (issues #1063, #1066, #1069) adds its own `staticJson` reader here;
+  until then nothing fetches it. Two things it knows that `byPlayer` cannot:
+  it holds the men who NEVER challenged, who leave no challenge row at all and
+  are the finding the list exists for, and its two rates are NOT the same kind
+  of number — `per1000Pitches` is a real count of pitches a batter stood in
+  against, `per9Caught` a stand-in, because nothing in statsapi counts pitches
+  RECEIVED. They are named apart so no surface can sort them into one list.
 - `around-the-game/clubs.js` — the one club-identity lookup those boards share,
   off the static `teams.json`. `clubShort` (Padres) is what a board ROW uses
   and `clubName` (San Diego Padres) what prose uses; the full name in a row

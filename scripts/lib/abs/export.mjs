@@ -26,7 +26,7 @@
 
 import { replayBank } from './bank.mjs'
 import { chancesByInning, challengesByInningRole } from './chances.mjs'
-import { exposureByPlayer, exposureRates } from './exposure.mjs'
+import { exposureByPlayer, exposureRates, hasExposure } from './exposure.mjs'
 import { ROLES } from './rows.mjs'
 
 // The four roles a challenge can come from. A batter challenges a called
@@ -200,7 +200,7 @@ function overturnCard(row, swing) {
 // umpire, which is what lets a club that was never challenged still appear
 // with a games denominator — a rate over "games in which somebody challenged"
 // would flatter the clubs nobody bothers to challenge.
-export function summarizeLevel(rows, games, exposure = []) {
+export function summarizeLevel(rows, games) {
   const total = rows.length
   const success = rows.filter((r) => r.outcome === 'success').length
 
@@ -240,21 +240,19 @@ export function summarizeLevel(rows, games, exposure = []) {
 
     if (r.player_id != null) {
       if (!players.has(r.player_id)) {
-        // `role` is the role of his FIRST challenge and stays that way for
-        // compatibility; `byRole` is the honest split, because a catcher who
-        // also hits challenges from two places and only his own split can be
-        // divided by the matching denominator (exposure.mjs).
+        // `role` is the role of his FIRST challenge, which is all this list
+        // claims. THE HONEST SPLIT IS NOT HERE: a catcher who also hits
+        // challenges from two places, and each of his counts can only be
+        // divided by its own denominator, so the split lives beside those
+        // denominators in abs-exposure.json (rolesByPlayer, exposure.mjs).
         players.set(r.player_id, {
           ...tally(),
           name: r.player_name ?? '',
           teamId: r.team_id,
           role: r.role,
-          byRole: {},
         })
       }
-      const p = players.get(r.player_id)
-      add(p, r)
-      p.byRole[r.role] = (p.byRole[r.role] ?? 0) + 1
+      add(players.get(r.player_id), r)
     }
 
     if (r.outcome === 'success' && r.favor != null) {
@@ -277,11 +275,6 @@ export function summarizeLevel(rows, games, exposure = []) {
     }
     if (g.umpire_id != null) umpGames.set(g.umpire_id, (umpGames.get(g.umpire_id) ?? 0) + 1)
   }
-
-  // HOW MUCH BASEBALL EACH MAN SAW, folded across his clubs. A man traded
-  // midseason is asked how often HE calls for a review, not how often he did
-  // it in one uniform, so his two clubs add up (exposure.mjs).
-  const seen = exposureByPlayer(exposure)
 
   const ranOut = ranOutByTeam(rows)
   const dates = games.map((g) => g.date).filter(Boolean).sort()
@@ -369,11 +362,12 @@ export function summarizeLevel(rows, games, exposure = []) {
         perGame: rate(t.n, umpGames.get(umpireId) ?? 0),
       }))
       .sort((a, b) => a.umpireId - b.umpireId),
-    // Each player's own totals, and the denominator they sit against. The two
-    // rates are NOT the same kind of number and are named separately so no
-    // surface can sort them into one list: a batter's is per 1,000 pitches he
-    // really saw, a catcher's per 9 innings caught, because nothing in
-    // statsapi counts pitches RECEIVED.
+    // Each player's own challenge totals, and NOTHING HE IS DIVIDED BY. The
+    // denominators and the rates they make live in abs-exposure.json
+    // (buildExposureExport): they are ten fields on every one of 1,553 rows,
+    // 321 KB on a file the report page downloads whole and shows none of them
+    // on, and the board that will want them wants the men who NEVER
+    // challenged too — who are not in this list at all.
     byPlayer: [...players]
       .map(([playerId, t]) => ({
         playerId,
@@ -381,33 +375,96 @@ export function summarizeLevel(rows, games, exposure = []) {
         teamId: t.teamId,
         role: t.role,
         ...sealed(t),
-        ...exposureRates(t.byRole, seen.get(playerId)),
       }))
-      .sort((a, b) => a.playerId - b.playerId),
-    // EVERY MAN WHO PLAYED, not only the ones who challenged. Seven qualified
-    // MLB hitters never called for a review all season, and a board built from
-    // the challenge rows alone cannot see them — which is half of what the
-    // question is asking. Shipped as its own list rather than folded into
-    // byPlayer so the reader decides the qualifying floor.
-    exposure: [...seen]
-      .map(([playerId, e]) => ({ playerId, ...e }))
       .sort((a, b) => a.playerId - b.playerId),
     biggest: best ? overturnCard(best.row, best.swing) : null,
   }
 }
 
-// The whole file. Rows and games arrive as they come out of SQLite (snake_case
-// columns); the split by level happens here so a caller never has to know
-// which levels are on file.
-export function buildExport(rows, games, { season, generatedAt, exposure = [] } = {}) {
+// A player's challenges split BY THE JOB HE WAS DOING, which is what each rate
+// has to be taken over. Francisco Alvarez called for 102 reviews, some standing
+// at the plate and some squatting behind it, and dividing all 102 by the
+// pitches he saw as a BATTER invents a man who argues with every other pitch
+// (exposure.mjs). It is taken over the rows of ONE level, because a man who
+// played at both is two different populations with two different denominators.
+function rolesByPlayer(rows) {
+  const out = new Map()
+  for (const r of rows ?? []) {
+    if (r.player_id == null) continue
+    const cur = out.get(r.player_id) ?? {}
+    cur[r.role] = (cur[r.role] ?? 0) + 1
+    out.set(r.player_id, cur)
+  }
+  return out
+}
+
+// The whole report file. Rows and games arrive as they come out of SQLite
+// (snake_case columns); the split by level happens here so a caller never has
+// to know which levels are on file.
+//
+// IT CARRIES NO DENOMINATOR A PLAYER IS DIVIDED BY. Everything that needs the
+// roster call is in the other file (buildExposureExport), because this one is
+// fetched by every visitor to /abs-challenges and that one is fetched by the
+// board that asks the question.
+export function buildExport(rows, games, { season, generatedAt } = {}) {
   const levels = {}
   const names = [...new Set([...games.map((g) => g.level), ...rows.map((r) => r.level)])].sort()
   for (const level of names) {
     levels[level] = summarizeLevel(
       rows.filter((r) => r.level === level),
       games.filter((g) => g.level === level),
-      exposure.filter((e) => e.level === level),
     )
+  }
+  return {
+    version: 1,
+    generatedAt: generatedAt ?? new Date().toISOString(),
+    season: season ?? null,
+    levels,
+  }
+}
+
+// EVERY MAN WHO PLAYED, not only the ones who challenged — and its OWN FILE.
+//
+// THE QUESTION THIS FILE ANSWERS is how often a man ASKS, which is not how
+// often he argues: "Yelich challenged 14 times" is a fact about how much he
+// played. Divided by the pitches he stood in against it becomes a habit, and
+// the spread is so wide that the mean describes nobody — four qualified MLB
+// hitters never challenged once all season, and Gary Sánchez called for 32 in
+// 1,085 pitches.
+//
+// WHY IT IS NOT IN abs-challenges.json, twice over.
+//
+// The men who never challenged ARE THE FINDING, and most of them leave no
+// challenge row anywhere: 115 of the 659 MLB men here have no byPlayer entry to
+// hang off, and three of the four qualified hitters are among them. They need a
+// list of their own whatever else is decided.
+//
+// And the ten fields cost 321 KB across 1,553 byPlayer rows on a file every
+// visitor to /abs-challenges downloads whole and shows none of them on. Kept
+// there the report file ran 526 KB against main's 198 KB; moved here it is
+// 206 KB, and the board that comes to want the rates (issues #1063, #1066,
+// #1069) fetches the file that has them.
+//
+// Rows with no denominator at all are dropped rather than shipped as nulls
+// (`hasExposure`): a pitcher who never batted and never caught supports no
+// rate, and cannot answer the never-challenged question either, because there
+// is nothing he had the opportunity to do.
+export function buildExposureExport(rows, exposure, { season, generatedAt } = {}) {
+  const levels = {}
+  for (const level of [...new Set((exposure ?? []).map((e) => e.level))].sort()) {
+    const seen = exposureByPlayer((exposure ?? []).filter((e) => e.level === level))
+    const roles = rolesByPlayer((rows ?? []).filter((r) => r.level === level))
+    levels[level] = {
+      players: [...seen]
+        .filter(([, e]) => hasExposure(e))
+        .map(([playerId, e]) => ({
+          playerId,
+          name: e.name,
+          position: e.position,
+          ...exposureRates(roles.get(playerId), e),
+        }))
+        .sort((a, b) => a.playerId - b.playerId),
+    }
   }
   return {
     version: 1,

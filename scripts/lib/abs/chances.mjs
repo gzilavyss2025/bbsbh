@@ -4,8 +4,8 @@
 // bank.mjs replays the bank, export.mjs ships the file).
 //
 // WHY THE RAW COUNT MISLEADS, TWICE. Ask which innings draw the most
-// challenges and the rows answer that the ninth (1,216) barely beats the
-// eighth (1,151), which reads as a flat appetite that sags at the end. Both
+// challenges and the rows answer that the ninth (1,224) barely beats the
+// eighth (1,157), which reads as a flat appetite that sags at the end. Both
 // halves of that are an artefact of the denominator:
 //
 //   1. NOT EVERY GAME REACHES THE NINTH, and in a good half of the ones that
@@ -15,11 +15,14 @@
 //      than a decision.
 //
 // Divide by the half-innings a club actually played holding a challenge and
-// the answer inverts: 10.20 challenges per 100 chances in the first against
-// 21.36 in the ninth. The appetite MORE THAN DOUBLES, and the raw count hides
+// the answer inverts: 10.21 challenges per 100 chances in the first against
+// 21.35 in the ninth. The appetite MORE THAN DOUBLES, and the raw count hides
 // half of that rise. The share won falls the other way across the same span,
-// 60.9% to 40.5%, which is the finding: clubs ask more as the game gets late
+// 61.2% to 40.5%, which is the finding: clubs ask more as the game gets late
 // and are right less often when they do.
+//
+// Measured over 4,418 games (2,269 MLB, 2,149 Triple-A) on 2026-09-16, the cut
+// docs/adr/0075 was written against. The figures move as the season runs.
 //
 // BOTH CLUBS ARE EXPOSED IN EVERY HALF-INNING — the batting club through its
 // batter, the fielding club through its catcher or its pitcher — so a played
@@ -34,10 +37,10 @@
 // Ship the three roles over the club denominator and they add up to the club
 // figure, which is the only way the panel can be read.
 
-import { replayBank } from './bank.mjs'
+import { HALVES, halfKey, replayBank } from './bank.mjs'
 import { ROLES } from './rows.mjs'
 
-// How many half-innings of inning `i` were played, given the game's shape.
+// Was this one half-inning played, given the game's shape?
 //
 // The top of an inning the game reached was always played — reaching it is
 // what "final inning" means. The bottom was played in every inning BEFORE the
@@ -49,10 +52,17 @@ import { ROLES } from './rows.mjs'
 // `runs: 0` (verified on gamePk 824872 against 823413). So `bottom_played` is
 // written from the key's presence, never from its value, and a reader that
 // tested `home.runs > 0` would drop every scoreless home half in the season.
+export function halfPlayed(inning, half, finalInning, bottomPlayed) {
+  if (inning > finalInning) return false
+  if (half === 'top') return true
+  return inning < finalInning || Boolean(bottomPlayed)
+}
+
+// The same question asked of a whole inning: how many of its two halves were
+// played. Kept because the shape of a game reads more naturally as a count than
+// as two booleans, and because the chances loop needs the halves by name.
 export function halvesPlayed(inning, finalInning, bottomPlayed) {
-  if (inning > finalInning) return 0
-  const bottom = inning < finalInning || Boolean(bottomPlayed)
-  return 1 + (bottom ? 1 : 0)
+  return HALVES.filter((h) => halfPlayed(inning, h, finalInning, bottomPlayed)).length
 }
 
 // THE THREE COLUMNS, READ OFF A LINESCORE. One function for both callers,
@@ -113,9 +123,16 @@ function byGameTeam(rows) {
 // logged so the export can say "every game counted" instead of printing a
 // number that reads as data loss (docs/adr/0075).
 //
-// The bank is replayed ONCE per club-game, not once per inning: `atStart`
-// already holds what the club had at the top of every inning, and asking
-// armedAt nine times a game would replay the same night nine times.
+// The bank is replayed ONCE per club-game, not once per half: `atHalf` already
+// holds what the club had entering every one of them, and asking armedAt
+// eighteen times a game would replay the same night eighteen times.
+//
+// AND IT IS ASKED PER HALF, NOT PER INNING. A club that spends its last
+// challenge in the top of the seventh cannot argue in the bottom of it, and an
+// inning-level reading credits it that half anyway (bank.mjs). It is 0.62% of
+// MLB's chances and 0.80% of Triple-A's, and it falls in the late innings the
+// appetite finding is measured across, so it is counted honestly rather than
+// absorbed.
 export function chancesByInning(rows, games) {
   const challenges = byGameTeam(rows)
   const byInning = new Map()
@@ -137,10 +154,14 @@ export function chancesByInning(rows, games) {
       // an extra inning it never challenged in still re-arms it, and the
       // SCHEDULED length goes in so the eighth of a seven-inning game counts
       // as the extra inning it is (bank.mjs).
-      const { atStart } = replayBank(challenges.get(`${g.game_pk}:${teamId}`) ?? [], last, scheduled)
+      const { atHalf } = replayBank(challenges.get(`${g.game_pk}:${teamId}`) ?? [], last, scheduled)
       for (let inning = 1; inning <= last; inning++) {
-        if ((atStart.get(inning) ?? 0) === 0) continue
-        const halves = halvesPlayed(inning, last, g.bottom_played)
+        let halves = 0
+        for (const half of HALVES) {
+          if (!halfPlayed(inning, half, last, g.bottom_played)) continue
+          if ((atHalf.get(halfKey(inning, half)) ?? 0) === 0) continue
+          halves += 1
+        }
         if (halves === 0) continue
         byInning.set(inning, (byInning.get(inning) ?? 0) + halves)
       }

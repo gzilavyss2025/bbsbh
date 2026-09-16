@@ -37,12 +37,15 @@ export {
   armedAt,
   auditBank,
   firstExtraInning,
+  halfKey,
+  HALVES,
   ISSUED,
   FIRST_EXTRA_INNING,
   REGULATION_INNINGS,
 } from './bank.mjs'
 export {
   gameShape,
+  halfPlayed,
   halvesPlayed,
   chancesByInning,
   challengesByInningRole,
@@ -52,6 +55,7 @@ export {
   exposureRowsFor,
   exposureByPlayer,
   exposureRates,
+  hasExposure,
   CATCHER,
 } from './exposure.mjs'
 export {
@@ -60,4 +64,5 @@ export {
   challengerGain,
   summarizeLevel,
   buildExport,
+  buildExposureExport,
 } from './export.mjs'
