@@ -623,13 +623,44 @@ CREATE TABLE IF NOT EXISTS abs_challenges (
 -- the plate umpire are carried here because every rate on the report page
 -- needs a per-club or per-umpire GAMES figure, and a game nobody challenged
 -- leaves no row in abs_challenges to count.
+--
+-- THE LAST THREE COLUMNS ARE THE GAME'S SHAPE, and they are here because
+-- "challenges per inning" is a misleading figure without them. Not every game
+-- reaches the ninth, and a club that has lost two cannot ask at all, so the
+-- later innings look quiet partly because the CHANCES are gone rather than
+-- because the appetite is. Counting half-innings played needs the length of
+-- the game, which no other column carries. See scripts/lib/abs/chances.mjs
+-- and docs/adr/0075.
+--
+-- `final_inning` is the last inning the game reached and `bottom_played` says
+-- whether the home club batted in it — 0 for a nine-inning game the home club
+-- led after the top of the ninth. The feed marks that case by OMITTING the
+-- `runs` key from the last inning's `home` object rather than by writing a
+-- zero (verified on gamePk 824872 against 823413, which did bat), so the test
+-- is the key's presence, never its value.
+--
+-- `scheduled_innings` is the length the game was SCHEDULED for, and storing it
+-- is not optional. Extra innings begin at `scheduled_innings + 1`, which is
+-- the tenth in every MLB game and the EIGHTH in the 171 seven-inning Triple-A
+-- doubleheader games on file. A club that has run out is armed again in
+-- extras, so a replay that assumed nine would call a club unarmed in the
+-- eighth of one of those games when the rule has just re-armed it — 15 times
+-- on the season. FIRST_EXTRA_INNING in scripts/lib/abs/bank.mjs reads this.
+--
+-- All three are NULL on a game swept before they existed, and a game that
+-- still has no `final_inning` is dropped from the chances denominator rather
+-- than counted as nought innings. `--recheck` backfills them from the
+-- schedule row it already reads, so the NULLs are transient by design.
 CREATE TABLE IF NOT EXISTS abs_ingested_games (
-  game_pk      INTEGER NOT NULL PRIMARY KEY,
-  date         TEXT NOT NULL,
-  season       INTEGER NOT NULL,
-  level        TEXT NOT NULL,
-  away_team_id INTEGER,
-  home_team_id INTEGER,
-  umpire_id    INTEGER,
-  challenges   INTEGER NOT NULL DEFAULT 0
+  game_pk          INTEGER NOT NULL PRIMARY KEY,
+  date             TEXT NOT NULL,
+  season           INTEGER NOT NULL,
+  level            TEXT NOT NULL,
+  away_team_id     INTEGER,
+  home_team_id     INTEGER,
+  umpire_id        INTEGER,
+  challenges       INTEGER NOT NULL DEFAULT 0,
+  final_inning     INTEGER,
+  bottom_played    INTEGER,
+  scheduled_innings INTEGER
 );
