@@ -9,7 +9,8 @@
 // club that called for no challenges and a club whose figure has not been
 // computed are different facts, and 0.0% would state the first when it means
 // the second. The generator leaves a genuinely absent cut null on purpose
-// (scripts/lib/abs-challenges.mjs), so the page has to carry that through.
+// (`rate` in scripts/lib/abs/export.mjs), so the page has to carry that
+// through.
 
 export const pct1 = (x) => (x == null ? '—' : `${(x * 100).toFixed(1)}%`)
 export const num1 = (x) => (x == null ? '—' : x.toFixed(1))

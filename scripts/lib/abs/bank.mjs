@@ -60,7 +60,28 @@
 // What a club is issued at the first pitch.
 export const ISSUED = 2
 
-// The first inning at which a club that has run out is armed again.
+// The first inning at which a club that has run out is armed again — in a
+// NINE-INNING game, which is every MLB game and all but 171 of Triple-A's.
+//
+// IT IS NOT NINE EVERYWHERE, and the ledger holds the exception. 171 Triple-A
+// games on file are seven-inning doubleheader games (`scheduledInnings` on the
+// schedule row says so), 22 of them went past the seventh, and 23 challenges
+// on file were called in the 8th or later of one. In those games extras start
+// at the EIGHTH, so this constant is two innings late.
+//
+// Nothing shipped is wrong today. replayBank is only ever called without a
+// length, so it tops a club up solely at innings it actually challenged in,
+// and on all 16 affected club-games the model and the real rule agree — the
+// audit is green because no club emptied before the eighth in one of them.
+//
+// IT GOES WRONG THE MOMENT A LENGTH IS PASSED, which is exactly what #1058
+// adds. Replaying those 22 games with their real length asks `armedAt` about
+// innings the club never challenged in, and the answer is wrong 15 times: the
+// model calls a club unarmed in the 8th when the rule has just re-armed it.
+// So #1058 stores `scheduled_innings` beside `final_inning` — the schedule row
+// --recheck already reads carries it, at no extra call — and this becomes
+// `scheduledInnings + 1`. Until then, do not pass `innings` for a Triple-A
+// game without it.
 export const FIRST_EXTRA_INNING = 10
 
 // TWO CLUB-GAMES THE RULE CANNOT PAY FOR, AND THEY ARE MLB'S DATA, NOT OURS.
