@@ -25,6 +25,7 @@
 // split gate.js and gen-gate.mjs already use.
 
 import { replayBank } from './bank.mjs'
+import { exposureByPlayer, exposureRates } from './exposure.mjs'
 
 // The four roles a challenge can come from. A batter challenges a called
 // strike against him; a catcher or a pitcher challenges a called ball. `other`
@@ -195,7 +196,7 @@ function overturnCard(row, swing) {
 // umpire, which is what lets a club that was never challenged still appear
 // with a games denominator — a rate over "games in which somebody challenged"
 // would flatter the clubs nobody bothers to challenge.
-export function summarizeLevel(rows, games) {
+export function summarizeLevel(rows, games, exposure = []) {
   const total = rows.length
   const success = rows.filter((r) => r.outcome === 'success').length
 
@@ -235,9 +236,21 @@ export function summarizeLevel(rows, games) {
 
     if (r.player_id != null) {
       if (!players.has(r.player_id)) {
-        players.set(r.player_id, { ...tally(), name: r.player_name ?? '', teamId: r.team_id, role: r.role })
+        // `role` is the role of his FIRST challenge and stays that way for
+        // compatibility; `byRole` is the honest split, because a catcher who
+        // also hits challenges from two places and only his own split can be
+        // divided by the matching denominator (exposure.mjs).
+        players.set(r.player_id, {
+          ...tally(),
+          name: r.player_name ?? '',
+          teamId: r.team_id,
+          role: r.role,
+          byRole: {},
+        })
       }
-      add(players.get(r.player_id), r)
+      const p = players.get(r.player_id)
+      add(p, r)
+      p.byRole[r.role] = (p.byRole[r.role] ?? 0) + 1
     }
 
     if (r.outcome === 'success' && r.favor != null) {
@@ -260,6 +273,11 @@ export function summarizeLevel(rows, games) {
     }
     if (g.umpire_id != null) umpGames.set(g.umpire_id, (umpGames.get(g.umpire_id) ?? 0) + 1)
   }
+
+  // HOW MUCH BASEBALL EACH MAN SAW, folded across his clubs. A man traded
+  // midseason is asked how often HE calls for a review, not how often he did
+  // it in one uniform, so his two clubs add up (exposure.mjs).
+  const seen = exposureByPlayer(exposure)
 
   const ranOut = ranOutByTeam(rows)
   const dates = games.map((g) => g.date).filter(Boolean).sort()
@@ -314,6 +332,11 @@ export function summarizeLevel(rows, games) {
         perGame: rate(t.n, umpGames.get(umpireId) ?? 0),
       }))
       .sort((a, b) => a.umpireId - b.umpireId),
+    // Each player's own totals, and the denominator they sit against. The two
+    // rates are NOT the same kind of number and are named separately so no
+    // surface can sort them into one list: a batter's is per 1,000 pitches he
+    // really saw, a catcher's per 9 innings caught, because nothing in
+    // statsapi counts pitches RECEIVED.
     byPlayer: [...players]
       .map(([playerId, t]) => ({
         playerId,
@@ -321,7 +344,16 @@ export function summarizeLevel(rows, games) {
         teamId: t.teamId,
         role: t.role,
         ...sealed(t),
+        ...exposureRates(t.byRole, seen.get(playerId)),
       }))
+      .sort((a, b) => a.playerId - b.playerId),
+    // EVERY MAN WHO PLAYED, not only the ones who challenged. Seven qualified
+    // MLB hitters never called for a review all season, and a board built from
+    // the challenge rows alone cannot see them — which is half of what the
+    // question is asking. Shipped as its own list rather than folded into
+    // byPlayer so the reader decides the qualifying floor.
+    exposure: [...seen]
+      .map(([playerId, e]) => ({ playerId, ...e }))
       .sort((a, b) => a.playerId - b.playerId),
     biggest: best ? overturnCard(best.row, best.swing) : null,
   }
@@ -330,13 +362,14 @@ export function summarizeLevel(rows, games) {
 // The whole file. Rows and games arrive as they come out of SQLite (snake_case
 // columns); the split by level happens here so a caller never has to know
 // which levels are on file.
-export function buildExport(rows, games, { season, generatedAt } = {}) {
+export function buildExport(rows, games, { season, generatedAt, exposure = [] } = {}) {
   const levels = {}
   const names = [...new Set([...games.map((g) => g.level), ...rows.map((r) => r.level)])].sort()
   for (const level of names) {
     levels[level] = summarizeLevel(
       rows.filter((r) => r.level === level),
       games.filter((g) => g.level === level),
+      exposure.filter((e) => e.level === level),
     )
   }
   return {

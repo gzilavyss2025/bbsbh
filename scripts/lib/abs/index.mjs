@@ -1,6 +1,7 @@
-// The pure half of gen-abs-challenges.mjs, in three parts: turn ONE Final
+// The pure half of gen-abs-challenges.mjs, in four parts: turn ONE Final
 // game's feed into challenge rows (rows.mjs), replay a club's challenge bank
-// inning by inning (bank.mjs), and turn the accumulated rows plus the
+// inning by inning (bank.mjs), turn one club's roster into how much baseball
+// each man saw (exposure.mjs), and turn the accumulated rows plus the
 // swept-games ledger into public/data/abs-challenges.json (export.mjs).
 //
 // THE SEAM BETWEEN THEM IS THE DISCIPLINE THE WHOLE JOB RESTS ON. The database
@@ -36,6 +37,13 @@ export {
   ISSUED,
   FIRST_EXTRA_INNING,
 } from './bank.mjs'
+export {
+  inningsFromOuts,
+  exposureRowsFor,
+  exposureByPlayer,
+  exposureRates,
+  CATCHER,
+} from './exposure.mjs'
 export {
   ROLES,
   MISS_BANDS,

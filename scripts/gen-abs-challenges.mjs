@@ -54,6 +54,7 @@
 //   node scripts/gen-abs-challenges.mjs --since=2026-03-26 --sports=11
 //   node scripts/gen-abs-challenges.mjs --export-only
 //   node scripts/gen-abs-challenges.mjs --recheck [--since=2026-03-26]
+//   node scripts/gen-abs-challenges.mjs --exposure [--sports=1]
 //   node scripts/gen-abs-challenges.mjs --rebuild --since=2026-03-26
 //
 // The --since form is the one-time backfill (2026-03-26 is Opening Day, and
@@ -62,11 +63,21 @@
 // level is added to a file that already holds the other. --export-only
 // re-derives every split from the rows already on file and writes the JSON: it
 // is what a new cut of the data costs, because the database stores FACTS and
-// scripts/lib/abs/ derives everything else. --rebuild clears both tables
-// first, for a schema change that makes old rows unusable.
+// scripts/lib/abs/ derives everything else. --rebuild clears the challenge
+// tables first, for a schema change that makes old rows unusable.
 //
-// Every pure part of this job — the per-game row derivation and every export
-// split — lives in scripts/lib/abs/ (rows.mjs and export.mjs, behind
+// --exposure IS THE ONE FETCH THIS JOB MAKES THAT IS NOT A GAME. It reads one
+// fullSeason roster a club a level, about 60 calls, for how many pitches each
+// man saw and how many innings he caught — the denominator that turns "he
+// challenged 14 times" into "he challenges once every 40 plate appearances".
+// It is a SEASON SNAPSHOT: a player's totals grow all year, so it REPLACES a
+// club's rows rather than appending, which is the opposite of how every other
+// table here works. It touches neither challenge rows nor the game ledger, so
+// it can be run at any time and re-run at no cost but the calls.
+//
+// Every pure part of this job — the per-game row derivation, the bank replay,
+// the roster-to-exposure fold and every export split — lives in
+// scripts/lib/abs/ (rows.mjs, bank.mjs, exposure.mjs and export.mjs, behind
 // index.mjs), because this file does its work at import and so nothing inside
 // it could be unit-tested. This file is the sweep: dates in, feeds fetched,
 // rows written, JSON out.
@@ -76,7 +87,13 @@ import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
-import { auditBank, buildExport, challengeRowsForGame, isPlayedGame } from './lib/abs/index.mjs'
+import {
+  auditBank,
+  buildExport,
+  challengeRowsForGame,
+  exposureRowsFor,
+  isPlayedGame,
+} from './lib/abs/index.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'abs-challenges.json')
@@ -106,7 +123,9 @@ const GAME_TYPES = 'R,F,D,L,W'
 const reTable = await readJsonOr(reTablePath, null)
 if (!reTable) console.log('run-expectancy.json not found — favor will be null this run')
 
-async function mapWithConcurrency(items, limit, fn) {
+// `label` names the failing item in the log. The pool carries game targets in
+// the sweep and bare club ids in --exposure, so it cannot assume a gamePk.
+async function mapWithConcurrency(items, limit, fn, label = (it) => `gamePk ${it?.gamePk}`) {
   const results = new Array(items.length)
   let cursor = 0
   async function worker() {
@@ -115,7 +134,7 @@ async function mapWithConcurrency(items, limit, fn) {
       try {
         results[i] = await fn(items[i])
       } catch (err) {
-        console.error(`gamePk ${items[i]?.gamePk}: ${err.message}`)
+        console.error(`${label(items[i])}: ${err.message}`)
         results[i] = null
       }
     }
@@ -146,12 +165,28 @@ const markIngested = db.prepare(
    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 )
 
+// A club's exposure is REWRITTEN, never added to. The delete is scoped to the
+// one club and the one season, so a run over MLB alone cannot disturb Triple-A
+// and a failed club leaves the others standing.
+const clearExposure = db.prepare(
+  'DELETE FROM abs_player_exposure WHERE season = ? AND level = ? AND team_id = ?',
+)
+const insertExposure = db.prepare(
+  `INSERT OR REPLACE INTO abs_player_exposure
+     (season, level, team_id, player_id, name, position,
+      pitches, plate_appearances, catcher_innings, catcher_starts)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+)
+
 async function writeOut() {
   await dumpGroup(db, 'abs-challenges')
   const rows = db.prepare('SELECT * FROM abs_challenges ORDER BY game_pk, seq').all()
   const games = db.prepare('SELECT * FROM abs_ingested_games ORDER BY game_pk').all()
+  const exposure = db
+    .prepare('SELECT * FROM abs_player_exposure ORDER BY level, team_id, player_id')
+    .all()
   const latest = games.reduce((m, g) => (g.season > m ? g.season : m), 0)
-  await writeJsonAtomic(out, buildExport(rows, games, { season: latest || season }))
+  await writeJsonAtomic(out, buildExport(rows, games, { season: latest || season, exposure }))
   // THE CHALLENGE BANK, CHECKED AGAINST EVERY ROW ON FILE. A club cannot spend
   // a challenge it does not hold, so a club-game the model cannot pay for
   // means the REPLENISHMENT RULE has moved, not that a club overdrew. It is
@@ -234,6 +269,53 @@ if (args['export-only']) {
   console.log(
     `--recheck ${startDate}..${endDate}: ${seen.size} scheduled game(s) read, ` +
       `${evict.length} evicted (-${lostChallenges} challenges) — ` +
+      `${rows} challenges over ${games} games on file`,
+  )
+  db.close()
+} else if (args.exposure) {
+  // THE DENOMINATOR SWEEP. One roster call a club a level, with the season's
+  // hitting and fielding splits hydrated onto each person — verified against a
+  // live club before it was relied on (scripts/lib/abs/exposure.mjs carries
+  // the query and what each field is).
+  //
+  // Clubs are read in parallel and written serially, the same shape the game
+  // sweep uses and for the same reason: node:sqlite writes are synchronous.
+  let clubs = 0
+  let people = 0
+  for (const { sportId, level } of activeLevels) {
+    const teams = await getJson(`/api/v1/teams?sportId=${sportId}&season=${season}`)
+    const ids = (teams.teams ?? []).map((t) => t.id).filter((id) => id != null)
+    console.log(`${level}: ${ids.length} club(s) to read`)
+
+    const fetched = await mapWithConcurrency(ids, CONCURRENCY, async (teamId) => ({
+      teamId,
+      roster: await getJson(
+        `/api/v1/teams/${teamId}/roster?rosterType=fullSeason&season=${season}` +
+          `&hydrate=person(stats(type=season,group=[hitting,fielding]` +
+          `,season=${season},sportId=${sportId}))`,
+      ),
+    }), (id) => `${level} club ${id}`)
+
+    for (const item of fetched) {
+      // A club whose call failed is left EXACTLY as it was — not cleared —
+      // so a transient outage costs a stale club rather than an empty one.
+      if (!item) continue
+      const rows = exposureRowsFor(item.roster, { season, level, teamId: item.teamId })
+      clearExposure.run(season, level, item.teamId)
+      for (const r of rows) {
+        insertExposure.run(
+          r.season, r.level, r.team_id, r.player_id, r.name, r.position,
+          r.pitches, r.plate_appearances, r.catcher_innings, r.catcher_starts,
+        )
+      }
+      clubs += 1
+      people += rows.length
+    }
+  }
+
+  const { rows, games } = await writeOut()
+  console.log(
+    `--exposure ${season}: ${clubs} club(s), ${people} player-season row(s) — ` +
       `${rows} challenges over ${games} games on file`,
   )
   db.close()

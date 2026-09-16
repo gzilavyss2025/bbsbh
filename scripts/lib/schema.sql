@@ -623,6 +623,47 @@ CREATE TABLE IF NOT EXISTS abs_challenges (
 -- the plate umpire are carried here because every rate on the report page
 -- needs a per-club or per-umpire GAMES figure, and a game nobody challenged
 -- leaves no row in abs_challenges to count.
+-- HOW MUCH BASEBALL EACH MAN SAW (gen-abs-challenges.mjs --exposure).
+-- The denominator behind "how often does he ask for a review": a challenge
+-- count on its own is a fact about how much a player played, and only against
+-- his pitches seen or his innings caught does it become a habit. One row per
+-- player per club per season per level.
+--
+-- A SEASON SNAPSHOT, NOT AN APPEND-ONLY LEDGER, which is the opposite of the
+-- two tables above. A player's totals grow all year, so the sweep DELETEs a
+-- club's rows for the season and writes them again; it never adds to them.
+--
+-- It is also the only part of this job that costs a new fetch — one roster
+-- call a club a level, about 60 in all:
+--   /api/v1/teams/{id}/roster?rosterType=fullSeason&season={season}
+--     &hydrate=person(stats(type=season,group=[hitting,fielding],season={season},sportId={1|11}))
+-- A traded player carries one split per club PLUS an aggregate that has no
+-- `team` key at all, so the rows are matched on team id and the aggregate is
+-- skipped. 39 MLB players challenged under more than one club this season.
+--
+-- `catcher_innings` is REAL and already converted out of MLB's outs notation
+-- ("1020.2" is 1020 and two thirds, not 1020.2 — see inningsFromOuts in
+-- scripts/lib/abs/exposure.mjs). NOTHING IN STATSAPI COUNTS PITCHES RECEIVED,
+-- so innings caught is a stand-in and the surface has to say so: a catcher's
+-- per-9 and a batter's per-1,000-pitches are not comparable across.
+--
+-- Every column but the keys may be NULL. A pitcher has no hitting split and a
+-- man who never caught has no catcher split, and null divides to "no rate"
+-- where a zero would divide to infinity.
+CREATE TABLE IF NOT EXISTS abs_player_exposure (
+  season            INTEGER NOT NULL,
+  level             TEXT NOT NULL,                 -- 'MLB' | 'AAA'
+  team_id           INTEGER NOT NULL,
+  player_id         INTEGER NOT NULL,
+  name              TEXT NOT NULL DEFAULT '',
+  position          TEXT NOT NULL DEFAULT '',
+  pitches           INTEGER,
+  plate_appearances INTEGER,
+  catcher_innings   REAL,
+  catcher_starts    INTEGER,
+  PRIMARY KEY (season, level, team_id, player_id)
+);
+
 CREATE TABLE IF NOT EXISTS abs_ingested_games (
   game_pk      INTEGER NOT NULL PRIMARY KEY,
   date         TEXT NOT NULL,

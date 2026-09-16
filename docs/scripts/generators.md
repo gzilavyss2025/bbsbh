@@ -247,6 +247,26 @@ don't run these by hand.
   the first shape and cannot be paid for — 815094 team 102 and 816599 team 416,
   checked row by row against their feeds, with the other club in each game
   coming out legal — so they are named in `TOLERATED` rather than floored away.
+  `--exposure` IS THE ONE FETCH THIS JOB MAKES THAT IS NOT A GAME, and it
+  fills the third table, `abs_player_exposure`: one row per player per club,
+  from one `rosterType=fullSeason` call a club a level (~60 calls) with the
+  season's hitting and fielding splits hydrated onto each person. It is the
+  denominator that turns "he challenged 14 times" into "he challenges once
+  every 39 plate appearances"; a catcher's stand-in is INNINGS CAUGHT, because
+  nothing in statsapi counts pitches RECEIVED, and the two rates are named
+  separately (`per1000Pitches`, `per9Caught`) so no surface can sort them into
+  one list. It is a SEASON SNAPSHOT, not an append-only ledger — a player's
+  totals grow all year, so a re-run REPLACES a club's rows.
+  Three traps, each verified live. A traded player carries one split per club
+  PLUS an aggregate that has **no `team` key at all** and is listed FIRST, so
+  rows are matched on `split.team.id`. `innings` is written in OUTS — "1020.2"
+  is 1020 and two thirds, and a `parseFloat` under-counts every catcher
+  (`inningsFromOuts`). And a man's challenges are split BY ROLE before either
+  rate is taken: Francisco Alvarez called for 102 reviews, 22 at the plate and
+  80 behind it, and dividing all 102 by his pitches seen as a batter put a
+  catcher at the top of the "most eager hitter" board. Matched 100% of MLB
+  batter/catcher challenge rows and 99.9% of Triple-A; the only players with
+  neither denominator are pitchers, correctly.
   `abs_ingested_games` is both the idempotency guard AND the denominator table:
   it carries the two club ids and the plate umpire, so a club or umpire nobody
   challenged still has a games figure. FACTS ONLY in the row table (who
