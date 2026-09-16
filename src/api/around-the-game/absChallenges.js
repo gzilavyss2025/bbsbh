@@ -79,6 +79,11 @@ export const TEAM_SORTS = [
   { key: 'n', label: 'Challenges', lowIsBest: false },
   { key: 'perGame', label: 'Per game', lowIsBest: false },
   { key: 'success', label: 'Overturns', lowIsBest: false },
+  // "Ran out" is games in which the club EMPTIED its bank, not games it
+  // finished unable to argue. In a game that goes to extras those are
+  // different facts: a club that ran out in the fifth is armed again in the
+  // tenth, and the cost it paid — four innings unable to argue — is what the
+  // column is for. The rule and the evidence are in scripts/lib/abs/bank.mjs.
   { key: 'ranOut', label: 'Games run out', lowIsBest: false },
 ]
 

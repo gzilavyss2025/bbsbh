@@ -76,7 +76,7 @@ import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
-import { buildExport, challengeRowsForGame, isPlayedGame } from './lib/abs/index.mjs'
+import { auditBank, buildExport, challengeRowsForGame, isPlayedGame } from './lib/abs/index.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'abs-challenges.json')
@@ -152,6 +152,18 @@ async function writeOut() {
   const games = db.prepare('SELECT * FROM abs_ingested_games ORDER BY game_pk').all()
   const latest = games.reduce((m, g) => (g.season > m ? g.season : m), 0)
   await writeJsonAtomic(out, buildExport(rows, games, { season: latest || season }))
+  // THE CHALLENGE BANK, CHECKED AGAINST EVERY ROW ON FILE. A club cannot spend
+  // a challenge it does not hold, so a club-game the model cannot pay for
+  // means the REPLENISHMENT RULE has moved, not that a club overdrew. It is
+  // the one rule in this job that MLB can change without changing a field
+  // name, and nothing else would notice. See scripts/lib/abs/bank.mjs.
+  const overdrawn = auditBank(rows)
+  if (overdrawn.length) {
+    console.log(`BANK RULE: ${overdrawn.length} club-game(s) the model cannot pay for:`)
+    for (const b of overdrawn.slice(0, 10)) {
+      console.log(`  gamePk ${b.gamePk} team ${b.teamId}: lost at [${b.failInnings}] (${b.overdrawn} over)`)
+    }
+  }
   return { rows: rows.length, games: games.length }
 }
 

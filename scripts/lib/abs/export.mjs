@@ -24,12 +24,14 @@
 // where the page can change its mind about them without a regeneration. Same
 // split gate.js and gen-gate.mjs already use.
 
+import { replayBank } from './bank.mjs'
 
 // The four roles a challenge can come from. A batter challenges a called
 // strike against him; a catcher or a pitcher challenges a called ball. `other`
 // is the honest bucket for a challenger the feed named but the box score put
 // at no recognisable position — it is expected to stay near zero, and a report
 // that hid it would hide the day it stops being near zero.
+
 export const ROLES = ['batter', 'catcher', 'pitcher', 'other']
 
 // How far the challenged pitch sat from the nearest edge of the buffered
@@ -48,6 +50,13 @@ export const MISS_BANDS = [
 // out of them after its SECOND loss. Entering the seventh with none left is
 // the strategic cost the page reports, which makes the sixth the last inning a
 // second loss can still be called early.
+//
+// THAT RULE IS REGULATION-ONLY, and this constant is safe because the sixth is
+// as well. A club that has run out is armed again in extra innings — see
+// bank.mjs, which replays it — so running out is not the end of a club's
+// night the way it reads. Nothing about the sixth inning changes; everything
+// about "ran out" as a phrase does, and ranOutByTeam below says what it counts
+// rather than leaning on the phrase.
 export const LAST_EARLY_INNING = 6
 
 const rate = (n, d) => (d > 0 ? n / d : null)
@@ -86,26 +95,56 @@ export function challengerGain(row) {
   return challengerBatting ? -row.favor : row.favor
 }
 
-// Per club, per game: how many challenges it lost, and the inning its second
-// loss came in. Both feed the "ran out" columns on the team board — running
-// out is the strategic cost of a failed challenge, and it is invisible in a
-// success rate alone.
+// Per club: the games it EMPTIED its bank in, and the ones it emptied early.
+// Running out is the strategic cost of a failed challenge, and it is invisible
+// in a success rate alone.
+//
+// WHAT "RAN OUT" COUNTS, now that the bank is modelled. It counts a game in
+// which the club's bank reached zero at least once, and `ranOutEarly` counts
+// one where that first happened by LAST_EARLY_INNING. It is deliberately NOT
+// "the club finished the game with none", because in a game that goes to
+// extras those are different facts: a club armed again in the tenth did run
+// out in the fifth, and the cost it paid — playing four innings unable to
+// argue — is exactly what the column is for.
+//
+// It replays the bank rather than counting to two, so a club that empties
+// twice in one game counts once and the emptying inning is the FIRST one, and
+// so the count stays right when the rule is used from anywhere else. Under the
+// old count-to-two the two agree in regulation and diverge in extras.
+//
+// The replay is fed EVERY challenge, not only the lost ones. A club must hold
+// one to ask at all, and an overturn hands it straight back — so `L L W` and
+// `W L L` are the same failure count and different nights, and only the replay
+// can tell them apart.
+//
+// The replay runs only as far as the last inning a challenge was lost in,
+// because the ledger does not carry the game's length yet. That is enough for
+// every emptying the rows can see. A club that emptied in the fifth of a game
+// that went to the twelfth and never challenged again is still counted here —
+// it did run out — and how long it then played re-armed is a question for the
+// chances denominator, which is where the game's length belongs.
 function ranOutByTeam(rows) {
   const byGameTeam = new Map()
   for (const r of rows) {
-    if (r.outcome !== 'fail') continue
     const key = `${r.game_pk}:${r.team_id}`
     const list = byGameTeam.get(key) ?? []
     list.push(r)
     byGameTeam.set(key, list)
   }
   const out = new Map() // teamId -> { ranOut, ranOutEarly }
-  for (const [key, list] of byGameTeam) {
-    if (list.length < 2) continue
+  for (const [key, challenges] of byGameTeam) {
+    // EVERY challenge, not only the lost ones: a club has to hold one to ask
+    // at all, and an overturn refunds it, so `L L W` and `W L L` leave the
+    // club in different places despite the same failure count.
+    const { emptiedIn } = replayBank(challenges)
+    if (emptiedIn.length === 0) continue
     const teamId = Number(key.split(':')[1])
-    // Chronological order, so the SECOND loss is the one that empties the club.
-    list.sort((a, b) => a.inning - b.inning || (a.half === 'top' ? 0 : 1) - (b.half === 'top' ? 0 : 1))
-    const emptiedAt = list[1].inning
+    // The FIRST time it emptied. A club can empty more than once in a game
+    // that goes to extras, and the game still counts once: the column is
+    // "games it ran out in", not "times it ran out". An emptying the club
+    // immediately undid with an overturn is not one — replayBank takes the
+    // refund off before it records anything.
+    const emptiedAt = emptiedIn[0]
     const cur = out.get(teamId) ?? { ranOut: 0, ranOutEarly: 0 }
     cur.ranOut += 1
     if (emptiedAt <= LAST_EARLY_INNING) cur.ranOutEarly += 1
