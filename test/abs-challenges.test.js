@@ -1,6 +1,7 @@
 // Coverage for the ABS Challenge System data layer: the generator's pure half
-// (scripts/lib/abs-challenges.mjs — one feed to rows, rows to the season
-// export) and the reader's boards (src/api/around-the-game/absChallenges.js).
+// (scripts/lib/abs/ — rows.mjs turns one feed into rows, export.mjs turns
+// rows into the season export) and the reader's boards
+// (src/api/around-the-game/absChallenges.js).
 //
 // Three of these pin traps that were real, not hypothetical, and each one
 // fails without the code that closes it:
@@ -26,7 +27,7 @@ import {
   summarizeLevel,
   buildExport,
   MISS_BANDS,
-} from '../scripts/lib/abs-challenges.mjs'
+} from '../scripts/lib/abs/index.mjs'
 import {
   levelsIn,
   summaryFor,

@@ -229,9 +229,10 @@ don't run these by hand.
   challenged, what the umpire called, outcome, inning, umpire, run value,
   zone-edge distance); every split — per club, per role, per umpire, call type,
   miss distance, the biggest overturn — is derived at export time in
-  `scripts/lib/abs-challenges.mjs`, which also holds the per-game row
-  derivation, since a generator does its work at import and nothing inside one
-  can be unit-tested (`test/abs-challenges.test.js`).
+  `scripts/lib/abs/export.mjs`, with the per-game row derivation beside it in
+  `scripts/lib/abs/rows.mjs` and `scripts/lib/abs/index.mjs` as the door both
+  callers import, since a generator does its work at import and nothing inside
+  one can be unit-tested (`test/abs-challenges.test.js`).
   Imports rather than re-derives: `selectChallengeState` (`src/api/challenges.js`,
   which knows an ABS review can sit at either the play or the pitch-event level
   and that MLB's older manager's-replay reviews must be excluded on

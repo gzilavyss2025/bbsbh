@@ -844,12 +844,15 @@ const BUDGETS = {
   // production first — one transient HTTP 500 aborted the whole generator on
   // 2026-08-28 — and test/war-splits.test.js now pins all five cases (retry,
   // give-up, one-player-fails, carry-forward, outage threshold).
-  // +1 for abs-challenges.mjs — the pure half of gen-abs-challenges.mjs: one
-  // Final game's feed to challenge rows, and the accumulated rows to every
-  // split public/data/abs-challenges.json ships. Both halves are unit-tested
-  // without a live statsapi call (test/abs-challenges.test.js), which is the
-  // testable-helper convention this directory exists for, and neither could be
-  // tested inside a generator that does its work at import.
+  // -1 as abs-challenges.mjs left for scripts/lib/abs/ — the pure half of
+  // gen-abs-challenges.mjs outgrew one file, so its two halves (one Final
+  // game's feed to challenge rows; the accumulated rows to every split
+  // public/data/abs-challenges.json ships) are now rows.mjs and export.mjs
+  // behind an index.mjs door. Both are still unit-tested without a live
+  // statsapi call (test/abs-challenges.test.js), which is the testable-helper
+  // convention this directory exists for. A SUBDIRECTORY is what the ABS
+  // report milestone's four new export cuts cost here, rather than four more
+  // siblings against a budget that only moves down.
   // +1 for schedule-shape.mjs — the pure half of gen-schedule-shape.mjs: a
   // season of raw schedule rows to each club's ordered ledger, and that
   // ledger cut into series, homestands and road trips. Same testable-helper
@@ -870,7 +873,7 @@ const BUDGETS = {
   // THREE generators read it (gen-command.mjs, gen-command-zone.mjs,
   // gen-command-received.mjs). Inlining it would put the same 170 MB download,
   // the same two source-column guards and the same play_id join in three files.
-  'scripts/lib': 35,
+  'scripts/lib': 34,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
