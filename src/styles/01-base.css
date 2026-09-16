@@ -56,6 +56,13 @@
        was counted" prose closing each of the four pages under
        `src/screens/around-the-game/`; the `.method h2` heading above it stays shouted,
        same split as the Team Score modal below)
+     - the report pages' few surviving sentences — `.rptprose` and the name links
+       riding inside them, `.rptprose .plink` (report/chrome.css),
+       worn by the caveat lines on `/abs-challenges` that a board cannot carry,
+       including the biggest-overturn sentence naming a player and an umpire;
+       every heading, column head, chip and figure on those pages stays shouted,
+       and the `.rptsource` credit line at the foot is deliberately left out
+       because it is middot-separated fields, not a paragraph
      - the About page body copy — `.aboutpage .caps-exempt`
      - the signed-out Game Log pitch — `.logbooklanding .caps-exempt`
      - the Team Score modal's headline + explainer paragraphs —

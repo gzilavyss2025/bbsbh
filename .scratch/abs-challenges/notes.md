@@ -9,8 +9,10 @@ about this feed that are not obvious from reading it.
   MLB (sportId 1) and Triple-A (sportId 11) games, SQLite-backed
   (`abs-challenges` group, ADR-0021). Nightly on `--days`; the season backfill
   was `--since=2026-03-26`.
-- `scripts/lib/abs-challenges.mjs` — the pure half. One feed to rows, and rows
-  to `public/data/abs-challenges.json`. Unit-tested in
+- `scripts/lib/abs/` — the pure half, in three files behind `index.mjs`:
+  `rows.mjs` (one feed to rows), `bank.mjs` (a club's challenge bank, replayed
+  inning by inning, including the extra-inning top-up) and `export.mjs` (rows
+  to `public/data/abs-challenges.json`). Unit-tested in
   `test/abs-challenges.test.js`.
 - `src/api/around-the-game/absChallenges.js` — the reader (ranking + sample
   floors only).

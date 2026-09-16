@@ -1,17 +1,18 @@
-// The pure half of gen-abs-challenges.mjs, in two parts: turn ONE Final game's
-// feed into challenge rows, and turn the accumulated rows plus the swept-games
-// ledger into public/data/abs-challenges.json.
+// THE ACCUMULATED ROWS, TURNED INTO public/data/abs-challenges.json — the
+// export half of the pure code behind gen-abs-challenges.mjs. Its other half,
+// scripts/lib/abs/rows.mjs, turns one Final game's feed into the rows this
+// reads.
 //
 // It lives here, apart from the generator, for the reason scripts/CLAUDE.md
 // gives: a generator file does its work AT IMPORT, so a helper inside one can
-// never be unit-tested. Everything below is pure — a feed in, rows out; rows
-// in, summary out — with no clock, no network and no database, and
-// test/abs-challenges.test.js pins it.
+// never be unit-tested. Everything below is pure — rows in, summary out — with
+// no clock, no network and no database, and test/abs-challenges.test.js pins
+// it.
 //
 // THE DISCIPLINE THIS FILE EXISTS TO KEEP. The database stores FACTS: one row
 // per challenge, one row per game. Every split the report page shows — per
 // club, per role, per plate umpire, call type, miss distance, run value — is
-// computed here, at export time. So a new cut of the season costs
+// computed HERE, at export time. So a new cut of the season costs
 // `--export-only` and no re-sweep of two thousand game feeds, and adding one
 // never needs a schema change or a backfill. Same rule gen-team-records.mjs
 // follows.
@@ -23,201 +24,14 @@
 // where the page can change its mind about them without a regeneration. Same
 // split gate.js and gen-gate.mjs already use.
 
-import { selectChallengeState } from '../../src/api/challenges.js'
-import { missEdge } from '../../src/api/umpireFavor.js'
-import { pitchFavor } from '../../src/lib/runExpectancy.js'
-
-// --- one game's rows ----------------------------------------------------------
-
-const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
-
-// Which of the three jobs on the field the challenger was doing. A batter
-// challenges a called strike against him; a catcher or a pitcher challenges a
-// called ball. The matchup names the batter and the pitcher outright, so only
-// the catcher has to be worked out.
-//
-// THE BOX SCORE'S POSITION IS NOT ENOUGH, and trusting it alone put real
-// catchers in a nameless bucket: a box-score entry carries the position a man
-// ENDED the game at, so a catcher who later moved to first base or to
-// designated hitter reads as neither pitcher nor catcher. Iván Herrera and
-// Samuel Basallo both landed there in the first backfill. The rule itself
-// closes it — only three men may ask for a review — so a challenger from the
-// FIELDING side who is not the pitcher is the catcher, whatever the box score
-// now says he is.
-//
-// `other` survives as the honest bucket for what should be impossible: a
-// challenge the feed attributes to nobody, or to a batting-side player who was
-// not the batter. It is expected to stay near zero, and a report that hid it
-// would hide the day it stops being near zero.
-export function roleFor(feed, play, side, half, playerId) {
-  if (playerId == null) return 'other'
-  if (play?.matchup?.batter?.id === playerId) return 'batter'
-  if (play?.matchup?.pitcher?.id === playerId) return 'pitcher'
-  const pos = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${playerId}`]?.position?.abbreviation
-  if (pos === 'C') return 'catcher'
-  if (pos === 'P') return 'pitcher'
-  // 'top' bats away, 'bottom' bats home — the same convention as the rest of
-  // the app.
-  const fielding = half === 'top' ? side === 'home' : side === 'away'
-  return fielding ? 'catcher' : 'other'
-}
-
-// THE ONE TRAP IN THE FEED. On a SUCCESSFUL challenge the feed rewrites the
-// pitch to the CORRECTED call — Garrett Mitchell's overturned strike in gamePk
-// 823036 prints as `code: 'B'` with a four-ball count after it, and Kyle
-// Hayes's overturned ball in gamePk 815863 prints as `code: 'C'`. So the
-// printed call is the umpire's OWN call only when the challenge failed, and
-// this is where it is flipped back. `postStrike` is what the pitch is now,
-// after any overturn, which is what the run-value math must treat as the
-// truth. Both are null for a pitch whose call could not be read at all.
-export function umpireCallFor(code, outcome) {
-  const postStrike = code === 'C' ? true : code === 'B' || code === '*B' ? false : null
-  if (postStrike == null) return { postStrike: null, callType: null }
-  const umpCalledStrike = outcome === 'success' ? !postStrike : postStrike
-  return { postStrike, callType: umpCalledStrike ? 'strike' : 'ball' }
-}
-
-// One challenge, as a database row. `hit` is the challenged pitch event plus
-// the count BEFORE it (a pitch event's own `count` is the count after), or
-// null when the pitch could not be resolved — in which case call type,
-// distance and run value are all null and the challenge still counts.
-export function buildRow({ feed, play, challenge, hit, batSide, preBaseMask, preOuts, awayId, homeId, table }) {
-  const { postStrike, callType } = umpireCallFor(hit?.ev?.details?.code, challenge.outcome)
-
-  const c = hit?.ev?.pitchData?.coordinates
-  const top = hit?.ev?.pitchData?.strikeZoneTop
-  const bot = hit?.ev?.pitchData?.strikeZoneBottom
-  const hasZone = c && c.pX != null && c.pZ != null && top != null && bot != null
-  const missInches = hasZone ? missEdge(c.pX, c.pZ, top, bot, batSide).inches : null
-
-  // The run expectancy an overturn moved, signed toward the batting team. Only
-  // a SUCCESS moved anything — a failed challenge left the game where it was.
-  // A pre-pitch count outside 0-3 balls / 0-2 strikes is corrupted feed data
-  // (a fourth ball ends the plate appearance): skip favor rather than look up a
-  // state that cannot exist, the same guard gen-umpire-accuracy.mjs uses.
-  const pre = hit?.preCount
-  let favor = null
-  if (
-    table && challenge.outcome === 'success' && postStrike != null && pre &&
-    pre.balls <= 3 && pre.strikes <= 2
-  ) {
-    favor = pitchFavor(table, preBaseMask, preOuts, pre.balls, pre.strikes, postStrike)
-  }
-
-  const teamId = challenge.teamId
-  return {
-    team_id: teamId,
-    opp_id: teamId === awayId ? homeId : awayId,
-    side: challenge.side,
-    player_id: challenge.playerId ?? null,
-    player_name: challenge.playerName ?? '',
-    role: roleFor(feed, play, challenge.side, challenge.half, challenge.playerId),
-    outcome: challenge.outcome,
-    inning: challenge.inning,
-    half: challenge.half,
-    call_type: callType,
-    favor,
-    miss_inches: missInches,
-  }
-}
-
-// Every challenge in one Final game, enriched with the pre-pitch state the run
-// value needs.
-//
-// The challenges themselves come from selectChallengeState (src/api/challenges.js),
-// imported rather than re-scanned: that module knows an ABS review can sit at
-// either the play or the pitch-event level, sometimes mirrored at both, and
-// that MLB's older manager's-replay reviews carry the same `challengeTeamId`
-// and must be excluded on `reviewType`. A count-only re-implementation of that
-// scan has got it wrong twice in this repo already (see gen-umpire-accuracy.mjs's
-// header). It is called with (feed, Infinity, 'bottom'), which its half-clamp
-// reads as "the whole game" — that clamp exists for the live UI, and a Final
-// game has nothing left to seal.
-//
-// Base and outs are carried across plays exactly as gen-run-expectancy.mjs and
-// gen-umpire-accuracy.mjs do (that walk is verified against a real game's
-// linescore), and the pre-pitch count is carried pitch to pitch inside a play.
-export function challengeRowsForGame(feed, table) {
-  const state = selectChallengeState(feed, Infinity, 'bottom')
-  const all = [...state.away.outcomes, ...state.home.outcomes]
-  if (all.length === 0) return []
-  const byAtBat = new Map()
-  for (const c of all) byAtBat.set(c.atBatIndex, c)
-
-  const awayId = feed?.gameData?.teams?.away?.id ?? null
-  const homeId = feed?.gameData?.teams?.home?.id ?? null
-  const rows = []
-
-  let bases = [null, null, null]
-  let outs = 0
-  let curHalfKey = null
-
-  for (const p of feed?.liveData?.plays?.allPlays ?? []) {
-    const halfKey = `${p.about?.inning}-${p.about?.halfInning}`
-    if (halfKey !== curHalfKey) {
-      bases = [null, null, null]
-      outs = 0
-      curHalfKey = halfKey
-    }
-    const preBaseMask = (bases[0] ? 1 : 0) | (bases[1] ? 2 : 0) | (bases[2] ? 4 : 0)
-    const preOuts = Math.min(outs, 2)
-    const batSide = p.matchup?.batSide?.code ?? 'R'
-    const challenge = byAtBat.get(p.about?.atBatIndex)
-
-    if (challenge) {
-      let prevCount = { balls: 0, strikes: 0 }
-      let hit = null
-      for (const ev of p.playEvents ?? []) {
-        if (!ev.isPitch) continue
-        const preCount = prevCount
-        prevCount = {
-          balls: ev.count?.balls ?? preCount.balls,
-          strikes: ev.count?.strikes ?? preCount.strikes,
-        }
-        if (ev.pitchNumber === challenge.pitchNumber) {
-          hit = { ev, preCount }
-          break
-        }
-      }
-      rows.push(
-        buildRow({ feed, play: p, challenge, hit, batSide, preBaseMask, preOuts, awayId, homeId, table }),
-      )
-      byAtBat.delete(p.about?.atBatIndex)
-    }
-
-    for (const r of p.runners ?? []) {
-      const rid = r.details?.runner?.id
-      const startBase = BASE_NUM[r.movement?.start]
-      const endBase = BASE_NUM[r.movement?.end]
-      if (startBase) bases[startBase - 1] = null
-      if (r.movement?.isOut) outs = Math.min(outs + 1, 3)
-      else if (endBase) bases[endBase - 1] = rid
-    }
-  }
-
-  // A challenge whose play never came round in the walk (an atBatIndex the
-  // plays array does not carry) still belongs on the board — it just has no
-  // pitch, so no call type, no distance and no run value.
-  for (const c of byAtBat.values()) {
-    rows.push(
-      buildRow({
-        feed, play: null, challenge: c, hit: null, batSide: 'R',
-        preBaseMask: 0, preOuts: 0, awayId, homeId, table,
-      }),
-    )
-  }
-
-  rows.sort((a, b) => a.inning - b.inning || (a.half === 'top' ? 0 : 1) - (b.half === 'top' ? 0 : 1))
-  return rows.map((r, i) => ({ ...r, seq: i }))
-}
-
-// --- the season export --------------------------------------------------------
+import { replayBank } from './bank.mjs'
 
 // The four roles a challenge can come from. A batter challenges a called
 // strike against him; a catcher or a pitcher challenges a called ball. `other`
 // is the honest bucket for a challenger the feed named but the box score put
 // at no recognisable position — it is expected to stay near zero, and a report
 // that hid it would hide the day it stops being near zero.
+
 export const ROLES = ['batter', 'catcher', 'pitcher', 'other']
 
 // How far the challenged pitch sat from the nearest edge of the buffered
@@ -236,6 +50,13 @@ export const MISS_BANDS = [
 // out of them after its SECOND loss. Entering the seventh with none left is
 // the strategic cost the page reports, which makes the sixth the last inning a
 // second loss can still be called early.
+//
+// THAT RULE IS REGULATION-ONLY, and this constant is safe because the sixth is
+// as well. A club that has run out is armed again in extra innings — see
+// bank.mjs, which replays it — so running out is not the end of a club's
+// night the way it reads. Nothing about the sixth inning changes; everything
+// about "ran out" as a phrase does, and ranOutByTeam below says what it counts
+// rather than leaning on the phrase.
 export const LAST_EARLY_INNING = 6
 
 const rate = (n, d) => (d > 0 ? n / d : null)
@@ -274,26 +95,56 @@ export function challengerGain(row) {
   return challengerBatting ? -row.favor : row.favor
 }
 
-// Per club, per game: how many challenges it lost, and the inning its second
-// loss came in. Both feed the "ran out" columns on the team board — running
-// out is the strategic cost of a failed challenge, and it is invisible in a
-// success rate alone.
+// Per club: the games it EMPTIED its bank in, and the ones it emptied early.
+// Running out is the strategic cost of a failed challenge, and it is invisible
+// in a success rate alone.
+//
+// WHAT "RAN OUT" COUNTS, now that the bank is modelled. It counts a game in
+// which the club's bank reached zero at least once, and `ranOutEarly` counts
+// one where that first happened by LAST_EARLY_INNING. It is deliberately NOT
+// "the club finished the game with none", because in a game that goes to
+// extras those are different facts: a club armed again in the tenth did run
+// out in the fifth, and the cost it paid — playing four innings unable to
+// argue — is exactly what the column is for.
+//
+// It replays the bank rather than counting to two, so a club that empties
+// twice in one game counts once and the emptying inning is the FIRST one, and
+// so the count stays right when the rule is used from anywhere else. Under the
+// old count-to-two the two agree in regulation and diverge in extras.
+//
+// The replay is fed EVERY challenge, not only the lost ones. A club must hold
+// one to ask at all, and an overturn hands it straight back — so `L L W` and
+// `W L L` are the same failure count and different nights, and only the replay
+// can tell them apart.
+//
+// The replay runs only as far as the last inning a challenge was lost in,
+// because the ledger does not carry the game's length yet. That is enough for
+// every emptying the rows can see. A club that emptied in the fifth of a game
+// that went to the twelfth and never challenged again is still counted here —
+// it did run out — and how long it then played re-armed is a question for the
+// chances denominator, which is where the game's length belongs.
 function ranOutByTeam(rows) {
   const byGameTeam = new Map()
   for (const r of rows) {
-    if (r.outcome !== 'fail') continue
     const key = `${r.game_pk}:${r.team_id}`
     const list = byGameTeam.get(key) ?? []
     list.push(r)
     byGameTeam.set(key, list)
   }
   const out = new Map() // teamId -> { ranOut, ranOutEarly }
-  for (const [key, list] of byGameTeam) {
-    if (list.length < 2) continue
+  for (const [key, challenges] of byGameTeam) {
+    // EVERY challenge, not only the lost ones: a club has to hold one to ask
+    // at all, and an overturn refunds it, so `L L W` and `W L L` leave the
+    // club in different places despite the same failure count.
+    const { emptiedIn } = replayBank(challenges)
+    if (emptiedIn.length === 0) continue
     const teamId = Number(key.split(':')[1])
-    // Chronological order, so the SECOND loss is the one that empties the club.
-    list.sort((a, b) => a.inning - b.inning || (a.half === 'top' ? 0 : 1) - (b.half === 'top' ? 0 : 1))
-    const emptiedAt = list[1].inning
+    // The FIRST time it emptied. A club can empty more than once in a game
+    // that goes to extras, and the game still counts once: the column is
+    // "games it ran out in", not "times it ran out". An emptying the club
+    // immediately undid with an overturn is not one — replayBank takes the
+    // refund off before it records anything.
+    const emptiedAt = emptiedIn[0]
     const cur = out.get(teamId) ?? { ranOut: 0, ranOutEarly: 0 }
     cur.ranOut += 1
     if (emptiedAt <= LAST_EARLY_INNING) cur.ranOutEarly += 1
