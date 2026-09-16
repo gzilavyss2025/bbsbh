@@ -22,6 +22,44 @@ import { pitchFavor } from '../../../src/lib/runExpectancy.js'
 
 // --- one game's rows ----------------------------------------------------------
 
+// WHICH GAMES GO ON THE LEDGER, and the one field that decides it.
+//
+// `abs_ingested_games` is not only the idempotency guard — it is the
+// DENOMINATOR every per-game figure on /abs-challenges divides by, so a row
+// that never should have been there does not sit harmlessly, it moves a
+// published number.
+//
+// The rule used to read `abstractGameState === 'Final'` and then exclude
+// `detailedState === 'Postponed'`, and that let two kinds of non-game in. A
+// game called off for weather comes back with an abstract state of FINAL and a
+// detailed state of `Cancelled: Rain` — no innings, no plays, no result — and
+// 23 of them were on the Triple-A ledger. So did one game that started, was
+// suspended after two innings, and was then cancelled outright (gamePk
+// 815811): its schedule row ends up Cancelled like the rest, while its feed
+// still reads `Suspended: Rain`.
+//
+// MATCHING THE DETAILED STRING IS THE WRONG FIX, because the string carries
+// the reason — `Cancelled: Rain`, `Postponed`, `Completed Early: Rain` — so
+// every new reason is a new string nobody knew to exclude. `codedGameState` is
+// one character and carries no reason, and across the whole 2026 MLB and
+// Triple-A schedule it takes exactly five values:
+//
+//   F  Final           4,407   played, and played out
+//   F  Completed Early    32   PLAYED, shortened by weather — 109 real
+//                             challenges, and they belong on the board
+//   C  Cancelled          24   never played: zero innings, zero plays
+//   D  Postponed         105   never played on that date
+//   S  Scheduled         249   not played yet
+//
+// So `F` is the whole rule. It admits both states of a game that happened and
+// excludes both states of one that did not, and a shortened game — a real
+// game, with real challenges — keeps its place. Anything MLB adds later that
+// is not a played game will not be coded F.
+export const PLAYED_CODE = 'F'
+export function isPlayedGame(status) {
+  return status?.codedGameState === PLAYED_CODE
+}
+
 const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
 
 // Which of the three jobs on the field the challenger was doing. A batter

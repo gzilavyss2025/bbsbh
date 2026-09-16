@@ -4461,7 +4461,6 @@ INSERT INTO abs_challenges (game_pk, seq, season, date, level, team_id, opp_id, 
 INSERT INTO abs_challenges (game_pk, seq, season, date, level, team_id, opp_id, side, player_id, player_name, role, outcome, inning, half, umpire_id, umpire_name, call_type, favor, miss_inches) VALUES (815808, 2, 2026, '2026-07-17', 'AAA', 533, 531, 'away', 681962, 'Vinny Capra', 'batter', 'fail', 8, 'top', 677388, 'Pete Talkington', 'strike', NULL, 2.0414440028856022);
 INSERT INTO abs_challenges (game_pk, seq, season, date, level, team_id, opp_id, side, player_id, player_name, role, outcome, inning, half, umpire_id, umpire_name, call_type, favor, miss_inches) VALUES (815808, 3, 2026, '2026-07-17', 'AAA', 533, 531, 'away', 681508, 'Mickey Gasper', 'catcher', 'fail', 8, 'bottom', 677388, 'Pete Talkington', 'ball', NULL, 0.6751450889126325);
 INSERT INTO abs_challenges (game_pk, seq, season, date, level, team_id, opp_id, side, player_id, player_name, role, outcome, inning, half, umpire_id, umpire_name, call_type, favor, miss_inches) VALUES (815810, 0, 2026, '2026-07-05', 'AAA', 531, 568, 'home', 685744, 'Kenedy Corona', 'batter', 'success', 2, 'bottom', 676581, 'James Jean', 'strike', -0.05587525725153081, 0.24386639358934614);
-INSERT INTO abs_challenges (game_pk, seq, season, date, level, team_id, opp_id, side, player_id, player_name, role, outcome, inning, half, umpire_id, umpire_name, call_type, favor, miss_inches) VALUES (815811, 0, 2026, '2026-07-05', 'AAA', 568, 531, 'away', 676480, 'José Barrero', 'batter', 'fail', 1, 'top', 665299, 'Louie Krupa', 'strike', NULL, NULL);
 INSERT INTO abs_challenges (game_pk, seq, season, date, level, team_id, opp_id, side, player_id, player_name, role, outcome, inning, half, umpire_id, umpire_name, call_type, favor, miss_inches) VALUES (815812, 0, 2026, '2026-07-02', 'AAA', 568, 531, 'away', 686976, 'Silas Ardoin', 'batter', 'success', 5, 'top', 682556, 'Paul Roemer', 'strike', -0.10942408005948984, 0.316029127922274);
 INSERT INTO abs_challenges (game_pk, seq, season, date, level, team_id, opp_id, side, player_id, player_name, role, outcome, inning, half, umpire_id, umpire_name, call_type, favor, miss_inches) VALUES (815812, 1, 2026, '2026-07-02', 'AAA', 531, 568, 'home', 670868, 'Abrahan Gutierrez', 'catcher', 'success', 5, 'top', 682556, 'Paul Roemer', 'ball', 0.12882234371877385, 0.8266373159795739);
 INSERT INTO abs_challenges (game_pk, seq, season, date, level, team_id, opp_id, side, player_id, player_name, role, outcome, inning, half, umpire_id, umpire_name, call_type, favor, miss_inches) VALUES (815812, 2, 2026, '2026-07-02', 'AAA', 568, 531, 'away', 676480, 'José Barrero', 'batter', 'fail', 6, 'top', 682556, 'Paul Roemer', 'strike', NULL, 1.0878044963889946);
@@ -19066,7 +19065,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814839, '2026-06-23', 2026, 'AAA', 4904, 5434, 668921, 7);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814840, '2026-06-24', 2026, 'AAA', 4904, 5434, 681783, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814841, '2026-06-28', 2026, 'AAA', 4904, 5434, 681783, 5);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814842, '2026-06-14', 2026, 'AAA', 105, 5434, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814843, '2026-06-25', 2026, 'AAA', 4904, 5434, 688060, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814844, '2026-06-26', 2026, 'AAA', 4904, 5434, 701964, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814845, '2026-06-13', 2026, 'AAA', 105, 5434, 681790, 6);
@@ -19105,7 +19103,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814878, '2026-09-12', 2026, 'AAA', 102, 561, 802055, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814879, '2026-09-13', 2026, 'AAA', 102, 561, 670567, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814880, '2026-08-21', 2026, 'AAA', 2310, 561, 681849, 4);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814881, '2026-08-23', 2026, 'AAA', 2310, 561, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814882, '2026-08-20', 2026, 'AAA', 2310, 561, 677890, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814883, '2026-09-10', 2026, 'AAA', 102, 561, 802055, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (814884, '2026-09-08', 2026, 'AAA', 102, 561, 670567, 1);
@@ -19237,8 +19234,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815015, '2026-04-25', 2026, 'AAA', 342, 105, 681791, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815016, '2026-04-24', 2026, 'AAA', 342, 105, 682501, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815017, '2026-04-22', 2026, 'AAA', 342, 105, 682954, 7);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815018, '2026-04-12', 2026, 'AAA', 400, 105, NULL, 0);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815019, '2026-04-12', 2026, 'AAA', 400, 105, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815020, '2026-04-23', 2026, 'AAA', 342, 105, 681791, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815021, '2026-03-29', 2026, 'AAA', 4904, 105, 703365, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815022, '2026-04-08', 2026, 'AAA', 400, 105, 605677, 8);
@@ -19446,7 +19441,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815229, '2026-05-22', 2026, 'AAA', 2310, 238, 665280, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815230, '2026-05-19', 2026, 'AAA', 2310, 238, 665280, 7);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815231, '2026-05-21', 2026, 'AAA', 2310, 238, 809196, 4);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815232, '2026-05-10', 2026, 'AAA', 561, 238, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815233, '2026-05-23', 2026, 'AAA', 2310, 238, 676583, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815234, '2026-04-24', 2026, 'AAA', 529, 238, 676582, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815235, '2026-05-06', 2026, 'AAA', 561, 238, 681791, 6);
@@ -19720,7 +19714,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815518, '2026-06-25', 2026, 'AAA', 512, 533, 677755, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815519, '2026-06-27', 2026, 'AAA', 512, 533, 668915, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815520, '2026-05-23', 2026, 'AAA', 534, 533, 605677, 3);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815521, '2026-06-11', 2026, 'AAA', 534, 533, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815522, '2026-06-06', 2026, 'AAA', 422, 533, 623995, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815523, '2026-06-02', 2026, 'AAA', 422, 533, 670565, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815524, '2026-05-22', 2026, 'AAA', 534, 533, 691047, 6);
@@ -19730,7 +19723,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815528, '2026-05-07', 2026, 'AAA', 531, 533, 701964, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815529, '2026-05-21', 2026, 'AAA', 534, 533, 703141, 7);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815530, '2026-05-08', 2026, 'AAA', 531, 533, 681783, 4);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815531, '2026-05-09', 2026, 'AAA', 531, 533, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815532, '2026-05-19', 2026, 'AAA', 534, 533, 668921, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815533, '2026-05-20', 2026, 'AAA', 534, 533, 605677, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815534, '2026-05-10', 2026, 'AAA', 531, 533, 688060, 4);
@@ -19958,7 +19950,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815766, '2026-04-19', 2026, 'AAA', 1410, 1960, 682501, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815767, '2026-04-29', 2026, 'AAA', 451, 1960, 681783, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815768, '2026-04-16', 2026, 'AAA', 1410, 1960, 682501, 5);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815769, '2026-04-03', 2026, 'AAA', 533, 1960, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815770, '2026-04-15', 2026, 'AAA', 1410, 1960, 681791, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815771, '2026-04-04', 2026, 'AAA', 533, 1960, 690896, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815772, '2026-04-05', 2026, 'AAA', 533, 1960, 681790, 8);
@@ -19993,9 +19984,7 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815806, '2026-07-23', 2026, 'AAA', 552, 531, 665576, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815807, '2026-07-21', 2026, 'AAA', 552, 531, 676578, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815808, '2026-07-17', 2026, 'AAA', 533, 531, 677388, 4);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815809, '2026-07-18', 2026, 'AAA', 533, 531, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815810, '2026-07-05', 2026, 'AAA', 568, 531, 676581, 1);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815811, '2026-07-05', 2026, 'AAA', 568, 531, 665299, 1);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815812, '2026-07-02', 2026, 'AAA', 568, 531, 682556, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815813, '2026-07-03', 2026, 'AAA', 568, 531, 688057, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815814, '2026-06-12', 2026, 'AAA', 1410, 531, 670565, 2);
@@ -20075,7 +20064,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815888, '2026-06-19', 2026, 'AAA', 512, 534, 682954, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815889, '2026-06-18', 2026, 'AAA', 512, 534, 682501, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815890, '2026-06-13', 2026, 'AAA', 533, 534, 682556, 1);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815891, '2026-06-14', 2026, 'AAA', 533, 534, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815892, '2026-06-10', 2026, 'AAA', 533, 534, 688057, 8);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815893, '2026-06-11', 2026, 'AAA', 533, 534, 682556, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (815894, '2026-06-12', 2026, 'AAA', 533, 534, 688057, 4);
@@ -20188,7 +20176,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816012, '2026-08-22', 2026, 'AAA', 556, 568, 670565, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816013, '2026-09-01', 2026, 'AAA', 564, 568, 690888, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816014, '2026-08-20', 2026, 'AAA', 556, 568, 623995, 3);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816015, '2026-08-22', 2026, 'AAA', 556, 568, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816016, '2026-09-02', 2026, 'AAA', 564, 568, 805163, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816017, '2026-09-03', 2026, 'AAA', 564, 568, 665278, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816018, '2026-08-11', 2026, 'AAA', 431, 568, 677388, 2);
@@ -20199,7 +20186,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816023, '2026-08-19', 2026, 'AAA', 556, 568, 703365, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816024, '2026-08-12', 2026, 'AAA', 431, 568, 686967, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816025, '2026-08-13', 2026, 'AAA', 431, 568, 490310, 9);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816026, '2026-07-12', 2026, 'AAA', 552, 568, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816027, '2026-07-29', 2026, 'AAA', 533, 568, 677389, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816028, '2026-07-28', 2026, 'AAA', 533, 568, 665302, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816029, '2026-08-02', 2026, 'AAA', 533, 568, 801282, 5);
@@ -20565,7 +20551,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816395, '2026-08-11', 2026, 'AAA', 552, 564, 664263, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816396, '2026-07-31', 2026, 'AAA', 235, 564, 670565, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816397, '2026-07-12', 2026, 'AAA', 234, 564, 665280, 5);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816398, '2026-07-11', 2026, 'AAA', 234, 564, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816399, '2026-07-28', 2026, 'AAA', 235, 564, 670565, 9);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816400, '2026-08-02', 2026, 'AAA', 235, 564, 623995, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816401, '2026-07-30', 2026, 'AAA', 235, 564, 623995, 5);
@@ -20584,7 +20569,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816414, '2026-06-13', 2026, 'AAA', 431, 564, 655461, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816415, '2026-06-23', 2026, 'AAA', 235, 564, 670567, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816416, '2026-06-11', 2026, 'AAA', 431, 564, 677890, 9);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816417, '2026-06-14', 2026, 'AAA', 431, 564, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816418, '2026-06-02', 2026, 'AAA', 556, 564, 658325, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816419, '2026-06-07', 2026, 'AAA', 556, 564, 668924, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816420, '2026-06-09', 2026, 'AAA', 431, 564, 658536, 3);
@@ -20621,7 +20605,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816451, '2026-09-13', 2026, 'AAA', 512, 451, 688057, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816452, '2026-09-12', 2026, 'AAA', 512, 451, 668921, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816453, '2026-03-27', 2026, 'AAA', 534, 564, 485856, 6);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816454, '2026-09-08', 2026, 'AAA', 512, 451, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816455, '2026-03-28', 2026, 'AAA', 534, 564, 676581, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816456, '2026-09-11', 2026, 'AAA', 512, 451, 682556, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816457, '2026-09-10', 2026, 'AAA', 512, 451, 688057, 6);
@@ -20662,7 +20645,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816492, '2026-06-17', 2026, 'AAA', 484, 451, 676583, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816493, '2026-06-03', 2026, 'AAA', 512, 451, 490310, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816494, '2026-06-06', 2026, 'AAA', 512, 451, 686967, 3);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816495, '2026-06-07', 2026, 'AAA', 512, 451, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816496, '2026-06-05', 2026, 'AAA', 512, 451, 545402, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816497, '2026-06-06', 2026, 'AAA', 512, 451, 677388, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816498, '2026-06-16', 2026, 'AAA', 484, 451, 665280, 7);
@@ -20685,7 +20667,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816515, '2026-04-21', 2026, 'AAA', 416, 451, 670565, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816516, '2026-04-11', 2026, 'AAA', 541, 451, 682501, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816517, '2026-04-24', 2026, 'AAA', 416, 451, 670565, 6);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816518, '2026-04-12', 2026, 'AAA', 541, 451, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816519, '2026-04-22', 2026, 'AAA', 416, 451, 623995, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816520, '2026-04-08', 2026, 'AAA', 541, 451, 681791, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816521, '2026-03-27', 2026, 'AAA', 445, 451, 676582, 9);
@@ -20927,13 +20908,11 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816767, '2026-08-20', 2026, 'AAA', 1960, 445, 682501, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816768, '2026-08-19', 2026, 'AAA', 1960, 445, 681791, 8);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816769, '2026-08-15', 2026, 'AAA', 541, 445, 676580, 6);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816770, '2026-08-16', 2026, 'AAA', 541, 445, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816771, '2026-08-14', 2026, 'AAA', 541, 445, 655461, 2);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816772, '2026-08-13', 2026, 'AAA', 541, 445, 677890, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816773, '2026-08-18', 2026, 'AAA', 1960, 445, 682954, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816774, '2026-08-02', 2026, 'AAA', 512, 445, 490310, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816775, '2026-08-12', 2026, 'AAA', 541, 445, 681849, 4);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816776, '2026-08-11', 2026, 'AAA', 541, 445, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816777, '2026-07-30', 2026, 'AAA', 512, 445, 490310, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816778, '2026-07-28', 2026, 'AAA', 512, 445, 677388, 6);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816779, '2026-07-29', 2026, 'AAA', 512, 445, 686967, 7);
@@ -20963,7 +20942,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816803, '2026-06-02', 2026, 'AAA', 541, 445, 665576, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816804, '2026-06-04', 2026, 'AAA', 541, 445, 682954, 11);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816805, '2026-05-23', 2026, 'AAA', 416, 445, 665302, 2);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816806, '2026-05-24', 2026, 'AAA', 416, 445, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816807, '2026-05-03', 2026, 'AAA', 512, 445, 655461, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816808, '2026-04-28', 2026, 'AAA', 512, 445, 691042, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816809, '2026-04-29', 2026, 'AAA', 512, 445, 677890, 7);
@@ -20981,7 +20959,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816821, '2026-04-04', 2026, 'AAA', 484, 445, 545402, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816822, '2026-04-05', 2026, 'AAA', 484, 445, 682954, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816823, '2026-09-10', 2026, 'AAA', 422, 494, 688060, 7);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816824, '2026-09-12', 2026, 'AAA', 422, 494, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816825, '2026-09-12', 2026, 'AAA', 422, 494, 658325, 4);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816826, '2026-04-02', 2026, 'AAA', 484, 445, 681791, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816827, '2026-04-01', 2026, 'AAA', 484, 445, 682954, 6);
@@ -21068,7 +21045,6 @@ INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816914, '2026-08-20', 2026, 'AAA', 1410, 422, 682443, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816915, '2026-08-19', 2026, 'AAA', 1410, 422, 676578, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816916, '2026-08-23', 2026, 'AAA', 1410, 422, 676578, 4);
-INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816917, '2026-08-22', 2026, 'AAA', 1410, 422, NULL, 0);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816918, '2026-08-21', 2026, 'AAA', 1410, 422, 801773, 3);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816919, '2026-08-07', 2026, 'AAA', 568, 422, 701964, 5);
 INSERT INTO abs_ingested_games (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges) VALUES (816920, '2026-08-06', 2026, 'AAA', 568, 422, 688060, 3);
