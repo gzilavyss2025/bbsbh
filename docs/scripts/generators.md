@@ -231,6 +231,17 @@ don't run these by hand.
   evicts games already on file that are no longer coded F, which is how a
   swept game that is later suspended or cancelled gets back out. The nightly
   job runs it over a fortnight before each sweep.
+  THE CHALLENGE BANK is modelled in `scripts/lib/abs/bank.mjs`: two issued, one
+  kept per overturn, and — the rule nothing else in the repo recorded — a club
+  that has run out is armed again at the start of each EXTRA inning. 54
+  club-games carry a third failed challenge, every one in extras and none in
+  regulation, and one Triple-A club-game reached five, which rules out a single
+  top-up. `gameData.absChallenges.remaining` is NOT a usable check on this: it
+  equals `max(0, 2 - usedFailed)` on 342 of 342 club-sides, so it cannot tell a
+  topped-up club from an empty one. Every `--export-only` instead runs
+  `auditBank` over all rows on file and prints any club-game the model cannot
+  pay for; it prints none today, and a row appearing there means MLB moved the
+  rule.
   `abs_ingested_games` is both the idempotency guard AND the denominator table:
   it carries the two club ids and the plate umpire, so a club or umpire nobody
   challenged still has a games figure. FACTS ONLY in the row table (who

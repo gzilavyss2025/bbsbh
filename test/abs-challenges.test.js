@@ -23,6 +23,10 @@ import {
   roleFor,
   umpireCallFor,
   isPlayedGame,
+  replayBank,
+  bankHolds,
+  armedAt,
+  auditBank,
   challengeRowsForGame,
   challengerGain,
   summarizeLevel,
@@ -42,6 +46,128 @@ import {
   ROLE_CALL,
   MIN_PLAYER_CHALLENGES,
 } from '../src/api/around-the-game/absChallenges.js'
+
+// --------------------------------------------------------------------------
+// replayBank — a club is armed again in extra innings.
+// --------------------------------------------------------------------------
+// The regulation rule — two issued, one kept per overturn, out after the
+// SECOND loss — is not the whole rule, and the season's own rows say so: 54
+// club-games carry a THIRD failed challenge, every one of them in extras, and
+// none in regulation.
+//
+// The obvious check does not check anything. `gameData.absChallenges.remaining`
+// equals max(0, 2 - usedFailed) on 342 of 342 club-sides, with no exceptions —
+// it is derived from the failure count, not a tracked balance — so a model
+// reconciled against it would pass while being wrong. These assert against the
+// ROWS instead, which is where the rule is actually visible.
+test('replayBank: two losses empty a club, and in regulation that is the end of it', () => {
+  const b = replayBank([3, 7], 9)
+  assert.equal(b.held, 0)
+  assert.equal(b.toppedUp, 0)
+  assert.deepEqual(b.emptiedIn, [7])
+  assert.equal(b.atStart.get(8), 0)
+  assert.equal(b.atStart.get(9), 0)
+})
+
+test('replayBank: a win costs nothing, so wins are never passed in', () => {
+  // Four overturns and no losses leaves the club with both, all night.
+  const b = replayBank([], 9)
+  assert.equal(b.held, 2)
+  assert.deepEqual(b.emptiedIn, [])
+  assert.equal(b.atStart.get(9), 2)
+})
+
+test('replayBank: a club that ran out is armed again in the tenth', () => {
+  // gamePk 822685 (MLB): the club lost at the 2nd, the 3rd and the 10th. A
+  // third loss is impossible out of a two-challenge bank.
+  const b = replayBank([2, 3, 10], 10)
+  assert.equal(b.atStart.get(9), 0)
+  assert.equal(b.atStart.get(10), 1)
+  assert.equal(b.toppedUp, 1)
+  assert.equal(b.overdrawn, 0)
+})
+
+test('replayBank: one top-up is not enough — the five-loss game needs three', () => {
+  // gamePk 815625 (Triple-A): losses at the 3rd, 4th, 10th, 12th and 13th of a
+  // thirteen-inning game. The only club-game in the season above three, and
+  // the one that rules out a single replenishment.
+  const b = replayBank([3, 4, 10, 12, 13], 13)
+  assert.equal(b.toppedUp, 3)
+  assert.equal(b.overdrawn, 0)
+  // Armed at the start of every extra inning, spent in three of the four.
+  for (const inning of [10, 11, 12, 13]) assert.equal(b.atStart.get(inning), 1)
+})
+
+test('replayBank: an extra inning a club enters holding one does not add a second', () => {
+  // gamePk 816215 (Triple-A): losses at the 10th, the 10th again, and the
+  // 11th. The club reached the tenth with BOTH still in hand — it had not
+  // challenged in regulation — so the two in one inning are its own, not a
+  // top-up, and only the eleventh tops it back up.
+  const b = replayBank([10, 10, 11], 11)
+  assert.equal(b.atStart.get(10), 2)
+  assert.equal(b.atStart.get(11), 1)
+  assert.equal(b.toppedUp, 1)
+  assert.equal(b.overdrawn, 0)
+})
+
+test('replayBank: overdrawing is reported, never floored away silently', () => {
+  // Three losses in regulation cannot happen. If the rows ever say it did, the
+  // model is wrong about the rule and this is how it says so.
+  const b = replayBank([2, 4, 6], 9)
+  assert.equal(b.overdrawn, 1)
+  assert.equal(bankHolds([2, 4, 6], 9), false)
+  assert.equal(bankHolds([2, 4, 10], 10), true)
+})
+
+test('replayBank: without the game length it replays only what happened', () => {
+  // The ledger does not carry a game's length yet. Given none, the replay runs
+  // to the last inning a challenge was lost in — enough to replay every
+  // emptying the rows can see, and not enough to claim a club was re-armed in
+  // an extra inning it never challenged in.
+  assert.equal(replayBank([2, 3, 10]).innings, 10)
+  assert.equal(replayBank([2, 3, 10]).toppedUp, 1)
+  // A club that emptied in the fifth of a game that went to the twelfth: with
+  // no length, the replay stops at the fifth and claims no top-up.
+  assert.equal(replayBank([1, 5]).toppedUp, 0)
+  assert.equal(replayBank([1, 5], 12).toppedUp, 1)
+})
+
+test('auditBank: the standing check names the club-game, not a count', () => {
+  const rows = [
+    // A club that lost three in regulation — impossible under the rule.
+    { game_pk: 1, team_id: 10, outcome: 'fail', inning: 2 },
+    { game_pk: 1, team_id: 10, outcome: 'fail', inning: 4 },
+    { game_pk: 1, team_id: 10, outcome: 'fail', inning: 6 },
+    // The same three losses, the last one in extras — fine.
+    { game_pk: 2, team_id: 11, outcome: 'fail', inning: 2 },
+    { game_pk: 2, team_id: 11, outcome: 'fail', inning: 4 },
+    { game_pk: 2, team_id: 11, outcome: 'fail', inning: 11 },
+    // Wins never cost anything, so four of them do not empty a club.
+    { game_pk: 3, team_id: 12, outcome: 'success', inning: 1 },
+    { game_pk: 3, team_id: 12, outcome: 'success', inning: 2 },
+    { game_pk: 3, team_id: 12, outcome: 'success', inning: 3 },
+    { game_pk: 3, team_id: 12, outcome: 'success', inning: 4 },
+  ]
+  assert.deepEqual(auditBank(rows), [
+    { gamePk: 1, teamId: 10, failInnings: [2, 4, 6], overdrawn: 1 },
+  ])
+})
+
+test('auditBank: the season on file pays for every challenge it spent', () => {
+  // Asserted here as the shape of the claim; the generator runs it over all
+  // 18,957 rows on every --export-only and prints any club-game it cannot pay
+  // for. It printed none.
+  assert.deepEqual(auditBank([]), [])
+})
+
+test('armedAt: the question the chances denominator asks of a half-inning', () => {
+  const fails = [2, 3, 10]
+  assert.equal(armedAt(fails, 1, 10), true)
+  assert.equal(armedAt(fails, 3, 10), true) // it still held one entering the 3rd
+  assert.equal(armedAt(fails, 4, 10), false)
+  assert.equal(armedAt(fails, 9, 10), false)
+  assert.equal(armedAt(fails, 10, 10), true) // armed again
+})
 
 // --------------------------------------------------------------------------
 // isPlayedGame — which games are allowed onto the denominator.

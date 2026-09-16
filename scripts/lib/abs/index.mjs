@@ -1,5 +1,6 @@
-// The pure half of gen-abs-challenges.mjs, in two parts: turn ONE Final game's
-// feed into challenge rows (rows.mjs), and turn the accumulated rows plus the
+// The pure half of gen-abs-challenges.mjs, in three parts: turn ONE Final
+// game's feed into challenge rows (rows.mjs), replay a club's challenge bank
+// inning by inning (bank.mjs), and turn the accumulated rows plus the
 // swept-games ledger into public/data/abs-challenges.json (export.mjs).
 //
 // THE SEAM BETWEEN THEM IS THE DISCIPLINE THE WHOLE JOB RESTS ON. The database
@@ -16,7 +17,7 @@
 // (src/api/around-the-game/absChallenges.js).
 //
 // This file is the door. gen-abs-challenges.mjs and test/abs-challenges.test.js
-// import from here, so moving a function between the two halves costs no
+// import from here, so moving a function between the three files costs no
 // caller an edit.
 
 export {
@@ -27,6 +28,14 @@ export {
   isPlayedGame,
   PLAYED_CODE,
 } from './rows.mjs'
+export {
+  replayBank,
+  bankHolds,
+  armedAt,
+  auditBank,
+  ISSUED,
+  FIRST_EXTRA_INNING,
+} from './bank.mjs'
 export {
   ROLES,
   MISS_BANDS,
