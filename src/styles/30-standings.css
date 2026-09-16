@@ -324,3 +324,76 @@
   background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card));
 }
 
+
+/* ---- Clinch marks -------------------------------------------------------- */
+
+/* MLB's one-letter clinch mark (ClinchMark.jsx), riding after a club name in a
+   standings row and repeated in the key below the board. A filled chip rather
+   than a tinted letter: at one character wide a colour change alone is far too
+   small a target to read as a state, and the chip also survives the favourite
+   club's own row tint sitting behind it. Mono so every letter occupies the same
+   box, which keeps the marks aligned down a column of names of different
+   lengths. `flex: none` because the team cell is a flex row whose name child is
+   allowed to shrink — without it the chip is what gives way first. */
+.clinchmark {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-none);
+  line-height: var(--lh-solid);
+  background: var(--accent-positive);
+  color: var(--text-on-ink);
+}
+/* Eliminated is the one mark that is not good news, so it is the one mark that
+   changes colour — the four clinch letters deliberately share a single tone
+   rather than grading z/y/x/w, since a reader distinguishes them by the letter
+   and the key, not by four shades of the same green. */
+.clinchmark--e {
+  background: var(--accent-negative);
+}
+
+/* An eliminated club's row, dimmed a step. Opacity (not a grey text colour) so
+   the club mark and the run-differential tone fade with the rest of the row
+   instead of leaving a full-strength logo beside faded numbers. It stays well
+   clear of unreadable: the row is still the page's ordinary body ink at 62%,
+   and the `e` chip on it does not fade, since that chip is the reason the row
+   is dimmed at all. */
+.standings tr.is-eliminated td {
+  opacity: 0.62;
+}
+.standings tr.is-eliminated .clinchmark {
+  opacity: 1;
+}
+
+/* The key under a board. A <dl> of chip/meaning pairs, laid out as rows that
+   wrap into columns once there is room — on a phone it is one pair per line,
+   and past the wide breakpoint the five possible pairs sit two or three across
+   rather than running a thin ragged column down the page. */
+.clinchkey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+}
+.clinchkey__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.clinchkey dt,
+.clinchkey dd {
+  margin: 0;
+}
+.clinchkey dd {
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}

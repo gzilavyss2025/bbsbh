@@ -10,6 +10,7 @@ import { useRouteLink } from '../lib/nav.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
+import { ClinchMark, ClinchKey } from '../components/team/ClinchMark.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
@@ -152,6 +153,7 @@ function SeedRow({ t, bye = false }) {
       <span className="seedrow__seed">{t.seed}</span>
       <TeamLogo teamId={t.id} name={t.name} size={18} />
       <span className="seedrow__name">{t.name}</span>
+      <ClinchMark mark={t.clinch} />
       {bye && <span className="psrace__bye">Bye</span>}
     </TeamLink>
   )
@@ -264,8 +266,16 @@ function LeagueBracket({ lg, side }) {
 // field even by winning out), not proximity to today's cutoff line, so a
 // club 8 games back with games in hand still shows. Division leaders aren't
 // repeated here — they're the bracket's own bye seeds, one section up.
+//
+// Its own function because the clinch key below the page has to agree with it
+// exactly: the key explains the marks this table prints, so both have to mean
+// the same thing by "still alive".
+function aliveWildCard(lg) {
+  return (lg.wildcard ?? []).filter((t) => !t.wcEliminated)
+}
+
 function WildCardMiniTable({ lg }) {
-  const rows = lg.wildcard.filter((t) => !t.wcEliminated)
+  const rows = aliveWildCard(lg)
   return (
     <div className="ledger-wrap standings-wrap psrace__minitable">
       <table className="standings standings--full standings--wc">
@@ -285,6 +295,7 @@ function WildCardMiniTable({ lg }) {
                 <TeamLink id={t.id} tab="numbers">
                   <TeamLogo teamId={t.id} name={t.name} size={18} />
                   {t.name}
+                  <ClinchMark mark={t.clinch} />
                   <span className="wc-div">{t.division}</span>
                 </TeamLink>
               </td>
@@ -298,6 +309,20 @@ function WildCardMiniTable({ lg }) {
       </table>
     </div>
   )
+}
+
+// The marks the key has to explain — collected from what this page actually
+// prints, not from the league. A league's eliminated clubs never reach either
+// surface here (the bracket shows six seeds, the table shows who is still
+// alive), so an 'e' row in the key would point at a chip nobody can see.
+function marksOnPage(leagues) {
+  const marks = new Set()
+  for (const lg of leagues) {
+    for (const t of [...seedField(lg), ...aliveWildCard(lg)]) {
+      if (t.clinch) marks.add(t.clinch)
+    }
+  }
+  return marks
 }
 
 function LeagueBlock({ lg }) {
@@ -355,6 +380,7 @@ export function PostseasonRacePage() {
             <LeagueBlock lg={al} />
             <LeagueBlock lg={nl} />
           </div>
+          <ClinchKey marks={marksOnPage([al, nl])} />
           <p className="psrace__tbdcaption">
             The bracket isn’t reseeded after the Wild Card round, so each Division Series pairing
             is already set — just waiting on a winner. Championship Series matchups are still TBD.
