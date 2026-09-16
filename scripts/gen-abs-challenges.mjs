@@ -46,11 +46,11 @@
 // level is added to a file that already holds the other. --export-only
 // re-derives every split from the rows already on file and writes the JSON: it
 // is what a new cut of the data costs, because the database stores FACTS and
-// scripts/lib/abs-challenges.mjs derives everything else. --rebuild clears
+// scripts/lib/abs/ derives everything else. --rebuild clears
 // both tables first, for a schema change that makes old rows unusable.
 //
 // Every pure part of this job — the per-game row derivation and every export
-// split — lives in scripts/lib/abs-challenges.mjs, because this file does its
+// split — lives in scripts/lib/abs/, because this file does its
 // work at import and so nothing inside it could be unit-tested. This file is
 // the sweep: dates in, feeds fetched, rows written, JSON out.
 import { dirname, join } from 'node:path'
@@ -59,7 +59,7 @@ import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
-import { buildExport, challengeRowsForGame } from './lib/abs-challenges.mjs'
+import { buildExport, challengeRowsForGame } from './lib/abs/index.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'abs-challenges.json')
