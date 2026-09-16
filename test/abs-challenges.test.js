@@ -60,8 +60,11 @@ import {
 // it is derived from the failure count, not a tracked balance — so a model
 // reconciled against it would pass while being wrong. These assert against the
 // ROWS instead, which is where the rule is actually visible.
+const L = (inning, half = 'top') => ({ inning, half, outcome: 'fail' })
+const W = (inning, half = 'top') => ({ inning, half, outcome: 'success' })
+
 test('replayBank: two losses empty a club, and in regulation that is the end of it', () => {
-  const b = replayBank([3, 7], 9)
+  const b = replayBank([L(3), L(7)], 9)
   assert.equal(b.held, 0)
   assert.equal(b.toppedUp, 0)
   assert.deepEqual(b.emptiedIn, [7])
@@ -69,18 +72,28 @@ test('replayBank: two losses empty a club, and in regulation that is the end of 
   assert.equal(b.atStart.get(9), 0)
 })
 
-test('replayBank: a win costs nothing, so wins are never passed in', () => {
-  // Four overturns and no losses leaves the club with both, all night.
-  const b = replayBank([], 9)
+test('replayBank: an overturn is paid for and handed straight back', () => {
+  // Four overturns cost nothing in the end, but each one is SPENT first — a
+  // club with none left cannot ask, win or lose. Four wins leave it on two.
+  const b = replayBank([W(1), W(2), W(3), W(4)], 9)
   assert.equal(b.held, 2)
   assert.deepEqual(b.emptiedIn, [])
-  assert.equal(b.atStart.get(9), 2)
+  assert.equal(b.overdrawn, 0)
+})
+
+test('replayBank: the order matters, which a failure count cannot see', () => {
+  // Same two losses and one overturn, two different nights. `W L L` is
+  // spendable out of a bank of two; `L L W` asks for a fourth challenge the
+  // club does not hold. gamePk 816599 is the real one: both clubs end on one
+  // overturn and two losses, and only team 416 overdraws.
+  assert.equal(replayBank([W(1), L(5), L(9)], 9).overdrawn, 0)
+  assert.equal(replayBank([L(1), L(5), W(9)], 9).overdrawn, 1)
 })
 
 test('replayBank: a club that ran out is armed again in the tenth', () => {
   // gamePk 822685 (MLB): the club lost at the 2nd, the 3rd and the 10th. A
   // third loss is impossible out of a two-challenge bank.
-  const b = replayBank([2, 3, 10], 10)
+  const b = replayBank([L(2), L(3), L(10)], 10)
   assert.equal(b.atStart.get(9), 0)
   assert.equal(b.atStart.get(10), 1)
   assert.equal(b.toppedUp, 1)
@@ -91,7 +104,7 @@ test('replayBank: one top-up is not enough — the five-loss game needs three', 
   // gamePk 815625 (Triple-A): losses at the 3rd, 4th, 10th, 12th and 13th of a
   // thirteen-inning game. The only club-game in the season above three, and
   // the one that rules out a single replenishment.
-  const b = replayBank([3, 4, 10, 12, 13], 13)
+  const b = replayBank([L(3), L(4), L(10), L(12), L(13)], 13)
   assert.equal(b.toppedUp, 3)
   assert.equal(b.overdrawn, 0)
   // Armed at the start of every extra inning, spent in three of the four.
@@ -103,70 +116,91 @@ test('replayBank: an extra inning a club enters holding one does not add a secon
   // 11th. The club reached the tenth with BOTH still in hand — it had not
   // challenged in regulation — so the two in one inning are its own, not a
   // top-up, and only the eleventh tops it back up.
-  const b = replayBank([10, 10, 11], 11)
+  const b = replayBank([L(10), L(10, 'bottom'), L(11)], 11)
   assert.equal(b.atStart.get(10), 2)
   assert.equal(b.atStart.get(11), 1)
   assert.equal(b.toppedUp, 1)
   assert.equal(b.overdrawn, 0)
 })
 
-test('replayBank: overdrawing is reported, never floored away silently', () => {
+test('replayBank: overdrawing is counted and carried, never thrown', () => {
   // Three losses in regulation cannot happen. If the rows ever say it did, the
-  // model is wrong about the rule and this is how it says so.
-  const b = replayBank([2, 4, 6], 9)
+  // model is wrong about the rule and this is how it says so — floored at
+  // zero, counted, carried on, because two real club-games do exactly this and
+  // a replay that threw would take the season's export down over two rows.
+  const b = replayBank([L(2), L(4), L(6)], 9)
   assert.equal(b.overdrawn, 1)
-  assert.equal(bankHolds([2, 4, 6], 9), false)
-  assert.equal(bankHolds([2, 4, 10], 10), true)
+  assert.equal(b.held, 0)
+  assert.equal(bankHolds([L(2), L(4), L(6)], 9), false)
+  assert.equal(bankHolds([L(2), L(4), L(10)], 10), true)
+})
+
+test('replayBank: an emptying the club immediately undid is not one', () => {
+  // Lost in the 3rd, then asked again in the 3rd and won: the bank touched
+  // zero and was back to one before the inning was out. That is not a club
+  // that ran out.
+  assert.deepEqual(replayBank([L(3), W(3, 'bottom')], 9).emptiedIn, [])
+  assert.deepEqual(replayBank([L(3), L(3, 'bottom')], 9).emptiedIn, [3])
 })
 
 test('replayBank: without the game length it replays only what happened', () => {
   // The ledger does not carry a game's length yet. Given none, the replay runs
-  // to the last inning a challenge was lost in — enough to replay every
+  // to the last inning the club challenged in — enough to replay every
   // emptying the rows can see, and not enough to claim a club was re-armed in
   // an extra inning it never challenged in.
-  assert.equal(replayBank([2, 3, 10]).innings, 10)
-  assert.equal(replayBank([2, 3, 10]).toppedUp, 1)
+  assert.equal(replayBank([L(2), L(3), L(10)]).innings, 10)
+  assert.equal(replayBank([L(2), L(3), L(10)]).toppedUp, 1)
   // A club that emptied in the fifth of a game that went to the twelfth: with
   // no length, the replay stops at the fifth and claims no top-up.
-  assert.equal(replayBank([1, 5]).toppedUp, 0)
-  assert.equal(replayBank([1, 5], 12).toppedUp, 1)
+  assert.equal(replayBank([L(1), L(5)]).toppedUp, 0)
+  assert.equal(replayBank([L(1), L(5)], 12).toppedUp, 1)
 })
 
-test('auditBank: the standing check names the club-game, not a count', () => {
+test('auditBank: the standing check names the club-game and the order it spent in', () => {
   const rows = [
     // A club that lost three in regulation — impossible under the rule.
-    { game_pk: 1, team_id: 10, outcome: 'fail', inning: 2 },
-    { game_pk: 1, team_id: 10, outcome: 'fail', inning: 4 },
-    { game_pk: 1, team_id: 10, outcome: 'fail', inning: 6 },
+    { game_pk: 1, team_id: 10, outcome: 'fail', inning: 2, half: 'top' },
+    { game_pk: 1, team_id: 10, outcome: 'fail', inning: 4, half: 'top' },
+    { game_pk: 1, team_id: 10, outcome: 'fail', inning: 6, half: 'top' },
     // The same three losses, the last one in extras — fine.
-    { game_pk: 2, team_id: 11, outcome: 'fail', inning: 2 },
-    { game_pk: 2, team_id: 11, outcome: 'fail', inning: 4 },
-    { game_pk: 2, team_id: 11, outcome: 'fail', inning: 11 },
-    // Wins never cost anything, so four of them do not empty a club.
-    { game_pk: 3, team_id: 12, outcome: 'success', inning: 1 },
-    { game_pk: 3, team_id: 12, outcome: 'success', inning: 2 },
-    { game_pk: 3, team_id: 12, outcome: 'success', inning: 3 },
-    { game_pk: 3, team_id: 12, outcome: 'success', inning: 4 },
+    { game_pk: 2, team_id: 11, outcome: 'fail', inning: 2, half: 'top' },
+    { game_pk: 2, team_id: 11, outcome: 'fail', inning: 4, half: 'top' },
+    { game_pk: 2, team_id: 11, outcome: 'fail', inning: 11, half: 'top' },
+    // Four overturns never empty a club, however many it asks for.
+    { game_pk: 3, team_id: 12, outcome: 'success', inning: 1, half: 'top' },
+    { game_pk: 3, team_id: 12, outcome: 'success', inning: 2, half: 'top' },
+    { game_pk: 3, team_id: 12, outcome: 'success', inning: 3, half: 'top' },
+    { game_pk: 3, team_id: 12, outcome: 'success', inning: 4, half: 'top' },
   ]
   assert.deepEqual(auditBank(rows), [
-    { gamePk: 1, teamId: 10, failInnings: [2, 4, 6], overdrawn: 1 },
+    { gamePk: 1, teamId: 10, overdrawn: 1, order: '2L 4L 6L' },
   ])
 })
 
-test('auditBank: the season on file pays for every challenge it spent', () => {
-  // Asserted here as the shape of the claim; the generator runs it over all
-  // 18,957 rows on every --export-only and prints any club-game it cannot pay
-  // for. It printed none.
-  assert.deepEqual(auditBank([]), [])
+test('auditBank: the two club-games that are MLB’s own data are named, not floored', () => {
+  // gamePk 816599 team 416 spent `1L 5L 9W` — the 9th-inning overturn had to
+  // be paid for out of a bank the 5th had already emptied. Checked row by row
+  // against the feed; the other club in the same game comes out legal. Listed
+  // rather than silently allowed, so a THIRD entry means MLB moved the rule.
+  const real = [
+    { game_pk: 816599, team_id: 416, outcome: 'fail', inning: 1, half: 'top' },
+    { game_pk: 816599, team_id: 416, outcome: 'fail', inning: 5, half: 'top' },
+    { game_pk: 816599, team_id: 416, outcome: 'success', inning: 9, half: 'top' },
+  ]
+  assert.equal(replayBank(real).overdrawn, 1)
+  assert.deepEqual(auditBank(real), [])
+  // The same shape under any other gamePk is still reported.
+  const other = real.map((r) => ({ ...r, game_pk: 999999 }))
+  assert.equal(auditBank(other).length, 1)
 })
 
 test('armedAt: the question the chances denominator asks of a half-inning', () => {
-  const fails = [2, 3, 10]
-  assert.equal(armedAt(fails, 1, 10), true)
-  assert.equal(armedAt(fails, 3, 10), true) // it still held one entering the 3rd
-  assert.equal(armedAt(fails, 4, 10), false)
-  assert.equal(armedAt(fails, 9, 10), false)
-  assert.equal(armedAt(fails, 10, 10), true) // armed again
+  const cs = [L(2), L(3), L(10)]
+  assert.equal(armedAt(cs, 1, 10), true)
+  assert.equal(armedAt(cs, 3, 10), true) // it still held one entering the 3rd
+  assert.equal(armedAt(cs, 4, 10), false)
+  assert.equal(armedAt(cs, 9, 10), false)
+  assert.equal(armedAt(cs, 10, 10), true) // armed again
 })
 
 // --------------------------------------------------------------------------

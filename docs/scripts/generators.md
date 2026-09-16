@@ -241,7 +241,12 @@ don't run these by hand.
   topped-up club from an empty one. Every `--export-only` instead runs
   `auditBank` over all rows on file and prints any club-game the model cannot
   pay for; it prints none today, and a row appearing there means MLB moved the
-  rule.
+  rule. The replay is fed EVERY challenge, not only the lost ones: a club has
+  to hold one to ask at all and an overturn refunds it, so `L L W` and `W L L`
+  are the same failure count and different nights. Two Triple-A club-games are
+  the first shape and cannot be paid for — 815094 team 102 and 816599 team 416,
+  checked row by row against their feeds, with the other club in each game
+  coming out legal — so they are named in `TOLERATED` rather than floored away.
   `abs_ingested_games` is both the idempotency guard AND the denominator table:
   it carries the two club ids and the plate umpire, so a club or umpire nobody
   challenged still has a games figure. FACTS ONLY in the row table (who

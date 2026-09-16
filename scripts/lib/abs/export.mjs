@@ -112,6 +112,11 @@ export function challengerGain(row) {
 // so the count stays right when the rule is used from anywhere else. Under the
 // old count-to-two the two agree in regulation and diverge in extras.
 //
+// The replay is fed EVERY challenge, not only the lost ones. A club must hold
+// one to ask at all, and an overturn hands it straight back — so `L L W` and
+// `W L L` are the same failure count and different nights, and only the replay
+// can tell them apart.
+//
 // The replay runs only as far as the last inning a challenge was lost in,
 // because the ledger does not carry the game's length yet. That is enough for
 // every emptying the rows can see. A club that emptied in the fifth of a game
@@ -121,20 +126,24 @@ export function challengerGain(row) {
 function ranOutByTeam(rows) {
   const byGameTeam = new Map()
   for (const r of rows) {
-    if (r.outcome !== 'fail') continue
     const key = `${r.game_pk}:${r.team_id}`
     const list = byGameTeam.get(key) ?? []
-    list.push(r.inning)
+    list.push(r)
     byGameTeam.set(key, list)
   }
   const out = new Map() // teamId -> { ranOut, ranOutEarly }
-  for (const [key, failInnings] of byGameTeam) {
-    const { emptiedIn } = replayBank(failInnings)
+  for (const [key, challenges] of byGameTeam) {
+    // EVERY challenge, not only the lost ones: a club has to hold one to ask
+    // at all, and an overturn refunds it, so `L L W` and `W L L` leave the
+    // club in different places despite the same failure count.
+    const { emptiedIn } = replayBank(challenges)
     if (emptiedIn.length === 0) continue
     const teamId = Number(key.split(':')[1])
     // The FIRST time it emptied. A club can empty more than once in a game
     // that goes to extras, and the game still counts once: the column is
-    // "games it ran out in", not "times it ran out".
+    // "games it ran out in", not "times it ran out". An emptying the club
+    // immediately undid with an overturn is not one — replayBank takes the
+    // refund off before it records anything.
     const emptiedAt = emptiedIn[0]
     const cur = out.get(teamId) ?? { ranOut: 0, ranOutEarly: 0 }
     cur.ranOut += 1
