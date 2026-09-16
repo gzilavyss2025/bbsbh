@@ -27,10 +27,22 @@ import {
   bankHolds,
   armedAt,
   auditBank,
+  firstExtraInning,
+  gameShape,
+  halfPlayed,
+  halvesPlayed,
+  chancesByInning,
+  halfKey,
   challengeRowsForGame,
   challengerGain,
+  inningsFromOuts,
+  exposureRowsFor,
+  exposureByPlayer,
+  exposureRates,
+  hasExposure,
   summarizeLevel,
   buildExport,
+  buildExposureExport,
   MISS_BANDS,
 } from '../scripts/lib/abs/index.mjs'
 import {
@@ -38,6 +50,10 @@ import {
   summaryFor,
   teamBoard,
   umpireBoard,
+  umpireTails,
+  umpireSpread,
+  UMPIRE_SORTS,
+  UMPIRE_TAIL,
   playerBoards,
   roleRows,
   callSplitAnomalies,
@@ -201,6 +217,247 @@ test('armedAt: the question the chances denominator asks of a half-inning', () =
   assert.equal(armedAt(cs, 4, 10), false)
   assert.equal(armedAt(cs, 9, 10), false)
   assert.equal(armedAt(cs, 10, 10), true) // armed again
+})
+
+// --------------------------------------------------------------------------
+// firstExtraInning — extras do not start at the tenth everywhere.
+// --------------------------------------------------------------------------
+// 171 Triple-A games on file are seven-inning doubleheader games, and in those
+// the eighth IS the extra inning. Nothing shipped was wrong while the bank was
+// replayed without a length; the chances denominator passes one on every game,
+// which is what makes this matter.
+test('firstExtraInning: the tenth in a nine-inning game, the eighth in a seven', () => {
+  assert.equal(firstExtraInning(9), 10)
+  assert.equal(firstExtraInning(7), 8)
+  // A caller that does not know gets the nine-inning answer.
+  assert.equal(firstExtraInning(null), 10)
+  assert.equal(firstExtraInning(undefined), 10)
+})
+
+test('firstExtraInning: a club that emptied in the 7th of a SEVEN-inning game is armed in the 8th', () => {
+  // gamePk 816247 is the real shape: scheduledInnings 7, currentInning 8.
+  const spent = [
+    { inning: 3, half: 'top', outcome: 'fail' },
+    { inning: 7, half: 'top', outcome: 'fail' },
+  ]
+  // Told the game's real length, the rule re-arms it — this is the answer that
+  // was wrong 15 times on the season before scheduled_innings was stored.
+  assert.equal(armedAt(spent, 8, 8, 7), true)
+  // Left to assume nine innings, the model calls it unarmed.
+  assert.equal(armedAt(spent, 8, 8, null), false)
+})
+
+// --------------------------------------------------------------------------
+// gameShape — the three columns, read off a linescore.
+// --------------------------------------------------------------------------
+// The same object arrives from a game feed (liveData.linescore) and from a
+// schedule row hydrated with `linescore`. Each fixture below is the real shape
+// the API returns for the gamePk named beside it.
+test('gameShape: a home club that never batted in the ninth has no `runs` KEY', () => {
+  // gamePk 824872 — the home club led after the top of the ninth.
+  const shape = gameShape({
+    currentInning: 9,
+    scheduledInnings: 9,
+    isTopInning: true,
+    innings: [{ num: 9, home: { hits: 0, errors: 0, leftOnBase: 0 } }],
+  })
+  assert.deepEqual(shape, { finalInning: 9, bottomPlayed: 0, scheduledInnings: 9 })
+})
+
+test('gameShape: a home club retired in order carries `runs: 0`, and DID bat', () => {
+  // gamePk 823413. This is the pair the rule turns on: a reader that tested
+  // `home.runs > 0` would drop every scoreless home half in the season.
+  const shape = gameShape({
+    currentInning: 9,
+    scheduledInnings: 9,
+    isTopInning: false,
+    innings: [{ num: 9, home: { runs: 0, hits: 0, errors: 0, leftOnBase: 0 } }],
+  })
+  assert.equal(shape.bottomPlayed, 1)
+})
+
+test('gameShape: a seven-inning game that went to the eighth keeps both lengths', () => {
+  // gamePk 816247 — a Triple-A doubleheader game, scheduled for seven.
+  const shape = gameShape({
+    currentInning: 8,
+    scheduledInnings: 7,
+    innings: [{ num: 8, home: { runs: 1 } }],
+  })
+  assert.deepEqual(shape, { finalInning: 8, bottomPlayed: 1, scheduledInnings: 7 })
+})
+
+test('gameShape: a game that was never played has no shape at all', () => {
+  // gamePk 815811 (cancelled) and 816704 (postponed) both carry an empty
+  // linescore. isPlayedGame already keeps them off the ledger; this is the
+  // belt to that brace.
+  assert.deepEqual(gameShape({}), {
+    finalInning: null, bottomPlayed: null, scheduledInnings: null,
+  })
+  assert.deepEqual(gameShape(undefined), {
+    finalInning: null, bottomPlayed: null, scheduledInnings: null,
+  })
+})
+
+// --------------------------------------------------------------------------
+// halvesPlayed / chancesByInning — the denominator itself.
+// --------------------------------------------------------------------------
+test('halvesPlayed: the bottom of the last inning is the only one in doubt', () => {
+  // A game the home club never batted the ninth of: eight full innings, then
+  // a single half.
+  assert.equal(halvesPlayed(8, 9, 0), 2)
+  assert.equal(halvesPlayed(9, 9, 0), 1)
+  // A walk-off: the home club batted, so the half counts even though it was
+  // cut short. The club was exposed in it, which is what a chance is.
+  assert.equal(halvesPlayed(9, 9, 1), 2)
+  // An inning the game never reached offers nothing.
+  assert.equal(halvesPlayed(10, 9, 1), 0)
+})
+
+const shaped = (over) => ({
+  game_pk: 1, away_team_id: 100, home_team_id: 200,
+  final_inning: 9, bottom_played: 1, scheduled_innings: 9, ...over,
+})
+
+test('chancesByInning: both clubs are exposed in every half-inning played', () => {
+  // Nobody challenged, so both clubs are armed throughout: two halves times
+  // two clubs is four chances an inning.
+  const { byInning, total, dropped } = chancesByInning([], [shaped({})])
+  assert.equal(byInning.get(1), 4)
+  assert.equal(byInning.get(9), 4)
+  assert.equal(total, 36)
+  assert.equal(dropped, 0)
+})
+
+test('chancesByInning: a home club that never batted the ninth offers half of it', () => {
+  const { byInning, total } = chancesByInning([], [shaped({ bottom_played: 0 })])
+  assert.equal(byInning.get(8), 4)
+  // One half-inning, both clubs exposed in it.
+  assert.equal(byInning.get(9), 2)
+  assert.equal(total, 34)
+})
+
+test('chancesByInning: a club that emptied in the third stops offering chances', () => {
+  const lost = (inning) => ({
+    game_pk: 1, team_id: 100, inning, half: 'top', outcome: 'fail',
+  })
+  const { byInning } = chancesByInning([lost(2), lost(3)], [shaped({})])
+  // The away club entered the TOP of the third holding one and spent it there,
+  // so it offers that top and not the bottom behind it: three, not four.
+  assert.equal(byInning.get(3), 3)
+  // From the fourth only the home club is armed, so an inning offers two.
+  assert.equal(byInning.get(4), 2)
+  assert.equal(byInning.get(9), 2)
+})
+
+test('chancesByInning: an emptying in the TOP costs the club the bottom of that inning', () => {
+  // THE HALF IS THE UNIT. Read per inning, a club that spends its last
+  // challenge in the top is still credited the bottom of the same inning —
+  // a half it could not have argued in. It is 0.62% of MLB's season and it
+  // falls in the late innings the appetite finding is measured across, which
+  // is why it is counted rather than absorbed (docs/adr/0075).
+  const spentInTop = [
+    { game_pk: 1, team_id: 100, inning: 1, half: 'top', outcome: 'fail' },
+    { game_pk: 1, team_id: 100, inning: 7, half: 'top', outcome: 'fail' },
+  ]
+  const { byInning } = chancesByInning(spentInTop, [shaped({})])
+  // Through the sixth both clubs are armed in both halves.
+  assert.equal(byInning.get(6), 4)
+  // The seventh: the away club's top counts, its bottom does not.
+  assert.equal(byInning.get(7), 3)
+  // From the eighth it offers nothing at all.
+  assert.equal(byInning.get(8), 2)
+
+  // The same two losses spent in the BOTTOM cost it the whole of the next
+  // inning instead, and none of the one it emptied in.
+  const spentInBottom = spentInTop.map((c) => ({ ...c, half: 'bottom' }))
+  const bottom = chancesByInning(spentInBottom, [shaped({})]).byInning
+  assert.equal(bottom.get(7), 4)
+  assert.equal(bottom.get(8), 2)
+})
+
+test('replayBank: the bank is carried ACROSS the two halves of an inning', () => {
+  // atStart is recorded once, before the inning's rows are spent, so it says
+  // the club was armed for the whole of the inning it emptied in. atHalf is
+  // the honest reading the chances denominator asks for.
+  const { atStart, atHalf } = replayBank([
+    { inning: 4, half: 'top', outcome: 'fail' },
+    { inning: 4, half: 'top', outcome: 'fail' },
+  ], 9)
+  assert.equal(atStart.get(4), 2)
+  assert.equal(atHalf.get(halfKey(4, 'top')), 2)
+  assert.equal(atHalf.get(halfKey(4, 'bottom')), 0)
+  assert.equal(atHalf.get(halfKey(5, 'top')), 0)
+})
+
+test('replayBank: a challenge in the bottom leaves the top of its own inning armed', () => {
+  const { atHalf } = replayBank([
+    { inning: 2, half: 'bottom', outcome: 'fail' },
+    { inning: 2, half: 'bottom', outcome: 'fail' },
+  ], 9)
+  assert.equal(atHalf.get(halfKey(2, 'top')), 2)
+  assert.equal(atHalf.get(halfKey(2, 'bottom')), 2)
+  assert.equal(atHalf.get(halfKey(3, 'top')), 0)
+})
+
+test('replayBank: an emptying is still DATED to the inning, not to the half', () => {
+  // "Ran out in the sixth" is what the club board's column means and what
+  // LAST_EARLY_INNING is drawn around. Splitting the bank by half must not
+  // move it.
+  const { emptiedIn } = replayBank([
+    { inning: 6, half: 'bottom', outcome: 'fail' },
+    { inning: 6, half: 'bottom', outcome: 'fail' },
+  ], 9)
+  assert.deepEqual(emptiedIn, [6])
+})
+
+test('armedAt: the half decides it, and the top is the default', () => {
+  const spent = [
+    { inning: 1, half: 'top', outcome: 'fail' },
+    { inning: 5, half: 'top', outcome: 'fail' },
+  ]
+  assert.equal(armedAt(spent, 5, 9, 9, 'top'), true)
+  assert.equal(armedAt(spent, 5, 9, 9, 'bottom'), false)
+  // Asked about the inning rather than a half, it answers for the start of it.
+  assert.equal(armedAt(spent, 5, 9, 9), true)
+})
+
+test('halfPlayed: only the bottom of the last inning is ever in doubt', () => {
+  assert.equal(halfPlayed(9, 'top', 9, 0), true)
+  assert.equal(halfPlayed(9, 'bottom', 9, 0), false)
+  assert.equal(halfPlayed(9, 'bottom', 9, 1), true)
+  assert.equal(halfPlayed(8, 'bottom', 9, 0), true)
+  assert.equal(halfPlayed(10, 'top', 9, 1), false)
+})
+
+test('chancesByInning: a SEVEN-inning game re-arms an empty club in the eighth', () => {
+  // The trap scheduled_innings exists to close. Without it the away club reads
+  // as unarmed in the 8th, and the inning offers two chances instead of four.
+  const lost = (inning) => ({
+    game_pk: 1, team_id: 100, inning, half: 'top', outcome: 'fail',
+  })
+  const rows = [lost(3), lost(7)]
+  const seven = chancesByInning(rows, [
+    shaped({ final_inning: 8, scheduled_innings: 7 }),
+  ])
+  assert.equal(seven.byInning.get(8), 4)
+  // Told nothing, the model assumes nine and leaves the club out of it.
+  const assumedNine = chancesByInning(rows, [
+    shaped({ final_inning: 8, scheduled_innings: null }),
+  ])
+  assert.equal(assumedNine.byInning.get(8), 2)
+})
+
+test('chancesByInning: a game with no length is DROPPED, never counted as nought innings', () => {
+  // The guard for a game swept before the columns existed. Counting a NULL as
+  // a short game would shrink every denominator and inflate every rate.
+  const { byInning, total, dropped, games } = chancesByInning([], [
+    shaped({}),
+    shaped({ game_pk: 2, final_inning: null, bottom_played: null, scheduled_innings: null }),
+  ])
+  assert.equal(dropped, 1)
+  assert.equal(games, 1)
+  assert.equal(total, 36)
+  assert.equal(byInning.get(1), 4)
 })
 
 // --------------------------------------------------------------------------
@@ -495,6 +752,235 @@ test('challengerGain: null when the call was never scored', () => {
 })
 
 // --------------------------------------------------------------------------
+// exposure — how much baseball a man saw.
+// --------------------------------------------------------------------------
+// The denominator questions 5 and 6 need, and the one new fetch in the whole
+// job. Every fixture below is the real shape returned by
+//   /api/v1/teams/{id}/roster?rosterType=fullSeason&season=2026
+//     &hydrate=person(stats(type=season,group=[hitting,fielding],season=2026,sportId=1))
+// for the player named beside it, checked against the live API before any of
+// this was relied on.
+
+test('inningsFromOuts: MLB writes innings in OUTS, not in decimals', () => {
+  // William Contreras caught "1020.2" — that is 1020 and TWO THIRDS. Across a
+  // whole Brewers roster the only fractional parts that appear are 0, 1 and 2,
+  // which is what proves the notation.
+  assert.equal(inningsFromOuts('1020.2'), 1020 + 2 / 3)
+  assert.equal(inningsFromOuts('28.0'), 28)
+  assert.equal(inningsFromOuts('7.1'), 7 + 1 / 3)
+  assert.equal(inningsFromOuts('0.0'), 0)
+  assert.equal(inningsFromOuts('45'), 45)
+  // parseFloat would have said 1020.2 — half an inning light on one catcher.
+  assert.notEqual(inningsFromOuts('1020.2'), 1020.2)
+})
+
+test('inningsFromOuts: anything that is not outs notation is null, not a guess', () => {
+  // A third of an inning written as .3 would mean the notation had changed
+  // under us, and a silent parseFloat would carry the change through.
+  assert.equal(inningsFromOuts('7.3'), null)
+  assert.equal(inningsFromOuts('7.9'), null)
+  assert.equal(inningsFromOuts(''), null)
+  assert.equal(inningsFromOuts(null), null)
+  assert.equal(inningsFromOuts(undefined), null)
+  assert.equal(inningsFromOuts('-3.1'), null)
+})
+
+// A roster entry, shaped like the live response.
+const person = (id, name, pos, groups) => ({
+  position: { abbreviation: pos },
+  person: { id, fullName: name, stats: groups },
+})
+const hitting = (splits) => ({ group: { displayName: 'hitting' }, splits })
+const fielding = (splits) => ({ group: { displayName: 'fielding' }, splits })
+
+test('exposureRowsFor: a catcher who also hits carries BOTH denominators', () => {
+  // William Contreras, Brewers (158): 2,152 pitches seen at the plate, and
+  // 1020.2 innings caught plus 18 games at DH that are not catching.
+  const rows = exposureRowsFor(
+    {
+      roster: [
+        person(1, 'William Contreras', 'C', [
+          hitting([{ team: { id: 158 }, stat: { numberOfPitches: 2152, plateAppearances: 602 } }]),
+          fielding([
+            { team: { id: 158 }, position: { abbreviation: 'C' }, stat: { gamesStarted: 114, innings: '1020.2', games: 120 } },
+            { team: { id: 158 }, position: { abbreviation: 'DH' }, stat: { gamesStarted: 18, innings: '0.0', games: 18 } },
+          ]),
+        ]),
+      ],
+    },
+    { season: 2026, level: 'MLB', teamId: 158 },
+  )
+  assert.equal(rows.length, 1)
+  assert.equal(rows[0].pitches, 2152)
+  assert.equal(rows[0].plate_appearances, 602)
+  assert.equal(rows[0].catcher_innings, 1020 + 2 / 3)
+  // The DH split is not catching, so it adds nothing to either catcher column.
+  assert.equal(rows[0].catcher_starts, 114)
+})
+
+test('exposureRowsFor: a traded player is credited to the right club, never the aggregate', () => {
+  // Bo Naylor's hitting group reads 94 PA with NO `team` key at all — the
+  // aggregate, listed FIRST — then 90 for Cleveland (114) and 4 for Milwaukee
+  // (158). Reading the first split would credit Milwaukee with all 94.
+  const roster = {
+    roster: [
+      person(2, 'Bo Naylor', 'C', [
+        hitting([
+          { stat: { numberOfPitches: 400, plateAppearances: 94 } },
+          { team: { id: 114 }, stat: { numberOfPitches: 380, plateAppearances: 90 } },
+          { team: { id: 158 }, stat: { numberOfPitches: 20, plateAppearances: 4 } },
+        ]),
+      ]),
+    ],
+  }
+  const brewers = exposureRowsFor(roster, { season: 2026, level: 'MLB', teamId: 158 })
+  assert.equal(brewers[0].plate_appearances, 4)
+  assert.equal(brewers[0].pitches, 20)
+  // The same response read as Cleveland's gives Cleveland's half, so each
+  // club's own call writes only its own rows.
+  const guardians = exposureRowsFor(roster, { season: 2026, level: 'MLB', teamId: 114 })
+  assert.equal(guardians[0].plate_appearances, 90)
+  // And the two halves are the aggregate, which is the check that nothing was
+  // double-counted or dropped.
+  assert.equal(brewers[0].plate_appearances + guardians[0].plate_appearances, 94)
+})
+
+test('exposureRowsFor: a pitcher with no hitting split is null, never zero', () => {
+  // Null divides to "no rate"; zero divides to Infinity. 93 of 102 MLB
+  // pitchers who challenged have neither denominator, and that is correct.
+  const rows = exposureRowsFor(
+    {
+      roster: [
+        person(3, 'A Reliever', 'P', [
+          fielding([{ team: { id: 158 }, position: { abbreviation: 'P' }, stat: { gamesStarted: 0, innings: '64.1' } }]),
+        ]),
+      ],
+    },
+    { season: 2026, level: 'MLB', teamId: 158 },
+  )
+  assert.equal(rows[0].pitches, null)
+  assert.equal(rows[0].plate_appearances, null)
+  // He pitched, but he did not CATCH, so the catcher columns stay empty too.
+  assert.equal(rows[0].catcher_innings, null)
+  assert.equal(rows[0].catcher_starts, null)
+})
+
+test('exposureRowsFor: a man who never challenged still gets a row', () => {
+  // Half of question 5 is "how many qualified hitters never asked at all", and
+  // a table built from the challenge rows cannot see them — they leave no row
+  // there. Four qualified MLB hitters are in this position.
+  const rows = exposureRowsFor(
+    {
+      roster: [
+        person(4, 'A Quiet Hitter', '1B', [
+          hitting([{ team: { id: 158 }, stat: { numberOfPitches: 2000, plateAppearances: 500 } }]),
+        ]),
+      ],
+    },
+    { season: 2026, level: 'MLB', teamId: 158 },
+  )
+  assert.equal(rows.length, 1)
+  assert.equal(rows[0].plate_appearances, 500)
+  assert.equal(rows[0].name, 'A Quiet Hitter')
+})
+
+test('exposureRowsFor: an empty or malformed roster yields nothing rather than throwing', () => {
+  const opts = { season: 2026, level: 'MLB', teamId: 158 }
+  assert.deepEqual(exposureRowsFor({ roster: [] }, opts), [])
+  assert.deepEqual(exposureRowsFor({}, opts), [])
+  assert.deepEqual(exposureRowsFor(null, opts), [])
+  // An entry with no person id is skipped, not written with a null key.
+  assert.deepEqual(exposureRowsFor({ roster: [{ person: {} }] }, opts), [])
+})
+
+test('exposureByPlayer: a traded man is asked how often HE argues, so his clubs add up', () => {
+  const total = exposureByPlayer([
+    { player_id: 2, name: 'Bo Naylor', position: 'C', pitches: 380, plate_appearances: 90, catcher_innings: 600, catcher_starts: 70 },
+    { player_id: 2, name: 'Bo Naylor', position: 'C', pitches: 20, plate_appearances: 4, catcher_innings: 30, catcher_starts: 3 },
+  ])
+  assert.deepEqual(total.get(2), {
+    name: 'Bo Naylor', position: 'C',
+    pitches: 400, plateAppearances: 94, catcherInnings: 630, catcherStarts: 73,
+  })
+})
+
+test('exposureByPlayer: a null column stays null rather than becoming a zero', () => {
+  const total = exposureByPlayer([
+    { player_id: 3, name: 'A Pitcher', position: 'P', pitches: null, plate_appearances: null, catcher_innings: null, catcher_starts: null },
+  ])
+  assert.deepEqual(total.get(3), {
+    name: 'A Pitcher', position: 'P',
+    pitches: null, plateAppearances: null, catcherInnings: null, catcherStarts: null,
+  })
+})
+
+test('exposureByPlayer: THE NAME COMES WITH HIM, because most of these men have no other row', () => {
+  // The fold is the only place the roster rows and the challenge rows meet,
+  // and 115 of the 659 MLB men it ships leave no challenge row anywhere — the
+  // qualified hitters who never once argued among them. Dropped here they are
+  // unprintable, and a board built on the list can show only player ids.
+  const total = exposureByPlayer([
+    { player_id: 4, name: 'Yandy Diaz', position: '1B', pitches: 2100, plate_appearances: 520 },
+  ])
+  assert.equal(total.get(4).name, 'Yandy Diaz')
+  assert.equal(total.get(4).position, '1B')
+  // A row the feed left unnamed does not overwrite one that has a name.
+  const mixed = exposureByPlayer([
+    { player_id: 5, name: '', position: '', pitches: 10 },
+    { player_id: 5, name: 'Real Name', position: 'RF', pitches: 10 },
+  ])
+  assert.equal(mixed.get(5).name, 'Real Name')
+  assert.equal(mixed.get(5).position, 'RF')
+})
+
+test('hasExposure: a nought is no more a denominator than a null is', () => {
+  // A pitcher who never came to the plate carries a hitting split reading 0
+  // rather than no split at all, and a zero divides to no rate exactly as a
+  // null does. Both are ballast: the row supports no rate, and cannot answer
+  // "he had the opportunity and never took it" either.
+  assert.equal(hasExposure({ pitches: 1200, plateAppearances: 300 }), true)
+  assert.equal(hasExposure({ pitches: null, catcherInnings: 4 }), true)
+  assert.equal(hasExposure({ pitches: 0, plateAppearances: 0 }), false)
+  assert.equal(
+    hasExposure({ pitches: null, plateAppearances: null, catcherInnings: null, catcherStarts: null }),
+    false,
+  )
+  assert.equal(hasExposure(null), false)
+})
+
+test('exposureRates: each rate takes ONLY the challenges its own denominator explains', () => {
+  // THE TRAP THIS MODULE EXISTS FOR. Francisco Alvarez called for 102 reviews
+  // — 22 at the plate and 80 behind it. Dividing all 102 by the pitches he saw
+  // as a BATTER invents a man who argues with every other pitch he sees, and
+  // it is what put a catcher at the top of the "most eager hitter" board.
+  const r = exposureRates(
+    { batter: 22, catcher: 80 },
+    { pitches: 1635, plateAppearances: 400, catcherInnings: 674, catcherStarts: 74 },
+  )
+  assert.equal(r.asBatter, 22)
+  assert.equal(r.asCatcher, 80)
+  assert.equal(r.per1000Pitches.toFixed(2), '13.46') // not 62.39
+  assert.equal(r.per9Caught.toFixed(3), '1.068')
+  // Neither rate borrows the other's numerator.
+  assert.notEqual(r.per1000Pitches, (102 / 1635) * 1000)
+})
+
+test('exposureRates: no denominator is null, which is not the same as no challenges', () => {
+  // "He never batted" and "he batted and never asked" are different facts, and
+  // a board that printed both as 0.0 would lose the more interesting one.
+  const none = exposureRates({ batter: 4 }, { pitches: null, catcherInnings: null })
+  assert.equal(none.per1000Pitches, null)
+  assert.equal(none.per9Caught, null)
+  // A denominator of nought is no opportunity, so it is no number either —
+  // never Infinity.
+  assert.equal(exposureRates({ batter: 1 }, { pitches: 0 }).per1000Pitches, null)
+  // A man with a denominator and no challenges of that kind is a real zero.
+  assert.equal(exposureRates({ catcher: 9 }, { pitches: 1000 }).per1000Pitches, 0)
+  // And nothing at all does not throw.
+  assert.equal(exposureRates(null, null).per1000Pitches, null)
+})
+
+// --------------------------------------------------------------------------
 // summarizeLevel — the export splits.
 // --------------------------------------------------------------------------
 const row = (over) => ({
@@ -505,7 +991,10 @@ const row = (over) => ({
 })
 const game = (over) => ({
   game_pk: 1, date: '2026-04-01', season: 2026, level: 'MLB',
-  away_team_id: 100, home_team_id: 200, umpire_id: 7, challenges: 1, ...over,
+  away_team_id: 100, home_team_id: 200, umpire_id: 7, challenges: 1,
+  // An ordinary nine-inning game the home club batted in. The three shape
+  // columns are on every row --recheck has seen, so the fixture carries them.
+  final_inning: 9, bottom_played: 1, scheduled_innings: 9, ...over,
 })
 
 test('summarizeLevel: totals, rate and the run figures', () => {
@@ -549,6 +1038,61 @@ test('summarizeLevel: a club is out of challenges after its SECOND loss, and ear
   // One loss is not running out.
   const one = summarizeLevel([lost(0, 2)], [game({})])
   assert.equal(one.byTeam.find((t) => t.teamId === 100).ranOut, 0)
+})
+
+test('summarizeLevel: an inning carries the chances its count sat against', () => {
+  // One challenge in the third of one nine-inning game the home club batted
+  // in. Both clubs are armed all night, so every inning offered four chances.
+  const s = summarizeLevel([row({})], [game({})])
+  const third = s.byInning.find((i) => i.inning === 3)
+  assert.equal(third.n, 1)
+  assert.equal(third.chances, 4)
+  assert.equal(third.perChance, 0.25)
+  assert.equal(s.chances, 36)
+  assert.equal(s.chancesGames, 1)
+  // The guard for a game with no length fires on nothing, which is the point.
+  assert.equal(s.chancesGamesDropped, 0)
+})
+
+test('summarizeLevel: a game swept before the columns existed is dropped, and says so', () => {
+  const s = summarizeLevel([row({})], [game({ final_inning: null, scheduled_innings: null })])
+  assert.equal(s.chancesGamesDropped, 1)
+  assert.equal(s.chancesGames, 0)
+  assert.equal(s.chances, 0)
+  // A dropped game leaves the rate null rather than dividing by nought.
+  assert.equal(s.byInning.find((i) => i.inning === 3).perChance, null)
+})
+
+test('summarizeLevel: the role rates add back up to the club rate, in every inning', () => {
+  // THE INVARIANT THE ONE-DENOMINATOR RULE EXISTS FOR. A batter can only
+  // challenge in his club's batting half, so a role drawn on its own half of
+  // the chances sums to twice the club figure and reads as though catchers
+  // alone out-ask the club they play for. Counted on the club denominator the
+  // three add up, which is the only way the panel can be read.
+  const s = summarizeLevel(
+    [
+      row({ seq: 0, role: 'batter', inning: 3 }),
+      row({ seq: 1, role: 'catcher', inning: 3, outcome: 'fail', favor: null }),
+      row({ seq: 2, role: 'pitcher', inning: 5, outcome: 'fail', favor: null }),
+    ],
+    [game({ challenges: 3 })],
+  )
+  for (const inning of s.byInning) {
+    const roles = s.byInningRole.filter((r) => r.inning === inning.inning)
+    assert.equal(
+      roles.reduce((n, r) => n + r.n, 0),
+      inning.n,
+      `counts disagree in inning ${inning.inning}`,
+    )
+    assert.equal(
+      roles.reduce((n, r) => n + r.perChance, 0),
+      inning.perChance,
+      `rates disagree in inning ${inning.inning}`,
+    )
+    // Every role gets a row in every inning that saw a challenge, so a panel
+    // draws a flat line rather than a gap where a role was quiet.
+    assert.deepEqual(roles.map((r) => r.role), ['batter', 'catcher', 'pitcher', 'other'])
+  }
 })
 
 test('summarizeLevel: distance bands are read from the edge outward', () => {
@@ -597,6 +1141,99 @@ test('buildExport: levels are split, and a level with no rows is still carried',
   assert.equal(out.generatedAt, 'now')
 })
 
+test('buildExport: the report file carries no denominator a player is divided by', () => {
+  // THE SIZE GUARD, PINNED. Ten exposure fields on every byPlayer row cost
+  // 321 KB on a file every visitor to /abs-challenges downloads whole and
+  // shows none of them on; with the full list folded in too it ran 895 KB
+  // against main's 198 KB. They belong in abs-exposure.json, and a row that
+  // grows them back here is the regression this test exists to catch.
+  const out = buildExport([row({})], [game({})], { season: 2026, generatedAt: 'now' })
+  assert.deepEqual(Object.keys(out.levels.MLB.byPlayer[0]).sort(), [
+    'name', 'playerId', 'rate', 'role', 'success', 'teamId', 'n',
+  ].sort())
+  // And the list of every man who played is not in this file at all.
+  assert.equal('exposure' in out.levels.MLB, false)
+})
+
+// --------------------------------------------------------------------------
+// buildExposureExport — the denominator list, in its own file.
+// --------------------------------------------------------------------------
+const seenRow = (over) => ({
+  season: 2026, level: 'MLB', team_id: 100, player_id: 11, name: 'A Hitter',
+  position: 'LF', pitches: 1000, plate_appearances: 250,
+  catcher_innings: null, catcher_starts: null, ...over,
+})
+
+test('buildExposureExport: a man is named, positioned and given the rates he supports', () => {
+  const out = buildExposureExport([row({})], [seenRow({})], { season: 2026, generatedAt: 'now' })
+  const p = out.levels.MLB.players[0]
+  assert.equal(p.playerId, 11)
+  assert.equal(p.name, 'A Hitter')
+  assert.equal(p.position, 'LF')
+  assert.equal(p.pitches, 1000)
+  // One batter challenge over a thousand pitches seen.
+  assert.equal(p.asBatter, 1)
+  assert.equal(p.per1000Pitches, 1)
+  // He never caught, so the catcher rate is no number rather than a nought.
+  assert.equal(p.per9Caught, null)
+  assert.equal(out.season, 2026)
+  assert.equal(out.generatedAt, 'now')
+})
+
+test('buildExposureExport: the men who NEVER challenged are in it, and they are the point', () => {
+  // Three of the four qualified MLB hitters who never called for a review
+  // leave no challenge row anywhere, so a list built from the challenge rows
+  // cannot see them. This file is the only place they exist.
+  const out = buildExposureExport(
+    [row({})],
+    [seenRow({}), seenRow({ player_id: 12, name: 'Never Asked', pitches: 2100, plate_appearances: 520 })],
+    { season: 2026 },
+  )
+  const quiet = out.levels.MLB.players.find((p) => p.playerId === 12)
+  assert.equal(quiet.name, 'Never Asked')
+  // A real zero, not a null: he had 2,100 pitches of opportunity and took none.
+  assert.equal(quiet.asBatter, 0)
+  assert.equal(quiet.per1000Pitches, 0)
+})
+
+test('buildExposureExport: each rate takes only the challenges its own denominator explains', () => {
+  // The catcher-who-also-hits trap, through the file rather than the helper.
+  const rows = [
+    row({ seq: 0, player_id: 20, player_name: 'A Catcher', role: 'batter' }),
+    row({ seq: 1, player_id: 20, player_name: 'A Catcher', role: 'catcher' }),
+    row({ seq: 2, player_id: 20, player_name: 'A Catcher', role: 'catcher' }),
+  ]
+  const out = buildExposureExport(rows, [
+    seenRow({ player_id: 20, name: 'A Catcher', position: 'C', pitches: 1000, catcher_innings: 900 }),
+  ], { season: 2026 })
+  const p = out.levels.MLB.players[0]
+  assert.equal(p.asBatter, 1)
+  assert.equal(p.asCatcher, 2)
+  assert.equal(p.per1000Pitches, 1) // his ONE batter challenge, not all three
+  assert.equal(p.per9Caught, 0.02) // his two catcher challenges over 900 innings
+})
+
+test('buildExposureExport: a man with no opportunity at all is dropped, not shipped as nulls', () => {
+  const out = buildExposureExport([], [
+    seenRow({}),
+    // A pitcher who never batted and never caught: nulls throughout.
+    seenRow({ player_id: 13, name: 'A Pitcher', position: 'P', pitches: null, plate_appearances: null }),
+    // And one whose hitting split reads nought rather than being absent.
+    seenRow({ player_id: 14, name: 'Another Pitcher', position: 'P', pitches: 0, plate_appearances: 0 }),
+  ], { season: 2026 })
+  assert.deepEqual(out.levels.MLB.players.map((p) => p.playerId), [11])
+})
+
+test('buildExposureExport: levels are split, and nothing on file is an empty object', () => {
+  const out = buildExposureExport([], [
+    seenRow({}),
+    seenRow({ level: 'AAA', player_id: 21, name: 'A Triple-A Hitter' }),
+  ], { season: 2026 })
+  assert.deepEqual(Object.keys(out.levels).sort(), ['AAA', 'MLB'])
+  assert.equal(out.levels.AAA.players.length, 1)
+  assert.deepEqual(buildExposureExport([], [], { season: 2026 }).levels, {})
+})
+
 // --------------------------------------------------------------------------
 // The reader's boards.
 // --------------------------------------------------------------------------
@@ -630,6 +1267,117 @@ test('umpireBoard: the games floor keeps a thin sample off the board', () => {
   const summary = summaryFor(data, 'MLB')
   assert.deepEqual(umpireBoard(summary), []) // one game worked, floor is 15
   assert.equal(umpireBoard(summary, 'rate', 1).length, 1)
+})
+
+// --------------------------------------------------------------------------
+// The plate-umpire board's fourth sort, and its two ends.
+// --------------------------------------------------------------------------
+// A board of umpires, each worked enough games to clear the floor, built
+// straight rather than through buildExport — the cut under test is the
+// ordering and the tails, not the export.
+const umpSummary = (n) => ({
+  perGame: 4.18,
+  byUmpire: Array.from({ length: n }, (_, i) => ({
+    umpireId: 100 + i,
+    name: `Umpire ${i}`,
+    games: 20,
+    // Spread evenly from 3.13 to 5.40, the season's real range.
+    n: 80 + i,
+    success: 40,
+    rate: 0.5,
+    perGame: 3.13 + (i * (5.4 - 3.13)) / Math.max(1, n - 1),
+  })),
+})
+
+test('UMPIRE_SORTS: one chip per question, because the board shows both ends of it', () => {
+  assert.deepEqual(UMPIRE_SORTS.map((s) => s.key), ['rate', 'perGame'])
+  // No sort names a field other than its own key any more. The `field`
+  // indirection existed only for the low chips.
+  assert.ok(UMPIRE_SORTS.every((s) => s.field == null))
+})
+
+test('umpireTails: a low chip would have re-printed the same twelve men', () => {
+  // WHY THE LOW CHIPS WENT. Sorting the board the other way returns the
+  // identical rows reversed, and the head and tail of a reversed list are the
+  // tail and head of the original — the same twelve umpires, swapped over. A
+  // control that promises a new view and re-prints the old one reads as broken
+  // data, so the chip picks the COLUMN and both of its ends come free.
+  const summary = umpSummary(30)
+  const most = umpireBoard(summary, 'perGame')
+  const reversed = [...most].reverse()
+  const a = umpireTails(most)
+  const b = umpireTails(reversed)
+  assert.deepEqual(a.head.map((u) => u.umpireId), b.tail.map((u) => u.umpireId).reverse())
+  assert.deepEqual(a.tail.map((u) => u.umpireId), b.head.map((u) => u.umpireId).reverse())
+  assert.equal(a.between, b.between)
+})
+
+test('umpireBoard: every qualifying man is on the board, whatever the tails show', () => {
+  // The expander's contract. UmpireBoard.jsx renders `umps` whole when
+  // `showAll` is on, so the men the tails leave out have to BE here — 75 of
+  // MLB's 87 were unreachable when the two ends were the only view.
+  const board = umpireBoard(umpSummary(30), 'perGame')
+  assert.equal(board.length, 30)
+  const { head, tail, between } = umpireTails(board)
+  assert.equal(head.length + tail.length + between, board.length)
+  // And the ranks are the board's own, so expanding renumbers nothing.
+  assert.equal(board[0].rank, 1)
+  assert.equal(board[board.length - 1].rank, 30)
+})
+
+test('umpireTails: both ends on one board, with the middle counted not hidden', () => {
+  const rows = umpireBoard(umpSummary(30), 'perGame')
+  const { head, tail, between } = umpireTails(rows)
+  assert.equal(head.length, UMPIRE_TAIL)
+  assert.equal(tail.length, UMPIRE_TAIL)
+  assert.equal(between, 30 - UMPIRE_TAIL * 2)
+  // The two ends are the real ends, and nothing is shown twice.
+  assert.equal(head[0].umpireId, rows[0].umpireId)
+  assert.equal(tail[tail.length - 1].umpireId, rows[rows.length - 1].umpireId)
+  assert.equal(new Set([...head, ...tail].map((u) => u.umpireId)).size, UMPIRE_TAIL * 2)
+})
+
+test('umpireTails: a board too short to have two ends is returned whole', () => {
+  // Triple-A on a thin sample, and the degenerate cases either side of it.
+  const rows = umpireBoard(umpSummary(8), 'perGame')
+  const { head, tail, between } = umpireTails(rows)
+  assert.equal(head.length, 8)
+  assert.deepEqual(tail, [])
+  assert.equal(between, 0)
+  assert.deepEqual(umpireTails([]), { head: [], tail: [], between: 0 })
+  assert.deepEqual(umpireTails(null), { head: [], tail: [], between: 0 })
+})
+
+test('umpireTails: one row past twice the tail is where the middle starts', () => {
+  const whole = umpireTails(umpireBoard(umpSummary(UMPIRE_TAIL * 2), 'perGame'))
+  assert.equal(whole.between, 0)
+  assert.equal(whole.tail.length, 0)
+  const split = umpireTails(umpireBoard(umpSummary(UMPIRE_TAIL * 2 + 1), 'perGame'))
+  assert.equal(split.between, 1)
+  assert.equal(split.tail.length, UMPIRE_TAIL)
+})
+
+test('umpireSpread: the scale is the widest margin on the league rate', () => {
+  const rows = umpireBoard(umpSummary(10), 'perGame')
+  // 5.40 is 1.22 above 4.18; 3.13 is 1.05 below it. The wider side wins, so
+  // the longest bar reaches the end of its track and none overflows.
+  assert.equal(umpireSpread(rows, 4.18).toFixed(2), '1.22')
+  // It does not move with the sort, only with the board.
+  assert.equal(
+    umpireSpread(umpireBoard(umpSummary(10), 'perGameLow'), 4.18),
+    umpireSpread(rows, 4.18),
+  )
+})
+
+test('umpireSpread: nothing to scale against returns null rather than zero', () => {
+  // A caller draws no bar on null; a zero would divide the width by nought.
+  assert.equal(umpireSpread([], 4.18), null)
+  assert.equal(umpireSpread(null, 4.18), null)
+  assert.equal(umpireSpread([{ perGame: 4.18 }], 4.18), null)
+  // No league rate is no baseline, whatever the rows say.
+  assert.equal(umpireSpread([{ perGame: 5.4 }], null), null)
+  // A row with no rate of its own is skipped, not counted as nought.
+  assert.equal(umpireSpread([{ perGame: null }, { perGame: 5.18 }], 4.18).toFixed(2), '1.00')
 })
 
 test('playerBoards: the rate board takes a floor, the count board does not', () => {

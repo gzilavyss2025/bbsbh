@@ -92,13 +92,16 @@ export const GROUPS = {
     file: join(dataDir, 'team-records.sql'),
     tables: ['team_record_games', 'team_record_ingested_games', 'team_record_pitcher_roles'],
   },
-  // Both tables are written by the one nightly gen-abs-challenges.mjs — its
-  // own group, same as jerseys/pitch-arsenal/team-records above. The row table
-  // stays small (one row per ABS challenge, a few thousand a season across MLB
-  // and Triple-A); the ledger carries one row per swept game.
+  // All three tables are written by the one nightly gen-abs-challenges.mjs —
+  // its own group, same as jerseys/pitch-arsenal/team-records above. The row
+  // table stays small (one row per ABS challenge, a few thousand a season
+  // across MLB and Triple-A); the ledger carries one row per swept game. The
+  // exposure table is the odd one: a SEASON SNAPSHOT rather than an
+  // append-only ledger, rewritten a club at a time, so its nightly diff is
+  // every row of whichever clubs were swept rather than a handful of appends.
   'abs-challenges': {
     file: join(dataDir, 'abs-challenges.sql'),
-    tables: ['abs_challenges', 'abs_ingested_games'],
+    tables: ['abs_challenges', 'abs_ingested_games', 'abs_player_exposure'],
   },
 }
 

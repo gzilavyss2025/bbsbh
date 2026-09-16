@@ -96,11 +96,76 @@ export function teamBoard(summary, sortBy = 'rate') {
   return sortOn(ranked(rows, sort.key, sort), sort.key, sort.lowIsBest)
 }
 
+// ONE CHIP PER QUESTION, AND IT NAMES A COLUMN RATHER THAN AN END OF ONE.
+//
+// The board used to sort one way at a time, so "Overturned most" and
+// "Overturned least" were two different views and both were worth a chip. They
+// stopped being two views the day the board grew a second tail: umpireTails
+// shows the head AND the tail of whichever column is on, so the low chip
+// returns the identical twelve men with the two ends swapped over. A control
+// that promises a new view and re-prints the old one is worse than no control,
+// because a reader who taps it concludes the data is broken.
+//
+// So the chip picks the COLUMN — the two ends of it come free — and the labels
+// say so. Both ends of both questions are still reachable; nothing was
+// removed from the board but the duplicate route to it.
 export const UMPIRE_SORTS = [
-  { key: 'rate', label: 'Overturned most', lowIsBest: false },
-  { key: 'rateLow', label: 'Overturned least', lowIsBest: true, field: 'rate' },
+  { key: 'rate', label: 'Overturn rate', lowIsBest: false },
   { key: 'perGame', label: 'Challenges drawn', lowIsBest: false },
 ]
+
+// How many rows each end of the board shows.
+export const UMPIRE_TAIL = 6
+
+// BOTH TAILS ON ONE BOARD, and the count of everybody between them.
+//
+// The per-game column is drawn as a bar measured from the LEAGUE RATE rather
+// than from zero, which is the only way 5.40 reads as "more" at a glance
+// instead of as a number a reader has to hold the league average beside. A
+// diverging bar earns that only if both sides of it are populated: a view that
+// shows the loud end alone leaves the left half of every track permanently
+// empty, and buys nothing over a plain bar.
+//
+// So the board shows the head and the tail of whichever sort is on, and says
+// how many men are between them. THE MIDDLE IS NOT HIDDEN, IT IS COUNTED — and
+// by construction it is the unremarkable part: an umpire near the league rate
+// draws a stub either way, so a reader scrolling 75 of them learns nothing the
+// count does not already say.
+//
+// A board too short to have two ends is returned whole, which is what the
+// Triple-A level does on a thin sample.
+//
+// THE MIDDLE IS COUNTED, AND IT IS ALSO ONE TAP AWAY. The count alone was not
+// enough: 75 of MLB's 87 qualifying umpires had no row, no rank and no link,
+// and looking up the man working tonight's plate is the ordinary use of this
+// board — a reader whose umpire is not in the twelve could not reach him at
+// all. The page keeps the two-ended view as its default and offers the whole
+// board behind a control under it (UmpireBoard.jsx), so the shape that makes
+// the diverging bar readable is what a reader meets first, without walling off
+// the other 75 men.
+export function umpireTails(rows, tail = UMPIRE_TAIL) {
+  const all = rows ?? []
+  if (all.length <= tail * 2) return { head: all, tail: [], between: 0 }
+  return { head: all.slice(0, tail), tail: all.slice(-tail), between: all.length - tail * 2 }
+}
+
+// The half-width the diverging bar is scaled to: the furthest any qualifying
+// umpire sits from the league rate. Derived from the WHOLE qualifying board
+// rather than from the rows on screen, so switching the sort re-orders the
+// board without silently re-scaling every bar on it.
+//
+// Null when nothing qualifies or when every man sits exactly on the rate, in
+// which case the caller draws no bar rather than dividing by zero.
+export function umpireSpread(rows, league) {
+  if (league == null) return null
+  let widest = 0
+  for (const r of rows ?? []) {
+    if (r.perGame == null) continue
+    const d = Math.abs(r.perGame - league)
+    if (d > widest) widest = d
+  }
+  return widest > 0 ? widest : null
+}
 
 // Plate umpires who worked at least MIN_UMPIRE_GAMES swept games, ranked on
 // the share of challenges against them that stood up.
@@ -114,9 +179,8 @@ export const UMPIRE_SORTS = [
 // being wrong.
 export function umpireBoard(summary, sortBy = 'rate', minGames = MIN_UMPIRE_GAMES) {
   const sort = UMPIRE_SORTS.find((s) => s.key === sortBy) ?? UMPIRE_SORTS[0]
-  const field = sort.field ?? sort.key
   const rows = (summary?.byUmpire ?? []).filter((u) => u.games >= minGames && u.n > 0)
-  return sortOn(ranked(rows, field, sort), field, sort.lowIsBest)
+  return sortOn(ranked(rows, sort.key, sort), sort.key, sort.lowIsBest)
 }
 
 // The players who call for the most reviews, and the ones who are right most

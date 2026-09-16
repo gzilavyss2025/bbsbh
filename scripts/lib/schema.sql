@@ -623,13 +623,85 @@ CREATE TABLE IF NOT EXISTS abs_challenges (
 -- the plate umpire are carried here because every rate on the report page
 -- needs a per-club or per-umpire GAMES figure, and a game nobody challenged
 -- leaves no row in abs_challenges to count.
+-- HOW MUCH BASEBALL EACH MAN SAW (gen-abs-challenges.mjs --exposure).
+-- The denominator behind "how often does he ask for a review": a challenge
+-- count on its own is a fact about how much a player played, and only against
+-- his pitches seen or his innings caught does it become a habit. One row per
+-- player per club per season per level.
+--
+-- A SEASON SNAPSHOT, NOT AN APPEND-ONLY LEDGER, which is the opposite of the
+-- two tables above. A player's totals grow all year, so the sweep DELETEs a
+-- club's rows for the season and writes them again; it never adds to them.
+--
+-- It is also the only part of this job that costs a new fetch — one roster
+-- call a club a level, about 60 in all:
+--   /api/v1/teams/{id}/roster?rosterType=fullSeason&season={season}
+--     &hydrate=person(stats(type=season,group=[hitting,fielding],season={season},sportId={1|11}))
+-- A traded player carries one split per club PLUS an aggregate that has no
+-- `team` key at all, so the rows are matched on team id and the aggregate is
+-- skipped. 39 MLB players challenged under more than one club this season.
+--
+-- `catcher_innings` is REAL and already converted out of MLB's outs notation
+-- ("1020.2" is 1020 and two thirds, not 1020.2 — see inningsFromOuts in
+-- scripts/lib/abs/exposure.mjs). NOTHING IN STATSAPI COUNTS PITCHES RECEIVED,
+-- so innings caught is a stand-in and the surface has to say so: a catcher's
+-- per-9 and a batter's per-1,000-pitches are not comparable across.
+--
+-- Every column but the keys may be NULL. A pitcher has no hitting split and a
+-- man who never caught has no catcher split, and null divides to "no rate"
+-- where a zero would divide to infinity.
+CREATE TABLE IF NOT EXISTS abs_player_exposure (
+  season            INTEGER NOT NULL,
+  level             TEXT NOT NULL,                 -- 'MLB' | 'AAA'
+  team_id           INTEGER NOT NULL,
+  player_id         INTEGER NOT NULL,
+  name              TEXT NOT NULL DEFAULT '',
+  position          TEXT NOT NULL DEFAULT '',
+  pitches           INTEGER,
+  plate_appearances INTEGER,
+  catcher_innings   REAL,
+  catcher_starts    INTEGER,
+  PRIMARY KEY (season, level, team_id, player_id)
+);
+
+--
+-- THE LAST THREE COLUMNS ARE THE GAME'S SHAPE, and they are here because
+-- "challenges per inning" is a misleading figure without them. Not every game
+-- reaches the ninth, and a club that has lost two cannot ask at all, so the
+-- later innings look quiet partly because the CHANCES are gone rather than
+-- because the appetite is. Counting half-innings played needs the length of
+-- the game, which no other column carries. See scripts/lib/abs/chances.mjs
+-- and docs/adr/0075.
+--
+-- `final_inning` is the last inning the game reached and `bottom_played` says
+-- whether the home club batted in it — 0 for a nine-inning game the home club
+-- led after the top of the ninth. The feed marks that case by OMITTING the
+-- `runs` key from the last inning's `home` object rather than by writing a
+-- zero (verified on gamePk 824872 against 823413, which did bat), so the test
+-- is the key's presence, never its value.
+--
+-- `scheduled_innings` is the length the game was SCHEDULED for, and storing it
+-- is not optional. Extra innings begin at `scheduled_innings + 1`, which is
+-- the tenth in every MLB game and the EIGHTH in the 171 seven-inning Triple-A
+-- doubleheader games on file. A club that has run out is armed again in
+-- extras, so a replay that assumed nine would call a club unarmed in the
+-- eighth of one of those games when the rule has just re-armed it — 15 times
+-- on the season. FIRST_EXTRA_INNING in scripts/lib/abs/bank.mjs reads this.
+--
+-- All three are NULL on a game swept before they existed, and a game that
+-- still has no `final_inning` is dropped from the chances denominator rather
+-- than counted as nought innings. `--recheck` backfills them from the
+-- schedule row it already reads, so the NULLs are transient by design.
 CREATE TABLE IF NOT EXISTS abs_ingested_games (
-  game_pk      INTEGER NOT NULL PRIMARY KEY,
-  date         TEXT NOT NULL,
-  season       INTEGER NOT NULL,
-  level        TEXT NOT NULL,
-  away_team_id INTEGER,
-  home_team_id INTEGER,
-  umpire_id    INTEGER,
-  challenges   INTEGER NOT NULL DEFAULT 0
+  game_pk          INTEGER NOT NULL PRIMARY KEY,
+  date             TEXT NOT NULL,
+  season           INTEGER NOT NULL,
+  level            TEXT NOT NULL,
+  away_team_id     INTEGER,
+  home_team_id     INTEGER,
+  umpire_id        INTEGER,
+  challenges       INTEGER NOT NULL DEFAULT 0,
+  final_inning     INTEGER,
+  bottom_played    INTEGER,
+  scheduled_innings INTEGER
 );

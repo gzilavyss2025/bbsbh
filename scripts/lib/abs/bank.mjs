@@ -60,29 +60,36 @@
 // What a club is issued at the first pitch.
 export const ISSUED = 2
 
-// The first inning at which a club that has run out is armed again — in a
-// NINE-INNING game, which is every MLB game and all but 171 of Triple-A's.
+// HOW LONG THE GAME WAS SCHEDULED FOR, when nothing says. Every MLB game and
+// all but 171 of Triple-A's.
+export const REGULATION_INNINGS = 9
+
+// The first inning at which a club that has run out is armed again. It is the
+// tenth in a nine-inning game and the EIGHTH in a seven-inning one, so it is
+// derived from the game's own length rather than fixed.
 //
-// IT IS NOT NINE EVERYWHERE, and the ledger holds the exception. 171 Triple-A
-// games on file are seven-inning doubleheader games (`scheduledInnings` on the
-// schedule row says so), 22 of them went past the seventh, and 23 challenges
-// on file were called in the 8th or later of one. In those games extras start
-// at the EIGHTH, so this constant is two innings late.
+// IT WAS FIXED AT TEN, AND THE LEDGER HELD THE EXCEPTION. 171 Triple-A games
+// on file are seven-inning doubleheader games, 22 of them went past the
+// seventh, and 23 challenges on file were called in the 8th or later of one.
+// Nothing shipped was wrong, because replayBank was only ever called WITHOUT a
+// length and so topped a club up solely at innings it really challenged in.
+// Passing a length is what broke it: replaying those 22 games at their real
+// length asked about innings the club never challenged in, and the answer came
+// out wrong 15 times — a club called unarmed in the 8th when the rule had just
+// re-armed it. The chances denominator passes a length on every game, which is
+// why `scheduled_innings` is stored beside `final_inning` (docs/adr/0075). The
+// schedule row --recheck already reads carries it, at no extra call.
 //
-// Nothing shipped is wrong today. replayBank is only ever called without a
-// length, so it tops a club up solely at innings it actually challenged in,
-// and on all 16 affected club-games the model and the real rule agree — the
-// audit is green because no club emptied before the eighth in one of them.
-//
-// IT GOES WRONG THE MOMENT A LENGTH IS PASSED, which is exactly what #1058
-// adds. Replaying those 22 games with their real length asks `armedAt` about
-// innings the club never challenged in, and the answer is wrong 15 times: the
-// model calls a club unarmed in the 8th when the rule has just re-armed it.
-// So #1058 stores `scheduled_innings` beside `final_inning` — the schedule row
-// --recheck already reads carries it, at no extra call — and this becomes
-// `scheduledInnings + 1`. Until then, do not pass `innings` for a Triple-A
-// game without it.
-export const FIRST_EXTRA_INNING = 10
+// A caller that does not know the length gets the nine-inning answer, which is
+// right for every MLB game and wrong only for a seven-inning game it did not
+// identify as one.
+export function firstExtraInning(scheduledInnings) {
+  return (scheduledInnings ?? REGULATION_INNINGS) + 1
+}
+
+// The nine-inning answer, named. Kept as a constant because it is the one the
+// tests and the prose both reach for.
+export const FIRST_EXTRA_INNING = firstExtraInning(null)
 
 // TWO CLUB-GAMES THE RULE CANNOT PAY FOR, AND THEY ARE MLB'S DATA, NOT OURS.
 // Each was checked row by row against its own feed and every challenge is
@@ -96,13 +103,30 @@ export const FIRST_EXTRA_INNING = 10
 // check: it is green today, and a THIRD entry means MLB moved the rule.
 export const TOLERATED = new Set(['815094:102', '816599:416'])
 
+// THE TWO HALVES OF AN INNING, IN THE ORDER THEY ARE PLAYED. The bank is
+// carried across them, so the replay walks them by name rather than counting.
+export const HALVES = ['top', 'bottom']
+
+// Which half a row belongs to, and the fallback is `bottom` for the same
+// reason inOrder sorts an unnamed half last: a row the feed left unlabelled is
+// put after the top, never before it, so the two agree on every night.
+function halfOf(c) {
+  return c.half === 'top' ? 'top' : 'bottom'
+}
+
+// The key `atHalf` is read by. One string rather than a Map of Maps, because
+// every caller asks for one half at a time and never iterates a whole inning.
+export function halfKey(inning, half) {
+  return `${inning}:${half}`
+}
+
 // Top before bottom, then the order the rows were written in — the sequence a
 // club actually spent its challenges in.
 function inOrder(challenges) {
   return [...challenges].sort(
     (a, b) =>
       a.inning - b.inning ||
-      (a.half === 'top' ? 0 : 1) - (b.half === 'top' ? 0 : 1) ||
+      (halfOf(a) === 'top' ? 0 : 1) - (halfOf(b) === 'top' ? 0 : 1) ||
       (a.seq ?? 0) - (b.seq ?? 0),
   )
 }
@@ -118,14 +142,24 @@ function lastInning(challenges, innings) {
   return Math.max(innings ?? 0, seen)
 }
 
-// One club's night, inning by inning. `challenges` is every challenge that
-// club called for, in any order, each `{ inning, half, outcome }` — the shape
-// the rows already have.
+// One club's night, half-inning by half-inning. `challenges` is every challenge
+// that club called for, in any order, each `{ inning, half, outcome }` — the
+// shape the rows already have.
 //
 // Returns what it held at the START of each inning (`atStart`, keyed by inning
-// number), what it held at the end (`held`), how many times it was armed again
-// in extras (`toppedUp`), the inning of each emptying (`emptiedIn`, in order),
-// and how many challenges the model could not pay for (`overdrawn`).
+// number) AND at the start of each HALF (`atHalf`, keyed by halfKey), what it
+// held at the end (`held`), how many times it was armed again in extras
+// (`toppedUp`), the inning of each emptying (`emptiedIn`, in order), and how
+// many challenges the model could not pay for (`overdrawn`).
+//
+// THE HALF IS THE UNIT, AND THE INNING IS TOO COARSE FOR THE ONE QUESTION THAT
+// MATTERS. A club that spends its last challenge in the TOP of the seventh
+// holds nothing in the bottom of it, but `atStart` — recorded once, before the
+// inning's rows are spent — still says it was armed. Counting chances off that
+// credits the club a half-inning it could not have argued in. It is 0.62% of
+// MLB's chances and 0.80% of Triple-A's, and it is concentrated in exactly the
+// late innings the appetite finding is measured across (docs/adr/0075), so the
+// replay carries the bank across the two halves and records it at each.
 //
 // AN EMPTYING IS DATED TO THE INNING THE LAST CHALLENGE WAS SPENT IN, not to
 // the next inning the club starts with nothing. The two differ by one, and the
@@ -138,9 +172,10 @@ function lastInning(challenges, innings) {
 // data rather than a bug here, so a replay that threw would take the whole
 // season's export down over two rows, and one that dropped the club would lose
 // challenges that genuinely happened.
-export function replayBank(challenges, innings = null) {
+export function replayBank(challenges, innings = null, scheduledInnings = null) {
   const ordered = inOrder(challenges)
   const last = lastInning(ordered, innings)
+  const firstExtra = firstExtraInning(scheduledInnings)
 
   const byInning = new Map()
   for (const c of ordered) {
@@ -151,46 +186,65 @@ export function replayBank(challenges, innings = null) {
 
   let held = ISSUED
   const atStart = new Map()
+  const atHalf = new Map()
   const emptiedIn = []
   let toppedUp = 0
   let overdrawn = 0
 
   for (let inning = 1; inning <= last; inning++) {
-    if (inning >= FIRST_EXTRA_INNING && held === 0) {
+    // The top-up lands at the START of the extra inning, which is its top.
+    if (inning >= firstExtra && held === 0) {
       held = 1
       toppedUp += 1
     }
     atStart.set(inning, held)
+    const here = byInning.get(inning) ?? []
     let emptiedHere = false
-    for (const c of byInning.get(inning) ?? []) {
-      if (held === 0) {
-        overdrawn += 1
-      } else {
-        held -= 1
-        if (held === 0) emptiedHere = true
-      }
-      // The overturn gives it straight back, so the club is not out after all.
-      if (c.outcome === 'success') {
-        held += 1
-        emptiedHere = false
+    for (const half of HALVES) {
+      atHalf.set(halfKey(inning, half), held)
+      for (const c of here) {
+        if (halfOf(c) !== half) continue
+        if (held === 0) {
+          overdrawn += 1
+        } else {
+          held -= 1
+          if (held === 0) emptiedHere = true
+        }
+        // The overturn gives it straight back, so the club is not out after all.
+        if (c.outcome === 'success') {
+          held += 1
+          emptiedHere = false
+        }
       }
     }
+    // AN EMPTYING IS STILL DATED TO THE INNING, not to the half. "Ran out in
+    // the sixth" is the figure the club board prints and LAST_EARLY_INNING is
+    // drawn around, and splitting it by half would change what that column
+    // means for a reason that has nothing to do with the column.
     if (emptiedHere) emptiedIn.push(inning)
   }
-  return { held, atStart, toppedUp, emptiedIn, overdrawn, innings: last }
+  return { held, atStart, atHalf, toppedUp, emptiedIn, overdrawn, innings: last }
 }
 
 // Did this club's challenges fit the rule? True when the replay never had to
 // spend one the club did not hold.
-export function bankHolds(challenges, innings = null) {
-  return replayBank(challenges, innings).overdrawn === 0
+export function bankHolds(challenges, innings = null, scheduledInnings = null) {
+  return replayBank(challenges, innings, scheduledInnings).overdrawn === 0
 }
 
-// Was the club armed at the start of this inning? The question the chances
-// denominator asks of every half-inning.
-export function armedAt(challenges, inning, innings = null) {
-  const { atStart } = replayBank(challenges, Math.max(inning, innings ?? 0))
-  return (atStart.get(inning) ?? 0) > 0
+// Was the club armed at the start of this HALF-INNING? The question the chances
+// denominator asks of every one of them.
+//
+// `half` defaults to the top, which is the start of the inning and so the
+// answer a caller asking about a whole inning means.
+//
+// PASS THE GAME'S LENGTH, BOTH OF THEM. `innings` is how far the game went and
+// `scheduledInnings` is how far it was meant to, and the second is what says
+// which innings were extra. Asking about the 8th of a seven-inning game
+// without it gets the nine-inning answer, which is wrong.
+export function armedAt(challenges, inning, innings = null, scheduledInnings = null, half = 'top') {
+  const { atHalf } = replayBank(challenges, Math.max(inning, innings ?? 0), scheduledInnings)
+  return (atHalf.get(halfKey(inning, half)) ?? 0) > 0
 }
 
 // EVERY CLUB-GAME ON FILE, CHECKED AGAINST THE MODEL. A standing check rather

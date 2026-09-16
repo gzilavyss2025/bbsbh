@@ -214,7 +214,8 @@ don't run these by hand.
   `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
   old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
-- `gen-abs-challenges.mjs` → `public/data/abs-challenges.json` — every ABS
+- `gen-abs-challenges.mjs` → `public/data/abs-challenges.json` **and
+  `public/data/abs-exposure.json`** — every ABS
   (Automated Ball-Strike) CHALLENGE of the season, at both levels that run the
   system: MLB (sportId 1, 2026 is its first season) and Triple-A (sportId 11,
   which has run it for several). SQLite-backed (`abs-challenges` group,
@@ -231,6 +232,35 @@ don't run these by hand.
   evicts games already on file that are no longer coded F, which is how a
   swept game that is later suspended or cancelled gets back out. The nightly
   job runs it over a fortnight before each sweep.
+  `--recheck` DOES TWO JOBS off that one call. Its schedule request carries
+  `&hydrate=linescore`, so the same row that settles `codedGameState` also
+  carries `currentInning`, `innings[].home.runs` and `scheduledInnings` — the
+  three columns (`final_inning`, `bottom_played`, `scheduled_innings`) the
+  CHANCES DENOMINATOR needs, at no extra request and no refetched feed. It
+  UPDATEs them on every surviving game, never touching a challenge row, and
+  prints how many games are still without a length (0 today). The ordinary
+  sweep writes the same three off the feed it already holds. The whole season
+  backfilled in two calls; there is deliberately no `--backfill-innings` mode,
+  because it would be a second pass over identical rows (ADR-0075).
+  A CHANCE is one half-inning a club played while it still held a challenge,
+  derived in `scripts/lib/abs/chances.mjs`. Both clubs are exposed in every
+  half-inning, so a played half offers two. THE HALF IS THE UNIT, not the
+  inning: `replayBank` records what a club holds entering each half (`atHalf`),
+  because a club that spends its last challenge in the top of the seventh could
+  not have argued in the bottom of it. Read per inning the denominator
+  over-counts by 0.62% at MLB and 0.80% at Triple-A, concentrated in the late
+  innings the finding is measured across. It matters because the raw count
+  by inning misleads twice — not every game reaches the ninth, and a club that
+  has lost two cannot ask at all — and correcting for both INVERTS the answer:
+  MLB runs 10.21 challenges per 100 chances in the first against 21.35 in the
+  ninth, while the share won falls 61.2% to 40.5%. The role cut rides the same
+  CLUB denominator so the three roles add back up to the club figure; a role's
+  own half of the chances would sum to twice it.
+  `scheduled_innings` is not optional. Extras begin at `scheduled_innings + 1`
+  — the tenth in every MLB game and the EIGHTH in the 171 seven-inning
+  Triple-A doubleheader games on file, 22 of which went past the seventh. A
+  replay handed a length but not a scheduled length calls a club unarmed in
+  the 8th 15 times on the season, when the rule has just re-armed it.
   THE CHALLENGE BANK is modelled in `scripts/lib/abs/bank.mjs`: two issued, one
   kept per overturn, and — the rule nothing else in the repo recorded — a club
   that has run out is armed again at the start of each EXTRA inning. 54
@@ -247,16 +277,53 @@ don't run these by hand.
   the first shape and cannot be paid for — 815094 team 102 and 816599 team 416,
   checked row by row against their feeds, with the other club in each game
   coming out legal — so they are named in `TOLERATED` rather than floored away.
+  TWO FILES COME OUT OF EVERY RUN, and the split is a size decision.
+  `abs-challenges.json` (206 KB) is what `/abs-challenges` fetches;
+  `abs-exposure.json` (418 KB) is the per-player DENOMINATOR list, which no
+  surface reads yet. Folded into the report file they took it from 198 KB to
+  895 KB — 369 KB for the list itself and 321 KB for ten exposure fields on
+  every one of 1,553 `byPlayer` rows — on a file every visitor downloads whole
+  and shows none of it on. So `byPlayer` carries a player's CHALLENGE totals
+  only, `abs-exposure.json` carries every denominator and every rate, and the
+  board that comes to need them (issues #1063, #1066, #1069) fetches its own
+  file. A man with no opportunity at all is dropped rather than shipped as
+  nulls: 1,963 of the 3,521 on a fullSeason roster are pitchers who never
+  batted and never caught, and a nought divides to no rate exactly as a null
+  does. The rule and the reasoning are ADR-0076.
+  `--exposure` IS THE ONE FETCH THIS JOB MAKES THAT IS NOT A GAME, and it
+  fills the third table, `abs_player_exposure`: one row per player per club,
+  from one `rosterType=fullSeason` call a club a level (~60 calls) with the
+  season's hitting and fielding splits hydrated onto each person. It is the
+  denominator that turns "he challenged 14 times" into "he challenges once
+  every 39 plate appearances"; a catcher's stand-in is INNINGS CAUGHT, because
+  nothing in statsapi counts pitches RECEIVED, and the two rates are named
+  separately (`per1000Pitches`, `per9Caught`) so no surface can sort them into
+  one list. It is a SEASON SNAPSHOT, not an append-only ledger — a player's
+  totals grow all year, so a re-run REPLACES a club's rows — **which is why
+  the nightly runs it**, after the recheck and the sweep. Left to one manual
+  run the denominators freeze while the numerators keep growing, and a rate
+  that drifts quietly is worse than one that is missing.
+  Three traps, each verified live. A traded player carries one split per club
+  PLUS an aggregate that has **no `team` key at all** and is listed FIRST, so
+  rows are matched on `split.team.id`. `innings` is written in OUTS — "1020.2"
+  is 1020 and two thirds, and a `parseFloat` under-counts every catcher
+  (`inningsFromOuts`). And a man's challenges are split BY ROLE before either
+  rate is taken: Francisco Alvarez called for 102 reviews, 22 at the plate and
+  80 behind it, and dividing all 102 by his pitches seen as a batter put a
+  catcher at the top of the "most eager hitter" board. Matched 100% of MLB
+  batter/catcher challenge rows and 99.9% of Triple-A; the only players with
+  neither denominator are pitchers, correctly.
   `abs_ingested_games` is both the idempotency guard AND the denominator table:
   it carries the two club ids and the plate umpire, so a club or umpire nobody
   challenged still has a games figure. FACTS ONLY in the row table (who
   challenged, what the umpire called, outcome, inning, umpire, run value,
   zone-edge distance); every split — per club, per role, per umpire, call type,
-  miss distance, the biggest overturn — is derived at export time in
-  `scripts/lib/abs/export.mjs`, with the per-game row derivation beside it in
-  `scripts/lib/abs/rows.mjs` and `scripts/lib/abs/index.mjs` as the door both
-  callers import, since a generator does its work at import and nothing inside
-  one can be unit-tested (`test/abs-challenges.test.js`).
+  miss distance, the biggest overturn, the chances denominator — is derived at
+  export time in `scripts/lib/abs/export.mjs`, with the per-game row derivation
+  beside it in `scripts/lib/abs/rows.mjs`, the bank replay in `bank.mjs`, the
+  chances denominator in `chances.mjs`, and `scripts/lib/abs/index.mjs` as the
+  door every caller imports, since a generator does its work at import and
+  nothing inside one can be unit-tested (`test/abs-challenges.test.js`).
   Imports rather than re-derives: `selectChallengeState` (`src/api/challenges.js`,
   which knows an ABS review can sit at either the play or the pitch-event level
   and that MLB's older manager's-replay reviews must be excluded on

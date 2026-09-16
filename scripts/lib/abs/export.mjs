@@ -25,14 +25,19 @@
 // split gate.js and gen-gate.mjs already use.
 
 import { replayBank } from './bank.mjs'
+import { chancesByInning, challengesByInningRole } from './chances.mjs'
+import { exposureByPlayer, exposureRates, hasExposure } from './exposure.mjs'
+import { ROLES } from './rows.mjs'
 
 // The four roles a challenge can come from. A batter challenges a called
 // strike against him; a catcher or a pitcher challenges a called ball. `other`
 // is the honest bucket for a challenger the feed named but the box score put
 // at no recognisable position — it is expected to stay near zero, and a report
 // that hid it would hide the day it stops being near zero.
-
-export const ROLES = ['batter', 'catcher', 'pitcher', 'other']
+//
+// The list itself lives in rows.mjs beside roleFor, which is what produces it.
+// Re-exported here because every board reads it from this file.
+export { ROLES }
 
 // How far the challenged pitch sat from the nearest edge of the buffered
 // strike zone, in inches. The bands are read from the edge outward, because
@@ -235,7 +240,17 @@ export function summarizeLevel(rows, games) {
 
     if (r.player_id != null) {
       if (!players.has(r.player_id)) {
-        players.set(r.player_id, { ...tally(), name: r.player_name ?? '', teamId: r.team_id, role: r.role })
+        // `role` is the role of his FIRST challenge, which is all this list
+        // claims. THE HONEST SPLIT IS NOT HERE: a catcher who also hits
+        // challenges from two places, and each of his counts can only be
+        // divided by its own denominator, so the split lives beside those
+        // denominators in abs-exposure.json (rolesByPlayer, exposure.mjs).
+        players.set(r.player_id, {
+          ...tally(),
+          name: r.player_name ?? '',
+          teamId: r.team_id,
+          role: r.role,
+        })
       }
       add(players.get(r.player_id), r)
     }
@@ -265,6 +280,12 @@ export function summarizeLevel(rows, games) {
   const dates = games.map((g) => g.date).filter(Boolean).sort()
   const best = biggestOverturn(rows)
 
+  // THE CHANCES DENOMINATOR — half-innings a club played still holding a
+  // challenge, which is what "challenges by inning" has to be divided by
+  // before it says anything (chances.mjs, docs/adr/0075).
+  const chances = chancesByInning(rows, games)
+  const inningRoles = challengesByInningRole(rows)
+
   return {
     games: games.length,
     gamesWithChallenge: games.filter((g) => (g.challenges ?? 0) > 0).length,
@@ -283,9 +304,36 @@ export function summarizeLevel(rows, games) {
     scoredOverturns,
     byRole: ROLES.map((role) => ({ role, ...sealed(byRole.get(role)) })),
     byCall: [...byCall].map(([callType, t]) => ({ callType, ...sealed(t) })),
+    // Per inning: the raw count, the chances that count sat against, and the
+    // rate between them. `perChance` is a SHARE — challenges per chance — and
+    // the page multiplies by 100 to print it, the same way successRate is
+    // shipped as a share rather than as a percentage.
     byInning: [...byInning]
       .sort((a, b) => a[0] - b[0])
-      .map(([inning, t]) => ({ inning, ...sealed(t) })),
+      .map(([inning, t]) => {
+        const c = chances.byInning.get(inning) ?? 0
+        return { inning, ...sealed(t), chances: c, perChance: rate(t.n, c) }
+      }),
+    // The same cut crossed with role, on the SAME club denominator so the
+    // roles add back up to the club figure. See chances.mjs for why a role's
+    // own half of the chances is the wrong divisor.
+    byInningRole: [...inningRoles]
+      .sort((a, b) => a[0] - b[0])
+      .flatMap(([inning, roles]) => {
+        const c = chances.byInning.get(inning) ?? 0
+        return ROLES.map((role) => {
+          const t = roles.get(role)
+          return { inning, role, ...sealed(t), chances: c, perChance: rate(t.n, c) }
+        })
+      }),
+    // What the denominator was built from. `chancesGamesDropped` is games with
+    // no length on file, which --recheck backfills — it is expected to be
+    // zero, and is shipped so the page can say every game counted rather than
+    // print a drop count that reads as data loss.
+    chances: chances.total,
+    chancesGames: chances.games,
+    chancesGamesDropped: chances.dropped,
+    perChance: rate(total, chances.total),
     byMiss: MISS_BANDS.map((b) => ({
       key: b.key,
       label: b.label,
@@ -314,6 +362,12 @@ export function summarizeLevel(rows, games) {
         perGame: rate(t.n, umpGames.get(umpireId) ?? 0),
       }))
       .sort((a, b) => a.umpireId - b.umpireId),
+    // Each player's own challenge totals, and NOTHING HE IS DIVIDED BY. The
+    // denominators and the rates they make live in abs-exposure.json
+    // (buildExposureExport): they are ten fields on every one of 1,553 rows,
+    // 321 KB on a file the report page downloads whole and shows none of them
+    // on, and the board that will want them wants the men who NEVER
+    // challenged too — who are not in this list at all.
     byPlayer: [...players]
       .map(([playerId, t]) => ({
         playerId,
@@ -327,9 +381,31 @@ export function summarizeLevel(rows, games) {
   }
 }
 
-// The whole file. Rows and games arrive as they come out of SQLite (snake_case
-// columns); the split by level happens here so a caller never has to know
-// which levels are on file.
+// A player's challenges split BY THE JOB HE WAS DOING, which is what each rate
+// has to be taken over. Francisco Alvarez called for 102 reviews, some standing
+// at the plate and some squatting behind it, and dividing all 102 by the
+// pitches he saw as a BATTER invents a man who argues with every other pitch
+// (exposure.mjs). It is taken over the rows of ONE level, because a man who
+// played at both is two different populations with two different denominators.
+function rolesByPlayer(rows) {
+  const out = new Map()
+  for (const r of rows ?? []) {
+    if (r.player_id == null) continue
+    const cur = out.get(r.player_id) ?? {}
+    cur[r.role] = (cur[r.role] ?? 0) + 1
+    out.set(r.player_id, cur)
+  }
+  return out
+}
+
+// The whole report file. Rows and games arrive as they come out of SQLite
+// (snake_case columns); the split by level happens here so a caller never has
+// to know which levels are on file.
+//
+// IT CARRIES NO DENOMINATOR A PLAYER IS DIVIDED BY. Everything that needs the
+// roster call is in the other file (buildExposureExport), because this one is
+// fetched by every visitor to /abs-challenges and that one is fetched by the
+// board that asks the question.
 export function buildExport(rows, games, { season, generatedAt } = {}) {
   const levels = {}
   const names = [...new Set([...games.map((g) => g.level), ...rows.map((r) => r.level)])].sort()
@@ -338,6 +414,59 @@ export function buildExport(rows, games, { season, generatedAt } = {}) {
       rows.filter((r) => r.level === level),
       games.filter((g) => g.level === level),
     )
+  }
+  return {
+    version: 1,
+    generatedAt: generatedAt ?? new Date().toISOString(),
+    season: season ?? null,
+    levels,
+  }
+}
+
+// EVERY MAN WHO PLAYED, not only the ones who challenged — and its OWN FILE.
+//
+// THE QUESTION THIS FILE ANSWERS is how often a man ASKS, which is not how
+// often he argues: "Yelich challenged 14 times" is a fact about how much he
+// played. Divided by the pitches he stood in against it becomes a habit, and
+// the spread is so wide that the mean describes nobody — four qualified MLB
+// hitters never challenged once all season, and Gary Sánchez called for 32 in
+// 1,085 pitches.
+//
+// WHY IT IS NOT IN abs-challenges.json, twice over.
+//
+// The men who never challenged ARE THE FINDING, and most of them leave no
+// challenge row anywhere: 115 of the 659 MLB men here have no byPlayer entry to
+// hang off, and three of the four qualified hitters are among them. They need a
+// list of their own whatever else is decided.
+//
+// And the ten fields cost 321 KB across 1,553 byPlayer rows on a file every
+// visitor to /abs-challenges downloads whole and shows none of them on. Kept
+// there the report file ran 526 KB against main's 198 KB; moved here it is
+// 206 KB, and the board that comes to want the rates (issues #1063, #1066,
+// #1069) fetches the file that has them.
+//
+// Rows with no denominator at all are dropped rather than shipped as nulls
+// (`hasExposure`): a pitcher who never batted and never caught supports no
+// rate, and cannot answer the never-challenged question either, because there
+// is nothing he had the opportunity to do.
+//
+// The whole split, and the rule it generalises to, is docs/adr/0076.
+export function buildExposureExport(rows, exposure, { season, generatedAt } = {}) {
+  const levels = {}
+  for (const level of [...new Set((exposure ?? []).map((e) => e.level))].sort()) {
+    const seen = exposureByPlayer((exposure ?? []).filter((e) => e.level === level))
+    const roles = rolesByPlayer((rows ?? []).filter((r) => r.level === level))
+    levels[level] = {
+      players: [...seen]
+        .filter(([, e]) => hasExposure(e))
+        .map(([playerId, e]) => ({
+          playerId,
+          name: e.name,
+          position: e.position,
+          ...exposureRates(roles.get(playerId), e),
+        }))
+        .sort((a, b) => a.playerId - b.playerId),
+    }
   }
   return {
     version: 1,
