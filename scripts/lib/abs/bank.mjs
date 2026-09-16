@@ -149,8 +149,18 @@ function lastInning(challenges, innings) {
 // Returns what it held at the START of each inning (`atStart`, keyed by inning
 // number) AND at the start of each HALF (`atHalf`, keyed by halfKey), what it
 // held at the end (`held`), how many times it was armed again in extras
-// (`toppedUp`), the inning of each emptying (`emptiedIn`, in order), and how
-// many challenges the model could not pay for (`overdrawn`).
+// (`toppedUp`), the inning of each emptying (`emptiedIn`, in order), the
+// challenge that CAUSED each of those emptyings (`emptiedBy`, the same order
+// and the same length), and how many challenges the model could not pay for
+// (`overdrawn`).
+//
+// `emptiedBy` IS THE ROW, not a copy of it, so a caller reads the player, the
+// half, the call and the miss distance off the one the club really spent. The
+// out-of-challenges board is built on it (ranout.mjs), and it comes from the
+// replay rather than from "the second failed challenge" for the reason the
+// whole of this file exists: two fails empty a club under TODAY'S rule, and a
+// board that counted to two would keep printing a confident answer on the day
+// the rule moves.
 //
 // THE HALF IS THE UNIT, AND THE INNING IS TOO COARSE FOR THE ONE QUESTION THAT
 // MATTERS. A club that spends its last challenge in the TOP of the seventh
@@ -188,6 +198,7 @@ export function replayBank(challenges, innings = null, scheduledInnings = null) 
   const atStart = new Map()
   const atHalf = new Map()
   const emptiedIn = []
+  const emptiedBy = []
   let toppedUp = 0
   let overdrawn = 0
 
@@ -199,7 +210,7 @@ export function replayBank(challenges, innings = null, scheduledInnings = null) 
     }
     atStart.set(inning, held)
     const here = byInning.get(inning) ?? []
-    let emptiedHere = false
+    let emptiedHere = null
     for (const half of HALVES) {
       atHalf.set(halfKey(inning, half), held)
       for (const c of here) {
@@ -208,12 +219,12 @@ export function replayBank(challenges, innings = null, scheduledInnings = null) 
           overdrawn += 1
         } else {
           held -= 1
-          if (held === 0) emptiedHere = true
+          if (held === 0) emptiedHere = c
         }
         // The overturn gives it straight back, so the club is not out after all.
         if (c.outcome === 'success') {
           held += 1
-          emptiedHere = false
+          emptiedHere = null
         }
       }
     }
@@ -221,9 +232,12 @@ export function replayBank(challenges, innings = null, scheduledInnings = null) 
     // the sixth" is the figure the club board prints and LAST_EARLY_INNING is
     // drawn around, and splitting it by half would change what that column
     // means for a reason that has nothing to do with the column.
-    if (emptiedHere) emptiedIn.push(inning)
+    if (emptiedHere) {
+      emptiedIn.push(inning)
+      emptiedBy.push(emptiedHere)
+    }
   }
-  return { held, atStart, atHalf, toppedUp, emptiedIn, overdrawn, innings: last }
+  return { held, atStart, atHalf, toppedUp, emptiedIn, emptiedBy, overdrawn, innings: last }
 }
 
 // Did this club's challenges fit the rule? True when the replay never had to

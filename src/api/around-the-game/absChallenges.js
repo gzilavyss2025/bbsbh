@@ -271,6 +271,57 @@ export function callSplitOffBy(anomalies) {
   return Math.max(over, under)
 }
 
+// THE LAST INNING IN WHICH RUNNING OUT IS STILL "EARLY". A club is issued two
+// challenges, so a second loss in the sixth is a club that enters the seventh
+// unable to argue a pitch — which is the strategic cost the club board's
+// `ranOutEarly` column counts.
+//
+// IT IS THE SAME NUMBER AS LAST_EARLY_INNING in scripts/lib/abs/export.mjs,
+// held twice because the export half runs in Node and this half runs in the
+// browser, and nothing can be imported across that line. The two are pinned
+// together by a test rather than by a comment: every club's `ranOutEarly`
+// added up equals the nights this constant admits, so the day one moves
+// without the other, the suite says so (test/abs-challenges.test.js).
+export const RAN_OUT_EARLY_THROUGH = 6
+
+// OUT OF CHALLENGES — the nights, read as the page shows them.
+//
+// The file ships the whole distribution of first emptyings and the rows of the
+// earliest inning that has any (ranout.mjs). This turns that into shares, and
+// splits the season into the clubs that emptied early and the ones that
+// emptied late, which is the context the band needs: nine first-inning nights
+// read as a scandal until you see that most clubs which run out do it in the
+// eighth or the ninth, having spent their challenges on a game still in front
+// of them.
+//
+// A BAND, NOT A TOP TEN, and the reason is in ranout.mjs: eighteen club-games
+// tie for tenth. Nothing here re-cuts the band, because a cut applied twice is
+// a cut nobody can find.
+//
+// Null when the level has no emptied club-game at all, which is what a page
+// draws nothing for rather than an empty board.
+export function ranOutNights(summary) {
+  const src = summary?.ranOutNights
+  if (!src || src.earliest == null) return null
+  const emptied = src.emptied ?? 0
+  const early = (src.byInning ?? [])
+    .filter((b) => b.inning <= RAN_OUT_EARLY_THROUGH)
+    .reduce((n, b) => n + b.n, 0)
+  return {
+    earliest: src.earliest,
+    band: src.band ?? [],
+    emptied,
+    clubGames: src.clubGames ?? 0,
+    share: src.clubGames > 0 ? emptied / src.clubGames : null,
+    byInning: (src.byInning ?? []).map((b) => ({
+      ...b,
+      share: emptied > 0 ? b.n / emptied : null,
+    })),
+    early,
+    late: emptied - early,
+  }
+}
+
 // Percentage of the season's challenges that fell in each distance band, so
 // the page can draw the shape of the distribution rather than five raw counts.
 export function missBands(summary) {

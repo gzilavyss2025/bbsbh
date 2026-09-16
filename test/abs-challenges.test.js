@@ -40,6 +40,7 @@ import {
   exposureByPlayer,
   exposureRates,
   hasExposure,
+  ranOutBoard,
   summarizeLevel,
   buildExport,
   buildExposureExport,
@@ -59,6 +60,8 @@ import {
   callSplitAnomalies,
   callSplitOffBy,
   missBands,
+  ranOutNights,
+  RAN_OUT_EARLY_THROUGH,
   ROLE_CALL,
   MIN_PLAYER_CHALLENGES,
 } from '../src/api/around-the-game/absChallenges.js'
@@ -1461,4 +1464,182 @@ test('missBands: shares add to one over the challenges that carry a distance', (
   const bands = missBands(summaryFor(data, 'MLB'))
   const total = bands.reduce((n, b) => n + (b.share ?? 0), 0)
   assert.ok(Math.abs(total - 1) < 1e-9)
+})
+
+// --------------------------------------------------------------------------
+// ranOutBoard — the nights a club was left with nothing to argue with.
+// --------------------------------------------------------------------------
+// The per-club `ranOut` column counts HOW MANY nights; this is the nights
+// themselves, and the band is every club-game that emptied in the earliest
+// inning any did. Four of these pin cases the count could not see: a club that
+// lost only one, a club emptied in an extra inning, both losses inside one
+// half, and the tiebreak that decides which of nine equal nights prints first.
+
+test('ranOutBoard: one loss is not an emptying', () => {
+  const board = ranOutBoard([row({ seq: 0, outcome: 'fail' })], [game({})])
+  assert.equal(board.emptied, 0)
+  assert.equal(board.earliest, null)
+  assert.deepEqual(board.band, [])
+  // Both sides of the game are still a denominator, challenged or not.
+  assert.equal(board.clubGames, 2)
+})
+
+test('ranOutBoard: both losses inside one half, and the half is recorded', () => {
+  const board = ranOutBoard(
+    [
+      row({ seq: 0, outcome: 'fail', inning: 1, half: 'top' }),
+      row({ seq: 1, outcome: 'fail', inning: 1, half: 'top', player_id: 12, player_name: 'B Hitter' }),
+    ],
+    [game({ challenges: 2 })],
+  )
+  assert.equal(board.earliest, 1)
+  assert.equal(board.emptied, 1)
+  assert.equal(board.band.length, 1)
+  assert.equal(board.band[0].inning, 1)
+  assert.equal(board.band[0].half, 'top')
+  // Both losses are on the row, in the order they were spent — a board that
+  // named only the second would hide the man who asked twice.
+  assert.deepEqual(board.band[0].fails.map((f) => f.playerName), ['A Hitter', 'B Hitter'])
+})
+
+test('ranOutBoard: an overturn between two losses is not an emptying', () => {
+  // L W L leaves the club empty at the THIRD call, not the first loss: the
+  // overturn handed the challenge straight back. A board counting losses would
+  // date this night to the fifth.
+  const board = ranOutBoard(
+    [
+      row({ seq: 0, outcome: 'fail', inning: 2 }),
+      row({ seq: 1, outcome: 'success', inning: 5 }),
+      row({ seq: 2, outcome: 'fail', inning: 8 }),
+    ],
+    [game({ challenges: 3 })],
+  )
+  assert.equal(board.earliest, 8)
+  assert.deepEqual(board.byInning, [{ inning: 8, n: 1 }])
+})
+
+test('ranOutBoard: a club emptied in extras, and only the FIRST emptying counts', () => {
+  // Out in the tenth, armed again in the eleventh by the extra-inning top-up,
+  // and out again at once. The night is dated to the tenth: it is "games it
+  // ran out in", not "times it ran out".
+  const board = ranOutBoard(
+    [
+      row({ seq: 0, outcome: 'fail', inning: 3 }),
+      row({ seq: 1, outcome: 'fail', inning: 10 }),
+      row({ seq: 2, outcome: 'fail', inning: 11 }),
+    ],
+    [game({ challenges: 3, final_inning: 11 })],
+  )
+  assert.equal(board.emptied, 1)
+  assert.equal(board.earliest, 10)
+  assert.equal(board.band[0].inning, 10)
+  // Every loss up to the emptying, which is two — the third belongs to the
+  // top-up the eleventh handed back.
+  assert.equal(board.band[0].fails.length, 2)
+})
+
+test('ranOutBoard: the band ties break on the half, then the sequence, then the date', () => {
+  const rows = [
+    // Three club-games all emptied in the first. Written out of order on
+    // purpose, so the sort is doing the work rather than the input.
+    ...[0, 1].map((i) => row({ game_pk: 3, seq: 40 + i, date: '2026-05-02', outcome: 'fail', inning: 1, half: 'top' })),
+    ...[0, 1].map((i) => row({ game_pk: 1, seq: i, outcome: 'fail', inning: 1, half: 'bottom', team_id: 200, side: 'home' })),
+    ...[0, 1].map((i) => row({ game_pk: 2, seq: 40 + i, date: '2026-04-30', outcome: 'fail', inning: 1, half: 'top' })),
+  ]
+  const games = [
+    game({ challenges: 2 }),
+    game({ game_pk: 2, date: '2026-04-30', challenges: 2 }),
+    game({ game_pk: 3, date: '2026-05-02', challenges: 2 }),
+  ]
+  const board = ranOutBoard(rows, games)
+  assert.equal(board.band.length, 3)
+  // The bottom-of-the-first night sorts last however early its sequence is;
+  // the two tops share a sequence, so the earlier date prints first.
+  assert.deepEqual(board.band.map((b) => [b.gamePk, b.half]), [
+    [2, 'top'],
+    [3, 'top'],
+    [1, 'bottom'],
+  ])
+})
+
+test('ranOutBoard: the rows carry nothing a score could be read from', () => {
+  const board = ranOutBoard(
+    [
+      row({ seq: 0, outcome: 'fail', inning: 1 }),
+      row({ seq: 1, outcome: 'fail', inning: 1, half: 'bottom' }),
+    ],
+    [game({ challenges: 2 })],
+  )
+  // The exact key set, asserted rather than scanned: /abs-challenges is
+  // spoiler-free, this is the only board on it that names a night, and a field
+  // added later without thought is how that classification would quietly stop
+  // being true.
+  assert.deepEqual(Object.keys(board.band[0]).sort(), [
+    'date', 'fails', 'gamePk', 'half', 'inning', 'oppId', 'seq', 'side', 'teamId',
+  ])
+  assert.deepEqual(Object.keys(board.band[0].fails[0]).sort(), [
+    'callType', 'half', 'inning', 'missInches', 'playerId', 'playerName', 'role',
+  ])
+})
+
+test('ranOutBoard: the distribution counts every emptied club-game, band or not', () => {
+  const rows = [
+    row({ seq: 0, outcome: 'fail', inning: 2 }),
+    row({ seq: 1, outcome: 'fail', inning: 2 }),
+    row({ game_pk: 2, seq: 0, outcome: 'fail', inning: 8 }),
+    row({ game_pk: 2, seq: 1, outcome: 'fail', inning: 9 }),
+  ]
+  const board = ranOutBoard(rows, [game({ challenges: 2 }), game({ game_pk: 2, challenges: 2 })])
+  assert.deepEqual(board.byInning, [{ inning: 2, n: 1 }, { inning: 9, n: 1 }])
+  assert.equal(board.emptied, 2)
+  assert.equal(board.band.length, 1) // only the second-inning night
+  assert.equal(board.clubGames, 4)
+})
+
+// --------------------------------------------------------------------------
+// ranOutNights — the reader's half.
+// --------------------------------------------------------------------------
+
+// The fixture the reader tests share: one club out in the second, one out in
+// the ninth, over two games.
+const ranOutData = buildExport(
+  [
+    row({ seq: 0, outcome: 'fail', inning: 2 }),
+    row({ seq: 1, outcome: 'fail', inning: 2 }),
+    row({ game_pk: 2, date: '2026-04-02', seq: 0, outcome: 'fail', inning: 8 }),
+    row({ game_pk: 2, date: '2026-04-02', seq: 1, outcome: 'fail', inning: 9 }),
+  ],
+  [game({ challenges: 2 }), game({ game_pk: 2, date: '2026-04-02', challenges: 2 })],
+  { season: 2026, generatedAt: 'now' },
+)
+
+test('ranOutNights: the early and late split is where the band gets its context', () => {
+  const out = ranOutNights(summaryFor(ranOutData, 'MLB'))
+  assert.equal(out.earliest, 2)
+  assert.equal(out.emptied, 2)
+  assert.equal(out.clubGames, 4)
+  assert.equal(out.share, 0.5)
+  assert.equal(out.early, 1)
+  assert.equal(out.late, 1)
+  assert.deepEqual(out.byInning.map((b) => b.share), [0.5, 0.5])
+  assert.equal(out.band.length, 1)
+})
+
+test('ranOutNights: a level nobody ran out in draws no board at all', () => {
+  const quiet = buildExport([row({ seq: 0, outcome: 'fail' })], [game({})], { season: 2026 })
+  assert.equal(ranOutNights(summaryFor(quiet, 'MLB')), null)
+  assert.equal(ranOutNights(null), null)
+})
+
+test('RAN_OUT_EARLY_THROUGH: the reader and the export agree on what "early" is', () => {
+  // The constant is held twice — LAST_EARLY_INNING runs in Node, this one runs
+  // in the browser — so the two are pinned to each other here. Every club's
+  // `ranOutEarly` added up is the same set of nights this constant admits.
+  const summary = summaryFor(ranOutData, 'MLB')
+  const perClub = summary.byTeam.reduce((n, t) => n + t.ranOutEarly, 0)
+  const perNight = summary.ranOutNights.byInning
+    .filter((b) => b.inning <= RAN_OUT_EARLY_THROUGH)
+    .reduce((n, b) => n + b.n, 0)
+  assert.equal(perClub, perNight)
+  assert.equal(perClub, 1)
 })
