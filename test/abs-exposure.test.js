@@ -21,6 +21,8 @@ import {
   binPosition,
   clubChallengeBoard,
   clubRowsFor,
+  exposureClubLevelFor,
+  fetchAbsExposureClubs,
   exposureBoard,
   exposureFor,
   exposureKind,
@@ -365,14 +367,75 @@ test('clubChallengeBoard: the men under the league line are counted, and the top
   assert.deepEqual(board.players.map((p) => p.playerId), [1, 2, 3])
 })
 
-test('clubChallengeBoard: an affiliate draws nothing, not an empty card', () => {
+test('clubChallengeBoard: a club below Triple-A draws nothing, not an empty card', () => {
   const data = clubs({ 100: [clubRow({})] })
   assert.equal(clubChallengeBoard(data, 5015, 'batter'), null)
   assert.equal(clubChallengeBoard(null, 100, 'batter'), null)
   assert.equal(clubRowsFor(data, 5015), null)
   assert.equal(clubRowsFor(data, 100).length, 1)
-  // The file is MLB only, so asking for Triple-A is asking for nothing.
+  // A file holds the one level it is named for, so asking it for the other is
+  // asking for nothing — never a silent fall-through to the level it does hold.
   assert.equal(clubRowsFor(data, 100, 'AAA'), null)
+})
+
+// --------------------------------------------------------------------------
+// One file a level, and the level a club's hub asks for.
+// --------------------------------------------------------------------------
+
+test('exposureClubLevelFor: the two levels that run the rig, and nothing under them', () => {
+  // Double-A and below carry neither the system nor the rule, so they get no
+  // level — which is what stops the hub fetching a file that does not exist.
+  assert.equal(exposureClubLevelFor(1), 'MLB')
+  assert.equal(exposureClubLevelFor(11), 'AAA')
+  for (const sportId of [12, 13, 14, 17, undefined, null]) {
+    assert.equal(exposureClubLevelFor(sportId), null, `sportId ${sportId} claimed a level`)
+  }
+})
+
+test('fetchAbsExposureClubs: no level means no fetch, and resolves null rather than throwing', async () => {
+  // The hub hands this straight to the card, so a club with no level has to
+  // come back as a plain null the card can decline to render.
+  assert.equal(await fetchAbsExposureClubs(null), null)
+  assert.equal(await fetchAbsExposureClubs('AA'), null)
+})
+
+test('clubChallengeBoard: a Triple-A club is ranked inside Triple-A', () => {
+  // The rank is "of thirty" at either level, never a club measured against a
+  // level it does not play in. The file is one level, so this is structural —
+  // the test pins that the level key travels all the way through.
+  const aaa = { levels: { AAA: { byTeam: {
+    400: [clubRow({ playerId: 1, pitches: 1000, asBatter: 12 })],
+    401: [clubRow({ playerId: 2, pitches: 1000, asBatter: 4 })],
+  } } } }
+  const board = clubChallengeBoard(aaa, 400, 'batter', 'AAA')
+  assert.equal(board.rank, 1)
+  assert.equal(board.of, 2)
+  assert.equal(board.players.length, 1)
+  // League is the file's own two clubs, not MLB's.
+  assert.equal(board.league, (16 / 2000) * 1000)
+  // And the same club read at the default level is absent, not mis-ranked.
+  assert.equal(clubChallengeBoard(aaa, 400, 'batter'), null)
+})
+
+test('the shipped club files hold one level each, and every club draws', async () => {
+  // A silent null here is a card that renders nothing and reads as a styling
+  // bug. Not a snapshot of the figures — those move every night.
+  const fs = await import('node:fs')
+  for (const level of ['MLB', 'AAA']) {
+    const url = new URL(`../public/data/abs-exposure-clubs-${level.toLowerCase()}.json`, import.meta.url)
+    const data = JSON.parse(fs.readFileSync(url, 'utf8'))
+    assert.deepEqual(Object.keys(data.levels), [level], `${level} file carries another level`)
+    const teamIds = Object.keys(data.levels[level].byTeam)
+    assert.equal(teamIds.length, 30, `${level} is not thirty clubs`)
+    for (const teamId of teamIds) {
+      for (const kind of ['batter', 'catcher']) {
+        const board = clubChallengeBoard(data, Number(teamId), kind, level)
+        assert.ok(board, `${level}/${teamId}/${kind} has no board`)
+        assert.ok(board.rate > 0, `${level}/${teamId}/${kind} has no rate`)
+        assert.ok(board.players.length > 0, `${level}/${teamId}/${kind} draws no dots`)
+      }
+    }
+  }
 })
 
 // --------------------------------------------------------------------------

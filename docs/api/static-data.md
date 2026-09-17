@@ -627,17 +627,21 @@ for each generator; the reader modules:
   by a counted index drifts from its own label the first time the data moves.
   The written report is `docs/abs-challenges.md`. Spoiler-free: plate
   appearances, pitches seen and innings caught over completed games.
-  IT READS A SECOND FILE TOO: `public/data/abs-exposure-clubs.json`, the same
-  sweep cut by `team_id` instead of folded across clubs, behind the team hub's
-  challenge card (`clubChallengeBoard`). 95 KB against the folded list's 418,
-  fetched by one club's Numbers tab and by nothing else, because the fold that
-  makes a 200-plate-appearance floor correct on a SEASON is the same fold that
-  drops the club a traded man played for. It ships counts and denominators and
-  no rates: the reader divides with the same `EXPOSURE_KINDS` the league board
-  uses, so a club's figure and the league's cannot come apart. MLB only. Two
-  things it knows that the folded file cannot: which club a traded man's
-  pitches belong to, and — by holding every club's rows — the league line the
-  card draws its dots against, without fetching the 418 KB list to get it.
+  IT READS A SECOND FILE TOO: `public/data/abs-exposure-clubs-{level}.json`,
+  the same sweep cut by `team_id` instead of folded across clubs, behind the
+  team hub's challenge card (`clubChallengeBoard`). 93 KB for MLB and 128 KB for
+  Triple-A against the folded list's 418, fetched by one club's Numbers tab and
+  by nothing else, because the fold that makes a 200-plate-appearance floor
+  correct on a SEASON is the same fold that drops the club a traded man played
+  for. It ships counts and denominators and no rates: the reader divides with
+  the same `EXPOSURE_KINDS` the league board uses, so a club's figure and the
+  league's cannot come apart. ONE FILE PER LEVEL, read through `staticJsonBy`
+  and memoized per level, so a major-league club's page never carries Triple-A's
+  rows; `exposureClubLevelFor` turns the hub's sportId into the level, and null
+  below Triple-A means no fetch and no card. Two things it knows that the folded
+  file cannot: which club a traded man's pitches belong to, and — by holding
+  every club's rows — the league line the card draws its dots against, without
+  fetching the 418 KB list to get it.
 - `around-the-game/clubs.js` — the one club-identity lookup those boards share,
   off the static `teams.json`. `clubShort` (Padres) is what a board ROW uses
   and `clubName` (San Diego Padres) what prose uses; the full name in a row

@@ -253,8 +253,8 @@ line the league's own rate would put them on, and the thirteenth is Gary
 Sánchez — the most eager hitter in the league, 32 reviews in 1,085 pitches.
 
 **The card lives on the team hub's Numbers tab**, beside the run value card,
-and it is MLB only: `abs-exposure-clubs.json` sweeps sportId 1, so an
-affiliate's page is unchanged the way it is for run value.
+at both levels that run the rig. A club below Triple-A has no ABS data at all,
+so its page is unchanged the way it is for run value.
 
 ### Why this needed a third file
 
@@ -267,11 +267,18 @@ The same fold drops `team_id`, which the sweep's own rows carry. So a club board
 built on that file would have to attribute a traded man to whoever holds him
 now, counting a whole season against a club he played sixty games for.
 
-`abs-exposure-clubs.json` is the same sweep cut by club instead: **733 MLB rows
-against the fold's 659**, because only 178 of MLB's 1,453 swept men appear for
-more than one club. **95 KB**, fetched by one club's hub tab and by nothing
-else — ADR-0076 applied a second time, and the alternative was 95 KB on a file
-every visitor to `/abs-challenges` downloads whole.
+`abs-exposure-clubs-{level}.json` is the same sweep cut by club instead: **733
+MLB rows against the fold's 659**, because only 178 of MLB's 1,453 swept men
+appear for more than one club. **93 KB**, fetched by one club's hub tab and by
+nothing else — ADR-0076 applied a second time, and the alternative was 93 KB on
+a file every visitor to `/abs-challenges` downloads whole.
+
+**And one file per LEVEL, which is the same argument a third time.** Triple-A's
+cut is a further 128 KB, on rows a major-league club's page would never read.
+The level is lowercased into the file name, and that spelling is the whole
+contract between `gen-abs-challenges.mjs` and
+`src/api/around-the-game/absExposure.js`. A file holds the one level it is named
+for, so asking it for the other returns nothing rather than falling through.
 
 **It ships counts and denominators and no rates.** `per1000Pitches` prints as
 `11.224987798926305` — forty bytes for a number the reader divides in one line
@@ -448,9 +455,10 @@ audit of statsapi is `docs/MLB_STATS_API.md`.
 | Tests | `test/abs-challenges.test.js`, `test/abs-exposure.test.js` |
 | Decisions | ADR-0075 (what a chance is), ADR-0076 (a dataset no surface reads) |
 
-Three files come out of every run of the generator, and the split is a size
+Four files come out of every run of the generator, and the split is a size
 decision every time: `abs-challenges.json` (250 KB) is what `/abs-challenges`
 fetches, `abs-exposure.json` (418 KB) is the per-player denominator list that
-one section of that page reads, and `abs-exposure-clubs.json` (95 KB) is the
-same denominators cut by club, read by one club's hub tab. Folded into one file
-they would be 763 KB on every visit to either page.
+one section of that page reads, and `abs-exposure-clubs-mlb.json` (93 KB) and
+`abs-exposure-clubs-aaa.json` (128 KB) are the same denominators cut by club,
+one level each, read by one club's hub tab. Folded into one file they would be
+889 KB on every visit to either page.

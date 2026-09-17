@@ -40,9 +40,18 @@ import { ChevronLink } from '../../../components/ui/ChevronLink.jsx'
 // roster's. The floor is the league board's own, reused rather than invented,
 // and the count that cleared it is printed.
 //
-// MLB ONLY. `abs-exposure-clubs.json` ships sportId 1, so `data` is null for an
-// affiliate and the card does not render — the same shape TeamRunValueCard
-// takes for a club Baseball Savant runs no board for.
+// MLB AND TRIPLE-A, the two levels that run the rig. `level` names the file the
+// rows came from AND the key inside it, so a club is only ever ranked against
+// its own level — a Triple-A club is third of thirty in Triple-A, never against
+// major-league clubs. Below Triple-A `data` is null and the card does not
+// render, the same shape TeamRunValueCard takes for a club Savant runs no board
+// for.
+//
+// A TRIPLE-A CLUB'S DOTS ARE A THINNER SLICE OF IT, and that is drawn, not
+// hidden: its qualifiers hold 71.8% of the club's plate appearances against a
+// major-league club's 84.2% (docs/abs-challenges.md §6). The count that cleared
+// the floor is printed under the chart at both levels, which is where a reader
+// sees it.
 
 // How the two views are labelled. Held here rather than built off the kind's
 // own `label`, because these are the chip words and they are the card's, not
@@ -74,16 +83,16 @@ function ordinal(n) {
   return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`
 }
 
-export function TeamChallengeCard({ data, teamId, clubName }) {
+export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
   const navigate = useNav()
   const [view, setView] = useState('batter')
 
   const boards = useMemo(
     () =>
       Object.fromEntries(
-        EXPOSURE_KINDS.map((k) => [k.key, clubChallengeBoard(data, teamId, k.key)]),
+        EXPOSURE_KINDS.map((k) => [k.key, clubChallengeBoard(data, teamId, k.key, level)]),
       ),
-    [data, teamId],
+    [data, teamId, level],
   )
 
   const shown = boards[view]?.players.length ? view : 'batter'

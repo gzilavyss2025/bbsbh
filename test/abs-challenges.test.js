@@ -49,6 +49,7 @@ import {
   buildExport,
   buildExposureExport,
   buildExposureClubsExport,
+  EXPOSURE_CLUB_LEVELS,
   MISS_BANDS,
 } from '../scripts/lib/abs/index.mjs'
 import {
@@ -1305,19 +1306,24 @@ test('buildExposureClubsExport: a man with no opportunity at that club is droppe
   assert.deepEqual(out.levels.MLB.byTeam['100'].map((p) => p.playerId), [11])
 })
 
-test('buildExposureClubsExport: MLB only, because no surface draws Triple-A yet', () => {
-  // ADR-0076: shipping rows before a surface reads them is the thing the split
-  // was made to stop. The loop is per level, so the day a board wants Triple-A
-  // it is one word here.
-  const out = buildExposureClubsExport([], [
+test('buildExposureClubsExport: both levels are drawn, and each ships in its own file', () => {
+  // ADR-0076 a third time. The generator calls this ONCE PER LEVEL and writes
+  // abs-exposure-clubs-{level}.json, so a club's hub tab never carries the
+  // other level's rows — 129 KB of Triple-A on a major-league page. What that
+  // rests on is this: asking for one level yields ONLY that level.
+  const seen = [
     seenRow({}),
     seenRow({ level: 'AAA', team_id: 400, player_id: 21, name: 'A Triple-A Hitter' }),
-  ], { season: 2026 })
-  assert.deepEqual(Object.keys(out.levels), ['MLB'])
-  const both = buildExposureClubsExport([], [
-    seenRow({}),
-    seenRow({ level: 'AAA', team_id: 400, player_id: 21, name: 'A Triple-A Hitter' }),
-  ], { season: 2026, levels: ['MLB', 'AAA'] })
+  ]
+  for (const level of EXPOSURE_CLUB_LEVELS) {
+    const one = buildExposureClubsExport([], seen, { season: 2026, levels: [level] })
+    assert.deepEqual(Object.keys(one.levels), [level], `${level} file carries another level`)
+  }
+  // And the default names both, so a level added to the constant is written
+  // rather than silently dropped by a generator that hard-coded one.
+  assert.deepEqual(EXPOSURE_CLUB_LEVELS, ['MLB', 'AAA'])
+  const both = buildExposureClubsExport([], seen, { season: 2026 })
+  assert.equal(both.levels.MLB.byTeam['100'].length, 1)
   assert.equal(both.levels.AAA.byTeam['400'].length, 1)
 })
 

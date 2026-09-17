@@ -90,12 +90,13 @@ export function NumbersTab({ id, asOf, sportId }) {
               baseball they see. It is the only place a club's challenge habit
               appears — the league board ranks thirty clubs on one rate and
               cannot show that the same club is last at the plate and third
-              behind it. MLB only (abs-exposure-clubs.json sweeps sportId 1),
-              so an affiliate's page is unchanged. */}
+              behind it. MLB and Triple-A, the two levels that run the rig; a
+              club below that draws nothing and fetches nothing. */}
           <TeamChallengeCard
             data={n.absExposureClubs}
             teamId={teamId}
             clubName={teamClubName(team)}
+            level={n.absExposureLevel}
           />
 
           {/* The full ledger — six categories a side, every one on screen. The

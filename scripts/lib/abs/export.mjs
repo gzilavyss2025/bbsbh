@@ -534,12 +534,16 @@ export function buildExposureExport(rows, exposure, { season, generatedAt } = {}
 // DOES ride along: a team hub that had to fetch 418 KB to put a name on a dot
 // would have paid for the file this one exists to avoid.
 //
-// MLB ONLY because no Triple-A surface reads these rows yet, which is what
-// ADR-0076 is against — NOT because the level is unfit. Its dots cover 71.8% of
-// a club against MLB's 84.2%, measured in docs/abs-challenges.md §6. Adding the
-// level is a word here and about 129 KB on a file one hub tab fetches, so the
-// §6 file decision lands with it.
-export const EXPOSURE_CLUB_LEVELS = ['MLB']
+// BOTH LEVELS, AND ONE FILE EACH. Triple-A earns its rows: a club's dots hold
+// 71.8% of its plate appearances against MLB's 84.2%, and its catcher table
+// draws at every club (docs/abs-challenges.md §6). The rate the card leads with
+// is not floored at all, so it is complete either way.
+//
+// THE FILE PER LEVEL IS ADR-0076 A THIRD TIME. Together the two levels are
+// 222 KB and a club's hub tab reads ONE, so a single file would make a
+// major-league club download the Triple-A half for nothing. The caller writes
+// one file per level and the reader picks by level; nothing here ships two.
+export const EXPOSURE_CLUB_LEVELS = ['MLB', 'AAA']
 
 export function buildExposureClubsExport(
   rows,
