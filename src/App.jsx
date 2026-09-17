@@ -598,7 +598,15 @@ export default function App() {
           fallback={
             <div className="app">
               <div className="screen">
-                <Loader />
+                {/* `loader--route` names THIS boundary and nothing else. The
+                    same <Loader> also stands in for data still landing
+                    (AsyncGate) and for GameView's own nested chunks, so
+                    `.loader--page` alone cannot tell "the route has not been
+                    drawn" from "the page is drawn, its numbers are coming".
+                    A verification pass has to tell those apart to report a
+                    cold-server stall honestly (issue #1095, e2e/fixtures.js
+                    `routeRendered`). It carries no styling. */}
+                <Loader className="loader--route" />
               </div>
             </div>
           }

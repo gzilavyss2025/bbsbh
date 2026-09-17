@@ -24,6 +24,10 @@ const DEV_SCRIPT =
 
 export default defineConfig({
   testDir: './e2e',
+  // Runs after webServer is up and before the first test: one request for the
+  // app entry, so vite's dependency pre-bundle and eager-graph transform are
+  // not charged to whichever spec happens to go first (issue #1095).
+  globalSetup: './e2e/global-setup.js',
   timeout: 30_000,
   retries: 0,
   reporter: [['list']],

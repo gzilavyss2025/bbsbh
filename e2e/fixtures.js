@@ -12,15 +12,49 @@ import { test as base, expect } from '@playwright/test'
 // ALWAYS import `test`/`expect` from this file, never from '@playwright/test'
 // directly, so no spec can forget the flag. `page.reload()` re-requests the
 // same `?nointro` URL, so it's covered too.
+//
+// The wrapper also waits for the route to be DRAWN before handing the page
+// back — see `routeRendered` below. That is here, and not in each spec, for
+// the same reason the flag is: a spec that forgets it does not fail loudly,
+// it fails mysteriously, somewhere else, on a machine that is not yours.
 export const test = base.extend({
   page: async ({ page }, use) => {
     const origGoto = page.goto.bind(page)
-    page.goto = (url, opts) => origGoto(withNoIntro(url), opts)
+    page.goto = async (url, opts) => {
+      const res = await origGoto(withNoIntro(url), opts)
+      await routeRendered(page)
+      return res
+    }
     await use(page)
   },
 })
 
 export { expect }
+
+// Wait until the lazy route module has rendered, before timing anything else.
+//
+// Vite never pre-transforms a dynamic import (importAnalysis gates that on
+// `!isDynamicImport`), and every route in App.jsx is `lazy(() => import(...))`,
+// so on a dev server that has not served this route yet the module is compiled
+// on the first navigation to it. That compile is charged to whatever the spec
+// waits for next. Two wrong readings come out of it (issue #1095):
+//
+//   - a bare "Test timeout of 30000ms exceeded", which looks like a hang in the
+//     code under test and is really the clock spent before the page existed;
+//   - a `test.skip` whose reason names the DATA — "this player has no MLB
+//     situational splits on file today" — a sentence about MLB that is not
+//     true, printed because a locator was counted before the page was drawn.
+//
+// The route's own Suspense fallback carries `loader--route` (App.jsx) and
+// nothing else does, so its absence is exactly "the route is drawn". Past this
+// call a missing locator is missing from the DATA, which is the only thing a
+// skip is allowed to claim. A route that never renders fails HERE, naming the
+// fallback, rather than as a bare timeout further down.
+//
+// It is not a substitute for a spec's own waits: data arrives after the route.
+export async function routeRendered(page) {
+  await expect(page.locator('.loader--route')).toHaveCount(0, { timeout: 20_000 })
+}
 
 // The Game Log's season grid (`.logbook__cell`) sits inside a disclosure that
 // is CLOSED when the page loads — the book above it is already the collection,
