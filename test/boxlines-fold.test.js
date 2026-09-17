@@ -184,3 +184,52 @@ test('a row with no counts on it folds to games alone', () => {
   assert.equal(line.games, 2)
   assert.equal(line.rate, '.500')
 })
+
+// #998's list, over the same machinery: parks rather than slots, named from the
+// group's newest row rather than from its key, biggest first rather than in
+// sequence. Nothing but the descriptor changes.
+const BY_PARK = {
+  groupBy: (row) => row.venueId,
+  name: (id, newest) => newest?.venueName || 'Unnamed park',
+  order: 'games',
+  facet: (venueId) => ({ kind: 'venue', venueId }),
+  title: (surname, name) => `${surname} at ${name}`,
+}
+
+test('a park is named from its NEWEST row, so a renamed stadium reads as it does today', () => {
+  // The trap #998 measured: nine of Yelich's 36 parks carry more than one name
+  // inside his own career, and id 32 is Miller Park for 185 games and American
+  // Family Field for 372. The rows arrive newest first, so the newest name is
+  // the one the entry wears — and the older games are still in it, because the
+  // GROUP is the id.
+  const groups = foldGroups(
+    [
+      { gamePk: 3, venueId: 32, venueName: 'American Family Field', counts: { atBats: 4, hits: 2 } },
+      { gamePk: 2, venueId: 32, venueName: 'Miller Park', counts: { atBats: 4, hits: 1 } },
+      { gamePk: 1, venueId: 32, venueName: 'Miller Park', counts: { atBats: 2, hits: 0 } },
+    ],
+    BY_PARK,
+    'hitting',
+  )
+  assert.equal(groups.length, 1, 'one park, not two')
+  assert.equal(groups[0].name, 'American Family Field')
+  assert.equal(groups[0].games, 3)
+  assert.equal(groups[0].line.rate, '.300')
+})
+
+test('the parks list leads with the park he has played at most', () => {
+  const rows = [
+    { gamePk: 1, venueId: 32, venueName: 'American Family Field', counts: { atBats: 4, hits: 1 } },
+    { gamePk: 2, venueId: 32, venueName: 'American Family Field', counts: { atBats: 4, hits: 1 } },
+    { gamePk: 3, venueId: 2504, venueName: 'London Stadium', counts: { atBats: 4, hits: 2 } },
+  ]
+  const groups = foldGroups(rows, BY_PARK, 'hitting')
+  assert.deepEqual(
+    groups.map((g) => [g.name, g.games]),
+    [
+      ['American Family Field', 2],
+      ['London Stadium', 1],
+    ],
+  )
+  assert.deepEqual(groups[1].facet, { kind: 'venue', venueId: 2504 })
+})

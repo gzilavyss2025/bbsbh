@@ -175,21 +175,23 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
     'Stakes',
   ])
 
-  // A pitcher who has reached October and pitched in every month gets nine
-  // doors STANDING — Home, Road, On grass, On turf, Day, Night, Started, In
-  // relief, Postseason — and fifteen more folded into two families, the eight
-  // months and the seven weekdays (GameLinesCard.jsx). A folded door is not in
-  // the DOM at all, which is what the second count says. MiLB service returns
-  // no rows for these codes and a door with no career row drops out on its own,
-  // so this also says he is being read as a major leaguer. He gets no lineup
-  // pair: a pitcher is never on the batting card.
+  // A pitcher who has reached October and pitched in every month gets ten
+  // doors STANDING — Home, Road, On grass, On turf, By ballpark, Day, Night,
+  // Started, In relief, Postseason — and fifteen more folded into two families,
+  // the eight months and the seven weekdays (GameLinesCard.jsx). A folded door
+  // is not in the DOM at all, which is what the second count says. MiLB service
+  // returns no rows for these codes and a door with no career row drops out on
+  // its own, so this also says he is being read as a major leaguer. By ballpark
+  // is the exception and always stands: it is a LIST door, it names no label
+  // source, and there is no figure to test it by (#998). He gets no lineup pair
+  // and no spot-in-the-order list: a pitcher is never on the batting card.
   const doors = card.locator('.gamelines__door')
-  await expect(doors).toHaveCount(9)
+  await expect(doors).toHaveCount(10)
   await expect(card.locator('.gamelines__fam')).toHaveCount(2)
   await openFamily(card, 'By month')
-  await expect(doors).toHaveCount(17)
+  await expect(doors).toHaveCount(18)
   await openFamily(card, 'By day of the week')
-  await expect(doors).toHaveCount(24)
+  await expect(doors).toHaveCount(25)
 
   const home = card.getByRole('button', { name: /^Home: / })
   const label = await home.getAttribute('aria-label')
@@ -642,4 +644,91 @@ test('the batting-order door opens a list, and a slot opens its own rows', async
   if ((await pitcherCard.count()) > 0) {
     await expect(pitcherCard.getByRole('button', { name: 'By spot in the order' })).toHaveCount(0)
   }
+})
+
+// THE BALLPARK LIST (#998). The second list door, and the one the list shape was
+// built general for: a career is 36 parks, which cannot be 36 doors. MLB has no
+// aggregate to label them with either — `sitCodes=ven` returns nothing, three
+// ways over — so the entries are folded from the rows, most games first.
+test('the ballpark door opens a list, most games first, and a park opens its rows', async ({ page }) => {
+  await page.goto(`${YELICH}?d=${PLAYER_CUTOFF}`)
+  const card = page.locator('.gamelines')
+  await card.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await card.count()) === 0) {
+    test.skip(true, 'this player has no MLB situational splits on file today')
+    return
+  }
+
+  const door = card.getByRole('button', { name: 'By ballpark' })
+  await expect(door).toHaveCount(1)
+  await door.click()
+
+  const sheet = page.locator('.boxlines')
+  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · by ballpark')
+  await expect
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+
+  // A career's parks. Read in ONE pass: a list this long is a round trip per
+  // entry otherwise, which is what ran the batting-order spec past its timeout.
+  const parks = await sheet.evaluate((el) =>
+    [...el.querySelectorAll('.boxlines-entry')].map((b) => ({
+      name: b.querySelector('.boxlines-entry__name').textContent,
+      games: Number(b.querySelector('.boxlines-entry__fig').textContent),
+    })),
+  )
+  expect(parks.length, 'a career is played at many parks').toBeGreaterThan(5)
+  // MOST GAMES FIRST. A career's parks are not a sequence, so the one he has
+  // played at most leads — and his own home park is about a quarter of a career.
+  for (let i = 1; i < parks.length; i++) {
+    expect(
+      parks[i].games <= parks[i - 1].games,
+      `${parks[i].name} (${parks[i].games}) sits under ${parks[i - 1].name} (${parks[i - 1].games})`,
+    ).toBe(true)
+  }
+  // A PARK IS NAMED ONCE. Grouping on the drifting NAME rather than the stable
+  // id would split Miller Park from American Family Field, which is one park.
+  expect(new Set(parks.map((p) => p.name)).size).toBe(parks.length)
+
+  // The park he knows best opens the games he played there, and the entry
+  // counted exactly those.
+  await sheet.locator('.boxlines-entry').first().click()
+  await expect(sheet.locator('.boxlines__kicker')).toHaveText(`Game lines · ${parks[0].name}`)
+  await expect(sheet.locator('.boxlines__title')).toContainText(parks[0].name)
+  await expect
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+  const hrefs = await sheet.evaluate((el) =>
+    [...el.querySelectorAll('.boxline:not(.boxline--skel)')].map((li) =>
+      li.querySelector('a')?.getAttribute('href'),
+    ),
+  )
+  expect(hrefs.length, `the entry counted ${parks[0].games} and opened ${hrefs.length}`).toBe(parks[0].games)
+  for (const [i, href] of hrefs.entries()) {
+    const [, mmddyyyy] = href.match(/^\/(\d{8})\//)
+    const iso = `${mmddyyyy.slice(4)}-${mmddyyyy.slice(0, 2)}-${mmddyyyy.slice(2, 4)}`
+    expect(iso < PLAYER_CUTOFF, `row ${i} is dated ${iso}, not before ${PLAYER_CUTOFF}`).toBe(true)
+  }
+
+  await sheet.getByRole('button', { name: /Back/ }).click()
+  await expect(sheet.locator('.boxlines-entry')).toHaveCount(parks.length)
+  await page.keyboard.press('Escape')
+
+  // A PITCHER GETS THIS ONE. He plays at parks; he is just never on the batting
+  // card, which is why he gets no spot-in-the-order list.
+  await page.goto(`${PETERSON}?d=${PLAYER_CUTOFF}`)
+  const pitcherCard = page.locator('.gamelines')
+  await pitcherCard.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await pitcherCard.count()) === 0) return
+  await expect(pitcherCard.getByRole('button', { name: 'By spot in the order' })).toHaveCount(0)
+  const pitcherDoor = pitcherCard.getByRole('button', { name: 'By ballpark' })
+  await expect(pitcherDoor).toHaveCount(1)
+  await pitcherDoor.click()
+  const arm = page.locator('.boxlines')
+  await expect
+    .poll(async () => (await arm.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+  // His column is ERA, not AVG — the list names the group's own two figures.
+  await expect(arm.locator('.boxlines__listcol')).toHaveText(['G', 'ERA'])
+  expect(await arm.locator('.boxlines-entry').count()).toBeGreaterThan(1)
 })

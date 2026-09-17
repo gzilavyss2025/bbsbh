@@ -194,6 +194,48 @@ export const CARD_FACETS = [
     section: 'where',
     groups: ['hitting', 'pitching'],
   },
+  // WHICH PARK (#998). The second LIST door, and the one the list was built
+  // general for: a career is 36 ballparks — Yelich 36, Semien 36, Betts 36,
+  // and a seven-year pitcher 26 — which cannot be 36 doors on a card that
+  // already carries twenty-five. So they live behind one, most games first.
+  //
+  // THERE IS NO AGGREGATE TO LABEL IT WITH, and that is settled three ways
+  // (2026-09-15): `sitCodes=ven` returns 0 splits for every player tested;
+  // `ven,h,a` returns only `h` and `a`, so the code is dropped in silence
+  // rather than erroring; and no `statTypes` entry names a venue. The rows are
+  // the only path — which is the same place the batting order landed, from the
+  // opposite direction.
+  //
+  // THE ID IS STABLE AND THE NAME DRIFTS, inside one career: nine of Yelich's
+  // 36 parks carry more than one name in his own games (id 32 is Miller Park
+  // for 185 of them and American Family Field for 372; id 4 is three names).
+  // So the group is the ID and the NAME comes off the group's newest row —
+  // which rows.js already sorts first, so it costs nothing and it matched MLB's
+  // current name on 35 of 36 parks. The miss is better than a match: Globe Life
+  // Park in Arlington, which MLB now calls Choctaw Stadium, is named as the
+  // reader knew it. Do NOT reach for `/api/v1/venues` instead — unseasoned it
+  // returns SPONSOR names ("UNIQLO Field at Dodger Stadium"), and a `&season=`
+  // call silently omits a park not in use that season.
+  {
+    key: 'ballpark',
+    label: 'By ballpark',
+    kicker: 'Game lines · by ballpark',
+    title: (surname) => `${surname} by ballpark`,
+    section: 'where',
+    groups: ['hitting', 'pitching'],
+    list: {
+      // The park the game was PLAYED at, off the schedule record's own venue —
+      // never opponent + isHome, which is wrong at a neutral site (London,
+      // Mexico City, a hurricane relocation).
+      groupBy: (row) => row.venueId,
+      name: (id, newest) => newest?.venueName || 'Unnamed park',
+      // Not a sequence: the park he has played at most is the one a reader
+      // wants at the top, and the tail runs down to parks he saw once.
+      order: 'games',
+      facet: (venueId) => ({ kind: 'venue', venueId }),
+      title: (surname, name) => `${surname} at ${name}`,
+    },
+  },
   // WHEN HE PLAYED. The rows read day/night off the SCHEDULE record, never the
   // game log, which reported "day" for two known night games (ADR-0069).
   {

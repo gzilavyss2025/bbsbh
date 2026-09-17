@@ -727,3 +727,24 @@ test('a pitcher row carries OUTS, because innings are thirds and do not add', ()
     ],
   )
 })
+
+test('a NEUTRAL-SITE game lands under the park it was played at', () => {
+  // #998's one row-level trap. The park must come off the SCHEDULE record's own
+  // venue, never off opponent + isHome: a game his club is listed as home for,
+  // played at a third park — London, Mexico City, a hurricane relocation — is a
+  // game at that third park and nowhere else.
+  const splits = [
+    split('2024-06-08', 1, { isHome: true }),
+    split('2024-06-09', 2, { isHome: true }),
+  ]
+  const schedule = [
+    sched(1, '2024-06-08'),
+    // Same clubs, same home side, a different park.
+    sched(2, '2024-06-09', { venue: { id: 2504, name: 'London Stadium' } }),
+  ]
+  const home = boxLineRows({ splits, schedule, group: 'hitting', keep: (r) => r.venueId === 32 })
+  const neutral = boxLineRows({ splits, schedule, group: 'hitting', keep: (r) => r.venueId === 2504 })
+  assert.deepEqual(home.map((r) => r.gamePk), [1])
+  assert.deepEqual(neutral.map((r) => r.gamePk), [2])
+  assert.equal(neutral[0].venueName, 'London Stadium')
+})

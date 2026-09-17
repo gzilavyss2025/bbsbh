@@ -232,3 +232,21 @@ test('the slot facet costs the same second pass the lineup doors do', () => {
   assert.equal(facetPlan({ kind: 'lineupSpot', spot: 5 }).narrowsSplits, false)
   assert.equal(facetPlan({ kind: 'lineupSpot', spot: 5 }).gameTypes, null)
 })
+
+test('a venue facet with NO park is the ballpark list itself', () => {
+  // #998's listing pass, the same shape the slot facet's is. It must keep every
+  // row that HAS a park — not none, which empties the list, and not all, which
+  // would put a row with no venue under some park.
+  const plan = facetPlan({ kind: 'venue', venueId: null })
+  assert.equal(plan.keep(row({ venueId: 32 })), true)
+  assert.equal(plan.keep(row({ venueId: 15 })), true)
+  assert.equal(plan.keep(row({ venueId: null })), false)
+  // And naming a park still narrows to it alone.
+  const one = facetPlan({ kind: 'venue', venueId: 32 }).keep
+  assert.equal(one(row({ venueId: 32 })), true)
+  assert.equal(one(row({ venueId: 15 })), false)
+  assert.equal(one(row({ venueId: null })), false)
+  // It costs no second pass: a park is on the schedule record the join already
+  // holds, unlike a slot in the order.
+  assert.equal(plan.needsLineups, false)
+})

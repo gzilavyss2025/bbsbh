@@ -232,6 +232,7 @@ test('a hitter is offered no started/relief door, which would keep nothing', () 
       'road',
       'grass',
       'turf',
+      'ballpark',
       'day',
       'night',
       ...CALENDAR,
@@ -249,6 +250,7 @@ test('a hitter is offered no started/relief door, which would keep nothing', () 
       'road',
       'grass',
       'turf',
+      'ballpark',
       'day',
       'night',
       ...CALENDAR,
@@ -585,6 +587,66 @@ test('the batting order lists nine slots, named in words, in order', () => {
   assert.equal(list.groupBy({ lineupSpot: null }), null)
   // The sheet's heading once a slot is picked.
   assert.equal(list.title('Yelich', 'Batting third'), 'Yelich, batting third')
+})
+
+test('the ballpark list groups on the ID and names from the newest row', () => {
+  // #998's trap, pinned. A park's venueId is stable and its NAME drifts inside
+  // a single career — id 32 is Miller Park for 185 of Yelich's games and
+  // American Family Field for 372 — so grouping on the name would split one
+  // park into two entries and name neither of them wrongly enough to notice.
+  // The group is the id; the name comes off the group's NEWEST row, which
+  // rows.js already sorts first.
+  const { list } = CARD_FACETS.find((r) => r.key === 'ballpark')
+  assert.equal(list.groupBy({ venueId: 32, venueName: 'American Family Field' }), 32)
+  assert.equal(list.name(32, { venueName: 'American Family Field' }), 'American Family Field')
+  // The older row's name is NOT what the entry says, which is the whole point.
+  assert.notEqual(list.name(32, { venueName: 'American Family Field' }), 'Miller Park')
+  // A row with no park at all leaves the list rather than joining a group.
+  assert.equal(list.groupBy({ venueId: null }), null)
+  // MiLB degrades gracefully: a record with no name still names its entry
+  // something a reader can read, rather than "undefined".
+  assert.equal(list.name(32, { venueName: '' }), 'Unnamed park')
+  assert.equal(list.name(32, undefined), 'Unnamed park')
+  // Most games first — a career's parks are not a sequence, and the tail runs
+  // down to parks he saw once.
+  assert.equal(list.order, 'games')
+  assert.deepEqual(list.facet(32), { kind: 'venue', venueId: 32 })
+  assert.equal(list.title('Yelich', 'American Family Field'), 'Yelich at American Family Field')
+})
+
+test('the ballpark list costs no second pass, and narrows no fetch', () => {
+  // A park is on the schedule record the join already holds, so this list rides
+  // the shared fetch exactly as the other doors in its section do. (A slot in
+  // the order does not — it needs the lineups.)
+  const { list } = CARD_FACETS.find((r) => r.key === 'ballpark')
+  for (const venueId of [null, 32, 2504]) {
+    const plan = facetPlan(list.facet(venueId))
+    assert.equal(plan.needsLineups, false, `park ${venueId} asked for a second pass`)
+    assert.equal(plan.narrowsSplits, false)
+    assert.equal(plan.gameTypes, null)
+    assert.equal(typeof plan.keep, 'function')
+  }
+  // Named, it keeps that park; unnamed, every row that HAS one.
+  const one = facetPlan(list.facet(32)).keep
+  assert.equal(one({ venueId: 32 }), true)
+  assert.equal(one({ venueId: 2504 }), false)
+  const all = facetPlan(list.facet(null)).keep
+  assert.equal(all({ venueId: 2504 }), true)
+  assert.equal(all({ venueId: null }), false)
+})
+
+test('both groups are offered the ballpark list, and only hitters the order', () => {
+  // A pitcher plays at parks too — 26 over seven years — but he is never on the
+  // batting card, so the two lists do not travel together.
+  for (const group of GROUPS) {
+    assert.equal(
+      cardFacetsFor(group).some((r) => r.key === 'ballpark'),
+      true,
+      `${group} has no ballpark list`,
+    )
+  }
+  assert.equal(cardFacetsFor('pitching').some((r) => r.key === 'order'), false)
+  assert.equal(cardFacetsFor('hitting').some((r) => r.key === 'order'), true)
 })
 
 test('a list door asks careerSplits for nothing at all', async () => {

@@ -843,7 +843,7 @@ Not postseason-specific, and not a facet's problem. Any facet, any era: a
 rain-postponed regular-season game replayed the same day under the same gamePk
 has the same shape. The postseason door just made it countable.
 
-## Amendment (2026-09-16, issue #1048): a door that opens a LIST
+## Amendment (2026-09-16, issues #1048 and #998): a door that opens a LIST
 
 The 2026-09-15 note above ends "it wants a door that opens a LIST … and it
 should be built once for both". It is built, and the batting order is its first
@@ -921,12 +921,31 @@ so the slot was there to be read. One pass, one memo, three doors.
 posted a card"), 0 is false, 1 through 9 is true. A 0 also means `lineupSpot` is
 **null**, not 0 — a bench appearance is not a tenth place in the order.
 
-### What #998 needs now
+### #998 came with it, and it cost a descriptor and a name
 
-**A descriptor and a name, and nothing else.** `venueId` and `venueName` are
-already on every row, `{ kind: 'venue', venueId }` is already a facet, and
-`order: 'games'` is already the other sort. Nothing in the list is slot-shaped:
-the fold, the sort, the sheet's two modes and the back control are all keyed off
-the descriptor. The one thing that issue still has to decide for itself is its
-own naming trap — a park's row is the source of its name, and its `ven`
-situation code is not (it returns nothing, recorded above).
+**By ballpark**, filed under *Where*, both groups. It is 22 lines of registry
+and two tests, because everything else was already there: `venueId` and
+`venueName` on every row, `{ kind: 'venue', venueId }` in `facets.js`, and
+`order: 'games'` as the other sort. That is the evidence that the list is
+general rather than a batting order with a seam in it.
+
+Its own trap, measured 2026-09-15 and now pinned by test: **a park's id is
+stable and its NAME drifts inside one career.** Nine of Yelich's 36 parks carry
+more than one name in his own games — id 32 is Miller Park for 185 and American
+Family Field for 372, id 4 is three names. So the GROUP is the id and the NAME
+comes off the group's newest row, which the list already had a member for. It
+matched MLB's current name on 35 of 36 parks, and the miss is better than a
+match: Globe Life Park in Arlington, now Choctaw Stadium, is named as the reader
+knew it. **Do not reach for `/api/v1/venues`** — unseasoned it returns SPONSOR
+names ("UNIQLO Field at Dodger Stadium"), and a `&season=` call silently omits a
+park not in use that season.
+
+Live on Yelich at `?d=2026-06-27`: 35 parks, American Family Field 521 G / .284
+at the top, down a tail to parks he saw once. Both of his home parks appear
+once, under the name they carry today, with every older game inside them.
+
+`sitCodes=ven` stays dead, three ways over (0 splits; dropped in silence from a
+`ven,h,a` list; no `statTypes` entry names a venue). The rows are the only path,
+which is where the batting order arrived from the opposite direction — and it is
+why one door on this card prints no figures. It opens a list rather than a
+line.

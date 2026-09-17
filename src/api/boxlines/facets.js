@@ -43,6 +43,16 @@ export function monthOf(iso) {
   return Number(String(iso).slice(5, 7))
 }
 
+// A facet a LIST asks TWICE: once per group, and once with NO group named —
+// the sheet's own listing pass, which must come back with every row the list
+// can describe. Naming no group therefore keeps every row that HAS one, which
+// is never "none" (an empty list) and never "all" (a list with a group for the
+// rows that belong to none). Both list facets are built from this, so the
+// second one cannot forget the case the first one needed.
+function groupKeep(key, read) {
+  return key == null ? (r) => read(r) != null : (r) => read(r) === key
+}
+
 // The plan for one facet, or the everything-plan when `facet` is null.
 // `narrowsSplits` tells fetch.js which of its two paths this facet earns: the
 // club path filters the game log first, everything else joins the career once.
@@ -61,7 +71,12 @@ export function facetPlan(facet) {
       // The only facet that narrows the fetch: one club, a handful of games.
       return { ...plan, opponentId: facet.opponentId ?? null, narrowsSplits: true }
     case 'venue':
-      return { ...plan, keep: (r) => r.venueId === facet.venueId }
+      // WHICH PARK, off the SCHEDULE record's own venue and never off opponent
+      // + isHome, which is wrong at a neutral site — London, Mexico City, a
+      // hurricane relocation. One park's games, or, with no park named, every
+      // row that has one: this facet backs the By ballpark LIST (#998) as well
+      // as a single park's sheet.
+      return { ...plan, keep: groupKeep(facet.venueId ?? null, (r) => r.venueId) }
     case 'surface':
       // GRASS OR ARTIFICIAL TURF, as the park was THAT SEASON. The schedule
       // record carries it under `hydrate=venue(fieldInfo)` and it is
@@ -159,10 +174,7 @@ export function facetPlan(facet) {
       return {
         ...plan,
         needsLineups: true,
-        keep:
-          facet.spot == null
-            ? (r) => r.lineupSpot != null
-            : (r) => r.lineupSpot === Number(facet.spot),
+        keep: groupKeep(facet.spot == null ? null : Number(facet.spot), (r) => r.lineupSpot),
       }
     case 'pinchHit':
       // HE CAME UP OFF THE BENCH. The hitting game log's `positionsPlayed`

@@ -153,8 +153,8 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `keep` cannot resurrect a row the cutoff or the Final check dropped.
   **A LIST DOOR IS THE ONE WHOSE FIGURES ARE NOT MLB'S** (`fold.js`, #1048,
   spoiler-free). Some questions have too many answers to be doors — the nine
-  spots in the batting order, #998's thirty-six ballparks — so one door opens a
-  LIST of groups, each opening its own rows. Its figures are folded from the
+  spots in the batting order (#1048) and a career's thirty-six ballparks (#998) —
+  so one door opens a LIST of groups, each opening its own rows. Its figures are folded from the
   GATED ROWS, and that is forced rather than chosen: MLB's `b1`–`b9` count games
   with a plate appearance in a slot where the lineups count who STARTED there
   (Yelich reads 18 at `b9` against 0 starts), so a door labelled from the
@@ -168,6 +168,13 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   entry from `careerStatSplits` to "fix" that. The sheet asks `list.facet(null)`
   — the same facet kind with no group named — for its listing pass, which is
   what plans the lineups pass and keeps every row that HAS a group.
+  A list facet asked with NO group named — `{ kind: 'venue', venueId: null }` —
+  is the listing pass, and keeps every row that HAS a group. **A park's id is
+  stable and its NAME drifts inside one career** (id 32 is Miller Park for 185 of
+  Yelich's games and American Family Field for 372), so a park list groups on the
+  ID and names from the group's NEWEST row; `/api/v1/venues` is the wrong answer,
+  returning SPONSOR names unseasoned and omitting parks with `&season=`.
+  `sitCodes=ven` returns nothing at all, three ways over.
   `test/boxlines-fold.test.js` pins the arithmetic.
   `vsClub.js` is now a one-line wrapper on `fetch.js` for the club facet, kept
   so the two shipped doors did not have to change.
