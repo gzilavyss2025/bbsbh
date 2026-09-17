@@ -264,10 +264,11 @@ export function exposureBoard(level, key) {
 
 export const fetchAbsExposureClubs = staticJson('/data/abs-exposure-clubs.json')
 
-// MLB only today, because a Triple-A club keeps half its qualified hitters
-// from April to September and MLB keeps three quarters — docs/abs-challenges.md
-// §6. The file's level loop is the generator's, so the day that changes it is a
-// one-word change there and a null here until then.
+// MLB only today, and the level is fit to draw when a surface wants it: a
+// Triple-A club's dots cover 71.8% of its plate appearances against MLB's
+// 84.2%, and its rate here is not floored at all (docs/abs-challenges.md §6).
+// The file's level loop is the generator's, so it is a one-word change there
+// and a null here until then.
 export function clubRowsFor(data, teamId, level = 'MLB') {
   return data?.levels?.[level]?.byTeam?.[String(teamId)] ?? null
 }

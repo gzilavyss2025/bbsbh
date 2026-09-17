@@ -299,38 +299,63 @@ when what it means is "further from the line".
 
 ### Whether Triple-A is worth drawing
 
-**Not yet — and this is now measured rather than suspected, so nobody has to
-ask a third time.** The denominators were never the problem. A Triple-A club
-qualifies as many hitters as a major-league club does: 355 against 341, a
-median of twelve a club at both levels. A scatter would draw.
+**The churn is real and it is not the objection it looks like.** This was first
+argued as "an affiliate's roster turns over, so the dots are a different
+population in April and September". That is true — and it was measured, below —
+but it tests the card against a claim the card does not make.
 
-**Half of a Triple-A club's dots are a different man by September.** Of the
-qualified men a Triple-A club carried, **50.4% played for it in both April and
-September, against MLB's 77.4%** — a 27-point gap. The median Triple-A club
-keeps 50.0% and the median major-league club keeps 80.9%. Sacramento keeps
-three of fourteen.
+**The card is a record of a season, not a picture of a roster.** A man who
+batted 250 times at Sacramento and was promoted in July clears the floor and
+gets a dot, and that dot is a true fact about what he did there. Counting him
+against the club he actually batted for is the entire reason the per-club cut
+exists. Nothing on the card says "these are the men here now", so a man leaving
+does not make it wrong.
 
-The gap is not an artifact of where the windows were drawn. Measured instead
-over each level's first thirty days against its last thirty, it is 55.2%
-against 78.3% — 23 points, the same answer.
+**The test that decides it is coverage: how much of a club the dots account
+for.** A floor that admits twelve men holding four in five of a club's plate
+appearances draws that club. The same floor admitting twelve men holding two in
+five draws a fragment and looks identical.
 
-**The men do not vanish; half of them are promoted.** 126 qualified Triple-A
-men were absent from their club in September, and 62 of them were in the majors
-instead. That is the affiliate working exactly as intended, and it is precisely
-what makes the chart a poor claim: the dots a reader would study in September
-are, by construction, the men the parent club did not want.
+| | MLB | Triple-A |
+| --- | --- | --- |
+| Men who batted for a club, median | 24 | 34 |
+| Men clearing 200 plate appearances, median a club | 12 | 12 |
+| **Share of a club's plate appearances drawn** | **84.2%** | **71.8%** |
+| Worst club | 70.6% | 57.6% |
+| Catchers clearing 200 innings | 73 | 75 |
+| Share of a club's catcher innings drawn, median | 90.9% | 74.8% |
 
-A scatter that draws cleanly and says less than it appears to is worse than no
-scatter, so `EXPOSURE_CLUB_LEVELS` in `scripts/lib/abs/export.mjs` stays
-`['MLB']`. Shipping rows before a surface draws them is what ADR-0076 is
-against. Adding a level is still a one-word change if a later season's numbers
-come out differently.
+**Three quarters of a club is not a fragment.** Triple-A uses ten more batters
+a club and still concentrates 71.8% of its plate appearances in the twelve men
+the floor admits. Every Triple-A club would draw a scatter, and every one would
+draw a catcher table too — 75 catchers clear 200 innings, a median of two a
+club, and no club has none.
+
+**And the club's own rate, the number the card leads with and is ranked on, is
+not floored at all.** `clubRate` runs over every man with a denominator. The
+floor decides who gets a dot, never what the club's figure is, so the headline
+and the rank are complete at Triple-A whatever the scatter shows.
+
+**The churn, for the record.** 50.4% of a Triple-A club's qualified men played
+for it in both April and September, against MLB's 77.4%; over each level's
+first thirty days against its last thirty, 55.2% against 78.3%. Of the 126
+Triple-A men absent in September, 62 were in the majors instead. The number is
+a fact about how a farm system works. It is not a reason the chart would lie.
+
+**What is left is a build, and one file decision.** ADR-0076 holds: the rows
+and the surface land together, so `EXPOSURE_CLUB_LEVELS` in
+`scripts/lib/abs/export.mjs` is still `['MLB']` until a Triple-A surface reads
+them. Adding the level takes `abs-exposure-clubs.json` from 93 KB to about
+222 KB, and that file is fetched by one club's hub tab — so a major-league club
+would download the Triple-A half for nothing. Split it per level, or accept the
+weight; do not ship the level without settling which.
 
 **The figures above are cut per club, not per season.** §5's board floors a
 man's folded season — 377 Triple-A men and 352 major-league men clear it — and
-the card floors his plate appearances *for that one club*, which is a stricter
-test that a traded regular can fail at both stops. `.scratch/abs-reports/churn.mjs`
-reproduces every number here in about four minutes.
+the card floors his plate appearances *for that one club*, a stricter test a
+traded regular can fail at both stops. That is why the counts here are 355 and
+341 instead. `.scratch/abs-reports/churn.mjs` reproduces every number in about
+four minutes.
 
 ## 7. After a win, after a loss
 

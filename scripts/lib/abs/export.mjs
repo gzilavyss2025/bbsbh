@@ -534,9 +534,11 @@ export function buildExposureExport(rows, exposure, { season, generatedAt } = {}
 // DOES ride along: a team hub that had to fetch 418 KB to put a name on a dot
 // would have paid for the file this one exists to avoid.
 //
-// MLB ONLY, and the reason is measured: a Triple-A club keeps 50.4% of its
-// qualified hitters from April to September against MLB's 77.4%, so half its
-// dots are a different man. docs/abs-challenges.md §6. Adding one is a word.
+// MLB ONLY because no Triple-A surface reads these rows yet, which is what
+// ADR-0076 is against — NOT because the level is unfit. Its dots cover 71.8% of
+// a club against MLB's 84.2%, measured in docs/abs-challenges.md §6. Adding the
+// level is a word here and about 129 KB on a file one hub tab fetches, so the
+// §6 file decision lands with it.
 export const EXPOSURE_CLUB_LEVELS = ['MLB']
 
 export function buildExposureClubsExport(

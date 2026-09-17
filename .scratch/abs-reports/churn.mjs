@@ -115,6 +115,7 @@ for (const [sportId, level] of LEVELS) {
     // One call per window. The first also carries the season line, which is
     // what the 200-plate-appearance floor is applied to.
     const seen = {}
+    const everyone = [] // every man's plate appearances FOR THIS CLUB, floored or not
     let qualified = null
     for (const [name, w] of Object.entries(windows)) {
       for (const half of ['early', 'late']) {
@@ -126,6 +127,7 @@ for (const [sportId, level] of LEVELS) {
           qualified = new Map()
           for (const p of roster.roster ?? []) {
             const pa = teamsIn(p.person, 'season').get(team.id) ?? 0
+            if (pa > 0) everyone.push(pa)
             if (pa >= MIN_PLATE_APPEARANCES) qualified.set(p.person.id, { name: p.person.fullName, pa })
           }
         }
@@ -139,7 +141,15 @@ for (const [sportId, level] of LEVELS) {
       }
     }
 
-    const club = { teamId: team.id, name: team.name, qualified: qualified.size, men: [] }
+    const club = {
+      teamId: team.id,
+      name: team.name,
+      qualified: qualified.size,
+      batted: everyone.length,
+      clubPa: everyone.reduce((a, b) => a + b, 0),
+      qualifiedPa: [...qualified.values()].reduce((a, m) => a + m.pa, 0),
+      men: [],
+    }
     for (const [playerId, info] of qualified) {
       club.men.push({
         playerId,
@@ -205,6 +215,33 @@ for (const [, level] of LEVELS) {
     `${level.padEnd(6)} total ${q.reduce((a, b) => a + b, 0)}` +
       `  median ${median(q)}  min ${Math.min(...q)}  max ${Math.max(...q)}` +
       `  clubs under 8: ${q.filter((x) => x < 8).length}`,
+  )
+}
+
+// THE DECIDING TEST, and not the one this script was first written for.
+//
+// Retention asks whether a club's men are the SAME men in April and September.
+// That matters only if the card claims to draw today's roster, and it does not:
+// the per-club cut exists so that a man traded or promoted in July is counted
+// against the club he actually batted for. His dot is true either way.
+//
+// What decides it is COVERAGE — how much of a club's season the drawn dots
+// account for. A floor that admits twelve men holding four in five of a club's
+// plate appearances draws that club. The same floor admitting twelve men who
+// hold two in five draws a fragment and looks identical.
+console.log('\n=== COVERAGE — how much of a club the dots account for ===')
+console.log('level  men who batted (median)  qualified (median)  share of club PA: pooled / median / worst')
+for (const [, level] of LEVELS) {
+  const clubs = report.levels[level].clubs
+  const shares = clubs.map((c) => (c.qualifiedPa / c.clubPa) * 100)
+  console.log(
+    `${level.padEnd(6)} ${String(median(clubs.map((c) => c.batted))).padStart(23)}` +
+      ` ${String(median(clubs.map((c) => c.qualified))).padStart(19)}` +
+      ` ${pct(
+        clubs.reduce((a, c) => a + c.qualifiedPa, 0),
+        clubs.reduce((a, c) => a + c.clubPa, 0),
+      ).padStart(17)}` +
+      ` / ${median(shares).toFixed(1)} / ${Math.min(...shares).toFixed(1)}`,
   )
 }
 
