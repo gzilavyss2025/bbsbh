@@ -4,8 +4,10 @@ import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { EDGE, H, W, sx, sy } from '../../lib/zone/zoneGeometry.js'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
-// where it crossed the plate (pX/pZ, feet, catcher's-eye view) against THIS
-// batter's own zone (strikeZoneTop/Bottom). Dots are numbered in pitch order
+// where it crossed the plate (pX/pZ, feet) against THIS batter's own zone
+// (strikeZoneTop/Bottom), drawn from the BROADCAST CAMERA behind the pitcher
+// rather than the umpire's eye — the mirror lives in lib/zone/zoneGeometry.js,
+// whose header carries the argument. Dots are numbered in pitch order
 // and colored by the same five categories as the pitch ladder (pitchDotCategory
 // → cat), so the two read as one system.
 //
@@ -77,10 +79,11 @@ function BatterSilhouette({ x, mirror }) {
 
 // A batter stands in the box on the side of the plate closer to the base he
 // runs out of the box toward: right-handed batters box on the third-base
-// side, left-handed on the first-base side. In this catcher's-eye view (px
-// positive = first-base side, matching the plate-crossing coordinates
-// plotted below), that puts an 'R' batter's box to the left of the plate and
-// an 'L' batter's box to the right.
+// side, left-handed on the first-base side. This diagram is drawn from the
+// camera behind the pitcher (sx mirrors pX — see zoneGeometry.js), so the
+// third-base side is the picture's RIGHT: an 'R' batter's box goes to the
+// right of the plate and an 'L' batter's box to the left, which is where a
+// viewer watching the telecast beside this app has just seen them stand.
 export function StrikeZone({ pitchDetails, batSide, className = '' }) {
   const shown = (pitchDetails ?? []).filter(plottable)
   if (shown.length === 0) return null
@@ -88,13 +91,16 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
   // The zone box wobbles a few tenths per pitch; median gives a steady frame.
   const zt = median(shown.map((p) => p.szTop))
   const zb = median(shown.map((p) => p.szBottom))
-  const zx = sx(-EDGE)
-  const zr = sx(EDGE)
+  // The projection mirrors pX, so +EDGE (the first-base side) is the LEFT edge
+  // of the drawn box and -EDGE the right. Reading these two the other way round
+  // is a rect with a negative width, which renders as nothing at all.
+  const zx = sx(EDGE)
+  const zr = sx(-EDGE)
   const zyT = sy(zt)
   const zyB = sy(zb)
   const zw = zr - zx
   const zh = zyB - zyT
-  // A small home-plate pentagon under the zone anchors the catcher's-eye view.
+  // A small home-plate pentagon under the zone anchors the view.
   const py = sy(0.6)
   const cx = (zx + zr) / 2
   const half = zw / 2
@@ -103,7 +109,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
   // the plate and pitch dots keep their usual scale — the whole zone plot
   // just shifts over to make room when the batter's box sits to its left.
   const showBatter = batSide === 'L' || batSide === 'R'
-  const zoneOffsetX = batSide === 'R' ? BATTER_W : 0
+  const zoneOffsetX = batSide === 'L' ? BATTER_W : 0
   const totalW = showBatter ? W + BATTER_W : W
 
   return (
@@ -145,7 +151,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
           )
         })}
       </g>
-      {showBatter && <BatterSilhouette x={batSide === 'R' ? 0 : W + zoneOffsetX} mirror={batSide === 'R'} />}
+      {showBatter && <BatterSilhouette x={batSide === 'L' ? 0 : W + zoneOffsetX} mirror={batSide === 'L'} />}
     </svg>
   )
 }
