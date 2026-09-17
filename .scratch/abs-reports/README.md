@@ -14,6 +14,7 @@ This directory is notes, not the tracker. The open work is in GitHub Issues.
 | `build-fixture.mjs` | Rebuilds `test/fixtures/abs-denominators.json` — the linescore and roster shapes the denominator work has to read correctly |
 | `fetch-innings.mjs` | Sweeps both levels' schedules with `hydrate=linescore` into `final-innings.json` (gitignored, about a minute) |
 | `fetch-exposure.mjs` | Sweeps every club's fullSeason roster into `exposure.json` (gitignored, about a minute) |
+| `churn.mjs` | **#1099.** Does a Triple-A club keep the hitters its scatter would draw? Writes `churn.json` (gitignored, about four minutes). The answer is in `docs/abs-challenges.md` §6 |
 | `diag-*.mjs` | The one-off diagnoses behind #1073 and #1074 |
 | `issues/` | The issue bodies as filed, so a reader can diff what was asked for against what shipped |
 | `design/` | The `.dc.html` artboards behind the design canvas |

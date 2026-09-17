@@ -264,8 +264,10 @@ export function exposureBoard(level, key) {
 
 export const fetchAbsExposureClubs = staticJson('/data/abs-exposure-clubs.json')
 
-// MLB only today. The file's level loop is the generator's, so a Triple-A
-// board is a one-word change there and a null here until then.
+// MLB only today, because a Triple-A club keeps half its qualified hitters
+// from April to September and MLB keeps three quarters — docs/abs-challenges.md
+// §6. The file's level loop is the generator's, so the day that changes it is a
+// one-word change there and a null here until then.
 export function clubRowsFor(data, teamId, level = 'MLB') {
   return data?.levels?.[level]?.byTeam?.[String(teamId)] ?? null
 }

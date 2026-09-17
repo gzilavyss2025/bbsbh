@@ -299,15 +299,38 @@ when what it means is "further from the line".
 
 ### Whether Triple-A is worth drawing
 
-**Not yet, and the file says so rather than shipping the rows.** The
-denominators exist — 377 Triple-A hitters clear the 200-plate-appearance floor
-against MLB's 352 — so a scatter would draw. What is unclear is whether it would
-MEAN the same thing: an affiliate's roster turns over hard enough through a
-season that "this club's hitters" is a different population in April and
-September, and a season-long club rate is a weaker claim there than it is in
-MLB. Shipping rows before a surface draws them is what ADR-0076 is against, so
-`EXPOSURE_CLUB_LEVELS` in `scripts/lib/abs/export.mjs` is `['MLB']` and adding
-one is a one-word change.
+**Not yet — and this is now measured rather than suspected, so nobody has to
+ask a third time.** The denominators were never the problem. A Triple-A club
+qualifies as many hitters as a major-league club does: 355 against 341, a
+median of twelve a club at both levels. A scatter would draw.
+
+**Half of a Triple-A club's dots are a different man by September.** Of the
+qualified men a Triple-A club carried, **50.4% played for it in both April and
+September, against MLB's 77.4%** — a 27-point gap. The median Triple-A club
+keeps 50.0% and the median major-league club keeps 80.9%. Sacramento keeps
+three of fourteen.
+
+The gap is not an artifact of where the windows were drawn. Measured instead
+over each level's first thirty days against its last thirty, it is 55.2%
+against 78.3% — 23 points, the same answer.
+
+**The men do not vanish; half of them are promoted.** 126 qualified Triple-A
+men were absent from their club in September, and 62 of them were in the majors
+instead. That is the affiliate working exactly as intended, and it is precisely
+what makes the chart a poor claim: the dots a reader would study in September
+are, by construction, the men the parent club did not want.
+
+A scatter that draws cleanly and says less than it appears to is worse than no
+scatter, so `EXPOSURE_CLUB_LEVELS` in `scripts/lib/abs/export.mjs` stays
+`['MLB']`. Shipping rows before a surface draws them is what ADR-0076 is
+against. Adding a level is still a one-word change if a later season's numbers
+come out differently.
+
+**The figures above are cut per club, not per season.** §5's board floors a
+man's folded season — 377 Triple-A men and 352 major-league men clear it — and
+the card floors his plate appearances *for that one club*, which is a stricter
+test that a traded regular can fail at both stops. `.scratch/abs-reports/churn.mjs`
+reproduces every number here in about four minutes.
 
 ## 7. After a win, after a loss
 
