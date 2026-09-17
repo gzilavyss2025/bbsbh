@@ -215,7 +215,9 @@ don't run these by hand.
   old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
 - `gen-abs-challenges.mjs` → `public/data/abs-challenges.json` **and
-  `public/data/abs-exposure.json`** — every ABS
+  `public/data/abs-exposure.json`** — **the written report is
+  `docs/abs-challenges.md`: the answer to each of the seven questions
+  `/abs-challenges` asks, with the numbers and every caveat.** Every ABS
   (Automated Ball-Strike) CHALLENGE of the season, at both levels that run the
   system: MLB (sportId 1, 2026 is its first season) and Triple-A (sportId 11,
   which has run it for several). SQLite-backed (`abs-challenges` group,
@@ -279,14 +281,22 @@ don't run these by hand.
   coming out legal — so they are named in `TOLERATED` rather than floored away.
   TWO FILES COME OUT OF EVERY RUN, and the split is a size decision.
   `abs-challenges.json` (250 KB) is what `/abs-challenges` fetches;
-  `abs-exposure.json` (418 KB) is the per-player DENOMINATOR list, which no
-  surface reads yet. Folded into the report file they took it from 198 KB to
+  `abs-exposure.json` (418 KB) is the per-player DENOMINATOR list, read by the
+  page's "How often is normal" section through
+  `src/api/around-the-game/absExposure.js` and fetched only by that page. Folded into the report file they took it from 198 KB to
   895 KB — 369 KB for the list itself and 321 KB for ten exposure fields on
   every one of 1,553 `byPlayer` rows — on a file every visitor downloads whole
   and shows none of it on. So `byPlayer` carries a player's CHALLENGE totals
   only, `abs-exposure.json` carries every denominator and every rate, and the
   board that comes to need them (issues #1063, #1066, #1069) fetches its own
-  file. A man with no opportunity at all is dropped rather than shipped as
+  file. IT SHIPS ONE ROW PER PLAYER-SEASON, folded across clubs — a man traded
+  in July clears a 200-plate-appearance floor on his season, not on either half
+  of it — so `team_id`, which the sweep's own rows carry, does not survive the
+  fold. The team-hub card (#1069) needs it back; the per-club cut is 1,740 rows
+  against the 1,560 the fold ships, because only 178 of MLB's 1,453 swept men
+  appear for more than one club. `docs/abs-challenges.md` §6 records the
+  decision that is still open.
+  A man with no opportunity at all is dropped rather than shipped as
   nulls: 1,963 of the 3,521 on a fullSeason roster are pitchers who never
   batted and never caught, and a nought divides to no rate exactly as a null
   does. The rule and the reasoning are ADR-0076.

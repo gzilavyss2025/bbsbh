@@ -12,6 +12,8 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 
 | File | Tests | Modules under test | Feature |
 |---|---|---|---|
+| abs-challenges.test.js | 141 | scripts/lib/abs/, src/api/around-the-game/absChallenges.js | The ABS challenge report's whole data layer — the per-game row derivation, the challenge-bank replay (two issued, one kept per overturn, re-armed every EXTRA inning, ADR-0075), the chances denominator, and the readers' boards. Three of its cases pin traps that were real: a SUCCESSFUL challenge prints the CORRECTED call, a box-score entry carries the position a man ENDED at, and a club's games denominator has to come off the swept-games ledger |
+| abs-exposure.test.js | 19 | src/api/around-the-game/absExposure.js | The DENOMINATOR half of the same report — how often a man is even exposed to a call he could argue. Two of its cases pin real mistakes: a histogram mark placed by a hand-counted bin index drifts from its own label, and a batter's two denominators (plate appearances, pitches seen) are not interchangeable |
 | all-started-games.test.js | 3 | src/api/schedule.js | TeamPhotosPage's game list — keys on `started`, not `won`, so a live game's photos are reachable before it's Final |
 | analytics.test.js | 5 | src/lib/analytics.js | Toggle-consent telemetry allowlist (ADR-0028) |
 | api-handlers.test.js | 51 | api/copy.js, api/reveal.js, api/spoiled-days.js, api/stamps.js | Node-runtime request shapes, the Logbook's tombstone read side (ADR-0035), the "pick up your pencil" scorebook index's auto-drop rule |

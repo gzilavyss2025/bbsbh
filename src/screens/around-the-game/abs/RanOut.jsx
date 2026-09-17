@@ -35,7 +35,7 @@ import { commas, inches, pct1 } from './format.js'
 //
 // "OUT OF CHALLENGES" CLAIMS LESS THAN IT SOUNDS LIKE. A club that has run out
 // is issued one again in every extra inning (ADR-0075, scripts/lib/abs/bank.mjs
-// — 54 club-games on file carry a third failed challenge and every one of them
+// — 55 club-games on file carry a third failed challenge and every one of them
 // is in extras). So a club that emptied in the fifth really did play the sixth
 // through the ninth unable to argue a pitch, which is the cost this board is
 // about, and was not necessarily silent for the whole night. The caption says

@@ -26,7 +26,7 @@ import { commas } from './format.js'
 // nine innings the second loss ends its argument — and the obvious caption,
 // "two is the rulebook and not a record", is FALSE one chip tap away. A club
 // that has run out is armed again at the start of every extra inning
-// (ADR-0075), 54 club-games on file carry a third failed challenge and every
+// (ADR-0075), 55 club-games on file carry a third failed challenge and every
 // one is in extras, and two Triple-A catchers lost three in a row because of
 // it. So the figure comes from inGameLossCap(summary), which reads it off the
 // season, and the sentence is written around what came back.
