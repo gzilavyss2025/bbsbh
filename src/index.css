@@ -217,6 +217,7 @@
      77c-express-lane-deck    screens/expresslane/ScoringDeck.jsx
      78-offseason             components/offseason/{OffseasonLead,
                               WinterCalendar}.jsx
+     report/charts            components/around-the-game/BroadcastBar.jsx
      report/chrome            screens/around-the-game/RunValuePage.jsx,
                               screens/around-the-game/AbsChallengesPage.jsx
      research/diary           screens/research/ResearchDiaryPage.jsx

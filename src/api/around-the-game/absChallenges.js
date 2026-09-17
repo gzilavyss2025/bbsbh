@@ -271,6 +271,87 @@ export function callSplitOffBy(anomalies) {
   return Math.max(over, under)
 }
 
+// HOW LONG A GAME IS BEFORE IT IS EXTRA. Nine in MLB and in all but the
+// seven-inning Triple-A doubleheaders, which is why the file's own bank replay
+// derives the first extra inning from each game's scheduled length rather than
+// fixing it (scripts/lib/abs/bank.mjs). Here it is only a cut in a chart —
+// every inning past the ninth is pooled into one column — and the pooling is
+// what makes the constant harmless: a seven-inning game's eighth is already
+// inside the pool it belongs to.
+export const REGULATION_INNINGS = 9
+
+// THE INNING SERIES A CHART IS DRAWN FROM: nine regulation columns and one for
+// everything after them.
+//
+// EXTRA INNINGS NEVER GET A COLUMN EACH. The thirteenth carries eleven chances
+// on file against the first's nine thousand, and four columns of rounding error
+// drawn at the same weight as nine columns of season makes the right-hand end
+// of the chart look like data. Pooled, they are one honest column — and the
+// page draws it hollow and states its chances, because thin evidence has to say
+// so.
+//
+// THE POOLED RATES ARE RE-DIVIDED, never averaged. A mean of four innings'
+// rates weights the thirteenth's eleven chances the same as the tenth's seven
+// hundred; the pooled count over the pooled chances is what the nine columns
+// beside it already are.
+export function inningSeries(summary) {
+  const rows = summary?.byInning ?? []
+  const regulation = rows.filter((r) => r.inning <= REGULATION_INNINGS)
+  const extras = rows.filter((r) => r.inning > REGULATION_INNINGS)
+  if (extras.length === 0) return regulation.map((r) => ({ ...r, extras: false }))
+
+  const n = extras.reduce((t, r) => t + r.n, 0)
+  const success = extras.reduce((t, r) => t + r.success, 0)
+  const chances = extras.reduce((t, r) => t + (r.chances ?? 0), 0)
+  return [
+    ...regulation.map((r) => ({ ...r, extras: false })),
+    {
+      inning: REGULATION_INNINGS + 1,
+      n,
+      success,
+      chances,
+      rate: n > 0 ? success / n : null,
+      perChance: chances > 0 ? n / chances : null,
+      extras: true,
+    },
+  ]
+}
+
+// ONE ROLE'S INNINGS, ON THE CLUB'S OWN DENOMINATOR.
+//
+// The file ships the role cut already divided by the CLUB's chances rather than
+// by the role's own share of them, and that is the only divisor the panels can
+// be read on. A batter can only challenge in his club's batting half, so his
+// own opportunity is half the club total — and three panels drawn that way sum
+// to exactly twice the club rate, which reads as though catchers alone out-ask
+// the club they play for. On the club denominator the roles add back up to the
+// club figure (scripts/lib/abs/chances.mjs).
+//
+// Regulation only. The pooled extras column belongs to the club chart, where
+// its size is stated; a panel one tenth the height of the others with no
+// caption is a column a reader would take at face value.
+export function roleInnings(summary, role) {
+  return (summary?.byInningRole ?? []).filter(
+    (r) => r.role === role && r.inning <= REGULATION_INNINGS,
+  )
+}
+
+// The span a role's rate sits inside across regulation — the two numbers that
+// let a stat line replace a panel.
+//
+// A PITCHER GETS THE LINE RATHER THAN A CHART. His nine values span a third of
+// one challenge per hundred chances, so against the club scale every bar rounds
+// to the same hairline: a third panel would draw a thicker axis rule and call
+// it a chart. Null when nothing can be measured, so the caller prints no
+// sentence rather than an empty one.
+export function roleSpan(summary, role) {
+  const rates = roleInnings(summary, role)
+    .map((r) => r.perChance)
+    .filter((x) => x != null)
+  if (rates.length === 0) return null
+  return { low: Math.min(...rates), high: Math.max(...rates) }
+}
+
 // THE LAST INNING IN WHICH RUNNING OUT IS STILL "EARLY". A club is issued two
 // challenges, so a second loss in the sixth is a club that enters the seventh
 // unable to argue a pitch — which is the strategic cost the club board's
@@ -320,6 +401,36 @@ export function ranOutNights(summary) {
     early,
     late: emptied - early,
   }
+}
+
+// THE DISTRIBUTION AS A CHART DRAWS IT: nine regulation columns and one for
+// everything after them — inningSeries's cut, for its reason. MLB's twelfth
+// carries five nights against the ninth's three hundred, and four columns of
+// rounding error drawn at the weight of a season read as data. `extras` tells
+// the caller to draw that column hollow; `mark` is the band's own inning, the
+// one whose rows are printed under the chart.
+//
+// EVERY COLUMN IS A CLUB-GAME'S FIRST EMPTYING (ranout.mjs), so the pooled one
+// is a club that had not run out before the tenth, NOT a club running out a
+// second time. Both readings are available and only one is true, so the page
+// says which.
+export function ranOutSeries(nights) {
+  const rows = nights?.byInning ?? []
+  const regulation = rows.filter((r) => r.inning <= REGULATION_INNINGS)
+  const extras = rows.filter((r) => r.inning > REGULATION_INNINGS)
+  const marked = (r) => ({ ...r, extras: false, mark: r.inning === nights?.earliest })
+  if (extras.length === 0) return regulation.map(marked)
+  const n = extras.reduce((t, r) => t + r.n, 0)
+  return [
+    ...regulation.map(marked),
+    {
+      inning: REGULATION_INNINGS + 1,
+      n,
+      share: nights?.emptied > 0 ? n / nights.emptied : null,
+      extras: true,
+      mark: (nights?.earliest ?? 0) > REGULATION_INNINGS,
+    },
+  ]
 }
 
 // A RUN OF ONE IS NOT A RUN. Every man who ever won a challenge has a "run"

@@ -1,0 +1,453 @@
+/* ============================================================
+   REPORT CHARTS — the column chart and the line chart the
+   broadcast report boards draw when a table cannot answer the
+   question (components/around-the-game/BroadcastBar.jsx).
+
+   ITS OWN PARTIAL, NOT A BLOCK IN 68-around-the-game.css, and the
+   reason is that file's own budget: it sits at 1071 of 1100 lines
+   with the four report pages' rules already in it, and the guard's
+   answer to a file at its cap is to split rather than to widen the
+   table (scripts/check-file-size.mjs). src/styles is AT its
+   directory budget of 115, which is why 68 holds one sheet for
+   four pages — but report/ is its own directory entry with room,
+   and report/chrome.css already lives there.
+
+   COMPONENT-IMPORTED, from BroadcastBar.jsx rather than from a
+   page, so a board that draws a chart cannot forget to bring its
+   rules. That makes it a partial four lazy routes can share, which
+   is the <link>-order trap 68's header records — and it cannot
+   bite here, because every selector below is a name nothing else
+   in this app uses. Order only matters where two sheets style the
+   same element.
+   ============================================================ */
+
+/* THE BOARDS ON THESE PAGES ARE TABLES, and that is the right default: a
+   ranked list of thirty clubs is read by scanning one column, and BarCell puts
+   the shape behind the figure so the eye never crosses the row twice. Two
+   questions on the ABS report cannot be asked that way — "does the appetite for
+   a challenge rise across the game" and "does the share won fall" are both
+   shapes over nine ordered innings, and nine table rows hide them.
+
+   So this block is the exception, and it is built to stay ONE exception: the
+   column chart, its small multiples and the line chart share every class here,
+   and the report sections still to come read them rather than each bringing
+   their own. That is also what keeps this file inside one band.
+
+   DRAWN IN HTML, NOT SVG, except the line itself. Text inside an SVG scales
+   with the viewBox, so a chart sized for a 390px phone would set its axis
+   labels a third larger at 960px — and an inline font-size in SVG is invisible
+   to check-typography, which reads these stylesheets and nothing else. */
+
+.colchart {
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+/* The gutter holds the axis labels, and 36px is the width of "1200" set in
+   JetBrains Mono at --fs-caption with --ls-label tracking. The raw-count cut
+   really does tick to four digits, so a gutter fitted to two clipped it. */
+.colchart__plot {
+  position: relative;
+  height: 148px;
+  padding-left: 36px;
+}
+
+/* The small multiples carry no ticks of their own — they are read against the
+   chart above them — so they give the axis gutter back to the bars. */
+.colchart--small .colchart__plot,
+.colchart--small .colchart__labels {
+  padding-left: 0;
+}
+
+.colchart--small .colchart__plot {
+  height: 76px;
+}
+
+.colchart--line .colchart__plot {
+  height: 128px;
+}
+
+/* A tick is the line AND its label, placed together from the bottom, so a
+   caller changing the scale never has to move two things. --graphite-soft
+   measures 3.10:1 on card paper and fails AA at this size, so the label takes
+   the caption ink. */
+.colchart__tick {
+  position: absolute;
+  left: 36px;
+  right: 0;
+  border-top: var(--bw-hair) solid var(--rule-grid);
+}
+
+.colchart__ticklabel,
+.colchart__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.colchart__ticklabel {
+  position: absolute;
+  right: 100%;
+  bottom: -0.6em;
+  width: 34px;
+  padding-right: var(--space-1);
+  text-align: right;
+}
+
+/* Positioned, so the columns paint OVER the gridlines rather than under them.
+   A tick is absolutely positioned and would otherwise sit on top of every bar
+   it crosses, which on navy reads as a scratch rather than as an axis. */
+.colchart__cols {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 100%;
+}
+
+.colchart__col {
+  flex: 1 1 0;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+
+.colchart__bar {
+  position: relative;
+  width: 100%;
+  background: var(--navy);
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+}
+
+/* THE COLUMN WHOSE OWN ROWS ARE PRINTED UNDER THE CHART. The out-of-challenges
+   board draws every inning a club emptied in and then names the club-games in
+   the earliest of them; without a mark, a reader meets nine rows with no way
+   to see where in the season's shape those nine sit.
+
+   CLAY AGAINST NAVY, which is the pair that survives the colourblind check —
+   clay against field green measures delta-E 4.4 under protanopia and clay
+   against graphite 4.8. It is also a two-way split, not a three-way one, and
+   the marked column is the one the rows below it name, so the meaning does not
+   rest on hue alone. */
+.colchart__bar--mark {
+  background: var(--clay);
+}
+
+.colchart__bar--hollow.colchart__bar--mark {
+  background: transparent;
+  border-color: var(--clay);
+}
+
+/* A figure printed over one column, for the one or two values a reader came
+   for. Absolutely positioned off the top of the bar rather than laid out above
+   it: the bar's height is a percentage of the plot, so a sibling in the flex
+   column would take space out of the scale it is labelling. */
+.colchart__value {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-bottom: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+/* THIN EVIDENCE IS HOLLOW, NOT GREY AND NOT A SECOND HUE. Clay against
+   graphite fails the colourblind check at delta-E 4.8 under protanopia, and
+   grey at this size fails AA — an outline says "counted differently" with no
+   colour at all. */
+.colchart__bar--hollow {
+  background: transparent;
+  border: var(--bw-hair) solid var(--navy);
+}
+
+.colchart__labels {
+  display: flex;
+  gap: 2px;
+  padding-left: 36px;
+  margin-top: var(--space-1);
+}
+
+.colchart__label {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+}
+
+/* The small multiples, side by side from 420px and stacked below it: two
+   nine-column charts inside 390px of phone give each column under 16px, which
+   is a bar too thin to read a shape off. */
+.colchart__multiples {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+@media (min-width: 420px) {
+  .colchart__multiples {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.colchart__panel--wide {
+  margin-top: var(--space-4);
+}
+
+.colchart__paneltitle {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+.colchart__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.colchart__path {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* The two ends carry their own figures, because nothing here can be hovered: a
+   `title` tooltip is invisible on a touch screen and is not used in this app. */
+.colchart__end {
+  position: absolute;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-label);
+  color: var(--clay-deep);
+}
+
+.colchart__end--start {
+  left: 36px;
+}
+
+.colchart__end--end {
+  right: 0;
+}
+
+/* A VALUE MARKED ACROSS THE COLUMNS — the median and the mean of a
+   distribution, which is the one thing a histogram cannot say by itself. The
+   gap between the two IS the finding on the exposure board, so both are drawn
+   and neither is asserted in a sentence instead.
+
+   SOLID CLAY FOR THE MEDIAN, DASHED CAPTION INK FOR THE MEAN. Two marks at
+   once need telling apart, and the dash carries it with no second hue: the
+   pair that survives the colourblind check is navy against clay, and the
+   columns are already navy. Positioned as a fraction of .colchart__cols, which
+   is the positioned box the bars are laid out in. */
+.colchart__rule {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: var(--bw-rule) solid var(--clay);
+}
+
+/* THE MEAN'S LINE STARTS BELOW THE MEDIAN'S LABEL. The two rules sit within a
+   few per cent of each other on this data — which is the point of drawing both
+   — so a full-height dashed line runs straight through the median's words. */
+.colchart__rule--mean {
+  top: var(--space-4);
+  border-left: var(--bw-hair) dashed var(--text-caption);
+}
+
+/* The label sits beside its own rule and flips to the other side past halfway,
+   so a median at the right-hand end does not run off the plot. */
+.colchart__rulelabel {
+  position: absolute;
+  top: 0;
+  left: var(--space-1);
+  white-space: nowrap;
+  /* KNOCKED OUT OF WHATEVER IT LANDS ON. A median sits near the middle of a
+     distribution, which is exactly where the tallest column is, so the label
+     reliably falls on navy — and clay on navy is unreadable rather than merely
+     tight. The paper behind it is the page's own, so the label reads the same
+     over a bar as it does over the plot. */
+  padding: 0 2px;
+  background: var(--bg-page);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--clay-deep);
+}
+
+.colchart__rulelabel--before {
+  left: auto;
+  right: var(--space-1);
+}
+
+/* The mean's label rides at the head of its own (lowered) line, which puts it
+   one row under the median's — two labels on one baseline would overlap on
+   every draw. */
+.colchart__rule--mean .colchart__rulelabel {
+  color: var(--text-caption);
+}
+
+/* The sample floor rides in the chart head it qualifies, the same move the
+   report boards make with a column head's `.rpt__sub`. */
+.colchart__panelsub {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+}
+
+/* THE SECOND SHADE OF THE SAME HUE, for a pair of bars that are two halves of
+   one question. Clay is this palette's alarm token and "after a loss" is a
+   neutral category rather than a status, so navy against clay would call one
+   half of the pair a problem. Soft ink is a step lighter in the same family,
+   and the pair carries its own figures and its own labels, so nothing about
+   which bar is which rests on the shade. */
+.colchart__bar--soft {
+  background: var(--ink-2);
+}
+
+/* THREE PANELS THAT SHARE ONE SCALE, which is the only way the second reads as
+   an answer to the first. Stacked on a phone and three across once there is
+   room — never two-plus-one, which reads as a pair and an afterthought when the
+   third panel is the one that settles the question. */
+.colchart__trio {
+  display: grid;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+@media (min-width: 700px) {
+  .colchart__trio {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ============================================================
+   THE SCATTER — one dot per man against a line saying what the
+   league would predict (BroadcastBar.jsx's ScatterChart).
+
+   It shares the column chart's axis furniture on purpose: the
+   36px gutter, the tick and its label, the SVG box. One axis
+   grammar for every chart in this package is what keeps a
+   reader from relearning where the numbers are.
+   ============================================================ */
+
+.scatter {
+  margin: var(--space-3) 0 0;
+}
+
+.scatter__plot {
+  position: relative;
+  height: 190px;
+  padding-left: 36px;
+  border-bottom: var(--bw-rule) solid var(--navy);
+}
+
+/* The positioned box the dots and the line are laid out in — the same job
+   .colchart__cols does, so a tick drawn across the plot still paints under
+   them. */
+.scatter__field {
+  position: relative;
+  display: block;
+  /* INSET FROM THE PLOT ON BOTH AXES, so a man sitting on either maximum is
+     drawn whole instead of half over the edge. Everything measured against the
+     scale lives in here — the dots, the league line and the ticks — so the
+     inset moves them together and a tick still lands on the dot it measures. */
+  height: calc(100% - 6px);
+  margin: 6px 6px 0 0;
+}
+
+.scatter__field .colchart__tick {
+  left: 0;
+}
+
+/* THE LEAGUE'S OWN RATE, DRAWN AS A PREDICTION. Dashed, because it is not a
+   measurement of this club: it is what the club's men would have called for at
+   the league's rate, and a solid rule reads as a threshold somebody set. */
+.scatter__line {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+/* A PAPER RING ROUND EVERY DOT, so two men a pixel apart still read as two.
+   Emphasis is by HUE and never by size: a larger dot reads as "more
+   important" when what it means is "further from the line". */
+.scatter__dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: 0 0 -4px -4px;
+  border-radius: 50%;
+  background: var(--navy);
+  box-shadow: 0 0 0 2px var(--surface-card);
+}
+
+.scatter__dot--mark {
+  background: var(--clay);
+}
+
+/* ONE DIRECT LABEL AT MOST, on the dot that is the story. It flips to the
+   other side of its own dot past halfway so a label on the right-hand end
+   does not run off the plot. */
+.scatter__label {
+  position: absolute;
+  margin: 0 0 var(--space-2) var(--space-2);
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--clay-deep);
+}
+
+.scatter__label--before {
+  transform: translateX(-100%);
+  margin-left: calc(-1 * var(--space-2));
+}
+
+/* Under its own dot rather than over it, for the labelled man near the top of
+   the plot — which is nearly always the one worth labelling. */
+.scatter__label--under {
+  margin-bottom: calc(-1 * var(--space-4));
+}
+
+/* The x axis labels are placed at their own VALUES rather than spread evenly,
+   because a scatter's x is continuous — the column chart's labels are one per
+   column and can be a flex row, these cannot. */
+.scatter__xaxis {
+  position: relative;
+  display: block;
+  height: 1.2em;
+}
+
+.scatter__xaxis .colchart__label {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.scatter__note {
+  display: block;
+  margin-top: var(--space-1);
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}

@@ -137,9 +137,11 @@ one you need:
 | `docs/api/account-layer.md` | `src/lib/account/` — the per-user state that crosses a signed-in user's devices (ADR-0039, ADR-0026). |
 
 `around-the-game/` is the fourth subdirectory and the odd one out: it holds no
-new fetching and no new spoiler footing, only the five spoiler-FREE readers
-behind the five pages listed under **Around the game**
-(`src/screens/around-the-game/`). It is named for the group a reader sees rather
+new fetching and no new spoiler footing, only the spoiler-FREE readers behind
+the pages listed under **Around the game**
+(`src/screens/around-the-game/`) — one a page, except `/abs-challenges`, whose
+denominators are a second file and so a second reader (`absExposure.js`,
+ADR-0076). It is named for the group a reader sees rather
 than for what it is made of, and that is deliberate: it was called `reports/`
 first, which collided with `reportPages.js` / `ReportFooter.jsx` /
 `check-report-pages.mjs` — all of which predate it and mean EVERY standalone

@@ -5,6 +5,7 @@ import { fetchTeamRecords } from '../../../api/teamRecords.js'
 import { fetchScheduleShape } from '../../../api/scheduleShape.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
 import { fetchRunValue, clubRunValue, clubBoard } from '../../../api/around-the-game/runValue.js'
+import { fetchAbsExposureClubs } from '../../../api/around-the-game/absExposure.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { rankTeam, ordinal } from '../../../api/person.js'
 import {
@@ -55,6 +56,12 @@ export async function loadNumbers(id, asOf) {
     // read through staticJson and shared with the player card and the league
     // board, so a reader who has opened either already has it.
     runValueData,
+    // The ABS challenge card's denominators, one row per player per CLUB
+    // (ADR-0076, scripts/lib/abs/export.mjs). 95 KB, MLB only, and its own
+    // file rather than a key in the league list precisely so this tab does
+    // not download the 418 KB that page reads. An affiliate gets null and the
+    // card does not render.
+    absExposureClubs,
     // The situational-records ledger — one static file per club per season,
     // every level. The card tallies it against `standingsDate` itself, so it
     // reads no further ahead than the standings and the day-of-week card.
@@ -74,6 +81,7 @@ export async function loadNumbers(id, asOf) {
     sportId === 1 ? fetchPostseasonOdds() : Promise.resolve(null),
     sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
     sportId === 1 ? fetchRunValue() : Promise.resolve(null),
+    sportId === 1 ? fetchAbsExposureClubs() : Promise.resolve(null),
     fetchTeamRecords(id, season),
     sportId === 1 ? fetchScheduleShape(id) : Promise.resolve(null),
     // Cutoff-gated rows only — `won` stays null past standingsDate (see
@@ -189,6 +197,9 @@ export async function loadNumbers(id, asOf) {
     recordsCutoff: standingsDate,
     dayOfWeek,
     runValue,
+    // Handed through whole rather than sliced here: the card ranks this club
+    // against every other one in the file, so it needs them all.
+    absExposureClubs,
     jerseyCombos,
     homeRecord,
     awayRecord,
