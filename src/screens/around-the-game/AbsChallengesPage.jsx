@@ -21,6 +21,7 @@ import { WhoCalls } from './abs/WhoCalls.jsx'
 import { WhenTheyCall } from './abs/WhenTheyCall.jsx'
 import { ClubBoard } from './abs/ClubBoard.jsx'
 import { RanOut } from './abs/RanOut.jsx'
+import { LongestRuns } from './abs/LongestRuns.jsx'
 import { PlayerBoards } from './abs/PlayerBoards.jsx'
 import { UmpireBoard } from './abs/UmpireBoard.jsx'
 import { MissBands } from './abs/MissBands.jsx'
@@ -171,12 +172,15 @@ export function AbsChallengesPage() {
 
               OUT OF CHALLENGES FOLLOWS THE CLUB BOARD because it is that
               board's "Ran out" column opened up: the column counts each club's
-              emptied games, and the section under it names the nights. */}
+              emptied games, and the section under it names the nights. LONGEST
+              RUNS follows the player boards for the same reason: it is those
+              boards' men again, ranked on how long they stayed right. */}
           <WhoCalls summary={summary} />
           <WhenTheyCall summary={summary} />
           <ClubBoard summary={summary} clubs={clubs} />
           <RanOut summary={summary} clubs={clubs} />
           <PlayerBoards summary={summary} clubs={clubs} />
+          <LongestRuns summary={summary} clubs={clubs} />
           <UmpireBoard summary={summary} />
           <MissBands summary={summary} />
           <BiggestOverturn summary={summary} clubs={clubs} />

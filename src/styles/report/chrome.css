@@ -168,3 +168,53 @@
 .rptmark {
   color: var(--clay-deep);
 }
+
+/* ---- a run, and the shape of it ---------------------------- */
+
+/* THE RUN LENGTH IS THE ROW'S SUBJECT, so it is set at the figure size the
+   board's other columns are not. Navy for a run of wins and clay-deep for a run
+   of losses — the two the colourblind check leaves standing, and the chip above
+   the board says which is on, so the colour is confirmation rather than the
+   only carrier. */
+.rptrun {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-num);
+  color: var(--navy);
+}
+
+.rptrun--lost {
+  color: var(--clay-deep);
+}
+
+/* ONE PIP PER CALL, NOT A BAR. A run is countable — sixteen separate calls a
+   man got right in a row — and a bar says "a large quantity" where a row of
+   pips says how many. It wraps rather than truncating at a cap: a capped row
+   draws the record-holder the same length as the man below him, which is the
+   one thing the shape is there to show. */
+.rptpips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  margin-top: var(--space-1);
+}
+
+.rptpips__pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--navy);
+}
+
+.rptpips--lost .rptpips__pip {
+  background: var(--clay);
+}
+
+/* A SECOND CHIP ROW ASKING A SECOND QUESTION. The two rows are one control
+   surface — outcome, then role — so the gap between them is a gap inside the
+   control, not the gap that separates a control from a board. */
+.rpt-controls + .rpt-controls {
+  margin-top: calc(-1 * var(--space-2));
+}
