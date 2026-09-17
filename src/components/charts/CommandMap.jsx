@@ -1,6 +1,6 @@
 import '../../styles/26d-command-map.css'
 import { useState } from 'react'
-import { GRID, commandCell, normalizePitch } from '../../lib/zone/zoneGeometry.js'
+import { GRID, commandCell, normalizePitch, viewCol } from '../../lib/zone/zoneGeometry.js'
 import { MIN_COMMAND_PITCHES, commandHandCounts, commandTypes, commandView } from '../../api/commandMap.js'
 import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
 
@@ -32,10 +32,14 @@ import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
 const BANDS = 4
 
 // A cell's index -> its rect, in the same viewBox the zone frame is drawn in.
+// The counted column runs in the feed's frame and the card is drawn from the
+// camera behind the pitcher, so the column is mirrored on its way to the
+// screen — `viewCol`, the same mirror `sx` applies to a single pitch, which is
+// what keeps this card and the in-game diagram the same picture.
 function cellRects(zx, zyT, cw, ch) {
   const out = []
   for (let i = 0; i < GRID * GRID; i++) {
-    const col = i % GRID
+    const col = viewCol(i % GRID)
     const row = Math.floor(i / GRID)
     out.push({ i, x: zx + (col - 1) * cw, y: zyT + (row - 1) * ch })
   }

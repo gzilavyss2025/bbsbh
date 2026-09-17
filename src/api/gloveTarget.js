@@ -111,10 +111,13 @@ export function gloveTargetBias(view) {
   const [x, z] = bias
   if (!Number.isFinite(x) || !Number.isFinite(z)) return null
   const parts = []
-  // x runs to the CATCHER's right, which is the reader's right on this card
-  // because the plot is drawn from the catcher's eye — the same view the
-  // Command Map takes, so the two agree about which side is which.
-  if (Math.abs(x) >= BIAS_FLOOR_IN) parts.push(x > 0 ? 'to the catcher’s right' : 'to the catcher’s left')
+  // NAMED BY THE SIDE OF THE FIELD, never by somebody's left or right. x runs
+  // to the CATCHER's right, and the card draws it from the camera behind the
+  // pitcher, so "the catcher's right" would print on a reader's LEFT — a
+  // sentence and a picture pointing opposite ways. First base is first base
+  // from every seat in the park, so the words hold whichever view the plot
+  // takes.
+  if (Math.abs(x) >= BIAS_FLOOR_IN) parts.push(x > 0 ? 'to the first-base side' : 'to the third-base side')
   if (Math.abs(z) >= BIAS_FLOOR_IN) parts.push(z > 0 ? 'high' : 'low')
   if (!parts.length) return null
   return { x, z, text: parts.join(' and ') }

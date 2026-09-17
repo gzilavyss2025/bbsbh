@@ -615,7 +615,10 @@ don't run these by hand.
   taught this repo about).
   Also ships a per-row `bias` — the MEDIAN miss offset over **every** pitch, not
   over the 48 drawn — which the card turns into "misses low and to the
-  catcher's right" above a 2in floor. Measured over the whole 2026 set only 3.6%
+  first-base side" above a 2in floor. The stored `x` runs to the catcher's
+  right; the card both draws it mirrored and names the SIDE OF THE FIELD rather
+  than anybody's left or right, because every pitch picture in the app is drawn
+  from the camera behind the pitcher (ADR-0077). Measured over the whole 2026 set only 3.6%
   of rows clear that floor (median largest component 0.6in), so the card prints
   the clause only when there is one and says nothing otherwise, rather than
   reading "no consistent direction" on nineteen cards in twenty.

@@ -3,14 +3,36 @@
 //
 // Lifted verbatim out of components/scoring/StrikeZone.jsx, which now imports
 // it back. Nothing here reads a feed or a game: it is arithmetic on the "feet"
-// domain the MLB feed reports (pX/pZ, catcher's-eye view) plus each batter's
-// own strikeZoneTop/Bottom. Same move api/hitchart.js's projection makes into
-// lib/ballpark/, and for the same reason — a projection with two consumers
-// belongs to neither of them.
+// domain the MLB feed reports (pX/pZ, measured from the catcher's side of the
+// plate) plus each batter's own strikeZoneTop/Bottom. Same move
+// api/hitchart.js's projection makes into lib/ballpark/, and for the same
+// reason — a projection with two consumers belongs to neither of them.
 //
 // It lives in a DIRECTORY rather than a flat src/lib/zone.js because src/lib
 // sits at its check-dir-size budget; a subdirectory is what that guard asks
 // for, and it gives the normalisers below a home beside the plot maths.
+//
+// ---------------------------------------------------------------------------
+// THE VIEW — every pitch plot in this app is drawn from the BROADCAST CAMERA,
+// the one in centre field behind the pitcher, and never from the umpire's eye.
+//
+// The feed reports pX from behind the plate: positive is the catcher's right,
+// which is the first-base side. Plot that straight and the picture is the
+// umpire's view, where a right-handed batter stands on the LEFT — the mirror
+// of the only view of a pitch most people have ever watched. A scorer with the
+// game on beside them should not have to flip a diagram in their head to know
+// whether a slider ran in on the hitter or away from him, so the projection
+// negates pX: +pX (first base) draws to the LEFT, a right-handed batter stands
+// to the RIGHT, the way he does on the telecast.
+//
+// THE MIRROR IS A VIEW, NEVER A STORED FACT. `normalizePitch` and
+// `commandCell` below still bin in the feed's own frame, because the nightly
+// precompute writes those cells to disk and a stored coordinate that means
+// "whichever way we happened to draw it" is a coordinate that rots. A card
+// draws a binned cell through `viewCol` instead. test/zone-geometry.test.js
+// pins the two together: the cell a pitch is COUNTED into is the cell the
+// diagram DRAWS it in, with the same mirror applied to each.
+// ---------------------------------------------------------------------------
 
 // Plot geometry, in the same "feet" domain the feed reports. The plate is
 // 17in = 1.417ft wide, so the rulebook zone's vertical edges sit at ±0.708ft;
@@ -22,7 +44,10 @@ export const DOM_X = [-1.55, 1.55]
 export const DOM_Z = [0.4, 4.6]
 export const EDGE = 0.708 // half plate width, ft
 
-export const sx = (px) => PAD + ((px - DOM_X[0]) / (DOM_X[1] - DOM_X[0])) * (W - 2 * PAD)
+// Horizontal MIRRORS the feed — see THE VIEW above. The domain is symmetric,
+// so negating pX is the whole of it: sx(EDGE) is the zone's left edge on
+// screen, sx(-EDGE) its right.
+export const sx = (px) => PAD + ((-px - DOM_X[0]) / (DOM_X[1] - DOM_X[0])) * (W - 2 * PAD)
 // SVG y grows downward, so height flips: the top of the zone maps to a small y.
 export const sy = (pz) => PAD + ((DOM_Z[1] - pz) / (DOM_Z[1] - DOM_Z[0])) * (H - 2 * PAD)
 
@@ -53,9 +78,11 @@ export function normalizePitch(px, pz, szTop, szBottom) {
 // cell of chase territory on every side, so a pitch off the plate lands
 // somewhere honest instead of being clamped onto the black.
 //
-// Columns run catcher's-eye LEFT to RIGHT (col 0 is the third-base side, which
-// is a right-handed batter's inside); rows run TOP to BOTTOM (row 0 is above
-// the zone). Anything beyond the outer ring clamps into it — a pitch that
+// Columns run in the FEED's own frame, not the drawn one (col 0 is the
+// third-base side, a right-handed batter's inside); rows run TOP to BOTTOM
+// (row 0 is above the zone). A card mirrors a column with `viewCol` on its way
+// to the screen — see THE VIEW at the top of this file, and never store a
+// mirrored cell. Anything beyond the outer ring clamps into it — a pitch that
 // bounces to the backstop is still "way low", and a separate bucket for it
 // would carry a handful of pitches and no meaning.
 export const GRID = 5
@@ -77,6 +104,11 @@ export function commandCell(norm) {
   const row = GRID - 1 - zRow
   return { col, row, index: row * GRID + col }
 }
+
+// A binned column, mirrored for the screen — the `sx` of the grid side. Cell
+// `i` of a stored counter is drawn at column viewCol(i % GRID), so the season
+// map and the in-game diagram put the third-base side in the same place.
+export const viewCol = (col) => GRID - 1 - col
 
 // True when the pitch was in the rulebook zone — the middle nine cells.
 export function inZone(cell) {

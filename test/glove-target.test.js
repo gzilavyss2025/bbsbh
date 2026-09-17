@@ -116,15 +116,18 @@ test('a pitcher who lives below it is told so', () => {
   assert.equal(gloveTargetBias(withBias(0, -3.1)).text, 'low')
 })
 
-test('a drift to one side is named from the catcher’s point of view', () => {
-  // x runs to the catcher's right, and the plot is drawn from his eye, so the
-  // words and the picture have to agree about which side is which.
-  assert.match(gloveTargetBias(withBias(4, 0)).text, /catcher’s right/)
-  assert.match(gloveTargetBias(withBias(-4, 0)).text, /catcher’s left/)
+test('a drift to one side is named by the side of the FIELD, not by a seat', () => {
+  // x runs to the catcher's right, which is the first-base side — and the card
+  // draws it from the camera behind the pitcher, where that side is on the
+  // reader's left. So the sentence names the base, which is true from every
+  // seat in the park, rather than somebody's left or right, which would point
+  // the opposite way to the picture beside it.
+  assert.match(gloveTargetBias(withBias(4, 0)).text, /first-base side/)
+  assert.match(gloveTargetBias(withBias(-4, 0)).text, /third-base side/)
 })
 
 test('a drift in both directions reads as both', () => {
-  assert.equal(gloveTargetBias(withBias(3, 3)).text, 'to the catcher’s right and high')
+  assert.equal(gloveTargetBias(withBias(3, 3)).text, 'to the first-base side and high')
 })
 
 test('a drift too small to see is not reported', () => {
@@ -137,7 +140,7 @@ test('a drift too small to see is not reported', () => {
 })
 
 test('exactly at the floor counts, so the boundary is not a silent gap', () => {
-  assert.equal(gloveTargetBias(withBias(2, 0)).text, 'to the catcher’s right')
+  assert.equal(gloveTargetBias(withBias(2, 0)).text, 'to the first-base side')
 })
 
 test('a row written before the bias field existed degrades to no sentence', () => {

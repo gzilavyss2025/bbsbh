@@ -32,8 +32,11 @@ import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
 // borrows the Command Map's CHIPS (that card's own .cmdmap__chip rules, not a
 // copy of them) but none of its zone geometry.
 //
-// Catcher's eye, matching the Command Map above it: right on the card is the
-// catcher's right, up is up.
+// Drawn from the camera behind the pitcher, matching the Command Map above it
+// and the in-game strike zone: the third-base side is the card's right, up is
+// up. The stored offsets run to the CATCHER's right, so the plot negates x the
+// same way lib/zone/zoneGeometry.js's `sx` does — one view for every pitch
+// picture in the app, whatever frame the data underneath it arrived in.
 //
 // Renders nothing when the pitcher has no cloud — a hitter, a season outside
 // OpenCommand's 2024-on coverage, or every pitch type under the sample floor.
@@ -128,12 +131,13 @@ export function GloveTarget({ entry, data }) {
         )}
 
         {/* Every dot is one pitch. SVG y grows downward, so a miss ABOVE the
-            target subtracts. */}
+            target subtracts; x subtracts too, because the view is mirrored
+            (see the header) and d.x runs to the catcher's right. */}
         {view.dots.map((d, i) => (
           <circle
             key={i}
             className={`glovetarget__dot${d.clamped ? ' glovetarget__dot--rim' : ''}`}
-            cx={CENTRE + px(d.x)}
+            cx={CENTRE - px(d.x)}
             cy={CENTRE - px(d.z)}
             r="3.4"
           />
