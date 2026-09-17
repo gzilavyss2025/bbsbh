@@ -543,11 +543,14 @@ export default function App() {
     // navigates those URLs itself (useNav) when you page a day or tap a league,
     // so both are real, shareable addresses and Back/Forward walk what you
     // visited. `sportId` is left undefined rather than defaulted here — the
-    // default lives on GameSelect's own signature, in one place.
+    // default lives on GameSelect's own signature, in one place. `route.leagueId`
+    // is set only by the four winter slugs, which share sportId 17 and so need
+    // one more thing said about them than the sportId can say (issue #1055).
     content = (
       <GameSelect
         date={route.date ?? null}
         sportId={route.sportId}
+        leagueId={route.leagueId ?? null}
         onPick={openGame}
         onShowLogos={() => go('/logos')}
       />

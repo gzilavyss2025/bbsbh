@@ -118,6 +118,18 @@ existing split file covers it (`vs-team-splits`, the API's own `statSplits`, per
 - **MiLB degrades, it doesn't crash.** Minor-league feeds (sportIds 11–14) often
   miss lineups, weather, coaches and logos. Every selector falls back to
   `''`/`null`/`—` and the caller renders "not posted yet".
+- **A sportId is not always a league.** sportId 17 holds SEVEN winter leagues,
+  and Tally ships four of them (ADR-0078). A bare `sportId=17` call is mostly
+  the wrong league — on three sampled dates it answered 15 games across four
+  leagues where `&leagueId=119` answered exactly the three AFL ones — so every
+  winter call carries a `leagueId`: `fetchSchedule`, `fetchTeams`,
+  `fetchSlateScores`, `fetchNextGameDate` and `fetchWinterCalendar` all take
+  one, and it is `null` for the five ordinary levels, which leaves their URLs
+  unchanged. The one call that cannot be scoped at runtime is the club list, so
+  it is not made at runtime: `gen-teams.mjs` fetches the four leagues by id at
+  BUILD time and writes them as `bySportId[17]`, each club carrying its own
+  `leagueId`. The rule that decides which four is in `lib/winter/leagues.js` —
+  ship no league whose data would make the app state something false.
 - **A generator that needs app logic imports it** rather than keeping a second
   copy (`gen-minors-leaders.mjs` imports `combineToPool`/`computeLeaders`;
   `gen-milestones.mjs` imports the projection math from `person.js`). The

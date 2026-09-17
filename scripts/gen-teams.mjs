@@ -31,8 +31,31 @@ const out = join(here, '..', 'public', 'data', 'teams.json')
 
 const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 
-async function fetchLevel(sportId) {
-  const url = `https://statsapi.mlb.com/api/v1/teams?sportId=${sportId}&activeStatus=Y`
+// THE WINTER LEAGUES ARE IN THE SNAPSHOT BUT NOT IN THE SEARCH (issue #1055).
+// They are two separate lists on purpose:
+//
+//   SEARCHABLE_SPORT_IDS is the set the team-name search and resolveGame scan.
+//   It stays at five. A reader typing "Toros" is looking for a club they can
+//   find on a rail tab that exists all year, and adding sportId 17 would make
+//   every deep-link resolution scan four more leagues for eleven months of
+//   nothing.
+//
+//   The winter leagues are still WRITTEN here, because the slate's club strip
+//   reads this file (fetchTeams in src/api/schedule.js), and a live call for
+//   them cannot be scoped the way the others can: a bare sportId=17 call
+//   answers with all 46 clubs behind that door, four leagues Tally ships and
+//   three it deliberately does not. Fetching per leagueId at BUILD time is how
+//   that list stays exactly the 30 clubs we mean.
+//
+// This list must match WINTER_LEAGUES in src/lib/winter/leagues.js, which
+// states the rule that decides what is in it: ship no league whose data would
+// make the app state something false.
+const WINTER_SPORT_ID = 17
+const WINTER_LEAGUE_IDS = [119, 132, 135, 131]
+
+async function fetchLevel(sportId, leagueId = null) {
+  const league = leagueId ? `&leagueId=${leagueId}` : ''
+  const url = `https://statsapi.mlb.com/api/v1/teams?sportId=${sportId}${league}&activeStatus=Y`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`teams sportId=${sportId}: HTTP ${res.status}`)
   const json = await res.json()
@@ -59,7 +82,15 @@ for (const sportId of SEARCHABLE_SPORT_IDS) {
   bySportId[sportId] = await fetchLevel(sportId)
 }
 
+// One bucket for the four winter leagues, each club carrying its own leagueId
+// (fetchLevel already records it), which is what lets the club strip scope
+// itself to one league without a fetch.
+const winter = []
+for (const leagueId of WINTER_LEAGUE_IDS) {
+  winter.push(...(await fetchLevel(WINTER_SPORT_ID, leagueId)))
+}
+bySportId[WINTER_SPORT_ID] = winter
+
+const levels = [...SEARCHABLE_SPORT_IDS, WINTER_SPORT_ID]
 await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), bySportId })
-console.log(
-  `wrote ${out} (${SEARCHABLE_SPORT_IDS.map((id) => `${id}:${bySportId[id].length}`).join(', ')})`,
-)
+console.log(`wrote ${out} (${levels.map((id) => `${id}:${bySportId[id].length}`).join(', ')})`)

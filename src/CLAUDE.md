@@ -9,12 +9,12 @@ fetching, and the design system. The data layer has its own file
 
 ## Screens (`src/screens/`)
 
-`GameSelect` (slate with the MLB/AAA/AA/A+/A level toggle) → `GameView` (owns the
-site-home bar + away@home masthead of uniform-treatment tiles — the same
-`TeamTreatmentMark` square the slate card shows — each opening the grayscale sketch
-modal) → `TeamInfo` (×2, away then home) → `InningViewer`. `LogoSheet` is a printable
-grayscale logo sheet, off the slate header. Nov-Feb the MLB slate has a second page
-state, the roster wire leading it (`components/offseason/`, ADR-0074).
+`GameSelect` (slate; its MLB/AAA/AA/A+/A rail grows a sixth `WINTER` tab, second,
+Oct-Feb — `components/winter/`, ADR-0078) → `GameView` (site-home bar + away@home
+masthead of uniform-treatment tiles — the `TeamTreatmentMark` square the slate card
+shows — each opening the sketch modal) → `TeamInfo` (×2) → `InningViewer`.
+`LogoSheet` is a printable grayscale logo sheet, off the slate header. Nov-Feb the
+MLB slate has a second page state, the wire leading it (`offseason/`, ADR-0074).
 
 `TeamInfo`'s club-name bar and section mastheads are **themed** to the jersey that
 club wears that game (ADR-0030) — three CSS properties from `lib/headerTheme.js`,

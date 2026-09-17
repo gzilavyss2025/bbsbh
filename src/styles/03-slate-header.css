@@ -217,6 +217,40 @@
   margin: 0;
 }
 
+/* SIX CELLS DO NOT FIT BESIDE THE WORDMARK on a phone, and the rule above is
+   why: the level strip keeps its min-content floor rather than compressing. So
+   from October to February the extra WINTER cell pushed the strip straight over
+   the Tally lockup at 320px, and then — once the topbar was allowed to wrap —
+   past the left edge of its own row, with MLB cut in half. Both were rendered
+   and confirmed, and the second is the reason this does not stop at wrapping.
+
+   Below the wide breakpoint the strip stops being a thing that rides beside the
+   title and becomes its own full-width row, which is what the standalone
+   .levelnav in 05-masthead-nav.css has always been. Its grid then divides the
+   row into six equal cells instead of six 57px ones, and the cells give back
+   the horizontal padding they do not have room for.
+
+   Five cells still fit beside the wordmark, so none of this applies for the
+   eight months the rail has five. */
+.topbar--slate:has(.levelnav--six) {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 739px) {
+  .topbar--slate:has(.levelnav--six) .topbar__slateactions {
+    flex: 1 1 100%;
+  }
+
+  .topbar--slate .levelnav--six {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .topbar--slate .levelnav--six .levelnav__btn {
+    padding: 0 3px;
+  }
+}
+
 .topbar--slate .levelnav__btn {
   min-height: 30px;
   padding: 0 6px;
@@ -534,3 +568,69 @@
   box-shadow: var(--ring);
 }
 
+
+/* ------------------------------------------------ winter league picker
+   One rail tab covers four leagues (issue #1055), so the choice between
+   them is made on this row — between the level rail above it and the club
+   strip below, which the pick then scopes. Every chip is an anchor holding
+   a real address, so this row doubles as the page's own breadcrumb.
+
+   Scrolls sideways rather than wrapping. Four chips fit at 320px only
+   because the full names are hidden there, and a row that wrapped would
+   push the club strip and the date banner down by its own height the
+   moment a league opened its season. */
+.leaguepicker {
+  display: flex;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.leaguepicker::-webkit-scrollbar {
+  display: none;
+}
+
+.leaguepicker__chip {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-label);
+  text-decoration: none;
+}
+
+/* The same ink-filled pill the level rail above uses for its own active
+   cell, so the two rows read as one control two levels deep. */
+.leaguepicker__chip.is-active {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+/* In season, but no game today. The league is real and still openable — it
+   just has nothing on, and the slate it opens says so. Dimmed rather than
+   deleted; src/lib/winter/window.js carries the reason. */
+.leaguepicker__chip.is-idle:not(.is-active) {
+  opacity: 0.55;
+}
+
+.leaguepicker__chipname {
+  font-size: var(--fs-caption);
+}
+
+/* Four full league names do not fit a phone, and the three-letter chip is
+   the label that has to survive. The names come back at the same 600px
+   line the rest of this file turns on. */
+@media (max-width: 600px) {
+  .leaguepicker__chipname {
+    display: none;
+  }
+}

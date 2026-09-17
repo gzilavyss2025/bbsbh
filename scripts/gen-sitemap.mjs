@@ -59,6 +59,8 @@ import { LANDING_PAGES } from '../src/copy/landing/pages/index.js'
 import { SITE_URL } from '../src/copy/landing/site.js'
 import { entitySegment } from '../src/lib/route.js'
 
+const WINTER_SPORT_ID = 17
+
 // Stable public app routes. Hand-kept ON PURPOSE rather than derived from
 // route.js: that file's table includes dev labs, unlisted QA pages and every
 // game-scoped shape, and a derivation would have to exclude more than it keeps.
@@ -129,6 +131,15 @@ export function readClubs() {
         (clubs ?? []).map((club) => ({ id: club.id, name: club.name, sportId: Number(sportId) })),
       )
       .filter((club) => club.id && club.name)
+      // NOT the winter leagues. `bySportId` gained a sportId 17 bucket so the
+      // slate's club strip could be scoped to one league without a fetch
+      // (ADR-0078), and every club in it is a real club with a real hub — but a
+      // winter club has no standings, no contracts, no farm system and no
+      // season-long history, so nine of its ten tabs are a page saying so. The
+      // strip needed the data; the crawler does not need 300 addresses that are
+      // thin for ten months of the year. Drop this filter deliberately if a
+      // winter club's hub ever fills out.
+      .filter((club) => club.sportId !== WINTER_SPORT_ID)
   } catch {
     return []
   }
