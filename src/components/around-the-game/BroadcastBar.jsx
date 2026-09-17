@@ -163,7 +163,14 @@ export function roundTicks(max, step) {
   return out
 }
 
-export function ColumnChart({ columns, max, ticks = [], label, size = 'full' }) {
+//
+// `rules` marks a VALUE on the x axis — a median, a mean — as `[{ key, pos,
+// label, tone }]`, where `pos` is a 0-to-1 fraction of the drawn columns. The
+// fraction is the caller's because it belongs to the caller's scale: a
+// histogram's median lands through its bin edges (api/around-the-game/
+// absExposure.js's binPosition), and a mark placed by a hand-counted index
+// drifts from its own label the first time the data moves.
+export function ColumnChart({ columns, max, ticks = [], rules = [], label, size = 'full' }) {
   const height = (v) => (max > 0 && v != null ? `${Math.max(1, Math.min(100, (v / max) * 100))}%` : '0%')
   return (
     <div className={`colchart colchart--${size}`}>
@@ -186,6 +193,25 @@ export function ColumnChart({ columns, max, ticks = [], label, size = 'full' }) 
               </span>
             </span>
           ))}
+          {/* Drawn after the columns so they paint over them, which is what a
+              rule marking a value across a distribution has to do. */}
+          {rules.map((r) =>
+            r.pos == null ? null : (
+              <span
+                key={r.key}
+                className={`colchart__rule colchart__rule--${r.tone ?? 'mark'}`}
+                style={{ left: `${r.pos * 100}%` }}
+              >
+                <span
+                  className={`colchart__rulelabel${
+                    r.pos > 0.5 ? ' colchart__rulelabel--before' : ''
+                  }`}
+                >
+                  {r.label}
+                </span>
+              </span>
+            ),
+          )}
         </span>
       </div>
       <span className="colchart__labels">

@@ -6,6 +6,10 @@ import {
   levelsIn,
   summaryFor,
 } from '../../api/around-the-game/absChallenges.js'
+import {
+  fetchAbsExposure,
+  exposureFor,
+} from '../../api/around-the-game/absExposure.js'
 import { loadClubs } from '../../api/around-the-game/clubs.js'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { groupLabelFor } from '../../lib/reportPages.js'
@@ -22,6 +26,7 @@ import { WhenTheyCall } from './abs/WhenTheyCall.jsx'
 import { ClubBoard } from './abs/ClubBoard.jsx'
 import { RanOut } from './abs/RanOut.jsx'
 import { LongestRuns } from './abs/LongestRuns.jsx'
+import { HowOften } from './abs/HowOften.jsx'
 import { PlayerBoards } from './abs/PlayerBoards.jsx'
 import { UmpireBoard } from './abs/UmpireBoard.jsx'
 import { MissBands } from './abs/MissBands.jsx'
@@ -61,7 +66,7 @@ import { BiggestOverturn } from './abs/BiggestOverturn.jsx'
 // needing to know the chip exists. A section that reached back to
 // fetchAbsChallenges for itself would keep showing MLB, and nobody would notice
 // until a reader did. What is left in this file is the chrome the sections sit
-// in — the masthead, the level chips, the slab row, the two fetches and the
+// in — the masthead, the level chips, the slab row, the three fetches and the
 // source line.
 //
 // SPOILER-FREE. A challenge is a ball-strike judgment, not a run
@@ -83,6 +88,14 @@ export function AbsChallengesPage() {
   // MLB and Triple-A both, because both run the system and both are on the
   // board. Club ids never collide across levels, so one lookup covers them.
   const { data: clubs } = useAsync(() => loadClubs([1, 11]), [])
+  // THE DENOMINATORS ARE THEIR OWN FILE AND THEIR OWN FETCH. One row per player
+  // per level — pitches seen, plate appearances, innings caught — which is
+  // 418 KB of roster sweep behind ONE section
+  // (api/around-the-game/absExposure.js). It is fetched here rather than inside
+  // that section for the same reason `clubs` is: the page owns what this page
+  // downloads, and a board that fetched for itself would be invisible from
+  // here. Nothing else waits on it — the section draws once it lands.
+  const { data: exposure } = useAsync(() => fetchAbsExposure(), [])
 
   const levels = useMemo(() => levelsIn(data), [data])
   const shown = levels.some((l) => l.key === level) ? level : (levels[0]?.key ?? 'MLB')
@@ -181,6 +194,7 @@ export function AbsChallengesPage() {
           <RanOut summary={summary} clubs={clubs} />
           <PlayerBoards summary={summary} clubs={clubs} />
           <LongestRuns summary={summary} clubs={clubs} />
+          <HowOften exposure={exposureFor(exposure, shown)} />
           <UmpireBoard summary={summary} />
           <MissBands summary={summary} />
           <BiggestOverturn summary={summary} clubs={clubs} />

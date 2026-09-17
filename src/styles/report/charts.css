@@ -240,3 +240,72 @@
 .colchart__end--end {
   right: 0;
 }
+
+/* A VALUE MARKED ACROSS THE COLUMNS — the median and the mean of a
+   distribution, which is the one thing a histogram cannot say by itself. The
+   gap between the two IS the finding on the exposure board, so both are drawn
+   and neither is asserted in a sentence instead.
+
+   SOLID CLAY FOR THE MEDIAN, DASHED CAPTION INK FOR THE MEAN. Two marks at
+   once need telling apart, and the dash carries it with no second hue: the
+   pair that survives the colourblind check is navy against clay, and the
+   columns are already navy. Positioned as a fraction of .colchart__cols, which
+   is the positioned box the bars are laid out in. */
+.colchart__rule {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: var(--bw-rule) solid var(--clay);
+}
+
+/* THE MEAN'S LINE STARTS BELOW THE MEDIAN'S LABEL. The two rules sit within a
+   few per cent of each other on this data — which is the point of drawing both
+   — so a full-height dashed line runs straight through the median's words. */
+.colchart__rule--mean {
+  top: var(--space-4);
+  border-left: var(--bw-hair) dashed var(--text-caption);
+}
+
+/* The label sits beside its own rule and flips to the other side past halfway,
+   so a median at the right-hand end does not run off the plot. */
+.colchart__rulelabel {
+  position: absolute;
+  top: 0;
+  left: var(--space-1);
+  white-space: nowrap;
+  /* KNOCKED OUT OF WHATEVER IT LANDS ON. A median sits near the middle of a
+     distribution, which is exactly where the tallest column is, so the label
+     reliably falls on navy — and clay on navy is unreadable rather than merely
+     tight. The paper behind it is the page's own, so the label reads the same
+     over a bar as it does over the plot. */
+  padding: 0 2px;
+  background: var(--bg-page);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--clay-deep);
+}
+
+.colchart__rulelabel--before {
+  left: auto;
+  right: var(--space-1);
+}
+
+/* The mean's label rides at the head of its own (lowered) line, which puts it
+   one row under the median's — two labels on one baseline would overlap on
+   every draw. */
+.colchart__rule--mean .colchart__rulelabel {
+  color: var(--text-caption);
+}
+
+/* The sample floor rides in the chart head it qualifies, the same move the
+   report boards make with a column head's `.rpt__sub`. */
+.colchart__panelsub {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+}
