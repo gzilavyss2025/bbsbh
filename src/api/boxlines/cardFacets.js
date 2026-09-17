@@ -125,6 +125,21 @@ const WEEKDAYS = [
   [6, 'dsa', 'Saturday'],
 ]
 
+// The nine spots in the batting order, in words (#1048). A list ENTRY's name,
+// not a door's label: the slots live behind one door, and fold.js says why
+// nine doors would state a career they do not open.
+const SLOT_WORDS = [
+  'first',
+  'second',
+  'third',
+  'fourth',
+  'fifth',
+  'sixth',
+  'seventh',
+  'eighth',
+  'ninth',
+]
+
 export const CARD_FACETS = [
   // WHERE HE PLAYED. `h`/`a` count games at the park; the rows count the club
   // the schedule listed as home. Both are MLB's own, and they differ only on a
@@ -318,6 +333,45 @@ export const CARD_FACETS = [
     facet: { kind: 'lineupStart', value: false },
     section: 'how',
     groups: ['hitting'],
+  },
+  // WHERE HE HIT (#1048). The first door on this card that opens a LIST rather
+  // than a sheet of rows, and the reason is in `list` below: nine slots cannot
+  // be nine doors, because the only aggregate that would label them counts
+  // something else. fold.js has the measurement; ADR-0069's 2026-09-16
+  // amendment has the shape.
+  //
+  // IT NAMES NO LABEL SOURCE, and the registry's test knows that a `list` entry
+  // names none. Its figures are folded from the gated rows, so the entry and the
+  // rows behind it are the same games counted once — which is the property nine
+  // doors could not have had.
+  //
+  // IT ALWAYS RENDERS, for the same reason: there is no probe call that could
+  // tell the card whether he ever started, and the card only draws at all for a
+  // player with major-league situational splits. A hitter with no starts opens
+  // it and reads that he has none, which is an answer.
+  {
+    key: 'order',
+    label: 'By spot in the order',
+    kicker: 'Game lines · by spot in the order',
+    title: (surname) => `${surname} by spot in the order`,
+    section: 'how',
+    groups: ['hitting'],
+    list: {
+      // The slot he STARTED in, off the schedule's own lineups (facets.js).
+      // Null for a game he came into, and a null key drops the row — a bench
+      // appearance is under no slot, and the Substitution door above already
+      // holds those games.
+      groupBy: (row) => row.lineupSpot,
+      name: (spot) => `Batting ${SLOT_WORDS[spot - 1] ?? spot}`,
+      // A batting order is a SEQUENCE: it reads 1 through 9, not
+      // most-played-first. #998's parks are not a sequence and will say
+      // 'games'.
+      order: 'key',
+      facet: (spot) => ({ kind: 'lineupSpot', spot }),
+      // The sheet's heading once a slot is picked, in the voice the pitcher's
+      // own two doors already use ("Peterson, in relief").
+      title: (surname, name) => `${surname}, ${name.toLowerCase()}`,
+    },
   },
   // OFF THE BENCH, BAT IN HAND (#1002). Hitters only, and the one door on this
   // card whose rows MLB publishes no per-game list for: `pH` gives the career

@@ -49,6 +49,7 @@ test('the club facet is the only one that narrows the game log', () => {
     'pinchHit',
     'surface',
     'lineupStart',
+    'lineupSpot',
   ]) {
     assert.equal(facetPlan({ kind }).narrowsSplits, false, `${kind} must not narrow the log`)
   }
@@ -189,4 +190,45 @@ test('a game with no lineup is on neither side of the lineup facet', () => {
   // A pitcher's row never carries one at all — the same shape as unknown.
   assert.equal(started(row({ lineupStart: undefined })), false)
   assert.equal(bench(row({ lineupStart: undefined })), false)
+})
+
+test('a slot facet keeps that spot in the order and no other', () => {
+  // #1048. The nine slots are a LIST behind one door, not nine doors, because
+  // MLB's own `bN` aggregate counts something else — see ADR-0069 — so the
+  // figures come from the rows and the rows come from here.
+  const third = facetPlan({ kind: 'lineupSpot', spot: 3 }).keep
+  assert.equal(third(row({ lineupSpot: 3 })), true)
+  assert.equal(third(row({ lineupSpot: 4 })), false)
+  assert.equal(third(row({ lineupSpot: 1 })), false)
+  // A game he did not start, and a game with no card posted, both read null —
+  // and null belongs to no slot. Counting either as a slot would put a bench
+  // appearance under "batting third".
+  assert.equal(third(row({ lineupSpot: null })), false)
+  assert.equal(third(row({ lineupSpot: undefined })), false)
+  // The nine each keep their own and drop the one below.
+  for (let spot = 1; spot <= 9; spot++) {
+    const keep = facetPlan({ kind: 'lineupSpot', spot }).keep
+    assert.equal(keep(row({ lineupSpot: spot })), true, `spot ${spot} dropped its own row`)
+    assert.equal(keep(row({ lineupSpot: spot === 1 ? 9 : spot - 1 })), false, `spot ${spot} kept another`)
+  }
+})
+
+test('a slot facet with NO slot is the list itself: every row that has one', () => {
+  // The sheet in list mode asks this. It must not narrow to a slot (there is
+  // none yet) and it must still cost the lineups pass, or every row comes back
+  // with a null slot and the list folds to nothing.
+  const plan = facetPlan({ kind: 'lineupSpot', spot: null })
+  assert.equal(plan.needsLineups, true)
+  assert.equal(plan.keep(row({ lineupSpot: 1 })), true)
+  assert.equal(plan.keep(row({ lineupSpot: 9 })), true)
+  // It is not "every row": a bench game has no slot to list him under.
+  assert.equal(plan.keep(row({ lineupSpot: null })), false)
+})
+
+test('the slot facet costs the same second pass the lineup doors do', () => {
+  // It reads the same nine names a side. Sharing `needsLineups` is what lets
+  // the list and the two lineup doors share ONE pass over a card.
+  assert.equal(facetPlan({ kind: 'lineupSpot', spot: 5 }).needsLineups, true)
+  assert.equal(facetPlan({ kind: 'lineupSpot', spot: 5 }).narrowsSplits, false)
+  assert.equal(facetPlan({ kind: 'lineupSpot', spot: 5 }).gameTypes, null)
 })

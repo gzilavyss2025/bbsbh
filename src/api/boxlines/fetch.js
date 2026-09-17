@@ -117,11 +117,11 @@ const SCHEDULE_FIELDS =
 // doors alone: at that price a second, differently-shaped join would cost far
 // more than carrying it, the same trade `positionsPlayed` made for #1002.
 const SCHEDULE_HYDRATE = 'team,venue(fieldInfo)'
-// The lineups pass asks for NOTHING but the nine names a side. It is a second
-// call over the same gamePks rather than a hydrate on the one above, because
-// folding `lineups` into the shared call costs +65% (32.3 KB -> 53.4 KB over
-// 73 gamePks) on EVERY hitter's join, where two of a card's twenty-odd doors
-// need it. Asked on its own it is 23.3 KB over the same games — the same bytes
+// The lineups pass asks for NOTHING but the nine names a side, in order. It is
+// a second call over the same gamePks rather than a hydrate on the one above,
+// because folding `lineups` into the shared call costs +65% (32.3 KB -> 53.4 KB
+// over 73 gamePks) on EVERY hitter's join, where three of a card's twenty-odd
+// doors need it. Asked on its own it is 23.3 KB over the same games — the same bytes
 // — and only the reader who opens one of those two doors ever pays them.
 const LINEUP_FIELDS = 'fields=dates,games,gamePk,lineups,homePlayers,awayPlayers,id'
 // THE SCORE A STUCK SCHEDULE ROW WILL NOT GIVE UP (#1031). Some games MLB left
@@ -198,19 +198,24 @@ async function fetchSchedule(gamePks) {
   return games
 }
 
-// WAS HE IN THE STARTING LINEUP, game by game — a Map gamePk -> boolean over
-// the same gamePks the join already holds. The schedule's `hydrate=lineups`
-// returns nine names a side, in BATTING ORDER (index 0 is the leadoff man,
-// checked against the boxscore's own `battingOrder` on gamePk 747043), and
-// `fields=` trims them to bare ids.
+// WHERE HE BATTED, game by game — a Map gamePk -> his 1-based slot in the
+// order, or 0 for "played, did not start", over the same gamePks the join
+// already holds. The schedule's `hydrate=lineups` returns nine names a side, in
+// BATTING ORDER (index 0 is the leadoff man, checked against the boxscore's own
+// `battingOrder` on gamePk 747043), and `fields=` trims them to bare ids.
+//
+// IT WAS A MAP OF BOOLEANS UNTIL #1048, and widening it cost nothing: the array
+// was already ordered, so the index was there to be read. The two lineup doors
+// ask it whether he started; the batting-order list asks it where — one pass,
+// one memo, three doors.
 //
 // Coverage was measured across six full club seasons before this was built:
 // every game that was actually PLAYED carries a full eighteen names back to
 // 2008, and the only games without one are the games with no score, which the
 // gate has already dropped. A game that still answers with no lineup is left
-// OUT of the map rather than answered `false`, so rows.js can tell "he came
-// off the bench" from "nobody posted a card".
-async function fetchLineupStarts(personId, gamePks) {
+// OUT of the map rather than answered `0`, so rows.js can tell "he came off
+// the bench" from "nobody posted a card".
+async function fetchLineupSlots(personId, gamePks) {
   const chunks = []
   for (let i = 0; i < gamePks.length; i += SCHEDULE_CHUNK) chunks.push(gamePks.slice(i, i + SCHEDULE_CHUNK))
   const pages = await Promise.all(
@@ -218,15 +223,21 @@ async function fetchLineupStarts(personId, gamePks) {
       getJson(`/api/v1/schedule?sportId=1&gamePks=${pks.join(',')}&hydrate=lineups&${LINEUP_FIELDS}`),
     ),
   )
-  const starts = new Map()
+  const slots = new Map()
   for (const g of pages.flatMap((p) => (p.dates ?? []).flatMap((d) => d.games ?? []))) {
-    if (!g?.gamePk || starts.has(g.gamePk)) continue
+    if (!g?.gamePk || slots.has(g.gamePk)) continue
     const home = g.lineups?.homePlayers ?? []
     const away = g.lineups?.awayPlayers ?? []
     if (!home.length || !away.length) continue
-    starts.set(g.gamePk, [...home, ...away].some((p) => p?.id === personId))
+    // His side is whichever card his name is on; 0 when it is on neither, which
+    // is a game he entered. Both sides are searched rather than the one his
+    // split names, because the split's `team` is the club he played FOR and
+    // the lineups are keyed home/away.
+    const at = home.findIndex((p) => p?.id === personId)
+    const also = at >= 0 ? at : away.findIndex((p) => p?.id === personId)
+    slots.set(g.gamePk, also >= 0 ? also + 1 : 0)
   }
-  return starts
+  return slots
 }
 
 // A small in-order pool: statsapi is public and shared, and a veteran's
@@ -309,15 +320,16 @@ function joinFor(key, args) {
   return inFlight.get(key)
 }
 
-function lineupStartsFor(key, personId, gamePks) {
+function lineupSlotsFor(key, personId, gamePks) {
   if (!lineupsInFlight.has(key)) {
     lineupsInFlight.set(
       key,
-      fetchLineupStarts(personId, gamePks).catch(() => {
+      fetchLineupSlots(personId, gamePks).catch(() => {
         // Not memoized on failure, same as the join: Try again should try.
         lineupsInFlight.delete(key)
-        // An empty map leaves every row's `lineupStart` null, so the two doors
-        // that asked render an empty sheet rather than a confidently wrong one.
+        // An empty map leaves every row's `lineupSpot` and `lineupStart` null,
+        // so the doors that asked render an empty sheet rather than a
+        // confidently wrong one.
         return new Map()
       }),
     )
@@ -339,9 +351,10 @@ export async function fetchBoxLines({ personId, group, cutoff = null, facet = nu
   const key = [personId, group, cutoff ?? '', types.join('+'), narrowsSplits ? opponentId : ''].join('|')
   const join = await joinFor(key, { personId, group, opponentId, gameTypes: types, cutoff })
   if (!join) return null
-  // Only the two lineup doors go back for a second pass, and only once a card.
-  const lineupStarts = needsLineups
-    ? await lineupStartsFor(key, personId, [...new Set(join.splits.map((s) => s.game.gamePk))])
+  // Only the doors that read the card go back for a second pass — the two
+  // lineup doors and the batting-order list — and only once a card.
+  const lineupSlots = needsLineups
+    ? await lineupSlotsFor(key, personId, [...new Set(join.splits.map((s) => s.game.gamePk))])
     : null
-  return boxLineRows({ ...join, group, cutoff, gameTypes: types, keep, lineupStarts })
+  return boxLineRows({ ...join, group, cutoff, gameTypes: types, keep, lineupSlots })
 }

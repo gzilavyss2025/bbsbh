@@ -1,9 +1,11 @@
 import '../../styles/boxlines/boxlines.css'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { fetchBoxLines } from '../../api/boxlines/fetch.js'
+import { foldGroups, LIST_COLUMNS } from '../../api/boxlines/fold.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { BoxLineRow, BoxLineSkeleton } from './BoxLineRow.jsx'
+import { BoxLinesList } from './BoxLinesList.jsx'
 import { humanDateWithYear } from '../../lib/dates.js'
 
 // BOX LINES — the drilldown behind a summary stat line (ADR-0069). Tap a
@@ -46,9 +48,25 @@ import { humanDateWithYear } from '../../lib/dates.js'
 // not reach this sheet; boxlines.css re-states it for `.boxlines *` the way
 // focus/reference.css does for the reference sheet.
 //
-// The headline is the tapped line, verbatim, so the door and the sheet can
+// THE HEADLINE is the tapped line, verbatim, so the door and the sheet can
 // never disagree. It is the career aggregate already open on the page
 // (ADR-0034); it may say a meeting happened, never how it went.
+//
+// AND ONE DOOR OPENS A LIST (#1048). A question with too many answers to be
+// doors — the nine spots in the batting order, #998's thirty-six ballparks —
+// hands this sheet a `list` descriptor instead of a facet. The sheet then opens
+// on the GROUPS, folded from the same gated rows (api/boxlines/fold.js), and a
+// tap re-renders it in rows mode for that group. The join is memoized per
+// (person, group, cutoff, gameTypes), so going in and back out again costs no
+// requests at all — both questions read the rows the first one already
+// fetched.
+//
+// A LIST CHANGES NOTHING ABOUT THE GATE. It folds rows that already passed it:
+// the cutoff still runs first and a facet's `keep` still runs last, so a list
+// can only ever describe games the gate allowed. On a page carrying `?d=` a
+// folded line therefore stops where the rows stop — which is more correct than
+// a career aggregate would be, and it is what makes an entry and its rows agree
+// by construction.
 export function BoxLinesSheet({
   personId,
   playerSurname,
@@ -56,6 +74,7 @@ export function BoxLinesSheet({
   opponentId,
   opponentName,
   facet = null,
+  list = null,
   kicker = 'Game lines · regular season',
   title,
   footNote = null,
@@ -63,11 +82,21 @@ export function BoxLinesSheet({
   cutoff = null,
   onClose,
 }) {
+  // WHICH GROUP OF A LIST the reader has picked, or null while the list itself
+  // is showing. A sheet with no `list` is never in list mode and this stays
+  // null for its whole life.
+  const [picked, setPicked] = useState(null)
+  const listing = Boolean(list) && !picked
   // A caller that named only an opponent is asking the club question; one that
-  // named a facet is asking its own. Serialised for the dependency list because
-  // an object literal is a new identity on every render, and useAsync would
-  // refetch each one.
-  const question = facet ?? (opponentId ? { kind: 'club', opponentId } : null)
+  // named a facet is asking its own; one that named a LIST asks the list's own
+  // question first — every row that has a group — and then the picked group's.
+  // Serialised for the dependency list because an object literal is a new
+  // identity on every render, and useAsync would refetch each one.
+  const question = picked
+    ? picked.facet
+    : list
+      ? list.facet(null)
+      : (facet ?? (opponentId ? { kind: 'club', opponentId } : null))
   const facetKey = JSON.stringify(question)
   const query = useAsync(
     () => fetchBoxLines({ personId, group, cutoff, facet: question }),
@@ -93,7 +122,33 @@ export function BoxLinesSheet({
 
   const rows = query.data
   const failed = !query.loading && rows === null
-  const heading = title ?? `${playerSurname} vs the ${opponentName}`
+  // The groups, folded from the rows the gate approved. A group with no rows
+  // cannot exist, because the groups are built FROM the rows: a hitter who has
+  // never batted ninth gets eight entries, not a ninth reading zero.
+  const groups = useMemo(
+    () => (listing && rows ? foldGroups(rows, list, group) : null),
+    [listing, rows, list, group],
+  )
+  // Once a group is picked the sheet says which one, in all three places a
+  // reader reads: the kicker, the heading and the headline — which is the
+  // entry's own line, verbatim, the same contract a door's headline keeps.
+  const heading = picked
+    ? list.title(playerSurname, picked.name)
+    : (title ?? `${playerSurname} vs the ${opponentName}`)
+  const kick = picked ? `Game lines · ${picked.name}` : kicker
+  const head = picked
+    ? `${picked.name}: ${picked.games} G${picked.line.rate ? `, ${picked.line.rate}` : ''}`
+    : listing
+      ? null
+      : headline
+
+  // Back to the list, with the focus kept inside the dialog: the control the
+  // reader pressed is the one that unmounts, and focus would otherwise fall to
+  // the document.
+  const toList = () => {
+    setPicked(null)
+    closeRef.current?.focus()
+  }
 
   return (
     <ModalPortal>
@@ -104,15 +159,23 @@ export function BoxLinesSheet({
         <div className="sheet boxlines" role="dialog" aria-modal="true" aria-label={heading}>
           <div className="boxlines__head">
             <div>
-              <p className="boxlines__kicker">{kicker}</p>
+              {picked && (
+                <button type="button" className="boxlines__back" onClick={toList}>
+                  ‹ Back
+                </button>
+              )}
+              <p className="boxlines__kicker">{kick}</p>
               <h2 className="sheet__title boxlines__title">{heading}</h2>
             </div>
             <button ref={closeRef} type="button" className="sheet__close" onClick={onClose} aria-label="Close">
               ✕
             </button>
           </div>
-          {headline && <p className="boxlines__headline">{headline}</p>}
+          {head && <p className="boxlines__headline">{head}</p>}
 
+          {/* The row skeletons stand in for a loading LIST too: the sheet is
+              one fetch either way, and a second skeleton shape would be a
+              second thing to keep in step with the rows it precedes. */}
           {query.loading && (
             <>
               <ul className="boxlines__rows" aria-hidden="true">
@@ -139,7 +202,18 @@ export function BoxLinesSheet({
             </p>
           )}
 
-          {rows && rows.length > 0 && (
+          {/* THE GROUPS, not the rows. Tapping one asks the same join its own
+              question, which it has already answered — so the switch costs no
+              request. */}
+          {listing && groups?.length > 0 && (
+            <BoxLinesList
+              groups={groups}
+              columns={LIST_COLUMNS[group] ?? LIST_COLUMNS.hitting}
+              onPick={setPicked}
+            />
+          )}
+
+          {!listing && rows && rows.length > 0 && (
             <>
               <ul className="boxlines__rows">
                 {rows.map((row, i) => (

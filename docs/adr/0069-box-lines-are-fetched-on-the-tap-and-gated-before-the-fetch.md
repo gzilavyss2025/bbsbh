@@ -842,3 +842,91 @@ the card instead of being inferred.
 Not postseason-specific, and not a facet's problem. Any facet, any era: a
 rain-postponed regular-season game replayed the same day under the same gamePk
 has the same shape. The postseason door just made it countable.
+
+## Amendment (2026-09-16, issue #1048): a door that opens a LIST
+
+The 2026-09-15 note above ends "it wants a door that opens a LIST … and it
+should be built once for both". It is built, and the batting order is its first
+reader. **The shape is general; nothing in it is slot-shaped.**
+
+### What a list door is
+
+A registry entry with a `list` descriptor instead of a `facet`. The sheet behind
+it opens on the GROUPS rather than on rows: it fetches the same join with no
+narrowing, folds the gated rows into groups, and prints two figures against
+each. Tap a group and the same sheet re-renders in rows mode for that group's
+own facet. The join is memoized per (person, group, cutoff, gameTypes), so
+going in, back out and into another group **costs no requests at all** — every
+question reads the rows the first one already fetched.
+
+The descriptor has five members:
+
+| member | the batting order | #998's parks |
+| --- | --- | --- |
+| `groupBy(row)` | `row.lineupSpot` | `row.venueId` |
+| `name(key, newest)` | "Batting first"…"Batting ninth" | the newest row's `venueName` |
+| `order` | `'key'` — an order is a sequence | `'games'` |
+| `facet(key)` | `{ kind: 'lineupSpot', spot }` | `{ kind: 'venue', venueId }` |
+| `title(surname, name)` | "Yelich, batting third" | "Yelich at …" |
+
+`name` takes the group's NEWEST row as a second argument, which is the member
+#998 needs and the batting order does not: a park is named by the row, so a club
+that renamed its stadium is listed under what it is called now.
+
+### The figures come from the rows, and that is the whole decision
+
+Every other door on this card takes its line from an aggregate MLB publishes and
+its rows from the game log, and the two agree or they nearly do. **The batting
+order is where they do not** — the measurements are in the 2026-09-15 note, and
+`b9` reading 18 games against 0 starts is not a margin, it is a different
+question. So a list folds the rows themselves. An entry and the rows behind it
+are then the same games, counted once and then shown, and they cannot disagree.
+
+Two figures, not the card's five: games, and AVG for a bat or ERA for an arm —
+the same two a chip prints. OPS and OBP are not available at all, and this is a
+fact about the fetch rather than a choice: `LOG_FIELDS` carries no `hitByPitch`
+and no `sacFlies`, so neither can be computed honestly from these rows.
+
+**A folded line is not a career line.** On a page carrying `?d=` it stops where
+the rows stop. That is more correct than a career aggregate would be, and it is
+what makes the entry and its rows agree by construction. Do not "fix" it by
+labelling an entry from `careerStatSplits`.
+
+### Three things the shape needed that the issue did not name
+
+1. **A list door names no label source, so the card cannot ask whether it has
+   games behind it.** It renders whenever the card renders — but it cannot vouch
+   for the card on its own, or a MiLB player with no situational splits would
+   get a card holding one door. The card's existence test now reads "at least
+   one SOURCED door", and the list rides along.
+2. **The list's own fetch still needs the lineups pass.** Grouping by
+   `lineupSpot` is worth nothing if every row comes back with a null slot, and
+   `needsLineups` lives on the facet. So `facet(null)` — no group named — is the
+   list's own question: the same `kind`, with no `keep` narrowing it to a slot,
+   which plans the pass and keeps every row that HAS a slot. It is the narrowest
+   honest reading of "all the rows this list can describe".
+3. **A list door has no headline**, because there is no tapped line to quote.
+   Once a group is picked the headline is that entry's own line, verbatim —
+   which is the same contract every other door's headline keeps, one level in.
+
+### The lineups pass widened for nothing
+
+`fetchLineupStarts` returned a Map of gamePk to boolean. It now returns the
+1-based SLOT, or 0 for "played, did not start", and the two lineup doors derive
+their boolean from it. The arrays were already in batting order — index 0 is the
+leadoff man, checked against a boxscore's own `battingOrder` on gamePk 747043 —
+so the slot was there to be read. One pass, one memo, three doors.
+
+`lineupStart`'s semantics did not move: absent from the map is null ("nobody
+posted a card"), 0 is false, 1 through 9 is true. A 0 also means `lineupSpot` is
+**null**, not 0 — a bench appearance is not a tenth place in the order.
+
+### What #998 needs now
+
+**A descriptor and a name, and nothing else.** `venueId` and `venueName` are
+already on every row, `{ kind: 'venue', venueId }` is already a facet, and
+`order: 'games'` is already the other sort. Nothing in the list is slot-shaped:
+the fold, the sort, the sheet's two modes and the back control are all keyed off
+the descriptor. The one thing that issue still has to decide for itself is its
+own naming trap — a park's row is the source of its name, and its `ven`
+situation code is not (it returns nothing, recorded above).

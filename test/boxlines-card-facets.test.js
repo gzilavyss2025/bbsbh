@@ -17,12 +17,23 @@ import {
   careerSplitLine,
   doorCells,
   doorLine,
+  fetchDoorLabels,
   mergeCareerSplits,
 } from '../src/api/boxlines/careerSplits.js'
 import { facetPlan } from '../src/api/boxlines/facets.js'
 import { POSTSEASON } from '../src/api/boxlines/rows.js'
 
 const GROUPS = ['hitting', 'pitching']
+
+// A DOOR IS ONE OF TWO SHAPES (#1048). Most name a FACET outright — one
+// question, one sheet of rows. A few name a LIST: a run of groups too long to
+// be doors (the nine batting-order slots, #998's thirty-six ballparks), folded
+// from the gated rows, each group naming its own facet. The checks below that
+// are about a facet read the facet doors; the list doors have their own, and
+// everything a READER meets — a label, a kicker, a heading, a key — is checked
+// over both.
+const FACET_DOORS = CARD_FACETS.filter((r) => r.facet)
+const LIST_DOORS = CARD_FACETS.filter((r) => r.list)
 
 test('no door narrows the game log or pins an opponent', () => {
   // Either of those is the club facet's shape, and the club facet costs a fetch
@@ -47,7 +58,7 @@ test('every door filters rows or moves the game types, and the calendar does bot
   // the result down to their own month or weekday, which is exactly both
   // (ADR-0073). Doing both was never a fault — it was just a shape the card had
   // no use for until October had to mean October.
-  for (const entry of CARD_FACETS) {
+  for (const entry of FACET_DOORS) {
     const plan = facetPlan(entry.facet)
     const filters = typeof plan.keep === 'function'
     const moves = Array.isArray(plan.gameTypes)
@@ -103,7 +114,7 @@ test('each row-filtering door keeps a matching row and drops its opposite', () =
     lineupStart: [{ lineupStart: true }, { lineupStart: false }],
     cameIn: [{ lineupStart: false }, { lineupStart: true }],
   }
-  for (const entry of CARD_FACETS) {
+  for (const entry of FACET_DOORS) {
     const { keep } = facetPlan(entry.facet)
     if (!keep) continue
     const pair = cases[entry.key]
@@ -137,9 +148,20 @@ test('every door names exactly one source for its label', () => {
   // call) or a career under a game type (one call each). A door naming neither
   // renders no label and so never renders at all; one naming both would take
   // whichever the reader happened to write first.
+  //
+  // A LIST DOOR NAMES NONE, and that is not an omission (#1048). Its figures
+  // are folded from the gated rows, because the aggregate that looks like its
+  // label source counts something else: MLB's `b1`…`b9` count games with a
+  // plate appearance in a slot, the lineups count who STARTED there, and a door
+  // reading "Batting ninth: 18 G" over an EMPTY sheet is exactly the silent
+  // failure this file exists to prevent (ADR-0069).
   for (const entry of CARD_FACETS) {
     const sources = [entry.sitCode, entry.careerGameType, entry.fielding].filter(Boolean)
-    assert.equal(sources.length, 1, `${entry.key} names ${sources.length} label sources`)
+    assert.equal(
+      sources.length,
+      entry.list ? 0 : 1,
+      `${entry.key} names ${sources.length} label sources`,
+    )
   }
 })
 
@@ -199,7 +221,7 @@ test('a hitter is offered no started/relief door, which would keep nothing', () 
   // lineups — so the two kinds must not be confused for one another.
   const hitting = cardFacetsFor('hitting')
   assert.equal(
-    hitting.some((r) => r.facet.kind === 'started'),
+    hitting.some((r) => r.facet?.kind === 'started'),
     false,
   )
   const CALENDAR = ['m3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'w0', 'w1', 'w2', 'w3', 'w4', 'w5', 'w6']
@@ -215,6 +237,7 @@ test('a hitter is offered no started/relief door, which would keep nothing', () 
       ...CALENDAR,
       'lineupStart',
       'cameIn',
+      'order',
       'pinchHit',
       'postseason',
     ],
@@ -244,11 +267,11 @@ test('a pitcher is offered no lineup door: he is never on the card', () => {
   // it counts the games he STARTED on the mound, which is a different question
   // from the one this door asks. Pitchers keep `sp`/`rp`.
   assert.equal(
-    cardFacetsFor('pitching').some((r) => r.facet.kind === 'lineupStart'),
+    cardFacetsFor('pitching').some((r) => r.facet?.kind === 'lineupStart'),
     false,
   )
   assert.equal(
-    cardFacetsFor('hitting').some((r) => r.facet.kind === 'lineupStart'),
+    cardFacetsFor('hitting').some((r) => r.facet?.kind === 'lineupStart'),
     true,
   )
 })
@@ -257,7 +280,7 @@ test('a pitcher is offered no pinch-hitting door', () => {
   // `positions` is null on a pitcher's rows -- the hitting game log is the only
   // one that carries positionsPlayed -- so the facet would keep nothing.
   assert.equal(
-    cardFacetsFor('pitching').some((r) => r.facet.kind === 'pinchHit'),
+    cardFacetsFor('pitching').some((r) => r.facet?.kind === 'pinchHit'),
     false,
   )
 })
@@ -448,7 +471,7 @@ test('a door that spans the postseason says so on BOTH halves', () => {
   // ROWS'. Set one without the other and the door states a career it does not
   // open — 42 October games on the line, 16 behind it, and nothing on the page
   // to say why.
-  for (const entry of CARD_FACETS) {
+  for (const entry of FACET_DOORS) {
     assert.equal(
       Boolean(entry.spansPostseason),
       Boolean(entry.facet.postseason),
@@ -458,7 +481,7 @@ test('a door that spans the postseason says so on BOTH halves', () => {
   // The calendar doors, and only those: a home game in October is still a home
   // game, but "Home" is not a question about the date and its aggregate is the
   // regular season's.
-  const spanning = CARD_FACETS.filter((r) => r.spansPostseason).map((r) => r.facet.kind)
+  const spanning = FACET_DOORS.filter((r) => r.spansPostseason).map((r) => r.facet.kind)
   assert.deepEqual([...new Set(spanning)].sort(), ['month', 'weekday'])
   assert.equal(spanning.length, 15, 'eight months and seven weekdays')
 })
@@ -466,7 +489,7 @@ test('a door that spans the postseason says so on BOTH halves', () => {
 test('a spanning calendar facet asks the log for the four rounds as well', () => {
   // The umbrella 'P' must never reach the game log: a pitching log answers it
   // for every row and the sheet comes back empty (rows.js's POSTSEASON).
-  for (const entry of CARD_FACETS.filter((r) => r.spansPostseason)) {
+  for (const entry of FACET_DOORS.filter((r) => r.spansPostseason)) {
     const { gameTypes } = facetPlan(entry.facet)
     assert.deepEqual(gameTypes, ['R', 'F', 'D', 'L', 'W'], `${entry.key} asks for the wrong game types`)
   }
@@ -474,7 +497,7 @@ test('a spanning calendar facet asks the log for the four rounds as well', () =>
   // them go on sharing one join. The Postseason door is the exception and the
   // opposite case: it MOVES the game types rather than widening them, because
   // it is not a question about the regular season at all.
-  for (const entry of CARD_FACETS.filter((r) => !r.spansPostseason && r.key !== 'postseason')) {
+  for (const entry of FACET_DOORS.filter((r) => !r.spansPostseason && r.key !== 'postseason')) {
     const { gameTypes } = facetPlan(entry.facet)
     assert.ok(gameTypes == null, `${entry.key} widened the fetch without asking`)
   }
@@ -487,15 +510,90 @@ test('the month and weekday doors are a complete set, each numbered once', () =>
   // Built from a table rather than written out fifteen times, so the thing to
   // pin is that the table is whole: March through October, Sunday through
   // Saturday, no number twice and none missing.
-  const months = CARD_FACETS.filter((r) => r.facet.kind === 'month').map((r) => r.facet.month)
+  const months = FACET_DOORS.filter((r) => r.facet.kind === 'month').map((r) => r.facet.month)
   assert.deepEqual(months, [3, 4, 5, 6, 7, 8, 9, 10])
-  const days = CARD_FACETS.filter((r) => r.facet.kind === 'weekday').map((r) => r.facet.day)
+  const days = FACET_DOORS.filter((r) => r.facet.kind === 'weekday').map((r) => r.facet.day)
   assert.deepEqual(days, [0, 1, 2, 3, 4, 5, 6])
   // The situation code and the facet must name the SAME month. They come from
   // one table row, and this is what says the row was read in the right order.
-  for (const entry of CARD_FACETS.filter((r) => r.facet.kind === 'month')) {
+  for (const entry of FACET_DOORS.filter((r) => r.facet.kind === 'month')) {
     assert.equal(entry.sitCode, String(entry.facet.month), `${entry.key} asks MLB for a different month`)
   }
+})
+
+// THE LIST DOORS (#1048). A door that opens a LIST rather than a sheet of rows:
+// the nine batting-order slots today, #998's thirty-six ballparks next. The
+// descriptor is pure data for the same reason the rest of this registry is —
+// the sheet that renders it is .jsx, and the failure it would ship is silent.
+test('a list door carries a descriptor the sheet can actually fold with', () => {
+  assert.ok(LIST_DOORS.length, 'the registry has no list door')
+  for (const entry of LIST_DOORS) {
+    const { list } = entry
+    assert.equal(typeof list.groupBy, 'function', `${entry.key} needs a groupBy`)
+    assert.equal(typeof list.name, 'function', `${entry.key} needs a name`)
+    assert.equal(typeof list.facet, 'function', `${entry.key} needs a facet`)
+    assert.equal(typeof list.title, 'function', `${entry.key} needs a picked title`)
+    assert.ok(['key', 'games'].includes(list.order), `${entry.key} orders by "${list.order}"`)
+    // And it names no facet of its OWN: a list door has as many questions as it
+    // has groups, and the sheet asks one of them only once a reader picks.
+    assert.equal(entry.facet, undefined, `${entry.key} names a facet as well as a list`)
+  }
+})
+
+test("a list entry's facet round-trips through facetPlan, and discriminates", () => {
+  // The same check every other door gets, one level down: the descriptor builds
+  // a facet per group, and facetPlan must understand it. A typo in a `kind`
+  // here keeps nothing and opens an empty sheet in silence.
+  const order = CARD_FACETS.find((r) => r.key === 'order')
+  assert.ok(order, 'the batting-order door is missing')
+  for (let spot = 1; spot <= 9; spot++) {
+    const { keep, needsLineups, narrowsSplits, gameTypes } = facetPlan(order.list.facet(spot))
+    assert.equal(typeof keep, 'function', `spot ${spot} filters nothing`)
+    assert.equal(keep({ lineupSpot: spot }), true, `spot ${spot} drops its own row`)
+    assert.equal(keep({ lineupSpot: spot === 9 ? 1 : spot + 1 }), false, `spot ${spot} keeps another`)
+    // It reads the same lineups the two lineup doors do, and shares their pass.
+    assert.equal(needsLineups, true, `spot ${spot} would come back with no slots`)
+    // And it stays a door on THIS card: no club narrowing, no game-type move,
+    // so it goes on sharing the one join every other door is paying for.
+    assert.equal(narrowsSplits, false)
+    assert.equal(gameTypes, null)
+  }
+})
+
+test('the batting order lists nine slots, named in words, in order', () => {
+  const { list } = CARD_FACETS.find((r) => r.key === 'order')
+  assert.deepEqual(
+    [1, 2, 3, 4, 5, 6, 7, 8, 9].map((s) => list.name(s)),
+    [
+      'Batting first',
+      'Batting second',
+      'Batting third',
+      'Batting fourth',
+      'Batting fifth',
+      'Batting sixth',
+      'Batting seventh',
+      'Batting eighth',
+      'Batting ninth',
+    ],
+  )
+  // A batting order is a SEQUENCE, so the list reads down it rather than
+  // leading with the slot he hit in most.
+  assert.equal(list.order, 'key')
+  // It groups on the row's own slot, which is null for a game he did not start
+  // — and a null key drops the row, so a bench game is under no slot.
+  assert.equal(list.groupBy({ lineupSpot: 4 }), 4)
+  assert.equal(list.groupBy({ lineupSpot: null }), null)
+  // The sheet's heading once a slot is picked.
+  assert.equal(list.title('Yelich', 'Batting third'), 'Yelich, batting third')
+})
+
+test('a list door asks careerSplits for nothing at all', async () => {
+  // It names no source, so `fetchDoorLabels` must not go looking for one. This
+  // runs with no network and must still resolve: every branch in there is
+  // guarded by a source being named, so a card of list doors alone asks
+  // statsapi zero questions.
+  const labels = await fetchDoorLabels(592885, 'hitting', LIST_DOORS)
+  assert.equal(labels.size, 0)
 })
 
 // A gated row as boxLineRows builds it, trimmed to what a facet reads.

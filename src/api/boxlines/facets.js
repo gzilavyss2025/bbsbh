@@ -134,6 +134,36 @@ export function facetPlan(facet) {
       // NEITHER door, which is the app's degrade-gracefully rule: a game with
       // no lineup posted is not evidence that he came off the bench.
       return { ...plan, needsLineups: true, keep: (r) => r.lineupStart === Boolean(facet.value) }
+    case 'lineupSpot':
+      // WHERE HE HIT THAT DAY (#1048). The same lineup arrays the facet above
+      // reads, one question further in: they are already in BATTING ORDER —
+      // index 0 is the leadoff man, checked against a boxscore's own
+      // `battingOrder` on gamePk 747043 — so the slot costs nothing the start
+      // did not already cost, and the two share one pass.
+      //
+      // THIS IS NOT NINE DOORS, AND MLB'S OWN SPLIT IS WHY. `sitCodes=b1…b9`
+      // return clean career rows and count something else: a game with a PLATE
+      // APPEARANCE in that slot, which a pinch hitter earns in the slot he hit
+      // for. Yelich reads 18 at b9 and started there 0 times. A door labelled
+      // from the aggregate over rows built from the lineups would open EMPTY
+      // on the very slots a reader is most likely to tap, so the figures come
+      // from the rows instead and the nine live behind one door as a LIST
+      // (boxlines/fold.js, ADR-0069's 2026-09-16 amendment).
+      //
+      // NO SPOT NAMED is the list's own question: every row that HAS a slot,
+      // which is what the sheet asks for while it is listing. It still costs
+      // the lineups pass — without it every row comes back with a null slot and
+      // the list folds to nothing — and it keeps no more than the list can
+      // describe, so the widest this facet ever reaches is the games he
+      // started.
+      return {
+        ...plan,
+        needsLineups: true,
+        keep:
+          facet.spot == null
+            ? (r) => r.lineupSpot != null
+            : (r) => r.lineupSpot === Number(facet.spot),
+      }
     case 'pinchHit':
       // HE CAME UP OFF THE BENCH. The hitting game log's `positionsPlayed`
       // lists the positions he played in the ORDER he played them, so the

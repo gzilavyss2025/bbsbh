@@ -49,7 +49,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `test/boxlines-score-recovery.test.js` pins both halves.
   `facets.js` (spoiler-free) is the question: one tagged object — `club`,
   `venue`, `month`, `dayNight`, `weekday`, `side`, `started`, `pinchHit`,
-  `gameTypes` —
+  `lineupStart`, `lineupSpot`, `gameTypes` —
   becomes the `opponentId`/`gameTypes`/`keep` triple `rows.js` applies, and
   `keep` runs AFTER the gate, so a facet can only ever narrow a row set the
   gate approved. An unknown facet keeps nothing, never everything.
@@ -151,6 +151,24 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   layer, `test/boxlines-card-facets.test.js` pins every door against the same
   `facetPlan` the sheet calls, and `test/boxlines-rows.test.js` pins that
   `keep` cannot resurrect a row the cutoff or the Final check dropped.
+  **A LIST DOOR IS THE ONE WHOSE FIGURES ARE NOT MLB'S** (`fold.js`, #1048,
+  spoiler-free). Some questions have too many answers to be doors — the nine
+  spots in the batting order, #998's thirty-six ballparks — so one door opens a
+  LIST of groups, each opening its own rows. Its figures are folded from the
+  GATED ROWS, and that is forced rather than chosen: MLB's `b1`–`b9` count games
+  with a plate appearance in a slot where the lineups count who STARTED there
+  (Yelich reads 18 at `b9` against 0 starts), so a door labelled from the
+  aggregate would open an EMPTY sheet on the slots substitution concentrates in.
+  Folding the rows makes an entry and its rows the same games, counted once. Two
+  figures only — games and AVG, or games and ERA — because `LOG_FIELDS` carries
+  no `hitByPitch` or `sacFlies` and OBP/OPS cannot be computed honestly from
+  these rows at all. Innings are THIRDS, so the row carries MLB's own out count
+  (`counts.outs`) and the fold adds integers. A folded line stops where the rows
+  stop on a `?d=` page, which is what makes it agree with them; never relabel an
+  entry from `careerStatSplits` to "fix" that. The sheet asks `list.facet(null)`
+  — the same facet kind with no group named — for its listing pass, which is
+  what plans the lineups pass and keeps every row that HAS a group.
+  `test/boxlines-fold.test.js` pins the arithmetic.
   `vsClub.js` is now a one-line wrapper on `fetch.js` for the club facet, kept
   so the two shipped doors did not have to change.
   THE SCHEDULE IS ASKED BY gamePk FOR EVERY FACET, not per (club, season):

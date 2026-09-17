@@ -44,6 +44,7 @@
 // games), so day/night is read off the schedule record too.
 import { gamePath } from '../../lib/route.js'
 import { hitterLine, pitcherLine } from '../person/gameLog.js'
+import { ipToOuts } from '../rehab-policy.js'
 
 // "2024-09-29" -> "2024-09-28". Manual y/m/d, midday UTC, so a DST edge or a
 // local-timezone offset can never move the answer by a day.
@@ -196,17 +197,28 @@ function scoreOf(g, awayIsHis, recovered) {
 // The rows. `schedule` is the list of schedule game records for the splits'
 // gamePks (any order, extras ignored). Shape of a row:
 //   { season, date, gamePk, gameNumber, gameType, series, home, teamId,
-//     teamAbbr, opponentId, opponentAbbr, started, lineupStart, positions,
-//     line, won, runs, oppRuns, venueId, venueName, surface, dayNight,
-//     boxScorePath }
+//     teamAbbr, opponentId, opponentAbbr, started, lineupSpot, lineupStart,
+//     positions, counts, line, won, runs, oppRuns, venueId, venueName,
+//     surface, dayNight, boxScorePath }
 // `started` is null for hitters: the hitting game log carries no gamesStarted.
 // `positions` is null for pitchers, for the same reason in reverse.
 //
-// `lineupStart` answers the same question for a HITTER — was he on the card —
-// and it is null unless the caller handed over `lineupStarts`, the second,
-// narrow schedule pass fetch.js makes only for the two doors that need it. A
-// game the lineups could not answer for stays null and belongs to neither
-// side of that facet, rather than being counted as a bench appearance.
+// `lineupSpot` is WHERE HE HIT — 1 through 9 — and `lineupStart` is whether he
+// was on the card at all. Both come off ONE map, `lineupSlots`, which fetch.js
+// builds from the schedule's own `hydrate=lineups` for the three doors that
+// need it; both are null unless the caller handed it over. The arrays are
+// already in batting order, so the slot cost nothing the start did not
+// (fetch.js). Three answers, not two: absent from the map is "nobody posted a
+// card" (both null), 0 is "he played and did not start" (no slot, not a start),
+// and 1 through 9 is the slot he hit in. A game with no lineup is not evidence
+// that he came off the bench.
+//
+// `counts` is the smallest raw subset a LIST folds a line from (#1048) — at-bats
+// and hits for a bat, OUTS and earned runs for an arm. `line` above it is a
+// formatted string and adds up to nothing, and innings do not add as numbers:
+// "6.1" is six innings and one out, so the row stores MLB's own out count and a
+// fold adds integers (boxlines/fold.js). Every field is already in fetch.js's
+// LOG_FIELDS, so it costs no bytes.
 //
 // `keep` is a facet's row predicate (api/boxlines/facets.js) and is applied
 // AFTER the gate, never before, so no facet can widen what the gate allows:
@@ -219,7 +231,7 @@ export function boxLineRows({
   cutoff = null,
   gameTypes = REGULAR_SEASON,
   keep = null,
-  lineupStarts = null,
+  lineupSlots = null,
   recoveredScores = null,
 }) {
   const rows = []
@@ -246,6 +258,8 @@ export function boxLineRows({
     // scored still has no row, which is the same fail-closed answer as before.
     const { runs, oppRuns } = scoreOf(g, awayIsHis, recoveredScores?.get(s.game.gamePk))
     if (runs == null || oppRuns == null) continue
+    // 1 through 9, 0 for "played, did not start", or null for "no card posted".
+    const slot = lineupSlots?.has(s.game.gamePk) ? Number(lineupSlots.get(s.game.gamePk)) : null
     rows.push({
       season: Number(s.date.slice(0, 4)),
       date: s.date,
@@ -269,12 +283,23 @@ export function boxLineRows({
         group === 'hitting'
           ? (s.positionsPlayed ?? []).map((p) => p?.abbreviation).filter(Boolean)
           : null,
-      // WAS HE ON THE CARD? A Map gamePk -> boolean, built by fetch.js from
-      // the schedule's `hydrate=lineups`, or null when no door on this sheet
-      // asked. `has` rather than `get`, so a game the lineups did not cover is
-      // null (unknown) and not false (came off the bench).
-      lineupStart: lineupStarts?.has(s.game.gamePk) ? lineupStarts.get(s.game.gamePk) : null,
+      // WHERE HE HIT, AND WHETHER HE WAS ON THE CARD AT ALL — both off the one
+      // map fetch.js built from the schedule's `hydrate=lineups`, or null when
+      // no door on this sheet asked for it. `has` rather than `get`, so a game
+      // the lineups did not cover is null (unknown) and not false (came off
+      // the bench). A 0 is a game he played and did not start: he batted in no
+      // SLOT, so the spot is null — a bench appearance is not a tenth place in
+      // the order — while the start is a real `false`.
+      lineupSpot: slot > 0 ? slot : null,
+      lineupStart: slot == null ? null : slot > 0,
       line: group === 'pitching' ? pitcherLine(st) : hitterLine(st),
+      // THE RAW FIGURES A LIST FOLDS (#1048), and nothing more: `line` above is
+      // a string, and a list needs to add up a group of rows. Outs rather than
+      // innings, because innings are thirds and "6.1" + "1.2" is not 7.3.
+      counts:
+        group === 'pitching'
+          ? { outs: ipToOuts(st.inningsPitched), earnedRuns: Number(st.earnedRuns) || 0 }
+          : { atBats: Number(st.atBats) || 0, hits: Number(st.hits) || 0 },
       won: runs != null && oppRuns != null ? runs > oppRuns : Boolean(s.isWin),
       runs,
       oppRuns,
