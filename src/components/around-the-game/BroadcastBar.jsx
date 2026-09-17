@@ -141,12 +141,18 @@ export function StatusMeter({ fresh, limited, down, label }) {
 // fails AA, so the outline carries it: an unfilled bar reads as "counted
 // differently" with no colour at all.
 //
-// TWO OPTIONAL MARKS, BOTH FOR A CHART THAT HAS ROWS UNDER IT. `mark` inks one
-// column in clay — the column whose own rows the board goes on to print, so
-// the reader can see which slice of the distribution they are about to read.
-// It is a TWO-way split and it is carried by position as much as by hue (the
-// marked column is the one the rows name), which is what keeps it clear of the
-// three-way-by-colour trap the diverging bar records above.
+// TWO OPTIONAL MARKS. `tone` inks one column differently from its neighbours:
+// `mark` is clay, for the column whose own rows the board goes on to print, so
+// a reader can see which slice of the distribution they are about to read;
+// `soft` is the second shade of the SAME hue, for a pair of bars that are two
+// halves of one question rather than a thing and its alarm. Clay is this
+// palette's alarm token and "after a loss" is a neutral category, so a pair
+// drawn navy-against-clay would call one of them a problem.
+//
+// Either way the split is TWO-way and never rests on hue alone: the marked
+// column is the one the rows name, and a pair of bars carries its own figures
+// and its own labels. That is what keeps this clear of the three-way-by-colour
+// trap the diverging bar records above.
 //
 // `note` prints a figure over one column. Nothing here can be hovered — a
 // `title` tooltip is invisible on a touch screen and is not used in this app —
@@ -185,7 +191,7 @@ export function ColumnChart({ columns, max, ticks = [], rules = [], label, size 
             <span key={c.key} className="colchart__col">
               <span
                 className={`colchart__bar${c.hollow ? ' colchart__bar--hollow' : ''}${
-                  c.mark ? ' colchart__bar--mark' : ''
+                  c.tone ? ` colchart__bar--${c.tone}` : ''
                 }`}
                 style={{ height: height(c.value) }}
               >

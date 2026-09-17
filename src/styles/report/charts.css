@@ -309,3 +309,29 @@
   line-height: var(--lh-snug);
   color: var(--text-caption);
 }
+
+/* THE SECOND SHADE OF THE SAME HUE, for a pair of bars that are two halves of
+   one question. Clay is this palette's alarm token and "after a loss" is a
+   neutral category rather than a status, so navy against clay would call one
+   half of the pair a problem. Soft ink is a step lighter in the same family,
+   and the pair carries its own figures and its own labels, so nothing about
+   which bar is which rests on the shade. */
+.colchart__bar--soft {
+  background: var(--ink-2);
+}
+
+/* THREE PANELS THAT SHARE ONE SCALE, which is the only way the second reads as
+   an answer to the first. Stacked on a phone and three across once there is
+   room — never two-plus-one, which reads as a pair and an afterthought when the
+   third panel is the one that settles the question. */
+.colchart__trio {
+  display: grid;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+@media (min-width: 700px) {
+  .colchart__trio {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

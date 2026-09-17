@@ -79,7 +79,7 @@ export function RanOut({ summary, clubs }) {
     label: r.extras ? `${r.inning}+` : String(r.inning),
     value: r.n,
     hollow: r.extras,
-    mark: r.mark,
+    tone: r.mark ? 'mark' : undefined,
     note: r.mark || r.n === tallest ? commas(r.n) : null,
   }))
 

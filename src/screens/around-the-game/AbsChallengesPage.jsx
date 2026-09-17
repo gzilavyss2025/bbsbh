@@ -27,6 +27,7 @@ import { ClubBoard } from './abs/ClubBoard.jsx'
 import { RanOut } from './abs/RanOut.jsx'
 import { LongestRuns } from './abs/LongestRuns.jsx'
 import { HowOften } from './abs/HowOften.jsx'
+import { AfterAWin } from './abs/AfterAWin.jsx'
 import { PlayerBoards } from './abs/PlayerBoards.jsx'
 import { UmpireBoard } from './abs/UmpireBoard.jsx'
 import { MissBands } from './abs/MissBands.jsx'
@@ -196,6 +197,7 @@ export function AbsChallengesPage() {
           <LongestRuns summary={summary} clubs={clubs} />
           <HowOften exposure={exposureFor(exposure, shown)} />
           <UmpireBoard summary={summary} />
+          <AfterAWin summary={summary} data={data} level={shown} />
           <MissBands summary={summary} />
           <BiggestOverturn summary={summary} clubs={clubs} />
 
