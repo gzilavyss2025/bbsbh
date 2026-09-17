@@ -80,6 +80,10 @@
       "class": "spoiler-free",
       "why": "Static abs-challenges.json — the season board for the ABS Challenge System, over Final MLB and Triple-A games. A challenge is a ball-strike judgment, not a run: it says a pitch was on the other side of the line, never who scored. Same footing as umpires.js's accuracy aggregates. The LIVE per-game challenge state, which can flip a called third strike, is challenges.js and stays reveal-only. No SealBox."
     },
+    "around-the-game/absExposure.js": {
+      "class": "spoiler-free",
+      "why": "Static abs-exposure.json — one row per player per level: plate appearances, pitches seen, innings caught, and how many reviews he called for. The DENOMINATOR half of the ABS report, shipped beside absChallenges.js rather than inside it because it is 418 KB of roster sweep behind one section. Season totals over completed games; no run, no margin and no game's result can be read back out of a plate-appearance count. No SealBox."
+    },
     "around-the-game/bullpen.js": {
       "class": "spoiler-free",
       "why": "Re-runs api/workload.js’s availability rules across all thirty clubs. Inherits that module’s classification unchanged: completed appearances only, as-of date excludes today, so no in-progress line can leak. No SealBox."
@@ -135,6 +139,10 @@
     "boxlines/fetch.js": {
       "class": "cutoff-gated",
       "why": "The Box Lines sheet's fetch half for every facet: yearByYear for the seasons, one trimmed game log per season (never past the cutoff's day-before, via rows.js's plan), one schedule call per chunk of the gamePks those splits named, and one linescore call for each of the handful of those records that came back with no score (#1031 — a game MLB left stuck at Postponed after it was played). Asking the schedule by gamePk is what keeps it safe without a date bound — the only gamePks that exist came from already-gated splits — and the recovery list is narrower still: rows.js's own `scorelessGamePks` runs the SAME gate, so a game at or after the cutoff, or one the schedule does not call Final, is never asked about. A miss or a failure leaves the row dropped exactly as before. Every row it returns went through boxLineRows, so it inherits rows.js's footing whole — it computes nothing rows.js does not."
+    },
+    "boxlines/fold.js": {
+      "class": "spoiler-free",
+      "why": "The fold behind a LIST door on the Game lines card (#1048): it groups rows boxlines/rows.js already gated, names each group, and folds two figures over it — games, and AVG or ERA. It reads no score (`runs` and `oppRuns` are on every row it folds and it never looks at them), no date and no reveal mark, and it can only describe a set the gate approved. Its figures come from the ROWS and never from a career aggregate, which is the point: MLB's `b1`-`b9` count games with a plate appearance in a slot where the lineups count who started there, so a door labelled from the aggregate would open an empty sheet. A folded line therefore stops where the rows stop on a `?d=` page, which is what makes an entry and its rows agree by construction."
     },
     "boxlines/rows.js": {
       "class": "cutoff-gated",

@@ -587,21 +587,57 @@ for each generator; the reader modules:
   table — `callSplitAnomalies` exists to surface the day that stops holding
   rather than to assert it silently. Spoiler-free: a challenge is a ball-strike
   judgment, not a run.
-  THE GENERATOR WRITES A SECOND FILE THIS MODULE DOES NOT READ:
-  `public/data/abs-exposure.json`, one row per player per level carrying how
+  THE GENERATOR WRITES A SECOND FILE THIS MODULE DOES NOT READ, and
+  `around-the-game/absExposure.js` below is what reads it:
+  `public/data/abs-exposure.json`, one row per player-season per level carrying how
   much baseball he saw (pitches, plate appearances, innings caught, starts
   behind the plate), his challenges split by the job he was doing, and the
   rates those make. It is separate because the report page shows none of it and
   the file is twice the size of the one the page fetches — folded in, every
   visitor downloaded 895 KB instead of 206 KB. A board that comes to need the
-  rates (issues #1063, #1066, #1069) adds its own `staticJson` reader here;
-  until then nothing fetches it. Two things it knows that `byPlayer` cannot:
+  rates adds its own `staticJson` reader here, which is what #1066 did. Two
+  things it knows that `byPlayer` cannot:
   it holds the men who NEVER challenged, who leave no challenge row at all and
   are the finding the list exists for, and its two rates are NOT the same kind
   of number — `per1000Pitches` is a real count of pitches a batter stood in
   against, `per9Caught` a stand-in, because nothing in statsapi counts pitches
   RECEIVED. They are named apart so no surface can sort them into one list.
   Why it is a second file rather than a key in the first: ADR-0076.
+  ONE ROW PER PLAYER-SEASON, FOLDED ACROSS CLUBS, which is right for a floor —
+  a man traded in July clears 200 plate appearances on his season, not on
+  either half of it — and is why `team_id`, which the sweep's own rows carry,
+  does not survive into the file. The team-hub card needs it back;
+  `docs/abs-challenges.md` §6 records what that would cost.
+- `around-the-game/absExposure.js` — the DENOMINATOR reader behind
+  /abs-challenges's "How often is normal": how often a man is even exposed to a
+  call he could argue. It ships the two league baselines (one challenge every
+  40 plate appearances, one every 8 innings caught) and — the point of the
+  section — the DISTRIBUTION behind them, because the mean describes almost
+  nobody: among the MLB hitters clearing 200 plate appearances the rate runs
+  2.13 to 12.11 per thousand pitches, six of them never challenged all season,
+  and one man called for 32 in 1,085. Three things it knows that a reader of
+  the JSON alone would not. The league figure covers EVERY man while the
+  histogram's floors cover only the qualifiers — different populations on
+  purpose, since a floor applied to the league rate would report the habits of
+  regulars as everyone's. A batter has TWO denominators (plate appearances for
+  "one every N", pitches seen for the rate) and reading the second off the
+  first gives an answer four times too big that still looks like a rate. And
+  `binPosition` places a chart's median and mean rules from their VALUES
+  through the same bin edges the labels are written from, because a mark placed
+  by a counted index drifts from its own label the first time the data moves.
+  The written report is `docs/abs-challenges.md`. Spoiler-free: plate
+  appearances, pitches seen and innings caught over completed games.
+  IT READS A SECOND FILE TOO: `public/data/abs-exposure-clubs.json`, the same
+  sweep cut by `team_id` instead of folded across clubs, behind the team hub's
+  challenge card (`clubChallengeBoard`). 95 KB against the folded list's 418,
+  fetched by one club's Numbers tab and by nothing else, because the fold that
+  makes a 200-plate-appearance floor correct on a SEASON is the same fold that
+  drops the club a traded man played for. It ships counts and denominators and
+  no rates: the reader divides with the same `EXPOSURE_KINDS` the league board
+  uses, so a club's figure and the league's cannot come apart. MLB only. Two
+  things it knows that the folded file cannot: which club a traded man's
+  pitches belong to, and — by holding every club's rows — the league line the
+  card draws its dots against, without fetching the 418 KB list to get it.
 - `around-the-game/clubs.js` — the one club-identity lookup those boards share,
   off the static `teams.json`. `clubShort` (Padres) is what a board ROW uses
   and `clubName` (San Diego Padres) what prose uses; the full name in a row

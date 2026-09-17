@@ -26,7 +26,13 @@ import { BoxLinesSheet } from './BoxLinesSheet.jsx'
 // was always for — the sheet's headline, verbatim — and becomes the button's
 // accessible name, because a face is columns and a screen reader should hear
 // the sentence.
-export function BoxLinesDoor({ className = '', label, face = null, sheet }) {
+//
+// `headline` IS THAT LABEL unless a host says otherwise, and the one host that
+// does is a LIST door (#1048): it has no career line to quote, because its
+// figures are folded from the rows it opens rather than fetched as an
+// aggregate. It passes null, and the sheet heads its list with nothing rather
+// than repeating its own title back at the reader.
+export function BoxLinesDoor({ className = '', label, face = null, headline = label, sheet }) {
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -47,7 +53,7 @@ export function BoxLinesDoor({ className = '', label, face = null, sheet }) {
           </>
         )}
       </button>
-      {open && <BoxLinesSheet {...sheet} headline={label} onClose={() => setOpen(false)} />}
+      {open && <BoxLinesSheet {...sheet} headline={headline} onClose={() => setOpen(false)} />}
     </>
   )
 }

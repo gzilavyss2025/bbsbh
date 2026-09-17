@@ -214,8 +214,11 @@ don't run these by hand.
   `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
   old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
-- `gen-abs-challenges.mjs` → `public/data/abs-challenges.json` **and
-  `public/data/abs-exposure.json`** — every ABS
+- `gen-abs-challenges.mjs` → `public/data/abs-challenges.json`,
+  **`public/data/abs-exposure.json`** and
+  **`public/data/abs-exposure-clubs.json`** — **the written report is
+  `docs/abs-challenges.md`: the answer to each of the seven questions
+  `/abs-challenges` asks, with the numbers and every caveat.** Every ABS
   (Automated Ball-Strike) CHALLENGE of the season, at both levels that run the
   system: MLB (sportId 1, 2026 is its first season) and Triple-A (sportId 11,
   which has run it for several). SQLite-backed (`abs-challenges` group,
@@ -277,16 +280,29 @@ don't run these by hand.
   the first shape and cannot be paid for — 815094 team 102 and 816599 team 416,
   checked row by row against their feeds, with the other club in each game
   coming out legal — so they are named in `TOLERATED` rather than floored away.
-  TWO FILES COME OUT OF EVERY RUN, and the split is a size decision.
+  THREE FILES COME OUT OF EVERY RUN, and the split is a size decision each
+  time.
   `abs-challenges.json` (250 KB) is what `/abs-challenges` fetches;
-  `abs-exposure.json` (418 KB) is the per-player DENOMINATOR list, which no
-  surface reads yet. Folded into the report file they took it from 198 KB to
+  `abs-exposure.json` (418 KB) is the per-player DENOMINATOR list, read by the
+  page's "How often is normal" section through
+  `src/api/around-the-game/absExposure.js` and fetched only by that page. Folded into the report file they took it from 198 KB to
   895 KB — 369 KB for the list itself and 321 KB for ten exposure fields on
   every one of 1,553 `byPlayer` rows — on a file every visitor downloads whole
   and shows none of it on. So `byPlayer` carries a player's CHALLENGE totals
   only, `abs-exposure.json` carries every denominator and every rate, and the
   board that comes to need them (issues #1063, #1066, #1069) fetches its own
-  file. A man with no opportunity at all is dropped rather than shipped as
+  file. IT SHIPS ONE ROW PER PLAYER-SEASON, folded across clubs — a man traded
+  in July clears a 200-plate-appearance floor on his season, not on either half
+  of it — so `team_id`, which the sweep's own rows carry, does not survive the
+  fold. The team-hub card needs it back, which is what the THIRD file is:
+  `abs-exposure-clubs.json`, the same sweep cut by `team_id`, 733 MLB rows
+  against the fold's 659 and 95 KB against its 418. It ships counts and
+  denominators and NO rates — `per1000Pitches` prints as eleven significant
+  figures, and three a row was 210 KB of a first draft that came out at 465.
+  MLB only: `EXPOSURE_CLUB_LEVELS` is `['MLB']`, because shipping rows before a
+  surface draws them is the thing ADR-0076 is against. `docs/abs-challenges.md`
+  §6 argues whether Triple-A is worth adding.
+  A man with no opportunity at all is dropped rather than shipped as
   nulls: 1,963 of the 3,521 on a fullSeason roster are pitchers who never
   batted and never caught, and a nought divides to no rate exactly as a null
   does. The rule and the reasoning are ADR-0076.

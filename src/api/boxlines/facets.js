@@ -43,13 +43,26 @@ export function monthOf(iso) {
   return Number(String(iso).slice(5, 7))
 }
 
+// A facet a LIST asks TWICE: once per group, and once with NO group named —
+// the sheet's own listing pass, which must come back with every row the list
+// can describe. Naming no group therefore keeps every row that HAS one, which
+// is never "none" (an empty list) and never "all" (a list with a group for the
+// rows that belong to none). Both list facets are built from this, so the
+// second one cannot forget the case the first one needed.
+function groupKeep(key, read) {
+  return key == null ? (r) => read(r) != null : (r) => read(r) === key
+}
+
 // The plan for one facet, or the everything-plan when `facet` is null.
 // `narrowsSplits` tells fetch.js which of its two paths this facet earns: the
 // club path filters the game log first, everything else joins the career once.
-// The game types a calendar door asks the log for. Already normalized to the
-// four rounds rather than the umbrella 'P', which a pitching log answers for
-// every row and so empties the sheet (rows.js's POSTSEASON).
-function calendarTypes(facet) {
+// The game types a facet asks the log for when it means to count EVERY kind of
+// game — the calendar doors, and since #1048/#998 the two lists. Already
+// normalized to the four rounds rather than the umbrella 'P', which a pitching
+// log answers for every row and so empties the sheet (rows.js's POSTSEASON).
+// Null when the facet did not ask, which leaves the fetch on its default
+// regular season and on the join every other door is sharing.
+function widenedTypes(facet) {
   return facet.postseason ? [...REGULAR_SEASON, ...POSTSEASON] : null
 }
 
@@ -61,7 +74,24 @@ export function facetPlan(facet) {
       // The only facet that narrows the fetch: one club, a handful of games.
       return { ...plan, opponentId: facet.opponentId ?? null, narrowsSplits: true }
     case 'venue':
-      return { ...plan, keep: (r) => r.venueId === facet.venueId }
+      // WHICH PARK, off the SCHEDULE record's own venue and never off opponent
+      // + isHome, which is wrong at a neutral site — London, Mexico City, a
+      // hurricane relocation. One park's games, or, with no park named, every
+      // row that has one: this facet backs the By ballpark LIST (#998) as well
+      // as a single park's sheet.
+      //
+      // IT COUNTS OCTOBER, like the calendar doors and for the same reason: a
+      // park does not stop being Dodger Stadium because the game was a division
+      // series. Measured 2026-09-17 — Betts at Globe Life Field is 9
+      // regular-season games and 16 postseason ones, so the regular season
+      // alone would state 9 of 25. No park is ever ADDED by this (every
+      // postseason park was one he also played at in the summer, over three
+      // careers checked); the counts are what it corrects.
+      return {
+        ...plan,
+        gameTypes: widenedTypes(facet),
+        keep: groupKeep(facet.venueId ?? null, (r) => r.venueId),
+      }
     case 'surface':
       // GRASS OR ARTIFICIAL TURF, as the park was THAT SEASON. The schedule
       // record carries it under `hydrate=venue(fieldInfo)` and it is
@@ -85,12 +115,12 @@ export function facetPlan(facet) {
       // series — so a calendar door marked `postseason` widens the FETCH to
       // both and keeps whatever lands in its month. The predicate is unchanged;
       // it never asked what kind of game it was.
-      return { ...plan, gameTypes: calendarTypes(facet), keep: (r) => monthOf(r.date) === Number(facet.month) }
+      return { ...plan, gameTypes: widenedTypes(facet), keep: (r) => monthOf(r.date) === Number(facet.month) }
     case 'dayNight':
       return { ...plan, keep: (r) => r.dayNight === facet.value }
     case 'weekday':
       // Same for a Sunday in the World Series (see 'month' above).
-      return { ...plan, gameTypes: calendarTypes(facet), keep: (r) => weekdayOf(r.date) === Number(facet.day) }
+      return { ...plan, gameTypes: widenedTypes(facet), keep: (r) => weekdayOf(r.date) === Number(facet.day) }
     case 'side':
       // `isHome` is on the split too, but the row's `home` is derived from the
       // SCHEDULE's away/home clubs, which is the same fact checked against the
@@ -134,6 +164,40 @@ export function facetPlan(facet) {
       // NEITHER door, which is the app's degrade-gracefully rule: a game with
       // no lineup posted is not evidence that he came off the bench.
       return { ...plan, needsLineups: true, keep: (r) => r.lineupStart === Boolean(facet.value) }
+    case 'lineupSpot':
+      // WHERE HE HIT THAT DAY (#1048). The same lineup arrays the facet above
+      // reads, one question further in: they are already in BATTING ORDER —
+      // index 0 is the leadoff man, checked against a boxscore's own
+      // `battingOrder` on gamePk 747043 — so the slot costs nothing the start
+      // did not already cost, and the two share one pass.
+      //
+      // THIS IS NOT NINE DOORS, AND MLB'S OWN SPLIT IS WHY. `sitCodes=b1…b9`
+      // return clean career rows and count something else: a game with a PLATE
+      // APPEARANCE in that slot, which a pinch hitter earns in the slot he hit
+      // for. Yelich reads 18 at b9 and started there 0 times. A door labelled
+      // from the aggregate over rows built from the lineups would open EMPTY
+      // on the very slots a reader is most likely to tap, so the figures come
+      // from the rows instead and the nine live behind one door as a LIST
+      // (boxlines/fold.js, ADR-0069's 2026-09-16 amendment).
+      //
+      // NO SPOT NAMED is the list's own question: every row that HAS a slot,
+      // which is what the sheet asks for while it is listing. It still costs
+      // the lineups pass — without it every row comes back with a null slot and
+      // the list folds to nothing — and it keeps no more than the list can
+      // describe, so the widest this facet ever reaches is the games he
+      // started.
+      //
+      // IT COUNTS OCTOBER TOO, and the lineups are there to say where he hit:
+      // every postseason game carries a full card, measured over three careers
+      // on 2026-09-17 (Yelich 27 of 27, Betts 91 of 91, Arenado 8 of 8). That
+      // mattered more here than for a park — a game with no lineup has a null
+      // slot and would leave the list silently.
+      return {
+        ...plan,
+        gameTypes: widenedTypes(facet),
+        needsLineups: true,
+        keep: groupKeep(facet.spot == null ? null : Number(facet.spot), (r) => r.lineupSpot),
+      }
     case 'pinchHit':
       // HE CAME UP OFF THE BENCH. The hitting game log's `positionsPlayed`
       // lists the positions he played in the ORDER he played them, so the

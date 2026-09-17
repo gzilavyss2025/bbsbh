@@ -48,6 +48,7 @@ import {
   summarizeLevel,
   buildExport,
   buildExposureExport,
+  buildExposureClubsExport,
   MISS_BANDS,
 } from '../scripts/lib/abs/index.mjs'
 import {
@@ -64,7 +65,11 @@ import {
   callSplitAnomalies,
   callSplitOffBy,
   missBands,
+  inningSeries,
+  roleInnings,
+  roleSpan,
   ranOutNights,
+  ranOutSeries,
   streakBoard,
   streakRoles,
   inGameLossCap,
@@ -1247,6 +1252,76 @@ test('buildExposureExport: levels are split, and nothing on file is an empty obj
 })
 
 // --------------------------------------------------------------------------
+// buildExposureClubsExport — the same denominators, split by club.
+// --------------------------------------------------------------------------
+// The fold above is right for a season floor and wrong for a club board, and
+// this cut is the difference. Two of these pin what the fold costs.
+
+test('buildExposureClubsExport: a traded man is TWO rows, each with the club he was there for', () => {
+  // The fold sums him into one 350-plate-appearance season. Here he is 250 for
+  // one club and 100 for the other, and his challenges follow the club he made
+  // them for — which is what the team hub card's attribution rests on.
+  const rows = [
+    row({ seq: 0, team_id: 100, player_id: 11 }),
+    row({ seq: 1, team_id: 101, player_id: 11 }),
+    row({ seq: 2, team_id: 101, player_id: 11 }),
+  ]
+  const out = buildExposureClubsExport(
+    rows,
+    [
+      seenRow({ team_id: 100, pitches: 1000, plate_appearances: 250 }),
+      seenRow({ team_id: 101, pitches: 400, plate_appearances: 100 }),
+    ],
+    { season: 2026, generatedAt: 'now' },
+  )
+  const first = out.levels.MLB.byTeam['100']
+  const second = out.levels.MLB.byTeam['101']
+  assert.equal(first.length, 1)
+  assert.equal(first[0].plateAppearances, 250)
+  assert.equal(first[0].asBatter, 1)
+  assert.equal(second[0].plateAppearances, 100)
+  assert.equal(second[0].asBatter, 2)
+  // Neither row carries the other's numbers, and the season is the sum.
+  assert.equal(first[0].pitches + second[0].pitches, 1400)
+})
+
+test('buildExposureClubsExport: counts and denominators, and NOT the rates', () => {
+  // `per1000Pitches` prints as eleven significant figures. Three a row over
+  // 1,740 rows was 210 KB of the first draft, for arithmetic the reader does
+  // in one line.
+  const out = buildExposureClubsExport([row({})], [seenRow({})], { season: 2026 })
+  const p = out.levels.MLB.byTeam['100'][0]
+  assert.deepEqual(Object.keys(p).sort(), [
+    'asBatter', 'asCatcher', 'catcherInnings', 'name', 'pitches', 'plateAppearances', 'playerId',
+  ])
+})
+
+test('buildExposureClubsExport: a man with no opportunity at that club is dropped', () => {
+  const out = buildExposureClubsExport([], [
+    seenRow({}),
+    seenRow({ team_id: 100, player_id: 13, name: 'A Pitcher', pitches: null, plate_appearances: null }),
+    seenRow({ team_id: 100, player_id: 14, name: 'Another', pitches: 0, plate_appearances: 0 }),
+  ], { season: 2026 })
+  assert.deepEqual(out.levels.MLB.byTeam['100'].map((p) => p.playerId), [11])
+})
+
+test('buildExposureClubsExport: MLB only, because no surface draws Triple-A yet', () => {
+  // ADR-0076: shipping rows before a surface reads them is the thing the split
+  // was made to stop. The loop is per level, so the day a board wants Triple-A
+  // it is one word here.
+  const out = buildExposureClubsExport([], [
+    seenRow({}),
+    seenRow({ level: 'AAA', team_id: 400, player_id: 21, name: 'A Triple-A Hitter' }),
+  ], { season: 2026 })
+  assert.deepEqual(Object.keys(out.levels), ['MLB'])
+  const both = buildExposureClubsExport([], [
+    seenRow({}),
+    seenRow({ level: 'AAA', team_id: 400, player_id: 21, name: 'A Triple-A Hitter' }),
+  ], { season: 2026, levels: ['MLB', 'AAA'] })
+  assert.equal(both.levels.AAA.byTeam['400'].length, 1)
+})
+
+// --------------------------------------------------------------------------
 // The reader's boards.
 // --------------------------------------------------------------------------
 const data = buildExport(
@@ -1653,6 +1728,78 @@ test('RAN_OUT_EARLY_THROUGH: the reader and the export agree on what "early" is'
   assert.equal(perClub, 1)
 })
 
+// A season whose second club-game does not empty until the ELEVENTH. The club
+// loses one in the third, carries the other into extras, and the extra-inning
+// top-up leaves it holding exactly one to lose there — which is how a FIRST
+// emptying lands past regulation at all.
+const extrasData = buildExport(
+  [
+    row({ seq: 0, outcome: 'fail', inning: 2 }),
+    row({ seq: 1, outcome: 'fail', inning: 2 }),
+    row({ game_pk: 2, date: '2026-04-02', seq: 0, outcome: 'fail', inning: 3 }),
+    row({ game_pk: 2, date: '2026-04-02', seq: 1, outcome: 'fail', inning: 11 }),
+  ],
+  [
+    game({ challenges: 2 }),
+    game({ game_pk: 2, date: '2026-04-02', challenges: 2, final_inning: 11 }),
+  ],
+  { season: 2026, generatedAt: 'now' },
+)
+
+test('ranOutSeries: everything past the ninth is ONE column, re-divided and not averaged', () => {
+  const nights = ranOutNights(summaryFor(extrasData, 'MLB'))
+  assert.deepEqual(
+    nights.byInning.map((b) => b.inning),
+    [2, 11],
+  )
+  const series = ranOutSeries(nights)
+  // Two columns, and the eleventh is not one of them.
+  assert.equal(series.length, 2)
+  assert.deepEqual(
+    series.map((r) => r.inning),
+    [2, 10],
+  )
+  const pooled = series[1]
+  assert.equal(pooled.extras, true)
+  assert.equal(pooled.n, 1)
+  // The pooled share is the pooled count over every emptying, which is what
+  // the nine columns beside it already are — never the mean of its members.
+  assert.equal(pooled.share, 0.5)
+  assert.equal(series[0].extras, false)
+})
+
+test('ranOutSeries: the marked column is the one whose rows the board prints', () => {
+  const series = ranOutSeries(ranOutNights(summaryFor(ranOutData, 'MLB')))
+  // No extras in this fixture, so nothing is pooled and nothing is hollow.
+  assert.equal(series.length, 2)
+  assert.ok(series.every((r) => r.extras === false))
+  assert.deepEqual(
+    series.map((r) => r.mark),
+    [true, false],
+  )
+})
+
+test('ranOutSeries: a band that is itself in extras marks the pooled column', () => {
+  // The pooled column is numbered REGULATION_INNINGS + 1, so a band in the
+  // ELEVENTH never equals it — the mark has to follow the pooling rather than
+  // the inning number, or the board would print rows no column points at.
+  const series = ranOutSeries({
+    earliest: 11,
+    emptied: 2,
+    clubGames: 8,
+    byInning: [{ inning: 11, n: 2, share: 1 }],
+  })
+  assert.equal(series.length, 1)
+  assert.equal(series[0].inning, 10)
+  assert.equal(series[0].extras, true)
+  assert.equal(series[0].mark, true)
+})
+
+test('ranOutSeries: nothing on file draws nothing', () => {
+  assert.deepEqual(ranOutSeries(null), [])
+  assert.deepEqual(ranOutSeries({ byInning: [] }), [])
+})
+
 // --------------------------------------------------------------------------
 // streaksByPlayer / streakBoards — runs of being right, and runs of being wrong.
 // --------------------------------------------------------------------------
@@ -2004,4 +2151,109 @@ test('momentum: the standard errors ship with the gap, not under it', () => {
   const out = momentum(summaryFor(data, 'MLB'))
   assert.equal(typeof out.strict.errors, 'number')
   assert.ok(Number.isFinite(out.strict.errors))
+})
+
+// --------------------------------------------------------------------------
+// inningSeries / roleInnings / roleSpan — the columns the inning chart draws.
+// --------------------------------------------------------------------------
+// The whole point of the chart is that the RAW COUNT misleads: the ninth
+// barely beats the eighth on counts and nearly doubles it per chance, because
+// fewer clubs reach the ninth still able to argue. These pin the two ways that
+// correction can be thrown away — pooling the extras by averaging their rates,
+// and dividing a role by its own half of the chances instead of the club's.
+
+const inn = (over) => ({
+  inning: 1, n: 100, success: 50, rate: 0.5, chances: 1000, perChance: 0.1, ...over,
+})
+const seriesOf = (rows) => inningSeries({ byInning: rows })
+
+test('inningSeries: nine regulation columns and one for everything after', () => {
+  const rows = []
+  for (let i = 1; i <= 9; i += 1) rows.push(inn({ inning: i }))
+  rows.push(inn({ inning: 10 }), inn({ inning: 11 }), inn({ inning: 12 }))
+  const series = seriesOf(rows)
+  assert.equal(series.length, 10)
+  assert.deepEqual(series.map((r) => r.inning), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+  assert.equal(series.filter((r) => r.extras).length, 1)
+  assert.equal(series[9].n, 300)
+  assert.equal(series[9].chances, 3000)
+})
+
+test('inningSeries: the pooled rates are RE-DIVIDED, never averaged', () => {
+  // The tenth is a real inning; the thirteenth is eleven chances. A mean of the
+  // two rates weights them equally and prints 30%; the pooled count over the
+  // pooled chances is 10.9%, which is what the nine columns beside it are.
+  const series = seriesOf([
+    inn({ inning: 1 }),
+    inn({ inning: 10, n: 100, success: 40, chances: 1000, perChance: 0.1, rate: 0.4 }),
+    inn({ inning: 13, n: 10, success: 2, chances: 20, perChance: 0.5, rate: 0.2 }),
+  ])
+  const pooled = series.find((r) => r.extras)
+  assert.equal(pooled.n, 110)
+  assert.equal(pooled.chances, 1020)
+  assert.ok(Math.abs(pooled.perChance - 110 / 1020) < 1e-12)
+  // Not the mean of 0.1 and 0.5.
+  assert.ok(pooled.perChance < 0.2)
+  assert.ok(Math.abs(pooled.rate - 42 / 110) < 1e-12)
+})
+
+test('inningSeries: a season that never went to extras draws nine columns', () => {
+  const series = seriesOf([inn({ inning: 1 }), inn({ inning: 9 })])
+  assert.equal(series.length, 2)
+  assert.equal(series.some((r) => r.extras), false)
+  assert.deepEqual(inningSeries(null), [])
+})
+
+test('inningSeries: an extras column with no chances on file has no rate, not a zero', () => {
+  const series = seriesOf([inn({ inning: 1 }), inn({ inning: 10, n: 0, success: 0, chances: 0 })])
+  const pooled = series.find((r) => r.extras)
+  assert.equal(pooled.perChance, null)
+  assert.equal(pooled.rate, null)
+})
+
+test('roleInnings: regulation only, because the pooled column belongs to the club chart', () => {
+  const summary = {
+    byInningRole: [
+      { inning: 9, role: 'catcher', n: 10, success: 5, chances: 100, perChance: 0.1 },
+      { inning: 10, role: 'catcher', n: 1, success: 0, chances: 8, perChance: 0.125 },
+      { inning: 9, role: 'batter', n: 8, success: 4, chances: 100, perChance: 0.08 },
+    ],
+  }
+  assert.deepEqual(roleInnings(summary, 'catcher').map((r) => r.inning), [9])
+  assert.equal(roleInnings(summary, 'pitcher').length, 0)
+  assert.equal(roleInnings(null, 'catcher').length, 0)
+})
+
+test('roleInnings: the roles are divided by the CLUB’s chances, so they add back up to it', () => {
+  // The invariant the panels are read on. Each role's row carries the club's
+  // own chances, so the three per-chance figures sum to the club's — a panel
+  // drawn on a role's own half of the chances would sum to twice it.
+  const summary = {
+    byInning: [{ inning: 1, n: 30, success: 15, rate: 0.5, chances: 300, perChance: 0.1 }],
+    byInningRole: [
+      { inning: 1, role: 'batter', n: 12, success: 6, chances: 300, perChance: 0.04 },
+      { inning: 1, role: 'catcher', n: 17, success: 8, chances: 300, perChance: 17 / 300 },
+      { inning: 1, role: 'pitcher', n: 1, success: 1, chances: 300, perChance: 1 / 300 },
+    ],
+  }
+  const club = inningSeries(summary)[0].perChance
+  const roles = ['batter', 'catcher', 'pitcher']
+    .map((r) => roleInnings(summary, r)[0].perChance)
+    .reduce((a, b) => a + b, 0)
+  assert.ok(Math.abs(roles - club) < 1e-12)
+})
+
+test('roleSpan: the two numbers that let a stat line replace a panel', () => {
+  const summary = {
+    byInningRole: [
+      { inning: 1, role: 'pitcher', n: 2, success: 1, chances: 1000, perChance: 0.0018 },
+      { inning: 5, role: 'pitcher', n: 3, success: 1, chances: 1000, perChance: 0.0031 },
+      // An extra inning, which the span must not reach into.
+      { inning: 11, role: 'pitcher', n: 1, success: 0, chances: 10, perChance: 0.1 },
+    ],
+  }
+  assert.deepEqual(roleSpan(summary, 'pitcher'), { low: 0.0018, high: 0.0031 })
+  // Nothing to measure means no sentence, rather than an empty one.
+  assert.equal(roleSpan(summary, 'catcher'), null)
+  assert.equal(roleSpan(null, 'pitcher'), null)
 })

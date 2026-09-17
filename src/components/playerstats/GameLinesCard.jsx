@@ -90,10 +90,17 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
   // A door with no games behind it does not exist: a hitter who never reached
   // October has no Postseason door, a March call-up no March door, and a MiLB
   // player no doors at all.
+  //
+  // A LIST DOOR IS THE EXCEPTION, and it has to be (#1048): it names no label
+  // source, so there is no figure here to test, and the only way to know
+  // whether it has groups behind it would be to make the fetch it exists to
+  // defer. It renders whenever the card does — but it cannot vouch for the card
+  // on its own, or a MiLB player with no situational splits at all would get a
+  // card holding one door.
   const doors = rows
     .map((r) => ({ row: r, stat: data.get(r.key) }))
-    .filter(({ stat }) => stat && Number(stat.gamesPlayed) > 0);
-  if (!doors.length) return null;
+    .filter(({ row, stat }) => row.list || (stat && Number(stat.gamesPlayed) > 0));
+  if (!doors.some(({ row }) => !row.list)) return null;
 
   const columns = DOOR_COLUMNS[group] ?? DOOR_COLUMNS.hitting;
   const emphasis = DOOR_EMPHASIS[group] ?? DOOR_EMPHASIS.hitting;
@@ -102,7 +109,8 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
     personId,
     playerSurname,
     group,
-    facet: row.facet,
+    facet: row.facet ?? null,
+    list: row.list ?? null,
     kicker: row.kicker,
     title: row.title(playerSurname),
     footNote: row.footNote ?? null,
@@ -112,7 +120,28 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
   // One door as a row of the table. `label` is still the whole career as a
   // sentence — the sheet's headline and the button's accessible name — while
   // the face is that same sentence in the columns above it.
-  const door = (row, stat, sub) => (
+  const door = (row, stat, sub) =>
+    row.list ? (
+      // A LIST DOOR has no five figures to print — its groups do, and they are
+      // folded from the rows behind it. So its name takes the whole row and the
+      // chevron keeps its track: the reader is promised a list, not a line.
+      <li className="gamelines__row" key={row.key}>
+        <BoxLinesDoor
+          className="gamelines__door gamelines__door--list"
+          label={row.label}
+          headline={null}
+          face={
+            <>
+              <span className="gamelines__name">{row.label}</span>
+              <span className="gamelines__chev" aria-hidden="true">
+                ›
+              </span>
+            </>
+          }
+          sheet={sheetFor(row)}
+        />
+      </li>
+    ) : (
     <li className="gamelines__row" key={row.key}>
       <BoxLinesDoor
         className="gamelines__door"

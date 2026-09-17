@@ -175,21 +175,23 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
     'Stakes',
   ])
 
-  // A pitcher who has reached October and pitched in every month gets nine
-  // doors STANDING — Home, Road, On grass, On turf, Day, Night, Started, In
-  // relief, Postseason — and fifteen more folded into two families, the eight
-  // months and the seven weekdays (GameLinesCard.jsx). A folded door is not in
-  // the DOM at all, which is what the second count says. MiLB service returns
-  // no rows for these codes and a door with no career row drops out on its own,
-  // so this also says he is being read as a major leaguer. He gets no lineup
-  // pair: a pitcher is never on the batting card.
+  // A pitcher who has reached October and pitched in every month gets ten
+  // doors STANDING — Home, Road, On grass, On turf, By ballpark, Day, Night,
+  // Started, In relief, Postseason — and fifteen more folded into two families,
+  // the eight months and the seven weekdays (GameLinesCard.jsx). A folded door
+  // is not in the DOM at all, which is what the second count says. MiLB service
+  // returns no rows for these codes and a door with no career row drops out on
+  // its own, so this also says he is being read as a major leaguer. By ballpark
+  // is the exception and always stands: it is a LIST door, it names no label
+  // source, and there is no figure to test it by (#998). He gets no lineup pair
+  // and no spot-in-the-order list: a pitcher is never on the batting card.
   const doors = card.locator('.gamelines__door')
-  await expect(doors).toHaveCount(9)
+  await expect(doors).toHaveCount(10)
   await expect(card.locator('.gamelines__fam')).toHaveCount(2)
   await openFamily(card, 'By month')
-  await expect(doors).toHaveCount(17)
+  await expect(doors).toHaveCount(18)
   await openFamily(card, 'By day of the week')
-  await expect(doors).toHaveCount(24)
+  await expect(doors).toHaveCount(25)
 
   const home = card.getByRole('button', { name: /^Home: / })
   const label = await home.getAttribute('aria-label')
@@ -553,4 +555,247 @@ test('the surface doors split a career, and the rows never exceed the door', asy
     expect(await grassSheet.locator('.boxline:not(.boxline--skel)').count()).toBeGreaterThan(turfRows)
     await page.keyboard.press('Escape')
   }
+})
+
+// THE LIST DOOR (#1048): "By spot in the order". The one door on this card that
+// opens on GROUPS rather than on rows, because the nine slots cannot be nine
+// doors — MLB's `b1`…`b9` count games with a plate appearance in a slot and the
+// lineups count who STARTED there, so a door labelled from the aggregate would
+// open an empty sheet on the very slots substitution concentrates in
+// (ADR-0069). The figures are folded from the gated rows instead, which is what
+// this spec holds: the list has entries, an entry opens the rows it counted,
+// every row is still behind the page's own cutoff, and Back returns to the list.
+test('the batting-order door opens a list, and a slot opens its own rows', async ({ page }) => {
+  await page.goto(`${YELICH}?d=${PLAYER_CUTOFF}`)
+  const card = page.locator('.gamelines')
+  await card.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await card.count()) === 0) {
+    test.skip(true, 'this player has no MLB situational splits on file today')
+    return
+  }
+
+  // It prints no career line: it names no label source, because the only
+  // aggregate that could label it counts something else.
+  const door = card.getByRole('button', { name: 'By spot in the order' })
+  await expect(door).toHaveCount(1)
+  await door.click()
+
+  const sheet = page.locator('.boxlines')
+  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · by spot in the order')
+  // No headline over a list: there is no tapped line to quote.
+  await expect(sheet.locator('.boxlines__headline')).toHaveCount(0)
+  await expect
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+
+  const entries = sheet.locator('.boxlines-entry')
+  const slots = await entries.count()
+  expect(slots, 'a regular has hit in more than one spot').toBeGreaterThan(1)
+  expect(slots, 'there are nine spots in a batting order').toBeLessThanOrEqual(9)
+  // Each entry counts games and prints the rate folded from them.
+  const first = entries.first()
+  const name = await first.locator('.boxlines-entry__name').textContent()
+  const games = Number(await first.locator('.boxlines-entry__fig').first().textContent())
+  const rate = await first.locator('.boxlines-entry__fig').last().textContent()
+  expect(games).toBeGreaterThan(0)
+
+  // Tapping it shows the rows it counted — no request, the join is memoized.
+  await first.click()
+  await expect(sheet.locator('.boxlines__kicker')).toHaveText(`Game lines · ${name}`)
+  // THE PICKED GROUP GETS THE WHOLE LINE, folded from the very rows under it —
+  // the entry had room for two figures, this has room for twelve. Counts first,
+  // then the slash line.
+  const cells = await sheet.evaluate((el) =>
+    Object.fromEntries(
+      [...el.querySelectorAll('.boxlines__stats .stat')].map((c) => [
+        c.querySelector('.stat__k').textContent,
+        c.querySelector('.stat__v').textContent,
+      ]),
+    ),
+  )
+  expect(Object.keys(cells)).toEqual(['G', 'PA', 'H', 'HR', 'RBI', 'BB', 'K', 'SB', 'AVG', 'OBP', 'SLG', 'OPS'])
+  // AND IT IS THE SAME FOLD THE ENTRY PRINTED. The entry said "692 G, .283";
+  // the grid it opened must not say 693 or .284. They are two renderings of one
+  // sum, and this is the only place a reader sees both.
+  expect(Number(cells.G), 'the grid and the entry disagree about the games').toBe(games)
+  expect(cells.AVG).toBe(rate)
+  // A rate is a rate and a count is a count — three places with no leading zero
+  // for the slash line, whole numbers for what happened.
+  for (const k of ['AVG', 'OBP', 'SLG']) expect(cells[k]).toMatch(/^\.\d{3}$/)
+  expect(cells.OPS).toMatch(/^\d?\.\d{3}$/)
+  for (const k of ['PA', 'H', 'HR', 'RBI', 'BB', 'K', 'SB']) expect(cells[k]).toMatch(/^\d+$/)
+  await expect
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+  // EVERY ROW IN ONE READ. A leadoff man's slot holds hundreds of games, and a
+  // locator call per row is a round trip per row — enough to run this test past
+  // its timeout before it has checked half of them.
+  const hrefs = await sheet.evaluate((el) =>
+    [...el.querySelectorAll('.boxline:not(.boxline--skel)')].map((li) =>
+      li.querySelector('a')?.getAttribute('href'),
+    ),
+  )
+  expect(hrefs.length, 'a slot opens the games behind it').toBeGreaterThan(0)
+  // AND THE ENTRY COUNTED EXACTLY THESE GAMES. Every other door on this card
+  // takes its figure from an MLB aggregate and cannot be held to its own rows;
+  // a list entry is FOLDED FROM them, so here the two must match to the game.
+  expect(hrefs.length, `the entry counted ${games} games and opened ${hrefs.length}`).toBe(games)
+  // THE GATE STILL RUNS FIRST. A list folds rows it was already handed, so
+  // every row here is behind the page's own `?d=`, the same as every other door.
+  for (const [i, href] of hrefs.entries()) {
+    expect(href, `row ${i} links to no box score`).toBeTruthy()
+    const [, mmddyyyy] = href.match(/^\/(\d{8})\//)
+    const iso = `${mmddyyyy.slice(4)}-${mmddyyyy.slice(0, 2)}-${mmddyyyy.slice(2, 4)}`
+    expect(iso < PLAYER_CUTOFF, `row ${i} is dated ${iso}, not before ${PLAYER_CUTOFF}`).toBe(true)
+  }
+
+  // Back returns to the list, with every entry it had.
+  await sheet.getByRole('button', { name: /Back/ }).click()
+  await expect(sheet.locator('.boxlines-entry')).toHaveCount(slots)
+  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · by spot in the order')
+
+  // Escape still closes the whole sheet, and focus returns to the door.
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.boxlines')).toHaveCount(0)
+  await expect(door).toBeFocused()
+
+  // A pitcher is never on the batting card, so he is offered no list.
+  await page.goto(`${PETERSON}?d=${PLAYER_CUTOFF}`)
+  const pitcherCard = page.locator('.gamelines')
+  await pitcherCard.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await pitcherCard.count()) > 0) {
+    await expect(pitcherCard.getByRole('button', { name: 'By spot in the order' })).toHaveCount(0)
+  }
+})
+
+// THE BALLPARK LIST (#998). The second list door, and the one the list shape was
+// built general for: a career is 36 parks, which cannot be 36 doors. MLB has no
+// aggregate to label them with either — `sitCodes=ven` returns nothing, three
+// ways over — so the entries are folded from the rows, most games first.
+test('the ballpark door opens a list, most games first, and a park opens its rows', async ({ page }) => {
+  await page.goto(`${YELICH}?d=${PLAYER_CUTOFF}`)
+  const card = page.locator('.gamelines')
+  await card.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await card.count()) === 0) {
+    test.skip(true, 'this player has no MLB situational splits on file today')
+    return
+  }
+
+  const door = card.getByRole('button', { name: 'By ballpark' })
+  await expect(door).toHaveCount(1)
+  await door.click()
+
+  const sheet = page.locator('.boxlines')
+  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · by ballpark')
+  await expect
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+
+  // A career's parks. Read in ONE pass: a list this long is a round trip per
+  // entry otherwise, which is what ran the batting-order spec past its timeout.
+  const parks = await sheet.evaluate((el) =>
+    [...el.querySelectorAll('.boxlines-entry')].map((b) => ({
+      name: b.querySelector('.boxlines-entry__name').textContent,
+      games: Number(b.querySelector('.boxlines-entry__fig').textContent),
+    })),
+  )
+  expect(parks.length, 'a career is played at many parks').toBeGreaterThan(5)
+  // MOST GAMES FIRST. A career's parks are not a sequence, so the one he has
+  // played at most leads — and his own home park is about a quarter of a career.
+  for (let i = 1; i < parks.length; i++) {
+    expect(
+      parks[i].games <= parks[i - 1].games,
+      `${parks[i].name} (${parks[i].games}) sits under ${parks[i - 1].name} (${parks[i - 1].games})`,
+    ).toBe(true)
+  }
+  // A PARK IS NAMED ONCE. Grouping on the drifting NAME rather than the stable
+  // id would split Miller Park from American Family Field, which is one park.
+  expect(new Set(parks.map((p) => p.name)).size).toBe(parks.length)
+
+  // EVERY ENTRY IS REACHABLE — a 35-park list is taller than any phone, so the
+  // SHEET has to be what scrolls. It is a column flex container, so the list
+  // panel is free to be squashed to whatever height is left, and the panel clips
+  // what it cannot fit because a rounded panel needs `overflow: hidden` to cut
+  // its corners. Together those hid 21 of 35 parks behind a box with no
+  // scrollbar, under a sheet that had nothing to scroll. The fix is one line of
+  // CSS (`flex: 0 0 auto`) and this is what keeps it.
+  const lastPark = sheet.locator('.boxlines-entry').last()
+  await lastPark.scrollIntoViewIfNeeded()
+  await expect(lastPark, 'the last park in the list cannot be scrolled to').toBeInViewport()
+  await expect(sheet.locator('.boxlines__foot')).toBeInViewport()
+  // And the panel is not hiding rows inside itself: what it holds, it shows.
+  expect(
+    await sheet.evaluate((el) => {
+      const ul = el.querySelector('.boxlines__list')
+      return ul.scrollHeight - Math.ceil(ul.getBoundingClientRect().height)
+    }),
+    'the list panel is clipping its own entries',
+  ).toBeLessThanOrEqual(1)
+  await sheet.evaluate((el) => {
+    el.scrollTop = 0
+  })
+
+  // The park he knows best opens the games he played there, and the entry
+  // counted exactly those.
+  await sheet.locator('.boxlines-entry').first().click()
+  await expect(sheet.locator('.boxlines__kicker')).toHaveText(`Game lines · ${parks[0].name}`)
+  await expect(sheet.locator('.boxlines__title')).toContainText(parks[0].name)
+  await expect
+    .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+  const hrefs = await sheet.evaluate((el) =>
+    [...el.querySelectorAll('.boxline:not(.boxline--skel)')].map((li) =>
+      li.querySelector('a')?.getAttribute('href'),
+    ),
+  )
+  expect(hrefs.length, `the entry counted ${parks[0].games} and opened ${hrefs.length}`).toBe(parks[0].games)
+  // OCTOBER IS IN IT. A park does not stop being his park because the game was
+  // a division series, so the list counts every kind of game — and a postseason
+  // row says so, wearing the round it was played in. His own home park is the
+  // one park a contender is certain to have October games at.
+  const rounds = await sheet.evaluate((el) =>
+    [...el.querySelectorAll('.boxline__series')].map((p) => p.textContent),
+  )
+  expect(rounds.length, 'no postseason row at his most-played park').toBeGreaterThan(0)
+  for (const r of rounds) expect(['WC', 'DS', 'LCS', 'WS']).toContain(r)
+  for (const [i, href] of hrefs.entries()) {
+    const [, mmddyyyy] = href.match(/^\/(\d{8})\//)
+    const iso = `${mmddyyyy.slice(4)}-${mmddyyyy.slice(0, 2)}-${mmddyyyy.slice(2, 4)}`
+    expect(iso < PLAYER_CUTOFF, `row ${i} is dated ${iso}, not before ${PLAYER_CUTOFF}`).toBe(true)
+  }
+
+  await sheet.getByRole('button', { name: /Back/ }).click()
+  await expect(sheet.locator('.boxlines-entry')).toHaveCount(parks.length)
+  await page.keyboard.press('Escape')
+
+  // A PITCHER GETS THIS ONE. He plays at parks; he is just never on the batting
+  // card, which is why he gets no spot-in-the-order list.
+  await page.goto(`${PETERSON}?d=${PLAYER_CUTOFF}`)
+  const pitcherCard = page.locator('.gamelines')
+  await pitcherCard.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
+  if ((await pitcherCard.count()) === 0) return
+  await expect(pitcherCard.getByRole('button', { name: 'By spot in the order' })).toHaveCount(0)
+  const pitcherDoor = pitcherCard.getByRole('button', { name: 'By ballpark' })
+  await expect(pitcherDoor).toHaveCount(1)
+  await pitcherDoor.click()
+  const arm = page.locator('.boxlines')
+  await expect
+    .poll(async () => (await arm.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+  // His column is ERA, not AVG — the list names the group's own two figures.
+  await expect(arm.locator('.boxlines__listcol')).toHaveText(['G', 'ERA'])
+  expect(await arm.locator('.boxlines-entry').count()).toBeGreaterThan(1)
+  // And an arm's picked line is an arm's vocabulary, not a bat's: no PA, no
+  // slash line, and the two rates that survive a dozen games at one park.
+  await arm.locator('.boxlines-entry').first().click()
+  await expect
+    .poll(async () => (await arm.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+  const armCells = await arm.evaluate((el) =>
+    [...el.querySelectorAll('.boxlines__stats .stat')].map((c) => c.querySelector('.stat__k').textContent),
+  )
+  expect(armCells).toEqual(['G', 'GS', 'IP', 'H', 'R', 'ER', 'HR', 'BB', 'K', 'ERA', 'WHIP', 'K/9'])
+  // INNINGS ARE THIRDS, and the cell says so: a third is .1 or .2, never .3.
+  const ip = await arm.locator('.boxlines__stats .stat').nth(2).locator('.stat__v').textContent()
+  expect(ip, `${ip} is not innings`).toMatch(/^\d+\.[012]$/)
 })

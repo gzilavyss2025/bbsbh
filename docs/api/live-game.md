@@ -49,7 +49,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `test/boxlines-score-recovery.test.js` pins both halves.
   `facets.js` (spoiler-free) is the question: one tagged object — `club`,
   `venue`, `month`, `dayNight`, `weekday`, `side`, `started`, `pinchHit`,
-  `gameTypes` —
+  `lineupStart`, `lineupSpot`, `gameTypes` —
   becomes the `opponentId`/`gameTypes`/`keep` triple `rows.js` applies, and
   `keep` runs AFTER the gate, so a facet can only ever narrow a row set the
   gate approved. An unknown facet keeps nothing, never everything.
@@ -151,6 +151,43 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   layer, `test/boxlines-card-facets.test.js` pins every door against the same
   `facetPlan` the sheet calls, and `test/boxlines-rows.test.js` pins that
   `keep` cannot resurrect a row the cutoff or the Final check dropped.
+  **A LIST DOOR IS THE ONE WHOSE FIGURES ARE NOT MLB'S** (`fold.js`, #1048,
+  spoiler-free). Some questions have too many answers to be doors — the nine
+  spots in the batting order (#1048) and a career's thirty-six ballparks (#998) —
+  so one door opens a LIST of groups, each opening its own rows. Its figures are folded from the
+  GATED ROWS, and that is forced rather than chosen: MLB's `b1`–`b9` count games
+  with a plate appearance in a slot where the lineups count who STARTED there
+  (Yelich reads 18 at `b9` against 0 starts), so a door labelled from the
+  aggregate would open an EMPTY sheet on the slots substitution concentrates in.
+  Folding the rows makes an entry and its rows the same games, counted once. Two
+  figures in the LIST (games, and AVG or ERA) and **twelve in the group a reader
+  picks** — `foldStats`: a hitter's G/PA/H/HR/RBI/BB/K/SB then AVG/OBP/SLG/OPS,
+  a pitcher's G/GS/IP/H/R/ER/HR/BB/K then ERA/WHIP/K/9. Counts first, rates
+  last. On-base needs `hitByPitch` and `sacFlies`, so `LOG_FIELDS.hitting` asks
+  for those and `plateAppearances` (+16%, 22.0 -> 25.5 KB on a season log,
+  measured) and `LOG_FIELDS.pitching` asks for `homeRuns` (a ballpark's whole
+  question). TOTAL BASES is BUILT from the extra-base hits — MLB sends it on an
+  aggregate, never on a game log. Innings are THIRDS, so the row carries MLB's
+  own out count (`counts.outs`) and every rate divides by that, never by a
+  summed "6.1". The rates are pinned against MLB's own published strings,
+  including its OPS rounding (each half to three places, THEN added). A folded line stops where the rows
+  stop on a `?d=` page, which is what makes it agree with them; never relabel an
+  entry from `careerStatSplits` to "fix" that. The sheet asks `list.facet(null)`
+  — the same facet kind with no group named — for its listing pass, which is
+  what plans the lineups pass and keeps every row that HAS a group.
+  A list facet asked with NO group named — `{ kind: 'venue', venueId: null }` —
+  is the listing pass, and keeps every row that HAS a group. **Both lists count
+  October** (`postseason: true` on the facet, so `widenedTypes` moves the fetch
+  to `R,F,D,L,W`): a park does not stop being Dodger Stadium because the game
+  was a division series. Betts at Globe Life Field is 9 regular-season games and
+  25 with the 2020 World Series. A list door must NOT set `spansPostseason` —
+  that widens a LABEL's fetch and a list has no label source. **A park's id is
+  stable and its NAME drifts inside one career** (id 32 is Miller Park for 185 of
+  Yelich's games and American Family Field for 372), so a park list groups on the
+  ID and names from the group's NEWEST row; `/api/v1/venues` is the wrong answer,
+  returning SPONSOR names unseasoned and omitting parks with `&season=`.
+  `sitCodes=ven` returns nothing at all, three ways over.
+  `test/boxlines-fold.test.js` pins the arithmetic.
   `vsClub.js` is now a one-line wrapper on `fetch.js` for the club facet, kept
   so the two shipped doors did not have to change.
   THE SCHEDULE IS ASKED BY gamePk FOR EVERY FACET, not per (club, season):

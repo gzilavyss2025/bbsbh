@@ -49,6 +49,7 @@ test('the club facet is the only one that narrows the game log', () => {
     'pinchHit',
     'surface',
     'lineupStart',
+    'lineupSpot',
   ]) {
     assert.equal(facetPlan({ kind }).narrowsSplits, false, `${kind} must not narrow the log`)
   }
@@ -189,4 +190,94 @@ test('a game with no lineup is on neither side of the lineup facet', () => {
   // A pitcher's row never carries one at all — the same shape as unknown.
   assert.equal(started(row({ lineupStart: undefined })), false)
   assert.equal(bench(row({ lineupStart: undefined })), false)
+})
+
+test('a slot facet keeps that spot in the order and no other', () => {
+  // #1048. The nine slots are a LIST behind one door, not nine doors, because
+  // MLB's own `bN` aggregate counts something else — see ADR-0069 — so the
+  // figures come from the rows and the rows come from here.
+  const third = facetPlan({ kind: 'lineupSpot', spot: 3 }).keep
+  assert.equal(third(row({ lineupSpot: 3 })), true)
+  assert.equal(third(row({ lineupSpot: 4 })), false)
+  assert.equal(third(row({ lineupSpot: 1 })), false)
+  // A game he did not start, and a game with no card posted, both read null —
+  // and null belongs to no slot. Counting either as a slot would put a bench
+  // appearance under "batting third".
+  assert.equal(third(row({ lineupSpot: null })), false)
+  assert.equal(third(row({ lineupSpot: undefined })), false)
+  // The nine each keep their own and drop the one below.
+  for (let spot = 1; spot <= 9; spot++) {
+    const keep = facetPlan({ kind: 'lineupSpot', spot }).keep
+    assert.equal(keep(row({ lineupSpot: spot })), true, `spot ${spot} dropped its own row`)
+    assert.equal(keep(row({ lineupSpot: spot === 1 ? 9 : spot - 1 })), false, `spot ${spot} kept another`)
+  }
+})
+
+test('a slot facet with NO slot is the list itself: every row that has one', () => {
+  // The sheet in list mode asks this. It must not narrow to a slot (there is
+  // none yet) and it must still cost the lineups pass, or every row comes back
+  // with a null slot and the list folds to nothing.
+  const plan = facetPlan({ kind: 'lineupSpot', spot: null })
+  assert.equal(plan.needsLineups, true)
+  assert.equal(plan.keep(row({ lineupSpot: 1 })), true)
+  assert.equal(plan.keep(row({ lineupSpot: 9 })), true)
+  // It is not "every row": a bench game has no slot to list him under.
+  assert.equal(plan.keep(row({ lineupSpot: null })), false)
+})
+
+test('the slot facet costs the same second pass the lineup doors do', () => {
+  // It reads the same nine names a side. Sharing `needsLineups` is what lets
+  // the list and the two lineup doors share ONE pass over a card.
+  assert.equal(facetPlan({ kind: 'lineupSpot', spot: 5 }).needsLineups, true)
+  assert.equal(facetPlan({ kind: 'lineupSpot', spot: 5 }).narrowsSplits, false)
+  assert.equal(facetPlan({ kind: 'lineupSpot', spot: 5 }).gameTypes, null)
+})
+
+test('a venue facet with NO park is the ballpark list itself', () => {
+  // #998's listing pass, the same shape the slot facet's is. It must keep every
+  // row that HAS a park — not none, which empties the list, and not all, which
+  // would put a row with no venue under some park.
+  const plan = facetPlan({ kind: 'venue', venueId: null })
+  assert.equal(plan.keep(row({ venueId: 32 })), true)
+  assert.equal(plan.keep(row({ venueId: 15 })), true)
+  assert.equal(plan.keep(row({ venueId: null })), false)
+  // And naming a park still narrows to it alone.
+  const one = facetPlan({ kind: 'venue', venueId: 32 }).keep
+  assert.equal(one(row({ venueId: 32 })), true)
+  assert.equal(one(row({ venueId: 15 })), false)
+  assert.equal(one(row({ venueId: null })), false)
+  // It costs no second pass: a park is on the schedule record the join already
+  // holds, unlike a slot in the order.
+  assert.equal(plan.needsLineups, false)
+})
+
+test('a list facet marked postseason asks the log for October too', () => {
+  // The rule ADR-0069 set for the calendar doors, applied to the two lists: a
+  // park does not stop being Dodger Stadium because the game was a division
+  // series. Measured 2026-09-17 — Betts at Globe Life Field is 9 regular-season
+  // games and 16 postseason ones, so the regular season alone states 9 of 25.
+  for (const facet of [
+    { kind: 'venue', venueId: 32, postseason: true },
+    { kind: 'venue', venueId: null, postseason: true },
+    { kind: 'lineupSpot', spot: 3, postseason: true },
+    { kind: 'lineupSpot', spot: null, postseason: true },
+  ]) {
+    const { gameTypes } = facetPlan(facet)
+    assert.deepEqual(gameTypes, ['R', 'F', 'D', 'L', 'W'], `${facet.kind} asks for the wrong types`)
+    // NEVER the umbrella 'P': a pitching log answers it as every row's type and
+    // the type filter then drops all of them (rows.js's POSTSEASON).
+    assert.equal(gameTypes.includes('P'), false)
+  }
+})
+
+test('a list facet without the flag still reads the regular season alone', () => {
+  // The widening is opt-in per facet, so a future list that should not span
+  // October simply does not say so — and the single-park sheet the lineup page
+  // could open keeps its own answer.
+  for (const facet of [
+    { kind: 'venue', venueId: 32 },
+    { kind: 'lineupSpot', spot: 3 },
+  ]) {
+    assert.equal(facetPlan(facet).gameTypes, null, `${facet.kind} widened without asking`)
+  }
 })
