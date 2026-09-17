@@ -1,8 +1,9 @@
-// Shared card-data builder for the link-preview edge layer. Both functions —
-// api/preview.js (injects <meta> tags the crawler reads) and api/og.js
-// (renders the 1200×630 image) — resolve a deep-link route to the same handful
-// of display strings here, so the words on the card and the picture behind it
-// can't drift.
+// Shared card-data builder for the link-preview edge layer. api/preview.js
+// injects the <meta> tags the crawler reads, resolving a deep-link route to a
+// handful of display strings here. The picture behind those words is the one
+// static file for every route (see `ogUrl` below); the per-route renderer that
+// used to draw it — api/og.js, an @vercel/og function — is DELETED, not merely
+// unreferenced. See docs/adr/0012-dynamic-link-previews.md.
 //
 // This is still the ONE place the app talks to statsapi from the server side,
 // never the app itself — the SPA fetches every byte of game data directly from
@@ -18,8 +19,8 @@
 // `buildCard`: a club's active roster is what makes /team/{id}/roster worth
 // crawling and is the link graph the rest of this site has never had, but the
 // card and its image do not need it. So it is a separate export that
-// api/preview.js alone calls, in parallel with buildCard, and api/og.js goes on
-// making exactly the one request it makes today.
+// api/preview.js calls in parallel with buildCard, leaving buildCard's own
+// request count untouched.
 //
 // Everything here degrades to `null` on any failure, and the caller falls back
 // to the app's static home-page card, so a statsapi hiccup can never break a
@@ -116,13 +117,13 @@ async function resolveGame(apiDate, matchup) {
 // absolute URL on `origin` -- the live host, so previews work on any
 // deploy/preview URL, not just the pinned production domain.
 
-// TEMPORARY: every card points at the STATIC default image rather than a
-// per-route api/og.js render. That function is untouched and still correct;
-// nothing calls it any more. See docs/adr/0012-dynamic-link-previews.md.
+// Every card points at the STATIC default image. There is no per-route render
+// any more: api/og.js is deleted, along with the embedded font and logo bytes
+// it alone read. See docs/adr/0012-dynamic-link-previews.md.
 //
-// WHY. One card costs ~400ms of CPU -- Satori laying the card out, then resvg
+// WHY. One card cost ~400ms of CPU -- Satori laying the card out, then resvg
 // rasterising a 1200x630 PNG. Nothing about a shared link makes that worth
-// paying, but scripts/warm-previews.mjs pays it ~855 times a night, warming
+// paying, but scripts/warm-previews.mjs paid it ~855 times a night, warming
 // today's slate: three sections per game, both clubs, and every player on all
 // thirty active rosters. Measured on 2026-09-15, /api/og was 885 invocations
 // and 6 minutes of CPU in twelve hours, against ~8 seconds for all twelve Node
@@ -131,8 +132,10 @@ async function resolveGame(apiDate, matchup) {
 //
 // What a shared link KEEPS is the part that carries the information: its own
 // title, description, alt text and canonical, all built per route below. Only
-// the picture is now shared between them. Revert this one function to restore
-// per-route art.
+// the picture is shared between them. Restoring per-route art now means
+// WRITING THE RENDERER BACK, which is the point: test/cards.test.js fails the
+// moment a card names a dynamic renderer again, so the CPU has to be spent on
+// purpose rather than drifting back in.
 function ogUrl(origin, _params) {
   return `${origin}/og-image.png`
 }
@@ -143,7 +146,7 @@ function ogUrl(origin, _params) {
 // defaults the season to the current one (no `season=` needed) and picks the
 // group from the player's position, so a hitter comes back with hitting and a
 // pitcher with pitching. It costs about a kilobyte of response and no round
-// trip. api/og.js makes the same call and ignores the extra field.
+// trip.
 async function playerCard(idSegment, origin) {
   const id = idFromSlug(idSegment)
   const data = await getJson(`/api/v1/people/${id}?hydrate=currentTeam,stats(type=season)`)
@@ -236,10 +239,10 @@ async function teamCard(idSegment, origin, { tab } = {}) {
 
 // The one extra upstream call this work added, on the one route that earns it.
 //
-// It is NOT part of buildCard: api/og.js draws a club's mark and its level line
-// and has no use for 26 names, so it goes on making exactly the one request it
-// makes today. api/preview.js calls this in parallel with buildCard, so the
-// route's wall-clock is unchanged even though its request count is two.
+// It is NOT part of buildCard: a card carries a club's mark and its level line
+// and has no use for 26 names, so buildCard goes on making exactly the one
+// request it makes today. api/preview.js calls this in parallel with buildCard,
+// so the route's wall-clock is unchanged even though its request count is two.
 //
 // What it buys is the reason ADR-0059 leaves player pages out of the sitemap: a
 // crawler that reaches one club roster page reaches 26 player pages from it, by

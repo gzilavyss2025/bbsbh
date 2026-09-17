@@ -129,9 +129,9 @@ The **only** server-side statsapi calls, all in `api/_lib/cards.js`, all for lin
 | `person` | `/api/v1/people/{id}` | `hydrate=currentTeam` | `playerCard` (`cards.js:104`) |
 | `team` | `/api/v1/teams/{id}` | none | `teamCard` (`cards.js:126`) |
 
-`api/og.js` makes **no** statsapi call (all display strings arrive as query params); it fetches
-only cosmetic assets (`img.mlbstatic.com` headshot/logo, Google Fonts), each inlined as a data
-URI and degrading to a monogram/abbreviation/bundled font. `api/preview.js` fetches only its own
+`api/og.js` — which made **no** statsapi call and fetched only cosmetic assets — was deleted on
+2026-09-17 (ADR-0012, third amendment), so the image is the static `public/og-image.png` for every
+route and no cosmetic fetch happens at request time at all. `api/preview.js` fetches only its own
 `index.html`. Everything degrades to `null` → the static default OG card.
 
 ---
@@ -354,8 +354,9 @@ possession-time.
 
 `api/_lib/cards.js` reads only identity/schedule metadata (team names/ids, player name/position,
 date) and **never** reads `score`/`isWinner`/`status`/`linescore`, even though `hydrate=team`
-schedule rows carry a live score. `api/og.js` renders logos + names + a date (and literally
-stamps a "SPOILER SAFE" note). Matches ADR-0012. Nothing score-revealing is fetched or rendered.
+schedule rows carry a live score. The image is a static file with no game data in it at all, since
+`api/og.js` was deleted (ADR-0012, third amendment). Matches ADR-0012. Nothing score-revealing is
+fetched or rendered.
 
 ### Where the reliance is strongest
 

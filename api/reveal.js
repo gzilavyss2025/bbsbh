@@ -22,7 +22,7 @@ import { authenticateUser } from './_lib/auth.js'
 import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
-// Node.js runtime, NOT edge (unlike og.js/preview.js) — @clerk/backend's
+// Node.js runtime, NOT edge (unlike preview.js) — @clerk/backend's
 // verifyToken pulls in @clerk/shared internals that Vercel's edge sandbox
 // rejects outright (confirmed live: NOW_SANDBOX_WORKER_EDGE_FUNCTION_UNSUPPORTED_MODULES).
 // The handler below still uses the Web-standard Request/Response shape, which

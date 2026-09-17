@@ -229,8 +229,8 @@ export default async function handler(req) {
 
   if (card && MARKER.test(html)) {
     // The card's IMAGE stays on the request origin (buildCard, above) so a
-    // preview deploy renders its own /api/og; the PAGE URL does not, so a
-    // preview deploy never advertises itself as canonical.
+    // preview deploy serves its own copy of the static card; the PAGE URL does
+    // not, so a preview deploy never advertises itself as canonical.
     html = html.replace(MARKER, renderHead(card, canonicalUrl(url.searchParams, card)))
   }
 

@@ -139,3 +139,43 @@ still runs and still warms `/api/preview`, which costs ~55ms a route; its
 `test/cards.test.js` pins the invariant ("no card points at the dynamic
 /api/og renderer"), so restoring per-route art means changing that test on
 purpose rather than letting the cost drift back in.
+
+## Amendment (2026-09-17) — the renderer is deleted, not parked
+
+The sentence above — "`api/og.js` is untouched and still correct. Nothing calls
+it" — no longer holds. `api/og.js` is **deleted**, with the two files it alone
+read:
+
+| file | bytes | what it held |
+|---|---|---|
+| `api/og.js` | 14,877 | the `@vercel/og` renderer |
+| `api/_lib/fonts.js` | 548,602 | base64 IBM Plex bytes, read only by `og.js` |
+| `api/_lib/logos.js` | 121,025 | `TEAM_LOGOS` SVGs, read only by `og.js` |
+
+`@vercel/og` leaves `package.json` with it, and `satori` and
+`@resvg/resvg-wasm` go as transitive deps — 177 lines out of the lockfile.
+`api/_lib` drops from ten files to eight, back under the ADR-0038 threshold it
+was sitting on.
+
+**Why the 09-15 judgement changed.** Leaving the function in place was recorded
+above as free. It was not. Reading the Hobby meters on 2026-09-17 —
+Deployment Storage **16.34 GB against a 10 GB cap** — and dividing by the 37
+production deploys inside the one-week retention window gives about **442 MB
+per deployment**. Only 127 MB of that is the built static site (`du -sh dist`).
+The other ~315 MB is the function bundles and build artifacts, so the
+serverless layer is roughly 71% of what each deploy stores, and a function
+nothing calls is still paid for on every one of ~7 deploys a day.
+
+**Be honest about the size of this win.** It is small: a few MB of the 442, so
+about 1–2% per deploy. It does not fix the storage overage — cutting production
+deployment retention does that, and it is an account setting, not code. The
+reasons to delete are that the code is unreachable, and that deleting it closes
+the path by which the CPU overage returns. A renderer that exists is one
+`ogUrl()` edit away from drawing 855 cards a night again; a renderer that does
+not exist has to be written, reviewed and deployed.
+
+**What did not change.** Every card still carries its own title, description,
+`og:image:alt` and canonical. The image is still `public/og-image.png`.
+`test/cards.test.js` keeps its assertion and its `/api/og` string — that is the
+name the route would take if somebody built it again, so the test now guards
+against the renderer being written BACK rather than merely re-referenced.

@@ -56,7 +56,7 @@ const BUDGETS = {
   // subdividing it into `api/admin/copy.js` renames a live endpoint, and the
   // rename is silent — the old path 404s and every client falls back to its
   // "not configured" degrade, which is the exact class of outage the KV_*
-  // episode was (api/_lib/redis.js). So the twelve endpoints here stay flat,
+  // episode was (api/_lib/redis.js). So the endpoints here stay flat,
   // and this budget is the deliberate exception the guard's own header asks
   // for rather than a directory awaiting subdivision.
   //
@@ -70,7 +70,14 @@ const BUDGETS = {
   // 14 -> 15 for `contract-identity.js`: the admin override store behind
   // /admin/contracts (ADR-0066), same shape as identity.js one entry above —
   // a narrow, allowlist-gated endpoint, so it stays flat with every sibling.
-  api: 15,
+  //
+  // 15 -> 14, the first time this one has come DOWN: `og.js` deleted. Its
+  // renderer had been unreferenced since ADR-0012's second amendment and is
+  // now gone outright, along with the two files it alone read
+  // (`_lib/fonts.js`, `_lib/logos.js`) — see that ADR's third amendment. A URL
+  // really did disappear here, which is what makes tightening this safe: no
+  // client ever asked for `/api/og` except the warm pass, and it stopped.
+  api: 14,
   // The 51 stylesheet partials src/index.css @imports in order. This one is a
   // deliberate exception rather than a directory awaiting subdivision: the files
   // are an ORDERED SEQUENCE, not independent modules, and the numeric prefix is

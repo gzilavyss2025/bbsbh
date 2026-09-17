@@ -137,8 +137,8 @@ directly. Each game's reveal high-water mark (`revealedThrough`) persists in
 so the spoiler rule still holds on return. A same-device tab picks up another tab's
 reveal through a `storage` listener in `useRevealProgress.js`.
 
-**Fifteen Vercel functions live in `api/`**, each inert when unconfigured;
-**fourteen never render or fetch a score.** Link previews (`og.js` + `preview.js` + `_lib/cards.js`)
+**Fourteen Vercel functions live in `api/`**, each inert when unconfigured;
+**thirteen never render or fetch a score.** Link previews (`preview.js` + `_lib/cards.js`)
 render Open Graph cards, failing safe to the default (ADR-0012). Reveal sync (Clerk-gated) mirrors
 `revealedThrough` via `reveal.js` + Upstash Redis, ratcheted both sides (ADR-0022);
 `spoiled-days.js` mirrors which DAYS the user consented to spoil — consent, reversible (ADR-0026).
@@ -151,7 +151,7 @@ BYTES the same way, feeding the overlay's `logo` URLs (ADR-0050, `docs/identity-
 `account.js` erases every per-user key (ADR-0039). The Game Log's `books.js` mirrors the shelf — a
 cover's title, club and mark, never a stamp (ADR-0041). `game-story.js` is a CORS hop to MLB.com's
 team RSS feeds, which send none. `page.js` + `src/copy/landing/` server-render `/learn` for AI
-crawlers, which run no JS (ADR-0053). **The fifteenth stores a score, by design**: the Game Log's
+crawlers, which run no JS (ADR-0053). **The fourteenth stores a score, by design**: the Game Log's
 stamps (`stamps.js`, `src/lib/stamps.js`) — safe because of WHERE stamp art may render
 (`check-stamp-surfaces`), not a mint-time check (ADR-0035). Voice: `docs/game-log.md`.
 
