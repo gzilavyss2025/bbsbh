@@ -584,9 +584,12 @@ test('lineupStart follows the map, and a game the map never saw stays null', () 
     splits: [split('2024-07-04', 1), split('2024-07-05', 2), split('2024-07-06', 3)],
     schedule: [sched(1, '2024-07-04'), sched(2, '2024-07-05'), sched(3, '2024-07-06')],
     group: 'hitting',
-    lineupStarts: new Map([
-      [1, true],
-      [2, false],
+    // The map speaks in SLOTS now (#1048): 1 through 9, or 0 for "played, did
+    // not start". `lineupStart` is derived from it and its three answers are
+    // unchanged.
+    lineupSlots: new Map([
+      [1, 1],
+      [2, 0],
     ]),
   })
   assert.deepEqual(
@@ -609,9 +612,9 @@ test('the gate still runs first: a lineup start on the cutoff day has no row', (
     schedule: [sched(1, '2024-07-04'), sched(2, '2024-07-05')],
     group: 'hitting',
     cutoff: '2024-07-05',
-    lineupStarts: new Map([
-      [1, true],
-      [2, true],
+    lineupSlots: new Map([
+      [1, 4],
+      [2, 4],
     ]),
     keep: (r) => r.lineupStart === true,
   })
@@ -619,4 +622,169 @@ test('the gate still runs first: a lineup start on the cutoff day has no row', (
     rows.map((r) => r.gamePk),
     [1],
   )
+})
+
+// THE SLOT HE BATTED IN (#1048), and the two fields that come off one map.
+// `lineupSlots` is a Map gamePk -> his 1-based slot, or 0 for "played, did not
+// start". It replaced a Map of booleans: the lineup arrays were already in
+// batting order, so the same pass answers both questions for no extra bytes.
+test('lineupSpot is the slot, and lineupStart is derived from the same map', () => {
+  const rows = boxLineRows({
+    splits: [split('2024-07-04', 1), split('2024-07-05', 2), split('2024-07-06', 3)],
+    schedule: [sched(1, '2024-07-04'), sched(2, '2024-07-05'), sched(3, '2024-07-06')],
+    group: 'hitting',
+    lineupSlots: new Map([
+      [1, 3],
+      [2, 0],
+    ]),
+  })
+  assert.deepEqual(
+    rows.map((r) => ({ pk: r.gamePk, spot: r.lineupSpot, start: r.lineupStart })),
+    [
+      // Absent from the map: nobody posted a card. Neither question is
+      // answered, and null is not "he came off the bench".
+      { pk: 3, spot: null, start: null },
+      // 0: he played and did not start. He batted in no SLOT, so the spot is
+      // null — a bench appearance is not a tenth place in the order.
+      { pk: 2, spot: null, start: false },
+      { pk: 1, spot: 3, start: true },
+    ],
+  )
+})
+
+test('every slot from one to nine lands on the row as itself', () => {
+  const pks = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+  const rows = boxLineRows({
+    splits: pks.map((pk) => split(`2024-07-0${pk}`, pk)),
+    schedule: pks.map((pk) => sched(pk, `2024-07-0${pk}`)),
+    group: 'hitting',
+    lineupSlots: new Map(pks.map((pk) => [pk, pk])),
+  })
+  assert.deepEqual(
+    rows.map((r) => r.lineupSpot).sort((a, b) => a - b),
+    pks,
+  )
+  assert.equal(
+    rows.every((r) => r.lineupStart === true),
+    true,
+  )
+})
+
+test('the gate still runs first: a slot on the cutoff day has no row', () => {
+  // The same invariant the lineup doors re-pinned. A list folds rows; it can
+  // only ever fold rows the gate already approved.
+  const rows = boxLineRows({
+    splits: [split('2024-07-04', 1), split('2024-07-05', 2)],
+    schedule: [sched(1, '2024-07-04'), sched(2, '2024-07-05')],
+    group: 'hitting',
+    cutoff: '2024-07-05',
+    lineupSlots: new Map([
+      [1, 2],
+      [2, 2],
+    ]),
+    keep: (r) => r.lineupSpot === 2,
+  })
+  assert.deepEqual(
+    rows.map((r) => r.gamePk),
+    [1],
+  )
+})
+
+// THE RAW COUNTING STATS A LIST FOLDS (#1048). `line` is a formatted string,
+// so a list that wanted "his line at each slot" had nothing to add up. The row
+// carries the smallest subset that folds the two figures a list prints — and
+// every field is already in LOG_FIELDS, so it costs no bytes.
+test('a hitter row carries every component the picked-group grid folds', () => {
+  // Including the two nobody would guess: `hitByPitch` and `sacFlies`. ON-BASE
+  // is (H + BB + HBP) / (AB + BB + HBP + SF), so without them the grid cannot
+  // print an honest OBP or OPS — and the extra-base hits, because TOTAL BASES
+  // is built from them (MLB sends `totalBases` on an aggregate, never on a
+  // game log).
+  const rows = boxLineRows({
+    splits: [
+      split('2024-07-04', 1, {
+        stat: {
+          plateAppearances: 5, atBats: 4, hits: 2, doubles: 1, triples: 0, homeRuns: 1,
+          rbi: 3, baseOnBalls: 1, strikeOuts: 1, stolenBases: 2, hitByPitch: 0, sacFlies: 0,
+        },
+      }),
+    ],
+    schedule: [sched(1, '2024-07-04')],
+    group: 'hitting',
+  })
+  assert.deepEqual(rows[0].counts, {
+    plateAppearances: 5, atBats: 4, hits: 2, doubles: 1, triples: 0, homeRuns: 1,
+    rbi: 3, baseOnBalls: 1, strikeOuts: 1, stolenBases: 2, hitByPitch: 0, sacFlies: 0,
+  })
+  // A split that came back without a field counts as zero, not NaN — one NaN
+  // in a sum takes the whole folded figure with it.
+  const bare = boxLineRows({
+    splits: [split('2024-07-04', 1, { stat: { atBats: 4, hits: 2 } })],
+    schedule: [sched(1, '2024-07-04')],
+    group: 'hitting',
+  })
+  assert.equal(bare[0].counts.hitByPitch, 0)
+  assert.equal(bare[0].counts.plateAppearances, 0)
+  assert.equal(Number.isNaN(bare[0].counts.doubles), false)
+})
+
+test('a pitcher row carries OUTS, because innings are thirds and do not add', () => {
+  // "6.1" is six innings and one out, not six and a tenth. Summing the strings
+  // as numbers is the bug this field exists to make impossible: the row stores
+  // MLB's own out count and a fold adds integers.
+  const rows = boxLineRows({
+    splits: [
+      split('2024-07-04', 1, { stat: { inningsPitched: '6.1', earnedRuns: 2 } }),
+      split('2024-07-05', 2, { stat: { inningsPitched: '7.0', earnedRuns: 0 } }),
+      split('2024-07-06', 3, { stat: { inningsPitched: '0.2', earnedRuns: 1 } }),
+    ],
+    schedule: [sched(1, '2024-07-04'), sched(2, '2024-07-05'), sched(3, '2024-07-06')],
+    group: 'pitching',
+  })
+  // A stat that named no gamesStarted is 0 starts, not NaN.
+  assert.equal(rows[2].counts.starts, 0)
+  assert.deepEqual(
+    rows.map((r) => ({ pk: r.gamePk, outs: r.counts.outs, er: r.counts.earnedRuns })),
+    [
+      { pk: 3, outs: 2, er: 1 },
+      { pk: 2, outs: 21, er: 0 },
+      { pk: 1, outs: 19, er: 2 },
+    ],
+  )
+})
+
+test("a pitcher row carries the grid's own components, starts included", () => {
+  // The split fixture's default stat is one start, seven innings, eight
+  // strikeouts. All of it is already in LOG_FIELDS; the row just keeps it in a
+  // form a fold can add.
+  const rows = boxLineRows({
+    splits: [split('2024-07-04', 1)],
+    schedule: [sched(1, '2024-07-04')],
+    group: 'pitching',
+  })
+  assert.deepEqual(rows[0].counts, {
+    starts: 1, outs: 21, hits: 1, runs: 0, earnedRuns: 0, homeRuns: 0,
+    baseOnBalls: 3, strikeOuts: 8,
+  })
+})
+
+test('a NEUTRAL-SITE game lands under the park it was played at', () => {
+  // #998's one row-level trap. The park must come off the SCHEDULE record's own
+  // venue, never off opponent + isHome: a game his club is listed as home for,
+  // played at a third park — London, Mexico City, a hurricane relocation — is a
+  // game at that third park and nowhere else.
+  const splits = [
+    split('2024-06-08', 1, { isHome: true }),
+    split('2024-06-09', 2, { isHome: true }),
+  ]
+  const schedule = [
+    sched(1, '2024-06-08'),
+    // Same clubs, same home side, a different park.
+    sched(2, '2024-06-09', { venue: { id: 2504, name: 'London Stadium' } }),
+  ]
+  const home = boxLineRows({ splits, schedule, group: 'hitting', keep: (r) => r.venueId === 32 })
+  const neutral = boxLineRows({ splits, schedule, group: 'hitting', keep: (r) => r.venueId === 2504 })
+  assert.deepEqual(home.map((r) => r.gamePk), [1])
+  assert.deepEqual(neutral.map((r) => r.gamePk), [2])
+  assert.equal(neutral[0].venueName, 'London Stadium')
 })

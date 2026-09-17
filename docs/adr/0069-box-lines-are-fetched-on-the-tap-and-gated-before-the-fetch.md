@@ -842,3 +842,186 @@ the card instead of being inferred.
 Not postseason-specific, and not a facet's problem. Any facet, any era: a
 rain-postponed regular-season game replayed the same day under the same gamePk
 has the same shape. The postseason door just made it countable.
+
+## Amendment (2026-09-16, issues #1048 and #998): a door that opens a LIST
+
+The 2026-09-15 note above ends "it wants a door that opens a LIST … and it
+should be built once for both". It is built, and the batting order is its first
+reader. **The shape is general; nothing in it is slot-shaped.**
+
+### What a list door is
+
+A registry entry with a `list` descriptor instead of a `facet`. The sheet behind
+it opens on the GROUPS rather than on rows: it fetches the same join with no
+narrowing, folds the gated rows into groups, and prints two figures against
+each. Tap a group and the same sheet re-renders in rows mode for that group's
+own facet. The join is memoized per (person, group, cutoff, gameTypes), so
+going in, back out and into another group **costs no requests at all** — every
+question reads the rows the first one already fetched.
+
+The descriptor has five members:
+
+| member | the batting order | #998's parks |
+| --- | --- | --- |
+| `groupBy(row)` | `row.lineupSpot` | `row.venueId` |
+| `name(key, newest)` | "Batting first"…"Batting ninth" | the newest row's `venueName` |
+| `order` | `'key'` — an order is a sequence | `'games'` |
+| `facet(key)` | `{ kind: 'lineupSpot', spot }` | `{ kind: 'venue', venueId }` |
+| `title(surname, name)` | "Yelich, batting third" | "Yelich at …" |
+
+`name` takes the group's NEWEST row as a second argument, which is the member
+#998 needs and the batting order does not: a park is named by the row, so a club
+that renamed its stadium is listed under what it is called now.
+
+### The figures come from the rows, and that is the whole decision
+
+Every other door on this card takes its line from an aggregate MLB publishes and
+its rows from the game log, and the two agree or they nearly do. **The batting
+order is where they do not** — the measurements are in the 2026-09-15 note, and
+`b9` reading 18 games against 0 starts is not a margin, it is a different
+question. So a list folds the rows themselves. An entry and the rows behind it
+are then the same games, counted once and then shown, and they cannot disagree.
+
+Two figures in the LIST — games, and AVG for a bat or ERA for an arm — because
+an entry is one row of a comparison and a comparison is read down a column.
+
+**The group a reader PICKS gets twelve.** That was a correction made on the day
+(Gary: "i'd like to see the 34 G, .256 expand"), and it is the right shape: the
+list is the comparison, the picked group is where someone went FOR the detail.
+
+| | the twelve |
+| --- | --- |
+| hitter | G · PA · H · HR · RBI · BB · K · SB, then AVG · OBP · SLG · OPS |
+| pitcher | G · GS · IP · H · R · ER · HR · BB · K, then ERA · WHIP · K/9 |
+
+Counts first, rates last — the order a box score is read in, and the order this
+app's own stat grids print. The reasoning behind the two sets:
+
+- **the slash line beats OPS alone**, which hides whether he got on base or hit
+  for power, and it is the standard way to state a hitter;
+- **a pitcher's HR is a ballpark's whole question** — Coors against Oracle is
+  that one cell — so the pitching log now asks for `homeRuns`;
+- **WHIP and K/9 survive a short sample** (a dozen games at one park) where a
+  win-loss record says almost nothing;
+- **GS** says whether these were starts or relief outings, which changes what
+  every figure above it means.
+
+It cost four field names. A hitter's log gains `plateAppearances`, `hitByPitch`
+and `sacFlies` — **on-base cannot be computed honestly without the last two**,
+so an earlier draft of this amendment said OPS was unavailable; it is available,
+it just had to be asked for. Measured 2026-09-17 on Yelich's 2024 log: **22.0 KB
+-> 25.5 KB over 73 games, +16%**, the same price `positionsPlayed` already pays
+on the same shared join. TOTAL BASES is not fetched at all: MLB publishes it on
+an aggregate and never on a game log, so the fold builds it from the extra-base
+hits, which is the identity MLB would have sent.
+
+The rates are pinned against **MLB's own published strings**, not against
+themselves: Yelich's October fed back through the fold must come out .444 /
+.559 / .630 / 1.189. That catches the OPS rounding in particular — OPS is each
+half rounded to three places and THEN added, so .559 + .630 is 1.189 where the
+unrounded sum would print 1.188.
+
+**A folded line is not a career line.** On a page carrying `?d=` it stops where
+the rows stop. That is more correct than a career aggregate would be, and it is
+what makes the entry and its rows agree by construction. Do not "fix" it by
+labelling an entry from `careerStatSplits`.
+
+### Three things the shape needed that the issue did not name
+
+1. **A list door names no label source, so the card cannot ask whether it has
+   games behind it.** It renders whenever the card renders — but it cannot vouch
+   for the card on its own, or a MiLB player with no situational splits would
+   get a card holding one door. The card's existence test now reads "at least
+   one SOURCED door", and the list rides along.
+2. **The list's own fetch still needs the lineups pass.** Grouping by
+   `lineupSpot` is worth nothing if every row comes back with a null slot, and
+   `needsLineups` lives on the facet. So `facet(null)` — no group named — is the
+   list's own question: the same `kind`, with no `keep` narrowing it to a slot,
+   which plans the pass and keeps every row that HAS a slot. It is the narrowest
+   honest reading of "all the rows this list can describe".
+3. **A list door has no headline**, because there is no tapped line to quote.
+   Once a group is picked the headline is that entry's own line, verbatim —
+   which is the same contract every other door's headline keeps, one level in.
+
+### The lineups pass widened for nothing
+
+`fetchLineupStarts` returned a Map of gamePk to boolean. It now returns the
+1-based SLOT, or 0 for "played, did not start", and the two lineup doors derive
+their boolean from it. The arrays were already in batting order — index 0 is the
+leadoff man, checked against a boxscore's own `battingOrder` on gamePk 747043 —
+so the slot was there to be read. One pass, one memo, three doors.
+
+`lineupStart`'s semantics did not move: absent from the map is null ("nobody
+posted a card"), 0 is false, 1 through 9 is true. A 0 also means `lineupSpot` is
+**null**, not 0 — a bench appearance is not a tenth place in the order.
+
+### #998 came with it, and it cost a descriptor and a name
+
+**By ballpark**, filed under *Where*, both groups. It is 22 lines of registry
+and two tests, because everything else was already there: `venueId` and
+`venueName` on every row, `{ kind: 'venue', venueId }` in `facets.js`, and
+`order: 'games'` as the other sort. That is the evidence that the list is
+general rather than a batting order with a seam in it.
+
+Its own trap, measured 2026-09-15 and now pinned by test: **a park's id is
+stable and its NAME drifts inside one career.** Nine of Yelich's 36 parks carry
+more than one name in his own games — id 32 is Miller Park for 185 and American
+Family Field for 372, id 4 is three names. So the GROUP is the id and the NAME
+comes off the group's newest row, which the list already had a member for. It
+matched MLB's current name on 35 of 36 parks, and the miss is better than a
+match: Globe Life Park in Arlington, now Choctaw Stadium, is named as the reader
+knew it. **Do not reach for `/api/v1/venues`** — unseasoned it returns SPONSOR
+names ("UNIQLO Field at Dodger Stadium"), and a `&season=` call silently omits a
+park not in use that season.
+
+Live on Yelich at `?d=2026-06-27`: 35 parks, American Family Field 521 G / .284
+at the top, down a tail to parks he saw once. Both of his home parks appear
+once, under the name they carry today, with every older game inside them.
+
+`sitCodes=ven` stays dead, three ways over (0 splits; dropped in silence from a
+`ven,h,a` list; no `statTypes` entry names a venue). The rows are the only path,
+which is where the batting order arrived from the opposite direction — and it is
+why one door on this card prints no figures. It opens a list rather than a
+line.
+
+### Both lists count October (2026-09-17)
+
+Asked on the live page — does By ballpark include postseason games? It did not,
+and it should, for the reason this ADR already gave the calendar doors: **a date
+does not stop being October because the game was a division series, and a park
+does not stop being Dodger Stadium.** Both lists now carry
+`postseason: true` on their facet.
+
+Measured 2026-09-17, regular season against the whole career:
+
+| | regular season | with October |
+| --- | --- | --- |
+| Betts at Globe Life Field | 9 | **25** (the 2020 neutral-site World Series was 16 of them) |
+| Betts at Dodger Stadium | 430 | 462 |
+| Yelich at Dodger Stadium | 37 | 44 |
+| Scherzer at Nationals Park | 100 | 105 |
+
+**No park is ever ADDED**: over Yelich, Betts and Scherzer, every postseason park
+was one he had also played at in the summer. It is the counts this corrects, and
+Globe Life Field is where the old answer was badly wrong.
+
+Two things made it cheap and safe:
+
+- **A list door has no label to widen.** A calendar door needs
+  `spansPostseason` AND `facet.postseason` because its figure comes from an MLB
+  aggregate that has to be summed across game types. A list folds the rows, so
+  only the rows' half exists — and a test now pins that a list door must NOT set
+  `spansPostseason`, which would send `fetchDoorLabels` after a figure that does
+  not exist.
+- **Every postseason game carries a full lineup.** That mattered for the batting
+  order, where a game with no card has a null slot and would leave the list in
+  silence: Yelich 27 of 27, Betts 91 of 91, Arenado 8 of 8.
+
+The cost is the one the calendar doors already pay: a widened door does not
+share the join with the regular-season doors, because the game types are in the
+join key. A widened list now shares with the months and the weekdays instead.
+`fetchSeasons` returns the same seasons either way, so it is the same number of
+game-log calls with a few more rows in each.
+
+`calendarTypes` is renamed `widenedTypes` — it was never about the calendar, it
+is about a facet that means to count every kind of game.

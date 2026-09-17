@@ -1,0 +1,263 @@
+/* ============================================================
+   WHAT A LIST DOOR OPENS (ADR-0069, issues #1048 and #998).
+   Most doors open on ROWS, which boxlines.css beside this
+   dresses. A few open on a LIST — the nine spots in the batting
+   order, a career's thirty-six ballparks — because the question
+   has more answers than a card can hold as doors. This partial
+   is that second face: the list of groups, the control back to
+   it, and the twelve figures the group a reader PICKS is headed
+   by.
+
+   Its own file rather than more of boxlines.css: that file
+   dresses the sheet and the door's reset, which four surfaces
+   use, and it reached its own line cap holding both
+   (check-file-size.mjs). Component-imported by
+   BoxLinesSheet.jsx, never added to index.css's chain, the same
+   as its neighbour.
+   ============================================================ */
+
+/* ============================================================
+   THE LIST INSIDE THE SHEET (components/boxlines/BoxLinesList.jsx,
+   #1048). A door with too many answers to be doors opens on its
+   GROUPS — the nine spots in the batting order, #998's parks —
+   and each group opens the rows behind it.
+
+   A GRID, NOT A LEDGER STACK, for the reason the Game lines card
+   became a table (ADR-0073): this is a comparison, and a
+   comparison is read down a column. Two figures, not that card's
+   five, because two is all the rows can honestly fold
+   (api/boxlines/fold.js). It borrows that card's vocabulary —
+   the same mono figures, the same three steps of ink, the same
+   quiet mark for a cell with nothing in it — so a reader who
+   tapped a row of a table does not arrive somewhere new.
+   ============================================================ */
+
+.boxlines__list {
+  /* The tracks, in `ch` of the mono face this element is set in, the same
+     measurement .gamelines makes and for the same reason: `ch` resolves
+     against the grid ELEMENT's font, so the head's names sit over the
+     figures they name at every width. */
+  --bl-cols: minmax(0, 1fr) 4ch 5ch 16px;
+  /* IT MUST NOT SHRINK, and this one line is load-bearing. `.boxlines` is a
+     column flex container that scrolls, so a child is free to be squashed to
+     whatever height is left — and this child CLIPS what it cannot fit, because
+     a rounded panel needs `overflow: hidden` to cut its own corners. Together
+     those two facts hid 21 of a 35-park list behind a box with no scrollbar of
+     its own, while the sheet stayed exactly as tall as the window and so had
+     nothing to scroll either. Refusing to shrink gives the panel its full
+     height back and hands the scrolling to the sheet, which is the only thing
+     here that should own it. The rows list beside it never showed this because
+     it has no `overflow` and no corners to cut. */
+  flex: 0 0 auto;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.boxlines__listhead,
+button.boxlines-entry {
+  display: grid;
+  grid-template-columns: var(--bl-cols);
+  column-gap: var(--space-2);
+  align-items: center;
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+}
+
+.boxlines__listhead {
+  min-height: 26px;
+  background: var(--bg-page);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.boxlines__listcol {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+  text-align: right;
+}
+
+/* THE ENTRY. A full button reset, the way .boxlines-door is one, so a control
+   in a list of figures starts its ink where the rows above it start theirs. */
+button.boxlines-entry {
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* The band, the same alternation the card's panel uses. */
+.boxlines__listrow:nth-child(even) .boxlines-entry {
+  background: var(--surface-inset);
+}
+
+.boxlines-entry__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+  /* The column that can outgrow its track — a park's whole name on #998's
+     list. It gives way rather than pushing the figures off the row. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boxlines-entry__fig {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  text-align: right;
+}
+
+/* The figure that answers "how well", in the page's darkest ink — the card's
+   own --key step, so the two surfaces weight the same question the same way.
+   Colour and not weight: the mono face ships one registered weight. */
+.boxlines-entry__fig--key {
+  color: var(--text-heading);
+}
+
+/* Nothing to print: a group with no at-bats, or none with an out recorded.
+   A rule-coloured dot, never a zero — the card's own mark for the same case. */
+.boxlines-entry__fig--nil {
+  color: var(--border-rule);
+}
+
+.boxlines-entry__chev {
+  color: var(--graphite-soft);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  text-align: right;
+}
+
+/* An entry stands in a bordered panel, so the door's hover OUTLINE would draw
+   a box outside that panel's edge and clip. It lifts its paper instead, which
+   is the answer the card's own rows give (gamelines.css). Pointer devices
+   only: on a phone :hover sticks after the tap. */
+@media (hover: hover) and (pointer: fine) {
+  .boxlines__list .boxlines-entry:hover {
+    background: var(--rule-grid);
+  }
+
+  .boxlines__list .boxlines-entry:hover .boxlines-entry__chev {
+    color: var(--accent-link);
+  }
+}
+
+/* The press, which on a phone is the whole of the feedback. */
+.boxlines__list .boxlines-entry:active {
+  background: var(--rule-grid);
+}
+
+.boxlines-entry:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* BACK TO THE LIST. Above the kicker, in the chevron-link voice the app uses
+   for every "back to where this opened" control, and it is the only thing in
+   the sheet's head that is not the sheet's own name — so it is small, and it
+   leads with the mark that says which way it goes. */
+button.boxlines__back {
+  display: block;
+  padding: 0;
+  margin: 0 0 4px;
+  border: none;
+  background: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-link);
+  cursor: pointer;
+}
+
+.boxlines__back:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+/* A narrow phone gives back the gutters before it gives back a track: the
+   figures ARE the values. */
+@media (max-width: 359px) {
+  .boxlines__listhead,
+  button.boxlines-entry {
+    padding: 0 6px;
+    column-gap: 4px;
+    font-size: var(--fs-caption);
+  }
+
+  .boxlines-entry__name {
+    font-size: var(--fs-small);
+  }
+}
+
+/* THE PICKED GROUP'S LINE (#1048 follow-up) — twelve figures folded from the
+   very rows listed under them, where the LIST's entry had room for two. It is
+   the app's own stat cell (.stat, from 12-sealbox.css, the one the player page's
+   own grid above this sheet is built from), set in the grid that page uses:
+   hairline gaps over a rule-coloured ground, so the cells read as one object
+   and not as twelve chips.
+
+   Four across, three down. Counts fill the first two rows and the rates the
+   last, which is the order a box score is read in — so the slash line lands
+   together on a row of its own rather than being hunted for among the counts. */
+.boxlines__stats {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  margin: 10px 0 0;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* The cells give up their own frames to the grid's, the same trade
+   .player__statgrid makes: twelve bordered, shadowed chips inside a sheet is
+   noise, and the 1px gaps already say where one figure stops. */
+.boxlines__stats .stat {
+  padding: 9px 3px;
+  background: var(--surface-card);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.boxlines__stats .stat__v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-title-sm);
+}
+
+/* A rate with no denominator — a group of games with no at-bat, an outing with
+   no out recorded. The card's own quiet mark, for the same reason: ".000" and
+   "0.00" are both claims, and neither is true. */
+.boxlines__stats .stat--nil .stat__v {
+  color: var(--border-rule);
+}
+
+/* A narrow phone keeps all twelve and takes a step down the type scale instead
+   of dropping a column: "1.189" is five characters wide whatever the width of
+   the screen, and a figure that wraps is worse than a figure that is small. */
+@media (max-width: 359px) {
+  .boxlines__stats .stat {
+    padding: 7px 2px;
+  }
+
+  .boxlines__stats .stat__v {
+    font-size: var(--fs-num-md);
+  }
+}

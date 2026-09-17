@@ -125,6 +125,21 @@ const WEEKDAYS = [
   [6, 'dsa', 'Saturday'],
 ]
 
+// The nine spots in the batting order, in words (#1048). A list ENTRY's name,
+// not a door's label: the slots live behind one door, and fold.js says why
+// nine doors would state a career they do not open.
+const SLOT_WORDS = [
+  'first',
+  'second',
+  'third',
+  'fourth',
+  'fifth',
+  'sixth',
+  'seventh',
+  'eighth',
+  'ninth',
+]
+
 export const CARD_FACETS = [
   // WHERE HE PLAYED. `h`/`a` count games at the park; the rows count the club
   // the schedule listed as home. Both are MLB's own, and they differ only on a
@@ -178,6 +193,52 @@ export const CARD_FACETS = [
     facet: { kind: 'surface', value: 'turf' },
     section: 'where',
     groups: ['hitting', 'pitching'],
+  },
+  // WHICH PARK (#998). The second LIST door, and the one the list was built
+  // general for: a career is 36 ballparks — Yelich 36, Semien 36, Betts 36,
+  // and a seven-year pitcher 26 — which cannot be 36 doors on a card that
+  // already carries twenty-five. So they live behind one, most games first.
+  //
+  // THERE IS NO AGGREGATE TO LABEL IT WITH, and that is settled three ways
+  // (2026-09-15): `sitCodes=ven` returns 0 splits for every player tested;
+  // `ven,h,a` returns only `h` and `a`, so the code is dropped in silence
+  // rather than erroring; and no `statTypes` entry names a venue. The rows are
+  // the only path — which is the same place the batting order landed, from the
+  // opposite direction.
+  //
+  // THE ID IS STABLE AND THE NAME DRIFTS, inside one career: nine of Yelich's
+  // 36 parks carry more than one name in his own games (id 32 is Miller Park
+  // for 185 of them and American Family Field for 372; id 4 is three names).
+  // So the group is the ID and the NAME comes off the group's newest row —
+  // which rows.js already sorts first, so it costs nothing and it matched MLB's
+  // current name on 35 of 36 parks. The miss is better than a match: Globe Life
+  // Park in Arlington, which MLB now calls Choctaw Stadium, is named as the
+  // reader knew it. Do NOT reach for `/api/v1/venues` instead — unseasoned it
+  // returns SPONSOR names ("UNIQLO Field at Dodger Stadium"), and a `&season=`
+  // call silently omits a park not in use that season.
+  {
+    key: 'ballpark',
+    label: 'By ballpark',
+    kicker: 'Game lines · by ballpark',
+    title: (surname) => `${surname} by ballpark`,
+    section: 'where',
+    groups: ['hitting', 'pitching'],
+    list: {
+      // The park the game was PLAYED at, off the schedule record's own venue —
+      // never opponent + isHome, which is wrong at a neutral site (London,
+      // Mexico City, a hurricane relocation).
+      groupBy: (row) => row.venueId,
+      name: (id, newest) => newest?.venueName || 'Unnamed park',
+      // Not a sequence: the park he has played at most is the one a reader
+      // wants at the top, and the tail runs down to parks he saw once.
+      order: 'games',
+      // Every kind of game: see the `venue` case in facets.js for the
+      // measurement. There is no `spansPostseason` beside it, and there must
+      // not be — that flag widens a LABEL's fetch, and a list door has no
+      // label source to widen.
+      facet: (venueId) => ({ kind: 'venue', venueId, postseason: true }),
+      title: (surname, name) => `${surname} at ${name}`,
+    },
   },
   // WHEN HE PLAYED. The rows read day/night off the SCHEDULE record, never the
   // game log, which reported "day" for two known night games (ADR-0069).
@@ -318,6 +379,47 @@ export const CARD_FACETS = [
     facet: { kind: 'lineupStart', value: false },
     section: 'how',
     groups: ['hitting'],
+  },
+  // WHERE HE HIT (#1048). The first door on this card that opens a LIST rather
+  // than a sheet of rows, and the reason is in `list` below: nine slots cannot
+  // be nine doors, because the only aggregate that would label them counts
+  // something else. fold.js has the measurement; ADR-0069's 2026-09-16
+  // amendment has the shape.
+  //
+  // IT NAMES NO LABEL SOURCE, and the registry's test knows that a `list` entry
+  // names none. Its figures are folded from the gated rows, so the entry and the
+  // rows behind it are the same games counted once — which is the property nine
+  // doors could not have had.
+  //
+  // IT ALWAYS RENDERS, for the same reason: there is no probe call that could
+  // tell the card whether he ever started, and the card only draws at all for a
+  // player with major-league situational splits. A hitter with no starts opens
+  // it and reads that he has none, which is an answer.
+  {
+    key: 'order',
+    label: 'By spot in the order',
+    kicker: 'Game lines · by spot in the order',
+    title: (surname) => `${surname} by spot in the order`,
+    section: 'how',
+    groups: ['hitting'],
+    list: {
+      // The slot he STARTED in, off the schedule's own lineups (facets.js).
+      // Null for a game he came into, and a null key drops the row — a bench
+      // appearance is under no slot, and the Substitution door above already
+      // holds those games.
+      groupBy: (row) => row.lineupSpot,
+      name: (spot) => `Batting ${SLOT_WORDS[spot - 1] ?? spot}`,
+      // A batting order is a SEQUENCE: it reads 1 through 9, not
+      // most-played-first. #998's parks are not a sequence and will say
+      // 'games'.
+      order: 'key',
+      // October included, the same as the ballpark list beside it: he batted
+      // somewhere in the order in the World Series too.
+      facet: (spot) => ({ kind: 'lineupSpot', spot, postseason: true }),
+      // The sheet's heading once a slot is picked, in the voice the pitcher's
+      // own two doors already use ("Peterson, in relief").
+      title: (surname, name) => `${surname}, ${name.toLowerCase()}`,
+    },
   },
   // OFF THE BENCH, BAT IN HAND (#1002). Hitters only, and the one door on this
   // card whose rows MLB publishes no per-game list for: `pH` gives the career

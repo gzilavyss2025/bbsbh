@@ -323,3 +323,12 @@ button.gamelines__fam {
     margin-top: 0;
   }
 }
+
+/* A LIST DOOR (#1048) — one that opens on its GROUPS rather than on rows,
+   because the question has more answers than a card can hold as doors. It has
+   no five figures to print (its groups do, folded from the rows behind it), so
+   its name takes every track but the chevron's and the row reads as a promise
+   of a list rather than a line with its figures missing. */
+.gamelines__door--list .gamelines__name {
+  grid-column: 1 / -2;
+}
