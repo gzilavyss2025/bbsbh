@@ -115,9 +115,46 @@
 }
 
 .colchart__bar {
+  position: relative;
   width: 100%;
   background: var(--navy);
   border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+}
+
+/* THE COLUMN WHOSE OWN ROWS ARE PRINTED UNDER THE CHART. The out-of-challenges
+   board draws every inning a club emptied in and then names the club-games in
+   the earliest of them; without a mark, a reader meets nine rows with no way
+   to see where in the season's shape those nine sit.
+
+   CLAY AGAINST NAVY, which is the pair that survives the colourblind check —
+   clay against field green measures delta-E 4.4 under protanopia and clay
+   against graphite 4.8. It is also a two-way split, not a three-way one, and
+   the marked column is the one the rows below it name, so the meaning does not
+   rest on hue alone. */
+.colchart__bar--mark {
+  background: var(--clay);
+}
+
+.colchart__bar--hollow.colchart__bar--mark {
+  background: transparent;
+  border-color: var(--clay);
+}
+
+/* A figure printed over one column, for the one or two values a reader came
+   for. Absolutely positioned off the top of the bar rather than laid out above
+   it: the bar's height is a percentage of the plot, so a sibling in the flex
+   column would take space out of the scale it is labelling. */
+.colchart__value {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-bottom: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
 }
 
 /* THIN EVIDENCE IS HOLLOW, NOT GREY AND NOT A SECOND HUE. Clay against

@@ -68,6 +68,7 @@ import {
   roleInnings,
   roleSpan,
   ranOutNights,
+  ranOutSeries,
   streakBoard,
   streakRoles,
   inGameLossCap,
@@ -1654,6 +1655,78 @@ test('RAN_OUT_EARLY_THROUGH: the reader and the export agree on what "early" is'
     .reduce((n, b) => n + b.n, 0)
   assert.equal(perClub, perNight)
   assert.equal(perClub, 1)
+})
+
+// A season whose second club-game does not empty until the ELEVENTH. The club
+// loses one in the third, carries the other into extras, and the extra-inning
+// top-up leaves it holding exactly one to lose there — which is how a FIRST
+// emptying lands past regulation at all.
+const extrasData = buildExport(
+  [
+    row({ seq: 0, outcome: 'fail', inning: 2 }),
+    row({ seq: 1, outcome: 'fail', inning: 2 }),
+    row({ game_pk: 2, date: '2026-04-02', seq: 0, outcome: 'fail', inning: 3 }),
+    row({ game_pk: 2, date: '2026-04-02', seq: 1, outcome: 'fail', inning: 11 }),
+  ],
+  [
+    game({ challenges: 2 }),
+    game({ game_pk: 2, date: '2026-04-02', challenges: 2, final_inning: 11 }),
+  ],
+  { season: 2026, generatedAt: 'now' },
+)
+
+test('ranOutSeries: everything past the ninth is ONE column, re-divided and not averaged', () => {
+  const nights = ranOutNights(summaryFor(extrasData, 'MLB'))
+  assert.deepEqual(
+    nights.byInning.map((b) => b.inning),
+    [2, 11],
+  )
+  const series = ranOutSeries(nights)
+  // Two columns, and the eleventh is not one of them.
+  assert.equal(series.length, 2)
+  assert.deepEqual(
+    series.map((r) => r.inning),
+    [2, 10],
+  )
+  const pooled = series[1]
+  assert.equal(pooled.extras, true)
+  assert.equal(pooled.n, 1)
+  // The pooled share is the pooled count over every emptying, which is what
+  // the nine columns beside it already are — never the mean of its members.
+  assert.equal(pooled.share, 0.5)
+  assert.equal(series[0].extras, false)
+})
+
+test('ranOutSeries: the marked column is the one whose rows the board prints', () => {
+  const series = ranOutSeries(ranOutNights(summaryFor(ranOutData, 'MLB')))
+  // No extras in this fixture, so nothing is pooled and nothing is hollow.
+  assert.equal(series.length, 2)
+  assert.ok(series.every((r) => r.extras === false))
+  assert.deepEqual(
+    series.map((r) => r.mark),
+    [true, false],
+  )
+})
+
+test('ranOutSeries: a band that is itself in extras marks the pooled column', () => {
+  // The pooled column is numbered REGULATION_INNINGS + 1, so a band in the
+  // ELEVENTH never equals it — the mark has to follow the pooling rather than
+  // the inning number, or the board would print rows no column points at.
+  const series = ranOutSeries({
+    earliest: 11,
+    emptied: 2,
+    clubGames: 8,
+    byInning: [{ inning: 11, n: 2, share: 1 }],
+  })
+  assert.equal(series.length, 1)
+  assert.equal(series[0].inning, 10)
+  assert.equal(series[0].extras, true)
+  assert.equal(series[0].mark, true)
+})
+
+test('ranOutSeries: nothing on file draws nothing', () => {
+  assert.deepEqual(ranOutSeries(null), [])
+  assert.deepEqual(ranOutSeries({ byInning: [] }), [])
 })
 
 // --------------------------------------------------------------------------

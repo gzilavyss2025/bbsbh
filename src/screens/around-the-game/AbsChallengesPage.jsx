@@ -20,6 +20,7 @@ import { commas, num1, num2, pct1 } from './abs/format.js'
 import { WhoCalls } from './abs/WhoCalls.jsx'
 import { WhenTheyCall } from './abs/WhenTheyCall.jsx'
 import { ClubBoard } from './abs/ClubBoard.jsx'
+import { RanOut } from './abs/RanOut.jsx'
 import { PlayerBoards } from './abs/PlayerBoards.jsx'
 import { UmpireBoard } from './abs/UmpireBoard.jsx'
 import { MissBands } from './abs/MissBands.jsx'
@@ -166,10 +167,15 @@ export function AbsChallengesPage() {
               WHO ASKS COMES BEFORE WHEN THEY ASK, and both come before who is
               good at it: the roles table defines the three jobs the inning
               chart then splits, so reading it the other way round meets a
-              catcher panel before anything has said a catcher can challenge. */}
+              catcher panel before anything has said a catcher can challenge.
+
+              OUT OF CHALLENGES FOLLOWS THE CLUB BOARD because it is that
+              board's "Ran out" column opened up: the column counts each club's
+              emptied games, and the section under it names the nights. */}
           <WhoCalls summary={summary} />
           <WhenTheyCall summary={summary} />
           <ClubBoard summary={summary} clubs={clubs} />
+          <RanOut summary={summary} clubs={clubs} />
           <PlayerBoards summary={summary} clubs={clubs} />
           <UmpireBoard summary={summary} />
           <MissBands summary={summary} />

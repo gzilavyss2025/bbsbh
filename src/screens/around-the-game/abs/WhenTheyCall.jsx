@@ -6,7 +6,11 @@ import {
   ROLE_LABEL,
 } from '../../../api/around-the-game/absChallenges.js'
 import { BroadcastSection } from '../../../components/around-the-game/BroadcastMasthead.jsx'
-import { ColumnChart, LineChart } from '../../../components/around-the-game/BroadcastBar.jsx'
+import {
+  ColumnChart,
+  LineChart,
+  roundTicks,
+} from '../../../components/around-the-game/BroadcastBar.jsx'
 import { commas, num2, pct1 } from './format.js'
 
 // WHEN THEY CALL FOR ONE — and the correction that turns the answer round.
@@ -47,14 +51,6 @@ const per100 = (x) => (x == null ? null : x * 100)
 
 function cutValue(row, cut) {
   return cut === 'n' ? row.n : per100(row.perChance)
-}
-
-// Ticks a reader can count on: a round step that clears the tallest column,
-// and never more than four lines across the plot.
-function ticksTo(max, step) {
-  const out = []
-  for (let v = step; v <= max; v += step) out.push({ value: v, label: String(v) })
-  return out
 }
 
 export function WhenTheyCall({ summary }) {
@@ -127,7 +123,7 @@ export function WhenTheyCall({ summary }) {
       <ColumnChart
         columns={columns}
         max={scale}
-        ticks={ticksTo(scale, step)}
+        ticks={roundTicks(scale, step)}
         label={
           cut === 'n'
             ? 'Challenges called in each inning'

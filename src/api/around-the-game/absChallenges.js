@@ -403,6 +403,36 @@ export function ranOutNights(summary) {
   }
 }
 
+// THE DISTRIBUTION AS A CHART DRAWS IT: nine regulation columns and one for
+// everything after them — inningSeries's cut, for its reason. MLB's twelfth
+// carries five nights against the ninth's three hundred, and four columns of
+// rounding error drawn at the weight of a season read as data. `extras` tells
+// the caller to draw that column hollow; `mark` is the band's own inning, the
+// one whose rows are printed under the chart.
+//
+// EVERY COLUMN IS A CLUB-GAME'S FIRST EMPTYING (ranout.mjs), so the pooled one
+// is a club that had not run out before the tenth, NOT a club running out a
+// second time. Both readings are available and only one is true, so the page
+// says which.
+export function ranOutSeries(nights) {
+  const rows = nights?.byInning ?? []
+  const regulation = rows.filter((r) => r.inning <= REGULATION_INNINGS)
+  const extras = rows.filter((r) => r.inning > REGULATION_INNINGS)
+  const marked = (r) => ({ ...r, extras: false, mark: r.inning === nights?.earliest })
+  if (extras.length === 0) return regulation.map(marked)
+  const n = extras.reduce((t, r) => t + r.n, 0)
+  return [
+    ...regulation.map(marked),
+    {
+      inning: REGULATION_INNINGS + 1,
+      n,
+      share: nights?.emptied > 0 ? n / nights.emptied : null,
+      extras: true,
+      mark: (nights?.earliest ?? 0) > REGULATION_INNINGS,
+    },
+  ]
+}
+
 // A RUN OF ONE IS NOT A RUN. Every man who ever won a challenge has a "run"
 // of at least one, so a board whose longest is one is a list of everybody who
 // was ever right, sorted by nothing. Two is the shortest thing worth printing,

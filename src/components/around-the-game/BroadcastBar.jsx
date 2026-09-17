@@ -140,6 +140,29 @@ export function StatusMeter({ fresh, limited, down, label }) {
 // the colourblind check at delta-E 4.8 under protanopia and grey on this paper
 // fails AA, so the outline carries it: an unfilled bar reads as "counted
 // differently" with no colour at all.
+//
+// TWO OPTIONAL MARKS, BOTH FOR A CHART THAT HAS ROWS UNDER IT. `mark` inks one
+// column in clay — the column whose own rows the board goes on to print, so
+// the reader can see which slice of the distribution they are about to read.
+// It is a TWO-way split and it is carried by position as much as by hue (the
+// marked column is the one the rows name), which is what keeps it clear of the
+// three-way-by-colour trap the diverging bar records above.
+//
+// `note` prints a figure over one column. Nothing here can be hovered — a
+// `title` tooltip is invisible on a touch screen and is not used in this app —
+// so the one or two values a reader came for are printed where they sit, the
+// same answer LineChart's `endLabels` gives.
+// THE GRIDLINES A CALLER ASKS FOR, at a round step it picks. The STEP is the
+// judgement — 8 challenges per hundred chances and 100 club-games are different
+// questions — and where the lines then fall is arithmetic, so the caller keeps
+// the first and hands the second here. It stops at the tallest column, which is
+// what keeps a chart to three or four lines rather than to a ruled page.
+export function roundTicks(max, step) {
+  const out = []
+  for (let v = step; v <= max; v += step) out.push({ value: v, label: String(v) })
+  return out
+}
+
 export function ColumnChart({ columns, max, ticks = [], label, size = 'full' }) {
   const height = (v) => (max > 0 && v != null ? `${Math.max(1, Math.min(100, (v / max) * 100))}%` : '0%')
   return (
@@ -154,9 +177,13 @@ export function ColumnChart({ columns, max, ticks = [], label, size = 'full' }) 
           {columns.map((c) => (
             <span key={c.key} className="colchart__col">
               <span
-                className={`colchart__bar${c.hollow ? ' colchart__bar--hollow' : ''}`}
+                className={`colchart__bar${c.hollow ? ' colchart__bar--hollow' : ''}${
+                  c.mark ? ' colchart__bar--mark' : ''
+                }`}
                 style={{ height: height(c.value) }}
-              />
+              >
+                {c.note ? <span className="colchart__value">{c.note}</span> : null}
+              </span>
             </span>
           ))}
         </span>
