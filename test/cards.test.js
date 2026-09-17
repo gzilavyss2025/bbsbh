@@ -109,12 +109,14 @@ for (const route of STATIC_REPORT_ROUTES) {
 }
 
 // The invariant that protects the CPU budget: NO card builds a per-route
-// api/og.js render. One 1200x630 Satori/resvg raster costs ~400ms of CPU, and
-// scripts/warm-previews.mjs asks for ~855 of them a night, which on its own
+// render. One 1200x630 Satori/resvg raster cost ~400ms of CPU, and
+// scripts/warm-previews.mjs asks for ~855 cards a night, which on its own
 // outran the whole Hobby Active-CPU allowance. See ogUrl() in api/_lib/cards.js.
 //
-// Restoring per-route art means deliberately changing this test, which is the
-// point of it -- the cost has to be taken on purpose, not drift back in.
+// The renderer that drew them (api/og.js) is now deleted, so this test guards
+// against it being written BACK rather than merely re-referenced -- the cost
+// has to be taken on purpose, not drift back in. `/api/og` stays in the
+// assertion as the name that route would take again.
 test('no card points at the dynamic /api/og renderer', async () => {
   const images = new Set()
   for (const route of STATIC_REPORT_ROUTES) {

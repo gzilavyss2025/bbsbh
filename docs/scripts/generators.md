@@ -1020,14 +1020,16 @@ don't run these by hand.
   no entry in the nightly commit step). Runs in `update-nightly-data.yml`
   alongside the generators above, but is the one script here that calls
   `bbsbh.vercel.app` itself rather than only statsapi: proactively warms
-  `api/preview.js` + `api/og.js`'s edge cache (see
+  `api/preview.js`'s edge cache (see
   `docs/adr/0012-dynamic-link-previews.md`) for today's MLB slate — every
   game's `lineup1`/`lineup2`/`boxscore` pages + shared `og:image`, every
   playing team's page, and every one of those teams' active-roster players —
   so the first real crawl of a shared link isn't a cold, statsapi-contested
   resolution. Fetches each pretty page and reads its own rendered `og:image`
-  tag back out to warm rather than reconstructing `/api/og`'s query params by
-  hand, so it can't drift from what `api/_lib/cards.js` actually builds.
+  tag back out rather than reconstructing that URL by hand, so it can't drift
+  from what `api/_lib/cards.js` actually builds. Since ADR-0012's amendments
+  that tag is one static file for every route, and the `seenImages` set
+  collapses the image warm to a single fetch for the whole run.
   Best-effort only (`mapConcurrent`, same helper as `gen-milestones.mjs`) —
   a failed warm is logged and skipped, never fatal to the run.
 - `gen-affiliates.mjs` → `public/data/affiliates.json` — every MLB org's full

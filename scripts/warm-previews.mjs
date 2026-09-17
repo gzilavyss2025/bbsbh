@@ -1,5 +1,5 @@
-// Proactively warms the crawler-facing preview edge cache (api/preview.js +
-// api/og.js) for today's MLB slate — every game, both clubs, and each club's
+// Proactively warms the crawler-facing preview edge cache (api/preview.js)
+// for today's MLB slate — every game, both clubs, and each club's
 // active roster — so the first REAL crawl of a shared link (iMessage/Slack/
 // Discord/etc., which happens once per message and is never retried) doesn't
 // race a cold, statsapi-contested resolution. See
@@ -20,12 +20,14 @@
 // boundary (plain fetch/AbortController, no edge-runtime-only API), so its
 // fetchWithTimeout is imported directly rather than re-copied a third time.
 //
-// Rather than reconstructing /api/og's query params by hand (which would
-// duplicate — and could drift from — api/_lib/cards.js's own card-building
-// logic), each pretty page is fetched first and its own <meta property=
+// Rather than reconstructing the image URL by hand (which would duplicate —
+// and could drift from — api/_lib/cards.js's own card-building logic), each
+// pretty page is fetched first and its own <meta property=
 // "og:image"> is read back out and warmed verbatim. That guarantees the
-// exact URL a real crawler will request, with no risk of warming a
-// differently-parameterized (and therefore differently-cached) image URL.
+// exact URL a real crawler will request. It now resolves to one static file
+// for every route (ADR-0012's amendments retired the per-route renderer), so
+// `seenImages` collapses the image warm to a single fetch per run; reading the
+// tag rather than assuming that keeps this honest if art ever returns.
 // If api/preview.js's renderHead() ever reorders/requotes that tag, OG_IMAGE_RE
 // stops matching silently — warmPage logs a warning in that case rather than
 // letting image-warm coverage quietly drop to zero with no signal.
