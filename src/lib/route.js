@@ -799,6 +799,11 @@ export function foulsPath() {
 export function runValuePath() {
   return '/run-value'
 }
+// The league ABS challenge board, for the same reason and with the same shape:
+// the level chip and every board's sort are page state, not an address.
+export function absChallengesPath() {
+  return '/abs-challenges'
+}
 export function gamePhotosPath(gamePk) {
   return `/photos/${gamePk}`
 }

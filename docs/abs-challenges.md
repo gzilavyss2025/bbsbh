@@ -13,8 +13,8 @@ loud. **A finding that survives its caveat is worth more than five that were
 never tested against one**, and two of the seven below only became interesting
 after the caveat was applied.
 
-Read it before changing `scripts/gen-abs-challenges.mjs` or the boards on
-`/abs-challenges`. The generator's own rules are documented at the top of that
+Read it before changing `scripts/gen-abs-challenges.mjs`, the boards on
+`/abs-challenges`, or the challenge card on a club's Numbers tab. The generator's own rules are documented at the top of that
 file and in `scripts/lib/abs/`; the readers' rules are at the top of
 `src/api/around-the-game/absChallenges.js` and `absExposure.js`.
 
@@ -241,31 +241,73 @@ draft pointed at 5.11 under a label reading 5.90.
 
 ## 6. The scatter — a club's hitters against what they see
 
-**Status: not built.** Question 5's team-hub card (#1069) is the one surface in
-this report that the shipped data cannot support, and the reason is worth
-recording rather than rediscovering.
+**Finding.** **Milwaukee is last of thirty at the plate and third of thirty
+behind it** — 4.53 challenges per 1,000 pitches seen against a league 6.42, and
+1.50 per nine innings caught against 1.12. The same club, two different habits,
+and neither figure is visible from the other. That is the whole reason the card
+exists: the league board ranks thirty clubs on one rate at a time and cannot
+say it.
 
-`abs-exposure.json` ships **one row per player-season**, folded across clubs by
-`exposureByPlayer`. The fold is deliberate and correct for the league board: a
-man traded in July clears a 200-plate-appearance floor on his season, not on
-either half of it. But the fold drops `team_id`, which the sweep's own rows
-carry, so **there is no way to attribute a traded man to the club he was with
-at the time** — which the card's acceptance requires.
+Twelve of the thirteen Brewers hitters who clear the floor sit **under** the
+line the league's own rate would put them on, and the thirteenth is Gary
+Sánchez — the most eager hitter in the league, 32 reviews in 1,085 pitches.
 
-The per-club cut exists in the database and is small: **1,740 rows against the
-1,560 the fold ships**, because only 178 of MLB's 1,453 swept men appear for
-more than one club. Widening the export costs `--export-only` and no refetch.
-What it also costs is payload on a file every `/abs-challenges` visitor
-downloads whole, which is a product decision rather than a build one. See
-ADR-0076 for the rule that decides where a dataset no surface reads should
-live.
+**The card lives on the team hub's Numbers tab**, beside the run value card,
+and it is MLB only: `abs-exposure-clubs.json` sweeps sportId 1, so an
+affiliate's page is unchanged the way it is for run value.
 
-**Whether Triple-A is worth drawing** is unanswered for the same reason. The
-denominators are there — 377 Triple-A hitters clear the floor against MLB's 352
-— so the scatter would draw. The question is whether an affiliate's roster
-churn leaves a season scatter that means anything.
+### Why this needed a third file
 
----
+`abs-exposure.json` ships **one row per player-SEASON**, folded across clubs.
+The fold is deliberate and right for the league board: a hitter traded in July
+clears a 200-plate-appearance floor on his season, not on either half of it, and
+the histograms in §5 would lose every traded regular without it.
+
+The same fold drops `team_id`, which the sweep's own rows carry. So a club board
+built on that file would have to attribute a traded man to whoever holds him
+now, counting a whole season against a club he played sixty games for.
+
+`abs-exposure-clubs.json` is the same sweep cut by club instead: **733 MLB rows
+against the fold's 659**, because only 178 of MLB's 1,453 swept men appear for
+more than one club. **95 KB**, fetched by one club's hub tab and by nothing
+else — ADR-0076 applied a second time, and the alternative was 95 KB on a file
+every visitor to `/abs-challenges` downloads whole.
+
+**It ships counts and denominators and no rates.** `per1000Pitches` prints as
+`11.224987798926305` — forty bytes for a number the reader divides in one line
+— and three of them a row was 210 KB of a first draft that came out at 465 KB.
+`name` does ride along, because a team hub that had to fetch 418 KB to put a
+name on a dot would have paid for the file this one exists to avoid.
+
+### A scatter for the hitters, a table for the catchers
+
+One dot a man, pitches seen across against reviews called up, with the league's
+rate drawn as the diagonal a man would sit on if he argued at exactly the
+league's pace. **That is a shape**, and a ranked list of thirteen rates would
+say who argues most and hide it.
+
+Most clubs carry two or three catchers, so the same chart behind the plate is
+three dots and a line. The catcher view is a table.
+
+**The table is not a repetition of the chart.** It is the only way to reach a
+player page from the card — an SVG text node cannot be a link — and it gives
+the unlabelled dots their names. One direct label on the chart at most: three
+in a first draft ran straight through other players' dots.
+
+**Emphasis is by hue, never by size.** A larger dot reads as "more important"
+when what it means is "further from the line".
+
+### Whether Triple-A is worth drawing
+
+**Not yet, and the file says so rather than shipping the rows.** The
+denominators exist — 377 Triple-A hitters clear the 200-plate-appearance floor
+against MLB's 352 — so a scatter would draw. What is unclear is whether it would
+MEAN the same thing: an affiliate's roster turns over hard enough through a
+season that "this club's hitters" is a different population in April and
+September, and a season-long club rate is a weaker claim there than it is in
+MLB. Shipping rows before a surface draws them is what ADR-0076 is against, so
+`EXPOSURE_CLUB_LEVELS` in `scripts/lib/abs/export.mjs` is `['MLB']` and adding
+one is a one-word change.
 
 ## 7. After a win, after a loss
 
@@ -351,8 +393,16 @@ audit of statsapi is `docs/MLB_STATS_API.md`.
 | Sweep, export and CLI | `scripts/gen-abs-challenges.mjs` |
 | Pure generator halves | `scripts/lib/abs/` — `rows`, `bank`, `chances`, `ranout`, `streaks`, `momentum`, `exposure`, `export` |
 | Season board reader | `src/api/around-the-game/absChallenges.js` |
-| Denominator reader | `src/api/around-the-game/absExposure.js` |
+| Denominator reader | `src/api/around-the-game/absExposure.js` — the league histograms AND the team hub's per-club board |
+| Team hub card | `src/screens/team/modules/TeamChallengeCard.jsx`, `src/styles/report/challenge-card.css` |
 | Page and its sections | `src/screens/around-the-game/AbsChallengesPage.jsx`, `src/screens/around-the-game/abs/` |
 | Chart primitives | `src/components/around-the-game/BroadcastBar.jsx`, `src/styles/report/charts.css` |
 | Tests | `test/abs-challenges.test.js`, `test/abs-exposure.test.js` |
 | Decisions | ADR-0075 (what a chance is), ADR-0076 (a dataset no surface reads) |
+
+Three files come out of every run of the generator, and the split is a size
+decision every time: `abs-challenges.json` (250 KB) is what `/abs-challenges`
+fetches, `abs-exposure.json` (418 KB) is the per-player denominator list that
+one section of that page reads, and `abs-exposure-clubs.json` (95 KB) is the
+same denominators cut by club, read by one club's hub tab. Folded into one file
+they would be 763 KB on every visit to either page.

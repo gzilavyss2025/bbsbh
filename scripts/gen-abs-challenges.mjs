@@ -112,6 +112,7 @@ import {
   auditBank,
   buildExport,
   buildExposureExport,
+  buildExposureClubsExport,
   challengeRowsForGame,
   exposureRowsFor,
   gameShape,
@@ -126,6 +127,11 @@ const out = join(here, '..', 'public', 'data', 'abs-challenges.json')
 // kilobytes on every visit to /abs-challenges for data nothing on screen
 // shows. See buildExposureExport in scripts/lib/abs/export.mjs.
 const exposureOut = join(here, '..', 'public', 'data', 'abs-exposure.json')
+// AND THE SAME DENOMINATORS SPLIT BY CLUB, a THIRD file for the same reason
+// the second one exists: the team hub's challenge card is the only surface
+// that reads it, and abs-exposure.json is downloaded whole by every visitor to
+// /abs-challenges. See buildExposureClubsExport in scripts/lib/abs/export.mjs.
+const exposureClubsOut = join(here, '..', 'public', 'data', 'abs-exposure-clubs.json')
 const reTablePath = join(here, '..', 'public', 'data', 'run-expectancy.json')
 
 const DEFAULT_DAYS = 3
@@ -223,13 +229,17 @@ async function writeOut() {
     .prepare('SELECT * FROM abs_player_exposure ORDER BY level, team_id, player_id')
     .all()
   const latest = games.reduce((m, g) => (g.season > m ? g.season : m), 0)
-  // BOTH FILES, EVERY RUN. They are cut from the same tables, so writing one
-  // without the other is how a season ends up with a report and a denominator
-  // list that disagree about who played.
+  // ALL THREE FILES, EVERY RUN. They are cut from the same tables, so writing
+  // one without the others is how a season ends up with a report, a
+  // denominator list and a club split that disagree about who played.
   await writeJsonAtomic(out, buildExport(rows, games, { season: latest || season }))
   await writeJsonAtomic(
     exposureOut,
     buildExposureExport(rows, exposure, { season: latest || season }),
+  )
+  await writeJsonAtomic(
+    exposureClubsOut,
+    buildExposureClubsExport(rows, exposure, { season: latest || season }),
   )
   // THE CHALLENGE BANK, CHECKED AGAINST EVERY ROW ON FILE. A club cannot spend
   // a challenge it does not hold, so a club-game the model cannot pay for

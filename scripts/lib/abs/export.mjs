@@ -408,6 +408,21 @@ export function summarizeLevel(rows, games) {
 // pitches he saw as a BATTER invents a man who argues with every other pitch
 // (exposure.mjs). It is taken over the rows of ONE level, because a man who
 // played at both is two different populations with two different denominators.
+// The same fold, keyed by CLUB as well as by man. A traded catcher's calls
+// belong to whichever club he was squatting for when he made them, and the
+// per-club file is the only place that distinction survives.
+function rolesByPlayerTeam(rows) {
+  const out = new Map()
+  for (const r of rows ?? []) {
+    if (r.player_id == null || r.team_id == null) continue
+    const key = `${r.team_id}:${r.player_id}`
+    const cur = out.get(key) ?? {}
+    cur[r.role] = (cur[r.role] ?? 0) + 1
+    out.set(key, cur)
+  }
+  return out
+}
+
 function rolesByPlayer(rows) {
   const out = new Map()
   for (const r of rows ?? []) {
@@ -494,5 +509,76 @@ export function buildExposureExport(rows, exposure, { season, generatedAt } = {}
     generatedAt: generatedAt ?? new Date().toISOString(),
     season: season ?? null,
     levels,
+  }
+}
+
+// THE SAME DENOMINATORS, SPLIT BY CLUB — a THIRD file, and the one cut the
+// folded list above cannot give back.
+//
+// buildExposureExport folds a man's clubs into one row on purpose: a hitter
+// traded in July clears a 200-plate-appearance floor on his SEASON, not on
+// either half of it, and the league histograms would lose every traded regular
+// if they did not. The same fold drops `team_id`, which the sweep's own rows
+// carry — so a club board built on that file would have to attribute a traded
+// man to whoever holds him now, counting a whole season against a club he
+// played sixty games for.
+//
+// A THIRD FILE RATHER THAN A KEY IN THE SECOND is ADR-0076 applied again: one
+// club's hub tab reads this, and abs-exposure.json is downloaded whole by
+// every visitor to /abs-challenges. The duplication is small — 733 MLB rows
+// against the fold's 659 — and docs/abs-challenges.md §6 carries the decision.
+//
+// IT SHIPS COUNTS AND DENOMINATORS, NEVER RATES. `per1000Pitches` prints as
+// `11.224987798926305`, forty bytes for a number the reader divides in one
+// line, and three of them a row was 210 KB of the first draft's 465. `name`
+// DOES ride along: a team hub that had to fetch 418 KB to put a name on a dot
+// would have paid for the file this one exists to avoid.
+//
+// MLB ONLY for now — shipping rows before a surface draws them is what
+// ADR-0076 is against. The loop is per level, so adding one is a one-word
+// change.
+export const EXPOSURE_CLUB_LEVELS = ['MLB']
+
+export function buildExposureClubsExport(
+  rows,
+  exposure,
+  { season, generatedAt, levels = EXPOSURE_CLUB_LEVELS } = {},
+) {
+  const out = {}
+  for (const level of levels) {
+    const roles = rolesByPlayerTeam((rows ?? []).filter((r) => r.level === level))
+    const byTeam = {}
+    for (const e of (exposure ?? []).filter((x) => x.level === level)) {
+      if (e.team_id == null) continue
+      const seen = {
+        pitches: e.pitches ?? null,
+        plateAppearances: e.plate_appearances ?? null,
+        catcherInnings: e.catcher_innings ?? null,
+        catcherStarts: e.catcher_starts ?? null,
+      }
+      // Same gate as the folded file: a man with no opportunity at all supports
+      // no rate and cannot answer the never-challenged question either.
+      if (!hasExposure(seen)) continue
+      const calls = roles.get(`${e.team_id}:${e.player_id}`) ?? {}
+      const key = String(e.team_id)
+      byTeam[key] = byTeam[key] ?? []
+      byTeam[key].push({
+        playerId: e.player_id,
+        name: e.name ?? '',
+        pitches: seen.pitches,
+        plateAppearances: seen.plateAppearances,
+        catcherInnings: seen.catcherInnings,
+        asBatter: calls.batter ?? 0,
+        asCatcher: calls.catcher ?? 0,
+      })
+    }
+    for (const list of Object.values(byTeam)) list.sort((a, b) => a.playerId - b.playerId)
+    out[level] = { byTeam }
+  }
+  return {
+    version: 1,
+    generatedAt: generatedAt ?? new Date().toISOString(),
+    season: season ?? null,
+    levels: out,
   }
 }

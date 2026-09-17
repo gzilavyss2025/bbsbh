@@ -71,4 +71,5 @@ export {
   summarizeLevel,
   buildExport,
   buildExposureExport,
+  buildExposureClubsExport,
 } from './export.mjs'

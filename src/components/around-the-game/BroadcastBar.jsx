@@ -303,3 +303,98 @@ export function LineChart({ points, min, max, ticks = [], label, endLabels }) {
     </div>
   )
 }
+
+// A SCATTER — one dot per man, and a line saying what the league would predict.
+//
+// WHY A CHART AND NOT A LIST HERE. The team hub's challenge card asks whether
+// a club's hitters argue as often as their time at the plate says they should,
+// and that is a question about a RELATIONSHIP between two numbers. A ranked
+// list of rates answers "who argues most" and hides the thing the card is for:
+// twelve of a club's thirteen regulars sitting under one line is a shape, and
+// a table of twelve rates is not.
+//
+// THE SAME HTML-NOT-SVG RULE the column chart records, for the same reason:
+// every label here is an HTML element, and only the league line — which has no
+// letters in it — is drawn in SVG. `preserveAspectRatio="none"` lets it stretch
+// to whatever width the card gets, and `vector-effect` keeps the stroke one
+// weight while it does.
+//
+// `points` is `[{ key, x, y, label }]` in DATA units, and the caller passes the
+// two maxima, because the scale a chart is drawn on is a judgement about the
+// data. `slope` is the y the line reaches at `maxX` — the league rate expressed
+// in the same units as the dots, so the line is a prediction and not a
+// decoration. At most ONE point carries a `label`: three direct labels on a
+// first draft ran straight through other players' dots, and the table under
+// the chart names every one of them anyway.
+export function ScatterChart({ points, maxX, maxY, xTicks = [], yTicks = [], slope, label, note }) {
+  const px = (v) => `${Math.max(0, Math.min(100, (v / maxX) * 100))}%`
+  const py = (v) => `${Math.max(0, Math.min(100, (v / maxY) * 100))}%`
+  return (
+    <div className="scatter">
+      <div className="scatter__plot" role="img" aria-label={label}>
+        {/* THE TICKS LIVE IN THE SAME BOX AS THE DOTS. The field is inset from
+            the plot so a man at either maximum is drawn whole rather than half
+            over the edge, and a tick placed against the plot instead would sit
+            a few pixels off the dots it is there to measure. */}
+        <span className="scatter__field">
+          {yTicks.map((t) => (
+            <span key={t.value} className="colchart__tick" style={{ bottom: py(t.value) }}>
+              <span className="colchart__ticklabel">{t.label}</span>
+            </span>
+          ))}
+          {slope != null && (
+            <svg
+              className="colchart__svg"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <line
+                className="scatter__line"
+                x1="0"
+                y1="100"
+                x2="100"
+                y2={100 - Math.max(0, Math.min(100, (slope / maxY) * 100))}
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+          )}
+          {points.map((p) => (
+            <span
+              key={p.key}
+              className={`scatter__dot${p.label ? ' scatter__dot--mark' : ''}`}
+              style={{ left: px(p.x), bottom: py(p.y) }}
+            />
+          ))}
+          {points
+            .filter((p) => p.label)
+            .map((p) => (
+              <span
+                key={`${p.key}-label`}
+                className={`scatter__label${
+                  p.x / maxX > 0.5 ? ' scatter__label--before' : ''
+                }${
+                  // A labelled dot is usually the highest one on the board, so
+                  // a label above it lands outside the plot and on whatever the
+                  // chart is sitting under. Past four fifths of the way up it
+                  // goes below its own dot instead.
+                  p.y / maxY > 0.8 ? ' scatter__label--under' : ''
+                }`}
+                style={{ left: px(p.x), bottom: py(p.y) }}
+              >
+                {p.label}
+              </span>
+            ))}
+        </span>
+      </div>
+      <span className="colchart__labels scatter__xaxis">
+        {xTicks.map((t) => (
+          <span key={t.value} className="colchart__label" style={{ left: px(t.value) }}>
+            {t.label}
+          </span>
+        ))}
+      </span>
+      {note ? <span className="scatter__note">{note}</span> : null}
+    </div>
+  )
+}

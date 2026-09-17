@@ -48,6 +48,7 @@ import {
   summarizeLevel,
   buildExport,
   buildExposureExport,
+  buildExposureClubsExport,
   MISS_BANDS,
 } from '../scripts/lib/abs/index.mjs'
 import {
@@ -1248,6 +1249,76 @@ test('buildExposureExport: levels are split, and nothing on file is an empty obj
   assert.deepEqual(Object.keys(out.levels).sort(), ['AAA', 'MLB'])
   assert.equal(out.levels.AAA.players.length, 1)
   assert.deepEqual(buildExposureExport([], [], { season: 2026 }).levels, {})
+})
+
+// --------------------------------------------------------------------------
+// buildExposureClubsExport — the same denominators, split by club.
+// --------------------------------------------------------------------------
+// The fold above is right for a season floor and wrong for a club board, and
+// this cut is the difference. Two of these pin what the fold costs.
+
+test('buildExposureClubsExport: a traded man is TWO rows, each with the club he was there for', () => {
+  // The fold sums him into one 350-plate-appearance season. Here he is 250 for
+  // one club and 100 for the other, and his challenges follow the club he made
+  // them for — which is what the team hub card's attribution rests on.
+  const rows = [
+    row({ seq: 0, team_id: 100, player_id: 11 }),
+    row({ seq: 1, team_id: 101, player_id: 11 }),
+    row({ seq: 2, team_id: 101, player_id: 11 }),
+  ]
+  const out = buildExposureClubsExport(
+    rows,
+    [
+      seenRow({ team_id: 100, pitches: 1000, plate_appearances: 250 }),
+      seenRow({ team_id: 101, pitches: 400, plate_appearances: 100 }),
+    ],
+    { season: 2026, generatedAt: 'now' },
+  )
+  const first = out.levels.MLB.byTeam['100']
+  const second = out.levels.MLB.byTeam['101']
+  assert.equal(first.length, 1)
+  assert.equal(first[0].plateAppearances, 250)
+  assert.equal(first[0].asBatter, 1)
+  assert.equal(second[0].plateAppearances, 100)
+  assert.equal(second[0].asBatter, 2)
+  // Neither row carries the other's numbers, and the season is the sum.
+  assert.equal(first[0].pitches + second[0].pitches, 1400)
+})
+
+test('buildExposureClubsExport: counts and denominators, and NOT the rates', () => {
+  // `per1000Pitches` prints as eleven significant figures. Three a row over
+  // 1,740 rows was 210 KB of the first draft, for arithmetic the reader does
+  // in one line.
+  const out = buildExposureClubsExport([row({})], [seenRow({})], { season: 2026 })
+  const p = out.levels.MLB.byTeam['100'][0]
+  assert.deepEqual(Object.keys(p).sort(), [
+    'asBatter', 'asCatcher', 'catcherInnings', 'name', 'pitches', 'plateAppearances', 'playerId',
+  ])
+})
+
+test('buildExposureClubsExport: a man with no opportunity at that club is dropped', () => {
+  const out = buildExposureClubsExport([], [
+    seenRow({}),
+    seenRow({ team_id: 100, player_id: 13, name: 'A Pitcher', pitches: null, plate_appearances: null }),
+    seenRow({ team_id: 100, player_id: 14, name: 'Another', pitches: 0, plate_appearances: 0 }),
+  ], { season: 2026 })
+  assert.deepEqual(out.levels.MLB.byTeam['100'].map((p) => p.playerId), [11])
+})
+
+test('buildExposureClubsExport: MLB only, because no surface draws Triple-A yet', () => {
+  // ADR-0076: shipping rows before a surface reads them is the thing the split
+  // was made to stop. The loop is per level, so the day a board wants Triple-A
+  // it is one word here.
+  const out = buildExposureClubsExport([], [
+    seenRow({}),
+    seenRow({ level: 'AAA', team_id: 400, player_id: 21, name: 'A Triple-A Hitter' }),
+  ], { season: 2026 })
+  assert.deepEqual(Object.keys(out.levels), ['MLB'])
+  const both = buildExposureClubsExport([], [
+    seenRow({}),
+    seenRow({ level: 'AAA', team_id: 400, player_id: 21, name: 'A Triple-A Hitter' }),
+  ], { season: 2026, levels: ['MLB', 'AAA'] })
+  assert.equal(both.levels.AAA.byTeam['400'].length, 1)
 })
 
 // --------------------------------------------------------------------------
