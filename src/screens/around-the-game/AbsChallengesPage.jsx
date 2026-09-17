@@ -18,6 +18,7 @@ import { BroadcastMasthead } from '../../components/around-the-game/BroadcastMas
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { commas, num1, num2, pct1 } from './abs/format.js'
 import { WhoCalls } from './abs/WhoCalls.jsx'
+import { WhenTheyCall } from './abs/WhenTheyCall.jsx'
 import { ClubBoard } from './abs/ClubBoard.jsx'
 import { PlayerBoards } from './abs/PlayerBoards.jsx'
 import { UmpireBoard } from './abs/UmpireBoard.jsx'
@@ -159,9 +160,15 @@ export function AbsChallengesPage() {
             />
           </SlabRow>
 
-          {/* THE SIX BOARDS. Each one is handed the summary the level chip
-              chose; none of them reads the file. See the header. */}
+          {/* THE BOARDS. Each one is handed the summary the level chip chose;
+              none of them reads the file. See the header.
+
+              WHO ASKS COMES BEFORE WHEN THEY ASK, and both come before who is
+              good at it: the roles table defines the three jobs the inning
+              chart then splits, so reading it the other way round meets a
+              catcher panel before anything has said a catcher can challenge. */}
           <WhoCalls summary={summary} />
+          <WhenTheyCall summary={summary} />
           <ClubBoard summary={summary} clubs={clubs} />
           <PlayerBoards summary={summary} clubs={clubs} />
           <UmpireBoard summary={summary} />

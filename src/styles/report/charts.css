@@ -1,0 +1,205 @@
+/* ============================================================
+   REPORT CHARTS — the column chart and the line chart the
+   broadcast report boards draw when a table cannot answer the
+   question (components/around-the-game/BroadcastBar.jsx).
+
+   ITS OWN PARTIAL, NOT A BLOCK IN 68-around-the-game.css, and the
+   reason is that file's own budget: it sits at 1071 of 1100 lines
+   with the four report pages' rules already in it, and the guard's
+   answer to a file at its cap is to split rather than to widen the
+   table (scripts/check-file-size.mjs). src/styles is AT its
+   directory budget of 115, which is why 68 holds one sheet for
+   four pages — but report/ is its own directory entry with room,
+   and report/chrome.css already lives there.
+
+   COMPONENT-IMPORTED, from BroadcastBar.jsx rather than from a
+   page, so a board that draws a chart cannot forget to bring its
+   rules. That makes it a partial four lazy routes can share, which
+   is the <link>-order trap 68's header records — and it cannot
+   bite here, because every selector below is a name nothing else
+   in this app uses. Order only matters where two sheets style the
+   same element.
+   ============================================================ */
+
+/* THE BOARDS ON THESE PAGES ARE TABLES, and that is the right default: a
+   ranked list of thirty clubs is read by scanning one column, and BarCell puts
+   the shape behind the figure so the eye never crosses the row twice. Two
+   questions on the ABS report cannot be asked that way — "does the appetite for
+   a challenge rise across the game" and "does the share won fall" are both
+   shapes over nine ordered innings, and nine table rows hide them.
+
+   So this block is the exception, and it is built to stay ONE exception: the
+   column chart, its small multiples and the line chart share every class here,
+   and the report sections still to come read them rather than each bringing
+   their own. That is also what keeps this file inside one band.
+
+   DRAWN IN HTML, NOT SVG, except the line itself. Text inside an SVG scales
+   with the viewBox, so a chart sized for a 390px phone would set its axis
+   labels a third larger at 960px — and an inline font-size in SVG is invisible
+   to check-typography, which reads these stylesheets and nothing else. */
+
+.colchart {
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+/* The gutter holds the axis labels, and 36px is the width of "1200" set in
+   JetBrains Mono at --fs-caption with --ls-label tracking. The raw-count cut
+   really does tick to four digits, so a gutter fitted to two clipped it. */
+.colchart__plot {
+  position: relative;
+  height: 148px;
+  padding-left: 36px;
+}
+
+/* The small multiples carry no ticks of their own — they are read against the
+   chart above them — so they give the axis gutter back to the bars. */
+.colchart--small .colchart__plot,
+.colchart--small .colchart__labels {
+  padding-left: 0;
+}
+
+.colchart--small .colchart__plot {
+  height: 76px;
+}
+
+.colchart--line .colchart__plot {
+  height: 128px;
+}
+
+/* A tick is the line AND its label, placed together from the bottom, so a
+   caller changing the scale never has to move two things. --graphite-soft
+   measures 3.10:1 on card paper and fails AA at this size, so the label takes
+   the caption ink. */
+.colchart__tick {
+  position: absolute;
+  left: 36px;
+  right: 0;
+  border-top: var(--bw-hair) solid var(--rule-grid);
+}
+
+.colchart__ticklabel,
+.colchart__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.colchart__ticklabel {
+  position: absolute;
+  right: 100%;
+  bottom: -0.6em;
+  width: 34px;
+  padding-right: var(--space-1);
+  text-align: right;
+}
+
+/* Positioned, so the columns paint OVER the gridlines rather than under them.
+   A tick is absolutely positioned and would otherwise sit on top of every bar
+   it crosses, which on navy reads as a scratch rather than as an axis. */
+.colchart__cols {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 100%;
+}
+
+.colchart__col {
+  flex: 1 1 0;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+
+.colchart__bar {
+  width: 100%;
+  background: var(--navy);
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+}
+
+/* THIN EVIDENCE IS HOLLOW, NOT GREY AND NOT A SECOND HUE. Clay against
+   graphite fails the colourblind check at delta-E 4.8 under protanopia, and
+   grey at this size fails AA — an outline says "counted differently" with no
+   colour at all. */
+.colchart__bar--hollow {
+  background: transparent;
+  border: var(--bw-hair) solid var(--navy);
+}
+
+.colchart__labels {
+  display: flex;
+  gap: 2px;
+  padding-left: 36px;
+  margin-top: var(--space-1);
+}
+
+.colchart__label {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+}
+
+/* The small multiples, side by side from 420px and stacked below it: two
+   nine-column charts inside 390px of phone give each column under 16px, which
+   is a bar too thin to read a shape off. */
+.colchart__multiples {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+@media (min-width: 420px) {
+  .colchart__multiples {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.colchart__panel--wide {
+  margin-top: var(--space-4);
+}
+
+.colchart__paneltitle {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+.colchart__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.colchart__path {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* The two ends carry their own figures, because nothing here can be hovered: a
+   `title` tooltip is invisible on a touch screen and is not used in this app. */
+.colchart__end {
+  position: absolute;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-label);
+  color: var(--clay-deep);
+}
+
+.colchart__end--start {
+  left: 36px;
+}
+
+.colchart__end--end {
+  right: 0;
+}

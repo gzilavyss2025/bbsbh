@@ -1,5 +1,9 @@
-// The two chart primitives every report board shares: a bar drawn behind a
-// number, and a month-by-month trend strip.
+import '../../styles/report/charts.css'
+
+// The chart primitives every report board shares: a bar drawn behind a number,
+// a month-by-month trend strip, a three-way status meter, and — for the boards
+// that ask a question no table row can answer — a column chart and a line chart
+// with axes of their own.
 //
 // WHY A BAR BEHIND THE NUMBER RATHER THAN BESIDE IT. A ranked table of thirty
 // clubs is read by scanning the leftmost column and then the number; a bar in
@@ -107,5 +111,136 @@ export function StatusMeter({ fresh, limited, down, label }) {
       <span className="statusmeter__seg statusmeter__seg--limited" style={{ width: w(limited) }} />
       <span className="statusmeter__seg statusmeter__seg--down" style={{ width: w(down) }} />
     </span>
+  )
+}
+
+// A COLUMN CHART — the one shape a report board cannot make out of table rows.
+//
+// TrendStrip above is a column chart too, and it is deliberately not this one:
+// it is 68px of sparkline inside a table cell, read as a shape beside a number
+// and never for a value. This is a chart a reader looks AT — it carries an
+// axis, a scale somebody chose, and labels under every column.
+//
+// IT IS HTML AND CSS, NOT SVG, and that is a typography decision rather than a
+// drawing one. Text inside an SVG scales with the viewBox, so a chart that fits
+// a 390px phone would set its axis labels a third larger on a 960px screen, and
+// an inline `font-size` in SVG is invisible to check-typography, which reads
+// stylesheets only. Flex columns with percentage heights draw the same picture
+// with every font in src/styles/68-around-the-game.css, where the guard can see
+// it.
+//
+// `columns` is `[{ key, label, value, hollow }]` and `ticks` is
+// `[{ value, label }]` — both the caller's, because the scale a chart is drawn
+// on is a judgement about the data and belongs to the page that knows it. A
+// column with a null value draws nothing rather than a zero.
+//
+// THIN EVIDENCE IS DRAWN HOLLOW, NOT GREY AND NOT IN A SECOND COLOUR. The
+// extra-innings column pools thirteen games' worth of nights against nine
+// columns of a full season, and it has to say so. Clay against graphite fails
+// the colourblind check at delta-E 4.8 under protanopia and grey on this paper
+// fails AA, so the outline carries it: an unfilled bar reads as "counted
+// differently" with no colour at all.
+export function ColumnChart({ columns, max, ticks = [], label, size = 'full' }) {
+  const height = (v) => (max > 0 && v != null ? `${Math.max(1, Math.min(100, (v / max) * 100))}%` : '0%')
+  return (
+    <div className={`colchart colchart--${size}`}>
+      <div className="colchart__plot" role="img" aria-label={label}>
+        {ticks.map((t) => (
+          <span key={t.value} className="colchart__tick" style={{ bottom: height(t.value) }}>
+            <span className="colchart__ticklabel">{t.label}</span>
+          </span>
+        ))}
+        <span className="colchart__cols">
+          {columns.map((c) => (
+            <span key={c.key} className="colchart__col">
+              <span
+                className={`colchart__bar${c.hollow ? ' colchart__bar--hollow' : ''}`}
+                style={{ height: height(c.value) }}
+              />
+            </span>
+          ))}
+        </span>
+      </div>
+      <span className="colchart__labels">
+        {columns.map((c) => (
+          <span key={c.key} className="colchart__label">
+            {c.label}
+          </span>
+        ))}
+      </span>
+    </div>
+  )
+}
+
+// A LINE CHART ON ITS OWN SCALE — for the series that must never share an axis
+// with the columns above it.
+//
+// WHY IT IS A SEPARATE CHART AND NOT A SECOND AXIS. Challenges per chance rises
+// across the game and the share won falls across it, and drawn on one pair of
+// axes the two lines cross wherever the second scale happens to be pinned. The
+// crossing point is an artefact of that choice and a reader cannot tell it from
+// a finding. Two charts, each with its own ticks, say the same two things and
+// invent nothing.
+//
+// THE PATH IS SVG BECAUSE A LINE IS A LINE; everything with letters in it is
+// HTML, for the reason ColumnChart gives. `preserveAspectRatio="none"` lets the
+// path stretch to whatever width the page gives it, and `vector-effect` keeps
+// the stroke one weight while it does.
+export function LineChart({ points, min, max, ticks = [], label, endLabels }) {
+  const span = max - min
+  const usable = points.filter((p) => p.value != null)
+  // THE POINTS SIT AT THE COLUMN CENTRES, not at the plot's edges, because the
+  // labels under them are centred cells of one shared row (.colchart__labels)
+  // and a line drawn edge to edge lands half a cell left of every label it
+  // belongs to.
+  const x = (i) => ((i + 0.5) / points.length) * 100
+  const y = (v) => (span > 0 ? 100 - ((v - min) / span) * 100 : 50)
+  const pct = (v) => (span > 0 ? `${((v - min) / span) * 100}%` : '50%')
+  const path = points
+    .map((p, i) => (p.value == null ? null : `${x(i)},${y(p.value)}`))
+    .filter(Boolean)
+    .join(' ')
+
+  return (
+    <div className="colchart colchart--line">
+      <div className="colchart__plot" role="img" aria-label={label}>
+        {ticks.map((t) => (
+          <span key={t.value} className="colchart__tick" style={{ bottom: pct(t.value) }}>
+            <span className="colchart__ticklabel">{t.label}</span>
+          </span>
+        ))}
+        <svg
+          className="colchart__svg"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <polyline className="colchart__path" points={path} vectorEffect="non-scaling-stroke" />
+        </svg>
+        {/* THE TWO ENDS CARRY THEIR OWN FIGURES. Nothing else on the line is
+            labelled and nothing can be hovered — a `title` tooltip is invisible
+            on a touch screen and is not used anywhere in this app — so the
+            first and last values are printed where they sit. They are also the
+            two the reader came for: the fall from one to the other IS the
+            finding. */}
+        {usable.length > 1 &&
+          endLabels?.map((e) => (
+            <span
+              key={e.key}
+              className={`colchart__end colchart__end--${e.side}`}
+              style={{ bottom: pct(e.value) }}
+            >
+              {e.text}
+            </span>
+          ))}
+      </div>
+      <span className="colchart__labels">
+        {points.map((p) => (
+          <span key={p.key} className="colchart__label">
+            {p.label}
+          </span>
+        ))}
+      </span>
+    </div>
   )
 }

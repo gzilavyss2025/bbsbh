@@ -64,6 +64,9 @@ import {
   callSplitAnomalies,
   callSplitOffBy,
   missBands,
+  inningSeries,
+  roleInnings,
+  roleSpan,
   ranOutNights,
   streakBoard,
   streakRoles,
@@ -2004,4 +2007,109 @@ test('momentum: the standard errors ship with the gap, not under it', () => {
   const out = momentum(summaryFor(data, 'MLB'))
   assert.equal(typeof out.strict.errors, 'number')
   assert.ok(Number.isFinite(out.strict.errors))
+})
+
+// --------------------------------------------------------------------------
+// inningSeries / roleInnings / roleSpan — the columns the inning chart draws.
+// --------------------------------------------------------------------------
+// The whole point of the chart is that the RAW COUNT misleads: the ninth
+// barely beats the eighth on counts and nearly doubles it per chance, because
+// fewer clubs reach the ninth still able to argue. These pin the two ways that
+// correction can be thrown away — pooling the extras by averaging their rates,
+// and dividing a role by its own half of the chances instead of the club's.
+
+const inn = (over) => ({
+  inning: 1, n: 100, success: 50, rate: 0.5, chances: 1000, perChance: 0.1, ...over,
+})
+const seriesOf = (rows) => inningSeries({ byInning: rows })
+
+test('inningSeries: nine regulation columns and one for everything after', () => {
+  const rows = []
+  for (let i = 1; i <= 9; i += 1) rows.push(inn({ inning: i }))
+  rows.push(inn({ inning: 10 }), inn({ inning: 11 }), inn({ inning: 12 }))
+  const series = seriesOf(rows)
+  assert.equal(series.length, 10)
+  assert.deepEqual(series.map((r) => r.inning), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+  assert.equal(series.filter((r) => r.extras).length, 1)
+  assert.equal(series[9].n, 300)
+  assert.equal(series[9].chances, 3000)
+})
+
+test('inningSeries: the pooled rates are RE-DIVIDED, never averaged', () => {
+  // The tenth is a real inning; the thirteenth is eleven chances. A mean of the
+  // two rates weights them equally and prints 30%; the pooled count over the
+  // pooled chances is 10.9%, which is what the nine columns beside it are.
+  const series = seriesOf([
+    inn({ inning: 1 }),
+    inn({ inning: 10, n: 100, success: 40, chances: 1000, perChance: 0.1, rate: 0.4 }),
+    inn({ inning: 13, n: 10, success: 2, chances: 20, perChance: 0.5, rate: 0.2 }),
+  ])
+  const pooled = series.find((r) => r.extras)
+  assert.equal(pooled.n, 110)
+  assert.equal(pooled.chances, 1020)
+  assert.ok(Math.abs(pooled.perChance - 110 / 1020) < 1e-12)
+  // Not the mean of 0.1 and 0.5.
+  assert.ok(pooled.perChance < 0.2)
+  assert.ok(Math.abs(pooled.rate - 42 / 110) < 1e-12)
+})
+
+test('inningSeries: a season that never went to extras draws nine columns', () => {
+  const series = seriesOf([inn({ inning: 1 }), inn({ inning: 9 })])
+  assert.equal(series.length, 2)
+  assert.equal(series.some((r) => r.extras), false)
+  assert.deepEqual(inningSeries(null), [])
+})
+
+test('inningSeries: an extras column with no chances on file has no rate, not a zero', () => {
+  const series = seriesOf([inn({ inning: 1 }), inn({ inning: 10, n: 0, success: 0, chances: 0 })])
+  const pooled = series.find((r) => r.extras)
+  assert.equal(pooled.perChance, null)
+  assert.equal(pooled.rate, null)
+})
+
+test('roleInnings: regulation only, because the pooled column belongs to the club chart', () => {
+  const summary = {
+    byInningRole: [
+      { inning: 9, role: 'catcher', n: 10, success: 5, chances: 100, perChance: 0.1 },
+      { inning: 10, role: 'catcher', n: 1, success: 0, chances: 8, perChance: 0.125 },
+      { inning: 9, role: 'batter', n: 8, success: 4, chances: 100, perChance: 0.08 },
+    ],
+  }
+  assert.deepEqual(roleInnings(summary, 'catcher').map((r) => r.inning), [9])
+  assert.equal(roleInnings(summary, 'pitcher').length, 0)
+  assert.equal(roleInnings(null, 'catcher').length, 0)
+})
+
+test('roleInnings: the roles are divided by the CLUB’s chances, so they add back up to it', () => {
+  // The invariant the panels are read on. Each role's row carries the club's
+  // own chances, so the three per-chance figures sum to the club's — a panel
+  // drawn on a role's own half of the chances would sum to twice it.
+  const summary = {
+    byInning: [{ inning: 1, n: 30, success: 15, rate: 0.5, chances: 300, perChance: 0.1 }],
+    byInningRole: [
+      { inning: 1, role: 'batter', n: 12, success: 6, chances: 300, perChance: 0.04 },
+      { inning: 1, role: 'catcher', n: 17, success: 8, chances: 300, perChance: 17 / 300 },
+      { inning: 1, role: 'pitcher', n: 1, success: 1, chances: 300, perChance: 1 / 300 },
+    ],
+  }
+  const club = inningSeries(summary)[0].perChance
+  const roles = ['batter', 'catcher', 'pitcher']
+    .map((r) => roleInnings(summary, r)[0].perChance)
+    .reduce((a, b) => a + b, 0)
+  assert.ok(Math.abs(roles - club) < 1e-12)
+})
+
+test('roleSpan: the two numbers that let a stat line replace a panel', () => {
+  const summary = {
+    byInningRole: [
+      { inning: 1, role: 'pitcher', n: 2, success: 1, chances: 1000, perChance: 0.0018 },
+      { inning: 5, role: 'pitcher', n: 3, success: 1, chances: 1000, perChance: 0.0031 },
+      // An extra inning, which the span must not reach into.
+      { inning: 11, role: 'pitcher', n: 1, success: 0, chances: 10, perChance: 0.1 },
+    ],
+  }
+  assert.deepEqual(roleSpan(summary, 'pitcher'), { low: 0.0018, high: 0.0031 })
+  // Nothing to measure means no sentence, rather than an empty one.
+  assert.equal(roleSpan(summary, 'catcher'), null)
+  assert.equal(roleSpan(null, 'pitcher'), null)
 })
