@@ -77,6 +77,17 @@ export const EXPOSURE_KINDS = [
     // other.
     rateOn: 'pitches',
     ratePer: 1000,
+    // `unit` names the FLOOR's denominator and `seen` names the RATE's, and on
+    // a batter they are two different columns. A sentence that reached for
+    // `unit` printed "32 in 1,085 plate appearances" over his PITCH count — the
+    // same confusion in words that reading the rate off the wrong divisor makes
+    // in arithmetic.
+    seen: 'pitches seen',
+    seenLabel: 'Pitches',
+    // And the same denominator written to sit mid-sentence. Four word forms
+    // for one column looks like a lot until a component tries to build one
+    // from another and prints "1,085 plate appearances" over a pitch count.
+    theirs: 'the pitches they see',
     scale: 'per 1,000 pitches seen',
     step: 2,
     bins: 9,
@@ -96,6 +107,9 @@ export const EXPOSURE_KINDS = [
     // the pitches he received. That is the caveat the page prints.
     rateOn: 'catcherInnings',
     ratePer: 9,
+    seen: 'innings caught',
+    seenLabel: 'Innings',
+    theirs: 'the innings they catch',
     scale: 'per 9 innings caught',
     step: 0.2,
     bins: 8,
@@ -230,5 +244,102 @@ export function exposureBoard(level, key) {
     // The man at the top of the board, carried whole so a sentence can say what
     // his rate is made of: a rate on its own is not evidence of anything.
     leader: qualified.reduce((best, p) => (best && best[kind.rate] >= p[kind.rate] ? best : p), null),
+  }
+}
+
+// ---------------------------------------------------------------------------
+// THE PER-CLUB CUT — the team hub's challenge card, and a THIRD file.
+// ---------------------------------------------------------------------------
+//
+// The list above is folded across clubs, which is right for a season floor and
+// wrong for a club board: a man traded in July would be counted in full against
+// whichever club holds him now. `abs-exposure-clubs.json` is the same sweep cut
+// by `team_id` instead (scripts/lib/abs/export.mjs), 95 KB against the folded
+// file's 418, fetched by ONE club's hub tab and by nothing else — ADR-0076
+// applied a second time.
+//
+// It ships COUNTS AND DENOMINATORS AND NO RATES, because a rate prints as
+// eleven significant figures and the arithmetic is one line. That line is
+// `EXPOSURE_KINDS` above, so the card and the league board divide identically.
+
+export const fetchAbsExposureClubs = staticJson('/data/abs-exposure-clubs.json')
+
+// MLB only today. The file's level loop is the generator's, so a Triple-A
+// board is a one-word change there and a null here until then.
+export function clubRowsFor(data, teamId, level = 'MLB') {
+  return data?.levels?.[level]?.byTeam?.[String(teamId)] ?? null
+}
+
+// One club's rate for one kind, over EVERY man on it who had a denominator —
+// the same construction as the league figure, and deliberately not the
+// floored population the board below draws. "This club challenges once every N
+// times up" is a fact about the club, and a floor applied to it would report
+// the habits of its regulars as the whole roster's.
+function clubRate(rows, kind) {
+  let calls = 0
+  let exposure = 0
+  for (const r of rows ?? []) {
+    if (!((r[kind.rateOn] ?? 0) > 0)) continue
+    calls += r[kind.calls] ?? 0
+    exposure += r[kind.rateOn]
+  }
+  return exposure > 0 ? (calls / exposure) * kind.ratePer : null
+}
+
+// THE CARD, for one club and one kind.
+//
+// `rank` is among every club in the file, counted on the same rate — so the
+// figure a reader sees and the figure they are ranked on cannot come apart.
+// Ties share the better rank, the way every other board in this app does it.
+//
+// `players` is the men who clear the LEAGUE BOARD'S floor, reused rather than
+// invented: a man with forty pitches who never argued is not a habit, and a
+// card with its own private floor would be a second answer to a question the
+// league page has already answered. The count that cleared it is printed.
+//
+// Null for a club the file has no rows for, which is every affiliate — the
+// card then draws nothing, the way TeamRunValueCard does for a club Savant
+// runs no board for.
+export function clubChallengeBoard(data, teamId, key, level = 'MLB') {
+  const kind = exposureKind(key)
+  const mine = clubRowsFor(data, teamId, level)
+  if (!mine) return null
+
+  // Every club in the file, on the same rate, so the figure a reader sees and
+  // the figure they are ranked on cannot come apart.
+  const clubs = Object.values(data?.levels?.[level]?.byTeam ?? {})
+  const rates = clubs.map((rows) => clubRate(rows, kind)).filter((r) => r != null)
+  const rate = clubRate(mine, kind)
+  const ahead = rate == null ? null : rates.filter((r) => r > rate).length
+
+  // The league figure off the same file, so the card never fetches the 418 KB
+  // league list to print the line its own dots are measured against.
+  const league = clubRate(clubs.flat(), kind)
+
+  const players = mine
+    .filter((r) => (r[kind.floorOn] ?? 0) >= kind.floor && (r[kind.rateOn] ?? 0) > 0)
+    .map((r) => ({
+      playerId: r.playerId,
+      name: r.name,
+      exposure: r[kind.rateOn],
+      calls: r[kind.calls] ?? 0,
+      rate: ((r[kind.calls] ?? 0) / r[kind.rateOn]) * kind.ratePer,
+    }))
+    .sort((a, b) => b.exposure - a.exposure)
+
+  return {
+    key: kind.key,
+    kind,
+    rate,
+    league,
+    rank: ahead == null ? null : ahead + 1,
+    of: rates.length,
+    players,
+    roster: mine.filter((r) => (r[kind.rateOn] ?? 0) > 0).length,
+    // The one dot worth a direct label, and the count the sentence needs: a
+    // club whose hitters nearly all sit under the league line is the card's
+    // whole finding, and it has to be read off the drawn population.
+    leader: players.reduce((best, p) => (best && best.rate >= p.rate ? best : p), null),
+    below: league == null ? 0 : players.filter((p) => p.rate < league).length,
   }
 }

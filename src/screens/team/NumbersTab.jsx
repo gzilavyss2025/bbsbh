@@ -15,6 +15,7 @@ import { StandingsCard } from './modules/StandingsCard.jsx'
 import { TeamStats, todayDowLabel } from './modules/TeamStatsCard.jsx'
 import { ComebackCard } from './modules/ComebackCard.jsx'
 import { TeamRunValueCard } from './modules/TeamRunValueCard.jsx'
+import { TeamChallengeCard } from './modules/TeamChallengeCard.jsx'
 import { RecordsCard } from './modules/records/RecordsCard.jsx'
 import { LastTimeCard } from './modules/records/LastTimeCard.jsx'
 
@@ -83,6 +84,19 @@ export function NumbersTab({ id, asOf, sportId }) {
               into the leaders below. MLB only (Savant runs no minor-league
               board), so an affiliate's page is unchanged. */}
           <TeamRunValueCard data={n.runValue} clubName={teamClubName(team)} />
+
+          {/* And beside it, the one question the run-value card cannot ask: who
+              on this club argues with the plate umpire, against how much
+              baseball they see. It is the only place a club's challenge habit
+              appears — the league board ranks thirty clubs on one rate and
+              cannot show that the same club is last at the plate and third
+              behind it. MLB only (abs-exposure-clubs.json sweeps sportId 1),
+              so an affiliate's page is unchanged. */}
+          <TeamChallengeCard
+            data={n.absExposureClubs}
+            teamId={teamId}
+            clubName={teamClubName(team)}
+          />
 
           {/* The full ledger — six categories a side, every one on screen. The
               "See all ›" door goes on to /team/{id}/leaders, which is where the
