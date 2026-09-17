@@ -72,6 +72,12 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
   'src/styles/02-wordmark-lab.css': 700, // 644
+  // 600 -> 700: the winter league picker's row (issue #1055) — the control that
+  // covers the gap between one rail tab and the four leagues behind it. It sits
+  // in this file rather than beside .levelnav in 05-masthead-nav.css because
+  // that file is AT its own 700 cap, and because the picker is a slate-header
+  // row: it renders between the rail and the club strip it scopes.
+  'src/styles/03-slate-header.css': 650, // 602
   'src/styles/05-masthead-nav.css': 700, // 697 — current player-page masthead and level-progression rules after CareerTimeline moved to 05a
   'src/styles/06-loader-and-cards.css': 800, // 900 -> 742: the off-day club tiles left for 06b-offday-cards.css, taking their hover/focus states with them
   'src/styles/08-site-shell.css': 900, // 1000 -> 898: the footer's flat link-list rules left for 08a-site-menu.css, which holds the shared site-directory language the sheet, the footer and /more all read
@@ -191,7 +197,13 @@ const BUDGETS = {
   // TEAM_TAB_ROUTES and teamTabPath, which they are modelled on line for line —
   // a separate module for one table and one builder would put the two halves of
   // the same convention in two files and let them drift.
-  'src/lib/route.js': 900, // 814
+  // 900 -> 1000: the four winter-league slugs (issue #1055). They are table
+  // entries and a `leagueId` on one existing parse branch, which is the whole
+  // reason flat '/fall' beat nested '/winter/fall' — but the three paragraphs
+  // that record WHY sportId 17 needs a second key, and why slatePath had to
+  // learn it or every winter league would build the same URL, are worth more
+  // here than beside the four-line table they explain.
+  'src/lib/route.js': 950, // 934
   'scripts/gen-fouls.mjs': 1000, // 996
   // The sweep gained a batter-side dimension: the side is read off the matchup,
   // it keys the type buckets, and the export folds the sides back into the one
@@ -216,14 +228,25 @@ const BUDGETS = {
   // banner already. The growth was kept to ~28 lines by moving both halves
   // out first: the gate into hooks/useOffseason.js and the surface into
   // components/offseason/. What is left here is the branch itself.
-  'src/screens/GameSelect.jsx': 1200, // 1115
+  // The conditional WINTER tab (issue #1055) landed inside this budget. The
+  // slate gains a SIXTH level whose existence is a fetched question, and this
+  // screen is where a rail that changes shape has to be decided, for the same
+  // reason the offseason page was: it already owns the level rail, the club
+  // strip and the empty day. It fits because both halves moved out first — the
+  // gate into hooks/useWinter.js over pure rules in src/lib/winter/, and the
+  // surface into components/winter/LeaguePicker.jsx.
+  'src/screens/GameSelect.jsx': 1200, // 1187
   // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's
   // one new reader tipped it. fetchSeasonMeta belongs here and nowhere else:
   // this module already owned the seasons endpoint (fetchAllStarInfo was a
   // narrow read of the same row, and now delegates to it), and the whole point
   // of the change is that one fetch answers both questions. A new src/api file
   // for a nine-line fetcher would cost that directory's budget to buy less.
-  'src/api/schedule.js': 700, // 617
+  // The winter calendar (issue #1055) landed inside this budget, with one line
+  // to spare: fetchWinterCalendar belongs in this module for the same reason
+  // fetchSeasonMeta did — it is a schedule call, and the alternative was a new
+  // src/api file for one fetcher, bought with that directory's budget.
+  'src/api/schedule.js': 700, // 699
   // 800 -> 900: selectFinalHalfIndex — the cloud scorebook index's
   // auto-drop-once-fully-revealed check needs the SAME structural, isFinal-
   // gated reasoning selectSkippedBottomHalf right above it already has, so it

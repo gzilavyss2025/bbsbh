@@ -6,9 +6,12 @@
 // Route shapes:
 //   '/'                                 -> { name: 'home' }  (MLB, today)
 //   '/{MMDDYYYY}'                       -> { name: 'home', date: YYYY-MM-DD }
-//   '/{league}'                         -> { name: 'home', sportId }
-//   '/{league}/{MMDDYYYY}'              -> { name: 'home', date, sportId }
-//                                          league is aaa|aa|higha|a — see LEAGUE_SLUG below.
+//   '/{league}'                         -> { name: 'home', sportId, leagueId? }
+//   '/{league}/{MMDDYYYY}'              -> { name: 'home', date, sportId, leagueId? }
+//                                          league is aaa|aa|higha|a — see LEAGUE_SLUG below
+//                                          — or one of the four winter slugs fall|mex|ven|dom,
+//                                          which all share sportId 17 and so carry a leagueId
+//                                          as well (issue #1055).
 //   '/logos'                            -> { name: 'logos' }
 //   '/about'                            -> { name: 'about' }
 //   '/more'                             -> { name: 'more' }  (every standalone page, grouped — WCAG 2.4.5's second way in)
@@ -114,6 +117,12 @@
 
 import { REPORT_ROUTES } from './reportPages.js'
 import { SPORT_IDS, teamFullName } from './teams.js'
+import {
+  WINTER_LEAGUES,
+  WINTER_SPORT_ID,
+  winterLeagueById,
+  winterLeagueBySlug,
+} from './winter/leagues.js'
 
 // The slate's league, as a URL prefix. Two things are deliberately missing.
 //
@@ -135,12 +144,24 @@ export const LEAGUE_SLUG = Object.freeze({
   [SPORT_IDS['A+']]: 'higha',
   [SPORT_IDS.A]: 'a',
 })
+//
+// The four winter leagues join this table as FLAT slugs — '/fall', '/mex',
+// '/ven', '/dom' — rather than as a nested '/winter/{league}'. A flat slug is
+// two segments, so it falls into the branch below that already serves '/aaa'
+// and '/aa/08152026' and needs no new parse branch at all; a nested one is
+// three segments and would need one, and would collide with the game-route
+// shape sitting at that length. Verified against every named single-segment
+// route: none of them is 'fall', 'mex', 'ven' or 'dom'.
+//
+// They all map to sportId 17, so unlike every other row here the sportId does
+// NOT name the page on its own. That is what `leagueId` below is for.
 const SPORT_ID_BY_SLUG = Object.freeze({
   aaa: SPORT_IDS.AAA,
   aa: SPORT_IDS.AA,
   higha: SPORT_IDS['A+'],
   aplus: SPORT_IDS['A+'], // inbound alias only — see above
   a: SPORT_IDS.A,
+  ...Object.fromEntries(WINTER_LEAGUES.map((l) => [l.slug, WINTER_SPORT_ID])),
 })
 
 // The team hub's tabs, as `third URL segment -> route name`. Every one of these
@@ -286,9 +307,14 @@ export function parseRoute(url) {
   if (parts.length <= 2 && SPORT_ID_BY_SLUG[parts[0]]) {
     const sport = SPORT_ID_BY_SLUG[parts[0]]
     const date = parts.length === 2 ? urlDateToApi(parts[1]) : null
+    // Four winter leagues share sportId 17, so the slug carries the answer the
+    // sportId cannot. Only those slugs put `leagueId` on the route; the five
+    // ordinary levels keep the exact object shape they have always returned.
+    const winter = winterLeagueBySlug(parts[0])
+    const league = winter ? { leagueId: winter.leagueId } : null
     return isRealDate(date)
-      ? { name: 'home', date, sportId: sport }
-      : { name: 'home', sportId: sport }
+      ? { name: 'home', date, sportId: sport, ...league }
+      : { name: 'home', sportId: sport, ...league }
   }
   if (parts.length === 1 && parts[0] === 'logos') return { name: 'logos' }
   if (parts.length === 1 && parts[0] === 'about') return { name: 'about' }
@@ -700,8 +726,17 @@ function isRealDate(api) {
 // only when it is not the default. `apiDate` is null for today (GameSelect
 // passes null rather than today's date), `sportId` defaults to MLB — so the
 // canonical home slate is the bare '/' and never grows a redundant suffix.
-export function slatePath(apiDate, sportId = SPORT_IDS.MLB) {
-  const league = LEAGUE_SLUG[sportId] ? `/${LEAGUE_SLUG[sportId]}` : ''
+// `leagueId` only means anything for sportId 17, where four leagues share the
+// one sportId and LEAGUE_SLUG therefore cannot name the page. Without it every
+// winter league would build the same URL, and a picker that changed the league
+// without changing the address would break ADR-0056's rule that every slate day
+// is a shareable address. An unknown or absent leagueId on sportId 17 degrades
+// to the bare home slate rather than minting '/undefined'.
+export function slatePath(apiDate, sportId = SPORT_IDS.MLB, leagueId = null) {
+  const winter =
+    Number(sportId) === WINTER_SPORT_ID ? winterLeagueById(leagueId)?.slug : null
+  const slug = winter ?? LEAGUE_SLUG[sportId]
+  const league = slug ? `/${slug}` : ''
   const day = apiDate ? `/${apiDateToUrl(apiDate)}` : ''
   return `${league}${day}` || '/'
 }

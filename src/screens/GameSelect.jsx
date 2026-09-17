@@ -33,6 +33,9 @@ import { WireRail } from '../components/transactions/WireRail.jsx'
 import { OffseasonLead } from '../components/offseason/OffseasonLead.jsx'
 import { SpringCountdown } from '../components/offseason/WinterCalendar.jsx'
 import { useOffseason } from '../hooks/useOffseason.js'
+import { useWinter } from '../hooks/useWinter.js'
+import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
+import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
@@ -93,7 +96,13 @@ function welcomeSuppressed() {
 // soonest → latest (the favorite team pinned to the top), with a LIVE pill on
 // any game in progress. Level is toggled with the thin buttons up top; no
 // more search box.
-export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onShowLogos }) {
+export function GameSelect({
+  date = null,
+  sportId = SPORT_IDS.MLB,
+  leagueId = null,
+  onPick,
+  onShowLogos,
+}) {
   useDocumentTitle(null)
   const navigate = useNav()
   const { favoriteTeamId, hasClubOpinion, setFavoriteTeam } = useFavoriteTeam()
@@ -130,7 +139,11 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // moves regardless of when they're read. `singleDay` (passed to WireRail/
   // WireDock below) is what keeps the claim honest: off today it narrows the
   // feed to exactly the paged date, never a window running past it.
-  const showWire = true
+  // OFF ON THE WINTER TAB. `scopeFor` in api/transactions/leagueFeed.js builds
+  // its club scope from a bare sportId=17 call, which answers with all seven
+  // winter leagues — and a winter club has no roster wire worth reading in the
+  // first place. Turning it off is the honest answer, not a missing feature.
+  const showWire = !isWinterSport(sportId)
   // The dock renders nothing on a quiet window, and only IT knows that (the
   // answer arrives with the fetch). It reports back so the slate pads its floor
   // for a rail that actually exists — see .screen--wiredock in
@@ -180,16 +193,50 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // whichever one you changed the URL still names the exact page on screen.
   // Today is passed as null, which is how slatePath knows to leave the date
   // off (see its header).
-  const goToSlate = (apiDate, level) =>
-    navigate(slatePath(apiDate === todayStr ? null : apiDate, level))
-  const goToDate = (apiDate) => goToSlate(apiDate, sportId)
-  const pickLevel = (level) => goToSlate(dateStr, level)
+  const goToSlate = (apiDate, level, league = null) =>
+    navigate(slatePath(apiDate === todayStr ? null : apiDate, level, league))
+  const goToDate = (apiDate) => goToSlate(apiDate, sportId, activeLeagueId)
+  // The rail hands back a leagueId for the WINTER tab and null for the five
+  // ordinary levels, because one tab covers four leagues (issue #1055).
+  const pickLevel = (level, league) => goToSlate(dateStr, level, league)
   const pageDay = (n) => {
     const [y, m, d] = dateStr.split('-').map(Number)
     goToDate(toApiDate(addDays(new Date(y, m - 1, d), n)))
   }
 
-  const slate = useAsync(() => fetchSchedule(dateStr, sportId), [dateStr, sportId])
+  // IS THERE A SIXTH TAB TODAY? Read off each winter league's own published
+  // schedule, never off the clock (hooks/useWinter.js). Fails closed in every
+  // direction: until the calendar lands, and forever if it never does, the rail
+  // is the five levels it has always been.
+  const onWinter = isWinterSport(sportId)
+  const winterBall = useWinter(dateStr, sportId, leagueId)
+  // The URL's own league is used until the calendar can confirm or replace it,
+  // so the first fetch on '/mex/12152025' asks for the Mexican league rather
+  // than for a bare sportId=17 — which would answer with four other leagues'
+  // games, three of which this app does not ship.
+  const activeLeagueId = onWinter ? (winterBall.leagueId ?? leagueId ?? null) : null
+  // SECOND, RIGHT AFTER MLB — chosen over appending it after A, with the cost
+  // named and accepted: the ladder splits in the middle and the rail re-orders
+  // itself each October and February. The reason is that for the months this
+  // tab exists it is the only one with games on it. Do not quietly move it back.
+  const levels = useMemo(
+    () =>
+      winterBall.tabVisible
+        ? [
+            LEVELS[0],
+            { label: 'WINTER', sportId: WINTER_SPORT_ID, leagueId: winterBall.defaultLeagueId },
+            ...LEVELS.slice(1),
+          ]
+        : LEVELS,
+    [winterBall.tabVisible, winterBall.defaultLeagueId],
+  )
+  const slate = useAsync(
+    () =>
+      onWinter && !activeLeagueId
+        ? Promise.resolve([])
+        : fetchSchedule(dateStr, sportId, undefined, activeLeagueId),
+    [dateStr, sportId, onWinter, activeLeagueId],
+  )
   const { loading, error, data } = slate
 
   // A COLD load — the first fetch for this date/level, with nothing on the page
@@ -210,8 +257,11 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // on foreground (the score-critical convention) so a checked-in glance is fresh.
   const showSlateScores = scoresUnlocked
   const slateScores = useAsync(
-    () => (showSlateScores ? fetchSlateScores(dateStr, sportId) : Promise.resolve({})),
-    [showSlateScores, dateStr, sportId],
+    () =>
+      showSlateScores
+        ? fetchSlateScores(dateStr, sportId, activeLeagueId)
+        : Promise.resolve({}),
+    [showSlateScores, dateStr, sportId, activeLeagueId],
     { refetchOnForeground: showSlateScores },
   )
   const liveLineFor = (game) =>
@@ -223,12 +273,17 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // (not "now") so paging near a year boundary still asks for the season the
   // displayed date actually falls in; fetchAffiliates degrades to [] offline.
   const season = Number(dateStr.slice(0, 4))
+  // An AFL club reports `parentOrgName: "Office of the Commissioner"` — it is a
+  // composite of six or seven organisations and an affiliate of nothing, and
+  // the same is true of every club in the three winter leagues. So there is no
+  // club here for a favourite to resolve to, and asking would spend a fetch to
+  // be told so.
   const affiliates = useAsync(
     () =>
-      sportId === SPORT_IDS.MLB
+      sportId === SPORT_IDS.MLB || onWinter
         ? Promise.resolve([])
         : fetchAffiliates(favoriteTeamId, season),
-    [favoriteTeamId, season, sportId],
+    [favoriteTeamId, season, sportId, onWinter],
   )
   const favoriteAffiliateIds = useMemo(
     () => new Set((affiliates.data ?? []).map((a) => a.id)),
@@ -281,7 +336,10 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
 
   // Every active club at this level (see fetchTeams), independent of the
   // date — so it barely ever refetches as the user pages day to day.
-  const levelTeams = useAsync(() => fetchTeams(sportId), [sportId])
+  const levelTeams = useAsync(
+    () => fetchTeams(sportId, activeLeagueId),
+    [sportId, activeLeagueId],
+  )
 
   // This level's full league minus whoever's on today's slate = the clubs
   // with an off day, favorite (or its affiliate, on a MiLB level — see
@@ -344,10 +402,20 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // (a level's own single day off, e.g. a MiLB Monday) outside any break.
   // `!offseason` spares a winter morning the scan entirely: it reaches ten days
   // and the next game is a hundred away, so it can only ever answer null.
-  const needsResumeLookup = isEmptyDay && !isDerbyDay && !allStarPending && !offseason
+  // The last clause is the winter's copy of `!offseason`, and it is there for
+  // the identical reason (ADR-0074): a bookmarked '/fall' read in July reaches
+  // ten days forward one fetch at a time, and the next AFL game is two months
+  // away, so the scan can only ever answer null — expensively, on exactly the
+  // day it cannot help. The calendar already knows the league is out of season.
+  const winterDark = onWinter && winterBall.ready && !winterBall.tabVisible
+  const needsResumeLookup =
+    isEmptyDay && !isDerbyDay && !allStarPending && !offseason && !winterDark
   const resumeLookup = useAsync(
-    () => (needsResumeLookup ? fetchNextGameDate(sportId, dateStr) : Promise.resolve(null)),
-    [needsResumeLookup, sportId, dateStr],
+    () =>
+      needsResumeLookup
+        ? fetchNextGameDate(sportId, dateStr, 10, activeLeagueId)
+        : Promise.resolve(null),
+    [needsResumeLookup, sportId, dateStr, activeLeagueId],
   )
   const resumeLookupPending = needsResumeLookup && resumeLookup.loading
   const resumeDate = resumeLookup.data
@@ -385,7 +453,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // Reset computed during render (not in an effect) on a day/level change —
   // see Headshot.jsx for the same pattern. Shares `dayKey` with the filter
   // reset below since both key off the same (dateStr, sportId) change.
-  const dayKey = `${dateStr}|${sportId}`
+  const dayKey = `${dateStr}|${sportId}|${activeLeagueId ?? ''}`
   const [prevDayKeyForReveal, setPrevDayKeyForReveal] = useState(dayKey)
   if (dayKey !== prevDayKeyForReveal) {
     setPrevDayKeyForReveal(dayKey)
@@ -580,13 +648,13 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
         <button
           type="button"
           className="topbar__title topbar__home"
-          onClick={() => goHome(slatePath(null, sportId))}
+          onClick={() => goHome(slatePath(null, sportId, activeLeagueId))}
           aria-label="Reload games"
         >
           <TallyLockup height={20} />
         </button>
         <div className="topbar__slateactions">
-          <LevelNav sportId={sportId} onChange={pickLevel} />
+          <LevelNav sportId={sportId} onChange={pickLevel} levels={levels} />
           {/* The icon buttons live in one nowrap sub-group so that when the
               row runs out of width they drop below the level pills together —
               as bare siblings flex-wrap moved them one at a time, orphaning
@@ -624,6 +692,18 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
           appeared out of nothing on arrival and shoved the date banner, the
           games and the footer down by its own 82px. That single insertion was
           worth ~0.37 CLS on the slate's cold load. */}
+      {/* Four leagues share the one WINTER tab, so the choice between them is
+          made here — above the club strip, which the pick then scopes. Every
+          chip is a real address, never local state (ADR-0056). */}
+      {onWinter && (
+        <LeaguePicker
+          leagues={winterBall.leagues}
+          leagueId={activeLeagueId}
+          dateStr={dateStr}
+          isToday={isToday}
+        />
+      )}
+
       <div className="slatestrip">
         {levelTeams.data?.length > 0 && (
           <TeamFilterStrip
@@ -633,7 +713,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
             showMlbPin={false}
             showArrows
             centerTeamId={favoriteTeamId}
-            ariaLabel={`Browse ${LEVELS.find((l) => l.sportId === sportId)?.label ?? ''} teams`}
+            ariaLabel={`Browse ${levels.find((l) => l.sportId === sportId)?.label ?? ''} teams`}
             className="teamfilterstrip--nav"
           />
         )}

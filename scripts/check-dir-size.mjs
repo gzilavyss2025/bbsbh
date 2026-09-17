@@ -933,7 +933,12 @@ const BUDGETS = {
   // derivation and a conditional second fetch, and the screen it serves was at
   // its cap. It is a hook rather than a pure module because the pure half
   // already exists separately, in src/lib/time/seasonPhase.js.
-  'src/hooks': 27,
+  // 27 -> 28 for useWinter.js — the conditional WINTER tab's gate (issue
+  // #1055), and useOffseason.js's sibling in every way the entry above
+  // describes: it owns a fetch, a module-scoped cache and a derivation, its
+  // rules are pure one tier down in src/lib/winter/, and the screen it serves
+  // was at its own budget.
+  'src/hooks': 28,
   'src/screens/identity-lab': 15,
   // New entry: +1 for PlayerHoverCard.jsx — a player-identity primitive like
   // Headshot/PlayerLink beside it, not one of this bucket's ten player-PAGE cards.

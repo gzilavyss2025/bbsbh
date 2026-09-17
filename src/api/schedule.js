@@ -7,6 +7,7 @@ import { matchupSlug } from '../lib/route.js'
 import { BROADCAST_FIELDS, BROADCAST_HYDRATE, nationalName } from './broadcast.js'
 import { getJson } from './statsapi.js'
 import { fetchStaticTeams } from './teams-static.js'
+import { WINTER_LEAGUE_IDS, WINTER_SPORT_ID } from '../lib/winter/leagues.js'
 
 // Normalize a raw schedule game into the shape our cards need. Exported so
 // test/slate-scores.test.js can pin the spoiler-critical invariant that this
@@ -115,17 +116,69 @@ export function normalizeGame(game, sportId) {
 // `broadcasts(all)` the national-TV assignment, in the same request — all
 // spoiler-free. Callers that only need to RESOLVE a game (see resolveGame)
 // pass a lighter hydrate to skip the readiness payload.
+//
+// `leagueId` narrows a sportId that holds more than one league, which today
+// means sportId 17 and nothing else. It is NOT optional decoration there: a
+// bare sportId=17 call is mostly the wrong league — on 2025-10-16, 10-18 and
+// 11-04 it returned 15 games across four leagues where `&leagueId=119`
+// returned exactly the three AFL ones. Every other level passes it undefined
+// and the URL is unchanged, byte for byte, from what it has always been.
 export async function fetchSchedule(
   dateStr,
   sportId = 1,
   hydrate = `team,venue(timezone),lineups,officials,probablePitcher,${BROADCAST_HYDRATE}`,
+  leagueId = null,
 ) {
+  const league = leagueId ? `&leagueId=${leagueId}` : ''
   const data = await getJson(
-    `/api/v1/schedule?sportId=${sportId}&date=${dateStr}&hydrate=${hydrate}&fields=${SCHEDULE_FIELDS}`,
+    `/api/v1/schedule?sportId=${sportId}${league}&date=${dateStr}&hydrate=${hydrate}&fields=${SCHEDULE_FIELDS}`,
   )
   const dates = data.dates ?? []
   const games = dates.flatMap((d) => d.games ?? [])
   return games.map((g) => normalizeGame(g, sportId))
+}
+
+// THE WINTER CALENDAR — one season of dated games per shipped league, which is
+// everything the WINTER tab needs to decide it exists (issue #1055).
+//
+// Four calls, run together, and the whole answer is 27.6 KB: the leanest
+// `fields=` leaves only the dates and a gamePk to count, so the AFL's season is
+// under 3 KB and the longest of them is under 10. The caller caches this for
+// the session (hooks/useWinter.js), so a winter day pays for it once.
+//
+// One call per league rather than one bare sportId=17 call for the lot, even
+// though the bare call is a similar size: the schedule row does not carry the
+// league, so splitting a combined response back into four would need a club ->
+// league map, and a club missing from that map would silently drop its games
+// out of the picker's counts. `&leagueId=` is verified to isolate exactly one
+// league, so this asks the question it actually wants answered.
+//
+// FAILS CLOSED, PER LEAGUE. A league whose call rejects or answers with no
+// dates is simply absent from the calendar, which leaves it out of the picker
+// and out of the tab's existence test. That is not hypothetical: on
+// 2026-09-17 the Venezuelan league's 2026-27 schedule had not been published
+// yet, while the other three had. A winter that publishes in pieces is the
+// normal case, not the error case.
+export async function fetchWinterCalendar(season) {
+  const rows = await Promise.allSettled(
+    WINTER_LEAGUE_IDS.map(async (leagueId) => {
+      const data = await getJson(
+        `/api/v1/schedule?sportId=${WINTER_SPORT_ID}&leagueId=${leagueId}` +
+          `&season=${season}&fields=dates,date,games,gamePk`,
+      )
+      const dates = (data.dates ?? []).filter((d) => (d.games ?? []).length > 0)
+      if (!dates.length) return null
+      const gamesByDate = {}
+      for (const d of dates) gamesByDate[d.date] = d.games.length
+      const days = dates.map((d) => d.date).sort()
+      return { leagueId, firstDate: days[0], lastDate: days[days.length - 1], gamesByDate }
+    }),
+  )
+  const calendar = {}
+  for (const row of rows) {
+    if (row.status === 'fulfilled' && row.value) calendar[row.value.leagueId] = row.value
+  }
+  return calendar
 }
 
 // A season's own date row — the endpoint that states, rather than implies,
@@ -198,14 +251,14 @@ export async function fetchAllStarGame(season) {
 // with games" endpoint; sequential so the common one-day-off case (a Monday
 // MiLB off day) resolves on the first hop instead of firing the whole window.
 // Returns null if nothing turns up within the window (e.g. off-season).
-export async function fetchNextGameDate(sportId, fromDateStr, maxDays = 10) {
+export async function fetchNextGameDate(sportId, fromDateStr, maxDays = 10, leagueId = null) {
   const [y, m, d] = fromDateStr.split('-').map(Number)
   const from = new Date(y, m - 1, d)
   for (let i = 1; i <= maxDays; i++) {
     const copy = new Date(from)
     copy.setDate(copy.getDate() + i)
     const dateStr = `${copy.getFullYear()}-${String(copy.getMonth() + 1).padStart(2, '0')}-${String(copy.getDate()).padStart(2, '0')}`
-    const games = await fetchSchedule(dateStr, sportId, 'team')
+    const games = await fetchSchedule(dateStr, sportId, 'team', leagueId)
     if (games.length > 0) return dateStr
   }
   return null
@@ -221,15 +274,24 @@ export async function fetchNextGameDate(sportId, fromDateStr, maxDays = 10) {
 // identity barely ever changes mid-season, so this reads the static weekly
 // snapshot (see teams-static.js) first and only falls back to the live
 // endpoint if that file is missing, unparseable, or lacks this sportId.
-export async function fetchTeams(sportId) {
+// `leagueId` scopes a sportId that holds more than one league. Without it, the
+// club strip on a winter tab would draw all 46 clubs behind sportId 17 at once
+// — four leagues we ship and three we deliberately do not — which is the exact
+// shape of "the app states something false" the shipping rule exists to stop.
+// The static snapshot carries `leagueId` on every club already (gen-teams.mjs),
+// so scoping costs a filter and no fetch.
+export async function fetchTeams(sportId, leagueId = null) {
+  const inLeague = (t) => !leagueId || t.leagueId === Number(leagueId)
   const staticTeams = await fetchStaticTeams()
   const bucket = staticTeams?.bySportId?.[sportId]
   if (bucket) {
     return bucket
+      .filter(inLeague)
       .map((t) => ({ id: t.id, name: t.name, teamName: t.teamName, sportId, abbreviation: teamAbbr(t) }))
       .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
   }
-  const data = await getJson(`/api/v1/teams?sportId=${sportId}&activeStatus=Y`)
+  const league = leagueId ? `&leagueId=${leagueId}` : ''
+  const data = await getJson(`/api/v1/teams?sportId=${sportId}${league}&activeStatus=Y`)
   const teams = data.teams ?? []
   return teams
     .filter((t) => t.active)
@@ -248,6 +310,12 @@ export async function fetchTeams(sportId) {
 // about the schedule; partial failures keep degrading gracefully per MiLB
 // convention.
 export async function resolveGame(apiDate, matchup) {
+  const want = matchup.toLowerCase()
+  const pick = (games) =>
+    games.find(
+      (g) => matchupSlug(g.away.abbreviation, g.home.abbreviation, g.gameNumber) === want,
+    ) ?? null
+
   const results = await Promise.allSettled(
     SEARCHABLE_SPORT_IDS.map((sportId) =>
       fetchSchedule(apiDate, sportId, 'team'),
@@ -256,15 +324,28 @@ export async function resolveGame(apiDate, matchup) {
   if (results.every((r) => r.status === 'rejected')) {
     throw new Error('Schedule unreachable')
   }
-  const all = results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-  const want = matchup.toLowerCase()
-  return (
-    all.find(
-      (g) =>
-        matchupSlug(g.away.abbreviation, g.home.abbreviation, g.gameNumber) ===
-        want,
-    ) ?? null
+  const hit = pick(results.flatMap((r) => (r.status === 'fulfilled' ? r.value : [])))
+  if (hit) return hit
+
+  // A WINTER GAME'S URL CARRIES NO LEAGUE. Game addresses are
+  // '/{MMDDYYYY}/{matchup}/{section}' — the league lives on the SLATE's address
+  // and never on a game's, so a shared '/10252025/pejgdd/lineup' arrives here
+  // with nothing to say it is an AFL game. The five-level scan above cannot
+  // find it, and without this a winter link would resolve to "no such game"
+  // on every cold load and every share.
+  //
+  // It runs only AFTER that scan has missed, so an ordinary link pays nothing
+  // for it and a winter link pays one extra round trip. The four shipped
+  // leagues are asked one at a time rather than with a bare sportId=17 call
+  // that would find all seven: a bare call resolves a Puerto Rican game too,
+  // and opening one would put a pitch count on a scoring surface that is half
+  // the real number — see src/lib/winter/leagues.js for that rule.
+  const winter = await Promise.allSettled(
+    WINTER_LEAGUE_IDS.map((leagueId) =>
+      fetchSchedule(apiDate, WINTER_SPORT_ID, 'team', leagueId),
+    ),
   )
+  return pick(winter.flatMap((r) => (r.status === 'fulfilled' ? r.value : [])))
 }
 
 // Resolve a set of gamePks to the bits a boxscore deep-link needs — official
@@ -468,11 +549,12 @@ export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
 const SLATE_SCORES_FIELDS =
   'dates,games,gamePk,teams,away,home,score,linescore,currentInning,inningState'
 
-export async function fetchSlateScores(dateStr, sportId = 1) {
+export async function fetchSlateScores(dateStr, sportId = 1, leagueId = null) {
   if (!dateStr) return {}
   try {
+    const league = leagueId ? `&leagueId=${leagueId}` : ''
     const data = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&date=${dateStr}&hydrate=linescore&fields=${SLATE_SCORES_FIELDS}`,
+      `/api/v1/schedule?sportId=${sportId}${league}&date=${dateStr}&hydrate=linescore&fields=${SLATE_SCORES_FIELDS}`,
     )
     const out = {}
     for (const d of data.dates ?? []) {

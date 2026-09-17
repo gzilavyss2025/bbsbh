@@ -145,6 +145,58 @@ system and reports no `gameData.absChallenges` bank (issue #964), so the row
 reaches the page through the venue allowlist rather than the key. Captured as
 `test/fixtures/game-820258.trimmed.json`. Clearwater 4-1, Tampa 2-2.
 
+## Winter ball — one verified game per shipped league
+
+The four leagues behind `sportId 17` that Tally ships (ADR-0078, issue #1055).
+Each was read straight out of its own live feed on 2026-09-17: **9 innings, 4
+umpires, both batting orders at 9, and ~4 pitches per play** — MLB's own figure
+over the same check is 3.93, so a winter game is an ordinary game and the
+scoring flow needs nothing added for one.
+
+**These routes carry no league segment**, and that is not an omission. A GAME's
+address has never named a league (`/{MMDDYYYY}/{away}{home}/{section}`); the
+league lives on the SLATE's address (`/fall/10252025`). It is why `resolveGame`
+needs a winter pass at all — a shared winter link arrives with nothing on it to
+say which league to look in.
+
+| League | gamePk | Date | Game | Route base |
+| --- | --- | --- | --- | --- |
+| `FALL` | `825662` | 2025-10-25 | Peoria Javelinas at Glendale Desert Dogs, Camelback Ranch | `/10252025/pejgdd/` |
+| `MEX` | `826078` | 2025-11-23 | Charros de Jalisco at Algodoneros de Guasave | `/11232025/jalgsv/` |
+| `VEN` | `829914` | 2025-11-20 | Navegantes del Magallanes at Bravos de Margarita | `/11202025/magmar/` |
+| `DOM` | `826281` | 2025-11-25 | Toros del Este at Leones del Escogido | `/11252025/toresc/` |
+
+**2025-10-06 PEJ @ SCO** — gamePk `825618`, route base `/10062025/pejsco/`
+The Arizona Fall League's 2025 opener, and the first winter game of that season
+anywhere. Carries weather and both probable pitchers as well.
+
+### The counter-example — keep it
+
+**2025-12-05 CAG @ PON** — gamePk `826583`, route base `/12052025/cagpon/`
+
+Liga Roberto Clemente, the Puerto Rican winter league, which Tally deliberately
+does **not** ship. 83 plays and **148 pitch events — 1.78 per play**, against
+~4 everywhere else. The feed keeps the terminal pitch of most at-bats, drops
+the rest, and zeroes `count` to match, so it is internally consistent and
+factually thin: a half-inning that really took 28 pitches would render as 12 on
+a scoring surface.
+
+Everything else about it passes — 9 innings, 4 umpires, 9/9 batting orders —
+which is exactly why it is pinned here. A completeness check that asks whether a
+play has *any* pitch event passes this game. Use it to test that a thin-pitch
+league stays excluded.
+
+### Slate days worth having
+
+- **Multi-league days**, for the league picker: `2025-10-16`, `2025-10-18`,
+  `2025-11-04` — four leagues, 15 games each.
+- **A single-league day**: `2025-10-08` — the AFL alone, before the other three
+  open. The picker draws nothing, because one league is not a choice.
+- **FALL out of season**: `2025-12-15` — three chips, and the Mexican league in
+  season with no game that day.
+- **The last day of a winter**: `2026-02-02`, and `2026-02-03` for the day the
+  tab is gone.
+
 ## Categories not included (couldn't verify)
 
 Batting out of order and an overturned replay challenge were searched but
