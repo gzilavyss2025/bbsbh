@@ -694,15 +694,38 @@ test('the gate still runs first: a slot on the cutoff day has no row', () => {
 // so a list that wanted "his line at each slot" had nothing to add up. The row
 // carries the smallest subset that folds the two figures a list prints — and
 // every field is already in LOG_FIELDS, so it costs no bytes.
-test('a hitter row carries the at-bats and hits a list folds into an average', () => {
+test('a hitter row carries every component the picked-group grid folds', () => {
+  // Including the two nobody would guess: `hitByPitch` and `sacFlies`. ON-BASE
+  // is (H + BB + HBP) / (AB + BB + HBP + SF), so without them the grid cannot
+  // print an honest OBP or OPS — and the extra-base hits, because TOTAL BASES
+  // is built from them (MLB sends `totalBases` on an aggregate, never on a
+  // game log).
   const rows = boxLineRows({
     splits: [
-      split('2024-07-04', 1, { stat: { atBats: 4, hits: 2, homeRuns: 1, rbi: 3 } }),
+      split('2024-07-04', 1, {
+        stat: {
+          plateAppearances: 5, atBats: 4, hits: 2, doubles: 1, triples: 0, homeRuns: 1,
+          rbi: 3, baseOnBalls: 1, strikeOuts: 1, stolenBases: 2, hitByPitch: 0, sacFlies: 0,
+        },
+      }),
     ],
     schedule: [sched(1, '2024-07-04')],
     group: 'hitting',
   })
-  assert.deepEqual(rows[0].counts, { atBats: 4, hits: 2 })
+  assert.deepEqual(rows[0].counts, {
+    plateAppearances: 5, atBats: 4, hits: 2, doubles: 1, triples: 0, homeRuns: 1,
+    rbi: 3, baseOnBalls: 1, strikeOuts: 1, stolenBases: 2, hitByPitch: 0, sacFlies: 0,
+  })
+  // A split that came back without a field counts as zero, not NaN — one NaN
+  // in a sum takes the whole folded figure with it.
+  const bare = boxLineRows({
+    splits: [split('2024-07-04', 1, { stat: { atBats: 4, hits: 2 } })],
+    schedule: [sched(1, '2024-07-04')],
+    group: 'hitting',
+  })
+  assert.equal(bare[0].counts.hitByPitch, 0)
+  assert.equal(bare[0].counts.plateAppearances, 0)
+  assert.equal(Number.isNaN(bare[0].counts.doubles), false)
 })
 
 test('a pitcher row carries OUTS, because innings are thirds and do not add', () => {
@@ -718,6 +741,8 @@ test('a pitcher row carries OUTS, because innings are thirds and do not add', ()
     schedule: [sched(1, '2024-07-04'), sched(2, '2024-07-05'), sched(3, '2024-07-06')],
     group: 'pitching',
   })
+  // A stat that named no gamesStarted is 0 starts, not NaN.
+  assert.equal(rows[2].counts.starts, 0)
   assert.deepEqual(
     rows.map((r) => ({ pk: r.gamePk, outs: r.counts.outs, er: r.counts.earnedRuns })),
     [
@@ -726,6 +751,21 @@ test('a pitcher row carries OUTS, because innings are thirds and do not add', ()
       { pk: 1, outs: 19, er: 2 },
     ],
   )
+})
+
+test("a pitcher row carries the grid's own components, starts included", () => {
+  // The split fixture's default stat is one start, seven innings, eight
+  // strikeouts. All of it is already in LOG_FIELDS; the row just keeps it in a
+  // form a fold can add.
+  const rows = boxLineRows({
+    splits: [split('2024-07-04', 1)],
+    schedule: [sched(1, '2024-07-04')],
+    group: 'pitching',
+  })
+  assert.deepEqual(rows[0].counts, {
+    starts: 1, outs: 21, hits: 1, runs: 0, earnedRuns: 0, homeRuns: 0,
+    baseOnBalls: 3, strikeOuts: 8,
+  })
 })
 
 test('a NEUTRAL-SITE game lands under the park it was played at', () => {

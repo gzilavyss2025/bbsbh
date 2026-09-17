@@ -1,11 +1,13 @@
 import '../../styles/boxlines/boxlines.css'
+import '../../styles/boxlines/listdoor.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { fetchBoxLines } from '../../api/boxlines/fetch.js'
-import { foldGroups, LIST_COLUMNS } from '../../api/boxlines/fold.js'
+import { foldGroups, foldStats, LIST_COLUMNS } from '../../api/boxlines/fold.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { BoxLineRow, BoxLineSkeleton } from './BoxLineRow.jsx'
 import { BoxLinesList } from './BoxLinesList.jsx'
+import { Stat } from '../gamehud/StatBox.jsx'
 import { humanDateWithYear } from '../../lib/dates.js'
 
 // BOX LINES — the drilldown behind a summary stat line (ADR-0069). Tap a
@@ -136,11 +138,17 @@ export function BoxLinesSheet({
     ? list.title(playerSurname, picked.name)
     : (title ?? `${playerSurname} vs the ${opponentName}`)
   const kick = picked ? `Game lines · ${picked.name}` : kicker
-  const head = picked
-    ? `${picked.name}: ${picked.games} G${picked.line.rate ? `, ${picked.line.rate}` : ''}`
-    : listing
-      ? null
-      : headline
+  // A PICKED GROUP GETS THE WHOLE LINE, not the entry's two figures. The entry
+  // is one row of a comparison and says what a column has room for; this is
+  // where the reader came FOR the detail, so it folds the same rows into the
+  // box-score vocabulary — counts, then the slash line or the rates
+  // (api/boxlines/fold.js). It is the same fold the entry printed, so the two
+  // cannot disagree.
+  const stats = useMemo(
+    () => (picked && rows?.length ? foldStats(rows, group) : null),
+    [picked, rows, group],
+  )
+  const head = picked || listing ? null : headline
 
   // Back to the list, with the focus kept inside the dialog: the control the
   // reader pressed is the one that unmounts, and focus would otherwise fall to
@@ -172,6 +180,17 @@ export function BoxLinesSheet({
             </button>
           </div>
           {head && <p className="boxlines__headline">{head}</p>}
+          {stats && (
+            <div className="boxlines__stats">
+              {stats.map((c) => (
+                /* The app's own stat cell, the one the player page's grid above
+                   this sheet is built from — a figure over its name. A null is
+                   a rate with no denominator and draws the quiet mark, never a
+                   zero. */
+                <Stat key={c.k} k={c.k} v={c.v ?? '·'} tone={c.v == null ? 'nil' : undefined} />
+              ))}
+            </div>
+          )}
 
           {/* The row skeletons stand in for a loading LIST too: the sheet is
               one fetch either way, and a second skeleton shape would be a

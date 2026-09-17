@@ -46,6 +46,50 @@ import { gamePath } from '../../lib/route.js'
 import { hitterLine, pitcherLine } from '../person/gameLog.js'
 import { ipToOuts } from '../rehab-policy.js'
 
+const n = (v) => Number(v) || 0
+
+// THE RAW FIGURES A LIST FOLDS (boxlines/fold.js), and only those. `line` above
+// them is a formatted STRING and adds up to nothing, so a group of rows needs
+// its components. Every field here is already in fetch.js's LOG_FIELDS, so the
+// row costs no bytes it was not already paying for.
+//
+// A hitter carries the extra-base hits because TOTAL BASES is built from them
+// (MLB publishes `totalBases` on an aggregate, never on a game log), and
+// `hitByPitch`/`sacFlies` because ON-BASE cannot be computed honestly without
+// them — those two are the reason the fold can print a real OPS at all.
+function hittingCounts(st) {
+  return {
+    plateAppearances: n(st.plateAppearances),
+    atBats: n(st.atBats),
+    hits: n(st.hits),
+    doubles: n(st.doubles),
+    triples: n(st.triples),
+    homeRuns: n(st.homeRuns),
+    rbi: n(st.rbi),
+    baseOnBalls: n(st.baseOnBalls),
+    strikeOuts: n(st.strikeOuts),
+    stolenBases: n(st.stolenBases),
+    hitByPitch: n(st.hitByPitch),
+    sacFlies: n(st.sacFlies),
+  }
+}
+
+// OUTS, not innings: "6.1" is six innings and one out, so a fold that added the
+// strings as numbers would be wrong and look right. Every pitching rate divides
+// by this count.
+function pitchingCounts(st) {
+  return {
+    starts: n(st.gamesStarted),
+    outs: ipToOuts(st.inningsPitched),
+    hits: n(st.hits),
+    runs: n(st.runs),
+    earnedRuns: n(st.earnedRuns),
+    homeRuns: n(st.homeRuns),
+    baseOnBalls: n(st.baseOnBalls),
+    strikeOuts: n(st.strikeOuts),
+  }
+}
+
 // "2024-09-29" -> "2024-09-28". Manual y/m/d, midday UTC, so a DST edge or a
 // local-timezone offset can never move the answer by a day.
 export function dayBefore(iso) {
@@ -213,12 +257,10 @@ function scoreOf(g, awayIsHis, recovered) {
 // and 1 through 9 is the slot he hit in. A game with no lineup is not evidence
 // that he came off the bench.
 //
-// `counts` is the smallest raw subset a LIST folds a line from (#1048) — at-bats
-// and hits for a bat, OUTS and earned runs for an arm. `line` above it is a
-// formatted string and adds up to nothing, and innings do not add as numbers:
-// "6.1" is six innings and one out, so the row stores MLB's own out count and a
-// fold adds integers (boxlines/fold.js). Every field is already in fetch.js's
-// LOG_FIELDS, so it costs no bytes.
+// `counts` is the raw subset a LIST folds its figures from (#1048) — see
+// `hittingCounts` and `pitchingCounts` below. `line` above it is a formatted
+// string and adds up to nothing, and innings do not add as numbers, so an arm
+// carries MLB's own OUT count.
 //
 // `keep` is a facet's row predicate (api/boxlines/facets.js) and is applied
 // AFTER the gate, never before, so no facet can widen what the gate allows:
@@ -296,10 +338,7 @@ export function boxLineRows({
       // THE RAW FIGURES A LIST FOLDS (#1048), and nothing more: `line` above is
       // a string, and a list needs to add up a group of rows. Outs rather than
       // innings, because innings are thirds and "6.1" + "1.2" is not 7.3.
-      counts:
-        group === 'pitching'
-          ? { outs: ipToOuts(st.inningsPitched), earnedRuns: Number(st.earnedRuns) || 0 }
-          : { atBats: Number(st.atBats) || 0, hits: Number(st.hits) || 0 },
+      counts: group === 'pitching' ? pitchingCounts(st) : hittingCounts(st),
       won: runs != null && oppRuns != null ? runs > oppRuns : Boolean(s.isWin),
       runs,
       oppRuns,

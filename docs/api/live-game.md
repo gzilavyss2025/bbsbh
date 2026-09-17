@@ -160,10 +160,17 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   (Yelich reads 18 at `b9` against 0 starts), so a door labelled from the
   aggregate would open an EMPTY sheet on the slots substitution concentrates in.
   Folding the rows makes an entry and its rows the same games, counted once. Two
-  figures only — games and AVG, or games and ERA — because `LOG_FIELDS` carries
-  no `hitByPitch` or `sacFlies` and OBP/OPS cannot be computed honestly from
-  these rows at all. Innings are THIRDS, so the row carries MLB's own out count
-  (`counts.outs`) and the fold adds integers. A folded line stops where the rows
+  figures in the LIST (games, and AVG or ERA) and **twelve in the group a reader
+  picks** — `foldStats`: a hitter's G/PA/H/HR/RBI/BB/K/SB then AVG/OBP/SLG/OPS,
+  a pitcher's G/GS/IP/H/R/ER/HR/BB/K then ERA/WHIP/K/9. Counts first, rates
+  last. On-base needs `hitByPitch` and `sacFlies`, so `LOG_FIELDS.hitting` asks
+  for those and `plateAppearances` (+16%, 22.0 -> 25.5 KB on a season log,
+  measured) and `LOG_FIELDS.pitching` asks for `homeRuns` (a ballpark's whole
+  question). TOTAL BASES is BUILT from the extra-base hits — MLB sends it on an
+  aggregate, never on a game log. Innings are THIRDS, so the row carries MLB's
+  own out count (`counts.outs`) and every rate divides by that, never by a
+  summed "6.1". The rates are pinned against MLB's own published strings,
+  including its OPS rounding (each half to three places, THEN added). A folded line stops where the rows
   stop on a `?d=` page, which is what makes it agree with them; never relabel an
   entry from `careerStatSplits` to "fix" that. The sheet asks `list.facet(null)`
   — the same facet kind with no group named — for its listing pass, which is

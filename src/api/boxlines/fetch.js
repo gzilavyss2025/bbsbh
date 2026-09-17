@@ -91,9 +91,12 @@ import {
 // The fields each game-log split must keep for rows.js. `id` reaches both
 // `opponent.id` and `team.id`; `gamePk`/`gameNumber` reach `game.*`.
 const LOG_FIELDS = {
+  // `homeRuns` is here for the FOLD, not for a row's own line: a ballpark's
+  // question is the home run, and a park list that could not say how many he
+  // gave up there would be answering a different one. One field name.
   pitching:
     'fields=stats,splits,date,gameType,isHome,isWin,opponent,id,team,game,gamePk,gameNumber,' +
-    'stat,gamesStarted,inningsPitched,hits,runs,earnedRuns,strikeOuts,baseOnBalls',
+    'stat,gamesStarted,inningsPitched,hits,runs,earnedRuns,homeRuns,strikeOuts,baseOnBalls',
   // `positionsPlayed` is the hitting log's own list of the positions he played
   // that day, in the order he played them, and it is what answers the pinch-hit
   // facet (#1002) without a single boxscore. It costs 3 KB on a 19 KB season
@@ -101,10 +104,18 @@ const LOG_FIELDS = {
   // join, not just the pinch-hit one, because all of a card's doors share ONE
   // join — a second, differently-shaped join for one door would cost far more
   // than the 16%.
+  // `plateAppearances`, `hitByPitch` and `sacFlies` are the ON-BASE half, added
+  // for the picked-group grid a list door opens (#1048): OBP is
+  // (H + BB + HBP) / (AB + BB + HBP + SF), so without the last two it cannot be
+  // computed honestly at all, and neither can OPS. Measured 2026-09-17 on
+  // Yelich's 2024 log: 22.0 KB -> 25.5 KB over 73 games, +16%. That is the same
+  // price `positionsPlayed` pays below, on the same shared join, and it buys
+  // every hitting door the real figure instead of an approximation.
   hitting:
     'fields=stats,splits,date,gameType,isHome,isWin,opponent,id,team,game,gamePk,gameNumber,' +
     'positionsPlayed,abbreviation,' +
-    'stat,hits,atBats,doubles,triples,homeRuns,rbi,baseOnBalls,stolenBases,strikeOuts',
+    'stat,hits,atBats,doubles,triples,homeRuns,rbi,baseOnBalls,stolenBases,strikeOuts,' +
+    'plateAppearances,hitByPitch,sacFlies',
 }
 const SCHEDULE_FIELDS =
   'fields=dates,games,gamePk,officialDate,gameNumber,dayNight,status,abstractGameState,' +

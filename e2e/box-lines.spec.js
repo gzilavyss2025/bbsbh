@@ -596,12 +596,34 @@ test('the batting-order door opens a list, and a slot opens its own rows', async
   const first = entries.first()
   const name = await first.locator('.boxlines-entry__name').textContent()
   const games = Number(await first.locator('.boxlines-entry__fig').first().textContent())
+  const rate = await first.locator('.boxlines-entry__fig').last().textContent()
   expect(games).toBeGreaterThan(0)
 
   // Tapping it shows the rows it counted — no request, the join is memoized.
   await first.click()
   await expect(sheet.locator('.boxlines__kicker')).toHaveText(`Game lines · ${name}`)
-  await expect(sheet.locator('.boxlines__headline')).toContainText(`${games} G`)
+  // THE PICKED GROUP GETS THE WHOLE LINE, folded from the very rows under it —
+  // the entry had room for two figures, this has room for twelve. Counts first,
+  // then the slash line.
+  const cells = await sheet.evaluate((el) =>
+    Object.fromEntries(
+      [...el.querySelectorAll('.boxlines__stats .stat')].map((c) => [
+        c.querySelector('.stat__k').textContent,
+        c.querySelector('.stat__v').textContent,
+      ]),
+    ),
+  )
+  expect(Object.keys(cells)).toEqual(['G', 'PA', 'H', 'HR', 'RBI', 'BB', 'K', 'SB', 'AVG', 'OBP', 'SLG', 'OPS'])
+  // AND IT IS THE SAME FOLD THE ENTRY PRINTED. The entry said "692 G, .283";
+  // the grid it opened must not say 693 or .284. They are two renderings of one
+  // sum, and this is the only place a reader sees both.
+  expect(Number(cells.G), 'the grid and the entry disagree about the games').toBe(games)
+  expect(cells.AVG).toBe(rate)
+  // A rate is a rate and a count is a count — three places with no leading zero
+  // for the slash line, whole numbers for what happened.
+  for (const k of ['AVG', 'OBP', 'SLG']) expect(cells[k]).toMatch(/^\.\d{3}$/)
+  expect(cells.OPS).toMatch(/^\d?\.\d{3}$/)
+  for (const k of ['PA', 'H', 'HR', 'RBI', 'BB', 'K', 'SB']) expect(cells[k]).toMatch(/^\d+$/)
   await expect
     .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
     .toBe(true)
@@ -690,6 +712,29 @@ test('the ballpark door opens a list, most games first, and a park opens its row
   // id would split Miller Park from American Family Field, which is one park.
   expect(new Set(parks.map((p) => p.name)).size).toBe(parks.length)
 
+  // EVERY ENTRY IS REACHABLE — a 35-park list is taller than any phone, so the
+  // SHEET has to be what scrolls. It is a column flex container, so the list
+  // panel is free to be squashed to whatever height is left, and the panel clips
+  // what it cannot fit because a rounded panel needs `overflow: hidden` to cut
+  // its corners. Together those hid 21 of 35 parks behind a box with no
+  // scrollbar, under a sheet that had nothing to scroll. The fix is one line of
+  // CSS (`flex: 0 0 auto`) and this is what keeps it.
+  const lastPark = sheet.locator('.boxlines-entry').last()
+  await lastPark.scrollIntoViewIfNeeded()
+  await expect(lastPark, 'the last park in the list cannot be scrolled to').toBeInViewport()
+  await expect(sheet.locator('.boxlines__foot')).toBeInViewport()
+  // And the panel is not hiding rows inside itself: what it holds, it shows.
+  expect(
+    await sheet.evaluate((el) => {
+      const ul = el.querySelector('.boxlines__list')
+      return ul.scrollHeight - Math.ceil(ul.getBoundingClientRect().height)
+    }),
+    'the list panel is clipping its own entries',
+  ).toBeLessThanOrEqual(1)
+  await sheet.evaluate((el) => {
+    el.scrollTop = 0
+  })
+
   // The park he knows best opens the games he played there, and the entry
   // counted exactly those.
   await sheet.locator('.boxlines-entry').first().click()
@@ -731,4 +776,17 @@ test('the ballpark door opens a list, most games first, and a park opens its row
   // His column is ERA, not AVG — the list names the group's own two figures.
   await expect(arm.locator('.boxlines__listcol')).toHaveText(['G', 'ERA'])
   expect(await arm.locator('.boxlines-entry').count()).toBeGreaterThan(1)
+  // And an arm's picked line is an arm's vocabulary, not a bat's: no PA, no
+  // slash line, and the two rates that survive a dozen games at one park.
+  await arm.locator('.boxlines-entry').first().click()
+  await expect
+    .poll(async () => (await arm.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
+    .toBe(true)
+  const armCells = await arm.evaluate((el) =>
+    [...el.querySelectorAll('.boxlines__stats .stat')].map((c) => c.querySelector('.stat__k').textContent),
+  )
+  expect(armCells).toEqual(['G', 'GS', 'IP', 'H', 'R', 'ER', 'HR', 'BB', 'K', 'ERA', 'WHIP', 'K/9'])
+  // INNINGS ARE THIRDS, and the cell says so: a third is .1 or .2, never .3.
+  const ip = await arm.locator('.boxlines__stats .stat').nth(2).locator('.stat__v').textContent()
+  expect(ip, `${ip} is not innings`).toMatch(/^\d+\.[012]$/)
 })

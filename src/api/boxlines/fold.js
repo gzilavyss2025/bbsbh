@@ -23,16 +23,26 @@
 // what the cutoff means. Do not "fix" it by labelling an entry from
 // careerStatSplits: that is the disagreement above, reintroduced.
 //
-// TWO FIGURES, NOT FIVE. An entry prints games and one rate — AVG for a bat,
-// ERA for an arm — the same two a chip prints, so an entry and its rows cannot
-// disagree about more than they have room to say. OPS and OBP are deliberately
-// absent: LOG_FIELDS carries no `hitByPitch` and no `sacFlies`, so they cannot
-// be computed honestly from these rows at all.
+// TWO FIGURES IN THE LIST, TWELVE IN THE GROUP A READER PICKS. An ENTRY prints
+// games and one rate — AVG for a bat, ERA for an arm — because it is one row of
+// a comparison, and a comparison is read down a column. The group a reader then
+// picks gets `foldStats`: the whole box-score vocabulary, folded from the same
+// rows, because the drilldown is where someone went FOR the detail. They are
+// two renderings of one fold, and a test pins them to each other.
+//
+// EVERY FIGURE IS FOLDED, none fetched. That is what lets the summary and the
+// games under it agree — they are the same rows, added up once. `LOG_FIELDS`
+// (fetch.js) asks for exactly the components these need: a hitter's
+// `plateAppearances`, `hitByPitch` and `sacFlies` were added for the ON-BASE
+// half, which cannot be computed honestly without them, and a pitcher's
+// `homeRuns` because a ballpark's question IS the home run.
 //
 // Class: spoiler-free (spoiler-manifest.json). It reads no score, no date and
 // no reveal mark — `runs` and `oppRuns` are on every row it folds and it never
 // looks at them. It counts rows boxlines/rows.js already approved, and a fold
 // can only ever describe a set the gate allowed.
+
+import { outsToIp } from '../person/shared.js'
 
 // What an entry's two figures are CALLED, in the order `foldLine` returns them
 // and the vocabulary the card's own columns already print (careerSplits.js's
@@ -45,6 +55,56 @@ export const LIST_COLUMNS = {
 function num(v) {
   const n = Number(v)
   return Number.isFinite(n) ? n : 0
+}
+
+// Every counting stat a set of rows holds, added once. Both readers below take
+// their figures from here, so an entry and the grid it opens cannot be folded
+// two different ways.
+function totals(rows, group) {
+  const list = rows ?? []
+  const sum = (k) => list.reduce((t, r) => t + num(r.counts?.[k]), 0)
+  if (group === 'pitching') {
+    return {
+      games: list.length,
+      starts: sum('starts'),
+      // INNINGS ARE THIRDS. The row carries MLB's own out count for exactly
+      // this reason (rows.js): 16 outs and 5 outs are 21, which is seven
+      // innings — where Number('5.1') + Number('1.2') is 6.3, a real-looking
+      // wrong number. Every rate below divides by these outs, never by a
+      // summed "6.1".
+      outs: sum('outs'),
+      hits: sum('hits'),
+      runs: sum('runs'),
+      earnedRuns: sum('earnedRuns'),
+      homeRuns: sum('homeRuns'),
+      baseOnBalls: sum('baseOnBalls'),
+      strikeOuts: sum('strikeOuts'),
+    }
+  }
+  const hits = sum('hits')
+  const doubles = sum('doubles')
+  const triples = sum('triples')
+  const homeRuns = sum('homeRuns')
+  return {
+    games: list.length,
+    plateAppearances: sum('plateAppearances'),
+    atBats: sum('atBats'),
+    hits,
+    doubles,
+    triples,
+    homeRuns,
+    rbi: sum('rbi'),
+    baseOnBalls: sum('baseOnBalls'),
+    strikeOuts: sum('strikeOuts'),
+    stolenBases: sum('stolenBases'),
+    hitByPitch: sum('hitByPitch'),
+    sacFlies: sum('sacFlies'),
+    // TOTAL BASES, built rather than fetched: a single is one base, so the sum
+    // is the hits plus one more for each double, two for each triple and three
+    // for each home run. MLB publishes `totalBases` on an aggregate and not on
+    // a game log, and this is the identity it would have sent.
+    totalBases: hits + doubles + 2 * triples + 3 * homeRuns,
+  }
 }
 
 // ".293" — three places, no leading zero, the way a scorebook writes an
@@ -67,18 +127,78 @@ function avg3(v) {
 // group with no outs would divide by zero. The surfaces draw the card's quiet
 // mark there, the way a games-only door's four empty cells do.
 export function foldLine(rows, group) {
-  const list = rows ?? []
+  const t = totals(rows, group)
+  return group === 'pitching'
+    ? { games: t.games, rate: era(t) }
+    : { games: t.games, rate: t.atBats ? avg3(t.hits / t.atBats) : null }
+}
+
+// MLB'S OWN ROUNDING, copied deliberately: OPS is not OBP + SLG at full
+// precision. Each half is rounded to three places and THOSE are added, which is
+// how .559 + .630 comes to 1.189 where the unrounded sum is 1.1884 and would
+// print 1.188. careerSplits.js's merge does the same, and both are held to
+// MLB's own published strings.
+const round3 = (v) => Math.round(v * 1000) / 1000
+
+// Earned runs times nine, over innings — which is outs/3, so `* 27 / outs`.
+// Null and never "0.00" when he recorded no out: a zero there is a claim, and
+// it is not a true one.
+function era(t) {
+  return t.outs ? ((t.earnedRuns * 27) / t.outs).toFixed(2) : null
+}
+
+// THE WHOLE LINE, for the group a reader picked — counts first, then rates,
+// which is the order a box score is read in and the order this app's own stat
+// grids print. Each cell is `{ k, v }`: the name, and the figure, or NULL where
+// there is no denominator to divide by. A null draws the grid's quiet mark; a
+// zero would be a claim nobody made.
+export function foldStats(rows, group) {
+  const t = totals(rows, group)
+  const int = (v) => String(v)
   if (group === 'pitching') {
-    // INNINGS ARE THIRDS. The row carries MLB's own out count for exactly this
-    // reason (rows.js): 16 outs and 5 outs are 21, which is seven innings —
-    // where Number('5.1') + Number('1.2') is 6.3, a real-looking wrong number.
-    const outs = list.reduce((t, r) => t + num(r.counts?.outs), 0)
-    const earned = list.reduce((t, r) => t + num(r.counts?.earnedRuns), 0)
-    return { games: list.length, rate: outs ? ((earned * 27) / outs).toFixed(2) : null }
+    const innings = t.outs / 3
+    return [
+      { k: 'G', v: int(t.games) },
+      // Whether these were starts or relief outings, which changes what every
+      // figure under it means.
+      { k: 'GS', v: int(t.starts) },
+      { k: 'IP', v: outsToIp(t.outs) },
+      { k: 'H', v: int(t.hits) },
+      { k: 'R', v: int(t.runs) },
+      { k: 'ER', v: int(t.earnedRuns) },
+      // A PARK'S QUESTION IS THE HOME RUN, which is why the pitching log now
+      // asks for it: Coors against Oracle is this cell.
+      { k: 'HR', v: int(t.homeRuns) },
+      { k: 'BB', v: int(t.baseOnBalls) },
+      { k: 'K', v: int(t.strikeOuts) },
+      { k: 'ERA', v: era(t) },
+      // Walks and hits per inning, and strikeouts per nine — the two rates that
+      // survive a short sample (a dozen games at one park), where a win-loss
+      // record says almost nothing about how he pitched.
+      { k: 'WHIP', v: innings ? ((t.baseOnBalls + t.hits) / innings).toFixed(2) : null },
+      { k: 'K/9', v: innings ? ((t.strikeOuts * 9) / innings).toFixed(2) : null },
+    ]
   }
-  const atBats = list.reduce((t, r) => t + num(r.counts?.atBats), 0)
-  const hits = list.reduce((t, r) => t + num(r.counts?.hits), 0)
-  return { games: list.length, rate: atBats ? avg3(hits / atBats) : null }
+  // THE SLASH LINE, which says the thing OPS alone cannot: whether he got on
+  // base or hit for power. On-base needs `hitByPitch` and `sacFlies`, and that
+  // is the whole reason LOG_FIELDS asks for them.
+  const reached = t.atBats + t.baseOnBalls + t.hitByPitch + t.sacFlies
+  const obp = reached ? (t.hits + t.baseOnBalls + t.hitByPitch) / reached : null
+  const slg = t.atBats ? t.totalBases / t.atBats : null
+  return [
+    { k: 'G', v: int(t.games) },
+    { k: 'PA', v: int(t.plateAppearances) },
+    { k: 'H', v: int(t.hits) },
+    { k: 'HR', v: int(t.homeRuns) },
+    { k: 'RBI', v: int(t.rbi) },
+    { k: 'BB', v: int(t.baseOnBalls) },
+    { k: 'K', v: int(t.strikeOuts) },
+    { k: 'SB', v: int(t.stolenBases) },
+    { k: 'AVG', v: t.atBats ? avg3(t.hits / t.atBats) : null },
+    { k: 'OBP', v: obp == null ? null : avg3(obp) },
+    { k: 'SLG', v: slg == null ? null : avg3(slg) },
+    { k: 'OPS', v: obp == null || slg == null ? null : avg3(round3(obp) + round3(slg)) },
+  ]
 }
 
 // Biggest group first, ties broken on the NAME — never on the order the rows

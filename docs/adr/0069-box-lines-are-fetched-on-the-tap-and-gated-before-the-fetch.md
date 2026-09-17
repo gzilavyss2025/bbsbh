@@ -882,10 +882,44 @@ order is where they do not** — the measurements are in the 2026-09-15 note, an
 question. So a list folds the rows themselves. An entry and the rows behind it
 are then the same games, counted once and then shown, and they cannot disagree.
 
-Two figures, not the card's five: games, and AVG for a bat or ERA for an arm —
-the same two a chip prints. OPS and OBP are not available at all, and this is a
-fact about the fetch rather than a choice: `LOG_FIELDS` carries no `hitByPitch`
-and no `sacFlies`, so neither can be computed honestly from these rows.
+Two figures in the LIST — games, and AVG for a bat or ERA for an arm — because
+an entry is one row of a comparison and a comparison is read down a column.
+
+**The group a reader PICKS gets twelve.** That was a correction made on the day
+(Gary: "i'd like to see the 34 G, .256 expand"), and it is the right shape: the
+list is the comparison, the picked group is where someone went FOR the detail.
+
+| | the twelve |
+| --- | --- |
+| hitter | G · PA · H · HR · RBI · BB · K · SB, then AVG · OBP · SLG · OPS |
+| pitcher | G · GS · IP · H · R · ER · HR · BB · K, then ERA · WHIP · K/9 |
+
+Counts first, rates last — the order a box score is read in, and the order this
+app's own stat grids print. The reasoning behind the two sets:
+
+- **the slash line beats OPS alone**, which hides whether he got on base or hit
+  for power, and it is the standard way to state a hitter;
+- **a pitcher's HR is a ballpark's whole question** — Coors against Oracle is
+  that one cell — so the pitching log now asks for `homeRuns`;
+- **WHIP and K/9 survive a short sample** (a dozen games at one park) where a
+  win-loss record says almost nothing;
+- **GS** says whether these were starts or relief outings, which changes what
+  every figure above it means.
+
+It cost four field names. A hitter's log gains `plateAppearances`, `hitByPitch`
+and `sacFlies` — **on-base cannot be computed honestly without the last two**,
+so an earlier draft of this amendment said OPS was unavailable; it is available,
+it just had to be asked for. Measured 2026-09-17 on Yelich's 2024 log: **22.0 KB
+-> 25.5 KB over 73 games, +16%**, the same price `positionsPlayed` already pays
+on the same shared join. TOTAL BASES is not fetched at all: MLB publishes it on
+an aggregate and never on a game log, so the fold builds it from the extra-base
+hits, which is the identity MLB would have sent.
+
+The rates are pinned against **MLB's own published strings**, not against
+themselves: Yelich's October fed back through the fold must come out .444 /
+.559 / .630 / 1.189. That catches the OPS rounding in particular — OPS is each
+half rounded to three places and THEN added, so .559 + .630 is 1.189 where the
+unrounded sum would print 1.188.
 
 **A folded line is not a career line.** On a page carrying `?d=` it stops where
 the rows stop. That is more correct than a career aggregate would be, and it is

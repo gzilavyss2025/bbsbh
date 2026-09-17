@@ -18,7 +18,7 @@
 //     Number('1.2') is 6.3, which is a real-looking number and a wrong one.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { foldGroups, foldLine, LIST_COLUMNS } from '../src/api/boxlines/fold.js'
+import { foldGroups, foldLine, foldStats, LIST_COLUMNS } from '../src/api/boxlines/fold.js'
 
 // A gated row as boxLineRows builds it, trimmed to what a fold reads.
 function hit(over = {}) {
@@ -232,4 +232,120 @@ test('the parks list leads with the park he has played at most', () => {
     ],
   )
   assert.deepEqual(groups[1].facet, { kind: 'venue', venueId: 2504 })
+})
+
+// THE PICKED GROUP'S FULL LINE (#1048 follow-up). A list entry prints two
+// figures because it is a row of a comparison; the group a reader PICKS gets
+// the whole box-score vocabulary, folded from the same rows. The rates are what
+// this pins, against MLB's own published strings rather than against itself.
+//
+// Yelich's October, regular season, as MLB returns it (verified 2026-09-15,
+// `careerStatSplits&sitCodes=10`): 16 G, 68 PA, 54 AB, 24 H, 2 HR, 13 BB,
+// 1 HBP, 0 SF, 34 TB, .444/.559/.630, 1.189 OPS. The 34 total bases are 18
+// singles, 4 doubles and 2 home runs, which is what the rows carry.
+const OCT = {
+  gamePk: 1,
+  date: '2024-10-01',
+  counts: {
+    plateAppearances: 68, atBats: 54, hits: 24, doubles: 4, triples: 0, homeRuns: 2,
+    rbi: 12, baseOnBalls: 13, strikeOuts: 15, stolenBases: 3, hitByPitch: 1, sacFlies: 0,
+  },
+}
+// Fifteen more games with nothing in them, so the GAME count is MLB's 16 while
+// the sums stay his.
+const OCT_ROWS = [OCT, ...Array.from({ length: 15 }, (_, i) => ({ gamePk: i + 2, date: '2024-10-01', counts: {} }))]
+
+function cell(cells, k) {
+  return cells.find((c) => c.k === k)?.v
+}
+
+test("a picked hitter's rates reproduce the ones MLB published", () => {
+  // THE FORMULA IS CHECKED AGAINST MLB, NOT AGAINST ITSELF — the same rule
+  // careerSplits.js's merge is held to. It catches the OPS rounding in
+  // particular: OPS is not OBP + SLG at full precision. MLB rounds each half to
+  // three places and adds those, so .559 + .630 is 1.189 where the unrounded
+  // sum is 1.1884 and would print 1.188.
+  const cells = foldStats(OCT_ROWS, 'hitting')
+  assert.equal(cell(cells, 'AVG'), '.444')
+  assert.equal(cell(cells, 'OBP'), '.559')
+  assert.equal(cell(cells, 'SLG'), '.630', 'total bases are not being built from the extra-base hits')
+  assert.equal(cell(cells, 'OPS'), '1.189', 'the OPS halves are not being rounded before they are added')
+})
+
+test("a picked hitter's counts are the rows added up, and G is the games", () => {
+  const cells = foldStats(OCT_ROWS, 'hitting')
+  assert.equal(cell(cells, 'G'), '16')
+  assert.equal(cell(cells, 'PA'), '68')
+  assert.equal(cell(cells, 'H'), '24')
+  assert.equal(cell(cells, 'HR'), '2')
+  assert.equal(cell(cells, 'RBI'), '12')
+  assert.equal(cell(cells, 'BB'), '13')
+  assert.equal(cell(cells, 'K'), '15')
+  assert.equal(cell(cells, 'SB'), '3')
+})
+
+test('a hitter is read counts first, then the slash line', () => {
+  // The order a box score is read in, and the order the app's own stat grids
+  // print: what happened, then how well. OPS last, because it is the one figure
+  // that is a summary of the three before it.
+  assert.deepEqual(
+    foldStats(OCT_ROWS, 'hitting').map((c) => c.k),
+    ['G', 'PA', 'H', 'HR', 'RBI', 'BB', 'K', 'SB', 'AVG', 'OBP', 'SLG', 'OPS'],
+  )
+})
+
+test("a picked pitcher's line is innings in thirds, and the rates over them", () => {
+  // 16 outs and 5 outs are 21 — seven innings, not 6.3. Over those seven: 3
+  // earned is a 3.86 ERA, 7 hits and 2 walks a 1.29 WHIP, 9 strikeouts an 11.57
+  // K/9. Every one of them is a division by INNINGS, which is the figure the
+  // string "6.1" is not.
+  const rows = [
+    { gamePk: 1, counts: { outs: 16, earnedRuns: 2, runs: 3, hits: 5, homeRuns: 1, strikeOuts: 6, baseOnBalls: 1, starts: 1 } },
+    { gamePk: 2, counts: { outs: 5, earnedRuns: 1, runs: 1, hits: 2, homeRuns: 0, strikeOuts: 3, baseOnBalls: 1, starts: 0 } },
+  ]
+  const cells = foldStats(rows, 'pitching')
+  assert.equal(cell(cells, 'G'), '2')
+  assert.equal(cell(cells, 'GS'), '1')
+  assert.equal(cell(cells, 'IP'), '7.0')
+  assert.equal(cell(cells, 'H'), '7')
+  assert.equal(cell(cells, 'R'), '4')
+  assert.equal(cell(cells, 'ER'), '3')
+  assert.equal(cell(cells, 'HR'), '1')
+  assert.equal(cell(cells, 'BB'), '2')
+  assert.equal(cell(cells, 'K'), '9')
+  assert.equal(cell(cells, 'ERA'), '3.86')
+  assert.equal(cell(cells, 'WHIP'), '1.29')
+  assert.equal(cell(cells, 'K/9'), '11.57')
+  assert.deepEqual(
+    cells.map((c) => c.k),
+    ['G', 'GS', 'IP', 'H', 'R', 'ER', 'HR', 'BB', 'K', 'ERA', 'WHIP', 'K/9'],
+  )
+})
+
+test('a rate with no denominator prints nothing, never a zero', () => {
+  // A group of games he walked through without an at-bat, and a pitcher who
+  // faced a batter and recorded no out. ".000" and "0.00" are both claims, and
+  // neither is true. The grid draws its quiet mark instead.
+  const bat = foldStats([{ gamePk: 1, counts: { plateAppearances: 1, baseOnBalls: 1 } }], 'hitting')
+  assert.equal(cell(bat, 'G'), '1')
+  assert.equal(cell(bat, 'BB'), '1')
+  assert.equal(cell(bat, 'AVG'), null)
+  assert.equal(cell(bat, 'OPS'), null)
+  const arm = foldStats([{ gamePk: 1, counts: { outs: 0, earnedRuns: 1, hits: 2 } }], 'pitching')
+  assert.equal(cell(arm, 'IP'), '0.0')
+  assert.equal(cell(arm, 'H'), '2')
+  assert.equal(cell(arm, 'ERA'), null)
+  assert.equal(cell(arm, 'WHIP'), null)
+})
+
+test('the grid and the list entry fold the SAME rows to the same figures', () => {
+  // The entry a reader taps says "34 G, .256"; the grid it opens must not say
+  // 35 or .257. They are two renderings of one fold, and this is the only place
+  // the two meet.
+  const line = foldLine(OCT_ROWS, 'hitting')
+  const cells = foldStats(OCT_ROWS, 'hitting')
+  assert.equal(String(line.games), cell(cells, 'G'))
+  assert.equal(line.rate, cell(cells, 'AVG'))
+  const arm = [{ gamePk: 1, counts: { outs: 27, earnedRuns: 3, hits: 5, baseOnBalls: 2, strikeOuts: 8 } }]
+  assert.equal(foldLine(arm, 'pitching').rate, cell(foldStats(arm, 'pitching'), 'ERA'))
 })
