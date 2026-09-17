@@ -983,3 +983,45 @@ once, under the name they carry today, with every older game inside them.
 which is where the batting order arrived from the opposite direction — and it is
 why one door on this card prints no figures. It opens a list rather than a
 line.
+
+### Both lists count October (2026-09-17)
+
+Asked on the live page — does By ballpark include postseason games? It did not,
+and it should, for the reason this ADR already gave the calendar doors: **a date
+does not stop being October because the game was a division series, and a park
+does not stop being Dodger Stadium.** Both lists now carry
+`postseason: true` on their facet.
+
+Measured 2026-09-17, regular season against the whole career:
+
+| | regular season | with October |
+| --- | --- | --- |
+| Betts at Globe Life Field | 9 | **25** (the 2020 neutral-site World Series was 16 of them) |
+| Betts at Dodger Stadium | 430 | 462 |
+| Yelich at Dodger Stadium | 37 | 44 |
+| Scherzer at Nationals Park | 100 | 105 |
+
+**No park is ever ADDED**: over Yelich, Betts and Scherzer, every postseason park
+was one he had also played at in the summer. It is the counts this corrects, and
+Globe Life Field is where the old answer was badly wrong.
+
+Two things made it cheap and safe:
+
+- **A list door has no label to widen.** A calendar door needs
+  `spansPostseason` AND `facet.postseason` because its figure comes from an MLB
+  aggregate that has to be summed across game types. A list folds the rows, so
+  only the rows' half exists — and a test now pins that a list door must NOT set
+  `spansPostseason`, which would send `fetchDoorLabels` after a figure that does
+  not exist.
+- **Every postseason game carries a full lineup.** That mattered for the batting
+  order, where a game with no card has a null slot and would leave the list in
+  silence: Yelich 27 of 27, Betts 91 of 91, Arenado 8 of 8.
+
+The cost is the one the calendar doors already pay: a widened door does not
+share the join with the regular-season doors, because the game types are in the
+join key. A widened list now shares with the months and the weekdays instead.
+`fetchSeasons` returns the same seasons either way, so it is the same number of
+game-log calls with a few more rows in each.
+
+`calendarTypes` is renamed `widenedTypes` — it was never about the calendar, it
+is about a facet that means to count every kind of game.

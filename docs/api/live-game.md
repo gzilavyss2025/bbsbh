@@ -176,7 +176,12 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   — the same facet kind with no group named — for its listing pass, which is
   what plans the lineups pass and keeps every row that HAS a group.
   A list facet asked with NO group named — `{ kind: 'venue', venueId: null }` —
-  is the listing pass, and keeps every row that HAS a group. **A park's id is
+  is the listing pass, and keeps every row that HAS a group. **Both lists count
+  October** (`postseason: true` on the facet, so `widenedTypes` moves the fetch
+  to `R,F,D,L,W`): a park does not stop being Dodger Stadium because the game
+  was a division series. Betts at Globe Life Field is 9 regular-season games and
+  25 with the 2020 World Series. A list door must NOT set `spansPostseason` —
+  that widens a LABEL's fetch and a list has no label source. **A park's id is
   stable and its NAME drifts inside one career** (id 32 is Miller Park for 185 of
   Yelich's games and American Family Field for 372), so a park list groups on the
   ID and names from the group's NEWEST row; `/api/v1/venues` is the wrong answer,

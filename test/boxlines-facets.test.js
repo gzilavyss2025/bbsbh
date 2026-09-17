@@ -250,3 +250,34 @@ test('a venue facet with NO park is the ballpark list itself', () => {
   // holds, unlike a slot in the order.
   assert.equal(plan.needsLineups, false)
 })
+
+test('a list facet marked postseason asks the log for October too', () => {
+  // The rule ADR-0069 set for the calendar doors, applied to the two lists: a
+  // park does not stop being Dodger Stadium because the game was a division
+  // series. Measured 2026-09-17 — Betts at Globe Life Field is 9 regular-season
+  // games and 16 postseason ones, so the regular season alone states 9 of 25.
+  for (const facet of [
+    { kind: 'venue', venueId: 32, postseason: true },
+    { kind: 'venue', venueId: null, postseason: true },
+    { kind: 'lineupSpot', spot: 3, postseason: true },
+    { kind: 'lineupSpot', spot: null, postseason: true },
+  ]) {
+    const { gameTypes } = facetPlan(facet)
+    assert.deepEqual(gameTypes, ['R', 'F', 'D', 'L', 'W'], `${facet.kind} asks for the wrong types`)
+    // NEVER the umbrella 'P': a pitching log answers it as every row's type and
+    // the type filter then drops all of them (rows.js's POSTSEASON).
+    assert.equal(gameTypes.includes('P'), false)
+  }
+})
+
+test('a list facet without the flag still reads the regular season alone', () => {
+  // The widening is opt-in per facet, so a future list that should not span
+  // October simply does not say so — and the single-park sheet the lineup page
+  // could open keeps its own answer.
+  for (const facet of [
+    { kind: 'venue', venueId: 32 },
+    { kind: 'lineupSpot', spot: 3 },
+  ]) {
+    assert.equal(facetPlan(facet).gameTypes, null, `${facet.kind} widened without asking`)
+  }
+})

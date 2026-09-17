@@ -555,10 +555,13 @@ test("a list entry's facet round-trips through facetPlan, and discriminates", ()
     assert.equal(keep({ lineupSpot: spot === 9 ? 1 : spot + 1 }), false, `spot ${spot} keeps another`)
     // It reads the same lineups the two lineup doors do, and shares their pass.
     assert.equal(needsLineups, true, `spot ${spot} would come back with no slots`)
-    // And it stays a door on THIS card: no club narrowing, no game-type move,
-    // so it goes on sharing the one join every other door is paying for.
+    // It stays a door on THIS card — no club narrowing, so it never earns a
+    // fetch of its own the way the lineup page's club door does.
     assert.equal(narrowsSplits, false)
-    assert.equal(gameTypes, null)
+    // And it counts October: he batted somewhere in the order in the World
+    // Series too. That puts it on the calendar doors' join rather than the
+    // Home/Road one, which is the trade ADR-0069 already made for a month.
+    assert.deepEqual(gameTypes, ['R', 'F', 'D', 'L', 'W'])
   }
 })
 
@@ -610,20 +613,21 @@ test('the ballpark list groups on the ID and names from the newest row', () => {
   // Most games first — a career's parks are not a sequence, and the tail runs
   // down to parks he saw once.
   assert.equal(list.order, 'games')
-  assert.deepEqual(list.facet(32), { kind: 'venue', venueId: 32 })
+  assert.deepEqual(list.facet(32), { kind: 'venue', venueId: 32, postseason: true })
   assert.equal(list.title('Yelich', 'American Family Field'), 'Yelich at American Family Field')
 })
 
-test('the ballpark list costs no second pass, and narrows no fetch', () => {
-  // A park is on the schedule record the join already holds, so this list rides
-  // the shared fetch exactly as the other doors in its section do. (A slot in
-  // the order does not — it needs the lineups.)
+test('the ballpark list costs no second pass, and counts October', () => {
+  // A park is on the schedule record the join already holds, so this list needs
+  // no extra pass over the games. (A slot in the order does — it needs the
+  // lineups.) What it DOES move is the game types: a park does not stop being
+  // Dodger Stadium because the game was a division series.
   const { list } = CARD_FACETS.find((r) => r.key === 'ballpark')
   for (const venueId of [null, 32, 2504]) {
     const plan = facetPlan(list.facet(venueId))
     assert.equal(plan.needsLineups, false, `park ${venueId} asked for a second pass`)
     assert.equal(plan.narrowsSplits, false)
-    assert.equal(plan.gameTypes, null)
+    assert.deepEqual(plan.gameTypes, ['R', 'F', 'D', 'L', 'W'], `park ${venueId} misses October`)
     assert.equal(typeof plan.keep, 'function')
   }
   // Named, it keeps that park; unnamed, every row that HAS one.
@@ -672,3 +676,40 @@ function anyRow(over = {}) {
     ...over,
   }
 }
+
+test('both list doors count October, and neither claims a label that spans it', () => {
+  // The two halves that travel together on a CALENDAR door — `spansPostseason`
+  // for the label's fetch, `facet.postseason` for the rows' — come apart on a
+  // list door, and correctly: a list names no label source at all, so there is
+  // no aggregate to widen. Setting `spansPostseason` on one would send
+  // careerSplits.js looking for a second row of a figure that does not exist.
+  for (const entry of LIST_DOORS) {
+    assert.equal(
+      entry.spansPostseason,
+      undefined,
+      `${entry.key} asks for a postseason LABEL, and a list door has no label`,
+    )
+    const { gameTypes } = facetPlan(entry.list.facet(null))
+    assert.deepEqual(
+      gameTypes,
+      ['R', 'F', 'D', 'L', 'W'],
+      `${entry.key} does not count October`,
+    )
+  }
+})
+
+test('a list door asks for the same game types listing as it does for one group', () => {
+  // The sheet fetches twice — once to list the groups, once for the group a
+  // reader picks — and the two must land on the SAME join, or picking a group
+  // refetches a career and the entry's count and its rows can disagree.
+  for (const entry of LIST_DOORS) {
+    const listing = facetPlan(entry.list.facet(null)).gameTypes
+    for (const key of [1, 32]) {
+      assert.deepEqual(
+        facetPlan(entry.list.facet(key)).gameTypes,
+        listing,
+        `${entry.key} asks for different game types once a group is picked`,
+      )
+    }
+  }
+})

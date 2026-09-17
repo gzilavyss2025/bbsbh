@@ -749,6 +749,15 @@ test('the ballpark door opens a list, most games first, and a park opens its row
     ),
   )
   expect(hrefs.length, `the entry counted ${parks[0].games} and opened ${hrefs.length}`).toBe(parks[0].games)
+  // OCTOBER IS IN IT. A park does not stop being his park because the game was
+  // a division series, so the list counts every kind of game — and a postseason
+  // row says so, wearing the round it was played in. His own home park is the
+  // one park a contender is certain to have October games at.
+  const rounds = await sheet.evaluate((el) =>
+    [...el.querySelectorAll('.boxline__series')].map((p) => p.textContent),
+  )
+  expect(rounds.length, 'no postseason row at his most-played park').toBeGreaterThan(0)
+  for (const r of rounds) expect(['WC', 'DS', 'LCS', 'WS']).toContain(r)
   for (const [i, href] of hrefs.entries()) {
     const [, mmddyyyy] = href.match(/^\/(\d{8})\//)
     const iso = `${mmddyyyy.slice(4)}-${mmddyyyy.slice(0, 2)}-${mmddyyyy.slice(2, 4)}`

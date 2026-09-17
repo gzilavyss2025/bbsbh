@@ -232,7 +232,11 @@ export const CARD_FACETS = [
       // Not a sequence: the park he has played at most is the one a reader
       // wants at the top, and the tail runs down to parks he saw once.
       order: 'games',
-      facet: (venueId) => ({ kind: 'venue', venueId }),
+      // Every kind of game: see the `venue` case in facets.js for the
+      // measurement. There is no `spansPostseason` beside it, and there must
+      // not be — that flag widens a LABEL's fetch, and a list door has no
+      // label source to widen.
+      facet: (venueId) => ({ kind: 'venue', venueId, postseason: true }),
       title: (surname, name) => `${surname} at ${name}`,
     },
   },
@@ -409,7 +413,9 @@ export const CARD_FACETS = [
       // most-played-first. #998's parks are not a sequence and will say
       // 'games'.
       order: 'key',
-      facet: (spot) => ({ kind: 'lineupSpot', spot }),
+      // October included, the same as the ballpark list beside it: he batted
+      // somewhere in the order in the World Series too.
+      facet: (spot) => ({ kind: 'lineupSpot', spot, postseason: true }),
       // The sheet's heading once a slot is picked, in the voice the pitcher's
       // own two doors already use ("Peterson, in relief").
       title: (surname, name) => `${surname}, ${name.toLowerCase()}`,
