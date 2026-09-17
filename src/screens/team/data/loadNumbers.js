@@ -5,7 +5,10 @@ import { fetchTeamRecords } from '../../../api/teamRecords.js'
 import { fetchScheduleShape } from '../../../api/scheduleShape.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
 import { fetchRunValue, clubRunValue, clubBoard } from '../../../api/around-the-game/runValue.js'
-import { fetchAbsExposureClubs } from '../../../api/around-the-game/absExposure.js'
+import {
+  exposureClubLevelFor,
+  fetchAbsExposureClubs,
+} from '../../../api/around-the-game/absExposure.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { rankTeam, ordinal } from '../../../api/person.js'
 import {
@@ -41,6 +44,9 @@ export async function loadNumbers(id, asOf) {
   if (!team) return null
   const sportId = team.sport?.id ?? 1
   const isMilb = sportId !== 1
+  // Null below Triple-A, which is what keeps the challenge card off a level
+  // that runs no ABS rig — and keeps its file off that page's fetch list.
+  const absExposureLevel = exposureClubLevelFor(sportId)
   const season = seasonOf(asOf)
   const standingsDate = cutoffFor(asOf)
   const scoreCutoff = scoreCutoffFor(asOf)
@@ -57,10 +63,11 @@ export async function loadNumbers(id, asOf) {
     // board, so a reader who has opened either already has it.
     runValueData,
     // The ABS challenge card's denominators, one row per player per CLUB
-    // (ADR-0076, scripts/lib/abs/export.mjs). 95 KB, MLB only, and its own
-    // file rather than a key in the league list precisely so this tab does
-    // not download the 418 KB that page reads. An affiliate gets null and the
-    // card does not render.
+    // (ADR-0076, scripts/lib/abs/export.mjs). Its own file rather than a key
+    // in the league list precisely so this tab does not download the 418 KB
+    // that page reads — and one file per LEVEL for the same reason again, so
+    // a major-league club never carries Triple-A's 129 KB. MLB and Triple-A
+    // run the rig; below that there is no level, no fetch, and no card.
     absExposureClubs,
     // The situational-records ledger — one static file per club per season,
     // every level. The card tallies it against `standingsDate` itself, so it
@@ -81,7 +88,7 @@ export async function loadNumbers(id, asOf) {
     sportId === 1 ? fetchPostseasonOdds() : Promise.resolve(null),
     sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
     sportId === 1 ? fetchRunValue() : Promise.resolve(null),
-    sportId === 1 ? fetchAbsExposureClubs() : Promise.resolve(null),
+    fetchAbsExposureClubs(absExposureLevel),
     fetchTeamRecords(id, season),
     sportId === 1 ? fetchScheduleShape(id) : Promise.resolve(null),
     // Cutoff-gated rows only — `won` stays null past standingsDate (see
@@ -198,8 +205,10 @@ export async function loadNumbers(id, asOf) {
     dayOfWeek,
     runValue,
     // Handed through whole rather than sliced here: the card ranks this club
-    // against every other one in the file, so it needs them all.
+    // against every other one in the file, so it needs them all. The level
+    // travels with it because the rows are keyed on it inside the file too.
     absExposureClubs,
+    absExposureLevel,
     jerseyCombos,
     homeRecord,
     awayRecord,

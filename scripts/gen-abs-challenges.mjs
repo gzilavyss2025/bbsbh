@@ -114,6 +114,7 @@ import {
   buildExposureExport,
   buildExposureClubsExport,
   challengeRowsForGame,
+  EXPOSURE_CLUB_LEVELS,
   exposureRowsFor,
   gameShape,
   isPlayedGame,
@@ -131,7 +132,13 @@ const exposureOut = join(here, '..', 'public', 'data', 'abs-exposure.json')
 // the second one exists: the team hub's challenge card is the only surface
 // that reads it, and abs-exposure.json is downloaded whole by every visitor to
 // /abs-challenges. See buildExposureClubsExport in scripts/lib/abs/export.mjs.
-const exposureClubsOut = join(here, '..', 'public', 'data', 'abs-exposure-clubs.json')
+//
+// ONE FILE A LEVEL, and that is the same argument a third time. A club's hub
+// tab reads ONE level, so a file holding both would make a major-league club
+// carry the Triple-A half — 129 KB — for nothing. The level is lowercased into
+// the name, which is the contract src/api/around-the-game/absExposure.js reads.
+const exposureClubsOut = (level) =>
+  join(here, '..', 'public', 'data', `abs-exposure-clubs-${level.toLowerCase()}.json`)
 const reTablePath = join(here, '..', 'public', 'data', 'run-expectancy.json')
 
 const DEFAULT_DAYS = 3
@@ -229,18 +236,21 @@ async function writeOut() {
     .prepare('SELECT * FROM abs_player_exposure ORDER BY level, team_id, player_id')
     .all()
   const latest = games.reduce((m, g) => (g.season > m ? g.season : m), 0)
-  // ALL THREE FILES, EVERY RUN. They are cut from the same tables, so writing
-  // one without the others is how a season ends up with a report, a
-  // denominator list and a club split that disagree about who played.
+  // EVERY FILE, EVERY RUN. They are cut from the same tables, so writing one
+  // without the others is how a season ends up with a report, a denominator
+  // list and a club split that disagree about who played. The club split is
+  // one file a level, so "every file" is two of those and not one.
   await writeJsonAtomic(out, buildExport(rows, games, { season: latest || season }))
   await writeJsonAtomic(
     exposureOut,
     buildExposureExport(rows, exposure, { season: latest || season }),
   )
-  await writeJsonAtomic(
-    exposureClubsOut,
-    buildExposureClubsExport(rows, exposure, { season: latest || season }),
-  )
+  for (const level of EXPOSURE_CLUB_LEVELS) {
+    await writeJsonAtomic(
+      exposureClubsOut(level),
+      buildExposureClubsExport(rows, exposure, { season: latest || season, levels: [level] }),
+    )
+  }
   // THE CHALLENGE BANK, CHECKED AGAINST EVERY ROW ON FILE. A club cannot spend
   // a challenge it does not hold, so a club-game the model cannot pay for
   // means the REPLENISHMENT RULE has moved, not that a club overdrew. It is

@@ -111,6 +111,9 @@ undefined/
 # minute via .scratch/abs-reports/fetch-innings.mjs and fetch-exposure.mjs.
 .scratch/abs-reports/final-innings.json
 .scratch/abs-reports/exposure.json
+# The Triple-A churn measurement behind #1099, same deal — four minutes via
+# .scratch/abs-reports/churn.mjs, and the figures it decided are in the doc.
+.scratch/abs-reports/churn.json
 # The seeded design canvas carries a 2 MB editor payload; the .dc.html
 # artboards beside it are the source.
 .scratch/abs-reports/design/abs-challenge-report.html

@@ -21,7 +21,7 @@
 // for 32 in 1,085. A page that printed 6.4 and stopped would have described a
 // hitter who does not exist.
 
-import { staticJson } from '../staticJson.js'
+import { staticJson, staticJsonBy } from '../staticJson.js'
 
 export const fetchAbsExposure = staticJson('/data/abs-exposure.json')
 
@@ -262,10 +262,32 @@ export function exposureBoard(level, key) {
 // eleven significant figures and the arithmetic is one line. That line is
 // `EXPOSURE_KINDS` above, so the card and the league board divide identically.
 
-export const fetchAbsExposureClubs = staticJson('/data/abs-exposure-clubs.json')
+// ONE FILE A LEVEL, memoized per level, because a club's hub tab reads one and
+// the two together are 222 KB. gen-abs-challenges.mjs writes the level
+// lowercased into the name; that spelling is the contract between the two.
+const fetchClubsFile = staticJsonBy((level) => `/data/abs-exposure-clubs-${level}.json`)
 
-// MLB only today. The file's level loop is the generator's, so a Triple-A
-// board is a one-word change there and a null here until then.
+// THE LEVELS THIS CARD DRAWS, keyed by the sportId a team hub already knows.
+// The ABS rig itself stops here — AA and below run neither the system nor the
+// rule (scripts/gen-abs-challenges.mjs), so an affiliate below Triple-A gets no
+// level, no fetch and no card, which is the shape TeamRunValueCard takes too.
+const CLUB_LEVEL_BY_SPORT = { 1: 'MLB', 11: 'AAA' }
+
+export function exposureClubLevelFor(sportId) {
+  return CLUB_LEVEL_BY_SPORT[sportId] ?? null
+}
+
+// Null rather than a rejected promise for a level with no file, so a caller
+// that asks for one can hand the answer straight to the card.
+export function fetchAbsExposureClubs(level) {
+  if (!level || !Object.values(CLUB_LEVEL_BY_SPORT).includes(level)) return Promise.resolve(null)
+  return fetchClubsFile(level.toLowerCase())
+}
+
+// The level names the FILE as well as the key inside it, and a file holds the
+// one level it is named for — so `level` here is never a filter across levels,
+// only the key the writer used. Default MLB, which is what every caller that
+// predates Triple-A passed implicitly.
 export function clubRowsFor(data, teamId, level = 'MLB') {
   return data?.levels?.[level]?.byTeam?.[String(teamId)] ?? null
 }

@@ -216,7 +216,7 @@ don't run these by hand.
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
 - `gen-abs-challenges.mjs` → `public/data/abs-challenges.json`,
   **`public/data/abs-exposure.json`** and
-  **`public/data/abs-exposure-clubs.json`** — **the written report is
+  **`public/data/abs-exposure-clubs-{mlb,aaa}.json`** — **the written report is
   `docs/abs-challenges.md`: the answer to each of the seven questions
   `/abs-challenges` asks, with the numbers and every caveat.** Every ABS
   (Automated Ball-Strike) CHALLENGE of the season, at both levels that run the
@@ -295,13 +295,14 @@ don't run these by hand.
   in July clears a 200-plate-appearance floor on his season, not on either half
   of it — so `team_id`, which the sweep's own rows carry, does not survive the
   fold. The team-hub card needs it back, which is what the THIRD file is:
-  `abs-exposure-clubs.json`, the same sweep cut by `team_id`, 733 MLB rows
-  against the fold's 659 and 95 KB against its 418. It ships counts and
+  `abs-exposure-clubs-{level}.json`, the same sweep cut by `team_id`, 733 MLB
+  rows against the fold's 659 and 93 KB against its 418. It ships counts and
   denominators and NO rates — `per1000Pitches` prints as eleven significant
   figures, and three a row was 210 KB of a first draft that came out at 465.
-  MLB only: `EXPOSURE_CLUB_LEVELS` is `['MLB']`, because shipping rows before a
-  surface draws them is the thing ADR-0076 is against. `docs/abs-challenges.md`
-  §6 argues whether Triple-A is worth adding.
+  ONE FILE PER LEVEL, named for the level lowercased: `EXPOSURE_CLUB_LEVELS` is
+  `['MLB', 'AAA']` and the writer loops it, so a club's hub tab never carries
+  the other level's 128 KB. `docs/abs-challenges.md` §6 has the coverage
+  measurement that decided Triple-A was worth drawing.
   A man with no opportunity at all is dropped rather than shipped as
   nulls: 1,963 of the 3,521 on a fullSeason roster are pitchers who never
   batted and never caught, and a nought divides to no rate exactly as a null

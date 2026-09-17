@@ -253,8 +253,8 @@ line the league's own rate would put them on, and the thirteenth is Gary
 Sánchez — the most eager hitter in the league, 32 reviews in 1,085 pitches.
 
 **The card lives on the team hub's Numbers tab**, beside the run value card,
-and it is MLB only: `abs-exposure-clubs.json` sweeps sportId 1, so an
-affiliate's page is unchanged the way it is for run value.
+at both levels that run the rig. A club below Triple-A has no ABS data at all,
+so its page is unchanged the way it is for run value.
 
 ### Why this needed a third file
 
@@ -267,11 +267,18 @@ The same fold drops `team_id`, which the sweep's own rows carry. So a club board
 built on that file would have to attribute a traded man to whoever holds him
 now, counting a whole season against a club he played sixty games for.
 
-`abs-exposure-clubs.json` is the same sweep cut by club instead: **733 MLB rows
-against the fold's 659**, because only 178 of MLB's 1,453 swept men appear for
-more than one club. **95 KB**, fetched by one club's hub tab and by nothing
-else — ADR-0076 applied a second time, and the alternative was 95 KB on a file
-every visitor to `/abs-challenges` downloads whole.
+`abs-exposure-clubs-{level}.json` is the same sweep cut by club instead: **733
+MLB rows against the fold's 659**, because only 178 of MLB's 1,453 swept men
+appear for more than one club. **93 KB**, fetched by one club's hub tab and by
+nothing else — ADR-0076 applied a second time, and the alternative was 93 KB on
+a file every visitor to `/abs-challenges` downloads whole.
+
+**And one file per LEVEL, which is the same argument a third time.** Triple-A's
+cut is a further 128 KB, on rows a major-league club's page would never read.
+The level is lowercased into the file name, and that spelling is the whole
+contract between `gen-abs-challenges.mjs` and
+`src/api/around-the-game/absExposure.js`. A file holds the one level it is named
+for, so asking it for the other returns nothing rather than falling through.
 
 **It ships counts and denominators and no rates.** `per1000Pitches` prints as
 `11.224987798926305` — forty bytes for a number the reader divides in one line
@@ -299,15 +306,63 @@ when what it means is "further from the line".
 
 ### Whether Triple-A is worth drawing
 
-**Not yet, and the file says so rather than shipping the rows.** The
-denominators exist — 377 Triple-A hitters clear the 200-plate-appearance floor
-against MLB's 352 — so a scatter would draw. What is unclear is whether it would
-MEAN the same thing: an affiliate's roster turns over hard enough through a
-season that "this club's hitters" is a different population in April and
-September, and a season-long club rate is a weaker claim there than it is in
-MLB. Shipping rows before a surface draws them is what ADR-0076 is against, so
-`EXPOSURE_CLUB_LEVELS` in `scripts/lib/abs/export.mjs` is `['MLB']` and adding
-one is a one-word change.
+**The churn is real and it is not the objection it looks like.** This was first
+argued as "an affiliate's roster turns over, so the dots are a different
+population in April and September". That is true — and it was measured, below —
+but it tests the card against a claim the card does not make.
+
+**The card is a record of a season, not a picture of a roster.** A man who
+batted 250 times at Sacramento and was promoted in July clears the floor and
+gets a dot, and that dot is a true fact about what he did there. Counting him
+against the club he actually batted for is the entire reason the per-club cut
+exists. Nothing on the card says "these are the men here now", so a man leaving
+does not make it wrong.
+
+**The test that decides it is coverage: how much of a club the dots account
+for.** A floor that admits twelve men holding four in five of a club's plate
+appearances draws that club. The same floor admitting twelve men holding two in
+five draws a fragment and looks identical.
+
+| | MLB | Triple-A |
+| --- | --- | --- |
+| Men who batted for a club, median | 24 | 34 |
+| Men clearing 200 plate appearances, median a club | 12 | 12 |
+| **Share of a club's plate appearances drawn** | **84.2%** | **71.8%** |
+| Worst club | 70.6% | 57.6% |
+| Catchers clearing 200 innings | 73 | 75 |
+| Share of a club's catcher innings drawn, median | 90.9% | 74.8% |
+
+**Three quarters of a club is not a fragment.** Triple-A uses ten more batters
+a club and still concentrates 71.8% of its plate appearances in the twelve men
+the floor admits. Every Triple-A club would draw a scatter, and every one would
+draw a catcher table too — 75 catchers clear 200 innings, a median of two a
+club, and no club has none.
+
+**And the club's own rate, the number the card leads with and is ranked on, is
+not floored at all.** `clubRate` runs over every man with a denominator. The
+floor decides who gets a dot, never what the club's figure is, so the headline
+and the rank are complete at Triple-A whatever the scatter shows.
+
+**The churn, for the record.** 50.4% of a Triple-A club's qualified men played
+for it in both April and September, against MLB's 77.4%; over each level's
+first thirty days against its last thirty, 55.2% against 78.3%. Of the 126
+Triple-A men absent in September, 62 were in the majors instead. The number is
+a fact about how a farm system works. It is not a reason the chart would lie.
+
+**What is left is a build, and one file decision.** ADR-0076 holds: the rows
+and the surface land together, so `EXPOSURE_CLUB_LEVELS` in
+`scripts/lib/abs/export.mjs` is still `['MLB']` until a Triple-A surface reads
+them. Adding the level takes `abs-exposure-clubs.json` from 93 KB to about
+222 KB, and that file is fetched by one club's hub tab — so a major-league club
+would download the Triple-A half for nothing. Split it per level, or accept the
+weight; do not ship the level without settling which.
+
+**The figures above are cut per club, not per season.** §5's board floors a
+man's folded season — 377 Triple-A men and 352 major-league men clear it — and
+the card floors his plate appearances *for that one club*, a stricter test a
+traded regular can fail at both stops. That is why the counts here are 355 and
+341 instead. `.scratch/abs-reports/churn.mjs` reproduces every number in about
+four minutes.
 
 ## 7. After a win, after a loss
 
@@ -400,9 +455,10 @@ audit of statsapi is `docs/MLB_STATS_API.md`.
 | Tests | `test/abs-challenges.test.js`, `test/abs-exposure.test.js` |
 | Decisions | ADR-0075 (what a chance is), ADR-0076 (a dataset no surface reads) |
 
-Three files come out of every run of the generator, and the split is a size
+Four files come out of every run of the generator, and the split is a size
 decision every time: `abs-challenges.json` (250 KB) is what `/abs-challenges`
 fetches, `abs-exposure.json` (418 KB) is the per-player denominator list that
-one section of that page reads, and `abs-exposure-clubs.json` (95 KB) is the
-same denominators cut by club, read by one club's hub tab. Folded into one file
-they would be 763 KB on every visit to either page.
+one section of that page reads, and `abs-exposure-clubs-mlb.json` (93 KB) and
+`abs-exposure-clubs-aaa.json` (128 KB) are the same denominators cut by club,
+one level each, read by one club's hub tab. Folded into one file they would be
+889 KB on every visit to either page.
