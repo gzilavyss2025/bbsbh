@@ -125,6 +125,40 @@ it shows the season that ENDED, final, with its date controls put away — there
 is nothing to scrub to when the record is the record, and a row of buttons that
 each return an empty table is worse than no buttons.
 
+### Two things the note's own shape then decided
+
+**The row is the /fouls page's, minus its scorebug.** "Most fouls in one plate
+appearance" already draws exactly this event: the batter's face pinned left, the
+pitcher's pinned right, their names and clubs facing each other across the
+count. A long at-bat is two men refusing to give in, and a table row cannot show
+that. What did NOT come across is the scorebug in the middle of its second line
+— the score, the inning, the outs, the bases and what the at-bat finally did.
+That is a report page's ordinary right and none of this note's, so the slot
+carries the DATE instead: the one thing about the at-bat that opens its game
+without saying a word about it.
+
+The classes are the note's own rather than `.storypa-row`'s, because
+`43-foul-tracker.css` is component-imported by that page alone and pulling 877
+lines of its chrome onto the home slate to reuse forty of them is a bad trade.
+The shared version of the row is the design lab's job (issues #1112-1114) —
+the same note `.movedup` and `.pgame` already carry.
+
+**The winter rail.** Once the page had four rows, the column beside it was still
+holding a 112px countdown over seventeen hundred pixels of nothing, while the
+club grid — which in the winter is EVERY club — ran a thousand pixels down the
+bottom of the games column. The league moves up into that column
+(`WinterRail.jsx`), which fills the margin and takes a third off the page,
+because thirty tiles two-wide is far shorter than thirty tiles five-wide. Wide
+only: on a phone there is no second column, the countdown already sits inside
+the lead, and the grid already follows it.
+
+That move also made an existing heading false. `OffDaySection` says "Off Day",
+which is a claim about TODAY — true of the eight clubs idle on a Tuesday in
+June, and not true of all thirty in December. In the winter it says "Every club"
+instead. The countdown's label became "First spring training game" for the same
+reason: the day it counts to is spring training's first GAME, not the day camps
+open, and the shorter label read as the latter.
+
 ## Consequences
 
 - The offseason page has exactly one row that opens onto results, and it is the
@@ -146,6 +180,8 @@ each return an empty table is worse than no buttons.
 - Both datasets are frozen from the day a season ends until the next one starts,
   which is the shape `check-data-freshness.mjs` cannot tell from a dead
   generator — so both take an `EXCEPT` entry, as `milb-pool/` already does.
+- `OffDaySection` takes a `winter` flag now. It is the one thing that section
+  cannot work out for itself, and the heading is the only thing it changes.
 - Whether a minor league qualifies its clubs by halves is still unanswered, and
   is still the thing that would have to be established before any of this comes
   in-house. What #1078 listed as unverified is now half-answered: the half

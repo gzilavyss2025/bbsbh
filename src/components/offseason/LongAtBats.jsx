@@ -4,6 +4,7 @@ import { atBatGamePath, clubAbbr, count, fetchLongAtBats } from '../../api/noteb
 import { useRouteLink } from '../../lib/nav.js'
 import { monthDayShort } from '../../lib/dates.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { Headshot } from '../player/Headshot.jsx'
 
 // THE NOTEBOOK, AT MLB — one note about the season that just finished (issue
 // #1078, step 4 of #1038).
@@ -33,6 +34,19 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 // minor levels (ADR-0080), and the reason #1078's own spoiler note only asks a
 // report to declare itself when it is about a RESULT.
 //
+// THE ROW IS THE /fouls PAGE'S, and that is a deliberate borrowing. "Most
+// fouls in one plate appearance" draws the batter's face pinned left and the
+// pitcher's pinned right, their names and clubs facing each other across the
+// count — because a long at-bat is two men refusing to give in, and a table row
+// cannot show that. This note is about the same event measured a different way,
+// so it reads the same way.
+//
+// WHAT DID NOT COME WITH IT IS THE SCOREBUG. On /fouls the middle of the second
+// line carries the score, the inning, the outs, the bases and what the at-bat
+// finally did — a report page's ordinary right, and none of it this note's. The
+// slot holds the DATE here instead, which is the one thing about the at-bat
+// that opens its game without saying a word about it.
+//
 // Five rows up front, and the door opens the whole census — it is 170 rows in a
 // full season, which is long, and it is also the entire answer. Trimming it to
 // a round number would be the one thing research.md §7 forbids outright.
@@ -53,7 +67,7 @@ export function LongAtBats({ season }) {
   const hidden = rows.length - shown.length
 
   return (
-    <section className="note" aria-label={`Twelve-pitch at-bats in the ${season} season`}>
+    <section className="note note--stories" aria-label={`Twelve-pitch at-bats in the ${season} season`}>
       <div className="oseason__head">
         {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
             invariant is never a per-component .toUpperCase() (ADR-0017). */}
@@ -78,46 +92,69 @@ export function LongAtBats({ season }) {
             one opens its game, sealed.
           </p>
 
-          <table className="note__table">
-            <thead>
-              <tr>
-                <th scope="col">At-bat</th>
-                <th scope="col">Pitches</th>
-                <th scope="col">Game</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map((row) => {
-                const path = atBatGamePath(row)
-                return (
-                  <tr key={`${row.pk}-${row.batter.id}-${row.pitches}`}>
-                    <th scope="row">
-                      <PlayerLink id={row.batter.id} name={row.batter.name}>
+          <ol className="note__stories">
+            {shown.map((row) => (
+              <li className="note__story" key={`${row.pk}-${row.batter.id}-${row.pitches}`}>
+                <Headshot
+                  personId={row.batter.id}
+                  name={row.batter.name}
+                  teamId={row.batter.teamId}
+                  className="note__shot note__shot--batter"
+                />
+
+                <div className="note__line">
+                  <div className="note__who">
+                    <div className="note__nameline">
+                      <PlayerLink id={row.batter.id} name={row.batter.name} className="note__name">
                         {row.batter.name}
                       </PlayerLink>
-                      <span className="note__org">
-                        {/* The other man in the at-bat, named as such: without
-                            the "vs" the line reads as one player and two clubs. */}
-                        {clubAbbr(row, row.batter.teamId)} <span aria-hidden="true">·</span> vs{' '}
-                        <PlayerLink id={row.pitcher.id} name={row.pitcher.name}>
-                          {row.pitcher.name}
-                        </PlayerLink>{' '}
-                        {clubAbbr(row, row.pitcher.teamId)}
-                      </span>
-                    </th>
-                    <td className="note__age">{row.pitches}</td>
-                    <td className="note__gap">
-                      {path ? (
-                        <a {...linkProps(path)}>{monthDayShort(row.date)}</a>
-                      ) : (
-                        monthDayShort(row.date)
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                      <span className="note__club">{clubAbbr(row, row.batter.teamId)}</span>
+                    </div>
+                    {/* The phone's only copy of the pitcher's name — his own
+                        block on the right drops at 600px, and his face alone
+                        would not tell a reader who he is. */}
+                    <div className="note__vs">
+                      vs{' '}
+                      <PlayerLink id={row.pitcher.id} name={row.pitcher.name}>
+                        {row.pitcher.name}
+                      </PlayerLink>
+                    </div>
+                  </div>
+
+                  <span className="note__val">
+                    <span className="note__valn">{row.pitches}</span>
+                    <span className="note__vallabel">Pitches</span>
+                  </span>
+
+                  <div className="note__who note__who--pitcher">
+                    <div className="note__nameline">
+                      <PlayerLink id={row.pitcher.id} name={row.pitcher.name} className="note__name">
+                        {row.pitcher.name}
+                      </PlayerLink>
+                      <span className="note__club">{clubAbbr(row, row.pitcher.teamId)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* The game, at its first lineup page — the same address the
+                    slate's own cards build, so it arrives sealed. */}
+                {atBatGamePath(row) && (
+                  <a className="note__when" {...linkProps(atBatGamePath(row))}>
+                    {monthDayShort(row.date)}
+                    <span className="sr-only"> — open this game</span>
+                    <span aria-hidden="true">›</span>
+                  </a>
+                )}
+
+                <Headshot
+                  personId={row.pitcher.id}
+                  name={row.pitcher.name}
+                  teamId={row.pitcher.teamId}
+                  className="note__shot note__shot--pitcher"
+                />
+              </li>
+            ))}
+          </ol>
 
           {(hidden > 0 || expanded) && (
             <button

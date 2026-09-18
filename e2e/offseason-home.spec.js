@@ -351,8 +351,8 @@ test('the MLB page carries one note, and it is a count with its denominator', as
 
   // Five rows up front, and the door opens the whole census — the count on the
   // figure IS the length of the list, or the note is claiming something the
-  // table cannot show.
-  const rows = note.locator('.note__table tbody tr')
+  // rows cannot show.
+  const rows = note.locator('.note__story')
   await expect(rows).toHaveCount(5)
   await note.locator('.oseason__door').click()
   await expect(rows).toHaveCount(figure)
@@ -360,21 +360,27 @@ test('the MLB page carries one note, and it is a count with its denominator', as
 
 test('a note row says how LONG an at-bat was, never how it went', async ({ page }) => {
   await page.goto(AT_BAT_WINTER)
-  const row = page.locator('.note__table tbody tr').first()
+  const row = page.locator('.note__story').first()
   await expect(row).toBeVisible()
   // Twelve is the floor, so every row is at or above it.
-  expect(Number(await row.locator('.note__age').innerText())).toBeGreaterThanOrEqual(12)
-  // And nothing in the table that could say what the at-bat DID, what inning it
-  // was, or how the game finished (ADR-0081). The scan is on the rows rather
-  // than the whole note, because the note's own footnote explains the
-  // inning-ending-caught-stealing rule in words and has to be allowed to.
-  await expect(page.locator('.note__table')).not.toContainText(
+  expect(Number(await row.locator('.note__valn').innerText())).toBeGreaterThanOrEqual(12)
+
+  // IT IS THE /fouls ROW, MINUS THE SCOREBUG. Both men's faces and both names,
+  // which is what makes a long at-bat read as two people — and none of the
+  // score, inning, outs, bases or result that board's scorebug carries, because
+  // this one is on the slate (ADR-0081). The scan is on the rows rather than the
+  // whole note: the note's own footnote explains the inning-ending-caught-
+  // stealing rule in words, and has to be allowed to.
+  await expect(row.locator('.note__shot')).toHaveCount(2)
+  await expect(row.locator('.note__name')).toHaveCount(2)
+  await expect(page.locator('.note__stories')).not.toContainText(
     /strikeout|walk|home run|flyout|groundout|inning|final|won|lost|[0-9]+-[0-9]+/i,
   )
+  await expect(page.locator('.note .scorebug')).toHaveCount(0)
 
   // The row opens its game at the slate's own lineup address, so it arrives
   // sealed under the same reveal mark as any other game.
-  const href = await row.locator('a').last().getAttribute('href')
+  const href = await row.locator('.note__when').getAttribute('href')
   expect(href).toMatch(/^\/\d{8}\/[a-z0-9-]+\/lineup1$/)
 })
 
@@ -476,4 +482,60 @@ test('the standings page a record opens onto is not empty in the winter', async 
   // record is the record, and every one of those buttons would come back empty.
   await expect(page.locator('.standings-jumps[aria-label="Standings date"]')).toHaveCount(0)
   await expect(page.locator('.standings-daynav')).toHaveCount(0)
+})
+
+test('the winter fills the rail with the league, and the page gets shorter for it', async ({
+  page,
+}) => {
+  await page.goto(WINTER)
+  const wide = page.viewportSize().width >= 740
+  const grid = page.locator('.offday')
+  await expect(grid).toBeVisible()
+
+  if (wide) {
+    // Every club is idle in the winter, so this is the whole league — 986px of
+    // grid that used to run down the bottom of the games column while the rail
+    // beside it held a 112px countdown and nothing else. It belongs up there.
+    // Measured on the section's HEADING rather than the section, which in the
+    // winter is 1,800px of grid — a box that size is a slow protocol round trip
+    // and was flaky under a parallel run. The heading is the section's own top
+    // left corner, which is the whole claim.
+    const main = await page.locator('.slatebody__main').boundingBox()
+    const head = await page.locator('.offday__banner').boundingBox()
+    expect(head.x).toBeGreaterThan(main.x + main.width - 2)
+    // Under the countdown, not above it.
+    const count = await page.locator('.springcount').boundingBox()
+    expect(head.y).toBeGreaterThan(count.y)
+    // And nothing left behind in the games column.
+    await expect(page.locator('.slatebody__main .offday')).toHaveCount(0)
+  } else {
+    // No rail on a phone: the countdown is already inside the lead and the grid
+    // already follows it down the one column there is. Nothing moved.
+    await expect(page.locator('.winterrail')).toHaveCount(0)
+    await expect(page.locator('.slatebody__main .offday')).toHaveCount(1)
+  }
+})
+
+test('the winter does not call a whole finished season an off day', async ({ page }) => {
+  // "Off Day" is a claim about TODAY, and in December it would be a false one
+  // over all thirty clubs at once.
+  await page.goto(WINTER)
+  await expect(page.locator('.offday__banner')).toHaveText('Every club')
+  await expect(page.locator('.offday')).toHaveAttribute('aria-label', 'Every club')
+
+  // An ordinary in-season off day is untouched — the clubs not playing today
+  // really are on an off day, and the heading has always been right there.
+  await page.goto('/04062026')
+  const offday = page.locator('.offday')
+  if ((await offday.count()) > 0) {
+    await expect(page.locator('.offday__banner')).toHaveText('Off Day')
+    await expect(page.locator('.winterrail')).toHaveCount(0)
+  }
+})
+
+test('the countdown names the game it counts to', async ({ page }) => {
+  await page.goto(WINTER)
+  // Spring training's FIRST GAME, not the day camps open — the date it counts
+  // to is a schedulable game on the season row, so the label says so.
+  await expect(page.locator('.springcount__label')).toHaveText('First spring training game')
 })
