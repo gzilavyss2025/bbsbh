@@ -226,6 +226,14 @@ const DoubleheadersPage = lazyNamed(
   () => import('./screens/around-the-game/DoubleheadersPage.jsx'),
   'DoubleheadersPage',
 )
+// Filed under "History" in the menu rather than with the five above, for the
+// same reason the ABS board is filed under "This season": it lives in this
+// directory because it wears the same masthead, boards and stylesheet, not
+// because it belongs to that group. See src/lib/reportPages.js.
+const RunDifferentialPage = lazyNamed(
+  () => import('./screens/around-the-game/RunDifferentialPage.jsx'),
+  'RunDifferentialPage',
+)
 // Filed under "This season" in the menu, not with the five above — it reports
 // on a result on the field rather than on the conditions around one. It lives
 // in this directory because it wears the same masthead, boards and stylesheet;
@@ -444,6 +452,8 @@ export default function App() {
     content = <BullpenPage />
   } else if (route.name === 'doubleheaders') {
     content = <DoubleheadersPage />
+  } else if (route.name === 'run-differential') {
+    content = <RunDifferentialPage />
   } else if (route.name === 'abs-challenges') {
     content = <AbsChallengesPage />
   } else if (route.name === 'run-value') {

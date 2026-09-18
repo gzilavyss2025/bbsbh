@@ -136,6 +136,14 @@ export const PAGE_GROUPS = [
     pages: [
       { label: 'Awards History', path: '/awards' },
       { label: 'Postseason History', path: '/postseason-history' },
+      // Directly under Postseason History because it is that page's question
+      // turned around: the bracket page shows who won each October, this one
+      // takes the clubs that were plainly the best over a season and asks what
+      // October did to them. It wears the broadcast masthead and sits in
+      // src/screens/around-the-game/ for the same reason /abs-challenges does —
+      // that is where the report components and the one report stylesheet live
+      // — and is filed here because it is history, back to 1901.
+      { label: 'Run Differential', path: '/run-differential' },
       // Unsettled: a leader board filed by era, while League Leaders is filed
       // by season. Same kind of page, two different groups.
       { label: 'Postseason Leaders', path: '/postseason-leaders' },
@@ -265,15 +273,17 @@ export const FOOTER_TRAIL = [
 // 'pace'), which is what App.jsx's switch and the preview-card key read. The
 // address and the name are allowed to differ, and this table is the only place
 // that has to know they do.
-// (Plus one page that is NOT one of the four: '/abs-challenges' shares this
-// package's directory and stylesheet but is filed under "This season" — see
-// its row in PAGE_GROUPS. It is here because this table is what route.js
-// parses, and a single-segment report address belongs beside the menu row that
-// links to it whichever group that row sits in.)
+// (Plus two pages that are NOT among the four: '/abs-challenges' and
+// '/run-differential' share this package's directory and stylesheet but are
+// filed under "This season" and "History" — see their rows in PAGE_GROUPS. They
+// are here because this table is what route.js parses, and a single-segment
+// report address belongs beside the menu row that links to it whichever group
+// that row sits in.)
 export const REPORT_ROUTES = {
   salaries: 'salaries',
   'run-value': 'run-value',
   'abs-challenges': 'abs-challenges',
+  'run-differential': 'run-differential',
   attendance: 'attendance',
   'pace-of-play': 'pace',
   doubleheaders: 'doubleheaders',

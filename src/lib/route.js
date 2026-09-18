@@ -29,7 +29,7 @@
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
 //   '/salaries' '/attendance' '/pace-of-play' '/farm-system-rankings'
-//   '/bullpen-availability' '/doubleheaders' '/abs-challenges'
+//   '/bullpen-availability' '/doubleheaders' '/abs-challenges' '/run-differential'
 //                                       -> single-segment report pages (REPORT_ROUTES, reportPages.js)
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)

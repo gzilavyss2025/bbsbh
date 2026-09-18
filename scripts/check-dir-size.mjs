@@ -718,7 +718,12 @@ const BUDGETS = {
   // dataset, flat for the same reason and sharing the same scripts/lib helper.
   // +1 for gen-command-received.mjs, the catcher-side cut — the third and last
   // generator off that dataset, flat for the same reason as the other two.
-  scripts: 113,
+  // +1 for gen-run-differential.mjs, the run differential report's nightly
+  // precompute. Flat for the reason every other gen-*.mjs is flat: the whole
+  // set is discovered by name, `npm run` and the nightly workflow name them one
+  // by one, and a generator that moved into a subdirectory would be the only
+  // one anybody had to remember the path of.
+  scripts: 114,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
