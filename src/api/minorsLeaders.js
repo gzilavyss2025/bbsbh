@@ -40,9 +40,10 @@ const RANK = new Map(MILB_LEVELS.map((level, i) => [level.sportId, i]))
 // WHO MOVED UP, at one level — the minor levels' offseason page, issue #1077.
 //
 // Each entry already carries `levels`: every level the player appeared at this
-// season, which is the whole of a promotion written as data. A player whose
-// season spans more than one of them climbed; the two ends of that span are
-// where he started and where he finished.
+// season. A season that spans more than one of them is a season that moved, and
+// the two ends of that span are the lowest and the highest level it reached —
+// which is what the row prints. Read the caveat below before trusting that as a
+// direction.
 //
 // It is a fact about a SEASON, not about a game, so it spoils nothing and needs
 // no seal — the same reason the reason line on the picked-game card is allowed
@@ -55,6 +56,17 @@ const RANK = new Map(MILB_LEVELS.map((level, i) => [level.sportId, i]))
 // season's leaders moved up", and a caption that promises more than that is
 // wrong. Naming the pool is the caller's job; keeping the derivation honest is
 // this function's.
+//
+// WHAT IT CANNOT SEE, and the surface currently overstates: `levels` is a SET,
+// sorted by level (combineToPool builds it that way), so it carries no
+// chronology at all. The two ends of it are the lowest and highest level a
+// season touched — NOT where the player started and where he ended. A player
+// sent DOWN from Triple-A to High-A reads here exactly like one promoted the
+// other way, and a rehab cameo three levels below a player's own reads as a
+// three-level climb. Checked against dated game logs for 24 of the 188 High-A
+// movers: 23 really did finish above where they started, and one (a demotion
+// and a return) did not. Issue #1122 is the fix — a handful of date-bounded
+// bulk pulls in the generator, which is all the direction needs.
 //
 // Sorted by how far a player climbed, then by where he finished, then by name —
 // a total order with no ties, so two readers on the same day see the same list.

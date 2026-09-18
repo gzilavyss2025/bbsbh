@@ -237,6 +237,14 @@
    as a real <table> rather than a grid of divs because it is a table: three
    labelled columns of the same three facts per row, and a screen reader that
    reads "Finished at, A to Triple-A" is reading what the page means.
+
+   THE .movedup ROWS ARE PROVISIONAL. They are drawn to the offseason study's
+   own artboard and to the .oseason__head / .oseason__door chrome beside them,
+   which is where they had to start. They are NOT meant to keep that shape:
+   when the design lab settles a canonical card and pill (issues #1112-1114),
+   these rows take that style instead. Recorded here as well as on those issues
+   because this is the file the next person will be standing in. Note the row
+   hosts a ProspectPill, so it is in the pill slice as well as the card one.
    --------------------------------------------------------------------------- */
 .oseason--level .movedup {
   margin-top: var(--space-6);
