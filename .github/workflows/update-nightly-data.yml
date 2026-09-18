@@ -203,6 +203,15 @@ jobs:
         if: steps.teams.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-minors-leaders.mjs
+      # MUST stay after "Minor-league leaders", "Top prospects" and "MiLB
+      # alumni": gen-milb-pool.mjs writes no reason line of its own, it joins the
+      # three boards those steps produce onto rosters it already holds. It makes
+      # no request at all once a level's pool is checked — a completed season's
+      # games do not change — so the nightly cost of this step is a re-join.
+      - name: Minor-league game pool
+        id: milb-pool
+        continue-on-error: true
+        run: node scripts/gen-milb-pool.mjs
       - name: Game call-outs
         id: callouts
         continue-on-error: true
@@ -562,6 +571,7 @@ jobs:
           steps.umpires.outcome == 'failure' ||
           steps.umpire-accuracy.outcome == 'failure' ||
           steps.minors-leaders.outcome == 'failure' ||
+          steps.milb-pool.outcome == 'failure' ||
           steps.callouts.outcome == 'failure' ||
           steps.former-teammates.outcome == 'failure' ||
           steps.career-matchups.outcome == 'failure' ||

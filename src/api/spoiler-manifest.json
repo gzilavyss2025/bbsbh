@@ -499,6 +499,10 @@
       "class": "cutoff-gated",
       "why": "Career counting-stat totals carry no individual game's score, so the page needs no seal — but the precompute cannot be retrofit to an old game's cutoff, so the player-page card shows its projection only on a bare current-day view."
     },
+    "milbPool.js": {
+      "class": "spoiler-free",
+      "why": "The offseason page's checked pool of minor-league games. Two clubs, a date, a park and counts of the careers in the game — the generator stores no score, no run total, no winner and no inning count, so there is nothing here to reconstruct one from."
+    },
     "minorsLeaders.js": {
       "class": "spoiler-free",
       "why": "Static pre-ranked all-minors leaderboard. Season aggregates."

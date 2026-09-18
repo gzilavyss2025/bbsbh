@@ -568,7 +568,17 @@ const BUDGETS = {
   // the one module it is defined against. The second is its static-file reader,
   // flat with targetCommand.js and gloveTarget.js for the reason those entries
   // give.
-  'src/api': 111,
+  //
+  // 112: milbPool.js, the reader over the offseason page's checked pool of
+  // minor-league games (ADR-0080). Flat with minorsLeaders.js, which the same
+  // page reads on the same visit and which it is written to match — both are
+  // static-file readers over a nightly precompute, and both carry the file's
+  // own `season` so a page naming a year can check the file still means it. It
+  // is also a module a spoiler audit will want to find beside its neighbours
+  // rather than in a directory of its own: it is the first reader over a dataset
+  // built by walking FINISHED games, and the argument for why that is
+  // spoiler-free is one its neighbours' headers make too.
+  'src/api': 112,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -718,7 +728,12 @@ const BUDGETS = {
   // dataset, flat for the same reason and sharing the same scripts/lib helper.
   // +1 for gen-command-received.mjs, the catcher-side cut — the third and last
   // generator off that dataset, flat for the same reason as the other two.
-  scripts: 113,
+  // +1 for gen-milb-pool.mjs, the offseason page's checked game pool
+  // (ADR-0080). Flat for the same reason every gen-*.mjs above it is: the
+  // nightly workflow runs this directory as a flat list, and this file RUNS on
+  // import — its pure half went to scripts/lib/milb-pool.mjs, which is what
+  // that directory is for.
+  scripts: 114,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -889,7 +904,15 @@ const BUDGETS = {
   // network. test/level-path.test.js pins the cases that make it hard (a rehab
   // cameo below a player's own level, a demotion, and the shared half-month key
   // that stops four levels' different opening days from reordering a season).
-  'scripts/lib': 35,
+  // +1 for milb-pool.mjs — the pure half of gen-milb-pool.mjs, and the same
+  // reason one more time: which season a level's pool is drawn from, which of
+  // its games are offered, and what the card may say about one are three
+  // DECISIONS, each wrong in a way a run's console output would not show. The
+  // middle one is the pool's fairness (a uniform draw with a per-club ceiling,
+  // never a ranking by drama — ADR-0080) and the last is the spoiler rule's own
+  // line, so both have to be checkable without a network. test/milb-pool.test.js
+  // holds them.
+  'scripts/lib': 36,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

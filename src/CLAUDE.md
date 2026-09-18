@@ -14,7 +14,7 @@ Oct-Feb — `components/winter/`, ADR-0078) → `GameView` (site-home bar + away
 masthead of uniform-treatment tiles — the `TeamTreatmentMark` square the slate card
 shows — each opening the sketch modal) → `TeamInfo` (×2) → `InningViewer`.
 `LogoSheet` is a printable grayscale logo sheet, off the slate header. An empty slate gets a second page
-state (`offseason/`): the wire at MLB (ADR-0074); who moved up at a level, dark from mid-September on ITS leagues' published dates, not the level's (ADR-0079).
+state (`offseason/`): the wire at MLB (ADR-0074); at a level, dark from mid-September on ITS leagues' published dates (ADR-0079), a checked game to score and who moved up (ADR-0080).
 
 `TeamInfo`'s club-name bar and section mastheads are **themed** to the jersey that
 club wears that game (ADR-0030) — three CSS properties from `lib/headerTheme.js`,

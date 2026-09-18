@@ -150,6 +150,21 @@ don't run these by hand.
   minor levels' offseason page both read it (ADR-0079). An empty pool is treated
   as "nothing new to say"; the file keeps the last season it had, and rolls over
   on its own once the new one has games in it.
+- `gen-milb-pool.mjs` → `public/data/milb-pool/{11,12,13,14}.json` — 120 CHECKED
+  games per minor level from the most recent season that is over, for the
+  offseason page's picked-game card (ADR-0080). One schedule call per level with
+  `hydrate=linescore` says which games were PLAYED (never the status string: all
+  1,980 rows of a High-A season say "Final"), then one trimmed feed per candidate
+  — 17KB against 686KB — gates it on what the scoring flow needs: every play
+  placed in an inning, nine in both batting orders, a pitcher a side. It stores no
+  score, no winner and **no inning count**, and `test/milb-pool.test.js` asserts
+  that of the committed files by vocabulary rather than by trust. The pool is
+  FROZEN per season — a completed season's games do not change, so the scan runs
+  once and every run after it only re-joins the reason line against
+  `top-prospects.json`, `minors-leaders.json` and `milb-alumni/`, with no network
+  at all (hence its `check-data-freshness.mjs` exception: unchanged is healthy
+  here). `--rebuild` forces the scan; `--level=13` narrows it. The roster ids that
+  make the nightly re-join free live in `scripts/data/milb-pool-scan.json`.
 - `gen-former-teammates.mjs` → `public/data/former-teammates/{a}-{b}.json` (ids
   ascending; one file per MATCHUP, which is what a game view reads) — for each upcoming
   matchup (MLB + MiLB), pairs of players on the two OPPOSING clubs once teammates. Two players are teammates iff their careers

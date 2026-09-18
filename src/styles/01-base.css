@@ -123,6 +123,10 @@
      - the minor levels' offseason page, where the promotions list says what
        board it is drawn from — `.movedup__pool` (issue #1077). The heading,
        the column labels, the player names, the level path and the org all stay
+       shouted, the same split one more time
+     - the same page's picked-game card, where one sentence says why that game
+       is being offered — `.pgame__why` (issue #1077). The club names, the
+       parent orgs, the seal line, the date, the park and both buttons all stay
        shouted, the same split one more time */
 #root * {
   text-transform: uppercase;

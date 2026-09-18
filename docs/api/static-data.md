@@ -263,6 +263,20 @@ for each generator; the reader modules:
   finished. The file's `season` is carried through the reader because the
   generator names the calendar year it ran in — a caller that prints a season
   has to check that the board is still about it.
+- `milbPool.js` — the checked pool of minor-league games the offseason page's
+  picked-game card is dealt from, one file per level
+  (`public/data/milb-pool/{sportId}.json`, `gen-milb-pool.mjs`). Spoiler-free by
+  CONSTRUCTION rather than by gate: the file holds two clubs, a date, a park and
+  counts of the careers in the game, and has no score, winner or inning count to
+  leak (ADR-0080). `pickGame` deals one game per day per level off a seed the
+  caller owns (the viewed date + the level), so a re-render cannot deal a new one,
+  and "another game" walks the same fixed deck; it skips any game this device has
+  a reveal mark for, and says `started` when every game in the pool has one.
+  `reasonLine` turns the stored counts into the card's one sentence, ordered so a
+  NAME off the prospect board outranks a count. The file's `season` is carried
+  through the reader for the same reason the leaders board's is: a level's winter
+  opens hours before the night's generator run, and a card offering a game from
+  the wrong season is worse than no card.
 - `allStarRosters.js` — the All-Star Rosters page, from
   `public/data/all-star-rosters.json`. Hand-run (`gen-all-star-rosters.mjs`) — a
   season's roster is decided once and never changes. Every named selectee,
