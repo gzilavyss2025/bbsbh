@@ -221,4 +221,10 @@
      report/chrome            screens/around-the-game/RunValuePage.jsx,
                               screens/around-the-game/AbsChallengesPage.jsx
      research/diary           screens/research/ResearchDiaryPage.jsx
+     designlab/lab            screens/designlab/index.jsx (the /design-lab
+                              catalog — a SUBDIRECTORY because src/styles is at
+                              its own 115-file directory budget, so a 116th flat
+                              partial cannot exist. Every selector in it is
+                              .dlab__*, shared with no other partial, and only
+                              that one unlisted route loads it.)
    ------------------------------------------------------------ */
