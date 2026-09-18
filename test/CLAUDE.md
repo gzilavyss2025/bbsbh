@@ -76,6 +76,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | logbook-milestones.test.js | 18 | src/api/logbookMilestones.js | Game Log stamp-sheet collection-progress engine — generic slot-fill mechanics, the real clubs/parks registry entries, and the per-LEVEL roster off the static team snapshot (docs/design-inspiration.md §8) |
 | logbook-stats.test.js | 27 | src/api/logbookStats.js | Logbook retrospective Tier 1 — records, streaks, aggregates (ADR-0035) |
 | logo-mono.test.js | 25 | logoMono.js | Mono logo editor (ADR-0031) |
+| long-at-bats.test.js | 10 | scripts/lib/long-at-bats.mjs, src/api/notebook.js | The offseason page's MLB notebook note — which season a note is about when the calendar year and the season disagree (the January trap, #1122), what counts as a plate appearance when the feed types a caught stealing 'atBat' like everything else, and a SPOILER INVARIANT read off the committed file: no result, no inning, no score, by vocabulary rather than by trust (ADR-0081) |
 | logo-recolor.test.js | 9 | logoMono.js, logoRecolor.js | Logo recolor editor (shares shape numbering w/ logo-mono by design) |
 | logo-tint.test.js | 8 | src/lib/logoTint.js | Logo tint wash |
 | logo-upload.test.js | 26 | src/lib/logoArt.js, scripts/lib/dev-logo-upload.mjs | Dev logo upload endpoint (ADR-0029) |
@@ -144,6 +145,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | stamps.test.js | 39 | src/lib/stamps.js | Logbook stamp rules — the reveal gate, tombstone sync merge, book placement (ADR-0035) |
 | standings.test.js | 15 | src/api/standings.js | Standings shaping/ranks |
 | stats-levels.test.js | 5 | src/api/statsLevels.js | sumHitting/sumPitching recomputed rates + combineToPool's raw split passthrough |
+| standings-dates.test.js | 3 | src/lib/time/standingsDates.js | The standings page's date arithmetic, split out when that screen crossed its 600-line cap — day math that cannot drift across a month, a year or a daylight-saving edge, and quick-jumps that only offer days already past. A date one day out on that page is a spoiler, not a cosmetic bug |
 | statsapi.test.js | 4 | src/api/statsapi.js | Shared getJson fetch wrapper |
 | steal-throwing-error-note.test.js | 3 | src/api/playbyplay.js (halfInningFeed, runnerNotes) | A steal/WP/balk that breaks on a plate appearance's last pitch carries no playEvent of its own — recovered from runners[] into its own leading card, with a same-play throwing-error leg folded in |
 | team-affiliate-cards.test.js | 6 | src/screens/team/data/shared.js (affiliateCardsFrom) | Minors tab's Affiliates section card list: full-season levels then Rookie/complex clubs (all of them, not just one), parent MLB card leading a MiLB affiliate's own page (issue #850) |
@@ -163,6 +165,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | workload-marks.test.js | 20 | src/api/workload.js | The four workload marks — flags, rest runs, staff grid, pen dots |
 | worktrees.test.js | 15 | scripts/worktrees.mjs | Git-worktree staleness classification |
 | wpa-logo.test.js | 18 | src/lib/wpa/wpaLogo.js, teams.js, logoArt.js | WPA band logo resolver/recolor guard |
+| youngest-regulars.test.js | 5 | scripts/lib/youngest-regulars.mjs | The offseason page's MiLB notebook note — a player who moved clubs inside one league is one row not two half-rows, a season age is taken on June 30 rather than today, and every committed league's figures stand on 20+ regulars (ADR-0081) |
 
 Last full audit: 2026-07-31 — all 89 files' imports resolved (87 since
 lineup-strength.test.js went with its feature), all features traced to
