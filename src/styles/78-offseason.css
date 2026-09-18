@@ -542,3 +542,326 @@
   color: var(--text-caption);
   text-wrap: pretty;
 }
+
+/* ---------------------------------------------------------------------------
+   THE NOTEBOOK — one note about the season that just finished, issue #1078.
+
+   Both pages carry one, and they are drawn by the same rules because they are
+   the same object with two subjects: a figure, the denominator that makes the
+   figure mean something, and a short table of the people it came out of. MLB's
+   note counts twelve-pitch at-bats; a farm level's measures the age of its
+   regulars against their league (LongAtBats.jsx, YoungestRegulars.jsx).
+
+   The figure sits BESIDE the table past the app's one breakpoint and above it
+   on a phone, which is the design study's own arrangement and the reason the
+   two halves are separate boxes rather than a heading and a body: the number is
+   the note's headline, and a headline that scrolls off before its table is no
+   headline at all.
+   --------------------------------------------------------------------------- */
+.note {
+  margin-top: var(--space-6);
+}
+
+/* Three leagues at a level, one of which is showing. Not tabs — there is no
+   panel switching underneath, only a different set of rows in the same table —
+   so these are toggle buttons carrying aria-pressed, which is what a reader's
+   screen reader should hear. */
+.note__leagues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.note__league {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.note__league:hover {
+  background: var(--surface-inset);
+}
+/* The one showing takes ink and a heavier rule, never colour alone — and it
+   carries aria-pressed in the markup, so the distinction survives with no
+   styling at all. */
+.note__league.is-on {
+  border-color: var(--accent-primary);
+  border-width: var(--bw-rule);
+  color: var(--text-heading);
+}
+
+.note__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+/* The figure. Mono at the score face, because it is the one number on the page
+   a reader is meant to carry away. */
+.note__figure {
+  flex: 0 0 auto;
+}
+.note__n {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-xl);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+/* The denominator, in prose. A bare figure on this page would be a claim with
+   no population behind it, which is the one thing research.md §7 rules out for
+   every note in this family. */
+/* #root ties the ID component of #root *'s specificity — a plain selector
+   loses to the ALL-CAPS INVARIANT and is a silent no-op. The inline spans need
+   their own rule for the same reason: #root * matches THEM, and the parent's
+   exemption is not inherited past it (the same split #root .wire__cutline
+   carries in 04-site-bar.css). */
+#root .note__under,
+#root .note__under .note__against {
+  text-transform: none; /* caps-exempt: a sentence under the figure, not a label */
+}
+.note__under {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+  text-wrap: pretty;
+}
+/* The numbers inside that sentence, so a reader scanning for figures finds
+   them without reading the words around them. */
+.note__against {
+  font-family: var(--font-mono);
+  color: var(--text-body);
+}
+
+.note__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.note__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+#root .note__lede {
+  text-transform: none; /* caps-exempt: the note's own question, not a label */
+}
+.note__lede {
+  margin: var(--space-2) 0 0;
+  max-width: 40em;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-snug);
+  color: var(--text-body);
+  text-wrap: pretty;
+}
+
+/* A real <table>, for the reason .movedup__table is one: three labelled columns
+   of the same three facts per row, and a screen reader that reads "vs league,
+   minus 3.1" is reading what the page means. */
+.note__table {
+  width: 100%;
+  margin-top: var(--space-4);
+  border-collapse: collapse;
+  table-layout: auto;
+}
+.note__table th,
+.note__table td {
+  padding: 7px 0;
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  text-align: left;
+  vertical-align: baseline;
+}
+.note__table thead th {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  border-bottom-color: var(--rule);
+}
+.note__table thead th:not(:first-child),
+.note__table td {
+  text-align: right;
+}
+.note__table tbody tr:last-child th,
+.note__table tbody tr:last-child td {
+  border-bottom: none;
+}
+.note__table tbody th {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-regular);
+  color: var(--text-body);
+}
+/* The club, or the other man in the at-bat, under the name rather than beside
+   it: the two right-hand columns are narrow and a second name on the same line
+   would push them off a phone. */
+.note__org {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+/* Mono in both figure columns, because they are compared down the column and a
+   proportional face would stagger them. */
+.note__age,
+.note__gap {
+  width: 4.5em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+.note__age {
+  color: var(--text-heading);
+}
+/* Below his league is the direction the note is about. The sign is in the text
+   as well as the colour — the app never carries a status in colour alone. */
+.note__gap.is-under {
+  color: var(--accent-positive);
+}
+
+#root .note__pool {
+  text-transform: none; /* caps-exempt: a sentence about the population, not a label */
+}
+.note__pool {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+  text-wrap: pretty;
+}
+
+/* 740px is WIDE_QUERY (src/hooks/useMediaQuery.js) — the app's one breakpoint.
+   Past it the figure stands to the left of the table, at the width the design
+   study's artboard gives it. */
+@media (min-width: 740px) {
+  .note__body {
+    flex-direction: row;
+    gap: var(--space-6);
+  }
+  .note__figure {
+    width: 196px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   THE SEASON RECORD — the one door on this page that opens onto results.
+
+   Everything else the offseason page draws is neutral by construction: roster
+   moves, careers, a sealed game, a length and an age. This row is the
+   exception, so it is the only thing on the page wearing kraft tape — the
+   app's one colour for "results are behind this" — and the warning is in words
+   beside it, never in the tape alone (SeasonRecord.jsx says why it is a LABEL
+   and not a SealBox).
+
+   The tape is the same woven texture the covers use rather than a flat amber
+   fill, because a reader has met it on every sealed score all season and should
+   recognise it here without being told.
+   --------------------------------------------------------------------------- */
+.srecord {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  margin-top: var(--space-6);
+  border: var(--bw-rule) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+/* Decoration, and aria-hidden in the markup to match: it carries no word a
+   reader needs, and the sentence beside it carries every word they do. */
+.srecord__tape {
+  flex: 0 0 auto;
+  width: 56px;
+  background: var(--seal-texture);
+}
+.srecord__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--space-4);
+}
+.srecord__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+/* The <strong> takes its own rule: #root * matches it too, and without this the
+   one sentence on the page that has to be read as a warning was shouted back
+   as a label. */
+#root .srecord__note,
+#root .srecord__note strong {
+  text-transform: none; /* caps-exempt: the warning, in words */
+}
+.srecord__note {
+  margin: var(--space-2) 0 0;
+  max-width: 44em;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+  color: var(--text-body);
+  text-wrap: pretty;
+}
+
+.srecord__doors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+/* Anchors, not buttons: every destination is a real address a reader may
+   middle-click, copy or open in a tab. They wear the page's own door treatment
+   rather than a filled control — the action on this page is the game card
+   above, and this row is a way out of the winter, not the point of it. */
+.srecord__door {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-link);
+  text-decoration: none;
+}
+.srecord__door:hover,
+.srecord__door:active {
+  background: var(--surface-inset);
+}
+/* The mark that says a link leaves Tally. The words beside it say so too, for
+   a reader who cannot see it (SeasonRecord.jsx carries the sr-only text). */
+.srecord__out {
+  font-family: var(--font-body);
+  color: var(--text-caption);
+}

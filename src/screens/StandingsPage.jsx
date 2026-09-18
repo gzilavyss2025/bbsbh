@@ -1,6 +1,7 @@
 import '../styles/30-standings.css'
 import { useMemo, useState } from 'react'
 import { fetchLeagueStandings } from '../api/team.js'
+import { fetchSeasonMeta } from '../api/schedule.js'
 import { fetchTeamScores, leagueSeasonGradesFor, gradeTiersByTeamId } from '../api/teamScore.js'
 import { fetchSeasonScores } from '../api/seasonScore.js'
 import {
@@ -13,6 +14,8 @@ import {
   DASH,
 } from '../api/standings.js'
 import { favoriteAccentColor } from '../lib/teams.js'
+import { offseasonPhase } from '../lib/time/seasonPhase.js'
+import { baseballToday, buildJumps, labelDate, shiftDays } from '../lib/time/standingsDates.js'
 import { useRouteLink } from '../lib/nav.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -89,60 +92,6 @@ function LeagueBar({ league }) {
   )
 }
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-// MLB seasons open in late March / early April; an earlier month-first button
-// would only ever show empty pre-season standings, so the quick-jumps start at
-// April.
-const FIRST_SEASON_MONTH = 4
-
-// The baseball "today" in US Pacific — the last US zone to roll over — so
-// "entering today" reliably excludes tonight's whole slate (even a late
-// West-coast game the user may still be scoring) rather than the viewer's own
-// local/UTC midnight folding one back in. en-CA formats as YYYY-MM-DD.
-function baseballToday() {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Los_Angeles',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date())
-}
-
-// String date math on YYYY-MM-DD (UTC-anchored so it never drifts a day).
-function shiftDays(iso, n) {
-  const d = new Date(`${iso}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + n)
-  return d.toISOString().slice(0, 10)
-}
-
-// "Jul 7, 2026"
-function labelDate(iso) {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
-// The historical quick-jumps: "30 days ago" plus the first of every month that
-// has already begun this season. A month-first is only offered when it's
-// strictly in the PAST (`< today`) — so on the 1st of a month that button
-// (which would equal today and fold in today's games) is simply absent, and the
-// default "entering today" view already covers "start of this month" anyway.
-function buildJumps(today) {
-  const y = Number(today.slice(0, 4))
-  const curMonth = Number(today.slice(5, 7))
-  const jumps = [{ key: '30d', label: '30d ago', date: shiftDays(today, -30) }]
-  for (let m = FIRST_SEASON_MONTH; m <= curMonth; m++) {
-    const date = `${y}-${String(m).padStart(2, '0')}-01`
-    if (date < today) {
-      jumps.push({ key: `m${m}`, label: `${MONTHS[m - 1]} 1`, date })
-    }
-  }
-  return jumps
-}
-
 // Screen: league-wide standings, both leagues × three divisions, with home/away
 // splits, runs for/against, run differential, expected (Pythagorean) W-L,
 // Season Grade, division magic number/clinch, streak, last-ten, and a
@@ -158,9 +107,33 @@ export function StandingsPage() {
   const { favoriteTeamId } = useFavoriteTeam()
 
   const today = useMemo(() => baseballToday(), [])
-  const season = Number(today.slice(0, 4))
   const yesterday = useMemo(() => shiftDays(today, -1), [today])
-  const jumps = useMemo(() => buildJumps(today), [today])
+
+  // IS THE SEASON OVER? — issue #1078, and the reason this page is a
+  // destination the offseason home page is allowed to send a reader to.
+  //
+  // Everything below was written for a season being played. From November to
+  // February it was not merely stale, it was EMPTY: statsapi's /standings only
+  // resolves a `date` that falls on a day the season played, so the default
+  // "entering today" view asked for December 14 and got zero records, and the
+  // page said "No standings available for this date" for a third of the year.
+  // Omitting the date entirely returns the season's real final standings —
+  // verified live, and the same fix gen-season-score.mjs needed for the same
+  // endpoint reading a closed season.
+  //
+  // So in the winter this page is about the season that ENDED, shows it final,
+  // and puts its date controls away: there is nothing to scrub to when the
+  // record is the record, and a row of buttons that each return an empty table
+  // would be worse than no buttons. Read off statsapi's own season row, never
+  // off the clock or off an empty response (src/lib/time/seasonPhase.js).
+  const { data: seasonRow } = useAsync(
+    () => fetchSeasonMeta(Number(today.slice(0, 4))),
+    [today],
+  )
+  const winter = useMemo(() => offseasonPhase(today, seasonRow), [today, seasonRow])
+  const final = Boolean(winter)
+  const season = winter?.seasonEnded ?? Number(today.slice(0, 4))
+  const jumps = useMemo(() => (final ? [] : buildJumps(today)), [final, today])
 
   // 'division' (the traditional three-divisions-per-league grid) or
   // 'wildcard' (mlb.com's pooled wild-card race board, one list per league
@@ -186,6 +159,9 @@ export function StandingsPage() {
   const [stepDate, setStepDate] = useState(null)
 
   const view = useMemo(() => {
+    // No date at all, which is what makes the endpoint answer for a closed
+    // season. It outranks every control because in the winter there are none.
+    if (final) return { date: null, mode: 'Final', detail: `${season} season` }
     if (selKey === 'step' && stepDate) {
       return { date: stepDate, mode: 'As of', detail: labelDate(stepDate) }
     }
@@ -198,7 +174,7 @@ export function StandingsPage() {
     const jump = jumps.find((j) => j.key === selKey)
     if (jump) return { date: jump.date, mode: 'As of', detail: labelDate(jump.date) }
     return { date: yesterday, mode: 'Entering today', detail: `Through ${labelDate(yesterday)}` }
-  }, [selKey, stepDate, yesterday, jumps])
+  }, [final, season, selKey, stepDate, yesterday, jumps])
 
   // Step one day backward/forward from whatever date is currently shown.
   // Forward is capped at yesterday — the day-stepper never leaks into today's
@@ -234,7 +210,10 @@ export function StandingsPage() {
   // Live mode: the nightly snapshots have no "today" entry to leak anyway, so
   // this makes the safety argument provable rather than incidental.
   const { data: scoreFiles } = useAsync(() => Promise.all([fetchTeamScores(), fetchSeasonScores()]), [])
-  const gradeCutoff = view.date ?? yesterday
+  // The nightly grade snapshots stop when the season does, so a December
+  // cutoff would find none of them. Final reads the season's own last day off
+  // the row the winter was established from.
+  const gradeCutoff = final ? (seasonRow?.regularSeasonEndDate ?? yesterday) : (view.date ?? yesterday)
   // Grade + percentile tier come from the SAME pool of rows, so a team's pill
   // color can never disagree with its printed number.
   const { gradeByTeamId, gradeTierByTeamId } = useMemo(() => {
@@ -251,8 +230,17 @@ export function StandingsPage() {
   // whatever date is currently effectively shown (`view.date`, or `today` in
   // Live mode) — always strictly OLDER than the primary fetch's own date, so
   // it can never be less spoiler-safe than what's already on screen.
-  const compareDate = useMemo(() => shiftDays(view.date ?? today, -7), [view.date, today])
-  const { data: compareData } = useAsync(() => fetchLeagueStandings(season, compareDate), [season, compareDate])
+  // Null in the winter: a week before a final standing is a date inside a
+  // finished season, and a rank that "moved" since then is a movement nobody
+  // is watching for. The glyph simply does not appear.
+  const compareDate = useMemo(
+    () => (final ? null : shiftDays(view.date ?? today, -7)),
+    [final, view.date, today],
+  )
+  const { data: compareData } = useAsync(
+    () => (compareDate ? fetchLeagueStandings(season, compareDate) : Promise.resolve(null)),
+    [season, compareDate],
+  )
   const prevRankByTeamId = useMemo(() => {
     const compareLeagues =
       boardMode === 'wildcard'
@@ -303,7 +291,7 @@ export function StandingsPage() {
             <span className="standings-ctrl__detail">{view.detail}</span>
           </div>
 
-          {selKey === 'entering' && (
+          {!final && selKey === 'entering' && (
             <button
               type="button"
               className="standings-reveal"
@@ -325,27 +313,37 @@ export function StandingsPage() {
           )}
         </div>
 
-        <div className="standings-jumps standings-jumps--scroll" role="group" aria-label="Standings date">
-          <button
-            type="button"
-            aria-pressed={selKey === 'entering'}
-            className={`standings-jump ${selKey === 'entering' ? 'is-active' : ''}`}
-            onClick={() => pick('entering')}
+        {/* Every date control on this page is hidden in the winter — the
+            season's record is the record, and each of these would ask the
+            endpoint for a day nobody played and come back with an empty
+            table (see the `final` reading above). */}
+        {!final && (
+          <div
+            className="standings-jumps standings-jumps--scroll"
+            role="group"
+            aria-label="Standings date"
           >
-            Entering today
-          </button>
-          {jumps.map((j) => (
             <button
-              key={j.key}
               type="button"
-              aria-pressed={selKey === j.key}
-              className={`standings-jump ${selKey === j.key ? 'is-active' : ''}`}
-              onClick={() => pick(j.key)}
+              aria-pressed={selKey === 'entering'}
+              className={`standings-jump ${selKey === 'entering' ? 'is-active' : ''}`}
+              onClick={() => pick('entering')}
             >
-              {j.label}
+              Entering today
             </button>
-          ))}
-        </div>
+            {jumps.map((j) => (
+              <button
+                key={j.key}
+                type="button"
+                aria-pressed={selKey === j.key}
+                className={`standings-jump ${selKey === j.key ? 'is-active' : ''}`}
+                onClick={() => pick(j.key)}
+              >
+                {j.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="standings-jumps" role="group" aria-label="Standings board">
           <button
@@ -550,26 +548,24 @@ export function StandingsPage() {
 
       <ClinchKey marks={clinchMarks} />
 
-      <nav className="standings-daynav" aria-label="Standings date stepper">
-        <button
-          type="button"
-          onClick={() => stepDay(-1)}
-          aria-label="Previous day's standings"
-        >
-          ‹ Back
-        </button>
-        <span className="standings-daynav__label">
-          {view.date ? labelDate(view.date) : 'Today'}
-        </span>
-        <button
-          type="button"
-          onClick={() => stepDay(1)}
-          disabled={selKey === 'live' || view.date === yesterday}
-          aria-label="Next day's standings"
-        >
-          Forward ›
-        </button>
-      </nav>
+      {!final && (
+        <nav className="standings-daynav" aria-label="Standings date stepper">
+          <button type="button" onClick={() => stepDay(-1)} aria-label="Previous day's standings">
+            ‹ Back
+          </button>
+          <span className="standings-daynav__label">
+            {view.date ? labelDate(view.date) : 'Today'}
+          </span>
+          <button
+            type="button"
+            onClick={() => stepDay(1)}
+            disabled={selKey === 'live' || view.date === yesterday}
+            aria-label="Next day's standings"
+          >
+            Forward ›
+          </button>
+        </nav>
+      )}
 
       <ReportFooter />
     </div>

@@ -578,7 +578,15 @@ const BUDGETS = {
   // rather than in a directory of its own: it is the first reader over a dataset
   // built by walking FINISHED games, and the argument for why that is
   // spoiler-free is one its neighbours' headers make too.
-  'src/api': 112,
+  //
+  // 113: notebook.js, the reader behind the offseason page's one notebook note
+  // (issue #1078). ONE module for both notes, not two: the twelve-pitch at-bats
+  // at MLB and the youngest regulars at a farm level are the same object with
+  // two subjects — a figure, its denominator, and a short list of the people it
+  // came out of — and the arguments for why each is spoiler-free are read
+  // together or not at all. Flat beside milbPool.js for every reason that entry
+  // gives, and read on the same visit by the same page.
+  'src/api': 113,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -733,7 +741,16 @@ const BUDGETS = {
   // nightly workflow runs this directory as a flat list, and this file RUNS on
   // import — its pure half went to scripts/lib/milb-pool.mjs, which is what
   // that directory is for.
-  scripts: 114,
+  // +2 for gen-long-at-bats.mjs and gen-youngest-regulars.mjs, the two halves
+  // of the offseason page's notebook note (issue #1078) — one census of an MLB
+  // season's twelve-pitch at-bats, one age profile of each minor league's
+  // regulars. They are two files rather than one because they share no source,
+  // no cadence and no shape: one sweeps every played game's play-by-play
+  // incrementally, the other makes four small season-stats calls a level and
+  // rewrites whole. Flat for the same reason every gen-*.mjs above them is —
+  // the nightly workflow runs this directory as a flat list, and both RUN on
+  // import; their pure halves went to scripts/lib/, which is what it is for.
+  scripts: 116,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -912,7 +929,15 @@ const BUDGETS = {
   // never a ranking by drama — ADR-0080) and the last is the spoiler rule's own
   // line, so both have to be checkable without a network. test/milb-pool.test.js
   // holds them.
-  'scripts/lib': 36,
+  // +2 for long-at-bats.mjs and youngest-regulars.mjs, the pure halves of those
+  // two generators, and the same testable-helper reason one more time. Each
+  // holds a DECISION that a run's console output would not show to be wrong:
+  // which season a note is about when the calendar year and the season disagree
+  // (the January trap, #1122), what counts as a plate appearance when a caught
+  // stealing is typed 'atBat' like everything else, and what a player's age on
+  // June 30 is. test/long-at-bats.test.js and test/youngest-regulars.test.js
+  // pin all three.
+  'scripts/lib': 38,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

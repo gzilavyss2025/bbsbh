@@ -64,6 +64,19 @@ export const EXCEPT = {
   // actually moves (scripts/gen-milb-pool.mjs). An unchanged file is the
   // healthy state here, not a missed night.
   'milb-pool/': 'frozen per season by design; re-joined, not regenerated, each night',
+  // The offseason page's two notebook notes (issue #1078). Both describe a
+  // FINISHED season, so both are frozen from the day it ends until the next one
+  // starts — the same shape as milb-pool/ above, and neither is rewritten on a
+  // timestamp alone.
+  //
+  // long-at-bats/ also does not need this guard, which is the stronger reason:
+  // it states its own coverage. Every run re-reads the season's played-game
+  // count off the live schedule, and the note renders nothing at all unless
+  // every one of those games has been ingested (`coverage.complete`). A sweep
+  // that quietly stopped in July takes the note off the page rather than
+  // publishing a census that is short a thousand games.
+  'long-at-bats/': 'frozen once a season ends; the file states its own coverage and fails closed',
+  'youngest-regulars/': 'frozen per season by design; rewritten only when a league’s figures move',
 }
 
 // Where a dataset keeps its stamp, when it is not a top-level `generatedAt`.

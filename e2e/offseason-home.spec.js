@@ -207,8 +207,9 @@ test('the level page leads with who moved up', async ({ page }) => {
   await expect(pool).toContainText('Not every promotion')
   await expect(pool).toHaveCSS('text-transform', 'none')
 
-  // The same door the wire uses, opening onto the rest.
-  const door = page.locator('.oseason__door')
+  // The same door the wire uses, opening onto the rest. Scoped to this list:
+  // step 4's notebook note wears the same door on the same page (#1078).
+  const door = page.locator('.movedup .oseason__door')
   await door.click()
   expect(await rows.count()).toBeGreaterThan(6)
 })
@@ -299,7 +300,9 @@ test('the door opens onto the rest of the window, and closes again', async ({ pa
   await page.goto(WINTER)
   const rows = page.locator('.oseason__list [data-move-row]')
   await expect(rows).toHaveCount(6)
-  const door = page.locator('.oseason__door')
+  // The wire's own door is the direct child of the lead; the notebook note
+  // below it wears the same one (#1078).
+  const door = page.locator('.oseason > .oseason__door')
   await expect(door).toHaveAttribute('aria-expanded', 'false')
   // A thumb-sized control, same floor as every other action in the app.
   const box = await door.boundingBox()
@@ -312,4 +315,165 @@ test('the door opens onto the rest of the window, and closes again', async ({ pa
 
   await door.click()
   await expect(rows).toHaveCount(6)
+})
+
+// ---------------------------------------------------------------------------
+// STEP 4 — the notebook note, and the season record (issue #1078).
+//
+// Both notes name the season their FILE is about, so every date below is
+// derived from the committed data rather than typed: a spec that hard-coded
+// 2026 would quietly measure nothing the first winter after a rollover.
+
+// The MLB note is a census of one season, so the winter that shows it is that
+// season's own — November of the year the file names.
+const AT_BAT_SEASON = JSON.parse(
+  readFileSync(new URL('../public/data/long-at-bats/2026.json', import.meta.url), 'utf8'),
+).season
+const AT_BAT_WINTER = `/1115${AT_BAT_SEASON}`
+
+// The age note ships one file per level, each naming its own season.
+const AGE_SEASON = JSON.parse(
+  readFileSync(new URL('../public/data/youngest-regulars/13.json', import.meta.url), 'utf8'),
+).season
+
+test('the MLB page carries one note, and it is a count with its denominator', async ({ page }) => {
+  await page.goto(AT_BAT_WINTER)
+  const note = page.locator('.note')
+  await expect(note).toBeVisible()
+  await expect(note.locator('.note__title')).toHaveText('The twelve-pitch at-bats')
+
+  // A figure means nothing without the population it came out of, which is the
+  // one rule research.md §7 puts on every note in this family.
+  const figure = Number(await note.locator('.note__n').innerText())
+  expect(figure).toBeGreaterThan(0)
+  await expect(note.locator('.note__under')).toContainText('plate appearances')
+  await expect(note.locator('.note__under')).toHaveCSS('text-transform', 'none')
+
+  // Five rows up front, and the door opens the whole census — the count on the
+  // figure IS the length of the list, or the note is claiming something the
+  // table cannot show.
+  const rows = note.locator('.note__table tbody tr')
+  await expect(rows).toHaveCount(5)
+  await note.locator('.oseason__door').click()
+  await expect(rows).toHaveCount(figure)
+})
+
+test('a note row says how LONG an at-bat was, never how it went', async ({ page }) => {
+  await page.goto(AT_BAT_WINTER)
+  const row = page.locator('.note__table tbody tr').first()
+  await expect(row).toBeVisible()
+  // Twelve is the floor, so every row is at or above it.
+  expect(Number(await row.locator('.note__age').innerText())).toBeGreaterThanOrEqual(12)
+  // And nothing in the table that could say what the at-bat DID, what inning it
+  // was, or how the game finished (ADR-0081). The scan is on the rows rather
+  // than the whole note, because the note's own footnote explains the
+  // inning-ending-caught-stealing rule in words and has to be allowed to.
+  await expect(page.locator('.note__table')).not.toContainText(
+    /strikeout|walk|home run|flyout|groundout|inning|final|won|lost|[0-9]+-[0-9]+/i,
+  )
+
+  // The row opens its game at the slate's own lineup address, so it arrives
+  // sealed under the same reveal mark as any other game.
+  const href = await row.locator('a').last().getAttribute('href')
+  expect(href).toMatch(/^\/\d{8}\/[a-z0-9-]+\/lineup1$/)
+})
+
+test('a level note measures age against its own league, and says what its floor drops', async ({
+  page,
+}) => {
+  await page.goto(`/higha/1012${AGE_SEASON}`)
+  const note = page.locator('.note')
+  await expect(note).toBeVisible()
+  await expect(note.locator('.note__title')).toHaveText('Youngest regulars')
+
+  // The youngest regular, and the league he is being measured against. The
+  // whole note is the gap between those two numbers.
+  const youngest = Number(await note.locator('.note__n').innerText())
+  expect(youngest).toBeGreaterThan(15)
+  expect(youngest).toBeLessThan(30)
+  await expect(note.locator('.note__under')).toContainText('regulars')
+
+  // The first row IS that figure, and its gap is negative — below his league.
+  const first = note.locator('.note__table tbody tr').first()
+  await expect(first.locator('.note__age')).toHaveText(youngest.toFixed(1))
+  await expect(first.locator('.note__gap')).toContainText('−'.replace('−', '-'))
+
+  // The floor is stated where a reader cannot miss it: a 250-PA floor at one
+  // level drops the players who were promoted out of it, and a note that hid
+  // that would be read as a ranking of the level's best young hitters.
+  const pool = note.locator('.note__pool')
+  await expect(pool).toContainText('250')
+  await expect(pool).toContainText('promoted')
+  await expect(pool).toHaveCSS('text-transform', 'none')
+})
+
+test('the level note opens on one league of three, and changes on request', async ({ page }) => {
+  await page.goto(`/higha/1012${AGE_SEASON}`)
+  const note = page.locator('.note')
+  await expect(note).toBeVisible()
+  // Three leagues at a level, and exactly one of them showing — no figure on
+  // this page is ever computed across two (research.md §7).
+  const picks = note.locator('.note__league')
+  await expect(picks).toHaveCount(3)
+  await expect(note.locator('.note__league.is-on')).toHaveCount(1)
+
+  const named = await note.locator('.oseason__note').innerText()
+  const other = picks.filter({ hasNot: page.locator('.is-on') }).first()
+  await other.click()
+  await expect(note.locator('.oseason__note')).not.toHaveText(named)
+  await expect(note.locator('.note__league.is-on')).toHaveCount(1)
+})
+
+test('the season record is the one row on the page wearing kraft tape', async ({ page }) => {
+  await page.goto(AT_BAT_WINTER)
+  const record = page.locator('.srecord')
+  await expect(record).toBeVisible()
+  await expect(record.locator('.srecord__title')).toHaveText('Season record')
+  // The warning is in WORDS, before the tap — never in the tape alone.
+  await expect(record.locator('.srecord__note')).toContainText('Opening this shows results')
+  await expect(record.locator('.srecord__tape')).toHaveAttribute('aria-hidden', 'true')
+
+  // At MLB both doors go inward, to pages the app already has.
+  const doors = record.locator('.srecord__door')
+  await expect(doors).toHaveCount(2)
+  await expect(doors.nth(0)).toHaveAttribute('href', '/standings')
+  await expect(doors.nth(1)).toHaveAttribute('href', '/postseason-history')
+  // A thumb-sized target, same floor as every other action in the app.
+  expect((await doors.nth(0).boundingBox()).height).toBeGreaterThanOrEqual(44)
+})
+
+test('a minor level links its record out, and says it is leaving', async ({ page }) => {
+  await page.goto(`/higha/1012${AGE_SEASON}`)
+  const doors = page.locator('.srecord__door')
+  await expect(doors).toHaveCount(2)
+  for (const i of [0, 1]) {
+    await expect(doors.nth(i)).toHaveAttribute('href', /^https:\/\/www\.milb\.com\//)
+    await expect(doors.nth(i)).toHaveAttribute('target', '_blank')
+    await expect(doors.nth(i)).toHaveAttribute('rel', /noopener/)
+    // The arrow is decoration; the words are what a reader who cannot see it
+    // is given instead.
+    await expect(doors.nth(i).locator('.sr-only')).toHaveText('opens MiLB.com')
+  }
+})
+
+test('the standings page a record opens onto is not empty in the winter', async ({ page }) => {
+  // The door has to open onto something. Before #1078 this page defaulted to
+  // "entering today" and passed that date to statsapi, which only resolves a
+  // day the season actually played — so from November to February it said
+  // "No standings available for this date" (ADR-0081).
+  //
+  // A FIXED CLOCK, because this is the one assertion in the file that cannot be
+  // reached by browsing to a date: the standings page has no date in its URL and
+  // reads the real one. December 10 of the season the notebook names is a day
+  // inside that winter, and everything below it is the live endpoint answering
+  // for a closed season.
+  await page.clock.setFixedTime(new Date(`${AT_BAT_SEASON}-12-10T18:00:00Z`))
+  await page.goto('/standings')
+  await expect(page.locator('.standings-ctrl__mode')).toHaveText('Final')
+  await expect(page.getByText('No standings available')).toHaveCount(0)
+  await expect(page.locator('.standings tbody tr').first()).toBeVisible()
+  // And its date controls are put away — there is nothing to scrub to when the
+  // record is the record, and every one of those buttons would come back empty.
+  await expect(page.locator('.standings-jumps[aria-label="Standings date"]')).toHaveCount(0)
+  await expect(page.locator('.standings-daynav')).toHaveCount(0)
 })

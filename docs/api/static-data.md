@@ -277,6 +277,23 @@ for each generator; the reader modules:
   through the reader for the same reason the leaders board's is: a level's winter
   opens hours before the night's generator run, and a card offering a game from
   the wrong season is worse than no card.
+- `notebook.js` — the offseason page's one NOTE, both kinds, in one reader.
+  `fetchLongAtBats(season)` reads `public/data/long-at-bats/{season}.json`
+  (`gen-long-at-bats.mjs`): every plate appearance of an MLB season that took 12
+  pitches or more, plus the coverage the census rests on. Keyed on the season,
+  not one rolling path, because the offseason page names one season from November
+  to February and a file that rolled over on January 1 would take the note off the
+  page until April (#1122). `fetchYoungestRegulars(sportId)` reads
+  `public/data/youngest-regulars/{sportId}.json` (`gen-youngest-regulars.mjs`):
+  each of the level's three leagues, its average age over its regulars, and its
+  twenty youngest. `defaultLeagueId` opens the note on the league the reader's own
+  club has an affiliate in, off the league's `orgIds` rather than off the twenty
+  names. Both are spoiler-free by CONSTRUCTION rather than by gate, and the at-bat
+  file is the one that had to be argued: it carries a batter, a pitcher, a date
+  and a pitch count, and no result, inning or score (ADR-0081).
+  `test/long-at-bats.test.js` asserts that of the committed files by vocabulary
+  rather than by trust. Both readers carry the file's `season` for the same reason
+  `milbPool.js` does.
 - `allStarRosters.js` — the All-Star Rosters page, from
   `public/data/all-star-rosters.json`. Hand-run (`gen-all-star-rosters.mjs`) — a
   season's roster is decided once and never changes. Every named selectee,
