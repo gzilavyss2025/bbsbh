@@ -549,7 +549,10 @@
    pill — routine stays the plain card treatment above (nothing to escalate),
    standout tints toward the medal-amber "honors" family, outlier toward the
    highlighter "watch flag" marker, both via the same color-mix() pattern
-   already used elsewhere in this file (e.g. .pin-card). */
+   already used elsewhere in this file (e.g. .pitchernotice--pbp, which tints
+   toward --seal the same way). It used to cite ".pin-card", a class that has
+   never had a rule in this repo — and the card census read that comment as a
+   selector and filed .pin-card as dead code to delete (#1127). */
 .favormeter--standout {
   background: color-mix(in srgb, var(--award-line) 10%, var(--paper-2));
   border-color: var(--award-line);

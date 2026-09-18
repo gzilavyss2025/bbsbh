@@ -48,7 +48,11 @@ const GROUPS = [
     id: 'layout',
     title: 'layout.css — the measured dimensions',
     file: 'src/tokens/layout.css',
-    match: (n) => /^(cell|shot|app|tap|console|slate|focus-bar|skel)-/.test(n),
+    // `refrail` and `xl` joined this list when the four dimensions the page's
+    // first run found unfiled moved out of their component partials and into
+    // layout.css (#1127). The list is names, not files, so a token has to be
+    // both moved AND matched here before the page stops calling it unfiled.
+    match: (n) => /^(cell|shot|app|tap|console|slate|focus-bar|skel|refrail|xl)-/.test(n),
   },
   {
     id: 'effects',

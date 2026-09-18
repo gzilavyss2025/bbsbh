@@ -9,7 +9,7 @@
 // finding for `.scratch/design-system/inventory.md`, not something to patch
 // with a lab-only override.
 
-export function Entry({ title, path, consumers, verdict, tone = '', note, wide = false, children }) {
+export function Entry({ title, path, consumers, verdict, tone = '', note, wide = false, contained = false, children }) {
   return (
     <section className={`dlab__entry${wide ? ' dlab__entry--wide' : ''}`}>
       <div className="dlab__entryhead">
@@ -17,8 +17,13 @@ export function Entry({ title, path, consumers, verdict, tone = '', note, wide =
         {verdict && <span className={`dlab__verdict${tone ? ` dlab__verdict--${tone}` : ''}`}>{verdict}</span>}
       </div>
       {/* The specimen sits on the app canvas, not on a lab surface, so a card
-          that sets --surface-card reads against the ground it really lands on. */}
-      <div className="dlab__stage">{children}</div>
+          that sets --surface-card reads against the ground it really lands on.
+          `contained` is for a specimen the app positions FIXED (.phcard is a
+          popover): the stage becomes its containing block so it draws inside
+          its own entry instead of floating over the page. That still invents no
+          geometry — not one of the specimen's own declarations is overridden;
+          the frame around it changes, which is the only CSS this page owns. */}
+      <div className={`dlab__stage${contained ? ' dlab__stage--contained' : ''}`}>{children}</div>
       {(path || consumers !== undefined) && (
         <p className="dlab__path">
           {path}

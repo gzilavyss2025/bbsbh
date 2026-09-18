@@ -32,7 +32,7 @@ export const PILL_RECIPE = [
 ]
 
 // ---------------------------------------------------------------------------
-// CARDS — 32 blocks.
+// CARDS — 31 blocks.
 export const CARDS = [
   {
     cls: 'thub-card',
@@ -120,7 +120,7 @@ export const CARDS = [
     consumers: 4,
     group: 'bespoke',
     verdict: 'Stays bespoke',
-    note: 'The slate card and the app’s front door — 178 selector hits, the most of any block. Its border is deliberately darker than the sheet: color-mix(--border-rule 35%, --text-muted 65%). It also carries park art and the @ watermark.',
+    note: 'The slate card and the app’s front door — 112 selector hits, the most of any block. Its border is deliberately darker than the sheet: color-mix(--border-rule 35%, --text-muted 65%). It also carries park art and the @ watermark.',
   },
   {
     cls: 'phcard',
@@ -128,6 +128,12 @@ export const CARDS = [
     consumers: 1,
     group: 'bespoke',
     verdict: 'Stays bespoke',
+    // The app positions this one FIXED. Its stage becomes the containing block
+    // so the specimen draws inside its own entry (Entry.jsx's `contained`), and
+    // the entry spans the grid because the popover is a real 300px wide — the
+    // frame gives way to the specimen, never the other way round.
+    contained: true,
+    wide: true,
     note: 'position:fixed, pointer-events:none, z-index 100, --border-hairline and --shadow-raised. It is a popover. Popovers and cards diverge the moment either one grows.',
   },
   {
@@ -202,7 +208,7 @@ export const CARDS = [
     consumers: 1,
     group: 'namespace',
     verdict: 'Already correct',
-    note: 'Sixteen selector hits, every one an __element, inside a .thub-card.',
+    note: 'Fifteen selector hits, every one an __element, inside a .thub-card.',
   },
   {
     cls: 'horizoncard',
@@ -228,15 +234,6 @@ export const CARDS = [
     verdict: 'Leave',
     note: 'Three __element rules and no box.',
   },
-  {
-    cls: 'pin-card',
-    partial: '12-sealbox.css',
-    consumers: 0,
-    group: 'namespace',
-    verdict: 'Delete',
-    note: 'One selector, ZERO consumers anywhere in src/. It is dead. Check git history before removing it, in case something outside src/ sets the hook.',
-  },
-
   {
     cls: 'scorecard',
     partial: 'scorecard/grid.css + scorecard/page.css',
