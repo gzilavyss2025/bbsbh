@@ -87,10 +87,10 @@ export function ComponentHalf() {
           <BreakableLocation text="Sahlen Field, Buffalo, New York" />
         </Entry>
         <Entry title="MasonryColumns" path={`${UI_PATH}/MasonryColumns.jsx`}>
-          {/* It calls children(item, i) inside a .map() and supplies no key, so
-              every consumer has to key its own returned element. */}
+          {/* The component keys what children() returns (#1127), so this call
+              does not have to — which is the point of the fix. */}
           <MasonryColumns items={[1, 2, 3, 4]} columnWidth={90} gap={8}>
-            {(n) => <div className="playercard" key={n}><span className="dlab__filler">Card {n}</span></div>}
+            {(n) => <div className="playercard"><span className="dlab__filler">Card {n}</span></div>}
           </MasonryColumns>
         </Entry>
         <Entry title="BuildStamp" path={`${UI_PATH}/BuildStamp.jsx`} note="The footer's build marker.">

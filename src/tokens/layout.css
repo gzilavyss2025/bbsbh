@@ -73,6 +73,31 @@
      the page to pad clear of. See .innings--focus's padding-bottom. */
   --focus-bar-h: 64px;
 
+  /* Focus mode's reference rail — the width the wide grid reserves for it
+     (focus/stage.css's `.innings--focus .innings__grid`). Fixed, so opening a
+     tab can never change the track and reflow the at-bat card beside it
+     (ADR-0010). 300px rather than the first pass's 268, where lineup rows
+     truncated and the defense SVG fought the track for min-content width; 300
+     fits a lineup row whole and still leaves a 478px stage at iPad-portrait
+     width.
+
+     300 -> 328 because the Arms tab is the one section 300 does not fit: the
+     Pitchers table carries a name column plus nine stat columns (R/LIP P BF H
+     R ER BB K), and the name was the column that gave — "SINGER, B…" on a
+     surface whose whole job is telling you which arm the line belongs to. The
+     28px comes out of the column gap beside it, not out of the at-bat card. */
+  --refrail-w: 328px;
+
+  /* Express Lane's scoring deck (77c-express-lane-deck.css) — the scrap of
+     paper under every at-bat box, and the scale that makes the batter's box the
+     primary one. `.sc-ab` takes its size from its cell, so the deck has to give
+     it an explicit one: the natural cell is 112 x 90, and the batter's box is
+     that same box SCALED, never a differently-proportioned one, so the marks
+     stay where the paper puts them. Read the partial for the rest of why. */
+  --xl-box-w: 112px;
+  --xl-box-h: 90px;
+  --xl-batter-scale: 1.34;
+
   /* The box-score skeleton's rolling baseball icon (BoxScoreSkeleton.jsx,
      .skel__ball) — its own component-scoped size rather than borrowing a
      --fs-* typography role for an unrelated icon dimension. */

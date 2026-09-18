@@ -38,9 +38,17 @@ const blockRe = /\.([a-z0-9-]*(?:card|pill))(?![a-z0-9-])/gi
 const cssFiles = walk(STYLES).filter((f) => f.endsWith('.css'))
 const jsFiles = walk(SRC).filter((f) => /\.(jsx?|mjs)$/.test(f))
 
+// COMMENTS ARE NOT SELECTORS. Blanked (newline-preserving, so the line-anchored
+// base-rule scan below still sees the same lines) before anything is matched.
+// Without this the census counts a class name that only ever appears in prose:
+// `.pin-card` was reported as a block with one selector hit and zero consumers,
+// and the inventory filed it as dead code to delete. It was a comment in
+// 12-sealbox.css citing an example that has never existed in this repo (#1127).
+const decomment = (css) => css.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+
 const blocks = new Map()
 for (const f of cssFiles) {
-  const text = readFileSync(f, 'utf8')
+  const text = decomment(readFileSync(f, 'utf8'))
   const r = rel(f)
   for (const m of text.matchAll(blockRe)) {
     const cls = m[1]

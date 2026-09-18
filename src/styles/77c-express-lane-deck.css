@@ -57,12 +57,10 @@
    `.sc-ab` is width:100%/height:100% and takes its size from its cell, so every
    box here needs an explicit one. The natural cell is 112 x 90; the batter's is
    the same box SCALED, never a differently-proportioned one, so the marks stay
-   where the paper puts them. */
-:root {
-  --xl-box-w: 112px;
-  --xl-box-h: 90px;
-  --xl-batter-scale: 1.34;
-}
+   where the paper puts them. Those three numbers — --xl-box-w, --xl-box-h and
+   --xl-batter-scale — are declared in tokens/layout.css with the app's other
+   component dimensions, not here: a partial that declares on :root spends every
+   route's budget on two rules, and nothing in the token tier lists it (#1127). */
 
 .xl-deck__paper {
   background: var(--paper-2);

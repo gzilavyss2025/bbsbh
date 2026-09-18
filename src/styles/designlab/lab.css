@@ -167,6 +167,16 @@
   min-height: var(--tap-min);
 }
 
+/* A `transform` (even the identity one) makes an element the containing block
+   for its position:fixed descendants. That is the whole trick: .phcard keeps
+   every declaration it ships — fixed, z-index 100, pointer-events none — and
+   simply resolves them against this stage rather than the viewport, so it stops
+   floating over the bespoke group and clipping .tally-cl-card's specimen. */
+.dlab__stage--contained {
+  position: relative;
+  transform: translate(0);
+}
+
 .dlab__filler {
   font-family: var(--font-body);
   font-size: var(--fs-small);

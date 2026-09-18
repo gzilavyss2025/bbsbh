@@ -1,3 +1,5 @@
+import { Fragment } from 'react'
+
 import { useColumnCount } from '../../hooks/useColumnCount.js'
 
 // Round-robin ("Pinterest") masonry. Distributes `items` across N columns
@@ -23,7 +25,15 @@ export function MasonryColumns({ items, columnWidth, gap, className, columnClass
     <div ref={ref} className={className}>
       {buckets.map((bucket, c) => (
         <div key={c} className={columnClassName}>
-          {bucket.map(({ item, i }) => children(item, i))}
+          {/* KEYED HERE, NOT BY THE CALLER. `i` is the item's index in the
+              original `items` array, so it is unique across every column and
+              stable while the list is. Without this every consumer had to
+              remember to key the element it returns from children(), nothing
+              said so, and the first two calls written against this component
+              disagreed about it. */}
+          {bucket.map(({ item, i }) => (
+            <Fragment key={i}>{children(item, i)}</Fragment>
+          ))}
         </div>
       ))}
     </div>

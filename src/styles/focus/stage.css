@@ -69,20 +69,11 @@
   gap: var(--space-3);
 }
 
-:root {
-  /* Fixed, so opening a tab can never change the track and reflow the at-bat
-     card beside it (ADR-0010). 300px rather than the first pass's 268, where
-     lineup rows truncated and the defense SVG fought the track for min-content
-     width; 300 fits a lineup row whole and still leaves a 478px stage at
-     iPad-portrait width.
-
-     300 -> 328 because the Arms tab is the one section 300 does not fit: the
-     Pitchers table carries a name column plus nine stat columns (R/LIP P BF H
-     R ER BB K), and the name was the column that gave — "SINGER, B…" on a
-     surface whose whole job is telling you which arm the line belongs to. The
-     28px comes out of the column gap beside it, not out of the at-bat card. */
-  --refrail-w: 328px;
-}
+/* The reference rail's reserved width is --refrail-w, declared in
+   tokens/layout.css beside --focus-bar-h and --console-hud-h — the same class of
+   frame dimension, and the tier that lists them. It used to be declared on :root
+   from inside this partial, which cost every route in the app for one grid
+   (#1127). Its value carries the reasoning for the number. */
 
 @media (min-width: 740px) {
   /* Only while focused does the grid gain a second, reserved column — an
