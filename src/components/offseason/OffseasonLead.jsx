@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { fetchLeagueMoves, windowDaysFor } from '../../api/transactions/leagueFeed.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { MoveItems, flattenDays, takeStories } from '../transactions/MoveRow.jsx'
+import { LongAtBats } from './LongAtBats.jsx'
+import { SeasonRecord } from './SeasonRecord.jsx'
 import { WinterCalendar } from './WinterCalendar.jsx'
 import { useCopy } from '../../copy/copyContext.js'
 
@@ -97,6 +99,15 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
             : `No moves filed in the last ${windowDaysFor(sportId)} days.`}
         </p>
       )}
+
+      {/* One note about the season the wire has just stopped covering, and the
+          one door on this page that opens onto results — issue #1078, step 4.
+          Both sit under the ledger because the wire is what a reader came for
+          in December; the note is what they stay for. Either renders nothing
+          when its file is not the season this page names. */}
+      <LongAtBats season={winter.seasonEnded} />
+
+      <SeasonRecord sportId={sportId} season={winter.seasonEnded} />
 
       <WinterCalendar winter={winter} />
 

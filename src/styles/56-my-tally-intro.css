@@ -43,7 +43,7 @@
   margin: 0;
   max-width: 34ch;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-body);
   color: var(--text-body);
 }
@@ -51,7 +51,7 @@
 .introsheet__fineprint {
   margin: var(--space-3) 0 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-body);
   color: var(--text-caption);
 }
@@ -148,7 +148,7 @@
   display: block;
   margin-top: 2px;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-body);
   color: var(--text-caption);
 }

@@ -57,7 +57,7 @@
 }
 
 .logbook__seasons small {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   opacity: 0.7;
 }
 
@@ -118,7 +118,7 @@
 }
 
 .logbook__pending small {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   opacity: 0.75;
 }
 
@@ -128,7 +128,7 @@
   gap: var(--space-2);
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -145,7 +145,7 @@
   margin: 0;
   max-width: 22ch;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-muted);
   text-align: center;
@@ -237,7 +237,7 @@
 
 .clubsseen__name {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   line-height: var(--lh-snug);
@@ -293,7 +293,7 @@
 .stampcard__meta {
   margin-left: auto;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 

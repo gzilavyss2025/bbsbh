@@ -1,6 +1,8 @@
 import { MovedUp } from './MovedUp.jsx'
 import { PickedGame } from './PickedGame.jsx'
+import { SeasonRecord } from './SeasonRecord.jsx'
 import { WinterCalendar } from './WinterCalendar.jsx'
+import { YoungestRegulars } from './YoungestRegulars.jsx'
 import { SPORT_LABEL } from '../../lib/teams.js'
 
 // THE OFFSEASON PAGE, ONE LEVEL DOWN — issue #1077, step 3 of #1038.
@@ -21,12 +23,15 @@ import { SPORT_LABEL } from '../../lib/teams.js'
 // exactly where they are in season, as they do on the MLB page. What changes is
 // the empty games area, and only that.
 //
-// TWO THINGS, IN THE DESIGN'S ORDER. The card on top offers a checked game from
-// the season that just ended — the page's one action, and the reason a scorer
-// opens it in December (PickedGame.jsx). The list under it says what became of
-// the people in games like it. Either can be absent without the other
-// noticing: a level whose pool has not been generated yet shows the list alone,
-// which is exactly what this page was when it first shipped.
+// FOUR THINGS, IN THE DESIGN'S ORDER. The card on top offers a checked game
+// from the season that just ended — the page's one action, and the reason a
+// scorer opens it in December (PickedGame.jsx). The list under it says what
+// became of the people in games like it. The notebook note then asks one
+// question about the league as a whole (YoungestRegulars.jsx), and the record
+// row at the foot is the one door on the page that opens onto results
+// (SeasonRecord.jsx, issue #1078). Any of the first three can be absent without
+// the others noticing: a level whose pool has not been generated yet shows the
+// list alone, which is exactly what this page was when it first shipped.
 export function LevelOffseason({ sportId, winter, dateStr, children }) {
   const label = SPORT_LABEL[sportId] ?? ''
 
@@ -45,6 +50,10 @@ export function LevelOffseason({ sportId, winter, dateStr, children }) {
       <PickedGame sportId={sportId} season={winter.seasonEnded} dateStr={dateStr} />
 
       <MovedUp sportId={sportId} season={winter.seasonEnded} />
+
+      <YoungestRegulars sportId={sportId} season={winter.seasonEnded} />
+
+      <SeasonRecord sportId={sportId} season={winter.seasonEnded} />
 
       {/* The same strip the MLB page carries, and mostly the same dates: the
           Rule 5 draft and the 40-man deadline are minor-league events that MLB

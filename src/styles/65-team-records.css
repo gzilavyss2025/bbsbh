@@ -31,7 +31,7 @@
   background: var(--surface-card);
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   cursor: pointer;
@@ -57,7 +57,7 @@
   padding-top: var(--space-2);
   border-top: var(--bw-hair) solid var(--seal);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -91,7 +91,7 @@
 }
 .trec__countk {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   line-height: var(--lh-title);
@@ -175,7 +175,7 @@ button.tstatrow__k.trec__rank,
   padding-bottom: 2px;
   border-bottom: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);
@@ -183,7 +183,7 @@ button.tstatrow__k.trec__rank,
 .trecinn__rowhead {
   align-self: center;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);
@@ -222,12 +222,12 @@ button.tstatrow__k.trec__rank,
 .trecinn__pct {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 .trecinn__last {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--graphite-soft);

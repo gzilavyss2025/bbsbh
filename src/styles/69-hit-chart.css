@@ -51,7 +51,7 @@
 .hitchart__eyebrow {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-display);
   color: var(--text-caption);
@@ -97,7 +97,7 @@
   flex: none;
   margin: 3px 0 0;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-wide);
   text-align: right;
@@ -171,7 +171,7 @@
    where --seal-ink is already at the contrast guard's floor. */
 .hitchart__count {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-none);
   opacity: 0.8;
@@ -297,7 +297,7 @@
   position: absolute;
   transform: translateY(-50%);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   color: var(--text-caption);
   text-shadow:
@@ -399,7 +399,7 @@
   align-items: center;
   gap: 6px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-xwide);
   color: var(--text-caption);
@@ -429,7 +429,7 @@
 .hitchart__factlabel {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-display);
   color: var(--text-caption);
@@ -455,7 +455,7 @@
   justify-content: space-between;
   padding: 2px 14px 7px;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-xwide);
   color: var(--text-caption);
@@ -479,7 +479,7 @@
   flex: none;
   width: 14px;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
@@ -498,7 +498,7 @@
 .hitchart__rowcode {
   flex: none;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-emphasis);
   color: var(--text-caption);
@@ -717,7 +717,7 @@
   flex: 0 0 auto;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-title);
   line-height: var(--lh-solid);
   color: var(--text-body);
@@ -824,7 +824,7 @@
 .bflight__factlabel {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);

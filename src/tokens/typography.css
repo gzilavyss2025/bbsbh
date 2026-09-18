@@ -45,13 +45,46 @@
      around it uses. */
   --fs-field:   16px;
   --fs-small:   13px;
-  --fs-compact: 12px;
+  /* Was a second literal 12px beside --fs-label (#1128). The scale carried 28
+     names for 25 sizes, which makes the lab's type column look like a decision
+     where there was none. Aliased rather than deleted: 220 rules read this
+     name, and "compact" says something --fs-label does not. If the two ever
+     need to differ, un-alias THIS line — do not move --fs-label, which the
+     label/pill/table-head role depends on. */
+  --fs-compact: var(--fs-label);
+  /* WHAT IS LEFT of the old universal 11px role, after #1128 split it by job.
+     It was set 793 times across three faces and did every small-text job in
+     the app; 669 of those moved to the role that names what they are
+     (--fs-label, --fs-cell, --fs-small). What stays here is deliberate and is
+     ONE job: body-face text too short to be a sentence — a position, a
+     fielder's name, a count, a venue. Do not reach for it for a label (that is
+     --fs-label), a figure (--fs-cell), or a sentence (--fs-small, and 11px
+     running copy is the thing the split exists to stop).
+     124 rules, and check-caption-budget.mjs holds that number as a ceiling:
+     about half are rules that never rendered on any route the sweep walked, so
+     their face could not be shown, and a rule that might sit in a mono table
+     was left at its own size rather than moved on a guess. Reclassify them as
+     they are seen. The count may fall; it may not rise. */
   --fs-caption: 11px;
-  --fs-num-xl:  40px;   /* revealed final score */
+  /* The scorebook figure: a number in the mono face, in a cell, in a table.
+     Split out of --fs-caption in #1128 — 195 rules, same 11px, so nothing
+     moved on screen. It exists because a figure and a label had been sharing
+     one name while wanting different sizes, and only a name for each lets
+     either change. */
+  --fs-cell:    11px;
+  /* Aliases --fs-display-lg (both were a literal 40px). Same rule as above:
+     the name stays because "the revealed final score" is worth saying. */
+  --fs-num-xl:  var(--fs-display-lg);   /* revealed final score */
   --fs-score-md: 42px;
   --fs-score-lg: 46px;
   --fs-num-lg:  22px;
-  --fs-num-md:  16px;
+  /* Aliases --fs-field (both were a literal 16px). This pair is the one
+     COINCIDENCE of the three — a mono figure and a text input want the same
+     size today for unrelated reasons, and --fs-field owns the value because
+     its 16px is a hard iOS floor (see its comment above) rather than a taste
+     call. If a figure ever needs a size the field floor cannot give it,
+     un-alias this line rather than raising the floor. */
+  --fs-num-md:  var(--fs-field);
   --fs-hero-sm: 28px;
   --fs-hero-md: 30px;
   --fs-hero-lg: 32px;

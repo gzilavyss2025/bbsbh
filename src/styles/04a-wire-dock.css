@@ -193,7 +193,7 @@
   background: var(--bg-canvas);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 .wiredock__chevron {

@@ -87,7 +87,7 @@
 .foulboard__whiffcol-heading {
   margin: 0 0 var(--space-2);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -133,7 +133,7 @@
   text-align: left;
   background: var(--bg-page);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -165,7 +165,7 @@
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   color: var(--text-caption);
 }
 .foulboard__subhead th.team {
@@ -285,7 +285,7 @@
 .foulboard__heroname-first {
   font-family: var(--font-display);
   font-weight: var(--w-semibold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -421,7 +421,7 @@
   gap: 4px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 .scorebug__team b {
@@ -441,12 +441,12 @@
   gap: 3px;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
 .scorebug__arrow {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   color: var(--graphite-soft);
 }
 .scorebug__situation {
@@ -476,7 +476,7 @@
   flex: none;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   padding: 2px 9px;
   border-radius: var(--radius-pill);
@@ -508,7 +508,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   font-family: var(--font-read);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   color: var(--text-body);
   text-transform: none; /* caps-exempt: at-bat prose reads as a natural sentence */
 }
@@ -650,7 +650,7 @@
 }
 .sgh-vallabel {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -777,7 +777,7 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   line-height: var(--lh-solid);
   color: var(--text-on-ink);
   padding: 3px 7px 2px;
@@ -813,7 +813,7 @@ button.gamehigh-matchup:active {
 }
 .gamehigh-matchup__date {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 .gamehigh-tiles {

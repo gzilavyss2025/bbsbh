@@ -14,7 +14,7 @@ Oct-Feb — `components/winter/`, ADR-0078) → `GameView` (site-home bar + away
 masthead of uniform-treatment tiles — the `TeamTreatmentMark` square the slate card
 shows — each opening the sketch modal) → `TeamInfo` (×2) → `InningViewer`.
 `LogoSheet` is a printable grayscale logo sheet, off the slate header. An empty slate gets a second page
-state (`offseason/`): the wire at MLB (ADR-0074); at a level, dark from mid-September on ITS leagues' published dates (ADR-0079), a checked game to score and who moved up (ADR-0080).
+state (`offseason/`): the wire at MLB (ADR-0074); at a level, dark from mid-September on ITS leagues' published dates (ADR-0079), a checked game to score and who moved up (ADR-0080). Both then carry one notebook note — twelve-pitch at-bats at MLB (the /fouls batter-vs-pitcher row, minus its scorebug), youngest regulars at a level — and the season record, the one door onto results: a label, never a seal, inward at MLB and out to MiLB.com below it. Wide, the rail the wire left holds the countdown and the whole league (`WinterRail`) — ADR-0081.
 
 `TeamInfo`'s club-name bar and section mastheads are **themed** to the jersey that
 club wears that game (ADR-0030) — three CSS properties from `lib/headerTheme.js`,
@@ -442,10 +442,10 @@ before changing how any of these render; the conversion itself lives in
 `src/lib/logoMono.js`.
 
 Type size, weight, leading, and tracking must use the semantic roles in
-`tokens/typography.css`; `scripts/check-typography.mjs` rejects new ad hoc values in
-`src/styles/*.css`. Focus rings must use `var(--focus-ring)`/`var(--ring)`
-(`check-focus-ring.mjs`), and the documented text-on-background token pairings must
-hold WCAG AA (`check-contrast.mjs`) — see ADR-0023. The global ALL-CAPS invariant
-(see the block comment in `src/styles/01-base.css`) is guarded by `scripts/check-caps.mjs`
-(the CSS half) and `scripts/check-name-casing.mjs` (the JS half — no per-component
-`.toUpperCase()`/`.toLowerCase()` on rendered text; see ADR-0017) via `npm run lint`.
+`tokens/typography.css`; `scripts/check-typography.mjs` rejects ad hoc values. Small
+text is split BY JOB: `--fs-label` 12px display labels, `--fs-cell` 11px mono figures,
+`--fs-small` 13px running copy; `--fs-caption` is short body-face text only, and
+`scripts/check-caption-budget.mjs` only ever lets its count shrink. Focus rings use `var(--focus-ring)`/`var(--ring)` (`check-focus-ring.mjs`); text-on-
+background pairings hold WCAG AA (`check-contrast.mjs`) — ADR-0023. The ALL-CAPS
+invariant (`src/styles/01-base.css`) is guarded by `scripts/check-caps.mjs` and
+`scripts/check-name-casing.mjs` (no per-component `.toUpperCase()`; ADR-0017).

@@ -121,7 +121,7 @@ export const PAIRINGS = [
   { fg: 'text-muted', bg: '#D1E0D3', min: TEXT, note: 'live band state token on hover mow stripe' },
   // Link / text-button ink, on each of the three grounds it lands on: the app
   // canvas, a page, and a raised card. Held to the full text bar because these
-  // run SMALL — "See all ›" and the "more" affordance are --fs-caption caps.
+  // run SMALL — "See all ›" and the "more" affordance are --fs-label caps (#1128).
   { fg: 'accent-link', bg: 'bg-canvas', min: TEXT, note: 'link text on app canvas' },
   { fg: 'accent-link', bg: 'bg-page', min: TEXT, note: 'link text on page' },
   { fg: 'accent-link', bg: 'surface-card', min: TEXT, note: 'link text on raised card' },

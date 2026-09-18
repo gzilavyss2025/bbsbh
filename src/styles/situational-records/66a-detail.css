@@ -74,7 +74,7 @@
   left: var(--space-2);
   color: var(--trrank-edge);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
 }
 .trrank__podiumteam {
@@ -120,7 +120,7 @@
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-decoration: none;
@@ -157,7 +157,7 @@
   min-width: 2.1em;
   color: var(--graphite-soft);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-variant-numeric: tabular-nums;
   font-weight: var(--w-bold);
 }
@@ -195,7 +195,7 @@
     padding-left: var(--space-1);
   }
   .trrank__podiumteam {
-    font-size: var(--fs-caption);
+    font-size: var(--fs-label);
   }
   .trrank__teamname {
     display: none;
@@ -220,7 +220,7 @@
 .trrank__lastopp {
   display: block;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);

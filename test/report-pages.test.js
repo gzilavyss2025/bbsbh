@@ -47,6 +47,9 @@ const PATHS_BEFORE_GROUPING = [
   '/run-value',
   '/awards',
   '/postseason-history',
+  // The run differential report, filed under History beside the bracket page —
+  // which club seasons were plainly the best, and what October did to them.
+  '/run-differential',
   '/postseason-leaders',
   '/postseason-race',
   '/trade-deadline',

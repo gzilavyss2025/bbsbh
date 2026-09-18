@@ -69,7 +69,7 @@
 .cthist__clubname {
   overflow: hidden;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   line-height: var(--lh-compact);
   letter-spacing: var(--ls-caps);
@@ -138,7 +138,7 @@
   grid-column: 1 / -1;
   margin-top: 2px;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-ui);
   letter-spacing: var(--ls-text);
   color: var(--text-caption);
@@ -173,7 +173,7 @@
   border: var(--bw-hair) dashed var(--border-rule);
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   line-height: var(--lh-compact);
   letter-spacing: var(--ls-caps);

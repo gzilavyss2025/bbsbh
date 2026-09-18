@@ -103,7 +103,7 @@
 }
 .admincopy__historyCount {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-muted);
 }
 .admincopy__group {
@@ -180,7 +180,7 @@
 }
 .admincopy__count {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-muted);
 }
 .admincopy__count--over {
@@ -318,7 +318,7 @@
 }
 .awardord__steplabel {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -374,7 +374,7 @@
 .awardord__hd {
   margin: 0 0 var(--space-2);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -405,7 +405,7 @@
   width: 20px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   color: var(--graphite-soft);
 }
@@ -423,7 +423,7 @@
   border: var(--bw-hair) solid currentColor;
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -496,7 +496,7 @@
   flex: none;
   width: 14px;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   color: var(--graphite-soft);
 }
@@ -513,7 +513,7 @@
   flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   color: var(--award-ink);
 }
@@ -525,7 +525,7 @@
   gap: var(--space-2);
   margin: var(--space-1) 0 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;

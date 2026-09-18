@@ -259,7 +259,7 @@
 .seasonseries__date {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
   text-align: center;
   line-height: var(--lh-tight);
@@ -297,7 +297,7 @@
   border: var(--bw-hair) solid #FFFFFF;
   background: #FFFFFF;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -491,7 +491,7 @@
   padding: 4px 10px;
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -542,7 +542,7 @@
   padding: 3px 10px;
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   line-height: var(--lh-solid);

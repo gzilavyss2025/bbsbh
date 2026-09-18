@@ -46,7 +46,7 @@
 .coverpick__heading {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -186,7 +186,7 @@
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;

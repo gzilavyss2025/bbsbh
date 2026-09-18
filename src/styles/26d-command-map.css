@@ -62,7 +62,7 @@
 
 .cmdmap__chipn {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-regular);
   color: var(--text-caption);
 }
@@ -148,7 +148,7 @@
   align-items: center;
   gap: 5px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-wide);
   color: var(--text-caption);

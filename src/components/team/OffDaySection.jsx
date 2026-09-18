@@ -17,12 +17,20 @@ import { teamClubNameShort, favoriteAccentColor, teamPrimaryColor, offDayTreatme
 // renders it when the slate actually has games (an empty All-Star-break day
 // isn't an "off day" for a whole league). Sits above the Day Recap on a past
 // day, below the games on a current one — its one fixed home in the list.
-export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds }) {
+// `winter` is the one thing this section cannot work out for itself, and the
+// heading is why: "Off Day" is a claim about TODAY, and in December it would be
+// a false one over all thirty clubs at once. The offseason page passes the flag
+// and gets a heading that is true there instead (issue #1078). Nothing else
+// about the tiles changes — a club page is a club page in any month.
+export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds, winter = false }) {
   const navigate = useNav()
   if (!teams?.length) return null
   return (
-    <section className="offday" aria-label="Teams with an off day">
-      <h2 className="offday__banner">Off Day</h2>
+    <section
+      className={`offday${winter ? ' offday--winter' : ''}`}
+      aria-label={winter ? 'Every club' : 'Teams with an off day'}
+    >
+      <h2 className="offday__banner">{winter ? 'Every club' : 'Off Day'}</h2>
       <ul className="offday__grid">
         {teams.map((team) => (
           <li key={team.id}>

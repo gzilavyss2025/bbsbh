@@ -17,10 +17,10 @@
 // bug upstream of it.
 const FALLBACK = {
   paper0: '#F6EFDC',
-  paper1: '#F3ECD8',
+  paper1: '#F6EFDC', // folded into --paper-0 (#1128) — same hex on purpose
   paper2: '#FBF6E9',
   paper3: '#FFFDF6',
-  ink0: '#16222F',
+  ink0: '#0F1822', // pushed darker in #1128
   ink1: '#1B2A3A',
   ink2: '#3C4A5A',
   graphite: '#6B6558',

@@ -120,7 +120,7 @@
 
 .gamestory__leadbadgelabel {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -324,13 +324,13 @@
 .bs__grid td {
   padding: 5px 2px;
   text-align: center;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   white-space: nowrap;
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
 .bs__grid thead th {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-title);
@@ -381,7 +381,7 @@
 /* Position(s) after the batter's name, and the pitcher's decision tag. */
 .bs__pos {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -395,7 +395,7 @@
   height: 1.4em;
   border-radius: 50%;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
   /* IBM Plex Sans Condensed's line box carries more room below the baseline
@@ -462,7 +462,7 @@
 /* Footnote marker ("a", "b"…) next to a sub and in the footnote list. */
 .bs__mark {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   color: var(--text-caption);
 }
@@ -506,7 +506,7 @@
 .bs__notesTitle {
   margin: 0 0 3px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -543,7 +543,7 @@
 .bs__decisionK {
   min-width: 34px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -609,7 +609,7 @@
 }
 .bs__potgMeta {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -736,7 +736,7 @@
 .bs__insightsTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);

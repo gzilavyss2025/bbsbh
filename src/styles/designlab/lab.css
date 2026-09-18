@@ -48,7 +48,7 @@
   color: var(--accent-link);
   text-decoration: none;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
 }
@@ -188,7 +188,7 @@
 .dlab__path {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
   color: var(--text-caption);
   word-break: break-all;
@@ -202,7 +202,7 @@
 .dlab__note {
   margin: 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-ui);
   color: var(--text-muted);
 }
@@ -217,7 +217,7 @@
   background: var(--bg-page);
   color: var(--text-muted);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
 }
@@ -271,7 +271,7 @@
 
 .dlab__swatchname {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
   color: var(--text-body);
   word-break: break-all;
@@ -279,7 +279,7 @@
 
 .dlab__swatchval {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
   color: var(--text-caption);
   word-break: break-all;
@@ -318,7 +318,7 @@
   display: flex;
   gap: var(--space-2);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
   color: var(--text-caption);
 }
@@ -408,7 +408,7 @@
 .dlab__pairnote {
   flex: 1 1 14ch;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
@@ -418,7 +418,7 @@
   flex-direction: column;
   align-items: flex-end;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
   color: var(--accent-positive);
 }
@@ -454,7 +454,7 @@
   margin: var(--space-2) 0 0;
   padding-left: var(--space-5);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   line-height: var(--lh-ui);
   letter-spacing: var(--ls-num);
   color: var(--text-body);

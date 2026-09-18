@@ -205,7 +205,7 @@
   grid-template-columns: 1fr auto 1fr;
   align-items: baseline;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -295,7 +295,7 @@
 .prospectcard__latest,
 .prospectcard__chartmarklabel {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   fill: var(--text-caption);
 }
 
@@ -336,7 +336,7 @@
 .prospectcard__chartcaption {
   margin-top: var(--space-1);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   line-height: var(--lh-ui);
   color: var(--text-caption);
 }

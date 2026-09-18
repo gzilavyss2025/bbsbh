@@ -100,7 +100,7 @@
   margin-top: var(--space-1);
   max-width: 40ch;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-body);
   color: var(--text-caption);
 }
@@ -200,7 +200,7 @@
   margin: var(--space-2) 0 0;
   max-width: 48ch;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-body);
   color: var(--text-caption);
 }
@@ -383,7 +383,7 @@
   margin-top: var(--space-1);
   max-width: 52ch;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);
   line-height: var(--lh-body);

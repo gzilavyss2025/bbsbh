@@ -31,7 +31,7 @@
 }
 .umptend__season {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-wide);
   color: var(--rule);
   font-variant-numeric: tabular-nums;
@@ -58,7 +58,7 @@
 }
 .umptend__first {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -75,7 +75,7 @@
 }
 .umptend__sub {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
   color: var(--text-caption);
   margin-top: 5px;
@@ -93,7 +93,7 @@
 }
 .umptend__leanhd {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -199,7 +199,7 @@
 }
 .umptend__watchlbl {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--rule);
@@ -248,7 +248,7 @@
 .umptend__tilel {
   display: block;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -276,7 +276,7 @@
 }
 .umptend__challbl {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -287,7 +287,7 @@
   padding: 7px 13px 9px;
   text-align: center;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   letter-spacing: var(--ls-num);
   color: var(--text-caption);
   font-variant-numeric: tabular-nums;
@@ -296,7 +296,7 @@
   padding: 9px 13px;
   text-align: center;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   letter-spacing: var(--ls-num);
   color: var(--text-caption);
   border-top: 1px solid var(--border-hairline);

@@ -139,7 +139,7 @@
   max-width: 48ch;
   margin: var(--space-3) 0 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-body);
   color: var(--text-caption);
 }
@@ -348,7 +348,7 @@
 
 .logbooklanding__stepnum {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-num);
   color: var(--seal-cover);
@@ -407,7 +407,7 @@
   display: block;
   margin-bottom: var(--space-4);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-xwide);
   color: var(--text-on-ink);

@@ -149,7 +149,7 @@
 }
 .printsheet__crewhead {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -176,7 +176,7 @@
 .ps-ump__role,
 .ps-clubfact__label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -219,7 +219,7 @@
   gap: 0 3mm;
   margin: 0 0 1mm;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   line-height: var(--lh-title);
   letter-spacing: var(--ls-label);
@@ -250,7 +250,7 @@
 .printsheet__grid thead th {
   height: 4.5mm;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -332,7 +332,7 @@
 }
 .printsheet__mark {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);

@@ -384,7 +384,7 @@
   align-self: start;
   padding-top: 3px;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
   color: var(--text-caption);
   text-align: right;
@@ -406,7 +406,7 @@
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -452,7 +452,7 @@
   padding: 1px 6px;
   background: var(--bg-canvas);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   color: var(--text-muted);
 }
@@ -474,7 +474,7 @@
   color: var(--accent-primary);
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
 }
@@ -496,7 +496,7 @@
   background: none;
   cursor: pointer;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   color: var(--graphite);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -586,7 +586,7 @@
   display: block;
   margin-top: var(--space-1);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-muted);
 }
 

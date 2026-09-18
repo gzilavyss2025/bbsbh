@@ -8,11 +8,29 @@
 :root {
   /* ---- Base neutrals: paper & ink ---- */
   --paper-0:  #F6EFDC;   /* deepest manila — app canvas */
-  --paper-1:  #F3ECD8;   /* standard page */
+  /* FOLDED INTO --paper-0 (#1128). At CIE76 dE 1.2 — and 0.76 under the more
+     accurate CIEDE2000 — the old #F3ECD8 was below the just-noticeable
+     threshold, so the app shipped four papers and showed three. The name stays
+     because 58 rules in src/styles/ and two JS callers read it directly; only
+     the value folded. Deliberately the LITERAL hex rather than var(--paper-0),
+     because this is the PRIMITIVE tier: primitives carry raw values and the
+     alias tier below carries the var() hops (ADR-0023). src/lib/preview/
+     posterPaper.js reads this name straight off :root to paint a canvas, which
+     is exactly the consumer that contract exists to serve — keep its FALLBACK
+     hex in step with this line. */
+  --paper-1:  #F6EFDC;   /* standard page — folded into --paper-0 */
   --paper-2:  #FBF6E9;   /* raised card / cell fill */
   --paper-3:  #FFFDF6;   /* brightest inset (revealed value) */
 
-  --ink-0:    #16222F;   /* darkest ink — headings */
+  /* Pushed darker in #1128 from #16222F, which sat 4.2 (CIE76) / 2.78
+     (CIEDE2000) from --ink-1 — under or at the 1.0 just-noticeable threshold
+     on the metric that models dark navies properly, so a heading and the body
+     under it were one ink. Now 9.5 / 6.2, which clears the "reads" bar the
+     palette already sets elsewhere (--rule vs --rule-soft is 7.9) without
+     leaving the navy family for black: the heading/body split is a real
+     decision, so it gets a real difference. Contrast only goes UP — every
+     --text-heading pairing in check-contrast.mjs gains margin. */
+  --ink-0:    #0F1822;   /* darkest ink — headings */
   --ink-1:    #1B2A3A;   /* primary ink — body text */
   --ink-2:    #3C4A5A;   /* soft ink — secondary */
   --graphite: #6B6558;   /* pencil — tertiary / captions */
@@ -71,7 +89,11 @@
      SEMANTIC ALIASES
      ============================================================ */
   --bg-canvas:        var(--paper-0);
-  --bg-page:          var(--paper-1);
+  /* Aliases --bg-canvas since #1128 folded the two papers. Kept as its own
+     name because ~93 rules read it and "the page" is still a role worth
+     naming — it is the ground a card sits ON, which is a different thing to
+     say than "the canvas", even while they are one colour. */
+  --bg-page:          var(--bg-canvas);
   --surface-card:     var(--paper-2);
   --surface-inset:    var(--paper-3);
 

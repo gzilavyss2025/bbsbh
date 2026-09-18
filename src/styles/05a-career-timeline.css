@@ -61,7 +61,7 @@ button.careertl__badge {
    hairline ring, penciled rather than inked solid like the majors. */
 .careertl__years {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-body);
   font-weight: var(--w-semibold);
   text-align: center;
@@ -87,7 +87,7 @@ button.careertl__badge {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);

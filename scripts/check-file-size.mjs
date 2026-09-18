@@ -72,6 +72,23 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
   'src/styles/02-wordmark-lab.css': 700, // 644
+  // 600 -> 900 across steps 3 and 4 of the offseason home page (issues #1077,
+  // #1078): the picked-game card, then the notebook note and the season-record
+  // row. Growth this sheet was expected to take — check-dir-size.mjs's own
+  // 'src/styles' entry says so in as many words — because src/styles is AT its
+  // 115-file directory budget, so a 116th flat partial cannot exist and the
+  // /design-lab sheet already had to become a subdirectory to get in. One page,
+  // one sheet, and every selector in it is read by the five components in
+  // src/components/offseason/.
+  // 900 -> 1200 for step 4's two additions (issue #1078): the notebook note,
+  // which borrows the /fouls page's batter-vs-pitcher row rather than importing
+  // 43-foul-tracker.css's 877 lines onto the home slate to reuse forty of them,
+  // and the winter rail. Still one page, one sheet — src/styles is AT its
+  // 115-file directory budget (check-dir-size.mjs), so a 116th flat partial
+  // cannot exist and that entry's own note already said this sheet would take
+  // steps 3 and 4. The shared version of the row is the design lab's job
+  // (issues #1112-1114), which is where this and .movedup and .pgame all go.
+  'src/styles/78-offseason.css': 1200, // 1151
   // 600 -> 700: the winter league picker's row (issue #1055) — the control that
   // covers the gap between one rail tab and the four leagues behind it. It sits
   // in this file rather than beside .levelnav in 05-masthead-nav.css because
@@ -119,7 +136,7 @@ const BUDGETS = {
   // it works. Both notes prevented a real regression. Trimming them to hit a
   // line count would be deleting the reason the rules are correct.
   'src/styles/69-hit-chart.css': 900, // 811 — the ball-flight card, the chart's per-play sibling: same marks, same heat ring, same drawing, so one partial rather than two that can drift
-  'src/styles/68-around-the-game.css': 1100, // 954 -> 1041: the diverging bar (.barcell--diverge), a variant of the shared bar cell that measures from a baseline rather than from zero, plus the row that counts the middle of a two-ended board. 1000 -> 1100 is a deliberate one-band raise, not absorbed growth: the file sat at 993 with SEVEN lines of headroom, so the next rule of any size was going to cross it. Splitting is the preferred answer and is not available — the sixth partial it would need cannot exist, because src/styles is AT its directory budget of 115 (check-dir-size.mjs), which is why this package keeps one sheet for all of its pages in the first place. Earlier: 642 -> 954 for the doubleheader report's year slider (.yrange, two stacked native range inputs), its board cells and its year drawer.
+  'src/styles/68-around-the-game.css': 1200, // 1041 -> 1117: the run differential report's outcome cell (.rdiff__out and its three tones, .rdiff__series, .rdiff__era) — the one column on that board that is words rather than figures, and the two tones that mark the outcomes which are not results at all. 1100 -> 1200 is the second deliberate one-band raise for the same reason the first one records: splitting is the preferred answer and is still not available, because src/styles remains AT its directory budget of 115 (check-dir-size.mjs), which is why this package keeps one sheet for all of its pages. Earlier: 954 -> 1041: the diverging bar (.barcell--diverge), a variant of the shared bar cell that measures from a baseline rather than from zero, plus the row that counts the middle of a two-ended board. 1000 -> 1100 is a deliberate one-band raise, not absorbed growth: the file sat at 993 with SEVEN lines of headroom, so the next rule of any size was going to cross it. Splitting is the preferred answer and is not available — the sixth partial it would need cannot exist, because src/styles is AT its directory budget of 115 (check-dir-size.mjs), which is why this package keeps one sheet for all of its pages in the first place. Earlier: 642 -> 954 for the doubleheader report's year slider (.yrange, two stacked native range inputs), its board cells and its year drawer.
   // The directory-budget table itself. Every entry in it carries an inline
   // rationale BY DESIGN — that is the whole convention, and it means the file
   // grows a few lines on any commit that adds a deliberate exception. It was

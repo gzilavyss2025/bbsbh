@@ -89,7 +89,7 @@
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
   font-weight: var(--w-semibold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   background: var(--surface-inset);
   white-space: nowrap;
@@ -147,7 +147,7 @@
 .phcard__tilek {
   font-family: var(--font-display);
   font-weight: var(--w-semibold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }

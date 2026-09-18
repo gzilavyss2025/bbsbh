@@ -28,7 +28,7 @@ export function offseasonFields() {
       help: 'The label over the days-to-spring number beside the wire. Spring training’s first game is the day it counts to, straight off the schedule.',
       maxLength: 40,
       multiline: false,
-      default: 'First spring game',
+      default: 'First spring training game',
     },
     {
       id: 'offseason.openerLabel',

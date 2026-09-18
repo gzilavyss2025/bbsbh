@@ -108,7 +108,7 @@
   padding: 4px 10px;
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
 }

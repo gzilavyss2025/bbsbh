@@ -80,7 +80,7 @@
 .colchart__ticklabel,
 .colchart__label {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   line-height: var(--lh-compact);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -151,7 +151,7 @@
   transform: translateX(-50%);
   padding-bottom: 2px;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   line-height: var(--lh-compact);
   letter-spacing: var(--ls-label);
   color: var(--text-heading);
@@ -201,7 +201,7 @@
 .colchart__paneltitle {
   display: block;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   line-height: var(--lh-compact);
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
@@ -227,7 +227,7 @@
   position: absolute;
   margin-bottom: var(--space-2);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   line-height: var(--lh-title);
   letter-spacing: var(--ls-label);
   color: var(--clay-deep);
@@ -282,7 +282,7 @@
   background: var(--bg-page);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   line-height: var(--lh-compact);
   letter-spacing: var(--ls-label);
   color: var(--clay-deep);
@@ -305,7 +305,7 @@
 .colchart__panelsub {
   display: block;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-caption);
 }
@@ -410,7 +410,7 @@
   margin: 0 0 var(--space-2) var(--space-2);
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   line-height: var(--lh-compact);
   letter-spacing: var(--ls-label);
   color: var(--clay-deep);
@@ -446,7 +446,7 @@
   margin-top: var(--space-1);
   text-align: right;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   line-height: var(--lh-compact);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);

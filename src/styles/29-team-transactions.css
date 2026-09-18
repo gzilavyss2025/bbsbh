@@ -21,7 +21,7 @@
   border-bottom: var(--bw-hair) solid var(--rule-soft);
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -147,7 +147,7 @@
   padding: 2px 8px 0 0;
   border-right: var(--bw-hair) solid var(--rule-soft);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -247,7 +247,7 @@
    see scope.md). */
 .banner {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -272,7 +272,7 @@
   display: block;
   margin-bottom: 4px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -492,7 +492,7 @@
 }
 .last10__cap {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);
@@ -531,7 +531,7 @@
   left: 7px;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   color: var(--text-on-ink);
 }
@@ -541,7 +541,7 @@
 .last10__oppcap {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-title);
   color: var(--text-on-ink);
   white-space: nowrap;
@@ -572,7 +572,7 @@
 }
 .last10__meta {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
   margin-top: 2px;
 }
@@ -765,7 +765,7 @@
 }
 .sstrip__opplabel {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -843,7 +843,7 @@
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   color: var(--text-caption);
 }
 .standings td {
@@ -934,7 +934,7 @@
 /* Inline rank-movement glyph riding inside the GB/WCGB cell (not its own
    column — see the standings enhancement plan's column-density note). */
 .standings-trend {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   margin-left: 2px;
 }
 .standings-trend--up {

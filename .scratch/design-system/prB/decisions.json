@@ -1,0 +1,7139 @@
+[
+ {
+  "file": "src/styles/02-wordmark-lab.css",
+  "line": 217,
+  "sel": ".wordmarklab__pick",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/02-wordmark-lab.css",
+  "line": 254,
+  "sel": ".wordmarklab__sizerow > span",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/02-wordmark-lab.css",
+  "line": 267,
+  "sel": ".wordmarklab__detail",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/02-wordmark-lab.css",
+  "line": 363,
+  "sel": ".wordmarklab__levels",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/02-wordmark-lab.css",
+  "line": 442,
+  "sel": ".wordmarklab__phonebody > span",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/03-slate-header.css",
+  "line": 417,
+  "sel": ".datenav__today",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/03-slate-header.css",
+  "line": 551,
+  "sel": ".daystate__scopenote",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/03-slate-header.css",
+  "line": 626,
+  "sel": ".leaguepicker__chipname",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/04-site-bar.css",
+  "line": 101,
+  "sel": ".logbook-btn__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/04-site-bar.css",
+  "line": 127,
+  "sel": ".accountbtn__signin",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/04-site-bar.css",
+  "line": 297,
+  "sel": ".continuebar__meta",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/04-site-bar.css",
+  "line": 330,
+  "sel": ".continuebar__pitchline",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/04-site-bar.css",
+  "line": 434,
+  "sel": ".wire__dateline",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/04-site-bar.css",
+  "line": 448,
+  "sel": ".wire__count",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/04-site-bar.css",
+  "line": 524,
+  "sel": ".wire__type",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/04a-wire-dock.css",
+  "line": 196,
+  "sel": ".wiredock__count",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/05-masthead-nav.css",
+  "line": 387,
+  "sel": ".txntl__date",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/05-masthead-nav.css",
+  "line": 409,
+  "sel": ".txntl__chip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/05-masthead-nav.css",
+  "line": 455,
+  "sel": ".txntl__yr span",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/05-masthead-nav.css",
+  "line": 477,
+  "sel": ".txntl-expand",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/05-masthead-nav.css",
+  "line": 499,
+  "sel": ".txntl-collapse",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/05-masthead-nav.css",
+  "line": 589,
+  "sel": ".levelprog__detail",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/05a-career-timeline.css",
+  "line": 64,
+  "sel": ".careertl__years",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/05a-career-timeline.css",
+  "line": 90,
+  "sel": ".careertl__level",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 40,
+  "sel": ".loader__league",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 236,
+  "sel": ".gamecard__datebanner",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 297,
+  "sel": ".derbycard__eyebrow",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 360,
+  "sel": ".gamecard__live",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 392,
+  "sel": ".gamecard__delay",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 505,
+  "sel": ".postponed__makeup",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/06b-offday-cards.css",
+  "line": 128,
+  "sel": ".offdaycard__loc",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/06b-offday-cards.css",
+  "line": 154,
+  "sel": ".offdaycard__pin",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/07-team-logo-and-buttons.css",
+  "line": 385,
+  "sel": ".gamecard__nationaltv",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08-site-shell.css",
+  "line": 27,
+  "sel": ".searchbox__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08-site-shell.css",
+  "line": 158,
+  "sel": ".gamefinder__season label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08-site-shell.css",
+  "line": 259,
+  "sel": ".sitefooter__more-label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08-site-shell.css",
+  "line": 526,
+  "sel": ".searchoverlay__grouptitle",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08-site-shell.css",
+  "line": 538,
+  "sel": ".searchoverlay__clearrecent",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08-site-shell.css",
+  "line": 735,
+  "sel": ".favteamsheet__subtitle",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08-site-shell.css",
+  "line": 821,
+  "sel": ".mergestrip__link",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/08-site-shell.css",
+  "line": 867,
+  "sel": ".sitefooter__brand > span",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08a-site-menu.css",
+  "line": 37,
+  "sel": ".dirhd",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08a-site-menu.css",
+  "line": 135,
+  "sel": ".dirtag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08a-site-menu.css",
+  "line": 245,
+  "sel": ".sitemenusheet__eyebrow",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/08a-site-menu.css",
+  "line": 362,
+  "sel": ".guidelink__eyebrow",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/09-team-info.css",
+  "line": 234,
+  "sel": ".thub-card__head em",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/09-team-info.css",
+  "line": 357,
+  "sel": ".fact__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/09-team-info.css",
+  "line": 394,
+  "sel": ".fact__note",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/09-team-info.css",
+  "line": 456,
+  "sel": ".attendance__note-cap",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/09-team-info.css",
+  "line": 503,
+  "sel": ".fact__infonote",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/09-team-info.css",
+  "line": 579,
+  "sel": ".umps__role",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/09-team-info.css",
+  "line": 633,
+  "sel": ".tierpill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/09-team-info.css",
+  "line": 720,
+  "sel": ".umptier__note-text",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/09-team-info.css",
+  "line": 736,
+  "sel": ".umptier__note-link",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/10-lineup.css",
+  "line": 351,
+  "sel": ".teammatecard__groupmore",
+  "face": "other",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (other) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/10-lineup.css",
+  "line": 371,
+  "sel": ".teammatecard__badge",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/10-lineup.css",
+  "line": 385,
+  "sel": ".teammatecard__caption",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/10-lineup.css",
+  "line": 428,
+  "sel": ".teammatecard__posbadge",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/10-lineup.css",
+  "line": 443,
+  "sel": ".teammatecard__name-first",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/10-lineup.css",
+  "line": 478,
+  "sel": ".teammatecard__years",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/10-lineup.css",
+  "line": 557,
+  "sel": ".mastheadpill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/10-lineup.css",
+  "line": 593,
+  "sel": ".lineup__benchlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/10-lineup.css",
+  "line": 704,
+  "sel": ".defdiamond__name .ilmark",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/10-lineup.css",
+  "line": 710,
+  "sel": ".defdiamond__num",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/11-innings.css",
+  "line": 41,
+  "sel": ".innings__extras",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/11-innings.css",
+  "line": 96,
+  "sel": ".refreshstamp",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/11-innings.css",
+  "line": 117,
+  "sel": ".notesbtn",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/11-pregame-scoreboard.css",
+  "line": 160,
+  "sel": ".pregameboard__unitlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/11-pregame-scoreboard.css",
+  "line": 197,
+  "sel": ".pregameboard__status",
+  "face": "display",
+  "how": "same selector",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/11-pregame-scoreboard.css",
+  "line": 204,
+  "sel": ".pregameboard__meta",
+  "face": "display",
+  "how": "same selector",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 141,
+  "sel": ".abs__title",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 245,
+  "sel": ".abs__rec",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 267,
+  "sel": ".abs__detailrow",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 345,
+  "sel": ".umpfavor__title",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 373,
+  "sel": ".wcall__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 422,
+  "sel": ".wcall__edgeword",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 439,
+  "sel": ".wcall__pill",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 459,
+  "sel": ".wcall__arrow",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 486,
+  "sel": ".wcall__count-label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 501,
+  "sel": ".wcall__count-arrow",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 576,
+  "sel": ".favormeter__tierpill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 643,
+  "sel": ".favormeter__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 661,
+  "sel": ".favormeter__unit",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 673,
+  "sel": ".favormeter__tier",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 695,
+  "sel": ".upnext__title",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 837,
+  "sel": ".halfcast__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 938,
+  "sel": ".pitcherhandoff__chip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 979,
+  "sel": ".pitchernotice__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1033,
+  "sel": ".pitchernotice__mvcount",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1103,
+  "sel": ".pitchernotice__now",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1164,
+  "sel": ".pitchernotice__forline",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1192,
+  "sel": ".pitchernotice__enteringwhen",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1265,
+  "sel": ".dueup__title",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1365,
+  "sel": ".lineupcard__title",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1472,
+  "sel": ".lineupcard__slot",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1535,
+  "sel": ".lineupcard__jersey",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1544,
+  "sel": ".lineupcard__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1574,
+  "sel": ".halfdefense__title",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1677,
+  "sel": ".stat__k",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 206,
+  "sel": ".pbp__advance",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 218,
+  "sel": ".pbp__advslot",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 227,
+  "sel": ".pbp__advance--out",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 235,
+  "sel": ".pbp__pr",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 283,
+  "sel": ".pbp__pos",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 2 chars"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 292,
+  "sel": ".pbp__rbi",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 318,
+  "sel": ".pbp__placed",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 362,
+  "sel": ".pbp__ladderhead",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 383,
+  "sel": ".pbp__cell",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 404,
+  "sel": ".pbp__desc",
+  "face": "read",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 441,
+  "sel": ".pbp__subnote",
+  "face": "read",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 470,
+  "sel": ".pbp__callout",
+  "face": "read",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 479,
+  "sel": ".pbp__calloutmark",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 500,
+  "sel": ".roster__notice",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 577,
+  "sel": ".roster__group",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 69,
+  "sel": ".strikezone__num",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 105,
+  "sel": ".pitchlist",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 140,
+  "sel": ".pitchlist__num",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 264,
+  "sel": ".pbp__hlicon",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 295,
+  "sel": ".szmodal__eyebrow",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 310,
+  "sel": ".szmodal__vs",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 337,
+  "sel": ".szmodal__body .pitchlist__row",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 343,
+  "sel": ".szmodal__body .pitchlist__type",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 408,
+  "sel": ".umpmodal__eyebrow",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 429,
+  "sel": ".umpmodal__rank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 441,
+  "sel": ".umpmodal__gtitle",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 693,
+  "sel": ".gamephotos__notice p",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 201 chars"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 736,
+  "sel": ".gamephotos__resultsmeta",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 756,
+  "sel": ".gamephotos__browsebtn",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 821,
+  "sel": ".gamephotos__gamedate",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 891,
+  "sel": ".gamephotos__subjectname",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 909,
+  "sel": ".gamephotos__expand",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/15-team-color-lab.css",
+  "line": 244,
+  "sel": ".colorlab__logodropbadge",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/15-team-color-lab.css",
+  "line": 263,
+  "sel": ".colorlab__logodropmsg",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/15-team-color-lab.css",
+  "line": 678,
+  "sel": ".colorlab__weardates-hint",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/15-team-color-lab.css",
+  "line": 689,
+  "sel": ".colorlab__headercoverage",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 283,
+  "sel": ".idlab__stylecard__source",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 295,
+  "sel": ".idlab__stylecard__discard",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 320,
+  "sel": ".idlab__stylecard__pin, .idlab__carry",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 409,
+  "sel": ".idlab__landed",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 424,
+  "sel": ".idlab__savemsg",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 67,
+  "sel": ".idlab__ondecklabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 80,
+  "sel": ".idlab__offdaylabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 355,
+  "sel": ".idlab__recolorsourcelabel",
+  "face": "other:arial",
+  "how": "rendered",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (other:arial) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 444,
+  "sel": ".idlab__wpaartlabel",
+  "face": "other:arial",
+  "how": "rendered",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (other:arial) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 742,
+  "sel": ".idlab__wearercaption",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 763,
+  "sel": ".idlab__umpirechip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 774,
+  "sel": ".idlab__umpirenote",
+  "face": "body",
+  "how": "rendered",
+  "to": "--fs-small",
+  "why": "running copy — rendered 35 chars"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 797,
+  "sel": ".idlab__shelfcount",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 862,
+  "sel": ".idlab__shelflabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 880,
+  "sel": ".idlab__shelfworn",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 1003,
+  "sel": ".idlab__chiplabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 1012,
+  "sel": ".idlab__chipsub",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 1117,
+  "sel": ".idlab__stage .colorlab__logodropzone--over::after",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 1130,
+  "sel": ".idlab__lineagecaption",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 1148,
+  "sel": ".idlab__scenariocaption",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 1158,
+  "sel": ".idlab__stub",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 1185,
+  "sel": ".idlab__tapeflash",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 1219,
+  "sel": ".idlab__glove__text",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/17a-identity-lab-mark-panels.css",
+  "line": 31,
+  "sel": ".idlab__mastheadsource",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/19-pattern-and-sketch-labs.css",
+  "line": 277,
+  "sel": ".logomodal__caption",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 49,
+  "sel": ".rolling__grid thead th",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 274,
+  "sel": ".winprob__inninglabel",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 281,
+  "sel": ".winprob__inningarrow",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 333,
+  "sel": ".winprob__bigdot-label-text",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 357,
+  "sel": ".winprob__subhead",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 410,
+  "sel": ".winprob__ledger-chip",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 419,
+  "sel": ".winprob__ledger-half",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 530,
+  "sel": ".marginnotes__mark",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 596,
+  "sel": ".pitchers__teamname",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 623,
+  "sel": ".pitchers__grid thead th",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 75,
+  "sel": ".gamestory__note",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 123,
+  "sel": ".gamestory__leadbadgelabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 327,
+  "sel": ".bs__grid th, .bs__grid td",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 333,
+  "sel": ".bs__grid thead th",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 364,
+  "sel": ".bs__pname",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 384,
+  "sel": ".bs__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 398,
+  "sel": ".bs__dec",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 465,
+  "sel": ".bs__mark",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 475,
+  "sel": ".bs__ps",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 509,
+  "sel": ".bs__notesTitle",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 546,
+  "sel": ".bs__decisionK",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 612,
+  "sel": ".bs__potgMeta",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 718,
+  "sel": ".bs__potgPlayIcon",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 739,
+  "sel": ".bs__insightsTitle",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21a-box-score-stars.css",
+  "line": 106,
+  "sel": ".stars3__meta",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/21a-box-score-stars.css",
+  "line": 115,
+  "sel": ".stars3__stat",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/21a-box-score-stars.css",
+  "line": 223,
+  "sel": ".stars3__card--hero .stars3__stat",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/21b-box-score-tally.css",
+  "line": 114,
+  "sel": ".bs__tallyMeasure",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 55,
+  "sel": ".slate-filterbar__count",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 63,
+  "sel": ".slate-filterbar__chip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 207,
+  "sel": ".flipback__pill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 283,
+  "sel": ".flipback__lsTeamCol",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 291,
+  "sel": ".flipback__lsCol",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 370,
+  "sel": ".flipback__potgLabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 403,
+  "sel": ".flipback__boxbtn",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 690,
+  "sel": ".playercard__bucket",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 744,
+  "sel": ".playercard__posbadge",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 781,
+  "sel": ".playercard__team",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 788,
+  "sel": ".playercard__stat",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 25,
+  "sel": ".chevron-link",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 85,
+  "sel": ".tlead__cat-title",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 146,
+  "sel": ".tlead__teamabbr",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 171,
+  "sel": ".tlead__name-first",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 206,
+  "sel": ".tlead__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 226,
+  "sel": ".tlead__statlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 266,
+  "sel": ".tlead__rank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 293,
+  "sel": ".tlead__rowteam",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 314,
+  "sel": ".tlead__level",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 326,
+  "sel": ".tlead__row .prospectpill",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 445,
+  "sel": ".tledg__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 460,
+  "sel": ".tledg__row .ilmark",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 481,
+  "sel": ".leaders__sub",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 539,
+  "sel": ".bs__grid--totals thead th",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 627,
+  "sel": ".bs__grid--board thead th.bs__boardInn",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 668,
+  "sel": ".bs__grid--board thead .bs__boardFinal",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 704,
+  "sel": ".bs__fieldLabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/25-wide-layout.css",
+  "line": 115,
+  "sel": ".daystate__chip--reveal",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 78,
+  "sel": ".player .section__title em, .team-hub .section__title em",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 383,
+  "sel": ".ledger tr.ledger__ref .yr",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 398,
+  "sel": ".ledger tr.ledger__family td",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 466,
+  "sel": ".split__k",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 488,
+  "sel": ".split__sub",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 693,
+  "sel": ".vsteam__last-label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 768,
+  "sel": ".gamelog__opp",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 787,
+  "sel": ".gamelog__level",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 926,
+  "sel": ".ledger thead th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 959,
+  "sel": ".ledger__allstar",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 975,
+  "sel": ".ledger tfoot .yr",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 1001,
+  "sel": ".reg-pill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 1020,
+  "sel": ".ledger tr.reg-subtotal .ledger__sub",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 1086,
+  "sel": ".milestonewatch__title",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 1103,
+  "sel": ".milestonewatch__eta",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26-player-page.css",
+  "line": 1140,
+  "sel": ".plink.foulcard__more",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26a-percentile-strip.css",
+  "line": 130,
+  "sel": ".pctstrip__value-baseline",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/26a-percentile-strip.css",
+  "line": 224,
+  "sel": ".pctstrip__def",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/26a-percentile-strip.css",
+  "line": 243,
+  "sel": ".pctstrip__source",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 47,
+  "sel": ".contractcard__eyebrow, .contractcard__salary > span, .contr",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 72,
+  "sel": ".contractcard__regime",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 207,
+  "sel": ".contractcard__control li",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 232,
+  "sel": ".contractcard__control em",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 244,
+  "sel": ".contractcard__note",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 317,
+  "sel": ".contractcard__seg strong",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 325,
+  "sel": ".contractcard__seg em",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 352,
+  "sel": ".contractcard__barvalue",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 409,
+  "sel": ".contractcard__foot",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 438,
+  "sel": ".contractcard__tag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26b-recent-form.css",
+  "line": 45,
+  "sel": ".formtrend .formtrend__anchor .yr",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26b-recent-form.css",
+  "line": 66,
+  "sel": ".formtrend__count-k",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26c-mound-card.css",
+  "line": 40,
+  "sel": ".moundcard__leadsub",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/26c-mound-card.css",
+  "line": 52,
+  "sel": ".moundcard__avail",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26c-mound-card.css",
+  "line": 124,
+  "sel": ".moundstrip__label, .moundstrip__note",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26c-mound-card.css",
+  "line": 148,
+  "sel": ".moundstrip__day",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/26c-mound-card.css",
+  "line": 179,
+  "sel": ".moundstrip__band",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26d-command-map.css",
+  "line": 65,
+  "sel": ".cmdmap__chipn",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/26d-command-map.css",
+  "line": 151,
+  "sel": ".cmdmap__keyitem",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26e-contract-history.css",
+  "line": 72,
+  "sel": ".cthist__clubname",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26e-contract-history.css",
+  "line": 141,
+  "sel": ".cthist__sub",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/26e-contract-history.css",
+  "line": 176,
+  "sel": ".cthist__fuzzy",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26f-glove-target.css",
+  "line": 50,
+  "sel": ".glovetarget__ringlabel",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/26f-glove-target.css",
+  "line": 136,
+  "sel": ".glovetarget__keyitem",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/26g-command-received.css",
+  "line": 63,
+  "sel": ".cmdrecv__rank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/26g-command-received.css",
+  "line": 129,
+  "sel": ".cmdrecv__n",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/26g-command-received.css",
+  "line": 159,
+  "sel": ".cmdrecv__note",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/27-player-position-innings.css",
+  "line": 106,
+  "sel": ".posinn__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/27-player-position-innings.css",
+  "line": 120,
+  "sel": ".posinn__innings",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/27-player-position-innings.css",
+  "line": 179,
+  "sel": ".pitch__unit",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/27-player-position-innings.css",
+  "line": 279,
+  "sel": ".leaguerank__chip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/27-player-position-innings.css",
+  "line": 301,
+  "sel": ".gamelog__qs",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/27-player-position-innings.css",
+  "line": 615,
+  "sel": ".asof-banner__text",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/27-player-position-innings.css",
+  "line": 667,
+  "sel": ".asof-banner__label",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 120,
+  "sel": ".jerseydeck__name",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 165,
+  "sel": ".team-score__head",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 172,
+  "sel": ".team-score__head em",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 232,
+  "sel": ".team-score__grade-kicker",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 248,
+  "sel": ".team-score__grade-copy > span:last-child",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 32 chars"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 267,
+  "sel": ".team-score__grade-score small",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 274,
+  "sel": ".team-score__breakdown",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 287,
+  "sel": ".team-score__driver-heading",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 331,
+  "sel": ".team-score__row--driver .team-score__rank",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 403,
+  "sel": ".team-score__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 424,
+  "sel": ".team-score__rank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 441,
+  "sel": ".team-score__meta",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 515,
+  "sel": ".team-score__tooltip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 678,
+  "sel": ".rankstrip__n",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 779,
+  "sel": ".team-score__howlink",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 814,
+  "sel": ".team-score__detail-title",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 827,
+  "sel": ".team-score__detail dt",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 833,
+  "sel": ".team-score__detail dd",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/28a-team-hub-hero.css",
+  "line": 166,
+  "sel": ".team-hub__parent-label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28a-team-hub-hero.css",
+  "line": 186,
+  "sel": ".team-hub__level",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28a-team-hub-hero.css",
+  "line": 223,
+  "sel": ".team-hub__div",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/28a-team-hub-hero.css",
+  "line": 230,
+  "sel": ".team-hub__rec em",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 24,
+  "sel": ".txcard__head",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 150,
+  "sel": ".txday",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 250,
+  "sel": ".banner",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 264,
+  "sel": ".photo__cap",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 9 chars"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 275,
+  "sel": ".txstory__type",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 361,
+  "sel": ".team-hub__manager-interim",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 495,
+  "sel": ".last10__cap",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 534,
+  "sel": ".last10__wl",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 544,
+  "sel": ".last10__oppcap",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 575,
+  "sel": ".last10__meta",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 733,
+  "sel": ".teamphotos__loading",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 768,
+  "sel": ".sstrip__opplabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 846,
+  "sel": ".standings thead th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 937,
+  "sel": ".standings-trend",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/30-standings.css",
+  "line": 91,
+  "sel": ".standings-jump",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/30-standings.css",
+  "line": 124,
+  "sel": ".standings-reveal",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/30-standings.css",
+  "line": 179,
+  "sel": ".standings-daynav button",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/30-standings.css",
+  "line": 229,
+  "sel": ".lgstand__divname",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/30-standings.css",
+  "line": 347,
+  "sel": ".clinchmark",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/30-standings.css",
+  "line": 396,
+  "sel": ".clinchkey dd",
+  "face": "body",
+  "how": "rendered",
+  "to": "--fs-small",
+  "why": "running copy — rendered 30 chars"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 11,
+  "sel": ".wc-grouphead td",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 25,
+  "sel": ".wc-div",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 95,
+  "sel": ".tstats-card__head em",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 123,
+  "sel": ".tstatrow__k",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 138,
+  "sel": ".tstatrow__r",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 189,
+  "sel": ".cbk__gloss",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 217,
+  "sel": ".cbk__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 236,
+  "sel": ".cbk__of",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 243,
+  "sel": ".cbk__badge",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 293,
+  "sel": ".cbk__scale",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 304,
+  "sel": ".rankchip",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 331,
+  "sel": ".prospectpill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 354,
+  "sel": ".milestonepill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 372,
+  "sel": ".rookiepill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 405,
+  "sel": ".duepill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 507,
+  "sel": ".radarpill__note-tag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 520,
+  "sel": ".radarpill__note-text",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 628,
+  "sel": ".rolechip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 684,
+  "sel": ".roster-super__head em",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 732,
+  "sel": ".roster-super__toggle-btn",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 780,
+  "sel": ".ilchip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 815,
+  "sel": ".thub-affiliate__level",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 834,
+  "sel": ".thub-affiliate__loc",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 926,
+  "sel": ".prospectshowcase__posbadge",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 932,
+  "sel": ".prospectshowcase__name",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 958,
+  "sel": ".prospecttable__top",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 1039,
+  "sel": ".rehabcard__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 1080,
+  "sel": ".rehabcard__since",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 1165,
+  "sel": ".horizontile__posbadge",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 1190,
+  "sel": ".horizontile__meta, .horizontile__move",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 1228,
+  "sel": ".horizontile__statk",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 1285,
+  "sel": ".hzntile__trend",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 1325,
+  "sel": ".hzntile__tilek",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 1340,
+  "sel": ".depthpos",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31c-prospect-filters.css",
+  "line": 17,
+  "sel": ".prospects__dateline, .prospects__resultcount",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31c-prospect-filters.css",
+  "line": 122,
+  "sel": ".prospects__toggle-summary",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31c-prospect-filters.css",
+  "line": 142,
+  "sel": ".prospects__active-summary",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31c-prospect-filters.css",
+  "line": 226,
+  "sel": ".vslevelslider__ticks",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31d-prospect-card.css",
+  "line": 208,
+  "sel": ".prospectcard__scalelabels",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31d-prospect-card.css",
+  "line": 298,
+  "sel": ".prospectcard__axislabel, .prospectcard__axisdate, .prospect",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31d-prospect-card.css",
+  "line": 339,
+  "sel": ".prospectcard__chartcaption",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/31e-prospect-board.css",
+  "line": 25,
+  "sel": ".prospectboard th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31e-prospect-board.css",
+  "line": 161,
+  "sel": ".prospecttable__linetag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/31e-prospect-board.css",
+  "line": 196,
+  "sel": ".prospecttrend__details",
+  "face": "body",
+  "how": "rendered",
+  "to": "--fs-small",
+  "why": "running copy — rendered 43 chars"
+ },
+ {
+  "file": "src/styles/31e-prospect-board.css",
+  "line": 227,
+  "sel": ".prospecttrend--unqualified .prospecttrend__meta",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/31e-prospect-board.css",
+  "line": 292,
+  "sel": ".prospectboard__rank::before",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/32-milestone-watch.css",
+  "line": 64,
+  "sel": ".milestonewatch-page__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/32-milestone-watch.css",
+  "line": 95,
+  "sel": ".milestonewatch-page__team",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 21 chars"
+ },
+ {
+  "file": "src/styles/32-milestone-watch.css",
+  "line": 125,
+  "sel": ".milestonewatch-page__eta",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/33-awards-history.css",
+  "line": 161,
+  "sel": ".awardhistory__cards--dense .playercard__stat",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/33-awards-history.css",
+  "line": 167,
+  "sel": ".awardhistory__name--small .playercard__name",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/33-awards-history.css",
+  "line": 170,
+  "sel": ".awardhistory__name--tiny .playercard__name",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/33-awards-history.css",
+  "line": 188,
+  "sel": ".awardhistory__cards--full .playercard__team",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/33-awards-history.css",
+  "line": 206,
+  "sel": ".awardhistory__cards--compact .playercard__team",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/33-awards-history.css",
+  "line": 209,
+  "sel": ".awardhistory__cards--compact .playercard__stat",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/33-awards-history.css",
+  "line": 277,
+  "sel": ".awardhistory__allmlbhead",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/33-awards-history.css",
+  "line": 336,
+  "sel": ".awardhistory__yearawardlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/33-awards-history.css",
+  "line": 355,
+  "sel": ".awardhistory__grouptoggle .levelnav__btn",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/33-awards-history.css",
+  "line": 406,
+  "sel": ".pshistory__championtag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/34-postseason.css",
+  "line": 70,
+  "sel": ".psbracket__collabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/34-postseason.css",
+  "line": 166,
+  "sel": ".seedcard__byetag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/34-postseason.css",
+  "line": 186,
+  "sel": ".seedrow__seed",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/34-postseason.css",
+  "line": 276,
+  "sel": ".pswscard__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/34-postseason.css",
+  "line": 294,
+  "sel": ".pswscard__mvptag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/34-postseason.css",
+  "line": 310,
+  "sel": ".pswscard__mvppos",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/34-postseason.css",
+  "line": 328,
+  "sel": ".psstack__roundlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/34-postseason.css",
+  "line": 383,
+  "sel": ".psyearnav button",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/35-postseason-series.css",
+  "line": 105,
+  "sel": ".psseries__cell",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/35-postseason-series.css",
+  "line": 289,
+  "sel": ".psseries__potgTitle",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/35-postseason-series.css",
+  "line": 331,
+  "sel": ".psseries__potgMeta",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/35-postseason-series.css",
+  "line": 423,
+  "sel": ".psseries__mvptag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/35-postseason-series.css",
+  "line": 513,
+  "sel": ".psseries__ltied",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/35-postseason-series.css",
+  "line": 585,
+  "sel": ".psseries__lchaserval",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/36-postseason-leaders.css",
+  "line": 65,
+  "sel": ".psleaders__rank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/36-postseason-leaders.css",
+  "line": 121,
+  "sel": ".psleaders__mvppos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/37-all-star-rosters.css",
+  "line": 140,
+  "sel": ".allstarrosters__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/37-all-star-rosters.css",
+  "line": 212,
+  "sel": ".allstargame__date",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/37-all-star-rosters.css",
+  "line": 285,
+  "sel": ".allstargame__mvplabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/37-all-star-rosters.css",
+  "line": 307,
+  "sel": ".allstargame__mvppos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/37-all-star-rosters.css",
+  "line": 315,
+  "sel": ".allstargame__mvpstat",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/37-all-star-rosters.css",
+  "line": 341,
+  "sel": ".allstargame__venuename, .allstargame__venuelink",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 12 chars"
+ },
+ {
+  "file": "src/styles/38-umpire-pages.css",
+  "line": 37,
+  "sel": ".umpage__cardtitle",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/38-umpire-pages.css",
+  "line": 99,
+  "sel": ".umpage__venuerank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/38-umpire-pages.css",
+  "line": 128,
+  "sel": ".umpage__levelchip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/38-umpire-pages.css",
+  "line": 143,
+  "sel": ".umpage__ctxchip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/38-umpire-pages.css",
+  "line": 155,
+  "sel": ".umpage__showall",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/38-umpire-pages.css",
+  "line": 167,
+  "sel": ".foulboard__viewmore",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/38-umpire-pages.css",
+  "line": 230,
+  "sel": ".umpage__role",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 44,
+  "sel": ".mgrpage__cardtitle",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 105,
+  "sel": ".mgrpage__playlevel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 178,
+  "sel": ".mgrpage__recordinterim",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 408,
+  "sel": ".bpfact__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 429,
+  "sel": ".bpfact__note",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 449,
+  "sel": ".rankgrp__title",
+  "face": "body",
+  "how": "rendered",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 18 chars"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 477,
+  "sel": ".rankpost__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 500,
+  "sel": ".rankpost__note",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 11 chars"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 506,
+  "sel": ".bpsheet__foot",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 549,
+  "sel": ".psodds-pill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 570,
+  "sel": ".psoddsmodal__sub",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 588,
+  "sel": ".psoddsmodal__meta",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/40-game-modals.css",
+  "line": 26,
+  "sel": ".tscoremodal__kicker",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/40-game-modals.css",
+  "line": 67,
+  "sel": ".tscoremodal__subkicker",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/40-game-modals.css",
+  "line": 99,
+  "sel": ".tscoremodal__foot",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/40-game-modals.css",
+  "line": 210,
+  "sel": ".hlsheet__save",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 50,
+  "sel": ".scorebookstory__coverline, .scorebookstory__dateline",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 123,
+  "sel": ".scorebookstory__tally span",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 146,
+  "sel": ".scorebookstory__stamp",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 184,
+  "sel": ".scorebookstory__sectionhead > span",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 242,
+  "sel": ".scorebookstory__rank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 249,
+  "sel": ".scorebookstory__gamescore",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 275,
+  "sel": ".scorebookstory__matchup > span",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 282,
+  "sel": ".scorebookstory__gamefoot",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 40 chars"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 314,
+  "sel": ".scorebookstory__performerRank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 333,
+  "sel": ".scorebookstory__performerText span",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 364,
+  "sel": ".scorebookstory__momentmeta span",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 366,
+  "sel": ".scorebookstory__moment > strong",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 389,
+  "sel": ".scorebookstory__leaderhead, .scorebookstory__leaderrow",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 392,
+  "sel": ".scorebookstory__leaderhead",
+  "face": "mono",
+  "how": "same selector",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 396,
+  "sel": ".scorebookstory__leaderrow b",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 17 chars"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 397,
+  "sel": ".scorebookstory__leaderrow small",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 428,
+  "sel": ".scorebookstory__nuggetstat small",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 453,
+  "sel": ".scorebookstory__records b",
+  "face": "body",
+  "how": "rendered",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 17 chars"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 454,
+  "sel": ".scorebookstory__records small",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 469,
+  "sel": ".scorebookstory__filters button",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 489,
+  "sel": ".scorebookstory__ledgerrow > span",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 32 chars"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 503,
+  "sel": ".scorebookstory__footer",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 512,
+  "sel": ".scorebookstory__dateline",
+  "face": "mono",
+  "how": "same selector",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 559,
+  "sel": ".allstarlegacy__sectiontitle",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 618,
+  "sel": ".allstarlegacy__leaderteam",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 21 chars"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 670,
+  "sel": ".allstarlegacy__teamrank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 737,
+  "sel": ".allstarlegacy__honoreepos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 846,
+  "sel": ".allstarlegacy__rankrail-of",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 90,
+  "sel": ".foulboard__whiffcol-heading",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 136,
+  "sel": ".foulboard__grouprow th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 168,
+  "sel": ".foulboard__subhead th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 288,
+  "sel": ".foulboard__heroname-first",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 424,
+  "sel": ".scorebug__team",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 444,
+  "sel": ".scorebug__inning",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 449,
+  "sel": ".scorebug__arrow",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 479,
+  "sel": ".scorebug__result",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 511,
+  "sel": "#root .scorebug__prose",
+  "face": "read",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 122 chars"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 653,
+  "sel": ".sgh-vallabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 668,
+  "sel": ".sgh-sub",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 17 chars"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 780,
+  "sel": ".gamehigh-newstamp",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 816,
+  "sel": ".gamehigh-matchup__date",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/44-pre-game-cards.css",
+  "line": 247,
+  "sel": ".seasonseries__innings",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/44-pre-game-cards.css",
+  "line": 262,
+  "sel": ".seasonseries__date",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/44-pre-game-cards.css",
+  "line": 300,
+  "sel": ".photostrip__viewall",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/44-pre-game-cards.css",
+  "line": 410,
+  "sel": ".infopop__btn",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 1 chars"
+ },
+ {
+  "file": "src/styles/44-pre-game-cards.css",
+  "line": 494,
+  "sel": ".penboard__pill",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/44-pre-game-cards.css",
+  "line": 545,
+  "sel": ".penboard__tag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 106,
+  "sel": ".admincopy__historyCount",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 183,
+  "sel": ".admincopy__count",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 296,
+  "sel": ".admincopy__invalid",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 321,
+  "sel": ".awardord__steplabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 377,
+  "sel": ".awardord__hd",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 408,
+  "sel": ".awardord__n",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 426,
+  "sel": ".awardord__tier",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 499,
+  "sel": ".awardord__pvN",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 516,
+  "sel": ".awardord__pvCt",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 528,
+  "sel": ".awardord__cut",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/47-trade-deadline.css",
+  "line": 39,
+  "sel": ".tradedl__seasondeadline",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/47-trade-deadline.css",
+  "line": 65,
+  "sel": ".tradedl__filterlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/47-trade-deadline.css",
+  "line": 106,
+  "sel": ".tradecard__badge",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/47-trade-deadline.css",
+  "line": 233,
+  "sel": ".tradecard__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/47-trade-deadline.css",
+  "line": 391,
+  "sel": ".tradecard__swap .tradecard__statline",
+  "face": "read",
+  "how": "rendered",
+  "to": "--fs-small",
+  "why": "running copy — rendered 51 chars"
+ },
+ {
+  "file": "src/styles/48-logbook.css",
+  "line": 60,
+  "sel": ".logbook__seasons small",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48-logbook.css",
+  "line": 121,
+  "sel": ".logbook__pending small",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48-logbook.css",
+  "line": 131,
+  "sel": ".logbook__caption",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48-logbook.css",
+  "line": 148,
+  "sel": ".logbook__note",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/48-logbook.css",
+  "line": 240,
+  "sel": ".clubsseen__name",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48-logbook.css",
+  "line": 296,
+  "sel": ".stampcard__meta",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48-stamp-strip.css",
+  "line": 82,
+  "sel": ".stampstrip__eyebrow",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48-stamp-strip.css",
+  "line": 126,
+  "sel": ".stampstrip__disclose",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48-stamp-strip.css",
+  "line": 174,
+  "sel": ".stampstrip__modes button",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48-stamp-strip.css",
+  "line": 196,
+  "sel": ".stampstrip__notelabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48-stamp-strip.css",
+  "line": 231,
+  "sel": ".stampstrip__remove",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 22,
+  "sel": ".logbookstats__dateline",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 64,
+  "sel": ".logbookstats__tally span",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 81,
+  "sel": ".logbookstats__sectionhead span",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 123,
+  "sel": ".logbookstats__splits span",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 139,
+  "sel": ".logbookstats__splits small",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 173,
+  "sel": ".logbookstats__streaks span",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 181,
+  "sel": ".logbookstats__streaks small",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 205,
+  "sel": ".logbookstats__tablehead",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 239,
+  "sel": ".logbookstats__row--pair i",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 273,
+  "sel": ".logbookstats__toggle small",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 329,
+  "sel": ".logbookstats__performerRank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 357,
+  "sel": ".logbookstats__performerText span",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 364,
+  "sel": ".logbookstats__performerText b",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 411,
+  "sel": ".logbookstats__momentmeta span",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 425,
+  "sel": ".logbookstats__moment > strong",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 439,
+  "sel": ".logbookstats__watch",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 483,
+  "sel": ".logbookstats__leaderhead, .logbookstats__leaderrow",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 513,
+  "sel": ".logbookstats__leaderrow b",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 522,
+  "sel": ".logbookstats__leaderrow small",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48a-logbook-stats.css",
+  "line": 580,
+  "sel": ".logbookstats__records small",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48c-stamp-sheet.css",
+  "line": 123,
+  "sel": ".stamppane__count",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/48c-stamp-sheet.css",
+  "line": 322,
+  "sel": ".postagestamp__caption",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/48d-stamp-detail.css",
+  "line": 224,
+  "sel": ".stampdetail__fact dt",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/49-passport-book.css",
+  "line": 465,
+  "sel": ".passportpage__pending",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/49-passport-book.css",
+  "line": 495,
+  "sel": ".passportpage__number",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/49-passport-book.css",
+  "line": 507,
+  "sel": ".passportpage__addpage",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/49-passport-book.css",
+  "line": 948,
+  "sel": ".logbook__traystamp small",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/49-passport-book.css",
+  "line": 1032,
+  "sel": ".logbook__orderscope",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/49-passport-book.css",
+  "line": 1046,
+  "sel": ".logbook__unplace, .logbook__unplaced",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/50-logbook-landing.css",
+  "line": 77,
+  "sel": ".logbooklanding__devicenote",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/50-logbook-landing.css",
+  "line": 142,
+  "sel": ".logbooklanding__fineprint",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/50-logbook-landing.css",
+  "line": 351,
+  "sel": ".logbooklanding__stepnum",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/50-logbook-landing.css",
+  "line": 410,
+  "sel": ".logbooklanding__benefitlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/51-similar-players.css",
+  "line": 76,
+  "sel": ".simlike__measurelabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/51-similar-players.css",
+  "line": 101,
+  "sel": ".simlike__term",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/51-similar-players.css",
+  "line": 191,
+  "sel": ".simlike__first",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/51-similar-players.css",
+  "line": 212,
+  "sel": ".simlike__meta",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/51-similar-players.css",
+  "line": 257,
+  "sel": ".simlike__matchunit",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/52-highlight-clip-card.css",
+  "line": 163,
+  "sel": ".hlclip__play",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/52-highlight-clip-card.css",
+  "line": 218,
+  "sel": ".hlclip__meta",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/52-highlight-clip-card.css",
+  "line": 322,
+  "sel": ".hlclip__loading",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/52-highlight-clip-card.css",
+  "line": 342,
+  "sel": ".flipback__watchbtn",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 34,
+  "sel": ".umptend__season",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 61,
+  "sel": ".umptend__first",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 78,
+  "sel": ".umptend__sub",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 96,
+  "sel": ".umptend__leanhd",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 202,
+  "sel": ".umptend__watchlbl",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 251,
+  "sel": ".umptend__tilel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 267,
+  "sel": ".umptend__tilesup",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 279,
+  "sel": ".umptend__challbl",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 290,
+  "sel": ".umptend__chalfoot",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 299,
+  "sel": ".umptend__prov",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/54-my-tally.css",
+  "line": 103,
+  "sel": ".mytally__scopenote",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/54-my-tally.css",
+  "line": 203,
+  "sel": ".mytally__fieldnote",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/54-my-tally.css",
+  "line": 386,
+  "sel": ".mytally__rowbtnhint",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/55-my-tally-account.css",
+  "line": 84,
+  "sel": ".syncreceipt__state",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/55-my-tally-account.css",
+  "line": 92,
+  "sel": ".syncreceipt__last",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/55-my-tally-account.css",
+  "line": 189,
+  "sel": ".mytally__claimblurb",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/55-my-tally-account.css",
+  "line": 213,
+  "sel": ".mytally__fineprint",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/55-my-tally-account.css",
+  "line": 263,
+  "sel": ".mergereceipt__note",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/56-my-tally-intro.css",
+  "line": 46,
+  "sel": ".introsheet__reactiontext",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/56-my-tally-intro.css",
+  "line": 54,
+  "sel": ".introsheet__fineprint",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/56-my-tally-intro.css",
+  "line": 100,
+  "sel": ".introsheet__marker",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/56-my-tally-intro.css",
+  "line": 151,
+  "sel": ".introsheet__benefitblurb",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/57-ballpark-card.css",
+  "line": 113,
+  "sel": ".ballparkcard__note",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/58-logbook-shelf.css",
+  "line": 268,
+  "sel": ".shelf__edit",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/58-logbook-shelf.css",
+  "line": 392,
+  "sel": ".bookmgmt__field span",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/58-logbook-shelf.css",
+  "line": 432,
+  "sel": ".bookmgmt__remove",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/59-stamp-in.css",
+  "line": 111,
+  "sel": ".stampin__mark",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/60-book-cover-picker.css",
+  "line": 49,
+  "sel": ".coverpick__heading",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/60-book-cover-picker.css",
+  "line": 189,
+  "sel": ".coverpick__favorite",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/61-ballpark-admin.css",
+  "line": 56,
+  "sel": ".bpadmin__actions .bpadmin__btn",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/61-ballpark-admin.css",
+  "line": 79,
+  "sel": ".bpadmin__flag",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/61-ballpark-admin.css",
+  "line": 117,
+  "sel": ".bpadmin__label",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/61-ballpark-admin.css",
+  "line": 153,
+  "sel": ".bpadmin .bpadmin__btn",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/61-ballpark-admin.css",
+  "line": 166,
+  "sel": ".bpadmin__hint",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/61-ballpark-admin.css",
+  "line": 177,
+  "sel": ".bpadmin__error",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/62-game-preview.css",
+  "line": 79,
+  "sel": ".posterstudio__note, .posterstudio__hint",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/62-game-preview.css",
+  "line": 125,
+  "sel": ".posterstudio__waiting",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/62-game-preview.css",
+  "line": 144,
+  "sel": ".posterstudio__warn",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 72,
+  "sel": ".idadmin__actions .idadmin__btn",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 98,
+  "sel": ".idadmin__flag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 139,
+  "sel": ".iddrawer__tile",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 210,
+  "sel": ".iddrawer__label",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 278,
+  "sel": ".iddrawer__hint",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 286,
+  "sel": ".iddrawer__note, .iddrawer__warn, .iddrawer__foot",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 315,
+  "sel": ".iddrawer__error",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 355,
+  "sel": ".iddrawer__checkbox",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 458,
+  "sel": ".iddrawer__btn",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 491,
+  "sel": ".iddrawer__stampcap",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/63-print-sheet.css",
+  "line": 152,
+  "sel": ".printsheet__crewhead",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/63-print-sheet.css",
+  "line": 179,
+  "sel": ".ps-writein__label, .ps-ump__role, .ps-clubfact__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/63-print-sheet.css",
+  "line": 192,
+  "sel": ".ps-writein__line, .ps-ump__name, .ps-clubfact__line",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/63-print-sheet.css",
+  "line": 222,
+  "sel": ".printsheet__clubline",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/63-print-sheet.css",
+  "line": 253,
+  "sel": ".printsheet__grid thead th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/63-print-sheet.css",
+  "line": 261,
+  "sel": ".printsheet__grid tbody td",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 6 chars"
+ },
+ {
+  "file": "src/styles/63-print-sheet.css",
+  "line": 335,
+  "sel": ".printsheet__mark",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/64-milb-alumni.css",
+  "line": 86,
+  "sel": ".alum__ident",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/65-about-page.css",
+  "line": 162,
+  "sel": ".aboutfigs__k",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/65-about-page.css",
+  "line": 277,
+  "sel": ".aboutrule__n",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/65-about-page.css",
+  "line": 331,
+  "sel": ".aboutledger__n",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/65-team-records.css",
+  "line": 34,
+  "sel": ".trec__half",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/65-team-records.css",
+  "line": 60,
+  "sel": ".trec__grouphead",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/65-team-records.css",
+  "line": 94,
+  "sel": ".trec__countk",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/65-team-records.css",
+  "line": 141,
+  "sel": ".trec__empty",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/65-team-records.css",
+  "line": 166,
+  "sel": ".trecinn__legend",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/65-team-records.css",
+  "line": 178,
+  "sel": ".trecinn__colhead",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/65-team-records.css",
+  "line": 186,
+  "sel": ".trecinn__rowhead",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/65-team-records.css",
+  "line": 225,
+  "sel": ".trecinn__pct",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/65-team-records.css",
+  "line": 230,
+  "sel": ".trecinn__last",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/66-situational-records.css",
+  "line": 96,
+  "sel": ".trrank__scopehead strong",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/66-situational-records.css",
+  "line": 117,
+  "sel": ".trrank__chip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/66-situational-records.css",
+  "line": 168,
+  "sel": ".trrank__jump a",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/66-situational-records.css",
+  "line": 202,
+  "sel": ".trrank__groupnum",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/66-situational-records.css",
+  "line": 328,
+  "sel": ".trrank__figuresub",
+  "face": "mono",
+  "how": "rendered",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/66-situational-records.css",
+  "line": 342,
+  "sel": ".trrank__tilefoot",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/66-situational-records.css",
+  "line": 349,
+  "sel": ".trrank__tilefoot strong",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/67-awards-ledger.css",
+  "line": 35,
+  "sel": ".awards__tally",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/67-awards-ledger.css",
+  "line": 59,
+  "sel": ".awards__chip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/67-awards-ledger.css",
+  "line": 144,
+  "sel": ".awardtbl th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/67-awards-ledger.css",
+  "line": 209,
+  "sel": ".awardtbl__chip",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/67-awards-ledger.css",
+  "line": 238,
+  "sel": ".awardidx__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/67-awards-ledger.css",
+  "line": 276,
+  "sel": ".awardidx__ct",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/67-awards-ledger.css",
+  "line": 291,
+  "sel": ".awardidx__when",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 129,
+  "sel": ".bcast__meta dt",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 231,
+  "sel": ".slab__note",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 172 chars"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 323,
+  "sel": ".rpt__between th, .rpt__between td",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 23 chars"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 412,
+  "sel": ".rpt thead th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 520,
+  "sel": ".rpt__sub",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 42 chars"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 628,
+  "sel": ".pillar-key li",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 62 chars"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 798,
+  "sel": ".yrange__count",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 885,
+  "sel": ".yrange__ends",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 926,
+  "sel": ".dh__caption",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 69 chars"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 966,
+  "sel": ".dh__oppcount",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 1029,
+  "sel": ".dh__against-item",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 1056,
+  "sel": ".dh__drawer th, .dh__drawer td",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 54,
+  "sel": ".hitchart__eyebrow",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 100,
+  "sel": ".hitchart__tag",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 174,
+  "sel": ".hitchart__count",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 300,
+  "sel": ".hitchart__dotnum",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 402,
+  "sel": ".hitchart__keyitem",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 432,
+  "sel": ".hitchart__factlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 458,
+  "sel": ".hitchart__listhead",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 482,
+  "sel": ".hitchart__rownum",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 501,
+  "sel": ".hitchart__rowcode",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 703,
+  "sel": ".bflight__outcome",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 720,
+  "sel": ".bflight__code",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 827,
+  "sel": ".bflight__factlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/69-pitch-arsenal.css",
+  "line": 41,
+  "sel": ".pitchslab__total",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/69-pitch-arsenal.css",
+  "line": 91,
+  "sel": ".pitchslab__filterlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/69-pitch-arsenal.css",
+  "line": 193,
+  "sel": ".pitchslab__family",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/69-pitch-arsenal.css",
+  "line": 222,
+  "sel": ".pitchslab__pct",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/69-pitch-arsenal.css",
+  "line": 240,
+  "sel": ".pitchslab__unit",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/69-pitch-arsenal.css",
+  "line": 310,
+  "sel": ".pitchslab__factlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/69-pitch-arsenal.css",
+  "line": 384,
+  "sel": ".arsenal__title",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/69-pitch-arsenal.css",
+  "line": 503,
+  "sel": ".arsenal__tab",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 45,
+  "sel": ".ctr__tilelabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 64,
+  "sel": ".ctr__tilenote",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 98,
+  "sel": ".cliff__value",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 161,
+  "sel": ".ctr__namehead",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 173,
+  "sel": ".ctr__agehead",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 239,
+  "sel": ".ctr__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 262,
+  "sel": ".ctr__terms",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 313,
+  "sel": ".ctr__code",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 326,
+  "sel": ".ctr__subtotal td",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 336,
+  "sel": ".ctr__subtotal th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-postseason-race.css",
+  "line": 6,
+  "sel": ".psrace__asof",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-postseason-race.css",
+  "line": 60,
+  "sel": ".seedrow__pendslash",
+  "face": "body",
+  "how": "rendered",
+  "to": "--fs-caption (kept)",
+  "why": "token — rendered 1 chars"
+ },
+ {
+  "file": "src/styles/70-postseason-race.css",
+  "line": 65,
+  "sel": ".seedrow__pendlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-postseason-race.css",
+  "line": 73,
+  "sel": ".psrace__tbdcaption",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 172 chars"
+ },
+ {
+  "file": "src/styles/70-postseason-race.css",
+  "line": 89,
+  "sel": ".psrace__guide, .psrace__scrollhint, .psrace__destination",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-postseason-race.css",
+  "line": 113,
+  "sel": ".psrace__format",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/70-postseason-race.css",
+  "line": 133,
+  "sel": ".psrace__bye",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/71-salaries-league.css",
+  "line": 57,
+  "sel": ".payboard__chip",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/71-salaries-league.css",
+  "line": 138,
+  "sel": ".payboard__tag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/71-salaries-league.css",
+  "line": 202,
+  "sel": ".payclubs__rank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/71-salaries-league.css",
+  "line": 305,
+  "sel": ".posspend__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/71-salaries-league.css",
+  "line": 317,
+  "sel": ".posspend__money",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/72-club-transactions.css",
+  "line": 29,
+  "sel": ".txpage__dateline",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/72-player-hover-card.css",
+  "line": 92,
+  "sel": ".phcard__tag",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/72-player-hover-card.css",
+  "line": 150,
+  "sel": ".phcard__tilek",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/73-spray-map.css",
+  "line": 96,
+  "sel": ".spray__count",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/73-spray-map.css",
+  "line": 115,
+  "sel": ".spray__basis",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/73-spray-map.css",
+  "line": 246,
+  "sel": ".spray__key",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/73-spray-map.css",
+  "line": 313,
+  "sel": ".spray__dirlabels",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/73-spray-map.css",
+  "line": 330,
+  "sel": ".spray__dircaption",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/73-spray-map.css",
+  "line": 346,
+  "sel": ".spray__foot",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 103,
+  "sel": ".cwb__tabcount, .cwb__progressline",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 112,
+  "sel": ".cwb__tabblurb, .cwb__what",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 171,
+  "sel": ".cwb__key",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 234,
+  "sel": ".cwb__qsub",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 263,
+  "sel": ".cwb__panemeta, .cwb__rowhead",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 272,
+  "sel": ".cwb__badge",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 367,
+  "sel": ".cwb__mini",
+  "face": "display",
+  "how": "same selector",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 416,
+  "sel": ".cwb__candkey",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 450,
+  "sel": ".cwb__candid, .cwb__scorenum",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 492,
+  "sel": ".cwb__chip",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 526,
+  "sel": ".cwb__rosterrow",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/74-contract-workbench.css",
+  "line": 560,
+  "sel": ".cwb__rowmeta, .cwb__rowstate",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/74a-contract-lookup.css",
+  "line": 102,
+  "sel": ".lookupdeck__count",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/74a-contract-lookup.css",
+  "line": 145,
+  "sel": ".lookupdeck__rowmeta",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/75-run-value.css",
+  "line": 216,
+  "sel": ".rvsplit__item dt",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/75-run-value.css",
+  "line": 302,
+  "sel": ".rvclub__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/76-workload-marks.css",
+  "line": 96,
+  "sel": ".daystrip__day",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/76-workload-marks.css",
+  "line": 162,
+  "sel": ".daystrip-key li",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/76-workload-marks.css",
+  "line": 227,
+  "sel": ".bullets__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/76-workload-marks.css",
+  "line": 327,
+  "sel": ".bullets__of",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/76-workload-marks.css",
+  "line": 351,
+  "sel": ".staffgrid__tally",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/76-workload-marks.css",
+  "line": 385,
+  "sel": ".staffgrid__hlabel, .staffgrid__dayname",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/76-workload-marks.css",
+  "line": 517,
+  "sel": ".penpage__rulehead",
+  "face": "read",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 97 chars"
+ },
+ {
+  "file": "src/styles/77-express-lane.css",
+  "line": 249,
+  "sel": ".xl__chipcode",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/77a-express-lane-entry.css",
+  "line": 178,
+  "sel": ".xl-entry__side",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/77a-express-lane-entry.css",
+  "line": 211,
+  "sel": ".xl-entry__figlabel",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/77a-express-lane-entry.css",
+  "line": 347,
+  "sel": ".xl-pitch__type",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/77c-express-lane-deck.css",
+  "line": 108,
+  "sel": ".xl-deck__base",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/77c-express-lane-deck.css",
+  "line": 162,
+  "sel": ".xl-deck__atbat",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/78-offseason.css",
+  "line": 139,
+  "sel": ".wintercal__date",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/78-offseason.css",
+  "line": 331,
+  "sel": ".pgame__org",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/78-offseason.css",
+  "line": 387,
+  "sel": ".pgame__meta",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/78-offseason.css",
+  "line": 435,
+  "sel": ".movedup__table thead th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/78-offseason.css",
+  "line": 489,
+  "sel": ".movedup__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/78-offseason.css",
+  "line": 540,
+  "sel": ".movedup__pool",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/boxlines/boxlines.css",
+  "line": 167,
+  "sel": ".boxline__series",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/boxlines/boxlines.css",
+  "line": 390,
+  "sel": ".boxlines-door__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/boxlines/gamelines.css",
+  "line": 48,
+  "sel": ".gamelines__hint",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/boxlines/gamelines.css",
+  "line": 110,
+  "sel": ".gamelines__col",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/boxlines/gamelines.css",
+  "line": 220,
+  "sel": ".gamelines__famcount",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/boxlines/gamelines.css",
+  "line": 286,
+  "sel": "button.gamelines__door, .gamelines__head",
+  "face": "mono",
+  "how": "same selector",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/boxlines/gamelines.css",
+  "line": 296,
+  "sel": ".gamelines__heading",
+  "face": "display",
+  "how": "same selector",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/boxlines/listdoor.css",
+  "line": 79,
+  "sel": ".boxlines__listcol",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/boxlines/listdoor.css",
+  "line": 177,
+  "sel": "button.boxlines__back",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/boxlines/listdoor.css",
+  "line": 197,
+  "sel": ".boxlines__listhead, button.boxlines-entry",
+  "face": "mono",
+  "how": "same selector",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 51,
+  "sel": ".dlab__jumplink",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 191,
+  "sel": ".dlab__path",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 205,
+  "sel": ".dlab__note",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 293 chars"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 220,
+  "sel": ".dlab__verdict",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 274,
+  "sel": ".dlab__swatchname",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 282,
+  "sel": ".dlab__swatchval",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 321,
+  "sel": ".dlab__typelabel",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 411,
+  "sel": ".dlab__pairnote",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 46 chars"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 421,
+  "sel": ".dlab__ratio",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 457,
+  "sel": ".dlab__recipelist",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/focus/atbat.css",
+  "line": 97,
+  "sel": ".abhero__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/focus/atbat.css",
+  "line": 109,
+  "sel": ".abhero__jersey",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/focus/console.css",
+  "line": 268,
+  "sel": ".statline--console .stat__k",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/focus/console.css",
+  "line": 383,
+  "sel": ".betweeninnings__eyebrow",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/focus/console.css",
+  "line": 390,
+  "sel": ".betweeninnings__progress",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/focus/console.css",
+  "line": 420,
+  "sel": ".betweeninnings__who",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/focus/reference.css",
+  "line": 59,
+  "sel": ".trailcell__name",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/focus/reference.css",
+  "line": 110,
+  "sel": ".trailcell__notes",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/focus/reference.css",
+  "line": 169,
+  "sel": ".refpanel__tab, .refbar__chip, .trailstrip__followbtn, .trai",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/focus/reference.css",
+  "line": 365,
+  "sel": ".focusrail .pitchers__grid th, .focusrail .pitchers__grid td",
+  "face": "display",
+  "how": "rendered",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/focus/reference.css",
+  "line": 553,
+  "sel": ".lineupcard__swap",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/report/challenge-card.css",
+  "line": 56,
+  "sel": ".chalcard__league",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/report/challenge-card.css",
+  "line": 79,
+  "sel": ".chalcard__view",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/report/challenge-card.css",
+  "line": 118,
+  "sel": ".chalcard__board thead th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/report/challenge-card.css",
+  "line": 143,
+  "sel": ".chalcard__floor",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — role name"
+ },
+ {
+  "file": "src/styles/report/charts.css",
+  "line": 83,
+  "sel": ".colchart__ticklabel, .colchart__label",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/report/charts.css",
+  "line": 154,
+  "sel": ".colchart__value",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/report/charts.css",
+  "line": 204,
+  "sel": ".colchart__paneltitle",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/report/charts.css",
+  "line": 230,
+  "sel": ".colchart__end",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/report/charts.css",
+  "line": 285,
+  "sel": ".colchart__rulelabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/report/charts.css",
+  "line": 308,
+  "sel": ".colchart__panelsub",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 46 chars"
+ },
+ {
+  "file": "src/styles/report/charts.css",
+  "line": 413,
+  "sel": ".scatter__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/report/charts.css",
+  "line": 449,
+  "sel": ".scatter__note",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/report/chrome.css",
+  "line": 36,
+  "sel": ".rptkey dt",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/report/chrome.css",
+  "line": 44,
+  "sel": ".rptkey dd",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 30 chars"
+ },
+ {
+  "file": "src/styles/report/chrome.css",
+  "line": 62,
+  "sel": ".rptsource",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 561 chars"
+ },
+ {
+  "file": "src/styles/report/chrome.css",
+  "line": 155,
+  "sel": ".rptfail",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-small",
+  "why": "running copy — rendered 35 chars"
+ },
+ {
+  "file": "src/styles/research/diary.css",
+  "line": 270,
+  "sel": ".researchdiary__table thead th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/research/diary.css",
+  "line": 340,
+  "sel": ".researchdiary__techlist",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/box.css",
+  "line": 66,
+  "sel": ".sc-sub__num",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/box.css",
+  "line": 209,
+  "sel": ".sc-ab__sealtext",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/box.css",
+  "line": 249,
+  "sel": ".sc-ab__fliptext",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/box.css",
+  "line": 322,
+  "sel": ".sc-ab__type, .sc-ab__rbi",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/box.css",
+  "line": 406,
+  "sel": ".sc-ab__out",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/box.css",
+  "line": 464,
+  "sel": ".sc-ab__pip",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/footer.css",
+  "line": 108,
+  "sel": ".sc-scoreboard thead th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/footer.css",
+  "line": 201,
+  "sel": ".sc-decision__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/footer.css",
+  "line": 246,
+  "sel": ".sc-decision__fig",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 105,
+  "sel": ".sc-sheet thead th",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 146,
+  "sel": ".sc-sheet__name",
+  "face": "body",
+  "how": "same rule",
+  "to": "--fs-caption (kept)",
+  "why": "token — role name"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 180,
+  "sel": ".sc-sheet__jersey",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 199,
+  "sel": ".sc-sheet__pos",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 208,
+  "sel": ".sc-sheet__slotnum",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 259,
+  "sel": ".sc-sheet__sum",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 312,
+  "sel": ".sc-sheet__footlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 338,
+  "sel": ".sc-sheet__ptl",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 344,
+  "sel": ".sc-sheet__ptlLabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 365,
+  "sel": ".sc-sheet__totplate",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 380,
+  "sel": ".sc-sheet__totfigs",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/page.css",
+  "line": 76,
+  "sel": ".sc-zoom__pct",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/scorecard/page.css",
+  "line": 95,
+  "sel": ".sc-labload__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/page.css",
+  "line": 225,
+  "sel": ".sc-field__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/page.css",
+  "line": 235,
+  "sel": ".sc-field__line",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/scorecard/page.css",
+  "line": 288,
+  "sel": ".sc-scoreby__opt",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/scorecard/page.css",
+  "line": 347,
+  "sel": ".sc-firstpitch__mlabel",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/scorecard/page.css",
+  "line": 392,
+  "sel": ".sc-editsheet__hint",
+  "face": "unknown",
+  "how": "-",
+  "to": "--fs-caption (kept)",
+  "why": "face unresolved (none) — never rendered, left at 11px"
+ },
+ {
+  "file": "src/styles/scorecard/page.css",
+  "line": 408,
+  "sel": ".sc-editsheet__label",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/situational-records/66a-detail.css",
+  "line": 77,
+  "sel": ".trrank__podiumrank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/situational-records/66a-detail.css",
+  "line": 123,
+  "sel": ".trrank__related a",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/situational-records/66a-detail.css",
+  "line": 160,
+  "sel": ".trrank__rank",
+  "face": "mono",
+  "how": "same rule",
+  "to": "--fs-cell",
+  "why": "mono face -> figures, 11px, unchanged"
+ },
+ {
+  "file": "src/styles/situational-records/66a-detail.css",
+  "line": 198,
+  "sel": ".trrank__podiumteam",
+  "face": "display",
+  "how": "same selector",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ },
+ {
+  "file": "src/styles/situational-records/66a-detail.css",
+  "line": 223,
+  "sel": ".trrank__lastopp",
+  "face": "display",
+  "how": "same rule",
+  "to": "--fs-label",
+  "why": "display face -> the label role, 12px"
+ }
+]

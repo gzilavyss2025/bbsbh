@@ -40,10 +40,10 @@
 :root {
   /* --- copied from src/tokens/colors.css, guarded by check-learn-css.mjs --- */
   --paper-0: #F6EFDC;
-  --paper-1: #F3ECD8;
+  --paper-1: #F6EFDC;
   --paper-2: #FBF6E9;
   --paper-3: #FFFDF6;
-  --ink-0: #16222F;
+  --ink-0: #0F1822;
   --ink-1: #1B2A3A;
   --ink-2: #3C4A5A;
   --graphite: #6B6558;

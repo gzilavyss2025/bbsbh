@@ -24,7 +24,7 @@
 
 .searchbox__label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -155,7 +155,7 @@
 
 .gamefinder__season label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -256,7 +256,7 @@
 .sitefooter__more-label {
   margin: 0 0 var(--space-2);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -523,7 +523,7 @@
 .searchoverlay__grouptitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -535,7 +535,7 @@
   background: none;
   color: var(--field-deep);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   cursor: pointer;
@@ -732,7 +732,7 @@
 .favteamsheet__subtitle {
   margin: 0 0 4px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -864,7 +864,7 @@
 }
 
 .sitefooter__brand > span {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
 }
 

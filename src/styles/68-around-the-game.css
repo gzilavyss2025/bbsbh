@@ -126,7 +126,7 @@
 
 .bcast__meta dt {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--paper-2);
   opacity: 0.62;
@@ -228,7 +228,7 @@
 .slab__note {
   margin: var(--space-1) 0 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-muted);
 }
@@ -409,7 +409,7 @@
 
 .rpt thead th {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
   border-bottom: var(--bw-heavy) solid var(--navy);
@@ -517,7 +517,7 @@
 .rpt__sub {
   display: block;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   color: var(--text-caption);
 }
 
@@ -625,7 +625,7 @@
   align-items: baseline;
   gap: var(--space-2);
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
@@ -795,7 +795,7 @@
 
 .yrange__count {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -882,7 +882,7 @@
   justify-content: space-between;
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -923,7 +923,7 @@
 .dh__caption {
   margin: 0 0 var(--space-2);
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   color: var(--text-caption);
 }
 
@@ -963,7 +963,7 @@
 .dh__oppcount {
   margin-left: 6px;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -1053,7 +1053,7 @@
 .dh__drawer td {
   padding: 4px 10px;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;
@@ -1067,5 +1067,51 @@
 
 .dh__drawer tbody th {
   text-align: left;
+  color: var(--text-heading);
+}
+
+/* ---- the run differential report (/run-differential) --------------------- */
+
+/* WHAT HAPPENED NEXT, in the board's last column. The round a club went out in
+   and the score of that series are one fact — "out in the NLDS 0–3" — so they
+   share a cell rather than taking two columns a reader has to assemble. The
+   boards sit in a scroller, so the width is already paid for. */
+.rdiff__out {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* THE ONLY OUTCOME THAT GETS INK. A champion is about one row in five on this
+   board and the page's whole question is how few they are, so it carries the
+   seam red this package already uses for emphasis. The two that get LESS ink
+   are the two that are not results: a club that never got in, and a season
+   with no postseason to get into. Colour rather than weight, because the
+   display and mono faces here ship one weight each. */
+.rdiff__out--win {
+  color: var(--clay);
+}
+
+.rdiff__out--miss,
+.rdiff__out--none {
+  color: var(--text-muted);
+}
+
+/* The series score, in mono beside the round it belongs to, so a column of them
+   reads as figures that line up rather than as more words. */
+.rdiff__series {
+  margin-left: var(--space-2);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-caption);
+}
+
+/* An era's name sits in the row header where a club name sits on the board
+   above it — the same slot, so it takes the same treatment. */
+.rdiff__era {
+  display: block;
+  font-family: var(--font-display);
   color: var(--text-heading);
 }

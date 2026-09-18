@@ -265,7 +265,7 @@
 }
 
 .statline--console .stat__k {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
 }
 
 /* THE INK-IN (ADR-0046) — the half committed, so this card is what marks it:
@@ -380,14 +380,14 @@
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
 .betweeninnings__progress {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -417,7 +417,7 @@
 .betweeninnings__who {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   color: var(--text-caption);
 }
 .betweeninnings__text {

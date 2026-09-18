@@ -44,7 +44,7 @@
   display: block;
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-xwide);
   line-height: var(--lh-solid);
@@ -69,7 +69,7 @@
   border-radius: var(--radius-pill);
   box-shadow: 0 3px 10px color-mix(in srgb, var(--ink-0) 16%, transparent);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   line-height: var(--lh-solid);
@@ -204,7 +204,7 @@
   border-top: var(--bw-hair) solid var(--border-rule);
   color: var(--text-caption);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-variant-numeric: tabular-nums;
 }
 .contractcard__control li::before {
@@ -229,7 +229,7 @@
 .contractcard__control em {
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-style: normal;
   letter-spacing: var(--ls-label);
 }
@@ -241,7 +241,7 @@
   margin: var(--space-3) var(--space-4) 0;
   color: var(--text-caption);
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
 }
 
@@ -314,7 +314,7 @@
 .contractcard__seg strong {
   color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   line-height: var(--lh-compact);
@@ -322,7 +322,7 @@
 .contractcard__seg em {
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-style: normal;
   letter-spacing: var(--ls-label);
   line-height: var(--lh-solid);
@@ -349,7 +349,7 @@
 .contractcard__barvalue {
   color: var(--text-caption);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
   line-height: var(--lh-solid);
@@ -406,7 +406,7 @@
   padding: var(--space-3) var(--space-4);
   color: var(--text-caption);
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
 }
 
@@ -435,7 +435,7 @@
   border: var(--bw-hair) solid color-mix(in srgb, var(--seal) 45%, transparent);
   border-radius: var(--radius-sm);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   line-height: var(--lh-solid);

@@ -26,7 +26,7 @@ export const SHEET_RECIPE = [
 
 export const PILL_RECIPE = [
   'display: inline-flex; align-items: center',
-  'font-family: var(--font-display); font-size: var(--fs-caption)',
+  'font-family: var(--font-display); font-size: var(--fs-label)',
   'letter-spacing: var(--ls-label); text-transform: uppercase',
   'padding: 2px 7px; border-radius: var(--radius-pill)',
 ]

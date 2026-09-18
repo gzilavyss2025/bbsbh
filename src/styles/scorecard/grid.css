@@ -102,7 +102,7 @@
   padding: var(--space-1) 0;
   background: var(--bg-page);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -177,7 +177,7 @@
   flex: 0 0 auto;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-num);
   color: var(--accent-positive);
@@ -196,7 +196,7 @@
   background: var(--surface-card);
   text-align: center;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
 }
 /* The batting-order number leading a starter's name, printed small in the
    pencil ink the paper sheet preprints it in. */
@@ -205,7 +205,7 @@
   min-width: 12px;
   margin-right: var(--space-1);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
@@ -256,7 +256,7 @@
   text-align: center;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
 }
 
@@ -309,7 +309,7 @@
 }
 .sc-sheet__footlabel {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -335,13 +335,13 @@
   justify-items: center;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
   color: var(--text-body);
 }
 .sc-sheet__ptlLabel {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -362,7 +362,7 @@
   background: var(--book-board-kraft);
   color: var(--book-board-foil);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   line-height: var(--lh-ui);
@@ -377,7 +377,7 @@
   padding: 2px 0 3px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-num);
   color: var(--text-heading);
