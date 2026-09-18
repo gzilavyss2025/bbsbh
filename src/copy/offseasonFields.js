@@ -31,6 +31,15 @@ export function offseasonFields() {
       default: 'First spring game',
     },
     {
+      id: 'offseason.openerLabel',
+      group: 'offseason',
+      label: 'Countdown — what is being counted to, below MLB',
+      help: 'The same slot on a minor level’s offseason page. There is no minor-league spring training row to count to, so the day it counts to is that level’s own Opening Day, straight off the schedule.',
+      maxLength: 40,
+      multiline: false,
+      default: 'Opening Day',
+    },
+    {
       id: 'offseason.calendar',
       group: 'offseason',
       label: 'Winter calendar — the dated strip',

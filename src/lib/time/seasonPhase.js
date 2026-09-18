@@ -98,6 +98,93 @@ export function offseasonPhase(dateStr, row) {
   return null
 }
 
+// THE SAME READING, ONE LEVEL DOWN — issue #1077.
+//
+// A minor level is not a season; it is three leagues that each publish their
+// own. So there is no single row to compare a date against, and the sport-wide
+// row is not a stand-in for one (src/api/schedule.js's fetchLevelSeasonDates
+// records the year it was wrong by a day, in the direction that matters).
+//
+// The level's winter is the span in which NO league at it is playing:
+//
+//   it opens  the day the LAST league's offseason opens   max(offseasonStartDate)
+//   it closes the day before the FIRST league plays again min(regularSeasonStartDate)
+//
+// Both ends are the conservative one. Taking the max at the front means a level
+// whose third league is still in a championship series is not called a winter;
+// taking the min at the back means the page is gone before the earliest league's
+// Opening Day rather than after the latest one's.
+//
+// `leagues` is fetchLevelSeasonDates' array for the calendar year `dateStr`
+// falls in — the same "always the row for the DATE's year" rule offseasonPhase
+// above follows, and the same rollover consequence: statsapi rolls a minor
+// league over on January 1 too, so a January visit reads next season's opener
+// off the rows already in hand and needs no second call.
+//
+// There is no spring training at a minor level (no MiLB season row carries
+// springStartDate — checked for 2025, 2026 and 2027 at all four sport ids), so
+// the date the winter counts down to is the level's own Opening Day.
+//
+// Fails CLOSED at every step: an empty list, or one league missing either date,
+// returns null, and null means "not the offseason".
+export function levelOffseasonPhase(dateStr, leagues) {
+  if (!isIso(dateStr) || !Array.isArray(leagues) || leagues.length === 0) return null
+  const year = Number(dateStr.slice(0, 4))
+
+  let winterOpens = null
+  let opener = null
+  for (const league of leagues) {
+    const starts = league?.offseasonStartDate
+    const plays = league?.regularSeasonStartDate
+    // One unreadable league is enough to stop the whole level: the answer is a
+    // max and a min over ALL of them, and a partial list would silently give a
+    // window that is too wide at one end.
+    if (!isIso(starts) || !isIso(plays)) return null
+    if (winterOpens === null || starts > winterOpens) winterOpens = starts
+    if (opener === null || plays < opener) opener = plays
+  }
+
+  // September through December: this level's own offseason has opened. Next
+  // season's opener is on the NEXT year's rows, so the caller goes and gets it.
+  if (dateStr >= winterOpens) {
+    return {
+      seasonEnded: year,
+      startDate: winterOpens,
+      openingDay: null,
+      openerFromNextSeason: year + 1,
+    }
+  }
+
+  // January through the day before the first league plays: still the winter
+  // that opened last September, and the opener is on these rows already.
+  if (dateStr < opener) {
+    return {
+      seasonEnded: year - 1,
+      startDate: null,
+      openingDay: opener,
+      openerFromNextSeason: null,
+    }
+  }
+
+  // A day inside the season the leagues are playing. Not the offseason.
+  return null
+}
+
+// The first day any league at the level plays, out of one season's rows — the
+// date the September-to-December branch above has to fetch forward for. Null
+// unless every row carries one, for the same reason the phase itself is all or
+// nothing.
+export function levelOpeningDay(leagues) {
+  if (!Array.isArray(leagues) || leagues.length === 0) return null
+  let opener = null
+  for (const league of leagues) {
+    const plays = league?.regularSeasonStartDate
+    if (!isIso(plays)) return null
+    if (opener === null || plays < opener) opener = plays
+  }
+  return opener
+}
+
 // The winter calendar's rows, parsed out of the one admin-editable string that
 // holds them (`offseason.calendar` in the copy registry). One milestone per
 // line, `YYYY-MM-DD | Label`.

@@ -119,6 +119,10 @@
        (the SAME feed sentence `.pbp__desc` draws natural-case in Lora above —
        it is set in Lora here for that reason). Express Lane's title, legends,
        card names, figures, half label, batter name, chips and buttons all stay
+       shouted, the same split one more time
+     - the minor levels' offseason page, where the promotions list says what
+       board it is drawn from — `.movedup__pool` (issue #1077). The heading,
+       the column labels, the player names, the level path and the org all stay
        shouted, the same split one more time */
 #root * {
   text-transform: uppercase;

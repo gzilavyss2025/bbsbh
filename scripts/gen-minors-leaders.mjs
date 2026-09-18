@@ -83,6 +83,27 @@ for (const category of ALL_CATEGORIES) {
   if (entries.length) leaders[category.key] = entries
 }
 
-await writeJsonAtomic(out, { season, generatedAt: new Date().toISOString(), poolSize: pool.length, leaders })
-const cats = Object.keys(leaders).length
-console.log(`wrote ${out} (${pool.length} players ranked across ${cats} categories, top ${DEPTH} each)`)
+// DO NOT REPLACE A SEASON WITH AN EMPTY ONE. `season` is the calendar year this
+// script runs in, so the first nightly run of January asks four levels for a
+// season nobody has played a game of and gets nothing back. Written out, that
+// board would replace a finished season's with an empty one and hold it there
+// until April — through the exact months the minor levels' offseason page reads
+// it (components/offseason/MovedUp.jsx, issue #1077), and through the leaders
+// page's whole winter too.
+//
+// So an empty pool is treated as "nothing new to say", not as an answer. The
+// file keeps the last season it had, `season` keeps naming that season, and a
+// reader that checks the year (as MovedUp does) is told the truth either way.
+// The rollover happens on its own once the new season has games in it.
+if (pool.length === 0) {
+  console.log(`skipped ${out} — ${season} returned no players, keeping the board already on disk`)
+} else {
+  await writeJsonAtomic(out, {
+    season,
+    generatedAt: new Date().toISOString(),
+    poolSize: pool.length,
+    leaders,
+  })
+  const cats = Object.keys(leaders).length
+  console.log(`wrote ${out} (${pool.length} players ranked across ${cats} categories, top ${DEPTH} each)`)
+}

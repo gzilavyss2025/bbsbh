@@ -134,7 +134,13 @@ don't run these by hand.
   the file stays ~150KB and the leader-relative qualifier's floor is baked in.
   **NOT self-contained** — imports the app's own `combineToPool` (`statsLevels.js`) +
   `computeLeaders` (`teamLeaders.js`), the same code the live `org` board uses, to
-  stay in lockstep.
+  stay in lockstep. **It will not overwrite a season with an empty one**: it names
+  the calendar year it runs in, so the first nightly run of January asks four
+  levels for a season nobody has played and gets nothing — written out, that board
+  would sit there until April, through the whole winter the leaders page and the
+  minor levels' offseason page both read it (ADR-0079). An empty pool is treated
+  as "nothing new to say"; the file keeps the last season it had, and rolls over
+  on its own once the new one has games in it.
 - `gen-former-teammates.mjs` → `public/data/former-teammates/{a}-{b}.json` (ids
   ascending; one file per MATCHUP, which is what a game view reads) — for each upcoming
   matchup (MLB + MiLB), pairs of players on the two OPPOSING clubs once teammates. Two players are teammates iff their careers

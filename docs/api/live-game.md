@@ -212,6 +212,13 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   needs TWO rows to describe: `offSeasonEndDate` is December 31 and
   `preSeasonStartDate` is January 1 of the same row, so the offseason a reader
   lives through is season Y's `offseasonStartDate` to Y+1's `springStartDate`.
+  `fetchLevelSeasonDates(sportId, season)` is the same question at a MINOR level,
+  and a different endpoint because a level is three leagues that finish on three
+  different days: `/api/v1/league?sportId={11..14}&season={y}` carries each
+  league's own `seasonDateInfo`, and the level's winter is max(offseasonStartDate)
+  to min(regularSeasonStartDate) − 1 over them (ADR-0079). The level's own
+  seasons row is NOT a stand-in — sportId 13's 2025 row ended the season a day
+  before two of its three leagues did.
 - `uniforms.js` — `/api/v1/uniforms/game` for what each club is wearing (not in
   the live feed; spoiler-free but empty until ~first pitch, so it rides the
   feed's fetch/reload in `GameView` and renders on the lineup pages + box

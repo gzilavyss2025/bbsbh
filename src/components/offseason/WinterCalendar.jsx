@@ -74,24 +74,39 @@ export function WinterCalendar({ winter }) {
 }
 
 // The countdown. Wide, this is what stands in the rail slot the wire left; on a
-// phone it follows the calendar inside the lead. Either way it counts to spring
-// training's first game — a date off the schedule, not a typed one — so the
-// number cannot be stale while the page is up.
+// phone it follows the calendar inside the lead. Either way it counts to a date
+// off the schedule rather than a typed one, so the number cannot be stale while
+// the page is up.
 //
-// Renders nothing at all when that date is unknown (the next season's row
+// WHICH DATE depends on the level. At MLB the winter ends at spring training's
+// first game, which is a real schedulable date on the season row. Below MLB
+// there is no such date to count to — no minor-league season row carries a
+// spring field at all (checked for 2025, 2026 and 2027 at every level) — and
+// the level goes from no baseball straight to its own Opening Day, so that is
+// what it counts to. One component either way: the difference is a date and a
+// label, not a second countdown.
+//
+// Renders nothing at all when that date is unknown (the next season's rows
 // missing or unreadable). A countdown is a promise about a specific day, and
 // there is no honest version of it without the day.
-export function SpringCountdown({ winter }) {
+export function WinterCountdown({ winter }) {
   const { t } = useCopy()
-  const days = daysBetween(winter.today, winter.springStartDate)
+  const spring = Boolean(winter.springStartDate)
+  const target = winter.springStartDate ?? winter.openingDay
+  const days = daysBetween(winter.today, target)
   if (days == null || days < 0) return null
 
   return (
-    <aside className="springcount" aria-label="Days until spring training">
-      <p className="springcount__label">{t('offseason.springLabel')}</p>
+    <aside
+      className="springcount"
+      aria-label={spring ? 'Days until spring training' : 'Days until Opening Day'}
+    >
+      <p className="springcount__label">
+        {t(spring ? 'offseason.springLabel' : 'offseason.openerLabel')}
+      </p>
       <p className="springcount__n">{days}</p>
       <p className="springcount__day">
-        {days === 1 ? 'day' : 'days'} — {monthDayShort(winter.springStartDate)}
+        {days === 1 ? 'day' : 'days'} — {monthDayShort(target)}
       </p>
     </aside>
   )

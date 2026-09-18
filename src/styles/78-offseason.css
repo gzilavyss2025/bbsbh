@@ -224,3 +224,113 @@
     margin-top: 14px;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   THE SAME PAGE, ONE LEVEL DOWN — issue #1077.
+
+   Four tabs that go dark in the middle of September and stay dark into April.
+   Nothing in the shell changes and nothing above changes: the head, the door
+   and the calendar strip are the MLB page's, reused as they are, because the
+   two pages differ in WHAT LEADS them and in nothing else.
+
+   The one addition is a table — who left this level going up — and it is drawn
+   as a real <table> rather than a grid of divs because it is a table: three
+   labelled columns of the same three facts per row, and a screen reader that
+   reads "Finished at, A to Triple-A" is reading what the page means.
+   --------------------------------------------------------------------------- */
+.oseason--level .movedup {
+  margin-top: var(--space-6);
+}
+
+/* A level's page names itself, where MLB's is headed by the wire it promoted.
+   The head is otherwise the same rail head, so this only lifts the title out of
+   label size into a screen title. */
+.oseason__title--page {
+  font-size: var(--fs-h2);
+  color: var(--text-heading);
+}
+
+.movedup__table {
+  width: 100%;
+  margin-top: var(--space-2);
+  border-collapse: collapse;
+  /* Two of the three columns are short and fixed in width; the player takes
+     what is left, which is what a name needs and a level path does not. */
+  table-layout: auto;
+}
+.movedup__table th,
+.movedup__table td {
+  padding: 7px 0;
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  text-align: left;
+  vertical-align: baseline;
+}
+.movedup__table thead th {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  border-bottom-color: var(--rule);
+}
+/* Org is read as a right-hand column, so its heading follows it. */
+.movedup__table thead th:last-child {
+  text-align: right;
+}
+.movedup__table tbody tr:last-child th,
+.movedup__table tbody tr:last-child td {
+  border-bottom: none;
+}
+.movedup__table tbody th {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-regular);
+  color: var(--text-body);
+}
+/* The position sits beside the name as an aside, not as a column: it is one or
+   two letters and a column of its own would be mostly gutter. */
+.movedup__pos {
+  margin-left: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+/* Mono, because the two ends of a climb are compared down the column and a
+   proportional face would stagger them. */
+.movedup__climb {
+  width: 7.5em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+/* Where he finished takes the ink. Where he started is context. */
+.movedup__to {
+  color: var(--text-heading);
+}
+.movedup__org {
+  width: 4.5em;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-align: right;
+}
+/* What the list is drawn from, under the list. The board is thirty-nine
+   categories' top rows, not a census, so the page says so where it cannot be
+   mistaken for a heading — see MovedUp.jsx. */
+#root .movedup__pool {
+  text-transform: none; /* caps-exempt: a sentence about the list, not a label */
+}
+.movedup__pool {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+  text-wrap: pretty;
+}

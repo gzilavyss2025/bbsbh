@@ -246,7 +246,13 @@ const BUDGETS = {
   // to spare: fetchWinterCalendar belongs in this module for the same reason
   // fetchSeasonMeta did — it is a schedule call, and the alternative was a new
   // src/api file for one fetcher, bought with that directory's budget.
-  'src/api/schedule.js': 700, // 699
+  // 700 -> 800: fetchLevelSeasonDates (issue #1077) — the minor levels' own
+  // counterpart of fetchSeasonMeta, which had one line of headroom left. It is
+  // a schedule call and it belongs beside the two season-date fetchers it
+  // reasons against; splitting one fetcher into a new src/api file would be
+  // bought with that directory's budget instead, and would separate the three
+  // readings of "when is this season over" that have to stay comparable.
+  'src/api/schedule.js': 800, // 741
   // 800 -> 900: selectFinalHalfIndex — the cloud scorebook index's
   // auto-drop-once-fully-revealed check needs the SAME structural, isFinal-
   // gated reasoning selectSkippedBottomHalf right above it already has, so it
