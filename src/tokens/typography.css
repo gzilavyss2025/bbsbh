@@ -45,13 +45,27 @@
      around it uses. */
   --fs-field:   16px;
   --fs-small:   13px;
-  --fs-compact: 12px;
+  /* Was a second literal 12px beside --fs-label (#1128). The scale carried 28
+     names for 25 sizes, which makes the lab's type column look like a decision
+     where there was none. Aliased rather than deleted: 220 rules read this
+     name, and "compact" says something --fs-label does not. If the two ever
+     need to differ, un-alias THIS line — do not move --fs-label, which the
+     label/pill/table-head role depends on. */
+  --fs-compact: var(--fs-label);
   --fs-caption: 11px;
-  --fs-num-xl:  40px;   /* revealed final score */
+  /* Aliases --fs-display-lg (both were a literal 40px). Same rule as above:
+     the name stays because "the revealed final score" is worth saying. */
+  --fs-num-xl:  var(--fs-display-lg);   /* revealed final score */
   --fs-score-md: 42px;
   --fs-score-lg: 46px;
   --fs-num-lg:  22px;
-  --fs-num-md:  16px;
+  /* Aliases --fs-field (both were a literal 16px). This pair is the one
+     COINCIDENCE of the three — a mono figure and a text input want the same
+     size today for unrelated reasons, and --fs-field owns the value because
+     its 16px is a hard iOS floor (see its comment above) rather than a taste
+     call. If a figure ever needs a size the field floor cannot give it,
+     un-alias this line rather than raising the floor. */
+  --fs-num-md:  var(--fs-field);
   --fs-hero-sm: 28px;
   --fs-hero-md: 30px;
   --fs-hero-lg: 32px;
