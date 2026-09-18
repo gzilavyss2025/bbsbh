@@ -119,24 +119,29 @@ test('the opener is the earliest of a season, and all or nothing', () => {
 })
 
 // ---------------------------------------------------------------------------
-// WHO MOVED UP — the page's lead, derived from the nightly leader board.
-// `levels` is every level a player appeared at this season; the two ends of
-// that list are where he started and where he finished.
+// WHO MOVED UP — the page's lead.
+//
+// `levels` is every level a player's season touched, and it decides whether he
+// belongs on THIS level's page. `fromLevel`/`toLevel` are where that season
+// BEGAN and where it ENDED (scripts/lib/level-path.mjs builds them), and they
+// decide whether he moved UP — the distinction issue #1122 exists for, because
+// `levels` is a Set sorted by level and a demotion is indistinguishable from a
+// promotion inside it.
 
 const LEADERS = {
   avg: [
-    // A+ to AAA in one season — three levels of climb.
-    { id: 1, name: 'Bodine', position: 'C', levels: [14, 13, 11], displayTeamId: 139, displayTeamAbbr: 'TB' },
-    // Appeared at High-A and stayed there. Not a promotion.
+    // A+ to AAA across a season, in that order — three levels of climb.
+    { id: 1, name: 'Bodine', position: 'C', levels: [14, 13, 11], fromLevel: 14, toLevel: 11, displayTeamId: 139, displayTeamAbbr: 'TB' },
+    // Appeared at High-A and stayed there. Not a promotion, and no span.
     { id: 2, name: 'Stayed', position: 'SS', levels: [13], displayTeamId: 158, displayTeamAbbr: 'MIL' },
   ],
   hr: [
     // Repeated in a second category — counted once.
-    { id: 1, name: 'Bodine', position: 'C', levels: [14, 13, 11], displayTeamId: 139, displayTeamAbbr: 'TB' },
+    { id: 1, name: 'Bodine', position: 'C', levels: [14, 13, 11], fromLevel: 14, toLevel: 11, displayTeamId: 139, displayTeamAbbr: 'TB' },
     // Climbed INTO High-A from Single-A. Also a promotion, at this level.
-    { id: 3, name: 'Arrived', position: 'RHP', levels: [14, 13], displayTeamId: 112, displayTeamAbbr: 'CHC' },
+    { id: 3, name: 'Arrived', position: 'RHP', levels: [14, 13], fromLevel: 14, toLevel: 13, displayTeamId: 112, displayTeamAbbr: 'CHC' },
     // Climbed, but never at High-A — belongs to the AA page, not this one.
-    { id: 4, name: 'Elsewhere', position: 'LF', levels: [12, 11], displayTeamId: 158, displayTeamAbbr: 'MIL' },
+    { id: 4, name: 'Elsewhere', position: 'LF', levels: [12, 11], fromLevel: 12, toLevel: 11, displayTeamId: 158, displayTeamAbbr: 'MIL' },
   ],
 }
 
@@ -169,12 +174,65 @@ test('it answers per level, and only about players who were at that level', () =
   )
 })
 
+// The three cases the old reading got wrong, and the reason the two ends exist.
+// Each one has the SAME `levels` as a real promotion; only the order differs.
+
+test('a player sent DOWN is not a player who moved up', () => {
+  const demoted = {
+    avg: [
+      { id: 5, name: 'Sent down', levels: [13, 11], fromLevel: 11, toLevel: 13, displayTeamId: 158, displayTeamAbbr: 'MIL' },
+    ],
+  }
+  // `levels` is identical to a High-A-to-Triple-A promotion. The ends are not.
+  assert.deepEqual(demoted.avg[0].levels, [13, 11])
+  assert.deepEqual(movedUpAt(demoted, 13), [])
+  assert.deepEqual(movedUpAt(demoted, 11), [])
+})
+
+test('a rehab assignment ends where it started, so it is not a move', () => {
+  const rehab = {
+    avg: [
+      { id: 6, name: 'Rehabbing', levels: [13, 11], fromLevel: 11, toLevel: 11, displayTeamId: 158, displayTeamAbbr: 'MIL' },
+    ],
+  }
+  assert.deepEqual(movedUpAt(rehab, 13), [])
+  assert.deepEqual(movedUpAt(rehab, 11), [])
+})
+
+test('a detour does not disqualify a season that still ends higher', () => {
+  const detour = {
+    avg: [
+      { id: 7, name: 'Up, down, up', levels: [14, 13, 12], fromLevel: 13, toLevel: 12, displayTeamId: 158, displayTeamAbbr: 'MIL' },
+    ],
+  }
+  const [row] = movedUpAt(detour, 13)
+  // Where he BEGAN and where he FINISHED — not the two ends of `levels`,
+  // which would read "A to AA".
+  assert.equal(row.from.label, 'A+')
+  assert.equal(row.to.label, 'AA')
+  assert.equal(row.climbed, 1)
+})
+
+test('an entry with no span is left off rather than guessed at', () => {
+  // A board generated before the two ends existed, or one whose window pulls
+  // failed. Falling back to `levels` is the bug, so there is no fallback.
+  const noPath = {
+    avg: [{ id: 8, name: 'Unknown', levels: [14, 13], displayTeamId: 158, displayTeamAbbr: 'MIL' }],
+  }
+  assert.deepEqual(movedUpAt(noPath, 13), [])
+  // A season that ended where it began says the same thing about a climb.
+  const flat = {
+    avg: [{ id: 9, name: 'Flat', levels: [14, 13], fromLevel: 13, toLevel: 13, displayTeamId: 158, displayTeamAbbr: 'MIL' }],
+  }
+  assert.deepEqual(movedUpAt(flat, 13), [])
+})
+
 test('the order is total, so two readers see the same list', () => {
   const tied = {
     avg: [
-      { id: 7, name: 'Zeller', levels: [14, 13], displayTeamId: 158, displayTeamAbbr: 'MIL' },
-      { id: 8, name: 'Adams', levels: [14, 13], displayTeamId: 158, displayTeamAbbr: 'MIL' },
-      { id: 9, name: 'Banks', levels: [13, 12], displayTeamId: 158, displayTeamAbbr: 'MIL' },
+      { id: 71, name: 'Zeller', levels: [14, 13], fromLevel: 14, toLevel: 13, displayTeamId: 158, displayTeamAbbr: 'MIL' },
+      { id: 72, name: 'Adams', levels: [14, 13], fromLevel: 14, toLevel: 13, displayTeamId: 158, displayTeamAbbr: 'MIL' },
+      { id: 73, name: 'Banks', levels: [13, 12], fromLevel: 13, toLevel: 12, displayTeamId: 158, displayTeamAbbr: 'MIL' },
     ],
   }
   // Same climb of one level: the one who finished higher leads, then by name.
@@ -189,6 +247,6 @@ test('it fails closed on a missing or unusable board', () => {
   assert.deepEqual(movedUpAt({}, 13), [])
   // MLB is not a level this board covers.
   assert.deepEqual(movedUpAt(LEADERS, 1), [])
-  // A row with no level path at all cannot have climbed.
-  assert.deepEqual(movedUpAt({ avg: [{ id: 5, name: 'Thin' }] }, 13), [])
+  // A row with no level information at all cannot have climbed.
+  assert.deepEqual(movedUpAt({ avg: [{ id: 10, name: 'Thin' }] }, 13), [])
 })

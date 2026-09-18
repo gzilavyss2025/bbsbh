@@ -19,8 +19,11 @@ import { SPORT_LABEL } from '../../lib/teams.js'
 //
 // NO NEW FETCH, TWICE OVER. minors-leaders.json is on the wire once a day for
 // the leader boards; every entry already carries `levels` (every level the
-// player appeared at this season) and `displayTeamId` (his parent club). The
-// derivation is movedUpAt in src/api/minorsLeaders.js. The Top-100 snapshot
+// player appeared at this season), `displayTeamId` (his parent club), and the
+// two ends of his season — `fromLevel`/`toLevel`, the fields that say he moved
+// UP rather than merely moved, which the nightly generator establishes in bulk
+// so this page does not have to (issue #1122). The derivation over all three is
+// movedUpAt in src/api/minorsLeaders.js. The Top-100 snapshot
 // beside it is session-memoized and the slate has already asked for it on any
 // MiLB tab (GameSelect), so the pills are free here too.
 //

@@ -880,7 +880,16 @@ const BUDGETS = {
   // THREE generators read it (gen-command.mjs, gen-command-zone.mjs,
   // gen-command-received.mjs). Inlining it would put the same 170 MB download,
   // the same two source-column guards and the same play_id join in three files.
-  'scripts/lib': 34,
+  // +1 for level-path.mjs — the pure half of the level path issue #1122 added
+  // to gen-minors-leaders.mjs: a season's half-month windows, and the rule that
+  // reads a player's window observations as where his season BEGAN and where it
+  // ENDED. Same testable-helper reason as every entry above it — the generator
+  // does its work at import, and this is the arithmetic that decides whether the
+  // offseason page calls a player promoted, so it has to be checkable without a
+  // network. test/level-path.test.js pins the cases that make it hard (a rehab
+  // cameo below a player's own level, a demotion, and the shared half-month key
+  // that stops four levels' different opening days from reordering a season).
+  'scripts/lib': 35,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

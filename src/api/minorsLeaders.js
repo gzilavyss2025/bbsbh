@@ -39,16 +39,40 @@ const RANK = new Map(MILB_LEVELS.map((level, i) => [level.sportId, i]))
 
 // WHO MOVED UP, at one level — the minor levels' offseason page, issue #1077.
 //
-// Each entry already carries `levels`: every level the player appeared at this
-// season. A season that spans more than one of them is a season that moved, and
-// the two ends of that span are the lowest and the highest level it reached —
-// which is what the row prints. Read the caveat below before trusting that as a
-// direction.
+// A promotion is a fact about a SEASON, not about a game, so it spoils nothing
+// and needs no seal — the same reason the picked-game card's reason line is
+// allowed to count careers. It is also, deliberately, no new fetch: the board is
+// on the wire once a day whether this page asks for it or not.
 //
-// It is a fact about a SEASON, not about a game, so it spoils nothing and needs
-// no seal — the same reason the reason line on the picked-game card is allowed
-// to count careers. It is also, deliberately, no new fetch: the board is on the
-// wire once a day whether this page asks for it or not.
+// IT READS `fromLevel`/`toLevel`, NOT `levels`, AND THE DIFFERENCE IS THE POINT.
+// `levels` is a Set sorted by level (combineToPool builds it that way), so it
+// says which levels a season touched and nothing whatever about the order. This
+// function used to read its two ends as a climb, and that cannot tell a player
+// promoted from High-A to Triple-A from one sent the other way. Checked against
+// dated game logs, the old reading put nineteen names on the High-A list that
+// had not been promoted — demotions, rehab stints, and seasons that went up and
+// came back (issue #1122).
+//
+// The two fields are where a season BEGAN and where it ENDED, built in bulk by
+// scripts/gen-minors-leaders.mjs from half-month windows of the league-wide
+// stats endpoint. They make all three of the cases a reader cares about answer
+// correctly, and by one test rather than three special cases:
+//
+//   promoted   A+ -> AA           ends above where it started   on the list
+//   demoted    AAA -> AA          ends below                    not on it
+//   rehab      AAA -> A+ -> AAA   ends where it started         not on it
+//
+// FAIL CLOSED ON A BOARD THAT CANNOT SAY. An entry with neither field is not a
+// player who stayed put — it is a board generated before the fields existed, or
+// one whose window pulls failed. Either way the honest answer is to leave him
+// off rather than fall back to reading `levels` and guessing, which is the bug
+// this function was written out of. A player who really did stay at one level
+// all season is left off by the same test, and correctly.
+//
+// `levels` still decides MEMBERSHIP — whether a player belongs on THIS level's
+// page at all — because it is the complete set, while the two ends name only
+// where the season opened and closed. A player can belong to this page for a
+// stint in the middle that neither end names.
 //
 // WHAT THE POOL IS, and why the surface has to say so. These are the season's
 // leaders — the top rows of thirty-nine categories, roughly 500 players out of a
@@ -56,17 +80,6 @@ const RANK = new Map(MILB_LEVELS.map((level, i) => [level.sportId, i]))
 // season's leaders moved up", and a caption that promises more than that is
 // wrong. Naming the pool is the caller's job; keeping the derivation honest is
 // this function's.
-//
-// WHAT IT CANNOT SEE, and the surface currently overstates: `levels` is a SET,
-// sorted by level (combineToPool builds it that way), so it carries no
-// chronology at all. The two ends of it are the lowest and highest level a
-// season touched — NOT where the player started and where he ended. A player
-// sent DOWN from Triple-A to High-A reads here exactly like one promoted the
-// other way, and a rehab cameo three levels below a player's own reads as a
-// three-level climb. Checked against dated game logs for 24 of the 188 High-A
-// movers: 23 really did finish above where they started, and one (a demotion
-// and a return) did not. Issue #1122 is the fix — a handful of date-bounded
-// bulk pulls in the generator, which is all the direction needs.
 //
 // Sorted by how far a player climbed, then by where he finished, then by name —
 // a total order with no ties, so two readers on the same day see the same list.
@@ -81,10 +94,15 @@ export function movedUpAt(leaders, sportId) {
       if (seen.has(row?.id)) continue
       const levels = (Array.isArray(row?.levels) ? row.levels : []).filter((l) => RANK.has(l))
       if (!levels.includes(sportId)) continue
-      const ranks = levels.map((l) => RANK.get(l))
-      const from = Math.min(...ranks)
-      const to = Math.max(...ranks)
+
+      const from = RANK.get(row?.fromLevel)
+      const to = RANK.get(row?.toLevel)
+      if (from == null || to == null) continue
+      // The one question: did the season END above where it STARTED. A detour
+      // in the middle is a real part of a real season and is not held against a
+      // player who finished higher than he began.
       if (to <= from) continue
+
       seen.set(row.id, {
         id: row.id,
         name: row.name ?? '',
