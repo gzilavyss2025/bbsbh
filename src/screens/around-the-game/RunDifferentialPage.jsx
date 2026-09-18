@@ -8,7 +8,6 @@ import {
   THRESHOLDS,
   DEFAULT_THRESHOLD,
 } from '../../api/around-the-game/runDifferential.js'
-import { groupLabelFor } from '../../lib/reportPages.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -56,8 +55,6 @@ import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 // what the sample is, because the honest version of this finding is the shape
 // across five eras and not any one of its numbers.
 
-const PATH = '/run-differential'
-
 // How many rows the board opens on. The full board at the default threshold is
 // 107 club seasons, which is a scroll nobody asked for before they have decided
 // they care; the button under it opens the rest in place.
@@ -80,13 +77,19 @@ const OUTCOME = {
 // A round's name, shortened for a table cell. The feed spells every round out
 // in full ("AL Championship Series"), which is right in a sentence and four
 // times too wide in a column beside a club name and five numbers.
+// THE SPACE GOES WITH THE WORDS. "ALCS" and "NLDS" are one word each, the way
+// anyone says them out loud, so the league letters and the round letters close
+// up. Swapping only the round's words leaves the space behind and prints
+// "AL DS", which is not a thing anybody writes. The Wild Card round keeps its
+// space, because "AL Wild Card" is how that one is said.
+// "World Series" carries no league prefix and matches neither pattern, so it
+// stays spelled out.
 function roundShort(round) {
   if (!round) return ''
   return round
-    .replace('Championship Series', 'CS')
-    .replace('Division Series', 'DS')
-    .replace('Wild Card Series', 'Wild Card')
-    .replace('Wild Card Game', 'Wild Card')
+    .replace(/\s*Championship Series$/, 'CS')
+    .replace(/\s*Division Series$/, 'DS')
+    .replace(/ Wild Card (?:Series|Game)$/, ' Wild Card')
 }
 
 // The line the board prints in its last column: what happened, and the series
@@ -164,10 +167,13 @@ export function RunDifferentialPage() {
     <div className="screen">
       <SiteHeader />
 
+      {/* strand={null} drops the eyebrow line. "History / Run Differential"
+          over a title reading "The +200 Club" is three names for one page
+          before the reader has seen a number, and the menu row the reader came
+          through already said the first two. See BroadcastMasthead. */}
       <BroadcastMasthead
-        eyebrow="Run Differential"
         title="The +200 Club"
-        strand={groupLabelFor(PATH)}
+        strand={null}
         dekFull
         dek="Every club since 1901 that outscored its opponents by a wide margin over a full
              season — and what happened to it in October. Being the best club in baseball has
@@ -269,11 +275,7 @@ export function RunDifferentialPage() {
                       key={`${row.season}-${row.teamId}`}
                       className={row.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
                     >
-                      <ClubCell
-                        teamId={row.teamId}
-                        name={row.short}
-                        sub={row.name}
-                      />
+                      <ClubCell teamId={row.teamId} name={row.short} />
                       <td>{row.season}</td>
                       <td>
                         {row.w}–{row.l}
@@ -381,7 +383,7 @@ export function RunDifferentialPage() {
                   <tbody>
                     {report.missed.map((row) => (
                       <tr key={`miss-${row.season}-${row.teamId}`}>
-                        <ClubCell teamId={row.teamId} name={row.short} sub={row.name} />
+                        <ClubCell teamId={row.teamId} name={row.short} />
                         <td>{row.season}</td>
                         <td>
                           {row.w}–{row.l}
