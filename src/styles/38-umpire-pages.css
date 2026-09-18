@@ -34,7 +34,7 @@
 .umpage__cardtitle {
   margin: 0 0 10px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -96,7 +96,7 @@
   width: 14px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
   text-align: right;
 }
@@ -125,7 +125,7 @@
   border: 1px solid var(--border-hairline);
   border-radius: 4px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--seal-ink);
@@ -140,7 +140,7 @@
   padding: 0 5px;
   border-radius: 4px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-on-ink);
@@ -152,7 +152,7 @@
   display: block;
   margin-top: 10px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -164,7 +164,7 @@
   display: block;
   margin: 10px auto 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -227,7 +227,7 @@
 }
 .umpage__role {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);

@@ -103,7 +103,7 @@
 }
 .stars3__meta {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -112,7 +112,7 @@
 .stars3__stat {
   flex: none;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-muted);
   text-align: right;
 }

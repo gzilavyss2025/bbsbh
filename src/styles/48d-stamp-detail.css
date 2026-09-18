@@ -221,7 +221,7 @@
 .stampdetail__fact dt {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   color: var(--text-caption);

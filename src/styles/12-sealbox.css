@@ -138,7 +138,7 @@
   display: block;
   padding: 8px 10px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -242,7 +242,7 @@
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -342,7 +342,7 @@
 .umpfavor__title {
   display: block;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -370,7 +370,7 @@
 }
 .wcall__label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -419,7 +419,7 @@
 .wcall__edgeword {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   color: var(--text-caption);
 }
@@ -483,7 +483,7 @@
 }
 .wcall__count-label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -498,7 +498,7 @@
 }
 .wcall__count-arrow {
   color: var(--graphite-soft);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
 }
 .wcall__count-new {
   padding: 0 4px;
@@ -573,7 +573,7 @@
 .favormeter__tierpill {
   align-self: flex-end;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   padding: 2px 7px;
@@ -640,7 +640,7 @@
 }
 .favormeter__label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -658,7 +658,7 @@
 }
 .favormeter__unit {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -692,7 +692,7 @@
 .upnext__title {
   display: block;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -834,7 +834,7 @@
 }
 .halfcast__label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -935,7 +935,7 @@
    background both measure over 6:1, well past the 4.5:1 AA floor for text. */
 .pitcherhandoff__chip {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -976,7 +976,7 @@
 }
 .pitchernotice__label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
@@ -1030,7 +1030,7 @@
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 /* An ejection/event card's sentence — same natural-case prose treatment as
@@ -1100,7 +1100,7 @@
 
 .pitchernotice__now {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -1161,7 +1161,7 @@
    straight from the feed, e.g. .pitchernotice__eventtext). */
 .pitchernotice__forline {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
@@ -1189,7 +1189,7 @@
 }
 .pitchernotice__enteringwhen {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
@@ -1262,7 +1262,7 @@
   margin: -12px -14px 8px;
   padding: 8px 10px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -1362,7 +1362,7 @@
   gap: var(--space-2);
   font: inherit;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   color: var(--text-on-ink);
   background: var(--navy);
@@ -1469,7 +1469,7 @@
 .lineupcard__slot {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
   min-width: 12px;
   text-align: right;
@@ -1532,7 +1532,7 @@
 .lineupcard__jersey {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   color: var(--clay);
 }
@@ -1541,7 +1541,7 @@
   min-width: 20px;
   text-align: right;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   color: var(--field);
   text-transform: uppercase;
@@ -1571,7 +1571,7 @@
   gap: var(--space-2);
   font: inherit;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   color: var(--text-on-ink);
   background: var(--navy);
@@ -1674,7 +1674,7 @@
 
 .stat__k {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   color: var(--text-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);

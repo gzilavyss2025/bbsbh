@@ -88,7 +88,7 @@
   background: transparent;
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -121,7 +121,7 @@
   background: var(--seal-cover);
   color: var(--seal-cover-ink);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -176,7 +176,7 @@
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -226,7 +226,7 @@
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
   margin: 0 0 6px;
@@ -344,7 +344,7 @@
   padding: 0 3px;
   border-radius: var(--radius-xs);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-none);
   line-height: var(--lh-solid);
@@ -393,7 +393,7 @@
   margin: 0;
 }
 .clinchkey dd {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }

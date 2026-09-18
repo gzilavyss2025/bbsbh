@@ -93,7 +93,7 @@
   background: var(--surface-inset);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   color: var(--text-caption);
 }
@@ -159,7 +159,7 @@
   align-items: center;
   gap: 5px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
@@ -224,7 +224,7 @@
   justify-content: flex-end;
   gap: 5px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
@@ -324,7 +324,7 @@
 .bullets__of {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -348,7 +348,7 @@
 
 .staffgrid__tally {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
@@ -382,7 +382,7 @@
 .staffgrid__hlabel,
 .staffgrid__dayname {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
@@ -514,7 +514,7 @@
 .penpage__rulehead {
   margin-bottom: var(--space-3);
   font-family: var(--font-read);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-body);
   color: var(--text-muted);
 }

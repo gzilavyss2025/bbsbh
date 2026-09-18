@@ -213,7 +213,7 @@
 
 .rvsplit__item dt {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
@@ -299,7 +299,7 @@
 .rvclub__pos {
   flex: none;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }

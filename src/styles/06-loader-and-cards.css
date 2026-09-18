@@ -37,7 +37,7 @@
   padding: 2px 2px 1px;
   color: var(--paper-2);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   line-height: var(--lh-solid);
@@ -233,7 +233,7 @@
   margin: -14px -16px 0;
   padding: 5px 16px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -294,7 +294,7 @@
 }
 .derbycard__eyebrow {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -357,7 +357,7 @@
   background: var(--clay, #c0392b);
   color: #fff4f1;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -389,7 +389,7 @@
   background: var(--seal);
   color: var(--seal-ink);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -502,7 +502,7 @@
 }
 .postponed__makeup {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }

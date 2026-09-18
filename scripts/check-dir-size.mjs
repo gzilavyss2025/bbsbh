@@ -733,7 +733,11 @@ const BUDGETS = {
   // nightly workflow runs this directory as a flat list, and this file RUNS on
   // import — its pure half went to scripts/lib/milb-pool.mjs, which is what
   // that directory is for.
-  scripts: 114,
+  // +1 for check-caption-budget.mjs, the ratchet that holds #1128's --fs-caption
+  // split open. Flat like every other check-*.mjs: `npm run lint` runs this
+  // directory as a flat chain of guards, and a lone subdirectory for one of
+  // them would hide it from the list a reader scans to see what is enforced.
+  scripts: 115,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

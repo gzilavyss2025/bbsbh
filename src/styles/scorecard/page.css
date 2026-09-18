@@ -73,7 +73,7 @@
   text-align: center;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -92,7 +92,7 @@
 }
 .sc-labload__label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -222,7 +222,7 @@
 }
 .sc-field__label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -344,7 +344,7 @@
 }
 .sc-firstpitch__mlabel {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -405,7 +405,7 @@
 }
 .sc-editsheet__label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);

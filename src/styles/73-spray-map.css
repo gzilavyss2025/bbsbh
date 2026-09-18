@@ -93,7 +93,7 @@
    now. */
 .spray__count {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-num);
 }
@@ -112,7 +112,7 @@
 .spray__basis {
   margin: 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-caption);
 }
@@ -243,7 +243,7 @@
   gap: var(--space-3);
   padding: 10px 14px 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
@@ -310,7 +310,7 @@
   gap: var(--space-2);
   margin-top: 6px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
@@ -327,7 +327,7 @@
 .spray__dircaption {
   margin: 6px 0 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-caption);
 }
@@ -343,7 +343,7 @@
   margin: 10px 0 0;
   padding: 0 14px var(--space-3);
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-caption);
 }

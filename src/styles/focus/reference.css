@@ -56,7 +56,7 @@
 
 .trailcell__name {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   line-height: var(--lh-solid);
@@ -107,7 +107,7 @@
    the reader steps past it. Graphite and small: a cue, not a second code. */
 .trailcell__notes {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   line-height: var(--lh-solid);
   letter-spacing: var(--ls-label);
   color: var(--graphite-soft);
@@ -166,7 +166,7 @@
   background: none;
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -362,7 +362,7 @@
 .focusrail .pitchers__grid th,
 .focusrail .pitchers__grid td {
   padding: 6px 0;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
 }
 
 /* The stat/WPA row that used to be InningPage.jsx's `.innings__row2`, moved
@@ -550,7 +550,7 @@
   border-radius: var(--radius-sm);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-align: left;

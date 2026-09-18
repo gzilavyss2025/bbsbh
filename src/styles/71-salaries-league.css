@@ -54,7 +54,7 @@
   background: var(--surface-card);
   color: var(--text-muted);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -135,7 +135,7 @@
   background: var(--ink-2);
   color: var(--text-on-ink);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
 }
@@ -199,7 +199,7 @@
   text-align: right;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   color: var(--graphite-soft);
 }
@@ -302,7 +302,7 @@
 }
 .posspend__pos {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -314,7 +314,7 @@
 .posspend__money {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-tight-display);
   color: var(--text-heading);

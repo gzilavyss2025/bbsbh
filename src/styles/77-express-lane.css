@@ -246,7 +246,7 @@
    ledger face the rest of the app sets its figures in. */
 .xl__chipcode {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
 }
 
 /* --- the foot ------------------------------------------------------

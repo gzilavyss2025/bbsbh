@@ -203,7 +203,7 @@
 .pbp__advance {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   fill: var(--graphite);
 }
 
@@ -232,7 +232,7 @@
 .pbp__pr {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-title);
   fill: var(--clay-deep);
 }
@@ -289,7 +289,7 @@
 
 .pbp__rbi {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--field-deep);
@@ -315,7 +315,7 @@
 
 .pbp__placed {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -359,7 +359,7 @@
 .pbp__ladderhead {
   align-self: stretch;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -380,7 +380,7 @@
   justify-content: center;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
 }
 
 .pbp__laddercol--ball .pbp__cell {
@@ -401,7 +401,7 @@
      exception below) so it reads as a real sentence. See --font-read in
      tokens/typography.css. */
   font-family: var(--font-read);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-text);
   line-height: var(--lh-prose);
@@ -438,7 +438,7 @@
   padding-left: 7px;
   border-left: 2px solid var(--border-rule);
   font-family: var(--font-read);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-text);
   line-height: var(--lh-ui);
@@ -467,7 +467,7 @@
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   background: var(--surface-card);
   font-family: var(--font-read);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-num);
   line-height: var(--lh-ui);
@@ -497,7 +497,7 @@
 .roster__notice {
   margin: 2px 2px 8px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -574,7 +574,7 @@
 
 .roster__group {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);

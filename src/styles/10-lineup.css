@@ -425,7 +425,7 @@ button.startercard__careervs {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   line-height: var(--lh-ui);
   text-align: center;
@@ -475,7 +475,7 @@ button.startercard__careervs {
 .teammatecard__years {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
   white-space: nowrap;
 }
@@ -554,7 +554,7 @@ button.startercard__careervs {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -590,7 +590,7 @@ button.startercard__careervs {
   display: block;
   margin-bottom: 2px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -707,7 +707,7 @@ button.startercard__careervs {
 .defdiamond__num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 

@@ -67,7 +67,7 @@
 .psbracket__collabel {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -163,7 +163,7 @@
 }
 .seedcard__byetag {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -183,7 +183,7 @@
   flex: none;
   width: 13px;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
   text-align: center;
@@ -273,7 +273,7 @@
   bottom: 0;
   padding: 1px 4px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--paper-0);
@@ -291,7 +291,7 @@
 }
 .pswscard__mvptag {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -325,7 +325,7 @@
   gap: 8px;
   margin: 12px 0 2px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -380,7 +380,7 @@
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;

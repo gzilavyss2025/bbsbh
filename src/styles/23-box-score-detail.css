@@ -22,7 +22,7 @@
   padding: 4px 2px;
   cursor: pointer;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -82,7 +82,7 @@
 .tlead__cat-title {
   margin: 0 0 10px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -143,7 +143,7 @@
 }
 .tlead__teamabbr {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-muted);
@@ -168,7 +168,7 @@
 }
 .tlead__name-first {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -203,7 +203,7 @@
 .tlead__pos {
   margin-left: 6px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -223,7 +223,7 @@
 }
 .tlead__statlabel {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -263,7 +263,7 @@
   width: 14px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
   text-align: right;
 }
@@ -290,7 +290,7 @@
 .tlead__rowteam {
   flex: none;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-muted);
@@ -311,7 +311,7 @@
 .tlead__level {
   flex: none;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-muted);
@@ -323,7 +323,7 @@
 /* On a chaser row the pill/level sit small and inline before the value. */
 .tlead__row .prospectpill {
   flex: none;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   padding: 1px 6px;
 }
 
@@ -442,7 +442,7 @@
 .tledg__pos {
   flex: none;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -478,7 +478,7 @@
 .leaders__sub {
   margin: 2px 0 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -536,7 +536,7 @@
   font-size: var(--fs-title-lg);
 }
 .bs__grid--totals thead th {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
 }
 .bs__grid--totals .bs__nameCol {
   width: 20%;
@@ -624,7 +624,7 @@
   font-size: var(--fs-compact);
 }
 .bs__grid--board thead th.bs__boardInn {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
 }
 .bs__boardInn--scored {
   font-weight: var(--w-bold);
@@ -701,7 +701,7 @@
 }
 .bs__fieldLabel {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);

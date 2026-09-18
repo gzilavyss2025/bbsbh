@@ -75,7 +75,7 @@
 .team-hub .section__title em {
   font-style: normal;
   color: var(--graphite-soft);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
 }
 /* All copy on these pages is forced uppercase (the "scorebook all-caps"
@@ -380,7 +380,7 @@
 .ledger tr.ledger__ref .yr {
   font-family: var(--font-display);
   letter-spacing: var(--ls-caps);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   color: var(--text-caption);
 }
 /* A row CONTAINED by the one above it — RISP inside Runners on. Indenting is
@@ -395,7 +395,7 @@
   background: var(--surface-inset);
   font-family: var(--font-display);
   letter-spacing: var(--ls-label);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
   text-align: left;
@@ -463,7 +463,7 @@
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   color: var(--text-caption);
 }
 /* Phone (base): stack the date over its description so the date gets the card's
@@ -690,7 +690,7 @@
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   color: var(--text-caption);
   margin-bottom: 5px;
@@ -784,7 +784,7 @@
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
@@ -923,7 +923,7 @@
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   color: var(--text-caption);
   font-weight: var(--w-semibold);
 }
@@ -972,7 +972,7 @@
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   color: var(--text-caption);
 }
 
@@ -998,7 +998,7 @@
   align-items: center;
   gap: 3px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--graphite);
@@ -1017,7 +1017,7 @@
 }
 .ledger tr.reg-subtotal .ledger__sub {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
@@ -1083,7 +1083,7 @@
 .milestonewatch__title {
   margin: 0 0 4px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -1100,7 +1100,7 @@
 }
 .milestonewatch__eta {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -1137,7 +1137,7 @@
   display: inline-block;
   margin-top: 6px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
