@@ -47,14 +47,20 @@ import { Headshot } from '../player/Headshot.jsx'
 // slot holds the DATE here instead, which is the one thing about the at-bat
 // that opens its game without saying a word about it.
 //
-// Five rows up front, and the door opens the whole census — it is 170 rows in a
-// full season, which is long, and it is also the entire answer. Trimming it to
-// a round number would be the one thing research.md §7 forbids outright.
+// FIVE UP FRONT, THEN TEN AT A TIME. The whole census is the answer — trimming
+// it to a round number is the one thing research.md §7 forbids outright — but
+// the whole census is 170 rows, and each one carries two faces now, so opening
+// all of it in one press dropped a reader into eight thousand pixels of scroll
+// with the rest of the page somewhere below it. The door pages instead. Every
+// row is still reachable; none of them arrives uninvited.
 const LEAD_ROWS = 5
+const STEP = 10
 
 export function LongAtBats({ season }) {
   const { data } = useAsync(() => fetchLongAtBats(season), [season])
-  const [expanded, setExpanded] = useState(false)
+  // How many rows are on screen, not a boolean — the door adds to it rather
+  // than flipping it.
+  const [visible, setVisible] = useState(LEAD_ROWS)
   const linkProps = useRouteLink()
 
   const rows = data?.rows ?? []
@@ -63,8 +69,12 @@ export function LongAtBats({ season }) {
   // is nothing.
   if (rows.length === 0 || data?.season !== season || !data?.coverage?.complete) return null
 
-  const shown = expanded ? rows : rows.slice(0, LEAD_ROWS)
+  const shown = rows.slice(0, visible)
   const hidden = rows.length - shown.length
+  // The last press of the door is a short one — 170 rows off a 5 + 10n ladder
+  // ends on 5, and a button saying "10 more" that produced five would be a
+  // small lie about the file's own count.
+  const next = Math.min(STEP, hidden)
 
   return (
     <section className="note note--stories" aria-label={`Twelve-pitch at-bats in the ${season} season`}>
@@ -156,16 +166,29 @@ export function LongAtBats({ season }) {
             ))}
           </ol>
 
-          {(hidden > 0 || expanded) && (
+          {(hidden > 0 || visible > LEAD_ROWS) && (
             <button
               type="button"
               className="oseason__door"
-              aria-expanded={expanded}
-              onClick={() => setExpanded((open) => !open)}
+              // The visible words are inside the accessible name, which is what
+              // WCAG 2.5.3 asks of a control whose label says more than its
+              // text does.
+              aria-label={hidden > 0 ? `Show ${next} more at-bats` : 'Show fewer at-bats'}
+              onClick={() =>
+                setVisible((n) => (hidden > 0 ? n + STEP : LEAD_ROWS))
+              }
             >
-              {expanded ? 'Show fewer' : `All ${rows.length}`}
+              {hidden > 0 ? `${next} more` : 'Show fewer'}
             </button>
           )}
+
+          {/* Where the reader is in the census, for a reader who cannot see the
+              list grow. Polite, so it never interrupts — research.md §8's
+              acceptance criteria ask for exactly this when a requested change
+              adds content below the control that asked for it. */}
+          <p className="sr-only" role="status">
+            Showing {shown.length} of {rows.length} at-bats.
+          </p>
 
           {/* Natural case, because it is a sentence — the app shouts everything
               by default (01-base.css's ALL-CAPS INVARIANT) and a surface with

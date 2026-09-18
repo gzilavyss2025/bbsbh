@@ -349,13 +349,27 @@ test('the MLB page carries one note, and it is a count with its denominator', as
   await expect(note.locator('.note__under')).toContainText('plate appearances')
   await expect(note.locator('.note__under')).toHaveCSS('text-transform', 'none')
 
-  // Five rows up front, and the door opens the whole census — the count on the
-  // figure IS the length of the list, or the note is claiming something the
-  // rows cannot show.
+  // Five rows up front, then ten a press. The whole census is still reachable —
+  // the count on the figure IS the length of the list, or the note is claiming
+  // something the rows cannot show — it just does not all arrive at once.
   const rows = note.locator('.note__story')
+  const door = note.locator('.oseason__door')
   await expect(rows).toHaveCount(5)
-  await note.locator('.oseason__door').click()
+  await door.click()
+  await expect(rows).toHaveCount(15)
+  await door.click()
+  await expect(rows).toHaveCount(25)
+
+  // Walk it to the end. The last press is a short one (170 off a 5 + 10n ladder
+  // ends on 5) and the door says so rather than promising ten.
+  for (let n = 25; n < figure; n += 10) await door.click()
   await expect(rows).toHaveCount(figure)
+
+  // And then it folds back, rather than leaving the reader at the foot of a
+  // census with no way up.
+  await expect(door).toHaveText('Show fewer')
+  await door.click()
+  await expect(rows).toHaveCount(5)
 })
 
 test('a note row says how LONG an at-bat was, never how it went', async ({ page }) => {

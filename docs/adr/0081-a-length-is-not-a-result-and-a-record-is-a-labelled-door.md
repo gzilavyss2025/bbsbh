@@ -137,6 +137,12 @@ That is a report page's ordinary right and none of this note's, so the slot
 carries the DATE instead: the one thing about the at-bat that opens its game
 without saying a word about it.
 
+The door pages rather than opening the lot: five rows up front, ten a press.
+The whole census stays reachable — trimming it to a round number is the one
+thing `research.md` §7 forbids outright — but 170 photo rows arriving in one
+press dropped a reader into eight thousand pixels of scroll with the rest of the
+page somewhere below it.
+
 The classes are the note's own rather than `.storypa-row`'s, because
 `43-foul-tracker.css` is component-imported by that page alone and pulling 877
 lines of its chrome onto the home slate to reuse forty of them is a bad trade.
