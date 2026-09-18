@@ -256,7 +256,13 @@ for each generator; the reader modules:
   `combineToPool` + `computeLeaders`, so it can't drift from the live `org` board)
   rather than the raw pool — keeps the file ~150KB and bakes in the leader-relative
   qualifier's playing-time floor. `LeadersPage` reads it for the `minors` scope and
-  hands rows to `TeamLeaders`'s `precomputed` path.
+  hands rows to `TeamLeaders`'s `precomputed` path. `movedUpAt(leaders, sportId)`
+  is a second reading of the same file for the minor levels' offseason page
+  (ADR-0079): each entry's `levels` is every level the player appeared at this
+  season, so the two ends of that list are where he started and where he
+  finished. The file's `season` is carried through the reader because the
+  generator names the calendar year it ran in — a caller that prints a season
+  has to check that the board is still about it.
 - `allStarRosters.js` — the All-Star Rosters page, from
   `public/data/all-star-rosters.json`. Hand-run (`gen-all-star-rosters.mjs`) — a
   season's roster is decided once and never changes. Every named selectee,

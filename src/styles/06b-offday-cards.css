@@ -155,6 +155,13 @@
   color: var(--pin-accent, var(--field));
 }
 
+.offdaycard {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
 /* Hover — the one tile on the slate with nothing to reveal answers with its
    club instead. A pointer over an off-day card lifts it the same 2px the
    Logbook shelf lifts a book by on the way to picking it up
@@ -165,14 +172,48 @@
    logo) instead of overwriting it. --offday-accent is set per card in
    OffDaySection.jsx (teamPrimaryColor); an unaffiliated MiLB id has no known
    pair and falls back to --field, so every tile still responds. */
-.offdaycard {
-  transition:
-    transform var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
-}
 .offdaycard__logobox {
   transition: transform var(--dur-fast) var(--ease-out);
+}
+/* THE CLUB'S OWN BAR. A pointer over a tile used to answer with a hairline of
+   colour on the border and a 2px rule under the mascot — true to the club, and
+   almost invisible at tile size. On a level's offseason page the whole grid is
+   off-day tiles (every club at the level is off), so this is the one place on
+   the slate where colour is available and nothing else is competing for it.
+   So the tile wears the club the way a lineup page's masthead does (ADR-0030's
+   themed bar): a solid band of its own primary across the top, over a wash
+   that fades out before it reaches the name.
+
+   ONE OVERLAY, NOT A BACKGROUND. Both layers live on a pseudo-element rather
+   than on the card's own `background`, because `.offdaycard--pinned` sets that
+   property to the favourite's gradient — a hover that wrote there would take
+   the pin tint away for as long as you pointed at the tile. The overlay is
+   clipped by its own border-radius, which is what rounds the band's top
+   corners, and it sits under `.offdaycard__logobox` (position: relative) and
+   over nothing else, since the wash is fully transparent by the time it
+   reaches the two name lines. That is deliberate: the location and mascot are
+   small type in caption grey, and they stay on clean manila rather than on a
+   tinted ground whose contrast would depend on which club you point at.
+
+   --offday-accent is set per card in OffDaySection.jsx (teamPrimaryColor,
+   which resolves a MiLB club through its affiliate-then-parent chain); an
+   unaffiliated id has no known pair and falls back to --field, so every tile
+   still answers the pointer. */
+.offdaycard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(180deg, var(--offday-accent, var(--field)) 0 4px, transparent 4px),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--offday-accent, var(--field)) 24%, transparent),
+      transparent 52%
+    );
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  pointer-events: none;
 }
 /* The pencil rule, drawn from the middle out. Absolute over the mascot's own
    box so it never adds height and never nudges the two-line name — a card in
@@ -205,6 +246,9 @@
     border-color: color-mix(in srgb, var(--offday-accent, var(--field)) 55%, var(--border-rule));
     box-shadow: var(--shadow-raised);
   }
+  .offdaycard:hover::before {
+    opacity: 1;
+  }
   .offdaycard:hover .offdaycard__logobox {
     transform: scale(1.04);
   }
@@ -221,6 +265,9 @@
   outline-offset: 2px;
   border-color: color-mix(in srgb, var(--offday-accent, var(--field)) 55%, var(--border-rule));
 }
+.offdaycard:focus-visible::before {
+  opacity: 1;
+}
 .offdaycard:focus-visible .offdaycard__mascot::after {
   transform: scaleX(1);
 }
@@ -233,6 +280,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .offdaycard,
+  .offdaycard::before,
   .offdaycard__logobox,
   .offdaycard__mascot::after {
     transition: none;
@@ -244,7 +292,7 @@
   .offdaycard:hover .offdaycard__logobox {
     transform: none;
   }
-  /* The rule still arrives, it just does not draw itself. */
+  /* The colour still arrives, it just does not fade itself in. */
   .offdaycard:hover .offdaycard__mascot::after,
   .offdaycard:focus-visible .offdaycard__mascot::after {
     transform: scaleX(1);

@@ -30,8 +30,8 @@ import { FavoriteTeamModal } from '../components/account/FavoriteTeamModal.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
 import { WireDock } from '../components/transactions/WireDock.jsx'
 import { WireRail } from '../components/transactions/WireRail.jsx'
-import { OffseasonLead } from '../components/offseason/OffseasonLead.jsx'
-import { SpringCountdown } from '../components/offseason/WinterCalendar.jsx'
+import { OffseasonSlot } from '../components/offseason/OffseasonSlot.jsx'
+import { WinterCountdown } from '../components/offseason/WinterCalendar.jsx'
 import { useOffseason } from '../hooks/useOffseason.js'
 import { useWinter } from '../hooks/useWinter.js'
 import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
@@ -890,14 +890,13 @@ export function GameSelect({
             }
           />
 
-          {/* THE OFFSEASON PAGE (issue #1038). It moves nothing: the club strip,
-              the level tabs and the date banner all stay where they are in
-              season. The empty games area holds the wire at full width instead
-              of the words "No games scheduled." — see OffseasonLead.jsx. */}
+          {/* THE OFFSEASON PAGE (issues #1038, #1077). It moves nothing: the
+              club strip, the level tabs and the date banner all stay where they
+              are in season. The empty games area holds the winter instead of
+              the words "No games scheduled." — OffseasonSlot.jsx picks which of
+              the two leads it, and says why MLB's and a level's differ. */}
           {winter && (
-            <OffseasonLead endDate={dateStr} sportId={sportId} winter={winter}>
-              {!wide && <SpringCountdown winter={winter} />}
-            </OffseasonLead>
+            <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winter} wide={wide} />
           )}
 
           {showBreakBanner && (
@@ -1023,7 +1022,7 @@ export function GameSelect({
 
         {/* The slot the wire left. `railed` stays true through the offseason, so
             the countdown inherits a column the shell already reserves. */}
-        {wide && winter && <SpringCountdown winter={winter} />}
+        {wide && winter && <WinterCountdown winter={winter} />}
       </div>
 
       <SiteFooter onShowLogos={onShowLogos} />

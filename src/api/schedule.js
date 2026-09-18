@@ -198,6 +198,48 @@ export async function fetchSeasonMeta(season) {
   }
 }
 
+// EVERY LEAGUE AT ONE MINOR LEVEL, and the dates each one publishes for its own
+// season. The level's counterpart of fetchSeasonMeta above, and a separate call
+// rather than the same one with a different sportId because at a minor level the
+// sport-wide row is not a safe reading:
+//
+//   A minor level is THREE leagues that finish on three different days. A+ 2026
+//   is the South Atlantic (Sep 15), the Midwest (Sep 15) and the Northwest
+//   (Sep 11); AA 2026 is three leagues that all end Sep 23 while sportId 12's
+//   own row says Sep 27. The sport row is usually LATER than every league under
+//   it, which would be harmless — but it is not always. Checked across 2023-26,
+//   sportId 13's 2025 row ended the season on Sep 19 while two of its three
+//   leagues published Sep 20. One day, in the wrong direction: the level row
+//   would have called a winter that had not started.
+//
+// So the level's winter is read off the leagues themselves — it opens the day
+// the LAST of them opens its offseason, and it closes the day the FIRST of them
+// starts playing again (levelOffseasonPhase in src/lib/time/seasonPhase.js does
+// that arithmetic). Both are published dates; neither is inferred from an empty
+// slate, which is ADR-0074's rule carried down a level.
+//
+// `fields` trims the response from 3,023 bytes to 487 (verified live against
+// sportId 13, season 2026). Degrades to null on failure or an empty list —
+// callers treat null as "cannot say", never as a fact about the calendar.
+export async function fetchLevelSeasonDates(sportId, season) {
+  if (!sportId || !season) return null
+  try {
+    const data = await getJson(
+      `/api/v1/league?sportId=${sportId}&season=${season}` +
+        `&fields=leagues,id,name,seasonDateInfo,regularSeasonStartDate,` +
+        `seasonEndDate,offseasonStartDate`,
+    )
+    const rows = (data.leagues ?? []).map((league) => ({
+      leagueId: league.id,
+      name: league.name ?? '',
+      ...(league.seasonDateInfo ?? {}),
+    }))
+    return rows.length > 0 ? rows : null
+  } catch {
+    return null
+  }
+}
+
 // The season's All-Star break bounds, for the slate's empty-day treatment
 // (GameSelect): `allStarDate` is the All-Star Game's own date (which DOES show
 // up as a normal-looking schedule row, teams "AL/NL All-Stars" — real logos,

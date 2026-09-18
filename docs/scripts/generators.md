@@ -134,7 +134,22 @@ don't run these by hand.
   the file stays ~150KB and the leader-relative qualifier's floor is baked in.
   **NOT self-contained** — imports the app's own `combineToPool` (`statsLevels.js`) +
   `computeLeaders` (`teamLeaders.js`), the same code the live `org` board uses, to
-  stay in lockstep.
+  stay in lockstep. It then tags each ranked entry with `fromLevel`/`toLevel` — the
+  level a season BEGAN at and the level it ENDED at (`lib/level-path.mjs`, issue
+  #1122). `levels` is a Set sorted by level, so it says which levels a season
+  touched and nothing about the order: a demotion reads there exactly like a
+  promotion. The two ends say which. They cost one season row per level plus ~96
+  trimmed `stats=byDateRange` pulls (a dozen half-month windows x four levels x two
+  groups, ~47KB each with `fields=`), and only a player who changed level carries
+  them. The minor levels' offseason page reads them for its promotions list, and
+  leaves an entry off when they are absent rather than falling back to `levels`.
+  **It will not overwrite a season with an empty one**: it names
+  the calendar year it runs in, so the first nightly run of January asks four
+  levels for a season nobody has played and gets nothing — written out, that board
+  would sit there until April, through the whole winter the leaders page and the
+  minor levels' offseason page both read it (ADR-0079). An empty pool is treated
+  as "nothing new to say"; the file keeps the last season it had, and rolls over
+  on its own once the new one has games in it.
 - `gen-former-teammates.mjs` → `public/data/former-teammates/{a}-{b}.json` (ids
   ascending; one file per MATCHUP, which is what a game view reads) — for each upcoming
   matchup (MLB + MiLB), pairs of players on the two OPPOSING clubs once teammates. Two players are teammates iff their careers
