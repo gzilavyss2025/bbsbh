@@ -11,6 +11,7 @@ import {
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
+import { teamClubNameShort } from '../../lib/teams.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
@@ -179,11 +180,6 @@ export function RunDifferentialPage() {
              season — and what happened to it in October. Being the best club in baseball has
              never been the same thing as winning, and it has got harder every time the
              postseason gained a round."
-        meta={[
-          { label: 'Seasons', value: data ? `${data.firstSeason}–${data.lastSeason}` : '—' },
-          { label: 'Over the bar', value: totals ? `${totals.n}` : '—' },
-          { label: 'Won it all', value: totals ? `${totals.ring}` : '—' },
-        ]}
       />
 
       <AsyncStatus
@@ -275,7 +271,11 @@ export function RunDifferentialPage() {
                       key={`${row.season}-${row.teamId}`}
                       className={row.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
                     >
-                      <ClubCell teamId={row.teamId} name={row.short} />
+                      <ClubCell
+                        teamId={row.teamId}
+                        name={teamClubNameShort(row.teamId)}
+                        sub={row.era ?? undefined}
+                      />
                       <td>{row.season}</td>
                       <td>
                         {row.w}–{row.l}
@@ -383,7 +383,11 @@ export function RunDifferentialPage() {
                   <tbody>
                     {report.missed.map((row) => (
                       <tr key={`miss-${row.season}-${row.teamId}`}>
-                        <ClubCell teamId={row.teamId} name={row.short} />
+                        <ClubCell
+                          teamId={row.teamId}
+                          name={teamClubNameShort(row.teamId)}
+                          sub={row.era ?? undefined}
+                        />
                         <td>{row.season}</td>
                         <td>
                           {row.w}–{row.l}

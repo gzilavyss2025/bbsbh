@@ -28,8 +28,9 @@ const round = (name, w, l) => ({ round: name, w, l, opp: 1 })
 const club = (season, diff, postseason, extra = {}) => ({
   season,
   teamId: 158,
-  name: 'Milwaukee Brewers',
-  short: 'Brewers',
+  // The name the club wore that season, and only when it differs from today's
+  // — null on most rows. The board reads its main label from teams.js instead.
+  era: null,
   w: 100,
   l: 62,
   rs: 800,

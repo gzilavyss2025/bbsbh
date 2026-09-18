@@ -182,6 +182,14 @@ async function seasonStandings(season) {
 // in 1920; the Athletics have been Philadelphia's, Kansas City's and Oakland's.
 // statsapi answers this per season, so the page can print the name the club
 // actually wore that year beside the franchise id its logo is keyed on.
+//
+// ONLY WHEN IT DIFFERS. A row carries `era` only if the name that season is not
+// the name the club wears today, so the board prints "Brooklyn Superbas" under
+// the 1901 Dodgers and prints nothing under the 1939 Yankees rather than the
+// same name twice. The comparison is made HERE, against the current season's
+// answer from this same endpoint, so both sides are spelled the one way; the
+// app's own teams.js spells some clubs differently ("Athletics" against
+// "Oakland Athletics") and comparing across the two would invent differences.
 async function seasonNames(season) {
   const data = await getJson(
     `/api/v1/teams?sportId=1&season=${season}&fields=teams,id,name,clubName`,
@@ -291,6 +299,9 @@ async function main() {
   const floor = Number(args.floor) || FLOOR
 
   const calendar = await seasonCalendar()
+  // What each club is called NOW — the baseline every season's names are
+  // compared against, fetched once rather than per season.
+  const currentNames = await seasonNames(to)
   const seasons = {}
   const rows = []
 
@@ -329,14 +340,15 @@ async function main() {
     const names = await seasonNames(season)
     for (const club of over) {
       const named = names.get(club.teamId)
+      const nowCalled = currentNames.get(club.teamId)?.name ?? null
       rows.push({
         season,
         teamId: club.teamId,
-        // The name the club wore that year, and its short form for a table
-        // cell. Falls back to the id's own label if a season's team list ever
-        // misses a club that its standings carried.
-        name: named?.name ?? `Team ${club.teamId}`,
-        short: named?.short ?? `Team ${club.teamId}`,
+        // The name the club wore that year, and ONLY when it is not the name
+        // it wears today. A club the current season does not list at all keeps
+        // its era name, because "no longer exists under this id" is exactly the
+        // case worth printing. null when the name has not changed.
+        era: named?.name && named.name !== nowCalled ? named.name : null,
         w: club.wins,
         l: club.losses,
         rs: club.rs,
