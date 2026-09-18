@@ -263,9 +263,13 @@
   padding: 7px 0;
   border-bottom: var(--bw-hair) solid var(--rule-soft);
   text-align: left;
-  vertical-align: baseline;
+  /* Middle, not baseline: the player cell is as tall as a headshot and the two
+     short columns beside it would otherwise sit against the top rule. */
+  vertical-align: middle;
 }
 .movedup__table thead th {
+  /* The header row has no photo in it and reads better on its baseline. */
+  vertical-align: baseline;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -287,6 +291,34 @@
   font-size: var(--fs-body);
   font-weight: var(--w-regular);
   color: var(--text-body);
+}
+/* A face, then the name over whatever the snapshot has to say about him. The
+   photo is the row's anchor and never shrinks; the text column does, so a long
+   name wraps inside the cell rather than pushing the two short columns off the
+   right edge of a phone. */
+.movedup__who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.movedup__shot {
+  width: var(--shot-xs-w);
+  height: var(--shot-xs-h);
+  border-radius: var(--radius-sm);
+}
+.movedup__lines {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+.movedup__name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 /* The position sits beside the name as an aside, not as a column: it is one or
    two letters and a column of its own would be mostly gutter. */
@@ -320,6 +352,21 @@
   text-transform: uppercase;
   text-align: right;
 }
+/* Wide, the games column is ~940px and the player column takes whatever the
+   two short ones leave — which put the level path and the org hard against the
+   right edge, half a screen from the name they belong to. Past the app's one
+   breakpoint they claim more of their own width instead, so the row reads as
+   three things about one player rather than two columns and a gap. On a phone
+   the whole table is 358px and there is no gap to close. */
+@media (min-width: 740px) {
+  .movedup__climb {
+    width: 16em;
+  }
+  .movedup__org {
+    width: 8em;
+  }
+}
+
 /* What the list is drawn from, under the list. The board is thirty-nine
    categories' top rows, not a census, so the page says so where it cannot be
    mistaken for a heading — see MovedUp.jsx. */

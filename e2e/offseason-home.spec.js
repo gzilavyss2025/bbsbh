@@ -187,10 +187,14 @@ test('the level page leads with who moved up', async ({ page }) => {
   const table = page.locator('.movedup__table')
   await expect(table).toBeVisible()
   const rows = table.locator('tbody tr')
-  await expect(rows).toHaveCount(5)
+  await expect(rows).toHaveCount(6)
   // A climb is written as its two ends, and it is a real one: the level the
   // player finished at is above the level this page is.
   await expect(rows.first().locator('.movedup__climb')).toContainText('→')
+  // A face on every row, and a real photo rather than the monogram fallback —
+  // these are minor-leaguers, so the studio silo 404s for most of them and the
+  // milb rung is the one that has to answer (Headshot.jsx's rung policy).
+  await expect(rows.locator('.movedup__shot img')).toHaveCount(6)
   // What the list is drawn from, in a sentence, in natural case.
   const pool = page.locator('.movedup__pool')
   await expect(pool).toContainText('Not every promotion')
@@ -199,7 +203,21 @@ test('the level page leads with who moved up', async ({ page }) => {
   // The same door the wire uses, opening onto the rest.
   const door = page.locator('.oseason__door')
   await door.click()
-  expect(await rows.count()).toBeGreaterThan(5)
+  expect(await rows.count()).toBeGreaterThan(6)
+})
+
+test('a ranked prospect wears his rank, and the rest wear nothing', async ({ page }) => {
+  await page.goto(`/higha/1012${BOARD_SEASON}`)
+  const rows = page.locator('.movedup__table tbody tr')
+  await expect(rows.first()).toBeVisible()
+  // The pill is spliced in unconditionally and renders nothing for a player
+  // ranked nowhere, so the count is a real fraction of the list rather than
+  // one badge per row. Anything that decorated every row would be decoration.
+  const pills = page.locator('.movedup .prospectpill')
+  const shown = await pills.count()
+  expect(shown).toBeGreaterThan(0)
+  expect(shown).toBeLessThan(await rows.count())
+  await expect(pills.first()).toContainText('PROSPECT')
 })
 
 test('an in-season empty day at a level is still an empty day', async ({ page }) => {
