@@ -126,7 +126,7 @@
 
 .bcast__meta dt {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--paper-2);
   opacity: 0.62;
@@ -228,7 +228,7 @@
 .slab__note {
   margin: var(--space-1) 0 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-muted);
 }
@@ -409,7 +409,7 @@
 
 .rpt thead th {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
   border-bottom: var(--bw-heavy) solid var(--navy);
@@ -517,7 +517,7 @@
 .rpt__sub {
   display: block;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   color: var(--text-caption);
 }
 
@@ -625,7 +625,7 @@
   align-items: baseline;
   gap: var(--space-2);
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
@@ -795,7 +795,7 @@
 
 .yrange__count {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -882,7 +882,7 @@
   justify-content: space-between;
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -923,7 +923,7 @@
 .dh__caption {
   margin: 0 0 var(--space-2);
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   color: var(--text-caption);
 }
 
@@ -963,7 +963,7 @@
 .dh__oppcount {
   margin-left: 6px;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
@@ -1053,7 +1053,7 @@
 .dh__drawer td {
   padding: 4px 10px;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;

@@ -1,0 +1,1801 @@
+[
+ {
+  "cls": "rptsource",
+  "face": "body",
+  "routes": 2,
+  "maxLen": 561,
+  "txt": "2026 season, through Fri, Sep 18, 2026 ·"
+ },
+ {
+  "cls": "p",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 201,
+  "txt": "A photo here can show the result at a gl"
+ },
+ {
+  "cls": "slab__note",
+  "face": "body",
+  "routes": 6,
+  "maxLen": 172,
+  "txt": "Measured on the thirty rows below. Publi"
+ },
+ {
+  "cls": "psrace__tbdcaption",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 172,
+  "txt": "The bracket isn’t reseeded after the Wil"
+ },
+ {
+  "cls": "dh__caption",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 69,
+  "txt": "30 clubs · 2004–2026 · ranked by win per"
+ },
+ {
+  "cls": "colchart__panelsub",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 46,
+  "txt": "The club's second call, with one still i"
+ },
+ {
+  "cls": "rpt__sub",
+  "face": "body",
+  "routes": 5,
+  "maxLen": 42,
+  "txt": "Minimum 15 games · challenged pitches on"
+ },
+ {
+  "cls": "scorebookstory__gamefoot",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 40,
+  "txt": "Jul 11 · One-run game · 13 combined runs"
+ },
+ {
+  "cls": "rptfail",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 35,
+  "txt": "Munetaka Murakami · strike · 2.0 in"
+ },
+ {
+  "cls": "li",
+  "face": "body",
+  "routes": 4,
+  "maxLen": 32,
+  "txt": "Above the league average of 2:45"
+ },
+ {
+  "cls": "dd",
+  "face": "body",
+  "routes": 3,
+  "maxLen": 30,
+  "txt": "Eliminated from the postseason"
+ },
+ {
+  "cls": "plink milestonewatch-page__team",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 21,
+  "txt": "Philadelphia Phillies"
+ },
+ {
+  "cls": "plink allstargame__venuelink",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 18,
+  "txt": "Citizens Bank Park"
+ },
+ {
+  "cls": "rankgrp__title",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 18,
+  "txt": "Outfield distances"
+ },
+ {
+  "cls": "b",
+  "face": "body",
+  "routes": 2,
+  "maxLen": 17,
+  "txt": "William Contreras"
+ },
+ {
+  "cls": "sgh-sub",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 17,
+  "txt": "vs Gavin Williams"
+ },
+ {
+  "cls": "plink",
+  "face": "body",
+  "routes": 3,
+  "maxLen": 17,
+  "txt": "William Contreras"
+ },
+ {
+  "cls": "rptfail rptmark",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 15,
+  "txt": "Both on one man"
+ },
+ {
+  "cls": "allstargame__venuename",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 12,
+  "txt": "Marlins Park"
+ },
+ {
+  "cls": "rankpost__note",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 11,
+  "txt": "3rd deepest"
+ },
+ {
+  "cls": "plink photo__cap",
+  "face": "body",
+  "routes": 2,
+  "maxLen": 9,
+  "txt": "Zastryzny"
+ },
+ {
+  "cls": "seedrow__pendslash",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "/"
+ },
+ {
+  "cls": "pillar-key__swatch pillar-key__swatch--capital",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "pillar-key__swatch pillar-key__swatch--production",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "pillar-key__swatch pillar-key__swatch--youth",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "pillar-key__swatch pillar-key__swatch--down",
+  "face": "body",
+  "routes": 2,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "pillar-key__swatch pillar-key__swatch--fresh",
+  "face": "body",
+  "routes": 2,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "pillar-key__swatch pillar-key__swatch--limited",
+  "face": "body",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "psrace__guide",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 53,
+  "txt": "If the season ended today · Seeds 1 & 2 "
+ },
+ {
+  "cls": "team",
+  "face": "display",
+  "routes": 12,
+  "maxLen": 48,
+  "txt": "UmpireMinimum 15 games · challenged pitc"
+ },
+ {
+  "cls": "psrace__destination",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 46,
+  "txt": "League champion advances to the World Se"
+ },
+ {
+  "cls": "colchart__paneltitle",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 39,
+  "txt": "Inning a club’s bank first reached zero"
+ },
+ {
+  "cls": "psrace__asof",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 37,
+  "txt": "Entering today · through Sep 17, 2026"
+ },
+ {
+  "cls": "team-score__head",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 35,
+  "txt": "Season reportHow this is calculated"
+ },
+ {
+  "cls": "span",
+  "face": "display",
+  "routes": 29,
+  "maxLen": 32,
+  "txt": "Above the league average of 2:45"
+ },
+ {
+  "cls": "staffgrid__tally",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 32,
+  "txt": "5 available · 1 limited · 2 down"
+ },
+ {
+  "cls": "psrace__scrollhint",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 30,
+  "txt": "Scroll to follow the bracket →"
+ },
+ {
+  "cls": "ctr__terms",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 30,
+  "txt": "8 y/$50.75M (26-33)+34-35 opts"
+ },
+ {
+  "cls": "team-hub__div",
+  "face": "display",
+  "routes": 3,
+  "maxLen": 29,
+  "txt": "1st · National League Central"
+ },
+ {
+  "cls": "team-score__label",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 27,
+  "txt": "Last 10On one of those runs"
+ },
+ {
+  "cls": "trrank__tilefoot trrank__tilefoot--mine",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 26,
+  "txt": "Brewers16-12Tied 10 of 30›"
+ },
+ {
+  "cls": "psbracket__collabel psbracket__collabel--al",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 24,
+  "txt": "Division SeriesBest of 5"
+ },
+ {
+  "cls": "psbracket__collabel psbracket__collabel--nl",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 24,
+  "txt": "Division SeriesBest of 5"
+ },
+ {
+  "cls": "wire__dateline",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 23,
+  "txt": "Wednesday, September 16"
+ },
+ {
+  "cls": "th",
+  "face": "display",
+  "routes": 13,
+  "maxLen": 23,
+  "txt": "Won of calledAll season"
+ },
+ {
+  "cls": "txpage__dateline",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 23,
+  "txt": "Thursday, September 171"
+ },
+ {
+  "cls": "team-score__howlink",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 22,
+  "txt": "How this is calculated"
+ },
+ {
+  "cls": "dirhd",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 20,
+  "txt": "Prospects & injuries"
+ },
+ {
+  "cls": "dirhd__label",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 20,
+  "txt": "Prospects & injuries"
+ },
+ {
+  "cls": "tlead__cat-title",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 20,
+  "txt": "Double plays induced"
+ },
+ {
+  "cls": "prospects__dateline",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 20,
+  "txt": "MLB Pipeline ranking"
+ },
+ {
+  "cls": "foulboard__whiffcol-heading",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 20,
+  "txt": "Fewest (whiff-heavy)"
+ },
+ {
+  "cls": "a",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 20,
+  "txt": "Leading and trailing"
+ },
+ {
+  "cls": "ctr__tilelabel",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 20,
+  "txt": "Committed after 2026"
+ },
+ {
+  "cls": "chevron-link",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 18,
+  "txt": "All transactions ›"
+ },
+ {
+  "cls": "ctr__tilenote",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 18,
+  "txt": "Figure not yet set"
+ },
+ {
+  "cls": "aboutfigs__k",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 18,
+  "txt": "Notifications sent"
+ },
+ {
+  "cls": "topbar__action chevron-link",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 17,
+  "txt": "Postseason Race ›"
+ },
+ {
+  "cls": "em",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 16,
+  "txt": "preferred lineup"
+ },
+ {
+  "cls": "scorebookstory__stamp",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 15,
+  "txt": "The book’s team"
+ },
+ {
+  "cls": "scorebookstory__gamescore",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 15,
+  "txt": "10.0 Game Score"
+ },
+ {
+  "cls": "psodds-pill",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 15,
+  "txt": "Postseason Odds"
+ },
+ {
+  "cls": "wire__type wire__type--move",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 14,
+  "txt": "Roster shuffle"
+ },
+ {
+  "cls": "standings-jump is-active",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 14,
+  "txt": "Entering today"
+ },
+ {
+  "cls": "standings-jump",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 14,
+  "txt": "More columns ↔"
+ },
+ {
+  "cls": "tradedl__filterlabel",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 14,
+  "txt": "Filter by team"
+ },
+ {
+  "cls": "bpfact__label",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 14,
+  "txt": "Avg attendance"
+ },
+ {
+  "cls": "txcard__head",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 14,
+  "txt": "Transactions‹›"
+ },
+ {
+  "cls": "txstory__type txstory__type--move",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 14,
+  "txt": "Roster shuffle"
+ },
+ {
+  "cls": "sitefooter__more-label",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 13,
+  "txt": "More Baseball"
+ },
+ {
+  "cls": "payboard__chip is-active",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 13,
+  "txt": "All positions"
+ },
+ {
+  "cls": "tierpill tierpill--below",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 13,
+  "txt": "Below Average"
+ },
+ {
+  "cls": "foulboard__whiffcol-hint",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 13,
+  "txt": "(whiff-heavy)"
+ },
+ {
+  "cls": "trrank__chip",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 13,
+  "txt": "Post-All-Star"
+ },
+ {
+  "cls": "trrank__tileminerank",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 13,
+  "txt": "Tied 15 of 30"
+ },
+ {
+  "cls": "team-score__breakdown",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 13,
+  "txt": "See breakdown"
+ },
+ {
+  "cls": "wire__type wire__type--out",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 12,
+  "txt": "Injured list"
+ },
+ {
+  "cls": "dt",
+  "face": "display",
+  "routes": 6,
+  "maxLen": 12,
+  "txt": "Arms tracked"
+ },
+ {
+  "cls": "rehabcard__since",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 12,
+  "txt": "Since Sep 17"
+ },
+ {
+  "cls": "prospectpill",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 12,
+  "txt": "#13 PROSPECT"
+ },
+ {
+  "cls": "stat__k",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 12,
+  "txt": "Pitches seen"
+ },
+ {
+  "cls": "team-score__grade-kicker",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 12,
+  "txt": "Season Grade"
+ },
+ {
+  "cls": "txstory__type txstory__type--out",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 12,
+  "txt": "Injured list"
+ },
+ {
+  "cls": "standings-reveal",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 11,
+  "txt": "Reveal live"
+ },
+ {
+  "cls": "awardhistory__allmlbhead",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 11,
+  "txt": "Second Team"
+ },
+ {
+  "cls": "trrank__chip is-on",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 11,
+  "txt": "Full season"
+ },
+ {
+  "cls": "colchart__rulelabel",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 11,
+  "txt": "Median 5.83"
+ },
+ {
+  "cls": "colchart__rulelabel colchart__rulelabel--before",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 11,
+  "txt": "Median 1.14"
+ },
+ {
+  "cls": "notesbtn",
+  "face": "display",
+  "routes": 3,
+  "maxLen": 11,
+  "txt": "Game Notes↗"
+ },
+ {
+  "cls": "button",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 10,
+  "txt": "Brewers 32"
+ },
+ {
+  "cls": "tlead__name-first",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 10,
+  "txt": "Cristopher"
+ },
+ {
+  "cls": "playercard__team",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "Cardinals"
+ },
+ {
+  "cls": "awardhistory__teamname",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "Cardinals"
+ },
+ {
+  "cls": "foulboard__heroname-first",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "Christian"
+ },
+ {
+  "cls": "plink foulboard__viewmore",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "View more"
+ },
+ {
+  "cls": "scorebug__result is-negative",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "Strikeout"
+ },
+ {
+  "cls": "psrace__format",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "Best of 3"
+ },
+ {
+  "cls": "last10__cap",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "Sun · Sep"
+ },
+ {
+  "cls": "txday",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "ThuSep171"
+ },
+ {
+  "cls": "gamecard__delay",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "Suspended"
+ },
+ {
+  "cls": "logbook-btn__label",
+  "face": "display",
+  "routes": 31,
+  "maxLen": 8,
+  "txt": "Game Log"
+ },
+ {
+  "cls": "loader__league",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 8,
+  "txt": "NATIONAL"
+ },
+ {
+  "cls": "levelnav__btn is-active",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 8,
+  "txt": "By Award"
+ },
+ {
+  "cls": "milestonewatch-page__eta",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 8,
+  "txt": "Sep 2026"
+ },
+ {
+  "cls": "scorebug__result is-positive",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 8,
+  "txt": "Home Run"
+ },
+ {
+  "cls": "sr-only",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 8,
+  "txt": "Pitching"
+ },
+ {
+  "cls": "bullets__label",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 8,
+  "txt": "In a row"
+ },
+ {
+  "cls": "lgstand__divname",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 7,
+  "txt": "Central"
+ },
+ {
+  "cls": "st-ext",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 7,
+  "txt": "Exp W-L"
+ },
+ {
+  "cls": "tierpill tierpill--average",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 7,
+  "txt": "Average"
+ },
+ {
+  "cls": "levelnav__btn",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 7,
+  "txt": "By Year"
+ },
+ {
+  "cls": "roster-super__toggle-btn is-active",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 7,
+  "txt": "Current"
+ },
+ {
+  "cls": "rookiepill",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 7,
+  "txt": "ROOKIER"
+ },
+ {
+  "cls": "txstory__type txstory__type--add",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 7,
+  "txt": "Signing"
+ },
+ {
+  "cls": "dirtag",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 6,
+  "txt": "Guides"
+ },
+ {
+  "cls": "is-active",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 6,
+  "txt": "All 39"
+ },
+ {
+  "cls": "seedrow__pendlabel",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 6,
+  "txt": "Winner"
+ },
+ {
+  "cls": "roster-super__toggle-btn",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 6,
+  "txt": "Season"
+ },
+ {
+  "cls": "rookiepill__full",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 6,
+  "txt": "ROOKIE"
+ },
+ {
+  "cls": "ctr__namehead",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 6,
+  "txt": "Player"
+ },
+ {
+  "cls": "banner banner--out",
+  "face": "display",
+  "routes": 4,
+  "maxLen": 5,
+  "txt": "IL-15"
+ },
+ {
+  "cls": "banner banner--move",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "IL-60"
+ },
+ {
+  "cls": "tlead__statlabel",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "BABIP"
+ },
+ {
+  "cls": "tierpill tierpill--elite",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "Elite"
+ },
+ {
+  "cls": "sgh-vallabel",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "Fouls"
+ },
+ {
+  "cls": "scorebug__inning",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "▼10th"
+ },
+ {
+  "cls": "allstargame__mvppos",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "PH-DH"
+ },
+ {
+  "cls": "last10__oppcap",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "@ CIN"
+ },
+ {
+  "cls": "hlclip__play",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "Watch"
+ },
+ {
+  "cls": "tierpill tierpill--good",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 4,
+  "txt": "Good"
+ },
+ {
+  "cls": "standings__wide",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 4,
+  "txt": "Home"
+ },
+ {
+  "cls": "payboard__chip",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "TWP"
+ },
+ {
+  "cls": "payboard__tag",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "NYM"
+ },
+ {
+  "cls": "reg-pill",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "AAA"
+ },
+ {
+  "cls": "milestonewatch-page__pos",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "TWP"
+ },
+ {
+  "cls": "tradecard__pos",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "LHP"
+ },
+ {
+  "cls": "staffgrid__hlabel",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 3,
+  "txt": "Arm"
+ },
+ {
+  "cls": "psrace__bye",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "Bye"
+ },
+ {
+  "cls": "allstargame__mvplabel",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "MVP"
+ },
+ {
+  "cls": "tledg__pos",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "RHP"
+ },
+ {
+  "cls": "txday__wd",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "Thu"
+ },
+ {
+  "cls": "txday__mo",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "Sep"
+ },
+ {
+  "cls": "ctr__agehead",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "Age"
+ },
+ {
+  "cls": "ctr__code",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "OPT"
+ },
+ {
+  "cls": "banner banner--in",
+  "face": "display",
+  "routes": 4,
+  "maxLen": 2,
+  "txt": "In"
+ },
+ {
+  "cls": "tlead__pos",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "2B"
+ },
+ {
+  "cls": "posspend__pos",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "SP"
+ },
+ {
+  "cls": "rehabcard__pos",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "RF"
+ },
+ {
+  "cls": "staffgrid__hlabel staffgrid__hlabel--end",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 2,
+  "txt": "7d"
+ },
+ {
+  "cls": "allstarrosters__pos",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "1B"
+ },
+ {
+  "cls": "rankpost__pos",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "lf"
+ },
+ {
+  "cls": "rolechip",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 2,
+  "txt": "SP"
+ },
+ {
+  "cls": "rolechip rolechip--cl",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 2,
+  "txt": "CL"
+ },
+ {
+  "cls": "decknudge",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "‹›"
+ },
+ {
+  "cls": "rolechip rolechip--rp",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "RP"
+ },
+ {
+  "cls": "ilchip",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "15"
+ },
+ {
+  "cls": "ctr__pos ctr__pos--lineup",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "DH"
+ },
+ {
+  "cls": "ctr__pos ctr__pos--rotation",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "SP"
+ },
+ {
+  "cls": "ctr__pos ctr__pos--bullpen",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "RP"
+ },
+ {
+  "cls": "scorebug__arrow is-top",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "▲"
+ },
+ {
+  "cls": "scorebug__arrow is-bottom",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "▼"
+ },
+ {
+  "cls": "staffgrid__dayname",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 1,
+  "txt": "F"
+ },
+ {
+  "cls": "staffgrid__dayname staffgrid__dayname--today",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 1,
+  "txt": "F"
+ },
+ {
+  "cls": "last10__wl",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "L"
+ },
+ {
+  "cls": "txday__count",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "1"
+ },
+ {
+  "cls": "rookiepill__short",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "R"
+ },
+ {
+  "cls": "txpage__count",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "1"
+ },
+ {
+  "cls": "ctr__pos ctr__pos--offRoster",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "—"
+ },
+ {
+  "cls": "gamecard__nationaltv",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "gamecard__nationaltv-logo",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "dirglyph dirglyph--this-season",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "svg",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "rect",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "path",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "dirhd__rule",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "dirglyph dirglyph--around-the-game",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "dirglyph dirglyph--prospects",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "circle",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "dirglyph dirglyph--history",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "dirglyph dirglyph--yours",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "dirglyph dirglyph--guides",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "dirglyph dirglyph--tools",
+  "face": "display",
+  "routes": 26,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "plink awardhistory__teamlink",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "teamlogo",
+  "face": "display",
+  "routes": 5,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "prospectpill__logo",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "foulboard__barcol",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "daystrip-key__swatch daystrip-key__swatch--light",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "daystrip-key__swatch daystrip-key__swatch--moderate",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "daystrip-key__swatch daystrip-key__swatch--heavy",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "daystrip-key__rail",
+  "face": "display",
+  "routes": 2,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "txpage__rule",
+  "face": "display",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "scorebookstory__footer",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 50,
+  "txt": "Book No. 01Scored by hand. Remembered he"
+ },
+ {
+  "cls": "scorebookstory__leaderrow",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 35,
+  "txt": "Jacob Misiorowski35.0 IP55–05–00.26"
+ },
+ {
+  "cls": "playercard__stat",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 26,
+  "txt": ".331 AVG · 53 HR · 114 RBI"
+ },
+ {
+  "cls": "scorebookstory__dateline",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 25,
+  "txt": "May 18, 2026July 12, 2026"
+ },
+ {
+  "cls": "scorebookstory__leaderhead",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 22,
+  "txt": "PitcherGSRecordTeamERA"
+ },
+ {
+  "cls": "allstargame__mvpstat",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 22,
+  "txt": "1.0 IP, 0 H, 0 ER, 3 K"
+ },
+ {
+  "cls": "scorebookstory__coverline",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 18,
+  "txt": "Numbers GameNo. 01"
+ },
+ {
+  "cls": "trrank__tilemine",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 18,
+  "txt": "16-12Tied 10 of 30"
+ },
+ {
+  "cls": "strong",
+  "face": "mono",
+  "routes": 3,
+  "maxLen": 14,
+  "txt": "79-point swing"
+ },
+ {
+  "cls": "dh__oppcount",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 13,
+  "txt": "(12 DHs each)"
+ },
+ {
+  "cls": "small",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 12,
+  "txt": "Rotation ERA"
+ },
+ {
+  "cls": "colchart__label",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 12,
+  "txt": "After a loss"
+ },
+ {
+  "cls": "hlclip__meta",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 12,
+  "txt": "Sep 17 @ PIT"
+ },
+ {
+  "cls": "gamehigh-matchup__date",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 11,
+  "txt": "SAT 7/25/26"
+ },
+ {
+  "cls": "yrange__count",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 10,
+  "txt": "23 seasons"
+ },
+ {
+  "cls": "bpfact__note",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 10,
+  "txt": "11th of 30"
+ },
+ {
+  "cls": "trrank__figuresub",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "1.000 pct"
+ },
+ {
+  "cls": "team-score__rank",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 9,
+  "txt": "1st of 30"
+ },
+ {
+  "cls": "yrange__ends",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 8,
+  "txt": "20042026"
+ },
+ {
+  "cls": "posspend__money",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 7,
+  "txt": "$686.4M"
+ },
+ {
+  "cls": "wc-div",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 7,
+  "txt": "Central"
+ },
+ {
+  "cls": "cliff__value",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 7,
+  "txt": "$120.2M"
+ },
+ {
+  "cls": "gamephotos__gamedate",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 6,
+  "txt": "Sep 18"
+ },
+ {
+  "cls": "rptfail__miss",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 6,
+  "txt": "1.0 in"
+ },
+ {
+  "cls": "td",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 6,
+  "txt": "$67.2M"
+ },
+ {
+  "cls": "trrank__tilemineval",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "61-23"
+ },
+ {
+  "cls": "colchart__end colchart__end--start",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "61.4%"
+ },
+ {
+  "cls": "colchart__end colchart__end--end",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "40.6%"
+ },
+ {
+  "cls": "colchart__value",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 5,
+  "txt": "15.23"
+ },
+ {
+  "cls": "rankchip rankchip--bad",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 4,
+  "txt": "-0.5"
+ },
+ {
+  "cls": "scorebug__team scorebug__team--his",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 4,
+  "txt": "CWS0"
+ },
+ {
+  "cls": "scorebug__team",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 4,
+  "txt": "CLE0"
+ },
+ {
+  "cls": "bullets__of",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 4,
+  "txt": "/ 25"
+ },
+ {
+  "cls": "last10__meta last10__meta--inline",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 4,
+  "txt": "(10)"
+ },
+ {
+  "cls": "rankchip rankchip--good",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 3,
+  "txt": "9.1"
+ },
+ {
+  "cls": "rankchip",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 3,
+  "txt": "3.4"
+ },
+ {
+  "cls": "tlead__teamabbr",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "HOU"
+ },
+ {
+  "cls": "tlead__rowteam",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "HOU"
+ },
+ {
+  "cls": "playercard__posbadge",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "TWP"
+ },
+ {
+  "cls": "colchart__ticklabel",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 3,
+  "txt": "25%"
+ },
+ {
+  "cls": "wiredock__count",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 2,
+  "txt": "25"
+ },
+ {
+  "cls": "wire__count",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 2,
+  "txt": "15"
+ },
+ {
+  "cls": "tlead__rank",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "10"
+ },
+ {
+  "cls": "payclubs__rank",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "10"
+ },
+ {
+  "cls": "scorebookstory__rank",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "01"
+ },
+ {
+  "cls": "scorebookstory__performerRank",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "#1"
+ },
+ {
+  "cls": "trrank__groupnum",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "01"
+ },
+ {
+  "cls": "daystrip__day daystrip__day--light",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 2,
+  "txt": "20"
+ },
+ {
+  "cls": "daystrip__day daystrip__day--moderate",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 2,
+  "txt": "31"
+ },
+ {
+  "cls": "daystrip__day daystrip__day--heavy",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 2,
+  "txt": "42"
+ },
+ {
+  "cls": "rankstrip__n",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "30"
+ },
+ {
+  "cls": "aboutrule__n",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "01"
+ },
+ {
+  "cls": "aboutledger__n",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 2,
+  "txt": "01"
+ },
+ {
+  "cls": "clinchmark clinchmark--x",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 1,
+  "txt": "x"
+ },
+ {
+  "cls": "standings-trend standings-trend--up",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "▲"
+ },
+ {
+  "cls": "standings-trend standings-trend--down",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "▼"
+ },
+ {
+  "cls": "clinchmark clinchmark--e",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "e"
+ },
+ {
+  "cls": "clinchmark clinchmark--y",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 1,
+  "txt": "y"
+ },
+ {
+  "cls": "seedrow__seed",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 1,
+  "txt": "4"
+ },
+ {
+  "cls": "defdiamond__num",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 1,
+  "txt": "7"
+ },
+ {
+  "cls": "i",
+  "face": "mono",
+  "routes": 1,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "daystrip__day daystrip__day--none",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "daystrip__day daystrip__day--none daystrip__day--today",
+  "face": "mono",
+  "routes": 2,
+  "maxLen": 0,
+  "txt": ""
+ },
+ {
+  "cls": "scorebug__prose",
+  "face": "read",
+  "routes": 1,
+  "maxLen": 122,
+  "txt": "Pitch 14: Nick Madrigal challenged (pitc"
+ },
+ {
+  "cls": "penpage__rulehead",
+  "face": "read",
+  "routes": 1,
+  "maxLen": 97,
+  "txt": "The rule, on Aaron Ashby — a tick is the"
+ },
+ {
+  "cls": "tradecard__statline",
+  "face": "read",
+  "routes": 1,
+  "maxLen": 51,
+  "txt": "62 G (3 G at ROK, 3 G at A, 23 G at A+, "
+ }
+]

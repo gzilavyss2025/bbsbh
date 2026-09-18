@@ -47,7 +47,7 @@
   /* A real token, readable because the plot's viewBox is 1:1 with the
      rendered pixel (see GloveTarget.jsx) — so this is 11px on screen, not
      11 user units stretched by a viewBox scale. */
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   fill: var(--text-caption);
   /* The label carries its OWN paper ground, because it sits inside the plot
      and the innermost one lands exactly where the cloud is thickest. Same
@@ -133,7 +133,7 @@
   align-items: center;
   gap: 5px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-wide);
   color: var(--text-caption);

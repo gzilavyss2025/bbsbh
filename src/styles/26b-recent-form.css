@@ -42,7 +42,7 @@
 .formtrend .formtrend__anchor .yr {
   font-family: var(--font-display);
   letter-spacing: var(--ls-caps);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
@@ -63,7 +63,7 @@
 .formtrend__count-k {
   font-family: var(--font-display);
   letter-spacing: var(--ls-label);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   color: var(--text-caption);
 }

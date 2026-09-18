@@ -38,7 +38,7 @@
   color: var(--heat-band-ink);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
 }
 
 /* The times-through filter stays labelled, but the explanation and control
@@ -88,7 +88,7 @@
 .pitchslab__filterlabel {
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   white-space: nowrap;
@@ -190,7 +190,7 @@
 
 .pitchslab__family {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   white-space: nowrap;
@@ -219,7 +219,7 @@
   color: var(--text-body);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   text-align: right;
 }
 
@@ -237,7 +237,7 @@
   margin-left: 3px;
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
 }
@@ -307,7 +307,7 @@
   overflow: hidden;
   color: var(--heat-band-ink);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   text-transform: uppercase;
   text-overflow: ellipsis;
   letter-spacing: var(--ls-label);
@@ -381,7 +381,7 @@
 
 .arsenal__title {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -500,7 +500,7 @@
   background: transparent;
   color: var(--text-muted);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);

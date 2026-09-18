@@ -46,7 +46,7 @@
 }
 
 .rolling__grid thead th {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
@@ -271,7 +271,7 @@
 
 .winprob__inninglabel {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   fill: var(--text-caption);
 }
 
@@ -330,7 +330,7 @@
 .winprob__bigdot-label-bg { fill: var(--team-color); }
 .winprob__bigdot-label-text {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   fill: var(--team-text);
 }
@@ -354,7 +354,7 @@
 .winprob__subhead {
   margin: 10px 0 4px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -407,7 +407,7 @@
   align-items: center;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   letter-spacing: var(--ls-label);
   padding: 2px 7px;
   border-radius: var(--radius-pill);
@@ -416,7 +416,7 @@
 
 .winprob__ledger-half {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -593,7 +593,7 @@
 .pitchers__teamname {
   margin: 14px 0 4px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -620,7 +620,7 @@
 }
 
 .pitchers__grid thead th {
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-title);

@@ -442,10 +442,10 @@ before changing how any of these render; the conversion itself lives in
 `src/lib/logoMono.js`.
 
 Type size, weight, leading, and tracking must use the semantic roles in
-`tokens/typography.css`; `scripts/check-typography.mjs` rejects new ad hoc values in
-`src/styles/*.css`. Focus rings must use `var(--focus-ring)`/`var(--ring)`
-(`check-focus-ring.mjs`), and the documented text-on-background token pairings must
-hold WCAG AA (`check-contrast.mjs`) — see ADR-0023. The global ALL-CAPS invariant
-(see the block comment in `src/styles/01-base.css`) is guarded by `scripts/check-caps.mjs`
-(the CSS half) and `scripts/check-name-casing.mjs` (the JS half — no per-component
-`.toUpperCase()`/`.toLowerCase()` on rendered text; see ADR-0017) via `npm run lint`.
+`tokens/typography.css`; `scripts/check-typography.mjs` rejects ad hoc values. Small
+text is split BY JOB: `--fs-label` 12px display labels, `--fs-cell` 11px mono figures,
+`--fs-small` 13px running copy; `--fs-caption` is short body-face text only, and
+`scripts/check-caption-budget.mjs` only ever lets its count shrink. Focus rings use `var(--focus-ring)`/`var(--ring)` (`check-focus-ring.mjs`); text-on-
+background pairings hold WCAG AA (`check-contrast.mjs`) — ADR-0023. The ALL-CAPS
+invariant (`src/styles/01-base.css`) is guarded by `scripts/check-caps.mjs` and
+`scripts/check-name-casing.mjs` (no per-component `.toUpperCase()`; ADR-0017).

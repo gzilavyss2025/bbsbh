@@ -28,7 +28,7 @@
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   white-space: pre;
   overflow: auto;
   resize: vertical;

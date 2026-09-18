@@ -60,7 +60,7 @@
 .cmdrecv__rank {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
   min-width: 1.6em;
   text-align: right;
@@ -126,7 +126,7 @@
 .cmdrecv__n {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
   justify-self: end;
   min-width: 3em;
@@ -156,7 +156,7 @@
   max-width: 620px;
   margin: var(--space-3) 0 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-ui);
   color: var(--text-body);
 }

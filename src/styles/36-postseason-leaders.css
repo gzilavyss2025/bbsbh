@@ -62,7 +62,7 @@
   flex: none;
   width: 1.4em;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   color: var(--text-muted);
   text-align: right;
@@ -118,7 +118,7 @@
 .psleaders__mvppos {
   flex: none;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   color: var(--text-muted);
 }

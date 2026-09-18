@@ -136,7 +136,7 @@
 }
 .wintercal__date {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 .wintercal__label {
@@ -328,7 +328,7 @@
    knows the Brewers long before they know the Timber Rattlers. */
 .pgame__org {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
@@ -384,7 +384,7 @@
   gap: var(--space-2);
   margin: var(--space-3) 0 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
@@ -432,7 +432,7 @@
   /* The header row has no photo in it and reads better on its baseline. */
   vertical-align: baseline;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -486,7 +486,7 @@
 .movedup__pos {
   margin-left: var(--space-2);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-caption);

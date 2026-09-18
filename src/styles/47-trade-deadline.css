@@ -36,7 +36,7 @@
 }
 .tradedl__seasondeadline {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
@@ -62,7 +62,7 @@
 .tradedl__filterlabel {
   margin: var(--space-3) 0 6px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
@@ -103,7 +103,7 @@
 .tradecard__badge {
   margin: 0 0 var(--space-2);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
@@ -230,7 +230,7 @@
   flex: 0 0 auto;
   margin-left: 10px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
@@ -388,7 +388,7 @@
     margin-left: 0;
   }
   .tradecard__swap .tradecard__statline {
-    font-size: var(--fs-caption);
+    font-size: var(--fs-small);
   }
   .tradecard__swap .tradecard__teamname {
     font-size: var(--fs-compact);

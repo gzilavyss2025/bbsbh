@@ -382,7 +382,7 @@
   align-items: center;
   gap: 3px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-muted);

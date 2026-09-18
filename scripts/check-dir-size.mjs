@@ -755,7 +755,11 @@ const BUDGETS = {
   // rewrites whole. Flat for the same reason every gen-*.mjs above them is —
   // the nightly workflow runs this directory as a flat list, and both RUN on
   // import; their pure halves went to scripts/lib/, which is what it is for.
-  scripts: 117,
+  // +1 for check-caption-budget.mjs, the ratchet that holds #1128's --fs-caption
+  // split open. Flat like every other check-*.mjs: `npm run lint` runs this
+  // directory as a flat chain of guards, and a lone subdirectory for one of
+  // them would hide it from the list a reader scans to see what is enforced.
+  scripts: 118,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

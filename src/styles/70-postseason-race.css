@@ -3,7 +3,7 @@
 .psrace__asof {
   margin: 4px 0 var(--space-3);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -62,7 +62,7 @@
 .seedrow__pendlabel {
   flex: none;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-style: italic;
   color: var(--text-caption);
 }
@@ -70,7 +70,7 @@
 .psrace__tbdcaption {
   margin: var(--space-3) 0 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-body);
   color: var(--text-caption);
   text-align: center;
@@ -86,7 +86,7 @@
 /* Connected rounds keep their geometry on phones inside a local scroller. */
 .psrace__guide, .psrace__scrollhint, .psrace__destination {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
@@ -110,7 +110,7 @@
   display: block;
   margin-top: 4px;
   color: var(--text-caption);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-regular);
 }
 .psrace__round .psbracket__lanes {
@@ -130,7 +130,7 @@
 .psrace__miniboard .seedrow__name { font-weight: var(--w-semibold); }
 .psrace__miniboard .seedrow__seed { color: var(--text-body); }
 .psrace__miniboard .seedrow:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
-.psrace__bye { font-family: var(--font-display); font-size: var(--fs-caption); color: var(--text-caption); }
+.psrace__bye { font-family: var(--font-display); font-size: var(--fs-label); color: var(--text-caption); }
 /* The two Division Series paths join midway before the Championship. */
 .psrace__round--wc .seedcard::after,
 .psrace__round--ds .seedcard::after,

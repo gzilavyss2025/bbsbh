@@ -1,0 +1,2487 @@
+[
+ {
+  "route": "/",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#185",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#221",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Norfolk Tides"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#231",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Toledo Mud Hens"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#239",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Joey Loperfido"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#258",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Wyatt Mills"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#269",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Xzavion Curry"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#278",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Nick Madrigal"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#328",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Derek Law"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#348",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Paul Gervase"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#369",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Ramón Urías"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#387",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Charlotte Knights"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#405",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Scranton/Wilkes-Barre RailRiders"
+ },
+ {
+  "route": "/",
+  "kind": "extra-line-copy",
+  "el": "plink#406",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Oswaldo Cabrera"
+ },
+ {
+  "route": "/standings",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#654",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/leaders",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#1619",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/salaries",
+  "kind": "extra-line-copy",
+  "el": "paysource#184",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "Covers $4,521.2M of the league's $4,527."
+ },
+ {
+  "route": "/salaries",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#194",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/umpires",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#643",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/attendance",
+  "kind": "extra-line-copy",
+  "el": "slab__note#15",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Across 2,291 home dates."
+ },
+ {
+  "route": "/attendance",
+  "kind": "extra-line-copy",
+  "el": "bcast-sec__note#20",
+  "detail": "11px 5ln -> 13px 6ln",
+  "txt": "Bars are scaled across the league’s own "
+ },
+ {
+  "route": "/attendance",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#59",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Citizens Bank Park"
+ },
+ {
+  "route": "/attendance",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#213",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Sutter Health Park"
+ },
+ {
+  "route": "/attendance",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#345",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Kauffman Stadium"
+ },
+ {
+  "route": "/attendance",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#890",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/prospects",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#22",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "slab__note#17",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "Los Angeles Dodgers, 320-224 across four"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "bcast-sec__note#20",
+  "detail": "11px 3ln -> 13px 4ln",
+  "txt": "Each bar is the index itself, split into"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#40",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "6 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#51",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "5 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#62",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "6 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#73",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "5 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#84",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "4 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#95",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "3 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#106",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "3 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#117",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "3 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#128",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "4 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#139",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "3 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#150",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "3 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#161",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "6 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#172",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#183",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "4 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#194",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#205",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#216",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "3 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#227",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "4 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#238",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#249",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "3 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#260",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "4 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#271",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#282",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "4 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#293",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#304",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#315",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#326",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2 ranked prospects"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#337",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "1 ranked prospect"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#348",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "1 ranked prospect"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#359",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "1 ranked prospect"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-copy",
+  "el": "bcast-sec__note#366",
+  "detail": "11px 5ln -> 13px 6ln",
+  "txt": "Across these thirty organisations, the t"
+ },
+ {
+  "route": "/farm-system-rankings",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#428",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/rehab",
+  "kind": "extra-line-label",
+  "el": "plink#89",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Sugar Land Space Cowboys"
+ },
+ {
+  "route": "/rehab",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#199",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/awards",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#2137",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/milestones",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#1563",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#16",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "16 G (13 G at A, 3 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#21",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 3rd Round Pick, #103"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#32",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 11th Round Pick, #316"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#44",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2019 22nd Round Pick, #658"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#45",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "25 G (20 G at AA, 5 G at AAA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#50",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 9th Round Pick, #266"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#62",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2023"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#81",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 3rd Round Pick, #100"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#82",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "32 G (2 G at A, 30 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#86",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 15th Round Pick, #462"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#97",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 10th Round Pick, #299"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#103",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 5th Round Pick, #137"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#104",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "18 G (8 G at A+, 10 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#114",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2026"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#120",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2022 13th Round Pick, #401"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#132",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 1st Round Pick, #20"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#133",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "62 G (3 G at ROK, 3 G at A, 23 G at A+, "
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#137",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2024"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#142",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 8th Round Pick, #247"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#156",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 4C Round Pick, #136"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#162",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 3rd Round Pick, #83"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#167",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2022"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#168",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "25 G (23 G at A+, 2 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#177",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Miami Marlins traded RF Rece Hinds to Ba"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#185",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2022 8th Round Pick, #233"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#186",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "18 G (10 G at A, 8 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#201",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 14th Round Pick, #421"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#202",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "19 G (10 G at AA, 9 G at AAA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#213",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 11th Round Pick, #344"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#214",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "32 G (6 G at A+, 26 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#223",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 15th Round Pick, #464"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#224",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "16 G (3 G at A+, 13 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#241",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2022"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#252",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2018"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#266",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2024"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#267",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "85 G (39 G at A, 46 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#272",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 3rd Round Pick, #87"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#273",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "16 G (5 G at A+, 11 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#295",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2024"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#296",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "58 G (40 G at ROK, 18 G at A)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#300",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 9th Round Pick, #272"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#301",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "34 G (16 G at AA, 18 G at AAA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#303",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "Colorado Rockies traded RHP Antonio Senz"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#314",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2023"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#319",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2025"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#320",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "50 G (35 G at ROK, 15 G at A)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#322",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "Miami Marlins traded RHP Lake Bachar to "
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#331",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2021"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#332",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "12 G (1 G at A+, 11 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#337",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2026"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#348",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2021 14th Round Pick, #414"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#368",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 2nd Round Pick, #43"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#369",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "60 G (13 G at A, 47 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#390",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 CB-B Round Pick, #70"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#409",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2024"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#410",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "13 G (12 G at ROK, 1 G at A)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#412",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "Cincinnati Reds traded DH Nathaniel Lowe"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#445",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2023"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#446",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "31 G (20 G at A+, 11 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#451",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 3rd Round Pick, #102"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#464",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 14th Round Pick, #428"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#470",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 CB-A Round Pick, #31"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#471",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "54 G (3 G at ROK, 51 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#476",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 1st Round Pick, #19"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#491",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 1st Round Pick, #25"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#496",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2021 4th Round Pick, #129"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#499",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "Detroit Tigers traded RHP Casey Mize and"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#516",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 13th Round Pick, #403"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#517",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "30 G (28 G at A, 2 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#530",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2016 2nd Round Pick, #56"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#548",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 7th Round Pick, #213"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#549",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "31 G (13 G at A+, 18 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#553",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 17th Round Pick, #513"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#554",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "4 G (3 G at ROK, 1 G at A)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#556",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "Baltimore Orioles traded LF Taylor Ward "
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#560",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2024"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#561",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "22 G (20 G at ROK, 2 G at A)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#577",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 CB-B Round Pick, #69"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#586",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2023"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#587",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "83 G (58 G at A, 25 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#603",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2022 5th Round Pick, #155"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#619",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 2nd Round Pick, #48"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#627",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "24 G (22 G at A+, 2 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#632",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2021 4th Round Pick, #123"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#657",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2025"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#658",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "60 G (32 G at ROK, 28 G at A)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#663",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 7th Round Pick, #215"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#664",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "86 G (60 G at A+, 26 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#670",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 5th Round Pick, #157"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#671",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "33 G (18 G at A+, 15 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#679",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2016 15th Round Pick, #444"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#691",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2016 2nd Round Pick, #55"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#697",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 6th Round Pick, #171"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#714",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 4th Round Pick, #120"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#715",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "66 G (22 G at A, 44 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#720",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 8th Round Pick, #236"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#740",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 4th Round Pick, #124"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#746",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2022 6th Round Pick, #194"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#747",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "20 G (5 G at A+, 15 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#752",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 2nd Round Pick, #58"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#753",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "88 G (51 G at A+, 37 G at AA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#755",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "New York Mets traded RHP Freddy Peralta "
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#773",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2021 11th Round Pick, #340"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#779",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 3rd Round Pick, #95"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#780",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "21 G (19 G at A, 2 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#785",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 11th Round Pick, #326"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#793",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 6th Round Pick, #189"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#794",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "19 G (9 G at AA, 10 G at AAA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#798",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 2nd Round Pick, #62"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#799",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "10 G (3 G at ROK, 7 G at A)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#808",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "Kansas City Royals traded CF Lane Thomas"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#818",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2025"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#832",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 14th Round Pick, #418"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#844",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2025"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#845",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "56 G (49 G at ROK, 7 G at A)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#862",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "Cleveland Guardians traded C Bo Naylor a"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#868",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 6th Round Pick, #179"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#873",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 2nd Round Pick, #60"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#889",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 17th Round Pick, #511"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#905",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2022"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#930",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "International signee, 2025"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#944",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "St. Louis Cardinals traded RHP Scott Ble"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#969",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 10th Round Pick, #308"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#970",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "26 G (14 G at A, 12 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#977",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2020 4th Round Pick, #106"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#982",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 3rd Round Pick, #104"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#983",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "61 G (2 G at ROK, 59 G at A)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#995",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "17 G (2 G at ROK, 15 G at A)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#1007",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2014 25th Round Pick, #753"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#1016",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2024 10th Round Pick, #306"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "tradecard__cutline#1020",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "Tampa Bay Rays traded RHP Trey Pooser to"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#1081",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2023 7th Round Pick, #197"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#1082",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "28 G (17 G at AA, 11 G at AAA)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#1097",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2020 4th Round Pick, #130"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#1109",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "2025 8th Round Pick, #239"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-copy",
+  "el": "tradecard__statline#1110",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "67 G (65 G at A, 2 G at A+)"
+ },
+ {
+  "route": "/trade-deadline",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#1120",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/logbook",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#11",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/first-scorebook",
+  "kind": "extra-line-label",
+  "el": "SMALL#283",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Rotation ERA"
+ },
+ {
+  "route": "/first-scorebook",
+  "kind": "extra-line-label",
+  "el": "SMALL#284",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Elite starts"
+ },
+ {
+  "route": "/photos",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#481",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/fouls",
+  "kind": "extra-line-label",
+  "el": "TH#610",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "Fouls per whiff"
+ },
+ {
+  "route": "/fouls",
+  "kind": "extra-line-label",
+  "el": "TH#700",
+  "detail": "11px 2ln -> 12px 3ln",
+  "txt": "Fouls per whiff"
+ },
+ {
+  "route": "/fouls",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#1120",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/run-value",
+  "kind": "extra-line-copy",
+  "el": "rptsource#751",
+  "detail": "11px 9ln -> 13px 10ln",
+  "txt": "2026 season, through Fri, Sep 18, 2026 ·"
+ },
+ {
+  "route": "/run-value",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#758",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/situational-records",
+  "kind": "extra-line-copy",
+  "el": "P#468",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "When the game was played and where it sa"
+ },
+ {
+  "route": "/situational-records",
+  "kind": "extra-line-copy",
+  "el": "P#623",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Streaks, rallies, walk-offs and season-l"
+ },
+ {
+  "route": "/situational-records",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#738",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "slab__note#17",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Over 5,178 overturned calls"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "slab__note#439",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "No club ran out sooner"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "slab__note#443",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Three innings left, at least"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "rpt__sub#464",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "Every one that emptied this early"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "slab__note#807",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "6.42 per 1,000 pitches seen"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "slab__note#809",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "1.13 per 9 innings caught"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "plink#862",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Andy Fletcher"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "plink#912",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Roberto Ortiz"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "plink#923",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Austin Jones"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "plink#953",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Dexter Kelley"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "plink#963",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Derek Thomas"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "slab__note#1055",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Against New York Yankees"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-copy",
+  "el": "rptsource#1061",
+  "detail": "11px 7ln -> 13px 8ln",
+  "txt": "One row per ABS review, from each comple"
+ },
+ {
+  "route": "/abs-challenges",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#1068",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/pace-of-play",
+  "kind": "extra-line-label",
+  "el": "slab__label#12",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "League average game (h:mm)"
+ },
+ {
+  "route": "/pace-of-play",
+  "kind": "extra-line-copy",
+  "el": "slab__note#13",
+  "detail": "11px 5ln -> 13px 6ln",
+  "txt": "Median 2:43. 452 games have\n            "
+ },
+ {
+  "route": "/pace-of-play",
+  "kind": "extra-line-label",
+  "el": "slab__label#18",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Spent waiting on weather"
+ },
+ {
+  "route": "/pace-of-play",
+  "kind": "extra-line-copy",
+  "el": "slab__note#19",
+  "detail": "11px 4ln -> 13px 5ln",
+  "txt": "Across 114 delayed games. Counted once p"
+ },
+ {
+  "route": "/pace-of-play",
+  "kind": "extra-line-copy",
+  "el": "bcast-sec__note#20",
+  "detail": "11px 7ln -> 13px 8ln",
+  "txt": "The bar shows how many minutes above the"
+ },
+ {
+  "route": "/pace-of-play",
+  "kind": "extra-line-copy",
+  "el": "bcast-sec__note#29",
+  "detail": "11px 4ln -> 13px 5ln",
+  "txt": "The BY MONTH column runs Mar to Sep, lef"
+ },
+ {
+  "route": "/pace-of-play",
+  "kind": "extra-line-copy",
+  "el": "bcast-sec__note#366",
+  "detail": "11px 5ln -> 13px 6ln",
+  "txt": "Each club’s longest and shortest game of"
+ },
+ {
+  "route": "/pace-of-play",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#647",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/bullpen-availability",
+  "kind": "extra-line-label",
+  "el": "slab__label#18",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Relief pitches, last 7 days"
+ },
+ {
+  "route": "/bullpen-availability",
+  "kind": "extra-line-copy",
+  "el": "bcast-sec__note#20",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Each staff split three ways — available,"
+ },
+ {
+  "route": "/bullpen-availability",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#480",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/postseason-race",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#232",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/postseason-history",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#135",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/all-star-legacy",
+  "kind": "extra-line-label",
+  "el": "allstarlegacy__leaderyears#17",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "2011, 2012, 2013, 2014, 2016, 2017, 2018"
+ },
+ {
+  "route": "/all-star-legacy",
+  "kind": "extra-line-label",
+  "el": "allstarlegacy__leaderyears#20",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "2012, 2013, 2014, 2015, 2018, 2019, 2021"
+ },
+ {
+  "route": "/all-star-legacy",
+  "kind": "extra-line-label",
+  "el": "allstarlegacy__leaderyears#23",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "2012, 2013, 2015, 2016, 2017, 2018, 2022"
+ },
+ {
+  "route": "/all-star-legacy",
+  "kind": "extra-line-label",
+  "el": "allstarlegacy__leaderyears#26",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "2012, 2014, 2015, 2016, 2017, 2018, 2021"
+ },
+ {
+  "route": "/all-star-legacy",
+  "kind": "extra-line-label",
+  "el": "allstarlegacy__leaderyears#29",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "2013, 2014, 2015, 2016, 2017, 2018, 2021"
+ },
+ {
+  "route": "/all-star-legacy",
+  "kind": "extra-line-label",
+  "el": "allstarlegacy__honoreeyears#58",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "2013, 2014, 2015, 2016, 2017, 2018, 2022"
+ },
+ {
+  "route": "/all-star-legacy",
+  "kind": "extra-line-label",
+  "el": "allstarlegacy__honoreeyears#75",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "2013, 2015, 2016, 2018, 2021, 2022, 2025"
+ },
+ {
+  "route": "/all-star-legacy",
+  "kind": "extra-line-label",
+  "el": "allstarlegacy__honoreeyears#372",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "2017, 2018, 2021, 2022, 2023, 2024, 2025"
+ },
+ {
+  "route": "/all-star-legacy",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#526",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/postseason-leaders",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#336",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/more",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#27",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/about",
+  "kind": "extra-line-label",
+  "el": "aboutfigs__k#3",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Levels covered"
+ },
+ {
+  "route": "/team/158",
+  "kind": "extra-line-label",
+  "el": "hlclip__title#231",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Bo Naylor hits his first home run as a B"
+ },
+ {
+  "route": "/team/158",
+  "kind": "extra-line-label",
+  "el": "hlclip__title#234",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Kyle Harrison strands runner with a K"
+ },
+ {
+  "route": "/team/158/transactions",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#76",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#185",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#221",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Norfolk Tides"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#241",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Toledo Mud Hens"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#249",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Joey Loperfido"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#268",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Wyatt Mills"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#279",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Xzavion Curry"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#288",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Nick Madrigal"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#338",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Derek Law"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#358",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Paul Gervase"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#379",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Ramón Urías"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#397",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Charlotte Knights"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#415",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Scranton/Wilkes-Barre RailRiders"
+ },
+ {
+  "route": "/game/823035",
+  "kind": "extra-line-copy",
+  "el": "plink#416",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Oswaldo Cabrera"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#185",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#221",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Norfolk Tides"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#241",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Toledo Mud Hens"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#249",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Joey Loperfido"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#268",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Wyatt Mills"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#279",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Xzavion Curry"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#288",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Nick Madrigal"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#338",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Derek Law"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#358",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Paul Gervase"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#379",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Ramón Urías"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#397",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Charlotte Knights"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#415",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Scranton/Wilkes-Barre RailRiders"
+ },
+ {
+  "route": "/game/778442",
+  "kind": "extra-line-copy",
+  "el": "plink#416",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Oswaldo Cabrera"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#185",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#221",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Norfolk Tides"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#241",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Toledo Mud Hens"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#249",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Joey Loperfido"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#268",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Wyatt Mills"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#279",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Xzavion Curry"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#288",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Nick Madrigal"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#338",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Derek Law"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#358",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Paul Gervase"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#379",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Ramón Urías"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#397",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Charlotte Knights"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#415",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Scranton/Wilkes-Barre RailRiders"
+ },
+ {
+  "route": "/game/777877",
+  "kind": "extra-line-copy",
+  "el": "plink#416",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Oswaldo Cabrera"
+ },
+ {
+  "route": "/aaa",
+  "kind": "extra-line-label",
+  "el": "dirhd__label#184",
+  "detail": "11px 1ln -> 12px 2ln",
+  "txt": "Prospects & injuries"
+ },
+ {
+  "route": "/aaa",
+  "kind": "extra-line-copy",
+  "el": "plink#227",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Codi Heuer"
+ },
+ {
+  "route": "/aaa",
+  "kind": "extra-line-copy",
+  "el": "plink#229",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Baltimore Orioles"
+ },
+ {
+  "route": "/aaa",
+  "kind": "extra-line-copy",
+  "el": "plink#251",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Landon Knack"
+ },
+ {
+  "route": "/aaa",
+  "kind": "extra-line-copy",
+  "el": "plink#267",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Andrew Pinckney"
+ },
+ {
+  "route": "/aaa",
+  "kind": "extra-line-copy",
+  "el": "plink#274",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Xzavion Curry"
+ },
+ {
+  "route": "/aaa",
+  "kind": "extra-line-copy",
+  "el": "plink#292",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Paul Gervase"
+ },
+ {
+  "route": "/aaa",
+  "kind": "extra-line-copy",
+  "el": "plink#317",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Drew Thorpe"
+ },
+ {
+  "route": "/aaa",
+  "kind": "extra-line-copy",
+  "el": "plink#322",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Bradley Hanner"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "STRONG#9",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "6 draw no box at all"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__lede#13",
+  "detail": "11px 3ln -> 13px 4ln",
+  "txt": "604 lines across six files, layered prim"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__lede#168",
+  "detail": "11px 4ln -> 13px 5ln",
+  "txt": "58 pairs, imported from src/lib/design/c"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#170",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "seal ink on kraft base stripe"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#174",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "seal ink on kraft hatch stripe"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#186",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "knockout text on win stamp base stripe"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#198",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "book cover foil on the kraft board"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#202",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "book cover foil on the red board"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#206",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "book cover foil on the blue board"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#214",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "stamp caption on the album board"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#218",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "completed-set ring on the album board"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#246",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Blowout pill text"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#250",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Close Game pill text"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#258",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "Game of the Night crown pill text"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#262",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "Stamp In row action, unpressed"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#286",
+  "detail": "11px 2ln -> 13px 4ln",
+  "txt": "live band numerals on hover mow stripe"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#290",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "live band state token on hover mow strip"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#298",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "link text on page"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#306",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "run value, runs given back, on a board r"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#310",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "run value, runs given back, on a card"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#322",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "spray direction bar, center segment"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#330",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "spray direction bar hairline, against pu"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#334",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "spray direction bar hairline, against ce"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#338",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "spray direction bar hairline, against op"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#350",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "spray HR diamond ring on the hottest hea"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#362",
+  "detail": "11px 2ln -> 13px 4ln",
+  "txt": "Trade Deadline cash consideration icon"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#366",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "report masthead strand chip"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#370",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "report masthead title on the ink slab"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#374",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "pitch name / velocity on the heat slab"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__pairnote#394",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "100 mph band figures on the band"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__warn#409",
+  "detail": "11px 9ln -> 13px 11ln",
+  "txt": "Barlow Condensed and JetBrains Mono ship"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#640",
+  "detail": "11px 5ln -> 13px 6ln",
+  "txt": "Nothing above is a hand-kept list. The n"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#681",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "The tap-to-explain control. There are no"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#690",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "The 3D container behind the slate's resu"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#705",
+  "detail": "11px 5ln -> 13px 6ln",
+  "txt": "Not rendered here. It portals its childr"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#724",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Carries the shell only — it holds an ico"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#756",
+  "detail": "11px 5ln -> 13px 6ln",
+  "txt": "Not rendered. It reads a precomputed Fev"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#770",
+  "detail": "11px 3ln -> 13px 4ln",
+  "txt": "The team and player hubs share this stri"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__lede#772",
+  "detail": "11px 4ln -> 13px 5ln",
+  "txt": "Thirteen card blocks declare this, token"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#783",
+  "detail": "11px 4ln -> 13px 5ln",
+  "txt": "The team hub’s card, and the most-used b"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__filler#810",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Bottom 9th, two out"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#819",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "The sheet, plus padding that tightens un"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#837",
+  "detail": "11px 4ln -> 13px 5ln",
+  "txt": "The sheet plus hover lift, focus ring an"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#861",
+  "detail": "11px 2ln -> 13px 3ln",
+  "txt": "The tight sheet with a 3px --accent-prim"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#867",
+  "detail": "11px 3ln -> 13px 4ln",
+  "txt": "Renders as `className=\"thub-card chalcar"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#891",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "Two __element rules and no box. Rename t"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#903",
+  "detail": "11px 5ln -> 13px 6ln",
+  "txt": "Not a card at all — a block of thirteen "
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#957",
+  "detail": "11px 3ln -> 13px 4ln",
+  "txt": "Every declaration is !important, because"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#963",
+  "detail": "11px 4ln -> 13px 5ln",
+  "txt": "1.5px solid var(--seal) on --surface-ins"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__lede#965",
+  "detail": "11px 3ln -> 13px 4ln",
+  "txt": "Four pill blocks declare this, identical"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#1006",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "--seal / --seal-ink / --seal, padding 4p"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#1012",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "inline-block, --ls-caps, + line-height a"
+ },
+ {
+  "route": "/design-lab",
+  "kind": "extra-line-copy",
+  "el": "dlab__note#1018",
+  "detail": "11px 1ln -> 13px 2ln",
+  "txt": "border-radius: var(--radius-xs) — 3px, n"
+ }
+]

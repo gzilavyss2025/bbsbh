@@ -265,7 +265,7 @@
   padding: 0;
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-decoration: underline;
@@ -389,7 +389,7 @@
 
 .bookmgmt__field span {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -429,7 +429,7 @@
   padding: 0 var(--space-2);
   color: var(--accent-negative);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-decoration: underline;

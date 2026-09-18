@@ -53,7 +53,7 @@
 .chalcard__league {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
@@ -76,7 +76,7 @@
   background: var(--surface-card);
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   cursor: pointer;
@@ -115,7 +115,7 @@
   border-top: 0;
   border-bottom: var(--bw-heavy) solid var(--navy);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
   white-space: nowrap;
@@ -140,7 +140,7 @@
 .chalcard__floor {
   display: block;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   letter-spacing: var(--ls-none);
   white-space: normal;
   color: var(--text-caption);

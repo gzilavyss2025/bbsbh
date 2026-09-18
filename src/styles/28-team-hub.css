@@ -117,7 +117,7 @@
   z-index: 1;
   text-align: center;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -162,14 +162,14 @@
   padding: 10px 12px;
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
 .team-score__head em {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-style: normal;
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);
@@ -229,7 +229,7 @@
 .team-score__grade-kicker {
   color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -245,7 +245,7 @@
   margin-top: 4px;
   color: var(--graphite-soft);
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
 }
 .team-score__grade-result {
@@ -264,14 +264,14 @@
 .team-score__grade-score small {
   margin-left: 3px;
   color: var(--graphite-soft);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);
 }
 .team-score__breakdown {
   color: var(--seal-hatch);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -284,7 +284,7 @@
 .team-score__driver-heading {
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -328,7 +328,7 @@
 }
 .team-score__row--driver .team-score__rank {
   padding: 2px 5px;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
 }
 .team-score__row--driver .team-score__meta {
   min-height: 2.5em;
@@ -400,7 +400,7 @@
 .team-score__label {
   color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
 }
@@ -421,7 +421,7 @@
   color: var(--seal-hatch);
   background: color-mix(in srgb, var(--seal) 16%, transparent);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
   padding: 2px 6px;
   border-radius: 20px;
@@ -512,7 +512,7 @@
   background: var(--text-heading);
   color: var(--surface-card);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   white-space: nowrap;
   border-radius: 5px;
   pointer-events: none;
@@ -675,7 +675,7 @@
 }
 .rankstrip__n {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-variant-numeric: tabular-nums;
   color: var(--graphite-soft);
 }
@@ -776,7 +776,7 @@
   background: transparent;
   color: var(--seal-hatch);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   border-bottom: var(--bw-hair) solid color-mix(in srgb, var(--seal-hatch) 40%, transparent);
@@ -811,7 +811,7 @@
   margin: 0;
   color: var(--seal-hatch);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -824,13 +824,13 @@
 }
 .team-score__detail dt {
   color: var(--text-caption);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
 }
 .team-score__detail dd {
   margin: 0;
   color: var(--text-heading);
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   font-variant-numeric: tabular-nums;
   text-align: right;

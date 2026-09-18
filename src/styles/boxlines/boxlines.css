@@ -164,7 +164,7 @@ a.boxline__link:focus-visible {
   flex: none;
   padding: 0 5px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-body);
@@ -387,7 +387,7 @@ a.boxline__link:focus-visible {
 .boxlines-door__label {
   flex: 0 0 auto;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   color: var(--accent-link);

@@ -33,7 +33,7 @@
 
 .rptkey dt {
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -41,7 +41,7 @@
 .rptkey dd {
   margin: 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
@@ -59,7 +59,7 @@
   padding: var(--space-3) 0 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-caption);
 }
@@ -152,7 +152,7 @@
 .rptfail {
   display: block;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-caption);
   white-space: nowrap;
