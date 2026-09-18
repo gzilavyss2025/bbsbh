@@ -165,6 +165,33 @@ don't run these by hand.
   at all (hence its `check-data-freshness.mjs` exception: unchanged is healthy
   here). `--rebuild` forces the scan; `--level=13` narrows it. The roster ids that
   make the nightly re-join free live in `scripts/data/milb-pool-scan.json`.
+- `gen-long-at-bats.mjs` → `public/data/long-at-bats/{season}.json` — every plate
+  appearance of an MLB season that took **12 pitches or more**, for the offseason
+  page's notebook note (ADR-0081). A CENSUS, so every played game has to be read:
+  one `playByPlay?fields=…` call each, 28KB against 555KB untrimmed, because
+  `pitchIndex`'s LENGTH is the at-bat's pitch count and the pitch events
+  themselves never come down the wire. That makes it the cheapest feed sweep in
+  the nightly batch by a factor of twenty. Incremental (`scripts/data/long-at-bats-scan.json`
+  holds the per-game tallies) and keyed on the SEASON, so a January run keeps
+  filling the season the page still names rather than opening an empty new year
+  (the #1122 trap). A postponed game with `abstractGameState: "Final"` exists at
+  MLB too, so the schedule is hydrated with `linescore` and the game's own innings
+  decide whether it was played. Stores **no result, no inning and no score** — a
+  twelve-pitch at-bat is a length — and `test/long-at-bats.test.js` asserts that
+  of the committed file by vocabulary. `--rescan` re-ingests every game;
+  `--season=2026` pins the year.
+- `gen-youngest-regulars.mjs` → `public/data/youngest-regulars/{11,12,13,14}.json` —
+  how old each minor league's regulars were, for the same note one level down.
+  Four small calls per level: one `/league` for the three leagues, one
+  `/stats?leagueId=` each for every hitter who took a plate appearance there, and
+  one `/people` batch for the regulars' birth dates. A regular is 250+ PA **in the
+  one league**, summed across clubs first; age is taken on June 30, which is what
+  statsapi's own integer season `age` reports. A league under 20 regulars ships no
+  note rather than a thin one. Why age and not a rate board: a playing-time floor
+  at a single level selects for the players nobody promoted, so a rate board there
+  would rank the league's best seasons and be a list of who stayed —
+  `research.md` §7's trap, and the reason #1078 names age. `--level=13` narrows
+  it; `--season=2026` pins the year.
 - `gen-former-teammates.mjs` → `public/data/former-teammates/{a}-{b}.json` (ids
   ascending; one file per MATCHUP, which is what a game view reads) — for each upcoming
   matchup (MLB + MiLB), pairs of players on the two OPPOSING clubs once teammates. Two players are teammates iff their careers

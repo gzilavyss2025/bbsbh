@@ -72,6 +72,23 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
   'src/styles/02-wordmark-lab.css': 700, // 644
+  // 600 -> 900 across steps 3 and 4 of the offseason home page (issues #1077,
+  // #1078): the picked-game card, then the notebook note and the season-record
+  // row. Growth this sheet was expected to take — check-dir-size.mjs's own
+  // 'src/styles' entry says so in as many words — because src/styles is AT its
+  // 115-file directory budget, so a 116th flat partial cannot exist and the
+  // /design-lab sheet already had to become a subdirectory to get in. One page,
+  // one sheet, and every selector in it is read by the five components in
+  // src/components/offseason/.
+  // 900 -> 1200 for step 4's two additions (issue #1078): the notebook note,
+  // which borrows the /fouls page's batter-vs-pitcher row rather than importing
+  // 43-foul-tracker.css's 877 lines onto the home slate to reuse forty of them,
+  // and the winter rail. Still one page, one sheet — src/styles is AT its
+  // 115-file directory budget (check-dir-size.mjs), so a 116th flat partial
+  // cannot exist and that entry's own note already said this sheet would take
+  // steps 3 and 4. The shared version of the row is the design lab's job
+  // (issues #1112-1114), which is where this and .movedup and .pgame all go.
+  'src/styles/78-offseason.css': 1200, // 1151
   // 600 -> 700: the winter league picker's row (issue #1055) — the control that
   // covers the gap between one rail tab and the four leagues behind it. It sits
   // in this file rather than beside .levelnav in 05-masthead-nav.css because

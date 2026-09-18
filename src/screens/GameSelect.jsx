@@ -31,7 +31,7 @@ import { OffDaySection } from '../components/team/OffDaySection.jsx'
 import { WireDock } from '../components/transactions/WireDock.jsx'
 import { WireRail } from '../components/transactions/WireRail.jsx'
 import { OffseasonSlot } from '../components/offseason/OffseasonSlot.jsx'
-import { WinterCountdown } from '../components/offseason/WinterCalendar.jsx'
+import { WinterRail } from '../components/offseason/WinterRail.jsx'
 import { useOffseason } from '../hooks/useOffseason.js'
 import { useWinter } from '../hooks/useWinter.js'
 import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
@@ -989,14 +989,15 @@ export function GameSelect({
               })}
             </ul>
 
-            {/* Any idle club — including the whole-league case on an All-Star
-                break or (MLB) All-Star Game day, where there are no club games
-                and the full grid is the point (something to browse). */}
-            {offDayTeams.length > 0 && (
+            {/* Any idle club, the whole-league All-Star case included. In the
+                winter that is every club — and wide, it moves to the rail
+                (WinterRail.jsx, #1078). */}
+            {offDayTeams.length > 0 && !(wide && winter) && (
               <OffDaySection
                 teams={offDayTeams}
                 favoriteTeamId={favoriteTeamId}
                 favoriteAffiliateIds={favoriteAffiliateIds}
+                winter={Boolean(winter)}
               />
             )}
           </div>
@@ -1020,9 +1021,15 @@ export function GameSelect({
           />
         )}
 
-        {/* The slot the wire left. `railed` stays true through the offseason, so
-            the countdown inherits a column the shell already reserves. */}
-        {wide && winter && <WinterCountdown winter={winter} />}
+        {/* The slot the wire left; `railed` reserves it (WinterRail.jsx). */}
+        {wide && winter && (
+          <WinterRail
+            winter={winter}
+            teams={offDayTeams}
+            favoriteTeamId={favoriteTeamId}
+            favoriteAffiliateIds={favoriteAffiliateIds}
+          />
+        )}
       </div>
 
       <SiteFooter onShowLogos={onShowLogos} />

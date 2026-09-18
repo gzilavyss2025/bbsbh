@@ -212,6 +212,27 @@ jobs:
         id: milb-pool
         continue-on-error: true
         run: node scripts/gen-milb-pool.mjs
+      # The offseason page's two notebook notes (issue #1078). Both describe a
+      # FINISHED season, so both go quiet the day one ends and stay quiet until
+      # the next opens — a night that writes nothing here is the healthy state
+      # from October to March.
+      #
+      # The at-bat sweep is the cheapest feed sweep in this file by a factor of
+      # twenty: `playByPlay?fields=` is 28 KB a game against the 555 KB the foul
+      # and arsenal sweeps need, and it only reads gamePks it has not seen, so a
+      # night in season is ~15 games. A first run on an unswept season is ~2,300.
+      - name: Twelve-pitch at-bats
+        id: long-at-bats
+        continue-on-error: true
+        run: node scripts/gen-long-at-bats.mjs
+      # MUST stay after "Teams": it joins each farm club onto its parent
+      # organisation through public/data/teams.json, the same read
+      # gen-minors-leaders.mjs makes.
+      - name: Youngest regulars
+        id: youngest-regulars
+        if: steps.teams.outcome == 'success'
+        continue-on-error: true
+        run: node scripts/gen-youngest-regulars.mjs
       - name: Game call-outs
         id: callouts
         continue-on-error: true
@@ -583,6 +604,8 @@ jobs:
           steps.umpire-accuracy.outcome == 'failure' ||
           steps.minors-leaders.outcome == 'failure' ||
           steps.milb-pool.outcome == 'failure' ||
+          steps.long-at-bats.outcome == 'failure' ||
+          steps.youngest-regulars.outcome == 'failure' ||
           steps.callouts.outcome == 'failure' ||
           steps.former-teammates.outcome == 'failure' ||
           steps.career-matchups.outcome == 'failure' ||
