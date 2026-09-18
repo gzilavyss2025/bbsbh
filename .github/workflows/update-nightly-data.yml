@@ -446,6 +446,17 @@ jobs:
         id: doubleheaders
         continue-on-error: true
         run: node scripts/gen-doubleheaders.mjs
+      # the run differential report. A full rebuild of 1901-to-now every night —
+      # ~126 standings requests, ~126 narrow schedule requests and one season
+      # calendar — because only the current season's rows can change and the
+      # file is ~79 KB either way. It has to run nightly rather than by hand for
+      # two reasons: the live season's margins move daily, and a season's
+      # postseason lands here only once the whole bracket is Final, so the last
+      # October of every year arrives on one specific night.
+      - name: Run differential
+        id: run-differential
+        continue-on-error: true
+        run: node scripts/gen-run-differential.mjs
       - name: Farm system
         id: farm-system
         if: steps.affiliates.outcome == 'success' && steps.top-prospects.outcome == 'success'
@@ -600,6 +611,7 @@ jobs:
           steps.attendance.outcome == 'failure' ||
           steps.gate.outcome == 'failure' ||
           steps.doubleheaders.outcome == 'failure' ||
+          steps.run-differential.outcome == 'failure' ||
           steps.farm-system.outcome == 'failure' ||
           steps.highlights.outcome == 'failure' ||
           steps.team-records.outcome == 'failure' ||

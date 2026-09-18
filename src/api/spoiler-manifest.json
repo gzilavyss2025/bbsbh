@@ -104,6 +104,10 @@
       "class": "spoiler-free",
       "why": "Static gate.json — per-club home attendance and game DURATION, both season aggregates over Final games. A crowd count and a clock reading carry no result, same footing as the weather string and the umpire crew the app has always shown live. No SealBox."
     },
+    "around-the-game/runDifferential.js": {
+      "class": "spoiler-free",
+      "why": "Static run-differential.json - one row per club season since 1901 that outscored its opponents by the file's cut, plus what that club did in the postseason. Safe by SCOPE, not by content: /run-differential is a standalone history report outside the scoring flow (ADR-0034), and a season's run totals are standings data, which opens live. Note what the file DOES carry - a per-series win-loss line, so a 3-1 round row is four games' results - which is why the generator ships a season's postseason ALL AT ONCE or not at all, only after the whole bracket is Final. That is gen-postseason-history.mjs's policy, for the same reason: a half-played bracket on a history page is a live result. The season being played carries no postseason line; the page reads the season's own held/complete flags to tell \"there was none\" from \"not yet\". No SealBox."
+    },
     "around-the-game/runValue.js": {
       "class": "spoiler-free",
       "why": "Static run-value.json — a season aggregate of Baseball Savant run values (batting, fielding, baserunning, pitching), over completed games. Runs above average across a season carry no game's result, same footing as war.js and the other open season boards. No SealBox."

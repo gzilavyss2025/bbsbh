@@ -554,6 +554,27 @@ for each generator; the reader modules:
   its "@ / vs" list from; the season's sweep counts are derived from that list
   rather than tallied beside it, so the marks and the count cannot disagree. Spoiler-free: season aggregates over Final games, and
   the file holds no per-game runs to leak.
+- `around-the-game/runDifferential.js` — the reader behind `/run-differential`,
+  over `gen-run-differential.mjs`'s club-season rows. The file carries no era
+  totals, because the page's threshold control changes all of them:
+  `buildReport(data, threshold)` cuts the rows on the raw margin, sorts them
+  widest first (the board's own caption claims that order, so the code that
+  makes the claim keeps it), classifies each one, and folds the per-era table.
+  AN ERA IS A BRACKET DEPTH, not a date range — grouping by decade would file
+  1994, which held no postseason, beside 1993, which had two rounds — and
+  `seasonSpan` writes each group's years back as the ranges they actually
+  occupy, so the Division Series era prints "1981, 1995–2011", gap and all.
+  `outcomeOf` keeps apart the three states that look identical in a blank cell:
+  a year that held no postseason, the season still being played, and a club a
+  postseason actually excluded; the first two are read off the season's `held`
+  and `complete` flags, never off the row. A ring is read off the World Series
+  row rather than the last round played, and a first-round exit is "one series,
+  then home" rather than any round by name, so a 1980 Championship Series exit
+  and a 1997 Division Series exit count as the same thing. `rate` returns null
+  rather than 0% when there is no settled sample, which is what keeps the season
+  being played from printing a 0% championship rate. Spoiler-free by SCOPE: a
+  standalone history report outside the scoring flow (ADR-0034), and the file's
+  per-series lines only ever come from a bracket that is over.
 - `around-the-game/farmSystem.js` — THE FARM INDEX, from `public/data/farm-system.json`
   (`gen-farm-system.mjs`). Three pillars over thirty organisations: an
   exponential value curve on prospect rank (60%), level-weighted affiliate

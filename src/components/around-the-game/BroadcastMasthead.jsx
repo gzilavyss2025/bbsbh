@@ -38,6 +38,13 @@ import { BROADCAST_STRAND } from '../../lib/reportPages.js'
 // the reader came through, or it breaks the very promise the paragraph above
 // makes. Pass groupLabelFor(path) rather than a literal, so it still cannot
 // drift from the menu.
+//
+// `strand={null}` drops the eyebrow line ALTOGETHER — chip, slash and all.
+// Opt-in, and only for a page whose title already says what the page is:
+// /run-differential opens "History / Run Differential" over a title reading
+// "The +200 Club", which is three names for one page before the reader has
+// seen a number. Every other page here keeps the chip, so the promise above
+// still holds wherever it is made; this is the one page that stops making it.
 export function BroadcastMasthead({
   eyebrow,
   title,
@@ -50,11 +57,13 @@ export function BroadcastMasthead({
     <header className="bcast">
       <div className="bcast__bar" aria-hidden="true" />
       <div className="bcast__body">
-        <p className="bcast__eyebrow">
-          <span className="bcast__strand">{strand}</span>
-          {eyebrow ? <span className="bcast__slash">/</span> : null}
-          {eyebrow ? <span>{eyebrow}</span> : null}
-        </p>
+        {strand === null ? null : (
+          <p className="bcast__eyebrow">
+            <span className="bcast__strand">{strand}</span>
+            {eyebrow ? <span className="bcast__slash">/</span> : null}
+            {eyebrow ? <span>{eyebrow}</span> : null}
+          </p>
+        )}
         <h1 className="bcast__title">{title}</h1>
         {dek ? (
           <p className={`bcast__dek${dekFull ? ' bcast__dek--full' : ''}`}>{dek}</p>

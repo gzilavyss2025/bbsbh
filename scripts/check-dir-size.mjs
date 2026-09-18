@@ -733,7 +733,12 @@ const BUDGETS = {
   // nightly workflow runs this directory as a flat list, and this file RUNS on
   // import — its pure half went to scripts/lib/milb-pool.mjs, which is what
   // that directory is for.
-  scripts: 114,
+  // +1 for gen-run-differential.mjs, the run differential report's nightly
+  // precompute. Flat for the reason every other gen-*.mjs is flat: the whole
+  // set is discovered by name, `npm run` and the nightly workflow name them one
+  // by one, and a generator that moved into a subdirectory would be the only
+  // one anybody had to remember the path of.
+  scripts: 115,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

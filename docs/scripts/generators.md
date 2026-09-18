@@ -751,6 +751,28 @@ don't run these by hand.
   inside a doubleheader record; those days are counted as `incomplete` in the
   run log and the payload. `--from=`/`--to=` for a shorter sweep. MLB only, and
   regular season only.
+- `gen-run-differential.mjs` → `public/data/run-differential.json` — every MLB
+  club season since 1901 that outscored its opponents by at least +150 runs, and
+  what that club then did in the postseason; the file behind
+  `/run-differential`. One row per CLUB SEASON, plus per-season denominators
+  (`clubs`, `games`, `rounds`, `held`, `complete`) and nothing per era — the
+  page's threshold control changes every era number, so the fold lives in
+  `src/api/around-the-game/runDifferential.js` instead. Cut at +150 rather than
+  the +200 the page opens on, so the control can move without a refetch, and a
+  club is kept if it clears EITHER the raw bar or the same bar prorated to 162
+  games (2020's 60-game clubs clear only the second). FULL REBUILD each night
+  (~126 standings requests, ~126 narrow schedule requests, one season-calendar
+  request, ~79 KB out); only the current season's rows can change. FOUR RULES
+  ARE LOAD-BEARING. Bracket depth is READ off each season's own postseason
+  schedule, never from an era rule, so 1981's split-season Division Series files
+  itself correctly. Only a game carrying `isWinner` counts, because statsapi
+  puts the coming postseason on the schedule as placeholders months early (53 of
+  them on 2026-09-18). Rows are deduplicated by gamePk, because a suspended or
+  postponed game is listed under both dates — counting rows gave the 2011
+  Yankees a 3-3 Division Series. And a season's postseason lands ALL AT ONCE
+  once the whole bracket is over, or not at all, which is `gen-postseason-history.mjs`'s
+  policy for the same reason: a half-played bracket on a history page is a live
+  result. `--from=`/`--to=`/`--floor=` for a shorter sweep. MLB only.
 - `gen-gate.mjs` → `public/data/gate.json` — per-club attendance AND game
   DURATION, the two facts behind `/attendance` (The Gate) and `/pace-of-play`
   (The Clock). Deliberately NOT an extension of `gen-attendance.mjs`, which owns the
