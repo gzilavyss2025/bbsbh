@@ -399,12 +399,14 @@ shape-gated in `lib/recentSearches.js` (identity fields only, never a score) wit
 
 ## Design system (`src/styles/*` + `src/tokens/*`)
 
+**Look before you add a partial:** `/design-lab` renders every token, component and card/pill block — 32 cards against 12 shared components is what not looking cost (verdicts: `.scratch/design-system/inventory.md`).
+
 `src/index.css` holds **no rules** — a banner comment and `@import`s: the six
-`src/tokens/*.css` files, then the `src/styles/NN-name.css` partials in cascade
-order. It is the **core** sheet, not every partial: `main.jsx` imports it, so every
-line render-blocks every route, and a partial only one lazy screen uses is imported
-by that screen instead (a per-route chunk; 521 KB blocking → 368 KB). Files stay in
-`src/styles/`, guards unchanged; index.css says which left, who owns each, and the two rules for leaving.
+`src/tokens/*.css` files, then the `src/styles/NN-name.css` partials in cascade order.
+It is the **core** sheet, not every partial: `main.jsx` imports it, so every line
+render-blocks every route, and a partial only one lazy screen uses is imported by that
+screen instead (a per-route chunk; 521 KB blocking → 368 KB). Files stay in
+`src/styles/`, guards unchanged; index.css says which left, who owns each, and why.
 
 **Order is the contract.** The numeric prefix IS the cascade — later partials
 override earlier ones at equal specificity. Never reorder the `@import` list to
@@ -412,24 +414,22 @@ tidy it; add a new partial where its rules belong, not at the end. To find a rul
 grep `src/styles/` — the names say which surface each covers, and `motion/` is the
 animation layer (motion only, before `focus/`; **`docs/motion.md`**).
 
-`check-typography.mjs`, `check-focus-ring.mjs` and `check-strike-links.mjs` walk
-the whole directory TREE (subdirectories included), so a new partial is covered the
-moment it exists — and each fails loudly if pointed at rules-free files, which is
-what caught the first split rather than letting it silently disable them.
+`check-typography.mjs`, `check-focus-ring.mjs` and `check-strike-links.mjs` walk the
+whole directory TREE (subdirectories included), so a new partial is covered the moment
+it exists — and each fails loudly if pointed at rules-free files, which caught the
+first split rather than silently disabling them.
 
-The tiers are layered Carbon-style
-(ADR-0023): a **primitive** tier of raw values — `spacing.css` is the generic 4px
-scale + radii + border widths, `colors.css`'s `--paper-*`/`--ink-*`/`--seal` — and
-a **semantic alias** tier components consume (`--bg-canvas`, `--text-body`,
-`--seal-cover`). App-specific component geometry (the `--cell-size`, the `--shot-*`
-headshot rungs, the `--app-width` frame) lives in `tokens/layout.css`, kept OUT of
-the primitive scale. There is deliberately **no** third component tier — stay
-two-tier, promoting a value to a named component-scoped token only on high reuse or
-a guardable invariant (ADR-0023). The visual metaphor is a paper scorebook: manila
-paper, navy ink, pencil graphite, kraft-tape amber for seals. Use the semantic CSS
-variables (`--surface-card`, `--accent-negative`, `--seal-cover`, etc.) rather than
-raw hex. Numbers render as mono tabular figures; structural labels are condensed
-uppercase.
+The tiers are layered Carbon-style (ADR-0023): a **primitive** tier of raw values —
+`spacing.css` is the generic 4px scale + radii + border widths, `colors.css`'s
+`--paper-*`/`--ink-*`/`--seal` — and a **semantic alias** tier components consume
+(`--bg-canvas`, `--text-body`, `--seal-cover`). App-specific component geometry (the
+`--cell-size`, the `--shot-*` headshot rungs, the `--app-width` frame) lives in
+`tokens/layout.css`, kept OUT of the primitive scale. There is deliberately **no** third
+component tier — promote a value to a named component-scoped token only on high reuse or
+a guardable invariant. The metaphor is a paper scorebook: manila paper, navy ink, pencil
+graphite, kraft-tape amber for seals. Use the semantic variables (`--surface-card`,
+`--accent-negative`, `--seal-cover`) rather than raw hex; numbers render as mono tabular
+figures, structural labels condensed uppercase.
 
 **Team marks on a dark surface are ART, not a filter.** The navy section
 mastheads (`SectionMasthead`'s `logo` prop — Batting order, Starting pitcher,

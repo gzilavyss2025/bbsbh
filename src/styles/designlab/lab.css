@@ -1,0 +1,467 @@
+/* ============================================================
+   DESIGN LAB — the catalog page's own frame (issue #1112).
+
+   A SUBDIRECTORY, not a numbered sibling. src/styles is a flat directory at
+   its own file ratchet (scripts/check-dir-size.mjs) and it is AT that budget
+   — 115 of 115 — so a 116th flat partial cannot exist. ADR-0038 asks for a
+   subdivision rather than a budget raise, and that is what this is. Same
+   reason focus/, motion/, scorecard/ and report/ are directories.
+
+   A PER-ROUTE PARTIAL: imported by screens/designlab/index.jsx, never added to
+   src/index.css's @import chain. It satisfies both rules in that file's header
+   — every selector here is `.dlab__*`, shared with no other partial at any
+   position, and the one screen that uses those hooks is the only route that
+   loads it. Recorded in the "Per-route partials" list at the bottom of
+   index.css.
+
+   THIS FILE STYLES THE FRAME ONLY — the bands, the grid, the entry headings,
+   the captions, the specimen stage. It must NEVER style a specimen. The page's
+   whole value is that what you see is what the app ships; a lab-only override
+   on a card would make this page lie about the exact thing it was built to
+   measure. If a specimen looks wrong, that is a finding for
+   .scratch/design-system/inventory.md.
+
+   The ALL-CAPS invariant (01-base.css's `#root *`) applies here like anywhere
+   else, so class names and paths below render shouted. That is the app's voice
+   and this page does not get an exemption from it.
+   ============================================================ */
+
+/* ---- Bands ---- */
+
+.dlab__jump {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--app-gutter);
+  background: var(--bg-canvas);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.dlab__jumplink {
+  padding: 4px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--accent-link);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+
+.dlab__jumplink:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.dlab__verdictbox {
+  margin: var(--space-4) var(--app-gutter);
+  padding: var(--space-4);
+  border: var(--bw-rule) solid var(--seal);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+}
+
+.dlab__band {
+  margin-top: var(--space-10);
+  padding-top: var(--space-4);
+  border-top: var(--bw-heavy) solid var(--border-rule);
+}
+
+.dlab__bandtitle {
+  margin: 0 var(--app-gutter);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.dlab__lede {
+  margin: var(--space-2) var(--app-gutter) 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+  max-width: 62ch;
+}
+
+.dlab__lede--tight {
+  margin-inline: 0;
+}
+
+.dlab__group {
+  margin-top: var(--space-6);
+}
+
+.dlab__grouptitle {
+  margin: 0 var(--app-gutter);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+  border-left: 3px solid var(--seal);
+  padding-left: var(--space-2);
+}
+
+/* ---- Entry grid ---- */
+
+.dlab__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-3) var(--app-gutter) 0;
+}
+
+.dlab__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-3) var(--app-gutter) 0;
+}
+
+.dlab__entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+}
+
+.dlab__entry--wide {
+  grid-column: 1 / -1;
+}
+
+.dlab__entryhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.dlab__entrytitle {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+
+/* The specimen's ground. Deliberately the app canvas, so a card that sets
+   --surface-card reads against the paper it really lands on. */
+.dlab__stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  min-height: var(--tap-min);
+}
+
+.dlab__filler {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  padding: var(--space-2);
+  display: block;
+}
+
+.dlab__path {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  word-break: break-all;
+}
+
+.dlab__count {
+  display: block;
+  color: var(--graphite-soft);
+}
+
+.dlab__note {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-muted);
+}
+
+/* ---- Verdict chips ---- */
+
+.dlab__verdict {
+  flex: none;
+  padding: 2px 7px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+
+.dlab__verdict--canon {
+  border-color: var(--accent-positive);
+  color: var(--accent-positive);
+}
+
+.dlab__verdict--merge {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.dlab__verdict--bespoke,
+.dlab__verdict--hold {
+  border-color: var(--seal-deep);
+  background: var(--seal-cover);
+  color: var(--seal-cover-ink);
+}
+
+.dlab__verdict--delete {
+  border-color: var(--accent-negative);
+  color: var(--accent-negative);
+}
+
+/* ---- Token specimens ---- */
+
+.dlab__swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) var(--app-gutter) 0;
+}
+
+.dlab__swatch,
+.dlab__radius,
+.dlab__shadow,
+.dlab__shot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dlab__chip {
+  display: block;
+  height: var(--space-10);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+
+.dlab__swatchname {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+  word-break: break-all;
+}
+
+.dlab__swatchval {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  word-break: break-all;
+}
+
+.dlab__radiusbox,
+.dlab__shadowbox {
+  display: block;
+  width: 100%;
+  height: var(--space-12);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+}
+
+.dlab__shadowbox {
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+}
+
+.dlab__shotbox {
+  display: block;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-inset);
+}
+
+.dlab__typerow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--rule-grid);
+}
+
+.dlab__typelabel {
+  display: flex;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+}
+
+.dlab__typeval {
+  color: var(--graphite-soft);
+}
+
+.dlab__typesample {
+  font-family: var(--font-display);
+  color: var(--text-heading);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dlab__typesample--lg {
+  font-size: var(--fs-title-md);
+}
+
+.dlab__typesample--wrap {
+  white-space: normal;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  max-width: 48ch;
+}
+
+.dlab__measure {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.dlab__bar {
+  display: block;
+  height: var(--space-3);
+  min-width: 1px;
+  background: var(--accent-primary);
+  border-radius: var(--radius-xs);
+}
+
+.dlab__rule {
+  display: block;
+  width: var(--space-16);
+  border-top-style: solid;
+  border-top-color: var(--text-body);
+}
+
+.dlab__warn {
+  margin: var(--space-3) var(--app-gutter) 0;
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--seal-deep);
+  border-left: 3px solid var(--seal);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+  max-width: 62ch;
+}
+
+/* ---- Contrast pairings ---- */
+
+.dlab__pair {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--rule-grid);
+}
+
+.dlab__pairsample {
+  flex: none;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+
+.dlab__pairnote {
+  flex: 1 1 14ch;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+
+.dlab__ratio {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--accent-positive);
+}
+
+.dlab__ratio--under {
+  color: var(--accent-negative);
+}
+
+.dlab__ratiomin {
+  color: var(--graphite-soft);
+}
+
+/* ---- The two recipes ---- */
+
+.dlab__recipe {
+  margin: var(--space-4) var(--app-gutter) 0;
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+}
+
+.dlab__recipetitle {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.dlab__recipelist {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+}
+
+/* A bare wrapper for a specimen that has to be pressable (the flip card),
+   with none of a button's own dress — the specimen supplies all of it. */
+.dlab__plain {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.dlab__plain:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
