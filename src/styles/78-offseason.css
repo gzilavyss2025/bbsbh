@@ -258,6 +258,159 @@
   color: var(--text-heading);
 }
 
+/* THE PICKED GAME — the card that leads the page, issue #1077.
+
+   One game, offered. It is the only place in the app where a card's job is to
+   be OPENED rather than to report, so it is drawn as an invitation and not as a
+   row: the two marks large and centred, the matchup on the app's own '@' axis,
+   and one filled control under it. Every figure it could otherwise carry — a
+   score, a margin, an inning count — is absent by design, and the data file it
+   reads has none of them to give (api/milbPool.js).
+
+   It borrows .btn rather than restating one: the actions here are ordinary
+   buttons and the one solid fill is the navy primary the app uses for a
+   follow-on step everywhere else.
+
+   PROVISIONAL, in the same way the .movedup rows below are. This is drawn to
+   the offseason study's artboard and to the .oseason chrome around it; when the
+   design lab settles a canonical card (issues #1112-1114) this takes that
+   shape. It is one box with one action, which is the easy case for that move. */
+.pgame {
+  margin-top: var(--space-5);
+}
+.pgame__card {
+  padding: var(--space-5) var(--space-4);
+  border: var(--bw-rule) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+/* Away, '@', home — the slate card's own order, so a reader coming off a month
+   of game cards reads this one without being taught it. The two clubs share the
+   width and face the '@' between them: the away side is laid out in reverse so
+   both names sit against the axis rather than against the card's edges. */
+.pgame__clubs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+.pgame__club {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.pgame__club:first-child {
+  flex-direction: row-reverse;
+}
+.pgame__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+.pgame__club:first-child .pgame__lines {
+  text-align: right;
+}
+.pgame__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+/* The parent club, because at this level it is half of who a club is: a reader
+   knows the Brewers long before they know the Timber Rattlers. */
+.pgame__org {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* The same black '@' the slate's cards wear between two clubs. */
+.pgame__at {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-black);
+  color: var(--graphite-soft);
+}
+
+/* The promise, on a strip of kraft tape — the one colour in the app that means
+   "sealed", drawn the way the app draws a seal everywhere else rather than as a
+   tinted line of type. Seal ink ON the kraft base is the pairing the contrast
+   guard already pins (src/lib/design/contrastPairings.js); the amber as TEXT on
+   paper is not, and at 11px it would not hold 4.5:1. */
+.pgame__seal {
+  display: inline-block;
+  margin: var(--space-4) 0 0;
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--seal-cover);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--seal-cover-ink);
+}
+
+/* Why this game — a sentence about the careers in it, never about what
+   happened in it (PickedGame.jsx says why that distinction is the whole card).
+   Natural case because it is prose, in the body face for the same reason. */
+#root .pgame__why {
+  text-transform: none; /* caps-exempt: a sentence about the players, not a label */
+}
+.pgame__why {
+  margin: var(--space-2) auto 0;
+  max-width: 34em;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-snug);
+  color: var(--text-body);
+  text-wrap: pretty;
+}
+
+/* Date, park, and the one fact the pool was built to establish. */
+.pgame__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.pgame__dot {
+  color: var(--rule);
+}
+
+.pgame__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+/* An anchor wearing .btn: the destination is a real address, so a reader may
+   middle-click it, copy it, or open it in a tab (useRouteLink keeps the plain
+   click a client-side push). .btn sets no display of its own, which an inline
+   <a> needs before its padding and min-height mean anything. */
+.pgame__go,
+.pgame__another {
+  display: inline-flex;
+  flex: 1 1 12em;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 .movedup__table {
   width: 100%;
   margin-top: var(--space-2);

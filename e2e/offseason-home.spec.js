@@ -42,6 +42,13 @@ const BOARD_SEASON = JSON.parse(
   readFileSync(new URL('../public/data/minors-leaders.json', import.meta.url), 'utf8'),
 ).season
 
+// The picked-game card's pool names its season the same way, and for the same
+// reason — it is one season deep, so the page that deals from it has to be that
+// season's winter (ADR-0080).
+const POOL_SEASON = JSON.parse(
+  readFileSync(new URL('../public/data/milb-pool/13.json', import.meta.url), 'utf8'),
+).season
+
 test('the wire leads the page, and the rail is gone', async ({ page }) => {
   await page.goto(WINTER)
   const lead = page.locator('.oseason')
@@ -218,6 +225,66 @@ test('a ranked prospect wears his rank, and the rest wear nothing', async ({ pag
   expect(shown).toBeGreaterThan(0)
   expect(shown).toBeLessThan(await rows.count())
   await expect(pills.first()).toContainText('PROSPECT')
+})
+
+test('the level page offers a checked game, and says why', async ({ page }) => {
+  await page.goto(`/higha/1012${POOL_SEASON}`)
+  const card = page.locator('.pgame')
+  await expect(card).toBeVisible()
+
+  // It is above the promotions list — the page's one action comes first.
+  const cardBox = await card.boundingBox()
+  const listBox = await page.locator('.movedup').boundingBox()
+  expect(cardBox.y).toBeLessThan(listBox.y)
+
+  // The promise, on kraft tape, because the game it opens is sealed.
+  await expect(card.locator('.pgame__seal')).toHaveText('Score sealed')
+  // The fact the pool was built to establish, and the only claim on this card
+  // that a schedule row could not have made.
+  await expect(card.locator('.pgame__meta')).toContainText('Lineups posted')
+  // Why this game, in natural case, about the people in it.
+  const why = card.locator('.pgame__why')
+  await expect(why).toBeVisible()
+  await expect(why).toHaveCSS('text-transform', 'none')
+  // And nothing on the card that could say how the game went.
+  await expect(card).not.toContainText(/final|won|lost|innings/i)
+
+  // The link is the game's ordinary lineup address, not a second way in.
+  const href = await card.locator('.pgame__go').getAttribute('href')
+  expect(href).toMatch(/^\/\d{8}\/[a-z0-9-]+\/lineup1$/)
+})
+
+test('"another game" deals a different game from the same deck', async ({ page }) => {
+  await page.goto(`/higha/1012${POOL_SEASON}`)
+  const clubs = page.locator('.pgame__clubs')
+  await expect(clubs).toBeVisible()
+  const first = await clubs.innerText()
+  await page.getByRole('button', { name: 'Another game' }).click()
+  await expect(clubs).not.toHaveText(first)
+})
+
+test('the offered game opens, and opens on its lineups', async ({ page }) => {
+  await page.goto(`/higha/1012${POOL_SEASON}`)
+  const card = page.locator('.pgame')
+  await expect(card).toBeVisible()
+  const away = await card.locator('.pgame__name').first().innerText()
+  const href = await card.locator('.pgame__go').getAttribute('href')
+
+  await card.locator('.pgame__go').click()
+  await expect(page).toHaveURL(new RegExp(`${href}$`))
+  // The game the card named, on the page the card promised. A pool entry whose
+  // feed had gone thin would land here on an empty shell instead.
+  await expect(page.getByText(away, { exact: false }).first()).toBeVisible()
+  await expect(page.getByText('Ballpark', { exact: false }).first()).toBeVisible()
+})
+
+test('a winter the pool is not about shows no card at all', async ({ page }) => {
+  // The pool is one season deep. An older winter still gets its page — the
+  // promotions list, the calendar, the countdown — and simply no invitation,
+  // rather than a game from a season this page is not about.
+  await page.goto(`/higha/1012${POOL_SEASON - 1}`)
+  await expect(page.locator('.oseason--level')).toBeVisible()
+  await expect(page.locator('.pgame')).toHaveCount(0)
 })
 
 test('an in-season empty day at a level is still an empty day', async ({ page }) => {

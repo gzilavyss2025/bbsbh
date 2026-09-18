@@ -1,4 +1,5 @@
 import { MovedUp } from './MovedUp.jsx'
+import { PickedGame } from './PickedGame.jsx'
 import { WinterCalendar } from './WinterCalendar.jsx'
 import { SPORT_LABEL } from '../../lib/teams.js'
 
@@ -20,13 +21,13 @@ import { SPORT_LABEL } from '../../lib/teams.js'
 // exactly where they are in season, as they do on the MLB page. What changes is
 // the empty games area, and only that.
 //
-// The picked-game card that the design puts above this (a verified, scoreable
-// game from the season just finished, carrying its own reason line) is the rest
-// of #1077 and lands on its own; it needs a checked game pool that does not
-// exist yet. Nothing here is shaped around its absence: it will mount above
-// `MovedUp` and take the lead slot, and this component's own order is already
-// the order the design asks for.
-export function LevelOffseason({ sportId, winter, children }) {
+// TWO THINGS, IN THE DESIGN'S ORDER. The card on top offers a checked game from
+// the season that just ended — the page's one action, and the reason a scorer
+// opens it in December (PickedGame.jsx). The list under it says what became of
+// the people in games like it. Either can be absent without the other
+// noticing: a level whose pool has not been generated yet shows the list alone,
+// which is exactly what this page was when it first shipped.
+export function LevelOffseason({ sportId, winter, dateStr, children }) {
   const label = SPORT_LABEL[sportId] ?? ''
 
   return (
@@ -40,6 +41,8 @@ export function LevelOffseason({ sportId, winter, children }) {
         <h2 className="oseason__title oseason__title--page">{label} offseason</h2>
         <p className="oseason__note">{winter.seasonEnded} season</p>
       </div>
+
+      <PickedGame sportId={sportId} season={winter.seasonEnded} dateStr={dateStr} />
 
       <MovedUp sportId={sportId} season={winter.seasonEnded} />
 

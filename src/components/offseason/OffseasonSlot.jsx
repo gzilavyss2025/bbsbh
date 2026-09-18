@@ -30,7 +30,7 @@ export function OffseasonSlot({ dateStr, sportId, winter, wide }) {
     )
   }
   return (
-    <LevelOffseason sportId={sportId} winter={winter}>
+    <LevelOffseason sportId={sportId} winter={winter} dateStr={dateStr}>
       {countdown}
     </LevelOffseason>
   )

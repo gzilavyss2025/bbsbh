@@ -57,6 +57,13 @@ export const EXCEPT = {
   'game-notes-corroboration.json': 'hand-run audit sample, not a nightly product',
   'trade-deadline/': 'hand-run; the deadline passes once a year',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
+  // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a
+  // dead generator. A level's pool is a list of games from a season that is
+  // over, so it is checked once and then only re-joined against the prospect
+  // and promotion boards — and it is rewritten only when one of those boards
+  // actually moves (scripts/gen-milb-pool.mjs). An unchanged file is the
+  // healthy state here, not a missed night.
+  'milb-pool/': 'frozen per season by design; re-joined, not regenerated, each night',
 }
 
 // Where a dataset keeps its stamp, when it is not a top-level `generatedAt`.
