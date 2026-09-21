@@ -11,6 +11,12 @@ import { TOKENS as T, CLUBS } from './data.mjs'
 
 export const W = 390
 
+/* The club table, seeded from data.mjs and extensible: Phase 2 draws Nashville,
+   which Phase 1 never needed. chead() reads THIS, so a club added here is drawn
+   with its own triad everywhere. */
+export const CLUB = { ...CLUBS }
+export const addClub = (id, triad) => { CLUB[id] = triad }
+
 /* The three block spacings. There is no fourth. The 12px under the band title
    and the 16px under its standfirst are INSIDE the head, not between blocks. */
 export const SEAM = 48        // --space-12, above a band head
@@ -69,14 +75,26 @@ a{color:${T.field};text-decoration:none}a:hover{color:${T.field}}
 .shead{margin:0 0 12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;
   letter-spacing:.05em;text-transform:uppercase;color:${T.ink1};line-height:1.2}
 
-/* ---- the jump bar. Club-NEUTRAL navy per ADR-0030: a club may colour a card
-   that identifies the club, never page chrome. Shared with the player hub, so
-   it is drawn as one control rather than as a team-page control. ---- */
-.jump{display:flex;gap:6px;overflow:hidden;padding:8px 0}
-.jump .jp{border:1px solid ${T.rule};border-radius:999px;padding:5px 11px;background:${T.paper2};
+/* ---- THE JUMP BAR. It is the SHIPPED control (.teamtabs / .teamtabs__btn,
+   46-consent-modal.css:345) drawn as it ships and not as a pill: a 6px-radius
+   rect, 34px tall, --fs-label on --surface-card under --shadow-card, laid out
+   flex:1 0 auto so a bar that fits stretches to the full width and a bar that
+   does not scrolls sideways with its scrollbar hidden.
+
+   Club-NEUTRAL navy per ADR-0030 — a club may colour a card that identifies the
+   club, never page chrome — and it is HubTabBar, shared with the player hub, so
+   it is drawn here as one control rather than as a team-page control. ---- */
+.jump{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:8px 0}
+.jump::-webkit-scrollbar{display:none}
+.jump__row{display:flex;gap:6px;min-width:min-content}
+.jump .jp{flex:1 0 auto;min-height:34px;display:flex;align-items:center;justify-content:center;
+  padding:0 12px;white-space:nowrap;border-radius:6px;border:1px solid ${T.rule};
+  background:${T.paper2};box-shadow:${T.shadowCard};color:${T.graphite};
   font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.06em;color:${T.ink1};white-space:nowrap}
+  letter-spacing:.09em}
 .jump .jp.on{background:${T.navy};color:${T.paper2};border-color:${T.navy}}
+/* Stuck adds ONE pencil rule and the page's own paper. No new shadow: this is
+   paper, and the shadow is already the control's own. */
 .jumpstuck{border-bottom:1px solid ${T.rule};background:${T.paper0}}
 `
 
@@ -88,6 +106,11 @@ a{color:${T.field};text-decoration:none}a:hover{color:${T.field}}
 export const STANDFIRST = {
   standing: 'Where they stand, and the record split every way.',
   standing249: 'Where they stand, and the record split every way.',
+  // The floor has no Records card — team-records is precomputed per MLB club
+  // only — so its Standing band is the table and the day. A standfirst that
+  // promised "split every way" would be the head describing a card that is not
+  // there, which is the one thing a band head must never do.
+  standing675: 'Where they stand, and the record by day.',
   ranks: 'Where this club sits against its league.',
   ranks249: 'The league rank boards start at Triple-A, so this is the club’s own leaders.',
   ranks556: 'Where this club sits against its league. The rank boards start here, at Triple-A.',
@@ -118,7 +141,7 @@ export const seam = (px = SEAM) => `<div style="height:${px}px"></div>`
    hairline. On that page the band head's ink rule is the only structural colour
    there is, which is the band system carrying the floor when the theme cannot. */
 export function chead(club, title, note, extra = '') {
-  const c = CLUBS[club]
+  const c = CLUB[club]
   const style = c.themed
     ? `background:${c.bar};border-bottom:3px solid ${c.accent};color:${c.onBar}`
     : `background:transparent;border-bottom:1px solid ${T.ruleSoft};color:${T.graphite}`
@@ -133,14 +156,20 @@ export const card = (club, title, note, body, extra = '') =>
    not in the jump bar — so this list IS the jump bar and the page both. */
 export const BANDS = {
   158: ['Standing', 'Ranks', 'Games', 'Roster', 'Farm', 'Money', 'About'],
+  556: ['Standing', 'Ranks', 'Games', 'Roster', 'Farm', 'About'],
   249: ['Standing', 'Ranks', 'Games', 'Roster', 'Farm', 'About'],
   675: ['Standing', 'Ranks', 'Games', 'Roster', 'About'],
 }
 
-export const jumpBar = (club, on, stuck = true) =>
+// `shift` scrolls the bar, which is how the CURRENT band's pill is kept on
+// screen: a tab bar's current tab is wherever the reader tapped it, so it is
+// always visible; a jump bar's current pill changes by SCROLLING THE PAGE, so
+// without this it can sit off the end of a bar nobody has touched.
+export const jumpBar = (club, on, stuck = true, shift = 0) =>
   `<div class="${stuck ? 'jumpstuck' : ''}" style="padding:0 16px">
-     <div class="jump">${BANDS[club].map((n) =>
-       `<span class="jp${n === on ? ' on' : ''}">${esc(n)}</span>`).join('')}</div>
+     <div class="jump"><div class="jump__row" style="transform:translateX(${-shift}px)">${
+       BANDS[club].map((n) => `<span class="jp${n === on ? ' on' : ''}">${esc(n)}</span>`).join('')
+     }</div></div>
    </div>`
 
 /* ----------------------------------------------------------- the .dc.html
