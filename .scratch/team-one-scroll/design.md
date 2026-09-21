@@ -343,6 +343,76 @@ the long page does: at 249 Records is 22% of the whole page against Milwaukee's
 Full reasoning, the four rejected alternatives and the measured boards:
 `canvas/records/records.md`.
 
+##### And the rows carry a league mark — Gary, 2026-09-21
+
+> "I think it would be interesting to have a green or red tint on these records
+> sections if they were in the top 5 or bottom 5 in that category."
+
+**Green for top 5 at the level, clay for bottom 5.** Decided by Gary after being
+shown what the real numbers do to it, which is the part worth recording.
+
+**The finding that was put to him.** Ranks computed off every club's shard with
+the app's own `buildRankingIndex` / `rankMetric` / `bestOrder` — the same three
+functions `/situational-records` ranks with, so a mark here is one the ranking
+page would agree with:
+
+| threshold | Milwaukee (98-58) | Wilson (64-66) |
+| --- | --- | --- |
+| top/bottom **5** | 40 green · **0 red** · 54% of the card | 13 green · 10 red · 35% |
+| top/bottom 3 | 28 green · 0 red | 7 green · 5 red |
+| top/bottom 1 | 15 green · 0 red | 1 green · 0 red |
+
+**No threshold produces red on a 98-win club**, because such a club genuinely is
+not bottom-5 at anything — and any threshold loose enough to be interesting on
+Wilson paints half of Milwaukee green. League rank measures the club, not the
+split. The alternative put beside it was **±.200 from the club's own season**,
+which gives Milwaukee 6 green / 6 red and Wilson 13 / 7. Gary chose league rank,
+having seen both. His call, and the trade-off is his to accept.
+
+**How it is drawn.**
+
+- **A row** takes a 3px edge in its own gutter and inks its win pct in the same
+  colour. Never a fill: a fill puts the figure on a second paper and costs it
+  contrast, and this card is read by scanning one column.
+- **An index line** takes a **proportional** edge — green sized to the top-5
+  count, clay to the bottom-5, over a faint `--rule-grid` track. A mixed group
+  reads as mixed, where one flat colour would lie. Wilson is where it earns
+  itself: Scoring by inning and Starting pitching run clay, Leading and trailing
+  is split, Defense and Schedule carry nothing at all.
+- **The spread is NOT tinted**, and that was a fault caught by checking the data
+  rather than the picture. The spread is ordered by win pct; *good* is not.
+  Milwaukee's league-best row in Leading and trailing is **Trailing after 8 at
+  .075** — rank 5 of 30, because winning from there is rare — so tinting the ends
+  would have put **green on the lowest number in the range**, beside an untinted
+  `.966`. Two orderings, one pair of colours. Dropped.
+- **A key sits at the card foot**, printed only when the club has a mark. A
+  colour with nothing to read it by is a private joke on a touch screen: there is
+  no hover, and the house rule forbids a `title=` tooltip.
+
+**Two exclusions, both from running the real numbers.** Under **10 games** —
+"Started a game with an opener, 1 of 30" is four games, and "Scoring in extra
+innings, 1 of 30" is eight. And any split whose ordering **makes no claim about
+quality**, gated on the shipped `ordersByQuality()` rather than a list kept here,
+so *days in 2nd place* never takes a colour. `COUNT_METRICS` already carries
+`better: 'high' | 'low' | 'neutral'` for exactly this.
+
+**It must be precomputed, and that is what decides whether it can ship.**
+Ranking one split needs every club at the level — **31KB × 30 clubs ≈ 940KB and
+30 requests** — and ADR-0082 gives each band only its own data. So a **second
+generator pass writes the marks into the `team-records` shard the band already
+fetches**: zero extra requests, and it is the app's own build-time-fetch pattern
+(`src/api/CLAUDE.md`). `canvas/records/rank-probe.mjs` is the prototype of that
+pass.
+
+**Scope.** The marks are computed for **Full season / All months**. The card's
+two levers still work; the marks go when either moves off default, because a
+month-scoped top-5 is a small-sample claim the card should not make.
+
+**Cost: none.** Closed is still **760px** (158) and **715px** (249). No new
+token — `--field` and `--clay` are shipped, and the team batting/pitching tiles
+already use exactly this green/clay convention for ranks, so this **harmonizes
+two surfaces that currently disagree.**
+
 #### Problem 2 — the floor
 
 Measured, post-#1143, and it does not say what `scope.md` says:

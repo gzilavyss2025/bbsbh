@@ -1,148 +1,247 @@
 {
-  "v": 3,
-  "createdOnFiles": {
-    "v": 1,
-    "at": "2026-09-21T18:06:14.145Z"
+  "attachments": {},
+  "boards": {
+    "Main.dc.html": {
+      "h": 5200,
+      "title": "v1 · the plain promotion",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "Rec-249-All.dc.html": {
+      "h": 3700,
+      "title": "Records · Single-A, all open",
+      "w": 390,
+      "x": 2820,
+      "y": 3840
+    },
+    "Rec-249-Closed.dc.html": {
+      "h": 1400,
+      "title": "Records · Single-A, closed — 715px",
+      "w": 390,
+      "x": 2820,
+      "y": 0
+    },
+    "Rec-249.dc.html": {
+      "h": 2200,
+      "title": "Records · Single-A, open",
+      "w": 390,
+      "x": 2820,
+      "y": 1520
+    },
+    "Rec-All.dc.html": {
+      "h": 3700,
+      "title": "Records · all open — 3,039px",
+      "w": 390,
+      "x": 2350,
+      "y": 3840
+    },
+    "Rec-Closed.dc.html": {
+      "h": 1400,
+      "title": "Records · closed — 760px",
+      "w": 390,
+      "x": 2350,
+      "y": 0
+    },
+    "Rec-Open.dc.html": {
+      "h": 2200,
+      "title": "Records · two groups open",
+      "w": 390,
+      "x": 2350,
+      "y": 1520
+    },
+    "V1-Empty.dc.html": {
+      "h": 1500,
+      "title": "v1 · no data",
+      "w": 390,
+      "x": 0,
+      "y": 6940
+    },
+    "V1-Loading.dc.html": {
+      "h": 1500,
+      "title": "v1 · loading",
+      "w": 390,
+      "x": 0,
+      "y": 5320
+    },
+    "V2-Empty.dc.html": {
+      "h": 1500,
+      "title": "v2 · no data",
+      "w": 390,
+      "x": 470,
+      "y": 6940
+    },
+    "V2-Loaded.dc.html": {
+      "h": 5200,
+      "title": "v2 · the band tint",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "V2-Loading.dc.html": {
+      "h": 1500,
+      "title": "v2 · loading",
+      "w": 390,
+      "x": 470,
+      "y": 5320
+    },
+    "V3-Empty.dc.html": {
+      "h": 1500,
+      "title": "v3 · no data",
+      "w": 390,
+      "x": 940,
+      "y": 6940
+    },
+    "V3-Loaded.dc.html": {
+      "h": 5200,
+      "title": "v3 · over-corrected",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "V3-Loading.dc.html": {
+      "h": 1500,
+      "title": "v3 · loading",
+      "w": 390,
+      "x": 940,
+      "y": 5320
+    },
+    "V4-Empty.dc.html": {
+      "h": 1500,
+      "title": "v4 · no data",
+      "w": 390,
+      "x": 1410,
+      "y": 6940
+    },
+    "V4-Loaded.dc.html": {
+      "h": 5200,
+      "title": "v4 · SETTLED",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "V4-Loading.dc.html": {
+      "h": 1500,
+      "title": "v4 · loading",
+      "w": 390,
+      "x": 1410,
+      "y": 5320
+    },
+    "V4-Reduced.dc.html": {
+      "h": 4600,
+      "title": "v4 · the reduced band, Single-A",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    }
   },
-  "title": "Team page one-scroll — the band system",
+  "createdOnFiles": {
+    "at": "2026-09-21T18:06:14.145Z",
+    "v": 1
+  },
+  "designSystems": [],
   "launch": {
     "view": "canvas"
   },
-  "pages": [],
-  "designSystems": [],
-  "boards": {
-    "Main.dc.html": {
-      "x": 0,
-      "y": 0,
-      "w": 390,
-      "h": 5200,
-      "title": "v1 · the plain promotion"
+  "notes": {
+    "n0": {
+      "color": "blue",
+      "text": "THE BAND: Standing on Milwaukee. 4,511px, five cards, and it holds Records — 3,238px and 61 door rows, 72% of the band and 7.7x the next card in it.\n\nEvery figure on these boards is real, scraped off the running page. Records is at TRUE proportion: a placeholder would hide the crowding that is the whole problem here.",
+      "w": 330,
+      "x": 3290,
+      "y": 397
     },
-    "V1-Loading.dc.html": {
-      "x": 0,
-      "y": 5320,
-      "w": 390,
-      "h": 1500,
-      "title": "v1 · loading"
+    "n1": {
+      "color": "orange",
+      "text": "v1 — the plain promotion. BroadcastSection (the report pages’ section head) dropped in, nothing else changed.\n\nWRONG:\n1. Hierarchy inverted — the club-coloured card bar out-shouts the band head. Scroll to RANKS and the band head is the quietest of the three.\n2. The sub-head is weaker than the card it introduces, and it is the mechanism for the Records problem.\n3. The question is decoration. On Los Mochis it is load-bearing and nobody will see it.",
+      "w": 330,
+      "x": 3333,
+      "y": 657
     },
-    "V1-Empty.dc.html": {
-      "x": 0,
-      "y": 6940,
-      "w": 390,
-      "h": 1500,
-      "title": "v1 · no data"
+    "n10": {
+      "color": "blue",
+      "text": "CLOSED ON ARRIVAL. The sub-head above already says this material is reference, and a reference section opens at its contents. A scorekeeper wants ONE of these rows and which one changes with the inning, so opening any by default is right for almost nobody. Open all restores today’s card in one tap — and fully open is 3,039px, SHORTER than today, so it is not a punishment.\n\nOpen groups persist in sessionStorage, per tab. They must survive a navigation, because every row is a door to /situational-records and plain state would close the group you just drilled out of. They must NOT persist across devices: ADR-0049 stores a consent, not a preference.",
+      "w": 330,
+      "x": 3290,
+      "y": 1200
     },
-    "V2-Loaded.dc.html": {
-      "x": 470,
-      "y": 0,
-      "w": 390,
-      "h": 5200,
-      "title": "v2 · the band tint"
+    "n11": {
+      "color": "green",
+      "text": "THE LEAGUE MARK — Gary, 2026-09-21. Green for top 5 at the level, clay for bottom 5.\n\nHe was shown that this paints 54% of Milwaukee green and NOTHING red — a 98-win club is top-5 at 40 of 61 splits — and chose it anyway. Recorded, because the alternative (measuring each split against the club’s own season) is the one that produces red on a good team.\n\nA row carries it as a 3px edge in its own gutter, never a fill: a fill puts the figure on a second paper and costs it contrast. An index line carries a PROPORTIONAL edge — green sized to the top-5 count, clay to the bottom-5, over a faint track — so a mixed group reads as mixed. Wilson is where it earns itself: Scoring by inning and Starting pitching run clay, Leading and trailing is split, Defense and Schedule carry nothing.",
+      "w": 330,
+      "x": 4100,
+      "y": 0
     },
-    "V2-Loading.dc.html": {
-      "x": 470,
-      "y": 5320,
-      "w": 390,
-      "h": 1500,
-      "title": "v2 · loading"
+    "n12": {
+      "color": "blue",
+      "text": "AND IT IS PRECOMPUTED, which is the part that decides whether it can ship. Ranking ONE split needs every club at the level: 31KB x 30 = ~940KB and 30 requests, and ADR-0082 gives each band only its own data. So a second generator pass writes the marks into the team-records shard the band already fetches. Zero extra requests.\n\nTwo exclusions, both found by running the real numbers: under 10 games (Started a game with an opener is 1 of 30 on FOUR games), and any split whose ordering makes no claim about quality — gated on the shipped ordersByQuality(), so days-in-2nd-place never takes a colour.\n\nA key sits at the card foot. A colour with nothing to read it by is a private joke on a touch screen, and this app forbids a title= tooltip.",
+      "w": 330,
+      "x": 4100,
+      "y": 1400
     },
-    "V2-Empty.dc.html": {
-      "x": 470,
-      "y": 6940,
-      "w": 390,
-      "h": 1500,
-      "title": "v2 · no data"
+    "n2": {
+      "color": "orange",
+      "text": "v2 — the band tint, which 1D.4 asked step 2 to decide.\n\nWRONG:\n1. It does nothing the 48px seam was not already doing.\n2. It makes a third paper value, so the card sits on tint sits on canvas — and the canvas now survives only in thin strips.\n3. Tint every band and it is a new page colour, not a band device. Alternate them and the band head sits on two grounds, which is a second variant. Rejected, and drawn so the rejection is visible.",
+      "w": 330,
+      "x": 3641,
+      "y": 1923
     },
-    "V3-Loaded.dc.html": {
-      "x": 940,
-      "y": 0,
-      "w": 390,
-      "h": 5200,
-      "title": "v3 · over-corrected"
+    "n3": {
+      "color": "orange",
+      "text": "v3 — over-corrected, on purpose.\n\nRIGHT: the full-width rule ABOVE the head fixes v1’s inverted hierarchy outright.\n\nWRONG:\n1. Two rules for one head — the rule above and the trailing clay rule. One is redundant.\n2. “1 / 7” duplicates the jump bar, which already shows position.\n3. The closing dinkus marks an end the next band’s opening already marks.",
+      "w": 330,
+      "x": 3567,
+      "y": 2437
     },
-    "V3-Loading.dc.html": {
-      "x": 940,
-      "y": 5320,
-      "w": 390,
-      "h": 1500,
-      "title": "v3 · loading"
+    "n4": {
+      "color": "green",
+      "text": "v4 — settled. v3’s rule, minus v3’s three accessories.\n\nThe band head opens on a FULL-BLEED 2px ink rule. A card is inset 16px and rounded; a rule running edge to edge is a PLANE no card can reach at any weight or colour — and a plane difference survives a one-handed glance where a weight difference does not.\n\nThe sub-head is the same gesture one step down: full-bleed, 1px, pencil. So the page reads FULL-BLEED = page structure, CONTAINED = card structure. Four levels, two devices, two planes.",
+      "w": 330,
+      "x": 2350,
+      "y": 3280
     },
-    "V3-Empty.dc.html": {
-      "x": 940,
-      "y": 6940,
-      "w": 390,
-      "h": 1500,
-      "title": "v3 · no data"
+    "n5": {
+      "color": "green",
+      "text": "AND THE QUESTION BECAME A STANDFIRST. scope.md names each band by its question, and v1–v3 print it. A second screen ANSWERS; it does not ask. Seven interrogatives are seven lines the reader must read to find they carry no information.\n\nv4 prints what is in the band instead — and that line is also where 2G’s level qualifier and Money’s “not dated” note land, because those are sentences.",
+      "w": 330,
+      "x": 3381,
+      "y": 4087
     },
-    "V4-Loaded.dc.html": {
-      "x": 1410,
-      "y": 0,
-      "w": 390,
-      "h": 5200,
-      "title": "v4 · SETTLED"
-    },
-    "V4-Loading.dc.html": {
-      "x": 1410,
-      "y": 5320,
-      "w": 390,
-      "h": 1500,
-      "title": "v4 · loading"
-    },
-    "V4-Empty.dc.html": {
-      "x": 1410,
-      "y": 6940,
-      "w": 390,
-      "h": 1500,
-      "title": "v4 · no data"
-    },
-    "V4-Reduced.dc.html": {
+    "n6": {
+      "color": "blue",
+      "text": "THE REDUCED BAND, Single-A. Three cards: standings, Records, day-of-week. Team Score, Comebacks and Last Time are all MLB-only and simply absent.\n\nWilson’s own figures, not Milwaukee’s — and they carry a shape MLB never has: a MiLB record can end in a TIE, so the value is three parts (49-56-1), not two. The figure column has to be sized for it.",
+      "w": 330,
       "x": 1880,
-      "y": 0,
-      "w": 390,
-      "h": 4600,
-      "title": "v4 · the reduced band, Single-A"
+      "y": 4800
     },
-    "Rec-Closed.dc.html": {
-      "x": 2350,
-      "y": 0,
-      "w": 390,
-      "h": 1400,
-      "title": "Records · closed — 760px"
+    "n7": {
+      "color": "blue",
+      "text": "LOADING shows the band head, the standfirst and the SHAPE — one skeleton per card the band will have — because which cards exist is decided from cheap identity data before any fetch.\n\nIt does NOT reserve Records’ 3,238px. A skeleton cannot honestly pretend to be four screens tall, so the page does jump when Records lands. Naming that rather than hiding it.",
+      "w": 330,
+      "x": 1410,
+      "y": 8560
     },
-    "Rec-Open.dc.html": {
-      "x": 2350,
-      "y": 1520,
-      "w": 390,
-      "h": 2200,
-      "title": "Records · two groups open"
+    "n8": {
+      "color": "blue",
+      "text": "NO DATA is the band rendering when its fetch returned nothing. The head and standfirst are there because they were never fetched.\n\nEach card states what is missing, in natural case, in the app’s voice. No apology, and no action offered — this is a read-only second screen, so there is nothing for the reader to do.\n\nA band a club CANNOT fill is a different thing: it does not render at all, and it is not in the jump bar.",
+      "w": 330,
+      "x": 940,
+      "y": 8560
     },
-    "Rec-All.dc.html": {
-      "x": 2350,
-      "y": 3840,
-      "w": 390,
-      "h": 3700,
-      "title": "Records · all open — 3,039px"
+    "n9": {
+      "color": "green",
+      "text": "RECORDS, REORGANISED — Gary, 2026-09-21. Nothing removed; every row still on this page.\n\nThe twelve groups stop being headings inside a wall and BECOME the wall: each is a 44px ledger line carrying how many splits are behind it and the spread of win pct inside it. The spread is a finding, not a label — Leading and trailing runs .075–.966, Defense runs .544–.677, and today you read 61 rows to learn that.\n\n3,238px to 760px closed. 3.84 phone screens to 0.90.\n\nThe spread is NOT tinted, and that was a fault caught by checking the data: Milwaukee’s league-best row in Leading and trailing is Trailing after 8 at .075, so tinting the ends would have put GREEN on the lowest number in the range.",
+      "w": 330,
+      "x": 3290,
+      "y": 0
     },
-    "Rec-249-Closed.dc.html": {
-      "x": 2820,
-      "y": 0,
-      "w": 390,
-      "h": 1400,
-      "title": "Records · Single-A, closed — 715px"
-    },
-    "Rec-249.dc.html": {
-      "x": 2820,
-      "y": 1520,
-      "w": 390,
-      "h": 2200,
-      "title": "Records · Single-A, open"
-    },
-    "Rec-249-All.dc.html": {
-      "x": 2820,
-      "y": 3840,
-      "w": 390,
-      "h": 3700,
-      "title": "Records · Single-A, all open"
+    "t1": {
+      "kind": "title1",
+      "maxW": 2270,
+      "text": "STANDING, four times — the page’s longest band",
+      "w": 240,
+      "x": 0,
+      "y": -320
     }
   },
   "order": [
@@ -166,91 +265,7 @@
     "Rec-249.dc.html",
     "Rec-249-All.dc.html"
   ],
-  "notes": {
-    "t1": {
-      "kind": "title1",
-      "x": 0,
-      "y": -320,
-      "maxW": 2270,
-      "w": 240,
-      "text": "STANDING, four times — the page’s longest band"
-    },
-    "n0": {
-      "x": 2350,
-      "y": 0,
-      "text": "THE BAND: Standing on Milwaukee. 4,511px, five cards, and it holds Records — 3,238px and 61 door rows, 72% of the band and 7.7x the next card in it.\n\nEvery figure on these boards is real, scraped off the running page. Records is at TRUE proportion: a placeholder would hide the crowding that is the whole problem here.",
-      "color": "blue",
-      "w": 330
-    },
-    "n1": {
-      "x": 2350,
-      "y": 700,
-      "text": "v1 — the plain promotion. BroadcastSection (the report pages’ section head) dropped in, nothing else changed.\n\nWRONG:\n1. Hierarchy inverted — the club-coloured card bar out-shouts the band head. Scroll to RANKS and the band head is the quietest of the three.\n2. The sub-head is weaker than the card it introduces, and it is the mechanism for the Records problem.\n3. The question is decoration. On Los Mochis it is load-bearing and nobody will see it.",
-      "color": "orange",
-      "w": 330
-    },
-    "n2": {
-      "x": 2350,
-      "y": 1560,
-      "text": "v2 — the band tint, which 1D.4 asked step 2 to decide.\n\nWRONG:\n1. It does nothing the 48px seam was not already doing.\n2. It makes a third paper value, so the card sits on tint sits on canvas — and the canvas now survives only in thin strips.\n3. Tint every band and it is a new page colour, not a band device. Alternate them and the band head sits on two grounds, which is a second variant. Rejected, and drawn so the rejection is visible.",
-      "color": "orange",
-      "w": 330
-    },
-    "n3": {
-      "x": 2350,
-      "y": 2420,
-      "text": "v3 — over-corrected, on purpose.\n\nRIGHT: the full-width rule ABOVE the head fixes v1’s inverted hierarchy outright.\n\nWRONG:\n1. Two rules for one head — the rule above and the trailing clay rule. One is redundant.\n2. “1 / 7” duplicates the jump bar, which already shows position.\n3. The closing dinkus marks an end the next band’s opening already marks.",
-      "color": "orange",
-      "w": 330
-    },
-    "n4": {
-      "x": 2350,
-      "y": 3280,
-      "text": "v4 — settled. v3’s rule, minus v3’s three accessories.\n\nThe band head opens on a FULL-BLEED 2px ink rule. A card is inset 16px and rounded; a rule running edge to edge is a PLANE no card can reach at any weight or colour — and a plane difference survives a one-handed glance where a weight difference does not.\n\nThe sub-head is the same gesture one step down: full-bleed, 1px, pencil. So the page reads FULL-BLEED = page structure, CONTAINED = card structure. Four levels, two devices, two planes.",
-      "color": "green",
-      "w": 330
-    },
-    "n5": {
-      "x": 2350,
-      "y": 4300,
-      "text": "AND THE QUESTION BECAME A STANDFIRST. scope.md names each band by its question, and v1–v3 print it. A second screen ANSWERS; it does not ask. Seven interrogatives are seven lines the reader must read to find they carry no information.\n\nv4 prints what is in the band instead — and that line is also where 2G’s level qualifier and Money’s “not dated” note land, because those are sentences.",
-      "color": "green",
-      "w": 330
-    },
-    "n6": {
-      "x": 1880,
-      "y": 4800,
-      "text": "THE REDUCED BAND, Single-A. Three cards: standings, Records, day-of-week. Team Score, Comebacks and Last Time are all MLB-only and simply absent.\n\nWilson’s own figures, not Milwaukee’s — and they carry a shape MLB never has: a MiLB record can end in a TIE, so the value is three parts (49-56-1), not two. The figure column has to be sized for it.",
-      "color": "blue",
-      "w": 330
-    },
-    "n7": {
-      "x": 1410,
-      "y": 8560,
-      "text": "LOADING shows the band head, the standfirst and the SHAPE — one skeleton per card the band will have — because which cards exist is decided from cheap identity data before any fetch.\n\nIt does NOT reserve Records’ 3,238px. A skeleton cannot honestly pretend to be four screens tall, so the page does jump when Records lands. Naming that rather than hiding it.",
-      "color": "blue",
-      "w": 330
-    },
-    "n9": {
-      "x": 3290,
-      "y": 0,
-      "text": "RECORDS, REORGANISED — Gary, 2026-09-21. Nothing removed; every row still on this page.\n\nThe twelve groups stop being headings inside a wall and BECOME the wall: each is a 44px ledger line carrying how many splits are behind it and the spread of win pct inside it. The spread is a finding, not a label — Leading and trailing runs .075–.966, Defense runs .544–.677, and today you read 61 rows to learn that.\n\n3,238px to 760px closed. 3.84 phone screens to 0.90.",
-      "color": "green",
-      "w": 330
-    },
-    "n10": {
-      "x": 3290,
-      "y": 1200,
-      "text": "CLOSED ON ARRIVAL. The sub-head above already says this material is reference, and a reference section opens at its contents. A scorekeeper wants ONE of these rows and which one changes with the inning, so opening any by default is right for almost nobody. Open all restores today’s card in one tap — and fully open is 3,039px, SHORTER than today, so it is not a punishment.\n\nOpen groups persist in sessionStorage, per tab. They must survive a navigation, because every row is a door to /situational-records and plain state would close the group you just drilled out of. They must NOT persist across devices: ADR-0049 stores a consent, not a preference.",
-      "color": "blue",
-      "w": 330
-    },
-    "n8": {
-      "x": 940,
-      "y": 8560,
-      "text": "NO DATA is the band rendering when its fetch returned nothing. The head and standfirst are there because they were never fetched.\n\nEach card states what is missing, in natural case, in the app’s voice. No apology, and no action offered — this is a read-only second screen, so there is nothing for the reader to do.\n\nA band a club CANNOT fill is a different thing: it does not render at all, and it is not in the jump bar.",
-      "color": "blue",
-      "w": 330
-    }
-  }
+  "pages": [],
+  "title": "Team page one-scroll — the band system",
+  "v": 3
 }

@@ -492,10 +492,29 @@ const canvas = {
     n10: note(COL * 7, 1200,
       'CLOSED ON ARRIVAL. The sub-head above already says this material is reference, and a reference section opens at its contents. A scorekeeper wants ONE of these rows and which one changes with the inning, so opening any by default is right for almost nobody. Open all restores today\u2019s card in one tap — and fully open is 3,039px, SHORTER than today, so it is not a punishment.\n\nOpen groups persist in sessionStorage, per tab. They must survive a navigation, because every row is a door to /situational-records and plain state would close the group you just drilled out of. They must NOT persist across devices: ADR-0049 stores a consent, not a preference.',
       'blue'),
+    n11: note(COL * 7, 2500,
+      'THE LEAGUE MARK — Gary, 2026-09-21. Green for top 5 at the level, clay for bottom 5.\n\nHe was shown that this paints 54% of Milwaukee green and NOTHING red — a 98-win club is top-5 at 40 of 61 splits — and chose it anyway. Recorded, because the alternative (measuring each split against the club own season) is the one that produces red on a good team.\n\nA row carries it as a 3px edge in its own gutter, never a fill: a fill puts the figure on a second paper and costs it contrast. An index line carries a PROPORTIONAL edge — green sized to the top-5 count, clay to the bottom-5, over a faint track — so a mixed group reads as mixed. Wilson is where it earns itself: Scoring by inning and Starting pitching run clay, Leading and trailing is split, Defense and Schedule carry nothing.',
+      'green'),
+    n12: note(COL * 7, 3800,
+      'AND IT IS PRECOMPUTED, which is the part that decides whether it can ship. Ranking ONE split needs every club at the level: 31KB x 30 = ~940KB and 30 requests, and ADR-0082 gives each band only its own data. So a second generator pass writes the marks into the team-records shard the band already fetches. Zero extra requests.\n\nTwo exclusions, both found by running the real numbers: under 10 games (Started a game with an opener is 1 of 30 on FOUR games), and any split whose ordering makes no claim about quality — gated on the shipped ordersByQuality(), so days-in-2nd-place never takes a colour.\n\nA key sits at the card foot. A colour with nothing to read it by is a private joke on a touch screen, and this app forbids a title= tooltip.',
+      'blue'),
     n8: note(COL * 2, 8560,
       'NO DATA is the band rendering when its fetch returned nothing. The head and standfirst are there because they were never fetched.\n\nEach card states what is missing, in natural case, in the app’s voice. No apology, and no action offered — this is a read-only second screen, so there is nothing for the reader to do.\n\nA band a club CANNOT fill is a different thing: it does not render at all, and it is not in the jump bar.',
       'blue'),
   },
 }
-writeFileSync(join(OUT, 'canvas.json'), JSON.stringify(canvas, null, 2), 'utf8')
-console.log('wrote canvas.json')
+// GARY POSITIONS THE NOTES IN THE EDITOR, so a regenerated index would drag
+// every sticky back to where this script first put it. From version 6 on, the
+// published canvas.json is the source of truth for layout: this writes a
+// SIDECAR instead, and a publish reads the live index, adds only what changed,
+// and sends that. Delete the sidecar guard only if the canvas is being rebuilt
+// from nothing.
+const idxPath = join(OUT, 'canvas.json')
+if (existsSync(idxPath)) {
+  writeFileSync(join(OUT, 'canvas.proposed.json'), JSON.stringify(canvas, null, 2), 'utf8')
+  console.log('canvas.json EXISTS and is hand-positioned — wrote canvas.proposed.json instead.')
+  console.log('To publish a layout change: read the live index, merge your keys onto it, publish that.')
+} else {
+  writeFileSync(idxPath, JSON.stringify(canvas, null, 2), 'utf8')
+  console.log('wrote canvas.json')
+}
