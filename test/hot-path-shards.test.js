@@ -14,16 +14,32 @@ const list = (name) => readdirSync(dir(name)).filter((f) => f.endsWith('.json'))
 const read = (name, f) => JSON.parse(readFileSync(new URL(f, dir(name)), 'utf8'))
 
 test('a former-teammates shard is named by the key its reader builds', () => {
-  const files = list('former-teammates')
-  assert.ok(files.length > 20, `only ${files.length} matchups on file`)
-  for (const f of files) {
+  // NO COUNT FLOOR HERE. The shard set is one file per matchup in a 3-day
+  // window over MLB *and* the four full-season MiLB levels, so its size is the
+  // CALENDAR, not a health signal: ~40-90 in midsummer, ~16 once the MiLB
+  // regular seasons end in mid-September, a handful in October, and zero all
+  // winter — the generator sweeps the directory empty when nothing is
+  // scheduled, which is correct. A floor of 20 stood here and went red on
+  // 2026-09-21, the first night MLB was on its own, with all 20 shards
+  // perfectly well formed. Liveness is the freshness guard's job, not this
+  // test's, and former-teammates/ is the one dataset that guard cannot see:
+  // it has no index.json to read an age from (#1145).
+  for (const f of list('former-teammates')) {
     const { matchup } = read('former-teammates', f)
-    const { teamA, teamB } = matchup
+    const { teamA, teamB, kind, rows, orgTies } = matchup
     // The reader computes this name from the two clubs in the game, in either
     // order. If the generator filed it under anything else, the card silently
     // never appears.
     assert.equal(`${matchupKey(teamA, teamB)}.json`, f, `${f}: filed under the wrong key`)
     assert.equal(matchupKey(teamB, teamA), matchupKey(teamA, teamB), 'key must be order-free')
+    // What the count was really reaching for, said directly and without a
+    // calendar in it: a shard that reaches the page must carry the payload its
+    // `kind` promises. The client reads whichever of rows/orgTies the kind
+    // names and never both, so a husk — written, correctly keyed, empty — is a
+    // card that renders nothing, and no file count can see it.
+    assert.ok(kind === 'teammates' || kind === 'orgTies', `${f}: unknown kind ${kind}`)
+    const payload = kind === 'teammates' ? rows : orgTies
+    assert.ok(Array.isArray(payload) && payload.length, `${f}: ${kind} shard carries no ${kind}`)
   }
 })
 
