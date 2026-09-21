@@ -17,64 +17,33 @@ import { TOKENS as T, CLUBS, STANDINGS_158, STANDINGS_249, TEAM_SCORE, RECORDS, 
 // .chead, .rrow, .tab — the newer, mark-aware version wins. It defines no table
 // rules, so the standings table below keeps its own.
 import { recordsCard as recordsIndex, SHEET as RECORDS_SHEET } from './records/build-records.mjs'
+// The settled band system lives in ONE place, so Phase 1 and Phase 2 cannot
+// draw two different band heads. design.md §5: one treatment, zero variants.
+import { SYSTEM_SHEET, STANDFIRST, bandHead, subHead, chead, card, esc, W } from './system.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const OUT = join(HERE, 'project')
 mkdirSync(OUT, { recursive: true })
 
-const W = 390
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 /* ---------------------------------------------------------------- the sheet
    Every value below is a token from src/tokens/*.css, read at its literal
    value. The global `#root *` uppercase is reproduced by .u on the elements
    that shout; body copy stays natural case, which is the house rule. */
-const SHEET = `
-*{box-sizing:border-box}
-body{margin:0;background:${T.paper0};font-family:'Source Sans 3',system-ui,sans-serif;color:${T.ink1};
-  -webkit-font-smoothing:antialiased}
-a{color:${T.field};text-decoration:none}a:hover{color:${T.field}}
-.u{text-transform:uppercase}
-.disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700}
-.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+// Only what the SYSTEM sheet does not already hold. The band head, the
+// sub-head, the card and the jump bar all come from system.mjs.
+const SHEET = SYSTEM_SHEET + `
 
-/* ---- the card, exactly as shipped (09-team-info.css) ---- */
-.card{border:1px solid ${T.rule};border-radius:10px;background:${T.paper2};
-  box-shadow:${T.shadowCard};overflow:hidden}
-.card+.card{margin-top:16px}
-.chead{display:flex;align-items:baseline;flex-wrap:wrap;justify-content:space-between;gap:8px;
-  padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
-  text-transform:uppercase;letter-spacing:.09em}
-.chead>span{font-size:1.2em}
-.chead em{font-style:normal;font-weight:400;font-size:12px;letter-spacing:.05em}
-.cbody{padding:12px 16px 16px}
-
-/* ---- the BAND HEAD: BroadcastSection, promoted (68-around-the-game.css) ---- */
+/* ---- v1-v3's band head: BroadcastSection promoted UNCHANGED, with its
+   trailing --clay rule running from the end of the words to the column edge.
+   It is not the settled head — v4 replaced it with the full-bleed ink rule in
+   system.mjs — and it stays here because the three rejected versions still
+   draw it, which is what makes the rejection visible rather than asserted. ---- */
 .bhead{display:flex;align-items:center;gap:12px;margin:0 0 12px;
   font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;letter-spacing:.05em;
   text-transform:uppercase;color:${T.ink0};line-height:1.25}
 .bhead::after{content:'';flex:1 1 auto;height:2px;background:${T.clay};opacity:.5}
 .bq{margin:0 0 12px;font-size:13px;line-height:1.45;color:${T.ink2}}
-
-/* ---- v4: the band head opens on a FULL-BLEED rule. A card is inset 16px on
-   both sides and rounded; a rule that runs edge to edge is a plane no card can
-   reach, at any weight or colour. That is what makes the band senior to the
-   club-coloured card bar under it — a plane difference, which survives a
-   one-handed glance, not a weight difference, which does not. ---- */
-.bhead4{margin:0 0 10px;font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;
-  letter-spacing:.05em;text-transform:uppercase;color:${T.ink0};line-height:1.25}
-.brule{height:2px;background:${T.ink0};margin:0 -16px 12px}
-/* 16px under the standfirst, not 12: the line belongs to the HEAD, and at 12px
-   it sat close enough to the first card to read as that card's caption. */
-.bq4{margin:0 0 16px;font-size:13px;line-height:1.45;color:${T.ink1}}
-
-/* ---- the SUB-HEAD: the same gesture one step down. Full-bleed rule, 1px in
-   pencil rather than 2px in ink. FULL-BLEED is the page's structure and
-   CONTAINED is a card's, so the two weights of page rule stay distinct from the
-   card's filled bar and from the hairline over a group label inside it. ---- */
-.shead{margin:0 0 12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;
-  letter-spacing:.05em;text-transform:uppercase;color:${T.ink1};line-height:1.2}
-.srule{height:1px;background:${T.rule};margin:32px -16px 10px}
 
 /* ---- tables and rows ---- */
 table{width:100%;border-collapse:collapse}
@@ -112,14 +81,6 @@ td:first-child{text-align:left}
 .cap{font-size:11px;color:${T.graphite};line-height:1.35}
 .blurb{font-size:13px;line-height:1.45;color:${T.ink2};margin:0 0 12px}
 
-/* ---- the jump bar ---- */
-.jump{display:flex;gap:6px;overflow:hidden;padding:8px 0}
-.jump .jp{border:1px solid ${T.rule};border-radius:999px;padding:5px 11px;background:${T.paper2};
-  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.06em;color:${T.ink1};white-space:nowrap}
-.jump .jp.on{background:${T.navy};color:${T.paper2};border-color:${T.navy}}
-.jumpstuck{border-bottom:1px solid ${T.rule};background:${T.paper0}}
-
 /* ---- skeleton + empty ---- */
 .sk{background:${T.ruleGrid};border-radius:3px}
 .skline{height:11px;margin:9px 0}
@@ -127,18 +88,6 @@ td:first-child{text-align:left}
 `
 
 /* ---------------------------------------------------------------- cards */
-function chead(club, title, note) {
-  const c = CLUBS[club]
-  const style = c.themed
-    ? `background:${c.bar};border-bottom:3px solid ${c.accent};color:${c.onBar}`
-    : `background:transparent;border-bottom:1px solid ${T.ruleSoft};color:${T.graphite}`
-  const em = note ? `<em style="opacity:.82">${esc(note)}</em>` : ''
-  return `<div class="chead" style="${style}"><span>${esc(title)}</span>${em}</div>`
-}
-
-const card = (club, title, note, body) =>
-  `<div class="card">${chead(club, title, note)}<div class="cbody">${body}</div></div>`
-
 function standingsCard(club, S) {
   const head = `<table><tr>${S.cols.map((c) => `<th>${esc(c)}</th>`).join('')}</tr>` +
     S.rows.map((r) => `<tr${r[6] ? ' class="me"' : ''}>` +
@@ -240,18 +189,6 @@ function comebacksCard(club) {
 // what is in the band, and it is also where 2G's level qualifier and "not
 // dated" note land, because those are sentences.
 const QUESTION = 'How is the season going?'
-export const STANDFIRST = {
-  standing: 'Where they stand, and the record split every way.',
-  standing249: 'Where they stand, and the record split every way.',
-  ranks: 'Where this club sits against its league.',
-  ranks249: 'The league rank boards start at Triple-A, so this is the club’s own leaders.',
-  games: 'Every game this season, and where they played it.',
-  roster: 'Who plays here, and who arrived and left.',
-  farm: 'The org ladder, and the players climbing it.',
-  money: 'What the roster costs. This band does not move with the date.',
-  about: 'The ballpark, and the marks this club wears.',
-}
-
 function furniture(v) {
   // v1  the plain promotion — BroadcastSection dropped in, nothing else
   // v2  the band tint 1D.4 asked for, so the rejection is visible not asserted
@@ -265,16 +202,14 @@ function furniture(v) {
           <span class="mono cap" style="white-space:nowrap">1 / 7</span></div>
         <p class="bq">${esc(q)}${note ? ` ${esc(note)}` : ''}</p></div>`
     }
-    if (v === 4) {
-      return `<div class="brule"></div>
-        <div class="bhead4">${esc(name)}</div>
-        <p class="bq4">${esc(q)}${note ? ` ${esc(note)}` : ''}</p>`
-    }
+    // v4 is the settled head, and it is drawn by the shared module so Phase 1
+    // and Phase 2 cannot diverge.
+    if (v === 4) return bandHead(name, note ? `${q} ${note}` : q)
     return `<div class="bhead">${esc(name)}</div>
       <p class="bq">${esc(q)}${note ? ` ${esc(note)}` : ''}</p>`
   }
   const sub = (t) => {
-    if (v === 4) return `<div class="srule"></div><div class="shead">${esc(t)}</div>`
+    if (v === 4) return subHead(t)
     if (v === 3) return `<div class="shead" style="border-top:1px solid ${T.rule};padding-top:12px;margin-top:32px">${esc(t)}</div>`
     return `<div class="shead" style="margin-top:32px">${esc(t)}</div>`
   }

@@ -20,7 +20,8 @@ a{color:#2F6E4F;text-decoration:none}a:hover{color:#2F6E4F}
 .disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:.01em}
 
-/* ---- the card, exactly as shipped (09-team-info.css) ---- */
+/* ---- the card, exactly as shipped (09-team-info.css). design.md §4: the card
+   is right and stays. Nothing here changes it. ---- */
 .card{border:1px solid #CBC1A7;border-radius:10px;background:#FBF6E9;
   box-shadow:0 1px 2px rgba(22,34,47,.08), 0 4px 12px rgba(22,34,47,.06);overflow:hidden}
 .card+.card{margin-top:16px}
@@ -31,32 +32,53 @@ a{color:#2F6E4F;text-decoration:none}a:hover{color:#2F6E4F}
 .chead em{font-style:normal;font-weight:400;font-size:12px;letter-spacing:.05em}
 .cbody{padding:12px 16px 16px}
 
-/* ---- the BAND HEAD: BroadcastSection, promoted (68-around-the-game.css) ---- */
+/* ---- THE BAND HEAD, settled at v4. A FULL-BLEED 2px ink rule, the name at
+   --fs-h2 21px, then a standfirst at --fs-small 13px in --ink-1, natural case,
+   16px under it.
+
+   The rule runs edge to edge of the PAGE, not from the end of the words to the
+   column edge. A card is inset 16px and rounded, so a rule that runs full-bleed
+   is a plane no card can reach at any weight or colour — and a plane difference
+   survives a one-handed glance where a weight difference does not.
+
+   The standfirst is not the band's question. A second screen ANSWERS; it does
+   not ask. It says what is in the band, and it is also where 2G's level
+   qualifier and Money's "not dated" note land, because those are sentences. ---- */
+.brule{height:2px;background:#0F1822;margin:0 -16px 12px}
+.bhead4{margin:0 0 10px;font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:#0F1822;line-height:1.25}
+/* 16px under the standfirst, not 12: the line belongs to the HEAD, and at 12px
+   it sat close enough to the first card to read as that card's caption. */
+.bq4{margin:0 0 16px;font-size:13px;line-height:1.45;color:#1B2A3A}
+
+/* ---- THE SUB-HEAD: the same gesture one step down. Full-bleed, 1px, pencil
+   rather than 2px ink. So the page reads FULL-BLEED = page structure,
+   CONTAINED = card structure — four levels from two devices and two planes. ---- */
+.srule{height:1px;background:#CBC1A7;margin:32px -16px 10px}
+.shead{margin:0 0 12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:#1B2A3A;line-height:1.2}
+
+/* ---- the jump bar. Club-NEUTRAL navy per ADR-0030: a club may colour a card
+   that identifies the club, never page chrome. Shared with the player hub, so
+   it is drawn as one control rather than as a team-page control. ---- */
+.jump{display:flex;gap:6px;overflow:hidden;padding:8px 0}
+.jump .jp{border:1px solid #CBC1A7;border-radius:999px;padding:5px 11px;background:#FBF6E9;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#1B2A3A;white-space:nowrap}
+.jump .jp.on{background:#1B2A3A;color:#FBF6E9;border-color:#1B2A3A}
+.jumpstuck{border-bottom:1px solid #CBC1A7;background:#F6EFDC}
+
+
+/* ---- v1-v3's band head: BroadcastSection promoted UNCHANGED, with its
+   trailing --clay rule running from the end of the words to the column edge.
+   It is not the settled head — v4 replaced it with the full-bleed ink rule in
+   system.mjs — and it stays here because the three rejected versions still
+   draw it, which is what makes the rejection visible rather than asserted. ---- */
 .bhead{display:flex;align-items:center;gap:12px;margin:0 0 12px;
   font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;letter-spacing:.05em;
   text-transform:uppercase;color:#0F1822;line-height:1.25}
 .bhead::after{content:'';flex:1 1 auto;height:2px;background:#B4453A;opacity:.5}
 .bq{margin:0 0 12px;font-size:13px;line-height:1.45;color:#3C4A5A}
-
-/* ---- v4: the band head opens on a FULL-BLEED rule. A card is inset 16px on
-   both sides and rounded; a rule that runs edge to edge is a plane no card can
-   reach, at any weight or colour. That is what makes the band senior to the
-   club-coloured card bar under it — a plane difference, which survives a
-   one-handed glance, not a weight difference, which does not. ---- */
-.bhead4{margin:0 0 10px;font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;
-  letter-spacing:.05em;text-transform:uppercase;color:#0F1822;line-height:1.25}
-.brule{height:2px;background:#0F1822;margin:0 -16px 12px}
-/* 16px under the standfirst, not 12: the line belongs to the HEAD, and at 12px
-   it sat close enough to the first card to read as that card's caption. */
-.bq4{margin:0 0 16px;font-size:13px;line-height:1.45;color:#1B2A3A}
-
-/* ---- the SUB-HEAD: the same gesture one step down. Full-bleed rule, 1px in
-   pencil rather than 2px in ink. FULL-BLEED is the page's structure and
-   CONTAINED is a card's, so the two weights of page rule stay distinct from the
-   card's filled bar and from the hairline over a group label inside it. ---- */
-.shead{margin:0 0 12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;
-  letter-spacing:.05em;text-transform:uppercase;color:#1B2A3A;line-height:1.2}
-.srule{height:1px;background:#CBC1A7;margin:32px -16px 10px}
 
 /* ---- tables and rows ---- */
 table{width:100%;border-collapse:collapse}
@@ -94,14 +116,6 @@ td:first-child{text-align:left}
 .cap{font-size:11px;color:#6B6558;line-height:1.35}
 .blurb{font-size:13px;line-height:1.45;color:#3C4A5A;margin:0 0 12px}
 
-/* ---- the jump bar ---- */
-.jump{display:flex;gap:6px;overflow:hidden;padding:8px 0}
-.jump .jp{border:1px solid #CBC1A7;border-radius:999px;padding:5px 11px;background:#FBF6E9;
-  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.06em;color:#1B2A3A;white-space:nowrap}
-.jump .jp.on{background:#1B2A3A;color:#FBF6E9;border-color:#1B2A3A}
-.jumpstuck{border-bottom:1px solid #CBC1A7;background:#F6EFDC}
-
 /* ---- skeleton + empty ---- */
 .sk{background:#EDE6D1;border-radius:3px}
 .skline{height:11px;margin:9px 0}
@@ -116,9 +130,7 @@ td:first-child{text-align:left}
     <div style="padding:0 16px 24px">
       <div style="height:48px"></div>
       <div>
-        <div class="brule"></div>
-        <div class="bhead4">Standing</div>
-        <p class="bq4">Where they stand, and the record split every way.</p>
+        <div class="brule"></div><div class="bhead4">Standing</div><p class="bq4">Where they stand, and the record split every way.</p>
         <div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>National League Central</span><span class="pill">Postseason Odds</span></div><div class="cbody"><table><tr><th>Team</th><th>W</th><th>L</th><th>GB</th><th>Streak</th><th>L10</th></tr><tr class="me"><td class="u disp" style="font-size:12px">Brewers</td><td class="tnum">98</td><td class="tnum">58</td><td class="tnum">-</td><td class="tnum">W3</td><td class="tnum">8-2</td></tr><tr><td class="u disp" style="font-size:12px">Cubs</td><td class="tnum">87</td><td class="tnum">69</td><td class="tnum">11.0</td><td class="tnum">W2</td><td class="tnum">6-4</td></tr><tr><td class="u disp" style="font-size:12px">Pirates</td><td class="tnum">79</td><td class="tnum">77</td><td class="tnum">19.0</td><td class="tnum">W4</td><td class="tnum">6-4</td></tr><tr><td class="u disp" style="font-size:12px">Cardinals</td><td class="tnum">76</td><td class="tnum">80</td><td class="tnum">22.0</td><td class="tnum">W1</td><td class="tnum">4-6</td></tr><tr><td class="u disp" style="font-size:12px">Reds</td><td class="tnum">72</td><td class="tnum">84</td><td class="tnum">26.0</td><td class="tnum">L2</td><td class="tnum">3-7</td></tr></table></div></div><div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>Season report</span><em style="opacity:.82">How this is calculated</em></div><div class="cbody">
     <div style="padding:10px 0;border-top:1px solid #EDE6D1">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
