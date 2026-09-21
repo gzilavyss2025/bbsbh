@@ -252,14 +252,19 @@ redirect that drops the query string is the same spoiler bug a tab switch would
 have been. `/team/158/roster?d=2026-04-01` must land on
 `/team/158?d=2026-04-01#roster`.
 
-**And one honest loss.** The Contracts tab passes `datable={false}`, because a
-contract ledger is a season's book rather than a day's and `loadContracts` is
-deliberately not keyed on `asOf`. One page has one as-of banner. So a reader will
-now see a date control at the foot of a page that contains one band the control
-does not move. The Money band carries its `SourceLine` note — *"A season's book,
-not a day's — these figures do not move with a date"* — as the thing that says
-so. That is weaker than withholding the control, and it is recorded here rather
-than discovered later.
+**And one honest loss, accepted deliberately.** The Contracts tab passes
+`datable={false}`, because a contract ledger is a season's book rather than a
+day's and `loadContracts` is not keyed on `asOf`. One page has one as-of banner.
+So a reader will now see a date control at the foot of a page containing one band
+the control does not move. The Money band carries its `SourceLine` note — *"A
+season's book, not a day's — these figures do not move with a date"* — as the
+thing that says so.
+
+That is weaker than withholding the control. It was put to the maintainer against
+two alternatives and accepted on 2026-09-21: keeping Money as its own route would
+contradict the whole point of the page, and disabling the control as the reader
+scrolls into the band would be a control that changes state on scroll, which
+nothing else in this app does. Recorded here rather than discovered later.
 
 ### The five tab routes — kept as redirects
 

@@ -1,7 +1,8 @@
 # Team page one-scroll — the wireframe
 
 **Issue:** #1105, step 1 of three (#1106 designs it, #1107 builds it)
-**Status:** written, awaiting Gary's sign-off on the section list and the order
+**Status:** section list, order and every open call SIGNED OFF 2026-09-21.
+One question outstanding — winter ball (#1143), see 2E.
 **Draft ADR:** `docs/adr/0082-the-team-page-is-one-scroll-of-named-bands.md`
 
 This document is in two halves, and the order is the point. **Pass 1 is what was
@@ -464,11 +465,21 @@ rows** — 68% of this band and the largest single object on the page by a facto
 of three. It has a door on every row, but that door goes to
 `/situational-records`, which ranks *one* split across the level; it is not
 "this club's other fifty splits", so capping the card loses content with nowhere
-to send it. **Decision: Records stays full, and step 2 owns the rhythm.** If the
-drawing cannot hold it, the two ways out are (a) a `limit` prop plus a new
-"all splits for this club" door that does not exist today — new scope — or
-(b) the half/month toggle it already has doing more work. **Flagged to #1106 as
-the page's one scale outlier.**
+to send it. > **Decided 2026-09-21 (Gary): Records stays full.** Nothing is lost, no shipped
+> module changes, and no new scope opens. The cost is accepted — the first band
+> opens with about four phone screens of W-L splits.
+
+The alternative was measured and rejected: capping the card drops the band to
+~2,183px, but the ~45 rows that fall off have **nowhere to go**. The card's only
+door today is `/situational-records`, which ranks ONE split across thirty clubs —
+it is not "this club's other fifty splits". So a cap either builds a page that
+does not exist (new scope for both #1106 and #1107) or deletes content, which the
+PRD forbids.
+
+**#1106 still owns the rhythm**, and this is the page's one scale outlier: 61
+rows, 68% of the band, the largest object on the page by a factor of three. If
+the drawing genuinely cannot hold it, the way out is the half/month toggle the
+card already has doing more work — not a cap.
 
 ### 2 · RANKS — "Where does this club sit among the rest?"
 
@@ -589,9 +600,16 @@ revisiting; see the open question at the end of 2E.
 and the Contracts tab passes `datable={false}` to suppress the as-of banner. On
 one page there is one banner for the whole page, so this band carries its
 `SourceLine` note — *"A season's book, not a day's"* — as the thing that says so.
-**That is a real loss of precision and #1107 should know about it**: today a
-reader who opens `/contracts` sees no date control at all; tomorrow they will see
-one at the foot of a page that includes a band the control does not move.
+> **Decided 2026-09-21 (Gary): accepted.** One date control for the page. The
+> Money band's own `SourceLine` note is what says the band does not move with it.
+
+**It is a real loss of precision and #1107 should know about it**: today a reader
+who opens `/contracts` sees no date control at all; tomorrow they will see one at
+the foot of a page that includes a band the control does not move. The two
+alternatives were weighed and rejected — leaving Money as its own route would
+contradict #1105's "mostly everything gets a presence on the page", and greying
+the control out as the reader scrolls into the band would be a control that
+changes state on scroll, which nothing else in this app does.
 
 ---
 
