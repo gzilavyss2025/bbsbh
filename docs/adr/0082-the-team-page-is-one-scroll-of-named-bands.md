@@ -106,7 +106,7 @@ are not "who is coming".
 
 > **Every page ends on a band that no subject can fail to fill.**
 
-Money needs Cot's coverage. Ranks needs a league board. Farm needs a parent org.
+Money needs Cot's coverage. Ranks needs a league. Farm needs a parent org.
 Standing needs a division. A ballpark is a building, and every club in this app
 plays in one — so Milwaukee's 20,050px page and a Single-A club's 13,570px page
 close on the same band, with the same head, in the same place. **A page that
@@ -169,8 +169,8 @@ one band, with nothing between them:
 > record by day of week, record by jersey, comeback wins, Last Time.
 
 Cards 2, 5, 10 and 13 of the old page are now the first band of the new one, and
-the photos and jerseys that used to sit between them are in Games and in
-Standing's own record group respectively.
+the photos and jerseys that used to sit between them are in Games and in About
+respectively.
 
 Note what the tabs did with this failure: they did not fix it so much as
 **hide** it. Standings and comeback wins still sat nine cards apart — on the same
@@ -376,12 +376,21 @@ and its Minors tab is *longer* than Milwaukee's, because all three affiliates
 share one org's farm system. Every band a Single-A club keeps, it fills.
 
 **`hiddenTeamTabs()` cannot express this rule and is replaced.** It decides at
-tab grain, and nothing in it can say "Ranks is absent below Triple-A" — the most
-common absence on the new page. It also has a hole (below). #1107 writes
+tab grain, and the bands do not map one-to-one onto the tabs: the Numbers tab
+alone splits into **Standing and Ranks**, which are absent under different
+conditions — a club with no league id loses Ranks and keeps Standing. One
+boolean per tab cannot say that. It also has a hole (below). #1107 writes
 `hiddenTeamSections(team)` in the same file, decided off the same cheap identity
 data `loadTeamIdentity` already has — **never by fetching a band's payload to
 find out whether to show it**, which is the PRD non-negotiable that keeps the
 cold load cheap.
+
+> A draft of this paragraph justified the new function with "nothing in it can
+> say Ranks is absent below Triple-A — the most common absence on the new page".
+> That held only while the wireframe proposed moving the leaders ledger out of
+> Ranks. The ledger stays (Gary, 2026-09-21), so **Ranks renders on every club
+> with a league**, and the claim is withdrawn. The mapping and the hole are the
+> reasons; the absence count never was one.
 
 ## Two things found while measuring, both filed
 

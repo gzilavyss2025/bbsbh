@@ -263,8 +263,11 @@ leaders ledger. It needs no special handling. It is a thin club, not a broken on
 
 ### So the wireframe designs for how many missing sections?
 
-**Three, not one.** An affiliate can lose Money (always), Ranks (below Triple-A)
-and Farm (no parent org). Shapes 4 and 5 are not "one more edge case to soften" —
+**Two, not three — corrected after the sign-off.** An affiliate can lose Money
+(always) and Farm (no parent org). This section originally counted Ranks as a
+third, which was true only while this document was proposing to move the leaders
+ledger out of it; the ledger stays, so Ranks renders on every club that has a
+league at all. Shapes 4 and 5 are not "one more edge case to soften" —
 they are a club with **nothing under the tab bar at all**, and no page shape can
 rescue a page with no data on it. They belong to #1143, not to this wireframe.
 The wireframe's job is to make sure the *rule* that hides a section is one the
@@ -493,14 +496,25 @@ card already has doing more work — not a cap.
 - Team pitching ranks (MLB only)
 - Run value (MLB only — Savant runs no minor-league board)
 - ABS challenges (MLB and Triple-A only)
+- Team leaders ledger, six categories a side, with both its doors:
+  "See all ›" → `/team/{id}/leaders`, "Org leaders ›" → `/team/{orgId}/leaders`
 
 **Why it is called Ranks and not Numbers.** Every card here answers one question:
 where is this club against its league. Today's "Numbers" tab is a bag holding
-that *plus* the standings, the leaders and five record cards. With those moved to
-where their question is asked, "Numbers" would name a bag that no longer exists.
-`Ranks` is short enough for a jump bar and honest about what is under it.
+that *plus* the standings and five record cards. With those moved to where their
+question is asked, "Numbers" would name a bag that no longer exists. `Ranks` is
+short enough for a jump bar and honest about what is under it.
 
-**This is the section an affiliate loses whole**, below Triple-A. See 2E.
+> **Decided 2026-09-21 (Gary): the leaders ledger STAYS here.** This document
+> proposed moving it to Roster and argued the case at length; only the
+> Transactions move was approved. The ledger closes this band. See the note
+> under Roster for the argument that lost and why losing it was right.
+
+**And it is what keeps this band from ever being empty.** Below Triple-A the
+four cards above it are all absent — no league rank board, no Savant, no ABS —
+so the ledger is the whole band on a High-A or Single-A club, and the band still
+renders. That is the difference between this band and Money, which is the only
+one a real affiliate actually loses. See 2E.
 
 ### 3 · GAMES — "What have they played, and where?"
 
@@ -521,30 +535,46 @@ in **About** instead — see the seventh band below.
 - Roster projection, with its Season / Current toggle
 - Bullpen health (MLB only — `workload.json` has no MiLB rows; self-fetching and
   self-hiding today, and it stays that way)
-- Team leaders ledger, six categories a side, with both its doors:
-  "See all ›" → `/team/{id}/leaders`, "Org leaders ›" → `/team/{orgId}/leaders`
 - Current roster (40-man)
 - Injured list
 - Transactions deck, **capped**, with "All transactions ›" → `/team/{id}/transactions`
 
-**Leaders moves off Numbers, and this is the least obvious call here.** "Who is
-the best hitter on this club" is a question about *people*, not about the season
-measured. The ledger names players, and the 40-man list is directly beneath it.
-It is stat-shaped, which is why it ended up on a tab called Numbers, but a reader
-does not go looking for it there. The move also has a measured consequence: with
-leaders on Numbers, a Single-A club's Ranks section would be one lone card;
-without it, that section is honestly **empty and absent** (2E). That is the
-cleaner page.
+> **The leaders move was proposed here and REJECTED (Gary, 2026-09-21).** The
+> argument was that "who is the best hitter on this club" is a question about
+> *people* rather than about the season measured — the ledger names players and
+> the 40-man list would sit directly beneath it — and that a Single-A club's
+> Ranks band would then be honestly empty and absent rather than one lonely
+> card.
+>
+> **What that argument got wrong was the consequence, not the reasoning.** An
+> empty Ranks band is not the cleaner page; it is a band deleted from the middle
+> of the order, on the club least able to afford one. 2C's own rule says the
+> bands a thin club loses belong at the END — Ranks is second. Keeping the
+> ledger in Ranks costs this band its most people-shaped card and buys a page
+> where **every real affiliate loses exactly one band, Money, at position 6,
+> with About still to follow.** That is the rule working, rather than the rule
+> with an exception written into it.
 
-**Transactions moves off Games.** A transaction is a roster move. It answers "who
-arrived and who left", which is the same question as "who plays here" one tense
-back. It costs something rather than saving something: Roster is already the
-longer of the two (3,843px against Games' 3,421px today), so this move makes the
-page's longest band longer still. It is worth it on the question, not on the
-balance.
+**Transactions moves off Games — the one move of the three that was approved.**
+A transaction is a roster move. It answers "who arrived and who left", which is
+the same question as "who plays here" one tense back. It costs something rather
+than saving something: Roster is already the longer of the two tabs today
+(3,843px against Games' 3,421px), so the move makes the longer one longer still.
+It is worth it on the question, not on the balance.
 
-This is the page's longest band (~4,050px on an MLB club). It is also the page's
-biggest subject.
+**Roster is NOT the page's longest band, and an earlier draft of this section
+said it was.** With the ledger staying in Ranks, the band is projection 1,245 +
+bullpen health 467 + 40-man 1,282 + injured list 317 + the capped transactions
+deck 184 = **~3,495px** on Milwaukee. **Standing** is 272 + Team Score 421 +
+Records 3,238 + day-of-week 173 + Comebacks 407 = **~4,511px**, and it was
+longer even before the leaders decision — this document's own "Records is 68% of
+this band" figure puts Standing near 4,800px against the ~4,050px it claimed
+here. Two measured numbers in the same document disagreed and neither was
+checked against the other. Standing is the page's longest band; Roster is its
+biggest *subject*, which is the claim actually worth making.
+
+All card heights measured with `page-shape.mjs` at iPhone 13 width, 2026-09-21,
+same run as everything else here.
 
 ### 5 · FARM — "Who is coming, and where does this club sit in the org?"
 
@@ -621,7 +651,7 @@ the foot gives the page a close rather than a stop.
 
 **Why it is the band that matters most to a thin club.** It is the only band on
 this page that **no club can fail to fill**. Money needs Cot's. Ranks needs a
-league board. Farm needs a parent org. Standing needs a division. A ballpark is
+league. Farm needs a parent org. Standing needs a division. A ballpark is
 a building, and every club in the app plays in one. So every page — Milwaukee's
 20,050px and a Single-A club's 13,570px alike — ends on the same band, in the
 same place, with the same head. That is worth more to the short page than to the
@@ -711,7 +741,9 @@ Losing the **tail** of a book reads as a shorter book. Losing its **middle** rea
 as missing pages. Adding About at 7 strengthens this: the last thing a reader
 sees is a band that every club fills, so no page ends on an absence.
 
-Since team leaders stayed in Ranks (2D), **Ranks is never empty either** — a
+Since team leaders stayed in Ranks (2B, decided by Gary on the sign-off rather
+than by this document — it had proposed the opposite), **Ranks is never empty
+either** — a
 Single-A club keeps it with the leaders ledger alone. So the only band any real
 affiliate loses is Money, at 6, with About still to come after it.
 
@@ -761,9 +793,9 @@ for it.
 | Band | Modules |
 | --- | --- |
 | Standing | standings + odds · Team Score · Records · day-of-week · Comebacks · Last Time\* |
-| Ranks | batting · pitching · run value · ABS challenges |
+| Ranks | batting · pitching · run value · ABS challenges · leaders 6+6 (→ 2 doors) |
 | Games | Schedule (+ Stamp In) · games grid · Highlights · Photos (capped → door) |
-| Roster | projection · bullpen health · leaders 6+6 (→ 2 doors) · 40-man · IL · transactions (capped → door) |
+| Roster | projection · bullpen health · 40-man · IL · transactions (capped → door) |
 | Farm | Affiliates · Horizon · Prospects · Depth chart |
 | Money | tiles · cliff · grid · key · source |
 | About | Ballpark · **Logos & jerseys** (record by jersey) |
@@ -782,7 +814,7 @@ fetched. Recorded because a reader of this table would otherwise chase it.
 | Standing | standings · Records · day-of-week | **loses** Team Score, Comebacks, Last Time (all MLB-only files) |
 | Ranks | **ABS challenges · team leaders** | loses batting, pitching, run value |
 | Games | Schedule (+ Stamp In) · games grid | loses Highlights (`isMlbTeamId`), and see #1142 |
-| Roster | projection · leaders 6+6 · 40-man · IL | loses bullpen health, transactions |
+| Roster | projection · 40-man · IL | loses bullpen health, transactions |
 | Farm | Affiliates · Horizon · Prospects · Depth chart | same four as Milwaukee |
 | ~~Money~~ | — | **absent** |
 | About | Ballpark · **Logos & jerseys** (home and away) · **Affiliation history** · **Made The Show** | **gains** three · 1,441px against Milwaukee's 1,274 |
@@ -932,11 +964,24 @@ not render and does not appear in the jump bar. Three reasons:
 
 **But the rule needs a new function.** `hiddenTeamTabs()` is not enough:
 
-- It decides at **tab** grain; bands are finer. Nothing in it can express "Ranks
-  is absent below Triple-A", which is the single most common absence on the new
-  page.
+- **The bands do not map one-to-one onto the tabs.** The Numbers tab alone
+  splits into **two** bands, Standing and Ranks, and they are absent under
+  different conditions: a club with no league id loses Ranks and keeps
+  Standing. One boolean per tab cannot say that, and `numbers` is the tab it
+  cannot say it about.
 - It has a hole, proved in 1C: the `league?.id` guard sits **behind** an `isMilb`
-  early return, so it never fires for `/team/11`.
+  early return, so it never fires for `/team/11`. #1143 has since landed and did
+  NOT close this — it is deliberately left for the function that replaces this
+  one, so the guard is written in the right order once rather than twice.
+
+> **An earlier draft argued this differently and the argument has been
+> withdrawn.** It said the finest and most common absence was "Ranks is absent
+> below Triple-A". That was only true while this document was proposing to move
+> the leaders ledger out of Ranks. With the ledger staying (2B, Gary's call),
+> **Ranks renders on every club that has a league at all**, and the band-grain
+> absences reduce to the two the tab function already computes plus the split
+> above. The case for a new function rests on the mapping and the hole, not on
+> a count of absences.
 
 **#1107 writes `hiddenTeamSections(team)`**, in `data/shared.js` beside the
 function it replaces, decided off the same cheap identity data
@@ -971,9 +1016,9 @@ loaders are today's tab loaders with the duplication removed:
 | --- | --- | --- |
 | *(header)* | `loadTeamIdentity` | **page load** |
 | Standing | new `loadStanding.js` — lifted out of `loadNumbers` + `loadOverview` | **page load** — it is the first screen |
-| Ranks | new `loadRanks.js` — league team stats, run value, ABS exposure | on scroll |
+| Ranks | new `loadRanks.js` — league team stats, run value, ABS exposure, the leader pool | on scroll |
 | Games | `loadGames.js`, minus transactions | on scroll |
-| Roster | `loadRoster.js`, plus the leader pool and transactions | on scroll |
+| Roster | `loadRoster.js`, plus transactions | on scroll |
 | Farm | `loadMinors.js`, unchanged | on scroll |
 | Money | `loadContracts.js`, unchanged | on scroll |
 | About | new `loadAbout.js` — the jersey deck (MLB), the affiliation history and the alumni file (MiLB) | on scroll |
@@ -1050,7 +1095,7 @@ No component draws these. Six heads, and what each must carry:
 | Band | Head text | Must carry |
 | --- | --- | --- |
 | Standing | **Standing** | a sub-head for the band's *second* section ("Record, split every way") — the #928 two-section case |
-| Ranks | **Ranks** | a level qualifier on an affiliate ("Triple-A only" is the honest note when one card is all there is) |
+| Ranks | **Ranks** | a level qualifier on an affiliate — below Triple-A the leaders ledger is the whole band, and the head has to say that the rank boards do not exist at this level rather than let the band read as truncated |
 | Games | **Games** | nothing beyond the title |
 | Roster | **Roster** | nothing beyond the title |
 | Farm | **Farm** | the org's name on an affiliate, since the ladder shown is the parent's |
@@ -1078,8 +1123,8 @@ Every door out of the long page, and where it goes:
 | League challenge board › | Ranks | the league board |
 | Stamp In | Games | `/team/{id}/stamp-in` |
 | Photos "Full season ›" | Games | `/team/{id}/photos` |
-| Leaders "See all ›" | Roster | `/team/{id}/leaders` |
-| "Org leaders ›" | Roster | `/team/{orgId}/leaders` |
+| Leaders "See all ›" | Ranks | `/team/{id}/leaders` |
+| "Org leaders ›" | Ranks | `/team/{orgId}/leaders` |
 | "All transactions ›" | Roster | `/team/{id}/transactions` |
 | Affiliate cards, standings rows, club strip | several | `/team/{otherId}` |
 | every player name | several | `/player/{id}` |
