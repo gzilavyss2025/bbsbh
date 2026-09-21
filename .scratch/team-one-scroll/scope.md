@@ -1,8 +1,9 @@
 # Team page one-scroll — the wireframe
 
 **Issue:** #1105, step 1 of three (#1106 designs it, #1107 builds it)
-**Status:** section list, order and every open call SIGNED OFF 2026-09-21.
-One question outstanding — winter ball (#1143), see 2E.
+**Status:** SIGNED OFF 2026-09-21 — section list, order, and every open call.
+Winter ball is in scope: **#1143 lands before #1107**, and #1106 draws the
+winter artboard. Nothing outstanding.
 **Draft ADR:** `docs/adr/0082-the-team-page-is-one-scroll-of-named-bands.md`
 
 This document is in two halves, and the order is the point. **Pass 1 is what was
@@ -747,18 +748,47 @@ short.** They are 73–90% of an MLB club by height, and every band they keep is
 full. The band they lose from the middle is Ranks, and that is one artboard, not
 a rhythm problem across the whole page.
 
-### The fifth shape — winter ball (675) and `/team/11`
+### 675 · Caneros de los Mochis — winter ball, the fifth shape
 
-**Provisional on #1143.** Today: 664px, one Ballpark card, a dash for a level,
-and a chip to a non-club. There is no page shape that rescues a page with no data
-on it, and the fix is a season resolution, a label and a guard — all in #1143,
-none in this wireframe.
+> **In scope, decided 2026-09-21 (Gary). #1143 lands before #1107, and #1106
+> draws this artboard.**
 
-Once #1143 lands, the shape is **four bands** — Standing, Games, Roster, About —
-with Ranks, Farm and Money absent (no league board at that level,
-`parentOrgId: 11` is not a parent, no Cot's coverage). Four anchors. **That is
-the floor this design has to hold**, and it is the page #1106 should draw
-*second*, after the Single-A one.
+Today it is 664px: one Ballpark card, a dash where the level badge goes, and an
+Affiliate chip pointing at `/team/11`. That is not a page shape to design around
+— it is the bug in 1C, and the fix is a season resolution, a label and a guard,
+all in #1143.
+
+**What the page becomes once #1143 lands is better than this document first
+assumed, and it was measured rather than guessed** (live, against Los Mochis,
+season 2025 — the winter that a January 2026 date actually falls in):
+
+| Check | Result |
+| --- | --- |
+| `/standings?leagueId=132&season=2025` | **10 clubs, one record group.** `division` is `null` on both sides, and `divisionRecordFor` already normalises that, so the table matches and renders. |
+| `/stats?group=hitting&teamId=675&season=2025` | **23 splits** |
+| `/stats?group=pitching&teamId=675&season=2025` | **32 splits** |
+| `rosterType=fullSeason&season=2025` | **55 players** |
+
+So the winter shape is **five bands**, not the three this document first guessed:
+
+| Band | Holds |
+| --- | --- |
+| Standing | division standings (10 clubs, no division name) · Records\* · day-of-week\* |
+| Ranks | **team leaders 6+6** — the pool is real |
+| Games | Schedule (+ Stamp In) · the season's games |
+| Roster | projection · 40-man · injured list |
+| About | Ballpark, 93px |
+
+\* `team-records` and `schedule-shape` are precomputed per MLB club only, so both
+resolve empty below MLB and the cards self-hide. Standing is then the standings
+table alone.
+
+**Five bands. Five anchors.** Farm is absent (`parentOrgId: 11` is the Office of
+the Commissioner, not a parent org) and Money is absent (no Cot's coverage).
+
+**That is the floor this design has to hold**, and it is the page #1106 should
+draw *second*, after the Single-A one. It is a genuinely thin page — but it is a
+thin page with five named bands and a close, not a card adrift under a tab bar.
 
 Worth noting what About buys here: today this page renders exactly one card, the
 Ballpark, adrift under a tab bar with nothing above it. Under this wireframe that
@@ -865,7 +895,7 @@ That is a statement #1107 can check with `UNION=1` and fail on.
 | **556** Nashville, AAA | **≤ 18** (today: 19) | **≤ 85** (today, minus Games: 105 / 83) | **6** |
 | **572** Wisconsin, A+ | **≤ 18** (today: 19) | **≤ 80** (today, minus Games: 102 / 80) | **6** |
 | **249** Wilson, A | **≤ 18** (today: 19) | **≤ 80** (today, minus Games: 102 / 80) | **6** |
-| **675** winter ball | — provisional on #1143 — | | **4** |
+| **675** winter ball | — set by #1143; ≤ 18 is the working target — | | **5** |
 
 **About costs nothing.** `fetchTeam` already returns `venue`, and the header
 already reads it. The band adds a head and a card, not a request. So the seventh

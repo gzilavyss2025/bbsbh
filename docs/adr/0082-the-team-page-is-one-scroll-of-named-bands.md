@@ -380,10 +380,18 @@ the year it opens in; `rosterType=fullSeason&season=2025` returns 55 players and
 early-returns on `!isMilb` **before** reaching its own `league?.id` guard, and a
 league-less, roster-less entity gets all six tabs, Contracts included.
 
-There is no page shape that rescues a page with no data on it. The winter shape
-belongs to #1143, not to this ADR — but it is the reason
-`hiddenTeamSections(team)` must put the `league?.id` test **ahead** of any sport
-test, rather than inheriting the function it replaces.
+**Winter ball is in scope for this work (decided 2026-09-21): #1143 lands before
+#1107.** The correct absent-band logic cannot be built without it — it is the
+reason `hiddenTeamSections(team)` must put the `league?.id` test **ahead** of any
+sport test rather than inheriting the function it replaces.
+
+What the page becomes once that lands was measured, not guessed, against Los
+Mochis for season 2025: the league standings return **10 clubs** (with `division`
+null on both sides, which `divisionRecordFor` already normalises), the leader
+pool returns **23 hitting and 32 pitching splits**, and the full-season roster
+returns **55 players**. So the winter shape is **five bands** — Standing, Ranks,
+Games, Roster, About — not the empty page it is today. Thin, but named and
+closed.
 
 ## What was not decided here
 
