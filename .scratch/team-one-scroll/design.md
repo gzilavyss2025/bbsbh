@@ -88,17 +88,35 @@ the constraint that decided §5.
 
 #### The second constraint, found by looking rather than by reading
 
-The card head is a **club-coloured filled bar**: `--bar-fill` background, a
-`3px solid --bar-accent` bottom edge, `--bar-text` ink, all three resolved from
-`(teamId, treatment)` and gated twice on WCAG AA. On 158 it is navy under a gold
-edge, on 249 navy under a clay edge, and on **675 it is a pale cream bar with
-dark ink** — the winter club's identity resolves light.
+Computed off the running page (`computed.mjs`), the card head is **two different
+objects depending on whether the club has a tuned triad**:
 
-So a filled bar is *already spoken for*, and its colour and even its value are
-not constant across clubs. **The band head cannot be a filled bar.** ADR-0030
-says the same thing from the other direction — a club may colour a card that
-identifies the club, never page chrome — but the visual reason is the stronger
-one: a neutral bar would read as a card whose club theme failed to load.
+| | `--bar-fill` | `--bar-accent` | `--bar-text` | themed |
+| --- | --- | --- | --- | --- |
+| 158 Milwaukee | `#12284B` navy | `#A6801F` gold, **3px** | `#F8F8F5` | yes |
+| 249 Wilson | `#00274d` navy | `#98002e` crimson, **3px** | `#FFFFFF` | yes |
+| **675 Los Mochis** | *unset* | *unset* | *unset* | **no** |
+
+ADR-0030 tunes 67 (club, treatment) pairs out of several hundred and
+`headerThemeFor` returns **null** for the rest, which keeps default chrome. 675
+is one of the nulls. Its card head computes to **transparent background,
+`--graphite` `#6B6558` ink, a 1px `--rule-soft` hairline** — no club colour
+anywhere on the page.
+
+Two consequences, and both decide the design:
+
+1. **The band head cannot be a filled bar.** A filled bar is the themed card's
+   device, its colour is not constant across clubs, and a club-neutral one would
+   read as a card whose theme failed to load. ADR-0030 forbids it from the other
+   direction too — a club may colour a card that identifies the club, never page
+   chrome.
+2. **On an unthemed club the collision above gets worse, not better.** An
+   unthemed card head is graphite display caps on transparent paper over a
+   hairline — which is *exactly* `.section__title`, and *exactly* the Records
+   group label. On 675, tiers 3 and 4 and the app's generic section label are one
+   object. So the band head must work on a page with **no club colour at all**,
+   and on that page it is the only structural colour left. That is a feature: the
+   band system carries the floor page when the club theme cannot.
 
 ---
 
