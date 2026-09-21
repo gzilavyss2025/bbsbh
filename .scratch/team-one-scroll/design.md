@@ -171,9 +171,71 @@ Each of these is a number, not an adjective, and every artboard is held to it.
 
 #### ONE band-head treatment · 7 uses · 0 variants
 
-`BroadcastSection`, unchanged: **title + optional note**. The title is the band
-name. The note is **the band's question**, in the body face, natural case — the
-question `scope.md` already wrote for each band.
+> **Settled at v4, and §4's "promoted unchanged" is not what shipped.** Part one
+> was written before anything was drawn, as the brief asked. Drawing it changed
+> two things, and this passage is the settled spec — §4 records what the idea
+> *started* as and why, which is still the reason the head looks like the report
+> pages' rather than like something new.
+
+```
+────────────────────────────────  full-bleed, --bw-heavy 2px, --ink-0
+STANDING                          --fs-h2 21px display, --ink-0, --ls-caps
+Where they stand, and the         --fs-small 13px body, natural case, --ink-1
+record split every way.           16px beneath it
+```
+
+**The rule runs full-bleed, edge to edge of the page**, not from the end of the
+words to the column edge. `BroadcastSection`'s trailing `--clay` rule is right
+on the report pages, where a section head sits between *unbordered* tables and
+charts drawn straight on the paper. It loses here, where every block is a
+bordered card under a filled club-coloured bar. A card is inset 16px and
+rounded, so **a rule that runs edge to edge is a plane no card can reach** at
+any weight or colour — and a plane difference survives a one-handed glance where
+a weight difference does not.
+
+**The note is a standfirst, not the band's question.** `scope.md` names each
+band by a question and v1–v3 printed it. A second screen answers; it does not
+ask. Seven interrogatives are seven lines the reader must read to discover they
+carry no information. The standfirst says what is *in* the band — and it is
+still where 2G's level qualifier and Money's "not dated" note land, because
+those are sentences.
+
+The seven, as drawn:
+
+| Band | Standfirst |
+| --- | --- |
+| Standing | Where they stand, and the record split every way. |
+| Ranks | Where this club sits against its league. |
+| Ranks, below Triple-A | The league rank boards start at Triple-A, so this is the club's own leaders. |
+| Games | Every game this season, and where they played it. |
+| Roster | Who plays here, and who arrived and left. |
+| Farm | The org ladder, and the players climbing it. |
+| Money | What the roster costs. This band does not move with the date. |
+| About | The ballpark, and the marks this club wears. |
+
+#### The sub-head is the same gesture, one step down
+
+```
+────────────────────────────────  full-bleed, --bw-hair 1px, --rule (pencil)
+Record, split every way           --fs-h3 17px display, --ink-1
+```
+
+32px of air above the rule, 10px under it, 12px under the words. **Not** a
+ruleless head with air, which is what v1 drew and what §6's diagram below still
+showed until this was reconciled: at 17px in `--ink-2` with nothing else it read
+as a caption on the Records card rather than as a division of the band, and it
+was the weakest of the three heads despite being the middle one.
+
+So the page reads **full-bleed = page structure, contained = card structure**:
+
+| Level | Device | Plane |
+| --- | --- | --- |
+| band head | 2px ink rule + 21px | full-bleed |
+| sub-head | 1px pencil rule + 17px | full-bleed |
+| card head | filled club-coloured bar + 14.4px | contained |
+| group label in a card | hairline + 12px graphite | contained |
+
+Four levels from two devices and two planes.
 
 The right-aligned slot 2G asks for is **not used on this page, zero times.** The
 three heads that need to say something extra — Ranks (a level qualifier), Farm
@@ -250,13 +312,16 @@ else (the 40-man, 1,282px). It stays full — decided, not open.
 work rather than decorating:
 
 ```
-STANDING ——————————————————————————     band head, 21px, clay rule
-how is the season going                  the question, 13px, natural case
+════════════════════════════════════     full-bleed 2px ink rule
+STANDING                                 band head, 21px, --ink-0
+Where they stand, and the record          the standfirst, 13px, natural case
+split every way.
 
   [ division standings + odds  272px ]   the ANSWER — 693px, under one screen
   [ Team Score                 421px ]
 
-Record, split every way                  sub-head, 17px, no rule, 32px of air
+────────────────────────────────────     full-bleed 1px pencil rule, 32px above
+Record, split every way                  sub-head, 17px, --ink-1
 
   [ Records                  3,238px ]   the REFERENCE — 3,818px
   [ Record by day of week      173px ]

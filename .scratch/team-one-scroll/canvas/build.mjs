@@ -352,7 +352,8 @@ function board({ title, v, state, club = 158, h, reduced = false, jumpOn = 'Stan
       <div class="card" style="opacity:.45"><div class="chead" style="${CLUBS[club].themed
         ? `background:${CLUBS[club].bar};border-bottom:3px solid ${CLUBS[club].accent};color:${CLUBS[club].onBar}`
         : `background:transparent;border-bottom:1px solid ${T.ruleSoft};color:${T.graphite}`}">
-        <span>Team batting</span><em>rank out of 30</em></div>
+        <span>${club === 158 ? 'Team batting' : 'Team leaders'}</span><em>${
+          club === 158 ? 'rank out of 30' : 'six a side'}</em></div>
         <div class="cbody"><div class="cap">the next band begins — shown so the seam is judged, not described</div></div></div>
     </div>
   </div>`

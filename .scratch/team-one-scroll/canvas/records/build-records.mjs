@@ -346,6 +346,13 @@ function recordsCard(club, open) {
       ? `<span class="mkbar" aria-hidden="true">` +
         (gm.t ? `<i style="flex:${gm.t};background:${T.field}"></i>` : '') +
         (gm.b ? `<i style="flex:${gm.b};background:${T.clay}"></i>` : '') +
+        // THE REMAINDER, and leaving it out was a real bug. Flex children grow
+        // to fill, so without a spacer the bar showed the ratio of green to
+        // clay AMONG THE MARKED SPLITS and always filled the whole track:
+        // Starting pitching at Wilson painted 100% clay for ONE marked split
+        // in eleven, which reads as a weak group when the mark describes one
+        // circumstance. The denominator is the group's split count.
+        `<i style="flex:${Math.max(0, gm.n - gm.t - gm.b)}"></i>` +
         `</span>`
       : ''
     const panel = on
