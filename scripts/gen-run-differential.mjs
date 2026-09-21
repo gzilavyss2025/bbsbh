@@ -374,7 +374,14 @@ async function main() {
   rows.sort((a, b) => b.diff - a.diff || a.season - b.season)
 
   const payload = {
-    generated: new Date().toISOString().slice(0, 10),
+    // `generatedAt`, in full, is what scripts/check-data-freshness.mjs reads by
+    // default — this file first shipped writing `generated` with the time cut
+    // off, which that guard counts as no stamp at all, and the nightly job
+    // failed on the count two nights running while every generator stayed green.
+    // The time is kept rather than sliced off because the budget is measured in
+    // HOURS: a date-only stamp is read as midnight, so a file written at noon
+    // already reports twelve hours old and a late run would alarm on nothing.
+    generatedAt: new Date().toISOString(),
     firstSeason: from,
     lastSeason: to,
     // The cut the rows are taken at. The page's threshold control clamps to

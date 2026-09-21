@@ -1,6 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { EXCEPT, MAX_AGE_HOURS, evaluate } from '../scripts/check-data-freshness.mjs'
+import {
+  EXCEPT,
+  MAX_AGE_HOURS,
+  UNSTAMPED_BUDGET,
+  collectDatasets,
+  evaluate,
+} from '../scripts/check-data-freshness.mjs'
 
 // The guard behind the 2026-08-28 incident: GitHub silently dropped the nightly
 // cron, no run record existed, and every dataset went a day stale with nothing
@@ -93,4 +99,25 @@ test('a missed night shows up across every nightly dataset at once', () => {
     ['war.json', 'teams.json', 'milestones.json'],
   )
   assert.equal(r.excepted.length, 1, 'the hand-run file must not join the alarm')
+})
+
+// Every test above drives evaluate() on fixtures, so all of them pass while the
+// nightly job fails: the guard CI runs takes its count from the real
+// public/data, and nothing here was reading that. On 2026-09-18
+// run-differential.json landed writing `generated` where the guard reads
+// `generatedAt`, the unstamped count went 23 -> 24, and the nightly job failed
+// two nights running with every generator green and the data committed. The
+// count is the half that ratchets, so the count is what needs pinning.
+//
+// Asserted on `unstamped` only, never on `stale`: a checkout's data is as old as
+// its last pull, so a staleness assertion here would fail on any branch a day
+// behind. `unstamped` does not move with the clock.
+test('the shipped data stays inside the unstamped budget', () => {
+  const { unstamped } = evaluate(collectDatasets(), { now: NOW })
+  assert.ok(
+    unstamped.length <= UNSTAMPED_BUDGET,
+    `${unstamped.length} datasets carry no stamp, over the budget of ${UNSTAMPED_BUDGET}:\n` +
+      `  ${unstamped.join(', ')}\n` +
+      '  A new dataset should write generatedAt, not raise the budget.',
+  )
 })
