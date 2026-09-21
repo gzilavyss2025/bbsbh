@@ -46,7 +46,7 @@ const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 // sportId → level abbreviation, mirrored from src/lib/teams.js SPORT_LABEL. Used
 // to build the team card's "LEVEL | LEAGUE" line (e.g. "MLB | NATIONAL LEAGUE",
 // "AAA | INTERNATIONAL LEAGUE").
-const SPORT_LEVEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK' }
+const SPORT_LEVEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK', 17: 'WINTER' }
 
 // --- statsapi fetch (server side, crawler-only) ----------------------------
 

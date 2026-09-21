@@ -145,3 +145,56 @@ test('everything fails closed, so a bad fetch cannot re-order the rail', () => {
   // An unparseable date is not a winter date.
   assert.equal(hasWinterTab(CALENDAR, 'tomorrow'), false)
 })
+
+// ---------------------------------------------------------------------------
+// THE SAME RULE, WHERE THE TEAM HUB READS IT (#1143)
+//
+// `winterSeasonFor` was written for the slate and, until #1143, nothing else
+// called it. `/team/675` reached the hub anyway — three taps off a November
+// slate — and the hub's own `seasonOf()` took the calendar year, so from
+// January to July it asked statsapi for a winter that has not been played:
+// `rosterType=fullSeason&season=2025` answers 55 players and `season=2026`
+// answers 0. The rule has one home; the hub defers to it rather than keeping
+// a second copy.
+//
+// The level badge is the same fact on the other side of the page. `SPORT_LABEL`
+// had no key for sportId 17, so `TeamHubShell` printed an em dash where AAA /
+// AA / A+ / A / ROK go — the one thing the header exists to say about a club
+// below MLB. `api/_lib/cards.js`'s `SPORT_LEVEL` is a hand copy of that map and
+// `scripts/check-searchable-sport-ids.mjs` fails the lint if the two drift, so
+// the key lands in both files or in neither.
+// ---------------------------------------------------------------------------
+import { SPORT_LABEL } from '../src/lib/teams.js'
+import { WINTER_SPORT_ID } from '../src/lib/winter/leagues.js'
+import { seasonOf } from '../src/screens/team/data/shared.js'
+
+test('the team hub asks a winter club for the season it actually played', () => {
+  // January 15, 2026 is inside the 2025-26 winter, which statsapi files under
+  // season=2025. This is the date #1143 was measured on.
+  assert.equal(seasonOf('2026-01-15', WINTER_SPORT_ID), 2025)
+  assert.equal(seasonOf('2025-11-15', WINTER_SPORT_ID), 2025)
+  assert.equal(seasonOf('2026-02-02', WINTER_SPORT_ID), 2025)
+  // August onward is the winter about to open, not the one just finished.
+  assert.equal(seasonOf('2026-09-21', WINTER_SPORT_ID), 2026)
+})
+
+test('every other level still takes the calendar year', () => {
+  // The winter rule must not leak. An MLB or MiLB season IS its calendar year,
+  // and a January date on one of those pages is a January date.
+  for (const sportId of [1, 11, 12, 13, 14, 16]) {
+    assert.equal(seasonOf('2026-01-15', sportId), 2026)
+    assert.equal(seasonOf('2026-09-21', sportId), 2026)
+  }
+  // An unstated level is MLB, as it has always been.
+  assert.equal(seasonOf('2026-01-15'), 2026)
+})
+
+test('a winter club wears a real level badge rather than a dash', () => {
+  assert.equal(SPORT_LABEL[WINTER_SPORT_ID], 'WINTER')
+  // Every level the app can reach has a label. A missing key prints an em dash
+  // on the club's own header, which is what #1143 found.
+  for (const sportId of [1, 11, 12, 13, 14, 16, WINTER_SPORT_ID]) {
+    assert.equal(typeof SPORT_LABEL[sportId], 'string')
+    assert.ok(SPORT_LABEL[sportId].length > 0)
+  }
+})

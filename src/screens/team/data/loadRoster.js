@@ -20,6 +20,7 @@ import { fetchTopProspects, prospectBadge } from '../../../api/prospects.js'
 import { fetchRookiesData, showRookiePill } from '../../../api/rookies.js'
 import { SPORT_IDS } from '../../../lib/teams.js'
 import {
+  parentOrgIdOf,
   seasonOf,
   cutoffFor,
   injuredListFrom,
@@ -54,11 +55,13 @@ export async function loadRoster(id, asOf) {
   const sportId = team.sport?.id ?? 1
   const isMilb = sportId !== 1
   // The org a prospect badge should match against: this club's own id when
-  // it's already the MLB parent, else its live parentOrgId — never the
+  // it's already the MLB parent, else its live parent org — never the
   // affiliate's own id, since orgProspects rows are always keyed by parent
-  // (see prospectBadge, api/prospects.js).
-  const currentOrgId = team.parentOrgId ?? id
-  const season = seasonOf(asOf)
+  // (see prospectBadge, api/prospects.js). parentOrgIdOf, not a bare
+  // `team.parentOrgId`, so a winter club falls back to its own id rather than
+  // matching prospects against the Office of the Commissioner (#1143).
+  const currentOrgId = parentOrgIdOf(team) ?? id
+  const season = seasonOf(asOf, sportId)
   const standingsDate = cutoffFor(asOf)
 
   const [roster, fullRoster, seasonRoster, ilRoster, allStarIds, warData, prospectsSnapshot, rookiesData, schedule] =

@@ -13,7 +13,7 @@ import { parentOrgHistory } from '../../../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../../../api/careerTimeline.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { SPORT_LABEL } from '../../../lib/teams.js'
-import { seasonOf, affiliateCardsFrom } from './shared.js'
+import { seasonOf, affiliateCardsFrom, parentOrgIdOf } from './shared.js'
 
 const DASH = '—'
 
@@ -124,13 +124,15 @@ export async function loadMinors(id, asOf) {
   if (!team) return null
   const sportId = team.sport?.id ?? 1
   const isMilb = sportId !== 1
-  const season = seasonOf(asOf)
+  const season = seasonOf(asOf, sportId)
   // The MLB parent's own id — same value whether this page IS the parent or
-  // one of its affiliates (team.parentOrgId rides along on a MiLB team's
-  // /teams response). Every prospect belongs to the org, not to one specific
+  // one of its affiliates (the parent org rides along on a MiLB team's /teams
+  // response). Every prospect belongs to the org, not to one specific
   // affiliate, so both the parent's page and every affiliate's page show the
-  // same org-wide leaderboard.
-  const orgId = isMilb ? team.parentOrgId ?? null : id
+  // same org-wide leaderboard. Null for a club whose named parent is not a
+  // club at all, which is every winter-ball club (#1143) — every fetch below
+  // then degrades to empty, and the Minors tab is already hidden.
+  const orgId = isMilb ? parentOrgIdOf(team) : id
 
   const [roster, affiliates, complexAffiliates, prospectsSnapshot, trendSnapshot, rehabSnapshot] = await Promise.all([
     // Only needed to seed this org's own roster ids below (MLB clubs only —

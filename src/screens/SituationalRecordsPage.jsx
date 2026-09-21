@@ -228,7 +228,7 @@ export function SituationalRecordsPage({
   const order = routeOrder === 'asc' || routeOrder === 'desc' ? routeOrder : null
   const { favoriteTeamId } = useFavoriteTeam()
 
-  const season = seasonOf(asOf)
+  const season = seasonOf(asOf, sportId)
   const cutoff = cutoffFor(asOf)
   const { loading, error, data } = useAsync(
     () => fetchLevelTeamRecords(sportId, season),

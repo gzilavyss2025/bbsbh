@@ -24,7 +24,7 @@ export async function loadTeamIdentity(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
-  const season = seasonOf(asOf)
+  const season = seasonOf(asOf, sportId)
 
   const [standings, manager] = await Promise.all([
     // Standings as of the morning of a dated page — the day BEFORE the game

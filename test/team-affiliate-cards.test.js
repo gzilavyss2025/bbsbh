@@ -53,3 +53,12 @@ test('an MLB org with no affiliates of any kind renders an empty list rather tha
   const team = { id: 999, sport: { id: 1 } }
   assert.deepEqual(affiliateCardsFrom(team, false, [], []), [])
 })
+
+// A winter-ball club's `parentOrgId: 11` is the Office of the Commissioner
+// (#1143) — not a club, not in teams.json, and not something to lead an
+// affiliate list with. Same decision as the header's Affiliate chip and the
+// Minors tab gate, taken through the same helper.
+test('a winter-ball club gets no parent card for the Office of the Commissioner', () => {
+  const team = { id: 675, sport: { id: 17 }, parentOrgId: 11, parentOrgName: 'Office of the Commissioner' }
+  assert.deepEqual(affiliateCardsFrom(team, true, [], []), [])
+})

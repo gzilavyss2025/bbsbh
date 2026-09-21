@@ -89,12 +89,24 @@ STANDING  →  RANKS  →  GAMES  →  ROSTER  →  FARM  →  MONEY  →  ABOUT
 | **About** | What is this club? |
 
 Six of the seven answer a question about the club's **season**. The seventh,
-**About**, answers a question about the club itself, holds the Ballpark, and is
-last. It costs an anchor on a phone jump bar and it buys the rule below.
+**About**, answers a question about the club itself and is last. It costs an
+anchor on a phone jump bar and it buys the rule below.
+
+**About is the club's identity band, and that is what decides its contents.**
+It holds the Ballpark, **Logos & jerseys**, and — on an affiliate —
+**Affiliation history** and **Made The Show**: the building, the marks, the orgs
+this club has belonged to, and the players it sent up. Decided 2026-09-21, and
+it overrules the wireframe, which had put the jersey card in Standing (a record
+by X, beside its siblings) and the other two in Farm (the org ladder). The test
+that moved all three is the one every other band on this page is held to: a
+band is one question, and every season band's answer changed yesterday. Change
+`?d=` and none of these four cards move. A record-by-jersey card whose W-L is a
+caption on a uniform is not a split of the season, and a club's past parent orgs
+are not "who is coming".
 
 > **Every page ends on a band that no subject can fail to fill.**
 
-Money needs Cot's coverage. Ranks needs a league board. Farm needs a parent org.
+Money needs Cot's coverage. Ranks needs a league. Farm needs a parent org.
 Standing needs a division. A ballpark is a building, and every club in this app
 plays in one — so Milwaukee's 20,050px page and a Single-A club's 13,570px page
 close on the same band, with the same head, in the same place. **A page that
@@ -102,8 +114,27 @@ loses a band from its tail no longer ends on an absence.** That is worth more to
 the short page than to the long one, and it is this ADR's best answer to whether
 a thin club reads as quiet or as broken.
 
-It is also free: `fetchTeam` already returns `venue`, and the header already
-reads it. The seventh band adds a head and a card, not a request.
+**And it is a real band rather than a courtesy, which the first draft of this
+decision could not claim.** With the Ballpark alone it was 1,014px on Milwaukee
+and 93px on every affiliate, because no MiLB park has hand-verified outfield
+dimensions — one small card under a full-width head. Measured at iPhone 13
+width on 2026-09-21, card heights only: Milwaukee **1,274px**, Nashville
+**1,441px**, Wisconsin and Wilson **1,357px** each. On all three affiliates it
+is the page's longest band after Roster.
+
+**The floor is the exception, and it is stated rather than smoothed over.** A
+winter-ball club has no parent org and no alumni file, so two of the four cards
+do not exist there: `/team/675` gains one, and its About band is 349px against
+91px. The move pays on the affiliate and pays least where the page is thinnest.
+It gives the winter page a close with two cards on it instead of one, and that
+is the whole of the claim.
+
+The Ballpark itself is still free — `fetchTeam` already returns `venue`, and the
+header already reads it. The three that joined it bring a loader: a static
+history file and a logo-tint read per parent-org era, an alumni file, and on an
+MLB club two `/api/v1/uniforms/game` batches. Every one of those requests was
+already in this page's fully-scrolled union, so the ceilings do not move — and
+About sits at the foot, so none of it is paid on first paint.
 
 A band is a **question a visitor asks**, not a renamed tab. The clearest evidence
 that the two are different: today's "Numbers" tab holds the standings table, two
@@ -138,8 +169,8 @@ one band, with nothing between them:
 > record by day of week, record by jersey, comeback wins, Last Time.
 
 Cards 2, 5, 10 and 13 of the old page are now the first band of the new one, and
-the photos and jerseys that used to sit between them are in Games and in
-Standing's own record group respectively.
+the photos and jerseys that used to sit between them are in Games and in About
+respectively.
 
 Note what the tabs did with this failure: they did not fix it so much as
 **hide** it. Standings and comeback wins still sat nine cards apart — on the same
@@ -345,16 +376,26 @@ and its Minors tab is *longer* than Milwaukee's, because all three affiliates
 share one org's farm system. Every band a Single-A club keeps, it fills.
 
 **`hiddenTeamTabs()` cannot express this rule and is replaced.** It decides at
-tab grain, and nothing in it can say "Ranks is absent below Triple-A" — the most
-common absence on the new page. It also has a hole (below). #1107 writes
+tab grain, and the bands do not map one-to-one onto the tabs: the Numbers tab
+alone splits into **Standing and Ranks**, which are absent under different
+conditions — a club with no league id loses Ranks and keeps Standing. One
+boolean per tab cannot say that. It also has a hole (below). #1107 writes
 `hiddenTeamSections(team)` in the same file, decided off the same cheap identity
 data `loadTeamIdentity` already has — **never by fetching a band's payload to
 find out whether to show it**, which is the PRD non-negotiable that keeps the
 cold load cheap.
 
+> A draft of this paragraph justified the new function with "nothing in it can
+> say Ranks is absent below Triple-A — the most common absence on the new page".
+> That held only while the wireframe proposed moving the leaders ledger out of
+> Ranks. The ledger stays (Gary, 2026-09-21), so **Ranks renders on every club
+> with a league**, and the claim is withdrawn. The mapping and the hole are the
+> reasons; the absence count never was one.
+
 ## Two things found while measuring, both filed
 
-Neither is fixed here. Both make a decision above provisional.
+Both made a decision above provisional. **#1143 has since landed; #1142 has
+not.**
 
 **#1142 — the MiLB Photos rail walks the whole season and draws nothing.**
 `/team/556/games` fires **154** requests, `/team/572/games` and `/team/249/games`
@@ -392,6 +433,27 @@ pool returns **23 hitting and 32 pitching splits**, and the full-season roster
 returns **55 players**. So the winter shape is **five bands** — Standing, Ranks,
 Games, Roster, About — not the empty page it is today. Thin, but named and
 closed.
+
+> **#1143 landed 2026-09-21, and the prediction held.** `seasonOf()` now defers
+> to `winterSeasonFor()`, `SPORT_LABEL` has a key for 17, and one
+> `parentOrgIdOf()` answers the parent-org question for the five surfaces that
+> each asked it with a bare `team.parentOrgId` read. A sixth thing had to
+> change for the season fix to reach anything: `fetchTeamRoster` sent the
+> season only inside its stat hydrate, never on the request, so statsapi
+> answered the CURRENT roster whatever season the page was about — invisible on
+> an MLB club in its own season, total on a winter club.
+>
+> Re-measured on a fixed `/team/675?d=2026-01-15`: **664px to 2,355px**, with a
+> WINTER badge, no chip, a 38-30 record line, the division standings, the
+> roster projection and the leaders ledger. The Roster tab goes 664px to
+> 4,430px. 158, 249, 556 and 572 measure unchanged to the pixel.
+>
+> **One bullet of #1143 was deliberately left to #1107**: moving
+> `hiddenTeamTabs()`'s `league?.id` guard ahead of its `isMilb` early return.
+> That is the paragraph above — `hiddenTeamSections(team)` replaces the
+> function and needs the league test ahead of any sport test, so fixing the
+> old function first would be work thrown away. With the Affiliate chip gone,
+> `/team/11` is no longer reachable from the hub by tapping.
 
 ## What was not decided here
 

@@ -83,7 +83,7 @@ test('fetchTeamRoster is [] with no teamId or season', async () => {
 
 test('fetchTeamRoster fetches once and reuses the cache for the same key', async () => {
   const url =
-    '/api/v1/teams/158/roster?rosterType=active&hydrate=person(stats(type=season,group=[hitting,pitching,fielding],sportId=1,season=2026))'
+    '/api/v1/teams/158/roster?rosterType=active&season=2026&hydrate=person(stats(type=season,group=[hitting,pitching,fielding],sportId=1,season=2026))'
   const { calls, restore } = stubFetch({
     [`https://statsapi.mlb.com${url}`]: { json: { roster: [{ person: { id: 1 } }] } },
   })
@@ -100,7 +100,7 @@ test('fetchTeamRoster fetches once and reuses the cache for the same key', async
 
 test('fetchTeamRoster passes a MiLB club\'s own sportId rather than defaulting to MLB', async () => {
   const url =
-    'https://statsapi.mlb.com/api/v1/teams/446/roster?rosterType=40Man&hydrate=person(stats(type=season,group=[hitting,pitching,fielding],sportId=11,season=2026))'
+    'https://statsapi.mlb.com/api/v1/teams/446/roster?rosterType=40Man&season=2026&hydrate=person(stats(type=season,group=[hitting,pitching,fielding],sportId=11,season=2026))'
   const { restore } = stubFetch({ [url]: { json: { roster: [] } } })
   try {
     await fetchTeamRoster(446, 2026, { sportId: 11, rosterType: '40Man' })
@@ -109,8 +109,26 @@ test('fetchTeamRoster passes a MiLB club\'s own sportId rather than defaulting t
   }
 })
 
+// THE SEASON HAS TO RIDE ON THE REQUEST, not only inside the hydrate (#1143).
+// Without it statsapi answers the CURRENT roster whatever season the page is
+// about, which is invisible on an MLB club in its own season and total on a
+// winter-ball club: /teams/675/roster?rosterType=fullSeason answers 0 players,
+// and the same call with season=2025 answers 55. Measured live, 2026-09-21.
+test('fetchTeamRoster asks for the season the page is about', async () => {
+  const url =
+    'https://statsapi.mlb.com/api/v1/teams/675/roster?rosterType=fullSeason&season=2025&hydrate=person(stats(type=season,group=[hitting,pitching,fielding],sportId=17,season=2025))'
+  const { calls, restore } = stubFetch({ [url]: { json: { roster: [] } } })
+  try {
+    await fetchTeamRoster(675, 2025, { sportId: 17, rosterType: 'fullSeason' })
+    assert.equal(calls.length, 1)
+    assert.ok(calls[0].includes('rosterType=fullSeason&season=2025'))
+  } finally {
+    restore()
+  }
+})
+
 test('fetchTeamRoster degrades to [] on failure and does not cache the failure', async () => {
-  const url = 'https://statsapi.mlb.com/api/v1/teams/777/roster?rosterType=active&hydrate=person(stats(type=season,group=[hitting,pitching,fielding],sportId=1,season=2027))'
+  const url = 'https://statsapi.mlb.com/api/v1/teams/777/roster?rosterType=active&season=2027&hydrate=person(stats(type=season,group=[hitting,pitching,fielding],sportId=1,season=2027))'
   const { calls, restore } = stubFetch({ [url]: { fail: true } })
   try {
     assert.deepEqual(await fetchTeamRoster(777, 2027), [])

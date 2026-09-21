@@ -172,6 +172,7 @@ export const SPORT_LABEL = {
   13: 'A+',
   14: 'A',
   16: 'ROK',
+  17: 'WINTER', // one id for all four winter leagues — src/lib/winter/leagues.js
 }
 
 // MiLB-only, ordered LOW-to-HIGH — drives the player page's level-progression

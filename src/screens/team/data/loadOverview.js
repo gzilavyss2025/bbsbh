@@ -71,7 +71,7 @@ export async function loadOverview(id, asOf) {
   if (!team) return null
   const sportId = team.sport?.id ?? 1
   const isMilb = sportId !== 1
-  const season = seasonOf(asOf)
+  const season = seasonOf(asOf, sportId)
   const cutoff = cutoffFor(asOf)
   const scoreCutoff = scoreCutoffFor(asOf)
 

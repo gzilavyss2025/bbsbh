@@ -47,7 +47,7 @@ export async function loadNumbers(id, asOf) {
   // Null below Triple-A, which is what keeps the challenge card off a level
   // that runs no ABS rig — and keeps its file off that page's fetch list.
   const absExposureLevel = exposureClubLevelFor(sportId)
-  const season = seasonOf(asOf)
+  const season = seasonOf(asOf, sportId)
   const standingsDate = cutoffFor(asOf)
   const scoreCutoff = scoreCutoffFor(asOf)
 
