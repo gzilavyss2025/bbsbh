@@ -2,7 +2,7 @@
   "v": 3,
   "createdOnFiles": {
     "v": 1,
-    "at": "2026-09-21T17:40:51.842Z"
+    "at": "2026-09-21T18:06:14.145Z"
   },
   "title": "Team page one-scroll — the band system",
   "launch": {
@@ -101,6 +101,48 @@
       "w": 390,
       "h": 4600,
       "title": "v4 · the reduced band, Single-A"
+    },
+    "Rec-Closed.dc.html": {
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 1400,
+      "title": "Records · closed — 760px"
+    },
+    "Rec-Open.dc.html": {
+      "x": 2350,
+      "y": 1520,
+      "w": 390,
+      "h": 2200,
+      "title": "Records · two groups open"
+    },
+    "Rec-All.dc.html": {
+      "x": 2350,
+      "y": 3840,
+      "w": 390,
+      "h": 3700,
+      "title": "Records · all open — 3,039px"
+    },
+    "Rec-249-Closed.dc.html": {
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 1400,
+      "title": "Records · Single-A, closed — 715px"
+    },
+    "Rec-249.dc.html": {
+      "x": 2820,
+      "y": 1520,
+      "w": 390,
+      "h": 2200,
+      "title": "Records · Single-A, open"
+    },
+    "Rec-249-All.dc.html": {
+      "x": 2820,
+      "y": 3840,
+      "w": 390,
+      "h": 3700,
+      "title": "Records · Single-A, all open"
     }
   },
   "order": [
@@ -116,7 +158,13 @@
     "V4-Loaded.dc.html",
     "V4-Loading.dc.html",
     "V4-Empty.dc.html",
-    "V4-Reduced.dc.html"
+    "V4-Reduced.dc.html",
+    "Rec-Closed.dc.html",
+    "Rec-Open.dc.html",
+    "Rec-All.dc.html",
+    "Rec-249-Closed.dc.html",
+    "Rec-249.dc.html",
+    "Rec-249-All.dc.html"
   ],
   "notes": {
     "t1": {
@@ -180,6 +228,20 @@
       "x": 1410,
       "y": 8560,
       "text": "LOADING shows the band head, the standfirst and the SHAPE — one skeleton per card the band will have — because which cards exist is decided from cheap identity data before any fetch.\n\nIt does NOT reserve Records’ 3,238px. A skeleton cannot honestly pretend to be four screens tall, so the page does jump when Records lands. Naming that rather than hiding it.",
+      "color": "blue",
+      "w": 330
+    },
+    "n9": {
+      "x": 3290,
+      "y": 0,
+      "text": "RECORDS, REORGANISED — Gary, 2026-09-21. Nothing removed; every row still on this page.\n\nThe twelve groups stop being headings inside a wall and BECOME the wall: each is a 44px ledger line carrying how many splits are behind it and the spread of win pct inside it. The spread is a finding, not a label — Leading and trailing runs .075–.966, Defense runs .544–.677, and today you read 61 rows to learn that.\n\n3,238px to 760px closed. 3.84 phone screens to 0.90.",
+      "color": "green",
+      "w": 330
+    },
+    "n10": {
+      "x": 3290,
+      "y": 1200,
+      "text": "CLOSED ON ARRIVAL. The sub-head above already says this material is reference, and a reference section opens at its contents. A scorekeeper wants ONE of these rows and which one changes with the inning, so opening any by default is right for almost nobody. Open all restores today’s card in one tap — and fully open is 3,039px, SHORTER than today, so it is not a punishment.\n\nOpen groups persist in sessionStorage, per tab. They must survive a navigation, because every row is a door to /situational-records and plain state would close the group you just drilled out of. They must NOT persist across devices: ADR-0049 stores a consent, not a preference.",
       "color": "blue",
       "w": 330
     },

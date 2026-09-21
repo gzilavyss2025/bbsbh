@@ -6,7 +6,9 @@
 // Records holds THREE different row shapes and that matters to the drawing:
 //   - 61 W-L split rows, every one a door to /situational-records  (the "61 rows")
 //   - one 10x2 by-inning table, which is not a row list at all
-//   - 18 plain season counts, a number and a label, no W-L and no door
+//   - 18 plain season counts, a number and a label, no W-L — but they ARE doors:
+//     SeasonCounts renders each as a <button> to situationalRecordsPath
+//     (RecordsCard.jsx:75). An earlier note here said otherwise and was wrong.
 
 export const TOKENS = {
   paper0: '#F6EFDC', paper2: '#FBF6E9', paper3: '#FFFDF6',

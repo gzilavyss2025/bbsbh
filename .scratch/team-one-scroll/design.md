@@ -273,6 +273,76 @@ The second half of the mechanism is the **stuck jump bar**, which keeps the word
 *Standing* on screen through all 4,511px. Without it a reader four screens deep
 has no frame; with it, length costs nothing.
 
+##### And then the card itself was reorganised — Gary, 2026-09-21
+
+> "I don't want to remove any of this information, but I think we can condense
+> it and make it easier to navigate… so that you can drill into things you're
+> interested in but won't have to scroll past a really ton of data to get to the
+> next section."
+
+This is a **third option `scope.md` never evaluated.** §2B weighed *full*
+against *capped* and rejected capping because the ~45 rows that fall off have
+nowhere to go. Nesting removes nothing and sends nothing anywhere, so the
+decision that "Records stays full" is untouched — every row is still on this
+page. §2B even points here: *"the way out is the half/month toggle the card
+already has doing more work — not a cap."*
+
+**The scheme.** The twelve groups stop being headings inside a wall and **become
+the wall.** Each is a 44px ledger line carrying two figures: how many splits are
+behind it, and the spread of win pct inside it —
+`LEADING AND TRAILING · 9 SPLITS · .075–.966`. The rows live behind the line.
+The spread is a **finding, not a label**: Leading and trailing runs .075–.966
+where Defense runs .544–.677, and today you read 61 rows to learn that.
+
+Twelve was the right cut for one measurable reason: **twelve 44px lines plus the
+head and the two shipped scope controls is 760px — 0.90 of a phone screen.** The
+whole card, every door in it, visible at once. A coarser cut fits better but
+needs a fifth heading tier, which §3 says the page does not have.
+
+| | shipped | **closed** | all open |
+| --- | ---: | ---: | ---: |
+| 158 Milwaukee | 3,238px | **760px** | 3,039px |
+| 249 Wilson | 3,017px | **715px** | 2,869px |
+
+Measured independently of the drawing that proposed it. **4.3× shorter closed**,
+3.84 phone screens down to 0.90 — and **fully open is shorter than today**, so
+`Open all ›` is not a punishment.
+
+**Closed on arrival.** The sub-head above already declares this material
+reference, and a reference section opens at its contents. A scorekeeper wants
+*one* of these rows and which one changes with the inning, so opening any by
+default is right for almost nobody.
+
+**Open groups persist in `sessionStorage`, per tab**, keyed
+`bbsbh:records-open:{teamId}`. They must survive a navigation, because every row
+is a door to `/situational-records` and plain `useState` would close the group
+the reader just drilled out of. They must *not* persist across visits or
+devices: ADR-0049 persists a **consent**, not a preference, and borrowing that
+machinery would make the box-score bit look like a convention rather than the
+exception it is.
+
+**And the three row shapes are harmonized**, which was the other half of the
+ask. The 18 season counts stop being stacked tiles and become W-L rows with one
+figure — a count *is* a ledger row whose figure happens to be one number
+(411 → 363px). The 10×2 by-inning matrix stays a matrix, because the register is
+the point, but its cell goes from three lines to two, with record and win pct
+sharing a line in the same order and colours as every other row (644 → 508px).
+
+**What this changes in §5: nothing.** Ten type sizes, three spacings, no new
+token. One number in §6 moves — **the scale ratio falls from 36:1 to ≈14:1**,
+because Records was the numerator and the largest card on the page is now
+Milwaukee's 40-man at 1,282px. That is §6's own argument carried out rather than
+contradicted. One addition to the fold list: `--fs-ui` 14px is **not** one of the
+ten and the shipped card uses it in three places; it folds to `--fs-cell` 11px.
+
+Standing at 158 goes **4,511 → 2,033px**, Records' share of its own band goes
+**72% → 37%**, and the page goes **20,006 → 17,528px**. The floor gains more than
+the long page does: at 249 Records is 22% of the whole page against Milwaukee's
+16%.
+
+Full reasoning, the four rejected alternatives and the measured boards:
+`canvas/records/records.md`.
+
 #### Problem 2 — the floor
 
 Measured, post-#1143, and it does not say what `scope.md` says:
