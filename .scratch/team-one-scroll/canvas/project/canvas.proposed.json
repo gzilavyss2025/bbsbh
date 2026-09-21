@@ -2,7 +2,7 @@
   "v": 3,
   "createdOnFiles": {
     "v": 1,
-    "at": "2026-09-21T19:16:34.813Z"
+    "at": "2026-09-21T19:24:09.677Z"
   },
   "title": "Team page one-scroll — the band system",
   "launch": {
@@ -102,6 +102,13 @@
       "h": 4600,
       "title": "v4 · the reduced band, Single-A"
     },
+    "V4-Band.dc.html": {
+      "x": 1880,
+      "y": 4720,
+      "w": 390,
+      "h": 2600,
+      "title": "v4 · Standing, settled — 2,033px"
+    },
     "Rec-Closed.dc.html": {
       "x": 2350,
       "y": 0,
@@ -159,6 +166,7 @@
     "V4-Loading.dc.html",
     "V4-Empty.dc.html",
     "V4-Reduced.dc.html",
+    "V4-Band.dc.html",
     "Rec-Closed.dc.html",
     "Rec-Open.dc.html",
     "Rec-All.dc.html",

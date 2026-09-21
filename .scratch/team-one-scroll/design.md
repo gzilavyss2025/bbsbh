@@ -360,18 +360,27 @@ The spread is a **finding, not a label**: Leading and trailing runs .075–.966
 where Defense runs .544–.677, and today you read 61 rows to learn that.
 
 Twelve was the right cut for one measurable reason: **twelve 44px lines plus the
-head and the two shipped scope controls is 760px — 0.90 of a phone screen.** The
+head and the two shipped scope controls is 826px — 0.98 of a phone screen.** The
 whole card, every door in it, visible at once. A coarser cut fits better but
 needs a fifth heading tier, which §3 says the page does not have.
 
 | | shipped | **closed** | all open |
 | --- | ---: | ---: | ---: |
-| 158 Milwaukee | 3,238px | **760px** | 3,039px |
-| 249 Wilson | 3,017px | **715px** | 2,869px |
+| 158 Milwaukee | 3,238px | **826px** | 3,486px |
+| 249 Wilson | 3,017px | **781px** | 3,161px |
 
-Measured independently of the drawing that proposed it. **4.3× shorter closed**,
-3.84 phone screens down to 0.90 — and **fully open is shorter than today**, so
-`Open all ›` is not a punishment.
+Measured independently of the drawing that proposed it. **3.9× shorter closed**,
+3.84 phone screens down to **0.98** — still one screen, and every door on it.
+
+> **Two of these numbers moved after the outside design review, and one claim
+> died.** Closed grew 66px when `Open all` and the shipped scope pills were
+> taken to a 44px touch target (F3): 760 → 826 and 715 → 781. And **"fully open
+> is shorter than today" is no longer true** — it was, before the league mark
+> put a rank line on 49 marked rows. Open-all is now 3,486px against today's
+> 3,238px. The trade is 248px for a league rank on every marked split, and it is
+> only paid by a reader who deliberately taps `Open all ›`; the card's default
+> is closed at 826px. Recorded rather than quietly dropped, because the earlier
+> claim is in the commit history.
 
 **Closed on arrival.** The sub-head above already declares this material
 reference, and a reference section opens at its contents. A scorekeeper wants
@@ -400,8 +409,16 @@ Milwaukee's 40-man at 1,282px. That is §6's own argument carried out rather tha
 contradicted. One addition to the fold list: `--fs-ui` 14px is **not** one of the
 ten and the shipped card uses it in three places; it folds to `--fs-cell` 11px.
 
-Standing at 158 goes **4,511 → 2,033px**, Records' share of its own band goes
-**72% → 37%**, and the page goes **20,006 → 17,528px**. The floor gains more than
+Standing at 158 goes **4,511 → 2,099px** of cards — standings 272 + Team Score
+421 + Records 826 + day-of-week 173 + Comebacks 407 — Records' share of its own
+band goes **72% → 39%**, and the page goes **20,006 → 17,594px**. Drawn as
+`V4-Band.dc.html`, which measures **2,122px** from the opening rule to the last
+card.
+
+> `V4-Loaded` and v1–v3 still draw the 3,238px card, and that is deliberate:
+> they were the comparison that chose the band **furniture**, at a time when
+> Records was still that size, which was the right context for that decision.
+> `V4-Band` is the settled band on the settled card (review F7). The floor gains more than
 the long page does: at 249 Records is 22% of the whole page against Milwaukee's
 16%.
 
@@ -450,9 +467,19 @@ having seen both. His call, and the trade-off is his to accept.
   .075** — rank 5 of 30, because winning from there is rare — so tinting the ends
   would have put **green on the lowest number in the range**, beside an untinted
   `.966`. Two orderings, one pair of colours. Dropped.
-- **A key sits at the card foot**, printed only when the club has a mark. A
-  colour with nothing to read it by is a private joke on a touch screen: there is
-  no hover, and the house rule forbids a `title=` tooltip.
+- **The rank is printed on the marked row, on its own line** under the figure it
+  ranks — `1 of 30` — in the row's own tone. That is the house rule for a rank
+  ("78 of 89", never "#78") and it does three things at once: it explains the
+  colour where the reader is already looking, it stops colour being the only
+  carrier of meaning, and it removes the need for a legend.
+
+  > **This replaced a key at the card foot** (review F2). The key was below the
+  > fold when the card was closed and much further away with groups open, so a
+  > reader had to scroll away from the split they wanted in order to learn what
+  > the colour meant. The reviewer proposed moving the key above the first group;
+  > the top of the card is the most expensive space on the page, and a legend
+  > there is furniture before content. Putting the number on the row costs a
+  > line on marked rows only, and answers the question where it is asked.
 
 **Two exclusions, both from running the real numbers.** Under **10 games** —
 "Started a game with an opener, 1 of 30" is four games, and "Scoring in extra
@@ -469,11 +496,21 @@ fetches**: zero extra requests, and it is the app's own build-time-fetch pattern
 (`src/api/CLAUDE.md`). `canvas/records/rank-probe.mjs` is the prototype of that
 pass.
 
+**And the spread on an index line is floored at the same 10 games** (review F6).
+Starting pitching ran `.500–1.000` at Milwaukee, where the 1.000 was
+"Opposing starter exits before 2" — a **one-game** split; at Wilson it ran
+`.167–1.000` on a four-game opener row. A range that advertises a one-game
+extreme sends the reader to the least useful row in the group. Floored, they read
+`.500–.731` and `.214–.526`. The split **count** still counts every split,
+because every one of them is still reachable — only the range is floored, and it
+now uses exactly the rule the marks already use.
+
 **Scope.** The marks are computed for **Full season / All months**. The card's
 two levers still work; the marks go when either moves off default, because a
 month-scoped top-5 is a small-sample claim the card should not make.
 
-**Cost: none.** Closed is still **760px** (158) and **715px** (249). No new
+**Cost: 66px**, all of it the 44px touch targets, not the mark. Closed is
+**826px** (158) and **781px** (249) — still one screen. No new
 token — `--field` and `--clay` are shipped, and the team batting/pitching tiles
 already use exactly this green/clay convention for ranks, so this **harmonizes
 two surfaces that currently disagree.**

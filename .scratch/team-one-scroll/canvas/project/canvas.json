@@ -17,7 +17,7 @@
     },
     "Rec-249-Closed.dc.html": {
       "h": 1400,
-      "title": "Records · Single-A, closed — 715px",
+      "title": "Records · Single-A, closed — 781px",
       "w": 390,
       "x": 2820,
       "y": 0
@@ -31,14 +31,14 @@
     },
     "Rec-All.dc.html": {
       "h": 3700,
-      "title": "Records · all open — 3,039px",
+      "title": "Records · all open — 3,486px",
       "w": 390,
       "x": 2350,
       "y": 3840
     },
     "Rec-Closed.dc.html": {
       "h": 1400,
-      "title": "Records · closed — 760px",
+      "title": "Records · closed — 826px",
       "w": 390,
       "x": 2350,
       "y": 0
@@ -106,6 +106,13 @@
       "x": 940,
       "y": 5320
     },
+    "V4-Band.dc.html": {
+      "h": 2600,
+      "title": "v4 · Standing, settled — 2,122px",
+      "w": 390,
+      "x": 1880,
+      "y": 5320
+    },
     "V4-Empty.dc.html": {
       "h": 1500,
       "title": "v4 · no data",
@@ -160,7 +167,7 @@
     },
     "n10": {
       "color": "blue",
-      "text": "CLOSED ON ARRIVAL. The sub-head above already says this material is reference, and a reference section opens at its contents. A scorekeeper wants ONE of these rows and which one changes with the inning, so opening any by default is right for almost nobody. Open all restores today’s card in one tap — and fully open is 3,039px, SHORTER than today, so it is not a punishment.\n\nOpen groups persist in sessionStorage, per tab. They must survive a navigation, because every row is a door to /situational-records and plain state would close the group you just drilled out of. They must NOT persist across devices: ADR-0049 stores a consent, not a preference.",
+      "text": "CLOSED ON ARRIVAL. The sub-head above already says this material is reference, and a reference section opens at its contents. A scorekeeper wants ONE of these rows and which one changes with the inning, so opening any by default is right for almost nobody. Open all restores today’s card in one tap. Fully open is now 3,486px against today’s 3,238px — it WAS shorter, until the league mark put a rank line on 49 marked rows. 248px for a league rank on every marked split, paid only by a reader who taps Open all.\n\nOpen groups persist in sessionStorage, per tab. They must survive a navigation, because every row is a door to /situational-records and plain state would close the group you just drilled out of. They must NOT persist across devices: ADR-0049 stores a consent, not a preference.",
       "w": 330,
       "x": 3290,
       "y": 1200
@@ -174,10 +181,24 @@
     },
     "n12": {
       "color": "blue",
-      "text": "AND IT IS PRECOMPUTED, which is the part that decides whether it can ship. Ranking ONE split needs every club at the level: 31KB x 30 = ~940KB and 30 requests, and ADR-0082 gives each band only its own data. So a second generator pass writes the marks into the team-records shard the band already fetches. Zero extra requests.\n\nTwo exclusions, both found by running the real numbers: under 10 games (Started a game with an opener is 1 of 30 on FOUR games), and any split whose ordering makes no claim about quality — gated on the shipped ordersByQuality(), so days-in-2nd-place never takes a colour.\n\nA key sits at the card foot. A colour with nothing to read it by is a private joke on a touch screen, and this app forbids a title= tooltip.",
+      "text": "AND IT IS PRECOMPUTED, which is the part that decides whether it can ship. Ranking ONE split needs every club at the level: 31KB x 30 = ~940KB and 30 requests, and ADR-0082 gives each band only its own data. So a second generator pass writes the marks into the team-records shard the band already fetches. Zero extra requests.\n\nTwo exclusions, both found by running the real numbers: under 10 games (Started a game with an opener is 1 of 30 on FOUR games), and any split whose ordering makes no claim about quality — gated on the shipped ordersByQuality(), so days-in-2nd-place never takes a colour.\n\nThe RANK is printed on the marked row, on its own line under the figure — \"1 of 30\", the house rule for a rank. It replaced a key at the card foot, which sat below the fold and made the reader scroll away from the split they wanted to learn what the colour meant.",
       "w": 330,
       "x": 4100,
       "y": 1400
+    },
+    "n13": {
+      "color": "green",
+      "text": "THE SETTLED BAND ON THE SETTLED CARD — outside design review, F7.\n\nv1–v3 and V4-Loaded all draw the 3,238px Records card, and that is deliberate: they were the comparison that chose the band FURNITURE, at a time when Records was still that size. None of them shows the band as it now stands.\n\nThis board does. STANDING is 2,122px from the opening rule to the last card, against 4,511px today, and Records’ share of its own band falls from 72% to 39%.",
+      "w": 330,
+      "x": 1880,
+      "y": 8040
+    },
+    "n14": {
+      "color": "orange",
+      "text": "WHAT THE REVIEW CHANGED, beyond the three fixes already in.\n\nF6 — the spread is floored at the same 10 games the marks use. Starting pitching ran .500–1.000 at Milwaukee where the 1.000 was a ONE-game split, and .167–1.000 at Wilson on a four-game row. Now .500–.731 and .214–.526. The split COUNT still counts every split; only the range is floored.\n\nF3 — Open all was 26px and the shipped scope pills ~29px. Both are 44px now. That is the whole of the 66px the closed card grew.",
+      "w": 330,
+      "x": 4100,
+      "y": 2800
     },
     "n2": {
       "color": "orange",
@@ -230,7 +251,7 @@
     },
     "n9": {
       "color": "green",
-      "text": "RECORDS, REORGANISED — Gary, 2026-09-21. Nothing removed; every row still on this page.\n\nThe twelve groups stop being headings inside a wall and BECOME the wall: each is a 44px ledger line carrying how many splits are behind it and the spread of win pct inside it. The spread is a finding, not a label — Leading and trailing runs .075–.966, Defense runs .544–.677, and today you read 61 rows to learn that.\n\n3,238px to 760px closed. 3.84 phone screens to 0.90.\n\nThe spread is NOT tinted, and that was a fault caught by checking the data: Milwaukee’s league-best row in Leading and trailing is Trailing after 8 at .075, so tinting the ends would have put GREEN on the lowest number in the range.",
+      "text": "RECORDS, REORGANISED — Gary, 2026-09-21. Nothing removed; every row still on this page.\n\nThe twelve groups stop being headings inside a wall and BECOME the wall: each is a 44px ledger line carrying how many splits are behind it and the spread of win pct inside it. The spread is a finding, not a label — Leading and trailing runs .075–.966, Defense runs .544–.677, and today you read 61 rows to learn that.\n\n3,238px to 826px closed. 3.84 phone screens to 0.98 — still one screen, every door on it. (760px before the 44px touch targets went on.)\n\nThe spread is NOT tinted, and that was a fault caught by checking the data: Milwaukee’s league-best row in Leading and trailing is Trailing after 8 at .075, so tinting the ends would have put GREEN on the lowest number in the range.",
       "w": 330,
       "x": 3290,
       "y": 0
@@ -258,6 +279,7 @@
     "V4-Loading.dc.html",
     "V4-Empty.dc.html",
     "V4-Reduced.dc.html",
+    "V4-Band.dc.html",
     "Rec-Closed.dc.html",
     "Rec-Open.dc.html",
     "Rec-All.dc.html",

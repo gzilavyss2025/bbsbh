@@ -12,6 +12,7 @@
 
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { fileURLToPath } from 'node:url'
 import { TOKENS as T, CLUBS, RECORDS, RECORDS_249, DOW, DOW_249 } from '../data.mjs'
 
@@ -52,30 +53,34 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 // .075 to .966 and Defense runs .544 to .677, and that difference IS the
 // finding. Season counts has no pct, so it prints the count alone — a ledger
 // line with one fewer figure, not a different row shape.
+// Games behind a record string: 64-23 is 87, and a MiLB 49-56-1 is 106.
+const gamesIn = (rec) => String(rec).split('-').reduce((n, x) => n + (Number(x) || 0), 0)
+
+// The SAME 10-game floor the league marks use. Starting pitching at Milwaukee
+// ran ".500-1.000" where the 1.000 was "Opposing starter exits before 2", a
+// ONE-game split, and at Wilson ".167-1.000" on a four-game opener row. A range
+// that advertises a one-game extreme sends the reader to the least useful row
+// in the group. The split COUNT still counts every split, because every one of
+// them is still reachable; only the range is floored.
+const SPREAD_MIN_G = 10
+
 function summarise(g) {
   if (g.counts) return { n: g.counts.length, unit: 'tallies', lo: null, hi: null }
-  const pcts = g.rows
-    ? g.rows.map((r) => r[2])
-    : g.innings.flatMap((r) => [r[2], r[5]]).filter(Boolean)
+  const pairs = g.rows
+    ? g.rows.map((r) => [r[2], gamesIn(r[1])])
+    : g.innings.flatMap((r) => [[r[2], gamesIn(r[1])], [r[5], r[4] ? gamesIn(r[4]) : 0]])
+      .filter((x) => x[0])
+  const pcts = pairs.filter((x) => x[1] >= SPREAD_MIN_G).map((x) => x[0])
+  const nAll = g.rows ? g.rows.length : pairs.length
+  if (!pcts.length) return { n: nAll, unit: 'splits', lo: null, hi: null }
   const num = pcts.map(Number)
   const fmt = (v) => (v === 1 ? '1.000' : v.toFixed(3).replace(/^0/, ''))
-  // WHICH row is each end, so the index line can tint an end only when that
-  // row is itself league-extreme. A group can run .075-.966 with neither end
-  // top-5 or bottom-5.
-  const labels = g.rows
-    ? g.rows.map((r) => r[0])
-    : g.innings.flatMap((r) => r[0] === 'Extras'
-      ? ['Scoring in extra innings']
-      : [`Scoring in the top of the ${r[0]}`, `Scoring in the bottom of the ${r[0]}`])
-  const paired = labels.map((l, i) => ({ l, v: num[i] })).filter((x) => Number.isFinite(x.v))
-  const loRow = paired.reduce((a, b) => (b.v < a.v ? b : a), paired[0])
-  const hiRow = paired.reduce((a, b) => (b.v > a.v ? b : a), paired[0])
-  return { n: pcts.length, unit: 'splits', lo: fmt(Math.min(...num)), hi: fmt(Math.max(...num)),
-    loLabel: loRow?.l ?? null, hiLabel: hiRow?.l ?? null }
+  void nAll
+  return { n: nAll, unit: 'splits', lo: fmt(Math.min(...num)), hi: fmt(Math.max(...num)) }
 }
 
 /* ------------------------------------------------------------- the styles */
-const SHEET = `
+export const SHEET = `
 *{box-sizing:border-box}
 body{margin:0;background:${T.paper0};font-family:'Source Sans 3',system-ui,sans-serif;color:${T.ink1};
   -webkit-font-smoothing:antialiased}
@@ -243,9 +248,20 @@ body{margin:0;background:${T.paper0};font-family:'Source Sans 3',system-ui,sans-
 .innc.mk-top .innv,.innc.mk-top .innp{color:${T.field}}
 .innc.mk-bot .innv,.innc.mk-bot .innp{color:${T.clay}}
 .innc.mk{box-shadow:inset 3px 0 0 var(--mkc)}
-.key{display:flex;gap:14px;align-items:center;flex:1 1 auto;flex-wrap:wrap}
-.keyi{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:${T.graphite};line-height:1.3}
-.keyi i{display:block;width:4px;height:12px;border-radius:2px;flex:0 0 auto}
+/* The rank, on its own line under the figure. Takes the row's tone, so the
+   number and the edge say the same thing in two channels. */
+.rk{display:block;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;
+  line-height:1.3;letter-spacing:.01em}
+.rrow.mk-top .rk{color:${T.field}}
+.rrow.mk-bot .rk{color:${T.clay}}
+.innrk{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.3}
+.innc.mk-top .innrk{color:${T.field}}
+.innc.mk-bot .innrk{color:${T.clay}}
+/* F3 — a 44px target. "Open all" was 26px and the scope pills ~29px, which is
+   a two-handed control on a page read one-handed with a pencil in the other.
+   The closed card grows by ~40px and is still inside one 844px screen. */
+.tab{min-height:44px;display:inline-flex;align-items:center}
+.footb{min-height:44px;display:inline-flex;align-items:center}
 `
 
 /* ------------------------------------------------------------- the panels */
@@ -256,12 +272,21 @@ function markCls(mk, label) {
   return m.tone === 'top' ? ' mk mk-top' : ' mk mk-bot'
 }
 
+// The rank, on its own line under the figure it ranks — the house rule, and the
+// reason the foot key could go: a legend the reader has to scroll to is worse
+// than the number itself, and this also stops colour carrying the meaning alone.
+function rankLine(mk, label) {
+  const m = mk.get(label)
+  return m ? `<span class="rk">${m.rank} of ${m.field}</span>` : ''
+}
+
 // Day of week reuses this row, and its splits are not in the Records ranking,
 // so the marks map defaults to empty rather than every caller carrying one.
 function wlRows(rows, mk = NO_MARKS) {
   return `<div class="rgrid">` + rows.map((r) =>
     `<div class="rrow${markCls(mk, r[0])}"><span class="rl">${esc(r[0])}</span>` +
-    `<span><span class="rv">${esc(r[1])}</span> <span class="rp">${esc(r[2])}</span></span></div>`)
+    `<span><span class="rv">${esc(r[1])}</span> <span class="rp">${esc(r[2])}</span>` +
+    `${rankLine(mk, r[0])}</span></div>`)
     .join('') + `</div>`
 }
 
@@ -272,6 +297,7 @@ function innMatrix(g, mk = NO_MARKS) {
     const st = m ? ` style="--mkc:${m.tone === 'top' ? T.field : T.clay}"` : ''
     return rec
       ? `<div class="innc${cls}"${st}><span class="innv">${esc(rec)} <span class="innp">${esc(pct)}</span></span>` +
+        `${m ? `<span class="innrk">${m.rank} of ${m.field}</span>` : ''}` +
         `<span class="innl">${esc(last)}</span></div>`
       : `<div class="innc"><span class="innp">—</span></div>`
   }
@@ -292,11 +318,11 @@ function innMatrix(g, mk = NO_MARKS) {
 function counts(g, mk = NO_MARKS) {
   return `<div class="rgrid">` + g.counts.map((c) =>
     `<div class="rrow${markCls(mk, c[1])}"><span class="rl">${esc(c[1])}</span>` +
-    `<span><span class="rv">${esc(c[0])}</span></span></div>`).join('') + `</div>`
+    `<span><span class="rv">${esc(c[0])}</span>${rankLine(mk, c[1])}</span></div>`).join('') + `</div>`
 }
 
 /* --------------------------------------------------------------- the card */
-function recordsCard(club, open) {
+export function recordsCard(club, open) {
   const R = club === 249 ? RECORDS_249 : RECORDS
   const c = CLUBS[club]
   const headStyle = c.themed
@@ -364,18 +390,7 @@ function recordsCard(club, open) {
   }).join('')
 
   const anyOpen = open === 'all' || (Array.isArray(open) && open.length > 0)
-  // A KEY, because a colour with nothing to read it by is a private joke on a
-  // touch screen — there is no hover to explain it, and ADR-era house rule
-  // forbids a title= tooltip. The report pages set this precedent
-  // (styles/report/chrome.css: "the key that replaced four section notes").
-  // Printed only when this club actually has a mark, so a club with none is
-  // not told about a legend for something it does not have.
-  const anyMark = R.groups.some((g) => { const m = groupMarks(g); return m.t || m.b })
-  const key = anyMark
-    ? `<div class="key"><span class="keyi"><i style="background:${T.field}"></i>top 5 in the league</span>` +
-      `<span class="keyi"><i style="background:${T.clay}"></i>bottom 5</span></div>`
-    : ''
-  const foot = `<div class="foot">${key}<button class="footb" type="button">${
+  const foot = `<div class="foot"><button class="footb" type="button">${
     open === 'all' ? 'Close all' : 'Open all'} ›</button></div>`
 
   return `<div class="card">
@@ -475,12 +490,19 @@ const BOARDS = [
   }],
 ]
 
-for (const [name, opts] of BOARDS) writeFileSync(join(OUT, name), board(opts))
-console.log(`wrote ${BOARDS.length} boards to ${OUT}`)
+// Only when RUN, not when imported. build.mjs imports recordsCard and SHEET to
+// draw the Standing band on the reorganized card, and an unguarded emit would
+// rewrite these boards as a side effect of that import.
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (isMain) {
+  for (const [name, opts] of BOARDS) writeFileSync(join(OUT, name), board(opts))
+  console.log(`wrote ${BOARDS.length} boards to ${OUT}`)
+}
 
 // The summary figures, printed so records.md quotes measurements rather than
 // guesses at them.
-for (const [label, R] of [['158', RECORDS], ['249', RECORDS_249]]) {
+for (const [label, R] of isMain ? [['158', RECORDS], ['249', RECORDS_249]] : []) {
   console.log(`\n--- ${label} ---`)
   for (const g of R.groups) {
     const s = summarise(g)
