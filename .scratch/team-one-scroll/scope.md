@@ -445,9 +445,14 @@ page and a Milwaukee page close on the same note. See 2E.
 *Record, split every way*
 - Records — ~50 W-L splits, every row a door to `/situational-records`
 - Record by day of week
-- Logos & jerseys — record by jersey (MLB) / home and away (MiLB)
 - Comebacks (MLB only)
 - Last Time — droughts (MLB only)
+
+> **Decided 2026-09-21 (Gary): Logos & jerseys moves to About.** This document
+> argued to keep it here, because it is a *record by X* card and its siblings
+> are here. Overruled, and the reason is in About below: the card is a club's
+> uniforms, and the record on it is the caption, not the subject. Standing
+> loses 260px on every club (measured, all five).
 
 **Why this band exists in this shape.** ADR-0034 names the old page's second
 failure by naming these exact cards: *"Standings, team score, day-of-week record
@@ -543,16 +548,24 @@ biggest subject.
 
 ### 5 · FARM — "Who is coming, and where does this club sit in the org?"
 
-- Affiliation history (MiLB only — leads the band, as it does today)
 - Affiliates
 - On the horizon
 - Prospects (uncapped — `showAllProspects`, as the Minors tab already does)
 - Depth chart
-- Made The Show (MiLB only — closes the band)
 
-**Made The Show closes it.** It is the top of the org ladder seen from below: the
-players who came through this club and went up. Nothing else in the app holds it.
-It belongs at the end of the org band, not orphaned at the foot of the page.
+> **Decided 2026-09-21 (Gary): Affiliation history and Made The Show both move
+> to About.** This document put them here and argued for it twice — the ladder
+> seen from this club is the org, and the org is Farm. Overruled. Both are about
+> the CLUB rather than about the system it sits in: which parent orgs this club
+> has worn, and which of its own players reached the top. Neither moves with
+> `?d=`. Farm loses 1,004px on a Single-A or High-A club and 1,088px on
+> Nashville (measured), and keeps every module that answers "who is coming".
+
+**What Farm keeps is now one question, not two.** With the history and the
+alumni gone it is the org ladder in the present tense — the affiliates, the
+players climbing it, and where they sit. The two cards that left were the same
+ladder in the past tense, which is a different question and is answered in
+About.
 
 ### 6 · MONEY — "What does it cost?" — MLB only
 
@@ -569,6 +582,32 @@ should wear the same word on both hubs.
 ### 7 · ABOUT — "What is this club?" — every club
 
 - Ballpark — the diagram, the dimensions, the photo, capacity and attendance
+- Logos & jerseys — the marks this club wears (MLB: record by jersey; MiLB and
+  winter: home and away)
+- Affiliation history (MiLB only) — which MLB orgs this club has belonged to
+- Made The Show (MiLB only) — the players who came through here and went up
+
+> **Decided 2026-09-21 (Gary). All three move in.** 2E raised this as the one
+> open question About left and recommended against two of the three moves. That
+> recommendation is overruled, and the record of why is below rather than
+> deleted, because the counter-arguments were real.
+
+**The question decides it, not the card's shape.** Every band on this page is a
+question a visitor asks. About asks *what is this club* — its name on a
+building, its marks, its place in a system, and who it sent up. A club's
+uniforms are the most literal answer to that question in the whole app, and the
+W-L beside each tile is a caption on the jersey, not a split of the season. The
+same is true the other way for the two farm cards: the orgs a club has belonged
+to and the players it graduated are that club's biography, and both are told in
+seasons that ended.
+
+**The test the two counter-arguments fail.** *Logos & jerseys is a record-by-X
+card and belongs with its siblings* — but its siblings all move with `?d=` and
+it does not: change the date and the jersey tiles are the same tiles. *The
+history and the alumni are the org ladder, which is Farm* — but Farm answers
+"who is coming", in the present and forward. Both cards answer backward. A band
+that holds the season and its own past is two questions, which is the failure
+ADR-0034 recorded.
 
 **Why it is its own band and not a card inside one.** A ballpark is not a
 season. It does not move with `?d=`, it does not rank, and it is not a result.
@@ -589,11 +628,45 @@ same place, with the same head. That is worth more to the short page than to the
 long one, and it is the single best answer this wireframe has to #1106's
 question about whether a short page reads as broken.
 
-**It is also nearly free.** One static file, already fetched for the header's
-venue name. On an affiliate it is 93px rather than 1,014px, because nobody has
-hand-verified a MiLB park's outfield dimensions — so a MiLB About band is one
-small card. That is thin, and it is the one thing about this decision worth
-revisiting; see the open question at the end of 2E.
+**And it is no longer thin, which was the one thing worth revisiting.** The
+Ballpark alone is 1,014px on Milwaukee and 93px on an affiliate, because nobody
+has hand-verified a MiLB park's outfield dimensions — one small card under a
+full-width head. With the three modules above it, every club's About band is
+measured as:
+
+| Club | Ballpark | Logos & jerseys | Affiliation history | Made The Show | **About** | was |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| **158** Milwaukee, MLB | 1,014 | 260 | — | — | **1,274** | 1,014 |
+| **556** Nashville, AAA | 93 | 260 | 182 | 906 | **1,441** | 93 |
+| **572** Wisconsin, A+ | 93 | 260 | 98 | 906 | **1,357** | 93 |
+| **249** Wilson, A | 93 | 260 | 98 | 906 | **1,357** | 93 |
+| **675** Los Mochis, winter | 91 | 258 | — | — | **349** | 91 |
+
+Card heights only, no band head and no gaps, measured with `page-shape.mjs` at
+iPhone 13 width on 2026-09-21 — the same instrument and the same run as every
+other number in this document. An affiliate's About band is now the LONGEST it
+is on any club but Milwaukee, and on Milwaukee itself it is still the page's
+second-largest single card.
+
+**The floor is the exception, and it was measured rather than assumed.** At 675
+the two farm cards do not exist: Farm is absent (no parent org), so there is no
+affiliation history to show, and no `milb-alumni/675.json` is generated, so
+Made The Show self-hides. About gains exactly one module there, and goes 91px to
+349px. That is 3.8× and it is still a third of a phone screen. **The move does
+not rescue the winter page**; what it does for the winter page is give its About
+band a second card, so the close is a band rather than a single tile. The honest
+summary is that this decision pays on the three affiliates, pays a little on
+Milwaukee, and pays least where the page is thinnest.
+
+**It is no longer free, and 2F is corrected for it.** The Ballpark is still one
+static file the header already fetched. The three that moved in bring their own:
+`/data/milb-history.json` plus one logo-tint read per parent-org era, and
+`/data/milb-alumni/{id}.json` — about three to five requests on an affiliate,
+none at 675 — and, on an MLB club, the two `/api/v1/uniforms/game` batches that
+build the jersey deck (100 gamePks a batch, so 162 decided games is two calls).
+Every one of those is a request the page already made on the Numbers or Minors
+tab, so the fully-scrolled union does not move. What moves is that the seventh
+anchor now has a loader of its own.
 
 ---
 
@@ -644,8 +717,9 @@ affiliate loses is Money, at 6, with About still to come after it.
 
 **Inside each band**, one rule: **the thing that answers the band's question in
 one line goes first; everything that qualifies the answer follows; the door out
-goes last.** Standings before the splits. The ballpark before the schedule.
-The projection before the 40-man. The affiliate ladder before the prospects on it.
+goes last.** Standings before the splits. The schedule before the games on it.
+The projection before the 40-man. The affiliate ladder before the prospects on
+it. The ballpark before the marks worn in it.
 
 ---
 
@@ -686,13 +760,13 @@ for it.
 
 | Band | Modules |
 | --- | --- |
-| Standing | standings + odds · Team Score · Records · day-of-week · jersey records · Comebacks · Last Time\* |
+| Standing | standings + odds · Team Score · Records · day-of-week · Comebacks · Last Time\* |
 | Ranks | batting · pitching · run value · ABS challenges |
 | Games | Schedule (+ Stamp In) · games grid · Highlights · Photos (capped → door) |
 | Roster | projection · bullpen health · leaders 6+6 (→ 2 doors) · 40-man · IL · transactions (capped → door) |
 | Farm | Affiliates · Horizon · Prospects · Depth chart |
 | Money | tiles · cliff · grid · key · source |
-| About | Ballpark |
+| About | Ballpark · **Logos & jerseys** (record by jersey) |
 
 \* **Last Time does not render on the Brewers today**, and that is correct
 behaviour, not a bug: `LastTimeCard` returns null when `droughtsFor()` finds no
@@ -705,13 +779,13 @@ fetched. Recorded because a reader of this table would otherwise chase it.
 
 | Band | Modules | Against MLB |
 | --- | --- | --- |
-| Standing | standings · Records · day-of-week · home/away uniform strip | **loses** Team Score, Comebacks, Last Time (all MLB-only files) |
+| Standing | standings · Records · day-of-week | **loses** Team Score, Comebacks, Last Time (all MLB-only files) |
 | Ranks | **ABS challenges · team leaders** | loses batting, pitching, run value |
 | Games | Schedule (+ Stamp In) · games grid | loses Highlights (`isMlbTeamId`), and see #1142 |
 | Roster | projection · leaders 6+6 · 40-man · IL | loses bullpen health, transactions |
-| Farm | **Affiliation history** · Affiliates · Horizon · Prospects · Depth chart · **Made The Show** | **gains** two |
+| Farm | Affiliates · Horizon · Prospects · Depth chart | same four as Milwaukee |
 | ~~Money~~ | — | **absent** |
-| About | Ballpark | 93px, not 1,014 — no MiLB park has verified dimensions |
+| About | Ballpark · **Logos & jerseys** (home and away) · **Affiliation history** · **Made The Show** | **gains** three · 1,441px against Milwaukee's 1,274 |
 
 **Six bands. Six anchors.** Nashville is the club the level identity works
 hardest for: it is the only affiliate that keeps a Ranks band, and it keeps it
@@ -723,12 +797,12 @@ league does.
 
 | Band | Modules |
 | --- | --- |
-| Standing | standings · Records · day-of-week · home/away uniform strip |
+| Standing | standings · Records · day-of-week |
 | Ranks | **team leaders only** — batting, pitching, run value and ABS all absent |
 | Games | Schedule (+ Stamp In) · games grid |
 | Roster | projection · 40-man · IL |
-| Farm | Affiliation history · Affiliates · Horizon · Prospects · Depth chart · Made The Show |
-| About | Ballpark, 93px |
+| Farm | Affiliates · Horizon · Prospects · Depth chart |
+| About | Ballpark · Logos & jerseys · Affiliation history · Made The Show — 1,357px |
 
 **Six bands. Six anchors.** Only Money is absent.
 
@@ -773,15 +847,36 @@ So the winter shape is **five bands**, not the three this document first guessed
 
 | Band | Holds |
 | --- | --- |
-| Standing | division standings (10 clubs, no division name) · Records\* · day-of-week\* |
+| Standing | division standings (10 clubs, no division name) · day-of-week |
 | Ranks | **team leaders 6+6** — the pool is real |
 | Games | Schedule (+ Stamp In) · the season's games |
 | Roster | projection · 40-man · injured list |
-| About | Ballpark, 93px |
+| About | Ballpark, 91px · **Logos & jerseys** (home and away), 258px |
 
-\* `team-records` and `schedule-shape` are precomputed per MLB club only, so both
-resolve empty below MLB and the cards self-hide. Standing is then the standings
-table alone.
+**Two corrections to this table, both found by re-measuring it on 2026-09-21
+against a fixed `/team/675?d=2026-01-15`, and both errors in this document
+rather than in the code.**
+
+**1. The uniform strip renders here, and this table was the only one that said
+otherwise.** `isMilb` is `sport.id !== 1` (`NumbersTab.jsx`), which is true for
+sportId 17, and the strip has no data gate of its own — it draws home and away
+tiles from records that degrade to 0-0. The 249, 556 and 572 tables all listed
+it and this one did not. Measured on `/team/675/numbers?d=2026-01-15`: *Logos &
+jerseys · home and away*, 258px. It is now in About with the rest, which is
+what makes About the one band the winter club gains anything from.
+
+**2. Record by day of week renders too, and the footnote that said it could not
+was reading the wrong source.** `team-records` and `schedule-shape` ARE
+precomputed per MLB club only, so **Records** and **Last Time** do resolve empty
+below MLB and self-hide — that half was right. But day-of-week is derived from
+the club's own schedule (`dayOfWeekRecord(schedule)`, `loadNumbers.js`), not
+from either file, so any club with a decided game gets it. Measured at 675:
+171px.
+
+**Farm and Made The Show are both genuinely absent here**, and that is the
+answer to whether the About move helps the floor. There is no parent org, so
+there is no affiliation history; no `milb-alumni/675.json` is generated, so Made
+The Show self-hides. About gains one card, not three: 91px to 349px.
 
 **Five bands. Five anchors.** Farm is absent (`parentOrgId: 11` is the Office of
 the Commissioner, not a parent org) and Money is absent (no Cot's coverage).
@@ -796,16 +891,31 @@ same card is a named band with a head, in the place every other club's page also
 ends. It does not make the page full. It does make it look finished rather than
 broken.
 
-### The one open question About raises
+### The question About raised — answered 2026-09-21 (Gary)
 
-On an affiliate the Ballpark is **93px** — no MiLB park has hand-verified
-outfield dimensions, so the band is one small card under a full-width head. Three
-other modules are club-identity rather than season material and could join it:
-**Logos & jerseys / the uniform strip**, **Affiliation history**, and **Made The
-Show**. All three sit in other bands today, and moving any of them has a cost —
-the jersey card is a *record by X* card that belongs with its siblings in
-Standing, and the other two are the org ladder seen from this club, which is
-Farm. **Not moved. Raised for Gary rather than decided here.**
+**All three move into About.** On an affiliate the Ballpark alone is **93px** —
+no MiLB park has hand-verified outfield dimensions, so the band was one small
+card under a full-width head. Three other modules are club-identity rather than
+season material: **Logos & jerseys / the uniform strip**, **Affiliation
+history**, and **Made The Show**. This document recommended against moving two
+of them. That recommendation is overruled; 2B carries the argument, and the two
+costs it named were real and are recorded there rather than dropped.
+
+**About is the identity band**, not a band that happens to end the page. Once it
+is named that way the three moves are not additions to it — they are the rest of
+it, and the Ballpark was only ever the first one to arrive.
+
+**What it costs the bands they left.** Standing loses one card on every club
+(260px). Farm loses two on an affiliate — 1,004px at 572 and 249, 1,088px at
+556 — and loses nothing at 675, where Farm is absent already.
+
+**What it buys, measured rather than assumed.** An affiliate's About band goes
+93px to about 1,400px, which makes it that page's longest band after Roster.
+Milwaukee's goes 1,014px to 1,274px. **And at the floor it buys one card**:
+675 goes 91px to 349px, because the two farm cards do not exist there at all.
+The full table is in 2B. The answer to "does ABOUT rescue the thin page" is no
+— it makes the page's close a band with two cards on it instead of one, which
+is worth having and is not the same claim.
 
 ### Absent, not disabled — confirmed
 
@@ -866,7 +976,7 @@ loaders are today's tab loaders with the duplication removed:
 | Roster | `loadRoster.js`, plus the leader pool and transactions | on scroll |
 | Farm | `loadMinors.js`, unchanged | on scroll |
 | Money | `loadContracts.js`, unchanged | on scroll |
-| About | none — the venue is already in the header's `fetchTeam` response | **free** |
+| About | new `loadAbout.js` — the jersey deck (MLB), the affiliation history and the alumni file (MiLB) | on scroll |
 
 ### Two things the working assumption gets wrong
 
@@ -897,9 +1007,21 @@ That is a statement #1107 can check with `UNION=1` and fail on.
 | **249** Wilson, A | **≤ 18** (today: 19) | **≤ 80** (today, minus Games: 102 / 80) | **6** |
 | **675** winter ball | — set by #1143; ≤ 18 is the working target — | | **5** |
 
-**About costs nothing.** `fetchTeam` already returns `venue`, and the header
-already reads it. The band adds a head and a card, not a request. So the seventh
-anchor is free against both numbers above.
+**About no longer costs nothing, and this line is the correction.** When About
+held the Ballpark alone it was free: `fetchTeam` already returns `venue` and the
+header already reads it. With the three modules 2B moved in (decided
+2026-09-21), the band has a loader — `/data/milb-history.json` plus one
+logo-tint read per parent-org era and `/data/milb-alumni/{id}.json` on an
+affiliate, about three to five requests; two `/api/v1/uniforms/game` batches on
+an MLB club, which is 100 gamePks a call against 162 decided games; and nothing
+at all at 675, where the uniform strip reads records the page already holds.
+
+**The ceilings above do not move.** Every one of those requests is already in
+this page's fully-scrolled union — they were the Numbers tab's and the Minors
+tab's, and the union counts a distinct URL once wherever it is asked for. What
+changed is the COLD number's margin: About is at the foot of the page, so none
+of it is paid before a scroll, and the seventh anchor still costs nothing on
+first paint.
 
 **The cold target is deliberately below today's Overview, not level with it.**
 #1107 says the page must fire "no more than today's Overview". That is the floor,
@@ -933,7 +1055,7 @@ No component draws these. Six heads, and what each must carry:
 | Roster | **Roster** | nothing beyond the title |
 | Farm | **Farm** | the org's name on an affiliate, since the ladder shown is the parent's |
 | Money | **Money** | a "not dated" note, because this band alone does not move with `?d=` |
-| About | **About** | nothing beyond the title — and it must read as a close, not as another section |
+| About | **About** | nothing beyond the title — and it must read as a close, not as another section. It is four cards on an affiliate and two at 675, so the head has to hold a real band rather than caption one tile |
 
 So a merged `SectionHead` needs: **a title, an optional note, an optional
 right-aligned action, and a sub-head level.** `SectionTitle` has the first three
