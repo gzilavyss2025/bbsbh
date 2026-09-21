@@ -22,6 +22,7 @@ import { AsOfBanner } from '../../components/seal/AsOfBanner.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { TeamTabBar } from './TeamTabBar.jsx'
+import { parentOrgIdOf } from './data/shared.js'
 import { useIdentityDraft } from './modules/identity/useIdentityDraft.js'
 
 // Both halves of the identity editor are lazy, for two different reasons — the
@@ -104,6 +105,10 @@ export function TeamHubShell({
 }) {
   const navigate = useNav()
   const isMilb = (team.sport?.id ?? 1) !== 1
+  // Not `team.parentOrgId`: a winter-ball club's is the Office of the
+  // Commissioner, which is not a club and whose page is not one either
+  // (#1143). Same call the Minors tab gate and the Affiliates card list make.
+  const parentOrgId = parentOrgIdOf(team)
   const tabTitle = TAB_TITLE[active] ?? null
   useDocumentTitle(team.name ? [team.name, tabTitle].filter(Boolean).join(' · ') : null)
 
@@ -223,14 +228,14 @@ export function TeamHubShell({
               an MLB one, and — for the site owner only — the identity gear,
               last. */}
           <div className="team-hub__actions">
-            {isMilb && team.parentOrgId && (
+            {isMilb && parentOrgId && (
               <TeamLink
-                id={team.parentOrgId}
+                id={parentOrgId}
                 className="team-hub__parent"
                 ariaLabel={`Affiliate of ${team.parentOrgName ?? 'its MLB club'}`}
               >
                 <span className="team-hub__parent-label">Affiliate</span>
-                <TeamLogo teamId={team.parentOrgId} name={team.parentOrgName} size={34} />
+                <TeamLogo teamId={parentOrgId} name={team.parentOrgName} size={34} />
               </TeamLink>
             )}
             {!isMilb && <GameNotesLink teamId={team.id} />}

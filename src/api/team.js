@@ -88,7 +88,7 @@ export async function fetchTeamRoster(
   if (cached && Date.now() - cached.ts < TEAM_ROSTER_CACHE_TTL_MS) return cached.data
   try {
     const data = await getJson(
-      `/api/v1/teams/${teamId}/roster?rosterType=${rosterType}&hydrate=person(stats(type=season,group=[hitting,pitching,fielding],sportId=${sportId},season=${season}))`,
+      `/api/v1/teams/${teamId}/roster?rosterType=${rosterType}&season=${season}&hydrate=person(stats(type=season,group=[hitting,pitching,fielding],sportId=${sportId},season=${season}))`,
     )
     const roster = data.roster ?? []
     teamRosterCache.set(key, { ts: Date.now(), data: roster })

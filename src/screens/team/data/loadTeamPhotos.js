@@ -20,7 +20,7 @@ export async function loadTeamPhotos(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
-  const season = seasonOf(asOf)
+  const season = seasonOf(asOf, sportId)
   const schedule = await fetchTeamSchedule(id, season, sportId)
   return { team, season, seasonGames: allStartedGames(schedule) }
 }

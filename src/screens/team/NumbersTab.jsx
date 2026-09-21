@@ -10,7 +10,7 @@ import { JerseyCombos, MilbUniformStrip } from '../../components/logo/JerseyComb
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadNumbers } from './data/loadNumbers.js'
-import { hiddenTeamTabs } from './data/shared.js'
+import { hiddenTeamTabs, parentOrgIdOf } from './data/shared.js'
 import { StandingsCard } from './modules/StandingsCard.jsx'
 import { TeamStats, todayDowLabel } from './modules/TeamStatsCard.jsx'
 import { ComebackCard } from './modules/ComebackCard.jsx'
@@ -109,10 +109,10 @@ export function NumbersTab({ id, asOf, sportId }) {
             onSeeAll={() => navigate(teamLeadersPath(teamId, { d: asOf, s: sportId }))}
             injuredIds={n.injuredIds}
             secondaryAction={
-              (!isMilb || team.parentOrgId) && (
+              (!isMilb || parentOrgIdOf(team)) && (
                 <ChevronLink
                   onClick={() =>
-                    navigate(orgLeadersPath(isMilb ? team.parentOrgId : teamId, { d: asOf, s: sportId }))
+                    navigate(orgLeadersPath(isMilb ? parentOrgIdOf(team) : teamId, { d: asOf, s: sportId }))
                   }
                 >
                   Org leaders

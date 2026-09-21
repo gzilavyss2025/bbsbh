@@ -21,6 +21,6 @@ export async function loadStampIn(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
-  const schedule = await fetchTeamSchedule(id, seasonOf(asOf), sportId, cutoffFor(asOf))
+  const schedule = await fetchTeamSchedule(id, seasonOf(asOf, sportId), sportId, cutoffFor(asOf))
   return { team, schedule }
 }

@@ -17,7 +17,7 @@ export async function loadGames(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
-  const season = seasonOf(asOf)
+  const season = seasonOf(asOf, sportId)
   // The day BEFORE the game whose link carried `?d=`, so a dated page's
   // schedule never counts tonight's result early (see cutoffFor).
   const standingsDate = cutoffFor(asOf)

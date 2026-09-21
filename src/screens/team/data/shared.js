@@ -1,5 +1,7 @@
 import { lastName } from '../../../api/select.js'
 import { firstLast, isTwoWay } from '../../../api/person.js'
+import { isWinterSport } from '../../../lib/winter/leagues.js'
+import { winterSeasonFor } from '../../../lib/winter/window.js'
 
 // Pieces MORE THAN ONE team-hub loader genuinely needs, collapsed here once the
 // tabs had all landed (issue 07 of .scratch/team-page-ia — the tab loaders were
@@ -32,8 +34,17 @@ export function dayBefore(iso) {
 }
 
 // The season a page is about: the `?d=` year on a dated link, else this year.
-export function seasonOf(asOf) {
-  return Number((asOf || isoToday()).slice(0, 4))
+//
+// Every level but one names its season for the calendar year it is played in.
+// A WINTER league (sportId 17) names its season for the year it OPENS in, so
+// October 2025 through February 2026 is all `season=2025` — the rule
+// winterSeasonFor() already states for the slate, deferred to here rather than
+// copied (#1143). Before that, `/team/675?d=2026-01-15` asked for a winter that
+// has not been played: 55 players at season=2025, 0 at season=2026.
+export function seasonOf(asOf, sportId = 1) {
+  const iso = asOf || isoToday()
+  if (isWinterSport(sportId)) return winterSeasonFor(iso)
+  return Number(iso.slice(0, 4))
 }
 
 // The standings/schedule cutoff a loader passes to the API — null (live) on a
@@ -380,11 +391,35 @@ export function lineupDefenseFrom(preferredLineup, injuredIds) {
 // from the farm tree) — location is unavailable from the static team record,
 // so that card degrades to just the mark + name.
 export function affiliateCardsFrom(team, isMilb, affiliates, complexAffiliates) {
+  const orgId = parentOrgIdOf(team)
   const parentCard =
-    isMilb && team.parentOrgId
-      ? [{ id: team.parentOrgId, sportId: 1, name: team.parentOrgName, city: '', state: '' }]
+    isMilb && orgId
+      ? [{ id: orgId, sportId: 1, name: team.parentOrgName, city: '', state: '' }]
       : []
   return [...parentCard, ...affiliates, ...complexAffiliates]
+}
+
+// ---------------------------------------------------------------------------
+// Who this club's parent org is — and whether it has one at all
+// ---------------------------------------------------------------------------
+
+// MLB's own administrative entity, which statsapi hands back as the "parent
+// org" of every club it does not otherwise place. All 30 winter-ball clubs in
+// public/data/teams.json carry it (`parentOrgId: 11`, "Office of the
+// Commissioner"), and it is not a club: it is absent from teams.json, so
+// fetchTeam falls through to live statsapi, which answers `sport.id: 1` and a
+// league object with no `id`. Following the link lands on an MLB-shaped page
+// with six tabs and one card on it (#1143).
+const OFFICE_OF_THE_COMMISSIONER_ID = 11
+
+// This club's parent organization, or null when it has none a reader could
+// open. Asked by the header's Affiliate chip (TeamHubShell.jsx), the Minors
+// tab gate below, the Affiliates card list above, the Org leaders door
+// (NumbersTab.jsx), and the org keys the Minors and Roster loaders match
+// prospects against — one answer, so those five cannot disagree.
+export function parentOrgIdOf(team) {
+  const orgId = team?.parentOrgId ?? null
+  return orgId === OFFICE_OF_THE_COMMISSIONER_ID ? null : orgId
 }
 
 // ---------------------------------------------------------------------------
@@ -397,7 +432,9 @@ export function affiliateCardsFrom(team, isMilb, affiliates, complexAffiliates) 
 // non-negotiable 2). An MLB club never hides anything: every one of them has a
 // farm system and a league. Only two MiLB cases are cheap enough to trust:
 //  - `minors`: the Minors tab's own affiliates/prospects lookup is keyed off
-//    `team.parentOrgId` — with none, every module in that tab comes back empty.
+//    parentOrgIdOf(team) — with none, every module in that tab comes back
+//    empty. A winter-ball club is the case that made the bare `parentOrgId`
+//    read wrong rather than merely thin (#1143).
 //  - `numbers`: with no league at all there are no standings and no rank
 //    context — the tab would open onto nothing but a 0-0 jersey strip.
 // A hidden tab is still a real route — this only decides the BUTTON (see
@@ -411,7 +448,7 @@ export function hiddenTeamTabs(team) {
   // open on an empty ledger every time. Hidden rather than shown-and-apologetic:
   // a tab that is always empty is not a tab.
   hidden.add('contracts')
-  if (!team.parentOrgId) hidden.add('minors')
+  if (!parentOrgIdOf(team)) hidden.add('minors')
   if (!team.league?.id) hidden.add('numbers')
   return hidden
 }
