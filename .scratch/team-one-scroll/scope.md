@@ -516,7 +516,10 @@ cleaner page.
 
 **Transactions moves off Games.** A transaction is a roster move. It answers "who
 arrived and who left", which is the same question as "who plays here" one tense
-back. It also takes the last dense card off Games, which is the longer band.
+back. It costs something rather than saving something: Roster is already the
+longer of the two (3,843px against Games' 3,421px today), so this move makes the
+page's longest band longer still. It is worth it on the question, not on the
+balance.
 
 This is the page's longest band (~4,050px on an MLB club). It is also the page's
 biggest subject.
