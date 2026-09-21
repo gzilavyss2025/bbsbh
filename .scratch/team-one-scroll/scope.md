@@ -418,9 +418,19 @@ One consequence worth having on purpose: the long page uses
 
 ## 2B. The sections — an MLB club
 
-**Six bands.** The same count as today's six tabs, so the jump bar is the same
-control at the same width — which is what #1107 needs and what the player hub can
-take unchanged.
+**Seven bands.** Six answer a question about the club's SEASON. The seventh,
+**About**, answers a question about the club itself, and it is last.
+
+> **Decided 2026-09-21 (Gary).** About is a band of its own, at the foot of the
+> page, and the Ballpark lives in it. It replaces the three placements this
+> document originally offered for the Ballpark card, all of which put it inside
+> a season band.
+
+One anchor more than today's six tabs. That is a real cost on a phone jump bar
+and it buys two things: the Ballpark stops being a photograph wedged between two
+season cards, and **every club's page now ends the same way**, because About is
+the one band no club can fail to fill — every club has a ballpark. A Single-A
+page and a Milwaukee page close on the same note. See 2E.
 
 ### 1 · STANDING — "How is the season going?"
 
@@ -477,18 +487,13 @@ where their question is asked, "Numbers" would name a bag that no longer exists.
 
 ### 3 · GAMES — "What have they played, and where?"
 
-- Ballpark
 - Season schedule — carrying the **Stamp In** door to `/team/{id}/stamp-in`
 - The season's games, `AllGames` grid, newest first, "Show more" beneath
 - Highlights rail (MLB only — `isMlbTeamId`, as both callers already gate it)
 - Photos rail, **capped**, with its "Full season ›" door to `/team/{id}/photos`
 
-**Ballpark opens this band, ahead of the schedule.** Today it sits between
-Standings and Team Score on the Overview, which is failure 2 in miniature — a
-photograph between two season cards. A ballpark is where the home half of a
-schedule happens, so it belongs to Games. Putting it first also gives the page a
-visual break between two dense bands, and it is the cheapest thing in the section
-(one static file).
+**The Ballpark is not here.** An earlier draft opened this band with it. It is
+in **About** instead — see the seventh band below.
 
 **`LastTenGames` is proposed for a cut.** See 2D.
 
@@ -549,6 +554,37 @@ It belongs at the end of the org band, not orphaned at the foot of the page.
 That is the point of writing rules the player page can take: the same question
 should wear the same word on both hubs.
 
+### 7 · ABOUT — "What is this club?" — every club
+
+- Ballpark — the diagram, the dimensions, the photo, capacity and attendance
+
+**Why it is its own band and not a card inside one.** A ballpark is not a
+season. It does not move with `?d=`, it does not rank, and it is not a result.
+Every season band on this page answers a question whose answer changed
+yesterday; this one does not. Putting it inside Games, Standing or Roster makes
+some season band carry a thing that is not about the season, which is exactly
+the complaint ADR-0034 recorded about the old page.
+
+**Why last.** It is the least urgent question a visitor brings, and putting it at
+the foot gives the page a close rather than a stop.
+
+**Why it is the band that matters most to a thin club.** It is the only band on
+this page that **no club can fail to fill**. Money needs Cot's. Ranks needs a
+league board. Farm needs a parent org. Standing needs a division. A ballpark is
+a building, and every club in the app plays in one. So every page — Milwaukee's
+20,050px and a Single-A club's 13,570px alike — ends on the same band, in the
+same place, with the same head. That is worth more to the short page than to the
+long one, and it is the single best answer this wireframe has to #1106's
+question about whether a short page reads as broken.
+
+**It is also nearly free.** One static file, already fetched for the header's
+venue name. On an affiliate it is 93px rather than 1,014px, because nobody has
+hand-verified a MiLB park's outfield dimensions — so a MiLB About band is one
+small card. That is thin, and it is the one thing about this decision worth
+revisiting; see the open question at the end of 2E.
+
+---
+
 **This band does not date.** `loadContracts` is deliberately not keyed on `asOf`,
 and the Contracts tab passes `datable={false}` to suppress the as-of banner. On
 one page there is one banner for the whole page, so this band carries its
@@ -562,7 +598,7 @@ one at the foot of a page that includes a band the control does not move.
 ## 2C. The order
 
 ```
-STANDING  →  RANKS  →  GAMES  →  ROSTER  →  FARM  →  MONEY
+STANDING  →  RANKS  →  GAMES  →  ROSTER  →  FARM  →  MONEY  →  ABOUT
 ```
 
 **Between the bands**, two rules decide it:
@@ -573,15 +609,19 @@ STANDING  →  RANKS  →  GAMES  →  ROSTER  →  FARM  →  MONEY
    here yet. Money is the least-asked question on the page.
 
 2. **The bands an affiliate loses are at the end.** An affiliate always loses
-   Money (6). Below Triple-A it loses Ranks (2) as well, and with no parent org
-   it loses Farm (5).
+   Money (6). With no parent org it loses Farm (5). **About (7) is never lost**,
+   so the page still ends where every other club's page ends — the missing band
+   is a gap the reader cannot see, not a page that stops early.
 
 Rule 2 is the one that earns its place, and it is the answer to #1106's question
 — *does a short page read as a club with a quieter season, or as a broken page?*
 Losing the **tail** of a book reads as a shorter book. Losing its **middle** reads
-as missing pages. Ranks at position 2 is the exception, and it is the one that has
-to be drawn well: a Single-A page runs Standing → Games, and the reader must not
-feel a hole between them. **That is the artboard #1106 should draw first.**
+as missing pages. Adding About at 7 strengthens this: the last thing a reader
+sees is a band that every club fills, so no page ends on an absence.
+
+Since team leaders stayed in Ranks (2D), **Ranks is never empty either** — a
+Single-A club keeps it with the leaders ledger alone. So the only band any real
+affiliate loses is Money, at 6, with About still to come after it.
 
 **Inside each band**, one rule: **the thing that answers the band's question in
 one line goes first; everything that qualifies the answer follows; the door out
@@ -629,30 +669,32 @@ for it.
 | --- | --- |
 | Standing | standings + odds · Team Score · Records · day-of-week · jersey records · Comebacks · Last Time\* |
 | Ranks | batting · pitching · run value · ABS challenges |
-| Games | Ballpark · Schedule (+ Stamp In) · games grid · Highlights · Photos (capped → door) |
+| Games | Schedule (+ Stamp In) · games grid · Highlights · Photos (capped → door) |
 | Roster | projection · bullpen health · leaders 6+6 (→ 2 doors) · 40-man · IL · transactions (capped → door) |
 | Farm | Affiliates · Horizon · Prospects · Depth chart |
 | Money | tiles · cliff · grid · key · source |
+| About | Ballpark |
 
 \* **Last Time does not render on the Brewers today**, and that is correct
 behaviour, not a bug: `LastTimeCard` returns null when `droughtsFor()` finds no
 qualifying drought, and a 98-58 club has none. The data file exists and is
 fetched. Recorded because a reader of this table would otherwise chase it.
 
-**Six bands. Six anchors.**
+**Seven bands. Seven anchors.**
 
 ### 556 · Nashville Sounds — Triple-A, keeps nearly everything
 
 | Band | Modules | Against MLB |
 | --- | --- | --- |
 | Standing | standings · Records · day-of-week · home/away uniform strip | **loses** Team Score, Comebacks, Last Time (all MLB-only files) |
-| Ranks | **ABS challenges only** | loses batting, pitching, run value |
-| Games | Ballpark · Schedule (+ Stamp In) · games grid | loses Highlights (`isMlbTeamId`), and see #1142 |
+| Ranks | **ABS challenges · team leaders** | loses batting, pitching, run value |
+| Games | Schedule (+ Stamp In) · games grid | loses Highlights (`isMlbTeamId`), and see #1142 |
 | Roster | projection · leaders 6+6 · 40-man · IL | loses bullpen health, transactions |
 | Farm | **Affiliation history** · Affiliates · Horizon · Prospects · Depth chart · **Made The Show** | **gains** two |
 | ~~Money~~ | — | **absent** |
+| About | Ballpark | 93px, not 1,014 — no MiLB park has verified dimensions |
 
-**Five bands. Five anchors.** Nashville is the club the level identity works
+**Six bands. Six anchors.** Nashville is the club the level identity works
 hardest for: it is the only affiliate that keeps a Ranks band, and it keeps it
 because of ABS. One card is a thin band, but it is a *true* one — it is the only
 place in the app that says this club argues with the plate umpire more than its
@@ -663,15 +705,17 @@ league does.
 | Band | Modules |
 | --- | --- |
 | Standing | standings · Records · day-of-week · home/away uniform strip |
-| Games | Ballpark · Schedule (+ Stamp In) · games grid |
-| Roster | projection · leaders 6+6 · 40-man · IL |
+| Ranks | **team leaders only** — batting, pitching, run value and ABS all absent |
+| Games | Schedule (+ Stamp In) · games grid |
+| Roster | projection · 40-man · IL |
 | Farm | Affiliation history · Affiliates · Horizon · Prospects · Depth chart · Made The Show |
+| About | Ballpark, 93px |
 
-**Four bands. Four anchors.** Ranks and Money are both absent.
+**Six bands. Six anchors.** Only Money is absent.
 
 ### 249 · Wilson Warbirds — Single-A, "the thinnest real page"
 
-Identical band set and identical module list to 572. **Four bands, four anchors.**
+Identical band set and identical module list to 572. **Six bands, six anchors.**
 
 **And it is not thin.** `/team/249` is 3,158px today against Milwaukee's 4,340px —
 73% of it — and its Minors tab (3,869px) is *longer* than Milwaukee's (3,717px),
@@ -692,11 +736,28 @@ and a chip to a non-club. There is no page shape that rescues a page with no dat
 on it, and the fix is a season resolution, a label and a guard — all in #1143,
 none in this wireframe.
 
-Once #1143 lands, the shape is **three bands** — Standing, Games, Roster — with
-Ranks, Farm and Money all absent (no league board at that level, `parentOrgId: 11`
-is not a parent, no Cot's coverage). Three anchors. **That is the floor this
-design has to hold**, and it is the page #1106 should draw *second*, after the
-Single-A one.
+Once #1143 lands, the shape is **four bands** — Standing, Games, Roster, About —
+with Ranks, Farm and Money absent (no league board at that level,
+`parentOrgId: 11` is not a parent, no Cot's coverage). Four anchors. **That is
+the floor this design has to hold**, and it is the page #1106 should draw
+*second*, after the Single-A one.
+
+Worth noting what About buys here: today this page renders exactly one card, the
+Ballpark, adrift under a tab bar with nothing above it. Under this wireframe that
+same card is a named band with a head, in the place every other club's page also
+ends. It does not make the page full. It does make it look finished rather than
+broken.
+
+### The one open question About raises
+
+On an affiliate the Ballpark is **93px** — no MiLB park has hand-verified
+outfield dimensions, so the band is one small card under a full-width head. Three
+other modules are club-identity rather than season material and could join it:
+**Logos & jerseys / the uniform strip**, **Affiliation history**, and **Made The
+Show**. All three sit in other bands today, and moving any of them has a cost —
+the jersey card is a *record by X* card that belongs with its siblings in
+Standing, and the other two are the org ladder seen from this club, which is
+Farm. **Not moved. Raised for Gary rather than decided here.**
 
 ### Absent, not disabled — confirmed
 
@@ -757,6 +818,7 @@ loaders are today's tab loaders with the duplication removed:
 | Roster | `loadRoster.js`, plus the leader pool and transactions | on scroll |
 | Farm | `loadMinors.js`, unchanged | on scroll |
 | Money | `loadContracts.js`, unchanged | on scroll |
+| About | none — the venue is already in the header's `fetchTeam` response | **free** |
 
 ### Two things the working assumption gets wrong
 
@@ -781,11 +843,15 @@ That is a statement #1107 can check with `UNION=1` and fail on.
 
 | Club | Cold, before any scroll | Fully scrolled | Anchors |
 | --- | ---: | ---: | ---: |
-| **158** Milwaukee, MLB | **≤ 20** (today's Overview: **28**) | **≤ 110** (today, all six tabs: 159 fired / 109 distinct) | **6** |
-| **556** Nashville, AAA | **≤ 18** (today: 19) | **≤ 85** (today, minus Games: 105 / 83) | **5** |
-| **572** Wisconsin, A+ | **≤ 18** (today: 19) | **≤ 80** (today, minus Games: 102 / 80) | **4** |
-| **249** Wilson, A | **≤ 18** (today: 19) | **≤ 80** (today, minus Games: 102 / 80) | **4** |
-| **675** winter ball | — provisional on #1143 — | | **3** |
+| **158** Milwaukee, MLB | **≤ 20** (today's Overview: **28**) | **≤ 110** (today, all six tabs: 159 fired / 109 distinct) | **7** |
+| **556** Nashville, AAA | **≤ 18** (today: 19) | **≤ 85** (today, minus Games: 105 / 83) | **6** |
+| **572** Wisconsin, A+ | **≤ 18** (today: 19) | **≤ 80** (today, minus Games: 102 / 80) | **6** |
+| **249** Wilson, A | **≤ 18** (today: 19) | **≤ 80** (today, minus Games: 102 / 80) | **6** |
+| **675** winter ball | — provisional on #1143 — | | **4** |
+
+**About costs nothing.** `fetchTeam` already returns `venue`, and the header
+already reads it. The band adds a head and a card, not a request. So the seventh
+anchor is free against both numbers above.
 
 **The cold target is deliberately below today's Overview, not level with it.**
 #1107 says the page must fire "no more than today's Overview". That is the floor,
@@ -819,6 +885,7 @@ No component draws these. Six heads, and what each must carry:
 | Roster | **Roster** | nothing beyond the title |
 | Farm | **Farm** | the org's name on an affiliate, since the ladder shown is the parent's |
 | Money | **Money** | a "not dated" note, because this band alone does not move with `?d=` |
+| About | **About** | nothing beyond the title — and it must read as a close, not as another section |
 
 So a merged `SectionHead` needs: **a title, an optional note, an optional
 right-aligned action, and a sub-head level.** `SectionTitle` has the first three
@@ -887,9 +954,14 @@ one does not.
 4. **Order the bands so the ones a thin subject loses are at the end.** A pitcher
    with no hitting line, a rookie with no career register: same shape as an
    affiliate with no Money band. → generalises.
-5. **The band names.** Standing / Ranks / Games / Roster / Farm / Money are this
-   club's questions. Only **Money** carries over, because #928 already named it
-   that. → does not generalise, and should not.
+5. **A last band that no subject can fail to fill.** About is the team page's;
+   the player hub needs its own (a biography band — born, drafted, debut, height
+   and bats/throws — is the obvious candidate, since every player has all of it).
+   The rule is the transferable part: **end every page on the one band that is
+   never absent, so no page ends on a gap.** → generalises.
+6. **The band names.** Standing / Ranks / Games / Roster / Farm / Money / About
+   are this club's questions. Only **Money** carries over, because #928 already
+   named it that. → does not generalise, and should not.
 
 ---
 

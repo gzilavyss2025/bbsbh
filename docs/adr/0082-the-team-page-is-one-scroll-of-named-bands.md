@@ -69,23 +69,41 @@ was not.
 
 ## The decision
 
-`/team/{id}` is **one page of six named bands**, each on its own tinted band with
+`/team/{id}` is **one page of seven named bands**, each on its own tinted band with
 a clear head, with the tab strip kept in place as a **sticky jump bar** — anchor
 links that scroll to a band and mark the band you are in. No tab is a route any
 more.
 
 ```
-STANDING  →  RANKS  →  GAMES  →  ROSTER  →  FARM  →  MONEY
+STANDING  →  RANKS  →  GAMES  →  ROSTER  →  FARM  →  MONEY  →  ABOUT
 ```
 
 | Band | The question it answers |
 | --- | --- |
 | **Standing** | How is the season going? |
 | **Ranks** | Where does this club sit among the rest? |
-| **Games** | What have they played, and where? |
+| **Games** | What have they played? |
 | **Roster** | Who plays here? |
 | **Farm** | Who is coming, and where does this club sit in the org? |
 | **Money** | What does it cost? |
+| **About** | What is this club? |
+
+Six of the seven answer a question about the club's **season**. The seventh,
+**About**, answers a question about the club itself, holds the Ballpark, and is
+last. It costs an anchor on a phone jump bar and it buys the rule below.
+
+> **Every page ends on a band that no subject can fail to fill.**
+
+Money needs Cot's coverage. Ranks needs a league board. Farm needs a parent org.
+Standing needs a division. A ballpark is a building, and every club in this app
+plays in one — so Milwaukee's 20,050px page and a Single-A club's 13,570px page
+close on the same band, with the same head, in the same place. **A page that
+loses a band from its tail no longer ends on an absence.** That is worth more to
+the short page than to the long one, and it is this ADR's best answer to whether
+a thin club reads as quiet or as broken.
+
+It is also free: `fetchTeam` already returns `venue`, and the header already
+reads it. The seventh band adds a head and a card, not a request.
 
 A band is a **question a visitor asks**, not a renamed tab. The clearest evidence
 that the two are different: today's "Numbers" tab holds the standings table, two
@@ -100,8 +118,8 @@ contents land in three different bands, and the bag's name does not survive.
 
 **The band is the hierarchy.** ADR-0034's complaint was that every module wore
 the same `.thub-card` chrome in one undifferentiated scroll. The tabs answered it
-by *removing* modules from view. A band answers it by *grouping* them: six heads,
-six tinted grounds, generous space at each join. A reader who lands mid-page can
+by *removing* modules from view. A band answers it by *grouping* them: seven
+heads, seven tinted grounds, generous space at each join. A reader who lands mid-page can
 see which question they are inside without scrolling to find out.
 
 **Shelves are not coming back, and neither is the index grid.** Both were tried
@@ -302,19 +320,19 @@ able to argue back. It is also an apology, and #1106 is right that the level
 identity is real and should be used rather than apologised for.
 
 **The order of the bands is what makes a short page read as a short book rather
-than as missing pages.** An affiliate always loses **Money** (6). Below Triple-A
-it loses **Ranks** (2). With no parent org it loses **Farm** (5). Two of the
-three are the page's tail, by design.
+than as missing pages.** An affiliate always loses **Money** (6). With no parent
+org it loses **Farm** (5). Both are the page's tail, and **About (7) is never
+lost**, so the page still ends where every other club's page ends.
 
 | Club | Bands | Anchors |
 | --- | --- | ---: |
-| 158 Milwaukee, MLB | all six | 6 |
-| 556 Nashville, AAA | no Money; Ranks is ABS challenges alone | 5 |
-| 572 Wisconsin, A+ · 249 Wilson, A | no Money, no Ranks | 4 |
+| 158 Milwaukee, MLB | all seven | 7 |
+| 556 Nashville, AAA | no Money; Ranks is ABS and the leaders ledger | 6 |
+| 572 Wisconsin, A+ · 249 Wilson, A | no Money; Ranks is the leaders ledger alone | 6 |
 
-Ranks at position 2 is the exception, and it is the join that has to be drawn
-well: a Single-A page runs Standing → Games, and the reader must not feel a hole
-between them.
+**Money is the only band a real affiliate loses**, it is second from last, and
+About still follows it — so the missing band is a gap the reader cannot see
+rather than a page that stops early.
 
 **And the "thin affiliate" turns out not to be thin.** `/team/249` — nominated as
 the thinnest real page there is — measures 3,158px against Milwaukee's 4,340px,
@@ -393,13 +411,15 @@ player hub, as `HubTabBar` already enforces for both callers.
 
 ## Consequences
 
-- `TeamPage.jsx` becomes the composition of six bands. It does not grow back
+- `TeamPage.jsx` becomes the composition of seven bands. It does not grow back
   toward 2,205 lines; `check-file-size` and `check-dir-size` hold.
 - `TeamTabBar.jsx` becomes a jump bar over the same shared `HubTabBar` control in
   `components/chrome/`, so the player hub inherits it in the same commit.
-- Four rules generalise to `/player/{id}` and are written to: the band grammar,
-  the preview rule, absent-never-disabled, and ordering so thin subjects lose the
-  tail. The band *names* do not generalise, and should not — except **Money**,
-  which #928 already named.
+- Five rules generalise to `/player/{id}` and are written to: the band grammar,
+  the preview rule, absent-never-disabled, ordering so thin subjects lose the
+  tail, and ending every page on the one band that is never absent (the player
+  hub's equivalent of About is a biography band — every player has a birthplace,
+  a draft, a debut, a height and a handedness). The band *names* do not
+  generalise, and should not — except **Money**, which #928 already named.
 - `CLAUDE.md` and `src/CLAUDE.md` both say "`/team/{id}` is a six-tab hub; each
   tab is a real route". That stops being true the day #1107 merges.
