@@ -820,10 +820,16 @@ fetched. Recorded because a reader of this table would otherwise chase it.
 | About | Ballpark · **Logos & jerseys** (home and away) · **Affiliation history** · **Made The Show** | **gains** three · 1,441px against Milwaukee's 1,274 |
 
 **Six bands. Six anchors.** Nashville is the club the level identity works
-hardest for: it is the only affiliate that keeps a Ranks band, and it keeps it
-because of ABS. One card is a thin band, but it is a *true* one — it is the only
-place in the app that says this club argues with the plate umpire more than its
-league does.
+hardest for: it is the only affiliate whose Ranks band holds **two** cards, and
+the second one is ABS. It is the only place in the app that says this club argues
+with the plate umpire more than its league does.
+
+> **Corrected by #1106, 2026-09-21.** This paragraph said Nashville "is the only
+> affiliate that keeps a Ranks band". That stopped being true when the leaders
+> ledger stayed in Ranks (2B, #1148): 572 and 249 keep the band too, with the
+> ledger as its only card. Measured on the running page — `/team/556/numbers`
+> renders `.chalcard` 1,014px + `.tledg` 534px = **1,548px**;
+> `/team/249/numbers` renders `.tledg` alone at **534px**.
 
 ### 572 · Wisconsin Timber Rattlers — High-A
 
@@ -845,8 +851,13 @@ Identical band set and identical module list to 572. **Six bands, six anchors.**
 **And it is not thin.** `/team/249` is 3,158px today against Milwaukee's 4,340px —
 73% of it — and its Minors tab (3,869px) is *longer* than Milwaukee's (3,717px),
 because all three affiliates share one org's farm system. The measured thinnest
-real page in the hub is not a Single-A club at all. It is the winter-ball club at
-**664px** (1C, #1143).
+real page in the hub is not a Single-A club at all. It is the winter-ball club.
+
+> **Updated by #1106, 2026-09-21.** This sentence ended "at **664px** (1C,
+> #1143)". #1143 has landed, so that figure is dead. `/team/675?d=2026-01-15`
+> measures **2,355px** as one tab today, and **7,110px** as five bands — 36% of
+> Milwaukee's 20,006px, against 249's 68%. It is still the floor, and it is a
+> real page rather than a bug.
 
 So #1106's worry — *does a short page read as a club with a quieter season, or as
 a broken page?* — has a measured answer for these three clubs: **they are not
@@ -882,12 +893,21 @@ So the winter shape is **five bands**, not the three this document first guessed
 | Standing | division standings (10 clubs, no division name) · day-of-week |
 | Ranks | **team leaders 6+6** — the pool is real |
 | Games | Schedule (+ Stamp In) · the season's games |
-| Roster | projection · 40-man · injured list |
+| Roster | projection 1,530px · 40-man 2,387px — **no injured list** |
 | About | Ballpark, 91px · **Logos & jerseys** (home and away), 258px |
 
-**Two corrections to this table, both found by re-measuring it on 2026-09-21
-against a fixed `/team/675?d=2026-01-15`, and both errors in this document
-rather than in the code.**
+> **Third correction, #1106, 2026-09-21: the Injured List does not render here.**
+> This table listed it. `/team/675/roster?d=2026-01-15` measures three blocks on
+> two separate runs — projection 1,530px, 40-man 2,387px, the as-of banner — and
+> no `InjuredListCard`. Worth recording for a second reason: at 2,387px the
+> winter 40-man is a single uncapped list of 55 players, nearly twice
+> Milwaukee's 1,282px, which makes **Roster the winter club's longest band at
+> 3,917px — longer than Milwaukee's 3,517px.** The floor page is lopsided, not
+> uniformly thin. See `design.md` §6.
+
+**Two further corrections to this table, both found by re-measuring it on
+2026-09-21 against a fixed `/team/675?d=2026-01-15`, and both errors in this
+document rather than in the code.**
 
 **1. The uniform strip renders here, and this table was the only one that said
 otherwise.** `isMilb` is `sport.id !== 1` (`NumbersTab.jsx`), which is true for
@@ -1090,7 +1110,7 @@ must pass `limit` explicitly and say so in the PR.
 
 ## 2G. The band heads the page needs — evidence for #1113
 
-No component draws these. Six heads, and what each must carry:
+No component draws these. Seven heads, and what each must carry:
 
 | Band | Head text | Must carry |
 | --- | --- | --- |

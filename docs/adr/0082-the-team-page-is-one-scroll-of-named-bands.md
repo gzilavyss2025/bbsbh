@@ -119,8 +119,16 @@ decision could not claim.** With the Ballpark alone it was 1,014px on Milwaukee
 and 93px on every affiliate, because no MiLB park has hand-verified outfield
 dimensions — one small card under a full-width head. Measured at iPhone 13
 width on 2026-09-21, card heights only: Milwaukee **1,274px**, Nashville
-**1,441px**, Wisconsin and Wilson **1,357px** each. On all three affiliates it
-is the page's longest band after Roster.
+**1,441px**, Wisconsin and Wilson **1,357px** each.
+
+> **Corrected by #1106, 2026-09-21.** This paragraph ended "On all three
+> affiliates it is the page's longest band after Roster." It is not. Measured by
+> band on `/team/249`, the order is Standing **3,488px** · Farm **3,205** ·
+> Roster **2,974** · Games **2,010** · About **1,357** · Ranks **534** — About
+> is fifth of six. The claim worth making is the one this section opened with:
+> About is the band no club can fail, and it is **four times the 349px floor's
+> smallest band** rather than a courtesy card. Its rank inside the page was
+> never the argument.
 
 **The floor is the exception, and it is stated rather than smoothed over.** A
 winter-ball club has no parent org and no alumni file, so two of the four cards
