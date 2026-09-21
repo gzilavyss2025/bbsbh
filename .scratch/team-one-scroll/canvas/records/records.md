@@ -196,6 +196,16 @@ of the rows wrap. Both are follow-ups. The boards draw the real labels.
 
 ## 5 · The measured result
 
+> **Two figures in this section are behind `design.md` §6 and are left as
+> written, because they are what the boards in `boards/` still draw.** After the
+> outside design review, closed went **760 → 826** (158) and **715 → 781** (249)
+> — all of it F3 taking `Open all` and the two shipped scope rows to a 44px touch
+> target — and **"fully open is shorter than today" stopped being true**: the
+> league mark puts a rank line on 49 marked rows, so open-all is **3,486px
+> against today's 3,238px**. That 248px is paid only by a reader who taps
+> `Open all ›`; the card's default is closed at 826px. `design.md` §6 is the
+> settled record for both.
+
 Every figure below is measured, not estimated. Shipped from the live page;
 proposed from `boards/*.dc.html` at 390px.
 

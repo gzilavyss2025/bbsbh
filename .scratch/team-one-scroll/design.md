@@ -54,7 +54,7 @@ Pages walked: `/team/158` (all six tabs), `/team/249` (all five),
 
 | Element | Variants | What they are |
 | --- | ---: | --- |
-| **Card head** | **5** | (a) themed bar — club fill, 3px club accent, club ink (`.thub-card__head`, `.tstats-card__head`, `.roster-super__head`, `.team-score__head` under `.is-themed`) — ~20 cards; (b) bar-less caption on paper — Run value, ABS challenges; (c) page-level group label with the cards under it — Team leaders (`.tledg`), which then puts a **themed bar on each of its two sub-cards**; (d) unwrapped caption, deliberate — Transactions (`.txcard`), because its deck bleeds past the gutter; (e) **none at all** — the season games grid (`.gamesgrid`) |
+| **Card head** | **5** | (a) themed bar — club fill, 3px club accent, club ink (`.thub-card__head`, `.tstats-card__head`, `.roster-super__head`, `.team-score__head` under `.is-themed`) — ~20 cards; (b) bar-less caption on paper — Run value, ABS challenges; (c) page-level group label with the cards under it — Team leaders (`.tledg`), Affiliation history and Made The Show, which have **no card of their own at all**, and in the ledger's case put a bar on each of its two sub-cards that is **`--accent-primary`, the app's navy, never the club's** (corrected by Phase 2 — §14·A and §16.1; this read "a themed bar"); (d) unwrapped caption, deliberate — Transactions (`.txcard`), because its deck bleeds past the gutter; (e) **none at all** — the season games grid (`.gamesgrid`) |
 | **Rank cell** | **4** | (a) tinted tile, `RUNS 802 2ND`, green for good and clay for bad — team batting/pitching; (b) caption line, `3RD OF 30 CLUBS` — Run value; (c) inline after the figure, `6 OF 64` — Comebacks; (d) the word "org rank" as a card-head caption — Prospects |
 | **Table header row** | **4** | (a) graphite display caps on a hairline — standings; (b) the same plus a sub-line inside the cell (`.rpt__sub`) — ABS; (c) no header, label/value pairs — Records, day-of-week; (d) no header, a stat-code gutter column — leaders ledger |
 | **Bar / rail / plot** | **5** | (a) one stacked horizontal bar — Run value; (b) three dot-plot rails with a tick for the league average and a ringed dot for this club — Comebacks; (c) scatter + dashed trend line + axis — ABS; (d) form rails — Team Score; (e) workload marks — Bullpen health |
@@ -636,6 +636,490 @@ same PR. ADR-0082 stays **DRAFT**.
 
 ---
 
-*Part two — the mechanism chosen for each problem and what it beat, the
-element-by-element harmonization list, and the band-head spec — is written after
-the canvas is drawn and Gary has picked a version.*
+---
+
+## Part two — what was chosen, what it beat, and what #1107 builds
+
+Written after the canvas was drawn and Gary picked v4 on 2026-09-21. Part one was
+written before anything was drawn, as the brief asked; this is written after, and
+where the drawing changed a decision the change is recorded here rather than
+edited into part one.
+
+Everything below was re-measured on `2b58a0454` against a live dev server at
+iPhone 13 width on 2026-09-21 — `page-shape.mjs` for the card heights,
+`scrape-phase2.mjs` for the card contents, `measure-jumpbar.mjs` for the jump
+bar, `measure-heights.mjs` and `measure-furniture.mjs` for the drawings.
+
+---
+
+### 10 · Problem 1, the outlier: the mechanism, and the three it beat
+
+**The mechanism is two devices, not one, and they do different jobs.**
+
+1. **The sub-head divides the band.** Standing answers its question in the first
+   screen — the division table and the season grade, 693px — and everything under
+   *Record, split every way* is reference. That is what a records section in an
+   annual is: the part you turn to on purpose.
+2. **The card became an index that unfolds.** Twelve 44px ledger lines, each
+   carrying how many splits are behind it and the spread of win pct inside it.
+   3,238px to **826px** closed.
+
+**What the sub-head beat.** Three alternatives, all drawn or measured:
+
+| Beaten | Why it lost |
+| --- | --- |
+| **Two bands** — *Standing* and *Records* as separate anchors | ADR-0034's failure 2 is *interleaving*, not length, so two adjacent bands on one subject would not be that failure. It would be **eight anchors on a phone jump bar** — and §13 below measures that bar at 472px of pills in 358px of room at seven. Eight is not available. |
+| **A ruleless sub-head with air** — what v1 drew | At 17px in `--ink-2` with nothing else it read as a **caption on the Records card**, not as a division of the band. It was the weakest of the three heads despite being the middle one. The full-bleed 1px pencil rule fixes it by moving it to the page's plane. |
+| **No sub-head; let the band run** | Four screens of W-L splits with no statement that they are reference. The band's answer is then buried by its own footnotes, which is the complaint ADR-0034 recorded about the old page, one level down. |
+
+**What the index beat.** Four alternatives, each measured, each recorded in
+`canvas/records/records.md` §6 with its closed height. The two that came closest:
+
+- **A third row of pills, filtering to one group** — the best closed height here
+  (~550px) and the most consistent with the card's own two pill rows. It lost on
+  three counts: three rows of controls and ~200px before a single figure; twelve
+  group names squeezed to pill width destroys the one thing that makes the cut
+  legible; and a filter says the hidden rows are **excluded** where a fold says
+  they are **there**. Gary asked for nothing removed.
+- **Three cards — Records / Scoring by inning / Season counts** — the most honest
+  statement that three shapes are three objects. It lost on the **scope
+  controls**: the half and month toggles govern all three, and this system has a
+  band head, a sub-head, a card head and a group label, with **no section-level
+  control row**. Three copies of an eleven-pill control is worse than the problem
+  it solves.
+
+**And the sub-head is used once on the whole page.** About has four unlike
+modules and does not get one; Ranks at Nashville has two cards and does not get
+one. #928's rule is a device for a question with two halves, not a way to fit
+seven bands into six anchors, and the restraint is what keeps the level readable.
+
+---
+
+### 11 · Problem 2, the floor: the mechanism, and what it beat
+
+**The mechanism is that the band head prints the same way at every width of
+band, and a band a club cannot fill is absent.** The floor page was drawn whole
+(`P2-Page-675`), and it holds for a reason part one predicted and the drawing
+confirmed:
+
+> **675 is UNTHEMED.** `headerThemeFor` returns null, so every card head is
+> graphite on transparent over a hairline — which is *exactly* `.section__title`
+> and *exactly* the Records group label. On that page tiers 3 and 4 and the app's
+> generic section label are one object, and **the band head's 2px ink rule is the
+> only structural colour on the page.** The band system carries the floor when
+> the club theme cannot.
+
+**What it beat.**
+
+| Beaten | Why it lost |
+| --- | --- |
+| **A band tint** (1D.4 asked step 2 to decide; drawn as v2 so the rejection is visible) | Tint every band and the page ground is never seen, so it is a new page colour rather than a band device. Alternate them and the band head sits on two grounds, which is a second variant — and "one treatment, zero variants" is the first number in §5. The Game Log's test settles it: a new plane must show an edge the manila cannot, and a band's edges are already drawn by 48px of space and a full-bleed rule. |
+| **A disabled anchor for a band the club lacks** | A jump bar's only promise is "tap this and you land there", and a disabled anchor breaks the control's one contract on the page of the club least able to argue back. It is also an apology, where the level identity is real and should be used. |
+| **Padding the thin page** — a placeholder card, a "more coming" note | An absent band leaves no gap a reader can see. A *filled* gap is a gap a reader can see, and it says the page is short. |
+| **A different, shorter layout below MLB** | Then a thin club's page is a different object, and the whole idea — same sections, same order, same paper, shorter chapter — is gone. |
+
+**And here is the number that settles it, which part one could not have had.**
+Measured on the drawings with `measure-furniture.mjs`, with the board's own
+legend and jump bar taken off first:
+
+| | cards | page | furniture | share |
+| --- | ---: | ---: | ---: | ---: |
+| **158 Milwaukee**, 7 bands | 17,594 | 19,148 | **1,554px** | **8.8%** |
+| **675 Los Mochis**, 5 bands | 7,110 | 7,758 | **648px** | **9.1%** |
+
+**The system costs the floor the same share it costs Milwaukee.** That is not
+what fixed chrome normally does — fixed chrome on a smaller page costs
+proportionally more, every time. It does not here because **the furniture scales
+with the number of bands, and a thin club has fewer bands.** The floor pays for
+five heads and five seams, not seven. That is the mechanism working, and it is
+the best answer this document has to #1106's question.
+
+**Two seams exist on the floor page and nowhere else, and both were drawn.**
+Farm and Money are absent between Roster and About, and nothing marks it. And
+**Roster at 675 is 3,917px, larger than Milwaukee's 3,517px**, because a winter
+40-man is one uncapped list of 55 players — so the floor's dominant card is 34%
+of its page where Milwaukee's largest is 16% of its own. The floor is
+**lopsided, not small**, and a rhythm built on Records specifically would not
+have survived it.
+
+---
+
+### 12 · What survived from the three shipped screens
+
+§4 recorded what each screen contributed before anything was drawn. This records
+what is still true after.
+
+**`BroadcastBar.jsx` + `styles/report/charts.css` — the report pages.**
+
+| §4 said | After drawing |
+| --- | --- |
+| "I am not designing a band head. I am **promoting** this one." | **Half true, and the half that changed is the important half.** The type is `BroadcastSection`'s exactly — display face, `--fs-h2` 21px, `--ls-caps`, with a note under it in the body face at 13px. The **rule is not.** Its trailing `--clay` rule runs from the end of the words to the column edge, which is right on a page of unbordered tables drawn straight on the paper. Here every block is a bordered card under a filled club-coloured bar, so the head is **full-bleed 2px `--ink-0`** instead. A card is inset 16px and rounded; a rule that runs edge to edge is a plane no card can reach. |
+| "Tables are the default and a chart is the exception." | **Kept, unchanged.** Every board drawn here is a table or a ledger. |
+| "Drawn in HTML, not SVG, except the line." | **Kept, unchanged**, and it now also covers the Records index's mark: a 3px row edge and a proportional index edge are both HTML, so `check-typography` can see every size on them. |
+| Axis and tick labels use `--text-caption`, never `--graphite-soft` (3.10:1, a fail) | **Kept, and it did real work.** The Records index line's name is `--text-caption` where the shipped group head is `--graphite-soft`, so the reorganisation fixes a contrast failure as a side effect. |
+
+**The Game Log.** One idea was taken and it is the one that killed the band
+tint: **a new plane has to show an edge the manila cannot.** Nothing else from
+that screen reached this page — `--album-board` is the Game Log's, `--seal` is
+spoken for by #1138, and both warm browns on the manila ladder are taken.
+
+**Today's `/team/158`.** §4 said the card is right and stays, and **nothing in
+either phase changed it**: `--surface-card`, `--bw-hair` of `--border-rule`,
+`--radius-md`, `--shadow-card`, `overflow: hidden`, `margin-top: var(--space-4)`.
+The club-coloured head bar also stays, because it is the one place a club's
+identity reaches the page.
+
+> **What the drawing added to this.** The card is not applied evenly. Four
+> modules on this page have no card at all, and §14 lists them. Giving them one
+> is not a change to the card — it is the card, applied.
+
+---
+
+### 13 · The band-head spec — and the jump bar under it
+
+This section is also the evidence #1113 asked for in 2G.
+
+#### The band head
+
+```
+────────────────────────────────  full-bleed, --bw-heavy 2px, --ink-0
+STANDING                          --fs-h2 21px display, --ink-0, --ls-caps
+Where they stand, and the         --fs-small 13px body, natural case, --ink-1
+record split every way.           16px beneath it
+```
+
+| Part | Token | Value | Note |
+| --- | --- | --- | --- |
+| rule | `--bw-heavy` / `--ink-0` | 2px | **full-bleed**: `margin: 0 -16px 12px` against the page's 16px gutter |
+| title | `--fs-h2` / `--ink-0` / `--ls-caps` | 21px | display face, one weight (700), `line-height: 1.25`, 10px beneath |
+| standfirst | `--fs-small` / `--ink-1` | 13px | body face, **natural case**, `line-height: 1.45`, 16px beneath |
+| seam above | `--space-12` | 48px | |
+
+#### The sub-head — the same gesture one step down
+
+```
+────────────────────────────────  full-bleed, --bw-hair 1px, --rule (pencil)
+Record, split every way           --fs-h3 17px display, --ink-1
+```
+
+32px (`--space-8`) above the rule, 10px under it, 12px under the words.
+
+#### So the page has four heading levels from two devices and two planes
+
+| Level | Device | Plane | Uses on the longest page |
+| --- | --- | --- | ---: |
+| band head | 2px ink rule + 21px | **full-bleed** | 7 |
+| sub-head | 1px pencil rule + 17px | **full-bleed** | 1 |
+| card head | filled club-coloured bar + 14.4px | contained | ~20 |
+| group label in a card | hairline + 12px graphite | contained | many |
+
+**FULL-BLEED is page structure; CONTAINED is card structure.** That is the whole
+rule, and it is why the hierarchy survives on a club with no theme at all: the
+two page levels do not depend on colour.
+
+#### What each of the seven heads carries — 2G, answered
+
+| Band | Standfirst | Carries |
+| --- | --- | --- |
+| Standing | Where they stand, and the record split every way. | — (and the page's one sub-head) |
+| Standing, at 675 | Where they stand, and the record by day. | **the floor has no Records card** |
+| Ranks | Where this club sits against its league. | — |
+| Ranks, below Triple-A | The league rank boards start at Triple-A, so this is the club's own leaders. | **2G's level qualifier** |
+| Ranks, at 675 | Winter ball runs no rank boards, so this is the club's own leaders. | the same qualifier, one level further down |
+| Games | Every game this season, and where they played it. | — |
+| Roster | Who plays here, and who arrived and left. | — |
+| Roster, at 675 | Who plays here. A winter roster is one uncapped list. | why the band is 3,917px |
+| Farm | The org ladder, and the players climbing it. | — |
+| Farm, on an affiliate | The Milwaukee Brewers' ladder, and the players climbing it. | **2G's parent-org qualifier** |
+| Money | What the roster costs. This band does not move with the date. | **2G's "not dated" note** |
+| About | The ballpark, and the marks this club wears. | — |
+| About, on an affiliate | The ballpark, the marks, the orgs this club has worn, and who it sent up. | four modules, not two |
+
+**Every qualifier 2G asks for lands in the standfirst**, because each one is a
+sentence. The right-aligned action slot 2G proposes is used **zero times on this
+page**, and reporting that is better evidence for #1113 than inventing a slot
+this page does not use. The slot is still required — by the *player* hub, where
+`SectionTitle`'s `action` prop has 38 uses.
+
+> **A standfirst that describes a card the club does not have is the one thing a
+> head must never do.** That is why there are four club-specific lines above. It
+> was found by drawing the floor: Standing at 675 is the table and the day, and
+> the MLB line promised "split every way".
+
+#### The jump bar — and the one requirement a tab bar never had
+
+The jump bar is the **shipped control** (`.teamtabs` / `.teamtabs__btn`): a
+6px-radius button, 34px tall, `--fs-label` on `--surface-card` under
+`--shadow-card`, laid out `flex: 1 0 auto` in a strip that scrolls sideways with
+its scrollbar hidden. It is `HubTabBar`, so the player hub inherits every
+decision here in the same commit. Club-neutral navy per ADR-0030.
+
+| State | Drawn as |
+| --- | --- |
+| **resting** | no rule under it — there is nothing above it to divide from |
+| **stuck** | one 1px pencil rule, and the page's own paper. **No new shadow**: this is paper, and the control already carries `--shadow-card` |
+| **current section** | that band's button filled `--accent-primary` |
+
+**Measured, by putting the band names through the real control on the running
+page** (`measure-jumpbar.mjs`):
+
+| Club | Bands | Pills | Room | Tabs today |
+| --- | ---: | ---: | ---: | ---: |
+| 158 Milwaukee | 7 | **472** | 358 | 460 |
+| 249 Wilson | 6 | **405** | 358 | 367 |
+| 675 Los Mochis | 5 | **347** | 358 | 358 |
+
+The shipped bar already overflows at Milwaukee by 102px and at Wilson by 9px, so
+sideways scrolling is not new. **The floor is the one club in the app whose bar
+does not scroll.**
+
+> **And this is the new requirement.** A tab bar's current tab is wherever the
+> reader tapped it, so it is on screen by definition. A jump bar's current button
+> changes by **scrolling the page** — and measured, the two that fall off the end
+> at Milwaukee are **Money and About**, the last two bands. A reader four screens
+> into a 17,594px page arrives in About and the mark that says so is off the end
+> of a control nobody has touched. **The bar must scroll itself to keep the
+> current band in view.** Nothing in `HubTabBar` does this today, because a tab
+> bar never needed it.
+
+---
+
+### 14 · The harmonization list — what #1107 works through
+
+§3 counted **eight repeated elements, thirty ways of drawing them, and no band
+head at all**. This is that list resolved, element by element, with what Phase 2
+added. Each row is a decision, not an observation.
+
+#### A · The card head — 5 ways → 1, and the card is applied where it is missing
+
+| Today | Where | Decided |
+| --- | --- | --- |
+| (a) themed bar — club fill, 3px accent, club ink | ~20 cards | **the one card head.** Unchanged |
+| (b) bar-less caption on paper | Run value, ABS challenges | → (a) |
+| (c) page-level group label, no card at all | **Team leaders, Affiliation history, Made The Show** | → **(a), inside a card.** The largest item on this list |
+| (d) unwrapped caption, deliberate | Transactions — its deck bleeds past the gutter | → (a), with the deck still bleeding. A head does not have to clip its body |
+| (e) none at all | the season games grid | → (a). A 1,302px block with no head is the only unlabelled object on the page |
+
+> **And (c) hides a second fault, found by reading the CSS rather than the
+> screen.** `.tledg__block-title` is `--accent-primary` — **the app's navy, never
+> the club's**. So on Wilson an app-navy bar sits 16px under a club-navy one, and
+> on Nashville under crimson. §3 recorded this as "a themed bar on each of its two
+> sub-cards", which is wrong; the correction is in §16.
+
+Drawn both ways on the canvas: `P2-About-249` is the four modules as they ship,
+`P2-About-249-Carded` is the same four with the card applied. It is the one item
+on this list big enough to be looked at rather than argued.
+
+#### B · The rank cell — 4 ways → 2, split by what is being ranked
+
+| Today | Decided |
+| --- | --- |
+| (a) tinted tile, `RUNS 802 2ND` | **kept, for a board of ranked stats** |
+| (b) caption line, `3RD OF 30 CLUBS` | → (d) |
+| (c) inline after the figure, `6 OF 64` | → (d) |
+| (d) the word "org rank" as a card-head caption | **kept, as the head's note** |
+| — | **and the house rule governs all of them: no `#`, and the rank on its own line from the stat it ranks — `1 of 30`, never `1st of 30` and never `#1`.** The Records index already draws it this way |
+
+#### C · The table header row — 4 ways → 1
+
+Graphite display caps at `--fs-label` on a `--rule-soft` hairline, right-aligned
+except the first cell. The ABS card's sub-line inside the cell (`.rpt__sub`) is
+kept as an option on that one row; the two "no header" cases (Records,
+day-of-week) are ledgers rather than tables and keep no header, which is correct.
+
+#### D · Bar / rail / plot — 5 ways → 5, deliberately
+
+**Not harmonized, and this is the one row on the list that ends in "leave it".**
+A stacked bar, a dot-plot rail, a scatter with a trend line, form rails and
+workload marks answer five different questions. `charts.css` already states the
+rule they share — tables by default, a chart only for what nine table rows hide —
+and that rule is the harmonization. Forcing one mark on five questions would be
+the accessory Chanel says to take off, in reverse.
+
+#### E · The stat tile — 4 ways → 2
+
+The tinted rank tile (B·a) and the **ledger row** — label left, figure right, one
+dotted door under the label. The 18 season counts stop being stacked tiles and
+become ledger rows (411 → 363px); the payroll tiles stay tiles because they are
+a board of four figures, not a list.
+
+#### F · The door out — 5 ways → 3, by destination
+
+| Decided | Means |
+| --- | --- |
+| **a dotted underline on a label** | *this row opens a page* — every Records split, every season count |
+| **a chevron link, `See all ›`** | *this card has a fuller page* — the card head's right slot, or the card foot |
+| **a chevron on a 44px line** | *this folds, in place* — the Records index |
+
+The standalone 22px `.thub-door` row (`Season schedule ›`) goes: on a one-scroll
+page the band it pointed into is directly below it. And **the two affordances
+must stay apart** — today the group caption has no affordance at all and the rows
+carry the dotted underline, so the only thing that looks pressable is the thing
+that leaves.
+
+#### G · The prose explainer — 2 ways → 1
+
+**Natural case, at the card foot.** The shouted-caps version inside the Comebacks
+card is the bug: the house rule is shouted headings and natural-case body, and
+`#root *` uppercases everything that does not opt out. The ABS card already does
+it right (`text-transform: none`, caps-exempt).
+
+#### H · The empty and degraded state — 1, undrawn → drawn
+
+**The Ballpark at 93px (249) and 91px (675) is the page's one undrawn empty**: a
+head and a single line of text, with no diagram, no dimensions, no photo and no
+"not posted yet". It is a full card with most of it missing, and on the floor
+page it is the second-to-last thing a reader sees. Carding the other About
+modules makes it worse, not better — it becomes the only module in the band that
+still looks like it failed to load. **#1107 designs this state.** The MiLB rule
+already exists and says what it should do: fall back to `—` and say "not posted
+yet" rather than render a shape with nothing in it.
+
+#### I · The band head — 0 → the spec in §13
+
+#### J · Type sizes to fold — the eleventh, twelfth and thirteenth
+
+§5 allows **ten sizes and no eleventh**. Three shipped sizes are not among them:
+
+| Size | Where | Folds to |
+| --- | --- | --- |
+| `--fs-num-lg` 22px | several cards | 34 where it is a hero figure, 16 where it is a tile figure |
+| card-local `--fs-title-sm` / `--fs-title-md` | several cards | the card head at 14.4, or the sub-head at 17 |
+| `--fs-ui` 14px | `.tstatrow__v`, `.trec__countv`, `.trecinn__rec` | `--fs-cell` 11px — §5 defines it as "mono figures in a table cell", which is what all three are |
+
+#### K · Touch targets — two, both named rather than changed here
+
+- **The Records scope pills are ~29px**, on both rows, under the 44px minimum.
+  Pre-existing; the reorganisation neither worsens nor fixes it, and the index
+  lines it adds are exactly 44px.
+- **The jump bar is 34px.** The Records review held `Open all` to 44px (F3), and
+  on a one-scroll page the jump bar is the page's *only* navigation. It is a
+  strong argument for 44px, and it is **not made here**, because the control is
+  `HubTabBar` and raising it moves the player hub in the same commit and costs
+  10px of sticky chrome on every screen of both hubs. #1107's call, with the cost
+  stated.
+
+#### L · Contrast — one fix, already a side effect
+
+`.trec__grouphead` is `--graphite-soft` (`#938C7C`), **3.10:1 on card paper — a
+fail**. The Records index line's name is `--text-caption` (`#6B6558`), **5.44:1**.
+Any other `--graphite-soft` on text follows it to `--text-caption`.
+
+---
+
+### 15 · What Phase 2 confirmed, and what it did not
+
+**Confirmed, by re-measuring rather than trusting the brief.** Every page total
+and every band, band by band, off the running page:
+
+| Band | 158 Milwaukee | 249 Wilson | 675 Los Mochis |
+| --- | ---: | ---: | ---: |
+| Standing | 2,099 | 1,252 | 599 |
+| Ranks | 2,533 | 534 | 534 |
+| Games | 2,622 | 2,010 | 1,711 |
+| Roster | 3,517 | 2,974 | 3,917 |
+| Farm | 3,185 | 3,205 | *absent* |
+| Money | 2,364 | *absent* | *absent* |
+| About | 1,274 | 1,357 | 349 |
+| **total** | **17,594** | **11,332** | **7,110** |
+| bands | 7 | 6 | 5 |
+
+Nothing moved. The floor is **40.4% of Milwaukee**, up from 36% before Records
+was reorganised — the reorganisation cost the long page 2,412px and the floor
+nothing, because the floor has no Records card to reorganise.
+
+**Wilson is a check, not an artboard, and the system holds at six bands.** Its
+Ranks (one card) and its About (four modules) are the two hard cases and both are
+drawn. The rest of what differs is two *absences inside* bands — Games is two
+cards rather than four, with no Highlights and no Photos below MLB; Roster is
+three rather than five, with no bullpen health and no transactions deck — and
+neither costs anything, because the band head carries the rhythm and it is
+identical. **Farm is the one head that differs**, and it differs in the
+standfirst, in the same slot as the level qualifier. The four cards under it are
+Milwaukee's, unchanged, because all three affiliates share one org's system. 572
+is identical to Wilson. 556 differs by one card: the ABS board slots in above the
+ledger under the same head, 1,014 + 534 = 1,548px, with no new furniture and no
+variant.
+
+**Not confirmed, and left open.**
+
+- **The loading state does not reserve a band's height.** §5's v4-Loading board
+  draws one skeleton per card the band will have, because which cards exist is
+  decided from cheap identity data before any fetch — but a skeleton cannot
+  honestly pretend to be 3,917px tall, so the page jumps when the winter 40-man
+  lands. Named rather than hidden, and it is worse on the floor page than on
+  Milwaukee's, because the floor's single largest card is 34% of its page.
+- **Nothing here measures the cold request count.** ADR-0082 sets ≤ 20 cold and
+  ≤ 110 scrolled, and `count-requests.mjs` is the instrument. That is #1107's
+  gate, not this document's.
+
+---
+
+### 16 · Corrections proved by Phase 2's own measurements
+
+Applied in this PR. ADR-0082 stays **DRAFT**.
+
+1. **`design.md` §3 — the leaders ledger does not put a themed bar on its
+   sub-cards.** §3's card-head table says variant (c) "puts a **themed bar** on
+   each of its two sub-cards". `.tledg__block-title` is `background:
+   var(--accent-primary)` (`src/styles/23-box-score-detail.css:367`), and
+   `--accent-primary: var(--navy)` (`src/tokens/colors.css:110`). It is the app's
+   navy on every club. Corrected in §14·A, and it makes the element a *worse*
+   collision than §3 recorded, not a better one.
+
+2. **ADR-0082 — "each on its own tinted band" contradicts the band tint's
+   rejection.** The decision paragraph says the seven bands sit "each on its own
+   tinted band", and *Failure 1* says "seven heads, seven tinted grounds". §7 of
+   this document heard the tint and rejected it, drawn as v2 so the rejection is
+   visible. Both phrases go; the band's device is 48px of space and a full-bleed
+   rule.
+
+3. **ADR-0082 — "the six band heads this page needs".** There are **seven**, and
+   `scope.md` §2G lists seven under a heading that says six. Both corrected.
+
+4. **`scope.md` §2B — Roster at Milwaukee is 3,517px, not ~3,495px.** §2B sums the
+   band with the Overview tab's 184px transactions deck. The deck that moves into
+   Roster is the **Games tab's**, which measures **206px**. The band is
+   1,245 + 467 + 1,282 + 317 + 206 = **3,517px**, which is the figure `design.md`
+   and the page totals already use.
+
+5. **`canvas/records/records.md` §5 is behind `design.md` §6.** It still reports
+   closed at **760px / 715px** and claims "fully open is shorter than today". Both
+   moved after the outside design review: closed is **826 / 781** (F3 took
+   `Open all` and the scope pills to a 44px touch target) and open-all is
+   **3,486px against today's 3,238px** (the league mark adds a rank line to 49
+   marked rows). `design.md` §6 records both; records.md now points at it rather
+   than repeating stale figures.
+
+6. **`scope.md` §2E — the leaders ledger at 675 has one door, not two.** The table
+   lists "team leaders 6+6" for the winter club. Measured, it renders `See all ›`
+   alone: there is no parent org, so there are no org leaders to send anyone to.
+   Small, and it is the kind of thing a full-page drawing catches and a module
+   list does not.
+
+7. **`scope.md` §2I and ADR-0082 — the jump bar needs a requirement neither
+   states.** Both describe it as "the tab strip kept in place". Measured, the
+   current-band mark can sit off the end of a control nobody has touched (§13).
+   The bar must scroll itself. It is a `HubTabBar` change, so it is 2I's sixth
+   item — it generalises to the player hub.
+
+---
+
+### 17 · What #1107 is handed
+
+- **The band head and sub-head spec** — §13, in tokens, with the seven
+  standfirsts and the four club-specific ones.
+- **The harmonization list** — §14, twelve lettered items, each a decision.
+- **Two new requirements on `SectionHead`** (#1113): a **sub-head level**, which
+  neither `SectionMasthead` nor `SectionTitle` has; and the finding that this
+  page uses the **right-aligned action slot zero times**, while the player hub
+  uses it 38.
+- **One new requirement on `HubTabBar`**: the bar scrolls itself to keep the
+  current band in view.
+- **Two things to design that do not exist**: the degraded Ballpark (§14·H), and
+  a loading state for a band whose largest card is a third of the page (§15).
+- **One thing not to do**: no band tint, no new token, no fifth heading tier, no
+  eleventh type size, and no fourth block spacing.
+
+*The canvas is https://claude.ai/artifact/NV6fz4ywi3d3nvX5rdRa8s — Phase 1 at the
+left, Phase 2 at the right under its own title.*

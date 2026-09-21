@@ -69,10 +69,18 @@ was not.
 
 ## The decision
 
-`/team/{id}` is **one page of seven named bands**, each on its own tinted band with
-a clear head, with the tab strip kept in place as a **sticky jump bar** — anchor
-links that scroll to a band and mark the band you are in. No tab is a route any
-more.
+`/team/{id}` is **one page of seven named bands**, each opening on a full-bleed rule
+under a named head, with the tab strip kept in place as a **sticky jump bar** —
+anchor links that scroll to a band and mark the band you are in. No tab is a
+route any more.
+
+> **Corrected by #1106, 2026-09-21.** This paragraph said each band sits "on its
+> own tinted band", and *Failure 1* below said "seven tinted grounds". The band
+> tint was heard and **rejected** — `design.md` §7 draws it as v2 so the
+> rejection is visible rather than asserted. A tint applied to every band is a
+> new page colour rather than a band device; applied to alternate bands it puts
+> the band head on two grounds, which is a second head variant. The band's device
+> is 48px of space and a full-bleed 2px `--ink-0` rule.
 
 ```
 STANDING  →  RANKS  →  GAMES  →  ROSTER  →  FARM  →  MONEY  →  ABOUT
@@ -158,8 +166,17 @@ contents land in three different bands, and the bag's name does not survive.
 **The band is the hierarchy.** ADR-0034's complaint was that every module wore
 the same `.thub-card` chrome in one undifferentiated scroll. The tabs answered it
 by *removing* modules from view. A band answers it by *grouping* them: seven
-heads, seven tinted grounds, generous space at each join. A reader who lands mid-page can
-see which question they are inside without scrolling to find out.
+heads, each opening on a full-bleed rule the cards cannot reach, with 48px of
+space at each join. A reader who lands mid-page can see which question they are
+inside without scrolling to find out.
+
+**And the hierarchy does not depend on colour, which is what makes it hold at the
+floor.** `headerThemeFor` returns null for a winter club, so on `/team/675` every
+card head is graphite on transparent over a hairline and the band head's ink rule
+is the only structural colour on the page. Measured on the drawing, the band
+furniture costs Milwaukee **1,554px against 17,594px of cards (8.8%)** and Los
+Mochis **648px against 7,110px (9.1%)** — the same share, because the furniture
+scales with the number of bands and a thin club has fewer of them.
 
 **Shelves are not coming back, and neither is the index grid.** Both were tried
 and both were removed on 2026-08-04 (ADR-0034 records it). A collapsed row inside
@@ -483,14 +500,35 @@ what this pass hands it is the box to draw inside, which the token tier collapse
 
 **No component.** `SectionHead` does not exist — #1113 is open and blocked by
 #1129, #1130 and #1131, all open. `SectionMasthead` (36 uses) and `SectionTitle`
-(38 uses) are still two components. The six band heads this page needs are listed
-in `scope.md` §2G, and they put exactly one new requirement on #1113: **a
-sub-head level**, which neither component has, and which comes from #928's
+(38 uses) are still two components. The **seven** band heads this page needs are
+listed in `scope.md` §2G — this said six over a table of seven, corrected by
+#1106 — and they put exactly one new requirement on #1113: **a sub-head level**,
+which neither component has, and which comes from #928's
 two-sections-under-one-head rule rather than from the team page's taste.
+
+`design.md` §13 carries the drawn spec for both levels, in tokens, and it also
+reports the finding #1113 should have: **this page uses the right-aligned action
+slot zero times.** Every qualifier §2G asks a head to carry — the level below
+Triple-A, the parent org, "not dated" — is a sentence, and lands in the head's
+standfirst. The slot is still required, by the player hub, where `SectionTitle`'s
+`action` prop has 38 uses.
 
 **ADR-0030 is untouched.** A club may colour a card that identifies the club,
 never a control. The jump bar stays the app's own navy, on this hub and on the
 player hub, as `HubTabBar` already enforces for both callers.
+
+> **One requirement on that control is new, and #1106 found it by measuring
+> rather than by drawing.** Put through the real `.teamtabs__btn` on the running
+> page, the band names want **472px at Milwaukee in 358px of room** (249 wants
+> 405, and 675's five fit at 347 — the one club in the app whose bar does not
+> scroll). The shipped tab bar already overflows by 102px, so sideways scrolling
+> is not new. What is new is that **a jump bar's current mark changes by
+> scrolling the page**, where a tab bar's current tab is wherever the reader
+> tapped it. Measured, the two buttons that fall off the end at Milwaukee are
+> **Money and About** — the last two bands — so a reader four screens down
+> arrives in About and the mark that says so is off the end of a control nobody
+> has touched. **The bar must scroll itself to keep the current band in view**,
+> and nothing in `HubTabBar` does that today.
 
 ## Consequences
 
