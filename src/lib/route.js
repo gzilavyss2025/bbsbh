@@ -20,6 +20,7 @@
 //   '/milestones'                       -> { name: 'milestones' }
 //   '/awards'                           -> { name: 'awards-history' }
 //   '/postseason-history'               -> { name: 'postseason-history' }
+//   '/nine-keys'                        -> { name: 'nine-keys' }
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason-race'                  -> { name: 'postseason-race' }
 //   '/postseason/{seriesId}'            -> { name: 'postseason-series', seriesId }
@@ -326,6 +327,7 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'awards') return { name: 'awards-history' }
   if (parts.length === 1 && parts[0] === 'postseason-history')
     return { name: 'postseason-history' }
+  if (parts.length === 1 && parts[0] === 'nine-keys') return { name: 'nine-keys' }
   if (parts.length === 1 && parts[0] === 'postseason-leaders')
     return { name: 'postseason-leaders' }
   if (parts.length === 1 && parts[0] === 'postseason-race')

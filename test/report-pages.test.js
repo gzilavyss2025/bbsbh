@@ -47,6 +47,10 @@ const PATHS_BEFORE_GROUPING = [
   '/run-value',
   '/awards',
   '/postseason-history',
+  // The Nine Keys report, beside the bracket page: nine true-or-false keys
+  // every champion since 2000 is scored against, and the clubs holding a
+  // postseason place scored the same way.
+  '/nine-keys',
   // The run differential report, filed under History beside the bracket page —
   // which club seasons were plainly the best, and what October did to them.
   '/run-differential',
