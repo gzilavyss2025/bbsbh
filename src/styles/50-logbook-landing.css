@@ -38,7 +38,7 @@
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-xwide);
-  color: var(--seal-cover-ink);
+  color: var(--text-heading);
 }
 
 .logbooklanding__hero h1 {
@@ -351,7 +351,7 @@
   font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-num);
-  color: var(--seal-cover);
+  color: var(--accent-primary);
 }
 
 .logbooklanding__steps h3,
@@ -420,7 +420,7 @@
   gap: var(--space-4);
   margin: var(--space-10) 0 0;
   padding: var(--space-5);
-  border: var(--bw-hair) solid var(--seal-cover);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--award-soft);
   box-shadow: var(--shadow-card);
@@ -432,9 +432,9 @@
   justify-content: center;
   width: 56px;
   height: 56px;
-  border: var(--bw-heavy) solid var(--seal-cover-ink);
+  border: var(--bw-heavy) solid var(--accent-primary);
   border-radius: var(--radius-pill);
-  color: var(--seal-cover-ink);
+  color: var(--accent-primary);
   transform: rotate(-6deg);
 }
 

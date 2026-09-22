@@ -526,7 +526,7 @@
 }
 .marginnotes__mark {
   flex: none;
-  color: var(--seal-deep);
+  color: var(--text-caption);
   font-size: var(--fs-caption);
 }
 /* The fun-fact sentence reads as a natural-case sentence — same sanctioned

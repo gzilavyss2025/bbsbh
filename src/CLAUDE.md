@@ -425,11 +425,11 @@ The tiers are layered Carbon-style (ADR-0023): a **primitive** tier of raw value
 (`--bg-canvas`, `--text-body`, `--seal-cover`). App-specific component geometry (the
 `--cell-size`, the `--shot-*` headshot rungs, the `--app-width` frame) lives in
 `tokens/layout.css`, kept OUT of the primitive scale. There is deliberately **no** third
-component tier — promote a value to a named component-scoped token only on high reuse or
-a guardable invariant. The metaphor is a paper scorebook: manila paper, navy ink, pencil
-graphite, kraft-tape amber for seals. Use the semantic variables (`--surface-card`,
-`--accent-negative`, `--seal-cover`) rather than raw hex; numbers render as mono tabular
-figures, structural labels condensed uppercase.
+component tier — promote a value only on high reuse or a guardable invariant. The metaphor
+is a paper scorebook: manila paper, navy ink, pencil graphite, kraft-tape amber for seals.
+Use the semantic variables, not raw hex; numbers are mono tabular, structural labels
+condensed uppercase. **`--seal*` alone has a SCOPE** — readable only where a reveal is
+possible; rank and flag emphasis takes `--marker` (ADR-0083, `check-seal-scope.mjs`).
 
 **Team marks on a dark surface are ART, not a filter.** The navy section
 mastheads (`SectionMasthead`'s `logo` prop — Batting order, Starting pitcher,

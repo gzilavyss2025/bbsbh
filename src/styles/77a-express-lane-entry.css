@@ -145,8 +145,9 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-/* THE CHOSEN CARD TAKES THE KRAFT AMBER, which is this app's one colour for
-   "sealed, and yours to open" everywhere else. It arrives as the same 3px rail
+/* THE CHOSEN CARD TAKES THE HIGHLIGHTER, this app's colour for "look here".
+   It took the kraft amber until ADR-0083 — the one colour a door into
+   unsealed film must not wear. It arrives as the same 3px rail
    the consent block below carries, so the two read as one family rather than as
    two unrelated accents on the same screen. The rail is a pseudo-element and
    not a border, so choosing a card never reflows the text beside it. */
@@ -159,12 +160,12 @@
   background: transparent;
 }
 .xl-entry__choice.is-on {
-  border-color: var(--seal-deep);
+  border-color: var(--marker);
   background: rgb(181 130 74 / 0.12);
   color: var(--album-foil);
 }
 .xl-entry__choice.is-on::before {
-  background: var(--seal);
+  background: var(--marker);
 }
 .xl-entry__name {
   font-family: var(--font-display);
@@ -193,7 +194,7 @@
   border-top: 1px solid var(--album-board-line);
 }
 .xl-entry__choice.is-on .xl-entry__figs {
-  border-top-color: var(--seal-deep);
+  border-top-color: var(--marker);
 }
 .xl-entry__fig {
   display: flex;
@@ -218,7 +219,7 @@
 .xl-entry__consent {
   margin: 0;
   padding: var(--space-3) var(--space-4);
-  border-left: 3px solid var(--seal);
+  border-left: 3px solid var(--marker);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   background: rgb(181 130 74 / 0.1);
   font-size: var(--fs-ui);

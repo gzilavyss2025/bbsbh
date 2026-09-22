@@ -286,11 +286,11 @@
 }
 .team-hub.is-themed .team-score__howlink,
 .team-hub.is-themed .team-score__howsep {
-  color: var(--bar-text, var(--seal-hatch));
+  color: var(--bar-text, var(--text-caption));
   opacity: 0.85;
 }
 .team-hub.is-themed .team-score__howlink {
-  border-bottom-color: color-mix(in srgb, var(--bar-text, var(--seal-hatch)) 40%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--bar-text, var(--text-caption)) 40%, transparent);
 }
 .teaminfo__headright {
   display: flex;
@@ -399,9 +399,9 @@
 /* Attendance's "i" glyph + the unfold note it opens — same tap-glyph idiom
    as the Umpires card's .umptier__glyph, but deliberately quiet at rest
    (just background info, not a tier read worth a loud fill): the card's own
-   surface + rule color, with only the icon tinted kraft as a small tap hint.
-   Tapping it open switches to the kraft fill, same look the tier glyph uses
-   for its own open state. */
+   surface + rule color, with only the icon tinted in the action green as a
+   small tap hint. Tapping it open switches to an ink fill, same look the tier
+   glyph uses for its own open state. Both were kraft until ADR-0083. */
 .attendance__value {
   display: inline-flex;
   align-items: center;
@@ -418,16 +418,16 @@
   border-radius: 999px;
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
-  color: var(--seal);
+  color: var(--accent-link);
   cursor: pointer;
 }
 .attendance__glyph:hover {
   box-shadow: 0 0 0 1px var(--border-rule);
 }
 .attendance__glyph--open {
-  background: var(--seal);
-  border-color: var(--seal);
-  color: var(--seal-ink);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
 }
 .attendance__glyph:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -479,16 +479,16 @@
   border-radius: 999px;
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
-  color: var(--seal);
+  color: var(--accent-link);
   cursor: pointer;
 }
 .fact__infoglyph:hover {
   box-shadow: 0 0 0 1px var(--border-rule);
 }
 .fact__infoglyph--open {
-  background: var(--seal);
-  border-color: var(--seal);
-  color: var(--seal-ink);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
 }
 .fact__infoglyph:focus-visible {
   outline: 2px solid var(--focus-ring);

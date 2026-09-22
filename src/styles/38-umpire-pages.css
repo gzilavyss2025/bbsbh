@@ -117,7 +117,7 @@
   color: var(--text-muted);
 }
 /* Level tag on AAA rows (game log + ballparks). MLB is the implicit default, so
-   only AAA is chipped — a small kraft-amber pill, the level toggle's own hue. */
+   only AAA is chipped — a small ink pill, the level toggle's own hue. */
 .umpage__levelchip {
   display: inline-block;
   margin-left: 6px;
@@ -128,8 +128,8 @@
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  color: var(--seal-ink);
-  background: var(--seal);
+  color: var(--text-on-ink);
+  background: var(--accent-primary);
   vertical-align: middle;
 }
 /* Game-context tag (postseason round / All-Star Game) on game-log rows — same
@@ -280,7 +280,7 @@
   background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
 }
 /* Home-plate glyph beside a today-working umpire's name — a small round
-   kraft-tape badge, same 21px dot as .umptier__glyph (the Umpires card's own
+   highlighter badge, same 21px dot as .umptier__glyph (the Umpires card's own
    tap-glyph), reusing that same HomePlateIcon shape (UmpireTierGlyph.jsx) so
    "home plate" reads as one consistent mark across the app rather than a
    TEXT chip, which truncated illegibly on a narrow phone (the .standings td
@@ -296,8 +296,8 @@
   height: 21px;
   margin-left: 6px;
   border-radius: 999px;
-  color: var(--seal-ink);
-  background: var(--seal);
+  color: var(--text-heading);
+  background: var(--marker);
   vertical-align: middle;
 }
 .umprank__rank {

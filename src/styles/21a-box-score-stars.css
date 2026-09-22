@@ -49,7 +49,7 @@
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--seal) 12%, transparent), transparent 58%),
+    linear-gradient(135deg, color-mix(in srgb, var(--marker) 16%, transparent), transparent 58%),
     var(--surface-inset);
   box-shadow: var(--inset-cell);
 }
@@ -86,7 +86,7 @@
   font-size: var(--fs-compact);
   line-height: var(--lh-ui);
   letter-spacing: var(--ls-fixed);
-  color: var(--seal);
+  color: var(--text-caption);
 }
 .stars3__card--hero .stars3__marks {
   font-size: var(--fs-small);

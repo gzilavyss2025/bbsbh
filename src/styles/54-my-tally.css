@@ -92,7 +92,7 @@
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  color: var(--seal-cover-ink);
+  color: var(--text-heading);
 }
 
 .mytally__scopenote {
@@ -106,10 +106,11 @@
 }
 
 /* ------------------------------------------------------------- the club seal
-   A pressed rubber stamp: navy ink under a kraft rim, with the club's one-color
+   A pressed rubber stamp: navy ink under a navy rim, with the club's one-color
    knockout mark (ADR-0031) sitting in the middle. The mark is white art, which
    is why the disc has to be dark — do not lighten it without swapping the
-   variant. */
+   variant. (The rim was kraft until ADR-0083: a drawn crest is art, not a
+   spoiler cover.) */
 
 .clubseal {
   position: relative;
@@ -130,7 +131,7 @@
 
 .clubseal__circle {
   fill: none;
-  stroke: var(--seal-cover);
+  stroke: var(--accent-primary);
   stroke-width: 1.6;
 }
 
@@ -140,14 +141,14 @@
 }
 
 .clubseal__tick {
-  stroke: var(--seal-cover);
+  stroke: var(--accent-primary);
   stroke-width: 1.4;
   opacity: 0.8;
 }
 
 .clubseal__diamond {
   fill: none;
-  stroke: var(--seal-cover);
+  stroke: var(--accent-primary);
   stroke-width: 1;
   opacity: 0.65;
 }

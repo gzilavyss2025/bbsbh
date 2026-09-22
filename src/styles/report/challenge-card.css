@@ -83,8 +83,8 @@
 }
 
 .chalcard__view.is-on {
-  background: var(--seal-soft, var(--paper-2));
-  border-color: var(--seal);
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  border-color: var(--accent-primary);
   color: var(--text-heading);
   font-weight: var(--w-bold);
 }

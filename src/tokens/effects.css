@@ -78,6 +78,18 @@
       var(--seal) 0px, var(--seal) 6px,
       var(--seal-hatch) 6px, var(--seal-hatch) 8px);
 
+  /* On-hold tape — the same diagonal-hatch weave in the highlighter family,
+     for a game or a player put ON HOLD: a rehab assignment, a postponed or
+     delayed game, a season record taped to the page. It wove in kraft until
+     ADR-0083, which reserved --seal for surfaces where a reveal is possible;
+     tape that no tap will ever lift is a FLAG, so it wears the flag colour.
+     The weave itself is unchanged, which is the point — --il-texture and
+     --win-texture are still its siblings. */
+  --hold-texture: repeating-linear-gradient(
+      -45deg,
+      var(--marker) 0px, var(--marker) 6px,
+      var(--marker-deep) 6px, var(--marker-deep) 8px);
+
   /* Injured-list tape — the same diagonal-hatch weave as the kraft seal but in
      the clay/seam-red family, so the IL banner reads as a sibling of the amber
      rehab tape. White text holds WCAG AA (≥5.4:1) against both clay stripes. */

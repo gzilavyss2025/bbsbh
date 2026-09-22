@@ -233,7 +233,7 @@
   background: var(--accent-negative);
 }
 .abs__pip--open {
-  background: var(--seal);
+  background: var(--accent-primary);
 }
 /* Record (won–lost) + what's still in the bank, right-aligned as tabular
    figures — the same numbers the pips encode, for a scorer who wants the count. */
@@ -869,8 +869,8 @@
 /* A pitcher entering the game, filling row 2's stat-box slot before the
    current half is revealed (StatBox renders nothing there otherwise, to keep
    the row from costing space on a half the scorer hasn't reached yet) — a
-   kraft/seal-amber notification card (the app's attention color for
-   "something just happened," same family as the seal cover), since a
+   highlighted notification card (the app's attention color for
+   "something just happened" — the seal's own family until ADR-0083), since a
    pitching change is worth noticing before the scorer even reveals the half. */
 /* Shared inner layout for the "now pitching" card (see PitcherNotice), used in
    both the row-2 stat slot and the play-by-play feed; the card chrome is added
@@ -881,7 +881,7 @@
   gap: 12px;
 }
 
-/* The self-contained seal-amber notification card — the pre-pitch staging
+/* The self-contained highlighted notification card — the pre-pitch staging
    cards at the top of a half (a pitching change, a fresh fielder, a
    pinch-hitter; see HalfInning.jsx's PrePitchChanges) and the same card
    interleaved with the at-bat cards when a change happens mid-inning
@@ -894,9 +894,9 @@
      nested inside. */
   margin: 4px 14px;
   padding: 10px 12px;
-  border: var(--bw-hair) solid var(--seal-hatch);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
+  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
 }
 
 /* The two pitching-handoff cards (PitcherHandoffCard.jsx) — a departing
@@ -1004,7 +1004,7 @@
   border-radius: 50%;
 }
 .usagepips__pip--used {
-  background: var(--seal-hatch);
+  background: var(--text-caption);
 }
 .usagepips__pip--open {
   border: 1.3px solid var(--graphite-soft);
@@ -1104,7 +1104,7 @@
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--seal-ink);
+  color: var(--text-heading);
 }
 
 .pitchernotice__pitcher {

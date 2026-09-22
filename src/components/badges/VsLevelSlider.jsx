@@ -20,7 +20,7 @@ function bandFor(tier) {
 
 // `value` is a tier (1-5) or null for "All"; `onChange` receives the same
 // shape back.
-const THUMB_COLOR = { low: 'var(--accent-negative)', mid: 'var(--seal-cover)', high: 'var(--accent-positive)' }
+const THUMB_COLOR = { low: 'var(--accent-negative)', mid: 'var(--marker)', high: 'var(--accent-positive)' }
 
 export function VsLevelSlider({ value, onChange, ariaLabel }) {
   const index = value == null ? 0 : value

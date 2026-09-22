@@ -790,14 +790,14 @@
 
    Everything else the offseason page draws is neutral by construction: roster
    moves, careers, a sealed game, a length and an age. This row is the
-   exception, so it is the only thing on the page wearing kraft tape — the
-   app's one colour for "results are behind this" — and the warning is in words
+   exception, so it is the only thing on the page wearing tape — and the
+   warning is in words
    beside it, never in the tape alone (SeasonRecord.jsx says why it is a LABEL
    and not a SealBox).
 
-   The tape is the same woven texture the covers use rather than a flat amber
-   fill, because a reader has met it on every sealed score all season and should
-   recognise it here without being told.
+   The tape is --hold-texture: the covers' own weave, in the flag colour
+   rather than the cover's kraft. ADR-0083 reserved kraft for a surface a tap
+   can actually lift, and this row is a label that opens nothing.
    --------------------------------------------------------------------------- */
 .srecord {
   display: flex;
@@ -814,7 +814,7 @@
 .srecord__tape {
   flex: 0 0 auto;
   width: 56px;
-  background: var(--seal-texture);
+  background: var(--hold-texture);
 }
 .srecord__body {
   flex: 1 1 auto;
