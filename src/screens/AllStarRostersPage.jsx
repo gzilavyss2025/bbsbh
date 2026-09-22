@@ -17,6 +17,7 @@ import { AllStarGameResult } from '../components/allstar/AllStarGameResult.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { favoriteAccentColor } from '../lib/teams.js'
+import { Door } from '../components/ui/control/Door.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function monthDay(iso) {
@@ -288,13 +289,9 @@ export function AllStarRostersPage() {
             })}
           </div>
           {canLoadMore && (
-            <button
-              type="button"
-              className="allstarrosters__door"
-              onClick={() => setExpanded(true)}
-            >
+            <Door layout="block" onClick={() => setExpanded(true)}>
               Load more (back to {LOAD_MORE_CUTOFF})
-            </button>
+            </Door>
           )}
           {updated && <p className="hint prospects__caption">Updated {updated}.</p>}
         </>

@@ -60,6 +60,7 @@ const KEPT = [
   ['04-site-bar.css', '.continuebar__pitchcta', 'flex', '0 0 auto', 'the sign-in CTA keeps its width in the continue bar'],
   ['08-site-shell.css', '.sitefooter__btn', 'min-width', '0', 'a long label wraps inside its grid cell'],
   ['26-player-page.css', '.player__back', 'margin-left', 'calc(-1 * var(--space-2h))', 'the word sits on the page’s edge'],
+  ['42-first-scorebook.css', '.allstarlegacy__door', 'margin-top', 'var(--space-3)', 'the door stands clear of the last honoree card'],
 ]
 
 for (const [file, selector, property, value, why] of KEPT) {

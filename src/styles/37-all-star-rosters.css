@@ -143,30 +143,12 @@
   text-transform: uppercase;
   color: var(--text-muted);
 }
-/* "Load more" — a single flat jump back to LOAD_MORE_CUTOFF, not
-   incremental paging (see AllStarRostersPage). Plain text-button styling,
-   matching the app's other "reveal more" affordances rather than a heavy
-   bordered button. */
-.allstarrosters__door {
-  align-self: center;
-  margin: var(--space-2) auto 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--accent-primary);
-  background: none;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-4);
-  cursor: pointer;
-  display: block;
-}
-.allstarrosters__door:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
+/* "Load more" — a single flat jump back to LOAD_MORE_CUTOFF, not incremental
+   paging (see AllStarRostersPage). A block Door: it grows the list in place,
+   which is that door's job, so it wears .door .door--block and nothing else.
+   It used to draw an outlined capsule in --accent-primary — a button's dress
+   on a door — and the Button half of #1130 settled that a door never wears a
+   button skin. */
 @media (max-width: 520px) {
   .allstarrosters__year {
     flex-direction: column;
