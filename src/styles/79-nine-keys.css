@@ -41,17 +41,6 @@
   padding: var(--space-1) var(--space-3);
 }
 
-.ninekeys__asof {
-  margin-top: var(--space-4);
-  padding: var(--space-3);
-  border: 1px solid var(--rule);
-  background: var(--surface-card);
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  line-height: var(--lh-loose);
-  color: var(--ink-2);
-}
-
 .ninekeys__section {
   margin-top: var(--space-6);
 }
@@ -312,8 +301,15 @@
   color: var(--ink-0);
 }
 
-.ninekeys__rowval--em {
-  font-weight: var(--w-bold);
+/* The row at the limit. JetBrains Mono ships at 700 only, so a weight change
+   is a no-op; the stress is size and the darkest ink. Not --surface-inset,
+   which already means "failed" in the grids above. */
+.ninekeys__row--em .ninekeys__rowlabel {
+  color: var(--ink-0);
+}
+
+.ninekeys__row--em .ninekeys__rowval {
+  font-size: var(--fs-h3);
 }
 
 .ninekeys__rownote {

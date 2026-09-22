@@ -314,7 +314,9 @@ jobs:
       # which is the same quiet staleness the postseason-odds note above
       # describes. It reads public/data/postseason-history.json for who played
       # in October, so it sits after nothing in particular — that file is
-      # committed, not generated here.
+      # committed, not generated here. Finished seasons come from its cache,
+      # scripts/data/nine-keys-seasons.json (staged by the `git add` below), so
+      # a night fetches only the season in play: about 65 requests, not 1,800.
       - name: Nine Keys
         id: nine-keys
         continue-on-error: true

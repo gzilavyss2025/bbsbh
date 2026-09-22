@@ -1,5 +1,5 @@
 import '../styles/79-nine-keys.css'
-import { loadNineKeys } from '../api/nineKeys.js'
+import { floorSentence, loadNineKeys, placeboSentence, supportSentence } from '../api/nineKeys.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
@@ -15,9 +15,10 @@ import { TeamLink } from '../components/team/TeamLink.jsx'
 // The page REPORTS; it does not argue. Every number on it comes out of
 // public/data/nine-keys.json, including the threshold table, the outcome
 // ladder and the validation figures — none of it is written into this file,
-// so a regenerate can never leave prose contradicting the data. The one
-// exception is the sentence naming what the two clubs at the limit have in
-// common, which is derived here from the champion rows themselves.
+// so a regenerate can never leave prose contradicting the data. The sentences
+// that read the figures (who sits at the limit, how much it rests on one
+// season, the placebo) are built from the file by helpers in
+// src/api/nineKeys.js, where the tests check them for every count.
 //
 // The same grid draws twice, for the clubs holding a place now and for every
 // champion since 2000, so the two are read the same way.
@@ -122,24 +123,6 @@ function Legend() {
   )
 }
 
-// What the champions sitting exactly at the limit have in common, said
-// accurately whichever way the data falls. Rebuilt from the rows every
-// render rather than written into the prose, because a regenerate can move
-// which clubs are at the limit and what they share.
-function floorSentence(champions, limit, keyLabel) {
-  const atLimit = champions.filter((c) => (c.failed?.length ?? 0) === limit)
-  if (atLimit.length < 2) return null
-  const shared = atLimit
-    .slice(1)
-    .reduce((acc, c) => acc.filter((id) => c.failed.includes(id)), [...atLimit[0].failed])
-  const who = atLimit.map((c) => `${c.year} ${c.name}`).join(' and ')
-  if (shared.length === 0) {
-    return `${who} sit at the limit, and failed no key in common.`
-  }
-  const names = shared.map(keyLabel).join(' and ')
-  return `${who} sit at the limit. The only key they both failed is ${names}.`
-}
-
 export function NineKeysPage() {
   useDocumentTitle('Nine Keys')
   const { loading, error, data, reload } = useAsync(() => loadNineKeys(), [])
@@ -154,6 +137,8 @@ export function NineKeysPage() {
 
   const ladderMax = (data?.ladder ?? []).reduce((m, r) => Math.max(m, r.meanFailed), 0) || 1
   const atLimit = floorSentence(champions, limit, keyLabel)
+  const support = supportSentence(data?.limitSupport, limit, champions)
+  const placebo = placeboSentence(data?.placebo)
 
   return (
     <div className="screen">
@@ -178,7 +163,7 @@ export function NineKeysPage() {
       {hasData && (
         <>
           <p className="ninekeys__rule">
-            <span>No champion since {data.firstSeason ?? 2000} has failed more than</span>
+            <span>No champion since {data.firstSeason} has failed more than</span>
             <span className="ninekeys__count">
               {limit} of {keys.length}
             </span>
@@ -231,7 +216,7 @@ export function NineKeysPage() {
           )}
 
           <section className="ninekeys__section">
-            <h2 className="ninekeys__h">Every champion since {data.firstSeason ?? 2000}</h2>
+            <h2 className="ninekeys__h">Every champion since {data.firstSeason}</h2>
             <p className="ninekeys__note">
               The same nine ranks for each World Series winner, most recent first.
               {atLimit ? ` ${atLimit}` : ''}
@@ -264,11 +249,12 @@ export function NineKeysPage() {
                 {data.thresholds
                   .filter((t) => t.limit >= 1 && t.limit <= limit)
                   .map((t) => (
-                    <div className="ninekeys__row" key={t.limit}>
+                    <div
+                      className={`ninekeys__row${t.limit === limit ? ' ninekeys__row--em' : ''}`}
+                      key={t.limit}
+                    >
                       <span className="ninekeys__rowlabel">Fail no more than {t.limit}</span>
-                      <span
-                        className={`ninekeys__rowval${t.limit === limit ? ' ninekeys__rowval--em' : ''}`}
-                      >
+                      <span className="ninekeys__rowval">
                         {t.championsPassing} of {t.championTotal}
                       </span>
                       <span className="ninekeys__rownote">
@@ -307,19 +293,12 @@ export function NineKeysPage() {
           <div className="ninekeys__method">
             <p>
               Each measure is scored as a rank within its own season, so a run environment that
-              moves between 2000 and now cannot move a key. Equal values take the better rank.
-              Ranks come from the MLB Stats API; who played in October comes from this site’s own
-              postseason history.
+              moves between {data.firstSeason} and now cannot move a key. Equal values take the
+              better rank. Ranks come from the MLB Stats API. Who played in October comes from this
+              site’s own postseason history; for a season that history does not have yet, it comes
+              from the clubs the final standings mark as clinched.
             </p>
-            {data.leaveOneOut && data.placebo && (
-              <p>
-                Rebuilding the limit from every champion but one and checking the one left out
-                holds {data.leaveOneOut.passed} times out of {data.leaveOneOut.of}. Against{' '}
-                {data.placebo.reps.toLocaleString()} screens built the same way from randomly drawn
-                postseason clubs, this one filters at least as hard {Math.round(data.placebo.p * 100)}%
-                of the time.
-              </p>
-            )}
+            {(support || placebo) && <p>{[support, placebo].filter(Boolean).join(' ')}</p>}
           </div>
         </>
       )}

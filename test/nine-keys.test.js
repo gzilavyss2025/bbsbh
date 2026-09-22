@@ -11,7 +11,17 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import { BAR, KEYS, ladderFor, projectField, scoreSeason } from '../scripts/gen-nine-keys.mjs'
+import {
+  BAR,
+  KEYS,
+  buildReport,
+  ladderFor,
+  projectField,
+  scoreSeason,
+  seasonField,
+  warByTeam,
+} from '../scripts/gen-nine-keys.mjs'
+import { floorSentence, listOf, placeboSentence, supportSentence } from '../src/api/nineKeys.js'
 import { parseRoute } from '../src/lib/route.js'
 
 const file = JSON.parse(readFileSync(new URL('../public/data/nine-keys.json', import.meta.url)))
@@ -113,23 +123,196 @@ test('ladderFor places each club by the deepest round it reached', () => {
 })
 
 // --------------------------------------------------------------------------
-// projectField — who holds a place while the season is still being played.
+// warByTeam — Talent, split by stint.
 // --------------------------------------------------------------------------
-test('projectField takes three division leaders and three wild cards per league', () => {
-  const clubs = []
-  let id = 1
-  for (const leagueId of [103, 104]) {
-    for (const divisionId of [1, 2, 3]) {
-      for (let i = 0; i < 5; i += 1) {
-        clubs.push(club(id++, { leagueId, divisionId, winPct: 0.7 - i * 0.05 }))
-      }
-    }
-  }
-  const field = projectField(clubs)
+// The bug this closes: the bulk sabermetrics board files a traded player's
+// whole season under his LAST club (2024 Chisholm: one row, Yankees, 4.05).
+// Per-club queries return each stint, and each is summed to the club asked.
+test('a traded player counts for each club only the WAR he gave it', () => {
+  const war = warByTeam([
+    { teamId: 146, splits: [{ team: { id: 146 }, stat: { war: '1.79' } }, { team: { id: 146 }, stat: { war: 2 } }] },
+    { teamId: 147, splits: [{ team: { id: 147 }, stat: { war: 2.26 } }] },
+  ])
+  assert.equal(war.get(146), 3.79)
+  assert.equal(war.get(147), 2.26)
+})
+
+test('a row naming another club is not summed into the club that was asked', () => {
+  const war = warByTeam([{ teamId: 146, splits: [{ team: { id: 147 }, stat: { war: 4.05 } }] }])
+  assert.equal(war.get(146), undefined)
+})
+
+// --------------------------------------------------------------------------
+// projectField / seasonField — who holds a place, and whether that is final.
+// --------------------------------------------------------------------------
+// Standings records the way /standings sends them: three divisions a league,
+// the leader flagged by MLB rather than inferred from the rounded pct.
+const records = (pcts) =>
+  [103, 104].flatMap((leagueId, l) =>
+    [0, 1, 2].map((d) => ({
+      league: { id: leagueId },
+      division: { id: 200 + l * 3 + d },
+      teamRecords: pcts[l][d].map((pct, i) => ({
+        team: { id: l * 100 + d * 10 + i + 1, name: `T${l}${d}${i}` },
+        winningPercentage: pct,
+        divisionLeader: i === 0,
+      })),
+    })),
+  )
+const league = [
+  ['.600', '.560', '.540', '.450', '.400'],
+  ['.590', '.550', '.500', '.450', '.400'],
+  ['.580', '.530', '.520', '.450', '.400'],
+]
+
+test('projectField takes the three flagged division leaders and three wild cards per league', () => {
+  const field = projectField(records([league, league]))
   assert.equal(field.length, 12)
-  // The best club in each division is a leader, whatever its league record.
-  for (const leader of [1, 6, 11, 16, 21, 26]) assert.ok(field.includes(leader))
+  for (const leader of [1, 11, 21, 101, 111, 121]) assert.ok(field.includes(leader))
   assert.equal(new Set(field).size, 12, 'no club is counted twice')
+})
+
+// The bug this closed: a sort on the rounded pct string let array order
+// decide a tie for the last wild card. The app's board keeps both.
+test('a tie for the last wild card keeps both clubs', () => {
+  // Wild-card order: .560, .550, then two clubs at .530 for the last place.
+  const tied = [
+    ['.600', '.560', '.530', '.450', '.400'],
+    ['.590', '.550', '.500', '.450', '.400'],
+    ['.580', '.530', '.520', '.450', '.400'],
+  ]
+  const field = projectField(records([tied, league]))
+  assert.ok(field.includes(3) && field.includes(22), 'both .530 clubs hold the third place')
+  assert.equal(field.filter((id) => id < 100).length, 7)
+})
+
+test('seasonField prefers the played bracket, then the clinched clubs, then the projection', () => {
+  const recs = records([league, league])
+  const clubs = recs.flatMap((r) => r.teamRecords.map((t) => ({ teamId: t.team.id, clinched: false })))
+  assert.deepEqual(seasonField({ clubs, records: recs, history: [1, 2], regularSeasonOver: true }), {
+    ids: [1, 2],
+    final: true,
+  })
+
+  // The regular season is over and postseason-history.json does not have it
+  // yet: the standings' clinched flag names the field, and it is final.
+  const clinchedIds = [1, 2, 3, 11, 12, 21, 101, 102, 103, 111, 112, 121]
+  const done = clubs.map((c) => ({ ...c, clinched: clinchedIds.includes(c.teamId) }))
+  assert.deepEqual(seasonField({ clubs: done, records: recs, regularSeasonOver: true }), {
+    ids: clinchedIds,
+    final: true,
+  })
+
+  // Still being played: a projection, and not final even with 12 clinched.
+  const live = seasonField({ clubs: done, records: recs, regularSeasonOver: false })
+  assert.equal(live.final, false)
+  assert.deepEqual(live.ids, projectField(recs))
+})
+
+// --------------------------------------------------------------------------
+// buildReport — the limit is read off the champions, never a constant.
+// --------------------------------------------------------------------------
+// A 30-club season where every club ties at a good value on every key, and
+// the champion alone is worst on `fails` of them.
+const BAD = { runsScored: 400, runsAllowed: 1000, spERA: 7, rpERA: 7, obp: 0.2, hr: 50, batSO: 2000, whip: 2, war: 0 }
+const KEY_FIELDS = Object.keys(BAD)
+function fixtureSeason(year, fails) {
+  const bad = Object.fromEntries(KEY_FIELDS.slice(0, fails).map((f) => [f, BAD[f]]))
+  const clubs = Array.from({ length: 30 }, (_, i) => club(i + 1, { name: `C${i + 1}`, wins: 90, losses: 72 }))
+  clubs[0] = { ...clubs[0], ...bad }
+  return { year, clubs, regularSeasonOver: true }
+}
+const fixtureHistory = (years) => ({
+  seasons: years.map((year) => ({ year, championTeamId: 1, rounds: [series('worldseries', 1, 2, 1)] })),
+})
+
+// The bug this closed: LIMIT was a constant 3 and a 4-fail champion only
+// printed a NOTE, so the page would state a rule its own table broke.
+test('a champion who fails more keys moves the limit with him', () => {
+  const report = buildReport([fixtureSeason(2000, 1), fixtureSeason(2001, 4)], fixtureHistory([2000, 2001]))
+  assert.equal(report.limit, 4)
+  const atLimit = report.thresholds.find((t) => t.limit === report.limit)
+  assert.equal(atLimit.championsPassing, atLimit.championTotal)
+})
+
+// The bug this closed: "leave-one-out holds 26 of 26" passed by construction
+// whenever two champions shared the worst count.
+test('limitSupport counts the champions at the limit, and names the limit without a lone one', () => {
+  const shared = buildReport(
+    [fixtureSeason(2000, 3), fixtureSeason(2001, 3), fixtureSeason(2002, 1)],
+    fixtureHistory([2000, 2001, 2002]),
+  )
+  assert.deepEqual(shared.limitSupport, { atLimit: 2, of: 3, withoutLoneWorst: null })
+
+  const lone = buildReport(
+    [fixtureSeason(2000, 3), fixtureSeason(2001, 1), fixtureSeason(2002, 2)],
+    fixtureHistory([2000, 2001, 2002]),
+  )
+  assert.deepEqual(lone.limitSupport, { atLimit: 1, of: 3, withoutLoneWorst: 2 })
+})
+
+test('firstSeason is the first season the report scored', () => {
+  const report = buildReport([fixtureSeason(2012, 1)], fixtureHistory([2012]))
+  assert.equal(report.firstSeason, 2012)
+})
+
+// --------------------------------------------------------------------------
+// The page's derived sentences.
+// --------------------------------------------------------------------------
+const label = (id) => ({ offense: 'Runs', power: 'Power', bullpen: 'Bullpen' })[id] ?? id
+const champ = (year, name, failed) => ({ year, name, failed })
+
+test('listOf joins one, two and three items', () => {
+  assert.equal(listOf(['A']), 'A')
+  assert.equal(listOf(['A', 'B']), 'A and B')
+  assert.equal(listOf(['A', 'B', 'C']), 'A, B and C')
+})
+
+test('floorSentence says "both" for two clubs and one shared key', () => {
+  const text = floorSentence(
+    [champ(2014, 'Giants', ['power', 'bullpen']), champ(2003, 'Marlins', ['power', 'offense'])],
+    2,
+    label,
+  )
+  assert.equal(text, 'The 2014 Giants and the 2003 Marlins sit at the limit. The only key they both failed is Power.')
+})
+
+// The bug this closed: the grammar was fixed at two clubs and one key.
+test('floorSentence says "all" for three clubs, and lists two shared keys', () => {
+  const text = floorSentence(
+    [
+      champ(2014, 'Giants', ['power', 'bullpen']),
+      champ(2003, 'Marlins', ['power', 'bullpen']),
+      champ(2006, 'Cardinals', ['bullpen', 'power']),
+    ],
+    2,
+    label,
+  )
+  assert.equal(
+    text,
+    'The 2014 Giants, the 2003 Marlins and the 2006 Cardinals sit at the limit. The keys they all failed are Power and Bullpen.',
+  )
+})
+
+test('floorSentence says so when the clubs share no key, and is silent for one club', () => {
+  assert.match(floorSentence([champ(1, 'A', ['power']), champ(2, 'B', ['offense'])], 1, label), /share no failed key/)
+  assert.equal(floorSentence([champ(1, 'A', ['power'])], 1, label), null)
+})
+
+test('supportSentence names a lone club at the limit and the limit without it', () => {
+  const text = supportSentence({ atLimit: 1, of: 26, withoutLoneWorst: 2 }, 3, [champ(2014, 'Giants', ['a', 'b', 'c'])])
+  assert.equal(text, 'Only the 2014 Giants sit at the limit. Without that season, the limit would be 2.')
+  assert.match(supportSentence({ atLimit: 2, of: 26, withoutLoneWorst: null }, 3, []), /^2 of the 26 champions/)
+})
+
+// The bug this closed: the page said the REAL screen "filters at least as
+// hard 5% of the time". p is the share of RANDOM screens that do.
+test('placeboSentence says p is the share of random screens as strict as this one', () => {
+  assert.equal(
+    placeboSentence({ reps: 3000, p: 0.039 }),
+    'Of 3,000 screens built the same way from randomly drawn postseason clubs, 4% filter as hard as this one.',
+  )
+  assert.match(placeboSentence({ reps: 3000, p: 0.004 }), /fewer than 1% filter/)
 })
 
 // --------------------------------------------------------------------------
@@ -205,9 +388,10 @@ test('the threshold table is monotonic — a looser line never admits fewer cham
   assert.equal(atLimit.championsPassing, atLimit.championTotal, 'the rule admits every champion')
 })
 
-test('leave-one-out never reports more passes than there are champions', () => {
-  assert.ok(file.leaveOneOut.passed <= file.leaveOneOut.of)
-  assert.equal(file.leaveOneOut.of, file.champions.length)
+test("the file's limit support matches its own champion rows", () => {
+  const atLimit = file.champions.filter((c) => c.failed.length === file.limit).length
+  assert.equal(file.limitSupport.atLimit, atLimit)
+  assert.equal(file.limitSupport.of, file.champions.length)
 })
 
 // --------------------------------------------------------------------------

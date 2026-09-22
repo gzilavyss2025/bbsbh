@@ -18,10 +18,17 @@
 //
 // ONE FITTED NUMBER, DELIBERATELY. Every key is scored at the SAME bar — top
 // 15 of 30, the top half of the league, within that key's own season. Nothing
-// is tuned per measure. The only value fitted to the champions is the limit
-// of three, and it is simply the worst any champion has done. Fitting nine
-// separate thresholds instead would admit the same champions and would not
-// survive leave-one-out; this does, 26 times out of 26.
+// is tuned per measure. The only value fitted to the champions is the limit,
+// and it is not a constant: it is the worst any champion has done, read off
+// the rows on every run. A new champion who fails one more key moves the
+// limit with him, so the page's rule can never be contradicted by the table
+// under it.
+//
+// HOW MUCH THE LIMIT RESTS ON ONE SEASON. A leave-one-out check on a maximum
+// proves little: when two champions share the worst count, removing either
+// leaves the other, so every champion "passes" by construction. The file
+// instead says how many champions sit at the limit, and — when one sits there
+// alone — what the limit would be without it.
 //
 // WHY WITHIN-SEASON RANKS AND NOT RAW NUMBERS. A 4.10 ERA was ordinary in
 // 2000 and very good in 2014. Run environments move enough over 26 seasons
@@ -53,25 +60,42 @@
 // A SCHEDULED POSTSEASON GAME IS NOT A RESULT. statsapi puts the coming
 // bracket on the schedule as placeholder games well before the regular season
 // ends. This generator therefore never reads the current field off the
-// schedule; it reads the standings and applies the format (three division
-// winners plus three wild cards per league). For completed seasons it reads
-// the actual participants out of public/data/postseason-history.json, which
-// is built from played games.
+// schedule. The field comes from one of three places, best first:
+//   1. public/data/postseason-history.json, built from played games. That
+//      file is committed by hand, so it lags the end of a season.
+//   2. Once the regular season is over, the standings' own `clinched` flag,
+//      which marks exactly the twelve clubs that qualified. This covers the
+//      weeks between the last regular-season game and the next hand run of
+//      gen-postseason-history, and applies MLB's tiebreakers for free.
+//   3. While the season is still being played, the Wild Card board's own
+//      shaping (shapeWildCard in src/api/standings.js), imported rather than
+//      copied: the three division leaders by the standings' `divisionLeader`
+//      flag, then every club ranked 3rd or better for the wild card. A tie
+//      for the last place keeps both clubs, as the app's board does.
 //
-// Run: node scripts/gen-nine-keys.mjs
-// Writes: public/data/nine-keys.json
-import { readFileSync, writeFileSync } from 'node:fs'
+// FINISHED SEASONS ARE CACHED. The Talent key needs one sabermetrics query
+// per club and group (see seasonInputs), so a full rebuild is about 1,800
+// requests. A season whose regular season is over and whose field is settled
+// cannot change, so its raw inputs are kept in scripts/data/nine-keys-
+// seasons.json and the nightly run fetches only the season still in play.
+// `--refresh` ignores the cache and fetches every season again.
+//
+// Run: node scripts/gen-nine-keys.mjs [--refresh]
+// Writes: public/data/nine-keys.json, scripts/data/nine-keys-seasons.json
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { mapConcurrent } from './lib/concurrency.mjs'
+import { shapeWildCard } from '../src/api/standings.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = join(__dirname, '..')
+const API = 'https://statsapi.mlb.com/api/v1'
+const CACHE_PATH = join(REPO_ROOT, 'scripts', 'data', 'nine-keys-seasons.json')
 
 export const FIRST_SEASON = 2000
 export const BAR = 15 // top 15 of 30 passes a key
-export const LIMIT = 3 // no champion since 2000 has failed more than this
-const AL = 103
-const NL = 104
+const FIELD_SIZE = 12 // clubs in the postseason, 2022 on
 
 // A MISSING NUMBER MUST NOT BECOME A GOOD ONE. Five of the nine keys read
 // better-is-lower and so are negated, and `-null` is `-0` — a finite value
@@ -114,17 +138,47 @@ async function getJSON(url) {
   return null
 }
 
-// One season's 30 clubs, every raw input the nine keys need.
+// Talent WAR per club, from one sabermetrics response per club and group.
+//
+// A TRADED PLAYER'S WAR MUST BE SPLIT BY STINT, and the bulk leader board
+// cannot do it. Without a `teamId`, the endpoint returns ONE row per player:
+// the season total, filed under his LAST club (2024: Jazz Chisholm, one row,
+// Yankees, 4.05 WAR, his Marlins months included). Summing that would hand
+// every deadline buyer its new players' whole seasons, and take the same WAR
+// away from every seller. With `teamId`, the rows are that club's stints only
+// (Chisholm: 1.79 for Miami, 2.26 for New York). So each response is summed
+// to the club it was ASKED for; a row naming some other club is ignored.
+export function warByTeam(responses) {
+  const war = new Map()
+  for (const { teamId, splits } of responses) {
+    for (const split of splits ?? []) {
+      if (split.team?.id != null && split.team.id !== teamId) continue
+      const value = Number(split.stat?.war)
+      if (Number.isNaN(value)) continue
+      war.set(teamId, (war.get(teamId) ?? 0) + value)
+    }
+  }
+  return war
+}
+
+// mapConcurrent turns a failed item into null. For this report a missing
+// season or club is a wrong number, not a gap, so any null fails the run.
+async function mapAll(items, limit, mapper, what) {
+  const results = await mapConcurrent(items, limit, mapper)
+  const missing = results.filter((r) => r == null).length
+  if (missing) throw new Error(`${missing} of ${items.length} ${what} failed to load`)
+  return results
+}
+
+// One season's 30 clubs, every raw input the nine keys need. Returns the raw
+// standings records too: the projected field is shaped from them.
 async function seasonInputs(year) {
-  const base = 'https://statsapi.mlb.com/api/v1'
-  const [standings, hitting, pitching, sp, rp, warBat, warPit] = await Promise.all([
-    getJSON(`${base}/standings?leagueId=${AL},${NL}&season=${year}&standingsTypes=regularSeason`),
-    getJSON(`${base}/teams/stats?season=${year}&sportId=1&stats=season&group=hitting&gameType=R`),
-    getJSON(`${base}/teams/stats?season=${year}&sportId=1&stats=season&group=pitching&gameType=R`),
-    getJSON(`${base}/teams/stats?season=${year}&sportId=1&stats=statSplits&group=pitching&sitCodes=sp&gameType=R`),
-    getJSON(`${base}/teams/stats?season=${year}&sportId=1&stats=statSplits&group=pitching&sitCodes=rp&gameType=R`),
-    getJSON(`${base}/stats?stats=sabermetrics&group=hitting&season=${year}&sportId=1&playerPool=ALL&limit=4000`),
-    getJSON(`${base}/stats?stats=sabermetrics&group=pitching&season=${year}&sportId=1&playerPool=ALL&limit=4000`),
+  const [standings, hitting, pitching, sp, rp] = await Promise.all([
+    getJSON(`${API}/standings?leagueId=103,104&season=${year}&standingsTypes=regularSeason`),
+    getJSON(`${API}/teams/stats?season=${year}&sportId=1&stats=season&group=hitting&gameType=R`),
+    getJSON(`${API}/teams/stats?season=${year}&sportId=1&stats=season&group=pitching&gameType=R`),
+    getJSON(`${API}/teams/stats?season=${year}&sportId=1&stats=statSplits&group=pitching&sitCodes=sp&gameType=R`),
+    getJSON(`${API}/teams/stats?season=${year}&sportId=1&stats=statSplits&group=pitching&sitCodes=rp&gameType=R`),
   ])
 
   const clubs = new Map()
@@ -133,16 +187,15 @@ async function seasonInputs(year) {
     clubs.set(key, Object.assign(clubs.get(key) || { teamId: Number(teamId) }, patch))
   }
 
-  for (const record of standings?.records ?? []) {
+  const records = standings?.records ?? []
+  for (const record of records) {
     for (const row of record.teamRecords ?? []) {
       put(row.team.id, {
         name: row.team.name,
         wins: row.wins,
         losses: row.losses,
         games: (row.wins ?? 0) + (row.losses ?? 0),
-        winPct: num(row.winningPercentage),
-        leagueId: record.league?.id ?? null,
-        divisionId: record.division?.id ?? null,
+        clinched: row.clinched === true,
       })
     }
   }
@@ -162,21 +215,22 @@ async function seasonInputs(year) {
   for (const split of sp?.stats?.[0]?.splits ?? []) put(split.team.id, { spERA: num(split.stat.era) })
   for (const split of rp?.stats?.[0]?.splits ?? []) put(split.team.id, { rpERA: num(split.stat.era) })
 
-  // WAR is a player-level feed; sum it per club. A player traded mid-season
-  // appears once per club he played for, each row carrying that stint's WAR,
-  // so a plain sum attributes each stint to the club that got it.
-  const war = new Map()
-  for (const source of [warBat, warPit]) {
-    for (const split of source?.stats?.[0]?.splits ?? []) {
-      const teamId = split.team?.id
-      const value = Number(split.stat?.war)
-      if (!teamId || Number.isNaN(value)) continue
-      war.set(teamId, (war.get(teamId) ?? 0) + value)
-    }
-  }
-  for (const [teamId, value] of war) put(teamId, { war: value })
+  const played = [...clubs.values()].filter((c) => c.games > 0)
+  const queries = played.flatMap((c) => ['hitting', 'pitching'].map((group) => ({ teamId: c.teamId, group })))
+  const responses = await mapAll(
+    queries,
+    6,
+    async ({ teamId, group }) => {
+      const json = await getJSON(
+        `${API}/stats?stats=sabermetrics&group=${group}&season=${year}&sportId=1&playerPool=ALL&limit=4000&teamId=${teamId}`,
+      )
+      return { teamId, splits: json?.stats?.[0]?.splits ?? [] }
+    },
+    `${year} WAR queries`,
+  )
+  for (const [teamId, value] of warByTeam(responses)) put(teamId, { war: Math.round(value * 1000) / 1000 })
 
-  return [...clubs.values()].filter((c) => c.games > 0)
+  return { clubs: played, records }
 }
 
 // Rank 1..30 on every key, then count the failures.
@@ -218,28 +272,29 @@ export function scoreSeason(clubs) {
   return scored
 }
 
-// Who holds a postseason place right now: three division leaders per league,
-// then the next three by winning percentage. This is the 2022+ format. It is
-// read from the standings on purpose — the schedule carries placeholder games
-// for a bracket nobody has played.
-export function projectField(clubs) {
-  const field = []
-  for (const leagueId of [AL, NL]) {
-    const inLeague = clubs.filter((c) => c.leagueId === leagueId)
-    const byDivision = new Map()
-    for (const club of inLeague) {
-      const current = byDivision.get(club.divisionId)
-      if (!current || club.winPct > current.winPct) byDivision.set(club.divisionId, club)
-    }
-    const leaders = [...byDivision.values()]
-    const leaderIds = new Set(leaders.map((c) => c.teamId))
-    const wildCards = inLeague
-      .filter((c) => !leaderIds.has(c.teamId))
-      .sort((a, b) => b.winPct - a.winPct)
-      .slice(0, 3)
-    field.push(...leaders, ...wildCards)
-  }
-  return field.map((c) => c.teamId)
+// Who holds a postseason place while the season is still being played: the
+// app's own Wild Card board, fed the raw standings records. Division leaders
+// come from the standings' `divisionLeader` flag, and the wild cards are every
+// club the board ranks 3rd or better — so a tie for the last place keeps both
+// clubs rather than letting array order pick one. It is read from the
+// standings on purpose; the schedule carries placeholder games for a bracket
+// nobody has played.
+export function projectField(records) {
+  return shapeWildCard(records).flatMap((league) => [
+    ...league.leaders.map((t) => t.id),
+    ...league.wildcard.filter((t) => t.inWildCard).map((t) => t.id),
+  ])
+}
+
+// Which clubs a season's field holds, and whether that is final. `history` is
+// the played bracket, when postseason-history.json has the season; otherwise
+// a finished regular season names its field through the `clinched` flag, and
+// only a season still being played falls back to the projection.
+export function seasonField({ clubs, records, history, regularSeasonOver }) {
+  if (history) return { ids: history, final: true }
+  const clinched = clubs.filter((c) => c.clinched).map((c) => c.teamId)
+  if (regularSeasonOver && clinched.length === FIELD_SIZE) return { ids: clinched, final: true }
+  return { ids: projectField(records ?? []), final: false }
 }
 
 // How far a club got, 0 (missed October) to 5 (won the World Series). Read
@@ -282,11 +337,11 @@ function seededRandom(seed) {
 // from the same ranked data the tables are drawn from, so a figure on the page
 // can never drift from the file underneath it. Only completed seasons count —
 // a season still being played has no outcome to score against.
-function validation(seasonScores, championOf, fieldOf, history) {
+function validation(seasonScores, championOf, fieldOf, history, limit) {
   const seasons = seasonScores.filter((s) => championOf.has(s.year))
   const failsOf = (year, teamId) => seasonScores.find((s) => s.year === year)?.scored.get(teamId)?.failed.length
 
-  const reject = (limit) => {
+  const reject = (line) => {
     let october = 0
     let octoberTotal = 0
     let all = 0
@@ -295,10 +350,10 @@ function validation(seasonScores, championOf, fieldOf, history) {
       const field = new Set(fieldOf.get(year) ?? [])
       for (const [teamId, s] of scored) {
         allTotal += 1
-        if (s.failed.length > limit) all += 1
+        if (s.failed.length > line) all += 1
         if (field.has(teamId)) {
           octoberTotal += 1
-          if (s.failed.length > limit) october += 1
+          if (s.failed.length > line) october += 1
         }
       }
     }
@@ -310,23 +365,26 @@ function validation(seasonScores, championOf, fieldOf, history) {
 
   const championFails = seasons.map(({ year }) => failsOf(year, championOf.get(year)))
   const thresholds = []
-  for (let limit = 0; limit <= KEYS.length; limit += 1) {
-    const r = reject(limit)
+  for (let line = 0; line <= KEYS.length; line += 1) {
+    const r = reject(line)
     thresholds.push({
-      limit,
-      championsPassing: championFails.filter((f) => f <= limit).length,
+      limit: line,
+      championsPassing: championFails.filter((f) => f <= line).length,
       championTotal: championFails.length,
       rejectsOctober: Math.round(r.october * 10) / 10,
       rejectsAll: Math.round(r.all * 10) / 10,
     })
   }
 
-  // Leave-one-out: rebuild the limit from every champion but one, then check
-  // the one left out. This is what separates a rule from a curve fit.
-  let leaveOneOut = 0
-  for (let i = 0; i < championFails.length; i += 1) {
-    const others = championFails.filter((_, j) => j !== i)
-    if (championFails[i] <= Math.max(...others)) leaveOneOut += 1
+  // How much the limit rests on one season. When two or more champions share
+  // the worst count, no single one sets it; when one sits there alone, say
+  // what the limit would be without it.
+  const atLimit = championFails.filter((f) => f === limit).length
+  const others = championFails.filter((f) => f !== limit)
+  const limitSupport = {
+    atLimit,
+    of: championFails.length,
+    withoutLoneWorst: atLimit === 1 ? Math.max(0, ...others) : null,
   }
 
   // Mean keys failed by how far a club got. Nothing in the rule was fitted to
@@ -354,7 +412,7 @@ function validation(seasonScores, championOf, fieldOf, history) {
   // thousands of times, and see how often it filters as hard as the real one.
   const REPS = 3000
   const random = seededRandom(20260922)
-  const real = reject(LIMIT).october
+  const real = reject(limit).october
   let asStrong = 0
   for (let rep = 0; rep < REPS; rep += 1) {
     let limit = 0
@@ -370,19 +428,15 @@ function validation(seasonScores, championOf, fieldOf, history) {
   return {
     thresholds,
     ladder,
-    leaveOneOut: { passed: leaveOneOut, of: championFails.length },
+    limitSupport,
     placebo: { reps: REPS, p: Math.round((asStrong / REPS) * 1000) / 1000 },
   }
 }
 
-async function main() {
-  const history = JSON.parse(
-    readFileSync(join(REPO_ROOT, 'public', 'data', 'postseason-history.json'), 'utf8'),
-  )
-  const championOf = new Map()
+// A played bracket's clubs, per season, from postseason-history.json.
+function fieldsFromHistory(history) {
   const fieldOf = new Map()
   for (const season of history.seasons ?? []) {
-    championOf.set(season.year, season.championTeamId)
     const ids = new Set()
     for (const round of season.rounds ?? []) {
       for (const series of round.series ?? []) {
@@ -392,27 +446,29 @@ async function main() {
     }
     fieldOf.set(season.year, [...ids])
   }
+  return fieldOf
+}
 
-  // statsapi lists NEXT season in `seasons/all` as soon as its schedule is
-  // drafted — a run on 2026-09-22 saw 2027, a season with no games and no
-  // clubs. So this is only the upper bound to probe; the season the page
-  // actually reports on is the last one that came back with real clubs.
-  const seasonMeta = await getJSON('https://statsapi.mlb.com/api/v1/seasons/all?sportId=1')
-  const newest = (seasonMeta?.seasons ?? []).reduce(
-    (best, s) => (Number(s.seasonId) > best ? Number(s.seasonId) : best),
-    FIRST_SEASON,
-  )
+const rowOf = (club, s) => ({
+  teamId: club.teamId,
+  name: club.name,
+  wins: club.wins,
+  losses: club.losses,
+  ranks: s.ranks,
+  failed: s.failed,
+})
+
+// Everything the file says, from the raw seasons and the played brackets. No
+// fetching here, so the whole report can be built from fixtures in a test.
+// `seasons` is oldest first: [{ year, clubs, records?, regularSeasonOver }].
+export function buildReport(seasons, history) {
+  const championOf = new Map((history.seasons ?? []).map((s) => [s.year, s.championTeamId]))
+  const fieldOf = fieldsFromHistory(history)
 
   const champions = []
   const seasonScores = []
-  let currentField = null
-
-  for (let year = FIRST_SEASON; year <= newest; year += 1) {
-    const clubs = await seasonInputs(year)
-    if (clubs.length < 20) {
-      console.error(`  ${year}: no season played yet, stopping`)
-      break
-    }
+  let current = null
+  for (const { year, clubs, records, regularSeasonOver } of seasons) {
     const scored = scoreSeason(clubs)
     const byId = new Map(clubs.map((c) => [c.teamId, c]))
     seasonScores.push({ year, scored })
@@ -420,71 +476,110 @@ async function main() {
     const championId = championOf.get(year)
     if (championId != null && scored.has(championId)) {
       const club = byId.get(championId)
-      const s = scored.get(championId)
       champions.push({
         year,
-        teamId: championId,
-        name: club.name,
-        wins: club.wins,
-        losses: club.losses,
+        ...rowOf(club, scored.get(championId)),
         shortSeason: club.games < 100,
-        ranks: s.ranks,
-        failed: s.failed,
       })
     }
 
-    // Every season with data overwrites this, so it ends up holding the most
-    // recent one that was actually played.
-    {
-      const complete = championOf.has(year)
-      const ids = complete ? fieldOf.get(year) : projectField(clubs)
-      currentField = {
-        season: year,
-        complete,
-        teams: ids
-          .filter((id) => scored.has(id))
-          .map((id) => {
-            const club = byId.get(id)
-            const s = scored.get(id)
-            return {
-              teamId: id,
-              name: club.name,
-              wins: club.wins,
-              losses: club.losses,
-              ranks: s.ranks,
-              failed: s.failed,
-            }
-          })
-          .sort((a, b) => a.failed.length - b.failed.length || a.ranks.offense - b.ranks.offense),
-      }
+    // Every season overwrites this, so it ends up holding the newest one.
+    const { ids, final } = seasonField({ clubs, records, history: fieldOf.get(year), regularSeasonOver })
+    current = {
+      season: year,
+      complete: final,
+      teams: ids
+        .filter((id) => scored.has(id))
+        .map((id) => rowOf(byId.get(id), scored.get(id)))
+        .sort((a, b) => a.failed.length - b.failed.length || a.ranks.offense - b.ranks.offense),
     }
-    console.error(`  ${year}: ${clubs.length} clubs${championId ? ', champion scored' : ''}`)
   }
 
   champions.sort((a, b) => b.year - a.year)
-
   const distribution = {}
   for (const c of champions) distribution[c.failed.length] = (distribution[c.failed.length] ?? 0) + 1
-  const worst = champions.reduce((m, c) => Math.max(m, c.failed.length), 0)
-  if (worst !== LIMIT) {
-    console.error(`  NOTE: worst champion now fails ${worst}, file's limit says ${LIMIT}`)
-  }
+  // The rule's one fitted number, read off the rows every run.
+  const limit = champions.reduce((m, c) => Math.max(m, c.failed.length), 0)
 
-  const out = {
-    generatedAt: new Date().toISOString(),
+  return {
     bar: BAR,
-    limit: LIMIT,
-    firstSeason: FIRST_SEASON,
+    limit,
+    firstSeason: seasons[0]?.year ?? FIRST_SEASON,
     keys: KEYS.map(({ id, label, note }) => ({ id, label, note })),
     distribution,
     champions,
-    current: currentField,
-    ...validation(seasonScores, championOf, fieldOf, history),
+    current,
+    ...validation(seasonScores, championOf, fieldOf, history, limit),
   }
+}
+
+function readCache() {
+  if (!existsSync(CACHE_PATH)) return {}
+  try {
+    return JSON.parse(readFileSync(CACHE_PATH, 'utf8')).seasons ?? {}
+  } catch {
+    return {}
+  }
+}
+
+async function main() {
+  const refresh = process.argv.includes('--refresh')
+  const history = JSON.parse(
+    readFileSync(join(REPO_ROOT, 'public', 'data', 'postseason-history.json'), 'utf8'),
+  )
+  const fieldOf = fieldsFromHistory(history)
+  const cache = refresh ? {} : readCache()
+
+  // statsapi lists NEXT season in `seasons/all` as soon as its schedule is
+  // drafted — a run on 2026-09-22 saw 2027, a season with no games and no
+  // clubs. So this is only the upper bound to probe; the season the page
+  // actually reports on is the last one that came back with real clubs.
+  const seasonMeta = await getJSON(`${API}/seasons/all?sportId=1`)
+  const endOf = new Map((seasonMeta?.seasons ?? []).map((s) => [Number(s.seasonId), s.regularSeasonEndDate]))
+  const newest = Math.max(FIRST_SEASON, ...endOf.keys())
+  const today = new Date().toISOString().slice(0, 10)
+
+  const years = []
+  for (let year = FIRST_SEASON; year <= newest; year += 1) years.push(year)
+  const fetched = await mapAll(
+    years.filter((year) => !cache[year]),
+    3,
+    async (year) => ({ year, ...(await seasonInputs(year)) }),
+    'seasons',
+  )
+  const fresh = new Map(fetched.map((f) => [f.year, f]))
+
+  const seasons = []
+  const nextCache = {}
+  for (const year of years) {
+    const hit = fresh.get(year)
+    const clubs = cache[year] ?? hit.clubs
+    if (clubs.length < 20) {
+      console.error(`  ${year}: no season played yet, stopping`)
+      break
+    }
+    const regularSeasonOver = Boolean(endOf.get(year)) && endOf.get(year) < today
+    const season = { year, clubs, records: hit?.records, regularSeasonOver }
+    seasons.push(season)
+    // Cache a season only once nothing about it can move: its regular season
+    // is over and its field is known without the standings records.
+    const settled = seasonField({ clubs, history: fieldOf.get(year), regularSeasonOver }).final
+    if (regularSeasonOver && settled) nextCache[year] = clubs
+    console.error(`  ${year}: ${clubs.length} clubs${cache[year] ? ' (cached)' : ''}`)
+  }
+
+  const report = buildReport(seasons, history)
   const path = join(REPO_ROOT, 'public', 'data', 'nine-keys.json')
-  writeFileSync(path, `${JSON.stringify(out)}\n`)
+  writeFileSync(path, `${JSON.stringify({ generatedAt: new Date().toISOString(), ...report })}\n`)
+  writeFileSync(
+    CACHE_PATH,
+    `${JSON.stringify({
+      note: 'GENERATED by scripts/gen-nine-keys.mjs: raw inputs for finished seasons. Delete it, or run with --refresh, to fetch every season again.',
+      seasons: nextCache,
+    })}\n`,
+  )
   console.error(
-    `wrote nine-keys.json — ${champions.length} champions, ${currentField?.teams.length ?? 0} clubs in the ${currentField?.season} field`,
+    `wrote nine-keys.json — ${report.champions.length} champions, limit ${report.limit}, ${report.current?.teams.length ?? 0} clubs in the ${report.current?.season} field`,
   )
 }
 
