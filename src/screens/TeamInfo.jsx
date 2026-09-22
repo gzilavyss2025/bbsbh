@@ -201,7 +201,7 @@ export function TeamInfo({
           {onPreview && (
             <button
               type="button"
-              className="btn btn--next teaminfo__previewdoor"
+              className="btn btn--ink btn--next teaminfo__previewdoor"
               onClick={onPreview}
             >
               View preview card
@@ -279,12 +279,12 @@ export function TeamInfo({
             <button className="btn btn--reveal revealsplit__btn" onClick={onCatchUp}>
               Catch up to live ›
             </button>
-            <button className="btn btn--next revealsplit__btn" onClick={onNext}>
+            <button className="btn btn--ink btn--next revealsplit__btn" onClick={onNext}>
               {nextLabel}
             </button>
           </div>
         ) : (
-          <button className="btn btn--next" onClick={onNext}>
+          <button className="btn btn--ink btn--next" onClick={onNext}>
             {nextLabel}
           </button>
         )}

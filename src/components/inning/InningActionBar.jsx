@@ -151,7 +151,7 @@ export function InningActionBar({
         </div>
       ) : nextIdx != null ? (
         <button
-          className="btn btn--next"
+          className="btn btn--ink btn--next"
           onClick={() => !closing && onForward(nextIdx)}
           aria-disabled={turning || closing || undefined}
         >
@@ -170,7 +170,7 @@ export function InningActionBar({
            amendment) — still behind that page's own seal, which must not gain an
            onReveal (see BoxScore.jsx). */
         <button
-          className="btn btn--next"
+          className="btn btn--ink btn--next"
           onClick={() => !closing && onBoxScore()}
           aria-disabled={closing || undefined}
         >

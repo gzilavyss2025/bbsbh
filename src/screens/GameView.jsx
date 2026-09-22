@@ -210,7 +210,7 @@ export function GameView({ game, section, onSection }) {
         <button
           key={s.key}
           type="button"
-          className={`stepnav__btn ${s.active ? 'is-active' : ''}`}
+          className="btn btn--control stepnav__btn"
           aria-current={s.active ? 'page' : undefined}
           onClick={() => !s.active && onSection(s.section)}
         >

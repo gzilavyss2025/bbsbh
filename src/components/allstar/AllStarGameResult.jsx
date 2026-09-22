@@ -64,7 +64,7 @@ export function AllStarGameResult({ score, mvp, venue, dateLabel, onBoxScore }) 
           {onBoxScore && (
             <button
               type="button"
-              className="btn btn--next allstargame__boxbtn"
+              className="btn btn--ink btn--next allstargame__boxbtn"
               onClick={onBoxScore}
             >
               Box score

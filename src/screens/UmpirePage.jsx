@@ -11,6 +11,7 @@ import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { Button } from '../components/ui/control/Button.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const TOP_VENUES_LIMIT = 5
@@ -208,21 +209,18 @@ export function UmpirePage({ id }) {
       </div>
 
       <div className="umpage__filter" role="group" aria-label="Filter games by base">
-        <button
-          type="button"
-          className={`umpage__filterbtn ${!hpOnly ? 'is-active' : ''}`}
-          onClick={() => setHpOnly(false)}
-        >
+        <Button size="control" pressed={!hpOnly} className="umpage__filterbtn" onClick={() => setHpOnly(false)}>
           All games
-        </button>
-        <button
-          type="button"
-          className={`umpage__filterbtn ${hpOnly ? 'is-active' : ''}`}
+        </Button>
+        <Button
+          size="control"
+          pressed={hpOnly}
+          className="umpage__filterbtn"
           onClick={() => setHpOnly(true)}
           disabled={hpCount === 0}
         >
           Home plate only
-        </button>
+        </Button>
       </div>
 
       {shown.length === 0 ? (

@@ -1,4 +1,5 @@
 import { Loader } from '../ui/Loader.jsx'
+import { Button } from '../ui/control/Button.jsx'
 
 // Career/season workload by fielding position, drawn on a small diamond that
 // echoes DefenseDiamond's SPOTS layout (see components/DefenseDiamond.jsx) —
@@ -65,15 +66,15 @@ export function PositionInnings({ options, scope, onScope, loading, fielding, pi
       {options.length > 1 && (
         <div className="posinn__scope" aria-label="Scope">
           {options.map((o) => (
-            <button
+            <Button
               key={o.key}
-              type="button"
-              aria-pressed={scope === o.key}
-              className={`posinn__scopebtn ${scope === o.key ? 'is-active' : ''}`}
+              size="control"
+              pressed={scope === o.key}
+              className="posinn__scopebtn"
               onClick={() => onScope(o.key)}
             >
               {o.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}

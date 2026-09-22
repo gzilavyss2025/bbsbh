@@ -418,14 +418,11 @@
    this file. What stays here is the innings bar's own pair — the advance and
    the reveal — because both carry placement (the full-width bar slot) as well
    as dress, and the reveal is the spoiler rule's one control. */
+/* The advance: where the bar's one forward action stands. Placement only —
+   its navy is the ink skin, which every caller now wears beside it. */
 .btn--next {
   width: 100%;
   margin-top: 20px;
-  --btn-fill: var(--accent-primary);
-  --btn-edge: var(--accent-primary);
-  --btn-ink: var(--text-on-ink);
-  --btn-fill-hover: var(--accent-primary-hover);
-  --btn-edge-hover: var(--accent-primary-hover);
 }
 
 /* "Caught up to live" status — replaces the forward action in the innings bar

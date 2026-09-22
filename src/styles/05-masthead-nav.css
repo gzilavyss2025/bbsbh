@@ -202,33 +202,15 @@
   margin: 0 0 14px;
 }
 
-.stepnav__btn {
+/* Each stop is a Button (control size, outline) and the current one wears
+   aria-current="page", which draws the selected state. All this keeps is
+   where a stop stands: an equal share of the row, and the row's side padding,
+   since the row sizes the cell and not its label. BOTH ARE WRITTEN UNDER
+   .stepnav ON PURPOSE: this file loads before system/button.css, so a bare
+   .stepnav__btn would lose the padding to .btn--control on order alone. */
+.stepnav .stepnav__btn {
   flex: 1 1 0;
-  min-height: 34px;
-  padding: 0 var(--space-1);
-  border-radius: var(--radius-sm);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-muted);
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: var(--shadow-card);
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-
-.stepnav__btn:active {
-  transform: scale(0.96);
-}
-
-.stepnav__btn.is-active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-  box-shadow: none;
+  padding-inline: var(--space-1);
 }
 
 /* The '@' behind the two club marks — the exact same screen-print watermark

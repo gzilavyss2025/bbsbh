@@ -43,30 +43,11 @@
   gap: var(--space-1);
   margin-bottom: 2px;
 }
+/* A Button (control size, outline) drawn square: a one-glyph step takes its
+   width from the control height, not from padding. */
 .sc-zoom__btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: var(--control-min);
   padding: 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-solid);
-  color: var(--text-body);
-  cursor: pointer;
-}
-.sc-zoom__btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-.sc-zoom__btn:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 1px;
 }
 .sc-zoom__pct {
   min-width: 38px;
