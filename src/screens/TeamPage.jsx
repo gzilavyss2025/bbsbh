@@ -162,9 +162,10 @@ export function TeamPage({ id, asOf, sportId }) {
               limit={PREVIEW_HIGHLIGHTS}
             />
           )}
-          {photoGames.length > 0 && (
+          {photoGames.length > 0 && isMlbTeamId(team.id) && (
             // `photoGames`, not `seasonGames` — this rail may include a game
             // still in progress (an explicit override; see loadOverview.js).
+            // MLB only, like the Highlights rail (#1142).
             <TeamPhotosRail
               key={`photos-${team.id}-${asOf ?? ''}`}
               teamId={team.id}
