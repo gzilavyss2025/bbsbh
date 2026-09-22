@@ -82,7 +82,7 @@
 /* The Game Log trigger is the one labelled control in the row (see
    LogbookButton.jsx for why it earns the word). Labelled, it stops being a
    square tap target and becomes a pill: horizontal padding replaces the icon
-   buttons' square min-width, and the glyph and word share a 5px gap — tight
+   buttons' square min-width, and the glyph and word share a var(--space-1) gap — tight
    enough that the pair reads as one mark-plus-name lockup rather than two
    items that happen to sit near each other. */
 .logbook-btn--labeled {

@@ -92,7 +92,11 @@ const SPACING_RESIDUE = {
   '04a-wire-dock.css': { 62: 1 },
   '05-masthead-nav.css': { 18: 1 },
   '07-team-logo-and-buttons.css': { 18: 1 },
-  '08-site-shell.css': { 23: 2 },
+  // 23 -> 22: the favourite-team sheet's two centring paddings are HALF A LOGO
+  // BUTTON, and the button narrowed to 44px when .vsteam__team's own padding
+  // joined the scale. A derived literal follows its input or it stops being
+  // derived — see the re-derivation note at that rule.
+  '08-site-shell.css': { 22: 2 },
   '09-team-info.css': { 72: 1 },
   '11-innings.css': { 130: 1 },
   '12-sealbox.css': { 18: 1 },

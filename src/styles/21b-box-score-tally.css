@@ -119,8 +119,8 @@
   white-space: nowrap;
 }
 /* !important on both: ".bs__grid th, .bs__grid td" is element+class and beats
-   a bare class on specificity, so its centred text-align and 5px 2px padding
-   would otherwise win here and in the club column below. */
+   a bare class on specificity, so its centred text-align and var(--space-1) 2px
+   padding would otherwise win here and in the club column below. */
 /* `width: 1%`, not the logo's own 22px: a px width here is a column the table's
    auto layout hands a share of the leftover width to, which opened a finger's
    worth of empty paper between the club mark and the first inning on a desktop

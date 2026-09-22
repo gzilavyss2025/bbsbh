@@ -785,13 +785,16 @@
    native scrollLeft clamps at the content edge and an edge pick (e.g. the
    Diamondbacks or the Nationals) stops short of the middle instead of
    landing there like every interior club does. 50% of the tray's own
-   rendered width, minus half a logo button (46px: the 36px TeamLogo plus
-   .vsteam__team's 5px padding on each side) — same centering math as the
-   scrollTo effect in FavoriteTeamModal.jsx, just resolved by CSS instead of
-   a one-off JS measurement so it stays correct across viewport widths. */
+   rendered width, minus half a logo button (44px: the 36px TeamLogo plus
+   .vsteam__team's var(--space-1) padding on each side) — same centering math
+   as ClubPicker.jsx's scrollTo, resolved by CSS rather than a one-off JS
+   measurement. A DERIVED number: when that padding joined the scale under
+   ADR-0085 this stayed at 23px and put the sheet 1px off its own stated
+   centre, while ClubPicker's `btn.clientWidth / 2` measured the real 44px.
+   Re-derive it here whenever that padding moves. */
 .favteamsheet .vsteam__strip {
-  padding-left: calc(50% - 23px);
-  padding-right: calc(50% - 23px);
+  padding-left: calc(50% - 22px);
+  padding-right: calc(50% - 22px);
 }
 
 /* The merge-receipt slate strip (MergeReceiptStrip.jsx) — a compact utility

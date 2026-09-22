@@ -22,6 +22,14 @@
                and no chevron: an arrow on it would read as a link to another
                page, which is the one thing this door is not.
 
+               ITS TEXT IS --fs-small, AND FOR TWO DOORS THAT IS A CHANGE. Five
+               of the seven rules this absorbed already said so. The two
+               transaction pagers instead said `font: inherit` and so drew at
+               their container's own size, a step larger — which is the drift a
+               collapse exists to remove rather than carry: one shape was
+               printing at two sizes. They read --fs-small now, with the other
+               five.
+
    What they share is what every door shares — the pointer, the focus ring and
    the waiting state while the rest of the list is fetched — and that is all
    `.door` itself holds. `font-weight` is deliberately NOT on `.door`: a door
@@ -39,7 +47,8 @@
    was parked in that per-route partial. Nothing that used to beat the text door
    stops beating it, and every per-site residual in a later partial or a route
    chunk still wins on order — which is what .txcard__door and .txpage__door
-   rely on for the three declarations each of them keeps.
+   rely on for the declarations each of them keeps: four that place the deck's
+   door in its scroll row, one margin on the page-wide pager.
    --------------------------------------------------------------------------- */
 
 .door {
