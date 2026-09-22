@@ -77,7 +77,15 @@ test('a callouts shard is one game, filed under its slate date', () => {
   const dates = readdirSync(root, { withFileTypes: true })
     .filter((e) => e.isDirectory())
     .map((e) => e.name)
-  assert.ok(dates.length, 'no callouts dates on file')
+  // NO COUNT FLOOR HERE (#1147). gen-callouts.mjs keeps a rolling 10-day
+  // window of slate dates and prunes the rest, so the number of date
+  // directories is the CALENDAR, not a health signal. About ten days after the
+  // World Series the pruner correctly empties this directory, and it stays
+  // empty until spring. A `dates.length` floor would go red then on correct
+  // data, the same defect #1146 removed from the former-teammates test. The
+  // real claim is per bundle, below. Liveness is the freshness guard's job,
+  // but callouts/ has no index.json, so today that guard counts it as
+  // unstamped and cannot read its age (the same gap as #1145).
   for (const d of dates) {
     assert.match(d, /^\d{8}$/, `${d}: not an MMDDYYYY date directory`)
     const sub = new URL(`${d}/`, root)
