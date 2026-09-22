@@ -107,7 +107,8 @@ cover's own material, on something no tap will ever lift. But the family is
 real, and flattening the rehab banner to a plain fill would lose it. So the
 weave stays and the colour moves: `--marker-deep` (`#C9A32C`) and
 `--hold-texture`, same hatch, flag colour. `--text-heading` holds AA against
-both of its stripes (13.5:1 and 7.5:1), both asserted.
+both of its stripes (10.5:1 on `--marker`, 7.5:1 on `--marker-deep`), both
+asserted.
 
 One pairing moved with its surface, as pairings must: the Game Log's
 completed-set ring left the seal for `--marker`, which took it from 4.2:1 to
@@ -130,6 +131,27 @@ into `npm run lint`. An allowlist of the (file, selector) pairs that may read
 `public/learn.css` is checked too. The guide at `/learn` (ADR-0053) keeps its
 own copy of the palette and had three kraft rules on a page with nothing sealed
 on it.
+
+## The second guard: a ratio in a comment is a claim
+
+Reviewing this PR turned up four contrast ratios stated in comments that were
+simply wrong — including this ADR's own first draft, which said 13.5:1 where
+the measurement is 10.5:1, and `--accent-link`'s "5.14:1 at worst", which had
+been in `src/tokens/colors.css` since 2026-08-19. Every threshold check passed
+the whole time, because `check-contrast.mjs` asserted that a pair CLEARS its
+bar and never that a number written beside it was true.
+
+That is the same failure as a comment that lies about a colour, with a number
+attached — and worse, because a measurement looks checked. So the third half of
+`check-contrast.mjs` reads the prose:
+
+- A ratio written as `10.5:1 (--text-heading on --marker)` is resolved against
+  the shipped tokens and asserted, anywhere under `src/tokens/`, `src/styles/`
+  or `src/lib/design/`. Opt-in, so no existing comment had to change.
+- Under `src/tokens/` the annotation is **required** for a measurement, because
+  that tier is where a number is normative — it is the definition every other
+  comment cites. A threshold (`≥4.5:1`, "the 3:1 bar") states a rule rather
+  than a reading and is exempt.
 
 ## Consequences
 

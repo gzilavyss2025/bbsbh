@@ -56,7 +56,9 @@
   --seal-hatch:#A9743C;  /* diagonal hatch line on covers */
   --seal-ink:  #1E1405;  /* text/icon on a sealed cover — dark enough to hold
                             WCAG AA (≥4.5:1) against BOTH kraft stripes of
-                            --seal-texture (5.4:1 base, 4.5:1 hatch) */
+                            --seal-texture: 5.4:1 (--seal-ink on --seal) on the
+                            base, 4.5:1 (--seal-ink on --seal-hatch) on the
+                            hatch. Both asserted in check-contrast.mjs. */
 
   /* ---- Book board (Game Log cover) ---- a passport board is one deep,
      saturated colour with everything on it foil-stamped in paper. Kraft here
@@ -83,7 +85,8 @@
      "on hold" member of the status-tape family. Kraft used to weave that tape
      and no longer may (ADR-0083): a rehab banner wearing the cover's own
      material promises a tap that lifts nothing. Dark --text-heading holds AA
-     against BOTH stripes (13.5:1 base, 10.2:1 hatch) — both asserted in
+     against BOTH stripes: 10.5:1 (--text-heading on --marker) on the base,
+     7.5:1 (--text-heading on --marker-deep) on the hatch. Both asserted in
      check-contrast.mjs, the same way the kraft pair always has been. */
   --marker-deep: #C9A32C;
 
@@ -124,8 +127,9 @@
      them silently inherited its parent's ink instead — "See all ›" rendered in
      the section heading's graphite, indistinguishable from the label beside it.
      Field green rather than a new hue: it is already the app's action colour
-     (--focus-ring, --accent-positive), and it clears AA on all four papers
-     (5.14:1 at worst, asserted in check-contrast.mjs). */
+     (--focus-ring, --accent-positive), and it clears AA on all four papers —
+     worst on the darkest of them at 5.28:1 (--accent-link on --bg-canvas),
+     asserted in check-contrast.mjs. */
   --accent-link:      var(--field);
 
   --seal-cover:       var(--seal);

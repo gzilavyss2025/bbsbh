@@ -73,7 +73,8 @@ export const PAIRINGS = [
   // text (a pane's title and count, every stamp's caption). The highlighter
   // yellow is the completed-set ring, a non-text affordance, held to the 3:1
   // bar. It was the seal amber until ADR-0083 — a finished set is a highlight,
-  // not a cover — which also took the ring from 4.2:1 to 8.4:1 on this board.
+  // not a cover — which also took the ring from 4.2:1 (--seal-cover on
+  // --album-board) to 8.4:1 (--marker on --album-board).
   { fg: 'album-foil', bg: 'album-board', min: TEXT, note: 'stamp sheet pane title on the album board' },
   { fg: 'album-foil-soft', bg: 'album-board', min: TEXT, note: 'stamp caption on the album board' },
   { fg: 'marker', bg: 'album-board', min: UI, note: 'completed-set ring on the album board' },
