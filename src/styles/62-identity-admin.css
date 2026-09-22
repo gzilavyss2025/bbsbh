@@ -295,12 +295,13 @@
   font-weight: var(--w-semibold);
 }
 
-/* The stamp group's retroactive warning (ADR-0035's amendment). Kraft-taped
+/* The stamp group's retroactive warning (ADR-0035's amendment). Clay-railed
    like every other "read this before you act" strip in the app, because it is
-   the one control here whose effect reaches something a person already keeps. */
+   the one control here whose effect reaches something a person already keeps.
+   (Kraft-taped until ADR-0083.) */
 .iddrawer__warn {
   padding: var(--space-2);
-  border-left: 3px solid var(--seal-edge, var(--kraft-board));
+  border-left: 3px solid var(--accent-negative);
   border-radius: var(--radius-xs);
   background: var(--surface-card);
   color: var(--text-body);

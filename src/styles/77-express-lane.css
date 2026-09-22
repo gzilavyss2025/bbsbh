@@ -164,7 +164,7 @@
   height: 34px;
   border-radius: 50%;
   border: 2px solid var(--album-board-line);
-  border-top-color: var(--seal);
+  border-top-color: var(--album-foil-soft);
   animation: xl-turn 1.1s linear infinite;
 }
 .xl-film__placeholder--none .xl-film__mark {
@@ -222,7 +222,7 @@
   cursor: pointer;
 }
 .xl__chip.is-on {
-  border-color: var(--seal);
+  border-color: var(--marker);
   color: var(--album-foil);
   background: rgb(181 130 74 / 0.14);
 }
@@ -292,7 +292,7 @@
   height: 40px;
   border-radius: 50%;
   border: 2px solid var(--album-board-line);
-  border-top-color: var(--seal);
+  border-top-color: var(--album-foil-soft);
   animation: xl-turn 1.1s linear infinite;
 }
 @media (prefers-reduced-motion: reduce) {

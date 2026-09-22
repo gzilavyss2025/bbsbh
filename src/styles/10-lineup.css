@@ -529,27 +529,30 @@ button.startercard__careervs {
    "Bullpen" switch (BullpenBoard.jsx). One class so the look only needs
    tuning once; each caller supplies its own label and press handler.
 
-   Colour here is load-bearing, not decorative. Kraft gold as TEXT on the bar
-   measures 4.35:1, under the 4.5:1 check-contrast.mjs demands — so neither
-   state paints gold text. Both states are FILLED pills instead of
+   Colour here is load-bearing, not decorative. Neither state paints gold
+   text: kraft gold on the bar measured 4.35:1, under the 4.5:1
+   check-contrast.mjs demands, and the pill left the kraft family entirely in
+   ADR-0083 — a switch is not a seal. Both states are FILLED pills instead of
    filled-vs-outline: the bar is club-themed (ADR-0030), so a transparent pill
    inherits a different backdrop for all 30 clubs, while a paper fill is the
-   same chip everywhere and matches the card rows beneath it. Measured:
-   OFF text 13.5:1, ON text 5.4:1, and each pill clears 3:1 against the bar
-   (14.2:1 and 4.6:1 on the darkest club bar).
+   same chip everywhere and matches the card rows beneath it.
 
-   The catch of filling both: paper and kraft separate by only 3.11:1, which
-   only just clears the 3:1 a non-text state cue needs, and hue alone is a poor
-   state signal anyway. So the dot carries the state by SHAPE as well — a
-   hollow ring when off, filled when on — leaving three redundant cues
-   (aria-pressed, fill colour, dot shape). Don't collapse the dot back to an
+   THE BORDER is what carries the state now. Highlighter yellow separates from
+   paper by only 1.58:1 — worse than the kraft it replaced (3.11:1) — so the ON
+   pill takes a --text-heading edge against the OFF pill's --border-rule one,
+   a separation no club bar can wash out. Measured: OFF text 13.5:1, ON text
+   10.5:1 (the pair the Close Game pill already asserts), and each pill clears
+   3:1 against the bar — the yellow better than the kraft did, at 8.6:1 on
+   navy. The dot carries the state by SHAPE as well — a hollow ring when off,
+   filled when on — leaving four redundant cues (aria-pressed, border colour,
+   fill colour, dot shape). Don't collapse the dot back to an
    opacity change. */
 .mastheadpill {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
   padding: 3px 9px;
-  border: var(--bw-hair) solid var(--seal);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
   background: var(--surface-card);
   color: var(--text-body);
@@ -568,9 +571,9 @@ button.startercard__careervs {
   background: none;
 }
 .mastheadpill[aria-pressed='true'] {
-  background: var(--seal);
-  border-color: var(--seal);
-  color: var(--text-on-seal);
+  background: var(--marker);
+  border-color: var(--text-heading);
+  color: var(--text-heading);
 }
 .mastheadpill[aria-pressed='true'] .mastheadpill__dot {
   background: currentColor;

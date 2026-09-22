@@ -93,13 +93,15 @@
     repeating-linear-gradient(-45deg, var(--album-board-line) 0 1px, transparent 1px 8px);
 }
 
-/* A completed collection keeps one quiet, permanent mark of it — the same
-   kraft-tape amber a stamp seals with, as a ring rather than a rosette. No
-   badge glyph, no "complete" label; the ring alone is the whole statement.
+/* A completed collection keeps one quiet, permanent mark of it — the
+   highlighter's yellow, as a ring rather than a rosette. It was the stamp's
+   own kraft until ADR-0083; a finished set is a highlight, not a cover, and
+   yellow reads at 8.4:1 on the dark album board where the kraft read at 3.2.
+   No badge glyph, no "complete" label; the ring alone is the whole statement.
    Only ever reached from the counting surface (`counts`), so the book page
    can never show a completion state. */
 .stamppane.is-complete {
-  border-color: var(--seal-cover);
+  border-color: var(--marker);
 }
 
 .stamppane__head {
@@ -126,7 +128,7 @@
 }
 
 .stamppane.is-complete .stamppane__count {
-  color: var(--seal-cover);
+  color: var(--marker);
 }
 
 /* ---- the pane of stamps ----
@@ -333,25 +335,25 @@
 
 /* The one celebratory beat, played once and never again
    (useMilestoneCelebration), and only on the surface that counts. A quiet
-   ring-pulse in the seal's own amber plus the faintest settle of the pane
+   ring-pulse in the highlighter's yellow plus the faintest settle of the pane
    itself — answering the passport stamp's own passport-stamp-land moment
    (49-passport-book.css) rather than inventing a second vocabulary for
    "something finished." Transform/box-shadow/opacity only, so nothing here
    forces a layout pass mid-animation. */
 @keyframes stamppane-complete {
   from {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--seal-cover) 55%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--marker) 55%, transparent);
     transform: scale(1);
   }
 
   40% {
-    box-shadow: 0 0 0 10px color-mix(in srgb, var(--seal-cover) 0%, transparent);
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--marker) 0%, transparent);
     transform: scale(1.012);
     animation-timing-function: var(--ease-out);
   }
 
   to {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--seal-cover) 0%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--marker) 0%, transparent);
     transform: scale(1);
   }
 }

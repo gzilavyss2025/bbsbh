@@ -102,7 +102,7 @@ button.gamelines__door,
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  color: var(--seal-hatch);
+  color: var(--text-caption);
 }
 
 .gamelines__col {

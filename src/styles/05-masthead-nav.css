@@ -552,14 +552,14 @@
 }
 
 .levelprog__step.is-current {
-  border-left: 3px solid var(--seal-cover);
-  background: color-mix(in srgb, var(--seal-cover) 10%, transparent);
+  border-left: 3px solid var(--accent-primary);
+  background: color-mix(in srgb, var(--marker) 16%, transparent);
 }
 
 .levelprog__step.is-current::before {
   left: -6px;
-  background: var(--seal-cover);
-  border-color: var(--seal-cover);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
 }
 
 .levelprog__step.is-unreached::before {
@@ -622,7 +622,7 @@
   }
 
   .levelprog__step.is-current {
-    border-top: 3px solid var(--seal-cover);
+    border-top: 3px solid var(--accent-primary);
     border-left: 0;
   }
 

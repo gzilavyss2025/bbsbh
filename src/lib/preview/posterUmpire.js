@@ -45,7 +45,7 @@ function drawLeanScale(ctx, x, y, width, lean, palette) {
   ramp.addColorStop(0, palette.navy)
   ramp.addColorStop(0.16, palette.navy)
   ramp.addColorStop(0.46, palette.rule)
-  ramp.addColorStop(0.72, palette.seal)
+  ramp.addColorStop(0.72, palette.markerDeep)
   ramp.addColorStop(0.92, palette.marker)
   ramp.addColorStop(1, palette.marker)
   ctx.fillStyle = ramp

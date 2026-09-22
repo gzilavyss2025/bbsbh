@@ -37,11 +37,11 @@
 
 .strikezone__frame {
   fill: none;
-  stroke: var(--seal-hatch);
+  stroke: var(--graphite);
   stroke-width: 1.4;
 }
 .strikezone__third {
-  stroke: var(--seal-hatch);
+  stroke: var(--graphite);
   stroke-width: 0.6;
   stroke-dasharray: 2 3;
   opacity: 0.55;
@@ -220,9 +220,9 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-sm);
-  background: var(--seal);
-  border: var(--bw-hair) solid var(--seal-hatch);
-  color: var(--seal-ink);
+  background: var(--accent-primary);
+  border: var(--bw-hair) solid var(--accent-primary);
+  color: var(--text-on-ink);
   cursor: pointer;
 }
 .pbp__zoneicon {
@@ -250,9 +250,9 @@
   height: 32px;
   padding: 0 12px;
   border-radius: var(--radius-sm);
-  background: var(--seal);
-  border: var(--bw-hair) solid var(--seal-hatch);
-  color: var(--seal-ink);
+  background: var(--accent-primary);
+  border: var(--bw-hair) solid var(--accent-primary);
+  color: var(--text-on-ink);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   text-transform: uppercase;

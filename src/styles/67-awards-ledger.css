@@ -125,7 +125,7 @@
 .tier-intl.awardblk__rule { background: var(--clay); }
 .tier-intl.awardblk__count,
 .tier-intl.awardidx__ct { color: var(--clay-deep); }
-.tier-minors.awardblk__rule { background: var(--seal); }
+.tier-minors.awardblk__rule { background: var(--award-ink); }
 .tier-minors.awardblk__count,
 .tier-minors.awardidx__ct { color: var(--kraft-board); }
 

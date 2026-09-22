@@ -22,11 +22,11 @@ rendered from the three by `build-ledger.mjs`.
 
 | destination | reads | what it means |
 | --- | --- | --- |
-| **STAYS** | **60** | a reveal is possible on that surface — or finding 9's must-survive list names it |
-| **`--marker`** | **67** | rank, flag, "you are here", "this one stands out" |
-| **structural** | **168** | a rule, a neutral, an action colour, a club accent — mostly borders on controls |
+| **STAYS** | **61** | a reveal is possible on that surface — or finding 9's must-survive list names it |
+| **`--marker`** | **50** | rank, flag, "you are here", "this one stands out" |
+| **structural** | **184** | a rule, a neutral, an action colour, a club accent — mostly borders on controls |
 
-The STAYS rows sit in **20 partials**. That is the number
+The STAYS rows sit in **21 partials**. That is the number
 `scripts/check-seal-scope.mjs` allowlists, and the guard asserts it.
 
 ### Three house recipes carry `--marker`
@@ -71,11 +71,11 @@ family intact and frees the material. Both stripes are asserted in
 | line | selector | destination | reason |
 | --- | --- | --- | --- |
 | 265 | `.masthead__at-ghost` | STAYS → **STAYS** | the @ watermark — must-survive |
-| 555 | `.levelprog__step.is-current` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | "you are here" on the level ladder |
+| 555 | `.levelprog__step.is-current` | structural → `var(--accent-primary)` | the ladder rail — marker is 1.58:1 on paper, so the WASH carries the highlight and the rail is ink |
 | 556 | `.levelprog__step.is-current` | --marker → `color-mix(in srgb, var(--marker) 16%, transparent)` | "you are here" on the level ladder |
-| 561 | `.levelprog__step.is-current::before` | --marker → `var(--marker)` | "you are here" dot |
-| 562 | `.levelprog__step.is-current::before` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | "you are here" dot |
-| 625 | `@media (min-width: 700px) ⟩ .levelprog__step.is-current` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | "you are here" on the wide level ladder |
+| 561 | `.levelprog__step.is-current::before` | structural → `var(--accent-primary)` | the step dot is ink beside a marker wash |
+| 562 | `.levelprog__step.is-current::before` | structural → `var(--accent-primary)` | the step dot is ink beside a marker wash |
+| 625 | `@media (min-width: 700px) ⟩ .levelprog__step.is-current` | structural → `var(--accent-primary)` | the wide ladder rail is ink beside a marker wash |
 
 ### `06-loader-and-cards.css`
 
@@ -137,7 +137,7 @@ family intact and frees the material. Both stripes are asserted in
 | --- | --- | --- | --- |
 | 552 | `.mastheadpill` | structural → `var(--border-rule)` | named in finding 9 — a toggle pill edge is a rule |
 | 571 | `.mastheadpill[aria-pressed='true']` | --marker → `var(--marker)` | a pressed pill is a flag; marker separates from paper far better than kraft did (3.11:1) |
-| 572 | `.mastheadpill[aria-pressed='true']` | --marker → `var(--marker)` | a pressed pill is a flag |
+| 572 | `.mastheadpill[aria-pressed='true']` | --marker → `var(--text-heading)` | the pressed pill takes an INK edge — marker separates from paper by only 1.58:1, so the border is what carries the state against both the paper pill and the club bar |
 
 ### `11-innings.css`
 
@@ -161,7 +161,7 @@ family intact and frees the material. Both stripes are asserted in
 | 58 | `.cover__main` | STAYS → **STAYS** | the cover copy |
 | 67 | `.cover__sub` | STAYS → **STAYS** | the cover copy |
 | 147 | `.abs__title` | STAYS → **STAYS** | club band recipe |
-| 236 | `.abs__pip--open` | --marker → `var(--marker)` | an ABS challenge still in hand — a live flag |
+| 236 | `.abs__pip--open` | structural → `var(--accent-primary)` | an 11px pip beside a field pip and a clay pip — ink, not a 1.58:1 yellow |
 | 795 | `.statbox__title` | STAYS → **STAYS** | club band recipe |
 | 897 | `.pitchernotice--pbp` | structural → `var(--border-rule)` | a staging-card edge is a rule |
 | 899 | `.pitchernotice--pbp` | --marker → `color-mix(in srgb, var(--marker) 16%, var(--surface-card))` | the pre-pitch staging card reads as prominently as a note line |
@@ -182,7 +182,7 @@ family intact and frees the material. Both stripes are asserted in
 | 368 | `.pbp__ladderhead` | structural → `var(--border-rule)` | the ladder head rule |
 | 373 | `.pbp__laddercol--strike .pbp__ladderhead` | structural → `var(--text-heading)` | a lane head on a pencil shade |
 | 391 | `.pbp__laddercol--strike .pbp__cell` | structural → `var(--text-heading)` | a pitch number on a pencil shade |
-| 466 | `.pbp__callout` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | a callout is exactly "catches the eye without shouting" |
+| 466 | `.pbp__callout` | structural → `var(--accent-primary)` | a 2px rail cannot be marker at 1.58:1 on paper |
 | 478 | `.pbp__calloutmark` | structural → `var(--text-caption)` | marker cannot be text — the callout star is pencil beside a marker rule |
 | 528 | `.roster__toggle` | STAYS → **STAYS** | club band recipe |
 
@@ -254,7 +254,7 @@ family intact and frees the material. Both stripes are asserted in
 
 | line | selector | destination | reason |
 | --- | --- | --- | --- |
-| 122 | `.devbar.is-up .devbar__fill` | --marker → `var(--marker)` | a form bar trending UP is the flagged state |
+| 122 | `.devbar.is-up .devbar__fill` | structural → `var(--award-line)` | medal amber — the bar’s own comment rules OUT the positive/negative pair, because this scale is signed, not good/bad |
 
 ### `27-player-position-innings.css`
 
@@ -273,15 +273,15 @@ family intact and frees the material. Both stripes are asserted in
 | line | selector | destination | reason |
 | --- | --- | --- | --- |
 | 184 | `.team-score__grade` | --marker → `color-mix(in srgb, var(--marker) 16%, transparent)` | the Season Report grade is the headline figure |
-| 194 | `.team-score__grade.is-active` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | the picked grade |
+| 194 | `.team-score__grade.is-active` | structural → `var(--accent-primary)` | the picked edge is ink; the marker wash inside it carries the highlight |
 | 272 | `.team-score__breakdown` | structural → `var(--text-caption)` | a breakdown label is a caption |
-| 311 | `.team-score__row--driver.is-active` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | the picked driver row |
+| 311 | `.team-score__row--driver.is-active` | structural → `var(--accent-primary)` | the picked edge is ink; the marker wash inside it carries the highlight |
 | 312 | `.team-score__row--driver.is-active` | --marker → `color-mix(in srgb, var(--marker) 16%, var(--surface-inset))` | the picked driver row |
 | 350 | `.team-score__meter > span` | structural → `var(--accent-primary)` | a meter is a quantity, not a highlight |
 | 421 | `.team-score__rank` | structural → `var(--text-heading)` | the rank chip’s ink — dark heading ink is what holds AA on marker |
 | 422 | `.team-score__rank` | --marker → `var(--marker)` | THE worked example — a rank is not a reveal; the Close Game pill already asserts text-heading on marker |
 | 662 | `.rankstrip__chip--self` | --marker → `color-mix(in srgb, var(--marker) 16%, transparent)` | "you are here" among a strip of ranks |
-| 674 | `.rankstrip__arrow` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | the arrow onto "you are here" |
+| 674 | `.rankstrip__arrow` | structural → `var(--accent-primary)` | a 5px triangle on paper is ink |
 | 777 | `.team-score__howlink` | structural → `var(--accent-link)` | "how is this scored" is a link |
 | 782 | `.team-score__howlink` | structural → `color-mix(in srgb, var(--accent-link) 40%, transparent)` | a link underline |
 | 812 | `.team-score__detail-title` | structural → `var(--text-caption)` | a detail title is a caption |
@@ -299,7 +299,7 @@ family intact and frees the material. Both stripes are asserted in
 | 660 | `.teamphotos__nav:hover:not(:disabled)` | structural → `var(--accent-link)` | a hover state takes the action colour |
 | 661 | `.teamphotos__nav:hover:not(:disabled)` | structural → `var(--accent-link)` | a hover state takes the action colour |
 | 716 | `.teamphotos__thumb:hover` | structural → `var(--accent-link)` | a hover state takes the action colour |
-| 758 | `.sstrip__series--current` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | "you are here" among a season of series blocks |
+| 758 | `.sstrip__series--current` | structural → `var(--accent-primary)` | a 2px ring on paper is ink |
 | 791 | `.sstrip__cell--home` | STAYS → **STAYS** | season strip home-game kraft, the same convention |
 | 812 | `.sstrip__cell--home.sstrip__cell--win, .sstrip__cell--home.sstrip__cell--loss` | STAYS → **STAYS** | season strip home-game kraft, the same convention |
 | 821 | `.sstrip__series--allstar` | structural → `color-mix(in srgb, var(--allstar-blue) 12%, var(--bg-page))` | the All-Star Game has its own blue |
@@ -340,9 +340,9 @@ family intact and frees the material. Both stripes are asserted in
 
 | line | selector | destination | reason |
 | --- | --- | --- | --- |
-| 47 | `.levelprog__current` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | "you are here" on the level ladder |
+| 47 | `.levelprog__current` | structural → `var(--accent-primary)` | a 3px rail on paper is ink |
 | 323 | `.prospectcard__chartmark` | structural → `var(--accent-primary)` | a chart mark is ink |
-| 328 | `(top)` | --marker → `var(--marker)` | a chart FLAG is the flag colour |
+| 328 | `(top)` | structural → `var(--award-line)` | a chart flag beside an ink mark takes the medal amber |
 
 ### `31e-prospect-board.css`
 
@@ -483,8 +483,8 @@ family intact and frees the material. Both stripes are asserted in
 
 | line | selector | destination | reason |
 | --- | --- | --- | --- |
-| 129 | `.umptend__ramp` | structural → `color-mix(in srgb, var(--marker) 55%, var(--rule)) 72%` | the warm stop between --rule and --marker on one ramp |
-| 315 | `.is-themed .umptend__bar` | structural → `var(--border-rule)` | a themed bar rule |
+| 129 | `.umptend__ramp` | structural → `var(--marker-deep) 72%` | the warm stop between --rule and --marker on one ramp |
+| 315 | `.is-themed .umptend__bar` | STAYS → **STAYS** | restores the DEFAULT club band on a card that opts out of club theming — it moves with the band |
 
 ### `54-my-tally.css`
 
@@ -532,7 +532,7 @@ family intact and frees the material. Both stripes are asserted in
 | line | selector | destination | reason |
 | --- | --- | --- | --- |
 | 40 | `.trec__half.is-on` | --marker → `color-mix(in srgb, var(--marker) 16%, var(--paper-2))` | the picked half of a records toggle |
-| 41 | `.trec__half.is-on` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | the picked half of a records toggle |
+| 41 | `.trec__half.is-on` | structural → `var(--accent-primary)` | the picked edge is ink; the marker wash inside it carries the highlight |
 | 58 | `.trec__grouphead` | structural → `var(--border-rule)` | a group head rule |
 
 ### `66-situational-records.css`
@@ -546,7 +546,7 @@ family intact and frees the material. Both stripes are asserted in
 
 | line | selector | destination | reason |
 | --- | --- | --- | --- |
-| 128 | `(top)` | structural → `var(--award-line)` | a tier rule beside --kraft-board ink — medal amber, not tape |
+| 128 | `(top)` | structural → `var(--award-ink)` | the sixth tier rule — --award-line is already the year-end tier, so the darker medal amber |
 
 ### `68-around-the-game.css`
 
@@ -576,7 +576,7 @@ family intact and frees the material. Both stripes are asserted in
 | line | selector | destination | reason |
 | --- | --- | --- | --- |
 | 34 | `.ctr__tile` | structural → `var(--border-rule)` | a tile cap is a rule |
-| 110 | `.cliff__bar` | --marker → `var(--marker)` | the cliff bar, already ruled in --marker on the line below it |
+| 110 | `.cliff__bar` | --marker → `color-mix(in srgb, var(--marker) 35%, var(--paper-2))` | the cliff bar body under its existing --marker cap |
 | 346 | `.ctr__foot th, .ctr__foot td` | structural → `var(--border-rule)` | a table foot rule |
 
 ### `71-salaries-league.css`
@@ -586,7 +586,7 @@ family intact and frees the material. Both stripes are asserted in
 | 30 | `.payboard__context` | structural → `var(--text-caption)` | a context line is a caption |
 | 97 | `.payboard__row--lead .payboard__rank` | structural → `var(--text-heading)` | marker cannot be text — a lead rank is heading ink |
 | 177 | `.paybar__fill` | structural → `var(--club-2, var(--accent-primary))` | the unthemed fallback of a club slot |
-| 299 | `.posspend__chip--lead` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | the leading position group |
+| 299 | `.posspend__chip--lead` | structural → `var(--accent-primary)` | a heavy chip edge on paper is ink |
 | 367 | `.posspend__fill` | structural → `var(--accent-primary)` | a bar cap is ink |
 
 ### `74-contract-workbench.css`
@@ -668,13 +668,13 @@ family intact and frees the material. Both stripes are asserted in
 | line | selector | destination | reason |
 | --- | --- | --- | --- |
 | 86 | `.chalcard__view.is-on` | --marker → `color-mix(in srgb, var(--marker) 16%, var(--paper-2))` | the picked view of a challenge card |
-| 87 | `.chalcard__view.is-on` | --marker → `color-mix(in srgb, var(--marker) 70%, var(--text-heading))` | the picked view of a challenge card |
+| 87 | `.chalcard__view.is-on` | structural → `var(--accent-primary)` | the picked edge is ink; the marker wash inside it carries the highlight |
 
 ### `scorecard/box.css`
 
 | line | selector | destination | reason |
 | --- | --- | --- | --- |
-| 162 | `.sc-ab--noted::after` | --marker → `var(--marker)` | a hand-edited box flagged apart from a derived one |
+| 162 | `.sc-ab--noted::after` | structural → `var(--accent-primary)` | a 7px corner fold on a scorecard cell is ink |
 | 195 | `.sc-ab__seal` | STAYS → **STAYS** | the at-bat's own seal — the reveal frontier |
 | 196 | `.sc-ab__seal` | STAYS → **STAYS** | the at-bat's own seal — the reveal frontier |
 | 207 | `.sc-ab__sealtext` | STAYS → **STAYS** | the at-bat's own seal — the reveal frontier |

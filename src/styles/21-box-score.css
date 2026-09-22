@@ -630,7 +630,7 @@
   text-transform: none; /* caps-exempt: sentence case for the box score's play-of-the-game narrative only */
 }
 /* The inning it happened in, inline ahead of the description — same font as
-   the description, tinted the scorebook's kraft-tape amber so it reads as a
+   the description, tinted the scorebook's medal amber so it reads as a
    quiet tag rather than more description text. */
 .bs__potgWhen {
   font-family: var(--font-body);
@@ -649,11 +649,12 @@
 /* "Watch" — the video clip for this exact play, when MLB cut an eligible one
    (see eligibleHighlightForPlay). Two forms, one button: with a poster frame
    it becomes a full-width 16:9 still with the play badge sitting on it; with
-   no usable poster it collapses to the same kraft pill the innings view's
+   no usable poster it collapses to the same ink pill the innings view's
    per-play button uses (.pbp__hlbtn), so a missing or broken image costs the
    affordance nothing.
 
-   Both live inside the box score's seal, like the rest of this card. */
+   Both live inside the box score's seal — but sitting behind a cover is not
+   the same as being one, so neither wears the cover's colour (ADR-0083). */
 .bs__potgWatch {
   display: flex;
   width: fit-content;
@@ -663,9 +664,9 @@
   height: 32px;
   padding: 0 12px;
   border-radius: var(--radius-sm);
-  background: var(--seal);
-  border: var(--bw-hair) solid var(--seal-hatch);
-  color: var(--seal-ink);
+  background: var(--accent-primary);
+  border: var(--bw-hair) solid var(--accent-primary);
+  color: var(--text-on-ink);
   cursor: pointer;
 }
 .bs__potgWatch:focus-visible {
@@ -702,7 +703,7 @@
   white-space: nowrap;
 }
 /* Over a photo the badge needs its own ground to stay legible — the same
-   kraft chip the pill form is, floated onto the frame. */
+   ink chip the pill form is, floated onto the frame. */
 .bs__potgWatch--poster .bs__potgPlay {
   position: absolute;
   left: 8px;
@@ -710,9 +711,9 @@
   height: 28px;
   padding: 0 10px;
   border-radius: var(--radius-sm);
-  background: var(--seal);
-  border: var(--bw-hair) solid var(--seal-hatch);
-  color: var(--seal-ink);
+  background: var(--accent-primary);
+  border: var(--bw-hair) solid var(--accent-primary);
+  color: var(--text-on-ink);
 }
 .bs__potgPlayIcon {
   font-size: var(--fs-caption);

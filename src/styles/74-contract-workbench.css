@@ -433,14 +433,16 @@
   line-height: var(--lh-snug);
 }
 
-/* The one word that differs. Kraft-tape amber, the same ink this app already
-   uses to mean "look here" — a reviewer comparing "Ron" against "Ronnie"
-   should not have to read both strings to find the difference. */
+/* The one word that differs. Highlighter yellow, the ink this app uses to
+   mean "look here" — a reviewer comparing "Ron" against "Ronnie"
+   should not have to read both strings to find the difference. (Kraft until
+   ADR-0083, which is the confusion that rule exists to stop: nothing here is
+   sealed.) */
 .cwb__diff {
   padding: 0 2px;
   border-radius: var(--radius-xs);
-  background: var(--seal);
-  color: var(--text-on-seal);
+  background: var(--marker);
+  color: var(--text-heading);
 }
 
 .cwb__candid,

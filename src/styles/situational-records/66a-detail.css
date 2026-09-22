@@ -33,7 +33,7 @@
   color: var(--text-on-ink);
 }
 .trrank__detailgroup {
-  color: var(--seal-cover);
+  color: var(--text-caption);
 }
 .trrank__detailhead h2 {
   margin: var(--space-1) 0 var(--space-2);
@@ -147,7 +147,7 @@
   color: var(--text-on-ink);
 }
 .trrank__tablewrap .trrank tbody tr:first-child td {
-  background: color-mix(in srgb, var(--seal-cover) 16%, var(--surface-card));
+  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
 }
 .trrank__tablewrap .trrank td {
   height: 44px;
@@ -185,7 +185,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .trrank__related a:hover {
-    border-color: var(--seal-cover);
+    border-color: var(--accent-link);
   }
 }
 

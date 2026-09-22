@@ -372,9 +372,11 @@
 }
 
 /* Delayed/suspended/postponed badge — same corner and pill shape as
-   .gamecard__live above (the two are mutually exclusive), but in the kraft-
-   amber "on hold" color rather than live-game red. Flat fill, not the hatch
-   weave (--seal-texture) the spoiler covers use, so it doesn't read as a seal. */
+   .gamecard__live above (the two are mutually exclusive), but in the
+   highlighter "on hold" color rather than live-game red. A delayed game is a
+   FLAG, not a cover: it wore kraft until ADR-0083, and amber on a slate card
+   no tap will ever lift was the widest read of --seal outside a SealBox.
+   --text-heading is what holds AA on marker (10.5:1). */
 .gamecard__delay {
   position: absolute;
   top: 10px;
@@ -386,8 +388,8 @@
   align-items: center;
   padding: 3px 9px;
   border-radius: var(--radius-pill);
-  background: var(--seal);
-  color: var(--seal-ink);
+  background: var(--marker);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -440,7 +442,7 @@
 /* ---- Postponed game treatment ----------------------------------------------
    A postponed game has no result to reveal, so instead of the corner delay pill
    (+ a flip card that would only turn over to an empty 0-0 line) it gets a
-   kraft-tape strip under the matchup: a rubber-stamped POSTPONED, the cause,
+   highlighted strip under the matchup: a rubber-stamped POSTPONED, the cause,
    and the make-up date it moved to. The matchup above is eased back a touch so
    the stamp reads as the card's headline. */
 .gamecard--postponed .gamecard__teams {
@@ -454,11 +456,11 @@
   margin-top: 4px;
   padding: 8px 12px 8px 10px;
   border-radius: var(--radius-sm);
-  /* A faint wash of the kraft-seal amber rather than a full fill, edged with the
-     same hatch color as a dashed tape line — reads as "held" without shouting a
-     sealed cover. */
-  background: color-mix(in srgb, var(--seal) 15%, var(--surface-card));
-  border: var(--bw-hair) dashed var(--seal-hatch);
+  /* A faint highlighter wash rather than a full fill, edged with a dashed
+     rule — reads as "held" without shouting. The 16% marker wash is the app's
+     own highlighter recipe (12-sealbox.css, 14-strike-zone.css). */
+  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
+  border: var(--bw-hair) dashed var(--border-rule);
   /* Rare, first-load-only event (a slate has few postponements) — so a small
      entrance is warranted (see .agents/skills/review-animations): the strip
      rises and fades in as one, ease-out, under 300ms. */
@@ -473,16 +475,16 @@
   font-weight: var(--w-bold);
   font-size: var(--fs-small);
   line-height: var(--lh-solid);
-  color: var(--seal-ink);
+  color: var(--text-heading);
   padding: 4px 9px 3px;
   /* Double rule + a slight tilt = a pressed rubber stamp, not a UI chip. */
-  border: 2px double var(--seal-ink);
+  border: 2px double var(--text-heading);
   border-radius: 3px;
   transform: rotate(-4deg);
   /* The stamp itself gets the hero motion: it presses DOWN onto the paper —
      starting larger (nearer the eye) and motion-blurred, overshooting past its
      resting size on contact, then settling. Slightly delayed so it lands just
-     after the tape appears. */
+     after the wash appears. */
   animation: stamp-press 300ms var(--ease-out) 60ms both;
 }
 
@@ -498,7 +500,7 @@
   letter-spacing: var(--ls-label);
   font-weight: var(--w-semibold);
   font-size: var(--fs-label);
-  color: var(--seal-ink);
+  color: var(--text-body);
 }
 .postponed__makeup {
   font-family: var(--font-mono);

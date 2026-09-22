@@ -607,7 +607,7 @@
 }
 
 .pillars__seg--youth {
-  background: var(--seal);
+  background: var(--award-line);
   opacity: 0.9;
 }
 
@@ -645,7 +645,7 @@
 }
 
 .pillar-key__swatch--youth {
-  background: var(--seal);
+  background: var(--award-line);
 }
 
 /* The Pen's legend reads the same three inks as its own meter, so the key and

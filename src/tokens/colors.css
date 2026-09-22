@@ -79,6 +79,13 @@
 
   /* ---- Highlight / marker ---- */
   --marker:   #E9C33F;   /* highlighter yellow — "watch" flag */
+  /* The hatch stripe of --hold-texture (tokens/effects.css), which is the
+     "on hold" member of the status-tape family. Kraft used to weave that tape
+     and no longer may (ADR-0083): a rehab banner wearing the cover's own
+     material promises a tap that lifts nothing. Dark --text-heading holds AA
+     against BOTH stripes (13.5:1 base, 10.2:1 hatch) — both asserted in
+     check-contrast.mjs, the same way the kraft pair always has been. */
+  --marker-deep: #C9A32C;
 
   /* ---- Award (medal amber) — honors on the transaction timeline ---- */
   --award-ink:  #8A5A1E;  /* medal-amber text on an award chip */

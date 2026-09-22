@@ -251,8 +251,9 @@
   animation: idlab-card-drop var(--dur-med) var(--ease-out);
 }
 
-/* One rotated strip of kraft tape holding the card down — the same material
-   language as the taped rack tag: things being worked on are taped. */
+/* One rotated strip of tape holding the card down — the same material
+   language as the taped rack tag: things being worked on are taped. The weave
+   is --hold-texture, not the cover's own --seal-texture (ADR-0083). */
 .idlab__stylecard::before {
   content: '';
   position: absolute;
@@ -261,7 +262,7 @@
   width: 22px;
   height: 10px;
   transform: rotate(-24deg);
-  background: var(--seal-texture);
+  background: var(--hold-texture);
   opacity: 0.85;
 }
 

@@ -181,7 +181,7 @@
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--seal) 12%, transparent), transparent 58%),
+    linear-gradient(135deg, color-mix(in srgb, var(--marker) 16%, transparent), transparent 58%),
     var(--surface-inset);
   box-shadow: var(--inset-cell);
 }
@@ -191,7 +191,7 @@
   margin-bottom: 10px;
 }
 .team-score__grade.is-active {
-  border-color: color-mix(in srgb, var(--seal-hatch) 55%, var(--border-rule));
+  border-color: var(--accent-primary);
 }
 .team-score__grade-button {
   display: grid;
@@ -269,7 +269,7 @@
   letter-spacing: var(--ls-none);
 }
 .team-score__breakdown {
-  color: var(--seal-hatch);
+  color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -308,8 +308,8 @@
   transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease;
 }
 .team-score__row--driver.is-active {
-  border-color: color-mix(in srgb, var(--seal-hatch) 55%, var(--border-rule));
-  background: color-mix(in srgb, var(--seal) 9%, var(--surface-inset));
+  border-color: var(--accent-primary);
+  background: color-mix(in srgb, var(--marker) 16%, var(--surface-inset));
 }
 .team-score__row--driver .team-score__rowtop {
   display: grid;
@@ -347,7 +347,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--seal-hatch);
+  background: var(--accent-primary);
 }
 .team-score__row--compact {
   grid-template-columns: minmax(0, 1fr) auto;
@@ -418,8 +418,8 @@
   gap: 7px;
 }
 .team-score__rank {
-  color: var(--seal-hatch);
-  background: color-mix(in srgb, var(--seal) 16%, transparent);
+  color: var(--text-heading);
+  background: var(--marker);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
@@ -659,7 +659,7 @@
 .rankstrip__chip--self {
   padding: 2px;
   border-radius: var(--radius-xs);
-  background: color-mix(in srgb, var(--seal) 14%, transparent);
+  background: color-mix(in srgb, var(--marker) 16%, transparent);
   cursor: default;
 }
 .rankstrip__arrow {
@@ -671,7 +671,7 @@
   height: 0;
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
-  border-top: 5px solid var(--seal-hatch);
+  border-top: 5px solid var(--accent-primary);
 }
 .rankstrip__n {
   font-family: var(--font-mono);
@@ -774,12 +774,12 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--seal-hatch);
+  color: var(--accent-link);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  border-bottom: var(--bw-hair) solid color-mix(in srgb, var(--seal-hatch) 40%, transparent);
+  border-bottom: var(--bw-hair) solid color-mix(in srgb, var(--accent-link) 40%, transparent);
   cursor: pointer;
 }
 .team-score__howlink:focus-visible {
@@ -809,7 +809,7 @@
 }
 .team-score__detail-title {
   margin: 0;
-  color: var(--seal-hatch);
+  color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);

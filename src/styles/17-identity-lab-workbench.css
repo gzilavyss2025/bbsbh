@@ -946,7 +946,7 @@
   box-shadow: var(--shadow-raised);
 }
 
-/* Taped to the bench — the same kraft corner the style card wears. */
+/* Taped to the bench — the same corner the style card wears (--hold-texture). */
 .idlab__chip--on::after {
   content: '';
   position: absolute;
@@ -955,7 +955,7 @@
   width: 16px;
   height: 10px;
   transform: rotate(-38deg);
-  background: var(--seal-texture);
+  background: var(--hold-texture);
   opacity: 0.85;
 }
 
@@ -1172,15 +1172,15 @@
   outline-offset: 2px;
 }
 
-/* A torn-off scrap of kraft confirming an action, beside the thing acted on
+/* A torn-off scrap of tape confirming an action, beside the thing acted on
    rather than replacing its label — a label that swaps to "Copied!" moves the
    target out from under the pointer. */
 .idlab__tapeflash {
   margin-left: var(--space-1);
   padding: 0 var(--space-1);
-  background: var(--seal-texture);
+  background: var(--hold-texture);
   border-radius: var(--radius-xs);
-  color: var(--text-on-seal);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);

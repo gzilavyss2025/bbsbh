@@ -37,7 +37,7 @@
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
-  color: var(--seal-hatch);
+  color: var(--text-caption);
 }
 
 .boxlines__title {

@@ -21,7 +21,7 @@
 }
 .tscoremodal__kicker {
   margin: 0;
-  color: var(--seal-hatch);
+  color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -51,18 +51,18 @@
   line-height: var(--lh-hero);
   font-weight: var(--w-semibold);
   padding: .03em .06em 0 0;
-  color: var(--seal-hatch);
+  color: var(--accent-primary);
 }
 .tscoremodal__pull {
   margin: 16px 0 !important;
   padding-left: 12px;
-  border-left: 3px solid var(--seal);
+  border-left: 3px solid var(--accent-primary);
   color: var(--ink-2);
   font-style: italic;
 }
 .tscoremodal__subkicker {
   margin: 18px 0 8px !important;
-  color: var(--seal-hatch);
+  color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -191,9 +191,9 @@
   gap: var(--space-2);
 }
 
-/* The save button: a small kraft-tape pill, the same amber affordance
+/* The save button: a small ink pill, the same affordance
    language as a clip card's WATCH tab — you are taking the print out of the
-   scorebook, so it wears the tape rather than a generic outline button. The
+   scorebook. It wore kraft tape until ADR-0083: a save is not a seal. The
    states it moves through (idle → percent → SAVE TO PHOTOS → SAVED) are
    labeled in SaveClipButton.jsx; only two of them change how it looks. */
 .hlsheet__save {
@@ -204,8 +204,8 @@
   padding: 4px 9px;
   border: none;
   border-radius: var(--radius-xs);
-  background: var(--seal);
-  color: var(--text-on-seal);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
@@ -227,13 +227,13 @@
   border-top: 6px solid currentColor;
 }
 .hlsheet__save:hover:not(:disabled) {
-  background: var(--seal-hatch);
+  background: var(--ink-1);
 }
 .hlsheet__save:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-/* Mid-download: no arrow (it's reporting, not inviting), and the tape goes
+/* Mid-download: no arrow (it's reporting, not inviting), and the pill goes
    flat so it stops looking like something to press. */
 .hlsheet__save--working {
   background: var(--surface-inset);

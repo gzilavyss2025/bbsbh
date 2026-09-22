@@ -89,7 +89,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  color: var(--seal-ink);
+  color: var(--text-heading);
 }
 .psbracket__roundtrophy {
   flex: none;
@@ -215,7 +215,7 @@
   justify-content: center;
   gap: 6px;
   padding: 12px 10px;
-  border: 1.5px solid var(--seal);
+  border: 1.5px solid var(--award-line);
   border-radius: var(--radius-md);
   background: var(--surface-inset);
   text-align: left;
@@ -347,7 +347,7 @@
   color: var(--accent-positive);
 }
 .psstack__roundlabel--ws {
-  color: var(--seal-ink);
+  color: var(--text-heading);
 }
 
 /* Fixed bottom year stepper — phone only, same shape as .inningnav /

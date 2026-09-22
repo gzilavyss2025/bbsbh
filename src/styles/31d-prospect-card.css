@@ -44,7 +44,7 @@
 .levelprog__current {
   flex: 0 0 auto;
   padding-left: var(--space-3);
-  border-left: 3px solid var(--seal-cover);
+  border-left: 3px solid var(--accent-primary);
   text-align: right;
 }
 
@@ -320,12 +320,12 @@
 }
 
 .prospectcard__chartmark {
-  stroke: var(--seal-cover);
+  stroke: var(--accent-primary);
   stroke-width: 1;
   stroke-dasharray: 3 3;
 }
 
-.prospectcard__chartflag { fill: var(--seal-cover); }
+.prospectcard__chartflag { fill: var(--award-line); }
 
 .prospectcard__chartmarklabel,
 .prospectcard__latest {

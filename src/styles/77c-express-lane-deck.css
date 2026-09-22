@@ -106,7 +106,7 @@
 }
 .xl-deck__base {
   font-size: var(--fs-caption);
-  color: var(--seal);
+  color: var(--album-foil-soft);
   text-transform: uppercase;
   letter-spacing: var(--ls-wide);
 }
@@ -190,13 +190,13 @@
    only thing the hold adds to the band; the emptiness is real, not a cover over
    something drawn underneath.
 
-   It takes the SEAL amber, which is this app's one colour for "sealed, and
-   yours to open" everywhere else. */
+   It takes the album's own soft foil, this deck's colour for a label that
+   states rather than flags. (The seal amber until ADR-0083.) */
 .xl-deck__hold {
   margin: 8px 0 0;
   font-size: var(--fs-small);
   font-weight: var(--w-bold);
-  color: var(--seal);
+  color: var(--album-foil-soft);
 }
 /* The keyboard hint, drawn only where a keyboard is plausible. This surface is
    written for a phone held one-handed, where "press space" is an instruction

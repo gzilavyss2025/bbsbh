@@ -152,14 +152,16 @@
   );
 }
 /* A hand-edited cell: the scorer overrode this box's notation
-   (lib/scorecardNotes.js), flagged with a kraft-amber corner fold so an
-   edited box is tellable from a derived one at arm's length. */
+   (lib/scorecardNotes.js), flagged with an ink corner fold so an
+   edited box is tellable from a derived one at arm's length. The fold is the
+   one mark on this sheet that is NOT kraft: the box beside it may still be
+   sealed, and two ambers meaning two things is what ADR-0083 ends. */
 .sc-ab--noted::after {
   content: '';
   position: absolute;
   top: 0;
   right: 0;
-  border-top: 7px solid var(--seal-cover);
+  border-top: 7px solid var(--accent-primary);
   border-left: 7px solid transparent;
 }
 /* The notation editor's tap target — the whole box, invisible, above the

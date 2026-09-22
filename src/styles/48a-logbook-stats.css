@@ -81,7 +81,7 @@
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
-  color: var(--seal-cover-ink);
+  color: var(--text-heading);
 }
 
 .logbookstats__sectionhead h2 {
@@ -403,7 +403,7 @@
 .logbookstats__momentmeta b {
   font-family: var(--font-display);
   font-size: var(--fs-small);
-  color: var(--seal-cover-ink);
+  color: var(--text-heading);
 }
 
 .logbookstats__momentmeta span {
