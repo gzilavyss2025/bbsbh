@@ -460,6 +460,18 @@ test('the stamp-in branch wins over the generic 3-segment game branch', () => {
   assert.equal(parseRoute('/team/158/stamp-in').id, '158')
 })
 
+test('an unknown team-hub tab lands on the team page, not a game', () => {
+  // The generic 3-segment branch read '/team/158/media' as date='team',
+  // matchup='158', so GameRoute ran the schedule with a null date (#1164).
+  assert.deepEqual(parseRoute('/team/158/media'), {
+    name: 'team',
+    id: '158',
+    asOf: null,
+    sportId: null,
+  })
+  assert.equal(parseRoute('/team/milwaukee-brewers-158/media').id, '158')
+})
+
 // --------------------------------------------------------------------------
 // situationalRecordsPath / parseRoute — one situational record across a whole level
 // --------------------------------------------------------------------------
