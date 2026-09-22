@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T13:50:56.023Z",
+  "generatedAt": "2026-09-22T12:30:51.830Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -156,7 +156,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".302, 17 HR, 39 RBI",
+      "statLine": ".301, 17 HR, 39 RBI",
       "age": 21,
       "number": "11"
     },
@@ -265,7 +265,7 @@
       "position": "SS",
       "levelRaw": "ALL (2)",
       "statLine": ".295, 26 HR, 119 RBI",
-      "age": 19,
+      "age": 20,
       "number": null
     },
     {
@@ -731,8 +731,8 @@
       "teamId": 116,
       "team": "det",
       "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "41.0 IP, 4.39 ERA, 47 SO",
+      "levelRaw": "ALL (3)",
+      "statLine": "44.0 IP, 4.09 ERA, 50 SO",
       "age": 28,
       "number": "77"
     },
@@ -1184,18 +1184,6 @@
     },
     {
       "orgRank": 8,
-      "playerId": 828987,
-      "name": "Briggs McKenzie",
-      "teamId": 11,
-      "team": "",
-      "position": "LHP",
-      "levelRaw": "ALL (3)",
-      "statLine": "26.0 IP, 2.08 ERA, 31 SO",
-      "age": 19,
-      "topRank": null
-    },
-    {
-      "orgRank": 8,
       "playerId": 703610,
       "name": "Justin Lamkin",
       "teamId": 11,
@@ -1204,6 +1192,18 @@
       "levelRaw": "ALL (2)",
       "statLine": "39.2 IP, 2.04 ERA, 53 SO",
       "age": 22,
+      "topRank": null
+    },
+    {
+      "orgRank": 8,
+      "playerId": 828987,
+      "name": "Briggs McKenzie",
+      "teamId": 11,
+      "team": "",
+      "position": "LHP",
+      "levelRaw": "ALL (3)",
+      "statLine": "26.0 IP, 2.08 ERA, 31 SO",
+      "age": 19,
       "topRank": null
     },
     {
@@ -1989,7 +1989,7 @@
     {
       "orgRank": 7,
       "playerId": 801725,
-      "name": "Luis De León",
+      "name": "Luis De Leon",
       "teamId": 110,
       "team": "bal",
       "position": "LHP",
@@ -3087,7 +3087,7 @@
       "position": "CF",
       "levelRaw": "ALL (3)",
       "statLine": ".295, 8 HR, 43 RBI",
-      "age": 22,
+      "age": 23,
       "topRank": null
     },
     {
@@ -3913,8 +3913,8 @@
       "teamId": 116,
       "team": "det",
       "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "41.0 IP, 4.39 ERA, 47 SO",
+      "levelRaw": "ALL (3)",
+      "statLine": "44.0 IP, 4.09 ERA, 50 SO",
       "age": 28,
       "topRank": 63
     },
@@ -4070,7 +4070,7 @@
       "team": "det",
       "position": "LF",
       "levelRaw": "ALL (3)",
-      "statLine": ".262, 14 HR, 64 RBI",
+      "statLine": ".261, 14 HR, 64 RBI",
       "age": 24,
       "topRank": null
     },
@@ -4094,7 +4094,7 @@
       "team": "det",
       "position": "SS",
       "levelRaw": "ALL (5)",
-      "statLine": ".273, 11 HR, 54 RBI",
+      "statLine": ".270, 11 HR, 54 RBI",
       "age": 24,
       "topRank": null
     },
@@ -4863,7 +4863,7 @@
       "position": "SS",
       "levelRaw": "ALL (2)",
       "statLine": ".295, 26 HR, 119 RBI",
-      "age": 19,
+      "age": 20,
       "topRank": 22
     },
     {
@@ -5282,7 +5282,7 @@
       "team": "was",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "105.1 IP, 4.10 ERA, 108 SO",
+      "statLine": "107.1 IP, 4.44 ERA, 110 SO",
       "age": 23,
       "topRank": null
     },
@@ -7177,7 +7177,7 @@
       "teamId": 137,
       "team": "sf",
       "position": "OF",
-      "levelRaw": "ALL (2)",
+      "levelRaw": "ALL (3)",
       "statLine": ".290, 29 HR, 94 RBI",
       "age": 24,
       "topRank": null
@@ -7376,18 +7376,6 @@
     },
     {
       "orgRank": 27,
-      "playerId": 805345,
-      "name": "Trent Harris",
-      "teamId": 137,
-      "team": "sf",
-      "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "60.1 IP, 2.83 ERA, 78 SO",
-      "age": 27,
-      "topRank": null
-    },
-    {
-      "orgRank": 28,
       "playerId": 832318,
       "name": "Leandro Rodriguez",
       "teamId": 137,
@@ -7399,7 +7387,7 @@
       "topRank": null
     },
     {
-      "orgRank": 29,
+      "orgRank": 28,
       "playerId": 815464,
       "name": "Lisbel Diaz",
       "teamId": 137,
@@ -7411,7 +7399,7 @@
       "topRank": null
     },
     {
-      "orgRank": 30,
+      "orgRank": 29,
       "playerId": 683363,
       "name": "Matt Wilkinson",
       "teamId": 137,
@@ -7420,6 +7408,18 @@
       "levelRaw": "ALL (5)",
       "statLine": "114.2 IP, 3.45 ERA, 114 SO",
       "age": 23,
+      "topRank": null
+    },
+    {
+      "orgRank": 30,
+      "playerId": 814154,
+      "name": "Scott Bandura",
+      "teamId": 137,
+      "team": "sf",
+      "position": "LF",
+      "levelRaw": "ALL (3)",
+      "statLine": ".314, 13 HR, 94 RBI",
+      "age": 25,
       "topRank": null
     },
     {
@@ -8606,7 +8606,7 @@
       "team": "tor",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "81.2 IP, 3.53 ERA, 83 SO",
+      "statLine": "84.1 IP, 3.52 ERA, 87 SO",
       "age": 26,
       "topRank": null
     },
@@ -8714,7 +8714,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".302, 17 HR, 39 RBI",
+      "statLine": ".301, 17 HR, 39 RBI",
       "age": 21,
       "topRank": 13
     },
@@ -8762,7 +8762,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".260, 12 HR, 40 RBI",
+      "statLine": ".261, 13 HR, 41 RBI",
       "age": 23,
       "topRank": null
     },
@@ -9465,7 +9465,7 @@
     {
       "orgRank": 20,
       "playerId": 691548,
-      "name": "Rolddy Munoz",
+      "name": "Rolddy Muñoz",
       "teamId": 144,
       "team": "atl",
       "position": "RHP",
