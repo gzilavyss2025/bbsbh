@@ -73,7 +73,7 @@ export function StampCollection({
           )}
 
           <p className="stampcard__through">
-            <button type="button" className="btn btn--chip" onClick={() => onStats?.()}>
+            <button type="button" className="btn btn--control" onClick={() => onStats?.()}>
               What it adds up to ›
             </button>
           </p>

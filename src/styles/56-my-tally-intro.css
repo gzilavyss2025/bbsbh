@@ -172,7 +172,6 @@
 
 .introsheet__primary {
   width: 100%;
-  min-height: var(--tap-min);
 }
 
 .introsheet__secondary {

@@ -339,11 +339,8 @@
   flex: 0 0 auto;
 }
 
-.btn--account.continuebar__pitchcta {
+.continuebar__pitchcta {
   flex: 0 0 auto;
-  width: auto;
-  min-height: var(--tap-min);
-  padding-inline: var(--space-3);
 }
 
 .continuebar__dismiss {
