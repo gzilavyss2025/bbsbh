@@ -27,6 +27,7 @@ import { TeamLink } from '../components/team/TeamLink.jsx'
 import { ClinchMark, ClinchKey } from '../components/team/ClinchMark.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { Door } from '../components/ui/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 // Rank-movement glyph: '' (not '—') when there's nothing to compare, since
@@ -279,9 +280,9 @@ export function StandingsPage() {
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Standings</h1>
-        <a className="topbar__action chevron-link" {...linkProps('/postseason-race')}>
-          Postseason Race ›
-        </a>
+        <Door className="topbar__action" {...linkProps('/postseason-race')}>
+          Postseason Race
+        </Door>
       </header>
 
       <div className="standings-ctrl">

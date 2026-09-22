@@ -103,27 +103,9 @@
   margin: 20px 0;
 }
 
-/* The pager. Same dashed-to-solid treatment as the deck's own .txcard__more,
-   laid across the page instead of standing at the end of a scroll row. */
-.txpage__more {
-  display: block;
-  width: 100%;
+/* The pager, laid across the page rather than standing at the end of a scroll
+   row the way the deck's .txcard__door does. .door--block draws it; the margin
+   is the only thing a page-wide pager needs that a card-foot door does not. */
+.txpage__door {
   margin: 4px 0 20px;
-  padding: 12px;
-  border: var(--bw-hair) dashed var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font: inherit;
-  font-weight: var(--w-semibold);
-  cursor: pointer;
-}
-.txpage__more:hover:not(:disabled),
-.txpage__more:focus-visible {
-  color: var(--text-body);
-  border-style: solid;
-}
-.txpage__more:disabled {
-  cursor: wait;
-  opacity: 0.7;
 }

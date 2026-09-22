@@ -147,7 +147,7 @@
    incremental paging (see AllStarRostersPage). Plain text-button styling,
    matching the app's other "reveal more" affordances rather than a heavy
    bordered button. */
-.allstarrosters__more {
+.allstarrosters__door {
   align-self: center;
   margin: var(--space-2) auto 0;
   font-family: var(--font-display);
@@ -163,7 +163,7 @@
   cursor: pointer;
   display: block;
 }
-.allstarrosters__more:focus-visible {
+.allstarrosters__door:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }

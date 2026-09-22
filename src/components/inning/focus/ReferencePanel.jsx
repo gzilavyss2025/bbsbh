@@ -8,7 +8,7 @@ import { useAsync } from '../../../hooks/useAsync.js'
 import { fetchSavantMatchup } from '../../../api/matchup/savant.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
-import { ChevronLink } from '../../ui/ChevronLink.jsx'
+import { Door } from '../../ui/Door.jsx'
 import { DefenseSection, LineupSection } from '../EnteringReference.jsx'
 import { MarginNotes } from '../MarginNotes.jsx'
 import { PitchersSection } from '../PitchersSection.jsx'
@@ -400,8 +400,8 @@ function Section({
             once-a-game reaches: mid-half you're scoring, not reading the
             whole sheet. Structural (a route), never a score. */}
         {onScorecard && (
-          <div className="thub-door">
-            <ChevronLink onClick={onScorecard}>Open the live scorecard</ChevronLink>
+          <div className="thub__door">
+            <Door onClick={onScorecard}>Open the live scorecard</Door>
           </div>
         )}
       </>

@@ -2,7 +2,7 @@ import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react
 import { fetchTeamPhotoBatch } from '../../../../api/gamePhotos.js'
 import { useNav } from '../../../../lib/nav.js'
 import { teamPhotosPath } from '../../../../lib/route.js'
-import { ChevronLink } from '../../../../components/ui/ChevronLink.jsx'
+import { Door } from '../../../../components/ui/Door.jsx'
 
 // A setup jump, not a user-visible scroll gesture — bypasses the track's own
 // `scroll-behavior: smooth` (index.css) so it lands instantly. Without this,
@@ -229,7 +229,7 @@ export function TeamPhotosRail({ teamId, games, limit = null }) {
     <div className="thub-card">
       <div className="thub-card__head">
         <span>Photos</span>
-        <ChevronLink onClick={() => navigate(teamPhotosPath(teamId))}>Full season</ChevronLink>
+        <Door onClick={() => navigate(teamPhotosPath(teamId))}>Full season</Door>
       </div>
       <div className="thub-card__body">
         <div className="teamphotos">

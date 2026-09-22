@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
 import { fetchGamePhotos, photosForPlayer, onlyPhotographer } from '../../api/gamePhotos.js'
-import { ChevronLink } from '../ui/ChevronLink.jsx'
+import { Door } from '../ui/Door.jsx'
 
 // A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
 // copy of this helper for why `scroll-behavior: smooth` has to be bypassed.
@@ -235,8 +235,8 @@ export function PlayerPhotosRail({ personId, games, limit }) {
           exhausted with more than the cap already found (a big batch landed
           in one game) — either way there's more than this row shows. */}
       {!expanded && (!exhausted || photos.length > limit) && (
-        <div className="thub-door">
-          <ChevronLink onClick={() => setExpanded(true)}>See all</ChevronLink>
+        <div className="thub__door">
+          <Door onClick={() => setExpanded(true)}>See all</Door>
         </div>
       )}
     </section>

@@ -40,7 +40,7 @@ Where things live: roster projection / 40-man / injured list → Roster; schedul
 every decided game, photos, transactions → Games; standings, batting + pitching
 ranks, leaders, jerseys, day-of-week, comebacks → Numbers; affiliates, prospects,
 affiliation history → Minors. The Overview holds **previews only**, each ending in
-a `.thub-door` link to the tab that owns it, and each is a `preview`/`limit` prop
+a `.thub__door` link to the tab that owns it, and each is a `preview`/`limit` prop
 on the same module the tab renders in full — never a parallel component. The one
 pair that isn't literally the same component still lives in one module:
 `modules/TeamGames.jsx` exports the Overview's `LastTenGames` rail and the Games

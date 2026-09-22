@@ -3,7 +3,7 @@ import { computeLeaders, positionTag } from '../../api/teamLeaders.js'
 import { SectionTitle } from '../ui/SectionTitle.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { InjuredMark } from '../badges/InjuredMark.jsx'
-import { ChevronLink } from '../ui/ChevronLink.jsx'
+import { Door } from '../ui/Door.jsx'
 
 // TEAM LEADERS, LEDGER FORM — the team hub's own rendering of a club's
 // per-category leaders: two labelled blocks, BATTING over PITCHING, one ruled
@@ -78,7 +78,7 @@ export function TeamLeadersLedger({
         action={
           onSeeAll || secondaryAction ? (
             <span className="tledg__actions">
-              {onSeeAll && <ChevronLink onClick={onSeeAll}>See all</ChevronLink>}
+              {onSeeAll && <Door onClick={onSeeAll}>See all</Door>}
               {secondaryAction}
             </span>
           ) : null

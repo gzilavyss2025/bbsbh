@@ -8,15 +8,18 @@ and only there.** This file does not restate it. Two copies of a rule drift, and
 the copy a reader happens to open is the one they follow. Read the ADR for what
 the six clauses say and what each one rejects; read this file for what moves.
 
-Measured on `main` at `9a578dcb7`. **143 rows**, of which **8 are held**.
+Measured on `main` at `9a578dcb7`. **144 rows**, of which **8 are held**.
+
+One row was added after the measurement, by the rename that found it: see
+`.bs__noteMore` under #1130.
 
 | collapse issue | rows |
 | --- | --- |
-| Button and Door (#1130) | 25 |
+| Button and Door (#1130) | 26 |
 | Pill (#1131) | 33 |
 | SectionHead and Card (#1113) | 75 |
 | Table, EmptyState and Notice (#1132) | 10 |
-| **total** | **143** |
+| **total** | **144** |
 
 ## How to read a row
 
@@ -45,6 +48,21 @@ not a call site, so do not read it as one.
 interpolation or is orphaned. A grep-driven rename misses both. They are
 `.pitcherhandoff__chip--open` and `.cover__sub`, and each row says so.
 
+**A row whose note says `landed in #NNNN` has already moved.** Its `current
+class` column is then history — the name the class HAD — and its target column is
+what is in the tree. This file is the one place an old name is meant to survive,
+so a boundary grep for a renamed class that hits here and nowhere else is the
+expected result, not a miss.
+
+**An ABSORBED row's target is a shared rule, not a per-site name.** Each collapse
+issue gives its shape word one rule that owns it, and where a row turned out to be
+a copy of that rule declaration for declaration, the copy was deleted rather
+than renamed — so the element wears the shared class and no per-site class at
+all. Such a row's target column names the shared rule (`.door--block`) and the
+per-site name in its `current class` column exists nowhere in the tree. A row
+that keeps even one declaration of its own is a rename, not an absorb, and its
+target column names the class the way every other row does.
+
 **A held row moves nothing**, so its file column carries the measured count as
 evidence for the hold instead of a work list.
 
@@ -55,11 +73,14 @@ evidence for the hold instead of a work list.
 Rows are ordered by the sequence the collapse issues land in: #1130, then #1131,
 then #1113, then #1132.
 
-## Button and Door — #1130 — 25 rows
+## Button and Door — #1130 — 26 rows
 
 Eleven blocks carry `btn` or `door` without owning the base rule for it;
-`.btn` owns that rule and is not a row. Eleven `__more` doors and one
+`.btn` owns that rule and is not a row. Twelve `__more` doors and one
 `__action` control break clause 3.
+
+The rule the door rows collapse onto is `.door` in `src/styles/system/door.css`,
+with an `--inline` and a `--block` layout, written by `components/ui/Door.jsx`.
 
 | current class | clause(s) broken | target name | collapse issue | files that must move | hold + reason |
 | --- | --- | --- | --- | --- | --- |
@@ -71,21 +92,22 @@ Eleven blocks carry `btn` or `door` without owning the base rule for it;
 | `.sitemenu-btn` | 1 | `.sitebar__menu` | #1130 | `components/chrome/SiteMenu.jsx`, `styles/03-slate-header.css` †, `styles/04-site-bar.css`, `e2e/slate-header.spec.js` | — |
 | `.sitesearch-btn` | 1 | `.sitebar__search` | #1130 | `components/chrome/SiteSearch.jsx`, `styles/03-slate-header.css` †, `styles/04-site-bar.css`, `e2e/site-search.spec.js`, `e2e/slate-header.spec.js` | — |
 | `.watchbtn` | 1 | `.masthead__watch` | #1130 | `components/game/GamePhotosStrip.jsx` †, `screens/GameView.jsx`, `styles/05-masthead-nav.css`, `styles/44-pre-game-cards.css` † | — |
-| `.boxlines-door` | 1 | `.boxlines__door` | #1130 | `components/boxlines/BoxLinesDoor.jsx`, `styles/10-lineup.css` †, `styles/boxlines/boxlines.css`, `styles/boxlines/listdoor.css` † | — |
-| `.thub-door` | 1 | `.thub__door` | #1130 | `src/CLAUDE.md`, `components/inning/focus/ReferencePanel.jsx`, `components/player/PlayerHighlightsRail.jsx`, `components/player/PlayerPhotosRail.jsx`, `screens/PlayerPage.jsx`, `screens/team/GamesTab.jsx`, `screens/team/modules/TeamChallengeCard.jsx`, `screens/team/modules/TeamRunValueCard.jsx`, `screens/TeamInfo.jsx`, `screens/TeamPage.jsx`, `styles/10-lineup.css`, `styles/46-consent-modal.css` | — |
-| `.xldoor` | 1 | `.xl__door` | #1130 | `components/game/ExpressLaneDoor.jsx`, `styles/77b-express-lane-door.css` | — |
+| `.boxlines-door` | 1 | `.boxlines__door` | #1130 | `components/boxlines/BoxLinesDoor.jsx`, `styles/10-lineup.css` †, `styles/boxlines/boxlines.css`, `styles/boxlines/listdoor.css` † | landed in #1130. The name is BUILT BY INTERPOLATION (`BoxLinesDoor.jsx:41`), with a modifier this row did not list until the rename found it: `.boxlines-door--face` → `.boxlines__door--face`, a hook that has no rule of its own. Its `__label` did NOT follow the block — the words at the far end of that row are the text door's, so they are the shared `.door__label` now. |
+| `.thub-door` | 1 | `.thub__door` | #1130 | `src/CLAUDE.md`, `components/inning/focus/ReferencePanel.jsx`, `components/player/PlayerHighlightsRail.jsx`, `components/player/PlayerPhotosRail.jsx`, `screens/PlayerPage.jsx`, `screens/team/GamesTab.jsx`, `screens/team/modules/TeamChallengeCard.jsx`, `screens/team/modules/TeamRunValueCard.jsx`, `screens/TeamInfo.jsx`, `screens/TeamPage.jsx`, `styles/10-lineup.css`, `styles/46-consent-modal.css` | landed in #1130. It is the WRAPPER that right-aligns a text door under a preview card, never the control — `ui/Door.jsx` is the control, and `.thub__door` goes on owning only where it sits. |
+| `.xldoor` | 1 | `.xl__door` | #1130 | `components/game/ExpressLaneDoor.jsx`, `styles/77b-express-lane-door.css` | landed in #1130, with the names under it this row did not list: `.xldoor__go` → `.xl__go` (the chevron is an element of `.xl`, not of the door) and five `--xldoor-*` custom properties → `--xl-door-*`. Keeps its whole film-strip dress and wears `.door` for the pointer and the focus ring only. |
 | `.btn--reveal` | — (collapse risk) | hold | #1130 | 15 files — none move | HOLD — #1130 folds every `.btn--*` skin into a `skin` prop; this one may not go. The kraft hatch is the seal metaphor doing its job and this is the spoiler rule's one control. `scripts/check-seal-scope.mjs` allowlists it by name (ADR-0083). |
-| `.allstarlegacy__more` | 3 | `.allstarlegacy__door` | #1130 | `screens/AllStarLegacyPage.jsx`, `styles/42-first-scorebook.css` | — |
-| `.allstarrosters__more` | 3 | `.allstarrosters__door` | #1130 | `screens/AllStarRostersPage.jsx`, `styles/37-all-star-rosters.css` | — |
-| `.cmdrecv__more` | 3 | `.cmdrecv__door` | #1130 | `components/playerstats/CommandReceivedCard.jsx`, `styles/26g-command-received.css` | — |
-| `.foulcard__more` | 3 | `.foul__door` | #1130 | `components/playerstats/FoulCard.jsx`, `styles/26-player-page.css` | moves with its block — see the `.foulcard` row. |
-| `.gamesgrid__more` | 3 | `.gamesgrid__door` | #1130 | `screens/team/modules/TeamGames.jsx`, `styles/29-team-transactions.css` | — |
-| `.marginnotes__more` | 3 | `.marginnotes__door` | #1130 | `components/inning/MarginNotes.jsx`, `styles/20-charts.css`, `styles/29-team-transactions.css` † | — |
-| `.pshistory__more` | 3 | `.pshistory__door` | #1130 | `screens/PostseasonHistoryPage.jsx`, `screens/team/modules/InjuredListCard.jsx`, `screens/team/modules/minors/ProspectsCard.jsx`, `styles/33-awards-history.css` | — |
-| `.rvcard__more` | 3 | `.rv__door` | #1130 | `components/playerstats/RunValueCard.jsx`, `styles/75-run-value.css` | moves with its block — see the `.rvcard` row. |
-| `.teammates__more` | 3 | `.teammates__door` | #1130 | `screens/TeamInfo.jsx`, `styles/10-lineup.css`, `styles/20-charts.css` †, `styles/21-box-score.css` †, `styles/29-team-transactions.css` † | — |
-| `.txcard__more` | 3 | `.txrow__door` | #1130 | `components/transactions/TeamTransactionsCard.jsx`, `styles/29-team-transactions.css`, `styles/72-club-transactions.css` † | moves with its block — see the `.txcard` row. |
-| `.txpage__more` | 3 | `.txpage__door` | #1130 | `screens/team/TeamTransactionsPage.jsx`, `styles/72-club-transactions.css` | — |
+| `.allstarlegacy__more` | 3 | `.allstarlegacy__door` | #1130 | `screens/AllStarLegacyPage.jsx`, `styles/42-first-scorebook.css` | landed in #1130, RENAMED and not absorbed: this and `.allstarrosters__door` draw an outlined capsule in `--accent-primary`, which is a button's dress and not a door's. The audit found the pair one declaration apart — this one carried no `cursor: pointer` — and that is fixed here. Whether a door may wear a button skin is #1130's Button half to settle. |
+| `.allstarrosters__more` | 3 | `.allstarrosters__door` | #1130 | `screens/AllStarRostersPage.jsx`, `styles/37-all-star-rosters.css` | landed in #1130, renamed and not absorbed — see the `.allstarlegacy__more` row for the pair. |
+| `.bs__noteMore` | 3 | `.door--block` | #1130 | `screens/BoxScore.jsx`, `styles/21-box-score.css` | ADDED in #1130 and landed there. The census missed it because it spells the reject-list word `__noteMore`, not `__more`. It was the FIFTH declaration-identical copy of the block door, and the one three of the other four name in their own comments as the shape they were copying — so leaving it behind would have left the next reader a copy to copy. Absorbed whole: no per-site rule remains. |
+| `.cmdrecv__more` | 3 | `.cmdrecv__door` | #1130 | `components/playerstats/CommandReceivedCard.jsx`, `styles/26g-command-received.css` | landed in #1130. One declaration (a top margin) over `.plink`, so it is a rename and not an absorb. |
+| `.foulcard__more` | 3 | `.foul__door` | #1130 | `components/playerstats/FoulCard.jsx`, `styles/26-player-page.css` | moves with its block — see the `.foulcard` row. The ELEMENT half landed in #1130 on today's prefix, as `.foulcard__door`; the block half rides with #1113, which is what makes `.foul` exist. |
+| `.gamesgrid__more` | 3 | `.door--block` | #1130 | `screens/team/modules/TeamGames.jsx`, `styles/29-team-transactions.css` | landed in #1130, ABSORBED and not renamed. Read against the three the issue measured, this is a FOURTH copy of the same thirteen declarations, plus the focus ring that is now on `.door`. |
+| `.marginnotes__more` | 3 | `.door--block` | #1130 | `components/inning/MarginNotes.jsx`, `styles/20-charts.css`, `styles/29-team-transactions.css` † | landed in #1130, absorbed — one of the three the issue measured as declaration-identical. |
+| `.pshistory__more` | 3 | `.door--block` | #1130 | `screens/PostseasonHistoryPage.jsx`, `screens/team/modules/InjuredListCard.jsx`, `screens/team/modules/minors/ProspectsCard.jsx`, `styles/33-awards-history.css` | landed in #1130, absorbed — one of the three the issue measured as declaration-identical. The name was already a lie at two of its three call sites: the injured-list card and the prospects card both wore the postseason-history door. |
+| `.rvcard__more` | 3 | `.rv__door` | #1130 | `components/playerstats/RunValueCard.jsx`, `styles/75-run-value.css` | moves with its block — see the `.rvcard` row. The ELEMENT half landed in #1130 on today's prefix, as `.rvcard__door`; the block half rides with #1113, and that row's standing warning that `.rv` is not a free name is untouched here. |
+| `.teammates__more` | 3 | `.door--block` | #1130 | `screens/TeamInfo.jsx`, `styles/10-lineup.css`, `styles/20-charts.css` †, `styles/21-box-score.css` †, `styles/29-team-transactions.css` † | landed in #1130, absorbed — one of the three the issue measured as declaration-identical, and the one the other four cite in their comments. |
+| `.txcard__more` | 3 | `.txrow__door` | #1130 | `components/transactions/TeamTransactionsCard.jsx`, `styles/29-team-transactions.css`, `styles/72-club-transactions.css` † | moves with its block — see the `.txcard` row. The ELEMENT half landed in #1130 on today's prefix, as `.txcard__door`; the block half rides with #1113. Absorbed onto `.door--block` apart from three placement declarations it keeps as a flex item in a scroll deck; its dashed edge went solid, which #1132 reserves for the pencil meaning. |
+| `.txpage__more` | 3 | `.txpage__door` | #1130 | `screens/team/TeamTransactionsPage.jsx`, `styles/72-club-transactions.css` | landed in #1130, absorbed onto `.door--block` apart from the margin that lays it across a page rather than at the foot of a card. Its dashed edge went solid, which #1132 reserves for the pencil meaning. |
 | `.sitefooter__action` | 3, 5 | `.sitefooter__btn` | #1130 | `components/chrome/SiteFooter.jsx`, `styles/08-site-shell.css`, `styles/08a-site-menu.css` † | clause 3 reserves `__action` for the head's action slot; this is a standalone 44px control in the footer, not a head part. |
 | `.cta__go` | 5 | hold | #1130 | 1 file — none move | HOLD — `/learn` is server-rendered by `api/page.js` from `src/copy/landing/`, and its CSS is `public/learn.css`, outside `src/styles/`. The guide keeps its own copy of the palette; a rename here moves a file no collapse PR touches. |
 

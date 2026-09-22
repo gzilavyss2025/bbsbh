@@ -50,7 +50,7 @@ export function FoulCard({ playerId, group, asOf }) {
           </div>
         ))}
       </dl>
-      <button type="button" className="plink foulcard__more" onClick={() => navigate(foulsPath())}>
+      <button type="button" className="plink foulcard__door" onClick={() => navigate(foulsPath())}>
         League foul tracker ›
       </button>
     </div>

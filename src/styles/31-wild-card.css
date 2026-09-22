@@ -717,7 +717,7 @@
 }
 /* Roster super-section's Season / Last 10 Games toggle, in the SectionTitle
    `action` slot — a two-button segmented control, same caps/tracking as
-   .chevron-link so it reads as part of the same header row. */
+   .door--inline so it reads as part of the same header row. */
 .roster-super__toggle {
   display: flex;
   border: var(--bw-hair) solid var(--border-rule);

@@ -290,7 +290,7 @@ export function AllStarRostersPage() {
           {canLoadMore && (
             <button
               type="button"
-              className="allstarrosters__more"
+              className="allstarrosters__door"
               onClick={() => setExpanded(true)}
             >
               Load more (back to {LOAD_MORE_CUTOFF})

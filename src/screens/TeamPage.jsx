@@ -7,7 +7,7 @@ import { TeamLeadersLedger } from '../components/teamstats/TeamLeadersLedger.jsx
 import { MilbAlumni } from '../components/teamstats/MilbAlumni.jsx'
 import { TeamScoreCard } from '../components/teamstats/TeamScoreCard.jsx'
 import { TeamTransactionsCard } from '../components/transactions/TeamTransactionsCard.jsx'
-import { ChevronLink } from '../components/ui/ChevronLink.jsx'
+import { Door } from '../components/ui/Door.jsx'
 import { LEDGER_HITTING, LEDGER_PITCHING } from '../api/teamLeaders.js'
 import { TeamHubShell } from './team/TeamHubShell.jsx'
 import { loadOverview } from './team/data/loadOverview.js'
@@ -31,14 +31,14 @@ const PREVIEW_HIGHLIGHTS = 6
 const PREVIEW_PHOTOS = 6
 
 // The door itself: one text link under a preview, built from the same shared
-// ChevronLink TeamLeadersLedger's own built-in door uses (reused as-is below
+// Door TeamLeadersLedger's own built-in door uses (reused as-is below
 // rather than doubled up). It is a link, not a card — the tab bar, the shelf row and
 // the Org index tile remain the only new chrome this rebuild introduces (see
 // the PRD's non-negotiable 4).
 function PreviewDoor({ label, onClick }) {
   return (
-    <div className="thub-door">
-      <ChevronLink onClick={onClick}>{label}</ChevronLink>
+    <div className="thub__door">
+      <Door onClick={onClick}>{label}</Door>
     </div>
   )
 }

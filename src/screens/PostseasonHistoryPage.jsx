@@ -11,6 +11,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { Door } from '../components/ui/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { teamClubNameShort, teamFullName } from '../lib/teams.js'
 
@@ -409,9 +410,9 @@ export function PostseasonHistoryPage() {
             <SeasonBracket key={season.year} season={season} onOpenSeries={openSeries} wide />
           ))}
           {hasMoreYears && (
-            <button type="button" className="pshistory__more" onClick={() => setShowAllYears(true)}>
+            <Door layout="block" onClick={() => setShowAllYears(true)}>
               Load postseasons before {DEFAULT_CUTOFF_YEAR}
-            </button>
+            </Door>
           )}
         </div>
       )}

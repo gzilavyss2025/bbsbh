@@ -119,7 +119,7 @@ redundancy to fall back on.
 No visual redesign. Existing card chrome, tokens and typography carry over
 untouched; the new chrome was exactly four things — the tab bar, the shelf row
 (since removed, see above), the Org/Minors index tile, and the Overview's
-preview door (`.thub-door`, a text link built from the shared `.chevron-link`
+preview door (`.thub__door`, a text link built from the shared `.door--inline`
 primitive, not a card). This effort moved modules; it did not restyle them.
 
 Previews are **props on the existing modules** (`preview` on `StandingsCard` and
