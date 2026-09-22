@@ -33,18 +33,11 @@ export function ContractHistoryLedger({ rows }) {
   const view = contractHistoryView(rows)
   if (!view.seasons.length) return null
 
-  // WHY THIS COLLAPSES. The deepest career in the data carries 27 rows across
-  // 26 seasons, and this is a phone-first page: printed in full, a long career
-  // pushes every card under it off the bottom of a very long scroll for a
-  // reader who came to see this season. Six seasons is about one screenful on
-  // an iPhone, and the newest seasons are the ones a reader is looking for, so
-  // the rest stays one tap away — the same "cap the display, never the
-  // information" convention the Awards index and the transaction timeline use.
-  //
-  // The cap only applies when it saves more than a single season: hiding one
-  // season behind a control costs a tap and buys two lines of scroll back.
-  const dense = view.seasons.length > SEASONS_VISIBLE + 1
-  const seasons = dense && !expanded ? view.seasons.slice(0, SEASONS_VISIBLE) : view.seasons
+  // A long career collapses to its newest seasons plus every deal behind them,
+  // and the rest stays one tap away. WHICH seasons those are, and whether the
+  // collapse is worth a tap at all, is decided in history.js — this file only
+  // holds the reader's answer to it.
+  const seasons = expanded ? view.seasons : view.collapsed
 
   return (
     <section className="cthist">
@@ -62,7 +55,7 @@ export function ContractHistoryLedger({ rows }) {
           <SeasonBlock key={season.season ?? 'undated'} season={season} />
         ))}
       </ol>
-      {dense &&
+      {view.dense &&
         (expanded ? (
           <button type="button" className="cthist__toggle" onClick={() => setExpanded(false)}>
             Show fewer
@@ -75,8 +68,6 @@ export function ContractHistoryLedger({ rows }) {
     </section>
   )
 }
-
-const SEASONS_VISIBLE = 6
 
 // "13 seasons · 21 records" — the aside on the card's own heading, so the
 // collapsed view still says how deep the record goes.
