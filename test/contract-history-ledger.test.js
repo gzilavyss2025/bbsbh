@@ -379,9 +379,10 @@ test('grouping never reads rowKey as a number, whatever shape the key takes', ()
 })
 
 test('an empty history is an empty view, and no history at all does not throw', () => {
-  assert.deepEqual(contractHistoryView([]), { seasons: [], rows: 0 })
-  assert.deepEqual(contractHistoryView(null), { seasons: [], rows: 0 })
-  assert.deepEqual(contractHistoryView(undefined), { seasons: [], rows: 0 })
+  const empty = { seasons: [], rows: 0, collapsed: [], dense: false }
+  assert.deepEqual(contractHistoryView([]), empty)
+  assert.deepEqual(contractHistoryView(null), empty)
+  assert.deepEqual(contractHistoryView(undefined), empty)
 })
 
 test('a row with no season sorts below every dated one', () => {
@@ -390,4 +391,123 @@ test('a row with no season sorts below every dated one', () => {
     row({ rowKey: 'salaries#b', season: 1998, terms: { salary: 600000 } }),
   ])
   assert.deepEqual(view.seasons.map((s) => s.season), [1998, null])
+})
+
+// ---- the collapse ----------------------------------------------------------
+//
+// The card shows a career's newest seasons and puts the rest behind a tap. A
+// SALARY is the row a deep career has one of in every season; a DEAL is the row
+// a reader came for, and it sits in whichever season it was signed in. So the
+// cap is measured in seasons but falls on the SALARY rows: it may never hide a
+// deal, however far back the deal was signed (issue #1141).
+
+// A Pujols-shaped career: 22 seasons of pay, and the two deals that bought
+// them, both further back than the six newest seasons.
+function deepCareer() {
+  const rows = []
+  for (let season = 2022; season >= 2001; season -= 1) {
+    rows.push(row({ rowKey: `salaries#${season}`, season, teamId: null, terms: { salary: 1_000_000 + season } }))
+  }
+  rows.push(
+    row({
+      rowKey: 'free_agency#405395',
+      sourceFile: 'free_agency',
+      season: 2012,
+      teamId: 138,
+      terms: { years: 10, guarantee: 240_000_000, aav: 24_000_000, term: '2012-2021' },
+    }),
+    row({
+      rowKey: 'extensions#405395',
+      sourceFile: 'extensions',
+      season: 2004,
+      teamId: 138,
+      terms: { years: 7, guarantee: 100_000_000, aav: 14_290_000, first_year: 2004, final_year: 2010, option: 'c' },
+    }),
+  )
+  return rows
+}
+
+test('the collapse keeps every deal, however far back it was signed', () => {
+  const view = contractHistoryView(deepCareer())
+  assert.equal(view.seasons.length, 22)
+  assert.equal(view.dense, true)
+  // The six newest seasons, and then the two seasons that carry a deal.
+  assert.deepEqual(
+    view.collapsed.map((s) => s.season),
+    [2022, 2021, 2020, 2019, 2018, 2017, 2012, 2004],
+  )
+  // $240M and $100M are the two figures a reader came for; neither may sit
+  // behind the toggle.
+  const headlines = view.collapsed.flatMap((s) => s.rows.map((r) => r.headline))
+  assert.ok(headlines.includes('10 yr · $240M'))
+  assert.ok(headlines.includes('7 yr · $100M'))
+})
+
+test('a season kept for its deal shows the deal, not the salary beside it', () => {
+  const view = contractHistoryView(deepCareer())
+  const kept = view.collapsed.find((s) => s.season === 2012)
+  assert.deepEqual(kept.rows.map((r) => r.kind), ['freeAgency'])
+  // The newest seasons are still whole: the cap is on the salary rows the
+  // collapse reaches past, not on the seasons it shows.
+  const newest = view.collapsed[0]
+  assert.equal(newest.season, 2022)
+  assert.deepEqual(newest.rows.map((r) => r.kind), ['salary'])
+  // And the full view is untouched by any of it.
+  assert.deepEqual(view.seasons.find((s) => s.season === 2012).rows.map((r) => r.kind), ['freeAgency', 'salary'])
+})
+
+test('the collapse changes nothing when every deal is already in the newest six', () => {
+  const rows = []
+  for (let season = 2024; season >= 2005; season -= 1) {
+    rows.push(row({ rowKey: `salaries#${season}`, season, teamId: null, terms: { salary: 900_000 } }))
+  }
+  rows.push(
+    row({
+      rowKey: 'extensions#1',
+      sourceFile: 'extensions',
+      season: 2023,
+      teamId: 158,
+      terms: { years: 3, guarantee: 51_000_000, aav: 17_000_000, first_year: 2024, final_year: 2026 },
+    }),
+  )
+  const view = contractHistoryView(rows)
+  assert.equal(view.dense, true)
+  assert.deepEqual(view.collapsed.map((s) => s.season), [2024, 2023, 2022, 2021, 2020, 2019])
+  assert.deepEqual(view.collapsed[1].rows.map((r) => r.kind), ['extension', 'salary'])
+})
+
+test('a career too shallow to collapse is shown whole', () => {
+  const rows = []
+  for (let season = 2024; season >= 2018; season -= 1) {
+    rows.push(row({ rowKey: `salaries#${season}`, season, teamId: null, terms: { salary: 800_000 } }))
+  }
+  const view = contractHistoryView(rows)
+  assert.equal(view.seasons.length, 7)
+  assert.equal(view.dense, false)
+  assert.deepEqual(view.collapsed, view.seasons)
+})
+
+test('the toggle never offers seasons that are already on the page', () => {
+  // Every season older than the newest six carries a deal, so keeping the
+  // deals keeps every season. There is then nothing behind the toggle worth a
+  // tap, and the card shows the career whole rather than claiming otherwise.
+  const rows = []
+  for (let season = 2024; season >= 2016; season -= 1) {
+    rows.push(row({ rowKey: `salaries#${season}`, season, teamId: null, terms: { salary: 700_000 } }))
+    if (season <= 2018) {
+      rows.push(
+        row({
+          rowKey: `arbitration#${season}`,
+          sourceFile: 'arbitration',
+          season,
+          teamId: 158,
+          terms: { prior_salary: 600_000, settled_salary: 700_000 },
+        }),
+      )
+    }
+  }
+  const view = contractHistoryView(rows)
+  assert.equal(view.seasons.length, 9)
+  assert.equal(view.dense, false)
+  assert.deepEqual(view.collapsed, view.seasons)
 })
