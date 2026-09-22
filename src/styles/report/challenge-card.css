@@ -70,7 +70,7 @@
 
 .chalcard__view {
   flex: 1;
-  padding: 6px 8px;
+  padding: var(--space-1h) var(--space-2);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -106,7 +106,7 @@
 
 .chalcard__board th,
 .chalcard__board td {
-  padding: 6px 0;
+  padding: var(--space-1h) 0;
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }

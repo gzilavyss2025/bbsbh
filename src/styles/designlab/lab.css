@@ -41,7 +41,7 @@
 }
 
 .dlab__jumplink {
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
   background: var(--surface-card);

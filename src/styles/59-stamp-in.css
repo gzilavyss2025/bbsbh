@@ -104,8 +104,8 @@
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
+  gap: var(--space-1h);
+  padding: var(--space-1) var(--space-2h);
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
   font-size: var(--fs-label);

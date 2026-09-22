@@ -6,14 +6,14 @@
 
 .posinn__scope {
   display: flex;
-  gap: 6px;
+  gap: var(--space-1h);
   margin: 0 0 10px;
 }
 
 .posinn__scopebtn {
   flex: 1 1 0;
   min-height: 34px;
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
@@ -43,7 +43,7 @@
 
 .posinn__loading {
   justify-content: center;
-  padding: 24px 0;
+  padding: var(--space-6) 0;
 }
 
 .posinn__diamond {
@@ -51,7 +51,7 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px 10px 8px;
+  padding: var(--space-3) var(--space-2h) var(--space-2);
 }
 
 .posinn__field {
@@ -136,9 +136,9 @@
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 6px 0 0;
-  padding-top: 6px;
+  padding-top: var(--space-1h);
   border-top: var(--bw-hair) dashed var(--border-hairline);
   font-size: var(--fs-compact);
 }
@@ -162,7 +162,7 @@
 .posinn__pitchgrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: var(--space-2);
   margin-top: 10px;
 }
 
@@ -223,8 +223,8 @@
   display: grid;
   grid-template-columns: 10px minmax(0, 1fr) max-content max-content;
   align-items: center;
-  column-gap: 8px;
-  padding: 6px 0;
+  column-gap: var(--space-2);
+  padding: var(--space-1h) 0;
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 .pitchmix__row:first-child {
@@ -265,12 +265,12 @@
   margin: 10px 0 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 .leaguerank__chip {
   display: inline-flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--space-1);
   padding: 3px 9px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
@@ -294,7 +294,7 @@
    with the positive accent ink, so a run of strong starts reads at a glance. */
 .gamelog__qs {
   margin-left: 5px;
-  padding: 1px 4px;
+  padding: 1px var(--space-1);
   border: var(--bw-hair) solid var(--accent-positive);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
@@ -312,7 +312,7 @@
   justify-content: center;
   gap: var(--space-3);
   margin: 4px 0 var(--space-3);
-  padding: 10px 16px;
+  padding: var(--space-2h) var(--space-4);
   border-radius: var(--radius-md);
   background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
   box-shadow: var(--shadow-card);
@@ -347,7 +347,7 @@
   justify-content: center;
   gap: var(--space-2);
   margin: 4px 0 var(--space-3);
-  padding: 10px 16px;
+  padding: var(--space-2h) var(--space-4);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
 }
@@ -386,7 +386,7 @@
   justify-content: center;
   gap: var(--space-2);
   margin: 4px 0 var(--space-3);
-  padding: 9px 16px;
+  padding: 9px var(--space-4);
   border-radius: var(--radius-md);
   background: var(--hold-texture);
   border: var(--bw-hair) solid var(--border-rule);
@@ -416,7 +416,7 @@
   justify-content: center;
   gap: var(--space-2);
   margin: 4px 0 var(--space-3);
-  padding: 9px 16px;
+  padding: 9px var(--space-4);
   border-radius: var(--radius-md);
   background: var(--il-texture);
   border: var(--bw-hair) solid var(--clay-deep);
@@ -449,7 +449,7 @@
   align-items: center;
   justify-content: center;
   margin: 4px 0 var(--space-3);
-  padding: 9px 16px;
+  padding: 9px var(--space-4);
   border-radius: var(--radius-md);
   background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink-0) 100%);
   box-shadow: var(--shadow-card);
@@ -475,7 +475,7 @@
   justify-content: center;
   gap: var(--space-2);
   margin: 4px 0 var(--space-3);
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
   background: var(--marker);
   border: var(--bw-hair) solid var(--border-rule);
@@ -503,7 +503,7 @@
   align-items: center;
   gap: var(--space-3);
   margin: 4px 0 var(--space-3);
-  padding: 10px 14px;
+  padding: var(--space-2h) var(--space-3h);
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
   border: var(--bw-hair) solid var(--border-hairline);
@@ -608,7 +608,7 @@
   flex-wrap: wrap;
   gap: var(--space-3);
   margin: 4px 0 var(--space-3);
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
   background: var(--paper-1);
   border: var(--bw-hair) dashed var(--rule);
@@ -628,7 +628,7 @@
   background: none;
   border: var(--bw-hair) solid var(--accent-primary);
   border-radius: var(--radius-sm);
-  padding: 3px 10px;
+  padding: 3px var(--space-2h);
   cursor: pointer;
 }
 .asof-banner__btn:hover {
@@ -663,7 +663,7 @@
 .asof-banner--live {
   border: none;
   background: none;
-  padding: 4px 16px;
+  padding: var(--space-1) var(--space-4);
 }
 .asof-banner__label {
   font-size: var(--fs-caption);
@@ -676,6 +676,6 @@
   background: var(--bg-page);
   border: var(--bw-hair) solid var(--rule);
   border-radius: var(--radius-sm);
-  padding: 2px 6px;
+  padding: 2px var(--space-1h);
 }
 

@@ -11,7 +11,7 @@
      these side by side at 390px would truncate every surname. The card only
      doubles up once there is room for two whole ones. */
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: var(--space-2h);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -27,8 +27,8 @@
 .alum__card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px;
+  gap: var(--space-3);
+  padding: var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -82,7 +82,7 @@
 .alum__ident {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--space-1);
   font-size: var(--fs-caption);
   color: var(--text-caption);
 }
@@ -110,9 +110,9 @@
 .alum__stint {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--space-1);
   margin-top: 3px;
-  padding-top: 4px;
+  padding-top: var(--space-1);
   border-top: var(--bw-hair) solid var(--border-rule);
   width: 100%;
   font-size: var(--fs-compact);

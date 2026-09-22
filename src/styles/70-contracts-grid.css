@@ -31,7 +31,7 @@
   margin-bottom: var(--space-4);
 }
 .ctr__tile {
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-top: 3px solid var(--border-rule);
   border-radius: var(--radius-sm);
@@ -83,8 +83,8 @@
 }
 .cliff__row {
   display: flex;
-  gap: 6px;
-  padding: 12px 14px 13px;
+  gap: var(--space-1h);
+  padding: var(--space-3) var(--space-3h) 13px;
 }
 .cliff__col {
   flex: 1;
@@ -156,7 +156,7 @@
 }
 .ctr__namehead {
   z-index: 2;
-  padding: 7px 10px;
+  padding: 7px var(--space-2h);
   background: var(--bg-page);
   border-bottom: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-display);
@@ -179,7 +179,7 @@
   color: var(--text-caption);
 }
 .ctr__age {
-  padding: 6px var(--space-2);
+  padding: var(--space-1h) var(--space-2);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-hairline);
   background: var(--surface-card);
@@ -190,7 +190,7 @@
   color: var(--text-caption);
 }
 .ctr__yearhead {
-  padding: 7px 10px;
+  padding: 7px var(--space-2h);
   vertical-align: bottom;
   text-align: right;
   background: var(--bg-page);
@@ -206,7 +206,7 @@
 }
 
 .ctr__group td {
-  padding: 8px 10px 5px;
+  padding: var(--space-2) var(--space-2h) 5px;
   border-top: var(--bw-heavy) solid var(--navy);
   background: var(--bg-page);
   font-family: var(--font-display);
@@ -217,7 +217,7 @@
   color: var(--text-body);
 }
 .ctr__name {
-  padding: 6px 10px;
+  padding: var(--space-1h) var(--space-2h);
   background: var(--surface-card);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
@@ -272,7 +272,7 @@
    call, and pencil hatch a year the club has no hold at all. That last one is
    the point of the whole grid — the hatch is where a book runs out. */
 .ctr__cell {
-  padding: 6px 10px;
+  padding: var(--space-1h) var(--space-2h);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-mono);
@@ -319,7 +319,7 @@
 }
 
 .ctr__subtotal td {
-  padding: 5px 10px;
+  padding: 5px var(--space-2h);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-rule);
   background: var(--bg-page);
@@ -330,7 +330,7 @@
   color: var(--text-caption);
 }
 .ctr__subtotal th {
-  padding: 5px 10px;
+  padding: 5px var(--space-2h);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-rule);
   background: var(--bg-page);
@@ -344,7 +344,7 @@
 
 .ctr__foot th,
 .ctr__foot td {
-  padding: 10px;
+  padding: var(--space-2h);
   border-top: var(--bw-heavy) solid var(--border-rule);
   background: var(--ink-0);
   color: var(--text-on-ink);

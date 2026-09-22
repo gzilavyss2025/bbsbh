@@ -40,7 +40,7 @@
    drew 7px dots still spaced 5px apart, and the slate card's row never
    tightened the way the rule says it does. */
 .pendots--sm {
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .pendots--sm .pendots__dot {
@@ -423,7 +423,7 @@
 .staffgrid__arm {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   min-width: 0;
 }
 

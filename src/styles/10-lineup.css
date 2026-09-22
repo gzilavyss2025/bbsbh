@@ -21,7 +21,7 @@
      to center for a normal single-line row, so nothing else shifts. */
   align-items: start;
   gap: var(--space-2);
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
   background: var(--surface-card);
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-size: var(--fs-ui);
@@ -113,7 +113,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1h);
   min-width: 0;
 }
 
@@ -167,7 +167,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
   /* border/radius/shadow now live on the .startercard container so the masthead
      caps one card cleanly (see .startercard). */
 }
@@ -175,7 +175,7 @@
    it to match. */
 .startercard > .hint {
   margin: 0;
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
 }
 
 .shot.startercard__shot {
@@ -192,7 +192,7 @@
 .startercard__info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   min-width: 0;
   flex: 1;
 }
@@ -201,7 +201,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1h);
   min-width: 0;
 }
 
@@ -223,7 +223,7 @@
 
 .startercard__badges {
   display: flex;
-  gap: 10px;
+  gap: var(--space-2h);
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
@@ -251,7 +251,7 @@
   letter-spacing: var(--ls-num);
   font-size: var(--fs-compact);
   color: var(--text-caption);
-  padding-top: 4px;
+  padding-top: var(--space-1);
   border-top: var(--bw-hair) dashed var(--border-hairline);
 }
 
@@ -263,7 +263,7 @@
    restated here at `button.` specificity: without it the career line loses
    the dashed divider every line above it wears, and the 4px of air under it. */
 button.startercard__careervs {
-  padding-top: 4px;
+  padding-top: var(--space-1);
   border-top: var(--bw-hair) dashed var(--border-hairline);
 }
 
@@ -301,8 +301,8 @@ button.startercard__careervs {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: start;
-  gap: 8px;
-  padding: 10px 8px;
+  gap: var(--space-2);
+  padding: var(--space-2h) var(--space-2);
   margin-bottom: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -328,7 +328,7 @@ button.startercard__careervs {
   display: grid;
   grid-template-columns: repeat(auto-fill, 64px);
   justify-content: start;
-  gap: 10px;
+  gap: var(--space-2h);
 }
 
 .teammatecard__group .teammatecard__half {
@@ -342,7 +342,7 @@ button.startercard__careervs {
   grid-column: 1 / -1;
   width: 100%;
   margin-top: 2px;
-  padding: 6px 8px;
+  padding: var(--space-1h) var(--space-2);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
@@ -364,7 +364,7 @@ button.startercard__careervs {
   grid-column: 1 / -1;
   order: -1;
   margin: -2px -2px 2px;
-  padding: 3px 6px;
+  padding: 3px var(--space-1h);
   border-radius: var(--radius-sm);
   background: var(--accent-positive);
   color: var(--surface-card);
@@ -380,7 +380,7 @@ button.startercard__careervs {
 .teammatecard__caption {
   grid-column: 1 / -1;
   margin-top: 4px;
-  padding-top: 6px;
+  padding-top: var(--space-1h);
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-size: var(--fs-caption);
   color: var(--text-caption);
@@ -391,7 +391,7 @@ button.startercard__careervs {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   min-width: 0;
   text-align: center;
 }
@@ -462,14 +462,14 @@ button.startercard__careervs {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding-top: 20px;
+  gap: var(--space-1);
+  padding-top: var(--space-5);
 }
 
 .teammatecard__logos {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .teammatecard__years {
@@ -484,7 +484,7 @@ button.startercard__careervs {
   display: block;
   width: 100%;
   margin: 8px 0 0;
-  padding: 9px 12px;
+  padding: 9px var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-inset);
@@ -629,7 +629,7 @@ button.startercard__careervs {
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px 10px 8px;
+  padding: var(--space-3) var(--space-2h) var(--space-2);
 }
 
 .defdiamond__field {
@@ -662,7 +662,7 @@ button.startercard__careervs {
   font-weight: var(--w-semibold);
   color: var(--text-body);
   border-bottom: var(--bw-hair) solid var(--rule);
-  padding: 0 4px 1px;
+  padding: 0 var(--space-1) 1px;
   min-width: 58px;
   max-width: 112px;
   overflow: hidden;
@@ -724,9 +724,9 @@ button.startercard__careervs {
   justify-content: center;
   width: 100%;
   text-align: center;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 6px 0 0;
-  padding-top: 6px;
+  padding-top: var(--space-1h);
   border-top: var(--bw-hair) dashed var(--border-hairline);
   font-size: var(--fs-compact);
 }
@@ -747,6 +747,6 @@ button.startercard__careervs {
 .defdiamond__dhstack {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 

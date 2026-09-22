@@ -233,7 +233,7 @@
   scroll-snap-align: none;
 }
 .hlclip--feature .hlclip__play {
-  padding: 5px 10px;
+  padding: 5px var(--space-2h);
   font-size: var(--fs-compact);
 }
 
@@ -336,7 +336,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2h);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);

@@ -43,8 +43,8 @@
 .umptend__id {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 13px 12px;
+  gap: var(--space-2h);
+  padding: 11px 13px var(--space-3);
   border-bottom: 1px solid var(--border-hairline);
 }
 .umptend__mark {
@@ -153,7 +153,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
   height: 24px;
   padding: 0 7px;
   border-radius: 3px;
@@ -190,7 +190,7 @@
   align-items: center;
   gap: 11px;
   margin-top: 13px;
-  padding: 12px 13px;
+  padding: var(--space-3) 13px;
   background: var(--navy);
 }
 .umptend__watchbody {
@@ -220,7 +220,7 @@
    low-opacity navy cell in the map. */
 .umptend__watchmap {
   flex: none;
-  padding: 4px;
+  padding: var(--space-1);
   background: var(--surface-inset);
   border-radius: 2px;
 }
@@ -238,7 +238,7 @@
   grid-template-columns: 1fr 1fr;
 }
 .umptend__tile {
-  padding: 11px 8px;
+  padding: 11px var(--space-2);
   text-align: center;
   border-top: 1px solid var(--border-hairline);
 }
@@ -272,7 +272,7 @@
    asterisked footnote, which is the only natural-case string on the card. --- */
 .umptend__chal {
   border-top: 1px solid var(--border-hairline);
-  padding-top: 10px;
+  padding-top: var(--space-2h);
 }
 .umptend__challbl {
   font-family: var(--font-display);

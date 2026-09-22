@@ -13,7 +13,7 @@
    fit three side by side); from 740px up they lay out in one horizontal
    row — see the media query at the bottom of this block. */
 .bs__stars {
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-3h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--paper-1);
@@ -31,8 +31,8 @@
 .stars3__card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 2px;
+  gap: var(--space-2h);
+  padding: var(--space-2) 2px;
   border-top: var(--bw-hair) solid var(--rule-soft);
 }
 /* First card in the list — no rule above it, it isn't a continuation of a
@@ -44,7 +44,7 @@
    .stars3__card layout: an inset gradient background instead of the bare
    list-row rule above it, so the top mover reads as the headline entry. */
 .stars3__card--hero {
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
   border-top: none;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
@@ -140,8 +140,8 @@
   .stars3__card {
     display: grid;
     grid-template-columns: auto 1fr;
-    column-gap: 10px;
-    row-gap: 4px;
+    column-gap: var(--space-2h);
+    row-gap: var(--space-1);
     align-items: start;
   }
   .shot.stars3__shot {
@@ -185,7 +185,7 @@
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: var(--space-3);
-    row-gap: 4px;
+    row-gap: var(--space-1);
     align-items: center;
     padding: var(--space-3);
     border: var(--bw-hair) solid var(--border-rule);

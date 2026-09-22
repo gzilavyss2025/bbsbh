@@ -41,7 +41,7 @@
 .awardhistory__season {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--space-2h);
 }
 .awardhistory__season > :last-child {
   flex: 1 1 auto;
@@ -54,7 +54,7 @@
    per league column for a split one) so the stripe count restarts at each
    award/column rather than running continuously down the whole page. */
 .awardhistory__list--zebra .awardhistory__season {
-  padding: 4px 6px;
+  padding: var(--space-1) var(--space-1h);
   border-radius: var(--radius-sm);
 }
 .awardhistory__list--zebra .awardhistory__years > .awardhistory__season:nth-child(even),
@@ -100,7 +100,7 @@
   text-transform: uppercase;
   color: #fff;
   border-radius: var(--radius-sm);
-  padding: 6px 10px;
+  padding: var(--space-1h) var(--space-2h);
 }
 .awardhistory__leaguetag--al {
   background: linear-gradient(180deg, var(--clay) 0%, var(--clay-deep) 100%);
@@ -122,14 +122,14 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* MVP/Cy Young/Rookie of the Year — the base tile, at the plain
    .playercard size (no override needed). */
 .awardhistory__cards--base {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* Multi-recipient groups (Silver Slugger/Gold Glove) — 2-up, up to ~9
    recipients per league. The headshot still gets real size (--shot-md, the
@@ -174,8 +174,8 @@
    "fuller" headshot instead of a stat line, so a bare name+team card doesn't
    read as half-empty next to every other card's stat line. */
 .awardhistory__cards--full .playercard {
-  padding: 10px;
-  gap: 12px;
+  padding: var(--space-2h);
+  gap: var(--space-3);
 }
 .awardhistory__cards--full .shot.playercard__shot {
   width: var(--shot-lg-w);
@@ -192,8 +192,8 @@
    two-column grid instead of .awardhistory__cards--dense's), a bit tighter
    on padding so two full rosters still sit side by side on a phone. */
 .awardhistory__cards--compact .playercard {
-  padding: 6px;
-  gap: 8px;
+  padding: var(--space-1h);
+  gap: var(--space-2);
 }
 .awardhistory__cards--compact .shot.playercard__shot {
   width: var(--shot-md-w);
@@ -263,12 +263,12 @@
   /* Same shrink-to-fit reason as .awardhistory__cards--dense above — this one
      holds the same cards, two columns of them, on the same phone. */
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
+  gap: var(--space-2h);
 }
 .awardhistory__allmlbcol {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1h);
   min-width: 0;
 }
 .awardhistory__allmlbhead {
@@ -281,7 +281,7 @@
   background: var(--award-soft);
   border: var(--bw-hair) solid var(--award-line);
   border-radius: var(--radius-sm);
-  padding: 3px 8px;
+  padding: 3px var(--space-2);
   text-align: center;
 }
 
@@ -317,7 +317,7 @@
   .awardhistory__familysplit {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: var(--space-5);
     align-items: start;
   }
 }
@@ -327,7 +327,7 @@
 .awardhistory__yearaward {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 .awardhistory__yearawardlabel {
   margin: 0;
@@ -351,7 +351,7 @@
 }
 .awardhistory__grouptoggle .levelnav__btn {
   min-height: 30px;
-  padding: 0 10px;
+  padding: 0 var(--space-2h);
   font-size: var(--fs-label);
 }
 
@@ -386,8 +386,8 @@
 .pshistory__champion {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 10px 5px 6px;
+  gap: var(--space-2);
+  padding: 5px var(--space-2h) 5px var(--space-1h);
   border-radius: var(--radius-pill);
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
@@ -422,7 +422,7 @@
   display: block;
   width: 100%;
   margin: var(--space-2) 0 0;
-  padding: 9px 12px;
+  padding: 9px var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-inset);

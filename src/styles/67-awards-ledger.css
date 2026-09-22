@@ -20,7 +20,7 @@
    receipts rather than one page of a ledger. */
 .awards {
   margin: 0 2px;
-  padding: 12px;
+  padding: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -45,12 +45,12 @@
   background: none;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 .awards__chip {
   display: inline-flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--space-1);
   padding: 3px 9px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
@@ -66,7 +66,7 @@
 /* ---- one award's block ---- */
 .awardblk + .awardblk {
   margin-top: 15px;
-  padding-top: 14px;
+  padding-top: var(--space-3h);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .awardblk__head {
@@ -138,7 +138,7 @@
   margin-top: 2px;
 }
 .awardtbl th {
-  padding: 8px 0 5px;
+  padding: var(--space-2) 0 5px;
   text-align: left;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -223,7 +223,7 @@
    "+N more": the section's whole claim is that the cap ranks, never hides. */
 .awardidx {
   margin-top: 16px;
-  padding-top: 14px;
+  padding-top: var(--space-3h);
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 .awardidx__group + .awardidx__group {
@@ -301,7 +301,7 @@
   width: 100%;
   min-height: var(--tap-min);
   margin-top: 14px;
-  padding: 10px;
+  padding: var(--space-2h);
   appearance: none;
   cursor: pointer;
   border: var(--bw-hair) dashed var(--award-line);
@@ -328,7 +328,7 @@
   width: 100%;
   min-height: var(--tap-min);
   margin-top: 10px;
-  padding: 4px;
+  padding: var(--space-1);
   appearance: none;
   border: none;
   background: none;
@@ -361,14 +361,14 @@
     background: none;
   }
   .awardblk {
-    padding: 12px;
+    padding: var(--space-3);
     border: var(--bw-hair) solid var(--border-rule);
     border-radius: var(--radius-md);
     background: var(--surface-card);
   }
   .awardblk + .awardblk {
     margin-top: 0;
-    padding-top: 12px;
+    padding-top: var(--space-3);
     border-top: var(--bw-hair) solid var(--border-rule);
   }
   /* The index and both actions span the pair — they are about the whole

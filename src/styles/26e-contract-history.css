@@ -27,7 +27,7 @@
    than one page of a book. Same body as the Awards ledger above it. */
 .cthist__seasons {
   margin: 0;
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
   list-style: none;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -36,7 +36,7 @@
 
 .cthist__season + .cthist__season {
   margin-top: 10px;
-  padding-top: 10px;
+  padding-top: var(--space-2h);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
@@ -169,7 +169,7 @@
   grid-column: 1 / -1;
   justify-self: start;
   margin-top: 3px;
-  padding: 1px 6px;
+  padding: 1px var(--space-1h);
   border: var(--bw-hair) dashed var(--border-rule);
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
@@ -186,7 +186,7 @@
   width: 100%;
   min-height: var(--tap-min);
   margin-top: 10px;
-  padding: 10px;
+  padding: var(--space-2h);
   appearance: none;
   cursor: pointer;
   border: var(--bw-hair) dashed var(--border-rule);

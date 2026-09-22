@@ -13,7 +13,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--space-1h);
   color: var(--seal-ink);
   background: var(--seal-texture);
 }
@@ -69,10 +69,10 @@
 }
 
 .statgrid {
-  padding: 14px;
+  padding: var(--space-3h);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   background: var(--surface-inset);
   animation: reveal var(--dur-slow) var(--ease-out);
 }
@@ -136,7 +136,7 @@
    header floating separately, and overrides both back apart below. */
 .abs__title {
   display: block;
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2h);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -176,8 +176,8 @@
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 13px;
+  gap: var(--space-3);
+  padding: var(--space-2h) 13px;
   margin: 0;
   border: none;
   border-radius: 0;
@@ -217,7 +217,7 @@
 .abs__pips {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   flex-wrap: wrap;
 }
 .abs__pip {
@@ -254,16 +254,16 @@
 .abs__detail {
   list-style: none;
   margin: 0;
-  padding: 4px 13px 10px;
+  padding: var(--space-1) 13px var(--space-2h);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   background: var(--paper-1);
 }
 .abs__detailrow {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--space-2);
   font-size: var(--fs-caption);
 }
 .abs__detailhalf {
@@ -299,7 +299,7 @@
 /* Plate umpire: the worst missed call so far, then the net favor it's part of
    — a compact sibling to .abs (same title treatment). */
 .umpfavor {
-  padding-top: 10px;
+  padding-top: var(--space-2h);
 }
 /* .umpfavor__row: same idea as .bs__duo/.bs__col (BoxScore.jsx) — a column
    on a phone (each card its own natural height), a real two-up grid at the
@@ -310,7 +310,7 @@
 .umpfavor__row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   margin-top: 8px;
 }
 @media (min-width: 740px) {
@@ -357,7 +357,7 @@
   display: flex;
   flex-direction: column;
   gap: 7px;
-  padding: 10px;
+  padding: var(--space-2h);
   background: var(--paper-2);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
@@ -379,7 +379,7 @@
 .wcall__body {
   display: grid;
   grid-template-columns: 124px 1fr;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: center;
 }
 .wcall__diagram {
@@ -426,12 +426,12 @@
 .wcall__side {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 .wcall__calls {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   flex-wrap: wrap;
   font-family: var(--font-display);
 }
@@ -440,7 +440,7 @@
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
   white-space: nowrap;
 }
@@ -501,7 +501,7 @@
   font-size: var(--fs-cell);
 }
 .wcall__count-new {
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   border-radius: var(--radius-xs);
   color: var(--text-heading);
   animation: wcall-count-new var(--dur-highlight) var(--ease-out) 1;
@@ -538,8 +538,8 @@
      iPad/desktop .umpfavor__row grid stretches this card to match a taller
      worst-call card beside it. */
   justify-content: center;
-  gap: 8px;
-  padding: 10px 8px;
+  gap: var(--space-2);
+  padding: var(--space-2h) var(--space-2);
   background: var(--paper-2);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
@@ -595,7 +595,7 @@
 .favormeter__track-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   width: 100%;
 }
 .favormeter__track {
@@ -702,7 +702,7 @@
 .upnext__row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: var(--space-2h);
 }
 .upnext__col {
   display: flex;
@@ -729,7 +729,7 @@
 
 .prepitch {
   margin-bottom: 12px;
-  padding-bottom: 12px;
+  padding-bottom: var(--space-3);
   border-bottom: var(--bw-hair) dashed var(--border-rule);
 }
 
@@ -739,11 +739,11 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 
 .prepitch__item {
-  padding: 4px 8px;
+  padding: var(--space-1) var(--space-2);
   font-size: var(--fs-small);
   color: var(--text-body);
 }
@@ -784,7 +784,7 @@
    above clips its square corners to the card's own rounded ones. */
 .statbox__title {
   margin: 0;
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2h);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -826,8 +826,8 @@
 .halfcast__row {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 10px;
+  gap: var(--space-1);
+  padding: var(--space-2h);
 }
 .halfcast__row + .halfcast__row {
   border-top: var(--bw-hair) solid var(--border-rule);
@@ -878,7 +878,7 @@
 .pitchernotice {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 /* The self-contained highlighted notification card — the pre-pitch staging
@@ -893,7 +893,7 @@
      so without this the card's own border sits flush against the card it's
      nested inside. */
   margin: 4px 14px;
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
@@ -909,7 +909,7 @@
 .pitcherhandoff {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* .pitchers__grid's table-layout:fixed splits its 10 columns evenly, sized
    for the Arms tab's FULL page width — nested in this narrower card on a
@@ -956,7 +956,7 @@
    the event ("MV", "EJ", "SB", "WP", …), same family as the at-bat card's own
    .pbp__code. --event just tightens the gap for this denser, iconless row. */
 .pitchernotice--event {
-  gap: 8px;
+  gap: var(--space-2);
 }
 .pitchernotice__code {
   font-family: var(--font-mono);
@@ -1012,7 +1012,7 @@
 /* Mound-visit card: the pips are the card's one figure, so they read at 2x
    size. */
 .pitchernotice--mv .usagepips {
-  gap: 8px;
+  gap: var(--space-2);
 }
 .pitchernotice--mv .usagepips__pip {
   width: 14px;
@@ -1111,7 +1111,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
@@ -1127,7 +1127,7 @@
 .pitchernotice__badges {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: var(--space-1h);
   flex: none;
   font-size: var(--fs-compact);
 }
@@ -1213,8 +1213,8 @@
   .pitchernotice:has(.pitchernotice__entering) {
     display: grid;
     grid-template-columns: auto 1fr;
-    column-gap: 12px;
-    row-gap: 4px;
+    column-gap: var(--space-3);
+    row-gap: var(--space-1);
     align-items: start;
   }
   .pitchernotice:has(.pitchernotice__entering) .pitchernotice__shot {
@@ -1249,7 +1249,7 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-3h);
   overflow: hidden;
 }
 /* Bleeds past the card's own padding to cap it flush (same masthead recipe
@@ -1258,9 +1258,9 @@
 .dueup__title {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   margin: -12px -14px 8px;
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2h);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -1277,7 +1277,7 @@
 .dueup__row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: var(--space-2h);
 }
 .dueup__col {
   display: flex;
@@ -1356,7 +1356,7 @@
 .lineupcard__title {
   width: 100%;
   margin: 0;
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2h);
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -1384,10 +1384,10 @@
 /* Away over home, each a self-contained nine-slot list. Stacked so a long name
    with its number/position never has to wrap in a cramped column on a phone. */
 .lineupcard__teams {
-  padding: 12px 10px;
+  padding: var(--space-3) var(--space-2h);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 /* Same navy-bar recipe as .halfdefense__title — a themed club recolors it via
@@ -1399,7 +1399,7 @@
 .lineupteam__name {
   width: auto;
   margin: 0 -10px 8px;
-  padding: 8px 18px;
+  padding: var(--space-2) 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1434,17 +1434,17 @@
 
 .lineupcard__list {
   margin: 0;
-  padding: 0 8px;
+  padding: 0 var(--space-2);
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .lineupcard__row {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 /* The BATTING club's on-deck row (LineupSection's `onDeckSlot`, focus mode's
@@ -1455,7 +1455,7 @@
   background: color-mix(in srgb, var(--marker) 18%, var(--paper-2));
   border-radius: var(--radius-sm);
   margin-inline: -6px;
-  padding: 3px 6px;
+  padding: 3px var(--space-1h);
 }
 
 /* Reuses .duepill's shape (className="duepill lineupcard__ondeck"), just
@@ -1487,7 +1487,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 
 .lineupcard__name {
@@ -1565,7 +1565,7 @@
 .halfdefense__title {
   width: 100%;
   margin: 0;
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2h);
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -1652,9 +1652,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   text-align: center;
-  padding: 8px 4px;
+  padding: var(--space-2) var(--space-1);
   background: var(--paper-2);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);

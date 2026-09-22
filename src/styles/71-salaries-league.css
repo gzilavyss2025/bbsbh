@@ -36,7 +36,7 @@
 .payboard__filter {
   display: flex;
   gap: 5px;
-  padding: 9px 12px;
+  padding: 9px var(--space-3);
   background: var(--bg-page);
   border-bottom: var(--bw-hair) solid var(--border-rule);
   overflow-x: auto;
@@ -103,7 +103,7 @@
   flex-direction: column;
   justify-content: center;
   gap: var(--space-1);
-  padding: 8px 0;
+  padding: var(--space-2) 0;
 }
 .payboard__line {
   display: flex;
@@ -145,7 +145,7 @@
   align-items: center;
   justify-content: flex-end;
   width: 96px;
-  padding-right: 12px;
+  padding-right: var(--space-3);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-title-sm);
@@ -295,7 +295,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0;
-  padding: 4px var(--space-3);
+  padding: var(--space-1) var(--space-3);
   border: var(--bw-heavy) solid var(--accent-primary);
   background: var(--ink-0);
   box-shadow: var(--shadow-raised);

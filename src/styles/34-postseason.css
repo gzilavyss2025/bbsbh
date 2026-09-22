@@ -16,7 +16,7 @@
     minmax(160px, 1.05fr) minmax(150px, 1fr) minmax(150px, 1fr);
   gap: 0 var(--space-3);
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: var(--space-1);
   -webkit-overflow-scrolling: touch;
 }
 /* Seasons with no Wild Card round (2000-2011) drop both Wild Card columns
@@ -88,7 +88,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: var(--space-1);
   color: var(--text-heading);
 }
 .psbracket__roundtrophy {
@@ -102,7 +102,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  gap: 10px;
+  gap: var(--space-2h);
 }
 .psbracket__col--al .psbracket__lanes {
   position: relative;
@@ -140,7 +140,7 @@
   flex-direction: column;
   gap: 2px;
   width: 100%;
-  padding: 5px 8px;
+  padding: 5px var(--space-2);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -155,7 +155,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: var(--space-1h);
   border-style: dashed;
   background: transparent;
   opacity: 0.6;
@@ -174,7 +174,7 @@
 .seedrow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   font-family: var(--font-body);
   font-size: var(--fs-small);
   color: var(--text-muted);
@@ -213,8 +213,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 6px;
-  padding: 12px 10px;
+  gap: var(--space-1h);
+  padding: var(--space-3) var(--space-2h);
   border: 1.5px solid var(--award-line);
   border-radius: var(--radius-md);
   background: var(--surface-inset);
@@ -241,9 +241,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   margin-top: 4px;
-  padding-top: 8px;
+  padding-top: var(--space-2);
   border-top: var(--bw-hair) dashed var(--border-rule);
   text-align: center;
 }
@@ -271,7 +271,7 @@
   position: absolute;
   left: 0;
   bottom: 0;
-  padding: 1px 4px;
+  padding: 1px var(--space-1);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -317,12 +317,12 @@
 .psstack {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 .psstack__roundlabel {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 12px 0 2px;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -365,7 +365,7 @@
   gap: var(--space-2);
   max-width: var(--app-width);
   margin-inline: auto;
-  padding: 10px var(--app-gutter) calc(10px + env(safe-area-inset-bottom));
+  padding: var(--space-2h) var(--app-gutter) calc(var(--space-2h) + env(safe-area-inset-bottom));
   background: linear-gradient(
     to top,
     var(--bg-canvas) 55%,
@@ -374,7 +374,7 @@
 }
 .psyearnav button {
   min-height: 32px;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);

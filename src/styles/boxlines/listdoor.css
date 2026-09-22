@@ -63,7 +63,7 @@ button.boxlines-entry {
   grid-template-columns: var(--bl-cols);
   column-gap: var(--space-2);
   align-items: center;
-  padding: 0 10px;
+  padding: 0 var(--space-2h);
   font-family: var(--font-mono);
   font-size: var(--fs-compact);
 }
@@ -192,8 +192,8 @@ button.boxlines__back {
 @media (max-width: 359px) {
   .boxlines__listhead,
   button.boxlines-entry {
-    padding: 0 6px;
-    column-gap: 4px;
+    padding: 0 var(--space-1h);
+    column-gap: var(--space-1);
     font-size: var(--fs-cell);
   }
 

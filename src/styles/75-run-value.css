@@ -26,7 +26,7 @@
    name. Sized to --shot-2xs, the app's smallest row portrait (the box score's
    stars and the wire's notes wear the same one). */
 .rpt th.team .rv__nameplate {
-  gap: 6px;
+  gap: var(--space-1h);
 }
 
 /* Wider than ClubCell's 132px, because this cell carries a face and a person's
@@ -274,7 +274,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 6px 0;
+  padding: var(--space-1h) 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 

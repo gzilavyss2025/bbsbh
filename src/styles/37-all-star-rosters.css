@@ -57,7 +57,7 @@
    border and read as one doubled rule down each side. */
 .allstarrosters__leagues .roster-super__row {
   flex-wrap: wrap;
-  padding: 0 12px 14px;
+  padding: 0 var(--space-3) var(--space-3h);
 }
 .allstarrosters__leagues .roster-super__col {
   flex: 1 1 220px;
@@ -71,7 +71,7 @@
    The card's own radius + overflow:hidden round the bar's top corners. */
 .allstarrosters__leaguehead {
   margin: 0 0 12px;
-  padding: 8px 14px;
+  padding: var(--space-2) var(--space-3h);
   font-family: var(--font-display);
   font-size: var(--fs-small);
   font-weight: var(--w-bold);
@@ -101,8 +101,8 @@
   display: grid;
   grid-template-columns: 22px 1fr auto;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: var(--space-2);
+  padding: var(--space-1h) var(--space-2h);
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-body);
   font-size: var(--fs-small);
@@ -159,7 +159,7 @@
   background: none;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   display: block;
 }
@@ -199,7 +199,7 @@
 .allstargame__scorecol {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1h);
   flex: none;
 }
 .allstargame__scorerow {
@@ -218,7 +218,7 @@
 .allstargame__side {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   opacity: 0.6;
 }
 .allstargame__side--winner {
@@ -252,14 +252,14 @@
   min-width: 96px;
   min-height: 30px;
   margin-top: 0;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   font-size: var(--fs-compact);
 }
 /* MVP — headshot beside a stacked label/name+position/stat-line block. */
 .allstargame__mvpcol {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex: 1 1 160px;
   min-width: 140px;
   justify-content: center;
@@ -324,7 +324,7 @@
 .allstargame__venue {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   flex: none;
   max-width: 160px;
 }

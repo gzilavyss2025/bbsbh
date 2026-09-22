@@ -120,7 +120,7 @@
 
 .posterstudio__waiting {
   flex-basis: 100%;
-  padding-left: calc(20px + var(--space-2));
+  padding-left: calc(var(--space-5) + var(--space-2));
   font-family: var(--font-body);
   font-size: var(--fs-small);
   font-style: normal;
