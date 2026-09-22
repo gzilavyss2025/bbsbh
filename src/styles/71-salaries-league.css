@@ -35,8 +35,8 @@
    board's first row exactly where the eye goes looking for it. */
 .payboard__filter {
   display: flex;
-  gap: 5px;
-  padding: 9px var(--space-3);
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
   background: var(--bg-page);
   border-bottom: var(--bw-hair) solid var(--border-rule);
   overflow-x: auto;
@@ -48,7 +48,7 @@
 .payboard__chip {
   flex: none;
   min-height: 28px;
-  padding: 0 11px;
+  padding: 0 var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -130,7 +130,7 @@
   justify-content: center;
   min-width: 24px;
   height: 17px;
-  padding: 0 5px;
+  padding: 0 var(--space-1);
   border-radius: var(--radius-xs);
   background: var(--ink-2);
   color: var(--text-on-ink);
@@ -180,7 +180,7 @@
 /* --------------------------------------------------------- club payrolls */
 .payclubs__grid {
   display: grid;
-  gap: 7px var(--space-6);
+  gap: var(--space-1h) var(--space-6);
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 .payclubs__row {
@@ -234,7 +234,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 9px var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .payowed__name {
@@ -283,8 +283,8 @@
   transform: translate(-50%, -50%);
   display: flex;
   align-items: baseline;
-  gap: 5px;
-  padding: 2px 7px;
+  gap: var(--space-1);
+  padding: 2px var(--space-1h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -327,7 +327,7 @@
 .posspend__list {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: var(--space-2);
 }
 .posspend__row {
   display: flex;

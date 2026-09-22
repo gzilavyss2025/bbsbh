@@ -81,7 +81,7 @@
 .mgrpage__statgrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 5px;
+  gap: var(--space-1);
 }
 .mgrpage__statgrid .stat {
   padding: var(--space-2h) 3px;

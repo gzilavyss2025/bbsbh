@@ -497,7 +497,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 3px;
-  padding: 11px 7px 0 var(--space-1);
+  padding: var(--space-2h) var(--space-1h) 0 var(--space-1);
   border-right: var(--bw-rule) solid
     color-mix(in srgb, var(--clay) 45%, transparent);
   font-family: var(--font-display);
@@ -518,7 +518,7 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: var(--space-2) var(--space-2h) 9px;
+  padding: var(--space-2) var(--space-2h) var(--space-2);
 }
 .psseries__ltop {
   display: flex;
@@ -654,7 +654,7 @@
   grid-template-columns: 32px 1fr auto auto;
   align-items: center;
   gap: var(--space-2);
-  padding: 7px var(--space-2h);
+  padding: var(--space-1h) var(--space-2h);
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-size: var(--fs-small);
 }

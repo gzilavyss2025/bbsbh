@@ -51,11 +51,14 @@ const stripComments = (css) =>
 // ---------------------------------------------------------------------------
 // THE SPACING RESIDUE (ADR-0085)
 //
-// The padding/gap rule below says: no raw px. The sweep that turned the rule on
-// converted the 1086 literals a token already carried EXACTLY — 598 on the 4px
-// scale, 488 at the new half-steps 6/10/14. It moved no value. What is left is
-// 637 literals that no token carries, and they split into two kinds that are
-// answered differently on purpose.
+// The padding/gap rule below says: no raw px. Two sweeps got it there.
+//
+// The first converted the 1086 literals a token already carried EXACTLY — 598
+// on the 4px scale, 488 at the new half-steps 6/10/14 — and moved no value.
+// The second rounded the odd 5/7/9/11/13px band DOWN one step: 231 literals in
+// 222 declarations across 63 partials. That one DID move values, by 1px each,
+// and it is the only rounding this codebase has agreed to. 406 literals are
+// left, and they split into two kinds that are answered differently on purpose.
 //
 // 1. THE OPTICAL NUDGE, 1-3px. 363 literals in 348 declarations. #1128 already
 //    grants margins their 1-3px nudges as real spacing rather than sloppiness,
@@ -66,14 +69,18 @@ const stripComments = (css) =>
 //    be decided. NUDGE_CEILING keeps the exemption from quietly becoming the
 //    house style — see its note.
 //
-// 2. EVERYTHING ELSE OFF THE SCALE, 274 literals in 72 partials. The odd
-//    5/7/9/11/13px band and the genuine one-offs (18, 22, 28, 36, 72, 120,
-//    200 ...). These are NOT exempt. They are listed, one entry per partial,
-//    value by value with an exact count, and the list is the open question this
-//    guard hands to the next slice. Rounding a value to make an entry go away
-//    is the one repair that is forbidden: it is a real spacing change, and it
-//    would be made by whoever happened to be editing that partial instead of by
-//    the people who own the scale.
+// 2. THE GENUINE ONE-OFFS, 43 literals in 22 partials, at 18px and up. These
+//    are NOT exempt. They are listed, one entry per partial, value by value
+//    with an exact count. Eleven of their seventeen values have no honest
+//    rounding at all: five sit above the top of the scale, and six are exactly
+//    midway between two steps. Where the value is load-bearing — a reserved
+//    strip, a lab gutter, a safe-area offset — it wants an explaining comment
+//    at the declaration, not a number moved.
+//
+// DO NOT ROUND A VALUE TO MAKE AN ENTRY GO AWAY. The odd band was rounded by a
+// recorded decision over measured evidence, on all 231 of its sites at once.
+// Rounding one entry here is a different act: a real spacing change, made by
+// whoever happened to be editing that partial, on a surface nobody compared.
 //
 // The counts are exact in both directions, the same ratchet check-seal-scope.mjs
 // uses. A literal that is not listed fails. A listed literal that is no longer
@@ -82,77 +89,27 @@ const stripComments = (css) =>
 const NUDGE_MAX = 3
 
 const SPACING_RESIDUE = {
-  '03-slate-header.css': { 7: 1, 9: 1 },
-  '04-site-bar.css': { 5: 2, 7: 1 },
   '04a-wire-dock.css': { 62: 1 },
-  '05-masthead-nav.css': { 7: 1, 9: 1, 18: 1 },
-  '06-loader-and-cards.css': { 5: 2, 9: 3 },
+  '05-masthead-nav.css': { 18: 1 },
   '07-team-logo-and-buttons.css': { 18: 1 },
   '08-site-shell.css': { 23: 2 },
-  '09-team-info.css': { 5: 2, 7: 1, 72: 1 },
-  '10-lineup.css': { 9: 2 },
-  '11-innings.css': { 5: 1, 7: 1, 130: 1 },
-  '12-sealbox.css': { 5: 5, 7: 2, 13: 2, 18: 1 },
-  '13-play-by-play.css': { 5: 1, 7: 1 },
-  '14-strike-zone.css': { 5: 3, 7: 2 },
+  '09-team-info.css': { 72: 1 },
+  '11-innings.css': { 130: 1 },
+  '12-sealbox.css': { 18: 1 },
   '16-identity-lab-shell.css': { 72: 1, 120: 1, 200: 1 },
   '19-pattern-and-sketch-labs.css': { 22: 1, 28: 1 },
-  '20-charts.css': { 7: 2, 9: 1 },
-  '21-box-score.css': { 5: 5, 9: 1, 72: 1 },
-  '22-box-score-tables.css': { 5: 1 },
-  '23-box-score-detail.css': { 5: 1, 7: 1 },
-  '24-floating-nav-and-hud.css': { 5: 2, 9: 1 },
-  '26-player-page.css': { 5: 5, 7: 2, 9: 1, 11: 3, 22: 1 },
-  '26a-percentile-strip.css': { 7: 1, 9: 1 },
-  '26b-player-contract.css': { 5: 2, 9: 2, 13: 2 },
-  '26d-command-map.css': { 5: 2 },
-  '26e-contract-history.css': { 5: 2 },
-  '26f-glove-target.css': { 5: 1 },
-  '26g-command-received.css': { 7: 1 },
-  '27-player-position-innings.css': { 5: 1, 9: 4 },
-  '28-team-hub.css': { 5: 2, 7: 3, 9: 3, 13: 1 },
-  '28a-team-hub-hero.css': { 5: 2, 7: 1 },
-  '29-team-transactions.css': { 5: 2, 7: 4, 9: 1 },
-  '30-standings.css': { 5: 1, 9: 3, 11: 1, 56: 1 },
-  '31-wild-card.css': { 5: 6, 7: 6, 9: 1, 18: 5 },
-  '33-awards-history.css': { 5: 2, 9: 1 },
-  '34-postseason.css': { 5: 1, 56: 1 },
-  '35-postseason-series.css': { 7: 2, 9: 1, 11: 1, 50: 2 },
-  '37-all-star-rosters.css': { 5: 1 },
-  '38-umpire-pages.css': { 5: 2, 9: 1 },
-  '39-manager-page.css': { 5: 1 },
-  '40-game-modals.css': { 5: 1, 9: 1 },
-  '42-first-scorebook.css': { 5: 4, 7: 2, 13: 2, 28: 2, 30: 1, 36: 1, 42: 1, 52: 1, 62: 1, 84: 1 },
-  '43-foul-tracker.css': { 5: 3, 7: 1, 9: 1 },
-  '44-pre-game-cards.css': { 7: 1 },
-  '48a-logbook-stats.css': { 5: 1 },
-  '50-logbook-landing.css': { 5: 1 },
-  '51-similar-players.css': { 5: 4 },
-  '52-highlight-clip-card.css': { 5: 3, 7: 1 },
-  '53-umpire-tendencies.css': { 7: 3, 9: 2, 11: 3, 13: 7 },
-  '61-ballpark-admin.css': { 5: 1 },
-  '62-identity-admin.css': { 11: 2 },
+  '21-box-score.css': { 72: 1 },
+  '26-player-page.css': { 22: 1 },
+  '30-standings.css': { 56: 1 },
+  '31-wild-card.css': { 18: 5 },
+  '34-postseason.css': { 56: 1 },
+  '35-postseason-series.css': { 50: 2 },
+  '42-first-scorebook.css': { 28: 2, 30: 1, 36: 1, 42: 1, 52: 1, 62: 1, 84: 1 },
   '63-print-sheet.css': { 72: 1 },
-  '64-milb-alumni.css': { 5: 1 },
-  '66-situational-records.css': { 7: 1 },
-  '67-awards-ledger.css': { 5: 2, 7: 2, 9: 1 },
-  '68-around-the-game.css': { 5: 1, 7: 1 },
-  '69-hit-chart.css': { 5: 1, 7: 2, 9: 5, 11: 1 },
-  '69-pitch-arsenal.css': { 5: 1, 7: 3, 9: 1, 18: 3, 44: 1 },
-  '70-contracts-grid.css': { 5: 3, 7: 5, 13: 1 },
-  '71-salaries-league.css': { 5: 3, 7: 2, 9: 3, 11: 1 },
+  '69-pitch-arsenal.css': { 18: 3, 44: 1 },
   '72-club-transactions.css': { 18: 1 },
-  '73-spray-map.css': { 5: 1, 7: 1 },
-  '76-workload-marks.css': { 5: 3 },
-  '77-express-lane.css': { 5: 1, 18: 1 },
-  '77a-express-lane-entry.css': { 5: 1, 7: 1 },
-  '78-offseason.css': { 7: 2 },
-  'boxlines/boxlines.css': { 5: 1 },
-  'boxlines/gamelines.css': { 7: 1 },
-  'boxlines/listdoor.css': { 7: 1, 9: 1 },
-  'designlab/lab.css': { 7: 1 },
+  '77-express-lane.css': { 18: 1 },
   'report/charts.css': { 36: 3 },
-  'scorecard/box.css': { 5: 1 },
   'scorecard/footer.css': { 72: 1 },
 }
 

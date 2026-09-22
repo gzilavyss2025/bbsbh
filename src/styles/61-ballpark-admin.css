@@ -144,7 +144,7 @@
 /* The body's buttons are the plain outline pair — the masthead's currentColor
    trick does not apply down here, where the ground is paper, not the club bar. */
 .bpadmin .bpadmin__btn {
-  padding: 5px var(--space-3);
+  padding: var(--space-1) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);

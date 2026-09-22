@@ -79,14 +79,18 @@ The largest compound move is 14px on a 6583px page — two tenths of one percent
 The standings table does not change height at all: its 9px is horizontal only,
 so it moves column widths inside a fixed 358px table and nothing else.
 
-## The decision
+## The decision — made, and DONE
 
-**DECIDED 2026-09-22: round the whole band DOWN, in one direction, in one PR —
-candidate 2, with the direction fixed once rather than chosen 231 times.**
+**Decided 2026-09-22: round the whole band DOWN, in one direction, with the
+direction fixed once rather than chosen 231 times. Shipped the same day.**
 
-5 to 4, 7 to 6, 9 to 8, 11 to 10, 13 to 12. Do not re-open the direction per
-site: the point of fixing it once is that no site has a reason to differ.
-The reasoning follows.
+5 to 4, 7 to 6, 9 to 8, 11 to 10, 13 to 12 — 231 literals in 222 declarations
+across 63 partials. The residue ledger in `scripts/check-typography.mjs` fell
+from 274 entries in 72 partials to **43 in 22**, all of them genuine one-offs.
+
+Everything below is the evidence the decision was made on. It is kept because
+the next person to look at a 1px spacing question should be able to see what
+was measured, not just what was concluded.
 
 1. **Per-site judgement is not available.** Every value is an exact tie. A
    reviewer asked to pick a direction for `.umptend__prov` has nothing to
@@ -138,9 +142,10 @@ nearest step.
 They stay in `SPACING_RESIDUE` either way, and they want an exempting comment
 where the value is load-bearing, not a rounding.
 
-## The 231, by partial
+## The 231, by partial — the record of what moved
 
-Both counts, and the value mix, for each partial the band lives in.
+Both counts, and the value mix, for each partial the band lived in. Every row
+here went down one step.
 
 | partial | literals | declarations | values |
 | --- | ---: | ---: | --- |

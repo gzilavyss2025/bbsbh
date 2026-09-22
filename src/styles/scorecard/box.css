@@ -244,7 +244,7 @@
   outline-offset: -2px;
 }
 .sc-ab__fliptext {
-  padding: 2px 5px;
+  padding: 2px var(--space-1);
   border-radius: var(--radius-xs);
   background: var(--seal-cover);
   font-family: var(--font-display);

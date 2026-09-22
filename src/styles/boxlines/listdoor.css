@@ -228,7 +228,7 @@ button.boxlines__back {
    .player__statgrid makes: twelve bordered, shadowed chips inside a sheet is
    noise, and the 1px gaps already say where one figure stops. */
 .boxlines__stats .stat {
-  padding: 9px 3px;
+  padding: var(--space-2) 3px;
   background: var(--surface-card);
   border: none;
   border-radius: 0;
@@ -254,7 +254,7 @@ button.boxlines__back {
    the screen, and a figure that wraps is worse than a figure that is small. */
 @media (max-width: 359px) {
   .boxlines__stats .stat {
-    padding: 7px 2px;
+    padding: var(--space-1h) 2px;
   }
 
   .boxlines__stats .stat__v {

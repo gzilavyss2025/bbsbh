@@ -29,7 +29,7 @@
 .sitebar__home {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-1h);
   padding: var(--space-1h) 2px;
   min-height: var(--tap-min);
   background: none;
@@ -87,7 +87,7 @@
    items that happen to sit near each other. */
 .logbook-btn--labeled {
   min-width: 0;
-  gap: 5px;
+  gap: var(--space-1);
   padding: 0 var(--space-2h);
   white-space: nowrap;
 }
@@ -507,7 +507,7 @@
 .plink.wire__club {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   padding: var(--space-1h) var(--space-1);
   margin: -6px -4px;
   font-family: var(--font-display);

@@ -24,7 +24,7 @@
 .pendots {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
 }
 
 .pendots__dot {
@@ -157,7 +157,7 @@
 .daystrip-key li {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
@@ -222,7 +222,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 5px;
+  gap: var(--space-1);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);

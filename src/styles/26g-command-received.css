@@ -53,7 +53,7 @@
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
   align-items: center;
-  padding-block: 7px;
+  padding-block: var(--space-1h);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 

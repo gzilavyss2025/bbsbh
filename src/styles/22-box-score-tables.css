@@ -64,7 +64,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  padding: 5px var(--space-3h);
+  padding: var(--space-1) var(--space-3h);
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--chip-accent) 16%, var(--bg-page));
   color: var(--text-heading);

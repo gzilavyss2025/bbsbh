@@ -128,8 +128,8 @@
   width: 246px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 9px var(--space-2h) 0;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-2h) 0;
   background: var(--ink-1);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-raised);
@@ -481,7 +481,7 @@
 .gamehud__outs {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-1);
 }
 
 .gamehud__outdot {

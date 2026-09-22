@@ -481,7 +481,7 @@
   font-size: var(--fs-small);
   color: var(--text-body);
   letter-spacing: var(--ls-caps);
-  padding: 7px var(--space-2);
+  padding: var(--space-1h) var(--space-2);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
@@ -946,7 +946,7 @@
 .dh__oppclub {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   margin-left: var(--space-2);
 }
 

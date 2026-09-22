@@ -39,7 +39,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: var(--space-1h);
   padding: var(--space-1h) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
@@ -252,7 +252,7 @@
 .spray__keyitem {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
 }
 
 /* ---- Direction ---- */

@@ -177,7 +177,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2h) 13px;
+  padding: var(--space-2h) var(--space-3);
   margin: 0;
   border: none;
   border-radius: 0;
@@ -254,7 +254,7 @@
 .abs__detail {
   list-style: none;
   margin: 0;
-  padding: var(--space-1) 13px var(--space-2h);
+  padding: var(--space-1) var(--space-3) var(--space-2h);
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -356,7 +356,7 @@
 .wcall {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: var(--space-1h);
   padding: var(--space-2h);
   background: var(--paper-2);
   border: var(--bw-hair) solid var(--border-hairline);
@@ -475,7 +475,7 @@
 .wcall__count {
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  gap: var(--space-1);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-small);
@@ -576,7 +576,7 @@
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  padding: 2px 7px;
+  padding: 2px var(--space-1h);
   border-radius: 999px;
 }
 .favormeter__tierpill--routine {
@@ -708,7 +708,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   text-align: center;
   min-width: 0;
 }
@@ -994,7 +994,7 @@
 .usagepips {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   flex: none;
 }
 .usagepips__pip {
@@ -1283,7 +1283,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   text-align: center;
   min-width: 0;
 }
@@ -1525,7 +1525,7 @@
   flex: 0 0 auto;
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  gap: var(--space-1);
   white-space: nowrap;
 }
 

@@ -70,7 +70,7 @@
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   background: var(--paper-2);
-  padding: 5px var(--space-1h);
+  padding: var(--space-1) var(--space-1h);
 }
 
 .pbp__main {
@@ -437,7 +437,7 @@
    appearance. Quieter than .pbp__desc, marked off with a short left rule. */
 .pbp__subnote {
   margin-top: 4px;
-  padding-left: 7px;
+  padding-left: var(--space-1h);
   border-left: 2px solid var(--border-rule);
   font-family: var(--font-read);
   font-size: var(--fs-small);

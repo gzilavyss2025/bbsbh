@@ -64,7 +64,7 @@
 }
 
 .idadmin__actions .idadmin__btn {
-  padding: var(--space-1) 11px;
+  padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid currentColor;
   border-radius: var(--radius-pill);
   background: none;
@@ -450,7 +450,7 @@
    for paper (that one draws in the hero's `currentColor`, which down here
    would be body text on body text). */
 .iddrawer__btn {
-  padding: var(--space-1) 11px;
+  padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
   background: var(--surface-card);

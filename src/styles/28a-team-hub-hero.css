@@ -153,8 +153,8 @@
 .team-hub__parent {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 5px var(--space-2h) 5px var(--space-1h);
+  gap: var(--space-1h);
+  padding: var(--space-1) var(--space-2h) var(--space-1) var(--space-1h);
   border-radius: var(--radius-pill);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);

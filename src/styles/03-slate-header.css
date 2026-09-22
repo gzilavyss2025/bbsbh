@@ -395,7 +395,7 @@
    scaling up alongside. */
 .datenav--lg .datenav__today {
   min-height: 24px;
-  padding: 2px 9px;
+  padding: 2px var(--space-2);
   font-size: var(--fs-compact);
 }
 
@@ -408,7 +408,7 @@
    already applies here for free — no separate :hover/:active needed. */
 .datenav__today {
   min-height: 20px;
-  padding: 1px 7px;
+  padding: 1px var(--space-1h);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);

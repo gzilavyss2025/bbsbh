@@ -199,7 +199,7 @@
 .xl-entry__fig {
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  gap: var(--space-1);
 }
 .xl-entry__figval {
   font-family: var(--font-mono);
@@ -333,7 +333,7 @@
   grid-template-columns: 1.6rem minmax(0, 1fr) 4.2rem 2.6rem;
   gap: var(--space-2);
   align-items: baseline;
-  padding: 7px 2px;
+  padding: var(--space-1h) 2px;
   border-bottom: 1px solid var(--album-board-line);
   font-size: var(--fs-small);
 }

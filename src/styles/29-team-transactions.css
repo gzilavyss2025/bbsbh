@@ -251,7 +251,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  padding: 1px 5px;
+  padding: 1px var(--space-1);
   color: var(--surface-card);
   background: var(--graphite);
 }
@@ -453,7 +453,7 @@
 }
 .last10__stub {
   flex: 0 0 auto;
-  padding: 7px var(--space-2) var(--space-1h);
+  padding: var(--space-1h) var(--space-2) var(--space-1h);
   border-bottom: 1px dashed var(--border-rule);
   text-align: right;
 }
@@ -548,7 +548,7 @@
 }
 .last10__foot {
   flex: 0 0 auto;
-  padding: 7px var(--space-2) var(--space-2);
+  padding: var(--space-1h) var(--space-2) var(--space-2);
 }
 .last10__score {
   font-family: var(--font-mono);
@@ -614,7 +614,7 @@
   display: block;
   width: 100%;
   margin: var(--space-2) 0 0;
-  padding: 9px var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-inset);
@@ -746,7 +746,7 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: var(--space-1) 5px;
+  padding: var(--space-1) var(--space-1);
   border-radius: var(--radius-sm);
   background: var(--bg-page);
   border: var(--bw-hair) solid var(--border-hairline);
@@ -832,7 +832,7 @@
 /* standings */
 .standings th,
 .standings td {
-  padding: 7px var(--space-2);
+  padding: var(--space-1h) var(--space-2);
   font-size: var(--fs-small);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-hairline);
@@ -882,7 +882,7 @@
 .standings td.team > * {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-1h);
 }
 /* A name that wraps to two lines (a long surname on a narrow phone, e.g.
    "Pete Crow-Armstrong") grows the .team row's height; align-items: center

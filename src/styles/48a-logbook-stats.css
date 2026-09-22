@@ -502,7 +502,7 @@
 .logbookstats__leaderrow > span:first-child {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   min-width: 0;
   text-align: left;
 }

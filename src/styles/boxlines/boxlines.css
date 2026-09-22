@@ -162,7 +162,7 @@ a.boxline__link:focus-visible {
    already certifies. */
 .boxline__series {
   flex: none;
-  padding: 0 5px;
+  padding: 0 var(--space-1);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);

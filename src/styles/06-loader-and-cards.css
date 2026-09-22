@@ -231,7 +231,7 @@
    strip reaches edge to edge, radius matched to the card's own top corners. */
 .gamecard__datebanner {
   margin: -14px -16px 0;
-  padding: 5px var(--space-4);
+  padding: var(--space-1) var(--space-4);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -351,8 +351,8 @@
   -webkit-backface-visibility: hidden;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 9px 3px var(--space-2);
+  gap: var(--space-1);
+  padding: 3px var(--space-2) 3px var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--clay, #c0392b);
   color: #fff4f1;
@@ -386,7 +386,7 @@
   -webkit-backface-visibility: hidden;
   display: inline-flex;
   align-items: center;
-  padding: 3px 9px;
+  padding: 3px var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--marker);
   color: var(--text-heading);
@@ -476,7 +476,7 @@
   font-size: var(--fs-small);
   line-height: var(--lh-solid);
   color: var(--text-heading);
-  padding: var(--space-1) 9px 3px;
+  padding: var(--space-1) var(--space-2) 3px;
   /* Double rule + a slight tilt = a pressed rubber stamp, not a UI chip. */
   border: 2px double var(--text-heading);
   border-radius: 3px;

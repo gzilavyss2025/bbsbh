@@ -98,7 +98,7 @@
   padding: 0;
   display: grid;
   grid-template-columns: 16px 1fr auto auto;
-  column-gap: 7px;
+  column-gap: var(--space-1h);
   row-gap: 2px;
   align-items: baseline;
   font-family: var(--font-mono);
@@ -170,7 +170,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 1px 5px;
+  padding: 1px var(--space-1);
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--graphite-soft) 16%, var(--paper-2));
   border: var(--bw-hair) solid var(--graphite-soft);
@@ -246,7 +246,7 @@
   display: flex;
   width: fit-content;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   height: 32px;
   padding: 0 var(--space-3);
   border-radius: var(--radius-sm);
@@ -454,7 +454,7 @@
   grid-template-columns: 56px 1fr auto;
   align-items: center;
   gap: var(--space-2);
-  padding: 7px 0;
+  padding: var(--space-1h) 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .umpmodal__grow:first-child {
@@ -482,7 +482,7 @@
    signal, so it deliberately doesn't borrow .tierpill's four-ink language. */
 .umpmodal__glevel {
   display: inline-block;
-  padding: 1px 5px;
+  padding: 1px var(--space-1);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
   font-family: var(--font-display);

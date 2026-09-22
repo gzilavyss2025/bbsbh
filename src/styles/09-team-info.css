@@ -465,7 +465,7 @@
 .fact__label--info {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
 }
 .fact__infoglyph {
   display: inline-flex;
@@ -597,7 +597,7 @@
 .umps__namerow {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   flex-wrap: wrap;
 }
 /* Wraps the HP tier pill as a tap target for the accuracy modal — reset to
@@ -626,7 +626,7 @@
    distinct at a glance without a legend. */
 .tierpill {
   display: inline-block;
-  padding: 2px 7px;
+  padding: 2px var(--space-1h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
   font-family: var(--font-display);

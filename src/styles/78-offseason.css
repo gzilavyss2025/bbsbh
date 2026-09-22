@@ -421,7 +421,7 @@
 }
 .movedup__table th,
 .movedup__table td {
-  padding: 7px 0;
+  padding: var(--space-1h) 0;
   border-bottom: var(--bw-hair) solid var(--rule-soft);
   text-align: left;
   /* Middle, not baseline: the player cell is as tall as a headshot and the two
@@ -682,7 +682,7 @@
 }
 .note__table th,
 .note__table td {
-  padding: 7px 0;
+  padding: var(--space-1h) 0;
   border-bottom: var(--bw-hair) solid var(--rule-soft);
   text-align: left;
   vertical-align: baseline;

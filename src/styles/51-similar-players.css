@@ -68,7 +68,7 @@
 .simlike__measure {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-1);
   margin: 0;
 }
 .simlike__measurelabel {
@@ -137,7 +137,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   width: 100%;
   min-width: 0;
   padding: var(--space-3) var(--space-1h) var(--space-2h);
@@ -177,7 +177,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   min-width: 0;
 }
 .simlike__ident {
@@ -207,7 +207,7 @@
   align-items: baseline;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: var(--space-1);
   min-width: 0;
   font-size: var(--fs-caption);
   line-height: var(--lh-snug);

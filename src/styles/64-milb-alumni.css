@@ -98,7 +98,7 @@
 .alum__club {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   min-width: 0;
   max-width: 100%;
 }

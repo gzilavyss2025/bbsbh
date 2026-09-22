@@ -84,7 +84,7 @@
 .cliff__row {
   display: flex;
   gap: var(--space-1h);
-  padding: var(--space-3) var(--space-3h) 13px;
+  padding: var(--space-3) var(--space-3h) var(--space-3);
 }
 .cliff__col {
   flex: 1;
@@ -156,7 +156,7 @@
 }
 .ctr__namehead {
   z-index: 2;
-  padding: 7px var(--space-2h);
+  padding: var(--space-1h) var(--space-2h);
   background: var(--bg-page);
   border-bottom: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-display);
@@ -167,7 +167,7 @@
   color: var(--text-caption);
 }
 .ctr__agehead {
-  padding: 7px var(--space-2);
+  padding: var(--space-1h) var(--space-2);
   text-align: right;
   background: var(--bg-page);
   border-bottom: var(--bw-hair) solid var(--border-rule);
@@ -190,7 +190,7 @@
   color: var(--text-caption);
 }
 .ctr__yearhead {
-  padding: 7px var(--space-2h);
+  padding: var(--space-1h) var(--space-2h);
   vertical-align: bottom;
   text-align: right;
   background: var(--bg-page);
@@ -206,7 +206,7 @@
 }
 
 .ctr__group td {
-  padding: var(--space-2) var(--space-2h) 5px;
+  padding: var(--space-2) var(--space-2h) var(--space-1);
   border-top: var(--bw-heavy) solid var(--navy);
   background: var(--bg-page);
   font-family: var(--font-display);
@@ -224,7 +224,7 @@
 .ctr__player {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-1h);
 }
 .ctr__pos {
   flex: none;
@@ -319,7 +319,7 @@
 }
 
 .ctr__subtotal td {
-  padding: 5px var(--space-2h);
+  padding: var(--space-1) var(--space-2h);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-rule);
   background: var(--bg-page);
@@ -330,7 +330,7 @@
   color: var(--text-caption);
 }
 .ctr__subtotal th {
-  padding: 5px var(--space-2h);
+  padding: var(--space-1) var(--space-2h);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-rule);
   background: var(--bg-page);
@@ -379,7 +379,7 @@
 .ctr__keyitem {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-1h);
   font-size: var(--fs-small);
   color: var(--text-muted);
 }

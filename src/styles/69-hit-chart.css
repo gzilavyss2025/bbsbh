@@ -126,7 +126,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: var(--space-1h);
   padding: var(--space-1h) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
@@ -320,7 +320,7 @@
 
 .hitchart__readout {
   margin: var(--space-2) 14px 0;
-  padding: 9px var(--space-3) var(--space-2h);
+  padding: var(--space-2) var(--space-3) var(--space-2h);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
@@ -418,7 +418,7 @@
 
 .hitchart__fact {
   flex: 1;
-  padding: 9px var(--space-1);
+  padding: var(--space-2) var(--space-1);
   text-align: center;
 }
 
@@ -453,7 +453,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 2px var(--space-3h) 7px;
+  padding: 2px var(--space-3h) var(--space-1h);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
@@ -470,8 +470,8 @@
 .hitchart__row {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 9px 0;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
@@ -571,7 +571,7 @@
   }
 
   .hitchart__fact {
-    padding: 11px var(--space-1);
+    padding: var(--space-2h) var(--space-1);
   }
 
   .hitchart__factvalue {
@@ -666,7 +666,7 @@
   justify-content: space-between;
   gap: var(--space-3);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
-  padding-bottom: 9px;
+  padding-bottom: var(--space-2);
 }
 
 .bflight__ttl {
@@ -724,7 +724,7 @@
   background: var(--surface-inset);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
-  padding: 2px 5px;
+  padding: 2px var(--space-1);
 }
 
 /* Tapping anywhere on the sheet already dismisses it (BallFlight.jsx); this is

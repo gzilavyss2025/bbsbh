@@ -212,7 +212,7 @@
 .tlead__stat {
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  gap: var(--space-1);
 }
 .tlead__statval {
   font-family: var(--font-mono);
@@ -387,7 +387,7 @@
   display: flex;
   align-items: baseline;
   gap: var(--space-2h);
-  padding: 7px 0;
+  padding: var(--space-1h) 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .tledg__row:first-child {

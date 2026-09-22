@@ -322,7 +322,7 @@
 
 .bs__grid th,
 .bs__grid td {
-  padding: 5px 2px;
+  padding: var(--space-1) 2px;
   text-align: center;
   font-size: var(--fs-label);
   white-space: nowrap;
@@ -356,7 +356,7 @@
   display: inline-flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 3px 5px;
+  gap: 3px var(--space-1);
 }
 
 .bs__pname {
@@ -528,7 +528,7 @@
 .bs__decisions {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-1);
   padding: var(--space-3) var(--space-3h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -659,7 +659,7 @@
   display: flex;
   width: fit-content;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   margin-top: 10px;
   height: 32px;
   padding: 0 var(--space-3);
@@ -695,7 +695,7 @@
 .bs__potgPlay {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
@@ -857,7 +857,7 @@
   display: block;
   width: 100%;
   margin: 8px 0 0;
-  padding: 9px var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-inset);

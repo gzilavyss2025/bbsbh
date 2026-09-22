@@ -1,8 +1,16 @@
-// Applies one of the two live C2 candidates to src/styles/, so the before/after
-// can be shot. `down` rounds the odd band to the step below, `up` to the step
-// above. Every odd-band value is an EXACT tie between two adjacent tokens, so
-// these are the only two mechanical readings of "round to the nearest step".
-// Revert with `git checkout -- src/styles`.
+// Rounds the odd 5/7/9/11/13px band in src/styles/ to an adjacent step.
+// `down` takes the step below, `up` the step above. Every odd-band value is an
+// EXACT tie between two adjacent tokens, so these are the only two mechanical
+// readings of "round to the nearest step".
+//
+// It was written to SHOOT the two candidates, and then it made the change: the
+// decision went to `down`, and the same code path that produced the evidence
+// produced the commit. That is deliberate — a preview that is not the change
+// is a preview of something else.
+//
+// The band is closed now, so a further run has nothing to find. It is kept
+// because it is the only record of how the two candidates were compared, and
+// because reverting is `git checkout -- src/styles`, not a third mode.
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs'
 import { join, sep } from 'node:path'
 

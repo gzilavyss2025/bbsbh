@@ -93,11 +93,27 @@ partials was resolved back to px on both sides of the diff and compared: 2123
 declarations, zero differences. The diff is 866 insertions against 866
 deletions.
 
-**The 231 stay open.** The odd 5/7/9/11/13px band is the next decision, and this
-ADR does not make it. The two candidates are to round each value to the nearest
-existing step, or to exempt the band. The evidence for that choice — the band
-grouped by partial, and a before-and-after of three real surfaces at 390px —
-is in `docs/design-system-spacing-residue.md`.
+**The 231 were closed by a second decision, recorded here.** The odd
+5/7/9/11/13px band is the one rounding this codebase has agreed to: it went
+DOWN one step — 5 to 4, 7 to 6, 9 to 8, 11 to 10, 13 to 12 — across 231
+literals in 222 declarations in 63 partials.
+
+There was a direction to choose, and not a nearest step, because the scale
+these half-steps complete reads 4, 6, 8, 10, 12, 14, 16. Every gap is 2px, so
+every one of the 231 sat exactly midway between two tokens. "Round to the
+nearest" resolved to nothing, and no site had a reason to differ from any
+other, so the direction was fixed once instead of 231 times. Down suits a
+phone-first second screen: it recovers scroll and never widens a table already
+filling 358 of 390px. The evidence — the band grouped by partial, and a
+before-and-after of three real surfaces at 390px under both directions — is in
+`docs/design-system-spacing-residue.md`.
+
+That leaves 43 listed literals, all of them genuine one-offs at 18px and up.
+Eleven of their seventeen values have no honest rounding at all. **The rounding
+of the odd band does not license rounding one of these.** It was a recorded
+decision over measured evidence, applied to every affected site at once.
+Moving a single value to clear a ledger entry is a different act: an
+unreviewed spacing change on a surface nobody compared.
 
 **Two guard defects closed with it.** `check-typography.mjs` did not strip
 comments, and its property regex was unanchored, so it scanned no `padding`

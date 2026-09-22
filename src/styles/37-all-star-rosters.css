@@ -291,7 +291,7 @@
 .allstargame__mvpline {
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  gap: var(--space-1);
   min-width: 0;
 }
 .allstargame__mvpname {

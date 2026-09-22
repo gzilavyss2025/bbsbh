@@ -158,7 +158,7 @@
   width: min(100%, 460px);
   aspect-ratio: 1.42;
   margin: 0 auto;
-  padding: 5px;
+  padding: var(--space-1);
   border: var(--bw-heavy) solid var(--accent-primary);
   border-radius: var(--radius-sm);
   background: var(--accent-primary);

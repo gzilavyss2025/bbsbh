@@ -160,7 +160,7 @@
 .trrank__jump a {
   flex: 0 0 auto;
   min-height: 32px;
-  padding: 7px var(--space-3);
+  padding: var(--space-1h) var(--space-3);
   border: var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 22%, transparent);
   border-radius: var(--radius-pill);
   color: var(--text-on-ink);

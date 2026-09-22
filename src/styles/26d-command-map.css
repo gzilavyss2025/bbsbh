@@ -42,7 +42,7 @@
 }
 
 .cmdmap__chip--sm {
-  padding: 5px var(--space-2);
+  padding: var(--space-1) var(--space-2);
 }
 
 .cmdmap__chip--on {
@@ -146,7 +146,7 @@
 .cmdmap__keyitem {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);

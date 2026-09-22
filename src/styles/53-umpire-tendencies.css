@@ -44,7 +44,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2h);
-  padding: 11px 13px var(--space-3);
+  padding: var(--space-2h) var(--space-3) var(--space-3);
   border-bottom: 1px solid var(--border-hairline);
 }
 .umptend__mark {
@@ -89,7 +89,7 @@
    what the reference's own blue-to-yellow maps onto. No text ever sits on the
    ramp, so nothing here needs to clear contrast against a gradient. --- */
 .umptend__lean {
-  padding: 13px 13px 0;
+  padding: var(--space-3) var(--space-3) 0;
 }
 .umptend__leanhd {
   font-family: var(--font-display);
@@ -97,7 +97,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-  padding-right: 7px;
+  padding-right: var(--space-1h);
 }
 .umptend__scale {
   display: flex;
@@ -155,7 +155,7 @@
   justify-content: space-between;
   gap: var(--space-2);
   height: 24px;
-  padding: 0 7px;
+  padding: 0 var(--space-1h);
   border-radius: 3px;
 }
 .umptend__row + .umptend__row {
@@ -188,9 +188,9 @@
 .umptend__watch {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: var(--space-2h);
   margin-top: 13px;
-  padding: var(--space-3) 13px;
+  padding: var(--space-3) var(--space-3);
   background: var(--navy);
 }
 .umptend__watchbody {
@@ -238,7 +238,7 @@
   grid-template-columns: 1fr 1fr;
 }
 .umptend__tile {
-  padding: 11px var(--space-2);
+  padding: var(--space-2h) var(--space-2);
   text-align: center;
   border-top: 1px solid var(--border-hairline);
 }
@@ -280,11 +280,11 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-  padding: 0 13px;
+  padding: 0 var(--space-3);
 }
 .umptend__chalfoot {
   margin: 0;
-  padding: 7px 13px 9px;
+  padding: var(--space-1h) var(--space-3) var(--space-2);
   text-align: center;
   font-family: var(--font-body);
   font-size: var(--fs-small);
@@ -293,7 +293,7 @@
   font-variant-numeric: tabular-nums;
 }
 .umptend__prov {
-  padding: 9px 13px;
+  padding: var(--space-2) var(--space-3);
   text-align: center;
   font-family: var(--font-body);
   font-size: var(--fs-small);

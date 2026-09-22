@@ -527,7 +527,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2h);
-  padding: 7px 0;
+  padding: var(--space-1h) 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
   transition: opacity 0.14s ease;
 }

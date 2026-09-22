@@ -58,7 +58,7 @@
 .cthist__club {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   min-width: 0;
 }
 /* The mark is decorative — the club is named in text right beside it. */
@@ -97,7 +97,7 @@
   grid-template-columns: 1fr auto;
   align-items: baseline;
   column-gap: var(--space-3);
-  padding: 5px 0;
+  padding: var(--space-1) 0;
 }
 .cthist__row + .cthist__row {
   border-top: var(--bw-hair) dotted var(--rule-grid);

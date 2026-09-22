@@ -200,8 +200,8 @@
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: var(--space-1) 9px;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
   border: none;
   border-radius: var(--radius-xs);
   background: var(--accent-primary);

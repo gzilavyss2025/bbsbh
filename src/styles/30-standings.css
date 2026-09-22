@@ -12,7 +12,7 @@
 .standings-ctrl {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: var(--space-2);
   margin-bottom: 16px;
 }
 /* Readout + the kraft reveal chip share one row: the "as of" context reads left,
@@ -50,7 +50,7 @@
 .standings-jumps {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: var(--space-1);
 }
 /* The date quick-jumps grow a new "Month 1" tab every month of the season —
    left to wrap, that's an ever-taller control (already 3 lines by July; 7+
@@ -82,7 +82,7 @@
 }
 .standings-jump {
   min-height: 28px;
-  padding: 0 9px;
+  padding: 0 var(--space-2);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: transparent;
@@ -115,7 +115,7 @@
 .standings-reveal {
   flex: 0 0 auto;
   min-height: 28px;
-  padding: 0 11px;
+  padding: 0 var(--space-2h);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--seal-deep);
   background: var(--seal-cover);
@@ -266,7 +266,7 @@
   }
   .standings--full th,
   .standings--full td {
-    padding: var(--space-2) 9px;
+    padding: var(--space-2) var(--space-2);
     font-size: var(--fs-small);
   }
 }

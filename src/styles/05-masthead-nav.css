@@ -360,7 +360,7 @@
   display: grid;
   grid-template-columns: 56px 1fr;
   column-gap: 18px;
-  padding: 7px 0;
+  padding: var(--space-1h) 0;
 }
 /* The node, centered on the rail (left 64px). A canvas-colored ring masks the
    rail behind it so the dot reads as sitting on the line. */
@@ -465,7 +465,7 @@
   display: block;
   width: 100%;
   margin-top: 10px;
-  padding: 9px;
+  padding: var(--space-2);
   appearance: none;
   cursor: pointer;
   border: var(--bw-hair) dashed var(--border-rule);
