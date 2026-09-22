@@ -399,7 +399,7 @@
 }
 
 .staffgrid__dayname--today {
-  color: var(--seal);
+  color: var(--text-heading);
 }
 
 .staffgrid__rows {

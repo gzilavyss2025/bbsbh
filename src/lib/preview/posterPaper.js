@@ -49,6 +49,7 @@ const TOKEN_OF = {
   ruleSoft: '--rule-soft',
   ruleGrid: '--rule-grid',
   marker: '--marker',
+  markerDeep: '--marker-deep',
   field: '--field',
   clay: '--clay',
   navy: '--navy',

@@ -17,13 +17,13 @@
    Newsreader read voice in natural case, because a clip title IS a
    play description — same sanctioned caps exception as .pbp__desc),
    then which game it came from (mono graphite, the scorebook's
-   figures voice). The play affordance is a small tab of kraft tape
+   figures voice). The play affordance is a small tab
    stuck on the print's lower-left, a hair off-square the way tape
-   goes down by hand — solid --seal, like .sstrip__cell--home's tape
-   tone, deliberately NOT the --seal-texture hatch, which is the
-   spoiler-cover weave and would claim "sealed" on a card that is the
-   opposite. The amber tape carries its own contrast (--text-on-seal is
-   a validated pair) against any poster frame, so nothing here needs a
+   goes down by hand — navy ink, like .flipback__watchbtn's tab. It
+   was solid --seal until ADR-0083: every affordance meaning "there is
+   video here" wore the cover's own colour, on a card that is the
+   opposite of sealed. --text-on-ink carries its own validated
+   contrast against any poster frame, so nothing here needs a
    scrim to stay legible.
 
    HOVER DOES WASH THE PRINT, though, and that is a deliberate later
@@ -32,7 +32,7 @@
    posters reads as pictures until you point at one, and the wash is
    what says "this one is a video you can play". It stays a wash and not
    the full playbook — no zoom, no lift on the poster itself, and the
-   card's own hover (kraft edge + 1px rise) is unchanged — and it is
+   card's own hover (a green edge + 1px rise) is unchanged — and it is
    pointer-only, so a touchscreen, where every card would otherwise
    sit permanently "hovered", never sees it. See .hlclip__wash.
 
@@ -66,11 +66,11 @@
     border-color var(--dur-snappy) var(--ease-standard),
     transform var(--dur-snappy) var(--ease-standard);
 }
-/* The slip lifts a hair off the page and its edge warms to the kraft
-   tone — the same border-color: var(--seal) hover the photo tiles
+/* The slip lifts a hair off the page and its edge warms to the action
+   green — the same border-color hover the photo tiles
    beside it use, so the two rails read as one family. */
 .hlclip:hover {
-  border-color: var(--seal);
+  border-color: var(--accent-link);
   box-shadow: var(--shadow-raised);
   transform: translateY(-1px);
 }
@@ -99,7 +99,7 @@
    which one you're about to play.
 
    Drawn as its own element rather than a ::after on the frame because
-   the kraft tab lives inside that frame and has to stay ON TOP of the
+   the play tab lives inside that frame and has to stay ON TOP of the
    wash — it's tape stuck to the print, not something under the glass.
    Both get a stacking order here (wash 1, tab 2) instead of relying on
    source order, since a sibling ::after would paint over the tab.
@@ -140,12 +140,12 @@
   display: none;
 }
 
-/* The kraft-tape Watch tab — rotated a hair off-square (tape goes down
+/* The Watch tab — rotated a hair off-square (tape goes down
    by hand) and shadowed with the same soft paper elevation as the slip
    itself, so it reads as stuck ON the print rather than floating over
    a video. Triangle drawn from borders (::before) so there's no
    unicode-glyph baseline to fight — currentColor, so it inherits the
-   tab's validated on-seal ink. */
+   tab's validated inverse ink. */
 .hlclip__play {
   position: absolute;
   left: var(--space-2);
@@ -157,8 +157,8 @@
   gap: 5px;
   padding: 3px 7px;
   border-radius: var(--radius-xs);
-  background: var(--seal);
-  color: var(--text-on-seal);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
@@ -176,11 +176,10 @@
   border-bottom: 4px solid transparent;
   border-left: 6px solid currentColor;
 }
-/* Deepen to the hatch-line amber on hover — still ≥4.5:1 under
-   --seal-ink (the pair colors.css documents for the seal texture's
-   darker stripe). */
+/* Deepen a step on hover — still well past 4.5:1 under
+   --text-on-ink (the pair colors.css documents for an ink chip). */
 .hlclip:hover .hlclip__play {
-  background: var(--seal-hatch);
+  background: var(--ink-1);
 }
 
 /* The slip's lower margin: play title in body ink, game line in the
@@ -224,7 +223,7 @@
    used for the box score's condensed game (GameVideoRow.jsx). It drops
    the fixed rail width and the lower margin — no caption element is
    rendered at all — so the card is exactly a matted 16:9 frame with
-   the kraft tab on it. The tab carries a longer line here ("CONDENSED
+   the play tab on it. The tab carries a longer line here ("CONDENSED
    GAME (12:20)") on a much larger print, so it steps up from caption
    to compact and takes a touch more padding; the rotation, tone and
    shadow stay put, because it's the same piece of tape. */
@@ -262,9 +261,9 @@
   cursor: pointer;
 }
 .cliprail__nav:hover:not(:disabled) {
-  background: var(--seal);
-  border-color: var(--seal);
-  color: var(--text-on-seal);
+  background: var(--accent-link);
+  border-color: var(--accent-link);
+  color: var(--text-on-ink);
 }
 .cliprail__nav:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -328,9 +327,9 @@
    22-box-score-tables.css, for two reasons: that file is at its
    check-file-size ceiling, and this rule belongs to the video family
    anyway — every affordance in the app that means "there is video
-   here" wears kraft tape (the WATCH tab above, the condensed panel's
-   tab, the player's SAVE pill), and they should be read together. Ink
-   is for navigation, tape is for video. */
+   here" wears the same ink tab (the WATCH tab above, the condensed
+   panel's tab, the player's SAVE pill), and they should be read
+   together. They wore kraft tape until ADR-0083. */
 .flipback__watchbtn {
   width: auto;
   min-height: 0;
@@ -342,13 +341,13 @@
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
-  background: var(--seal);
-  border-color: var(--seal);
-  color: var(--text-on-seal);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
 }
 .flipback__watchbtn:hover:not(:disabled) {
-  background: var(--seal-hatch);
-  border-color: var(--seal-hatch);
+  background: var(--ink-1);
+  border-color: var(--ink-1);
 }
 /* The same border-drawn ▶ the clip cards use, at caption scale. */
 .flipback__watchIcon {

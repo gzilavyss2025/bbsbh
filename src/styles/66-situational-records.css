@@ -45,7 +45,7 @@
 .trrank__eyebrow {
   position: relative;
   z-index: 1;
-  color: var(--seal-cover);
+  color: var(--text-caption);
 }
 .trrank__hero h1 {
   position: relative;
@@ -387,7 +387,7 @@
     box-shadow: var(--shadow-raised);
   }
   .trrank__jump a:hover {
-    border-color: var(--seal-cover);
+    border-color: var(--accent-link);
   }
 }
 

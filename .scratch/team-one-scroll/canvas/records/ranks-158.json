@@ -1,0 +1,345 @@
+{
+ "scored-first": {
+  "k": "Scoring first",
+  "group": "Scoring",
+  "rank": 5,
+  "field": 30,
+  "tone": "top"
+ },
+ "opp-scored-first": {
+  "k": "Opponent scores first",
+  "group": "Scoring",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "scored-4-plus": {
+  "k": "Scoring 4+ runs",
+  "group": "Scoring",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "scored-top-2": {
+  "k": "Scoring in the top of the 2nd",
+  "group": "Scoring by inning",
+  "rank": 2,
+  "field": 30,
+  "tone": "top"
+ },
+ "scored-bottom-3": {
+  "k": "Scoring in the bottom of the 3rd",
+  "group": "Scoring by inning",
+  "rank": 4,
+  "field": 30,
+  "tone": "top"
+ },
+ "scored-bottom-4": {
+  "k": "Scoring in the bottom of the 4th",
+  "group": "Scoring by inning",
+  "rank": 3,
+  "field": 30,
+  "tone": "top"
+ },
+ "scored-bottom-8": {
+  "k": "Scoring in the bottom of the 8th",
+  "group": "Scoring by inning",
+  "rank": 3,
+  "field": 30,
+  "tone": "top"
+ },
+ "out-hit": {
+  "k": "Out-hit by opponent",
+  "group": "Hits and homers",
+  "rank": 4,
+  "field": 30,
+  "tone": "top"
+ },
+ "hits-even": {
+  "k": "Hit totals even",
+  "group": "Hits and homers",
+  "rank": 3,
+  "field": 30,
+  "tone": "top"
+ },
+ "hits-10-plus": {
+  "k": "10 or more hits",
+  "group": "Hits and homers",
+  "rank": 5,
+  "field": 30,
+  "tone": "top"
+ },
+ "homered": {
+  "k": "Hitting a home run",
+  "group": "Hits and homers",
+  "rank": 4,
+  "field": 30,
+  "tone": "top"
+ },
+ "no-homer": {
+  "k": "Not hitting a home run",
+  "group": "Hits and homers",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "opp-homered": {
+  "k": "Opponent homers",
+  "group": "Hits and homers",
+  "rank": 2,
+  "field": 30,
+  "tone": "top"
+ },
+ "opp-homerless": {
+  "k": "Opponent held homerless",
+  "group": "Hits and homers",
+  "rank": 4,
+  "field": 30,
+  "tone": "top"
+ },
+ "error-committed": {
+  "k": "Committing an error",
+  "group": "Defense",
+  "rank": 2,
+  "field": 30,
+  "tone": "top"
+ },
+ "error-free": {
+  "k": "Committing no errors",
+  "group": "Defense",
+  "rank": 2,
+  "field": 30,
+  "tone": "top"
+ },
+ "trail-6": {
+  "k": "Trailing after 6 innings",
+  "group": "Leading and trailing",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "tied-6": {
+  "k": "Tied after 6 innings",
+  "group": "Leading and trailing",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "trail-7": {
+  "k": "Trailing after 7 innings",
+  "group": "Leading and trailing",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "tied-7": {
+  "k": "Tied after 7 innings",
+  "group": "Leading and trailing",
+  "rank": 2,
+  "field": 30,
+  "tone": "top"
+ },
+ "trail-8": {
+  "k": "Trailing after 8 innings",
+  "group": "Leading and trailing",
+  "rank": 5,
+  "field": 30,
+  "tone": "top"
+ },
+ "extra-innings": {
+  "k": "Extra innings",
+  "group": "Close games",
+  "rank": 3,
+  "field": 30,
+  "tone": "top"
+ },
+ "starter-under-6": {
+  "k": "Starter goes under 6",
+  "group": "Starting pitching",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "opp-starter-6-plus": {
+  "k": "Opposing starter 6+",
+  "group": "Starting pitching",
+  "rank": 3,
+  "field": 30,
+  "tone": "top"
+ },
+ "opp-starter-under-6": {
+  "k": "Opposing starter under 6",
+  "group": "Starting pitching",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "vs-rhs": {
+  "k": "Vs. right-handed starter",
+  "group": "Starting pitching",
+  "rank": 4,
+  "field": 30,
+  "tone": "top"
+ },
+ "vs-lhs": {
+  "k": "Vs. left-handed starter",
+  "group": "Starting pitching",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "day-game": {
+  "k": "Day games",
+  "group": "Schedule",
+  "rank": 3,
+  "field": 30,
+  "tone": "top"
+ },
+ "night-game": {
+  "k": "Night games",
+  "group": "Schedule",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "series-opener": {
+  "k": "Series opener",
+  "group": "Schedule",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "month-5": {
+  "k": "May",
+  "group": "By month",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "month-6": {
+  "k": "June",
+  "group": "By month",
+  "rank": 4,
+  "field": 30,
+  "tone": "top"
+ },
+ "month-7": {
+  "k": "July",
+  "group": "By month",
+  "rank": 5,
+  "field": 30,
+  "tone": "top"
+ },
+ "month-9": {
+  "k": "September",
+  "group": "By month",
+  "rank": 3,
+  "field": 30,
+  "tone": "top"
+ },
+ "div-202": {
+  "k": "Vs. American League Central",
+  "group": "By division",
+  "rank": 5,
+  "field": 30,
+  "tone": "top"
+ },
+ "div-201": {
+  "k": "Vs. American League East",
+  "group": "By division",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "div-205": {
+  "k": "Vs. National League Central",
+  "group": "By division",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "div-204": {
+  "k": "Vs. National League East",
+  "group": "By division",
+  "rank": 5,
+  "field": 30,
+  "tone": "top"
+ },
+ "lg-103": {
+  "k": "Vs. American League",
+  "group": "By league",
+  "rank": 2,
+  "field": 30,
+  "tone": "top"
+ },
+ "lg-104": {
+  "k": "Vs. National League",
+  "group": "By league",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "count-wins-after-trailing": {
+  "k": "Wins after trailing",
+  "group": "Season counts",
+  "rank": 5,
+  "field": 30,
+  "tone": "top"
+ },
+ "count-shutouts-suffered": {
+  "k": "Times shut out",
+  "group": "Season counts",
+  "rank": 3,
+  "field": 30,
+  "tone": "top"
+ },
+ "count-walk-off-losses": {
+  "k": "Walk-off losses",
+  "group": "Season counts",
+  "rank": 4,
+  "field": 30,
+  "tone": "top"
+ },
+ "count-batted-around": {
+  "k": "Times batted around",
+  "group": "Season counts",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "count-sweeps": {
+  "k": "Series sweeps",
+  "group": "Season counts",
+  "rank": 5,
+  "field": 30,
+  "tone": "top"
+ },
+ "count-swept": {
+  "k": "Series swept",
+  "group": "Season counts",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "count-series-won": {
+  "k": "Series wins",
+  "group": "Season counts",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "count-series-lost": {
+  "k": "Series losses",
+  "group": "Season counts",
+  "rank": 1,
+  "field": 30,
+  "tone": "top"
+ },
+ "count-days-1": {
+  "k": "Days in 1st place",
+  "group": "Season counts",
+  "rank": 3,
+  "field": 30,
+  "tone": "top"
+ }
+}

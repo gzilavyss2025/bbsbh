@@ -351,7 +351,7 @@ export function HitChart({
           </button>
           <button
             type="button"
-            className={chip(showHard, 'on-seal')}
+            className={chip(showHard, 'on-marker')}
             aria-pressed={showHard}
             onClick={() => setShowHard((v) => !v)}
           >

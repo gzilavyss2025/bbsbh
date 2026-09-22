@@ -51,8 +51,8 @@
   --rule-soft: #DED6C0;
   --field: #2F6E4F;
   --field-deep: #255740;
-  --seal: #B5824A;
-  --seal-ink: #1E1405;
+  --marker: #E9C33F;
+  --marker-deep: #C9A32C;
 
   /* --- local scale. Reading sizes, not app-chrome sizes: these pages are
          read at arm's length for several minutes, not glanced at between
@@ -255,7 +255,7 @@ a:focus-visible {
   font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.35rem);
   line-height: var(--lh-prose);
   color: var(--ink-0);
-  border-left: 3px solid var(--seal);
+  border-left: 3px solid var(--accent-primary);
   padding: var(--space-2) 0 var(--space-2) var(--space-4);
   margin: 0 0 var(--space-8);
 }
@@ -330,12 +330,14 @@ tbody tr:last-child td {
 }
 
 /* --- the one call to action ------------------------------------------
-   Kraft-tape amber, the same colour the app uses for a seal, because this
-   is the one place on the page where the guide points at the product. */
+   The highlighter, the colour the app uses to mean "look here", because this
+   is the one place on the page where the guide points at the product. It was
+   the kraft amber until ADR-0083 reserved that for a surface a tap can lift —
+   and a guide has no seals on it at all. */
 
 .cta {
   background: var(--paper-3);
-  border: 1px solid var(--seal);
+  border: 1px solid var(--marker-deep);
   border-left-width: 4px;
   padding: var(--space-6);
   /* `auto`, not 0: this shorthand comes after the page-frame rules and would
@@ -443,8 +445,8 @@ tbody tr:last-child td {
   font-weight: var(--w-bold);
   font-size: 0.75rem;
   letter-spacing: var(--ls-label);
-  color: var(--seal-ink);
-  background: var(--seal);
+  color: var(--ink-0);
+  background: var(--marker);
   border-radius: 2px;
   padding: 0.0625rem var(--space-2);
 }

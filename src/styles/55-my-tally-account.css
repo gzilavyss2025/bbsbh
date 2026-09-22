@@ -48,8 +48,8 @@
 }
 
 .syncreceipt__row[data-tone='pulling'] .syncreceipt__mark {
-  background: var(--seal-cover);
-  border-color: var(--seal-cover);
+  background: var(--marker);
+  border-color: color-mix(in srgb, var(--marker) 70%, var(--text-heading));
 }
 
 /* `unavailable` is a 501 — this deployment configures no store. A supported,
@@ -136,21 +136,21 @@
   stroke-width: 1.4;
 }
 
-/* The kraft bars stand where the numbers would be. That absence IS the
+/* The ink bars stand where the numbers would be. That absence IS the
    illustration — see DeviceHandoff.jsx and PRD invariant P5. */
 .devicehandoff__seal {
-  fill: var(--seal-cover);
+  fill: var(--accent-primary);
 }
 
 .devicehandoff__arc {
   fill: none;
-  stroke: var(--seal-cover);
+  stroke: var(--accent-primary);
   stroke-width: 1.6;
   stroke-dasharray: 4 3;
 }
 
 .devicehandoff__arrow {
-  fill: var(--seal-cover);
+  fill: var(--accent-primary);
 }
 
 .mytally__pitchlede {
@@ -229,7 +229,7 @@
 .mergereceipt {
   margin: 0 0 var(--space-4);
   padding: var(--space-4);
-  border: var(--bw-rule) solid var(--seal-cover);
+  border: var(--bw-rule) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-inset);
 }

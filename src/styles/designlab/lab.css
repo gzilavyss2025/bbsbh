@@ -61,7 +61,7 @@
 .dlab__verdictbox {
   margin: var(--space-4) var(--app-gutter);
   padding: var(--space-4);
-  border: var(--bw-rule) solid var(--seal);
+  border: var(--bw-rule) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-inset);
 }
@@ -105,7 +105,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-body);
-  border-left: 3px solid var(--seal);
+  border-left: 3px solid var(--accent-primary);
   padding-left: var(--space-2);
 }
 
@@ -234,9 +234,9 @@
 
 .dlab__verdict--bespoke,
 .dlab__verdict--hold {
-  border-color: var(--seal-deep);
-  background: var(--seal-cover);
-  color: var(--seal-cover-ink);
+  border-color: color-mix(in srgb, var(--marker) 70%, var(--text-heading));
+  background: var(--marker);
+  color: var(--text-heading);
 }
 
 .dlab__verdict--delete {
@@ -372,8 +372,8 @@
 .dlab__warn {
   margin: var(--space-3) var(--app-gutter) 0;
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--seal-deep);
-  border-left: 3px solid var(--seal);
+  border: var(--bw-hair) solid var(--accent-negative);
+  border-left: 3px solid var(--accent-negative);
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
   font-family: var(--font-body);

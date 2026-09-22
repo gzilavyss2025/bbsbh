@@ -74,7 +74,7 @@
 @media (hover: hover) and (pointer: fine) {
   .prospectboard tbody tr:not(.is-selected):hover {
     background: var(--bg-page);
-    box-shadow: inset 4px 0 0 var(--seal-cover);
+    box-shadow: inset 4px 0 0 var(--accent-link);
   }
 }
 .prospectboard__rank {
@@ -121,7 +121,7 @@
   font-weight: var(--w-bold);
 }
 .prospectboard__level {
-  border-color: var(--seal-cover);
+  border-color: var(--border-rule);
   background: var(--surface-inset);
 }
 .prospectboard__club {
@@ -165,7 +165,7 @@
   text-align: center;
 }
 .prospecttable__lineitem--milb .prospecttable__linetag {
-  border: var(--bw-hair) solid var(--seal-cover);
+  border: var(--bw-hair) solid var(--border-rule);
   background: var(--bg-page);
   color: var(--text-caption);
 }
@@ -205,7 +205,7 @@
   text-transform: uppercase;
 }
 .prospecttrend__band--low { color: var(--accent-negative); }
-.prospecttrend__band--mid { color: var(--seal-cover); }
+.prospecttrend__band--mid { color: var(--text-caption); }
 .prospecttrend__band--high { color: var(--accent-positive); }
 .prospecttrend__sample {
   white-space: nowrap;

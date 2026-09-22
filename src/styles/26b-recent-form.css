@@ -76,9 +76,10 @@
 
 /* ---- the deviation bar ----
    One row's distance from the season line, diverging off a centred axis: right
-   and kraft amber for better than himself, left and navy for worse — NOT the
+   and medal amber for better than himself, left and navy for worse — NOT the
    positive/negative accent pair, which means good and bad, and neither end of
-   this scale is either. A diverging bar is the honest form here for two reasons
+   this scale is either, and no longer the kraft amber either, which after
+   ADR-0083 means one thing only. A diverging bar is the honest form here for two reasons
    — the quantity is signed, and its zero is real and is printed as its own row
    directly beneath the track, so the axis is never an unlabelled claim. The
    scale is FIXED at ±.300 OPS, never fitted to the player's own worst window,
@@ -119,7 +120,7 @@
 }
 .devbar.is-up .devbar__fill {
   left: 50%;
-  background: var(--seal);
+  background: var(--award-line);
   border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
 }
 .devbar.is-down .devbar__fill {

@@ -356,13 +356,14 @@
   border-radius: var(--radius-pill);
 }
 
-/* The stamp whose options bar is open above the book. Kraft amber rather than
+/* The stamp whose options bar is open above the book. Navy ink rather than
    --focus-ring, because this is a SELECTION that outlives the tap, not focus —
    the two can be on different stamps at once, and they must not look alike.
+   (Kraft until ADR-0083: a selection is not a seal.)
    The ring is drawn in the element's own coordinate space, so it tilts with
    the stamp rather than sitting square against a crooked mark. */
 .passportpage__stamp--selected {
-  outline: var(--bw-rule) solid var(--seal-cover);
+  outline: var(--bw-rule) solid var(--accent-primary);
   outline-offset: 4px;
   border-radius: var(--radius-pill);
 }
@@ -966,7 +967,7 @@
   gap: var(--space-2);
   margin-bottom: var(--space-3);
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--seal-cover);
+  border: var(--bw-hair) solid var(--accent-primary);
   border-radius: var(--radius-sm);
   background: var(--award-soft);
 }
@@ -977,7 +978,7 @@
   font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   line-height: var(--lh-snug);
-  color: var(--seal-cover-ink);
+  color: var(--text-heading);
 }
 
 /* Wraps, because the options bar carries four controls and a phone column is
@@ -1006,7 +1007,7 @@
   background: var(--surface-card);
 }
 
-/* Asking takes the kraft-amber of the bars above the book, because that is the
+/* Asking takes the ink of the bars above the book, because that is the
    same conversation — "confirm it, or leave it" — and stacks, because the cost
    of a re-order is two sentences rather than a label. Still not sticky: this
    one is answered where it stands. */
@@ -1014,7 +1015,7 @@
   flex-direction: column;
   align-items: stretch;
   border-style: solid;
-  border-color: var(--seal-cover);
+  border-color: var(--accent-primary);
   background: var(--award-soft);
 }
 
@@ -1031,7 +1032,7 @@
   margin: 0;
   font-size: var(--fs-caption);
   line-height: var(--lh-snug);
-  color: var(--seal-cover-ink);
+  color: var(--text-heading);
 }
 
 /* Which page a stamp sits on, in the grid below the book — and the way back to

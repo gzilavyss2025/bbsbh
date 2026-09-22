@@ -236,13 +236,14 @@ function HeatBand({ heat }) {
 }
 
 // Drawn rather than an emoji so it takes the card's inks and scales with it.
-// Two paths: a kraft body with a paper core, both readable on the navy footer.
+// Two paths: a highlighter body with a paper core, both readable on the navy
+// footer. Kraft until ADR-0083 — a flame flags a hot pitch, it seals nothing.
 function Flame() {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path
         d="M12 1.5c.6 2.9 2.1 4.6 3.6 6.3C17.4 9.9 19 11.9 19 14.8 19 18.9 15.9 22 12 22s-7-3.1-7-7.2c0-2.2 1-3.9 2.3-5.4C8.9 7.5 10 5.6 10.4 3.4c1 1.6 1.6 3.2 1.8 4.9.5-2.1.3-4.4-.2-6.8z"
-        fill="var(--seal-cover)"
+        fill="var(--marker)"
       />
       <path
         d="M12 13c1.3 1.3 2.4 2.2 2.4 3.7 0 1.4-1.1 2.5-2.4 2.5s-2.4-1.1-2.4-2.5c0-1.3.9-2.2 2.4-3.7z"

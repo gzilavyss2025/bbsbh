@@ -70,11 +70,14 @@ export const PAIRINGS = [
   // The Game Log's stamp sheet prints its panes on a dark album board
   // (48c-stamp-sheet.css) — the one dark surface in the app, so every ink that
   // lands on it is asserted here rather than eyeballed. Both foils carry real
-  // text (a pane's title and count, every stamp's caption). The seal amber is
-  // the completed-set ring, a non-text affordance, held to the 3:1 bar.
+  // text (a pane's title and count, every stamp's caption). The highlighter
+  // yellow is the completed-set ring, a non-text affordance, held to the 3:1
+  // bar. It was the seal amber until ADR-0083 — a finished set is a highlight,
+  // not a cover — which also took the ring from 4.2:1 (--seal-cover on
+  // --album-board) to 8.4:1 (--marker on --album-board).
   { fg: 'album-foil', bg: 'album-board', min: TEXT, note: 'stamp sheet pane title on the album board' },
   { fg: 'album-foil-soft', bg: 'album-board', min: TEXT, note: 'stamp caption on the album board' },
-  { fg: 'seal-cover', bg: 'album-board', min: UI, note: 'completed-set ring on the album board' },
+  { fg: 'marker', bg: 'album-board', min: UI, note: 'completed-set ring on the album board' },
   // Core semantic text roles on their intended surfaces.
   { fg: 'text-body', bg: 'bg-canvas', min: TEXT, note: 'body text on app canvas' },
   { fg: 'text-heading', bg: 'surface-card', min: TEXT, note: 'heading on raised card' },
@@ -90,6 +93,12 @@ export const PAIRINGS = [
   { fg: 'text-on-ink', bg: 'field', min: TEXT, note: 'Dominant Performance pill text' },
   { fg: 'text-on-ink', bg: 'clay', min: TEXT, note: 'Blowout pill text' },
   { fg: 'text-heading', bg: 'marker', min: TEXT, note: 'Close Game pill text' },
+  // --hold-texture (tokens/effects.css) weaves those same two stripes into the
+  // "on hold" status tape — a rehab assignment, a postponed or delayed game, a
+  // season record taped to the page. Its base stripe is --marker, asserted on
+  // the line above; only the hatch stripe is new here. ADR-0083 moved that tape
+  // off the kraft weave, so this pair replaces the seal-ink one that covered it.
+  { fg: 'text-heading', bg: 'marker-deep', min: TEXT, note: 'on-hold tape text on the hatch stripe' },
   { fg: 'text-on-ink', bg: 'allstar-blue', min: TEXT, note: 'Extra Innings pill text' },
   // The crown outranks all four and carries its own medal-amber fill, both on
   // the card pill (.flipback__pill--crown) and on the filter chip that selects

@@ -372,12 +372,14 @@
   color: rgba(255, 255, 255, 0.82);
 }
 
-/* ---- rehab-assignment banner — an actual strip of kraft-amber tape: the same
-   diagonal-hatch weave (--seal-texture) as the spoiler seals and the reveal
-   button, so a player's status reads as tape stuck onto the scorebook page. The
+/* ---- rehab-assignment banner — an actual strip of tape: the same
+   diagonal-hatch weave as the injured-list and All-Star tapes, so a player's
+   status reads as tape stuck onto the scorebook page. The
    "on hold / passing through the minors" counterpart to the clay injured-list
-   tape and the celebratory blue All-Star tape. --seal-ink is tuned to hold AA
-   against both kraft hatch stripes. ---- */
+   tape and the celebratory blue All-Star tape. It wove in kraft until
+   ADR-0083 reserved that colour for a surface a tap can lift; --hold-texture
+   keeps the weave and the family and drops the false promise. --text-heading
+   holds AA against both of its stripes. ---- */
 .rehab-banner {
   display: flex;
   align-items: center;
@@ -386,8 +388,8 @@
   margin: 4px 0 var(--space-3);
   padding: 9px 16px;
   border-radius: var(--radius-md);
-  background: var(--seal-texture);
-  border: var(--bw-hair) solid var(--seal-hatch);
+  background: var(--hold-texture);
+  border: var(--bw-hair) solid var(--border-rule);
   box-shadow: var(--shadow-card);
 }
 .rehab-banner__text {
@@ -396,15 +398,15 @@
   letter-spacing: var(--ls-label);
   font-weight: var(--w-bold);
   font-size: var(--fs-label);
-  color: var(--seal-ink);
+  color: var(--text-heading);
 }
 .rehab-banner__mark {
-  color: var(--seal-ink);
+  color: var(--text-heading);
   font-size: var(--fs-ui);
   line-height: var(--lh-solid);
 }
 
-/* ---- injured-list banner — the clay/seam-red sibling of the amber rehab tape,
+/* ---- injured-list banner — the clay/seam-red sibling of the rehab tape,
    same hatch weave in the app's "alert / negative" color (--il-texture). A
    player can carry both at once (on the IL and out on a rehab stint), so they
    stack. White text holds AA against both clay stripes. ---- */
@@ -435,7 +437,7 @@
 }
 
 /* ---- "last played in 2022" banner — the quietest member of the player-page
-   banner family. Deliberately NOT tape: the amber rehab and clay injured-list
+   banner family. Deliberately NOT tape: the rehab and injured-list
    strips both flag something in progress, and a career that ended four years
    ago is neither urgent nor an alert. So it borrows the slate's neutral
    graphite-to-ink gradient (.offday-banner) — the app's existing "nothing is
@@ -461,12 +463,12 @@
   color: #fff;
 }
 
-/* ---- game-status banner — flat kraft-amber strip flagging a delayed,
+/* ---- game-status banner — flat highlighter strip flagging a delayed,
    suspended, or postponed game, shown under the masthead on every section so
    it stays visible while the user navigates around a paused game. Structural
    metadata, not a score, so it renders unconditionally like the masthead
-   date. Same amber as .gamecard__delay's slate badge; flat fill, not the
-   hatch weave the spoiler covers use. ---- */
+   date. Same flag colour as .gamecard__delay's slate badge; flat fill, not
+   the --hold-texture weave the rehab banner wears. ---- */
 .game-status-banner {
   display: flex;
   align-items: center;
@@ -475,8 +477,8 @@
   margin: 4px 0 var(--space-3);
   padding: 8px 16px;
   border-radius: var(--radius-md);
-  background: var(--seal);
-  border: var(--bw-hair) solid var(--seal-hatch);
+  background: var(--marker);
+  border: var(--bw-hair) solid var(--border-rule);
 }
 .game-status-banner__text {
   font-family: var(--font-display);
@@ -484,7 +486,7 @@
   letter-spacing: var(--ls-label);
   font-weight: var(--w-bold);
   font-size: var(--fs-label);
-  color: var(--seal-ink);
+  color: var(--text-heading);
 }
 .game-status-banner__reason {
   font-weight: var(--w-semibold);
@@ -494,7 +496,7 @@
    for a delay (rain, etc.) during the half being viewed (see
    components/DelayCard, api/select.js selectDelays). Spoiler-free structural
    info: the stoppage, its cause, and how long it lasted — never a score. A cool
-   navy family (a weather interlude), set apart from the amber "on hold" status
+   navy family (a weather interlude), set apart from the highlighter "on hold" status
    tape and the clay out/alert red. "Pops up" on mount. ---- */
 .delaycard {
   display: flex;

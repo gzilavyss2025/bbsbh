@@ -23,7 +23,7 @@
 // deps. If you intentionally retune a color, update the hex until this passes —
 // don't loosen a threshold.
 
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import MLB_TREATMENT_TUNING from '../src/lib/data/mlb-treatment-tuning.json' with { type: 'json' }
 import MILB_TREATMENT_TUNING from '../src/lib/data/milb-treatment-tuning.json' with { type: 'json' }
@@ -113,7 +113,110 @@ for (const [label, store] of [['MLB', MLB_TREATMENT_TUNING], ['MiLB', MILB_TREAT
   }
 }
 
-const allFailures = [...failures, ...headerFailures]
+
+// ---- 3. RATIO CLAIMS WRITTEN IN PROSE ------------------------------------
+// Halves 1 and 2 assert that a pairing clears its THRESHOLD. Neither looks at
+// the ratio numbers this repo writes in its COMMENTS, and those numbers are
+// load-bearing. A token comment saying a pair measures 13.5:1 is the only
+// record a later reader has; nobody re-derives it, they trust it and tune
+// against it. ADR-0083 makes the case for its sibling guard in exactly these
+// terms — a comment that lies about a colour is how the colour drifted in the
+// first place. A comment that lies about a RATIO is the same failure with a
+// number attached, and it is harder to catch because it looks measured. Four
+// wrong ones were found by hand while reviewing that ADR's own PR — and the
+// fourth, --accent-link's "5.14:1 at worst", had been sitting in colors.css
+// since 2026-08-19, cited and trusted, with every threshold check passing.
+//
+// THE FORM: `10.5:1 (--text-heading on --marker)`. Naming the pair is what
+// turns an unverifiable assertion into a checkable one.
+//
+// Two halves, deliberately asymmetric:
+//
+//   A. ANYWHERE that form appears under the scanned roots, the pair is
+//      resolved against the shipped tokens and the number asserted. Opt-in, so
+//      it costs an existing comment nothing until someone chooses precision.
+//   B. Under src/tokens/, the annotation is REQUIRED for a measurement. That
+//      tier is where a number is normative rather than descriptive: it is the
+//      definition every other comment cites. A THRESHOLD is not a measurement
+//      — ">= 4.5:1", "at least 3:1" state a rule, not a reading — so a claim
+//      introduced that way is exempt.
+//
+// Rounding is compared at the precision written: `5.4:1` must round to 5.4,
+// `5.41:1` to 5.41. Write the number you mean.
+
+const ANNOTATED = /(\d+(?:\.\d+)?):1\s*\(\s*(--[\w-]+)\s+on\s+(--[\w-]+)\s*\)/g
+const ANY_RATIO = /(>=|≥|at least\s+)?\s*(\d+(?:\.\d+)?):1/g
+
+// Comment text only, so a declaration can never read as a claim. For JS the
+// `//` split also catches a `https://` inside a string literal; harmless here,
+// since a URL carries no `N:1`.
+function commentText(src, isJs) {
+  const blocks = src.match(/\/\*[\s\S]*?\*\//g) ?? []
+  if (!isJs) return blocks.join('\n')
+  const lineComments = src.split('\n').map((line) => {
+    const i = line.indexOf('//')
+    return i === -1 ? '' : line.slice(i + 2)
+  })
+  return [...blocks, ...lineComments].join('\n')
+}
+
+function claimFiles(dir, ext, out = []) {
+  for (const entry of readdirSync(resolve(dir))) {
+    const full = `${dir}/${entry}`
+    if (statSync(resolve(full)).isDirectory()) claimFiles(full, ext, out)
+    else if (entry.endsWith(ext)) out.push(full)
+  }
+  return out
+}
+
+const claimFailures = []
+const CLAIM_SCAN = [
+  ...claimFiles('src/tokens', '.css'),
+  ...claimFiles('src/styles', '.css'),
+  ...claimFiles('src/lib/design', '.js'),
+]
+
+let claimsChecked = 0
+for (const file of CLAIM_SCAN) {
+  const text = commentText(readFileSync(resolve(file), 'utf8'), file.endsWith('.js'))
+
+  // --- A: every annotated claim must be true ---
+  const annotated = []
+  for (const m of text.matchAll(ANNOTATED)) {
+    annotated.push([m.index, m.index + m[0].length])
+    const [, claim, fg, bg] = m
+    let r
+    try {
+      r = ratio(resolveColor(fg), resolveColor(bg))
+    } catch (err) {
+      claimFailures.push(`${file} — \`${m[0]}\` names a color this check cannot resolve: ${err.message}`)
+      continue
+    }
+    claimsChecked += 1
+    const actual = r.toFixed((claim.split('.')[1] ?? '').length)
+    if (actual !== claim) {
+      claimFailures.push(
+        `${file} — \`${m[0]}\` claims ${claim}:1, but ${fg} on ${bg} measures ` +
+          `${r.toFixed(2)}:1. Write ${actual}:1, or name the pair you actually meant.`,
+      )
+    }
+  }
+
+  // --- B: under src/tokens/, a measurement must name its pair ---
+  if (!file.startsWith('src/tokens/')) continue
+  for (const m of text.matchAll(ANY_RATIO)) {
+    if (m[1]) continue
+    const at = m.index + m[0].indexOf(m[2])
+    if (annotated.some(([a, b]) => at >= a && at < b)) continue
+    claimFailures.push(
+      `${file} — \`${m[2]}:1\` is a measured ratio with no pair named. Write it as ` +
+        `\`${m[2]}:1 (--fg on --bg)\` so this guard can check it, or write ">=" if ` +
+        'it is a threshold rather than a reading.',
+    )
+  }
+}
+
+const allFailures = [...failures, ...headerFailures, ...claimFailures]
 console.log(
   allFailures.length
     ? '\n✗ CONTRAST invariant violated:\n'
@@ -124,8 +227,23 @@ for (const row of headerRows) console.log(row)
 if (!headerFailures.length) {
   console.log(`  ✓ ${headerCount} club header triads — every onBar clears ${TEXT}:1 against its bar.`)
 }
+if (claimFailures.length) {
+  console.log('')
+  for (const row of claimFailures) console.log(`  ✗ ${row}`)
+} else {
+  console.log(`  ✓ ${claimsChecked} ratio claims written in comments — every one matches its pair.`)
+}
 if (allFailures.length) {
-  console.error('\nRetune the offending color until it clears the threshold — do not lower the threshold.')
+  if (failures.length || headerFailures.length) {
+    console.error('\nRetune the offending color until it clears the threshold — do not lower the threshold.')
+  }
+  if (claimFailures.length) {
+    console.error(
+      '\nA ratio written in a comment is the only record a later reader has of what a pair\n' +
+        'measures, and it is trusted and tuned against. Correct the NUMBER — do not delete\n' +
+        'the claim to silence this.',
+    )
+  }
   if (headerFailures.length) {
     console.error(
       'A club header triad lives in src/lib/data/{mlb,milb}-treatment-tuning.json — pick a readable\n' +

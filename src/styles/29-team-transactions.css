@@ -391,9 +391,9 @@
   cursor: pointer;
 }
 .last10__nav:hover:not(:disabled) {
-  background: var(--seal);
-  border-color: var(--seal);
-  color: var(--text-on-seal);
+  background: var(--accent-link);
+  border-color: var(--accent-link);
+  color: var(--text-on-ink);
 }
 .last10__nav:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -657,9 +657,9 @@
   cursor: pointer;
 }
 .teamphotos__nav:hover:not(:disabled) {
-  background: var(--seal);
-  border-color: var(--seal);
-  color: var(--text-on-seal);
+  background: var(--accent-link);
+  border-color: var(--accent-link);
+  color: var(--text-on-ink);
 }
 .teamphotos__nav:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -713,7 +713,7 @@
   display: block;
 }
 .teamphotos__thumb:hover {
-  border-color: var(--seal);
+  border-color: var(--accent-link);
 }
 .teamphotos__thumb:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -752,10 +752,10 @@
   border: var(--bw-hair) solid var(--border-hairline);
 }
 /* The series the page was opened from (asOf, or today on a bare visit) gets
-   a kraft-tape ring so it reads as "you are here" among a season's worth of
+   an ink ring so it reads as "you are here" among a season's worth of
    otherwise-identical blocks. */
 .sstrip__series--current {
-  border-color: var(--seal);
+  border-color: var(--accent-primary);
   border-width: 2px;
 }
 .sstrip__opp {
@@ -813,13 +813,13 @@
 }
 /* The All-Star Game card — a real, clickable game (see fetchAllStarGame) so
    it's a <button> rather than the .sstrip__series div wrapper the opponent
-   blocks use; kraft-tape tinted to read as a break in the season rather than
-   just another series. */
+   blocks use; tinted in its own All-Star blue to read as a break in the
+   season rather than just another series. */
 .sstrip__series--allstar {
   font: inherit;
   cursor: pointer;
-  background: color-mix(in srgb, var(--seal) 14%, var(--bg-page));
-  border-color: var(--seal);
+  background: color-mix(in srgb, var(--allstar-blue) 12%, var(--bg-page));
+  border-color: var(--allstar-blue);
 }
 .sstrip__series--allstar .sstrip__opp {
   gap: 1px;

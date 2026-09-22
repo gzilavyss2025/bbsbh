@@ -33,7 +33,7 @@
   width: var(--space-1);
   height: var(--space-1);
   border-radius: var(--radius-pill);
-  background: var(--seal-cover);
+  background: var(--graphite-soft);
 }
 
 .pregameboard__board::before {

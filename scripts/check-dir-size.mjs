@@ -759,7 +759,12 @@ const BUDGETS = {
   // split open. Flat like every other check-*.mjs: `npm run lint` runs this
   // directory as a flat chain of guards, and a lone subdirectory for one of
   // them would hide it from the list a reader scans to see what is enforced.
-  scripts: 118,
+  // +1 for check-seal-scope.mjs, the same #1128 programme one slice along: the
+  // allowlist that keeps the kraft seal colour on surfaces where a reveal is
+  // possible (ADR-0083), after the sweep took it off 234 declarations. Flat for
+  // exactly the reason above, and ONE file rather than two — scripts/lib/ is at
+  // its own budget, and the guard has no pure half worth splitting out anyway.
+  scripts: 119,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

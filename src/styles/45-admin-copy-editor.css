@@ -33,8 +33,8 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--seal-cover-ink);
-  background: var(--seal-cover);
+  color: var(--text-on-ink);
+  background: var(--accent-primary);
   border: none;
   border-radius: var(--radius-sm);
   padding: var(--space-2) var(--space-4);
@@ -249,8 +249,8 @@
   border: var(--bw-hair) solid var(--border-rule);
 }
 .admincopy__previewBtn--confirm {
-  color: var(--seal-cover-ink);
-  background: var(--seal-cover);
+  color: var(--text-on-ink);
+  background: var(--accent-primary);
 }
 @media (min-width: 720px) {
   .admincopy__groupGrid {

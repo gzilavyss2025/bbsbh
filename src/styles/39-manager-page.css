@@ -533,18 +533,20 @@
 
 /* ---------------------------------------------------- postseason odds pill
    The Standings section's "Postseason Odds" trigger (SectionTitle's action
-   slot) — same interactive-pill contract as .attendance__glyph--open (kraft
-   seal fill, seal-ink text, pill radius) rather than a plain text link, since
-   the ask was specifically a pill. Opens PostseasonOddsModal. */
+   slot) — same interactive-pill contract as .attendance__glyph--open (ink
+   fill, inverse text, pill radius) rather than a plain text link, since
+   the ask was specifically a pill. Both wore kraft until ADR-0083, which
+   named this pill as one of the four wearing it wrongly. Opens
+   PostseasonOddsModal. */
 .psodds-pill {
   flex: none;
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
-  border: var(--bw-hair) solid var(--seal);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
-  background: var(--seal);
-  color: var(--seal-ink);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);

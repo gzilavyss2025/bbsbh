@@ -150,7 +150,7 @@ export const CARDS = [
     consumers: 1,
     group: 'bespoke',
     verdict: 'Stays bespoke',
-    note: '1.5px solid var(--seal) on --surface-inset. That is the kraft-tape vocabulary, not the paper-sheet one. The seal means something here; folding it into a card variant turns a metaphor into a border width.',
+    note: '1.5px solid var(--award-line) on --surface-inset. A championship is a medal, so it keeps a medal-amber edge rather than the paper-sheet one. It read var(--seal) until ADR-0083 — a World Series card is not a cover.',
   },
 
   {
@@ -325,7 +325,7 @@ export const PILLS = [
     consumers: 1,
     group: 'tone',
     verdict: 'Merge — tone seal',
-    fill: '--seal-cover / --seal-cover-ink / --seal-deep',
+    fill: '--seal-cover / --seal-cover-ink / --seal-deep — one of the 21 partials ADR-0083 leaves on kraft, because the due-up pill IS a reveal surface',
   },
   {
     cls: 'mastheadpill',
@@ -333,15 +333,15 @@ export const PILLS = [
     consumers: 4,
     group: 'interactive',
     verdict: 'Merge — outline + interactive',
-    fill: '--surface-card / --text-body / --seal, padding 3px 9px, cursor',
+    fill: '--surface-card / --text-body / --border-rule, padding 3px 9px, cursor; pressed is --marker on a --text-heading edge (ADR-0083)',
   },
   {
     cls: 'psodds-pill',
     partial: '39-manager-page.css',
     consumers: 2,
     group: 'interactive',
-    verdict: 'Merge — seal-filled + interactive',
-    fill: '--seal / --seal-ink / --seal, padding 4px 10px, cursor',
+    verdict: 'Merge — ink-filled + interactive',
+    fill: '--accent-primary / --text-on-ink / --border-rule, padding 4px 10px, cursor (was seal-filled until ADR-0083)',
   },
   {
     cls: 'tierpill',

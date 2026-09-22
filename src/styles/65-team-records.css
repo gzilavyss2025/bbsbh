@@ -37,8 +37,8 @@
   cursor: pointer;
 }
 .trec__half.is-on {
-  background: var(--seal-soft, var(--paper-2));
-  border-color: var(--seal);
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  border-color: var(--accent-primary);
   color: var(--text-heading);
   font-weight: var(--w-bold);
 }
@@ -55,7 +55,7 @@
 .trec__grouphead {
   margin: 0 0 var(--space-1);
   padding-top: var(--space-2);
-  border-top: var(--bw-hair) solid var(--seal);
+  border-top: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);

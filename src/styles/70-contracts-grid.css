@@ -8,7 +8,9 @@
 
    Dressed as a broadcast graphics package on paper: the navy slab
    with its kraft-gold underline is .metricbar's own treatment
-   (SectionMasthead), the same move tokens/colors.css's --heat-slab
+   (SectionMasthead) — the one band ADR-0083 left on kraft, because on a
+   club page that underline is the club's accent and kraft is only its
+   unthemed fallback. The same move tokens/colors.css's --heat-slab
    block makes for the player page's Pitches card — "an INK slab,
    not paper", for the one card whose numbers are the reason the
    reader came.
@@ -31,7 +33,7 @@
 .ctr__tile {
   padding: 10px 12px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-top: 3px solid var(--seal);
+  border-top: 3px solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
@@ -107,7 +109,7 @@
 .cliff__bar {
   width: 100%;
   min-height: 2px;
-  background: var(--seal);
+  background: color-mix(in srgb, var(--marker) 35%, var(--paper-2));
   border-top: var(--bw-heavy) solid var(--marker);
 }
 .cliff__year {
@@ -343,7 +345,7 @@
 .ctr__foot th,
 .ctr__foot td {
   padding: 10px;
-  border-top: var(--bw-heavy) solid var(--seal);
+  border-top: var(--bw-heavy) solid var(--border-rule);
   background: var(--ink-0);
   color: var(--text-on-ink);
 }

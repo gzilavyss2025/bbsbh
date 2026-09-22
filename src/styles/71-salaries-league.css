@@ -27,7 +27,7 @@
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
-  color: var(--seal);
+  color: var(--text-caption);
 }
 
 /* The position filter sits UNDER the masthead rather than in it: the club rail
@@ -94,7 +94,7 @@
   color: var(--rule);
 }
 .payboard__row--lead .payboard__rank {
-  color: var(--seal);
+  color: var(--text-heading);
 }
 .payboard__body {
   flex: 1;
@@ -174,7 +174,7 @@
   display: block;
   height: 100%;
   background: var(--club, var(--navy));
-  border-right: 3px solid var(--club-2, var(--seal));
+  border-right: 3px solid var(--club-2, var(--accent-primary));
 }
 
 /* --------------------------------------------------------- club payrolls */
@@ -296,7 +296,7 @@
   align-items: center;
   gap: 0;
   padding: 4px var(--space-3);
-  border: var(--bw-heavy) solid var(--seal);
+  border: var(--bw-heavy) solid var(--accent-primary);
   background: var(--ink-0);
   box-shadow: var(--shadow-raised);
 }
@@ -364,7 +364,7 @@
   display: block;
   height: 100%;
   background: var(--navy);
-  border-right: 3px solid var(--seal);
+  border-right: 3px solid var(--accent-primary);
 }
 .posspend__value {
   flex: none;

@@ -135,7 +135,7 @@
 }
 
 .logbook__mode {
-  color: var(--seal-cover-ink);
+  color: var(--text-heading);
   background: var(--award-soft);
   border-radius: var(--radius-pill);
   padding: 0 var(--space-2);

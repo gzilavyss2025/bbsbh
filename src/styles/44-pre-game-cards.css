@@ -153,9 +153,9 @@
   cursor: pointer;
 }
 .seasonseries__nav:hover {
-  background: var(--seal);
-  border-color: var(--seal);
-  color: var(--text-on-seal);
+  background: var(--accent-link);
+  border-color: var(--accent-link);
+  color: var(--text-on-ink);
 }
 .seasonseries__nav:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -203,7 +203,7 @@
   cursor: pointer;
 }
 .seasonseries__cell:hover {
-  background: color-mix(in srgb, var(--seal) 12%, transparent);
+  background: color-mix(in srgb, var(--accent-link) 10%, transparent);
 }
 .seasonseries__cell:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -217,13 +217,13 @@
   background: color-mix(in srgb, var(--navy) 13%, var(--surface-card));
 }
 /* A cell whose game was hosted at the OTHER team's park than the current
-   game — a light kraft/cream tint, distinct enough to separate a series'
+   game — the inset paper, distinct enough to separate a series'
    legs at a glance without competing with the current-game navy highlight. */
 .seasonseries__cell--otherpark {
-  background: color-mix(in srgb, var(--seal) 7%, var(--surface-card));
+  background: var(--surface-inset);
 }
 .seasonseries__cell--otherpark:hover {
-  background: color-mix(in srgb, var(--seal) 16%, var(--surface-card));
+  background: color-mix(in srgb, var(--accent-link) 10%, var(--surface-inset));
 }
 .seasonseries__logo {
   flex-shrink: 0;
@@ -305,7 +305,7 @@
   cursor: pointer;
 }
 .photostrip__viewall:hover {
-  color: var(--seal);
+  color: var(--accent-link);
 }
 .photostrip__viewall:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -333,9 +333,9 @@
   cursor: pointer;
 }
 .photostrip__nav:hover {
-  background: var(--seal);
-  border-color: var(--seal);
-  color: var(--text-on-seal);
+  background: var(--accent-link);
+  border-color: var(--accent-link);
+  color: var(--text-on-ink);
 }
 .photostrip__nav:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -383,7 +383,7 @@
   display: block;
 }
 .photostrip__thumb:hover {
-  border-color: var(--seal);
+  border-color: var(--accent-link);
 }
 .photostrip__thumb:focus-visible {
   outline: 2px solid var(--focus-ring);

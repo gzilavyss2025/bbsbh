@@ -83,14 +83,14 @@
   display: none;
 }
 
-/* Kraft into clay — a short seam under the title, the same two inks the seals
-   and the outs are drawn in. */
+/* Ink into clay — a short seam under the title, the same two inks the
+   headings and the outs are drawn in. */
 .hitchart__rule {
   width: 42px;
   height: 3px;
   margin-top: 7px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, var(--seal-cover), var(--accent-negative));
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-negative));
 }
 
 .hitchart__tag {
@@ -161,14 +161,14 @@
   color: var(--text-on-ink);
 }
 
-.hitchart__chip--on-seal {
-  background: var(--seal-cover);
-  border-color: var(--seal-hatch);
-  color: var(--seal-cover-ink);
+.hitchart__chip--on-marker {
+  background: var(--marker);
+  border-color: color-mix(in srgb, var(--marker) 70%, var(--text-heading));
+  color: var(--text-heading);
 }
 
-/* Held just off full strength: on the kraft chip this figure sits on --seal,
-   where --seal-ink is already at the contrast guard's floor. */
+/* Held just off full strength: on the highlighter chip this figure sits on
+   --marker, where --text-heading has room to spare (10.5:1). */
 .hitchart__count {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
@@ -201,7 +201,7 @@
 }
 
 .hitchart__chip--on-ink .hitchart__switch::before,
-.hitchart__chip--on-seal .hitchart__switch::before {
+.hitchart__chip--on-marker .hitchart__switch::before {
   transform: translateX(8px);
 }
 

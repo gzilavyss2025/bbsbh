@@ -60,7 +60,7 @@
    tabular figure, tinted rank ordinal) rather than a padded card, so 9–13
    rows read as a compact box-score block, not a wall of boxes. Two columns
    on phone width, collapsing to one on the narrowest viewports. The whole
-   block sits on one soft-cream card with a kraft-tape border, rather than
+   block sits on one soft-cream card with a ruled border, rather than
    each row floating over the page's own graph-paper background — the grid
    lines behind an unbounded ledger made the rows hard to read at a glance. */
 .tstats-card {
@@ -71,8 +71,8 @@
   overflow: hidden;
 }
 /* The masthead bolted onto the card's own top border — same title/note
-   layout as .thub-card__head, just kraft-bordered like the rest of this
-   card instead of the plain hairline the shared shell uses. */
+   layout as .thub-card__head, on the same hairline the shared shell uses —
+   kraft-bordered until ADR-0083. */
 .tstats-card__head {
   display: flex;
   align-items: baseline;
@@ -86,7 +86,7 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-  border-bottom: var(--bw-hair) solid var(--seal);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 .tstats-card__head em {
   font-style: normal;
@@ -599,12 +599,13 @@
 .thub-namewrap .ilmark {
   font-size: var(--fs-compact);
 }
-/* Kraft-tape amber, deliberately NOT the clay red the IL cross (.ilmark) uses:
+/* All-Star blue, deliberately NOT the clay red the IL cross (.ilmark) uses:
    an All-Star who's also hurt would otherwise show a red star and a red cross
-   side by side in the same hue, reading as one smeared mark. Amber keeps the
-   honor distinct from the injury flag (and matches the gold-star convention). */
+   side by side in the same hue, reading as one smeared mark. The mark wore
+   kraft until ADR-0083; the app's own All-Star blue keeps the honor distinct
+   from the injury flag and claims nothing about a seal. */
 .thub-allstar {
-  color: var(--seal);
+  color: var(--allstar-blue);
   margin-left: 4px;
   font-size: var(--fs-compact);
 }
@@ -675,7 +676,7 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-  border-bottom: var(--bw-hair) solid var(--seal);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 .roster-super__head em {
   font-style: normal;
@@ -719,7 +720,7 @@
    .chevron-link so it reads as part of the same header row. */
 .roster-super__toggle {
   display: flex;
-  border: var(--bw-hair) solid var(--seal);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
@@ -736,11 +737,11 @@
   color: var(--text-caption);
 }
 .roster-super__toggle-btn + .roster-super__toggle-btn {
-  border-left: var(--bw-hair) solid var(--seal);
+  border-left: var(--bw-hair) solid var(--border-rule);
 }
 .roster-super__toggle-btn.is-active {
-  background: var(--seal);
-  color: var(--seal-ink);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
 }
 
 .roster-sub__title {
