@@ -84,19 +84,19 @@ with an `--inline` and a `--block` layout, written by `components/ui/control/Doo
 
 | current class | clause(s) broken | target name | collapse issue | files that must move | hold + reason |
 | --- | --- | --- | --- | --- | --- |
-| `.accountbtn` | 1 | `.account__btn` | #1130 | `components/account/AccountButton.jsx`, `styles/03-slate-header.css`, `styles/04-site-bar.css`, `e2e/slate-header.spec.js` | — |
-| `.backbtn` | 1 | `.player__back` | #1130 | `components/chrome/BackBtn.jsx`, `styles/26-player-page.css` | — |
-| `.logbook-btn` | 1 | `.sitebar__logbook` | #1130 | `components/chrome/LogbookButton.jsx`, `styles/04-site-bar.css` | — |
-| `.notesbtn` | 1 | `.innings__notes` | #1130 | `screens/team/TeamHubShell.jsx`, `screens/TeamInfo.jsx`, `styles/11-innings.css` | — |
-| `.refreshbtn` | 1 | `.innings__refresh` | #1130 | `screens/TeamInfo.jsx`, `styles/11-innings.css`, `styles/21-box-score.css`, `styles/25-wide-layout.css` | — |
-| `.sitemenu-btn` | 1 | `.sitebar__menu` | #1130 | `components/chrome/SiteMenu.jsx`, `styles/03-slate-header.css` †, `styles/04-site-bar.css`, `e2e/slate-header.spec.js` | — |
-| `.sitesearch-btn` | 1 | `.sitebar__search` | #1130 | `components/chrome/SiteSearch.jsx`, `styles/03-slate-header.css` †, `styles/04-site-bar.css`, `e2e/site-search.spec.js`, `e2e/slate-header.spec.js` | — |
-| `.watchbtn` | 1 | `.masthead__watch` | #1130 | `components/game/GamePhotosStrip.jsx` †, `screens/GameView.jsx`, `styles/05-masthead-nav.css`, `styles/44-pre-game-cards.css` † | — |
+| `.accountbtn` | 1 | `.account__btn` | #1130 | `components/account/AccountButton.jsx`, `styles/03-slate-header.css`, `styles/04-site-bar.css`, `e2e/slate-header.spec.js` | classified: renamed, keeps its `margin-left`; its sign-in wears `btn btn--ghost` (see the classification below). |
+| `.backbtn` | 1 | `.player__back` | #1130 | `components/chrome/BackBtn.jsx`, `styles/26-player-page.css` | classified: renamed, ghost · control, keeps the margins that seat it. |
+| `.logbook-btn` | 1 | `.sitebar__logbook` | #1130 | `components/chrome/LogbookButton.jsx`, `styles/04-site-bar.css` | classified: renamed, ghost · tap, keeps its square and the labelled inline padding. |
+| `.notesbtn` | 1 | `.innings__notes` | #1130 | `screens/team/TeamHubShell.jsx`, `screens/TeamInfo.jsx`, `styles/11-innings.css` | classified: renamed, outline · control. |
+| `.refreshbtn` | 1 | `.innings__refresh` | #1130 | `screens/TeamInfo.jsx`, `styles/11-innings.css`, `styles/21-box-score.css`, `styles/25-wide-layout.css` | classified: renamed, outline · control, with its `--float` modifier. |
+| `.sitemenu-btn` | 1 | `.sitebar__menu` | #1130 | `components/chrome/SiteMenu.jsx`, `styles/03-slate-header.css` †, `styles/04-site-bar.css`, `e2e/slate-header.spec.js` | classified: renamed, ghost · tap, keeps its square. |
+| `.sitesearch-btn` | 1 | `.sitebar__search` | #1130 | `components/chrome/SiteSearch.jsx`, `styles/03-slate-header.css` †, `styles/04-site-bar.css`, `e2e/site-search.spec.js`, `e2e/slate-header.spec.js` | classified: renamed, ghost · tap, keeps its square. |
+| `.watchbtn` | 1 | `.masthead__watch` | #1130 | `components/game/GamePhotosStrip.jsx` †, `screens/GameView.jsx`, `styles/05-masthead-nav.css`, `styles/44-pre-game-cards.css` † | classified: renamed, ink · control. |
 | `.boxlines-door` | 1 | `.boxlines__door` | #1130 | `components/boxlines/BoxLinesDoor.jsx`, `styles/10-lineup.css` †, `styles/boxlines/boxlines.css`, `styles/boxlines/listdoor.css` † | landed in #1130. The name is BUILT BY INTERPOLATION (`BoxLinesDoor.jsx:41`), with a modifier this row did not list until the rename found it: `.boxlines-door--face` → `.boxlines__door--face`, a hook that has no rule of its own. Its `__label` did NOT follow the block — the words at the far end of that row are the text door's, so they are the shared `.door__label` now. |
 | `.thub-door` | 1 | `.thub__door` | #1130 | `src/CLAUDE.md`, `components/inning/focus/ReferencePanel.jsx`, `components/player/PlayerHighlightsRail.jsx`, `components/player/PlayerPhotosRail.jsx`, `screens/PlayerPage.jsx`, `screens/team/GamesTab.jsx`, `screens/team/modules/TeamChallengeCard.jsx`, `screens/team/modules/TeamRunValueCard.jsx`, `screens/TeamInfo.jsx`, `screens/TeamPage.jsx`, `styles/10-lineup.css`, `styles/46-consent-modal.css` | landed in #1130. It is the WRAPPER that right-aligns a text door under a preview card, never the control — `ui/control/Door.jsx` is the control, and `.thub__door` goes on owning only where it sits. |
 | `.xldoor` | 1 | `.xl__door` | #1130 | `components/game/ExpressLaneDoor.jsx`, `styles/77b-express-lane-door.css` | landed in #1130, with the names under it this row did not list: `.xldoor__go` → `.xl__go` (the chevron is an element of `.xl`, not of the door) and five `--xldoor-*` custom properties → `--xl-door-*`. Keeps its whole film-strip dress and wears `.door` for the pointer and the focus ring only. |
 | `.btn--reveal` | — (collapse risk) | hold | #1130 | 15 files — none move | HOLD — #1130 folds every `.btn--*` skin into a `skin` prop; this one may not go. The kraft hatch is the seal metaphor doing its job and this is the spoiler rule's one control. `scripts/check-seal-scope.mjs` allowlists it by name (ADR-0083). |
-| `.allstarlegacy__more` | 3 | `.allstarlegacy__door` | #1130 | `screens/AllStarLegacyPage.jsx`, `styles/42-first-scorebook.css` | landed in #1130, RENAMED and not absorbed: this and `.allstarrosters__door` draw an outlined capsule in `--accent-primary`, which is a button's dress and not a door's. The audit found the pair one declaration apart — this one carried no `cursor: pointer` — and that is fixed here. Whether a door may wear a button skin is #1130's Button half to settle. |
+| `.allstarlegacy__more` | 3 | `.allstarlegacy__door` | #1130 | `screens/AllStarLegacyPage.jsx`, `styles/42-first-scorebook.css` | landed in #1130, RENAMED and not absorbed: this and `.allstarrosters__door` draw an outlined capsule in `--accent-primary`, which is a button's dress and not a door's. The audit found the pair one declaration apart — this one carried no `cursor: pointer` — and that is fixed here. Whether a door may wear a button skin is #1130's Button half to settle — it settled NO, see the classification below; this door moves onto `.door--block`. |
 | `.allstarrosters__more` | 3 | `.allstarrosters__door` | #1130 | `screens/AllStarRostersPage.jsx`, `styles/37-all-star-rosters.css` | landed in #1130, renamed and not absorbed — see the `.allstarlegacy__more` row for the pair. |
 | `.bs__noteMore` | 3 | `.door--block` | #1130 | `screens/BoxScore.jsx`, `styles/21-box-score.css` | ADDED in #1130 and landed there. The census missed it because it spells the reject-list word `__noteMore`, not `__more`. It was the FIFTH declaration-identical copy of the block door, and the one three of the other four name in their own comments as the shape they were copying — so leaving it behind would have left the next reader a copy to copy. Absorbed whole: no per-site rule remains. |
 | `.cmdrecv__more` | 3 | `.cmdrecv__door` | #1130 | `components/playerstats/CommandReceivedCard.jsx`, `styles/26g-command-received.css` | landed in #1130. One declaration (a top margin) over `.plink`, so it is a rename and not an absorb. |
@@ -108,8 +108,69 @@ with an `--inline` and a `--block` layout, written by `components/ui/control/Doo
 | `.teammates__more` | 3 | `.door--block` | #1130 | `screens/TeamInfo.jsx`, `styles/10-lineup.css`, `styles/20-charts.css` †, `styles/21-box-score.css` †, `styles/29-team-transactions.css` † | landed in #1130, absorbed — one of the three the issue measured as declaration-identical, and the one the other four cite in their comments. |
 | `.txcard__more` | 3 | `.txrow__door` | #1130 | `components/transactions/TeamTransactionsCard.jsx`, `styles/29-team-transactions.css`, `styles/72-club-transactions.css` † | moves with its block — see the `.txcard` row. The ELEMENT half landed in #1130 on today's prefix, as `.txcard__door`; the block half rides with #1113. Absorbed onto `.door--block` apart from three placement declarations it keeps as a flex item in a scroll deck; its dashed edge went solid, which #1132 reserves for the pencil meaning. |
 | `.txpage__more` | 3 | `.txpage__door` | #1130 | `screens/team/TeamTransactionsPage.jsx`, `styles/72-club-transactions.css` | landed in #1130, absorbed onto `.door--block` apart from the margin that lays it across a page rather than at the foot of a card. Its dashed edge went solid, which #1132 reserves for the pencil meaning. |
-| `.sitefooter__action` | 3, 5 | `.sitefooter__btn` | #1130 | `components/chrome/SiteFooter.jsx`, `styles/08-site-shell.css`, `styles/08a-site-menu.css` † | clause 3 reserves `__action` for the head's action slot; this is a standalone 44px control in the footer, not a head part. |
+| `.sitefooter__action` | 3, 5 | `.sitefooter__btn` | #1130 | `components/chrome/SiteFooter.jsx`, `styles/08-site-shell.css`, `styles/08a-site-menu.css` † | clause 3 reserves `__action` for the head's action slot; this is a standalone 44px control in the footer, not a head part. Classified: renamed, outline · tap, keeps `min-width: 0`. |
 | `.cta__go` | 5 | hold | #1130 | 1 file — none move | HOLD — `/learn` is server-rendered by `api/page.js` from `src/copy/landing/`, and its CSS is `public/learn.css`, outside `src/styles/`. The guide keeps its own copy of the palette; a rename here moves a file no collapse PR touches. |
+
+### The Button half — classification
+
+Written and committed BEFORE any control moved, so the sweep is reviewable
+against a decision (the ADR-0083 precedent). The rule every control moves onto
+is `.btn` in `src/styles/system/button.css`, written by
+`components/ui/control/Button.jsx`. The ledger rows above that this half
+touches say which bin they are in; this table also covers the in-scope
+controls whose names are already legal, so they are not rows.
+
+Three bins. **Absorbed**: the per-site rule was only dress, so none is left.
+**Renamed, keeps placement**: the class stays (or takes its ledger target) and
+keeps only what places it — margin, flex, alignment, width, or the one
+padding a flex cell's width forces. **Held**: moves nothing, with the reason.
+
+"Before the slot" means the old rule sat in 01–06b, which loads BEFORE
+`system/button.css`, so any declaration it keeps that `.btn` also sets must be
+written at two-class specificity or it silently loses.
+
+| control | bin | skin · size | kept | old rule vs the slot |
+| --- | --- | --- | --- | --- |
+| `.btn--chip` | absorbed | outline · control | — | after (48) |
+| `.btn--account` | absorbed | ink · tap | — (width moves to `.introsheet__primary`, already there) | after (08) |
+| `.erasesheet__btn`, `--danger` | renamed, keeps placement | outline / danger · tap | `flex: 1 1 auto` | after (55) |
+| `.btn--next` | renamed, keeps placement | ink · tap (callers add `btn--ink`) | `width`, `margin-top` | the slot's own file (07) |
+| `.btn--seal` on the four Game Log confirms that are not the mint | re-skinned to ink | ink · tap | — | — |
+| `.refreshbtn` | renamed → `.innings__refresh` | outline · control, icon, busy | — (its host rules keep `display` per width) | after (11) |
+| `.refreshbtn--float` | renamed → `.innings__refresh--float` | — | `pointer-events`, and in focus mode its position, z-index, flex and square min-width | after (24, focus/) |
+| `.notesbtn` | renamed → `.innings__notes` | outline · control, icon | `flex: none` | after (11) |
+| `.watchbtn` | renamed → `.masthead__watch` | ink · control, icon | — (`__logo` → `.masthead__watchlogo`) | BEFORE (05) |
+| `.stepnav__btn` | renamed, keeps placement | outline · control, `aria-current` | `flex: 1 1 0`, `padding-inline` | BEFORE (05) |
+| `.posinn__scopebtn` | renamed, keeps placement | outline · control, `pressed` | `flex: 1 1 0`, `padding-inline` | after (27) |
+| `.umpage__filterbtn` | renamed, keeps placement | outline · control, `pressed` | `flex: 1` | after (38) |
+| `.sc-zoom__btn` | renamed, keeps placement | outline · control | square: `width`, `padding: 0` | after (scorecard/) |
+| `.sitefooter__action` | renamed → `.sitefooter__btn` | outline · tap | `min-width: 0` (a grid item) | after (08) |
+| `.sitesearch-btn`, `.sitemenu-btn`, `.logbook-btn` | renamed → `.sitebar__search`, `__menu`, `__logbook` | ghost · tap | square: `min-width`, `padding: 0`; the labelled Game Log its inline padding | BEFORE (04) |
+| `.accountbtn` | renamed → `.account__btn` | the wrapper; its sign-in is ghost · tap | `margin-left` | BEFORE (04) |
+| `.backbtn` | renamed → `.player__back` | ghost · control | the margins that seat it on the page edge | after (26) |
+| `.allstarlegacy__door`, `.allstarrosters__door` | re-homed onto `.door--block` | — (a door, not a button) | the top margin | after (37, 42) |
+| `.mytally__rowbtn` | **held** | — | everything | — |
+| `.btn--reveal` | **held** | — | everything | — |
+| `.teamtabs__btn` | **held** — moves with #1131 | — | everything | — |
+| `.cta__go` | **held** | — | everything | — |
+
+**May a door wear a button skin? No.** The skin is how a reader knows what a
+tap will do: a ruled ink box acts on the page, a door opens more of what you
+are reading. The two All-Star "load more" controls grow their list in place,
+which is exactly `.door--block`'s job, so they move onto it rather than
+onto a button — and their accent-primary capsule, a button's dress on a door,
+goes with it.
+
+**Why `.mytally__rowbtn` is held.** It is an action ROW, not a button: a
+caps title over a sentence of body type, left-aligned, 66px tall because the
+sentence is. The button's anatomy is one centred label. Forcing the row into
+it breaks either the anatomy or the row; the list-row shape is #1132's.
+
+**Why four Game Log confirms leave the seal.** "Move it", "Stamp it here",
+"Start this book" and "Re-place them" place or arrange a stamp that already
+exists. None lifts a seal and none mints, so under ADR-0083 they may not wear
+kraft. They take ink — the skin 07's own comment already named for "the
+follow-on step (putting the stamp in the book)".
 
 ## Pill — #1131 — 33 rows
 
