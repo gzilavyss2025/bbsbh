@@ -64,8 +64,9 @@
    control takes its width from the tap height, not from padding — and the
    labelled Game Log keeps a tighter side padding than a page button, so the
    glyph and the word read as one lockup, and no block padding, so the row's
-   own height (44px, or the slate's 30px) is the height it draws at. THE PADDING IS WRITTEN AT .btn's OWN
-   SPECIFICITY PLUS ONE, because this file loads before system/button.css and
+   own height (44px, or the slate's 30px) is the height it draws at. THE
+   PADDING IS WRITTEN AT .btn's OWN SPECIFICITY PLUS ONE, because this file
+   loads before system/button.css and
    a bare class would lose it to the base rule on order. min-width stays a
    single class on purpose: the slate's 30px row (.topbar--slate
    .topbar__search in 03) has to keep beating it. */
