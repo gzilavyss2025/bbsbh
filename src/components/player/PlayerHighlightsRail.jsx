@@ -3,7 +3,7 @@ import { fetchTeamHighlights, flattenPositiveClips } from '../../api/gamehighlig
 import { useAsync } from '../../hooks/useAsync.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { HighlightClipCard } from '../highlights/HighlightClipCard.jsx'
-import { Door } from '../ui/Door.jsx'
+import { Door } from '../ui/control/Door.jsx'
 
 // A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
 // copy of this helper for why `scroll-behavior: smooth` has to be bypassed.

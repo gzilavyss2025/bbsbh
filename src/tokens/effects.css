@@ -29,6 +29,15 @@
   /* Focus ring */
   --ring: 0 0 0 3px rgba(47,110,79,0.35);
 
+  /* A control that cannot be used right now (#1130). One value for every
+     disabled button, where there were four (.4, .55, .6 and a repaint): the
+     skin stays, so the reader still sees WHICH control it is, and only its
+     strength drops. It is an opacity rather than a second set of colours
+     because the innings bar dims its buttons mid page-turn, the kraft reveal
+     among them, and a repaint would strip the seal off the one control that
+     must never change its dress. */
+  --opacity-disabled: 0.45;
+
   /* Motion */
   --ease-standard: cubic-bezier(0.2, 0.0, 0.0, 1.0);
   --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);

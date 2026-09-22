@@ -9,7 +9,7 @@ import { useNav } from '../../../lib/nav.js'
 import { absChallengesPath } from '../../../lib/route.js'
 import { ScatterChart } from '../../../components/around-the-game/BroadcastBar.jsx'
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
-import { Door } from '../../../components/ui/Door.jsx'
+import { Door } from '../../../components/ui/control/Door.jsx'
 
 // THE TEAM HUB'S CHALLENGE CARD, on the Numbers tab — who on this club argues
 // with the plate umpire, against how much baseball they see.

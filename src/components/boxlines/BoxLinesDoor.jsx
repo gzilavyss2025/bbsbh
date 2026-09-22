@@ -4,7 +4,7 @@ import { BoxLinesSheet } from './BoxLinesSheet.jsx'
 // The door to a Box Lines sheet (ADR-0069): the summary line itself, as a real
 // button, with a "See all ›" label pushed to its far end in the door's own
 // voice — the same words every other "open the full list behind
-// this summary" door says (ui/Door.jsx). "Box Lines" is the internal name
+// this summary" door says (ui/control/Door.jsx). "Box Lines" is the internal name
 // for this drilldown and never appears on the page; what the reader sees is
 // the sheet's own vocabulary, "game lines". Owns the open bit and mounts the sheet, so a surface that
 // wants a door pays one element, not a state hook and a mount of its own —

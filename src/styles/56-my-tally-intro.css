@@ -68,7 +68,6 @@
 
 .introsheet__actions .btn--ghost {
   width: 100%;
-  min-height: var(--tap-min);
 }
 
 /* --------------------------------------------------------------- step 2 */

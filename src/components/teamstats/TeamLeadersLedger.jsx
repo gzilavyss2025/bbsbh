@@ -3,7 +3,7 @@ import { computeLeaders, positionTag } from '../../api/teamLeaders.js'
 import { SectionTitle } from '../ui/SectionTitle.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { InjuredMark } from '../badges/InjuredMark.jsx'
-import { Door } from '../ui/Door.jsx'
+import { Door } from '../ui/control/Door.jsx'
 
 // TEAM LEADERS, LEDGER FORM — the team hub's own rendering of a club's
 // per-category leaders: two labelled blocks, BATTING over PITCHING, one ruled

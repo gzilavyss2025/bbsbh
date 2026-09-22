@@ -6,7 +6,7 @@ import { Entry, Group } from './Entry.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { BreakableLocation } from '../../components/ui/BreakableLocation.jsx'
 import { BuildStamp } from '../../components/ui/BuildStamp.jsx'
-import { Door } from '../../components/ui/Door.jsx'
+import { Door } from '../../components/ui/control/Door.jsx'
 import { CopyBox, CopyIconButton } from '../../components/ui/CopyBox.jsx'
 import { FlipCard } from '../../components/ui/FlipCard.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
@@ -55,8 +55,8 @@ export function ComponentHalf() {
   return (
     <>
       <Group
-        title="src/components/ui — 12 shared components"
-        lede="The whole shared tier, 472 lines. Against 32 card blocks and 10 pill blocks, this is the ratio #1112 exists to state."
+        title="src/components/ui — 13 shared components"
+        lede="The whole shared tier. Button and Door share control/, and Button has its own band above. Against 32 card blocks and 10 pill blocks, this is the ratio #1112 exists to state."
       >
         <Entry title="Loader" path={`${UI_PATH}/Loader.jsx`} note="The shared cold-load loader — a mini linescore whose cell cycles. size=&quot;inline&quot; here.">
           <Loader size="inline" />
@@ -70,7 +70,7 @@ export function ComponentHalf() {
         <Entry title="SectionMasthead" path={`${UI_PATH}/SectionMasthead.jsx`} note="The club-dressed band. No logo passed here, so it draws its undressed state.">
           <SectionMasthead title="Milwaukee" />
         </Entry>
-        <Entry title="Door" path={`${UI_PATH}/Door.jsx`} note="The app&#39;s one door — &quot;there is more behind this&quot;. Inline is the text link and writes its own chevron; block is the row that closes a list, and carries none.">
+        <Entry title="Door" path={`${UI_PATH}/control/Door.jsx`} note="The app&#39;s one door — &quot;there is more behind this&quot;. Inline is the text link and writes its own chevron; block is the row that closes a list, and carries none.">
           <Door onClick={() => {}}>Game lines</Door>
           <Door layout="block" onClick={() => {}}>Show 12 more former teammates</Door>
         </Entry>

@@ -144,6 +144,27 @@ export const PAIRINGS = [
   { fg: 'accent-negative', bg: 'surface-card', min: TEXT, note: 'run value, runs given back, on a card' },
   // Non-text UI: the focus ring must stay visible against the canvas.
   { fg: 'focus-ring', bg: 'bg-canvas', min: UI, note: 'focus ring on app canvas' },
+  // ---- The button (styles/system/button.css, #1130) ----
+  // Every skin's label against its OWN fill, at rest and under a pointer — the
+  // two fills a skin has. Selected is ink on navy for every skin, asserted
+  // above as 'inverse text on ink chip'. Disabled is exempt (WCAG 1.4.3 does
+  // not cover an inactive control) and dims by --opacity-disabled rather than
+  // by a colour, so it has no pair to assert. The outline and ghost hover fill
+  // is --surface-inset, whose pair with --text-body is the Stamp In row above.
+  // Ghost at rest has no fill of its own: it lands on the canvas (asserted
+  // above as body text on app canvas) or on a card (the outline pair here).
+  { fg: 'text-body', bg: 'surface-card', min: TEXT, note: 'button, outline skin at rest (and ghost on a card)' },
+  { fg: 'text-on-ink', bg: 'accent-primary-hover', min: TEXT, note: 'button, ink skin under a pointer' },
+  { fg: 'text-on-ink', bg: 'accent-negative', min: TEXT, note: 'button, danger skin at rest' },
+  { fg: 'text-on-ink', bg: 'accent-negative-hover', min: TEXT, note: 'button, danger skin under a pointer' },
+  { fg: 'text-on-seal', bg: 'seal-cover', min: TEXT, note: 'button, seal skin at rest (the mint strip)' },
+  { fg: 'text-on-seal', bg: 'seal-hatch', min: TEXT, note: 'button, seal skin under a pointer' },
+  // The outline's hover edge: the one part of a hovered outline that changes
+  // besides its fill, so it must read as a change against the card it sits on.
+  { fg: 'text-caption', bg: 'surface-card', min: UI, note: 'button, outline hover edge on a card' },
+  // The focus ring is an outline OFF the box, so it lands on whatever the
+  // button sits on — the canvas (asserted above) or a card.
+  { fg: 'focus-ring', bg: 'surface-card', min: UI, note: 'focus ring on a raised card' },
   // A pinned pairing earns its place here for one of two failure classes this
   // checker cannot see on its own, since it only ever compares TOKENS: a token
   // used in a new role nobody asserted before, or an ALPHA laid over an

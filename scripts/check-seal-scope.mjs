@@ -59,8 +59,12 @@ const ALLOWLIST = {
 
   // .btn--reveal IS the cover carried into the innings bar. .liveedge replaces
   // it at the live frontier and says "the seal is off, and we're current".
-  // .btn--seal is the Game Log's mint strip (ADR-0035).
-  '07-team-logo-and-buttons.css': ['.liveedge', '.liveedge__dot', '.btn--reveal', '.btn--seal'],
+  '07-team-logo-and-buttons.css': ['.liveedge', '.liveedge__dot', '.btn--reveal'],
+  // .btn--seal is the Game Log's mint strip (ADR-0035): minting is the one
+  // action that leaves something behind on the far side of a seal. It moved
+  // here with the rest of the button's skins when .btn left 07 (#1130), and it
+  // carries its own hover values so the seal never leaves this one selector.
+  'system/button.css': ['.btn--seal'],
 
   // The club band's 3px accent underline, themed. `var(--bar-accent, var(--seal))`
   // is the club-accent SLOT with kraft as its unthemed fallback (ADR-0030).

@@ -412,37 +412,20 @@
   object-fit: contain;
 }
 
-/* ---------------------------------------------------------------- buttons */
-.btn {
-  min-height: var(--tap-min);
-  padding: 0 18px;
-  border-radius: var(--radius-sm);
-  border: var(--bw-rule) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-body);
-  font-size: var(--fs-body);
-  font-weight: var(--w-semibold);
-  cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-
-.btn:active {
-  transform: translateY(1px);
-}
-
-.btn:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
-
+/* ---------------------------------------------------------------- buttons
+   The base .btn rule, its sizes, its skins and its states live in
+   system/button.css (#1130), which src/index.css imports immediately BEFORE
+   this file. What stays here is the innings bar's own pair — the advance and
+   the reveal — because both carry placement (the full-width bar slot) as well
+   as dress, and the reveal is the spoiler rule's one control. */
 .btn--next {
   width: 100%;
   margin-top: 20px;
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-  font-weight: var(--w-bold);
+  --btn-fill: var(--accent-primary);
+  --btn-edge: var(--accent-primary);
+  --btn-ink: var(--text-on-ink);
+  --btn-fill-hover: var(--accent-primary-hover);
+  --btn-edge-hover: var(--accent-primary-hover);
 }
 
 /* "Caught up to live" status — replaces the forward action in the innings bar
@@ -486,16 +469,30 @@
    the seal now (the inline cover is gone): the same kraft diagonal-hatch texture
    the cover box carried, so revealing still reads as "peel the tape." Flips to
    .btn--next once revealed. */
+/* ITS FACE IS PINNED HERE, AND THAT IS THE POINT. When .btn moved to the
+   display face (#1130) this button would have followed it, because it never
+   set a face of its own — it inherited .btn's body type. The reveal is the one
+   control the collapse may not redraw (ADR-0083, and the #1130 hold), so it
+   states the four things it used to inherit: the body face at --fs-body, no
+   tracking, and the old 18px side padding. Its hover values are its rest
+   values, so the shared hover rule has nothing to change on it; motion/
+   innings.css owns what a pointer does to it. */
 .btn--reveal {
   width: 100%;
   margin-top: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 18px;
   background: var(--seal-texture);
   border-color: var(--seal-hatch);
   color: var(--seal-ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-none);
+  --btn-fill-hover: var(--seal-texture);
+  --btn-edge-hover: var(--seal-hatch);
 }
 .btn--reveal .btn__ball {
   margin-right: 6px;
@@ -551,43 +548,3 @@
    in the console band on their own now, so the post-half bar carries the
    next-half advance alone and nothing in this split is ever "selected". See
    HalfTally.jsx and useFocusMode.) */
-
-.btn--ghost {
-  background: transparent;
-  border-color: transparent;
-}
-
-/* (`.btn--chip`, the small outlined skin, is a `.btn` modifier but lives in
-   48-logbook.css with its only caller — this file is at check-file-size.mjs's
-   ceiling, and the convention when a skin has one consumer is that the consumer
-   carries it. Move it here if a second feature reaches for it.) */
-
-.btn--danger {
-  background: var(--clay);
-  border-color: var(--clay-deep);
-  color: #fff4f1;
-  font-weight: var(--w-bold);
-}
-
-/* The two solid fills the Game Log's actions use, named here rather than at a
-   call site because all three of those sites — the box score's mint strip, the
-   book's "Stamp it here" and "Move it" confirmations — want the same two, and
-   two of them used to borrow a component class belonging to the third.
-
-   --seal is the kraft amber of a spoiler cover, and minting is the one action
-   in the app that leaves something behind on the far side of a seal, so it is
-   the one place outside SealBox that wears that colour. --ink is the ordinary
-   navy primary, for the follow-on step (putting the stamp in the book):
-   important, but not what the strip is asking for. */
-.btn--seal {
-  background: var(--seal-cover);
-  border-color: var(--seal-cover);
-  color: var(--text-on-seal);
-}
-
-.btn--ink {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-}
-

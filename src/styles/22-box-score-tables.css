@@ -15,8 +15,8 @@
    .daystate row instead of a separate full-width banner — see
    .daystate__chip--reveal in the 740px block below, which hides this
    floating bar there since there's no long scroll to reach for. */
-/* Match the kraft "Tap to reveal" cover's font (.cover__main) — .btn's own
-   base font-family (--font-body) read as a visibly different typeface next
+/* Match the kraft "Tap to reveal" cover's font (.cover__main) — the reveal
+   button's own face (--font-body, pinned in 07) read as a visibly different typeface next
    to the SealBox cover sitting right beside it. Shared with
    .daystate__chip--reveal so the desktop chip matches. */
 .pagenav--revealall .btn,
@@ -403,9 +403,6 @@
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
 }
 
 
