@@ -123,20 +123,21 @@ elements are measurably tappable, and six states are written as modifiers.
 | `.spray__chip` | 5 | `.spray__btn` | #1131 | `components/charts/SprayMap.jsx`, `styles/73-spray-map.css` | — |
 | `.trrank__chip` | 5 | `.trrank__btn` | #1131 | `screens/SituationalRecordsPage.jsx`, `styles/66-situational-records.css` | — |
 | `.xl__chip` | 5 | `.xl__btn` | #1131 | `screens/expresslane/ExpressLanePage.jsx`, `styles/77-express-lane.css` | — |
-| `.daystate__chip--live-on` | 4, 5 | `.is-on` | #1131 | `screens/GameSelect.jsx`, `styles/03-slate-header.css`, `styles/46-consent-modal.css` †, `scripts/check-seal-scope.mjs` | applied as `${scoresUnlocked ? ' daystate__chip--live-on' : ''}`. The rename edits `scripts/check-seal-scope.mjs`, which allowlists it by name (ADR-0083). |
-| `.slate-filterbar__chip--active` | 4, 5 | `.is-active` | #1131 | `screens/GameSelect.jsx`, `styles/22-box-score-tables.css` | — |
-| `.cmdmap__chip--on` | 4, 5 | `.is-on` | #1131 | `components/charts/CommandMap.jsx`, `components/charts/GloveTarget.jsx`, `styles/26d-command-map.css` | — |
-| `.idlab__chip--on` | 4, 5 | `.is-on` | #1131 | `screens/identity-lab/workbench/JerseyRack.jsx`, `styles/17-identity-lab-workbench.css` | — |
-| `.spray__chip--on` | 4, 5 | `.is-on` | #1131 | `components/charts/SprayMap.jsx`, `styles/73-spray-map.css` | — |
-| `.pitcherhandoff__chip--open` | 4 | `.is-open` | #1131 | `styles/12-sealbox.css` | no literal call site — `PitcherHandoffCard.jsx` builds the name as `` `pitcherhandoff__chip--${bookOpen ? "open" : "closed"}` ``, so a grep-driven rename misses it and the rule silently stops applying. `--closed` moves with it. |
+| `.daystate__chip--live-on` | 4, 5 | `.daystate__btn.is-on` | #1131 | `screens/GameSelect.jsx`, `styles/03-slate-header.css`, `styles/46-consent-modal.css` †, `scripts/check-seal-scope.mjs` | applied as `${scoresUnlocked ? ' daystate__chip--live-on' : ''}`. The rename edits `scripts/check-seal-scope.mjs`, which allowlists it by name (ADR-0083) — and the new entry is the compound pair. A bare `.is-on` there would widen a spoiler-scope exception from one named selector to every `.is-on` rule in that file. |
+| `.slate-filterbar__chip--active` | 4, 5 | `.slate-filterbar__btn.is-active` | #1131 | `screens/GameSelect.jsx`, `styles/22-box-score-tables.css` | — |
+| `.cmdmap__chip--on` | 4, 5 | `.cmdmap__btn.is-on` | #1131 | `components/charts/CommandMap.jsx`, `components/charts/GloveTarget.jsx`, `styles/26d-command-map.css` | — |
+| `.idlab__chip--on` | 4, 5 | `.idlab__btn.is-on` | #1131 | `screens/identity-lab/workbench/JerseyRack.jsx`, `styles/17-identity-lab-workbench.css` | — |
+| `.spray__chip--on` | 4, 5 | `.spray__btn.is-on` | #1131 | `components/charts/SprayMap.jsx`, `styles/73-spray-map.css` | — |
+| `.pitcherhandoff__chip--open` | 4 | `.pitcherhandoff__chip.is-open` | #1131 | `styles/12-sealbox.css` | no literal call site — `PitcherHandoffCard.jsx` builds the name as `` `pitcherhandoff__chip--${bookOpen ? "open" : "closed"}` ``, so a grep-driven rename misses it and the rule silently stops applying. `--closed` moves with it. |
 | `.index-group__badge` | — (for #1114) | hold | #1131 | 1 file — none move | HOLD — `badge` is not one of clause 1's eight shape words, so no clause reaches this class. It is recorded because it draws the pill shape and #1114 counts shapes, not words. It is also the same surface as `.cta__go`: server-rendered landing copy styled from `public/learn.css`. |
 
 ## SectionHead and Card — #1113 — 75 rows
 
 Twenty-nine blocks carry `card` without owning the base rule for it.
 `.thub-card` and `.gamecard` draw their own box and are not rows. The other
-forty-six rows are the head: four titles, twenty retired kickers and eyebrows,
-and twenty-two second lines that become `__note`.
+forty-six rows are the head: four titles, thirty-nine second lines that
+become `__note`, one eyebrow retired, one orphan deleted, and one row
+#1113 must name.
 
 | current class | clause(s) broken | target name | collapse issue | files that must move | hold + reason |
 | --- | --- | --- | --- | --- | --- |
@@ -145,12 +146,12 @@ and twenty-two second lines that become `__note`.
 | `.chalcard` | 1, 2 | `.chal` | #1113 | `screens/designlab/blocks.jsx`, `screens/designlab/catalog.js`, `screens/team/modules/TeamChallengeCard.jsx`, `styles/report/challenge-card.css` | — |
 | `.foulcard` | 1, 2 | `.foul` | #1113 | `components/playerstats/FoulCard.jsx`, `screens/designlab/catalog.js`, `styles/26-player-page.css` | — |
 | `.horizoncard` | 1, 2 | `.horizon` | #1113 | `screens/designlab/blocks.jsx`, `screens/designlab/catalog.js`, `screens/team/modules/minors/DepthChartCard.jsx`, `screens/team/modules/minors/HorizonCard.jsx`, `styles/31-wild-card.css` | — |
-| `.rvcard` | 1, 2 | `.rv` | #1113 | `components/playerstats/RunValueCard.jsx`, `screens/designlab/blocks.jsx`, `screens/designlab/catalog.js`, `screens/team/modules/TeamRunValueCard.jsx`, `styles/75-run-value.css`, `styles/report/challenge-card.css` † | — |
+| `.rvcard` | 1, 2 | `.rv` | #1113 | `components/playerstats/RunValueCard.jsx`, `screens/designlab/blocks.jsx`, `screens/designlab/catalog.js`, `screens/team/modules/TeamRunValueCard.jsx`, `styles/75-run-value.css`, `styles/report/challenge-card.css` † | two-step — `.rv` is NOT a free name. It is already the Run Value page's namespace (`rv__board`, `rv__num`, `rv__nameplate`, `rv__controls`, `rv__who`, `rv__pos`, `rv__face`), and both families live in `styles/75-run-value.css`, which `TeamRunValueCard.jsx` already draws from. No element name overlaps today, so the rename does not break on the day it lands — but two unrelated components then share one namespace in one file, and the next element added to either collides in silence. Give the card its own name, or move the page's rules out first. |
 | `.abscard` | 1 | `.absframe` | #1113 | `components/gamehud/StatBox.jsx`, `screens/designlab/catalog.js`, `styles/12-sealbox.css`, `styles/25-wide-layout.css` | two-step — `.abs` is already the ABS block this one frames, so the target may not be `.abs`. |
 | `.contractcard` | 1 | `.contract` | #1113 | `components/playerstats/PlayerContractCard.jsx`, `screens/designlab/catalog.js`, `styles/01-base.css` †, `styles/26b-player-contract.css`, `styles/26e-contract-history.css` †, `scripts/check-seal-scope.mjs` | the rename edits `scripts/check-seal-scope.mjs`, which allowlists `.contractcard__openzone` and `.contractcard__seg--option` by name (ADR-0083). |
 | `.derbycard` | 1 | `.gamecard--derby` | #1113 | `components/allstar/DerbyCard.jsx`, `screens/designlab/catalog.js`, `styles/06-loader-and-cards.css` | — |
 | `.flipcard` | 1 | `.flipstage` | #1113 | `components/ui/FlipCard.jsx`, `screens/designlab/catalog.js`, `screens/designlab/components.jsx`, `styles/22-box-score-tables.css`, `src/tokens/effects.css` † | — |
-| `.gamecardstack` | 1 | `.slate__stack` | #1113 | `components/game/GameCard.jsx`, `screens/animlab/motionDemos.jsx`, `styles/06-loader-and-cards.css`, `styles/motion/slate.css`, `e2e/wire-rail.spec.js` | — |
+| `.gamecardstack` | 1 | `.slate__stack` | #1113 | `components/game/GameCard.jsx`, `screens/animlab/motionDemos.jsx`, `styles/06-loader-and-cards.css`, `styles/motion/slate.css`, `e2e/wire-rail.spec.js` | clause 6 does not reach this row: `card` sits inside `gamecardstack` as a substring, not as the whole name, a suffix or a hyphen-delimited segment, so #1114's guard will not reproduce it. The rename is worth doing for the reader, and #1113 carries it as a judgment, not as a guard finding. |
 | `.lineupcard` | 1 | `.entering` | #1113 | `components/inning/EnteringReference.jsx`, `components/scoring/StruckLine.jsx` †, `screens/designlab/catalog.js`, `styles/12-sealbox.css`, `styles/46-consent-modal.css`, `styles/focus/atbat.css` †, `styles/focus/reference.css`, `styles/motion/strike.css`, `scripts/check-seal-scope.mjs` | the rename edits `scripts/check-seal-scope.mjs`, which allowlists `.lineupcard__title` by name (ADR-0083). |
 | `.metriccard` | 1 | `.metric` | #1113 | `components/game/GamePhotosStrip.jsx`, `components/teamstats/BullpenBoard.jsx`, `components/teamstats/SeasonSeriesStrip.jsx`, `screens/designlab/catalog.js`, `screens/FoulTrackerPage.jsx`, `screens/TeamInfo.jsx`, `styles/09-team-info.css` †, `styles/43-foul-tracker.css`, `styles/44-pre-game-cards.css` | — |
 | `.moundcard` | 1 | `.mound` | #1113 | `components/playerstats/PitcherWorkloadCard.jsx`, `screens/designlab/catalog.js`, `styles/26c-mound-card.css` | — |
@@ -173,26 +174,26 @@ and twenty-two second lines that become `__note`.
 | `.coverpick__heading` | 3 | `.coverpick__title` | #1113 | `components/passport/BookCoverPicker.jsx`, `styles/60-book-cover-picker.css` | — |
 | `.gamelines__heading` | 3 | `.gamelines__title` | #1113 | `components/playerstats/GameLinesCard.jsx`, `styles/boxlines/gamelines.css`, `e2e/box-lines.spec.js` | — |
 | `.lookupdeck__heading` | 3 | `.lookupdeck__title` | #1113 | `components/admin/contracts/LookupDeck.jsx`, `styles/74a-contract-lookup.css` | — |
-| `.abouthero__kicker` | 3 | retired — the block's name is its head | #1113 | `screens/AboutPage.jsx`, `styles/65-about-page.css` | — |
-| `.boxlines__kicker` | 3 | retired — the block's name is its head | #1113 | `components/boxlines/BoxLinesSheet.jsx`, `screens/animlab/motionDemos.jsx`, `styles/boxlines/boxlines.css`, `e2e/box-lines.spec.js` | — |
-| `.scorebookstory__kicker` | 3 | retired — the block's name is its head | #1113 | `screens/FirstScorebookPage.jsx`, `styles/42-first-scorebook.css` | — |
-| `.tscoremodal__kicker` | 3 | retired — the block's name is its head | #1113 | `components/teamstats/TeamScoreExplainer.jsx`, `styles/40-game-modals.css` | — |
-| `.wire__kicker` | 3 | retired — the block's name is its head | #1113 | `components/transactions/MoveRow.jsx`, `styles/04-site-bar.css`, `styles/25-wide-layout.css` | — |
-| `.bcast__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/around-the-game/BroadcastMasthead.jsx`, `styles/68-around-the-game.css` | — |
-| `.betweeninnings__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/gamehud/BetweenInnings.jsx`, `styles/focus/console.css` | — |
-| `.contractcard__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/playerstats/PlayerContractCard.jsx`, `styles/26b-player-contract.css` | — |
-| `.derbycard__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/allstar/DerbyCard.jsx`, `styles/06-loader-and-cards.css` | — |
-| `.guidelink__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/chrome/GuideLink.jsx`, `styles/08a-site-menu.css` | — |
-| `.hitchart__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/charts/HitChart.jsx`, `styles/69-hit-chart.css` | — |
-| `.introsheet__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/account/FavoriteTeamModal.jsx`, `styles/56-my-tally-intro.css`, `e2e/intro-two-step.spec.js` | — |
-| `.logbooklanding__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/account/LogbookLanding.jsx`, `styles/50-logbook-landing.css` | — |
-| `.researchdiary__eyebrow` | 3 | retired — the block's name is its head | #1113 | `screens/contenders/ContenderDiaryPage.jsx`, `screens/research/ResearchDiaryPage.jsx`, `styles/research/diary.css` | — |
-| `.sitemenusheet__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/chrome/SiteMenu.jsx`, `styles/08a-site-menu.css` | — |
-| `.stampstrip__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/logbook/StampGameButton.jsx`, `styles/48-stamp-strip.css` | — |
-| `.szmodal__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/scoring/StrikeZone.jsx`, `styles/14-strike-zone.css` | — |
-| `.trrank__eyebrow` | 3 | retired — the block's name is its head | #1113 | `screens/SituationalRecordsPage.jsx`, `styles/66-situational-records.css` | — |
-| `.umpmodal__eyebrow` | 3 | retired — the block's name is its head | #1113 | `components/umpire/UmpireAccuracyModal.jsx`, `styles/14-strike-zone.css` | — |
-| `.wordmarklab__eyebrow` | 3 | retired — the block's name is its head | #1113 | `screens/WordmarkLab.jsx`, `styles/02-wordmark-lab.css` | — |
+| `.abouthero__kicker` | 3 | `.abouthero__note` | #1113 | `screens/AboutPage.jsx`, `styles/65-about-page.css` | two-step — `.abouthero__lede` also lands on `.abouthero__note`. This line is "Keep score. Keep the surprise.", which is copy, not the block's name. |
+| `.boxlines__kicker` | 3 | `.boxlines__note` | #1113 | `components/boxlines/BoxLinesSheet.jsx`, `screens/animlab/motionDemos.jsx`, `styles/boxlines/boxlines.css`, `e2e/box-lines.spec.js` | the line is built — `` `Game lines · ${picked.name}` ``, defaulting to the `kicker` prop. `BoxLinesSheet.jsx` says the kicker titles the sheet. |
+| `.scorebookstory__kicker` | 3 | `.scorebookstory__note` | #1113 | `screens/FirstScorebookPage.jsx`, `styles/42-first-scorebook.css` | holds "The 22 Scorebook" above `<h1>My First Scorebook</h1>` — a second line, not the title again. |
+| `.tscoremodal__kicker` | 3 | `.tscoremodal__note` | #1113 | `components/teamstats/TeamScoreExplainer.jsx`, `styles/40-game-modals.css` | holds "How We Score It" above the modal's own question-form title. |
+| `.wire__kicker` | 3 | #1113 names it | #1113 | `components/transactions/MoveRow.jsx`, `styles/04-site-bar.css`, `styles/25-wide-layout.css` | NOT the head's second line — this is a `<div>` that holds the move banner, the club link, the club mark and the type label. Clause 3 rejects the word `kicker`, but `__note` is the wrong target for a meta row. Judge it with the `Card` work. |
+| `.bcast__eyebrow` | 3 | `.bcast__note` | #1113 | `components/around-the-game/BroadcastMasthead.jsx`, `styles/68-around-the-game.css` | a container, not a text line: it holds `.bcast__strand`, `.bcast__slash` and a dynamic `eyebrow`, and renders only when `strand` is set. |
+| `.betweeninnings__eyebrow` | 3 | retired — the line repeats the block's name | #1113 | `components/gamehud/BetweenInnings.jsx`, `styles/focus/console.css` | the one row of the twenty where the verdict holds: the line is "Between Innings" inside `.betweeninnings`. The other nineteen carry copy, data or a prop, and each says what it holds. |
+| `.contractcard__eyebrow` | 3 | `.contract__note` | #1113 | `components/playerstats/PlayerContractCard.jsx`, `styles/26b-player-contract.css` | moves with its block — see the `.contractcard` row. Holds "Player compensation" above `<h2>Contract</h2>`. |
+| `.derbycard__eyebrow` | 3 | `.gamecard__note` | #1113 | `components/allstar/DerbyCard.jsx`, `styles/06-loader-and-cards.css` | two-step — `.derbycard__sub` also lands on `.gamecard__note`. This line is "All-Star Break". Moves with its block; see the `.derbycard` row. |
+| `.guidelink__eyebrow` | 3 | `.guidelink__note` | #1113 | `components/chrome/GuideLink.jsx`, `styles/08a-site-menu.css` | renders a prop, `eyebrow = 'New to this?'`, so it has no fixed text to be redundant with. |
+| `.hitchart__eyebrow` | 3 | `.hitchart__note` | #1113 | `components/charts/HitChart.jsx`, `styles/69-hit-chart.css` | renders `eyebrow ?? venue` — a ballpark name. |
+| `.introsheet__eyebrow` | 3 | `.introsheet__note` | #1113 | `components/account/FavoriteTeamModal.jsx`, `styles/56-my-tally-intro.css`, `e2e/intro-two-step.spec.js` | holds the step indicator, "Step 1 · Your club" or "Step 2 · Your scorebook". The rule for when it renders is documented at the call site. |
+| `.logbooklanding__eyebrow` | 3 | `.logbooklanding__note` | #1113 | `components/account/LogbookLanding.jsx`, `styles/50-logbook-landing.css` | two-step — `.logbooklanding__lede` also lands on `.logbooklanding__note`, and this class renders TWO different lines: "The one place that is yours" and "One game starts the book". |
+| `.researchdiary__eyebrow` | 3 | `.researchdiary__note` | #1113 | `screens/contenders/ContenderDiaryPage.jsx`, `screens/research/ResearchDiaryPage.jsx`, `styles/research/diary.css` | two-step — `.researchdiary__lede` also lands on `.researchdiary__note`. This line is "Working notebook", above the diary's own title. |
+| `.sitemenusheet__eyebrow` | 3 | `.sitemenusheet__note` | #1113 | `components/chrome/SiteMenu.jsx`, `styles/08a-site-menu.css` | holds "Tally Baseball" — the app's name, not the block's. |
+| `.stampstrip__eyebrow` | 3 | `.stampstrip__note` | #1113 | `components/logbook/StampGameButton.jsx`, `styles/48-stamp-strip.css` | two-step — `.stampstrip__lede` also lands on `.stampstrip__note`, and today's `.stampstrip__note` becomes `.stampstrip__label`. Three classes reach one name: see the `.stampstrip__lede` row. |
+| `.szmodal__eyebrow` | 3 | `.szmodal__note` | #1113 | `components/scoring/StrikeZone.jsx`, `styles/14-strike-zone.css` | holds "Pitch zone". The slot beside it holds the batter's name, so this is the only line that says what the modal is. |
+| `.trrank__eyebrow` | 3 | `.trrank__note` | #1113 | `screens/SituationalRecordsPage.jsx`, `styles/66-situational-records.css` | renders `{season} {SPORT_LABEL[sportId]} season` — data, not a fixed line. |
+| `.umpmodal__eyebrow` | 3 | `.umpmodal__note` | #1113 | `components/umpire/UmpireAccuracyModal.jsx`, `styles/14-strike-zone.css` | holds "Plate accuracy" beside the umpire's name, the same shape as `.szmodal__eyebrow`. |
+| `.wordmarklab__eyebrow` | 3 | `.wordmarklab__note` | #1113 | `screens/WordmarkLab.jsx`, `styles/02-wordmark-lab.css` | renders FIVE different lines on one page, among them "Selected direction", "Live comparison" and "My read". |
 | `.cover__sub` | 3 | delete | #1113 | `styles/12-sealbox.css`, `scripts/check-seal-scope.mjs` | DELETE, do not rename — this rule has had no call site since `05ba45bdf` (2026-07-06) removed `<span className="cover__sub">` from `SealBox.jsx`. `scripts/check-seal-scope.mjs` still allowlists it: its reach assertion checks that the SELECTOR is still in the stylesheet, not that anything renders it, so an orphan passes. The allowlist entry goes with the rule. |
 | `.cthist__sub` | 3 | `.cthist__note` | #1113 | `components/player/ContractHistoryLedger.jsx`, `styles/01-base.css` †, `styles/26e-contract-history.css` | — |
 | `.derbycard__sub` | 3 | `.gamecard__note` | #1113 | `components/allstar/DerbyCard.jsx`, `styles/06-loader-and-cards.css` | moves with its block — `.derbycard` becomes `.gamecard--derby`, so its parts become `.gamecard`'s. See the `.derbycard` row. |
@@ -226,12 +227,12 @@ classes are held because clause 3 does not reach them.
 | --- | --- | --- | --- | --- | --- |
 | `.delaycard` | 1 | `.notice--delay` | #1132 | `components/inning/DelayCard.jsx`, `screens/designlab/catalog.js`, `styles/27-player-position-innings.css`, `styles/46-consent-modal.css` | — |
 | `.pitchernotice` | 1 | `.notice--pitcher` | #1132 | `src/CLAUDE.md`, `components/playbyplay/BatterNotice.jsx`, `components/playbyplay/EventCards.jsx`, `components/playbyplay/FielderNotice.jsx`, `components/playbyplay/PinchRunNotice.jsx`, `components/playbyplay/PitcherHandoffCard.jsx`, `components/playbyplay/PitcherNotice.jsx`, `styles/01-base.css` †, `styles/12-sealbox.css`, `styles/13-play-by-play.css`, `styles/21a-box-score-stars.css` †, `styles/focus/atbat.css`, `src/tokens/layout.css` † | no block owns the `notice` base rule today; #1132 builds one. This is the largest of the six and its 18 elements move with it. |
-| `.umptend__row--on` | 4 | `.is-on` | #1132 | `components/umpire/UmpireTendencies.jsx`, `styles/53-umpire-tendencies.css` | — |
-| `.dh__row--open` | 4 | `.is-open` | #1132 | `screens/around-the-game/DoubleheadersPage.jsx`, `styles/68-around-the-game.css` | — |
-| `.cwb__row--done` | 4 | `.is-done` | #1132 | `components/admin/contracts/DecisionPane.jsx`, `styles/74-contract-workbench.css` | — |
-| `.posinn__box--empty` | 4 | `.is-empty` | #1132 | `components/player/PositionInnings.jsx`, `styles/27-player-position-innings.css` | — |
-| `.xl-deck--empty` | 4 | `.is-empty` | #1132 | `screens/expresslane/ScoringDeck.jsx`, `styles/77c-express-lane-deck.css` | — |
-| `.stampstrip__mount--empty` | 4 | `.is-empty` | #1132 | `components/logbook/StampGameButton.jsx`, `styles/48-stamp-strip.css` | — |
+| `.umptend__row--on` | 4 | `.umptend__row.is-on` | #1132 | `components/umpire/UmpireTendencies.jsx`, `styles/53-umpire-tendencies.css` | — |
+| `.dh__row--open` | 4 | `.dh__row.is-open` | #1132 | `screens/around-the-game/DoubleheadersPage.jsx`, `styles/68-around-the-game.css` | — |
+| `.cwb__row--done` | 4 | `.cwb__row.is-done` | #1132 | `components/admin/contracts/DecisionPane.jsx`, `styles/74-contract-workbench.css` | — |
+| `.posinn__box--empty` | 4 | `.posinn__box.is-empty` | #1132 | `components/player/PositionInnings.jsx`, `styles/27-player-position-innings.css` | — |
+| `.xl-deck--empty` | 4 | `.xl-deck.is-empty` | #1132 | `screens/expresslane/ScoringDeck.jsx`, `styles/77c-express-lane-deck.css` | — |
+| `.stampstrip__mount--empty` | 4 | `.stampstrip__mount.is-empty` | #1132 | `components/logbook/StampGameButton.jsx`, `styles/48-stamp-strip.css` | — |
 | `.bs__sub` | 3 (does not apply) | hold | #1132 | 2 files — none move | HOLD — `__sub` here names a box-score SUBTOTAL row (`b.isSub`), not a head's second line, so clause 3 does not reach it. Renaming it to `.bs__row--subtotal` is #1132's Table work, not a grammar fix. |
 | `.ledger__sub` | 3 (does not apply) | hold | #1132 | 4 files — none move | HOLD — `__sub` here names a subtotal CELL (`tr.reg-subtotal .ledger__sub`), not a head's second line, so clause 3 does not reach it. Renaming it to `.ledger__cell--subtotal` is #1132's Table work. |
 

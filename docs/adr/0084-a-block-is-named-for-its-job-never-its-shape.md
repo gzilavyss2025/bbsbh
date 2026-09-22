@@ -14,8 +14,9 @@ builds `Pill`, #1113 builds `SectionHead` and `Card`, #1132 builds `Table`,
 each rename is a taste, and four agents working four issues will apply four
 different tastes to one system.
 
-The system already gropes toward a grammar. `.chal`, `.rv` and `.ballpark` are
-namespaces with elements under them. `.thub-card` draws a box and says so.
+The system already gropes toward a grammar. `.rv` is a namespace with seven
+elements under it and no shape word in its name. `.thub-card` draws a box and
+says so.
 `.is-themed` marks a state. The grammar is there; it is simply not written down,
 so it is followed where somebody remembered it and broken where nobody did.
 
@@ -60,7 +61,9 @@ at any commit. A name that lies about what a class draws is how the duplication
 got here.
 
 **2. A namespace carries no shape word.** `.chal`, `.rv`, `.ballpark`,
-`.horizon`, `.adv`, `.foul`, with elements `.chal__board`, `.rv__rank`.
+`.horizon`, `.adv`, `.foul`. Only `.rv` exists today; the other five are the
+ledger's targets for `.chalcard`, `.ballparkcard`, `.horizoncard`, `.advcard`
+and `.foulcard`, and their elements are written `.chal__board`, `.rv__rank`.
 
 *What it rejects:* the special case of clause 1 that cannot ever be argued.
 A namespace owns no base rule by definition, so it can never be the block that
@@ -84,6 +87,14 @@ element is when it is made. The test is the call site: `.daystate__chip--live-on
 is applied as `${scoresUnlocked ? ' daystate__chip--live-on' : ''}`, so it is a
 state, and it must be `.is-on`. `.penboard__tag--fresh` is passed once for what
 a reliever IS, so it is a variant and it stays.
+
+*A state is never written alone.* It is always compound with the block or the
+element it marks — `.awaketoggle.is-on`, `.leaguepicker__chip.is-active` — which
+is what every one of the app's state classes does today. `src/index.css` imports
+all partials into one global sheet, so a bare `.is-on { … }` rule written in one
+file reaches every `.is-on` element in the app. The ledger's target column writes
+the pair for that reason, and a renamed allowlist entry in
+`scripts/check-seal-scope.mjs` takes the pair, never the bare state.
 
 **5. A control's name says it is a control**: `__btn`, `__toggle`, `__tab`,
 `__door`. A `__chip` or `__tag` is never tappable — if it is, it is a `__btn`
