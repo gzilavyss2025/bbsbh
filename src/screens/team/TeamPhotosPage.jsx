@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
-import { fetchTeamPhotoBatch } from '../../api/gamePhotos.js'
+import {
+  fetchTeamPhotoBatch,
+  photoWalkFloorHit,
+  photoWalkShouldContinue,
+} from '../../api/gamePhotos.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate, AsyncStatus } from '../../components/ui/AsyncGate.jsx'
@@ -97,10 +101,18 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
       if (inFlightRef.current || !activeRef.current) return
       inFlightRef.current = true
       setLoading(true)
+      // No per-call batch cap here, but the same empty-batch floor as the
+      // rail (#1142): a club with no photos in its first batch stops there.
       while (
         activeRef.current &&
-        consumedRef.current < games.length &&
-        photosRef.current.length < targetCount
+        photoWalkShouldContinue({
+          consumed: consumedRef.current,
+          total: games.length,
+          found: photosRef.current.length,
+          target: targetCount,
+          rounds: 0,
+          maxBatches: Infinity,
+        })
       ) {
         const { photos: batchPhotos, consumed } = await fetchTeamPhotoBatch(
           games,
@@ -123,7 +135,12 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
         setPhotos(photosRef.current)
       }
       if (activeRef.current) {
-        if (consumedRef.current >= games.length) setExhausted(true)
+        if (
+          consumedRef.current >= games.length ||
+          photoWalkFloorHit({ consumed: consumedRef.current, found: photosRef.current.length })
+        ) {
+          setExhausted(true)
+        }
         setLoading(false)
       }
       inFlightRef.current = false

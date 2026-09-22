@@ -341,6 +341,28 @@ export async function fetchTeamPhotoBatch(games, teamId, consumed, batchSize, ca
   return { photos: results.flat(), consumed: batch.length }
 }
 
+// The loop test for a backward photo walk (TeamPhotosRail's growPhotos).
+// `consumed` is the count of games walked so far, `found` the photos kept so
+// far, `rounds` the batches this call has run. The walk stops at the target,
+// at the per-call batch cap, or at Opening Day — and at the EMPTY-BATCH
+// FLOOR: once a batch has run and the club still has zero photos, stop. A
+// club with no photographer stills in its most recent games has none in the
+// games before them either. That is every MiLB club: without the floor its
+// rail walked the whole season (~132 content fetches) to draw nothing
+// (#1142). A rail that already has photos never meets the floor, so the MLB
+// grow-on-scroll walk is unchanged.
+export function photoWalkFloorHit({ consumed, found }) {
+  return consumed > 0 && found === 0
+}
+
+export function photoWalkShouldContinue({ consumed, total, found, target, rounds, maxBatches }) {
+  if (consumed >= total) return false
+  if (found >= target) return false
+  if (rounds >= maxBatches) return false
+  if (photoWalkFloorHit({ consumed, found })) return false
+  return true
+}
+
 // The single best still for a game, for scripts/gen-highlights.mjs's day
 // index — the home slate's revealed result cards use this as the condensed
 // game's poster instead of MLB's own "CONDENSED GAME" graphic card. Takes the
