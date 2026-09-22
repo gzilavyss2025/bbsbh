@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ranks · Triple-A — the ABS card above it</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F6EFDC;font-family:'Source Sans 3',system-ui,sans-serif;color:#1B2A3A;
+  -webkit-font-smoothing:antialiased}
+a{color:#2F6E4F;text-decoration:none}a:hover{color:#2F6E4F}
+.u{text-transform:uppercase}
+.disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+/* ---- the card, exactly as shipped (09-team-info.css). design.md §4: the card
+   is right and stays. Nothing here changes it. ---- */
+.card{border:1px solid #CBC1A7;border-radius:10px;background:#FBF6E9;
+  box-shadow:0 1px 2px rgba(22,34,47,.08), 0 4px 12px rgba(22,34,47,.06);overflow:hidden}
+.card+.card{margin-top:16px}
+.chead{display:flex;align-items:baseline;flex-wrap:wrap;justify-content:space-between;gap:8px;
+  padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em}
+.chead>span{font-size:1.2em}
+.chead em{font-style:normal;font-weight:400;font-size:12px;letter-spacing:.05em}
+.cbody{padding:12px 16px 16px}
+
+/* ---- THE BAND HEAD, settled at v4. A FULL-BLEED 2px ink rule, the name at
+   --fs-h2 21px, then a standfirst at --fs-small 13px in --ink-1, natural case,
+   16px under it.
+
+   The rule runs edge to edge of the PAGE, not from the end of the words to the
+   column edge. A card is inset 16px and rounded, so a rule that runs full-bleed
+   is a plane no card can reach at any weight or colour — and a plane difference
+   survives a one-handed glance where a weight difference does not.
+
+   The standfirst is not the band's question. A second screen ANSWERS; it does
+   not ask. It says what is in the band, and it is also where 2G's level
+   qualifier and Money's "not dated" note land, because those are sentences. ---- */
+.brule{height:2px;background:#0F1822;margin:0 -16px 12px}
+.bhead4{margin:0 0 10px;font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:#0F1822;line-height:1.25}
+/* 16px under the standfirst, not 12: the line belongs to the HEAD, and at 12px
+   it sat close enough to the first card to read as that card's caption. */
+.bq4{margin:0 0 16px;font-size:13px;line-height:1.45;color:#1B2A3A}
+
+/* ---- THE SUB-HEAD: the same gesture one step down. Full-bleed, 1px, pencil
+   rather than 2px ink. So the page reads FULL-BLEED = page structure,
+   CONTAINED = card structure — four levels from two devices and two planes. ---- */
+.srule{height:1px;background:#CBC1A7;margin:32px -16px 10px}
+.shead{margin:0 0 12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:#1B2A3A;line-height:1.2}
+
+/* ---- THE JUMP BAR. It is the SHIPPED control (.teamtabs / .teamtabs__btn,
+   46-consent-modal.css:345) drawn as it ships and not as a pill: a 6px-radius
+   rect, 34px tall, --fs-label on --surface-card under --shadow-card, laid out
+   flex:1 0 auto so a bar that fits stretches to the full width and a bar that
+   does not scrolls sideways with its scrollbar hidden.
+
+   Club-NEUTRAL navy per ADR-0030 — a club may colour a card that identifies the
+   club, never page chrome — and it is HubTabBar, shared with the player hub, so
+   it is drawn here as one control rather than as a team-page control. ---- */
+.jump{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:8px 0}
+.jump::-webkit-scrollbar{display:none}
+.jump__row{display:flex;gap:6px;min-width:min-content}
+.jump .jp{flex:1 0 auto;min-height:34px;display:flex;align-items:center;justify-content:center;
+  padding:0 12px;white-space:nowrap;border-radius:6px;border:1px solid #CBC1A7;
+  background:#FBF6E9;box-shadow:0 1px 2px rgba(22,34,47,.08), 0 4px 12px rgba(22,34,47,.06);color:#6B6558;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em}
+.jump .jp.on{background:#1B2A3A;color:#FBF6E9;border-color:#1B2A3A}
+/* Stuck adds ONE pencil rule and the page's own paper. No new shadow: this is
+   paper, and the shadow is already the control's own. */
+.jumpstuck{border-bottom:1px solid #CBC1A7;background:#F6EFDC}
+
+/* A card pinned to its measured height. The body takes the rest and clips, so a
+   board is at true proportion by construction rather than by estimate. */
+.card--fixed{display:flex;flex-direction:column}
+.card--fixed>.cbody{flex:1 1 auto;overflow:hidden;min-height:0}
+
+/* ---- tables ---- */
+table{width:100%;border-collapse:collapse}
+th{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:#6B6558;text-align:right;padding:6px 3px;
+  border-bottom:1px solid #DED6C0}
+th:first-child{text-align:left}
+td{font-size:12px;padding:6px 3px;text-align:right;border-bottom:1px solid #EDE6D1}
+td:first-child{text-align:left}
+.tnum{font-family:'JetBrains Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums}
+.me{background:#E3EDE2}
+.cap{font-size:11px;color:#6B6558;line-height:1.35}
+.blurb{font-size:13px;line-height:1.45;color:#3C4A5A;margin:0 0 10px}
+.pill{display:inline-block;border:1px solid #CBC1A7;border-radius:999px;padding:3px 10px;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;background:#FFFDF6;color:#1B2A3A}
+.door{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#2F6E4F}
+
+/* ---- THE LEADERS LEDGER. Its head is a page-level group label with no card of
+   its own, and its two sub-cards wear --accent-primary, the APP's navy — never
+   the club's. On Wilson that puts an app-navy bar 16px under a club-navy one,
+   and it is the clearest single instance of the head problem #1107 works
+   through. ---- */
+.ledg__head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 10px}
+.ledg__title{font-family:'Barlow Condensed',sans-serif;font-size:14.4px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;color:#0F1822}
+.ledg__doors{display:flex;gap:12px}
+.ledg__block{border:1px solid #CBC1A7;border-radius:10px;background:#FBF6E9;
+  box-shadow:0 1px 2px rgba(22,34,47,.08), 0 4px 12px rgba(22,34,47,.06);overflow:hidden}
+.ledg__block+.ledg__block{margin-top:10px}
+.ledg__bt{margin:0;padding:6px 12px;background:#1B2A3A;color:#FBF6E9;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase}
+.ledg__rows{list-style:none;margin:0;padding:0 12px 4px}
+.ledg__row{display:flex;align-items:baseline;gap:10px;padding:7px 0;border-top:1px solid #EDE6D1}
+.ledg__row:first-child{border-top:none}
+.ledg__cat{flex:none;width:40px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.09em;color:#6B6558;text-transform:uppercase}
+.ledg__who{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px}
+.ledg__name{font-size:15px;color:#2F6E4F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ledg__pos{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.09em;
+  color:#6B6558;text-transform:uppercase;flex:none}
+.ledg__val{font-family:'JetBrains Mono',monospace;font-size:16px;color:#0F1822;flex:none}
+
+/* ---- ABOUT's four modules ---- */
+.bp__photo{height:175px;background:#EDE6D1;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;color:#938C7C;font-family:'Barlow Condensed',sans-serif;font-size:12px;
+  letter-spacing:.09em;text-transform:uppercase}
+.bp__name{margin:8px 0 0;font-size:15px;color:#0F1822}
+.bp__facts{display:flex;justify-content:space-between;gap:8px;padding:5px 0;
+  border-bottom:1px solid #EDE6D1;font-size:12px}
+.bp__facts b{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:400;color:#0F1822}
+.bp__facts i{font-style:normal;font-size:11px;color:#6B6558}
+.bp__gl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:#6B6558;padding-top:12px;margin-top:12px;border-top:1px solid #DED6C0}
+.bp__dims{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.bp__dim{flex:1 1 0;text-align:center;border:1px solid #EDE6D1;border-radius:6px;padding:5px 2px}
+.bp__dim span{display:block;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;color:#6B6558}
+.bp__dim b{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:400;color:#0F1822}
+
+.jd{display:flex;gap:10px;overflow:hidden}
+.jd__card{flex:0 0 118px}
+.jd__box{height:88px;background:#FFFDF6;border:1px solid #EDE6D1;border-radius:8px;
+  display:flex;align-items:center;justify-content:center}
+.jd__mark{width:46px;height:46px;border-radius:50%;background:#EDE6D1}
+.jd__name{display:block;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;color:#1B2A3A;margin-top:6px;line-height:1.15}
+.jd__rec{display:block;font-family:'JetBrains Mono',monospace;font-size:16px;color:#0F1822;margin-top:2px}
+
+.ctl{display:flex;gap:10px;overflow:hidden}
+.ctl__stop{flex:1 1 0;text-align:center}
+.ctl__badge{width:42px;height:42px;margin:0 auto;border-radius:50%;background:#EDE6D1}
+.ctl__yrs{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#6B6558;margin-top:6px}
+
+.alum__row{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid #EDE6D1}
+.alum__row:first-child{border-top:none}
+.alum__shot{flex:0 0 96px;height:117px;background:#EDE6D1;border-radius:6px}
+.alum__name{font-size:15px;color:#2F6E4F}
+.alum__ident{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:#6B6558;margin-top:2px}
+.alum__club{font-size:12px;color:#1B2A3A;margin-top:2px}
+.alum__stint{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6B6558;margin-top:4px}
+
+/* ---- the shapes: a shipped card at its true height, drawn as what it is ---- */
+.sh__row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  border-bottom:1px solid #EDE6D1}
+.sh__l{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em;color:#1B2A3A;flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap}
+.sh__v{font-family:'JetBrains Mono',monospace;font-size:11px;color:#0F1822;flex:0 0 auto}
+.sh__grid{display:grid;gap:8px}
+.sh__tile{border:1px solid #EDE6D1;border-radius:6px;background:#FFFDF6;padding:7px 8px}
+.sh__tile b{display:block;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:400;color:#0F1822}
+.sh__tile span{display:block;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;color:#6B6558}
+.sh__rail{display:flex;gap:10px;overflow:hidden}
+.sh__railc{flex:0 0 132px;background:#FFFDF6;border:1px solid #EDE6D1;border-radius:8px}
+.sh__gl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:#6B6558;padding-top:10px;margin-top:10px;border-top:1px solid #DED6C0}
+.sh__gl:first-child{padding-top:0;margin-top:0;border-top:none}
+.sh__bar{height:10px;border-radius:2px;background:#EDE6D1;overflow:hidden}
+.sh__bar i{display:block;height:100%;background:#2F6E4F;opacity:.55}
+.sh__plot{background:#FFFDF6;border:1px solid #EDE6D1;border-radius:6px;position:relative}
+.sh__dot{position:absolute;width:7px;height:7px;border-radius:50%;background:#1B2A3A;opacity:.6}
+.sh__ax{border-top:1px solid #DED6C0;margin-top:6px;padding-top:4px}
+
+/* ---- the legend on a full-page board ---- */
+.legend{margin:10px 0 0;padding:10px 12px;border:1px dashed #CBC1A7;border-radius:6px;
+  font-size:12px;line-height:1.45;color:#1B2A3A;background:#FBF6E9}
+
+/* ---- a board's own title. NOT the band head: a board is not a band, and
+   using the band head to title one would put an eighth band on this canvas. ---- */
+.boardtitle{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;color:#0F1822;margin:0 0 6px}
+.boardsub{font-size:13px;line-height:1.45;color:#1B2A3A;margin:0 0 24px}
+code{font-family:'JetBrains Mono',monospace;font-size:11px;color:#0F1822}
+
+/* ---- the jump bar's three states ---- */
+/* A stage is FULL-BLEED so the bar gets the 358px a real page gives it — the
+   first draft nested it inside two 16px gutters, starved it to 292px, and the
+   floor's five pills clipped where the measurement says they fit. And it draws
+   NO border: the difference between resting and stuck IS a 1px rule, so a box
+   around both states hides the only thing the board is comparing. */
+.stage{margin:0 -16px;background:#F6EFDC}
+.statelabel{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:#6B6558;margin:0 0 6px}
+.statenote{font-size:13px;line-height:1.45;color:#1B2A3A;margin:8px 0 22px}
+/* Stuck is the SAME bar with a rule under it and the page's own paper behind.
+   No new shadow: this is paper, and a shadow is the card's device. */
+.jump--rest{background:transparent;border-bottom:1px solid transparent}
+
+*{box-sizing:border-box}
+body{margin:0;background:#F6EFDC;font-family:'Source Sans 3',system-ui,sans-serif;color:#1B2A3A;
+  -webkit-font-smoothing:antialiased}
+.u{text-transform:uppercase}
+.disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+/* ---- the card, exactly as shipped (09-team-info.css). UNCHANGED. ---- */
+.card{border:1px solid #CBC1A7;border-radius:10px;background:#FBF6E9;
+  box-shadow:0 1px 2px rgba(22,34,47,.08), 0 4px 12px rgba(22,34,47,.06);overflow:hidden}
+.card+.card{margin-top:16px}
+.chead{display:flex;align-items:baseline;flex-wrap:wrap;justify-content:space-between;gap:8px;
+  padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em}
+.chead>span{font-size:1.2em}
+.chead em{font-style:normal;font-weight:400;font-size:12px;letter-spacing:.05em}
+.cbody{padding:12px 16px 16px}
+
+/* ---- the SUB-HEAD, from design.md §5: full-bleed 1px pencil rule, 17px ---- */
+.shead{margin:0 0 12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:#1B2A3A;line-height:1.2}
+.srule{height:1px;background:#CBC1A7;margin:32px -16px 10px}
+
+/* ---- the SCOPE CONTROLS, unchanged from the shipped card ---- */
+.tabrow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid #DED6C0}
+.tab{flex:1;border:1px solid #CBC1A7;border-radius:6px;padding:6px 8px;background:#FFFDF6;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#6B6558;text-align:center}
+.tabrow.months .tab{flex:0 1 auto;min-width:3rem}
+.tab.on{background:#F6E9D8;border-color:#B5824A;color:#0F1822}
+
+/* =================================================================
+   THE INDEX — twelve lines, each one a door into its own group.
+
+   A line is a BUTTON the full width of the card body, 44px tall, so a
+   one-handed reader hits it without aiming. It is a ledger line, not a menu
+   item: it carries the two figures that decide whether to open it.
+
+   Closed  NAME .......... 9 SPLITS  .075–.966   ›
+   Open    NAME ..............................   ⌄
+                (the rows now carry the figures)
+
+   The chevron is drawn, not a glyph — two 1.5px pencil strokes on a rotated
+   square, so it reads as a mark made on the paper rather than a UI icon, and
+   so it takes a colour token like everything else.
+   ================================================================= */
+.idx{list-style:none;margin:0;padding:0}
+.idxg+.idxg{border-top:1px solid #CBC1A7}
+.idxb{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;
+  padding:12px 4px;margin:0;border:0;background:none;text-align:left;cursor:pointer}
+.idxn{flex:1 1 auto;min-width:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;
+  font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#6B6558;line-height:1.2}
+.idxg.on .idxn{color:#0F1822}
+/* Both figures are COLUMNS, not trailing text. Without a fixed width the count
+   moves left whenever the range beside it is wide (".500–1.000" against
+   ".611–.667") and twelve lines wobble instead of scanning. */
+.idxc{flex:0 0 auto;min-width:64px;text-align:right;font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B6558;
+  white-space:nowrap}
+.idxr{flex:0 0 auto;min-width:68px;text-align:right;font-family:'JetBrains Mono',monospace;
+  font-variant-numeric:tabular-nums;font-size:11px;color:#0F1822;white-space:nowrap}
+.chev{flex:0 0 auto;width:7px;height:7px;margin-right:4px;
+  border-right:1.5px solid #6B6558;border-bottom:1.5px solid #6B6558;
+  transform:rotate(-45deg)}
+.idxg.on .chev{transform:rotate(45deg);border-color:#0F1822}
+/* The opened panel. No tint and no indent — a new plane has to show an edge
+   the manila cannot (design.md §4), and the 44px line above it already does. */
+.idxp{padding:0 0 12px}
+
+/* ---- a W-L split row. The label may wrap; the figure never does. Without
+   min-width:0 on the label a long one ("Opponent scores first") pushes its own
+   win pct onto a THIRD line, which the shipped card does today — design.md's
+   harmonization list names it. ---- */
+/* ONE dotted rule per row, not two. The shipped card draws a dotted underline
+   under the label (the door) AND a dotted rule under the whole row, so an open
+   group prints two dotted lines per split and stops reading as a ledger — the
+   card's own CSS comment warns about exactly this and then does it anyway.
+   The label's underline stays, because that is the door; the row rule goes. */
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+.rrow{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding:6px 0;
+  flex-wrap:nowrap}
+/* text-decoration, not border-bottom. Two fifths of these labels wrap ("VS.
+   AMERICAN / LEAGUE CENTRAL"), and a border-bottom then draws one short dash
+   under the second line only, which reads as a mistake rather than as a door.
+   A dotted text-decoration follows every line of the label. */
+.rrow .rl{flex:1 1 auto;min-width:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;
+  font-weight:700;text-transform:uppercase;letter-spacing:.04em;line-height:1.3;color:#1B2A3A;
+  text-decoration:underline dotted #CBC1A7;text-underline-offset:3px}
+.rrow>span:last-child{flex:0 0 auto;white-space:nowrap}
+.rrow .rv{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;
+  color:#0F1822}
+.rrow .rp{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;
+  color:#6B6558}
+
+/* ---- the by-inning matrix, shipped shape, unchanged ---- */
+.inn{display:grid;grid-template-columns:2.6rem 1fr 1fr;gap:2px 8px;align-items:stretch}
+.innh{padding-bottom:2px;border-bottom:1px solid #CBC1A7;font-family:'Barlow Condensed',sans-serif;
+  font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#6B6558}
+.innr{align-self:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;color:#6B6558}
+/* The cell is TWO lines, not three. Shipped stacks record / win pct / date, so
+   ten innings cost thirty lines and the group alone is 644px — a fifth of the
+   whole card. Record and win pct on one line is the same pairing every W-L row
+   on this card already uses, which is the harmonization and the saving at once. */
+.innc{display:flex;flex-direction:column;align-items:flex-start;padding:5px 6px;
+  border-left:1px solid #EDE6D1}
+.innv{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;
+  color:#0F1822;white-space:nowrap}
+.innp{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;
+  color:#6B6558}
+.innl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#6B6558;border-bottom:1px dotted #CBC1A7}
+.innx{display:grid;grid-template-columns:2.6rem 1fr;gap:8px;align-items:center;margin-top:6px;
+  padding-top:6px;border-top:1px solid #EDE6D1}
+
+/* ---- season counts. NO separate shape: a count is a ledger row whose figure
+   happens to be one number instead of two. Shipped stacks the figure over its
+   label in a tile grid, which is the third way this one card draws a row and
+   the reason the counts block reads as a different object bolted on. Label
+   left, figure right, same .rrow — the harmonization Gary asked for, and 391px
+   of tiles becomes ~270px of ledger. ---- */
+
+/* ---- the card foot: one tap puts the card back exactly as it ships today ---- */
+.foot{display:flex;justify-content:flex-end;padding:10px 4px 0;border-top:1px solid #CBC1A7}
+.footb{border:0;background:none;padding:6px 2px;margin:0;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#2F6E4F}
+
+.cap{font-size:11px;color:#6B6558;line-height:1.35}
+.note{font-size:11px;color:#6B6558;line-height:1.35;padding:0 0 8px}
+
+/* ---- the jump bar ---- */
+.jump{display:flex;gap:6px;overflow:hidden;padding:8px 0}
+.jump .jp{border:1px solid #CBC1A7;border-radius:999px;padding:5px 11px;background:#FBF6E9;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#1B2A3A;white-space:nowrap}
+.jump .jp.on{background:#1B2A3A;color:#FBF6E9;border-color:#1B2A3A}
+.jumpstuck{border-bottom:1px solid #CBC1A7;background:#F6EFDC}
+
+/* ---- the measuring frame: a 390x844 phone screen, drawn as a bracket in the
+   gutter so the board says how many screens it is without a caption ---- */
+.scr{position:absolute;left:0;width:3px;background:#B4453A;opacity:.28}
+/* ---- the league mark. A 3px edge in the row's own gutter, never a fill:
+   a fill would put the figure on a second paper and cost it contrast, and
+   this card is read by scanning one column. ---- */
+.rrow{position:relative}
+.rrow.mk{padding-left:9px}
+.rrow.mk::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:3px;border-radius:1px}
+.rrow.mk-top::before{background:#2F6E4F}
+.rrow.mk-bot::before{background:#B4453A}
+.rrow.mk-top .rp,.rrow.mk-top .rv{color:#2F6E4F}
+.rrow.mk-bot .rp,.rrow.mk-bot .rv{color:#B4453A}
+/* The index line's edge is SPLIT in proportion: a group holding three top-5
+   splits and one bottom-5 shows a mostly-green edge with a clay tail. Honest
+   about a mixed group, where one flat colour would not be, and it costs no
+   width on a 390px line. */
+.idxg{position:relative}
+.idxg.hasmk .idxb,.idxg.hasmk .idxp{padding-left:10px}
+/* Bounded to the BUTTON's own 44px, not to the group: a bottom-anchored bar
+   spanned the open panel too, where it ran down the matrix and clipped the
+   inning labels to "ST" and "ND". */
+.mkbar{position:absolute;left:0;top:6px;height:32px;width:4px;border-radius:2px;overflow:hidden;
+  display:flex;flex-direction:column;background:#EDE6D1}
+.mkbar i{display:block;width:4px}
+.innc.mk-top .innv,.innc.mk-top .innp{color:#2F6E4F}
+.innc.mk-bot .innv,.innc.mk-bot .innp{color:#B4453A}
+.innc.mk{box-shadow:inset 3px 0 0 var(--mkc)}
+/* The rank, on its own line under the figure. Takes the row's tone, so the
+   number and the edge say the same thing in two channels. */
+.rk{display:block;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;
+  line-height:1.3;letter-spacing:.01em}
+.rrow.mk-top .rk{color:#2F6E4F}
+.rrow.mk-bot .rk{color:#B4453A}
+.innrk{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.3}
+.innc.mk-top .innrk{color:#2F6E4F}
+.innc.mk-bot .innrk{color:#B4453A}
+/* F3 — a 44px target. "Open all" was 26px and the scope pills ~29px, which is
+   a two-handed control on a page read one-handed with a pencil in the other.
+   The closed card grows by ~40px and is still inside one 844px screen. */
+.tab{min-height:44px;display:inline-flex;align-items:center}
+.footb{min-height:44px;display:inline-flex;align-items:center}
+
+/* The reorganised Records card brings its own .card rule; the fixed-height
+   helper has to win over it for the shape cards, so it is restated last. */
+.card--fixed{display:flex;flex-direction:column}
+.card--fixed>.cbody{flex:1 1 auto;overflow:hidden;min-height:0}
+</style>
+</helmet>
+<div style="width:390px;height:1790px;background:#F6EFDC;overflow:hidden"><div class="pagebody"><div class="jumpstuck" style="padding:0 16px">
+     <div class="jump"><div class="jump__row" style="transform:translateX(0px)"><span class="jp">Standing</span><span class="jp on">Ranks</span><span class="jp">Games</span><span class="jp">Roster</span><span class="jp">Farm</span><span class="jp">About</span></div></div>
+   </div><div style="padding:0 16px 24px"><div style="height:48px"></div><div class="brule"></div><div class="bhead4">Ranks</div><p class="bq4">Where this club sits against its league. The rank boards start here, at Triple-A.</p><div class="card"><div class="chead" style="background:#C8102E;border-bottom:3px solid #071D49;color:#F8F8F5"><span>Who challenges</span><em style="opacity:.82">against what they see</em></div><div class="cbody"><div style="font-family:'JetBrains Mono',monospace;font-size:34px;color:#0F1822;line-height:1.1">6.44</div>
+    <div class="cap">Per 1,000 pitches seen</div>
+    <div class="cap" style="color:#2F6E4F;margin-top:2px">14 of 30 clubs</div>
+    <div class="cap">League 6.39</div>
+    <div style="display:flex;gap:6px;margin:10px 0">
+      <span class="pill" style="background:#1B2A3A;color:#FBF6E9;border-color:#1B2A3A">At the plate</span>
+      <span class="pill">Behind it</span></div>
+    <div class="sh__plot" style="height:183px"><span class="sh__dot" style="left:8%;top:14%"></span><span class="sh__dot" style="left:87%;top:51%"></span><span class="sh__dot" style="left:82%;top:18%"></span><span class="sh__dot" style="left:77%;top:55%"></span><span class="sh__dot" style="left:72%;top:22%"></span><span class="sh__dot" style="left:67%;top:59%"></span><span class="sh__dot" style="left:62%;top:26%"></span><span class="sh__dot" style="left:57%;top:63%"></span><span class="sh__dot" style="left:52%;top:30%"></span><span class="sh__dot" style="left:47%;top:67%"></span><span class="sh__dot" style="left:42%;top:34%"></span><span class="sh__dot" style="left:37%;top:71%"></span><span class="sh__dot" style="left:32%;top:38%"></span></div>
+    <div class="sh__ax cap" style="display:flex;justify-content:space-between"><span>1k</span><span>2k</span></div>
+    <div class="cap">Pitches seen across, reviews called up</div>
+    <table style="margin-top:12px"><tr><th>Player</th><th>Pitches</th><th>Called</th><th>Rate</th></tr><tr><td style="font-size:12px">Brock Wilken</td><td class="tnum">2,260</td><td class="tnum">17</td><td class="tnum">7.52</td></tr><tr><td style="font-size:12px">Tyler Black</td><td class="tnum">1,819</td><td class="tnum">17</td><td class="tnum">9.35</td></tr><tr><td style="font-size:12px">Jeferson Quero</td><td class="tnum">1,739</td><td class="tnum">8</td><td class="tnum">4.60</td></tr><tr><td style="font-size:12px">Ethan Murray</td><td class="tnum">1,515</td><td class="tnum">7</td><td class="tnum">4.62</td></tr><tr><td style="font-size:12px">Jett Williams</td><td class="tnum">1,406</td><td class="tnum">14</td><td class="tnum">9.96</td></tr><tr><td style="font-size:12px">Luis Lara</td><td class="tnum">1,337</td><td class="tnum">10</td><td class="tnum">7.48</td></tr><tr><td style="font-size:12px">Luke Adams</td><td class="tnum">1,121</td><td class="tnum">17</td><td class="tnum">15.17</td></tr><tr><td style="font-size:12px">Eddys Leonard</td><td class="tnum">1,053</td><td class="tnum">2</td><td class="tnum">1.90</td></tr><tr><td style="font-size:12px">Akil Baddoo</td><td class="tnum">1,017</td><td class="tnum">5</td><td class="tnum">4.92</td></tr><tr><td style="font-size:12px">Luis Matos</td><td class="tnum">1,007</td><td class="tnum">5</td><td class="tnum">4.97</td></tr><tr><td style="font-size:12px">Cooper Pratt</td><td class="tnum">969</td><td class="tnum">12</td><td class="tnum">12.38</td></tr><tr><td style="font-size:12px">Eduardo Garcia</td><td class="tnum">892</td><td class="tnum">0</td><td class="tnum">0.00</td></tr><tr><td style="font-size:12px">Ramón Rodríguez</td><td class="tnum">790</td><td class="tnum">4</td><td class="tnum">5.06</td></tr></table><p class="cap" style="margin:10px 0 0;font-size:12px;line-height:1.45">7 of 13 ask less often than the league rate predicts from the pitches they see, and Luke Adams called for 17 in 1,121 pitches seen — 15.17 against the league’s 6.39. A man traded in July is counted for the club he saw those pitches with, not the one holding him now.</p>
+     <div class="door" style="margin-top:10px">League challenge board ›</div></div></div><div style="height:16px"></div><div class="ledg"><div class="ledg__head">
+      <span class="ledg__title">Team leaders</span>
+      <span class="ledg__doors"><a href="#" class="door">See all ›</a><a href="#" class="door">Org leaders ›</a></span>
+    </div><div class="ledg__block"><p class="ledg__bt">Batting</p><ul class="ledg__rows"><li class="ledg__row"><span class="ledg__cat">AVG</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Luis Lara</a>
+         <span class="ledg__pos">CF</span></span>
+         <span class="ledg__val">.321</span></li><li class="ledg__row"><span class="ledg__cat">OPS</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Darrien Miller</a>
+         <span class="ledg__pos">C</span></span>
+         <span class="ledg__val">.943</span></li><li class="ledg__row"><span class="ledg__cat">HR</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Brock Wilken</a>
+         <span class="ledg__pos">1B</span></span>
+         <span class="ledg__val">17</span></li><li class="ledg__row"><span class="ledg__cat">RBI</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Brock Wilken</a>
+         <span class="ledg__pos">1B</span></span>
+         <span class="ledg__val">80</span></li><li class="ledg__row"><span class="ledg__cat">H</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Jeferson Quero</a>
+         <span class="ledg__pos">DH</span></span>
+         <span class="ledg__val">107</span></li><li class="ledg__row"><span class="ledg__cat">SB</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Luis Lara</a>
+         <span class="ledg__pos">CF</span></span>
+         <span class="ledg__val">24</span></li></ul></div><div class="ledg__block"><p class="ledg__bt">Pitching</p><ul class="ledg__rows"><li class="ledg__row"><span class="ledg__cat">ERA</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Cameron Wagoner</a>
+         <span class="ledg__pos">RHP</span></span>
+         <span class="ledg__val">0.56</span></li><li class="ledg__row"><span class="ledg__cat">WHIP</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Craig Yoho</a>
+         <span class="ledg__pos">RHP</span></span>
+         <span class="ledg__val">0.65</span></li><li class="ledg__row"><span class="ledg__cat">SO</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Coleman Crow</a>
+         <span class="ledg__pos">RHP</span></span>
+         <span class="ledg__val">102</span></li><li class="ledg__row"><span class="ledg__cat">W</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Coleman Crow</a>
+         <span class="ledg__pos">RHP</span></span>
+         <span class="ledg__val">9</span></li><li class="ledg__row"><span class="ledg__cat">SV</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Blake Holub</a>
+         <span class="ledg__pos">RHP</span></span>
+         <span class="ledg__val">5</span></li><li class="ledg__row"><span class="ledg__cat">IP</span>
+         <span class="ledg__who"><a href="#" class="ledg__name">Coleman Crow</a>
+         <span class="ledg__pos">RHP</span></span>
+         <span class="ledg__val">105.1</span></li></ul></div></div></div></div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1790}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

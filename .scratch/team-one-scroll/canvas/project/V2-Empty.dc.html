@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>v2 · no data</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F6EFDC;font-family:'Source Sans 3',system-ui,sans-serif;color:#1B2A3A;
+  -webkit-font-smoothing:antialiased}
+a{color:#2F6E4F;text-decoration:none}a:hover{color:#2F6E4F}
+.u{text-transform:uppercase}
+.disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+/* ---- the card, exactly as shipped (09-team-info.css). design.md §4: the card
+   is right and stays. Nothing here changes it. ---- */
+.card{border:1px solid #CBC1A7;border-radius:10px;background:#FBF6E9;
+  box-shadow:0 1px 2px rgba(22,34,47,.08), 0 4px 12px rgba(22,34,47,.06);overflow:hidden}
+.card+.card{margin-top:16px}
+.chead{display:flex;align-items:baseline;flex-wrap:wrap;justify-content:space-between;gap:8px;
+  padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em}
+.chead>span{font-size:1.2em}
+.chead em{font-style:normal;font-weight:400;font-size:12px;letter-spacing:.05em}
+.cbody{padding:12px 16px 16px}
+
+/* ---- THE BAND HEAD, settled at v4. A FULL-BLEED 2px ink rule, the name at
+   --fs-h2 21px, then a standfirst at --fs-small 13px in --ink-1, natural case,
+   16px under it.
+
+   The rule runs edge to edge of the PAGE, not from the end of the words to the
+   column edge. A card is inset 16px and rounded, so a rule that runs full-bleed
+   is a plane no card can reach at any weight or colour — and a plane difference
+   survives a one-handed glance where a weight difference does not.
+
+   The standfirst is not the band's question. A second screen ANSWERS; it does
+   not ask. It says what is in the band, and it is also where 2G's level
+   qualifier and Money's "not dated" note land, because those are sentences. ---- */
+.brule{height:2px;background:#0F1822;margin:0 -16px 12px}
+.bhead4{margin:0 0 10px;font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:#0F1822;line-height:1.25}
+/* 16px under the standfirst, not 12: the line belongs to the HEAD, and at 12px
+   it sat close enough to the first card to read as that card's caption. */
+.bq4{margin:0 0 16px;font-size:13px;line-height:1.45;color:#1B2A3A}
+
+/* ---- THE SUB-HEAD: the same gesture one step down. Full-bleed, 1px, pencil
+   rather than 2px ink. So the page reads FULL-BLEED = page structure,
+   CONTAINED = card structure — four levels from two devices and two planes. ---- */
+.srule{height:1px;background:#CBC1A7;margin:32px -16px 10px}
+.shead{margin:0 0 12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:#1B2A3A;line-height:1.2}
+
+/* ---- the jump bar. Club-NEUTRAL navy per ADR-0030: a club may colour a card
+   that identifies the club, never page chrome. Shared with the player hub, so
+   it is drawn as one control rather than as a team-page control. ---- */
+.jump{display:flex;gap:6px;overflow:hidden;padding:8px 0}
+.jump .jp{border:1px solid #CBC1A7;border-radius:999px;padding:5px 11px;background:#FBF6E9;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#1B2A3A;white-space:nowrap}
+.jump .jp.on{background:#1B2A3A;color:#FBF6E9;border-color:#1B2A3A}
+.jumpstuck{border-bottom:1px solid #CBC1A7;background:#F6EFDC}
+
+
+/* ---- v1-v3's band head: BroadcastSection promoted UNCHANGED, with its
+   trailing --clay rule running from the end of the words to the column edge.
+   It is not the settled head — v4 replaced it with the full-bleed ink rule in
+   system.mjs — and it stays here because the three rejected versions still
+   draw it, which is what makes the rejection visible rather than asserted. ---- */
+.bhead{display:flex;align-items:center;gap:12px;margin:0 0 12px;
+  font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;color:#0F1822;line-height:1.25}
+.bhead::after{content:'';flex:1 1 auto;height:2px;background:#B4453A;opacity:.5}
+.bq{margin:0 0 12px;font-size:13px;line-height:1.45;color:#3C4A5A}
+
+/* ---- tables and rows ---- */
+table{width:100%;border-collapse:collapse}
+th{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:#6B6558;text-align:right;padding:6px 4px;
+  border-bottom:1px solid #DED6C0}
+th:first-child{text-align:left}
+td{font-size:12px;padding:7px 4px;text-align:right;border-bottom:1px solid #EDE6D1}
+td:first-child{text-align:left}
+.tnum{font-family:'JetBrains Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums}
+.me{background:#E3EDE2}
+.gl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:#6B6558;padding-top:14px;margin-top:14px;
+  border-top:1px solid #DED6C0}
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+.rrow{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding:6px 0;
+  border-bottom:1px dotted #CBC1A7;flex-wrap:nowrap}
+/* The label wraps and the figure does not. Without min-width:0 a long label
+   ("Opponent scores first") pushes its own pct onto a third line, which the
+   shipped card does today — see design.md's harmonization list. */
+.rrow .rl{font-size:11px;line-height:1.2;color:#1B2A3A;text-transform:uppercase;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;
+  flex:1 1 auto;min-width:0}
+.rrow>span:last-child{flex:0 0 auto;white-space:nowrap}
+.rrow .rv{font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap;color:#0F1822}
+.rrow .rp{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6B6558}
+.pill{display:inline-block;border:1px solid #CBC1A7;border-radius:999px;padding:3px 10px;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;background:#FFFDF6;color:#1B2A3A}
+.tabrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab{border:1px solid #CBC1A7;border-radius:6px;padding:4px 10px;background:#FFFDF6;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#1B2A3A}
+.tab.on{background:#1B2A3A;color:#FBF6E9;border-color:#1B2A3A}
+.cap{font-size:11px;color:#6B6558;line-height:1.35}
+.blurb{font-size:13px;line-height:1.45;color:#3C4A5A;margin:0 0 12px}
+
+/* ---- skeleton + empty ---- */
+.sk{background:#EDE6D1;border-radius:3px}
+.skline{height:11px;margin:9px 0}
+.empty{padding:18px 16px;font-size:13px;line-height:1.45;color:#3C4A5A}
+</style>
+</helmet>
+
+  <div style="width:390px;height:1500px;background:#F6EFDC;overflow:hidden">
+    <div class="jumpstuck" style="padding:0 16px">
+      <div class="jump"><span class="jp on">Standing</span><span class="jp">Ranks</span><span class="jp">Games</span><span class="jp">Roster</span><span class="jp">Farm</span><span class="jp">Money</span><span class="jp">About</span></div>
+    </div>
+    <div style="padding:0 16px 24px">
+      <div style="height:48px"></div>
+      <div style="background:#EFE6CE;margin:0 -16px;padding:20px 16px">
+        <div class="bhead">Standing</div>
+      <p class="bq">How is the season going?</p>
+        <div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>National League Central</span></div><div class="cbody"><div class="empty">No standings posted for this division yet.</div></div></div><div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>Season report</span></div><div class="cbody"><div class="empty">The season grade needs ten games. This club has not played them.</div></div></div>
+        <div class="shead" style="margin-top:32px">Record, split every way</div>
+        <div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>Records</span></div><div class="cbody"><div class="empty">No splits posted for this club yet.</div></div></div><div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>Record by day of week</span></div><div class="cbody"><div class="empty">No games played.</div></div></div>
+        
+      </div>
+      <div style="height:48px"></div>
+      <div class="bhead">Ranks</div>
+           <p class="bq">Where does this club sit among the rest?</p>
+      <div class="card" style="opacity:.45"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5">
+        <span>Team batting</span><em>rank out of 30</em></div>
+        <div class="cbody"><div class="cap">the next band begins — shown so the seam is judged, not described</div></div></div>
+    </div>
+  </div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

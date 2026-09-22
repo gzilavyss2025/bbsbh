@@ -565,7 +565,12 @@ It is worth it on the question, not on the balance.
 **Roster is NOT the page's longest band, and an earlier draft of this section
 said it was.** With the ledger staying in Ranks, the band is projection 1,245 +
 bullpen health 467 + 40-man 1,282 + injured list 317 + the capped transactions
-deck 184 = **~3,495px** on Milwaukee. **Standing** is 272 + Team Score 421 +
+deck 206 = **3,517px** on Milwaukee.
+
+> **Corrected by #1106, 2026-09-21.** This read 184px and ~3,495px. 184px is the
+> **Overview tab's** copy of the deck; the one that moves into Roster is the
+> **Games tab's**, which measures 206px. `design.md` and the page totals both
+> use 3,517. **Standing** is 272 + Team Score 421 +
 Records 3,238 + day-of-week 173 + Comebacks 407 = **~4,511px**, and it was
 longer even before the leaders decision — this document's own "Records is 68% of
 this band" figure puts Standing near 4,800px against the ~4,050px it claimed
@@ -820,10 +825,16 @@ fetched. Recorded because a reader of this table would otherwise chase it.
 | About | Ballpark · **Logos & jerseys** (home and away) · **Affiliation history** · **Made The Show** | **gains** three · 1,441px against Milwaukee's 1,274 |
 
 **Six bands. Six anchors.** Nashville is the club the level identity works
-hardest for: it is the only affiliate that keeps a Ranks band, and it keeps it
-because of ABS. One card is a thin band, but it is a *true* one — it is the only
-place in the app that says this club argues with the plate umpire more than its
-league does.
+hardest for: it is the only affiliate whose Ranks band holds **two** cards, and
+the second one is ABS. It is the only place in the app that says this club argues
+with the plate umpire more than its league does.
+
+> **Corrected by #1106, 2026-09-21.** This paragraph said Nashville "is the only
+> affiliate that keeps a Ranks band". That stopped being true when the leaders
+> ledger stayed in Ranks (2B, #1148): 572 and 249 keep the band too, with the
+> ledger as its only card. Measured on the running page — `/team/556/numbers`
+> renders `.chalcard` 1,014px + `.tledg` 534px = **1,548px**;
+> `/team/249/numbers` renders `.tledg` alone at **534px**.
 
 ### 572 · Wisconsin Timber Rattlers — High-A
 
@@ -845,8 +856,13 @@ Identical band set and identical module list to 572. **Six bands, six anchors.**
 **And it is not thin.** `/team/249` is 3,158px today against Milwaukee's 4,340px —
 73% of it — and its Minors tab (3,869px) is *longer* than Milwaukee's (3,717px),
 because all three affiliates share one org's farm system. The measured thinnest
-real page in the hub is not a Single-A club at all. It is the winter-ball club at
-**664px** (1C, #1143).
+real page in the hub is not a Single-A club at all. It is the winter-ball club.
+
+> **Updated by #1106, 2026-09-21.** This sentence ended "at **664px** (1C,
+> #1143)". #1143 has landed, so that figure is dead. `/team/675?d=2026-01-15`
+> measures **2,355px** as one tab today, and **7,110px** as five bands — 36% of
+> Milwaukee's 20,006px, against 249's 68%. It is still the floor, and it is a
+> real page rather than a bug.
 
 So #1106's worry — *does a short page read as a club with a quieter season, or as
 a broken page?* — has a measured answer for these three clubs: **they are not
@@ -880,14 +896,29 @@ So the winter shape is **five bands**, not the three this document first guessed
 | Band | Holds |
 | --- | --- |
 | Standing | division standings (10 clubs, no division name) · day-of-week |
-| Ranks | **team leaders 6+6** — the pool is real |
+| Ranks | **team leaders 6+6** — the pool is real, and the ledger carries ONE door |
 | Games | Schedule (+ Stamp In) · the season's games |
-| Roster | projection · 40-man · injured list |
+| Roster | projection 1,530px · 40-man 2,387px — **no injured list** |
 | About | Ballpark, 91px · **Logos & jerseys** (home and away), 258px |
 
-**Two corrections to this table, both found by re-measuring it on 2026-09-21
-against a fixed `/team/675?d=2026-01-15`, and both errors in this document
-rather than in the code.**
+> **Fourth correction, #1106, 2026-09-21: the winter ledger has one door, not
+> two.** Every other club's ledger carries `See all ›` and `Org leaders ›`. At 675
+> there is no parent org, so `/team/675/numbers?d=2026-01-15` renders `See all ›`
+> alone. Recorded because a module list cannot show it and a drawing of the whole
+> band can — see `canvas/P2-Page-675.dc.html`.
+
+> **Third correction, #1106, 2026-09-21: the Injured List does not render here.**
+> This table listed it. `/team/675/roster?d=2026-01-15` measures three blocks on
+> two separate runs — projection 1,530px, 40-man 2,387px, the as-of banner — and
+> no `InjuredListCard`. Worth recording for a second reason: at 2,387px the
+> winter 40-man is a single uncapped list of 55 players, nearly twice
+> Milwaukee's 1,282px, which makes **Roster the winter club's longest band at
+> 3,917px — longer than Milwaukee's 3,517px.** The floor page is lopsided, not
+> uniformly thin. See `design.md` §6.
+
+**Two further corrections to this table, both found by re-measuring it on
+2026-09-21 against a fixed `/team/675?d=2026-01-15`, and both errors in this
+document rather than in the code.**
 
 **1. The uniform strip renders here, and this table was the only one that said
 otherwise.** `isMilb` is `sport.id !== 1` (`NumbersTab.jsx`), which is true for
@@ -1090,7 +1121,11 @@ must pass `limit` explicitly and say so in the PR.
 
 ## 2G. The band heads the page needs — evidence for #1113
 
-No component draws these. Six heads, and what each must carry:
+No component draws these. **Seven** heads — this section read "six" over a table
+of seven until #1106 corrected it — and what each must carry. `design.md` §13
+carries the drawn spec, the four club-specific standfirsts the floor page forced,
+and the finding that the right-aligned slot below is used **zero times** on this
+page:
 
 | Band | Head text | Must carry |
 | --- | --- | --- |
@@ -1154,8 +1189,8 @@ tab switch would have been.** `/team/158/roster?d=2026-04-01` must land on
 
 ## 2I. What this hands the player hub
 
-#1105 asks for rules written so `/player/{id}` can take them. Four generalise;
-one does not.
+#1105 asks for rules written so `/player/{id}` can take them. Six generalise; one
+does not.
 
 1. **A band is one question. A band may hold more than one section when the
    question has two halves, and it carries one head for both.** #928 already
@@ -1174,7 +1209,15 @@ one does not.
    and bats/throws — is the obvious candidate, since every player has all of it).
    The rule is the transferable part: **end every page on the one band that is
    never absent, so no page ends on a gap.** → generalises.
-6. **The band names.** Standing / Ranks / Games / Roster / Farm / Money / About
+6. **A jump bar must scroll itself to keep the current section in view.** A tab
+   bar's current tab is wherever the reader tapped it, so it is on screen by
+   definition; a jump bar's current mark changes by **scrolling the page**.
+   Measured in the shipped control, Milwaukee's seven band names want 472px in
+   358px of room, and the two that fall off the end are the last two bands. The
+   player hub's bands are no shorter. → generalises, and it is a `HubTabBar`
+   change, so both hubs get it in one commit. Drawn and measured in `design.md`
+   §13.
+7. **The band names.** Standing / Ranks / Games / Roster / Farm / Money / About
    are this club's questions. Only **Money** carries over, because #928 already
    named it that. → does not generalise, and should not.
 

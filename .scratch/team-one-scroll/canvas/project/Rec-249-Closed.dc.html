@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Records · closed · Wilson</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F6EFDC;font-family:'Source Sans 3',system-ui,sans-serif;color:#1B2A3A;
+  -webkit-font-smoothing:antialiased}
+.u{text-transform:uppercase}
+.disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+/* ---- the card, exactly as shipped (09-team-info.css). UNCHANGED. ---- */
+.card{border:1px solid #CBC1A7;border-radius:10px;background:#FBF6E9;
+  box-shadow:0 1px 2px rgba(22,34,47,.08), 0 4px 12px rgba(22,34,47,.06);overflow:hidden}
+.card+.card{margin-top:16px}
+.chead{display:flex;align-items:baseline;flex-wrap:wrap;justify-content:space-between;gap:8px;
+  padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em}
+.chead>span{font-size:1.2em}
+.chead em{font-style:normal;font-weight:400;font-size:12px;letter-spacing:.05em}
+.cbody{padding:12px 16px 16px}
+
+/* ---- the SUB-HEAD, from design.md §5: full-bleed 1px pencil rule, 17px ---- */
+.shead{margin:0 0 12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:#1B2A3A;line-height:1.2}
+.srule{height:1px;background:#CBC1A7;margin:32px -16px 10px}
+
+/* ---- the SCOPE CONTROLS, unchanged from the shipped card ---- */
+.tabrow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid #DED6C0}
+.tab{flex:1;border:1px solid #CBC1A7;border-radius:6px;padding:6px 8px;background:#FFFDF6;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#6B6558;text-align:center}
+.tabrow.months .tab{flex:0 1 auto;min-width:3rem}
+.tab.on{background:#F6E9D8;border-color:#B5824A;color:#0F1822}
+
+/* =================================================================
+   THE INDEX — twelve lines, each one a door into its own group.
+
+   A line is a BUTTON the full width of the card body, 44px tall, so a
+   one-handed reader hits it without aiming. It is a ledger line, not a menu
+   item: it carries the two figures that decide whether to open it.
+
+   Closed  NAME .......... 9 SPLITS  .075–.966   ›
+   Open    NAME ..............................   ⌄
+                (the rows now carry the figures)
+
+   The chevron is drawn, not a glyph — two 1.5px pencil strokes on a rotated
+   square, so it reads as a mark made on the paper rather than a UI icon, and
+   so it takes a colour token like everything else.
+   ================================================================= */
+.idx{list-style:none;margin:0;padding:0}
+.idxg+.idxg{border-top:1px solid #CBC1A7}
+.idxb{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;
+  padding:12px 4px;margin:0;border:0;background:none;text-align:left;cursor:pointer}
+.idxn{flex:1 1 auto;min-width:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;
+  font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#6B6558;line-height:1.2}
+.idxg.on .idxn{color:#0F1822}
+/* Both figures are COLUMNS, not trailing text. Without a fixed width the count
+   moves left whenever the range beside it is wide (".500–1.000" against
+   ".611–.667") and twelve lines wobble instead of scanning. */
+.idxc{flex:0 0 auto;min-width:64px;text-align:right;font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B6558;
+  white-space:nowrap}
+.idxr{flex:0 0 auto;min-width:68px;text-align:right;font-family:'JetBrains Mono',monospace;
+  font-variant-numeric:tabular-nums;font-size:11px;color:#0F1822;white-space:nowrap}
+.chev{flex:0 0 auto;width:7px;height:7px;margin-right:4px;
+  border-right:1.5px solid #6B6558;border-bottom:1.5px solid #6B6558;
+  transform:rotate(-45deg)}
+.idxg.on .chev{transform:rotate(45deg);border-color:#0F1822}
+/* The opened panel. No tint and no indent — a new plane has to show an edge
+   the manila cannot (design.md §4), and the 44px line above it already does. */
+.idxp{padding:0 0 12px}
+
+/* ---- a W-L split row. The label may wrap; the figure never does. Without
+   min-width:0 on the label a long one ("Opponent scores first") pushes its own
+   win pct onto a THIRD line, which the shipped card does today — design.md's
+   harmonization list names it. ---- */
+/* ONE dotted rule per row, not two. The shipped card draws a dotted underline
+   under the label (the door) AND a dotted rule under the whole row, so an open
+   group prints two dotted lines per split and stops reading as a ledger — the
+   card's own CSS comment warns about exactly this and then does it anyway.
+   The label's underline stays, because that is the door; the row rule goes. */
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+.rrow{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding:6px 0;
+  flex-wrap:nowrap}
+/* text-decoration, not border-bottom. Two fifths of these labels wrap ("VS.
+   AMERICAN / LEAGUE CENTRAL"), and a border-bottom then draws one short dash
+   under the second line only, which reads as a mistake rather than as a door.
+   A dotted text-decoration follows every line of the label. */
+.rrow .rl{flex:1 1 auto;min-width:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;
+  font-weight:700;text-transform:uppercase;letter-spacing:.04em;line-height:1.3;color:#1B2A3A;
+  text-decoration:underline dotted #CBC1A7;text-underline-offset:3px}
+.rrow>span:last-child{flex:0 0 auto;white-space:nowrap}
+.rrow .rv{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;
+  color:#0F1822}
+.rrow .rp{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;
+  color:#6B6558}
+
+/* ---- the by-inning matrix, shipped shape, unchanged ---- */
+.inn{display:grid;grid-template-columns:2.6rem 1fr 1fr;gap:2px 8px;align-items:stretch}
+.innh{padding-bottom:2px;border-bottom:1px solid #CBC1A7;font-family:'Barlow Condensed',sans-serif;
+  font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#6B6558}
+.innr{align-self:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;color:#6B6558}
+/* The cell is TWO lines, not three. Shipped stacks record / win pct / date, so
+   ten innings cost thirty lines and the group alone is 644px — a fifth of the
+   whole card. Record and win pct on one line is the same pairing every W-L row
+   on this card already uses, which is the harmonization and the saving at once. */
+.innc{display:flex;flex-direction:column;align-items:flex-start;padding:5px 6px;
+  border-left:1px solid #EDE6D1}
+.innv{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;
+  color:#0F1822;white-space:nowrap}
+.innp{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;
+  color:#6B6558}
+.innl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#6B6558;border-bottom:1px dotted #CBC1A7}
+.innx{display:grid;grid-template-columns:2.6rem 1fr;gap:8px;align-items:center;margin-top:6px;
+  padding-top:6px;border-top:1px solid #EDE6D1}
+
+/* ---- season counts. NO separate shape: a count is a ledger row whose figure
+   happens to be one number instead of two. Shipped stacks the figure over its
+   label in a tile grid, which is the third way this one card draws a row and
+   the reason the counts block reads as a different object bolted on. Label
+   left, figure right, same .rrow — the harmonization Gary asked for, and 391px
+   of tiles becomes ~270px of ledger. ---- */
+
+/* ---- the card foot: one tap puts the card back exactly as it ships today ---- */
+.foot{display:flex;justify-content:flex-end;padding:10px 4px 0;border-top:1px solid #CBC1A7}
+.footb{border:0;background:none;padding:6px 2px;margin:0;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#2F6E4F}
+
+.cap{font-size:11px;color:#6B6558;line-height:1.35}
+.note{font-size:11px;color:#6B6558;line-height:1.35;padding:0 0 8px}
+
+/* ---- the jump bar ---- */
+.jump{display:flex;gap:6px;overflow:hidden;padding:8px 0}
+.jump .jp{border:1px solid #CBC1A7;border-radius:999px;padding:5px 11px;background:#FBF6E9;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#1B2A3A;white-space:nowrap}
+.jump .jp.on{background:#1B2A3A;color:#FBF6E9;border-color:#1B2A3A}
+.jumpstuck{border-bottom:1px solid #CBC1A7;background:#F6EFDC}
+
+/* ---- the measuring frame: a 390x844 phone screen, drawn as a bracket in the
+   gutter so the board says how many screens it is without a caption ---- */
+.scr{position:absolute;left:0;width:3px;background:#B4453A;opacity:.28}
+/* ---- the league mark. A 3px edge in the row's own gutter, never a fill:
+   a fill would put the figure on a second paper and cost it contrast, and
+   this card is read by scanning one column. ---- */
+.rrow{position:relative}
+.rrow.mk{padding-left:9px}
+.rrow.mk::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:3px;border-radius:1px}
+.rrow.mk-top::before{background:#2F6E4F}
+.rrow.mk-bot::before{background:#B4453A}
+.rrow.mk-top .rp,.rrow.mk-top .rv{color:#2F6E4F}
+.rrow.mk-bot .rp,.rrow.mk-bot .rv{color:#B4453A}
+/* The index line's edge is SPLIT in proportion: a group holding three top-5
+   splits and one bottom-5 shows a mostly-green edge with a clay tail. Honest
+   about a mixed group, where one flat colour would not be, and it costs no
+   width on a 390px line. */
+.idxg{position:relative}
+.idxg.hasmk .idxb,.idxg.hasmk .idxp{padding-left:10px}
+/* Bounded to the BUTTON's own 44px, not to the group: a bottom-anchored bar
+   spanned the open panel too, where it ran down the matrix and clipped the
+   inning labels to "ST" and "ND". */
+.mkbar{position:absolute;left:0;top:6px;height:32px;width:4px;border-radius:2px;overflow:hidden;
+  display:flex;flex-direction:column;background:#EDE6D1}
+.mkbar i{display:block;width:4px}
+.innc.mk-top .innv,.innc.mk-top .innp{color:#2F6E4F}
+.innc.mk-bot .innv,.innc.mk-bot .innp{color:#B4453A}
+.innc.mk{box-shadow:inset 3px 0 0 var(--mkc)}
+/* The rank, on its own line under the figure. Takes the row's tone, so the
+   number and the edge say the same thing in two channels. */
+.rk{display:block;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;
+  line-height:1.3;letter-spacing:.01em}
+.rrow.mk-top .rk{color:#2F6E4F}
+.rrow.mk-bot .rk{color:#B4453A}
+.innrk{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.3}
+.innc.mk-top .innrk{color:#2F6E4F}
+.innc.mk-bot .innrk{color:#B4453A}
+/* F3 — a 44px target. "Open all" was 26px and the scope pills ~29px, which is
+   a two-handed control on a page read one-handed with a pencil in the other.
+   The closed card grows by ~40px and is still inside one 844px screen. */
+.tab{min-height:44px;display:inline-flex;align-items:center}
+.footb{min-height:44px;display:inline-flex;align-items:center}
+</style>
+</helmet>
+
+  <div style="position:relative;width:390px;background:#F6EFDC;padding-bottom:28px">
+    <div class="jumpstuck" style="padding:0 16px"><div class="jump"><span class="jp on">Standing</span><span class="jp">Ranks</span><span class="jp">Games</span><span class="jp">Roster</span><span class="jp">Farm</span><span class="jp">About</span></div></div>
+    <div style="padding:0 16px">
+      <div class="srule"></div>
+      <div class="shead">Record, split every way</div>
+      <p class="cap" style="margin:-6px 0 12px">WILSON ON ARRIVAL — eleven lines; no By league at Single-A</p>
+      <div class="card">
+    <div class="chead" style="background:#00274d;border-bottom:3px solid #98002e;color:#FFFFFF"><span>Records</span>
+      <em style="opacity:.82">132 games · win pct</em></div>
+    <div class="tabrow"><span class="tab on">Full season</span><span class="tab">Pre-All-Star</span><span class="tab">Post-All-Star</span></div>
+    <div class="tabrow months"><span class="tab on">All</span><span class="tab">Apr</span><span class="tab">May</span><span class="tab">Jun</span><span class="tab">Jul</span><span class="tab">Aug</span><span class="tab">Sep</span></div>
+    <div class="cbody" style="padding:4px 16px 14px">
+      <div class="idx"><div class="idxg hasmk"><span class="mkbar" aria-hidden="true"><i style="flex:1;background:#2F6E4F"></i><i style="flex:3"></i></span>
+      <button class="idxb" type="button"><span class="idxn">Scoring</span><span class="idxc">4 splits</span><span class="idxr">.128–.699</span>
+        <span class="chev"></span></button></div><div class="idxg hasmk"><span class="mkbar" aria-hidden="true"><i style="flex:1;background:#2F6E4F"></i><i style="flex:4;background:#B4453A"></i><i style="flex:14"></i></span>
+      <button class="idxb" type="button"><span class="idxn">Scoring by inning</span><span class="idxc">19 splits</span><span class="idxr">.429–.818</span>
+        <span class="chev"></span></button></div><div class="idxg hasmk"><span class="mkbar" aria-hidden="true"><i style="flex:1;background:#2F6E4F"></i><i style="flex:2;background:#B4453A"></i><i style="flex:7"></i></span>
+      <button class="idxb" type="button"><span class="idxn">Hits and homers</span><span class="idxc">10 splits</span><span class="idxr">.267–.826</span>
+        <span class="chev"></span></button></div><div class="idxg">
+      <button class="idxb" type="button"><span class="idxn">Defense</span><span class="idxc">2 splits</span><span class="idxr">.444–.571</span>
+        <span class="chev"></span></button></div><div class="idxg hasmk"><span class="mkbar" aria-hidden="true"><i style="flex:5;background:#2F6E4F"></i><i style="flex:2;background:#B4453A"></i><i style="flex:2"></i></span>
+      <button class="idxb" type="button"><span class="idxn">Leading and trailing</span><span class="idxc">9 splits</span><span class="idxr">.000–.981</span>
+        <span class="chev"></span></button></div><div class="idxg hasmk"><span class="mkbar" aria-hidden="true"><i style="flex:3;background:#2F6E4F"></i><i style="flex:2"></i></span>
+      <button class="idxb" type="button"><span class="idxn">Close games</span><span class="idxc">5 splits</span><span class="idxr">.500–.813</span>
+        <span class="chev"></span></button></div><div class="idxg hasmk"><span class="mkbar" aria-hidden="true"><i style="flex:1;background:#B4453A"></i><i style="flex:10"></i></span>
+      <button class="idxb" type="button"><span class="idxn">Starting pitching</span><span class="idxc">11 splits</span><span class="idxr">.214–.526</span>
+        <span class="chev"></span></button></div><div class="idxg">
+      <button class="idxb" type="button"><span class="idxn">Schedule</span><span class="idxc">6 splits</span><span class="idxr">.467–.619</span>
+        <span class="chev"></span></button></div><div class="idxg hasmk"><span class="mkbar" aria-hidden="true"><i style="flex:2;background:#2F6E4F"></i><i style="flex:1;background:#B4453A"></i><i style="flex:3"></i></span>
+      <button class="idxb" type="button"><span class="idxn">By month</span><span class="idxc">6 splits</span><span class="idxr">.375–.630</span>
+        <span class="chev"></span></button></div><div class="idxg">
+      <button class="idxb" type="button"><span class="idxn">By division</span><span class="idxc">2 splits</span><span class="idxr">.436–.516</span>
+        <span class="chev"></span></button></div><div class="idxg hasmk"><span class="mkbar" aria-hidden="true"><i style="flex:3;background:#2F6E4F"></i><i style="flex:2;background:#B4453A"></i><i style="flex:13"></i></span>
+      <button class="idxb" type="button"><span class="idxn">Season counts</span><span class="idxc">18 tallies</span>
+        <span class="chev"></span></button></div></div><div class="foot"><button class="footb" type="button">Open all ›</button></div>
+    </div></div>
+      <div class="card"><div class="chead" style="background:#00274d;border-bottom:3px solid #98002e;color:#FFFFFF"><span>Record by day of week</span><em style="opacity:.82">win pct</em></div><div class="cbody"><div class="rgrid"><div class="rrow"><span class="rl">Sun</span><span><span class="rv">9-10</span> <span class="rp">.474</span></span></div><div class="rrow"><span class="rl">Mon</span><span><span class="rv">2-3</span> <span class="rp">.400</span></span></div><div class="rrow"><span class="rl">Tue</span><span><span class="rv">11-11</span> <span class="rp">.500</span></span></div><div class="rrow"><span class="rl">Wed</span><span><span class="rv">10-12</span> <span class="rp">.455</span></span></div><div class="rrow"><span class="rl">Thu</span><span><span class="rv">9-10-1</span> <span class="rp">.474</span></span></div><div class="rrow"><span class="rl">Fri</span><span><span class="rv">12-10</span> <span class="rp">.545</span></span></div><div class="rrow"><span class="rl">Sat</span><span><span class="rv">11-10-1</span> <span class="rp">.524</span></span></div></div></div></div>
+    </div>
+  </div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

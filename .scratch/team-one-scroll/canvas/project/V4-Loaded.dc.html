@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>v4 · loaded</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F6EFDC;font-family:'Source Sans 3',system-ui,sans-serif;color:#1B2A3A;
+  -webkit-font-smoothing:antialiased}
+a{color:#2F6E4F;text-decoration:none}a:hover{color:#2F6E4F}
+.u{text-transform:uppercase}
+.disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+/* ---- the card, exactly as shipped (09-team-info.css). design.md §4: the card
+   is right and stays. Nothing here changes it. ---- */
+.card{border:1px solid #CBC1A7;border-radius:10px;background:#FBF6E9;
+  box-shadow:0 1px 2px rgba(22,34,47,.08), 0 4px 12px rgba(22,34,47,.06);overflow:hidden}
+.card+.card{margin-top:16px}
+.chead{display:flex;align-items:baseline;flex-wrap:wrap;justify-content:space-between;gap:8px;
+  padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em}
+.chead>span{font-size:1.2em}
+.chead em{font-style:normal;font-weight:400;font-size:12px;letter-spacing:.05em}
+.cbody{padding:12px 16px 16px}
+
+/* ---- THE BAND HEAD, settled at v4. A FULL-BLEED 2px ink rule, the name at
+   --fs-h2 21px, then a standfirst at --fs-small 13px in --ink-1, natural case,
+   16px under it.
+
+   The rule runs edge to edge of the PAGE, not from the end of the words to the
+   column edge. A card is inset 16px and rounded, so a rule that runs full-bleed
+   is a plane no card can reach at any weight or colour — and a plane difference
+   survives a one-handed glance where a weight difference does not.
+
+   The standfirst is not the band's question. A second screen ANSWERS; it does
+   not ask. It says what is in the band, and it is also where 2G's level
+   qualifier and Money's "not dated" note land, because those are sentences. ---- */
+.brule{height:2px;background:#0F1822;margin:0 -16px 12px}
+.bhead4{margin:0 0 10px;font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:#0F1822;line-height:1.25}
+/* 16px under the standfirst, not 12: the line belongs to the HEAD, and at 12px
+   it sat close enough to the first card to read as that card's caption. */
+.bq4{margin:0 0 16px;font-size:13px;line-height:1.45;color:#1B2A3A}
+
+/* ---- THE SUB-HEAD: the same gesture one step down. Full-bleed, 1px, pencil
+   rather than 2px ink. So the page reads FULL-BLEED = page structure,
+   CONTAINED = card structure — four levels from two devices and two planes. ---- */
+.srule{height:1px;background:#CBC1A7;margin:32px -16px 10px}
+.shead{margin:0 0 12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:#1B2A3A;line-height:1.2}
+
+/* ---- the jump bar. Club-NEUTRAL navy per ADR-0030: a club may colour a card
+   that identifies the club, never page chrome. Shared with the player hub, so
+   it is drawn as one control rather than as a team-page control. ---- */
+.jump{display:flex;gap:6px;overflow:hidden;padding:8px 0}
+.jump .jp{border:1px solid #CBC1A7;border-radius:999px;padding:5px 11px;background:#FBF6E9;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#1B2A3A;white-space:nowrap}
+.jump .jp.on{background:#1B2A3A;color:#FBF6E9;border-color:#1B2A3A}
+.jumpstuck{border-bottom:1px solid #CBC1A7;background:#F6EFDC}
+
+
+/* ---- v1-v3's band head: BroadcastSection promoted UNCHANGED, with its
+   trailing --clay rule running from the end of the words to the column edge.
+   It is not the settled head — v4 replaced it with the full-bleed ink rule in
+   system.mjs — and it stays here because the three rejected versions still
+   draw it, which is what makes the rejection visible rather than asserted. ---- */
+.bhead{display:flex;align-items:center;gap:12px;margin:0 0 12px;
+  font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;color:#0F1822;line-height:1.25}
+.bhead::after{content:'';flex:1 1 auto;height:2px;background:#B4453A;opacity:.5}
+.bq{margin:0 0 12px;font-size:13px;line-height:1.45;color:#3C4A5A}
+
+/* ---- tables and rows ---- */
+table{width:100%;border-collapse:collapse}
+th{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:#6B6558;text-align:right;padding:6px 4px;
+  border-bottom:1px solid #DED6C0}
+th:first-child{text-align:left}
+td{font-size:12px;padding:7px 4px;text-align:right;border-bottom:1px solid #EDE6D1}
+td:first-child{text-align:left}
+.tnum{font-family:'JetBrains Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums}
+.me{background:#E3EDE2}
+.gl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:#6B6558;padding-top:14px;margin-top:14px;
+  border-top:1px solid #DED6C0}
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+.rrow{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding:6px 0;
+  border-bottom:1px dotted #CBC1A7;flex-wrap:nowrap}
+/* The label wraps and the figure does not. Without min-width:0 a long label
+   ("Opponent scores first") pushes its own pct onto a third line, which the
+   shipped card does today — see design.md's harmonization list. */
+.rrow .rl{font-size:11px;line-height:1.2;color:#1B2A3A;text-transform:uppercase;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;
+  flex:1 1 auto;min-width:0}
+.rrow>span:last-child{flex:0 0 auto;white-space:nowrap}
+.rrow .rv{font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap;color:#0F1822}
+.rrow .rp{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6B6558}
+.pill{display:inline-block;border:1px solid #CBC1A7;border-radius:999px;padding:3px 10px;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;background:#FFFDF6;color:#1B2A3A}
+.tabrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab{border:1px solid #CBC1A7;border-radius:6px;padding:4px 10px;background:#FFFDF6;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#1B2A3A}
+.tab.on{background:#1B2A3A;color:#FBF6E9;border-color:#1B2A3A}
+.cap{font-size:11px;color:#6B6558;line-height:1.35}
+.blurb{font-size:13px;line-height:1.45;color:#3C4A5A;margin:0 0 12px}
+
+/* ---- skeleton + empty ---- */
+.sk{background:#EDE6D1;border-radius:3px}
+.skline{height:11px;margin:9px 0}
+.empty{padding:18px 16px;font-size:13px;line-height:1.45;color:#3C4A5A}
+</style>
+</helmet>
+
+  <div style="width:390px;height:5200px;background:#F6EFDC;overflow:hidden">
+    <div class="jumpstuck" style="padding:0 16px">
+      <div class="jump"><span class="jp on">Standing</span><span class="jp">Ranks</span><span class="jp">Games</span><span class="jp">Roster</span><span class="jp">Farm</span><span class="jp">Money</span><span class="jp">About</span></div>
+    </div>
+    <div style="padding:0 16px 24px">
+      <div style="height:48px"></div>
+      <div>
+        <div class="brule"></div><div class="bhead4">Standing</div><p class="bq4">Where they stand, and the record split every way.</p>
+        <div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>National League Central</span><span class="pill">Postseason Odds</span></div><div class="cbody"><table><tr><th>Team</th><th>W</th><th>L</th><th>GB</th><th>Streak</th><th>L10</th></tr><tr class="me"><td class="u disp" style="font-size:12px">Brewers</td><td class="tnum">98</td><td class="tnum">58</td><td class="tnum">-</td><td class="tnum">W3</td><td class="tnum">8-2</td></tr><tr><td class="u disp" style="font-size:12px">Cubs</td><td class="tnum">87</td><td class="tnum">69</td><td class="tnum">11.0</td><td class="tnum">W2</td><td class="tnum">6-4</td></tr><tr><td class="u disp" style="font-size:12px">Pirates</td><td class="tnum">79</td><td class="tnum">77</td><td class="tnum">19.0</td><td class="tnum">W4</td><td class="tnum">6-4</td></tr><tr><td class="u disp" style="font-size:12px">Cardinals</td><td class="tnum">76</td><td class="tnum">80</td><td class="tnum">22.0</td><td class="tnum">W1</td><td class="tnum">4-6</td></tr><tr><td class="u disp" style="font-size:12px">Reds</td><td class="tnum">72</td><td class="tnum">84</td><td class="tnum">26.0</td><td class="tnum">L2</td><td class="tnum">3-7</td></tr></table></div></div><div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>Season report</span><em style="opacity:.82">How this is calculated</em></div><div class="cbody">
+    <div style="padding:10px 0;border-top:1px solid #EDE6D1">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+        <div><div class="disp u" style="font-size:14px;color:#0F1822">Season Grade</div>
+          <div class="cap">The class of the league</div></div>
+        <div style="text-align:right">
+          <div class="mono" style="font-size:16px;color:#0F1822">9.4<span
+            class="cap">/10</span></div>
+          <div class="cap mono">1 of 30</div></div>
+      </div><div style="display:flex;gap:1px;margin-top:7px"><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div></div>
+    </div>
+    <div style="padding:10px 0;border-top:1px solid #EDE6D1">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+        <div><div class="disp u" style="font-size:14px;color:#0F1822">Last 10</div>
+          <div class="cap">On one of those runs</div></div>
+        <div style="text-align:right">
+          <div class="mono" style="font-size:16px;color:#0F1822">8.5<span
+            class="cap">/10</span></div>
+          <div class="cap mono">3 of 30</div></div>
+      </div><div style="display:flex;gap:1px;margin-top:7px"><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#2F6E4F"></div><div style="flex:1;height:14px;background:#EDE6D1"></div><div style="flex:1;height:14px;background:#EDE6D1"></div></div>
+    </div></div></div>
+        <div class="srule"></div><div class="shead">Record, split every way</div>
+        <div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>Records</span><em style="opacity:.82">156 games · win pct</em></div><div class="cbody"><div class="tabrow"><span class="tab on">Full season</span><span class="tab">Pre-All-Star</span><span class="tab">Post-All-Star</span></div><div class="tabrow"><span class="tab on">All</span><span class="tab">Mar</span><span class="tab">Apr</span><span class="tab">May</span><span class="tab">Jun</span><span class="tab">Jul</span><span class="tab">Aug</span><span class="tab">Sep</span></div><div class="gl">Scoring</div><div class="rgrid">
+    <div class="rrow"><span class="rl">Scoring first</span>
+      <span><span class="rv">64-23</span> <span class="rp">.736</span></span></div>
+    <div class="rrow"><span class="rl">Opponent scores first</span>
+      <span><span class="rv">34-35</span> <span class="rp">.493</span></span></div>
+    <div class="rrow"><span class="rl">Scoring 4+ runs</span>
+      <span><span class="rv">82-14</span> <span class="rp">.854</span></span></div>
+    <div class="rrow"><span class="rl">Scoring 3 or fewer</span>
+      <span><span class="rv">16-44</span> <span class="rp">.267</span></span></div></div><div class="gl">Scoring by inning</div><div class="cap" style="margin:4px 0 2px">W-L, win pct, and the last time it happened.</div><table style="margin-top:6px"><tr><th>Inn</th><th style="text-align:left">Top</th><th style="text-align:left">Bottom</th></tr><tr><td class="disp u" style="font-size:12px">1st</td><td style="text-align:left"><span class="mono" style="font-size:14px">11-4</span><div class="cap mono">.733</div><div class="cap">Sep 5 L</div></td><td style="text-align:left"><span class="mono" style="font-size:14px">24-8</span><div class="cap mono">.750</div><div class="cap">Sep 12 W</div></td></tr><tr><td class="disp u" style="font-size:12px">2nd</td><td style="text-align:left"><span class="mono" style="font-size:14px">21-6</span><div class="cap mono">.778</div><div class="cap">Sep 20 W</div></td><td style="text-align:left"><span class="mono" style="font-size:14px">17-6</span><div class="cap mono">.739</div><div class="cap">Sep 13 L</div></td></tr><tr><td class="disp u" style="font-size:12px">3rd</td><td style="text-align:left"><span class="mono" style="font-size:14px">13-8</span><div class="cap mono">.619</div><div class="cap">Sep 5 L</div></td><td style="text-align:left"><span class="mono" style="font-size:14px">12-3</span><div class="cap mono">.800</div><div class="cap">Sep 12 W</div></td></tr><tr><td class="disp u" style="font-size:12px">4th</td><td style="text-align:left"><span class="mono" style="font-size:14px">14-8</span><div class="cap mono">.636</div><div class="cap">Sep 20 W</div></td><td style="text-align:left"><span class="mono" style="font-size:14px">21-5</span><div class="cap mono">.808</div><div class="cap">Sep 12 W</div></td></tr><tr><td class="disp u" style="font-size:12px">5th</td><td style="text-align:left"><span class="mono" style="font-size:14px">15-8</span><div class="cap mono">.652</div><div class="cap">Sep 16 W</div></td><td style="text-align:left"><span class="mono" style="font-size:14px">14-8</span><div class="cap mono">.636</div><div class="cap">Sep 12 W</div></td></tr><tr><td class="disp u" style="font-size:12px">6th</td><td style="text-align:left"><span class="mono" style="font-size:14px">12-5</span><div class="cap mono">.706</div><div class="cap">Sep 17 L</div></td><td style="text-align:left"><span class="mono" style="font-size:14px">21-6</span><div class="cap mono">.778</div><div class="cap">Sep 9 W</div></td></tr><tr><td class="disp u" style="font-size:12px">7th</td><td style="text-align:left"><span class="mono" style="font-size:14px">18-8</span><div class="cap mono">.692</div><div class="cap">Sep 20 W</div></td><td style="text-align:left"><span class="mono" style="font-size:14px">18-6</span><div class="cap mono">.750</div><div class="cap">Sep 13 L</div></td></tr><tr><td class="disp u" style="font-size:12px">8th</td><td style="text-align:left"><span class="mono" style="font-size:14px">14-6</span><div class="cap mono">.700</div><div class="cap">Sep 17 L</div></td><td style="text-align:left"><span class="mono" style="font-size:14px">21-4</span><div class="cap mono">.840</div><div class="cap">Sep 11 W</div></td></tr><tr><td class="disp u" style="font-size:12px">9th</td><td style="text-align:left"><span class="mono" style="font-size:14px">12-8</span><div class="cap mono">.600</div><div class="cap">Sep 18 W</div></td><td style="text-align:left"><span class="mono" style="font-size:14px">3-3</span><div class="cap mono">.500</div><div class="cap">Sep 8 W</div></td></tr><tr><td class="disp u" style="font-size:12px">Extras</td><td style="text-align:left"><span class="mono" style="font-size:14px">11-3</span><div class="cap mono">.786</div><div class="cap">Sep 18 W</div></td><td style="text-align:left"></td></tr></table><div class="gl">Hits and homers</div><div class="rgrid">
+    <div class="rrow"><span class="rl">Out-hitting opponent</span>
+      <span><span class="rv">70-15</span> <span class="rp">.824</span></span></div>
+    <div class="rrow"><span class="rl">Out-hit by opponent</span>
+      <span><span class="rv">15-38</span> <span class="rp">.283</span></span></div>
+    <div class="rrow"><span class="rl">Hit totals even</span>
+      <span><span class="rv">13-5</span> <span class="rp">.722</span></span></div>
+    <div class="rrow"><span class="rl">10 or more hits</span>
+      <span><span class="rv">53-11</span> <span class="rp">.828</span></span></div>
+    <div class="rrow"><span class="rl">Hitting a home run</span>
+      <span><span class="rv">64-29</span> <span class="rp">.688</span></span></div>
+    <div class="rrow"><span class="rl">Not hitting a home run</span>
+      <span><span class="rv">34-29</span> <span class="rp">.540</span></span></div>
+    <div class="rrow"><span class="rl">Hitting 2+ homers</span>
+      <span><span class="rv">30-10</span> <span class="rp">.750</span></span></div>
+    <div class="rrow"><span class="rl">Opponent homers</span>
+      <span><span class="rv">51-46</span> <span class="rp">.526</span></span></div>
+    <div class="rrow"><span class="rl">Opponent held homerless</span>
+      <span><span class="rv">47-12</span> <span class="rp">.797</span></span></div>
+    <div class="rrow"><span class="rl">Opponent hits 2+ homers</span>
+      <span><span class="rv">15-27</span> <span class="rp">.357</span></span></div></div><div class="gl">Defense</div><div class="rgrid">
+    <div class="rrow"><span class="rl">Committing an error</span>
+      <span><span class="rv">31-26</span> <span class="rp">.544</span></span></div>
+    <div class="rrow"><span class="rl">Committing no errors</span>
+      <span><span class="rv">67-32</span> <span class="rp">.677</span></span></div></div><div class="gl">Leading and trailing</div><div class="rgrid">
+    <div class="rrow"><span class="rl">Leading after 6 innings</span>
+      <span><span class="rv">69-11</span> <span class="rp">.863</span></span></div>
+    <div class="rrow"><span class="rl">Trailing after 6 innings</span>
+      <span><span class="rv">13-45</span> <span class="rp">.224</span></span></div>
+    <div class="rrow"><span class="rl">Tied after 6 innings</span>
+      <span><span class="rv">16-2</span> <span class="rp">.889</span></span></div>
+    <div class="rrow"><span class="rl">Leading after 7 innings</span>
+      <span><span class="rv">75-5</span> <span class="rp">.938</span></span></div>
+    <div class="rrow"><span class="rl">Trailing after 7 innings</span>
+      <span><span class="rv">11-47</span> <span class="rp">.190</span></span></div>
+    <div class="rrow"><span class="rl">Tied after 7 innings</span>
+      <span><span class="rv">12-6</span> <span class="rp">.667</span></span></div>
+    <div class="rrow"><span class="rl">Leading after 8 innings</span>
+      <span><span class="rv">84-3</span> <span class="rp">.966</span></span></div>
+    <div class="rrow"><span class="rl">Trailing after 8 innings</span>
+      <span><span class="rv">4-49</span> <span class="rp">.075</span></span></div>
+    <div class="rrow"><span class="rl">Tied after 8 innings</span>
+      <span><span class="rv">10-6</span> <span class="rp">.625</span></span></div></div><div class="gl">Close games</div><div class="rgrid">
+    <div class="rrow"><span class="rl">One-run games</span>
+      <span><span class="rv">26-20</span> <span class="rp">.565</span></span></div>
+    <div class="rrow"><span class="rl">Two-run games</span>
+      <span><span class="rv">16-12</span> <span class="rp">.571</span></span></div>
+    <div class="rrow"><span class="rl">Extra innings</span>
+      <span><span class="rv">11-5</span> <span class="rp">.688</span></span></div>
+    <div class="rrow"><span class="rl">Decided in last at-bat</span>
+      <span><span class="rv">14-10</span> <span class="rp">.583</span></span></div>
+    <div class="rrow"><span class="rl">Walk-off games</span>
+      <span><span class="rv">6-4</span> <span class="rp">.600</span></span></div></div><div class="gl">Starting pitching</div><div class="rgrid">
+    <div class="rrow"><span class="rl">Quality start</span>
+      <span><span class="rv">38-14</span> <span class="rp">.731</span></span></div>
+    <div class="rrow"><span class="rl">Starter goes 6+ innings</span>
+      <span><span class="rv">38-15</span> <span class="rp">.717</span></span></div>
+    <div class="rrow"><span class="rl">Starter goes under 6</span>
+      <span><span class="rv">60-43</span> <span class="rp">.583</span></span></div>
+    <div class="rrow"><span class="rl">Opposing starter 6+</span>
+      <span><span class="rv">23-23</span> <span class="rp">.500</span></span></div>
+    <div class="rrow"><span class="rl">Opposing starter under 6</span>
+      <span><span class="rv">75-35</span> <span class="rp">.682</span></span></div>
+    <div class="rrow"><span class="rl">Faced an opener</span>
+      <span><span class="rv">4-0</span> <span class="rp">1.000</span></span></div>
+    <div class="rrow"><span class="rl">Starter exits before 2 innings</span>
+      <span><span class="rv">2-1</span> <span class="rp">.667</span></span></div>
+    <div class="rrow"><span class="rl">Opposing starter exits before 2</span>
+      <span><span class="rv">1-0</span> <span class="rp">1.000</span></span></div>
+    <div class="rrow"><span class="rl">Vs. right-handed starter</span>
+      <span><span class="rv">63-44</span> <span class="rp">.589</span></span></div>
+    <div class="rrow"><span class="rl">Vs. left-handed starter</span>
+      <span><span class="rv">35-14</span> <span class="rp">.714</span></span></div></div><div class="gl">Schedule</div><div class="rgrid">
+    <div class="rrow"><span class="rl">Day games</span>
+      <span><span class="rv">34-24</span> <span class="rp">.586</span></span></div>
+    <div class="rrow"><span class="rl">Night games</span>
+      <span><span class="rv">64-34</span> <span class="rp">.653</span></span></div>
+    <div class="rrow"><span class="rl">Doubleheaders</span>
+      <span><span class="rv">3-3</span> <span class="rp">.500</span></span></div>
+    <div class="rrow"><span class="rl">Series opener</span>
+      <span><span class="rv">36-15</span> <span class="rp">.706</span></span></div>
+    <div class="rrow"><span class="rl">Series finale</span>
+      <span><span class="rv">29-22</span> <span class="rp">.569</span></span></div>
+    <div class="rrow"><span class="rl">Getaway day</span>
+      <span><span class="rv">20-19</span> <span class="rp">.513</span></span></div></div><div class="gl">By month</div><div class="rgrid">
+    <div class="rrow"><span class="rl">March</span>
+      <span><span class="rv">4-1</span> <span class="rp">.800</span></span></div>
+    <div class="rrow"><span class="rl">April</span>
+      <span><span class="rv">12-13</span> <span class="rp">.480</span></span></div>
+    <div class="rrow"><span class="rl">May</span>
+      <span><span class="rv">19-7</span> <span class="rp">.731</span></span></div>
+    <div class="rrow"><span class="rl">June</span>
+      <span><span class="rv">17-10</span> <span class="rp">.630</span></span></div>
+    <div class="rrow"><span class="rl">July</span>
+      <span><span class="rv">16-10</span> <span class="rp">.615</span></span></div>
+    <div class="rrow"><span class="rl">August</span>
+      <span><span class="rv">17-12</span> <span class="rp">.586</span></span></div>
+    <div class="rrow"><span class="rl">September</span>
+      <span><span class="rv">13-5</span> <span class="rp">.722</span></span></div></div><div class="gl">By division</div><div class="rgrid">
+    <div class="rrow"><span class="rl">Vs. American League Central</span>
+      <span><span class="rv">12-6</span> <span class="rp">.667</span></span></div>
+    <div class="rrow"><span class="rl">Vs. American League East</span>
+      <span><span class="rv">11-4</span> <span class="rp">.733</span></span></div>
+    <div class="rrow"><span class="rl">Vs. American League West</span>
+      <span><span class="rv">9-6</span> <span class="rp">.600</span></span></div>
+    <div class="rrow"><span class="rl">Vs. National League Central</span>
+      <span><span class="rv">32-17</span> <span class="rp">.653</span></span></div>
+    <div class="rrow"><span class="rl">Vs. National League East</span>
+      <span><span class="rv">16-11</span> <span class="rp">.593</span></span></div>
+    <div class="rrow"><span class="rl">Vs. National League West</span>
+      <span><span class="rv">18-14</span> <span class="rp">.563</span></span></div></div><div class="gl">By league</div><div class="rgrid">
+    <div class="rrow"><span class="rl">Vs. American League</span>
+      <span><span class="rv">32-16</span> <span class="rp">.667</span></span></div>
+    <div class="rrow"><span class="rl">Vs. National League</span>
+      <span><span class="rv">66-42</span> <span class="rp">.611</span></span></div></div><div class="gl">Season counts</div><div class="rgrid">
+    <div class="rrow"><span class="rl">Wins after trailing</span>
+      <span class="rv">41</span></div>
+    <div class="rrow"><span class="rl">Losses after leading</span>
+      <span class="rv">28</span></div>
+    <div class="rrow"><span class="rl">Shutouts thrown</span>
+      <span class="rv">12</span></div>
+    <div class="rrow"><span class="rl">Times shut out</span>
+      <span class="rv">6</span></div>
+    <div class="rrow"><span class="rl">Walk-off wins</span>
+      <span class="rv">6</span></div>
+    <div class="rrow"><span class="rl">Walk-off losses</span>
+      <span class="rv">4</span></div>
+    <div class="rrow"><span class="rl">Times batted around</span>
+      <span class="rv">16</span></div>
+    <div class="rrow"><span class="rl">Series sweeps</span>
+      <span class="rv">10</span></div>
+    <div class="rrow"><span class="rl">Series swept</span>
+      <span class="rv">3</span></div>
+    <div class="rrow"><span class="rl">Series wins</span>
+      <span class="rv">35</span></div>
+    <div class="rrow"><span class="rl">Series losses</span>
+      <span class="rv">12</span></div>
+    <div class="rrow"><span class="rl">Longest win streak</span>
+      <span class="rv">5</span></div>
+    <div class="rrow"><span class="rl">Longest losing streak</span>
+      <span class="rv">6</span></div>
+    <div class="rrow"><span class="rl">Days in 1st place</span>
+      <span class="rv">135</span></div>
+    <div class="rrow"><span class="rl">Days in 2nd place</span>
+      <span class="rv">9</span></div>
+    <div class="rrow"><span class="rl">Days in 3rd place</span>
+      <span class="rv">8</span></div>
+    <div class="rrow"><span class="rl">Days in 4th place</span>
+      <span class="rv">13</span></div>
+    <div class="rrow"><span class="rl">Days in 5th place</span>
+      <span class="rv">7</span></div></div></div></div><div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>Record by day of week</span><em style="opacity:.82">win pct</em></div><div class="cbody"><div class="rgrid">
+    <div class="rrow"><span class="rl">Sun</span>
+      <span><span class="rv">14-12</span> <span class="rp">.538</span></span></div>
+    <div class="rrow"><span class="rl">Mon</span>
+      <span><span class="rv">10-6</span> <span class="rp">.625</span></span></div>
+    <div class="rrow"><span class="rl">Tue</span>
+      <span><span class="rv">18-6</span> <span class="rp">.750</span></span></div>
+    <div class="rrow"><span class="rl">Wed</span>
+      <span><span class="rv">14-10</span> <span class="rp">.583</span></span></div>
+    <div class="rrow"><span class="rl">Thu</span>
+      <span><span class="rv">9-6</span> <span class="rp">.600</span></span></div>
+    <div class="rrow"><span class="rl">Fri</span>
+      <span><span class="rv">17-6</span> <span class="rp">.739</span></span></div>
+    <div class="rrow"><span class="rl">Sat</span>
+      <span><span class="rv">16-12</span> <span class="rp">.571</span></span></div></div></div></div><div class="card"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5"><span>Comeback wins</span><em style="opacity:.82">all 30 teams</em></div><div class="cbody"><p class="blurb">How often they rallied to win after their chance of winning the game sank this low. Each rail plots all 30 clubs from 0% to the MLB leader; the ring is this club, and the tick is the MLB average.</p>
+    <div style="margin:14px 0 0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+        <span class="disp u" style="font-size:12px;color:#1B2A3A;letter-spacing:.06em">Down to ≤10%</span>
+        <span><span class="mono" style="font-size:14px;color:#0F1822">9%</span>
+          <span class="cap mono"> · 6 of 64</span></span>
+      </div>
+      <div style="position:relative;height:22px;margin-top:6px">
+        <div style="position:absolute;left:0;right:0;top:11px;height:1px;background:#CBC1A7"></div>
+        <div style="position:absolute;left:46%;top:2px;width:1px;height:18px;background:#3C4A5A"></div>
+        <div style="position:absolute;left:calc(69% - 5px);top:6px;width:10px;height:10px;
+          border:2px solid #0F1822;border-radius:999px;background:#FFFDF6"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between"><span class="cap mono">0%</span>
+        <span class="cap">MLB avg 6%</span><span class="cap mono">13%</span></div>
+    </div>
+    <div style="margin:14px 0 0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+        <span class="disp u" style="font-size:12px;color:#1B2A3A;letter-spacing:.06em">Down to ≤20%</span>
+        <span><span class="mono" style="font-size:14px;color:#0F1822">18%</span>
+          <span class="cap mono"> · 13 of 71</span></span>
+      </div>
+      <div style="position:relative;height:22px;margin-top:6px">
+        <div style="position:absolute;left:0;right:0;top:11px;height:1px;background:#CBC1A7"></div>
+        <div style="position:absolute;left:64%;top:2px;width:1px;height:18px;background:#3C4A5A"></div>
+        <div style="position:absolute;left:calc(82% - 5px);top:6px;width:10px;height:10px;
+          border:2px solid #0F1822;border-radius:999px;background:#FFFDF6"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between"><span class="cap mono">0%</span>
+        <span class="cap">MLB avg 14%</span><span class="cap mono">22%</span></div>
+    </div>
+    <div style="margin:14px 0 0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+        <span class="disp u" style="font-size:12px;color:#1B2A3A;letter-spacing:.06em">Down to ≤30%</span>
+        <span><span class="mono" style="font-size:14px;color:#0F1822">34%</span>
+          <span class="cap mono"> · 30 of 88</span></span>
+      </div>
+      <div style="position:relative;height:22px;margin-top:6px">
+        <div style="position:absolute;left:0;right:0;top:11px;height:1px;background:#CBC1A7"></div>
+        <div style="position:absolute;left:65%;top:2px;width:1px;height:18px;background:#3C4A5A"></div>
+        <div style="position:absolute;left:calc(100% - 5px);top:6px;width:10px;height:10px;
+          border:2px solid #0F1822;border-radius:999px;background:#FFFDF6"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between"><span class="cap mono">0%</span>
+        <span class="cap">MLB avg 22%</span><span class="cap mono">34%</span></div>
+    </div></div></div>
+        
+      </div>
+      <div style="height:48px"></div>
+      <div class="brule"></div><div class="bhead4">Ranks</div>
+           <p class="bq4">Where this club sits against its league.</p>
+      <div class="card" style="opacity:.45"><div class="chead" style="background:#12284B;border-bottom:3px solid #A6801F;color:#F8F8F5">
+        <span>Team batting</span><em>rank out of 30</em></div>
+        <div class="cbody"><div class="cap">the next band begins — shown so the seam is judged, not described</div></div></div>
+    </div>
+  </div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":5200}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
