@@ -201,13 +201,11 @@
    what made this bar 155px tall — a fifth of a phone viewport, on the screen
    with the least to spare. The raised z-index keeps its own taps clear of the
    reveal's dead space, same as the two-row bar does. */
-.pagenav--focus .refreshbtn--float {
+.pagenav--focus .innings__refresh--float {
   position: relative;
   z-index: 3;
   flex: 0 0 auto;
   min-width: var(--tap-min);
-  padding: 0 var(--space-3);
-  background: var(--surface-card);
 }
 
 /* No room for the staleness stamp on one row. It stays in the DOM for assistive
@@ -237,14 +235,14 @@
    that is no longer above the button.
 
    The `:has()` copy of the selector is not redundant. The rule it must beat is
-   `.pagenav--innings:has(.refreshbtn--float) .btn::after` (0,3,1), and a plain
+   `.pagenav--innings:has(.innings__refresh--float) .btn::after` (0,3,1), and a plain
    `.pagenav--focus .btn::after` is only (0,2,1) — so it LOST, the -76px claim
    stayed, and the hit area reached 68px above the bar into real page content.
    e2e/reveal-hit-area.spec.js's "the page above the bar keeps its own taps"
    caught exactly that. Matching the `:has()` ties the specificity, and this file
    imports later, so order decides. */
-.pagenav--focus:has(.refreshbtn--float) .btn::after,
-.pagenav--focus .btn::after {
+.pagenav--focus:has(.innings__refresh--float) .btn:where(:not(.innings__refresh))::after,
+.pagenav--focus .btn:where(:not(.innings__refresh))::after {
   top: calc(-1 * var(--space-2));
   bottom: calc(-1 * var(--space-2) - env(safe-area-inset-bottom));
 }

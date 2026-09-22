@@ -33,6 +33,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { teamTabPath } from '../lib/route.js'
 import { Door } from '../components/ui/control/Door.jsx'
+import { Button } from '../components/ui/control/Button.jsx'
 import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
@@ -259,7 +260,7 @@ export function TeamInfo({
           onReload={onReload}
           loading={loading}
           lastUpdated={lastUpdated}
-          className="refreshbtn--float"
+          className="innings__refresh--float"
         />
         {onCatchUp ? (
           /* CATCH UP TO LIVE (ADR-0055), on a game already in progress. The
@@ -1246,14 +1247,14 @@ function GameNotesButton({ feed, side }) {
   // The ↗ says so.
   return (
     <a
-      className="notesbtn"
+      className="btn btn--control innings__notes"
       href={notes.url}
       target="_blank"
       rel="noopener noreferrer"
       title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
     >
       Game Notes
-      <span className="notesbtn__ext" aria-hidden="true">↗</span>
+      <span className="btn__icon" aria-hidden="true">↗</span>
     </a>
   )
 }
@@ -1290,18 +1291,16 @@ export function RefreshButton({ onReload, loading, lastUpdated, className = '' }
   if (!onReload) return null
   return (
     <>
-      <button
-        type="button"
-        className={`refreshbtn ${className}`.trim()}
+      <Button
+        size="control"
+        icon="↻"
+        busy={loading}
+        className={`innings__refresh ${className}`.trim()}
         onClick={onReload}
-        disabled={loading}
         aria-label="Refresh live game data"
       >
-        <span className="refreshbtn__icon" aria-hidden="true">
-          ↻
-        </span>
         {loading ? 'Refreshing…' : 'Refresh'}
-      </button>
+      </Button>
       {lastUpdated && !loading && (
         <span className="refreshstamp">as of {timeOfDay(lastUpdated)}</span>
       )}

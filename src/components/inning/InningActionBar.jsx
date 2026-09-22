@@ -18,7 +18,7 @@ import { ordinal } from '../../lib/format.js'
 // IT CARRIES THE ONLY REFRESH, AT EVERY WIDTH — passed in as `refresh` rather
 // than built here, since the control belongs to the screen that owns the
 // reload. Refresh left `.inningchrome` entirely and nothing hides
-// `.refreshbtn--float` at any width, so this bar is where you reach for it
+// `.innings__refresh--float` at any width, so this bar is where you reach for it
 // during a live game, phone and desktop alike. That is also why
 // `.pagenav--innings`'s hit-area rules measure around a Refresh row that is
 // always there, and why focus mode's one-row bar shrinks it to icon scale
@@ -26,7 +26,7 @@ import { ordinal } from '../../lib/format.js'
 // the game is over, when there is nothing left to fetch — a control that cannot
 // change anything should not be on the one row a thumb is working. The
 // dead-space claims answer for themselves there: the -76px reach is behind
-// `:has(.refreshbtn--float)`, with a bare -20px for exactly that case.
+// `:has(.innings__refresh--float)`, with a bare -20px for exactly that case.
 //
 // THREE STATES, plus a hold:
 //

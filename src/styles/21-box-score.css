@@ -31,7 +31,7 @@
 /* Refresh (when the game isn't Final — see BoxScore.jsx) rides here inline
    once there's room; on a phone it hides in favor of the floating pill
    (.pagenav--boxscore below), same split as .daystate__chip--reveal/.pagenav--revealall. */
-.boxscore__headright .refreshbtn {
+.boxscore__headright .innings__refresh {
   display: none;
 }
 

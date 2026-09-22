@@ -991,7 +991,7 @@ export function InningViewer({
               onReload={onReload}
               loading={loading}
               lastUpdated={lastUpdated}
-              className="refreshbtn--float"
+              className="innings__refresh--float"
             />
           )
         }

@@ -281,7 +281,7 @@
   /* Same split for the box score's Refresh control (not Final games, which
      drop it entirely — see BoxScore.jsx): inline in the header once there's
      room, the mobile floating pill hides here. */
-  .boxscore__headright .refreshbtn {
+  .boxscore__headright .innings__refresh {
     display: inline-flex;
   }
   .pagenav--boxscore {

@@ -572,14 +572,14 @@ function KeepAwakeToggle({ on, onToggle }) {
 function WatchButton({ gamePk }) {
   return (
     <a
-      className="watchbtn"
+      className="btn btn--control btn--ink masthead__watch"
       href={`https://www.mlb.com/tv/g${gamePk}`}
       target="_blank"
       rel="noopener noreferrer"
       title="Watch this game on MLB.TV"
     >
-      <img className="watchbtn__logo" src="/icons/mlbtv-logo.svg" alt="Watch on MLB.TV" />
-      <span className="watchbtn__ext" aria-hidden="true">↗</span>
+      <img className="masthead__watchlogo" src="/icons/mlbtv-logo.svg" alt="Watch on MLB.TV" />
+      <span className="btn__icon" aria-hidden="true">↗</span>
     </a>
   )
 }

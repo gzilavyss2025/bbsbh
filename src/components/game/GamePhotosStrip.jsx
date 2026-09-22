@@ -74,7 +74,7 @@ export function GamePhotosStrip({ gamePk }) {
         >
           View all
           {/* Same external-link glyph as the masthead's own Watch button
-              (GameView.jsx's WatchButton, .watchbtn__ext) — this hands off to
+              (GameView.jsx's WatchButton, the Watch button's ↗ (.btn__icon)) — this hands off to
               a whole other page, not an inline action, same as that one hands
               off to MLB.TV. */}
           <span className="photostrip__viewallarrow" aria-hidden="true">↗</span>
