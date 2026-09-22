@@ -6,6 +6,8 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
+import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { ordinal } from '../lib/format.js'
 
 // Nine Keys (/nine-keys) — a Lichtman-style screen pointed at a baseball
 // season. Nine true-or-false keys, each asking whether a club finished in the
@@ -56,8 +58,11 @@ function GridRow({ row, keys, bar, limit, lead, meta, floor }) {
   return (
     <tr className={className || undefined}>
       <th scope="row" className="ninekeys__club">
-        <span className="ninekeys__clubname">{lead}</span>
-        <span className="ninekeys__clubmeta">{meta}</span>
+        <TeamLogo teamId={row.teamId} name={row.name} size={24} className="ninekeys__logo" />
+        <span className="ninekeys__clubtext">
+          <span className="ninekeys__clubname">{lead}</span>
+          <span className="ninekeys__clubmeta">{meta}</span>
+        </span>
       </th>
       {keys.map((key) => {
         const rank = row.ranks?.[key.id]
@@ -67,7 +72,16 @@ function GridRow({ row, keys, bar, limit, lead, meta, floor }) {
             key={key.id}
             className={`ninekeys__cell${fails ? ' ninekeys__cell--fail' : ''}`}
           >
-            <span className="ninekeys__mark">{rank ?? '—'}</span>
+            <span className="ninekeys__mark">
+              {rank == null ? (
+                '—'
+              ) : (
+                <>
+                  {rank}
+                  <sup className="ninekeys__ord">{ordinal(rank).slice(String(rank).length)}</sup>
+                </>
+              )}
+            </span>
           </td>
         )
       })}

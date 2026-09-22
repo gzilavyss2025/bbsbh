@@ -145,6 +145,19 @@
   font-weight: var(--w-regular);
 }
 
+/* Logo left, name over record right. Both are inline-blocks rather than a
+   flex row, because the th must stay a table cell to keep its sticky column. */
+.ninekeys__logo {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--space-2);
+}
+
+.ninekeys__clubtext {
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .ninekeys__clubname {
   font-family: var(--font-display);
   font-size: var(--fs-body);
@@ -170,6 +183,17 @@
   position: relative;
   display: block;
   padding: var(--space-2) 0;
+}
+
+/* The rank's ordinal suffix: small and raised, so the column of numbers
+   still reads as numbers. It inherits the cell's ink, so a failed rank's
+   suffix turns red with it. */
+.ninekeys__ord {
+  /* Relative, not a token: the figure is already --fs-cell, the smallest
+     step on the scale, and a suffix must sit below it. */
+  font-size: 0.7em;
+  margin-left: 1px;
+  line-height: var(--lh-zero);
 }
 
 .ninekeys__cell--fail {
