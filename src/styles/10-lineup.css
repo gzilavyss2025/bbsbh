@@ -258,7 +258,7 @@
 /* The career line doubles as the door to its Box Lines (ADR-0069) —
    components/boxlines/BoxLinesDoor.jsx, dressed by styles/boxlines/boxlines.css;
    it wears .startercard__careervs above for the row look. That door is a
-   <button>, and .boxlines-door resets a button whole — padding and border
+   <button>, and .boxlines__door resets a button whole — padding and border
    both — from a partial that loads after this one. So the row's own dress is
    restated here at `button.` specificity: without it the career line loses
    the dashed divider every line above it wears, and the 4px of air under it. */
@@ -480,25 +480,6 @@ button.startercard__careervs {
   white-space: nowrap;
 }
 
-.teammates__more {
-  display: block;
-  width: 100%;
-  margin: 8px 0 0;
-  padding: 9px 12px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font-family: inherit;
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  text-align: center;
-  cursor: pointer;
-}
-.teammates__more:hover {
-  color: var(--text-body);
-}
-
 /* Career vs today's starter — a margin note under the batter's name in the
    batting order (TeamInfo.jsx + components/teamstats/StarterMatchups.jsx),
    the thing a paper scorer pencils beside the name while staging the sheet.
@@ -605,14 +586,14 @@ button.startercard__careervs {
 }
 
 /* The Full roster door closing the pregame roster fallback (TeamInfo.jsx's
-   FullRosterLink) — same closing-row idea as .lineup__bench above. .thub-door's
+   FullRosterLink) — same closing-row idea as .lineup__bench above. .thub__door's
    usual home is BETWEEN two already-bordered cards (TeamPage's previews), so a
    bare margin reads fine there; here it sits inside the SAME card as the
    batter rows above it, so without its own top edge it read as a stray link
    adrift in the card's leftover bottom whitespace rather than the list's own
    closing row. The border/inset match .roster__row's own rhythm (12px
-   horizontal) instead of .thub-door's plain margin. */
-.lineup .thub-door {
+   horizontal) instead of .thub__door's plain margin. */
+.lineup .thub__door {
   margin: 0;
   padding: var(--space-2) var(--space-3) var(--space-3);
   border-top: var(--bw-hair) solid var(--border-hairline);

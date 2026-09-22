@@ -57,6 +57,15 @@
 @import './styles/21a-box-score-stars.css';
 @import './styles/21b-box-score-tally.css';
 @import './styles/22-box-score-tables.css';
+/* The DOOR — the one "there is more behind this" control the app draws
+   (#1130), and the first of the shared rules the design-system collapse pulls
+   out of the per-route partials. A SUBDIRECTORY because src/styles sits at its
+   115-file directory budget (scripts/check-dir-size.mjs), so a 116th flat
+   partial cannot exist and ADR-0038 says to subdivide rather than widen a
+   number. HERE in the order, and not earlier: this is the slot the text door's
+   rule already held, parked in a per-route partial it had nothing to do with,
+   so nothing that used to beat that door stops beating it. */
+@import './styles/system/door.css';
 @import './styles/23-box-score-detail.css';
 @import './styles/24-floating-nav-and-hud.css';
 @import './styles/25-wide-layout.css';

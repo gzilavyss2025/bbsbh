@@ -850,25 +850,3 @@
   line-height: var(--lh-prose);
 }
 
-/* Show-more for the ranked note grid — the notes arrive most-impactful-first
-   (see computeGameCalloutNotes), the tail folds behind this. Same quiet
-   full-width affordance as .teammates__more. */
-.bs__noteMore {
-  display: block;
-  width: 100%;
-  margin: 8px 0 0;
-  padding: 9px 12px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font-family: inherit;
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  text-align: center;
-  cursor: pointer;
-}
-.bs__noteMore:hover {
-  color: var(--text-body);
-}
-

@@ -137,7 +137,7 @@ function TeamLegacyCard({ teamId, rank, honorees, cardRef }) {
           {remaining > 0 && (
             <button
               type="button"
-              className="allstarlegacy__more"
+              className="allstarlegacy__door"
               onClick={() => setExpanded(true)}
             >
               Show all {honorees.length} (+{remaining} more)

@@ -43,7 +43,7 @@
      an empty box reads as content that failed to load, where a short card just
      reads as a short story. The deck's own height is unchanged (a single flex
      line is still as tall as its tallest item), so only the dead space inside
-     the short cards goes away. .txcard__more keeps its own align-self: stretch
+     the short cards goes away. .txcard__door keeps its own align-self: stretch
      and so stays a full-height tap target. */
   align-items: flex-start;
   gap: 10px;
@@ -72,27 +72,15 @@
   flex: 0 0 auto;
   width: 1px;
 }
-.txcard__more {
+/* The deck's own door wears .door--block like every other one; all it keeps is
+   where it stands. A block door is a full-width row at the foot of a list, and
+   this one is a flex item at the end of a horizontal scroll deck, so the three
+   declarations that place it there are the three that stay. Its edge used to be
+   dashed; dashed now means provisional and nothing else (#1132). */
+.txcard__door {
   flex: 0 0 160px;
-  align-self: stretch;
   scroll-snap-align: start;
-  padding: 12px;
-  border: var(--bw-hair) dashed var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font: inherit;
-  font-weight: var(--w-semibold);
-  cursor: pointer;
-}
-.txcard__more:hover:not(:disabled),
-.txcard__more:focus-visible {
-  color: var(--text-body);
-  border-style: solid;
-}
-.txcard__more:disabled {
-  cursor: wait;
-  opacity: 0.7;
+  margin: 0;
 }
 
 /* Each story is its own bordered card — wider than the deck's first cut
@@ -609,30 +597,6 @@
   width: auto;
   scroll-snap-align: none;
 }
-/* Same full-width block affordance as .teammates__more / .marginnotes__more. */
-.gamesgrid__more {
-  display: block;
-  width: 100%;
-  margin: var(--space-2) 0 0;
-  padding: 9px 12px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font-family: inherit;
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  text-align: center;
-  cursor: pointer;
-}
-.gamesgrid__more:hover {
-  color: var(--text-body);
-}
-.gamesgrid__more:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
 /* Team Page Photos rail — professional camera stills of this club, lazily
    fetched a few games at a time (TeamPhotosRail in TeamPage.jsx). Same
    nav/track/sentinel structure as .last10 just above (single-row flex track,

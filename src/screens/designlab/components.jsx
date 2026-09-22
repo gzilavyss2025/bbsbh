@@ -6,7 +6,7 @@ import { Entry, Group } from './Entry.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { BreakableLocation } from '../../components/ui/BreakableLocation.jsx'
 import { BuildStamp } from '../../components/ui/BuildStamp.jsx'
-import { ChevronLink } from '../../components/ui/ChevronLink.jsx'
+import { Door } from '../../components/ui/Door.jsx'
 import { CopyBox, CopyIconButton } from '../../components/ui/CopyBox.jsx'
 import { FlipCard } from '../../components/ui/FlipCard.jsx'
 import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
@@ -65,13 +65,14 @@ export function ComponentHalf() {
           <AsyncStatus loading={false} error={new Error('Nothing posted yet')} data={null} noun="lineup" />
         </Entry>
         <Entry title="SectionTitle" path={`${UI_PATH}/SectionTitle.jsx`} note="A section heading with an optional note and a right-hand action.">
-          <SectionTitle title="Team leaders" note="Regular season" action={<ChevronLink onClick={() => {}}>See all</ChevronLink>} />
+          <SectionTitle title="Team leaders" note="Regular season" action={<Door onClick={() => {}}>See all</Door>} />
         </Entry>
         <Entry title="SectionMasthead" path={`${UI_PATH}/SectionMasthead.jsx`} note="The club-dressed band. No logo passed here, so it draws its undressed state.">
           <SectionMasthead title="Milwaukee" />
         </Entry>
-        <Entry title="ChevronLink" path={`${UI_PATH}/ChevronLink.jsx`} note="The app's one door affordance — &quot;See all &rsaquo;&quot;.">
-          <ChevronLink onClick={() => {}}>Game lines</ChevronLink>
+        <Entry title="Door" path={`${UI_PATH}/Door.jsx`} note="The app&#39;s one door — &quot;there is more behind this&quot;. Inline is the text link and writes its own chevron; block is the row that closes a list, and carries none.">
+          <Door onClick={() => {}}>Game lines</Door>
+          <Door layout="block" onClick={() => {}}>Show 12 more former teammates</Door>
         </Entry>
         <Entry title="InfoPopover" path={`${UI_PATH}/InfoPopover.jsx`} note="The tap-to-explain control. There are no native title tooltips in this app — they are invisible on touch.">
           <InfoPopover label="What is this?">A run expectancy figure, from the 24 base-out states.</InfoPopover>

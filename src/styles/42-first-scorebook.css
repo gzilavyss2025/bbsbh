@@ -768,7 +768,7 @@
      same convention as .tscoremodal__title. */
   text-wrap: balance;
 }
-.allstarlegacy__more {
+.allstarlegacy__door {
   align-self: center;
   display: block;
   margin: var(--space-3) auto 0;
@@ -782,8 +782,12 @@
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   padding: 8px 16px;
+  /* Its twin on /all-star-rosters had this and it did not, which is the whole
+     drift the collapse looks for: a <button> defaults to the arrow cursor, so
+     one of two identical controls said it was pressable and the other did not. */
+  cursor: pointer;
 }
-.allstarlegacy__more:focus-visible {
+.allstarlegacy__door:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }

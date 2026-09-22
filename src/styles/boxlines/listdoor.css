@@ -82,7 +82,7 @@ button.boxlines-entry {
   text-align: right;
 }
 
-/* THE ENTRY. A full button reset, the way .boxlines-door is one, so a control
+/* THE ENTRY. A full button reset, the way .boxlines__door is one, so a control
    in a list of figures starts its ink where the rows above it start theirs. */
 button.boxlines-entry {
   width: 100%;
@@ -163,7 +163,7 @@ button.boxlines-entry {
   box-shadow: var(--ring);
 }
 
-/* BACK TO THE LIST. Above the kicker, in the chevron-link voice the app uses
+/* BACK TO THE LIST. Above the kicker, in the door’s own voice, which the app uses
    for every "back to where this opened" control, and it is the only thing in
    the sheet's head that is not the sheet's own name — so it is small, and it
    leads with the mark that says which way it goes. */

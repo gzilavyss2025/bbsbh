@@ -2,6 +2,7 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import { loadMoreTeamTransactions } from '../../api/teamTransactions.js'
 import { DayTab, TxStory, dayTabParts } from './TxStory.jsx'
 import { DeckNudge } from '../teamstats/DeckNudge.jsx'
+import { Door } from '../ui/Door.jsx'
 
 // The deck's per-card scroll step (card width + gap, both from .txcard__scroll
 // / .txstory in index.css) — DeckNudge's click target. Most cards are 320px
@@ -152,15 +153,15 @@ export function TeamTransactionsCard({
           </Fragment>
         ))}
         {canRevealMore && (
-          <button
-            type="button"
-            className="txcard__more"
+          <Door
+            layout="block"
+            className="txcard__door"
             onClick={revealMore}
             disabled={loadingMore}
             aria-live="polite"
           >
             {loadingMore ? 'Loading transactions…' : loadError ? 'Try loading again' : 'Load more transactions'}
-          </button>
+          </Door>
         )}
         {!limit && <div className="txcard__sentinel" ref={sentinelRef} aria-hidden="true" />}
       </div>

@@ -5,7 +5,7 @@ import { teamLeadersPath, orgLeadersPath } from '../../lib/route.js'
 import { teamClubName } from '../../lib/teams.js'
 import { LEDGER_HITTING, LEDGER_PITCHING } from '../../api/teamLeaders.js'
 import { TeamLeadersLedger } from '../../components/teamstats/TeamLeadersLedger.jsx'
-import { ChevronLink } from '../../components/ui/ChevronLink.jsx'
+import { Door } from '../../components/ui/Door.jsx'
 import { JerseyCombos, MilbUniformStrip } from '../../components/logo/JerseyCombos.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
@@ -110,13 +110,13 @@ export function NumbersTab({ id, asOf, sportId }) {
             injuredIds={n.injuredIds}
             secondaryAction={
               (!isMilb || parentOrgIdOf(team)) && (
-                <ChevronLink
+                <Door
                   onClick={() =>
                     navigate(orgLeadersPath(isMilb ? parentOrgIdOf(team) : teamId, { d: asOf, s: sportId }))
                   }
                 >
                   Org leaders
-                </ChevronLink>
+                </Door>
               )
             }
           />

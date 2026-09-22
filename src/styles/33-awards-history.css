@@ -416,27 +416,6 @@
   width: auto;
 }
 
-/* Reveals the pre-DEFAULT_CUTOFF_YEAR seasons — same shape as .bs__noteMore
-   (the box score's "Show N more insights" button). */
-.pshistory__more {
-  display: block;
-  width: 100%;
-  margin: var(--space-2) 0 0;
-  padding: 9px 12px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font-family: inherit;
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  text-align: center;
-  cursor: pointer;
-}
-.pshistory__more:hover {
-  color: var(--text-body);
-}
-
 /* Room for the 7-column bracket to actually breathe on a wide screen rather
    than horizontal-scrolling inside the app's ordinary 440px phone column —
    same widen-the-page-column idea as .screen.standings-screen. */

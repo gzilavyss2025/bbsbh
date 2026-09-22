@@ -39,6 +39,7 @@ import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from 
 import { useStampUnseal } from '../hooks/useStamps.js'
 import { useBoxScoreReveal } from '../hooks/useRevealProgress.js'
 import { BoxRevealSyncMount } from '../components/sync/BoxRevealSyncMount.jsx'
+import { Door } from '../components/ui/Door.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -563,9 +564,9 @@ function InsightsCard({ calloutNotes }) {
         ))}
       </div>
       {hiddenCount > 0 && (
-        <button type="button" className="bs__noteMore" onClick={() => setShowAll(true)}>
+        <Door layout="block" onClick={() => setShowAll(true)}>
           Show {hiddenCount} more {hiddenCount === 1 ? 'insight' : 'insights'}
-        </button>
+        </Door>
       )}
     </section>
   )

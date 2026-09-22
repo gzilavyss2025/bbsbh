@@ -13,6 +13,7 @@ import { TeamLink } from '../components/team/TeamLink.jsx'
 import { ClinchMark, ClinchKey } from '../components/team/ClinchMark.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { Door } from '../components/ui/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 // The league mark that rides the bar's right edge — same convention (and same
@@ -358,9 +359,9 @@ export function PostseasonRacePage() {
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Postseason Race</h1>
-        <a className="topbar__action chevron-link" {...linkProps('/standings')}>
-          Standings ›
-        </a>
+        <Door className="topbar__action" {...linkProps('/standings')}>
+          Standings
+        </Door>
       </header>
 
       <p className="psrace__asof">Entering today · through {labelDate(yesterday)}</p>

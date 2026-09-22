@@ -78,7 +78,7 @@ export function CommandReceivedCard({ data, personId, season }) {
       </ol>
 
       {hidden > 0 && (
-        <button type="button" className="plink cmdrecv__more" onClick={() => setAll(true)}>
+        <button type="button" className="plink cmdrecv__door" onClick={() => setAll(true)}>
           All {view.pitchers.length} pitchers &#8250;
         </button>
       )}

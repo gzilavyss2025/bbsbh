@@ -3,7 +3,7 @@ import { runValuePath } from '../../../lib/route.js'
 import { signed, tone } from '../../../api/around-the-game/runValue.js'
 import { RunValueSplit, splitScale } from '../../../components/around-the-game/RunValueParts.jsx'
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
-import { ChevronLink } from '../../../components/ui/ChevronLink.jsx'
+import { Door } from '../../../components/ui/Door.jsx'
 
 // The team hub's RUN VALUE card, on the Numbers tab — what this club's season
 // has been worth in runs, split four ways, and the men carrying it.
@@ -70,8 +70,8 @@ export function TeamRunValueCard({ data, clubName }) {
         A man traded in July brings his whole season with him.
       </p>
 
-      <div className="thub-door">
-        <ChevronLink onClick={() => navigate(runValuePath())}>League run value board</ChevronLink>
+      <div className="thub__door">
+        <Door onClick={() => navigate(runValuePath())}>League run value board</Door>
       </div>
     </div>
   )

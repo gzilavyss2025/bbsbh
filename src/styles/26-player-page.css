@@ -1130,10 +1130,10 @@
 }
 
 /* FoulCard's "League foul tracker ›" — a destination-named chevron link out
-   of the card, same register as .chevron-link's "See all ›". Compound to
+   of the card, same register as .door--inline's "See all ›". Compound to
    beat .plink's `font: inherit`/`color: inherit` reset (same fix as
    .plink.lineup__name/.plink.startercard__name above). */
-.plink.foulcard__more {
+.plink.foulcard__door {
   display: inline-block;
   margin-top: 6px;
   font-family: var(--font-display);

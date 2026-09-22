@@ -9,34 +9,10 @@
 .tlead {
   margin-top: 4px;
 }
-/* .chevron-link — the shared "See all ›" text-button primitive (see
-   ChevronLink.jsx), composed by TeamLeadersLedger's header action, TeamPage's
-   PreviewDoor, and NumbersTab's "Org leaders ›". One padding/hit-target model
-   for all three, so a tweak here reaches every placement. Also worn directly
-   by a real `<a>` (Standings ↔ Postseason Race's topbar cross-link, via
-   useRouteLink) rather than the ChevronLink button component — `text-decoration:
-   none` only matters there, since a `<button>` never underlines to begin with. */
-.chevron-link {
-  border: none;
-  background: none;
-  padding: 4px 2px;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  color: var(--accent-link);
-  text-decoration: none;
-}
-.chevron-link:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
 /* DeckNudge — the desktop "‹ ›" step control for TeamTransactionsCard's swipe
    deck (Team Leaders had one too until the hub moved to the ledger, which does
    not scroll). Bare text, same quiet register
-   as .chevron-link/.inningnav's chevron labels, not a floating icon button:
+   as .door--inline/.inningnav's chevron labels, not a floating icon button:
    no border, no background, no shadow. Mouse/trackpad only — a deck you can
    swipe never needs a click alternative, so this only exists where hover is
    possible at all. */
