@@ -28,7 +28,7 @@ export const PILL_RECIPE = [
   'display: inline-flex; align-items: center',
   'font-family: var(--font-display); font-size: var(--fs-label)',
   'letter-spacing: var(--ls-label); text-transform: uppercase',
-  'padding: 2px 7px; border-radius: var(--radius-pill)',
+  'padding: 2px var(--space-1h); border-radius: var(--radius-pill)',
 ]
 
 // ---------------------------------------------------------------------------

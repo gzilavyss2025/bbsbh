@@ -74,11 +74,18 @@
 }
 /* The deck's own door wears .door--block like every other one; all it keeps is
    where it stands. A block door is a full-width row at the foot of a list, and
-   this one is a flex item at the end of a horizontal scroll deck, so the three
-   declarations that place it there are the three that stay. Its edge used to be
-   dashed; dashed now means provisional and nothing else (#1132). */
+   this one is a flex item at the end of a horizontal scroll deck, so the four
+   declarations that place it there are the four that stay. Its edge used to be
+   dashed; dashed now means provisional and nothing else (#1132).
+
+   `align-self` is the one of those four that is easy to read as dress and drop.
+   It is not: .txcard__scroll sets `align-items: flex-start` so a short story
+   does not print as a bordered box with 250px of nothing under it, and this
+   door — like .txday above, for the same reason and in the same words — opts
+   back out so it stays a full-height tap target beside the tallest card. */
 .txcard__door {
   flex: 0 0 160px;
+  align-self: stretch;
   scroll-snap-align: start;
   margin: 0;
 }
