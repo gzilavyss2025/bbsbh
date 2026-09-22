@@ -92,6 +92,34 @@ Everything below is the evidence the decision was made on. It is kept because
 the next person to look at a 1px spacing question should be able to see what
 was measured, not just what was concluded.
 
+### What the shipped change measured
+
+The prediction was tested rather than trusted. Ten routes at 390px, loaded on
+one dev server minutes apart, with the computed padding and gap of every
+element recorded in DOM order on both sides:
+
+| | |
+| --- | --- |
+| computed padding/gap values compared | **3570** |
+| values that moved DOWN exactly 1px | **2936** |
+| anything else — a property swapped, an axis lost, a value moved the wrong way | **0** |
+| console errors, horizontal overflow | none, on any route |
+
+The moves by value were 1969 at 7 to 6, 824 at 5 to 4, 71 at 9 to 8, 57 at 11
+to 10, 15 at 13 to 12. The counts are far above the 231 literals in the source
+because one rule paints many elements — which is the point: `.rankchip` and its
+five siblings all sit at `padding: 2px 7px` and render on nearly every page.
+
+Page heights fell where the saving compounds down a long list and nowhere else:
+umpires 4721 to 4539, salaries 4771 to 4710, team hub 4344 to 4316, umpire 6583
+to 6569, player 2400 to 2388, standings 3230 to 3227. The slate, postseason,
+team roster and about pages did not move at all.
+
+Before-and-after shots of five surfaces, including the pill family and the
+contracts grid: `c2-umpire.png`, `c2-standings.png`, `c2-player.png`,
+`c2-pills.png` and `c2-contracts.png` in `.scratch/design-system/prC/shots/`.
+Each pair is indistinguishable apart from being a hair tighter.
+
 1. **Per-site judgement is not available.** Every value is an exact tie. A
    reviewer asked to pick a direction for `.umptend__prov` has nothing to
    weigh: both answers are 1px, and the shots say neither reads better. 231
