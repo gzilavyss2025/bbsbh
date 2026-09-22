@@ -21,7 +21,7 @@ const WIDTHS = [430, 402, 390, 375, 360, 320]
 // (VITE_CLERK_PUBLISHABLE_KEY — see lib/clerkConfig.js), which a local test run
 // can't assume. The layout contract under test is pure CSS driven by the extra
 // element's box, so stand in for AccountButton with the same wrapper/classes it
-// renders (a 28px Clerk UserButton trigger inside .accountbtn — see
+// renders (a 28px Clerk UserButton trigger inside .account__btn — see
 // AccountButton.jsx) against the real stylesheet. Falls back to appending to
 // .topbar__slateactions so on a pre-fix tree (no cluster) the spec still
 // reproduces the orphan instead of erroring out.
@@ -30,11 +30,11 @@ const INJECT_ACCOUNT_STANDIN = `
     const host =
       document.querySelector('.topbar__iconcluster') ||
       document.querySelector('.topbar__slateactions')
-    if (!host || host.querySelector('.accountbtn')) return
+    if (!host || host.querySelector('.account__btn')) return
     const el = document.createElement('div')
-    el.className = 'accountbtn'
+    el.className = 'account__btn'
     const team = document.createElement('span')
-    team.className = 'accountbtn__team'
+    team.className = 'account__team'
     const btn = document.createElement('button')
     btn.type = 'button'
     btn.style.cssText =
@@ -56,9 +56,9 @@ async function headerBoxes(page) {
     return {
       home: box('.topbar--slate .topbar__home'),
       levelnav: box('.topbar--slate .levelnav'),
-      search: box('.topbar--slate .sitesearch-btn'),
-      menu: box('.topbar--slate .sitemenu-btn'),
-      acct: box('.topbar--slate .accountbtn'),
+      search: box('.topbar--slate .sitebar__search'),
+      menu: box('.topbar--slate .sitebar__menu'),
+      acct: box('.topbar--slate .account__btn'),
     }
   })
 }
@@ -76,7 +76,7 @@ test.describe('slate topbar wrap', () => {
 
   test('icon buttons never orphan across rows', async ({ page }) => {
     await page.goto('/')
-    await page.waitForSelector('.topbar--slate .sitemenu-btn')
+    await page.waitForSelector('.topbar--slate .sitebar__menu')
     await page.evaluate(INJECT_ACCOUNT_STANDIN)
 
     for (const width of WIDTHS) {

@@ -49,6 +49,17 @@ const KEPT = [
   ['scorecard/page.css', '.sc-zoom__btn', 'padding', '0', 'a square takes its width from the height, not padding'],
   ['55-my-tally-account.css', '.erasesheet__btn', 'flex', '1 1 auto', 'the erase pair share the row'],
   ['21b-box-score-tally.css', '.bs__tallyScopebtn', 'min-width', '42px', 'three segments read as equal'],
+  ['11-innings.css', '.innings__notes', 'flex', 'none', 'Game Notes never shrinks in the team head'],
+  ['24-floating-nav-and-hud.css', '.innings__refresh--float', 'pointer-events', 'auto', 'the bar is click-through; Refresh is not'],
+  ['focus/stage.css', '.pagenav--focus .innings__refresh--float', 'z-index', '3', 'Refresh rides above the reveal pair’s dead space'],
+  ['focus/stage.css', '.pagenav--focus .innings__refresh--float', 'min-width', 'var(--tap-min)', 'Refresh stays a square-ish tap target on one row'],
+  ['04-site-bar.css', '.sitebar__search', 'min-width', 'var(--tap-min)', 'an icon-only control is square'],
+  ['04-site-bar.css', '.btn.sitebar__search', 'padding', '0', 'a square takes its width from the height'],
+  ['04-site-bar.css', '.btn.sitebar__logbook', 'padding', '0 var(--space-2h)', 'the Game Log lockup draws at its row’s height'],
+  ['04-site-bar.css', '.account__btn', 'margin-left', '2px', 'the account control closes the site bar’s row'],
+  ['04-site-bar.css', '.continuebar__pitchcta', 'flex', '0 0 auto', 'the sign-in CTA keeps its width in the continue bar'],
+  ['08-site-shell.css', '.sitefooter__btn', 'min-width', '0', 'a long label wraps inside its grid cell'],
+  ['26-player-page.css', '.player__back', 'margin-left', 'calc(-1 * var(--space-2h))', 'the word sits on the page’s edge'],
 ]
 
 for (const [file, selector, property, value, why] of KEPT) {
@@ -64,4 +75,19 @@ for (const [file, selector, property, value, why] of KEPT) {
 test('a kept declaration that .btn also sets, in a partial before the slot, outranks .btn', () => {
   const css = read('05-masthead-nav.css')
   assert.equal(ruleBody(css, '.stepnav__btn'), null, 'write it as .stepnav .stepnav__btn, not a bare .stepnav__btn')
+  const bar = read('04-site-bar.css')
+  for (const cls of ['.sitebar__search', '.sitebar__menu', '.sitebar__logbook']) {
+    const bare = ruleBody(bar, cls)
+    assert.ok(!bare || !/(^|;)\s*padding/.test(bare), `${cls}'s padding must be written as .btn${cls} to beat .btn`)
+  }
+})
+
+// The floating bar's primary-action rules must skip Refresh, which wears .btn
+// too: without the guard it takes the primary's full width, raised shadow and
+// dead-space hit area.
+test('the floating bar keeps its primary-action rules off Refresh', () => {
+  const css = read('24-floating-nav-and-hud.css')
+  assert.ok(ruleBody(css, '.pagenav .btn:where(:not(.innings__refresh))'), '.pagenav .btn must exclude Refresh')
+  assert.equal(ruleBody(css, '.pagenav .btn'), null)
+  assert.ok(ruleBody(css, '.pagenav--innings .btn:where(:not(.innings__refresh))::after'))
 })

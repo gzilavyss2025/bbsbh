@@ -39,19 +39,19 @@ export function SiteFooter({ onShowLogos }) {
       <div className="sitefooter__actions">
         <button
           type="button"
-          className="sitefooter__action"
+          className="btn sitefooter__btn"
           onClick={() => navigate(profilePath())}
         >
           Settings
         </button>
         <button
           type="button"
-          className="sitefooter__action"
+          className="btn sitefooter__btn"
           onClick={() => setShowFinder(true)}
         >
           Find a past matchup
         </button>
-        <button type="button" className="sitefooter__action" onClick={onShowLogos}>
+        <button type="button" className="btn sitefooter__btn" onClick={onShowLogos}>
           Logo sheet
         </button>
       </div>

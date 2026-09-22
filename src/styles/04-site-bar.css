@@ -49,7 +49,7 @@
 
 /* Persistent site-wide search trigger (SiteSearch.jsx), the Game Log shortcut
    (LogbookButton.jsx), and the "more pages" menu trigger (SiteMenu.jsx) —
-   plain icon buttons (no docked input; there's no room for one on a
+   ghost Buttons (no docked input; there's no room for one on a
    phone-width header, and a tap-to-open modal is the standard mobile
    pattern) that ride together at the far right of the site bar, in that
    order — matching the slate's own topbar__iconcluster (GameSelect.jsx). */
@@ -59,99 +59,59 @@
   align-items: center;
   gap: 2px;
 }
-.sitesearch-btn,
-.sitemenu-btn,
-.logbook-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* All three are Buttons in the ghost skin at tap size (#1130). What is left
+   here is their shape in this row: the two icons are SQUARE — a one-glyph
+   control takes its width from the tap height, not from padding — and the
+   labelled Game Log keeps a tighter side padding than a page button, so the
+   glyph and the word read as one lockup, and no block padding, so the row's
+   own height (44px, or the slate's 30px) is the height it draws at. THE PADDING IS WRITTEN AT .btn's OWN
+   SPECIFICITY PLUS ONE, because this file loads before system/button.css and
+   a bare class would lose it to the base rule on order. min-width stays a
+   single class on purpose: the slate's 30px row (.topbar--slate
+   .topbar__search in 03) has to keep beating it. */
+.sitebar__search,
+.sitebar__menu {
   min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border: none;
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--text-caption);
-  cursor: pointer;
 }
-.sitesearch-btn:active,
-.sitemenu-btn:active,
-.logbook-btn:active {
-  background: var(--surface-inset);
+.btn.sitebar__search,
+.btn.sitebar__menu {
+  padding: 0;
 }
-
-/* The Game Log trigger is the one labelled control in the row (see
-   LogbookButton.jsx for why it earns the word). Labelled, it stops being a
-   square tap target and becomes a pill: horizontal padding replaces the icon
-   buttons' square min-width, and the glyph and word share a var(--space-1) gap — tight
-   enough that the pair reads as one mark-plus-name lockup rather than two
-   items that happen to sit near each other. */
-.logbook-btn--labeled {
-  min-width: 0;
-  gap: var(--space-1);
+.btn.sitebar__logbook {
   padding: 0 var(--space-2h);
   white-space: nowrap;
-}
-
-/* Small caps in the display face, matching the level pills across the row —
-   the label has to read as chrome, not as a body-text link dropped in the
-   header. Uppercasing here (not in the JSX) keeps the accessible name and
-   find-in-page text as "Game Log". */
-.logbook-btn__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  line-height: var(--lh-solid);
 }
 
 /* AccountButton (sign-in / Clerk's UserButton) — only rendered when
    multi-device reveal sync is configured (see lib/clerkConfig.js), so it
    rides at the end of the same action row rather than needing its own
    layout slot. */
-.accountbtn {
+.account__btn {
   display: inline-flex;
   align-items: center;
   margin-left: 2px;
 }
-.accountbtn__signin {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--tap-min);
-  padding: 0 var(--space-3);
-  border: none;
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-title);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-.accountbtn__signin:active {
-  background: var(--surface-inset);
-}
+/* The signed-out "Sign in" is a Button, ghost skin, tap size; nothing about
+   its dress is left here. */
 
 /* Signed-in avatar = favorite-team logo (see AccountButton.jsx). Clerk's
    UserButton stays the real, clickable trigger; its own avatar image is
    faded out and our logo sits on top of the same box, taps passing through.
    The box gets a paper inset + hairline rule so any logo (dark or light)
    reads against the header. */
-.accountbtn__team {
+.account__team {
   position: relative;
   display: inline-flex;
   align-items: center;
 }
-.accountbtn__avatarbox {
+.account__avatarbox {
   background: var(--surface-inset) !important;
   border: var(--bw-hair) solid var(--border-rule) !important;
 }
-.accountbtn__avatarimg {
+.account__avatarimg {
   opacity: 0 !important;
 }
-.accountbtn__teamlogo {
+.account__teamlogo {
   position: absolute;
   inset: 0;
   margin: auto;

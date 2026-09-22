@@ -140,7 +140,7 @@
 }
 
 /* The door to /more, at the foot of the sheet and of the footer. Deliberately
-   not a .sitefooter__action: those three are things you DO on the slate, this
+   not a .sitefooter__btn: those three are things you DO on the slate, this
    is an address — so it borrows their shape at a lower contrast. */
 .navdir__everything {
   width: 100%;

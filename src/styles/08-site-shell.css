@@ -221,36 +221,11 @@
   gap: var(--space-2);
 }
 
-.sitefooter__action {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Each action is a Button (outline, tap size). All it keeps is its place in
+   the grid: min-width 0 lets a long label wrap inside its cell instead of
+   widening the column past the phone. */
+.sitefooter__btn {
   min-width: 0;
-  min-height: var(--tap-min);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  border: var(--bw-rule) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-small);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  line-height: var(--lh-compact);
-  text-transform: uppercase;
-  text-align: center;
-  cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-
-.sitefooter__action:active {
-  transform: translateY(1px);
-  background: var(--field-soft);
-}
-
-.sitefooter__action:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
 }
 
 .sitefooter__more-label {

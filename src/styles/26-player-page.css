@@ -33,22 +33,12 @@
   border-radius: 2px;
 }
 
-.backbtn {
-  appearance: none;
-  background: none;
-  border: none;
-  padding: var(--space-1h) 2px var(--space-3);
-  cursor: pointer;
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
-}
-.backbtn:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+/* ‹ Back is a Button (ghost, control size). It keeps only the margin that
+   puts its WORD on the page's left edge: the control pads its label by
+   --space-3, so the box starts that far outside the column, less the 2px the
+   old bare word already sat in by. */
+.player__back {
+  margin-left: calc(-1 * var(--space-2h));
 }
 
 .player .mono,
