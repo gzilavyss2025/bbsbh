@@ -27,7 +27,7 @@
   justify-content: space-between;
   gap: var(--space-3);
   min-height: 52px;
-  padding: 10px var(--space-4);
+  padding: var(--space-2h) var(--space-4);
   background: var(--accent-primary);
   /* Medal-amber seam under the band — championship trim. */
   border-bottom: var(--bw-heavy) solid var(--award-line);
@@ -64,7 +64,7 @@
 .psseries__teamlink {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2h);
   min-width: 0;
   font-family: var(--font-display);
   font-size: var(--fs-title-sm);
@@ -88,7 +88,7 @@
    the winner's row shows WHERE in the series the games were taken. */
 .psseries__cells {
   display: flex;
-  gap: 4px;
+  gap: var(--space-1);
 }
 .psseries__cell {
   display: flex;
@@ -132,7 +132,7 @@
   }
   .psseries__banner {
     min-height: 60px;
-    padding: 12px var(--space-5);
+    padding: var(--space-3) var(--space-5);
   }
   .psseries__trophy {
     height: 52px;
@@ -295,7 +295,7 @@
 .psseries__potgBody {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .shot.psseries__potgShot {
   flex: none;
@@ -310,14 +310,14 @@
 .psseries__potgMain {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   min-width: 0;
 }
 .psseries__potgWho {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .psseries__potgName {
   font-family: var(--font-body);
@@ -395,7 +395,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 10px var(--space-3) 10px 50px;
+  padding: var(--space-2h) var(--space-3) var(--space-2h) 50px;
   border-top: var(--bw-heavy) solid var(--award-line);
   background: var(--award-soft);
 }
@@ -446,7 +446,7 @@
 .psseries__leaders {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: var(--space-3h);
   align-items: start;
   margin: var(--space-3) 0;
 }
@@ -464,7 +464,7 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px;
+  padding: var(--space-3);
 }
 /* Board titles share the .section__title overline with "Game by game" above
    and the base TeamLeaders board this replaced; the card's own 12px padding
@@ -497,7 +497,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 3px;
-  padding: 11px 7px 0 4px;
+  padding: var(--space-2h) var(--space-1h) 0 var(--space-1);
   border-right: var(--bw-rule) solid
     color-mix(in srgb, var(--clay) 45%, transparent);
   font-family: var(--font-display);
@@ -518,12 +518,12 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: 8px 10px 9px;
+  padding: var(--space-2) var(--space-2h) var(--space-2);
 }
 .psseries__ltop {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* Same weight/color/size as .psseries__rostername below — a leader is still
    just a name off this series' roster, not a different typographic voice. */
@@ -556,7 +556,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px 6px;
+  gap: 2px var(--space-1h);
   font-size: var(--fs-small);
   line-height: var(--lh-compact);
   color: var(--text-muted);
@@ -564,7 +564,7 @@
 .psseries__lchaser {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   min-width: 0;
 }
 /* Same weight/color as .psseries__rostername — only the font-size (inherited
@@ -596,7 +596,7 @@
 .psseries__rosters {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: var(--space-3h);
   margin-top: var(--space-3);
 }
 @media (min-width: 560px) {
@@ -609,12 +609,12 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px;
+  padding: var(--space-3);
 }
 .psseries__rosterhead {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   margin-bottom: var(--space-2);
 }
 .psseries__rosterteam {
@@ -653,8 +653,8 @@
   display: grid;
   grid-template-columns: 32px 1fr auto auto;
   align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
+  gap: var(--space-2);
+  padding: var(--space-1h) var(--space-2h);
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-size: var(--fs-small);
 }

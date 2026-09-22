@@ -85,13 +85,13 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2h);
   font-size: var(--fs-compact);
   color: var(--text-caption);
 }
 
 .gamecard__level {
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--paper-1);
   border: var(--bw-hair) solid var(--border-rule);
@@ -105,7 +105,7 @@
 /* "Game 1 / Game 2" doubleheader chip — same pill as the level tag but tinted
    so a twin bill's two rows are told apart without a second glance. */
 .gamecard__dh {
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--paper-1);
   border: var(--bw-hair) solid var(--border-rule);
@@ -123,7 +123,7 @@
 .gamecard__prospects {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   font-family: var(--font-display);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -143,7 +143,7 @@
 .gamecard__metaright {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2h);
   margin-left: auto;
 }
 
@@ -326,11 +326,11 @@
 .gamecard__readypill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 
 .gamecard__readypill--complete {
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
   border: var(--bw-hair) solid color-mix(in srgb, var(--field) 35%, var(--border-rule));
   background: var(--field-soft);
@@ -342,7 +342,7 @@
 
 .gamecard__readypill-pips {
   display: flex;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .pip {
@@ -511,7 +511,7 @@
    instead of one full-width button. */
 .revealsplit {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
   max-width: calc(var(--app-width) - 2 * var(--app-gutter));
   margin-top: 20px;
@@ -527,7 +527,7 @@
      ellipsis (min-height is a floor, not a fixed height, so the button grows).
      This stays as the backstop for the longest label the bar can carry — a
      next-half advance like "Bottom 12th ›" beside Summary. */
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2h);
   white-space: normal;
   text-align: center;
   line-height: var(--lh-snug);
@@ -543,7 +543,7 @@
    scale or the 44px tap floor. */
 @media (max-width: 739.98px) {
   .revealsplit__btn {
-    padding: 8px 4px;
+    padding: var(--space-2) var(--space-1);
   }
 }
 /* (A `.revealsplit__btn.is-active` filled-navy state used to live here, for

@@ -32,7 +32,7 @@ import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { teamTabPath } from '../lib/route.js'
-import { ChevronLink } from '../components/ui/ChevronLink.jsx'
+import { Door } from '../components/ui/Door.jsx'
 import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
@@ -210,8 +210,8 @@ export function TeamInfo({
           {/* Renamed from "Print tonight's sheet" — the live #22 sheet covers
               what this used to promise; the destination awaits a rebuild. */}
           {onPrintSheet && (
-            <div className="thub-door">
-              <ChevronLink onClick={onPrintSheet}>Print blank scorecard</ChevronLink>
+            <div className="thub__door">
+              <Door onClick={onPrintSheet}>Print blank scorecard</Door>
             </div>
           )}
 
@@ -381,17 +381,17 @@ function BirthdayCake({ show }) {
 
 // The door out of the pregame roster fallback to the team hub's Roster tab —
 // the pitching staff (and everyone else) rosterFallbackGroups no longer lists
-// here now that it's batters-only. Same .thub-door/.chevron-link shell
+// here now that it's batters-only. Same .thub__door/.door--inline shell
 // TeamPage's own previews end in (PreviewDoor), reused rather than doubled
 // up. No `?d=` cutoff: a lineup-page link stays live per ADR-0034, same as
 // every other link off this page.
 function FullRosterLink({ teamId, sportId }) {
   const navigate = useNav()
   return (
-    <div className="thub-door">
-      <ChevronLink onClick={() => navigate(teamTabPath(teamId, 'roster', { s: sportId }))}>
+    <div className="thub__door">
+      <Door onClick={() => navigate(teamTabPath(teamId, 'roster', { s: sportId }))}>
         Full roster
-      </ChevronLink>
+      </Door>
     </div>
   )
 }
@@ -1034,9 +1034,9 @@ function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, homeTeamId 
           )}
         </ul>
         {hidden > 0 && (
-          <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
+          <Door layout="block" onClick={() => setShowAll(true)}>
             Show {hidden} more former {hidden === 1 ? 'teammate' : 'teammates'}
-          </button>
+          </Door>
         )}
       </div>
     </section>

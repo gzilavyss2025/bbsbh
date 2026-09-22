@@ -40,7 +40,7 @@ Where things live: roster projection / 40-man / injured list → Roster; schedul
 every decided game, photos, transactions → Games; standings, batting + pitching
 ranks, leaders, jerseys, day-of-week, comebacks → Numbers; affiliates, prospects,
 affiliation history → Minors. The Overview holds **previews only**, each ending in
-a `.thub-door` link to the tab that owns it, and each is a `preview`/`limit` prop
+a `.thub__door` link to the tab that owns it, and each is a `preview`/`limit` prop
 on the same module the tab renders in full — never a parallel component. The one
 pair that isn't literally the same component still lives in one module:
 `modules/TeamGames.jsx` exports the Overview's `LastTenGames` rail and the Games
@@ -399,7 +399,7 @@ shape-gated in `lib/recentSearches.js` (identity fields only, never a score) wit
 
 ## Design system (`src/styles/*` + `src/tokens/*`)
 
-**Look before you add a partial:** `/design-lab` renders every token, component and card/pill block — 32 cards against 12 shared components is what not looking cost (verdicts: `.scratch/design-system/inventory.md`).
+**Look before you add a partial:** `/design-lab` renders every token, component and card/pill block — 31 cards against 12 shared components is what not looking cost (verdicts: `.scratch/design-system/inventory.md`). **Name a block for its job, never its shape:** the six-clause grammar is ADR-0084, and the 143 classes that break it — with the collapse issue that renames each — are the ledger in `docs/design-system-naming.md`.
 
 `src/index.css` holds **no rules** — a banner comment and `@import`s: the six
 `src/tokens/*.css` files, then the `src/styles/NN-name.css` partials in cascade order.

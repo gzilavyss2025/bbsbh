@@ -1,7 +1,7 @@
 import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'
 import { teamTransactionsPath } from '../../lib/route.js'
-import { ChevronLink } from '../../components/ui/ChevronLink.jsx'
+import { Door } from '../../components/ui/Door.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { TeamTransactionsCard } from '../../components/transactions/TeamTransactionsCard.jsx'
 import { isMlbTeamId } from '../../lib/teams.js'
@@ -93,14 +93,14 @@ export function GamesTab({ id, asOf, sportId }) {
               skimmed backwards. The ledger page is the same moves upright —
               and it is where the home slate's wire lands, so a reader who
               arrives from there and then walks the club sees one shape. */}
-          <div className="thub-door">
-            <ChevronLink
+          <div className="thub__door">
+            <Door
               onClick={() =>
                 navigate(teamTransactionsPath(team.id, { name: team.name, d: asOf, s: sportId }))
               }
             >
               All transactions
-            </ChevronLink>
+            </Door>
           </div>
         </>
       )}

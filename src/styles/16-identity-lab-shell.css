@@ -67,7 +67,7 @@
   width: calc(100% - 32px);
   max-height: 80vh;
   overflow-y: auto;
-  padding: 16px 20px 20px;
+  padding: var(--space-4) var(--space-5) var(--space-5);
 }
 
 .idlabhint__head {
@@ -111,7 +111,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: var(--space-1h);
     width: 72px;
     padding: var(--space-2) 0;
     overflow-y: auto;
@@ -243,7 +243,7 @@
   flex: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   padding: var(--space-1) var(--space-2);
   background: var(--paper-3);
   border: var(--bw-hair) solid var(--border-rule);

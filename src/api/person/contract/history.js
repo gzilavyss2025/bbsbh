@@ -400,6 +400,48 @@ function namesTheSeason(view) {
   return view.kind !== 'freeAgency' && view.teamId != null
 }
 
+// THE COLLAPSE, AND THE AXIS IT COUNTS ON. The deepest career here carries 27
+// rows across 26 seasons, and this is a phone-first page: printed whole, a long
+// career pushes every card under it off the bottom of a very long scroll for a
+// reader who came to see this season. Six seasons is about one screenful on an
+// iPhone, and the newest are the ones a reader is looking for, so the rest goes
+// one tap away — the same "cap the display, never the information" convention
+// the Awards index and the transaction timeline keep.
+//
+// BUT SEASONS ARE THE WRONG THING TO CAP ON THEIR OWN. A SALARY is the row a
+// deep career has one of in EVERY season, including the newest; a DEAL is the
+// row a reader came for, and it sits in the one season it was signed in, which
+// is usually an old one. A cap counted purely in seasons therefore throws the
+// deals away first: Pujols' collapsed card showed his $2.5M final year and hid
+// the $240M and the $100M that paid for the career (issue #1141). Measured over
+// the shipped shards, 1,406 careers are deep enough to collapse; 722 of them
+// lost at least one row that was not a salary, 618 lost a signing or an
+// extension specifically, and 22 lost every deal they had.
+//
+// So the cap falls on the SALARY rows alone: the six newest seasons whole, plus
+// every older season that carries a deal, shown with its deal rows only. It is
+// cheap — a mean of 0.87 rows added across those 1,406 careers, p90 2, worst
+// case 7 — and for 684 of them it changes nothing at all, because every deal
+// was already inside the six newest seasons.
+const SEASONS_VISIBLE = 6
+
+function collapseSeasons(seasons) {
+  const collapsed = []
+  for (const [index, season] of seasons.entries()) {
+    if (index < SEASONS_VISIBLE) {
+      collapsed.push(season)
+      continue
+    }
+    // An older season earns its place by carrying something that is not a
+    // salary — a deal, a case, or a row whose source this file has never met
+    // (`unknown`), which is kept for the same reason contractRowView carries it
+    // through: a row that exists should not vanish because it is unfamiliar.
+    const deals = season.rows.filter((view) => view.kind !== 'salary')
+    if (deals.length) collapsed.push({ ...season, rows: deals })
+  }
+  return collapsed
+}
+
 export function contractHistoryView(rows) {
   const views = []
   for (const row of rows ?? []) {
@@ -436,5 +478,18 @@ export function contractHistoryView(rows) {
     return b.season - a.season
   })
 
-  return { seasons, rows: views.length }
+  // The collapse is a decision, so it is made here rather than in the card —
+  // the component keeps the toggle's state and draws whichever set it is given.
+  //
+  // `dense` asks whether the collapse is worth the tap it costs, and it is
+  // counted in SEASONS because that is the unit the toggle itself speaks in
+  // ("Show all 22 seasons"). Hiding one season buys about two lines of scroll
+  // back, and a career whose deals reach into every old season hides none at
+  // all — the toggle would then offer seasons already on the page, which is a
+  // control that lies. Below that bar the career is simply shown whole: 57 of
+  // the 1,406 deep careers land there, all of them 8 to 12 seasons and at most
+  // 18 rows, so the page a reader gets is still about one long screenful.
+  const collapsed = collapseSeasons(seasons)
+  const dense = seasons.length - collapsed.length > 1
+  return { seasons, rows: views.length, collapsed: dense ? collapsed : seasons, dense }
 }

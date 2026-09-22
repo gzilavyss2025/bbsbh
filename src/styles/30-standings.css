@@ -12,7 +12,7 @@
 .standings-ctrl {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: var(--space-2);
   margin-bottom: 16px;
 }
 /* Readout + the kraft reveal chip share one row: the "as of" context reads left,
@@ -22,13 +22,13 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px 10px;
+  gap: var(--space-2) var(--space-2h);
 }
 .standings-ctrl__asof {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 4px 8px;
+  gap: var(--space-1) var(--space-2);
 }
 .standings-ctrl__mode {
   font-family: var(--font-display);
@@ -50,7 +50,7 @@
 .standings-jumps {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: var(--space-1);
 }
 /* The date quick-jumps grow a new "Month 1" tab every month of the season —
    left to wrap, that's an ever-taller control (already 3 lines by July; 7+
@@ -63,7 +63,7 @@
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
   margin: 0 calc(-1 * var(--app-gutter));
-  padding: 2px var(--app-gutter) 4px;
+  padding: 2px var(--app-gutter) var(--space-1);
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-mask-image: linear-gradient(
@@ -82,7 +82,7 @@
 }
 .standings-jump {
   min-height: 28px;
-  padding: 0 9px;
+  padding: 0 var(--space-2);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: transparent;
@@ -115,7 +115,7 @@
 .standings-reveal {
   flex: 0 0 auto;
   min-height: 28px;
-  padding: 0 11px;
+  padding: 0 var(--space-2h);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--seal-deep);
   background: var(--seal-cover);
@@ -160,7 +160,7 @@
   gap: var(--space-2);
   max-width: var(--app-width);
   margin-inline: auto;
-  padding: 10px var(--app-gutter) calc(10px + env(safe-area-inset-bottom));
+  padding: var(--space-2h) var(--app-gutter) calc(var(--space-2h) + env(safe-area-inset-bottom));
   background: linear-gradient(
     to top,
     var(--bg-canvas) 55%,
@@ -170,7 +170,7 @@
 
 .standings-daynav button {
   min-height: 32px;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
@@ -240,7 +240,7 @@
    streak, last-ten). `.st-ext` columns are hidden below the breakpoint. */
 .standings--full th,
 .standings--full td {
-  padding: 6px 6px;
+  padding: var(--space-1h) var(--space-1h);
   font-size: var(--fs-compact);
 }
 .standings--full .st-ext {
@@ -266,7 +266,7 @@
   }
   .standings--full th,
   .standings--full td {
-    padding: 8px 9px;
+    padding: var(--space-2) var(--space-2);
     font-size: var(--fs-small);
   }
 }

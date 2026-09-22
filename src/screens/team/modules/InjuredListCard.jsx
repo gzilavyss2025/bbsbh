@@ -1,4 +1,5 @@
 import { RosterList } from './RosterList.jsx'
+import { Door } from '../../../components/ui/Door.jsx'
 
 export function InjuredListCard({ injured, season, showInjured, onShowInjured }) {
   return (
@@ -14,9 +15,9 @@ export function InjuredListCard({ injured, season, showInjured, onShowInjured })
           rows={injured.map((p) => ({ ...p, badge: p.ilLabel, badgeClass: 'ilchip', war: undefined }))}
         />
       ) : (
-        <button type="button" className="pshistory__more" onClick={onShowInjured}>
+        <Door layout="block" onClick={onShowInjured}>
           Show {injured.length} injured
-        </button>
+        </Door>
       )}
       </div>
     </div>

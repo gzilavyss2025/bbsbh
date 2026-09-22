@@ -1,0 +1,66 @@
+{
+  "umpire": {
+    "PAGE": {
+      "w": 390,
+      "h": 6583
+    },
+    ".umptend__id": {
+      "w": 356,
+      "h": 84.3
+    },
+    ".umptend__lean": {
+      "w": 356,
+      "h": 157
+    },
+    ".umptend__row": {
+      "w": 300,
+      "h": 24
+    },
+    ".umptend__tile": {
+      "w": 178,
+      "h": 69
+    },
+    ".umptend__prov": {
+      "w": 356,
+      "h": 37
+    }
+  },
+  "standings": {
+    "PAGE": {
+      "w": 390,
+      "h": 3230
+    },
+    ".standings--full": {
+      "w": 358,
+      "h": 181
+    },
+    ".standings--full tbody tr": {
+      "w": 358,
+      "h": 31
+    },
+    ".standings-jump": {
+      "w": 100.63,
+      "h": 28
+    },
+    ".standings-ctrl": {
+      "w": 358,
+      "h": 145
+    }
+  },
+  "player": {
+    "PAGE": {
+      "w": 390,
+      "h": 2400
+    },
+    ".player__statgrid": {
+      "w": 358,
+      "h": 60
+    },
+    ".player__statgrid .stat": {
+      "w": 70.39,
+      "h": 58
+    },
+    ".ledger": null,
+    ".ledger tbody tr": null
+  }
+}

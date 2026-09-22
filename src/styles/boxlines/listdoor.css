@@ -63,7 +63,7 @@ button.boxlines-entry {
   grid-template-columns: var(--bl-cols);
   column-gap: var(--space-2);
   align-items: center;
-  padding: 0 10px;
+  padding: 0 var(--space-2h);
   font-family: var(--font-mono);
   font-size: var(--fs-compact);
 }
@@ -82,7 +82,7 @@ button.boxlines-entry {
   text-align: right;
 }
 
-/* THE ENTRY. A full button reset, the way .boxlines-door is one, so a control
+/* THE ENTRY. A full button reset, the way .boxlines__door is one, so a control
    in a list of figures starts its ink where the rows above it start theirs. */
 button.boxlines-entry {
   width: 100%;
@@ -163,7 +163,7 @@ button.boxlines-entry {
   box-shadow: var(--ring);
 }
 
-/* BACK TO THE LIST. Above the kicker, in the chevron-link voice the app uses
+/* BACK TO THE LIST. Above the kicker, in the door’s own voice, which the app uses
    for every "back to where this opened" control, and it is the only thing in
    the sheet's head that is not the sheet's own name — so it is small, and it
    leads with the mark that says which way it goes. */
@@ -192,8 +192,8 @@ button.boxlines__back {
 @media (max-width: 359px) {
   .boxlines__listhead,
   button.boxlines-entry {
-    padding: 0 6px;
-    column-gap: 4px;
+    padding: 0 var(--space-1h);
+    column-gap: var(--space-1);
     font-size: var(--fs-cell);
   }
 
@@ -228,7 +228,7 @@ button.boxlines__back {
    .player__statgrid makes: twelve bordered, shadowed chips inside a sheet is
    noise, and the 1px gaps already say where one figure stops. */
 .boxlines__stats .stat {
-  padding: 9px 3px;
+  padding: var(--space-2) 3px;
   background: var(--surface-card);
   border: none;
   border-radius: 0;
@@ -254,7 +254,7 @@ button.boxlines__back {
    the screen, and a figure that wraps is worse than a figure that is small. */
 @media (max-width: 359px) {
   .boxlines__stats .stat {
-    padding: 7px 2px;
+    padding: var(--space-1h) 2px;
   }
 
   .boxlines__stats .stat__v {

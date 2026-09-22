@@ -1,4 +1,5 @@
 import { Headshot } from '../../../../components/player/Headshot.jsx'
+import { Door } from '../../../../components/ui/Door.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 
@@ -67,9 +68,9 @@ export function ProspectsCard({ prospects, showAllProspects, onShowAll }) {
           </tbody>
         </table>
         {!showAllProspects && prospects.length > PROSPECTS_PREVIEW_COUNT && (
-          <button type="button" className="pshistory__more" onClick={onShowAll}>
+          <Door layout="block" onClick={onShowAll}>
             Show all {prospects.length} prospects
-          </button>
+          </Door>
         )}
       </div>
       </div>

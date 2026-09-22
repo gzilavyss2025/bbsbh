@@ -70,7 +70,7 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   margin: 0 calc(-1 * var(--app-gutter));
-  padding: 0 var(--app-gutter) 8px;
+  padding: 0 var(--app-gutter) var(--space-2);
   border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 
@@ -80,19 +80,19 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  padding: calc(10px + env(safe-area-inset-top)) 0 10px;
+  padding: calc(var(--space-2h) + env(safe-area-inset-top)) 0 var(--space-2h);
 }
 
 /* A SiteHeader's .sitebar already clears the notch, so a topbar right below
    it shouldn't stack a second safe-area inset on top of it. */
 .sitebar + .topbar {
-  padding-top: 10px;
+  padding-top: var(--space-2h);
 }
 
 .topbar__title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-h1);
   font-weight: var(--w-bold);
@@ -106,9 +106,9 @@
    same row to its right rather than on its own line below. The title shrinks so
    all five level buttons fit beside it on a narrow phone. */
 .topbar--slate {
-  gap: 8px;
+  gap: var(--space-2);
   align-items: center;
-  padding-bottom: 8px;
+  padding-bottom: var(--space-2);
 }
 
 .topbar__home {
@@ -126,7 +126,7 @@
 .tally-lockup {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2h);
   min-width: 0;
 }
 
@@ -141,7 +141,7 @@
 
 @media (max-width: 600px) {
   .tally-lockup {
-    gap: 6px;
+    gap: var(--space-1h);
   }
 
   .tally-lockup__mark {
@@ -152,7 +152,7 @@
 
 .topbar--slate .topbar__title {
   font-size: var(--fs-title-sm);
-  gap: 6px;
+  gap: var(--space-1h);
 }
 
 /* Groups the level toggle + search trigger as one flex item, so the topbar's
@@ -162,8 +162,8 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
-  row-gap: 6px;
+  gap: var(--space-1);
+  row-gap: var(--space-1h);
   min-width: 0;
 }
 
@@ -182,7 +182,7 @@
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   flex: none;
 }
 
@@ -253,7 +253,7 @@
 
 .topbar--slate .levelnav__btn {
   min-height: 30px;
-  padding: 0 6px;
+  padding: 0 var(--space-1h);
   font-size: var(--fs-small);
 }
 
@@ -268,7 +268,7 @@
 }
 
 .topbar--game {
-  gap: 6px;
+  gap: var(--space-1h);
 }
 
 .topbar__back {
@@ -277,7 +277,7 @@
   color: var(--field);
   font-size: var(--fs-body);
   font-weight: var(--w-semibold);
-  padding: 8px 2px;
+  padding: var(--space-2) 2px;
   min-height: var(--tap-min);
   cursor: pointer;
   flex: 0 0 auto;
@@ -304,7 +304,7 @@
 .datenav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .datenav button {
@@ -347,7 +347,7 @@
    GameSelect.jsx. */
 .datenav--row {
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 /* The slate's date stepper is a compact control, not a primary tap target —
@@ -366,7 +366,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--space-1h);
   font-size: var(--fs-compact);
 }
 
@@ -384,7 +384,7 @@
 
 .datenav--lg .datenav__label {
   max-width: 320px;
-  gap: 8px;
+  gap: var(--space-2);
   font-size: var(--fs-ui);
 }
 
@@ -395,7 +395,7 @@
    scaling up alongside. */
 .datenav--lg .datenav__today {
   min-height: 24px;
-  padding: 2px 9px;
+  padding: 2px var(--space-2);
   font-size: var(--fs-compact);
 }
 
@@ -408,7 +408,7 @@
    already applies here for free — no separate :hover/:active needed. */
 .datenav__today {
   min-height: 20px;
-  padding: 1px 7px;
+  padding: 1px var(--space-1h);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
@@ -445,7 +445,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--space-1h);
   border: none;
   cursor: pointer;
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease,
@@ -458,7 +458,7 @@
 /* OFF — the default, most-common state, so it stays ordinary chrome rather
    than banner weight. */
 .daystate__chip--live {
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -477,7 +477,7 @@
 /* ON — a contained kraft chip, same footprint as OFF, so switching it on
    never pushes the date stepper or forces a wrap onto its own row. */
 .daystate__chip--live-on {
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid var(--seal-hatch);
   border-radius: var(--radius-sm);
   background: var(--seal-cover);
@@ -596,8 +596,8 @@
   display: flex;
   flex: 0 0 auto;
   align-items: baseline;
-  gap: 6px;
-  padding: 4px 10px;
+  gap: var(--space-1h);
+  padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   color: var(--text-muted);

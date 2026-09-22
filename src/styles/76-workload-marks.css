@@ -24,7 +24,7 @@
 .pendots {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
 }
 
 .pendots__dot {
@@ -40,7 +40,7 @@
    drew 7px dots still spaced 5px apart, and the slate card's row never
    tightened the way the rule says it does. */
 .pendots--sm {
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .pendots--sm .pendots__dot {
@@ -157,7 +157,7 @@
 .daystrip-key li {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
@@ -222,7 +222,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 5px;
+  gap: var(--space-1);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
@@ -423,7 +423,7 @@
 .staffgrid__arm {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   min-width: 0;
 }
 

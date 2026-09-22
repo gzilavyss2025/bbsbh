@@ -45,7 +45,7 @@
 /* The availability verdict — the SAME word the Bullpen Board prints, in the
    same three inks, because it is the same call off the same file. */
 .moundcard__avail {
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid;
   border-radius: var(--radius-pill);
   font-family: var(--font-display);

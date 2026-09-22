@@ -13,6 +13,7 @@ import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
+import { Door } from '../../components/ui/Door.jsx'
 import { loadTransactions } from './data/loadTransactions.js'
 
 // ===========================================================================
@@ -182,9 +183,9 @@ function ClubLedger({ team, asOf, first, onBack }) {
       {canGrow && (
         <>
           <div ref={sentinelRef} aria-hidden="true" />
-          <button type="button" className="txpage__more" onClick={grow} disabled={loading}>
+          <Door layout="block" className="txpage__door" onClick={grow} disabled={loading}>
             {loading ? 'Loading moves…' : failed ? 'Try loading again' : 'Earlier moves'}
-          </button>
+          </Door>
         </>
       )}
 

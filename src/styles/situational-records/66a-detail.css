@@ -205,8 +205,8 @@
   }
   .trrank__tablewrap .standings th,
   .trrank__tablewrap .standings td {
-    padding-right: 6px;
-    padding-left: 6px;
+    padding-right: var(--space-1h);
+    padding-left: var(--space-1h);
   }
 }
 

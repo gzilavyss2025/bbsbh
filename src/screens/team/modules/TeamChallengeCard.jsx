@@ -9,7 +9,7 @@ import { useNav } from '../../../lib/nav.js'
 import { absChallengesPath } from '../../../lib/route.js'
 import { ScatterChart } from '../../../components/around-the-game/BroadcastBar.jsx'
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
-import { ChevronLink } from '../../../components/ui/ChevronLink.jsx'
+import { Door } from '../../../components/ui/Door.jsx'
 
 // THE TEAM HUB'S CHALLENGE CARD, on the Numbers tab — who on this club argues
 // with the plate umpire, against how much baseball they see.
@@ -215,10 +215,10 @@ export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
           : 'A man traded in July is counted for the club he saw those pitches with, not the one holding him now.'}
       </p>
 
-      <div className="thub-door">
-        <ChevronLink onClick={() => navigate(absChallengesPath())}>
+      <div className="thub__door">
+        <Door onClick={() => navigate(absChallengesPath())}>
           League challenge board
-        </ChevronLink>
+        </Door>
       </div>
     </div>
   )

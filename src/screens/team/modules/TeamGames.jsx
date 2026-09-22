@@ -2,6 +2,7 @@ import { useState, useRef, useMemo, useLayoutEffect, useEffect } from 'react'
 import { gamePath } from '../../../lib/route.js'
 import { useNav } from '../../../lib/nav.js'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
+import { Door } from '../../../components/ui/Door.jsx'
 import { DOW_LABELS, MONTH_LABELS } from './TeamStatsCard.jsx'
 
 // Two surfaces over the same ticket-stub card, both fed lists the caller has
@@ -246,13 +247,9 @@ export function AllGames({ games }) {
         ))}
       </div>
       {remaining > 0 && (
-        <button
-          type="button"
-          className="gamesgrid__more"
-          onClick={() => setVisibleCount((c) => c + GRID_PAGE)}
-        >
+        <Door layout="block" onClick={() => setVisibleCount((c) => c + GRID_PAGE)}>
           Show {Math.min(GRID_PAGE, remaining)} more &middot; {remaining} left
-        </button>
+        </Door>
       )}
     </section>
   )

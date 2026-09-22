@@ -62,7 +62,7 @@
 }
 .contractcard__regime {
   flex: none;
-  padding: 5px 9px;
+  padding: var(--space-1) var(--space-2);
   color: var(--text-on-ink);
   background: var(--navy);
   border: var(--bw-hair) solid var(--navy);
@@ -119,7 +119,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2);
-  padding: 6px 0 6px var(--space-3);
+  padding: var(--space-1h) 0 var(--space-1h) var(--space-3);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 .contractcard__scorebug > div:last-child {
@@ -144,7 +144,7 @@
 }
 .contractcard__ticker > div {
   min-width: 0;
-  padding: 9px var(--space-4);
+  padding: var(--space-2) var(--space-4);
   background: color-mix(in srgb, var(--paper-3) 78%, var(--paper-2));
 }
 
@@ -200,7 +200,7 @@
   flex-direction: column;
   gap: 3px;
   min-width: 0;
-  padding: 13px var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-3) 0 0;
   border-top: var(--bw-hair) solid var(--border-rule);
   color: var(--text-caption);
   font-family: var(--font-mono);
@@ -276,7 +276,7 @@
   flex-direction: column;
   gap: 3px;
   min-width: 0;
-  padding: 13px var(--space-2) 0 0;
+  padding: var(--space-3) var(--space-2) 0 0;
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 .contractcard__seg::before {
@@ -343,7 +343,7 @@
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   min-width: 0;
 }
 .contractcard__barvalue {
@@ -429,7 +429,7 @@
 }
 .contractcard__tag {
   margin-left: var(--space-2);
-  padding: 2px 5px;
+  padding: 2px var(--space-1);
   color: var(--text-caption);
   background: color-mix(in srgb, var(--rule) 30%, transparent);
   border: var(--bw-hair) solid var(--border-rule);

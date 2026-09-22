@@ -1,0 +1,103 @@
+/* ---------------------------------------------------------------------------
+   DOOR — the app's one "there is more behind this" affordance (#1130).
+
+   A door is not a button. A button acts on the page you are standing on; a
+   door leaves it, or opens the rest of a list you are already reading. It is
+   drawn in --accent-link rather than in a control's ink and it never shouts:
+   the page's action is the scorecard, and the door out of it is not competing
+   with that. ADR-0084 clause 3 names `__door` for exactly this shape, and this
+   file is the base rule that owns the word.
+
+   TWO LAYOUTS, AND THEY SHARE ALMOST NOTHING ON PURPOSE.
+
+     --inline  the "See all ›" text link, set in the condensed caps voice, no
+               box at all. Its chevron is written by ui/Door.jsx rather than
+               passed, so a door and its arrow can never disagree. It does not
+               align itself: the host does that (.thub__door right-aligns a
+               preview card's door, .topbar__action seats one in a page head).
+
+     --block   the full-width row that closes a list — "Show 12 more" at the
+               foot of the teammates table, the pager under a wire. Inset
+               paper inside a hairline, ruled the width of the thing it opens,
+               and no chevron: an arrow on it would read as a link to another
+               page, which is the one thing this door is not.
+
+   What they share is what every door shares — the pointer, the focus ring and
+   the waiting state while the rest of the list is fetched — and that is all
+   `.door` itself holds. `font-weight` is deliberately NOT on `.door`: a door
+   that wraps a host's own row (the Box Lines door under a career line) would
+   otherwise re-weight the host's text through inheritance.
+
+   WHY THIS IS A SUBDIRECTORY. src/styles sits at its 115-file directory budget
+   (scripts/check-dir-size.mjs), so a 116th flat partial cannot exist, and
+   ADR-0038 says the answer to that is to subdivide rather than widen a number.
+   `system/` is for the rules the design-system collapse extracts — the shared
+   ones no single route owns.
+
+   WHERE IT SITS IN THE CASCADE. src/index.css @imports it immediately before
+   23-box-score-detail.css, the slot the text door’s rule already held while it
+   was parked in that per-route partial. Nothing that used to beat the text door
+   stops beating it, and every per-site residual in a later partial or a route
+   chunk still wins on order — which is what .txcard__door and .txpage__door
+   rely on for the three declarations each of them keeps.
+   --------------------------------------------------------------------------- */
+
+.door {
+  cursor: pointer;
+}
+.door:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* A door that is fetching the rest of the list. Both pagers wore this before
+   the collapse; on the shared rule a new door gets it without being told. */
+.door:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.door--inline {
+  border: none;
+  background: none;
+  padding: var(--space-1) 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-link);
+  /* Only matters on the two doors that are real anchors (Standings ↔
+     Postseason Race's head cross-link) — a <button> never underlines. */
+  text-decoration: none;
+}
+
+/* The label at the far end of a door that is a whole ROW of its own: the Box
+   Lines door says the career line across the row and "See all ›" at its end,
+   so the words are the inline door's even though the control is not one. */
+.door__label {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-link);
+  white-space: nowrap;
+}
+
+.door--block {
+  display: block;
+  width: 100%;
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: center;
+}
+.door--block:hover:not(:disabled) {
+  color: var(--text-body);
+}

@@ -21,6 +21,23 @@
   --space-12: 48px;
   --space-16: 64px;
 
+  /* Half-steps. The 4px grid is the scale; these three are the landings
+     between its first four rungs, and they exist because the app already
+     stood on them. Before they were minted, padding and gap in src/styles/
+     carried 488 raw literals at exactly 6, 10 and 14px — more than the 598
+     that were on the scale itself. A primitive tier earns a value by it
+     being reusable and app-agnostic, and a half-step between 4 and 8, 8 and
+     12, 12 and 16 is as general as the steps it sits between: it is where a
+     control lands when a full step is too loose and the step below is too
+     tight. Naming them stops that judgement being re-made as a bare number.
+     They are landings, not rungs — reach for --space-N first. There is no
+     half-step above 16px on purpose: past that the eye stops reading 2px of
+     difference, and a fourth would start to say the scale is 8 steps deep
+     between 0 and 16, which is not a scale (ADR-0085). */
+  --space-1h: 6px;
+  --space-2h: 10px;
+  --space-3h: 14px;
+
   /* Radii — boxy scorebook, small radii; capsules for pills */
   --radius-xs:  3px;
   --radius-sm:  6px;

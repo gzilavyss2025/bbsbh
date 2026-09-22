@@ -65,7 +65,7 @@ export function RunValueCard({ playerId }) {
         depends on the score of the game it happened in.
       </p>
 
-      <button type="button" className="plink rvcard__more" onClick={() => navigate(runValuePath())}>
+      <button type="button" className="plink rvcard__door" onClick={() => navigate(runValuePath())}>
         League run value board ›
       </button>
     </div>

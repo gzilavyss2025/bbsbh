@@ -5,14 +5,14 @@
 .umpage__toprow {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   margin-bottom: 16px;
 }
 .umpage__tendcol,
 .umpage__sidecol {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 @media (min-width: 740px) {
   .umpage__toprow {
@@ -26,7 +26,7 @@
   }
 }
 .umpage__card {
-  padding: 12px;
+  padding: var(--space-3);
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
@@ -50,7 +50,7 @@
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .umpage__teamitem {
   flex: 0 0 auto;
@@ -60,7 +60,7 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: 4px;
+  padding: var(--space-1);
 }
 .umpage__teamcount {
   font-family: var(--font-mono);
@@ -81,12 +81,12 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 .umpage__venuerow {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .umpage__reclogo {
   align-self: center;
@@ -121,7 +121,7 @@
 .umpage__levelchip {
   display: inline-block;
   margin-left: 6px;
-  padding: 0 5px;
+  padding: 0 var(--space-1);
   border: 1px solid var(--border-hairline);
   border-radius: 4px;
   font-family: var(--font-display);
@@ -137,7 +137,7 @@
 .umpage__ctxchip {
   display: inline-block;
   margin-left: 6px;
-  padding: 0 5px;
+  padding: 0 var(--space-1);
   border-radius: 4px;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -173,12 +173,12 @@
 
 .umpage__filter {
   display: flex;
-  gap: 6px;
+  gap: var(--space-1h);
   margin-bottom: 14px;
 }
 .umpage__filterbtn {
   flex: 1;
-  padding: 9px 10px;
+  padding: var(--space-2) var(--space-2h);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -213,8 +213,8 @@
   display: grid;
   grid-template-columns: 40px 64px 1fr auto;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: var(--space-2);
+  padding: var(--space-2h) var(--space-3);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .umpage__list li:first-child.umpage__row {

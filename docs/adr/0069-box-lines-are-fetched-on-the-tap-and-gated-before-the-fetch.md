@@ -132,7 +132,7 @@ an internal word on a page that never uses one. The reader has no way to know
 what a box line is; the app's own name for these rows, in the sheet's hints, is
 "game lines".
 
-So the label is now the house `See all ›` — the same words `ui/ChevronLink.jsx`
+So the label is now the house `See all ›` — the same words `ui/Door.jsx`
 gives every other "open the full list behind this summary" door, which is
 exactly what this is — and the kicker reads `Game lines · {facet}`. The internal
 name stays in `api/boxlines/`, `components/boxlines/`, this ADR and the issue
@@ -142,10 +142,10 @@ prompt, and no reader ever sees it.
 Two dress bugs went with it, both from the door being a real `<button>`:
 
 - **The line sat 6px right of its neighbours.** A button carries the UA's own
-  `padding: 1px 6px`, and `.boxlines-door` reset the border but not the
+  `padding: 1px 6px`, and `.boxlines__door` reset the border but not the
   padding, so the career line's ink started at 135px where every stat line
   above it started at 129px. The reset now takes the padding too. That makes
-  `.boxlines-door` a FULL reset from a partial that loads after its host's, so
+  `.boxlines__door` a FULL reset from a partial that loads after its host's, so
   a host restates its row's own dress at `button.` specificity — which is also
   what restored the dashed divider this line had silently lost.
 - **Hover said nothing.** The door had `:active` and `:focus-visible` and no

@@ -15,8 +15,8 @@
 .txcard__head {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  padding-bottom: 6px;
+  gap: var(--space-2);
+  padding-bottom: var(--space-1h);
   margin-bottom: 4px;
   border-bottom: var(--bw-hair) solid var(--rule-soft);
   color: var(--text-caption);
@@ -43,15 +43,15 @@
      an empty box reads as content that failed to load, where a short card just
      reads as a short story. The deck's own height is unchanged (a single flex
      line is still as tall as its tallest item), so only the dead space inside
-     the short cards goes away. .txcard__more keeps its own align-self: stretch
+     the short cards goes away. .txcard__door keeps its own align-self: stretch
      and so stays a full-height tap target. */
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--space-2h);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
   margin: 0 calc(-1 * var(--app-gutter));
-  padding: 2px var(--app-gutter) 6px;
+  padding: 2px var(--app-gutter) var(--space-1h);
   /* scrollbar-width is Firefox-only — Chrome/Safari/Edge ignore it entirely
      and fall back to a full-size native horizontal scrollbar, which reads as
      a stray gray bar under a touch-first swipe deck. The ::-webkit-scrollbar
@@ -72,27 +72,15 @@
   flex: 0 0 auto;
   width: 1px;
 }
-.txcard__more {
+/* The deck's own door wears .door--block like every other one; all it keeps is
+   where it stands. A block door is a full-width row at the foot of a list, and
+   this one is a flex item at the end of a horizontal scroll deck, so the three
+   declarations that place it there are the three that stay. Its edge used to be
+   dashed; dashed now means provisional and nothing else (#1132). */
+.txcard__door {
   flex: 0 0 160px;
-  align-self: stretch;
   scroll-snap-align: start;
-  padding: 12px;
-  border: var(--bw-hair) dashed var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font: inherit;
-  font-weight: var(--w-semibold);
-  cursor: pointer;
-}
-.txcard__more:hover:not(:disabled),
-.txcard__more:focus-visible {
-  color: var(--text-body);
-  border-style: solid;
-}
-.txcard__more:disabled {
-  cursor: wait;
-  opacity: 0.7;
+  margin: 0;
 }
 
 /* Each story is its own bordered card — wider than the deck's first cut
@@ -102,7 +90,7 @@
   flex: 0 0 auto;
   scroll-snap-align: start;
   width: 320px;
-  padding: 10px 10px 12px;
+  padding: var(--space-2h) var(--space-2h) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -144,7 +132,7 @@
   justify-content: flex-start;
   gap: 2px;
   width: 40px;
-  padding: 2px 8px 0 0;
+  padding: 2px var(--space-2) 0 0;
   border-right: var(--bw-hair) solid var(--rule-soft);
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -193,7 +181,7 @@
   float: right;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1h);
   max-width: 100%;
   margin: 0 0 6px 10px;
 }
@@ -251,7 +239,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  padding: 1px 5px;
+  padding: 1px var(--space-1);
   color: var(--surface-card);
   background: var(--graphite);
 }
@@ -453,7 +441,7 @@
 }
 .last10__stub {
   flex: 0 0 auto;
-  padding: 7px var(--space-2) 6px;
+  padding: var(--space-1h) var(--space-2) var(--space-1h);
   border-bottom: 1px dashed var(--border-rule);
   text-align: right;
 }
@@ -548,7 +536,7 @@
 }
 .last10__foot {
   flex: 0 0 auto;
-  padding: 7px var(--space-2) 8px;
+  padding: var(--space-1h) var(--space-2) var(--space-2);
 }
 .last10__score {
   font-family: var(--font-mono);
@@ -609,30 +597,6 @@
   width: auto;
   scroll-snap-align: none;
 }
-/* Same full-width block affordance as .teammates__more / .marginnotes__more. */
-.gamesgrid__more {
-  display: block;
-  width: 100%;
-  margin: var(--space-2) 0 0;
-  padding: 9px 12px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font-family: inherit;
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  text-align: center;
-  cursor: pointer;
-}
-.gamesgrid__more:hover {
-  color: var(--text-body);
-}
-.gamesgrid__more:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
 /* Team Page Photos rail — professional camera stills of this club, lazily
    fetched a few games at a time (TeamPhotosRail in TeamPage.jsx). Same
    nav/track/sentinel structure as .last10 just above (single-row flex track,
@@ -739,14 +703,14 @@
 .sstrip {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 8px;
+  gap: var(--space-1h) var(--space-2);
   margin: 4px 0 2px;
 }
 .sstrip__series {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: 4px 5px;
+  padding: var(--space-1) var(--space-1);
   border-radius: var(--radius-sm);
   background: var(--bg-page);
   border: var(--bw-hair) solid var(--border-hairline);
@@ -832,7 +796,7 @@
 /* standings */
 .standings th,
 .standings td {
-  padding: 7px 8px;
+  padding: var(--space-1h) var(--space-2);
   font-size: var(--fs-small);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-hairline);
@@ -882,7 +846,7 @@
 .standings td.team > * {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-1h);
 }
 /* A name that wraps to two lines (a long surname on a narrow phone, e.g.
    "Pete Crow-Armstrong") grows the .team row's height; align-items: center

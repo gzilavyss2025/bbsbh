@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { BoxLinesSheet } from './BoxLinesSheet.jsx'
 
 // The door to a Box Lines sheet (ADR-0069): the summary line itself, as a real
-// button, with a "See all ›" label pushed to its far end in the app's
-// chevron-link voice — the same words every other "open the full list behind
-// this summary" door says (ChevronLink.jsx). "Box Lines" is the internal name
+// button, with a "See all ›" label pushed to its far end in the door's own
+// voice — the same words every other "open the full list behind
+// this summary" door says (ui/Door.jsx). "Box Lines" is the internal name
 // for this drilldown and never appears on the page; what the reader sees is
 // the sheet's own vocabulary, "game lines". Owns the open bit and mounts the sheet, so a surface that
 // wants a door pays one element, not a state hook and a mount of its own —
@@ -38,7 +38,7 @@ export function BoxLinesDoor({ className = '', label, face = null, headline = la
     <>
       <button
         type="button"
-        className={`boxlines-door ${face ? 'boxlines-door--face ' : ''}${className}`.trim()}
+        className={`door boxlines__door ${face ? 'boxlines__door--face ' : ''}${className}`.trim()}
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -49,7 +49,7 @@ export function BoxLinesDoor({ className = '', label, face = null, headline = la
         {face ?? (
           <>
             <span>{label}</span>
-            <span className="boxlines-door__label">See all ›</span>
+            <span className="door__label">See all ›</span>
           </>
         )}
       </button>

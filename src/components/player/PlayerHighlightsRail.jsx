@@ -3,7 +3,7 @@ import { fetchTeamHighlights, flattenPositiveClips } from '../../api/gamehighlig
 import { useAsync } from '../../hooks/useAsync.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { HighlightClipCard } from '../highlights/HighlightClipCard.jsx'
-import { ChevronLink } from '../ui/ChevronLink.jsx'
+import { Door } from '../ui/Door.jsx'
 
 // A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
 // copy of this helper for why `scroll-behavior: smooth` has to be bypassed.
@@ -177,8 +177,8 @@ export function PlayerHighlightsRail({ playerId, teamId, limit }) {
         )}
       </div>
       {!expanded && allClips.length > limit && (
-        <div className="thub-door">
-          <ChevronLink onClick={() => setExpanded(true)}>See all</ChevronLink>
+        <div className="thub__door">
+          <Door onClick={() => setExpanded(true)}>See all</Door>
         </div>
       )}
       {openClip && <HighlightSheet item={openClip} onClose={() => setOpenClip(null)} />}

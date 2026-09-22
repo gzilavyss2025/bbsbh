@@ -481,7 +481,7 @@
   font-size: var(--fs-small);
   color: var(--text-body);
   letter-spacing: var(--ls-caps);
-  padding: 7px 8px;
+  padding: var(--space-1h) var(--space-2);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
@@ -498,7 +498,7 @@
 .rpt__club > .plink {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 
 /* The reader's own club, wherever it lands on the board. */
@@ -894,9 +894,9 @@
 .dh__open {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   min-height: var(--tap-min);
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   border: 0;
   background: none;
   font-family: var(--font-mono);
@@ -946,7 +946,7 @@
 .dh__oppclub {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   margin-left: var(--space-2);
 }
 
@@ -1023,7 +1023,7 @@
 .dh__against-item {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   margin: 0 var(--space-2) 2px 0;
   font-family: var(--font-body);
   font-size: var(--fs-caption);
@@ -1051,7 +1051,7 @@
 
 .dh__drawer th,
 .dh__drawer td {
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2h);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-variant-numeric: tabular-nums;

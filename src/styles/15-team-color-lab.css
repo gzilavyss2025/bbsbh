@@ -57,7 +57,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-1);
-    padding: 4px var(--space-2);
+    padding: var(--space-1) var(--space-2);
   }
 
   .milbneutrals__row:hover {
@@ -308,7 +308,7 @@
 
 .colorlab__posinlinefields {
   display: flex;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 
 .colorlab__posinlinefields label {
@@ -348,7 +348,7 @@
 .colorlab__posinlinefields label.colorlab__poscheck {
   flex-direction: row;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .colorlab__posinlinefields .colorlab__poscheck input {
@@ -361,7 +361,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   /* Widened from 76px so the hex input (still its original 62px — a full
      "#XXXXXX" needs every bit of that in --font-mono) has room for the
      eyedropper button (HexField.jsx) beside it without truncating. */
@@ -590,7 +590,7 @@
 .colorlab__wpapreviewfields label.colorlab__wpapreviewcheck {
   flex-direction: row;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .colorlab__wpapreviewfields .colorlab__wpapreviewcheck input {
@@ -670,7 +670,7 @@
 .colorlab__weardates-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .colorlab__weardates-hint {

@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { Headshot } from '../player/Headshot.jsx'
+import { Door } from '../ui/Door.jsx'
 import { useCalloutLedger } from '../../hooks/useCalloutLedger.js'
 
 // Show only the first handful up front and let a button reveal the rest —
@@ -93,9 +94,9 @@ export const MarginNotes = memo(function MarginNotes({ notes, feed, bundle, half
         })}
       </div>
       {hidden > 0 && (
-        <button type="button" className="marginnotes__more" onClick={() => setShowAll(true)}>
+        <Door layout="block" onClick={() => setShowAll(true)}>
           Show {hidden} more margin {hidden === 1 ? 'note' : 'notes'}
-        </button>
+        </Door>
       )}
     </section>
   )

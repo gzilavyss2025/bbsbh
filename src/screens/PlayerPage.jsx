@@ -17,7 +17,7 @@ import { MilestoneWatchCard } from '../components/playerstats/MilestoneWatchCard
 import { PlayerContractCard } from '../components/playerstats/PlayerContractCard.jsx'
 import { PlayerPhotosRail } from '../components/player/PlayerPhotosRail.jsx'
 import { PlayerHighlightsRail } from '../components/player/PlayerHighlightsRail.jsx'
-import { ChevronLink } from '../components/ui/ChevronLink.jsx'
+import { Door } from '../components/ui/Door.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './player/PlayerHubShell.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
@@ -44,13 +44,13 @@ const PREVIEW_AWARD_CHIPS = 4
 const PREVIEW_PHOTOS = 6
 const PREVIEW_HIGHLIGHTS = 6
 
-// The door itself — same shared ChevronLink the team hub's PreviewDoor
+// The door itself — same shared Door the team hub's PreviewDoor
 // builds on, so the two hubs' doors can't drift into two different-looking
 // controls.
 function PreviewDoor({ label, onClick }) {
   return (
-    <div className="thub-door">
-      <ChevronLink onClick={onClick}>{label}</ChevronLink>
+    <div className="thub__door">
+      <Door onClick={onClick}>{label}</Door>
     </div>
   )
 }

@@ -31,7 +31,7 @@
 
 .rolling__grid th,
 .rolling__grid td {
-  padding: 6px 0;
+  padding: var(--space-1h) 0;
   min-width: 24px;
   text-align: center;
   font-size: var(--fs-small);
@@ -57,8 +57,8 @@
 }
 
 .rolling__team {
-  padding-left: 12px !important;
-  padding-right: 8px !important;
+  padding-left: var(--space-3) !important;
+  padding-right: var(--space-2) !important;
   text-align: left !important;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
@@ -155,7 +155,7 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px 14px 10px;
+  padding: var(--space-3) var(--space-3h) var(--space-2h);
   overflow: hidden;
 }
 
@@ -168,9 +168,9 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 4px 8px;
+  gap: var(--space-1) var(--space-2);
   margin: -12px -14px 8px;
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2h);
   background: var(--navy);
   border-bottom: 3px solid var(--seal);
 }
@@ -191,7 +191,7 @@
    teamChipColors) rather than the generic navy/clay the chart bands use. */
 .winprob__split {
   display: flex;
-  gap: 10px;
+  gap: var(--space-2h);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-compact);
@@ -200,7 +200,7 @@
 .winprob__team {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-on-ink);
@@ -374,8 +374,8 @@
 .winprob__ledger-row {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 7px 6px;
+  gap: var(--space-2h);
+  padding: var(--space-1h) var(--space-1h);
   margin: 0 -6px;
   border-top: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
@@ -409,7 +409,7 @@
   font-weight: var(--w-bold);
   font-size: var(--fs-cell);
   letter-spacing: var(--ls-label);
-  padding: 2px 7px;
+  padding: 2px var(--space-1h);
   border-radius: var(--radius-pill);
   white-space: nowrap;
 }
@@ -455,12 +455,12 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px 14px 8px;
+  padding: var(--space-3) var(--space-3h) var(--space-2);
   overflow: hidden;
 }
 .marginnotes__title {
   margin: -12px -14px 8px;
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2h);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -473,13 +473,13 @@
 .marginnotes__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 8px;
+  gap: var(--space-2);
 }
 .marginnotes__card {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: var(--space-2);
+  padding: var(--space-2);
   background: var(--paper-2);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
@@ -516,7 +516,7 @@
 .marginnotes__text {
   display: flex;
   align-items: flex-start;
-  gap: 6px;
+  gap: var(--space-1h);
   font-family: var(--font-read);
   font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
@@ -537,27 +537,6 @@
 #root .marginnotes__text {
   text-transform: none; /* caps-exempt: margin notes' fun-fact line reads as a natural sentence */
 }
-/* Same "Show N more" block button as .teammates__more (TeamInfo.jsx) and
-   .bs__noteMore (BoxScore.jsx) — one-way reveal, no collapse back. */
-.marginnotes__more {
-  display: block;
-  width: 100%;
-  margin: 8px 0 0;
-  padding: 9px 12px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font-family: inherit;
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  text-align: center;
-  cursor: pointer;
-}
-.marginnotes__more:hover {
-  color: var(--text-body);
-}
-
 /* -------------------------------------------------------------- pitcher lines
    Running lines for every pitcher who has appeared in a revealed half-inning —
    one block per team, each led by the team name and its own header row (gated
@@ -570,7 +549,7 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px 14px 8px;
+  padding: var(--space-3) var(--space-3h) var(--space-2);
   overflow: hidden;
 }
 
@@ -578,7 +557,7 @@
    .pitchers clips the square corners here to the card's own rounded ones. */
 .pitchers__title {
   margin: -12px -14px 8px;
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2h);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -613,7 +592,7 @@
 
 .pitchers__grid th,
 .pitchers__grid td {
-  padding: 6px 1px;
+  padding: var(--space-1h) 1px;
   text-align: center;
   font-size: var(--fs-compact);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
@@ -638,14 +617,14 @@
   width: 36%;
   text-align: left !important;
   padding-left: 0 !important;
-  padding-right: 6px !important;
+  padding-right: var(--space-1h) !important;
 }
 
 .pitchers__cell {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 
 /* Caps-locked and auto-shrunk to fit on one line (see PitcherName): `flex: 1`

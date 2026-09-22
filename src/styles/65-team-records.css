@@ -20,12 +20,12 @@
 .trec__halves {
   display: flex;
   gap: var(--space-1);
-  padding: var(--space-2) 12px;
+  padding: var(--space-2) var(--space-3);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 .trec__half {
   flex: 1;
-  padding: 6px 8px;
+  padding: var(--space-1h) var(--space-2);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -75,7 +75,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
   gap: var(--space-2);
-  padding: var(--space-1) 8px var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-2);
 }
 .trec__count {
   display: flex;
@@ -136,7 +136,7 @@ button.tstatrow__k.trec__rank,
 
 .trec__empty {
   margin: 0;
-  padding: var(--space-3) 8px;
+  padding: var(--space-3) var(--space-2);
   color: var(--text-caption);
   font-size: var(--fs-caption);
 }
@@ -158,7 +158,7 @@ button.tstatrow__k.trec__rank,
    column. A club bats one half per game, so the two columns are its road and
    home games — never two views of the same games. */
 .trecinn {
-  padding: 0 8px var(--space-1);
+  padding: 0 var(--space-2) var(--space-1);
 }
 .trecinn__legend {
   margin: 0 0 var(--space-1);
@@ -197,7 +197,7 @@ button.tstatrow__k.trec__rank,
   align-items: flex-start;
   gap: 0;
   margin: 0;
-  padding: 4px 6px;
+  padding: var(--space-1) var(--space-1h);
   border: 0;
   border-left: var(--bw-hair) solid var(--border-hairline);
   background: none;

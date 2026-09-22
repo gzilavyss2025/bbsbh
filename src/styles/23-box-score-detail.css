@@ -9,34 +9,10 @@
 .tlead {
   margin-top: 4px;
 }
-/* .chevron-link — the shared "See all ›" text-button primitive (see
-   ChevronLink.jsx), composed by TeamLeadersLedger's header action, TeamPage's
-   PreviewDoor, and NumbersTab's "Org leaders ›". One padding/hit-target model
-   for all three, so a tweak here reaches every placement. Also worn directly
-   by a real `<a>` (Standings ↔ Postseason Race's topbar cross-link, via
-   useRouteLink) rather than the ChevronLink button component — `text-decoration:
-   none` only matters there, since a `<button>` never underlines to begin with. */
-.chevron-link {
-  border: none;
-  background: none;
-  padding: 4px 2px;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  color: var(--accent-link);
-  text-decoration: none;
-}
-.chevron-link:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
 /* DeckNudge — the desktop "‹ ›" step control for TeamTransactionsCard's swipe
    deck (Team Leaders had one too until the hub moved to the ledger, which does
    not scroll). Bare text, same quiet register
-   as .chevron-link/.inningnav's chevron labels, not a floating icon button:
+   as .door--inline/.inningnav's chevron labels, not a floating icon button:
    no border, no background, no shadow. Mouse/trackpad only — a deck you can
    swipe never needs a click alternative, so this only exists where hover is
    possible at all. */
@@ -53,7 +29,7 @@
 .decknudge__btn {
   border: none;
   background: none;
-  padding: 2px 4px;
+  padding: 2px var(--space-1);
   cursor: pointer;
   font-family: var(--font-display);
   font-size: var(--fs-ui);
@@ -65,7 +41,7 @@
 .tlead__grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: var(--space-3h);
 }
 @media (min-width: 560px) {
   .tlead__grid {
@@ -77,7 +53,7 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px;
+  padding: var(--space-3);
 }
 .tlead__cat-title {
   margin: 0 0 10px;
@@ -92,7 +68,7 @@
 .tlead__featured {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* Favorite-team highlight (league/level leader pages only, not team/org — see
    TeamLeaders' favoriteTeamId doc) — tints a leader's row in that club's own
@@ -103,7 +79,7 @@
   box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-primary));
   border-radius: var(--radius-sm);
   margin: -4px -6px;
-  padding: 4px 6px;
+  padding: var(--space-1) var(--space-1h);
 }
 /* The team filter's "everyone else" treatment (LeadersPage's TeamFilterStrip)
    — dulled, not hidden, so a picked club's leaders stand out without the
@@ -212,7 +188,7 @@
 .tlead__stat {
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  gap: var(--space-1);
 }
 .tlead__statval {
   font-family: var(--font-mono);
@@ -233,16 +209,16 @@
 .tlead__rest {
   list-style: none;
   margin: 10px 0 0;
-  padding: 8px 0 0;
+  padding: var(--space-2) 0 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 .tlead__row {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* Same favorite-team highlight as .tlead__featured--fav, sized down for a
    chaser row. */
@@ -251,7 +227,7 @@
   box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
   border-radius: var(--radius-xs);
   margin: 0 -6px;
-  padding: 1px 6px;
+  padding: 1px var(--space-1h);
 }
 /* Same team-filter dim treatment as .tlead__featured--dim, for a chaser row. */
 .tlead__row--dim {
@@ -303,7 +279,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 .tlead__badges:empty {
   display: none;
@@ -318,13 +294,13 @@
   background: var(--surface-inset);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-pill);
-  padding: 1px 6px;
+  padding: 1px var(--space-1h);
 }
 /* On a chaser row the pill/level sit small and inline before the value. */
 .tlead__row .prospectpill {
   flex: none;
   font-size: var(--fs-label);
-  padding: 1px 6px;
+  padding: 1px var(--space-1h);
 }
 
 /* ---------------------------------------------------------------------------
@@ -349,12 +325,12 @@
 .tledg__actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .tledg__blocks {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-2h);
 }
 .tledg__block {
   border: var(--bw-hair) solid var(--border-rule);
@@ -366,7 +342,7 @@
 }
 .tledg__block-title {
   margin: 0;
-  padding: 6px 12px;
+  padding: var(--space-1h) var(--space-3);
   background: var(--accent-primary);
   color: var(--text-on-ink);
   font-family: var(--font-display);
@@ -377,7 +353,7 @@
 .tledg__rows {
   list-style: none;
   margin: 0;
-  padding: 0 12px 4px;
+  padding: 0 var(--space-3) var(--space-1);
   display: flex;
   flex-direction: column;
 }
@@ -386,8 +362,8 @@
 .tledg__row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 7px 0;
+  gap: var(--space-2h);
+  padding: var(--space-1h) 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .tledg__row:first-child {
@@ -409,7 +385,7 @@
   min-width: 0;
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 /* Source Sans at the app's NAME role — every player name in this app is
    --font-body at --fs-body/--w-semibold (.tlead__name-last, .playercard__name,
@@ -473,7 +449,7 @@
 .leaders__org {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .leaders__sub {
   margin: 2px 0 0;
@@ -487,7 +463,7 @@
 
 /* Game-info foot: WP, umpires, weather, T, Att… */
 .bs__info {
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-3h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -516,7 +492,7 @@
 /* Final R/H/E/LOB card — the bottom-line tally lifted to the top of the page,
    each club by abbreviation. Matches the other summary cards' frame. */
 .bs__totalsCard {
-  padding: 10px 14px 12px;
+  padding: var(--space-2h) var(--space-3h) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -532,7 +508,7 @@
 .bs__grid--totals th,
 .bs__grid--totals td {
   width: 20%;
-  padding: 8px 4px;
+  padding: var(--space-2) var(--space-1);
   font-size: var(--fs-title-lg);
 }
 .bs__grid--totals thead th {
@@ -552,7 +528,7 @@
 /* Line score: the inning-by-inning runs card. Reuses the box-score table styling
    in a compact frame. */
 .bs__board {
-  padding: 10px 14px 12px;
+  padding: var(--space-2h) var(--space-3h) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -693,7 +669,7 @@
   flex-direction: column;
   gap: 3px;
   min-width: 0;
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
   background: var(--surface-card);
 }
 .bs__field--wide {

@@ -56,7 +56,7 @@
    part of the section rather than as a warning. */
 .simlike__legend {
   margin: 0 0 10px;
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   /* Square on the inked edge only: a radius there rounds the rule away at both
      ends and leaves a stub floating beside the band rather than a rule down
      the side of it. */
@@ -68,7 +68,7 @@
 .simlike__measure {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--space-1);
   margin: 0;
 }
 .simlike__measurelabel {
@@ -89,11 +89,11 @@
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 .simlike__term {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border: var(--bw-hair) solid var(--accent-primary);
   border-radius: var(--radius-pill);
   background: var(--surface-card);
@@ -137,10 +137,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   width: 100%;
   min-width: 0;
-  padding: 12px 6px 10px;
+  padding: var(--space-3) var(--space-1h) var(--space-2h);
   text-align: center;
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
@@ -177,7 +177,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   min-width: 0;
 }
 .simlike__ident {
@@ -207,7 +207,7 @@
   align-items: baseline;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: var(--space-1);
   min-width: 0;
   font-size: var(--fs-caption);
   line-height: var(--lh-snug);
@@ -231,7 +231,7 @@
   gap: 1px;
   width: 100%;
   margin-top: auto;
-  padding-top: 8px;
+  padding-top: var(--space-2);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .simlike__matchval {
@@ -262,7 +262,7 @@
    the column is ~300px, not ~115px. Everything steps up a rung together. */
 @media (min-width: 740px) {
   .simlike__legend {
-    padding: 10px 14px;
+    padding: var(--space-2h) var(--space-3h);
   }
   .simlike__measure {
     flex-direction: row;
@@ -273,7 +273,7 @@
     flex: none;
   }
   .simlike__term {
-    padding: 3px 10px;
+    padding: 3px var(--space-2h);
     font-size: var(--fs-small);
   }
   .simlike__list {
@@ -306,7 +306,7 @@
   .simlike__body {
     grid-area: body;
     align-items: flex-start;
-    gap: 6px;
+    gap: var(--space-1h);
   }
   .simlike__meta {
     justify-content: flex-start;
@@ -326,7 +326,7 @@
     align-self: end;
     align-items: flex-start;
     margin-top: var(--space-3);
-    padding-top: 10px;
+    padding-top: var(--space-2h);
   }
   .simlike__matchval {
     font-size: var(--fs-hero-sm);

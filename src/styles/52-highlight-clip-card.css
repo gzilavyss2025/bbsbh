@@ -154,8 +154,8 @@
   z-index: 2;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 7px;
+  gap: var(--space-1);
+  padding: 3px var(--space-1h);
   border-radius: var(--radius-xs);
   background: var(--accent-primary);
   color: var(--text-on-ink);
@@ -233,7 +233,7 @@
   scroll-snap-align: none;
 }
 .hlclip--feature .hlclip__play {
-  padding: 5px 10px;
+  padding: var(--space-1) var(--space-2h);
   font-size: var(--fs-compact);
 }
 
@@ -335,8 +335,8 @@
   min-height: 0;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2h);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);

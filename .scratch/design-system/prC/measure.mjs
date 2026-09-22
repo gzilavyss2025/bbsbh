@@ -20,7 +20,12 @@ const files = []
 
 const SCALE = new Set([0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64])
 const HALF = new Set([6, 10, 14])
-const PROPS = /(^|[;{\s])(padding|padding-top|padding-right|padding-bottom|padding-left|gap|row-gap|column-gap)\s*:\s*([^;}]+)/g
+// LONGEST SPELLING FIRST. The logical properties are real in this codebase and
+// the first version of this script walked past them. The leading [;{\s] also
+// keeps `scroll-padding-inline` out: the character before `padding` there is a
+// hyphen, not a boundary.
+const PROPS =
+  /(^|[;{\s])(padding-inline-start|padding-inline-end|padding-block-start|padding-block-end|padding-inline|padding-block|padding-top|padding-right|padding-bottom|padding-left|padding|row-gap|column-gap|gap)\s*:\s*([^;}]+)/g
 
 let declarations = 0, withLiteral = 0
 const literals = []        // every px number seen in those declarations

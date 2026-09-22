@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   margin: 2px 0 16px;
 }
 
@@ -16,7 +16,7 @@
   overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   /* `overflow: hidden` cancels this flex item's automatic min-width, so
      without flex-shrink: 0 a wide `.masthead__side` (a long date plus the
      keep-awake toggle and the MLB.TV pill) can squeeze this row narrower
@@ -38,7 +38,7 @@
   align-items: center;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px 10px;
+  gap: var(--space-2) var(--space-2h);
   min-width: 0;
 }
 
@@ -61,9 +61,9 @@
 .watchbtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   min-height: 28px;
-  padding: 0 10px;
+  padding: 0 var(--space-2h);
   border-radius: var(--radius-pill);
   border: var(--bw-hair) solid var(--accent-primary);
   background: var(--accent-primary);
@@ -126,7 +126,7 @@
    caption floor. */
 @media (max-width: 350px) {
   .masthead {
-    gap: 10px;
+    gap: var(--space-2h);
   }
   .masthead__teams {
     gap: 2px;
@@ -139,7 +139,7 @@
 .masthead__logo {
   position: relative;
   z-index: 1;
-  padding: 4px;
+  padding: var(--space-1);
   background: none;
   border: none;
   cursor: pointer;
@@ -198,14 +198,14 @@
    any other (the bottom "next" button still walks them in scoring order). */
 .stepnav {
   display: flex;
-  gap: 6px;
+  gap: var(--space-1h);
   margin: 0 0 14px;
 }
 
 .stepnav__btn {
   flex: 1 1 0;
   min-height: 34px;
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
@@ -290,7 +290,7 @@
   z-index: 0;
   min-width: 0;
   min-height: 34px;
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   border: none;
   border-right: var(--bw-hair) solid var(--border-rule);
   background: transparent;
@@ -360,7 +360,7 @@
   display: grid;
   grid-template-columns: 56px 1fr;
   column-gap: 18px;
-  padding: 7px 0;
+  padding: var(--space-1h) 0;
 }
 /* The node, centered on the rail (left 64px). A canvas-colored ring masks the
    rail behind it so the dot reads as sitting on the line. */
@@ -402,7 +402,7 @@
 }
 .txntl__chip {
   display: inline-block;
-  padding: 1px 6px;
+  padding: 1px var(--space-1h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
@@ -449,7 +449,7 @@
   left: 64px;
   transform: translateX(-50%);
   top: 2px;
-  padding: 1px 6px;
+  padding: 1px var(--space-1h);
   background: var(--bg-canvas);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
@@ -465,7 +465,7 @@
   display: block;
   width: 100%;
   margin-top: 10px;
-  padding: 9px;
+  padding: var(--space-2);
   appearance: none;
   cursor: pointer;
   border: var(--bw-hair) dashed var(--border-rule);
@@ -490,7 +490,7 @@
   display: block;
   width: 100%;
   margin-top: 10px;
-  padding: 4px;
+  padding: var(--space-1);
   appearance: none;
   border: none;
   background: none;
@@ -653,7 +653,7 @@
   color: var(--text-muted);
   font-size: var(--fs-ui);
   line-height: var(--lh-body);
-  padding: 12px 2px;
+  padding: var(--space-3) 2px;
 }
 
 .hint--error {

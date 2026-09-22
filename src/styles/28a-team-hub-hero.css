@@ -153,8 +153,8 @@
 .team-hub__parent {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 5px 10px 5px 6px;
+  gap: var(--space-1h);
+  padding: var(--space-1) var(--space-2h) var(--space-1) var(--space-1h);
   border-radius: var(--radius-pill);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
@@ -172,7 +172,7 @@
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* An opaque token background reads fine on any one club's tint, but not on
    every club's — instead the pill's own fill/border are mixed FROM `--ink`
@@ -189,7 +189,7 @@
   background: color-mix(in srgb, var(--ink, var(--text-muted)) 14%, transparent);
   border: var(--bw-hair) solid color-mix(in srgb, var(--ink, var(--text-muted)) 30%, transparent);
   border-radius: var(--radius-pill);
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
 }
 .team-hub__id h1 {
   margin: 0;
@@ -206,7 +206,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .team-hub__rec .mono {
   color: var(--ink, var(--text-heading));
