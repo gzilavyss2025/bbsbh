@@ -27,20 +27,20 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) 14px 10px;
+  padding: var(--space-3) var(--space-3h) var(--space-2h);
 }
 
 .spray__chiprow--switches {
   flex-wrap: wrap;
-  padding-top: 10px;
+  padding-top: var(--space-2h);
 }
 
 .spray__chip {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 6px 10px;
+  gap: var(--space-1h);
+  padding: var(--space-1h) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -120,7 +120,7 @@
 /* ---- The drawing ---- */
 
 .spray__plot {
-  padding: 0 14px;
+  padding: 0 var(--space-3h);
 }
 
 .spray__field {
@@ -241,7 +241,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
-  padding: 10px 14px 0;
+  padding: var(--space-2h) var(--space-3h) 0;
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
@@ -252,13 +252,13 @@
 .spray__keyitem {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
 }
 
 /* ---- Direction ---- */
 
 .spray__direction {
-  padding: var(--space-3) 14px 0;
+  padding: var(--space-3) var(--space-3h) 0;
 }
 
 /* ONE INK FAMILY, THREE REAL TOKENS. Pull, centre and oppo are three parts of
@@ -341,7 +341,7 @@
 
 .spray__foot {
   margin: 10px 0 0;
-  padding: 0 14px var(--space-3);
+  padding: 0 var(--space-3h) var(--space-3);
   font-family: var(--font-body);
   font-size: var(--fs-small);
   line-height: var(--lh-snug);

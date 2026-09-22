@@ -41,7 +41,7 @@
 .slate-filterbar__chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* "Showing 3 of 15 games" — a live region (role="status") that only carries
    text while a chip is on, so a screen reader hears the slate shrink instead
@@ -64,7 +64,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  padding: 5px 14px;
+  padding: var(--space-1) var(--space-3h);
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--chip-accent) 16%, var(--bg-page));
   color: var(--text-heading);
@@ -145,7 +145,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: 8px 16px 14px;
+  padding: var(--space-2) var(--space-4) var(--space-3h);
   border-radius: var(--radius-md);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
@@ -184,7 +184,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* The pill-badge row (ResultPills, GameResultFace.jsx) — at most one crowned
    "Game of the Night" pill (amber fill, same medal-amber the app already uses
@@ -197,7 +197,7 @@
 .flipback__pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 .flipback__pill {
   display: inline-flex;
@@ -208,7 +208,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
 }
 .flipback__pill--tag {
@@ -265,14 +265,14 @@
 .flipback__linescore {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 .flipback__lsHeader,
 .flipback__team {
   display: grid;
   grid-template-columns: 1fr repeat(3, 28px);
   align-items: center;
-  column-gap: 8px;
+  column-gap: var(--space-2);
 }
 /* Doubles as the "N innings" note on an extra-innings card (GameResultFace.jsx
    only fills it in then) — same font/weight/color as the R/H/E labels beside
@@ -299,7 +299,7 @@
 .flipback__abbr {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-family: var(--font-display);
   /* 1.5x the original 13px, on every viewport (not gated to wide layout). */
   font-size: var(--fs-title-md);
@@ -318,8 +318,8 @@
 .flipback__decisions {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding-top: 8px;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
   margin-top: 2px;
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-body);
@@ -338,8 +338,8 @@
 .flipback__potgWrap {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding-top: 4px;
+  gap: var(--space-2h);
+  padding-top: var(--space-1);
 }
 /* Headshot + its position badge, same wrapper idiom as
    .playercard__shotwrap/__posbadge (PerformerCard.jsx) — every headshot on
@@ -398,7 +398,7 @@
 .flipback__boxbtn {
   width: auto;
   min-height: 0;
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2h);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -453,7 +453,7 @@
 .skel__topRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .skel__bar--btn {
   width: 74px;
@@ -468,14 +468,14 @@
 .skel__linescore {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-top: 4px;
+  gap: var(--space-2);
+  padding-top: var(--space-1);
 }
 .skel__team {
   display: grid;
   grid-template-columns: 24px 1fr repeat(3, 20px);
   align-items: center;
-  column-gap: 8px;
+  column-gap: var(--space-2);
 }
 .skel__circle--logo {
   width: 24px;
@@ -492,8 +492,8 @@
 .skel__decisions {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-top: 8px;
+  gap: var(--space-1h);
+  padding-top: var(--space-2);
   margin-top: 2px;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
@@ -509,8 +509,8 @@
 .skel__perfcard {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: var(--space-2);
+  padding: var(--space-2);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
 }
@@ -524,7 +524,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 .skel__bar--perfName {
   height: 14px;
@@ -541,8 +541,8 @@
 .skel__potg {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding-top: 4px;
+  gap: var(--space-2h);
+  padding-top: var(--space-1);
 }
 .skel__circle--shot {
   width: var(--shot-md-w);
@@ -554,8 +554,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-top: 4px;
+  gap: var(--space-1h);
+  padding-top: var(--space-1);
 }
 .skel__bar--short {
   height: 12px;
@@ -702,7 +702,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 /* Same layout on every viewport now (no phone-vs-wide split) — the bigger
    headshot + two-line name that used to only kick in at the wide breakpoint
@@ -710,8 +710,8 @@
 .playercard {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: var(--space-2);
+  padding: var(--space-2);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -776,7 +776,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-1);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);

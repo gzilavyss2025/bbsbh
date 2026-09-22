@@ -23,14 +23,14 @@
   flex-wrap: wrap;
   align-items: center;
   row-gap: var(--space-1);
-  padding: calc(10px + env(safe-area-inset-top)) 0 6px;
+  padding: calc(var(--space-2h) + env(safe-area-inset-top)) 0 var(--space-1h);
 }
 
 .sitebar__home {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 2px;
+  gap: var(--space-1h);
+  padding: var(--space-1h) 2px;
   min-height: var(--tap-min);
   background: none;
   border: none;
@@ -87,8 +87,8 @@
    items that happen to sit near each other. */
 .logbook-btn--labeled {
   min-width: 0;
-  gap: 5px;
-  padding: 0 10px;
+  gap: var(--space-1);
+  padding: 0 var(--space-2h);
   white-space: nowrap;
 }
 
@@ -388,7 +388,7 @@
   margin-left: auto;
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: var(--space-1h) var(--space-3);
   min-height: var(--tap-min);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
@@ -427,7 +427,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) 0 6px;
+  padding: var(--space-3) 0 var(--space-1h);
 }
 .wire__dateline {
   font-family: var(--font-display);
@@ -485,7 +485,7 @@
   min-width: var(--shot-2xs-w);
 }
 .wire__face .banner {
-  padding: 1px 4px;
+  padding: 1px var(--space-1);
   letter-spacing: var(--ls-caps);
 }
 .shot.wire__shot {
@@ -507,8 +507,8 @@
 .plink.wire__club {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 4px;
+  gap: var(--space-1);
+  padding: var(--space-1h) var(--space-1);
   margin: -6px -4px;
   font-family: var(--font-display);
   font-size: var(--fs-label);

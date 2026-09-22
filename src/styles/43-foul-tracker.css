@@ -240,7 +240,7 @@
    still shares one "here's the #1 player" shape. */
 .foulboard__hero {
   margin-bottom: 10px;
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -255,7 +255,7 @@
 .foulboard__herotop {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2h);
   margin-bottom: 10px;
 }
 /* Compound with .shot/.shot--fallback so this outranks the base .shot sizing
@@ -351,7 +351,7 @@
    "quiet inset panel" idea as .scorebug, collapsed to a single bar. */
 .foulavg {
   margin-top: var(--space-3);
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-3h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -405,20 +405,20 @@
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
-  padding: 5px 8px;
+  padding: var(--space-1) var(--space-2);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 .scorebug__score {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2h);
 }
 .scorebug__team {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-cell);
@@ -452,14 +452,14 @@
 .scorebug__situation {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding-top: 5px;
+  gap: var(--space-1h);
+  padding-top: var(--space-1);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .scorebug__outs {
   display: inline-flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 .scorebug__outdot {
   width: 7px;
@@ -478,7 +478,7 @@
   font-weight: var(--w-bold);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
-  padding: 2px 9px;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
   border: var(--bw-hair) solid transparent;
 }
@@ -529,8 +529,8 @@
 .sgh-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: var(--space-2h);
+  padding: var(--space-2h) var(--space-3);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .sgh-row:first-child {
@@ -582,8 +582,8 @@
   grid-template-areas:
     'battershot topline    pitchershot'
     'battershot scorebug   pitchershot';
-  column-gap: 10px;
-  row-gap: 6px;
+  column-gap: var(--space-2h);
+  row-gap: var(--space-1h);
 }
 .storypa-row__battershot {
   grid-area: battershot;
@@ -597,7 +597,7 @@
   grid-area: topline;
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--space-2h);
 }
 /* Equal flex-grow on BOTH name blocks means they always end up the same
    width, whatever either name's length — which is what keeps
@@ -619,13 +619,13 @@
   flex: none;
   display: inline-flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--space-1);
   white-space: nowrap;
 }
 .sgh-top {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 /* Compound (beats .plink's `font: inherit`/`text-align: inherit` reset —
    same convention as .tlead__who .tlead__name). */
@@ -677,7 +677,7 @@
      the underline was computing as applied but rendering invisible. This
      padding gives it that room back without affecting the horizontal
      ellipsis clipping. */
-  padding-bottom: 6px;
+  padding-bottom: var(--space-1h);
 }
 /* Most-Fouls-In-A-PA's row on a phone: both headshots sit in their own auto
    grid columns now (.storypa-row), so unlike the row's older flex layout they
@@ -719,8 +719,8 @@
   grid-template-columns: auto 1fr auto;
   grid-template-areas: 'shot who matchup' 'tiles tiles tiles';
   align-items: center;
-  column-gap: 10px;
-  row-gap: 8px;
+  column-gap: var(--space-2h);
+  row-gap: var(--space-2);
 }
 .gamehigh-row .sgh-shot {
   grid-area: shot;
@@ -756,7 +756,7 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: 5px 10px;
+  padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: none;
@@ -780,7 +780,7 @@
   font-size: var(--fs-label);
   line-height: var(--lh-solid);
   color: var(--text-on-ink);
-  padding: 3px 7px 2px;
+  padding: 3px var(--space-1h) 2px;
   border: 2px double var(--text-on-ink);
   border-radius: 3px;
   background: var(--field);
@@ -800,7 +800,7 @@ button.gamehigh-matchup:active {
 .gamehigh-matchup__score {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-body);
@@ -844,7 +844,7 @@ button.gamehigh-matchup:active {
 .souvenir-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2h);
   flex-wrap: wrap;
 }
 /* The fouls-split + total, as compact tiles right after the rank — same look
@@ -864,7 +864,7 @@ button.gamehigh-matchup:active {
   border: none;
   border-radius: 0;
   box-shadow: none;
-  padding: 6px 10px;
+  padding: var(--space-1h) var(--space-2h);
   min-width: 60px;
 }
 /* margin-left: auto (rather than `justify-content: space-between` on the

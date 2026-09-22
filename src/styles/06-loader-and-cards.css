@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 12px 2px;
+  padding: var(--space-3) 2px;
 }
 
 .loader__stage {
@@ -66,7 +66,7 @@
 /* The "1 / 2 / 3" inning-number header row — lighter field tone, same as the
    old single-row header, now spanning three of the five columns. */
 .loader__colhead {
-  padding: 0 6px;
+  padding: 0 var(--space-1h);
   background: var(--field);
   color: var(--paper-2);
 }
@@ -82,7 +82,7 @@
 .loader__num,
 .loader__team {
   place-items: center start;
-  padding: 0 6px;
+  padding: 0 var(--space-1h);
   background: var(--field-deep);
   color: var(--text-on-ink);
 }
@@ -129,7 +129,7 @@
    a card or column without shoving content around. */
 .loader--inline {
   gap: var(--space-2);
-  padding: 8px 2px;
+  padding: var(--space-2) 2px;
 }
 .loader--inline .loader__label {
   font-size: var(--fs-ui);
@@ -174,7 +174,7 @@
      block redeclares .gamelist as a 2-up grid with its own independent 12px
      gap, so raising this value only ever reaches the narrow, one-card-wide
      list a phone actually shows. */
-  gap: 20px;
+  gap: var(--space-5);
 }
 
 .gamecard {
@@ -183,7 +183,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: 14px 16px;
+  padding: var(--space-3h) var(--space-4);
   border-radius: var(--radius-md);
   /* Back to --bw-hair (1px), the hairline every other bordered surface uses —
      the thickened --bw-heavy frame read heavier than the photo backdrop
@@ -231,7 +231,7 @@
    strip reaches edge to edge, radius matched to the card's own top corners. */
 .gamecard__datebanner {
   margin: -14px -16px 0;
-  padding: 5px 16px;
+  padding: var(--space-1) var(--space-4);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -312,7 +312,7 @@
 .derbycard__title {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   font-family: var(--font-display);
   font-size: var(--fs-h3);
   font-weight: var(--w-bold);
@@ -351,8 +351,8 @@
   -webkit-backface-visibility: hidden;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 9px 3px 8px;
+  gap: var(--space-1);
+  padding: 3px var(--space-2) 3px var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--clay, #c0392b);
   color: #fff4f1;
@@ -386,7 +386,7 @@
   -webkit-backface-visibility: hidden;
   display: inline-flex;
   align-items: center;
-  padding: 3px 9px;
+  padding: 3px var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--marker);
   color: var(--text-heading);
@@ -454,7 +454,7 @@
   align-items: center;
   gap: var(--space-3);
   margin-top: 4px;
-  padding: 8px 12px 8px 10px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2h);
   border-radius: var(--radius-sm);
   /* A faint highlighter wash rather than a full fill, edged with a dashed
      rule — reads as "held" without shouting. The 16% marker wash is the app's
@@ -476,7 +476,7 @@
   font-size: var(--fs-small);
   line-height: var(--lh-solid);
   color: var(--text-heading);
-  padding: 4px 9px 3px;
+  padding: var(--space-1) var(--space-2) 3px;
   /* Double rule + a slight tilt = a pressed rubber stamp, not a UI chip. */
   border: 2px double var(--text-heading);
   border-radius: 3px;
@@ -568,7 +568,7 @@
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
   column-gap: var(--space-3);
-  row-gap: 8px;
+  row-gap: var(--space-2);
   align-items: center;
 }
 

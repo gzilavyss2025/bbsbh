@@ -30,8 +30,8 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
-  padding: 10px var(--space-4);
+  gap: var(--space-2h);
+  padding: var(--space-2h) var(--space-4);
   background: var(--navy);
   border-bottom: 3px solid var(--seal);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
@@ -290,9 +290,9 @@
 .photostrip__viewall {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   min-height: 24px;
-  padding: 0 10px;
+  padding: 0 var(--space-2h);
   border-radius: var(--radius-pill);
   border: var(--bw-hair) solid #FFFFFF;
   background: #FFFFFF;
@@ -430,7 +430,7 @@
   z-index: 30;
   width: 240px;
   max-width: 72vw;
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
   background: var(--surface-inset);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
@@ -479,7 +479,7 @@
 .penboard__pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
   margin-bottom: 4px;
 }
 /* Summary pills double as a hover filter: pointing at one lights its arms on
@@ -487,8 +487,8 @@
 .penboard__pill {
   display: inline-flex;
   align-items: baseline;
-  gap: 6px;
-  padding: 4px 10px;
+  gap: var(--space-1h);
+  padding: var(--space-1) var(--space-2h);
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -526,8 +526,8 @@
 .penboard__row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 0;
+  gap: var(--space-2h);
+  padding: var(--space-1h) 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
   transition: opacity 0.14s ease;
 }
@@ -539,7 +539,7 @@
 .penboard__tag {
   flex: none;
   min-width: 92px;
-  padding: 3px 10px;
+  padding: 3px var(--space-2h);
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -578,7 +578,7 @@
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);

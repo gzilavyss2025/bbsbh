@@ -38,7 +38,7 @@
      beside, without a chip's border drawing a second box around a gear. */
   min-width: 30px;
   min-height: 30px;
-  padding: 4px;
+  padding: var(--space-1);
   border: 0;
   border-radius: var(--radius-sm);
   background: none;
@@ -64,7 +64,7 @@
 }
 
 .idadmin__actions .idadmin__btn {
-  padding: 4px 11px;
+  padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid currentColor;
   border-radius: var(--radius-pill);
   background: none;
@@ -128,9 +128,9 @@
 .iddrawer__tile {
   flex: 0 0 auto;
   display: grid;
-  gap: 4px;
+  gap: var(--space-1);
   justify-items: center;
-  padding: 6px 10px;
+  padding: var(--space-1h) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -202,7 +202,7 @@
 
 .iddrawer__field {
   display: grid;
-  gap: 4px;
+  gap: var(--space-1);
   align-content: start;
 }
 
@@ -216,14 +216,14 @@
 
 .iddrawer__inputrow {
   display: flex;
-  gap: 6px;
+  gap: var(--space-1h);
   align-items: stretch;
 }
 
 .iddrawer__input {
   width: 100%;
   min-width: 0;
-  padding: 6px 8px;
+  padding: var(--space-1h) var(--space-2);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   background: var(--surface-card);
@@ -352,13 +352,13 @@
 .iddrawer__checkbox {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   font-size: var(--fs-caption);
   color: var(--text-body);
   cursor: pointer;
 }
 .iddrawer__band {
-  gap: 6px;
+  gap: var(--space-1h);
 }
 
 /* The WPA group's live mockup: three REAL WinProbChart instances
@@ -450,7 +450,7 @@
    for paper (that one draws in the hero's `currentColor`, which down here
    would be body text on body text). */
 .iddrawer__btn {
-  padding: 4px 11px;
+  padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
   background: var(--surface-card);
@@ -484,7 +484,7 @@
 .iddrawer__stamp {
   margin: 0;
   display: grid;
-  gap: 4px;
+  gap: var(--space-1);
   justify-items: center;
 }
 

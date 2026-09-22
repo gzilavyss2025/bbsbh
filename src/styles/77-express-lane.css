@@ -43,15 +43,15 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: max(8px, env(safe-area-inset-top)) 14px 8px;
+  gap: var(--space-3);
+  padding: max(var(--space-2), env(safe-area-inset-top)) var(--space-3h) var(--space-2);
   border-bottom: 1px solid var(--album-board-line);
 }
 .xl__back {
   appearance: none;
   background: none;
   border: 0;
-  padding: 6px 2px;
+  padding: var(--space-1h) 2px;
   font: inherit;
   font-size: var(--fs-ui);
   color: var(--album-foil-soft);
@@ -64,7 +64,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 .xl__navbtn {
   appearance: none;
@@ -142,8 +142,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 20px;
+  gap: var(--space-3);
+  padding: var(--space-5);
   text-align: center;
   color: var(--album-foil-soft);
 }
@@ -196,9 +196,9 @@
 .xl__chips {
   flex: 0 0 auto;
   display: flex;
-  gap: 6px;
+  gap: var(--space-1h);
   overflow-x: auto;
-  padding: 8px 14px;
+  padding: var(--space-2) var(--space-3h);
   border-top: 1px solid var(--album-board-line);
   scrollbar-width: none;
 }
@@ -213,7 +213,7 @@
   align-items: flex-start;
   gap: 1px;
   min-width: 62px;
-  padding: 5px 8px;
+  padding: var(--space-1) var(--space-2);
   border: 1px solid var(--album-board-line);
   border-radius: 6px;
   background: transparent;
@@ -255,8 +255,8 @@
   flex: 0 0 auto;
   display: flex;
   align-items: stretch;
-  gap: 8px;
-  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  gap: var(--space-2);
+  padding: var(--space-2h) var(--space-3h) calc(var(--space-2h) + env(safe-area-inset-bottom));
   border-top: 1px solid var(--album-board-line);
 }
 /* Back one play sits BESIDE the primary action, not under it, and stays the
@@ -283,8 +283,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  padding: 32px 24px;
+  gap: var(--space-3h);
+  padding: var(--space-8) var(--space-6);
   text-align: center;
 }
 .xl__prerollmark {
@@ -353,7 +353,7 @@
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
     grid-template-rows: auto 1fr auto auto;
     column-gap: 18px;
-    padding-inline: 8px;
+    padding-inline: var(--space-2);
   }
   /* THE ENTRY STEP IS NOT A TWO-COLUMN LAYOUT. It has no film pane and no
      deck to set beside one. Taking the grid above, it was placed in the FILM

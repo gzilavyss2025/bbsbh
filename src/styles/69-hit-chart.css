@@ -45,7 +45,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3) 14px 10px;
+  padding: var(--space-3) var(--space-3h) var(--space-2h);
 }
 
 .hitchart__eyebrow {
@@ -76,7 +76,7 @@
 }
 
 .hitchart--half .hitchart__head {
-  padding: 10px 14px 8px;
+  padding: var(--space-2h) var(--space-3h) var(--space-2);
 }
 
 .hitchart--half .hitchart__rule {
@@ -114,20 +114,20 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0 14px 10px;
+  padding: 0 var(--space-3h) var(--space-2h);
 }
 
 .hitchart__chiprow--switches {
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: var(--space-2h);
+  padding-bottom: var(--space-2h);
 }
 
 .hitchart__chip {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 6px 10px;
+  gap: var(--space-1h);
+  padding: var(--space-1h) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -217,7 +217,7 @@
    on 8px, so its posted distances hung six pixels wider than the eyebrow, the
    chips and the key — close enough to read as a slip rather than a bleed. */
 .hitchart__fieldwrap {
-  padding: 0 14px;
+  padding: 0 var(--space-3h);
 }
 
 /* The plot box must be exactly the drawing's box: the half's dot numbers are
@@ -320,7 +320,7 @@
 
 .hitchart__readout {
   margin: var(--space-2) 14px 0;
-  padding: 9px var(--space-3) 10px;
+  padding: var(--space-2) var(--space-3) var(--space-2h);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
@@ -390,14 +390,14 @@
 .hitchart__key {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) 14px;
-  padding: 10px 14px 0;
+  gap: var(--space-2) var(--space-3h);
+  padding: var(--space-2h) var(--space-3h) 0;
 }
 
 .hitchart__keyitem {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
@@ -418,7 +418,7 @@
 
 .hitchart__fact {
   flex: 1;
-  padding: 9px var(--space-1);
+  padding: var(--space-2) var(--space-1);
   text-align: center;
 }
 
@@ -453,7 +453,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 2px 14px 7px;
+  padding: 2px var(--space-3h) var(--space-1h);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-weight: var(--w-semibold);
@@ -464,14 +464,14 @@
 .hitchart__list {
   list-style: none;
   margin: 0;
-  padding: 0 14px var(--space-3);
+  padding: 0 var(--space-3h) var(--space-3);
 }
 
 .hitchart__row {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 9px 0;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
@@ -526,7 +526,7 @@
    every width, and it reads better small at all of them. */
 @media (min-width: 740px) {
   .hitchart__head {
-    padding: var(--space-4) 14px var(--space-3);
+    padding: var(--space-4) var(--space-3h) var(--space-3);
   }
 
   .hitchart--game .hitchart__headline {
@@ -571,7 +571,7 @@
   }
 
   .hitchart__fact {
-    padding: 11px var(--space-1);
+    padding: var(--space-2h) var(--space-1);
   }
 
   .hitchart__factvalue {
@@ -632,7 +632,7 @@
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-raised);
   font-family: var(--font-body);
-  padding: 12px 12px 4px;
+  padding: var(--space-3) var(--space-3) var(--space-1);
 }
 
 .bflight--hover {
@@ -666,7 +666,7 @@
   justify-content: space-between;
   gap: var(--space-3);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
-  padding-bottom: 9px;
+  padding-bottom: var(--space-2);
 }
 
 .bflight__ttl {
@@ -694,7 +694,7 @@
 .bflight__result {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   min-width: 0;
 }
 
@@ -724,7 +724,7 @@
   background: var(--surface-inset);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
-  padding: 2px 5px;
+  padding: 2px var(--space-1);
 }
 
 /* Tapping anywhere on the sheet already dismisses it (BallFlight.jsx); this is
@@ -813,7 +813,7 @@
 }
 
 .bflight__fact {
-  padding: 8px 0 10px;
+  padding: var(--space-2) 0 var(--space-2h);
   text-align: center;
 }
 

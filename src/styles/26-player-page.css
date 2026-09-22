@@ -37,7 +37,7 @@
   appearance: none;
   background: none;
   border: none;
-  padding: 6px 2px 12px;
+  padding: var(--space-1h) 2px var(--space-3);
   cursor: pointer;
   font-family: var(--font-display);
   text-transform: uppercase;
@@ -129,7 +129,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 /* The league mark in the crest slot, for a player on no club. Sized to match
    the club logo it replaces (56px, 96px on the wide breakpoint below) so the
@@ -300,7 +300,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 8px;
+  gap: var(--space-1) var(--space-2);
   margin: 3px 0 0;
   font-size: var(--fs-ui);
   line-height: var(--lh-prose);
@@ -345,7 +345,7 @@
   border: none;
   border-radius: 0;
   box-shadow: none;
-  padding: 11px 3px;
+  padding: var(--space-2h) 3px;
 }
 .player__statgrid .stat__v {
   font-family: var(--font-mono);
@@ -399,8 +399,8 @@
   font-weight: var(--w-semibold);
   color: var(--text-caption);
   text-align: left;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 
@@ -426,7 +426,7 @@
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   box-shadow: var(--inset-cell);
-  padding: 11px 12px;
+  padding: var(--space-2h) var(--space-3);
   margin: 0;
   line-height: var(--lh-body);
 }
@@ -450,7 +450,7 @@
 }
 .split {
   background: var(--surface-card);
-  padding: 10px 12px;
+  padding: var(--space-2h) var(--space-3);
   margin: 0;
 }
 /* An odd item count (e.g. a pitcher's 5-item Firsts) leaves the last card
@@ -526,11 +526,11 @@
      `relative` with no top/left/etc. doesn't move anything. */
   position: relative;
   display: flex;
-  gap: 6px;
+  gap: var(--space-1h);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
-  padding: 8px 14px;
+  padding: var(--space-2) var(--space-3h);
   scrollbar-width: thin;
   /* Fade the leading/trailing edges so it's clear more clubs sit just out of
      view — the simplest cross-browser scroll affordance (a mask gradient), no
@@ -550,7 +550,7 @@
   place-items: center;
   width: 48px;
   height: 48px;
-  padding: 5px;
+  padding: var(--space-1);
   border: var(--bw-hair) solid transparent;
   border-radius: var(--radius-sm);
   background: none;
@@ -598,8 +598,8 @@
 .teamfilterstrip__pin {
   flex: 0 0 auto;
   width: auto;
-  padding-left: 14px;
-  padding-right: 14px;
+  padding-left: var(--space-3h);
+  padding-right: var(--space-3h);
   margin: 8px 8px 8px 8px;
 }
 /* The active/picked state draws its own bordered card (.vsteam__team.is-active)
@@ -607,8 +607,8 @@
    that border shows up, so pull it back to the scrolling logos' own tighter
    5px just for that state, without touching the resting padding. */
 .teamfilterstrip__pin.is-active {
-  padding-left: 5px;
-  padding-right: 5px;
+  padding-left: var(--space-1);
+  padding-right: var(--space-1);
 }
 .teamfilterstrip__divider {
   flex: 0 0 auto;
@@ -670,7 +670,7 @@
   margin-top: 2px;
 }
 .vsteam__grid .stat {
-  padding: 11px 2px;
+  padding: var(--space-2h) 2px;
 }
 .vsteam__none {
   margin: 8px 0 0;
@@ -680,7 +680,7 @@
    line, the same mono treatment as the game log. */
 .vsteam__last {
   margin: 10px 0 0;
-  padding: 9px 12px;
+  padding: var(--space-2) var(--space-3);
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
@@ -699,7 +699,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0;
 }
 .vsteam__last-meta {
@@ -743,8 +743,8 @@
      room to give since most lines are far short of the card's full width. */
   grid-template-columns: max-content minmax(0, 1fr);
   align-items: baseline;
-  column-gap: 12px;
-  padding: 8px 12px;
+  column-gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .gamelog__row:first-child {
@@ -753,7 +753,7 @@
 .gamelog__meta {
   display: flex;
   align-items: baseline;
-  gap: 7px;
+  gap: var(--space-1h);
   min-width: 0;
 }
 .gamelog__date {
@@ -780,7 +780,7 @@
    tells apart a rehabbing big leaguer's MLB rows from his MiLB rehab rows. */
 .gamelog__level {
   margin-left: 5px;
-  padding: 1px 4px;
+  padding: 1px var(--space-1);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
@@ -890,7 +890,7 @@
 }
 .ledger th,
 .ledger td {
-  padding: 7px 8px;
+  padding: var(--space-1h) var(--space-2);
   font-size: var(--fs-small);
   text-align: right;
   /* Data cells are single tokens; keep them on one line so a value like the
@@ -991,7 +991,7 @@
    majors by default, so tagging every one would just be dead repetition. */
 .reg-pill {
   margin: -3px 0 -3px 5px;
-  padding: 2px 4px;
+  padding: 2px var(--space-1);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   display: inline-flex;
@@ -1055,8 +1055,8 @@
      fits the viewport without the last stat spilling into a horizontal scroll. */
   .ledger th,
   .ledger td {
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-left: var(--space-1h);
+    padding-right: var(--space-1h);
   }
 }
 /* The "converted to pitcher" note that sits above the stat blocks. (The
@@ -1075,7 +1075,7 @@
    forward-looking half of the fact reads as distinct from the plain count. */
 .milestonewatch {
   margin: 8px 2px 0;
-  padding: 8px 10px;
+  padding: var(--space-2) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -1093,7 +1093,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 8px;
+  gap: var(--space-1) var(--space-2);
   margin: 3px 0;
   font-size: var(--fs-compact);
   font-weight: var(--w-semibold);

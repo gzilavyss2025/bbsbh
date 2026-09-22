@@ -43,8 +43,8 @@
 .umptend__id {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 13px 12px;
+  gap: var(--space-2h);
+  padding: var(--space-2h) var(--space-3) var(--space-3);
   border-bottom: 1px solid var(--border-hairline);
 }
 .umptend__mark {
@@ -89,7 +89,7 @@
    what the reference's own blue-to-yellow maps onto. No text ever sits on the
    ramp, so nothing here needs to clear contrast against a gradient. --- */
 .umptend__lean {
-  padding: 13px 13px 0;
+  padding: var(--space-3) var(--space-3) 0;
 }
 .umptend__leanhd {
   font-family: var(--font-display);
@@ -97,7 +97,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-  padding-right: 7px;
+  padding-right: var(--space-1h);
 }
 .umptend__scale {
   display: flex;
@@ -153,9 +153,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
   height: 24px;
-  padding: 0 7px;
+  padding: 0 var(--space-1h);
   border-radius: 3px;
 }
 .umptend__row + .umptend__row {
@@ -188,9 +188,9 @@
 .umptend__watch {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: var(--space-2h);
   margin-top: 13px;
-  padding: 12px 13px;
+  padding: var(--space-3) var(--space-3);
   background: var(--navy);
 }
 .umptend__watchbody {
@@ -220,7 +220,7 @@
    low-opacity navy cell in the map. */
 .umptend__watchmap {
   flex: none;
-  padding: 4px;
+  padding: var(--space-1);
   background: var(--surface-inset);
   border-radius: 2px;
 }
@@ -238,7 +238,7 @@
   grid-template-columns: 1fr 1fr;
 }
 .umptend__tile {
-  padding: 11px 8px;
+  padding: var(--space-2h) var(--space-2);
   text-align: center;
   border-top: 1px solid var(--border-hairline);
 }
@@ -272,7 +272,7 @@
    asterisked footnote, which is the only natural-case string on the card. --- */
 .umptend__chal {
   border-top: 1px solid var(--border-hairline);
-  padding-top: 10px;
+  padding-top: var(--space-2h);
 }
 .umptend__challbl {
   font-family: var(--font-display);
@@ -280,11 +280,11 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-  padding: 0 13px;
+  padding: 0 var(--space-3);
 }
 .umptend__chalfoot {
   margin: 0;
-  padding: 7px 13px 9px;
+  padding: var(--space-1h) var(--space-3) var(--space-2);
   text-align: center;
   font-family: var(--font-body);
   font-size: var(--fs-small);
@@ -293,7 +293,7 @@
   font-variant-numeric: tabular-nums;
 }
 .umptend__prov {
-  padding: 9px 13px;
+  padding: var(--space-2) var(--space-3);
   text-align: center;
   font-family: var(--font-body);
   font-size: var(--fs-small);

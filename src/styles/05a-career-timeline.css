@@ -83,7 +83,7 @@ button.careertl__badge {
    "the majors" without repeating the word on every single stop. */
 .careertl__level {
   margin-top: 1px;
-  padding: 1px 4px;
+  padding: 1px var(--space-1);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);

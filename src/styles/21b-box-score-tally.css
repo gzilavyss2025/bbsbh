@@ -32,7 +32,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-3);
-  padding: 8px 14px;
+  padding: var(--space-2) var(--space-3h);
 }
 /* The club pill — which staff the measure rows are counting. Three segments
    (Both, then each club), the same shape as .posinn__scopebtn's scope switch
@@ -42,13 +42,13 @@
    control earns that corner more than a caption does. */
 .bs__tallyScope {
   display: flex;
-  gap: 4px;
+  gap: var(--space-1);
   flex: 0 0 auto;
 }
 .bs__tallyScopebtn {
   min-width: 42px;
   min-height: 26px;
-  padding: 0 8px;
+  padding: 0 var(--space-2);
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
@@ -76,7 +76,7 @@
   outline-offset: 2px;
 }
 .bs__tallyBody {
-  padding: 2px 14px 12px;
+  padding: 2px var(--space-3h) var(--space-3);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
@@ -92,7 +92,7 @@
   padding: 0;
 }
 .bs__grid--tally thead th {
-  padding-bottom: 4px;
+  padding-bottom: var(--space-1);
   color: var(--text-caption);
 }
 /* One rule under each measure, none under the last, in the card's own navy
@@ -107,7 +107,7 @@
    card's real legend, in place of the old line of slash-separated words. */
 .bs__tallyMeasure {
   width: 1%;
-  padding-right: 8px !important;
+  padding-right: var(--space-2) !important;
   text-align: left !important;
   vertical-align: middle;
   font-family: var(--font-display);
@@ -129,7 +129,7 @@
    trick .bs__tallyMeasure already used. */
 .bs__tallyClub {
   width: 1%;
-  padding-right: 6px !important;
+  padding-right: var(--space-1h) !important;
 }
 .bs__tallyLogo {
   display: flex;
@@ -196,7 +196,7 @@
 .bs__tallyTotal {
   width: 44px;
   border-left: var(--bw-hair) solid var(--border-hairline) !important;
-  padding-left: 6px !important;
+  padding-left: var(--space-1h) !important;
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -225,11 +225,11 @@
     height: 30px;
   }
   .bs__tallyMeasure {
-    padding-right: 14px !important;
+    padding-right: var(--space-3h) !important;
     font-size: var(--fs-compact);
   }
   .bs__tallyClub {
-    padding-right: 10px !important;
+    padding-right: var(--space-2h) !important;
   }
   .bs__tallyLogo {
     width: 24px;
@@ -237,7 +237,7 @@
   }
   .bs__tallyTotal {
     width: 56px;
-    padding-left: 10px !important;
+    padding-left: var(--space-2h) !important;
   }
 }
 
@@ -247,7 +247,7 @@
    nine-inning game inside a 320px screen with no scroll. */
 @media (max-width: 359px) {
   .bs__tallyMeasure {
-    padding-right: 4px !important;
+    padding-right: var(--space-1) !important;
     letter-spacing: var(--ls-caps);
   }
   .bs__tallyCell {

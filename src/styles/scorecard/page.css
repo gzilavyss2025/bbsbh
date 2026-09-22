@@ -362,8 +362,8 @@
 }
 .scrim--top .sheet {
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  padding-top: calc(20px + env(safe-area-inset-top));
-  padding-bottom: 20px;
+  padding-top: calc(var(--space-5) + env(safe-area-inset-top));
+  padding-bottom: var(--space-5);
   animation-name: sheetdrop;
 }
 @keyframes sheetdrop {

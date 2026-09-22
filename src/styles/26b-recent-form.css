@@ -23,8 +23,8 @@
 .formtrend__barhead,
 .formtrend .formtrend__bar {
   width: 30%;
-  padding-left: 6px;
-  padding-right: 6px;
+  padding-left: var(--space-1h);
+  padding-right: var(--space-1h);
 }
 .formtrend__deltahead,
 .formtrend .formtrend__delta {
@@ -56,7 +56,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 8px 0 0;
   padding: 2px 2px 0;
 }

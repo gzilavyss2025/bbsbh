@@ -15,8 +15,8 @@
 .txcard__head {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  padding-bottom: 6px;
+  gap: var(--space-2);
+  padding-bottom: var(--space-1h);
   margin-bottom: 4px;
   border-bottom: var(--bw-hair) solid var(--rule-soft);
   color: var(--text-caption);
@@ -46,12 +46,12 @@
      the short cards goes away. .txcard__door keeps its own align-self: stretch
      and so stays a full-height tap target. */
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--space-2h);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
   margin: 0 calc(-1 * var(--app-gutter));
-  padding: 2px var(--app-gutter) 6px;
+  padding: 2px var(--app-gutter) var(--space-1h);
   /* scrollbar-width is Firefox-only — Chrome/Safari/Edge ignore it entirely
      and fall back to a full-size native horizontal scrollbar, which reads as
      a stray gray bar under a touch-first swipe deck. The ::-webkit-scrollbar
@@ -90,7 +90,7 @@
   flex: 0 0 auto;
   scroll-snap-align: start;
   width: 320px;
-  padding: 10px 10px 12px;
+  padding: var(--space-2h) var(--space-2h) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
@@ -132,7 +132,7 @@
   justify-content: flex-start;
   gap: 2px;
   width: 40px;
-  padding: 2px 8px 0 0;
+  padding: 2px var(--space-2) 0 0;
   border-right: var(--bw-hair) solid var(--rule-soft);
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -181,7 +181,7 @@
   float: right;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1h);
   max-width: 100%;
   margin: 0 0 6px 10px;
 }
@@ -239,7 +239,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  padding: 1px 5px;
+  padding: 1px var(--space-1);
   color: var(--surface-card);
   background: var(--graphite);
 }
@@ -441,7 +441,7 @@
 }
 .last10__stub {
   flex: 0 0 auto;
-  padding: 7px var(--space-2) 6px;
+  padding: var(--space-1h) var(--space-2) var(--space-1h);
   border-bottom: 1px dashed var(--border-rule);
   text-align: right;
 }
@@ -536,7 +536,7 @@
 }
 .last10__foot {
   flex: 0 0 auto;
-  padding: 7px var(--space-2) 8px;
+  padding: var(--space-1h) var(--space-2) var(--space-2);
 }
 .last10__score {
   font-family: var(--font-mono);
@@ -703,14 +703,14 @@
 .sstrip {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 8px;
+  gap: var(--space-1h) var(--space-2);
   margin: 4px 0 2px;
 }
 .sstrip__series {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: 4px 5px;
+  padding: var(--space-1) var(--space-1);
   border-radius: var(--radius-sm);
   background: var(--bg-page);
   border: var(--bw-hair) solid var(--border-hairline);
@@ -796,7 +796,7 @@
 /* standings */
 .standings th,
 .standings td {
-  padding: 7px 8px;
+  padding: var(--space-1h) var(--space-2);
   font-size: var(--fs-small);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-hairline);
@@ -846,7 +846,7 @@
 .standings td.team > * {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-1h);
 }
 /* A name that wraps to two lines (a long surname on a narrow phone, e.g.
    "Pete Crow-Armstrong") grows the .team row's height; align-items: center

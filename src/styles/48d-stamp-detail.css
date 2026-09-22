@@ -20,7 +20,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .stampdetail__head .sheet__title {
@@ -31,7 +31,7 @@
   flex: none;
   background: none;
   border: none;
-  padding: 4px;
+  padding: var(--space-1);
   margin: -4px -4px 0 0;
   color: var(--text-caption);
   font-size: var(--fs-num-md);

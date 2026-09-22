@@ -23,7 +23,7 @@
 .txpage__dateline {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0 0 8px;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -60,7 +60,7 @@
    second rule. */
 .txpage__stories {
   display: grid;
-  gap: 10px;
+  gap: var(--space-2h);
 }
 .txpage__stories .txstory,
 .txpage__stories .txstory--wide {
@@ -84,7 +84,7 @@
        the sentence it reads as the margin of a short entry, which is what it
        is. */
     grid-template-rows: auto 1fr;
-    column-gap: 14px;
+    column-gap: var(--space-3h);
     align-items: start;
   }
   .txpage__stories .photorail {

@@ -111,7 +111,7 @@
     width: auto;
     min-height: 28px;
     margin-top: 0;
-    padding: 0 12px;
+    padding: 0 var(--space-3);
     font-size: var(--fs-caption);
   }
 
@@ -131,7 +131,7 @@
   .slatebody {
     display: flex;
     align-items: flex-start;
-    gap: 24px;
+    gap: var(--space-6);
   }
   /* min-width: 0 or a long cutline in the rail sets this column's floor and
      the grid stops shrinking — the standard flex-item overflow trap. */
@@ -180,7 +180,7 @@
     display: flex;
     align-items: baseline;
     gap: var(--space-2);
-    padding-bottom: 6px;
+    padding-bottom: var(--space-1h);
     border-bottom: var(--bw-hair) solid var(--rule-soft);
   }
   .wirerail__title {
@@ -242,10 +242,10 @@
      reason to set prose smaller, never a reason to stop setting it as prose. */
   .wire__row--compact {
     display: block;
-    padding: var(--space-2) 0 var(--space-2) 10px;
+    padding: var(--space-2) 0 var(--space-2) var(--space-2h);
   }
   .wire__row--compact .wire__kicker {
-    gap: 6px;
+    gap: var(--space-1h);
   }
   .wire__row--compact .wire__cutline {
     font-size: var(--fs-compact);
@@ -267,7 +267,7 @@
   .gamelist {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-    gap: 12px;
+    gap: var(--space-3);
   }
 
   /* "Reveal all games" rides inline in the header's .daystate row once
@@ -293,7 +293,7 @@
   .flipback__decisions {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 6px 14px;
+    gap: var(--space-1h) var(--space-3h);
   }
 
   /* Winners/Losers baseball-card tiles: back to the two-line first/last stack
@@ -408,7 +408,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 16px;
+    gap: var(--space-4);
     max-width: 780px;
     margin: 0 auto 14px;
   }
@@ -493,12 +493,12 @@
   }
   .pbp__zonecell {
     display: flex;
-    gap: 14px;
+    gap: var(--space-3h);
     align-items: flex-start;
     border: var(--bw-hair) solid var(--border-hairline);
     border-radius: var(--radius-sm);
     background: var(--paper-2);
-    padding: 6px 10px;
+    padding: var(--space-1h) var(--space-2h);
   }
   .pbp__zonecell .pitchlist {
     flex: 1;

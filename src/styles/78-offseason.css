@@ -31,7 +31,7 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-3);
-  padding-bottom: 6px;
+  padding-bottom: var(--space-1h);
   border-bottom: var(--bw-hair) solid var(--rule-soft);
 }
 .oseason__title {
@@ -421,7 +421,7 @@
 }
 .movedup__table th,
 .movedup__table td {
-  padding: 7px 0;
+  padding: var(--space-1h) 0;
   border-bottom: var(--bw-hair) solid var(--rule-soft);
   text-align: left;
   /* Middle, not baseline: the player cell is as tall as a headshot and the two
@@ -682,7 +682,7 @@
 }
 .note__table th,
 .note__table td {
-  padding: 7px 0;
+  padding: var(--space-1h) 0;
   border-bottom: var(--bw-hair) solid var(--rule-soft);
   text-align: left;
   vertical-align: baseline;
@@ -971,9 +971,9 @@
   grid-template-areas:
     'battershot line   pitchershot'
     'battershot when   pitchershot';
-  column-gap: 10px;
-  row-gap: 6px;
-  padding: 10px 12px;
+  column-gap: var(--space-2h);
+  row-gap: var(--space-1h);
+  padding: var(--space-2h) var(--space-3);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .note__story:first-child {
@@ -1002,7 +1002,7 @@
   grid-area: line;
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--space-2h);
 }
 /* Equal growth on BOTH name blocks is what keeps the count genuinely centred
    between two faces, whatever either name's length. */
@@ -1019,7 +1019,7 @@
 .note__nameline {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
 }
 /* Compound, to beat .plink's own `font: inherit` reset — the same convention
    .sgh-top .sgh-name uses on /fouls. */
@@ -1044,7 +1044,7 @@
   flex: none;
   display: inline-flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--space-1);
   white-space: nowrap;
 }
 .note__valn {
@@ -1072,7 +1072,7 @@
   justify-self: center;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1h);
   min-height: var(--tap-min);
   padding: 0 var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
@@ -1106,7 +1106,7 @@
   white-space: nowrap;
   /* Ellipsis truncation needs overflow:hidden, which also clips .plink's
      focus/hover underline; the padding gives that underline its room back. */
-  padding-bottom: 6px;
+  padding-bottom: var(--space-1h);
 }
 #root .note__vs {
   text-transform: none; /* caps-exempt: "vs Gavin Williams" is a phrase, not a label */

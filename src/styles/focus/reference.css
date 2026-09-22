@@ -361,7 +361,7 @@
 
 .focusrail .pitchers__grid th,
 .focusrail .pitchers__grid td {
-  padding: 6px 0;
+  padding: var(--space-1h) 0;
   font-size: var(--fs-label);
 }
 
