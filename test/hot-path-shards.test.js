@@ -22,9 +22,21 @@ test('a former-teammates shard is named by the key its reader builds', () => {
   // scheduled, which is correct. A floor of 20 stood here and went red on
   // 2026-09-21, the first night MLB was on its own, with all 20 shards
   // perfectly well formed. Liveness is the freshness guard's job, not this
-  // test's, and former-teammates/ is the one dataset that guard cannot see:
-  // it has no index.json to read an age from (#1145).
-  for (const f of list('former-teammates')) {
+  // test's. The guard reads a directory's age from its index.json, and this
+  // test anchors on the same file (#1145): the generator writes it on every
+  // run, a winter night with no games included, so the test cannot pass on an
+  // empty directory. Without it the loop below has nothing to check and
+  // passes on zero files, all winter.
+  const index = read('former-teammates', 'index.json')
+  assert.ok(
+    !Number.isNaN(Date.parse(index.generatedAt)),
+    `index.json: generatedAt ${index.generatedAt} is not a timestamp`,
+  )
+  const shards = list('former-teammates').filter((f) => f !== 'index.json')
+  for (const f of shards) {
+    // The stamp lives in index.json only. A per-shard stamp rewrites every
+    // committed shard each night when no matchup changed.
+    assert.ok(!('generatedAt' in read('former-teammates', f)), `${f}: carries its own stamp`)
     const { matchup } = read('former-teammates', f)
     const { teamA, teamB, kind, rows, orgTies } = matchup
     // The reader computes this name from the two clubs in the game, in either
@@ -37,7 +49,7 @@ test('a former-teammates shard is named by the key its reader builds', () => {
     // `kind` promises. The client reads whichever of rows/orgTies the kind
     // names and never both, so a husk — written, correctly keyed, empty — is a
     // card that renders nothing, and no file count can see it.
-    assert.ok(kind === 'teammates' || kind === 'orgTies', `${f}: unknown kind ${kind}`)
+    assert.ok(kind === 'teammates' || kind === 'orgties', `${f}: unknown kind ${kind}`)
     const payload = kind === 'teammates' ? rows : orgTies
     assert.ok(Array.isArray(payload) && payload.length, `${f}: ${kind} shard carries no ${kind}`)
   }

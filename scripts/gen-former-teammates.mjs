@@ -64,7 +64,7 @@ import { fileURLToPath } from 'node:url'
 import { meetsStintCap } from '../src/api/rehab-policy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
-import { writeShards } from './lib/io.js'
+import { writeShardsWithStamp } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'former-teammates')
@@ -584,10 +584,11 @@ for (const { awayId, homeId } of pairs) {
   matchups[key] = { teamA: awayId, teamB: homeId, kind: 'orgties', orgTies }
 }
 
-const generatedAt = new Date().toISOString()
-const { written, swept } = await writeShards(
+// The stamp goes in index.json only, never per shard: the freshness guard reads
+// it, and no shard churns nightly on a timestamp (#1145, see scripts/lib/io.js).
+const { written, swept } = await writeShardsWithStamp(
   outDir,
-  Object.entries(matchups).map(([key, matchup]) => [key, { generatedAt, matchup }]),
+  Object.entries(matchups).map(([key, matchup]) => [key, { matchup }]),
 )
 const teammateMatchups = Object.keys(matchups).length - orgTieMatchups
 const total = Object.values(matchups).reduce((n, m) => n + (m.rows?.length ?? 0), 0)

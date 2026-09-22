@@ -34,7 +34,9 @@ export function matchupKey(teamIdA, teamIdB) {
 
 // Returns the same `{ matchups, generatedAt }` shape the league-wide file had,
 // holding this one matchup — so formerTeammatePairs/orgTiesFor below are
-// unchanged and still take (data, teamIdA, teamIdB).
+// unchanged and still take (data, teamIdA, teamIdB). `generatedAt` is always
+// null now: the run's stamp moved to the directory's index.json (#1145), and
+// no caller reads it.
 export async function loadFormerTeammates(teamIdA, teamIdB) {
   if (!teamIdA || !teamIdB) return { matchups: {}, generatedAt: null }
   const key = matchupKey(teamIdA, teamIdB)
@@ -44,7 +46,7 @@ export async function loadFormerTeammates(teamIdA, teamIdB) {
     const res = await fetch(`/data/former-teammates/${key}.json`)
     if (!res.ok) throw new Error(`former-teammates/${key}.json ${res.status}`)
     const shard = await res.json()
-    data = { matchups: { [key]: shard.matchup ?? {} }, generatedAt: shard.generatedAt ?? null }
+    data = { matchups: { [key]: shard.matchup ?? {} }, generatedAt: null }
   } catch {
     data = { matchups: {}, generatedAt: null }
   }
