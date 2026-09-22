@@ -3,12 +3,11 @@
 // unknown team-hub tab as a GAME address (date='team', matchup='158'), so
 // GameRoute ran resolveGame with no date. And fetchSchedule spelled that null
 // into the URL instead of refusing it, so the bad request looked like a real
-// one in the network panel. These tests pin both guards: no date means no
-// schedule request, ever.
+// one in the network panel. These tests pin the schedule guard: no date means
+// no schedule request, ever. The router half is in route.test.js.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { fetchSchedule, resolveGame } from '../src/api/schedule.js'
-import { parseRoute } from '../src/lib/route.js'
 
 function withFetchSpy(run) {
   const calls = []
@@ -38,16 +37,6 @@ test('resolveGame with no date finds no game and sends no request', () =>
     assert.equal(await resolveGame(undefined, 'milari'), null)
     assert.deepEqual(calls, [])
   }))
-
-test('an unknown team-hub tab lands on the team page, not a game', () => {
-  assert.deepEqual(parseRoute('/team/158/media'), {
-    name: 'team',
-    id: '158',
-    asOf: null,
-    sportId: null,
-  })
-  assert.equal(parseRoute('/team/milwaukee-brewers-158/media').id, '158')
-})
 
 test('a dated game address still resolves through the schedule', () =>
   withFetchSpy(async (calls) => {
