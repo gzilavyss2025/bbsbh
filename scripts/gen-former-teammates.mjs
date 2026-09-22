@@ -68,16 +68,13 @@ import { writeShardsWithStamp } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'former-teammates')
-// How many days of the slate to precompute (today + the next two), so late-night
-// and next-day browsing both find their game. Rosters are as-of-build; a club's
-// former-teammate ties barely shift day to day.
+// Days of slate to precompute (today + the next two), so late-night and next-day
+// browsing find their game. Rosters are as-of-build; ties barely shift daily.
 const WINDOW_DAYS = 2
-// MiLB levels to fan out over, high to low — AAA/AA/A+/A. Rookie/complex (16) is
-// deliberately excluded (see header). A copy of src/lib/teams.js's list; this
-// script is self-contained, like gen-rehab.mjs / gen-war.mjs.
+// MiLB levels, high to low (AAA/AA/A+/A); rookie (16) excluded, see header. A
+// copy of src/lib/teams.js's list, so the script stays self-contained.
 const MILB_SPORT_IDS = [11, 12, 13, 14]
-// Sport ids whose schedules get swept for matchups — MLB plus every MiLB full-
-// season level (see header: this is what extends the card past MLB-only).
+// Sport ids swept for matchups: MLB plus every MiLB full-season level (header).
 const MATCHUP_SPORT_IDS = [1, ...MILB_SPORT_IDS]
 const SPORT_LABEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK' }
 
@@ -103,11 +100,13 @@ const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
 async function fetchMatchups() {
   const pairs = new Map() // "awayId-homeId" -> { awayId, homeId, awayName, homeName }
   const teams = new Map() // teamId -> teamName
+  let answered = 0
   for (let d = 0; d <= WINDOW_DAYS; d++) {
     for (const sportId of MATCHUP_SPORT_IDS) {
       let data
       try {
         data = await getJson(`/api/v1/schedule?sportId=${sportId}&date=${isoDay(d)}&hydrate=team`)
+        answered++
       } catch {
         continue
       }
@@ -128,6 +127,8 @@ async function fetchMatchups() {
       }
     }
   }
+  // No answer is an outage, not an empty slate: fail before the sweep + stamp.
+  if (!answered) throw new Error('former-teammates: no schedule call answered')
   return { pairs: [...pairs.values()], teamIds: [...teams.keys()] }
 }
 
@@ -584,8 +585,7 @@ for (const { awayId, homeId } of pairs) {
   matchups[key] = { teamA: awayId, teamB: homeId, kind: 'orgties', orgTies }
 }
 
-// The stamp goes in index.json only, never per shard: the freshness guard reads
-// it, and no shard churns nightly on a timestamp (#1145, see scripts/lib/io.js).
+// The stamp goes in index.json only, for the freshness guard (#1145, lib/io.js).
 const { written, swept } = await writeShardsWithStamp(
   outDir,
   Object.entries(matchups).map(([key, matchup]) => [key, { matchup }]),
