@@ -1,9 +1,5 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
-import {
-  fetchTeamPhotoBatch,
-  photoWalkFloorHit,
-  photoWalkShouldContinue,
-} from '../../../../api/gamePhotos.js'
+import { fetchTeamPhotoBatch } from '../../../../api/gamePhotos.js'
 import { useNav } from '../../../../lib/nav.js'
 import { teamPhotosPath } from '../../../../lib/route.js'
 import { Door } from '../../../../components/ui/Door.jsx'
@@ -98,8 +94,7 @@ export function TeamPhotosRail({ teamId, games, limit = null }) {
 
   // Walks `games` backward from consumedRef's cursor in small batches,
   // fetching + filtering each batch's photos concurrently, until either
-  // `targetCount` is met, every game has been scanned (Opening Day), or the
-  // first batch found nothing for this club (the empty-batch floor). Caps
+  // `targetCount` is met or every game has been scanned (Opening Day). Caps
   // the number of batches a single call will chase so one interaction can't
   // stall the UI scanning a whole quiet season — if the target still isn't
   // met when the cap is hit, the sentinel (still in view, since nothing new
@@ -110,18 +105,11 @@ export function TeamPhotosRail({ teamId, games, limit = null }) {
       inFlightRef.current = true
       setLoading(true)
       let rounds = 0
-      // photoWalkShouldContinue carries the empty-batch floor (#1142): a
-      // club whose first batch holds no photos stops there, not at Opening Day.
       while (
         activeRef.current &&
-        photoWalkShouldContinue({
-          consumed: consumedRef.current,
-          total: games.length,
-          found: photosRef.current.length,
-          target: targetCount,
-          rounds,
-          maxBatches,
-        })
+        consumedRef.current < games.length &&
+        photosRef.current.length < targetCount &&
+        rounds < maxBatches
       ) {
         rounds++
         const { photos: batchPhotos, consumed } = await fetchTeamPhotoBatch(
@@ -137,12 +125,7 @@ export function TeamPhotosRail({ teamId, games, limit = null }) {
         setPhotos(photosRef.current)
       }
       if (activeRef.current) {
-        if (
-          consumedRef.current >= games.length ||
-          photoWalkFloorHit({ consumed: consumedRef.current, found: photosRef.current.length })
-        ) {
-          setExhausted(true)
-        }
+        if (consumedRef.current >= games.length) setExhausted(true)
         setLoading(false)
       }
       inFlightRef.current = false
