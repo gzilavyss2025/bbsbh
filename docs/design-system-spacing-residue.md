@@ -79,10 +79,14 @@ The largest compound move is 14px on a 6583px page — two tenths of one percent
 The standings table does not change height at all: its 9px is horizontal only,
 so it moves column widths inside a fixed 358px table and nothing else.
 
-## The recommendation
+## The decision
 
-**Round the whole band DOWN, in one direction, in one PR — candidate 2, with
-the direction fixed once rather than chosen 231 times.**
+**DECIDED 2026-09-22: round the whole band DOWN, in one direction, in one PR —
+candidate 2, with the direction fixed once rather than chosen 231 times.**
+
+5 to 4, 7 to 6, 9 to 8, 11 to 10, 13 to 12. Do not re-open the direction per
+site: the point of fixing it once is that no site has a reason to differ.
+The reasoning follows.
 
 1. **Per-site judgement is not available.** Every value is an exact tie. A
    reviewer asked to pick a direction for `.umptend__prov` has nothing to
