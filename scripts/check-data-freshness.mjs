@@ -114,7 +114,9 @@ const DEFAULT_KEYS = ['generatedAt']
 // milb-alumni/, and schedule-shape/ write 30-150 committed shards each, and a
 // per-shard timestamp would rewrite every one of them nightly for no reader's
 // benefit (gen-schedule-shape.mjs records the same trap at its own write site).
-export const UNSTAMPED_BUDGET = 23
+// Lowered 23 -> 22 when former-teammates/ started to write an index.json
+// (#1145), so the slot it freed cannot be reused in silence.
+export const UNSTAMPED_BUDGET = 22
 
 const dig = (obj, dotted) => dotted.split('.').reduce((o, k) => (o == null ? o : o[k]), obj)
 
