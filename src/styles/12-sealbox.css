@@ -1421,14 +1421,14 @@
 }
 
 /* Compact "R" pill in lineup rows only — every other roster surface
-   (RosterPanel.jsx) keeps the full "ROOKIE" word (see .rookiepill's own
+   (RosterPanel.jsx) keeps the full "ROOKIE" word (see the rookie pill's own
    header); a lineup row already carries a slot number, two names and a
    position/jersey column, and the full word was the one thing left to trim. */
-.lineupcard__names .rookiepill__full {
+.lineupcard__names .rookie__full {
   display: none;
 }
 
-.lineupcard__names .rookiepill__short {
+.lineupcard__names .rookie__short {
   display: inline;
 }
 

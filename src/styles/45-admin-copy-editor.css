@@ -417,17 +417,9 @@
   font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
+/* An outline pill (#1131). It keeps its place in the row: it never shrinks. */
 .awardord__tier {
   flex: none;
-  padding: 1px var(--space-2);
-  border: var(--bw-hair) solid currentColor;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  white-space: nowrap;
 }
 .awardord__ct {
   flex: none;

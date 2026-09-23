@@ -1,6 +1,7 @@
 import { PlayDiamond } from './PlayDiamond.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { StruckLine } from './StruckLine.jsx'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // The extra-innings automatic runner's card — the placed runner gets his own
 // row at the head of the half, above the leadoff batter, which is both where
@@ -69,9 +70,9 @@ export function PlacedRunnerCard({ entry, writing = false }) {
                 </StruckLine>
               ))}
             </span>
-            <span className="pbp__placed" title="Automatic runner">
+            <Pill ink="--text-caption" className="pbp__placed" title="Automatic runner">
               {code}
-            </span>
+            </Pill>
           </div>
           <div className="pbp__desc">
             {descSegments.map((seg, i) =>

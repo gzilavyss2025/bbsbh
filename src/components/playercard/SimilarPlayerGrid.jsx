@@ -75,14 +75,14 @@ export function SimilarPlayerGrid({ rows, measure, excludes }) {
           <span className="simlike__measurelabel">Measured on</span>
           <ul className="simlike__terms">
             {measure.map((term) => (
-              <li key={term} className="simlike__term">{term}</li>
+              <li key={term} className="pill simlike__term">{term}</li>
             ))}
           </ul>
         </div>
         <div className="simlike__measure simlike__measure--excludes">
           <span className="simlike__measurelabel">Not</span>
           <ul className="simlike__terms">
-            <li className="simlike__term simlike__term--muted">{excludes}</li>
+            <li className="pill simlike__term simlike__term--muted">{excludes}</li>
           </ul>
         </div>
       </div>

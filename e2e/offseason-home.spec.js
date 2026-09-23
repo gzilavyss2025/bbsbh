@@ -221,7 +221,7 @@ test('a ranked prospect wears his rank, and the rest wear nothing', async ({ pag
   // The pill is spliced in unconditionally and renders nothing for a player
   // ranked nowhere, so the count is a real fraction of the list rather than
   // one badge per row. Anything that decorated every row would be decoration.
-  const pills = page.locator('.movedup .prospectpill')
+  const pills = page.locator('.movedup .prospect__tag')
   const shown = await pills.count()
   expect(shown).toBeGreaterThan(0)
   expect(shown).toBeLessThan(await rows.count())

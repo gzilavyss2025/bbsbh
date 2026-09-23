@@ -23,6 +23,7 @@ import { PlayerHubShell } from './player/PlayerHubShell.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
 import { gameLogDoorLabel } from './player/overviewPreview.js'
 import { DASH, Fact, SectionTitle, StatGrid, debutLabel, isoToday, monthDay, roleWord } from './player/parts.jsx'
+import { Pill } from '../components/ui/control/Pill.jsx'
 
 // The player hub's OVERVIEW tab — the bare `/player/{id}`, and the tab the
 // other three hang off (screens/player/PlayerHubShell.jsx). Who he is now: the
@@ -195,10 +196,10 @@ export function PlayerPage({ id, asOf, sportId }) {
             {block.ranks && (
               <p className="leaguerank">
                 {block.ranks.items.map((it) => (
-                  <span className="leaguerank__chip" key={it.label}>
+                  <Pill fill="paper" ink="--text-muted" className="leaguerank__tag" key={it.label}>
                     <strong className="leaguerank__ord">{it.text}</strong>
                     {` ${block.ranks.league} · ${it.label}`}
-                  </span>
+                  </Pill>
                 ))}
               </p>
             )}

@@ -1061,7 +1061,7 @@
    (echoes .rehabcard's card treatment) rather than a bare line, since it now
    carries a projected timeframe alongside the progress fact. Title uppercase
    like every other SectionTitle; each row's progress text stays neutral, the
-   projected timeframe inked in the accent color (like .milestonepill) so the
+   projected timeframe inked in the accent color (like the milestone pill) so the
    forward-looking half of the fact reads as distinct from the plain count. */
 .milestonewatch {
   margin: 8px 2px 0;

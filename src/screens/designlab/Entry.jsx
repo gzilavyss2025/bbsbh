@@ -1,3 +1,5 @@
+import { Pill } from '../../components/ui/control/Pill.jsx'
+
 // ONE ENTRY ON THE DESIGN LAB: a heading, the specimen itself, and a caption
 // saying where the thing lives and what the inventory proposes for it.
 //
@@ -14,7 +16,7 @@ export function Entry({ title, path, consumers, verdict, tone = '', note, wide =
     <section className={`dlab__entry${wide ? ' dlab__entry--wide' : ''}`}>
       <div className="dlab__entryhead">
         <h3 className="dlab__entrytitle">{title}</h3>
-        {verdict && <span className={`dlab__verdict${tone ? ` dlab__verdict--${tone}` : ''}`}>{verdict}</span>}
+        {verdict && <Pill className={`dlab__verdict${tone ? ` dlab__verdict--${tone}` : ''}`}>{verdict}</Pill>}
       </div>
       {/* The specimen sits on the app canvas, not on a lab surface, so a card
           that sets --surface-card reads against the ground it really lands on.

@@ -477,22 +477,6 @@
   text-transform: uppercase;
   color: var(--accent-primary);
 }
-/* The level tag on a mixed MLB/AAA game log (see hasMixedLevels in
-   UmpireAccuracyModal.jsx) — neutral ink, not a positive/negative accuracy
-   signal, so it deliberately doesn't borrow .tierpill's four-ink language. */
-.umpmodal__glevel {
-  display: inline-block;
-  padding: 1px var(--space-1);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  line-height: var(--lh-solid);
-  color: var(--text-muted);
-  white-space: nowrap;
-}
 .umpmodal__gacc {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

@@ -191,7 +191,7 @@
    for award chips) alongside its own scenario pill (filled in that
    scenario's own accent — see .flipback__pill--scenario below), plus the
    doubleheader modifier (the one pill still left as a quiet outline chip,
-   same idiom as .prospectpill/.gamecard__dh — a doubleheader label isn't
+   same idiom as the prospect pill/.gamecard__dh — a doubleheader label isn't
    tied to any accent color). The favorite team's game is called out by the
    whole card's tint instead — see .flipback--pinned. */
 .flipback__pills {

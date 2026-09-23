@@ -2,6 +2,7 @@ import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { InjuredMark } from '../../../components/badges/InjuredMark.jsx'
 import { ProspectPill } from '../../../components/badges/ProspectPill.jsx'
 import { RookiePill } from '../../../components/badges/RookiePill.jsx'
+import { Pill } from '../../../components/ui/control/Pill.jsx'
 
 const DASH = '—'
 
@@ -23,12 +24,12 @@ export function RosterList({ rows, season, showProspect }) {
             <RookiePill active={r.rookie} />
           </span>
           {r.war !== undefined && (
-            <span
-              className={`rankchip${r.war == null ? '' : r.war >= 3 ? ' rankchip--good' : r.war < 0 ? ' rankchip--bad' : ''}`}
+            <Pill
+              className={`rank__tag${r.war == null ? '' : r.war >= 3 ? ' rank__tag--good' : r.war < 0 ? ' rank__tag--bad' : ''}`}
               title="Season WAR (MLB calc)"
             >
               {r.war == null ? DASH : r.war.toFixed(1)}
-            </span>
+            </Pill>
           )}
           {r.badge && <span className={r.badgeClass}>{r.badge}</span>}
           <span className="thub-chev">›</span>

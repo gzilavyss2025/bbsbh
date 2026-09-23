@@ -165,19 +165,17 @@
 .cthist__none {
   font-style: italic;
 }
+/* "Match unconfirmed" — an outline pill (#1131) inked --text-caption by the
+   component. What stays is its place in the row's grid, and the dashed edge:
+   a fuzzy match is pencilled in, and dashed is how this app says so. Its edge
+   stays the soft pencil rule on purpose, not the ink: the dash carries the
+   meaning, and a caption-dark dash would read as a firm line. */
 .cthist__fuzzy {
+  --pill-edge: var(--border-rule);
   grid-column: 1 / -1;
   justify-self: start;
   margin-top: 3px;
-  padding: 1px var(--space-1h);
-  border: var(--bw-hair) dashed var(--border-rule);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  line-height: var(--lh-compact);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-caption);
+  border-style: dashed;
 }
 
 /* ---- the collapse control ---- */

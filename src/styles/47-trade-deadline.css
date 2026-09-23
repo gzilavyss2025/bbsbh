@@ -246,7 +246,7 @@
   min-width: 0;
   flex: 1 1 auto;
 }
-.tradecard__playerinfo .prospectpill {
+.tradecard__playerinfo .prospect__tag {
   align-self: flex-start;
 }
 .tradecard__nameline {
