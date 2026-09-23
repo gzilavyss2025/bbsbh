@@ -308,6 +308,13 @@
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-cell);
   letter-spacing: var(--ls-none);
+  /* One more pixel on top. JetBrains Mono's figures sat 0.5px high in the
+     tag's 2px/2px box — at 1x, 2x and 3x alike, plain against the inked edge —
+     and the browser snaps text to a whole pixel, so a sub-pixel (em) nudge
+     changes nothing. Measured glyph box against inner box: 3px over 2px puts
+     the figures at 0.00 at every density, and the tag at 20.2px, beside the
+     20.4px display-face tags. */
+  padding-top: 3px;
 }
 /* The two tints: a soft wash, a deep ink, no edge. They set the pill's own
    custom properties rather than repainting it, the way a surface re-inks a
