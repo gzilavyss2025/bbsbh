@@ -44,7 +44,6 @@ const KNOWN_UNDEFINED = new Set([
   '--chip-text',
   '--card-accent',
   '--pill-accent',
-  '--pill-text',
   '--start', // 26a-percentile-strip.css — the band's geometry, per player
   '--width',
   '--pct',

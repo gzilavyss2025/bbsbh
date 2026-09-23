@@ -1,0 +1,465 @@
+{
+  "_comment": "Hand-checked calls, keyed by the census row's selector. A key that no longer matches a row is reported by census.mjs as STALE. fill: outline | paper | ink | seal | other:<what>. slice: see SLICES in census.mjs.",
+  ".milestonepill": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "canonical recipe (inventory); colour token = --accent-primary"
+  },
+  ".rookiepill": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "identical to .milestonepill but ink (--field); keep .rookiepill__short/__full phone swap as children"
+  },
+  ".prospectpill": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "identical + gap:4px for the logo; ProspectPill.jsx has 10 importers (incl. offseason/MovedUp.jsx) + a hand-rolled copy in PlayerHubShell.jsx:149-155; two context overrides (.tlead__row .prospectpill, .tradecard__playerinfo .prospectpill) must survive"
+  },
+  ".rankchip": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "the recipe in mono (face = --font-mono, tabular-nums); --good/--bad modifiers become a passed colour token"
+  },
+  ".tierpill": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "inventory: outline; inline-block + --ls-caps + line-height:1 are residue"
+  },
+  ".dlab__verdict": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "the lab's own capsule; critique: the lab should consume Pill (first real test)"
+  },
+  ".umpmodal__glevel": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "1px 4px — tightest tag; will grow to 2px 7px"
+  },
+  ".simlike__term": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "accent outline on --surface-card, rendered on <li>"
+  },
+  ".awards__chip": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "player-page award chips (NL MVP x1) — critique names it; semibold, 3px 8px"
+  },
+  ".leaguerank__chip": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "same recipe as .awards__chip (3px 8px, --surface-card)"
+  },
+  ".cwb__badge": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "admin (contract workbench); no weight, no transform"
+  },
+  ".awardord__tier": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "admin (/admin award order); border = currentColor"
+  },
+  ".pbp__placed": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "DASHED hairline (placed runner = provisional); needs an edge=dashed residual or a local rule"
+  },
+  ".cthist__fuzzy": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 1,
+    "reason": "DASHED hairline (fuzzy date); grid placement residual stays local"
+  },
+  ".cbk__badge": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "tint: --field-soft / --field-deep, no border"
+  },
+  ".prospecttable__top": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "tint: --clay-soft / --clay-deep, mono"
+  },
+  ".tlead__level": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "--surface-inset + hairline, mono level label (AAA)"
+  },
+  ".thub-affiliate__level": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "same as .tlead__level; position:absolute stays local"
+  },
+  ".wiredock__count": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "--bg-canvas count bubble, mono, no border, not uppercase"
+  },
+  ".cwb__chip": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "admin; --font-body at --fs-caption (the only body-face tag)"
+  },
+  ".phcard__tag": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "--surface-inset; --il/--dashed modifiers; ellipsis residual. The card (.phcard) stays bespoke, the tag need not"
+  },
+  ".moundcard__avail": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "tint set on --fresh/--limited/--down modifiers (field/award/clay soft)"
+  },
+  ".scorebug__result": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "tint set on .is-positive/.is-negative (tone classes, not states)"
+  },
+  ".wcall__pill": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "tint on --wrong/--right; lives in 12-sealbox.css and renders inside StatBox's reveal — CSS-only merge is spoiler-neutral, do NOT move the JSX out of the reveal render fn"
+  },
+  ".favormeter__tierpill": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "tint on --routine/--standout/--outlier (--standout/--outlier use --award-soft and --marker); raw 999px literal; inside the reveal, same note as .wcall__pill"
+  },
+  ".flipback__pill": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "already takes --pill-accent/--pill-text tokens (the target model); --crown is ink (--award-ink). On GameResultFace (a slate flip face, stamp FORBIDDEN_SURFACE) — CSS-only"
+  },
+  ".team-hub__level": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "tint of the club's --ink (14% fill / 30% edge) on the themed hero; ADR-0030 lets a club colour an identity surface — pass it as the colour token"
+  },
+  ".winprob__ledger-chip": {
+    "role": "tag",
+    "fill": "other:club colour",
+    "verdict": "merge",
+    "slice": 2,
+    "reason": "fill + ink set INLINE from the club triad (WinProbChart.jsx:597); mono. Solid club fill = the ink fill with a passed colour"
+  },
+  ".contractcard__regime": {
+    "role": "tag",
+    "fill": "ink",
+    "verdict": "merge",
+    "slice": 3,
+    "reason": "navy fill, paper text; carries a drop shadow (paper does not float, #1166) — dropping it is a visible change"
+  },
+  ".mastheadpill": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "button with aria-pressed (the 'MLB only' toggle); 3px 8px today, becomes a 34px control"
+  },
+  ".depthpos": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "button, mono; selected via .is-active — convert to aria-pressed per #1166"
+  },
+  ".cmdmap__chip": {
+    "role": "control",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "toggle button on --surface-inset; --ls-wide"
+  },
+  ".slate-filterbar__chip": {
+    "role": "control",
+    "fill": "paper",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "tint from inline --chip-accent (GameSelect.jsx:1137); 1.5px edge (--bw-rule). GameSelect.jsx is a stamp FORBIDDEN_SURFACE — fine, Pill imports nothing stamp-related"
+  },
+  ".scorebookstory__filters button": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "36px filter buttons (only 36px control)"
+  },
+  ".stampstrip__modes button": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "32px mode toggle on the Game Log mint strip. Its consumer StampGameButton.jsx IS on check-stamp-surfaces STAMP_ALLOWLIST (one importer: BoxScore.jsx, inside the SealBox reveal). A CSS-only merge is safe; Pill.jsx must never import a stamp module, and the JSX must not move"
+  },
+  ".logbookstats__levels button": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "34px, mono --fs-small; Logbook stats level filter (stamp-adjacent, no art)"
+  },
+  ".stampsheet__levels button": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "declaration-identical twin of .logbookstats__levels button"
+  },
+  ".logbookstats__watch": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "32px, accent edge + ink"
+  },
+  ".animlab__play": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "dev/QA page (/animation-lab); min-width 62px residual"
+  },
+  ".coverpick__favorite": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "passport book cover picker; .is-* selected state -> aria-pressed"
+  },
+  ".iddrawer__btn": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "team hub identity drawer (admin gear)"
+  },
+  ".idadmin__actions .idadmin__btn": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "border = currentColor, no fill"
+  },
+  ".lookupdeck__usebtn": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "admin; accent edge + ink"
+  },
+  ".trailstrip__followbtn, .trailstrip__summarybtn": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "34px already; carries --shadow-card (drop it); no own font-family (inherits body)"
+  },
+  ".dlab__jumplink": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "design-lab jump links (<a>)"
+  },
+  ".trrank__related a": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "merge",
+    "slice": 4,
+    "reason": "<a> links, 8px 12px padding"
+  },
+  ".psodds-pill": {
+    "role": "control",
+    "fill": "ink",
+    "verdict": "merge",
+    "slice": 5,
+    "reason": "the 'Postseason odds' button on the club band; navy fill. Inventory said 'seal-filled' — ADR-0083 moved it off kraft"
+  },
+  ".trrank__jump a": {
+    "role": "control",
+    "fill": "ink",
+    "verdict": "merge",
+    "slice": 5,
+    "reason": "outline drawn ON an ink band (paper ink, 22% paper edge) — the one reversed outline"
+  },
+  ".duepill": {
+    "role": "tag",
+    "fill": "seal",
+    "verdict": "bespoke",
+    "slice": 0,
+    "reason": "GUARDED: '.duepill' is on check-seal-scope.mjs's ALLOWLIST (31-wild-card.css). Its shape can adopt Pill, but the seal paint must stay on a selector the guard names — rename = edit the allowlist in the same PR"
+  },
+  ".gamecard__live": {
+    "role": "tag",
+    "fill": "other:clay solid (--clay, #fff4f1 ink)",
+    "verdict": "bespoke",
+    "slice": 0,
+    "reason": "absolute-positioned on the slate card face with backface-visibility for the flip; .gamecard is bespoke (inventory #4)"
+  },
+  ".gamecard__delay": {
+    "role": "tag",
+    "fill": "other:marker",
+    "verdict": "bespoke",
+    "slice": 0,
+    "reason": "twin of .gamecard__live, --marker fill; same reason"
+  },
+  ".stampin__mark": {
+    "role": "control",
+    "fill": "paper",
+    "verdict": "bespoke",
+    "slice": 0,
+    "reason": "Stamp In (ADR-0042): one class is a <span> when stamped (--on, --accent-positive fill) and a <button> when not (--off) — the tag and the control MUST share geometry here, which is the opposite of the Pill rule"
+  },
+  ".photostrip__viewall": {
+    "role": "control",
+    "fill": "other:#FFFFFF on a photo",
+    "verdict": "bespoke",
+    "slice": 0,
+    "reason": "sits on a photograph; literal white, not paper — a paper fill would tint on the photo"
+  },
+  ".wiredock__close": {
+    "role": "control",
+    "fill": "paper",
+    "verdict": "rename-out",
+    "slice": 6,
+    "reason": "x icon button, 44px wide hit area, no text — an IconButton (Button family, #1130), not a capsule"
+  },
+  ".gamefindersheet__close": {
+    "role": "control",
+    "fill": "other:none",
+    "verdict": "rename-out",
+    "slice": 6,
+    "reason": "44x44 x close — radius only rounds the hover/focus ring"
+  },
+  ".searchfield__clear": {
+    "role": "control",
+    "fill": "other:none",
+    "verdict": "rename-out",
+    "slice": 6,
+    "reason": "44x44 x clear — icon button"
+  },
+  ".favteamsheet__close": {
+    "role": "control",
+    "fill": "other:none",
+    "verdict": "rename-out",
+    "slice": 6,
+    "reason": "44x44 x close — icon button"
+  },
+  ".sheet__close": {
+    "role": "control",
+    "fill": "other:none",
+    "verdict": "rename-out",
+    "slice": 6,
+    "reason": "44x44 x close (3 consumers) — icon button"
+  },
+  ".logomodal__close": {
+    "role": "control",
+    "fill": "other:none",
+    "verdict": "rename-out",
+    "slice": 6,
+    "reason": "32x32 x close, absolute — icon button (a circle)"
+  },
+  ".infopop__btn": {
+    "role": "control",
+    "fill": "outline",
+    "verdict": "rename-out",
+    "slice": 6,
+    "reason": "18x18 italic 'i' — a circle icon button, not a capsule"
+  },
+  ".posterstudio__save": {
+    "role": "control",
+    "fill": "ink",
+    "verdict": "rename-out",
+    "slice": 6,
+    "reason": "primary CTA at --fs-body, 12px 20px padding — a Button (btn--primary), not a Pill"
+  },
+  ".logbook__pending": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "rename-out",
+    "slice": 6,
+    "reason": "aspect-ratio:1 dashed CIRCLE = an empty stamp slot on StampCollection.jsx (a STAMP_ALLOWLIST surface). Geometry is the stamp's footprint — leave it alone"
+  },
+  ".passportpage__pending": {
+    "role": "tag",
+    "fill": "outline",
+    "verdict": "rename-out",
+    "slice": 6,
+    "reason": "same empty stamp slot on PassportPage.jsx (STAMP_ALLOWLIST surface)"
+  },
+  ".pbp__rbi": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "delete",
+    "slice": 7,
+    "reason": "DEAD: no JSX consumer anywhere in src/"
+  },
+  ".penboard__pill": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "delete",
+    "slice": 7,
+    "reason": "DEAD: no .penboard__* class in any JSX (whole penboard block is orphaned)"
+  },
+  ".penboard__tag": {
+    "role": "tag",
+    "fill": "paper",
+    "verdict": "delete",
+    "slice": 7,
+    "reason": "DEAD: same orphaned block"
+  }
+}

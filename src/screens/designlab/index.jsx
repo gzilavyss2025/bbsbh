@@ -5,6 +5,7 @@ import { TokenHalf } from './tokens.jsx'
 import { CardHalf, PillHalf } from './blocks.jsx'
 import { ComponentHalf } from './components.jsx'
 import { ButtonHalf } from './buttons.jsx'
+import { PillSystemHalf } from './pills.jsx'
 import { CARDS, PILLS } from './catalog.js'
 import '../../styles/designlab/lab.css'
 
@@ -95,6 +96,7 @@ export function DesignLab() {
         lede="Everything in ui/, badges/ and the reusable half of chrome/. These are the destinations a new surface should be reaching for."
       >
         <ButtonHalf />
+        <PillSystemHalf />
         <ComponentHalf />
       </Band>
 

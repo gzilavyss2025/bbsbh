@@ -533,3 +533,10 @@
   flex-wrap: wrap;
   gap: var(--space-1h);
 }
+
+/* A row whose specimens differ in height on purpose (the pill's three-heights
+   entry, a name beside its tags): centred, so the difference is the only thing
+   the eye measures. */
+.dlab__row--middle {
+  align-items: center;
+}

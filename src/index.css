@@ -47,6 +47,12 @@
    stays in 07 at the same specificity as .btn — must still load AFTER it to
    keep its own face. Load this later and the base rule silently redraws the
    reveal button. test/button-cascade.test.js pins it. */
+/* The PILL — the app's one capsule (#1131), tag or control, four fills. Just
+   ahead of the button, and so still ahead of 07: every per-site pill rule
+   from 07 on loads after the base and wins on order. It shares no selector
+   with .btn, so the two system files may sit in either order between
+   themselves; test/pill-cascade.test.js pins that pill.css precedes 07. */
+@import './styles/system/pill.css';
 @import './styles/system/button.css';
 @import './styles/07-team-logo-and-buttons.css';
 @import './styles/08-site-shell.css';

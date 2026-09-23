@@ -84,6 +84,18 @@ export const PAIRINGS = [
   { fg: 'text-muted', bg: 'surface-card', min: TEXT, note: 'muted text on raised card' },
   { fg: 'text-caption', bg: 'bg-page', min: TEXT, note: 'caption/graphite on page' },
   { fg: 'text-on-ink', bg: 'accent-primary', min: TEXT, note: 'inverse text on ink chip' },
+  // THE PILL (#1131, styles/system/pill.css). An outline pill is see-through,
+  // so its ink sits on whatever paper the card or the page is — both are
+  // asserted, for every ink a pill is passed today. A paper pill's text sits
+  // on --surface-card. The ink and seal fills are the two pairs just above and
+  // the seal cover's first pair. A new `ink` a caller passes belongs here.
+  { fg: 'text-muted', bg: 'bg-page', min: TEXT, note: 'pill outline, no ink, on page' },
+  { fg: 'field', bg: 'surface-card', min: TEXT, note: 'pill ink --field on card' },
+  { fg: 'field', bg: 'bg-page', min: TEXT, note: 'pill ink --field on page' },
+  { fg: 'accent-primary', bg: 'bg-page', min: TEXT, note: 'pill ink --accent-primary on page' },
+  { fg: 'clay', bg: 'surface-card', min: TEXT, note: 'pill ink --clay on card' },
+  { fg: 'clay', bg: 'bg-page', min: TEXT, note: 'pill ink --clay on page' },
+  { fg: 'text-body', bg: 'surface-card', min: TEXT, note: 'pill paper fill text' },
   // The slate result card's scenario pills (GameResultFace.jsx's
   // SCENARIO_STYLE) — each filled solid in its own accent, so the fg/bg pair
   // (and which text color a given accent needs) is asserted here rather than
