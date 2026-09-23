@@ -41,7 +41,7 @@ function LeaderBadges({ entry, showLevel, prospectSnapshot }) {
   const level = showLevel ? levelLabel(entry) : ''
   return (
     <>
-      {level && <Pill fill="paper" className="tlead__level">{level}</Pill>}
+      {level && <Pill fill="paper" figure className="tlead__level">{level}</Pill>}
       {prospectSnapshot && <ProspectPill {...prospectBadge(prospectSnapshot, entry.id)} />}
     </>
   )

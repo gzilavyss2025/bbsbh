@@ -439,7 +439,7 @@ export function WireDock({ endDate, sportId, onPresence, singleDay = false }) {
                 <span className="wiredock__club">{newestAbbr}</span>
                 <span className="wiredock__cut">{newestLine}</span>
               </span>
-              <Pill fill="paper" className="wiredock__count">{total}</Pill>
+              <Pill fill="paper" figure className="wiredock__count">{total}</Pill>
               <span className="wiredock__chevron" aria-hidden="true">⌃</span>
             </button>
 
