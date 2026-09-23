@@ -200,8 +200,13 @@
   gap: var(--space-1h);
 }
 /* Each pill is a Pill tag (#1131). The crown and the scenario are solid: the
-   ink fill with its ground swapped. The doubleheader label is the plain
-   outline tag. */
+   ink fill with its ground swapped. The doubleheader label is a quiet tint:
+   the page fill and a hairline edge, so its muted text always sits on
+   --bg-page (a checked pair), never on a pinned card's club-tinted ground. */
+.flipback__pill--tag {
+  --pill-fill: var(--bg-page);
+  --pill-edge: var(--border-hairline);
+}
 .flipback__pill--crown {
   --pill-fill: var(--award-ink);
   --pill-edge: var(--award-ink);

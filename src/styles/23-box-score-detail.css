@@ -302,8 +302,9 @@
   padding-block: 2px 1px;
 }
 /* On a chaser row the pill/level sit small and inline before the value: the
-   prospect pill keeps a 1px pad here, a hair under the tag's own 2px, so it
-   matches the level tag beside it. Its size is the pill's own --fs-label. */
+   prospect pill keeps a 1px pad here, a hair under the tag's own 2px. The
+   level tag beside it is 2px over 1px (its mono figures need the extra pixel
+   on top), so the two do not share block padding. Its size is the pill's own --fs-label. */
 .tlead__row .prospect__tag {
   flex: none;
   padding: 1px var(--space-1h);

@@ -438,11 +438,7 @@
 /* The two calls are Pill tags (#1131), and each is a tint: it sets the pill's
    custom properties and does not repaint it. They render inside StatBox's
    reveal render function, so only the class names moved there — no JSX left
-   the function. The pill leaves the face to its host here: the calls take the
-   display face of .wcall__calls, as they always did. */
-.wcall__pill {
-  font-family: inherit;
-}
+   the function. */
 .wcall__pill--wrong {
   --pill-fill: var(--clay-soft);
   --pill-edge: transparent;
@@ -574,9 +570,12 @@
    It is a Pill tag (#1131), and each tier is a tint on the pill's custom
    properties. Like the calls above, it renders inside StatBox's reveal, so
    only its class names moved. --marker is the outlier's FILL, never an ink
-   (ADR-0083): the ink on it is --ink-0. */
+   (ADR-0083): the ink on it is --ink-0.
+   It may wrap, as it did before the Pill: a long tier label on this narrow
+   card must break onto a second line, not run past the card's edge. */
 .favormeter__tierpill {
   align-self: flex-end;
+  white-space: normal;
 }
 .favormeter__tierpill--routine {
   --pill-fill: var(--surface-inset);

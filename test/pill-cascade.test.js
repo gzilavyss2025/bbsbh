@@ -75,6 +75,20 @@ test('there is exactly one .pill base rule, and it is in system/pill.css', () =>
   assert.deepEqual(owners, ['system/pill.css'])
 })
 
+test('the pill\'s colour defaults carry zero specificity, so a host tint wins in any load order', () => {
+  // A tint host is one class, the same weight as .pill. Written plain, the
+  // defaults beat a tint whose sheet happens to load BEFORE index.css (a lazy
+  // chunk turned static), and every tint goes grey with no error.
+  const css = read('system/pill.css')
+  const colours = /--pill-(ink|fill|edge|text):/
+  for (const sel of ['.pill', '.pill--control', '.pill--paper', '.pill--ink']) {
+    const plain = ruleBody(css, sel)
+    if (plain !== null) assert.doesNotMatch(plain, colours, `${sel} sets a colour default at class weight; move it into :where(${sel})`)
+    const zero = ruleBody(css, `:where(${sel})`)
+    assert.ok(zero !== null && colours.test(zero), `:where(${sel}) should carry ${sel}'s colour defaults`)
+  }
+})
+
 test('a control is --control-min tall and a tag declares no height, so the two never meet', () => {
   const css = read('system/pill.css')
   assert.doesNotMatch(css, /(?<![0-9.])34px/, 'the control height is var(--control-min), never a literal')
@@ -120,7 +134,7 @@ const TINTS = {
     '.favormeter__tierpill--standout',
     '.favormeter__tierpill--outlier',
   ],
-  '22-box-score-tables.css': ['.flipback__pill--crown', '.flipback__pill--scenario'],
+  '22-box-score-tables.css': ['.flipback__pill--crown', '.flipback__pill--scenario', '.flipback__pill--tag'],
   '23-box-score-detail.css': ['.tlead__level'],
   '26c-mound-card.css': ['.moundcard__avail--fresh', '.moundcard__avail--limited', '.moundcard__avail--down'],
   '28a-team-hub-hero.css': ['.team-hub__level'],
