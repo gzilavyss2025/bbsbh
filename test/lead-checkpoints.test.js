@@ -74,7 +74,10 @@ test('no checkpoint list reaches the 9th inning', () => {
 test('no committed callouts bundle carries a 9th-inning lead tally', () => {
   const root = new URL('../public/data/callouts/', import.meta.url)
   const dates = readdirSync(root, { withFileTypes: true }).filter((e) => e.isDirectory())
-  assert.ok(dates.length, 'no callouts dates on file')
+  // NO COUNT FLOOR HERE (#1147). gen-callouts.mjs prunes public/data/callouts/
+  // to a rolling 10-day window, so about ten days after the World Series this
+  // directory is correctly empty until spring. A floor would assert the
+  // calendar, not the data. The claim is per bundle, below.
   for (const d of dates) {
     const dir = new URL(`${d.name}/`, root)
     for (const f of readdirSync(dir).filter((n) => n.endsWith('.json'))) {

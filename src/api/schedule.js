@@ -129,6 +129,11 @@ export async function fetchSchedule(
   hydrate = `team,venue(timezone),lineups,officials,probablePitcher,${BROADCAST_HYDRATE}`,
   leagueId = null,
 ) {
+  // A missing date is a caller bug, not a question for statsapi. Without this
+  // guard `${dateStr}` spells null as the four characters "null", and the 400
+  // that comes back looks like any other request in the network panel — which
+  // is how five of them a load went unnoticed on a bogus team URL (#1164).
+  if (!dateStr) throw new Error('fetchSchedule needs a date')
   const league = leagueId ? `&leagueId=${leagueId}` : ''
   const data = await getJson(
     `/api/v1/schedule?sportId=${sportId}${league}&date=${dateStr}&hydrate=${hydrate}&fields=${SCHEDULE_FIELDS}`,
@@ -352,6 +357,10 @@ export async function fetchTeams(sportId, leagueId = null) {
 // about the schedule; partial failures keep degrading gracefully per MiLB
 // convention.
 export async function resolveGame(apiDate, matchup) {
+  // No date (a URL whose first segment is not MMDDYYYY, so urlDateToApi gave
+  // null) names no slate to scan: that is "no such game", answered without a
+  // request, not nine schedule calls that each ask for date=null (#1164).
+  if (!apiDate || !matchup) return null
   const want = matchup.toLowerCase()
   const pick = (games) =>
     games.find(
