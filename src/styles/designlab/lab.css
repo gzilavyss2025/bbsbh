@@ -209,39 +209,32 @@
 
 /* ---- Verdict chips ---- */
 
+/* The lab's own verdicts are the real Pill (#1131) — the first consumer the
+   critique asked for. The frame keeps where it sits (it never shrinks beside
+   a long title) and names each verdict's ink. A held block is highlighted:
+   --marker is a FILL, never an ink (ADR-0083), so it fills the pill and the
+   heading ink writes on it. */
 .dlab__verdict {
   flex: none;
-  padding: 2px var(--space-1h);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  color: var(--text-muted);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
 }
 
 .dlab__verdict--canon {
-  border-color: var(--accent-positive);
-  color: var(--accent-positive);
+  --pill-ink: var(--accent-positive);
 }
 
 .dlab__verdict--merge {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
+  --pill-ink: var(--accent-primary);
 }
 
 .dlab__verdict--bespoke,
 .dlab__verdict--hold {
-  border-color: color-mix(in srgb, var(--marker) 70%, var(--text-heading));
-  background: var(--marker);
-  color: var(--text-heading);
+  --pill-fill: var(--marker);
+  --pill-edge: color-mix(in srgb, var(--marker) 70%, var(--text-heading));
+  --pill-ink: var(--text-heading);
 }
 
 .dlab__verdict--delete {
-  border-color: var(--accent-negative);
-  color: var(--accent-negative);
+  --pill-ink: var(--accent-negative);
 }
 
 /* ---- Token specimens ---- */
@@ -532,4 +525,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1h);
+}
+
+/* A row whose specimens differ in height on purpose (the pill's three-heights
+   entry, a name beside its tags): centred, so the difference is the only thing
+   the eye measures. */
+.dlab__row--middle {
+  align-items: center;
 }

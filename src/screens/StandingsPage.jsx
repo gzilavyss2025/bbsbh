@@ -29,6 +29,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Door } from '../components/ui/control/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { Pill } from '../components/ui/control/Pill.jsx'
 
 // Rank-movement glyph: '' (not '—') when there's nothing to compare, since
 // this rides inline inside the always-visible GB/WCGB cell rather than its
@@ -52,11 +53,11 @@ function formatGrade(grade) {
 }
 
 // Season Grade cell: the number plus a percentile pill (top third of the
-// league-wide pool green, bottom third red, the rest the neutral rankchip
-// tone) — same good/bad palette as the WAR rank chip on the Team page.
+// league-wide pool green, bottom third red, the rest the neutral rank tag)
+// — same good/bad palette as the WAR rank tag on the Team page.
 function GradePill({ grade, tier }) {
-  const cls = tier === 'high' ? ' rankchip--good' : tier === 'low' ? ' rankchip--bad' : ''
-  return <span className={`rankchip${cls}`}>{formatGrade(grade)}</span>
+  const cls = tier === 'high' ? ' rank__tag--good' : tier === 'low' ? ' rank__tag--bad' : ''
+  return <Pill className={`rank__tag${cls}`}>{formatGrade(grade)}</Pill>
 }
 
 // The league mark that rides the right edge of a league's bar. The two league

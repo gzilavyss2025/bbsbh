@@ -98,7 +98,7 @@
 }
 /* One nested milestone row inside the card — the stat/threshold reads as a
    headline on its own line, then the plain progress fact and the projected
-   timeframe (inked accent, like .milestonepill) share the line below it. */
+   timeframe (inked accent, like the milestone pill) share the line below it. */
 .milestonewatch-page__row {
   display: flex;
   flex-wrap: wrap;

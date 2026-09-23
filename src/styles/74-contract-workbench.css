@@ -263,22 +263,15 @@
   font-size: var(--fs-cell);
 }
 
-.cwb__badge {
-  padding: 1px var(--space-2);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  color: var(--text-muted);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-}
-
+/* The badges are outline pills (#1131); a variant names the pill's ink. */
 .cwb__badge--fuzzy {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
+  --pill-ink: var(--accent-primary);
 }
 
-.cwb__badge--target,
+.cwb__badge--target {
+  --pill-ink: var(--accent-positive);
+}
+
 .cwb__qdone {
   border-color: var(--accent-positive);
   color: var(--accent-positive);

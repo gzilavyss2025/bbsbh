@@ -79,7 +79,7 @@
   color: var(--accent-primary);
 }
 /* Each scored term as its own chip rather than a middot-joined phrase —
-   same pill shape .tierpill uses elsewhere (hairline border, pill radius,
+   same pill shape the tier pills use elsewhere (hairline border, pill radius,
    bold caps) so a reader can count what went into the score without parsing
    a sentence. Navy-on-card, not a tier ink: this legend ranks nothing, it
    only names its inputs. */
@@ -91,20 +91,9 @@
   flex-wrap: wrap;
   gap: var(--space-1h);
 }
+/* Each term is an outline pill (#1131) on its <li>; this names its ink. */
 .simlike__term {
-  display: inline-block;
-  padding: 2px var(--space-2);
-  border: var(--bw-hair) solid var(--accent-primary);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  line-height: var(--lh-solid);
-  color: var(--accent-primary);
-  white-space: nowrap;
+  --pill-ink: var(--accent-primary);
 }
 /* The second legend row — what the ranking leaves out — sits right under the
    first with less air between the two than the block above the pair, so
@@ -117,8 +106,8 @@
    giving it the same ink as the scored terms above would say the model
    weighs it too. */
 .simlike__term--muted {
-  border-color: var(--border-rule);
-  color: var(--text-muted);
+  --pill-ink: var(--text-muted);
+  --pill-edge: var(--border-rule);
 }
 
 .simlike__list {
@@ -271,10 +260,6 @@
   }
   .simlike__measurelabel {
     flex: none;
-  }
-  .simlike__term {
-    padding: 3px var(--space-2h);
-    font-size: var(--fs-small);
   }
   .simlike__list {
     gap: var(--space-3);

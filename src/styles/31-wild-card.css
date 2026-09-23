@@ -298,98 +298,60 @@
   color: var(--text-body);
   font-weight: var(--w-semibold);
 }
-.rankchip {
+/* A rank or a grade on a pill (#1131): the WAR column on a roster, a club's
+   grade on the standings page. The capsule is .pill's (styles/system/pill.css);
+   this keeps only what makes it a FIGURE — the mono face at the table's own
+   cell size, tabular figures and no caps tracking, so a column of them lines
+   up. The pill leaves the face to its host by design: a figure pill pins it. */
+.rank__tag {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
-  padding: 2px var(--space-1h);
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  color: var(--text-muted);
-  border: var(--bw-hair) solid var(--border-hairline);
-  white-space: nowrap;
+  letter-spacing: var(--ls-none);
+  /* One more pixel on top. JetBrains Mono's figures sat 0.5px high in the
+     tag's 2px/2px box — at 1x, 2x and 3x alike, plain against the inked edge —
+     and the browser snaps text to a whole pixel, so a sub-pixel (em) nudge
+     changes nothing. Measured glyph box against inner box: 3px over 2px puts
+     the figures at 0.00 at every density, and the tag at 20.2px, beside the
+     20.4px display-face tags. */
+  padding-top: 3px;
 }
-.rankchip--good {
-  background: var(--field-soft);
-  color: var(--field-deep);
-  border-color: transparent;
+/* The two tints: a soft wash, a deep ink, no edge. They set the pill's own
+   custom properties rather than repainting it, the way a surface re-inks a
+   button skin — so the pill's rules still draw every part. */
+.rank__tag--good {
+  --pill-fill: var(--field-soft);
+  --pill-ink: var(--field-deep);
+  --pill-edge: transparent;
 }
-.rankchip--bad {
-  background: var(--clay-soft);
-  color: var(--clay-deep);
-  border-color: transparent;
+.rank__tag--bad {
+  --pill-fill: var(--clay-soft);
+  --pill-ink: var(--clay-deep);
+  --pill-edge: transparent;
 }
 
-/* Top-100-prospect badge — a neutral pill (not a performance judgment, so it
-   doesn't borrow rankchip's good/bad tone pair), MLB logo + rank number. */
-.prospectpill {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  padding: 2px var(--space-1h);
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  color: var(--text-muted);
-  border: var(--bw-hair) solid var(--border-hairline);
-}
-.prospectpill__logo {
+/* Top 100 prospect — an outline pill carrying the MLB mark (or the org's) and
+   the rank (components/badges/ProspectPill.jsx). .prospect__tag draws nothing
+   itself: it is the hook two context rules and the offseason spec hold on to
+   (.tlead__row, .tradecard__playerinfo, e2e/offseason-home.spec.js). */
+.prospect__logo {
   width: 12px;
   height: 12px;
   display: block;
 }
 
-/* Milestone-watch pill — a lineup row's "N shy of X for his career" fact,
-   sibling to .prospectpill (same shape/weight), inked in the accent color
-   rather than neutral so a milestone chase reads as a distinct kind of note. */
-.milestonepill {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  padding: 2px var(--space-1h);
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  color: var(--accent-primary);
-  border: var(--bw-hair) solid var(--accent-primary);
-}
-
-/* Rookie pill — still under MLB's rookie limit, another sibling to
-   .prospectpill (same shape/weight), inked in field green so a debut-season
-   player reads as its own distinct tone from the milestone/prospect pills. */
-.rookiepill {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  padding: 2px var(--space-1h);
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  color: var(--field);
-  border: var(--bw-hair) solid var(--field);
-}
-.rookiepill__short {
+/* The rookie pill (components/badges/RookiePill.jsx) is a plain outline pill in
+   --field. Phone widths swap the full "ROOKIE" word for just "R" — with WAR,
+   name, and a chevron already sharing the row (see .thub-row), the full word
+   was a big part of what made roster rows feel scrunched. */
+.rookie__short {
   display: none;
 }
-/* Phone widths swap the full "ROOKIE" word for just "R" — with WAR, name,
-   and a chevron already sharing the row (see .thub-row), the full word was
-   a big part of what made roster rows feel scrunched. */
 @media (max-width: 420px) {
-  .rookiepill__full {
+  .rookie__full {
     display: none;
   }
-  .rookiepill__short {
+  .rookie__short {
     display: inline;
   }
 }
@@ -413,9 +375,10 @@
   border: var(--bw-hair) solid var(--seal-deep);
 }
 
-/* MLB-debut pill — icon-only sibling to .prospectpill/.rookiepill/
-   .milestonepill (same shape/weight): no text, since the shield mark alone
-   carries the meaning next to a name. */
+/* MLB-debut pill — an icon-only capsule beside the prospect, rookie and
+   milestone pills: no text, since the shield mark alone carries the meaning
+   next to a name. Held out of Pill (#1131): it is the shell for an icon, with
+   no type of its own for the pill's tag geometry to size. */
 .debutpill {
   display: inline-flex;
   align-items: center;

@@ -1,0 +1,212 @@
+/* ---------------------------------------------------------------------------
+   PILL — the app's one capsule (#1131). components/ui/control/Pill.jsx writes
+   it; a hand-written <span class="pill …"> wears the same classes.
+
+   Three shapes share a screen on the team hub, and each has one job:
+
+     BUTTON  a ruled box, --radius-sm. Acts on the page you stand on.
+     DOOR    a link in --accent-link, no box. Leaves the page.
+     PILL    a capsule, --radius-pill. A label you read, or a small choice
+             you flip.
+
+   The capsule is how a reader tells a pill from a button. The HEIGHT is how a
+   thumb tells a pill you read from a pill you press: a tag is about 20px and a
+   control is --control-min (34px), and the two never meet in between.
+
+   TWO AXES, NO TONE. The census found 70 capsules (finding 1 of
+   .scratch/design-system/fable-critique.md). What varied between them was
+   never a tone: it was whether you could press it, and what ground it was
+   filled with. Meaning — rookie, top 100, a milestone chase — lives in the
+   copy and in ONE colour token the caller passes (--pill-ink). Six tone names
+   were six file names.
+
+   THE ANATOMY. One spec; every part reads a token.
+
+     part       tag (the default)               control (.pill--control)
+     ---------  ------------------------------  ------------------------------
+     height     from its content: 2px + the     --control-min (34px), the
+                line + 2px + the edge ≈ 20px    button's own control height
+     padding    2px --space-1h                  0 --space-3
+     edge       --bw-hair                       --bw-rule, the button's edge
+     radius     --radius-pill, for both. That is the whole family.
+     type       --font-display, --fs-label, --ls-label, uppercase,
+                --lh-compact, for both. No font-weight: the display face ships
+                one weight (700), so a weight does nothing. Emphasis is the
+                ink or the fill, never a weight.
+     gap        --space-1, between an icon (the MLB mark on Top 100) and the
+                label.
+
+   A FIGURE PILL (a rank, a level, a count) keeps the mono face, and its
+   HOST pins it: `font-family: var(--font-mono)` plus tabular-nums, written
+   two-class. The face is not a third axis on the pill (signed off for #1131).
+
+   The tag's 2px is the recipe every tag already drew. It is the one literal
+   here, and it is not a new one: the scale starts at 4px, and 4px vertical
+   padding would lift a tag to 24px, into the band a control reads as.
+
+   THE FILLS. Four cover all 70.
+
+     outline  the default. The ground shows through; the ink draws the edge
+              and the text. For a tag on paper.
+     paper    a filled paper chip with a pencil edge. The one that rides a
+              coloured band (a club's bar, the navy masthead) — the house
+              convention 09-team-info.css already wrote for the band's
+              controls, now the fill that owns it.
+     ink      navy, paper text. The strongest tag, and the selected state of
+              every control.
+     seal     kraft amber, seal ink. ONLY a sealed thing (ADR-0083): the
+              due-up marker and a control that lifts a seal. The one selector
+              in this file that reads --seal*, allowlisted by
+              scripts/check-seal-scope.mjs.
+
+   A FILL IS CUSTOM PROPERTIES, not a repaint — the button's model. Each
+   modifier sets --pill-fill, --pill-edge, --pill-text and the two hover
+   values, and the base rule and the states read them. --pill-ink is the one
+   a caller sets (Pill's `ink` prop writes it inline); outline draws its edge
+   and text from it, paper its text.
+
+   THE STATES — a control's only. A tag has none: it is not focusable, it has
+   no hover and it cannot be pressed.
+
+     rest            the fill.
+     hover           pointer devices only, inside @media (hover: hover). The
+                     fill darkens a step.
+     pressed         :active. 1px down and --inset-cell, as the button does.
+     selected        [aria-pressed="true"] or [aria-current="page"]. Ink fill
+                     AND a leading tick — the contract button.css wrote for
+                     "Pill (#1131) inherits exactly this". The tick survives
+                     forced-colors mode; the fill alone would not.
+     focus-visible   a 2px --focus-ring outline, 2px off the capsule.
+     disabled        :disabled or [aria-disabled="true"]. The fill stays and
+                     drops to --opacity-disabled. Never repainted.
+
+   WHERE IT SITS IN THE CASCADE. src/index.css imports this file immediately
+   before system/button.css, which is pinned directly before 07. Every per-site rule in 07 onward
+   loads after it and still wins on order; a rule in 01–06b that styles a pill
+   loses to it, so a slice that keeps one writes it two-class.
+   test/pill-cascade.test.js pins the slot.
+   --------------------------------------------------------------------------- */
+
+.pill {
+  --pill-ink: var(--text-muted);
+  --pill-fill: transparent;
+  --pill-edge: var(--pill-ink);
+  --pill-text: var(--pill-ink);
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-1h);
+  border: var(--bw-hair) solid var(--pill-edge);
+  border-radius: var(--radius-pill);
+  background: var(--pill-fill);
+  color: var(--pill-text);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-compact);
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---- the control role ---- */
+
+.pill--control {
+  --pill-ink: var(--text-body);
+  --pill-edge: var(--border-rule);
+  --pill-fill-hover: var(--surface-inset);
+  --pill-edge-hover: var(--text-caption);
+
+  justify-content: center;
+  gap: var(--space-1h);
+  min-height: var(--control-min);
+  padding: 0 var(--space-3);
+  border-width: var(--bw-rule);
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard);
+}
+
+/* ---- fills ---- */
+
+.pill--paper {
+  --pill-ink: var(--text-body);
+  --pill-fill: var(--surface-card);
+  --pill-edge: var(--border-rule);
+  --pill-fill-hover: var(--surface-inset);
+  --pill-edge-hover: var(--text-caption);
+}
+
+.pill--ink {
+  --pill-fill: var(--accent-primary);
+  --pill-edge: var(--accent-primary);
+  --pill-text: var(--text-on-ink);
+  --pill-fill-hover: var(--accent-primary-hover);
+  --pill-edge-hover: var(--accent-primary-hover);
+}
+
+/* The only rule in this file that reads the seal (ADR-0083; allowlisted in
+   scripts/check-seal-scope.mjs). Its hover is the cover's own hatch stripe,
+   set here so the seal never leaves this selector. */
+.pill--seal {
+  --pill-fill: var(--seal-cover);
+  --pill-edge: var(--seal-cover);
+  --pill-text: var(--text-on-seal);
+  --pill-fill-hover: var(--seal-hatch);
+  --pill-edge-hover: var(--seal-hatch);
+}
+
+/* ---- states: a control's only ---- */
+
+@media (hover: hover) {
+  .pill--control:where(:not(:disabled, [aria-disabled='true'])):hover {
+    background: var(--pill-fill-hover);
+    border-color: var(--pill-edge-hover);
+  }
+}
+
+.pill--control:active {
+  transform: translateY(1px);
+  box-shadow: var(--inset-cell);
+}
+
+.pill--control[aria-pressed='true'],
+.pill--control[aria-current='page'] {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+.pill--control[aria-pressed='true']::before,
+.pill--control[aria-current='page']::before {
+  content: '✓';
+  content: '✓' / '';
+  flex: none;
+  line-height: var(--lh-solid);
+}
+
+.pill--control:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+
+.pill--control:disabled,
+.pill--control[aria-disabled='true'] {
+  opacity: var(--opacity-disabled);
+  cursor: default;
+}
+.pill--control:is(:disabled, [aria-disabled='true']):active {
+  transform: none;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill--control {
+    transition: none;
+  }
+  .pill--control:active {
+    transform: none;
+  }
+}

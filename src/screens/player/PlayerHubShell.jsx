@@ -11,6 +11,7 @@ import { AsOfBanner } from '../../components/seal/AsOfBanner.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { PlayerTabBar } from './PlayerTabBar.jsx'
 import { monthDay } from './parts.jsx'
+import { Pill } from '../../components/ui/control/Pill.jsx'
 
 const TAB_TITLE = {
   overview: null,
@@ -146,20 +147,20 @@ export function PlayerHubShell({ core, asOf = null, sportId = null, active, chil
                 )}
                 {status && <span className="player__status">{status.label}</span>}
                 {core.prospectRank && (
-                  <span className="prospectpill">
-                    <img src={leagueLogoUrl()} alt="" className="prospectpill__logo" />
+                  <Pill className="prospect__tag">
+                    <img src={leagueLogoUrl()} alt="" className="prospect__logo" />
                     #{core.prospectRank} PROSPECT
-                  </span>
+                  </Pill>
                 )}
                 {core.orgProspectRank && (
-                  <span className="prospectpill">
+                  <Pill className="prospect__tag">
                     <TeamLogo
                       teamId={club?.parentOrgId ?? club?.id}
                       name={club?.parentOrgName ?? club?.name}
                       size={12}
                     />
                     #{core.orgProspectRank} PROSPECT
-                  </span>
+                  </Pill>
                 )}
               </p>
             )}

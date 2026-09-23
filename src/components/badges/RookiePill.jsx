@@ -1,3 +1,5 @@
+import { Pill } from '../ui/control/Pill.jsx'
+
 // A neutral "rookie" pill for the roster/lineup surfaces: shown while a
 // player is still under MLB's rookie limit (130 career at-bats / 50 innings
 // pitched). Sibling to ProspectPill/MilestonePill — renders nothing when not
@@ -7,9 +9,9 @@
 export function RookiePill({ active }) {
   if (!active) return null
   return (
-    <span className="rookiepill" title="Rookie">
-      <span className="rookiepill__full">ROOKIE</span>
-      <span className="rookiepill__short">R</span>
-    </span>
+    <Pill ink="--field" title="Rookie">
+      <span className="rookie__full">ROOKIE</span>
+      <span className="rookie__short">R</span>
+    </Pill>
   )
 }

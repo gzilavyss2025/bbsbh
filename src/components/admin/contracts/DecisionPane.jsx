@@ -20,6 +20,7 @@ import {
 } from '../../../lib/admin/contractGroups.js'
 import { CandidateList } from './CandidateList.jsx'
 import { RosterSearch, useSeasonPool } from './RosterSearch.jsx'
+import { Pill } from '../../ui/control/Pill.jsx'
 
 const SOURCE_LABEL = {
   extensions: 'Extension',
@@ -105,8 +106,8 @@ export function DecisionPane({ group, overrides, saving, onSave }) {
     <section className="cwb__pane">
       <header className="cwb__panehead">
         <p className="cwb__panemeta caps-exempt">
-          <span className="cwb__badge">{SOURCE_LABEL[group.sourceFile] ?? group.sourceFile}</span>
-          <span className={`cwb__badge cwb__badge--${group.confidence}`}>{group.confidence}</span>
+          <Pill className="cwb__badge">{SOURCE_LABEL[group.sourceFile] ?? group.sourceFile}</Pill>
+          <Pill className={`cwb__badge cwb__badge--${group.confidence}`}>{group.confidence}</Pill>
           <span>
             {group.count} {group.count === 1 ? 'row' : 'rows'}
             {group.firstSeason != null &&
@@ -234,7 +235,7 @@ export function DecisionPane({ group, overrides, saving, onSave }) {
             <li key={row.rowKey} className={`cwb__row${override ? ' cwb__row--done' : ''}`}>
               <p className="cwb__rowhead caps-exempt">
                 <code>{row.rowKey}</code>
-                {row === target && <span className="cwb__badge cwb__badge--target">this row</span>}
+                {row === target && <Pill className="cwb__badge cwb__badge--target">this row</Pill>}
               </p>
               <RowMeta row={row} />
               {override ? (

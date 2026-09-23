@@ -126,7 +126,7 @@ const SPACING_RESIDUE = {
 // that says the nudge stopped being a correction and became the house spacing.
 // It only moves down: if the count falls a full band below, tighten it, so this
 // number can never become a record of a codebase that no longer exists.
-const NUDGE_CEILING = 375
+const NUDGE_CEILING = 350
 const NUDGE_BAND = 25
 
 // A live copy of the ledger, drawn down as each listed literal is found.

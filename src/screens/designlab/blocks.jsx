@@ -1,5 +1,6 @@
 import { CARDS, GROUP_TITLES, PILLS, PILL_RECIPE, SHEET_RECIPE } from './catalog.js'
 import { Entry, Group } from './Entry.jsx'
+import { Pill } from '../../components/ui/control/Pill.jsx'
 
 // ---------------------------------------------------------------------------
 // HALF TWO OF THE DESIGN LAB: every card block and pill block, drawn with its
@@ -120,7 +121,13 @@ function PillGroup({ group }) {
           tone={toneFor(p.verdict)}
           note={p.fill}
         >
-          <span className={p.cls}>{p.cls === 'debutpill' ? '●' : 'Rule 5.09'}</span>
+          {/* A merged block has no class left to draw, so its entry shows the
+              Pill it became, with the props the consumer now passes. */}
+          {p.pill ? (
+            <Pill {...p.pill}>Rule 5.09</Pill>
+          ) : (
+            <span className={p.cls}>{p.cls === 'debutpill' ? '●' : 'Rule 5.09'}</span>
+          )}
         </Entry>
       ))}
     </Group>

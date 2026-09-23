@@ -302,7 +302,7 @@
 /* The extra-innings automatic runner's mark ("AR"), in the top-right slot the
    RBI chip would take on an at-bat card — where a scorer writes it, in the
    place a batting result would otherwise go. Penciled graphite in the pill
-   shape the roster/lineup pills already use (.rookiepill), deliberately NOT
+   shape the roster/lineup pills already use (the rookie pill), deliberately NOT
    the RBI chip's green: nothing here was earned. The dashed border is the
    same given-not-run motif the diamond's dotted ghost path carries. See
    PlacedRunnerCard.jsx. */
@@ -313,17 +313,14 @@
   border-left: var(--bw-heavy) dashed var(--graphite-soft);
 }
 
+/* The capsule is .pill's (#1131), inked --text-caption by the component.
+   What stays here is the motif: the dashed edge, in the same --graphite-soft
+   as the card's dashed leading edge above, so the mark and its card say
+   "given, not run" in one line. Edge colour is kept on purpose — the pill's
+   own rule would draw it in the ink. */
 .pbp__placed {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  background: var(--bg-page);
-  border: var(--bw-hair) dashed var(--graphite-soft);
-  border-radius: var(--radius-pill);
-  padding: 2px var(--space-2);
-  white-space: nowrap;
+  --pill-edge: var(--graphite-soft);
+  border-style: dashed;
 }
 
 /* Numbers Game #22-style ball/strike lanes beside the diamond: two adjacent

@@ -47,21 +47,8 @@
   flex-wrap: wrap;
   gap: var(--space-1h);
 }
-.awards__chip {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-1);
-  padding: 3px var(--space-2);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-muted);
-  white-space: nowrap;
-}
+/* Each chip ("NL MVP ×1") is a paper pill (#1131), drawn by
+   components/player/AwardsLedger.jsx with no class of its own. */
 
 /* ---- one award's block ---- */
 .awardblk + .awardblk {

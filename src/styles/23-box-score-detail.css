@@ -296,10 +296,11 @@
   border-radius: var(--radius-pill);
   padding: 1px var(--space-1h);
 }
-/* On a chaser row the pill/level sit small and inline before the value. */
-.tlead__row .prospectpill {
+/* On a chaser row the pill/level sit small and inline before the value: the
+   prospect pill keeps a 1px pad here, a hair under the tag's own 2px, so it
+   matches the level tag beside it. Its size is the pill's own --fs-label. */
+.tlead__row .prospect__tag {
   flex: none;
-  font-size: var(--fs-label);
   padding: 1px var(--space-1h);
 }
 

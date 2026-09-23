@@ -3,6 +3,7 @@ import { awardChipsView, rankAwards, parseAwardOrder, parseAwardCap } from '../.
 import { useCopy } from '../../copy/copyContext.js'
 import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { teamAbbr, teamFullName, teamLogoUrl } from '../../lib/teams.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // Awards — the player page's career-honors section (api/person/awards.js's
 // awardsView). Replaces the Trophy Case, which promoted ONE honor to a marquee
@@ -49,9 +50,9 @@ export function AwardsLedger({ ledger, preview = false, limit }) {
     return (
       <div className="awards awards--preview">
         {chips.map((c) => (
-          <span className="awards__chip" key={c.key}>
+          <Pill fill="paper" ink="--text-muted" key={c.key}>
             {c.label} ×{c.count}
-          </span>
+          </Pill>
         ))}
       </div>
     )

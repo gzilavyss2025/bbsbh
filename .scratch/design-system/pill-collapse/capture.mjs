@@ -1,0 +1,154 @@
+// Contact sheet for the #1131 Pill collapse, slice 1 (the tags).
+//
+//   node .scratch/design-system/pill-collapse/capture.mjs before http://localhost:5170
+//   node .scratch/design-system/pill-collapse/capture.mjs after  http://localhost:5171
+//
+// Adapted from ../button-collapse/capture.mjs. A tag has no states, so each
+// target is one 2x crop at rest (two, when a page shows a second variant worth
+// seeing) plus its computed box, in sheet.json and sheet.md. Each target lists
+// its old selector first and its new one second: the first that resolves wins,
+// and the table records which. The "after" run uses the same target names, so
+// each pair compares file for file.
+import { chromium } from '@playwright/test'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const phase = process.argv[2] || 'before'
+const base = process.argv[3] || 'http://localhost:5170'
+const here = dirname(fileURLToPath(import.meta.url))
+const out = join(here, phase)
+mkdirSync(out, { recursive: true })
+
+const W = process.env.W ? +process.env.W : 390
+const TARGETS_ALL = [
+  { name: 'milestone', url: '/09222026/tbnyy/lineup1', sel: ['.milestonepill', 'span.pill[style*="accent-primary"]'] },
+  { name: 'rookie', url: '/team/121/roster', sel: ['.rookiepill', '.pill:has(.rookie__full)'] },
+  { name: 'prospect-trade', url: '/trade-deadline/2026', sel: ['.prospectpill', '.prospect__tag'] },
+  { name: 'prospect-movedup', url: '/higha/10122026', sel: ['.movedup .prospectpill', '.movedup .prospect__tag'] },
+  { name: 'tier', url: '/umpires', sel: ['.tierpill', '.tier__tag'] },
+  { name: 'tier-2', url: '/umpires', nth: 3, sel: ['.tierpill', '.tier__tag'] },
+  { name: 'rank-roster', url: '/team/158/roster', sel: ['.rankchip', '.rank__tag'] },
+  { name: 'rank-good', url: '/standings', sel: ['.rankchip--good', '.rank__tag--good'] },
+  { name: 'rank-bad', url: '/standings', sel: ['.rankchip--bad', '.rank__tag--bad'] },
+  { name: 'rank-plain', url: '/standings', sel: ['.rankchip:not(.rankchip--good):not(.rankchip--bad)', '.rank__tag:not(.rank__tag--good):not(.rank__tag--bad)'] },
+  { name: 'leaguerank', url: '/player/jacob-misiorowski-694819', sel: ['.leaguerank__chip', '.leaguerank .pill'] },
+  { name: 'awards', url: '/player/christian-yelich-592885', sel: ['.awards__chip', '.awards .pill'] },
+  { name: 'simlike', url: '/player/christian-yelich-592885/analytics', sel: ['.simlike__term'] },
+  { name: 'simlike-muted', url: '/player/christian-yelich-592885/analytics', sel: ['.simlike__term--muted'] },
+  { name: 'cthist-fuzzy', url: '/player/christian-yelich-592885/history', sel: ['.cthist__fuzzy'] },
+  { name: 'dlab-verdict', url: '/design-lab', sel: ['.dlab__verdict--merge'] },
+  { name: 'dlab-verdict-hold', url: '/design-lab', sel: ['.dlab__verdict--bespoke', '.dlab__verdict--hold'] },
+]
+const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null
+const TARGETS = ONLY ? TARGETS_ALL.filter((t) => ONLY.includes(t.name)) : TARGETS_ALL
+
+const PROPS = [
+  'height', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'fontFamily', 'fontSize',
+  'letterSpacing', 'lineHeight', 'textTransform', 'borderTopWidth', 'borderTopStyle', 'borderTopColor',
+  'borderRadius', 'backgroundColor', 'color', 'display', 'alignSelf', 'marginTop', 'gap',
+]
+
+async function settle(page) {
+  await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {})
+  await page.waitForTimeout(700)
+}
+
+async function find(page, sels, nth = 0) {
+  for (const s of sels) {
+    const loc = page.locator(s)
+    const n = await loc.count()
+    let seen = 0
+    for (let i = 0; i < n; i++) {
+      const el = loc.nth(i)
+      if (await el.isVisible()) {
+        if (seen === nth) return { el, sel: s }
+        seen += 1
+      }
+    }
+  }
+  return null
+}
+
+const browser = await chromium.launch()
+const ctx = await browser.newContext({ viewport: { width: W, height: 844 }, deviceScaleFactor: 2 })
+const rows = []
+for (const t of TARGETS) {
+  const page = await ctx.newPage()
+  const sep = t.url.includes('?') ? '&' : '?'
+  try {
+    await page.goto(`${base}${t.url}${sep}nointro`, { waitUntil: 'domcontentloaded' })
+    await settle(page)
+    const hit = await find(page, t.sel, t.nth || 0)
+    if (!hit) {
+      rows.push({ name: t.name, url: t.url, missing: true })
+      console.log('MISSING', t.name)
+      await page.close()
+      continue
+    }
+    const { el, sel } = hit
+    await el.scrollIntoViewIfNeeded()
+    await el.evaluate((n) => {
+      const r = n.getBoundingClientRect()
+      if (r.top < 140 || r.bottom > 700) window.scrollBy(0, r.top - 300)
+    })
+    await page.waitForTimeout(250)
+    const m = await el.evaluate((n, props) => {
+      const cs = getComputedStyle(n)
+      const o = { tag: n.tagName.toLowerCase(), cls: String(n.className), text: n.textContent.trim().slice(0, 40) }
+      for (const p of props) o[p] = cs[p]
+      const r = n.getBoundingClientRect()
+      o.rectH = Math.round(r.height * 10) / 10
+      o.rectW = Math.round(r.width * 10) / 10
+      // The row it sits in: a tag's job is to sit in a line of text, so the
+      // host's height is part of what the pair must not change unplanned.
+      const host = n.parentElement.getBoundingClientRect()
+      o.hostH = Math.round(host.height * 10) / 10
+      return o
+    }, PROPS)
+    // Crop the tag with its parent row, so a baseline shift shows.
+    const box = await el.evaluate((n) => {
+      const a = n.getBoundingClientRect()
+      const p = n.parentElement.getBoundingClientRect()
+      const x = Math.max(0, Math.min(a.left, p.left) - 6)
+      const y = Math.max(0, Math.min(a.top, p.top) - 6)
+      const w = Math.min(window.innerWidth - x, Math.max(a.right, Math.min(p.right, a.right + 200)) - x + 6)
+      const h = Math.min(160, Math.max(a.bottom, p.bottom) - y + 6)
+      return { x, y, width: w, height: h }
+    })
+    const file = `${t.name}.png`
+    await page.screenshot({ path: join(out, file), clip: box })
+    const tight = `${t.name}--tag.png`
+    const b = await el.boundingBox()
+    await page.screenshot({ path: join(out, tight), clip: { x: Math.max(0, b.x - 4), y: Math.max(0, b.y - 4), width: b.width + 8, height: b.height + 8 } })
+    rows.push({ name: t.name, url: t.url, sel, ...m, shots: [file, tight] })
+    console.log('ok', t.name.padEnd(18), m.rectH, m.fontSize, m.fontFamily.split(',')[0], m.color, m.borderTopColor)
+  } catch (e) {
+    rows.push({ name: t.name, url: t.url, error: String(e).slice(0, 200) })
+    console.log('ERR', t.name, String(e).slice(0, 120))
+  }
+  await page.close()
+}
+await browser.close()
+
+const sheetFile = join(out, 'sheet.json')
+let prior = []
+try { prior = JSON.parse((await import('node:fs')).readFileSync(sheetFile, 'utf8')) } catch {}
+const merged = TARGETS_ALL.map((t) => rows.find((r) => r.name === t.name) || prior.find((r) => r.name === t.name)).filter(Boolean)
+writeFileSync(sheetFile, JSON.stringify(merged, null, 2))
+const px = (v) => (v || '').replace(/px/g, '')
+const md = [
+  `# Contact sheet — ${phase}`,
+  '',
+  `${W}px, ?nointro, captured from ${base}. Crops: \`<name>.png\` (tag in its row) and \`<name>--tag.png\` (2x).`,
+  '',
+  '| tag | selector | h | host h | padding T R B L | font | size | tracking | line-h | border | fill | ink | edge |',
+  '| --- | --- | ---: | ---: | --- | --- | ---: | --- | --- | --- | --- | --- | --- |',
+  ...merged.map((r) =>
+    r.missing || r.error
+      ? `| ${r.name} | — | ${r.missing ? 'not rendered at this route' : r.error} | | | | | | | | | | |`
+      : `| ${r.name} | \`${r.sel}\` | ${r.rectH} | ${r.hostH} | ${[r.paddingTop, r.paddingRight, r.paddingBottom, r.paddingLeft].map(px).join(' ')} | ${r.fontFamily.split(',')[0].replace(/"/g, '')} | ${px(r.fontSize)} | ${r.letterSpacing} | ${r.lineHeight} | ${px(r.borderTopWidth)} ${r.borderTopStyle} | ${r.backgroundColor} | ${r.color} | ${r.borderTopColor} |`,
+  ),
+]
+writeFileSync(join(out, 'sheet.md'), md.join('\n') + '\n')
+console.log('wrote', out)

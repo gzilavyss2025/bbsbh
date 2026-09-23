@@ -3,6 +3,7 @@ import '../../styles/26e-contract-history.css'
 import { contractHistoryView } from '../../api/person/contract/history.js'
 import { teamFullName } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // CONTRACT HISTORY — the money half of a career, season by season, newest
 // first. Arbitration cases, extensions, free-agency signings and the season
@@ -135,7 +136,11 @@ function Row({ row }) {
       )}
       {/* A fuzzy row is one the identity match could not pin to this player
           outright. Saying so is cheaper than a wrong contract read as fact. */}
-      {row.confidence === 'fuzzy' && <span className="cthist__fuzzy">Match unconfirmed</span>}
+      {row.confidence === 'fuzzy' && (
+        <Pill ink="--text-caption" className="cthist__fuzzy">
+          Match unconfirmed
+        </Pill>
+      )}
     </li>
   )
 }

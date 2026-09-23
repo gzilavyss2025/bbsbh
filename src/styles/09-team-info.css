@@ -623,45 +623,37 @@
    plate umpire's name on the lineup Umpires card, his own page, and the
    rankings table. Same four-ink language as the transaction-timeline chips
    (field=positive, award=honors, clay=negative) so the tiers read as
-   distinct at a glance without a legend. */
-.tierpill {
-  display: inline-block;
-  padding: 2px var(--space-1h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  line-height: var(--lh-solid);
-  white-space: nowrap;
-  color: var(--graphite);
+   distinct at a glance without a legend.
+
+   The capsule is .pill's (styles/system/pill.css, #1131); a tier is a tint
+   of it. Each sets the pill's own custom properties rather than repainting,
+   the way a surface re-inks a button skin. The four always come with a tier
+   (components/badges/TierPill.jsx renders nothing without one), so
+   .tier__tag itself draws nothing. */
+.tier__tag--elite {
+  --pill-fill: var(--field-soft);
+  --pill-edge: var(--field);
+  --pill-ink: var(--field-deep);
 }
-.tierpill--elite {
-  color: var(--field-deep);
-  border-color: var(--field);
-  background: var(--field-soft);
+.tier__tag--good {
+  --pill-fill: var(--award-soft);
+  --pill-edge: var(--award-line);
+  --pill-ink: var(--award-ink);
 }
-.tierpill--good {
-  color: var(--award-ink);
-  border-color: var(--award-line);
-  background: var(--award-soft);
+.tier__tag--average {
+  --pill-fill: var(--bg-page);
+  --pill-edge: var(--border-rule);
+  --pill-ink: var(--text-muted);
 }
-.tierpill--average {
-  color: var(--text-muted);
-  border-color: var(--border-rule);
-  background: var(--bg-page);
-}
-.tierpill--below {
-  color: var(--clay-deep);
-  border-color: var(--clay);
-  background: var(--clay-soft);
+.tier__tag--below {
+  --pill-fill: var(--clay-soft);
+  --pill-edge: var(--clay);
+  --pill-ink: var(--clay-deep);
 }
 
 /* Umpire accuracy glyph — the HP tier's tap target on the lineup Umpires
    card (UmpireTierGlyph.jsx). A solid home-plate silhouette on a
-   tier-colored dot, same four-ink language as .tierpill above; unlike
+   tier-colored dot, same four-ink language as the tier pills above; unlike
    RadarPill's glyph (neutral until pressed) this one stays colored at rest
    — the at-a-glance read is the point in this tight card. Tapping unfolds
    .umptier__note in place, same idiom as .radarpill__note. */

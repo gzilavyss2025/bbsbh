@@ -65,6 +65,11 @@ const ALLOWLIST = {
   // here with the rest of the button's skins when .btn left 07 (#1130), and it
   // carries its own hover values so the seal never leaves this one selector.
   'system/button.css': ['.btn--seal'],
+  // .pill--seal is the capsule's kraft fill (#1131), for the due-up marker and
+  // a control that lifts a seal — the two pill surfaces ADR-0083 clause 2
+  // already names. It carries its own hover values, like .btn--seal, so the
+  // seal never leaves this one selector.
+  'system/pill.css': ['.pill--seal'],
 
   // The club band's 3px accent underline, themed. `var(--bar-accent, var(--seal))`
   // is the club-accent SLOT with kraft as its unthemed fallback (ADR-0030).
@@ -162,6 +167,9 @@ const NON_STYLE_ALLOWLIST = {
   'src/screens/designlab/catalog.js': true,
   'src/lib/clerkAppearance.js': true,
   'src/CLAUDE.md': true,
+  // The pill's ink check names --seal only to REFUSE it as an ink (#1131): a
+  // pill wears the seal through .pill--seal or not at all.
+  'src/lib/design/pillClass.js': true,
 }
 
 const READ = /var\(\s*--seal[a-z-]*/

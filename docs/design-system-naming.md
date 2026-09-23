@@ -68,7 +68,8 @@ evidence for the hold instead of a work list.
 
 **Blocks that own the base rule for their shape keep the word and are not rows:**
 `.thub-card` and `.gamecard` (card), `.btn` (btn), `.sheet` (sheet) and
-`.milestonepill` (pill).
+`.pill` (pill). `.milestonepill` owned the pill recipe until #1131 moved it into
+`.pill` (`styles/system/pill.css`); it is absorbed, and no class is left.
 
 Rows are ordered by the sequence the collapse issues land in: #1130, then #1131,
 then #1113, then #1132.
@@ -175,7 +176,7 @@ follow-on step (putting the stamp in the book)".
 ## Pill — #1131 — 33 rows
 
 Fourteen blocks carry `pill`, `chip` or `tag` without owning the base rule;
-`.milestonepill` owns it (`inventory.md`) and is not a row. Twelve `__chip`
+`.pill` owns it now (#1131; `.milestonepill` held it before) and is not a row. Twelve `__chip`
 elements are measurably tappable, and six states are written as modifiers.
 
 | current class | clause(s) broken | target name | collapse issue | files that must move | hold + reason |
@@ -183,14 +184,14 @@ elements are measurably tappable, and six states are written as modifiers.
 | `.debutpill` | 1 | `.debut__tag` | #1131 | `components/badges/DebutPill.jsx`, `screens/designlab/blocks.jsx`, `screens/designlab/catalog.js`, `styles/31-wild-card.css` | — |
 | `.duepill` | 1 | `.dueup__tag` | #1131 | `components/inning/EnteringReference.jsx`, `screens/designlab/catalog.js`, `styles/12-sealbox.css` †, `styles/31-wild-card.css`, `scripts/check-seal-scope.mjs` | the rename edits `scripts/check-seal-scope.mjs`, which allowlists `.duepill` by name (ADR-0083). |
 | `.mastheadpill` | 1, 5 | `.masthead__btn` | #1131 | `components/player/CareerRegister.jsx`, `components/player/GameLog.jsx`, `components/teamstats/BullpenBoard.jsx`, `components/teamstats/StarterMatchups.jsx`, `screens/designlab/catalog.js`, `styles/10-lineup.css` | measured tappable — `cursor: pointer` and a `<button>` call site. |
-| `.prospectpill` | 1 | `.prospect__tag` | #1131 | `components/badges/ProspectPill.jsx`, `screens/designlab/catalog.js`, `screens/player/PlayerHubShell.jsx`, `styles/22-box-score-tables.css` †, `styles/23-box-score-detail.css`, `styles/31-wild-card.css`, `styles/47-trade-deadline.css`, `e2e/offseason-home.spec.js` | — |
+| `.prospectpill` | 1 | `.prospect__tag` | #1131 | `components/badges/ProspectPill.jsx`, `screens/designlab/catalog.js`, `screens/player/PlayerHubShell.jsx`, `styles/22-box-score-tables.css` †, `styles/23-box-score-detail.css`, `styles/31-wild-card.css`, `styles/47-trade-deadline.css`, `e2e/offseason-home.spec.js` | landed in #1131 slice 1, renamed: an outline `Pill` with no ink. It keeps no declaration of its own; the class is the hook for `.tlead__row` and `.tradecard__playerinfo` and for `e2e/offseason-home.spec.js`. Its logo element moved with it (`.prospect__logo`). |
 | `.psodds-pill` | 1, 5 | `.psodds__btn` | #1131 | `screens/designlab/catalog.js`, `screens/team/modules/SeasonSchedule.jsx`, `screens/team/modules/StandingsCard.jsx`, `styles/09-team-info.css`, `styles/39-manager-page.css` | measured tappable — `cursor: pointer`, `:focus-visible` and a `<button>` call site. |
 | `.radarpill` | 1, 2, 5 | `.radar__btn` | #1131 | `components/badges/RadarPill.jsx`, `screens/designlab/catalog.js`, `screens/designlab/components.jsx`, `styles/09-team-info.css` †, `styles/10-lineup.css`, `styles/31-wild-card.css`, `styles/motion/lineup.css` † | measured tappable — `cursor: pointer` and a `<button>` call site. Also a namespace: it owns no base rule. |
 | `.reg-pill` | 1 | `.reg__tag` | #1131 | `components/player/CareerRegister.jsx`, `screens/designlab/catalog.js`, `screens/RehabPage.jsx`, `styles/05a-career-timeline.css` †, `styles/26-player-page.css` | #1129 names this one: a 3px `--radius-xs` tag wearing a capsule's name. It does not join the capsule family. |
-| `.rookiepill` | 1 | `.rookie__tag` | #1131 | `components/badges/RookiePill.jsx`, `screens/designlab/catalog.js`, `styles/12-sealbox.css`, `styles/13-play-by-play.css` †, `styles/31-wild-card.css` | — |
-| `.tierpill` | 1 | `.tier__tag` | #1131 | `components/badges/TierPill.jsx`, `screens/designlab/catalog.js`, `styles/09-team-info.css`, `styles/14-strike-zone.css` †, `styles/51-similar-players.css` † | — |
+| `.rookiepill` | 1 | `.pill` | #1131 | `components/badges/RookiePill.jsx`, `screens/designlab/catalog.js`, `styles/12-sealbox.css`, `styles/13-play-by-play.css` †, `styles/31-wild-card.css` | landed in #1131 slice 1, absorbed: `<Pill ink="--field">`, no class of its own. Its two elements moved (`.rookie__full`, `.rookie__short`) and keep the phone swap. |
+| `.tierpill` | 1 | `.tier__tag` | #1131 | `components/badges/TierPill.jsx`, `screens/designlab/catalog.js`, `styles/09-team-info.css`, `styles/14-strike-zone.css` †, `styles/51-similar-players.css` † | landed in #1131 slice 1, renamed: an outline `Pill`; each `.tier__tag--*` tint sets the pill's custom properties rather than repainting it. |
 | `.ilchip` | 1 | `.il__tag` | #1131 | `components/badges/InjuredMark.jsx` †, `screens/team/modules/InjuredListCard.jsx`, `styles/31-wild-card.css` | — |
-| `.rankchip` | 1 | `.rank__tag` | #1131 | `screens/StandingsPage.jsx`, `screens/team/modules/RosterList.jsx`, `styles/31-wild-card.css` | `inventory.md`'s pill recipe declaration for declaration, in mono, never counted because its name says chip. |
+| `.rankchip` | 1 | `.rank__tag` | #1131 | `screens/StandingsPage.jsx`, `screens/team/modules/RosterList.jsx`, `styles/31-wild-card.css` | landed in #1131 slice 1, renamed: an outline `Pill` that keeps the figure face (mono, tabular, `--fs-cell`, no tracking); `--good`/`--bad` are tints on the pill's custom properties. |
 | `.rolechip` | 1 | `.role__tag` | #1131 | `screens/team/modules/CurrentRosterCard.jsx`, `screens/team/modules/RosterProjection.jsx`, `styles/31-wild-card.css` | — |
 | `.rpt-chip` | 1, 5 | `.rpt__btn` | #1131 | `screens/around-the-game/abs/ClubBoard.jsx`, `screens/around-the-game/abs/LongestRuns.jsx`, `screens/around-the-game/abs/UmpireBoard.jsx`, `screens/around-the-game/abs/WhenTheyCall.jsx`, `screens/around-the-game/AbsChallengesPage.jsx`, `screens/around-the-game/AttendancePage.jsx`, `screens/around-the-game/BullpenPage.jsx`, `screens/around-the-game/DoubleheadersPage.jsx`, `screens/around-the-game/FarmSystemPage.jsx`, `screens/around-the-game/PacePage.jsx`, `screens/around-the-game/RunDifferentialPage.jsx`, `screens/around-the-game/RunValuePage.jsx`, `styles/68-around-the-game.css`, `e2e/pen-rule.spec.js` | measured tappable — `cursor: pointer` and a `<button>` call site. |
 | `.dirtag` | 1 | `.dirlink__tag` | #1131 | `components/account/AdminFooterLink.jsx`, `components/account/AdminMenuLink.jsx`, `components/chrome/FooterParts.jsx`, `components/chrome/SiteMenu.jsx`, `screens/MorePage.jsx`, `styles/08a-site-menu.css`, `styles/59-more-directory.css` † | — |

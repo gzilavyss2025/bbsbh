@@ -8,6 +8,7 @@ import {
   rankAwards,
 } from '../../api/person/awards.js'
 import { fetchPlayerAwards } from '../../api/person-fetch.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // The /admin panel's one non-text editor: the order that decides which of a
 // player's awards lead his page, plus the two numbers that say how many of
@@ -122,9 +123,9 @@ export function AwardOrderEditor({ fields, values, onChange, onReset }) {
                 <li className="awardord__row" key={key}>
                   <span className="awardord__n">{String(i + 1).padStart(2, '0')}</span>
                   <span className="awardord__name">{key}</span>
-                  <span className={`awardord__tier tier-${hit?.tier ?? 'other'}`}>
+                  <Pill className={`awardord__tier tier-${hit?.tier ?? 'other'}`}>
                     {TIER_LABEL[hit?.tier ?? 'other']}
-                  </span>
+                  </Pill>
                   <span className={hit ? 'awardord__ct' : 'awardord__ct awardord__ct--none'}>
                     {hit ? `×${hit.count}` : '—'}
                   </span>
