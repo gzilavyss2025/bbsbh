@@ -475,3 +475,61 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
+
+/* ---- The button matrix (#1130) ----
+   Frame only: a table of skins by sizes, and the row each cell's four state
+   specimens sit in. Every specimen is the real Button; nothing here reaches
+   into .btn. On a phone the four states stack, so two size columns fit 358px
+   without a sideways scroll. */
+
+.dlab__matrix {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.dlab__matrix th,
+.dlab__matrix td {
+  padding: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--rule-grid);
+  text-align: left;
+  vertical-align: top;
+}
+
+.dlab__matrix th {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.dlab__matrixcell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+@media (max-width: 739.98px) {
+  .dlab__matrixcell {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.dlab__candidates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+.dlab__neighbours {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dlab__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1h);
+}

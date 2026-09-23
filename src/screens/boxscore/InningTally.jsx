@@ -99,7 +99,7 @@ export function InningTally({ rows, away, home, treatments }) {
           <button
             type="button"
             aria-pressed={shownSide === CLUB_ALL}
-            className={`bs__tallyScopebtn ${shownSide === CLUB_ALL ? 'is-active' : ''}`}
+            className="btn btn--control bs__tallyScopebtn"
             onClick={() => setShownSide(CLUB_ALL)}
           >
             Both
@@ -109,7 +109,7 @@ export function InningTally({ rows, away, home, treatments }) {
               key={side}
               type="button"
               aria-pressed={shownSide === side}
-              className={`bs__tallyScopebtn ${shownSide === side ? 'is-active' : ''}`}
+              className="btn btn--control bs__tallyScopebtn"
               onClick={() => setShownSide(side)}
             >
               {team.abbreviation || (side === 'away' ? 'Away' : 'Home')}

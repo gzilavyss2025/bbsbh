@@ -507,6 +507,10 @@
       "class": "spoiler-free",
       "why": "The offseason page's checked pool of minor-league games. Two clubs, a date, a park and counts of the careers in the game — the generator stores no score, no run total, no winner and no inning count, so there is nothing here to reconstruct one from."
     },
+    "nineKeys.js": {
+      "class": "spoiler-free",
+      "why": "Static nine-keys.json reader. Two halves, both outside the rule's scope. The champion half is finished seasons back to 2000 — immutable history, same footing as postseasonHistory.js. The current-season half is a within-season RANK on nine season-long aggregates (runs per game, staff ERA splits, OBP, WHIP, roster WAR), which is standings and leader-board data — open live since ADR-0034. It carries no game, no inning, no linescore and no per-game score, so there is nothing here a reader could subtract to recover one."
+    },
     "notebook.js": {
       "class": "spoiler-free",
       "why": "The offseason page's two notebook notes. The age note is a season aggregate and a date of birth, which have opened live since ADR-0034. The at-bat note names games — a batter, a pitcher, a date and a pitch count — and stores no result, no inning and no score: a twelve-pitch at-bat is a LENGTH, true of it whoever won, and the game it links to opens sealed under the same revealedThrough mark as any other (ADR-0081)."

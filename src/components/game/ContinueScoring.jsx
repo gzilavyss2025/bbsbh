@@ -100,7 +100,7 @@ export function ContinueScoring() {
       </p>
       <div className="continuebar__pitchactions">
         <SignInButton mode="modal">
-          <button type="button" className="btn btn--account continuebar__pitchcta">
+          <button type="button" className="btn btn--ink continuebar__pitchcta">
             Sign in
           </button>
         </SignInButton>

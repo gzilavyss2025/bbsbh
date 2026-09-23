@@ -1,0 +1,420 @@
+/* Nine Keys report (/nine-keys).
+   Two rank grids in the same shape — the clubs holding a postseason place
+   now, and every champion since 2000 — so a reader can compare a live club
+   against 26 finished seasons without relearning the table.
+
+   The grid reads as a scorer's sheet: a rank in every cell, a red pencil
+   strike through the ones that failed, and a key in the tally column that is
+   whole or cut. Ranks use tabular figures so the columns line up. */
+
+.ninekeys__intro {
+  max-width: 62ch;
+  margin: var(--space-3) 0 0;
+  color: var(--ink-1);
+  font-size: var(--fs-body);
+  line-height: var(--lh-loose);
+  /* caps-exempt: report prose reads as natural sentences, not app chrome.
+     Prefixed with #root below so it actually beats the all-caps invariant. */
+}
+#root .ninekeys__intro,
+#root .ninekeys__note,
+#root .ninekeys__method p {
+  text-transform: none; /* caps-exempt: report prose reads as natural sentences */
+}
+
+.ninekeys__rule {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-title);
+  color: var(--ink-0);
+}
+
+.ninekeys__count {
+  font-family: var(--font-mono);
+  background: var(--ink-0);
+  color: var(--paper-0);
+  padding: var(--space-1) var(--space-3);
+}
+
+.ninekeys__section {
+  margin-top: var(--space-6);
+}
+
+.ninekeys__h {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  color: var(--ink-0);
+  margin: 0;
+}
+
+.ninekeys__note {
+  max-width: 64ch;
+  margin: var(--space-2) 0 0;
+  color: var(--ink-2);
+  font-size: var(--fs-small);
+  line-height: var(--lh-loose);
+}
+
+/* --- key definitions, above the first grid --- */
+.ninekeys__keys {
+  margin-top: var(--space-3);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
+  border-top: 1px solid var(--rule);
+}
+
+.ninekeys__key {
+  padding: var(--space-2) var(--space-4) var(--space-2) 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.ninekeys__key dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  color: var(--ink-0);
+}
+
+.ninekeys__key dd {
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+#root .ninekeys__key dd {
+  text-transform: none; /* caps-exempt: a key's definition reads as a natural phrase */
+}
+
+/* --- the rank grid --- */
+.ninekeys__scroller {
+  overflow-x: auto;
+  margin-top: var(--space-3);
+  border: 1px solid var(--rule);
+  background: var(--surface-card);
+}
+
+.ninekeys__grid {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 720px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+}
+
+.ninekeys__grid thead th {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  text-align: center;
+  padding: var(--space-2) var(--space-1);
+  vertical-align: bottom;
+  border-bottom: 2px solid var(--ink-0);
+  color: var(--ink-0);
+  white-space: nowrap;
+}
+
+.ninekeys__grid thead th:first-child {
+  text-align: left;
+  padding-left: var(--space-3);
+}
+
+.ninekeys__grid tbody td,
+.ninekeys__grid tbody th {
+  border-bottom: 1px solid var(--rule-soft);
+  padding: 0;
+}
+
+.ninekeys__grid tbody tr:last-child td,
+.ninekeys__grid tbody tr:last-child th {
+  border-bottom: 0;
+}
+
+.ninekeys__club {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface-card);
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  white-space: nowrap;
+  border-right: 1px solid var(--rule);
+  font-weight: var(--w-regular);
+}
+
+/* Logo left, name over record right. Both are inline-blocks rather than a
+   flex row, because the th must stay a table cell to keep its sticky column. */
+.ninekeys__logo {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--space-2);
+}
+
+.ninekeys__clubtext {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.ninekeys__clubname {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  color: var(--ink-0);
+  display: block;
+}
+
+.ninekeys__clubmeta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--ink-2);
+  display: block;
+  margin-top: 1px;
+}
+
+.ninekeys__cell {
+  text-align: center;
+  width: 58px;
+  color: var(--ink-1);
+}
+
+.ninekeys__mark {
+  position: relative;
+  display: block;
+  padding: var(--space-2) 0;
+}
+
+/* The rank's ordinal suffix: small and raised, so the column of numbers
+   still reads as numbers. It inherits the cell's ink, so a failed rank's
+   suffix turns red with it. */
+.ninekeys__ord {
+  /* Relative, not a token: the figure is already --fs-cell, the smallest
+     step on the scale, and a suffix must sit below it. */
+  font-size: 0.7em;
+  margin-left: 1px;
+  line-height: var(--lh-zero);
+}
+
+.ninekeys__cell--fail {
+  color: var(--accent-negative);
+  background: var(--surface-inset);
+}
+
+.ninekeys__cell--fail .ninekeys__mark::after {
+  content: '';
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 50%;
+  height: 2px;
+  background: var(--accent-negative);
+  transform: rotate(-16deg);
+}
+
+.ninekeys__tally {
+  text-align: center;
+  width: 72px;
+  border-left: 1px solid var(--rule);
+  padding: var(--space-1) var(--space-1);
+  color: var(--ink-1);
+}
+
+.ninekeys__tallyn {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  display: block;
+  line-height: var(--lh-tight);
+}
+
+.ninekeys__tally--out {
+  background: var(--surface-inset);
+  color: var(--accent-negative);
+}
+
+.ninekeys__tally--clean {
+  color: var(--accent-positive);
+}
+
+.ninekeys__keyglyph {
+  width: 24px;
+  height: 17px;
+  display: block;
+  margin: 2px auto 0;
+  overflow: visible;
+}
+
+.ninekeys__keyglyph .ninekeys__kline {
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.ninekeys__keyglyph .ninekeys__kcut {
+  stroke: var(--accent-negative);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.ninekeys__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  color: var(--ink-2);
+}
+
+.ninekeys__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.ninekeys__legend .ninekeys__keyglyph {
+  display: inline-block;
+  margin: 0;
+}
+
+.ninekeys__swatch {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--rule);
+  display: inline-block;
+}
+
+.ninekeys__swatch--fail {
+  background: var(--surface-inset);
+  border-color: var(--accent-negative);
+}
+
+/* champion rows that sit exactly at the limit */
+.ninekeys__row--floor .ninekeys__club,
+.ninekeys__row--floor .ninekeys__cell {
+  background: var(--surface-inset);
+}
+
+/* --- plain figure rows (thresholds, ladder) --- */
+.ninekeys__rows {
+  margin-top: var(--space-3);
+  border-top: 2px solid var(--ink-0);
+}
+
+.ninekeys__row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--space-1) var(--space-4);
+  align-items: baseline;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.ninekeys__rowlabel {
+  font-size: var(--fs-small);
+  color: var(--ink-1);
+}
+
+.ninekeys__rowval {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 82px;
+  color: var(--ink-0);
+}
+
+/* The row at the limit. JetBrains Mono ships at 700 only, so a weight change
+   is a no-op; the stress is size and the darkest ink. Not --surface-inset,
+   which already means "failed" in the grids above. */
+.ninekeys__row--em .ninekeys__rowlabel {
+  color: var(--ink-0);
+}
+
+.ninekeys__row--em .ninekeys__rowval {
+  font-size: var(--fs-h3);
+}
+
+.ninekeys__rownote {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--ink-2);
+  text-align: right;
+  min-width: 104px;
+}
+
+.ninekeys__rung {
+  display: grid;
+  grid-template-columns: minmax(124px, 1.1fr) 1fr auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.ninekeys__runglabel {
+  font-size: var(--fs-small);
+  color: var(--ink-1);
+}
+
+.ninekeys__rungbar {
+  height: 12px;
+  background: var(--rule-grid);
+  position: relative;
+}
+
+.ninekeys__rungbar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--ink-1);
+  display: block;
+}
+
+.ninekeys__rung--win .ninekeys__rungbar i {
+  background: var(--accent-positive);
+}
+
+.ninekeys__rungn {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+  min-width: 38px;
+  text-align: right;
+  color: var(--ink-1);
+}
+
+.ninekeys__method {
+  margin-top: var(--space-5);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  line-height: var(--lh-loose);
+}
+
+.ninekeys__method p {
+  margin: 0 0 var(--space-2);
+  max-width: 74ch;
+}
+
+@media (max-width: 560px) {
+  .ninekeys__row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .ninekeys__rownote {
+    grid-column: 1 / -1;
+    text-align: left;
+    min-width: 0;
+  }
+
+  .ninekeys__rung {
+    grid-template-columns: 1fr auto;
+  }
+
+  .ninekeys__rungbar {
+    grid-column: 1 / -1;
+  }
+}

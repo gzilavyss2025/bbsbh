@@ -193,7 +193,9 @@ don't run these by hand.
   `research.md` §7's trap, and the reason #1078 names age. `--level=13` narrows
   it; `--season=2026` pins the year.
 - `gen-former-teammates.mjs` → `public/data/former-teammates/{a}-{b}.json` (ids
-  ascending; one file per MATCHUP, which is what a game view reads) — for each upcoming
+  ascending; one file per MATCHUP, which is what a game view reads) plus an `index.json`
+  that holds the run's `generatedAt` for the freshness guard (no shard carries a stamp,
+  #1145) — for each upcoming
   matchup (MLB + MiLB), pairs of players on the two OPPOSING clubs once teammates. Two players are teammates iff their careers
   share a (teamId, season) pair — a year-by-year pull PER MiLB level per player.
   Self-contained; scopes to the next few days' slate, skips Rookie/complex ball

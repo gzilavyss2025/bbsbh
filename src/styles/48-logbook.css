@@ -151,30 +151,6 @@
   text-align: center;
 }
 
-/* ---- the small outlined button this page's actions wear ----
-   A `.btn` modifier (07-team-logo-and-buttons.css), carried here rather than
-   there because the Game Log is its only caller and that file is at
-   check-file-size.mjs's ceiling. It loads after the base `.btn`, so the
-   cascade lands the same either way; move it back if a second feature adopts it.
-
-   It exists because the Game Log's page head (Shelf / Settings / Add +) and the
-   way through to its retrospective were bare green text, which is what this app
-   uses for a LINK. Every one of them opens a sheet or a route inside the
-   feature, so they now look like what they are. Sized off the same 34px box the
-   season chips and the book sheet's mode buttons already use, so "a small
-   button" is one shape in the Game Log rather than three. */
-.btn--chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  min-height: 34px;
-  padding: 0 var(--space-3);
-  font-family: var(--font-display);
-  font-size: var(--fs-small);
-  letter-spacing: var(--ls-label);
-  white-space: nowrap;
-}
-
 /* ---- the league under the book (components/logbook/ClubsSeen.jsx) ----
    Every current MLB club, the ones you have stamped a game of in their own
    colours and the rest grey. Read that file's header for why it is not a

@@ -467,7 +467,7 @@
   min-width: 0;
 }
 
-/* Tighter than it was: these are outlined chips now (`.btn--chip`) rather than
+/* Tighter than it was: these are control-size outline buttons now (`.btn--control`) rather than
    bare green text, and a button carries its own edges, so the air between them
    no longer has to do that work. Three of them plus a book title still fit one
    phone line. */

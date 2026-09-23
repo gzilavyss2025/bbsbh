@@ -4,6 +4,7 @@ import { Band } from './Entry.jsx'
 import { TokenHalf } from './tokens.jsx'
 import { CardHalf, PillHalf } from './blocks.jsx'
 import { ComponentHalf } from './components.jsx'
+import { ButtonHalf } from './buttons.jsx'
 import { CARDS, PILLS } from './catalog.js'
 import '../../styles/designlab/lab.css'
 
@@ -64,7 +65,7 @@ export function DesignLab() {
       <section className="dlab__verdictbox">
         <h2 className="dlab__bandtitle">What the catalog shows</h2>
         <p className="dlab__lede">
-          {CARDS.length} card blocks and {PILLS.length} pill blocks, against 12 shared components.
+          {CARDS.length} card blocks and {PILLS.length} pill blocks, against 13 shared components.
           But there are not {CARDS.length} cards: <strong>{sheets} of them draw the same box</strong>,
           token for token, and <strong>{namespaces} draw no box at all</strong>. On the pill side,{' '}
           <strong>{tones} are the same pill</strong> differing in exactly three values. The team hub
@@ -93,6 +94,7 @@ export function DesignLab() {
         title="Two — the shared components"
         lede="Everything in ui/, badges/ and the reusable half of chrome/. These are the destinations a new surface should be reaching for."
       >
+        <ButtonHalf />
         <ComponentHalf />
       </Band>
 

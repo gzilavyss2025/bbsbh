@@ -13,7 +13,7 @@ import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
-import { Door } from '../../components/ui/Door.jsx'
+import { Door } from '../../components/ui/control/Door.jsx'
 import { loadTransactions } from './data/loadTransactions.js'
 
 // ===========================================================================

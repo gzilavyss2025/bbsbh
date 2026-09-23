@@ -11,7 +11,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
-import { Door } from '../components/ui/Door.jsx'
+import { Door } from '../components/ui/control/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { teamClubNameShort, teamFullName } from '../lib/teams.js'
 

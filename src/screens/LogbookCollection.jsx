@@ -294,18 +294,18 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
           {bookCount > 1 && (
             <button
               type="button"
-              className="btn btn--chip"
+              className="btn btn--control"
               onClick={() => navigate(placingPk ? logbookPlacePath(placingPk) : logbookPath())}
             >
               ‹ Shelf
             </button>
           )}
-          <button type="button" className="btn btn--chip" onClick={() => setManaging(true)}>
+          <button type="button" className="btn btn--control" onClick={() => setManaging(true)}>
             Settings
           </button>
           <button
             type="button"
-            className="btn btn--chip"
+            className="btn btn--control"
             onClick={() => navigate(logbookNewPath(placingPk))}
           >
             Add +
@@ -316,7 +316,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
       {total > 0 && (
         <button
           type="button"
-          className="btn btn--chip logbook__headstats"
+          className="btn btn--control logbook__headstats"
           onClick={() => navigate(thisStatsPath)}
         >
           Stats ›
@@ -423,7 +423,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                 </button>
                 <button
                   type="button"
-                  className="btn btn--seal"
+                  className="btn btn--ink"
                   onClick={() => startMove(selectedStamp)}
                 >
                   Move it
@@ -466,7 +466,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
               </p>
               <div className="logbook__placingactions">
                 {pending && (
-                  <button type="button" className="btn btn--seal" onClick={confirmPlacement}>
+                  <button type="button" className="btn btn--ink" onClick={confirmPlacement}>
                     {movingFrom ? 'Move it here' : 'Stamp it here'}
                   </button>
                 )}

@@ -195,10 +195,10 @@
   align-self: flex-start;
 }
 
-/* The signed-out "Sign in" pill keeps its 44px tap-target height elsewhere,
+/* The signed-out "Sign in" keeps its 44px tap-target height elsewhere,
    but inside the slate topbar it rides the same condensed 30px row as the
    search/menu icons (same reasoning as .topbar--slate .topbar__search). */
-.topbar--slate .accountbtn__signin {
+.topbar--slate .account__signin {
   min-height: 30px;
 }
 
@@ -257,7 +257,7 @@
   font-size: var(--fs-small);
 }
 
-/* Two-class selector so this actually beats .sitesearch-btn/.sitemenu-btn's
+/* Two-class selector so this actually beats .sitebar__search/.sitebar__menu's
    own min-width/height (equal specificity, source order would otherwise let
    the 44px tap-target size win here and crowd the level toggle beside it —
    confirmed by rendered overlap before this fix). */

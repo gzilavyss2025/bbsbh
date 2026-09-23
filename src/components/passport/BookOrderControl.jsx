@@ -25,7 +25,7 @@ export function BookOrderControl({ count = 0, onReorder }) {
         <div className="logbook__placingactions">
           <button
             type="button"
-            className="btn btn--seal"
+            className="btn btn--ink"
             onClick={() => {
               setAsking(null)
               onReorder?.(asking)

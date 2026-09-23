@@ -123,6 +123,7 @@ const PostseasonHistoryPage = lazyNamed(
   () => import('./screens/PostseasonHistoryPage.jsx'),
   'PostseasonHistoryPage',
 )
+const NineKeysPage = lazyNamed(() => import('./screens/NineKeysPage.jsx'), 'NineKeysPage')
 const PostseasonLeadersPage = lazyNamed(
   () => import('./screens/PostseasonLeadersPage.jsx'),
   'PostseasonLeadersPage',
@@ -380,6 +381,8 @@ export default function App() {
     content = <AwardsHistoryPage />
   } else if (route.name === 'postseason-history') {
     content = <PostseasonHistoryPage />
+  } else if (route.name === 'nine-keys') {
+    content = <NineKeysPage />
   } else if (route.name === 'postseason-leaders') {
     content = <PostseasonLeadersPage />
   } else if (route.name === 'postseason-series') {

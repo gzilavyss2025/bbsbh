@@ -20,7 +20,12 @@
   pointer-events: none;
 }
 
-.pagenav .btn {
+/* :where() keeps Refresh out of every rule here that is about the bar's
+   PRIMARY action. Refresh is a .btn too since #1130, and without the guard it
+   would take the primary's full width, its raised shadow and its dead-space
+   hit area. :where() adds no specificity, so every selector below still ties
+   the ones in focus/stage.css that are written to beat it. */
+.pagenav .btn:where(:not(.innings__refresh)) {
   pointer-events: auto;
   width: 100%;
   max-width: calc(var(--app-width) - 2 * var(--app-gutter));
@@ -37,9 +42,8 @@
   gap: var(--space-2);
 }
 
-.refreshbtn--float {
+.innings__refresh--float {
   pointer-events: auto;
-  background: var(--bg-canvas);
 }
 
 /* The dead space around this bar's primary action belongs to the action, not
@@ -73,7 +77,7 @@
   position: relative;
 }
 
-.pagenav--innings .btn::after {
+.pagenav--innings .btn:where(:not(.innings__refresh))::after {
   content: '';
   position: absolute;
   top: -20px;
@@ -82,7 +86,7 @@
   left: calc(-1 * var(--app-gutter));
 }
 
-.pagenav--innings:has(.refreshbtn--float) .btn::after {
+.pagenav--innings:has(.innings__refresh--float) .btn:where(:not(.innings__refresh))::after {
   top: -76px;
 }
 
@@ -90,7 +94,7 @@
    area stopping short of it: the stamp between the two rows comes and goes
    with each poll (see RefreshButton), so the gap under Refresh has no fixed
    height to stop at. */
-.pagenav--innings .refreshbtn--float {
+.pagenav--innings .innings__refresh--float {
   position: relative;
   z-index: 3;
 }

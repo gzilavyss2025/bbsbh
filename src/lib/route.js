@@ -20,6 +20,7 @@
 //   '/milestones'                       -> { name: 'milestones' }
 //   '/awards'                           -> { name: 'awards-history' }
 //   '/postseason-history'               -> { name: 'postseason-history' }
+//   '/nine-keys'                        -> { name: 'nine-keys' }
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason-race'                  -> { name: 'postseason-race' }
 //   '/postseason/{seriesId}'            -> { name: 'postseason-series', seriesId }
@@ -83,6 +84,8 @@
 //   '/team/{id}/transactions'           -> { name: 'team-transactions', id, asOf, sportId }
 //                                          (the club's roster moves, whole season, spoiler-free.
 //                                           NOT a tab — where the home slate's wire sends a reader.)
+//   '/team/{id}/{anything else}'        -> { name: 'team', id, asOf, sportId }
+//                                          (an unknown tab lands on the club's page, never a game — #1164)
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
 //   '/leaders/org/{orgId}'              -> { name: 'leaders', scope: 'org', orgId, asOf, sportId }
@@ -326,6 +329,7 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'awards') return { name: 'awards-history' }
   if (parts.length === 1 && parts[0] === 'postseason-history')
     return { name: 'postseason-history' }
+  if (parts.length === 1 && parts[0] === 'nine-keys') return { name: 'nine-keys' }
   if (parts.length === 1 && parts[0] === 'postseason-leaders')
     return { name: 'postseason-leaders' }
   if (parts.length === 1 && parts[0] === 'postseason-race')
@@ -587,6 +591,13 @@ export function parseRoute(url) {
     return { name: 'team-transactions', id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
     return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }
+  // An UNKNOWN third segment ('/team/158/media', a hand-edited URL, a tab
+  // renamed later) lands on the club's own page — the same contract
+  // PLAYER_TAB_ROUTES keeps for '/player/{id}/…'. Without it the generic game
+  // branch below read the URL as date='team', matchup='158', and GameRoute
+  // asked statsapi for the schedule of date=null at every level (#1164).
+  if (parts.length === 3 && parts[0] === 'team')
+    return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
   // The player hub's tabs. Same 3-segment shape as the team tabs above, so it
   // needs the same placement ahead of the generic game branch below, which would
   // otherwise read '/player/661388/stats' as date='player'. An unrecognised third

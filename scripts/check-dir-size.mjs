@@ -454,7 +454,8 @@ const BUDGETS = {
   // presentation of the wire, not the page the wire leads. This sheet will
   // also grow: steps 3 and 4 of that issue add the picked-game card and the
   // season notebook to the same page.
-  'src/styles': 115,
+  // +1: 79-nine-keys.css, the Nine Keys report's own partial.
+  'src/styles': 116,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -586,7 +587,8 @@ const BUDGETS = {
   // came out of — and the arguments for why each is spoiler-free are read
   // together or not at all. Flat beside milbPool.js for every reason that entry
   // gives, and read on the same visit by the same page.
-  'src/api': 113,
+  // +1: nineKeys.js, one more static-data reader beside its siblings.
+  'src/api': 114,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -764,7 +766,8 @@ const BUDGETS = {
   // possible (ADR-0083), after the sweep took it off 234 declarations. Flat for
   // exactly the reason above, and ONE file rather than two — scripts/lib/ is at
   // its own budget, and the guard has no pure half worth splitting out anyway.
-  scripts: 119,
+  // +1: gen-nine-keys.mjs, one more generator beside the other gen-*.mjs.
+  scripts: 120,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -976,7 +979,8 @@ const BUDGETS = {
   // same feature is a team-hub TAB and correctly went to src/screens/team/.
   // +1 for PostseasonRacePage.jsx — the current-season "if it ended today"
   // bracket + Wild Card standings, same one-route-one-screen shape.
-  'src/screens': 45,
+  // +1: NineKeysPage.jsx — one route, one screen, same as its neighbours.
+  'src/screens': 46,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.

@@ -1,7 +1,7 @@
 import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'
 import { teamTransactionsPath } from '../../lib/route.js'
-import { Door } from '../../components/ui/Door.jsx'
+import { Door } from '../../components/ui/control/Door.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { TeamTransactionsCard } from '../../components/transactions/TeamTransactionsCard.jsx'
 import { isMlbTeamId } from '../../lib/teams.js'
@@ -73,9 +73,11 @@ export function GamesTab({ id, asOf, sportId }) {
         <TeamHighlightsRail key={`highlights-${team.id}`} teamId={team.id} games={seasonGames} />
       )}
 
-      {photoGames.length > 0 && (
+      {photoGames.length > 0 && isMlbTeamId(team.id) && (
         // `photoGames`, not `seasonGames` — this rail may include a game
-        // still in progress (an explicit override; see loadGames.js).
+        // still in progress (an explicit override; see loadGames.js). MLB
+        // only, like the Highlights rail: MiLB games carry no photographer
+        // stills, so the rail would fetch a batch and draw nothing (#1142).
         <TeamPhotosRail key={`photos-${team.id}-${asOf ?? ''}`} teamId={team.id} games={photoGames} />
       )}
 

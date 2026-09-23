@@ -306,6 +306,21 @@ jobs:
         id: postseason-odds
         continue-on-error: true
         run: node scripts/gen-postseason-odds.mjs
+      # Nine Keys. Half the file is settled history — a finished season's
+      # champion never moves — but the other half ranks the clubs currently
+      # holding a postseason place, and a rank moves every night a game is
+      # played. Left to a hand-run regenerate it would read the standings of
+      # whatever day someone last ran it, with nothing on the page to say so,
+      # which is the same quiet staleness the postseason-odds note above
+      # describes. It reads public/data/postseason-history.json for who played
+      # in October, so it sits after nothing in particular — that file is
+      # committed, not generated here. Finished seasons come from its cache,
+      # scripts/data/nine-keys-seasons.json (staged by the `git add` below), so
+      # a night fetches only the season in play: about 65 requests, not 1,800.
+      - name: Nine Keys
+        id: nine-keys
+        continue-on-error: true
+        run: node scripts/gen-nine-keys.mjs
       # Also written for this cron and never wired to it: the generator's own
       # header points at this file ("Meant for a nightly cron (NOT yet wired)")
       # and even drafts the step. --current-only re-sweeps THIS season's 30
@@ -641,6 +656,7 @@ jobs:
           steps.schedule-shape.outcome == 'failure' ||
           steps.warm-previews.outcome == 'failure' ||
           steps.compress-logos.outcome == 'failure' ||
+          steps.nine-keys.outcome == 'failure' ||
           steps.feed-shape-drift.outcome == 'failure'
         run: |
           echo "One or more nightly generators failed — see the step logs above."

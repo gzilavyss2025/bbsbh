@@ -132,7 +132,7 @@ an internal word on a page that never uses one. The reader has no way to know
 what a box line is; the app's own name for these rows, in the sheet's hints, is
 "game lines".
 
-So the label is now the house `See all ›` — the same words `ui/Door.jsx`
+So the label is now the house `See all ›` — the same words `ui/control/Door.jsx`
 gives every other "open the full list behind this summary" door, which is
 exactly what this is — and the kicker reads `Game lines · {facet}`. The internal
 name stays in `api/boxlines/`, `components/boxlines/`, this ADR and the issue

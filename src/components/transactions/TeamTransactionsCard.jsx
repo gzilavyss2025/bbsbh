@@ -2,7 +2,7 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import { loadMoreTeamTransactions } from '../../api/teamTransactions.js'
 import { DayTab, TxStory, dayTabParts } from './TxStory.jsx'
 import { DeckNudge } from '../teamstats/DeckNudge.jsx'
-import { Door } from '../ui/Door.jsx'
+import { Door } from '../ui/control/Door.jsx'
 
 // The deck's per-card scroll step (card width + gap, both from .txcard__scroll
 // / .txstory in index.css) — DeckNudge's click target. Most cards are 320px

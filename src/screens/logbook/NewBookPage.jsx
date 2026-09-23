@@ -98,7 +98,7 @@ export function NewBookPage({ createBook, placing = null, onCreated, onCancel })
       {/* One way out, in the topbar, where every other page keeps it. A second
           Cancel down here only competed with Start for the same glance. */}
       <div className="bookmgmt__actions newbook__actions">
-        <button type="button" className="btn btn--seal" onClick={start}>
+        <button type="button" className="btn btn--ink" onClick={start}>
           Start this book
         </button>
       </div>

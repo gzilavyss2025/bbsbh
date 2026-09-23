@@ -17,7 +17,7 @@ import { MilestoneWatchCard } from '../components/playerstats/MilestoneWatchCard
 import { PlayerContractCard } from '../components/playerstats/PlayerContractCard.jsx'
 import { PlayerPhotosRail } from '../components/player/PlayerPhotosRail.jsx'
 import { PlayerHighlightsRail } from '../components/player/PlayerHighlightsRail.jsx'
-import { Door } from '../components/ui/Door.jsx'
+import { Door } from '../components/ui/control/Door.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './player/PlayerHubShell.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'

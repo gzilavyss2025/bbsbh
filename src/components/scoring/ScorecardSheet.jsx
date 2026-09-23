@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { AtBatBox } from './AtBatBox.jsx'
 import { cellNote } from '../../lib/scorecardNotes.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { Button } from '../ui/control/Button.jsx'
 
 // The main scorecard grid, in the #22 sheet's own column order: a sticky
 // PLAYER column (each row led by its batting-order number, closed by the
@@ -198,25 +199,25 @@ export function ScorecardSheet({
   return (
     <div className="sc-sheet__frame">
       <div className="sc-zoom" role="group" aria-label="Sheet zoom">
-        <button
-          type="button"
+        <Button
+          size="control"
           className="sc-zoom__btn"
           onClick={() => step(1 / ZOOM_STEP)}
           disabled={zoom <= floor + 0.001}
           aria-label="Zoom out"
         >
           −
-        </button>
+        </Button>
         <span className="sc-zoom__pct">{Math.round(zoom * 100)}%</span>
-        <button
-          type="button"
+        <Button
+          size="control"
           className="sc-zoom__btn"
           onClick={() => step(ZOOM_STEP)}
           disabled={zoom >= ZOOM_MAX - 0.001}
           aria-label="Zoom in"
         >
           +
-        </button>
+        </Button>
       </div>
       <div className="sc-sheet__scroll" ref={paneRef}>
         <table className="sc-sheet" ref={tableRef} style={{ zoom }}>

@@ -1,6 +1,7 @@
 import { fetchTeam } from '../../../api/team.js'
 import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { allStartedGames } from '../../../api/scheduleGames.js'
+import { isMlbTeamId } from '../../../lib/teams.js'
 import { seasonOf } from './shared.js'
 
 // TeamPhotosPage's own data — the club and its season schedule, nothing else
@@ -16,11 +17,17 @@ import { seasonOf } from './shared.js'
 // `allStartedGames`, not `allDecidedGames`: this page's photo walk includes a
 // game still in progress, not just Final ones — see that function's own
 // header for why that's this page's call to make and no other consumer's.
+//
+// MLB only, like the rails that link here: MiLB games carry no photographer
+// stills, so a MiLB club's walk fetched its whole season's content packages
+// and drew nothing (#1142). A MiLB club gets no games, so the page shows its
+// empty state and sends no content request.
 export async function loadTeamPhotos(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
   const season = seasonOf(asOf, sportId)
+  if (!isMlbTeamId(team.id)) return { team, season, seasonGames: [] }
   const schedule = await fetchTeamSchedule(id, season, sportId)
   return { team, season, seasonGames: allStartedGames(schedule) }
 }

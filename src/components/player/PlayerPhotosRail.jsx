@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
 import { fetchGamePhotos, photosForPlayer, onlyPhotographer } from '../../api/gamePhotos.js'
-import { Door } from '../ui/Door.jsx'
+import { Door } from '../ui/control/Door.jsx'
 
 // A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
 // copy of this helper for why `scroll-behavior: smooth` has to be bypassed.

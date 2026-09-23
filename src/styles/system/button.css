@@ -1,0 +1,257 @@
+/* ---------------------------------------------------------------------------
+   BUTTON — the app's one control (#1130). components/ui/control/Button.jsx
+   writes it; a hand-written <button class="btn …"> wears the same classes.
+
+   A button acts on the page you are standing on. That is the whole difference
+   from a DOOR (system/door.css), which leaves the page or opens more of a list:
+   a door is a link in --accent-link, a button is a ruled box in ink. A door
+   never wears a button skin, because the skin is how a reader knows what a tap
+   will do.
+
+   THE ANATOMY. One spec; every part reads a token.
+
+     part       rule
+     ---------  -----------------------------------------------------------
+     height     tap = --tap-min (44px): the bar and the page. The default.
+                control = --control-min (34px): a switch inside a card.
+     padding    tap: --space-2 / --space-4. control: --space-1 / --space-3.
+                Vertical padding only shows once a label wraps.
+     icon gap   --space-1h, between the icon slot and the label.
+     radius     --radius-sm, for every skin. A capsule is a PILL (#1131): a
+                tag you read. A ruled box is a control you press.
+     border     --bw-rule, solid. Never dashed: a dashed line means
+                "pencilled in", provisional (finding 7, #1132).
+     type       --font-display, uppercase, --ls-label, --lh-compact.
+                tap = --fs-ui, control = --fs-label. No font-weight: the
+                display face ships one weight (700), so a weight does
+                nothing. Emphasis is a skin's colour, never a weight.
+     icon slot  .btn__icon: a glyph (↻, ↗) in the label's own box, at
+                --lh-solid, lifted 0.06em so it centres on the caps' height
+                and not on the em box. Checked in the contact sheet crops.
+
+   THE SKINS. Each has one meaning.
+
+     outline  the default. A pencil-ruled box on manila paper.
+     ink      navy. The one primary action in a view — at most one per view.
+     ghost    a bare word, no box: the secondary choice beside an ink.
+     danger   clay. Only an action that destroys something.
+     seal     kraft amber. Only the Game Log's mint strip (ADR-0083, ADR-0035):
+              minting is the one action that leaves something behind on the
+              far side of a seal. Never on a control that does not mean that.
+
+   Size and skin are the only two axes. `tap` and `outline` are the defaults,
+   so neither has a class: a second copy of the default is a second place for
+   it to drift. .btn--control and .btn--ink/--ghost/--danger/--seal are the
+   modifiers. No club colour ever reaches a control (ADR-0030), and --marker is
+   a fill, never an ink or a hairline, so no skin reads it.
+
+   A SKIN IS FIVE CUSTOM PROPERTIES, not five repaints. Each modifier sets
+   --btn-fill, --btn-edge, --btn-ink and the two hover values, and the base
+   rule and the states read them. A state therefore works on every skin with
+   one rule, and a surface that re-inks a skin (.xl .btn--ghost on the film
+   strip) sets the same five names instead of fighting the hover rule.
+
+   THE STATES, for every skin.
+
+     rest            the skin.
+     hover           pointer devices only, inside @media (hover: hover), so a
+                     tap on a phone never leaves a button stuck in it. The rule
+                     darkens a step: pencil to graphite on outline.
+     pressed         :active. 1px down, and --inset-cell: the box is pressed
+                     into the paper. The inset had one other job in this
+                     family, the resting shadow of .posinn__scopebtn, and
+                     --shadow-card was on its twin .stepnav__btn. Paper does
+                     not float, so neither rests on a shadow any more, and the
+                     inset moved to the one moment a control really is pressed
+                     into the page.
+     selected        [aria-pressed="true"] for a toggle, [aria-current="page"]
+                     for the current stop in a set of pages. Ink fill AND a
+                     leading tick: the tick is the part that survives
+                     forced-colors mode and a reader who cannot tell the fills
+                     apart, so the state never rests on colour alone. Pill
+                     (#1131) inherits exactly this contract.
+     focus-visible   a 2px --focus-ring outline, 2px off the box. It replaced
+                     `box-shadow: var(--ring)`: that ring is field green at 35%
+                     alpha and composites to under the 3:1 non-text bar on the
+                     canvas, and a box-shadow lost to every host rule that set a
+                     shadow of its own (the floating bar's). An outline off the
+                     box sits on the page, not on the fill, so it reads the same
+                     on ink, danger and seal. It is the ring .door already draws.
+     disabled        :disabled or [aria-disabled="true"]. The skin stays and
+                     drops to --opacity-disabled: unavailable, never repainted.
+                     No hover, no press.
+     busy            [aria-busy="true"], set by Button's `busy` prop — Refresh
+                     while it fetches. The skin stays (it is working, not
+                     unavailable), the cursor says so, and the icon spins
+                     one full turn (a half turn left ↻ reading as a
+                     horseshoe in the contact sheet). The label carries the
+                     state too ("Refreshing…").
+
+   Motion is --dur-fast on --ease-standard, and none at all under
+   prefers-reduced-motion.
+
+   SPACING. Two controls side by side sit at least --space-1h apart (WCAG
+   2.5.8): the host's gap owns that, and every host row in this family already
+   uses a scale gap. A button never carries its own outer margin.
+
+   WHERE IT SITS IN THE CASCADE. src/index.css imports this file immediately
+   BEFORE 07-team-logo-and-buttons.css, which is where .btn's base rule used to
+   open. Two things depend on that slot:
+     1. .btn--reveal, the spoiler rule's one control, stays in 07 at the same
+        specificity as .btn. Loaded after this file it still wins every
+        declaration it restates — its face and its padding included, which 07
+        pins so the reveal button looks exactly as it did.
+     2. Every rule that used to beat .btn on order still does: nothing in
+        01–06b that styles a .btn element moved past it, and every per-site
+        rule in 08 onward loads after it.
+   test/button-cascade.test.js pins the slot.
+   --------------------------------------------------------------------------- */
+
+.btn {
+  --btn-fill: var(--surface-card);
+  --btn-edge: var(--border-rule);
+  --btn-ink: var(--text-body);
+  --btn-fill-hover: var(--surface-inset);
+  --btn-edge-hover: var(--text-caption);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1h);
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-4);
+  border: var(--bw-rule) solid var(--btn-edge);
+  border-radius: var(--radius-sm);
+  background: var(--btn-fill);
+  color: var(--btn-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-compact);
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard);
+}
+
+.btn--control {
+  min-height: var(--control-min);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--fs-label);
+}
+
+/* ---- skins ---- */
+
+.btn--ink {
+  --btn-fill: var(--accent-primary);
+  --btn-edge: var(--accent-primary);
+  --btn-ink: var(--text-on-ink);
+  --btn-fill-hover: var(--accent-primary-hover);
+  --btn-edge-hover: var(--accent-primary-hover);
+}
+
+.btn--ghost {
+  --btn-fill: transparent;
+  --btn-edge: transparent;
+  --btn-fill-hover: var(--surface-inset);
+  --btn-edge-hover: transparent;
+}
+
+.btn--danger {
+  --btn-fill: var(--accent-negative);
+  --btn-edge: var(--accent-negative);
+  --btn-ink: var(--text-on-ink);
+  --btn-fill-hover: var(--accent-negative-hover);
+  --btn-edge-hover: var(--accent-negative-hover);
+}
+
+/* The mint strip's skin, and the only rule in this file that reads the seal
+   (scripts/check-seal-scope.mjs allowlists it here, ADR-0083). Its hover is
+   the cover's own hatch stripe, read here rather than in the hover rule so the
+   seal stays inside the one selector that is allowed to wear it. */
+.btn--seal {
+  --btn-fill: var(--seal-cover);
+  --btn-edge: var(--seal-cover);
+  --btn-ink: var(--text-on-seal);
+  --btn-fill-hover: var(--seal-hatch);
+  --btn-edge-hover: var(--seal-hatch);
+}
+
+/* ---- the icon slot ---- */
+
+.btn__icon {
+  flex: none;
+  font-size: 1.15em;
+  line-height: var(--lh-solid);
+  translate: 0 -0.06em;
+  transition: rotate var(--dur-fast) var(--ease-standard);
+}
+
+/* ---- states ---- */
+
+/* :where() keeps the guard out of the specificity, so the selected rule below
+   still outranks hover on order alone. */
+@media (hover: hover) {
+  .btn:where(:not(:disabled, [aria-disabled='true'], [aria-busy='true'])):hover {
+    background: var(--btn-fill-hover);
+    border-color: var(--btn-edge-hover);
+  }
+}
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: var(--inset-cell);
+}
+
+.btn[aria-pressed='true'],
+.btn[aria-current='page'] {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+.btn[aria-pressed='true']::before,
+.btn[aria-current='page']::before {
+  content: '✓';
+  content: '✓' / '';
+  flex: none;
+  line-height: var(--lh-solid);
+}
+
+.btn:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: var(--opacity-disabled);
+  cursor: default;
+}
+.btn:is(:disabled, [aria-disabled='true'], [aria-busy='true']):active {
+  transform: none;
+  box-shadow: none;
+}
+
+.btn[aria-busy='true'] {
+  cursor: progress;
+}
+.btn[aria-busy='true'] .btn__icon {
+  rotate: 1turn;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn__icon {
+    transition: none;
+  }
+  .btn:active {
+    transform: none;
+  }
+  .btn[aria-busy='true'] .btn__icon {
+    rotate: none;
+  }
+}

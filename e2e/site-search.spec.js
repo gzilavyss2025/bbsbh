@@ -17,7 +17,7 @@ import { test, expect } from './fixtures.js'
 // pleasant at all: no auto-zoom, a real tap target to clear, a locked page
 // behind, and focus handed back on the way out.
 
-const SEARCH_BTN = '.topbar--slate .sitesearch-btn'
+const SEARCH_BTN = '.topbar--slate .sitebar__search'
 
 async function openSearch(page) {
   await page.goto('/')

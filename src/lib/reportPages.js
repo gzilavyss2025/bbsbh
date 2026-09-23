@@ -136,6 +136,10 @@ export const PAGE_GROUPS = [
     pages: [
       { label: 'Awards History', path: '/awards' },
       { label: 'Postseason History', path: '/postseason-history' },
+      // Beside Postseason History because it reads the same 26 brackets from
+      // the other end: that page shows what happened each October, this one
+      // asks what every champion had in common before October started.
+      { label: 'Nine Keys', path: '/nine-keys' },
       // Directly under Postseason History because it is that page's question
       // turned around: the bracket page shows who won each October, this one
       // takes the clubs that were plainly the best over a season and asks what

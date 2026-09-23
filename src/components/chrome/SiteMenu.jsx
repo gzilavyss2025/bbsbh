@@ -43,7 +43,7 @@ export function SiteMenuButton({ className = '' }) {
     <>
       <button
         type="button"
-        className={`sitemenu-btn ${className}`}
+        className={`btn btn--ghost sitebar__menu ${className}`}
         onClick={() => setOpen(true)}
         aria-label="Site menu"
         aria-haspopup="dialog"

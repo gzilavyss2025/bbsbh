@@ -176,28 +176,10 @@
   gap: var(--space-1h);
   margin-bottom: 14px;
 }
+/* A Button toggle (control size, outline); aria-pressed draws the selected
+   one. All it keeps is its share of the row. */
 .umpage__filterbtn {
   flex: 1;
-  padding: var(--space-2) var(--space-2h);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  cursor: pointer;
-}
-.umpage__filterbtn.is-active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--paper-0);
-}
-.umpage__filterbtn:disabled {
-  opacity: 0.4;
-  cursor: default;
 }
 
 .umpage__list {

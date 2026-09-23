@@ -150,7 +150,7 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
           <button
             ref={cancelRef}
             type="button"
-            className="erasesheet__btn"
+            className="btn erasesheet__btn"
             // aria-disabled, not `disabled`. A button that disables itself under
             // the user's focus drops focus to <body> — and this dialog's Escape
             // handler and Tab trap are both bound to the dialog element, so from
@@ -166,7 +166,7 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
           {state === 'failed' ? (
             <button
               type="button"
-              className="erasesheet__btn erasesheet__btn--danger"
+              className="btn btn--danger erasesheet__btn"
               onClick={wipeDeviceAndRestart}
             >
               Erase this device only
@@ -174,7 +174,7 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
           ) : (
             <button
               type="button"
-              className="erasesheet__btn erasesheet__btn--danger"
+              className="btn btn--danger erasesheet__btn"
               aria-disabled={state === 'working'}
               onClick={() => state !== 'working' && run()}
             >

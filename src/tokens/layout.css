@@ -31,6 +31,13 @@
   --app-width:   440px;      /* iPhone-class second screen */
   --app-gutter:  16px;
   --tap-min:     44px;       /* min hit target */
+  /* The OTHER button height (#1130). A control that switches something inside
+     a card — a scope toggle, a filter, a zoom step, Refresh — is 34px; a
+     control that stands on the page or in the bar is --tap-min. Two heights,
+     not five: the 28/30/32/34/44px spread the collapse measured was one
+     control drawn five ways. 34px still clears WCAG 2.5.8's 24px floor with
+     room, and styles/system/button.css keeps two of them from touching. */
+  --control-min: 34px;
 
   /* Focus mode's console masthead — the anchored scorebug band
      (24-floating-nav-and-hud.css's `.gamehud--console`, ADR-0043). The band's

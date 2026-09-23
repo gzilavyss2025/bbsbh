@@ -1,5 +1,5 @@
 import { RosterList } from './RosterList.jsx'
-import { Door } from '../../../components/ui/Door.jsx'
+import { Door } from '../../../components/ui/control/Door.jsx'
 
 export function InjuredListCard({ injured, season, showInjured, onShowInjured }) {
   return (
