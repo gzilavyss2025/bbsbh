@@ -33,7 +33,7 @@ async function barSpots(page) {
   await page.waitForSelector('.pagenav--innings .btn')
   return page.evaluate(() => {
     const bar = document.querySelector('.pagenav--innings')
-    const refresh = bar.querySelector('.refreshbtn--float')
+    const refresh = bar.querySelector('.innings__refresh--float')
     const btns = [...bar.querySelectorAll('.btn')].filter((b) => b !== refresh)
     const rBar = bar.getBoundingClientRect()
     const rRefresh = refresh?.getBoundingClientRect() ?? null

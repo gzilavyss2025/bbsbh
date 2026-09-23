@@ -313,28 +313,9 @@
   margin-top: var(--space-4);
 }
 
+/* The pair are Buttons at tap size: outline for "Keep my data", danger for
+   the one that erases — the danger skin's first real caller. All they keep is
+   an equal share of the row. */
 .erasesheet__btn {
   flex: 1 1 auto;
-  min-height: var(--tap-min);
-  padding: var(--space-3) var(--space-4);
-  border: var(--bw-rule) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: none;
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  cursor: pointer;
-}
-
-.erasesheet__btn--danger {
-  background: var(--accent-negative);
-  border-color: transparent;
-  color: var(--text-on-ink);
-}
-
-.erasesheet__btn[disabled] {
-  opacity: 0.6;
-  cursor: default;
 }

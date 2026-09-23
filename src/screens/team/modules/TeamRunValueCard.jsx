@@ -3,7 +3,7 @@ import { runValuePath } from '../../../lib/route.js'
 import { signed, tone } from '../../../api/around-the-game/runValue.js'
 import { RunValueSplit, splitScale } from '../../../components/around-the-game/RunValueParts.jsx'
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
-import { Door } from '../../../components/ui/Door.jsx'
+import { Door } from '../../../components/ui/control/Door.jsx'
 
 // The team hub's RUN VALUE card, on the Numbers tab — what this club's season
 // has been worth in runs, split four ways, and the men carrying it.

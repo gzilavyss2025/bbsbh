@@ -122,7 +122,7 @@ export function GameResultFace({
       <div className="flipback__topRow">
         <button
           type="button"
-          className="btn flipback__boxbtn"
+          className="btn btn--ink flipback__boxbtn"
           onClick={() => navigate(boxScorePath)}
         >
           Box score

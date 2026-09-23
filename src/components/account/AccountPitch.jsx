@@ -83,7 +83,7 @@ export function AccountPitch({ clubTeamId, clubName, onContinue }) {
         <ProgressMarker />
         <BenefitRows />
         <SignUpButton mode="modal">
-          <button type="button" className="btn btn--account introsheet__primary">
+          <button type="button" className="btn btn--ink introsheet__primary">
             Create my Tally
           </button>
         </SignUpButton>
@@ -129,7 +129,7 @@ function SignedInConfirmation({ clubName, onContinue }) {
       <BenefitRows />
       <button
         type="button"
-        className="btn btn--account introsheet__primary"
+        className="btn btn--ink introsheet__primary"
         onClick={onContinue}
       >
         Continue

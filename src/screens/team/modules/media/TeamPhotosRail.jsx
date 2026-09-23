@@ -2,7 +2,7 @@ import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react
 import { fetchTeamPhotoBatch } from '../../../../api/gamePhotos.js'
 import { useNav } from '../../../../lib/nav.js'
 import { teamPhotosPath } from '../../../../lib/route.js'
-import { Door } from '../../../../components/ui/Door.jsx'
+import { Door } from '../../../../components/ui/control/Door.jsx'
 
 // A setup jump, not a user-visible scroll gesture — bypasses the track's own
 // `scroll-behavior: smooth` (index.css) so it lands instantly. Without this,

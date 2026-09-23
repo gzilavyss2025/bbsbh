@@ -14,6 +14,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
+import { Door } from '../components/ui/control/Door.jsx'
 
 // How many honorees a team card shows before "Show all" — most clubs' full
 // history runs well past this (a 90-year-old franchise can have 100+ distinct
@@ -135,13 +136,9 @@ function TeamLegacyCard({ teamId, rank, honorees, cardRef }) {
             ))}
           </ul>
           {remaining > 0 && (
-            <button
-              type="button"
-              className="allstarlegacy__door"
-              onClick={() => setExpanded(true)}
-            >
+            <Door layout="block" className="allstarlegacy__door" onClick={() => setExpanded(true)}>
               Show all {honorees.length} (+{remaining} more)
-            </button>
+            </Door>
           )}
         </>
       ) : (

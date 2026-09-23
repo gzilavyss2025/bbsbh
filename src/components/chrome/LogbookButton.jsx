@@ -30,11 +30,11 @@ export function LogbookButton({ className = '' }) {
   return (
     <button
       type="button"
-      className={`logbook-btn logbook-btn--labeled ${className}`}
+      className={`btn btn--ghost sitebar__logbook ${className}`}
       onClick={() => navigate('/logbook')}
     >
       <LogbookGlyph />
-      <span className="logbook-btn__label">Game Log</span>
+      Game Log
     </button>
   )
 }

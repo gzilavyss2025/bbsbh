@@ -11,7 +11,7 @@
    TWO LAYOUTS, AND THEY SHARE ALMOST NOTHING ON PURPOSE.
 
      --inline  the "See all ›" text link, set in the condensed caps voice, no
-               box at all. Its chevron is written by ui/Door.jsx rather than
+               box at all. Its chevron is written by ui/control/Door.jsx rather than
                passed, so a door and its arrow can never disagree. It does not
                align itself: the host does that (.thub__door right-aligns a
                preview card's door, .topbar__action seats one in a page head).

@@ -240,7 +240,6 @@
 .mytally__rowbtn:focus-visible,
 .mytally__inlinebtn:focus-visible,
 .mytally__cta:focus-visible,
-.erasesheet__btn:focus-visible,
 .mergereceipt__dismiss:focus-visible {
   outline: none;
   box-shadow: var(--ring);

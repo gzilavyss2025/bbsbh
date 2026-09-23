@@ -185,7 +185,7 @@ export function FavoriteTeamModal({ favoriteTeamId, onSave, onClose }) {
             </p>
 
             <div className="sheet__actions favteamsheet__actions introsheet__actions">
-              <button type="button" className="btn btn--next" onClick={goToStep2}>
+              <button type="button" className="btn btn--ink btn--next" onClick={goToStep2}>
                 {AccountPitch && clubLabel ? `Continue with the ${clubLabel}` : 'Get started'}
               </button>
               {AccountPitch && (

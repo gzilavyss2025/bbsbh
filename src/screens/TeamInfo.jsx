@@ -32,7 +32,8 @@ import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { teamTabPath } from '../lib/route.js'
-import { Door } from '../components/ui/Door.jsx'
+import { Door } from '../components/ui/control/Door.jsx'
+import { Button } from '../components/ui/control/Button.jsx'
 import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
@@ -201,7 +202,7 @@ export function TeamInfo({
           {onPreview && (
             <button
               type="button"
-              className="btn btn--next teaminfo__previewdoor"
+              className="btn btn--ink btn--next teaminfo__previewdoor"
               onClick={onPreview}
             >
               View preview card
@@ -259,7 +260,7 @@ export function TeamInfo({
           onReload={onReload}
           loading={loading}
           lastUpdated={lastUpdated}
-          className="refreshbtn--float"
+          className="innings__refresh--float"
         />
         {onCatchUp ? (
           /* CATCH UP TO LIVE (ADR-0055), on a game already in progress. The
@@ -279,12 +280,12 @@ export function TeamInfo({
             <button className="btn btn--reveal revealsplit__btn" onClick={onCatchUp}>
               Catch up to live ›
             </button>
-            <button className="btn btn--next revealsplit__btn" onClick={onNext}>
+            <button className="btn btn--ink btn--next revealsplit__btn" onClick={onNext}>
               {nextLabel}
             </button>
           </div>
         ) : (
-          <button className="btn btn--next" onClick={onNext}>
+          <button className="btn btn--ink btn--next" onClick={onNext}>
             {nextLabel}
           </button>
         )}
@@ -1246,14 +1247,14 @@ function GameNotesButton({ feed, side }) {
   // The ↗ says so.
   return (
     <a
-      className="notesbtn"
+      className="btn btn--control innings__notes"
       href={notes.url}
       target="_blank"
       rel="noopener noreferrer"
       title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
     >
       Game Notes
-      <span className="notesbtn__ext" aria-hidden="true">↗</span>
+      <span className="btn__icon" aria-hidden="true">↗</span>
     </a>
   )
 }
@@ -1290,18 +1291,16 @@ export function RefreshButton({ onReload, loading, lastUpdated, className = '' }
   if (!onReload) return null
   return (
     <>
-      <button
-        type="button"
-        className={`refreshbtn ${className}`.trim()}
+      <Button
+        size="control"
+        icon="↻"
+        busy={loading}
+        className={`innings__refresh ${className}`.trim()}
         onClick={onReload}
-        disabled={loading}
         aria-label="Refresh live game data"
       >
-        <span className="refreshbtn__icon" aria-hidden="true">
-          ↻
-        </span>
         {loading ? 'Refreshing…' : 'Refresh'}
-      </button>
+      </Button>
       {lastUpdated && !loading && (
         <span className="refreshstamp">as of {timeOfDay(lastUpdated)}</span>
       )}

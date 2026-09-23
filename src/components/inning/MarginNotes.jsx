@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { Headshot } from '../player/Headshot.jsx'
-import { Door } from '../ui/Door.jsx'
+import { Door } from '../ui/control/Door.jsx'
 import { useCalloutLedger } from '../../hooks/useCalloutLedger.js'
 
 // Show only the first handful up front and let a button reveal the rest —

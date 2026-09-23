@@ -21,7 +21,7 @@ export function SiteSearchButton({ className = '' }) {
     <>
       <button
         type="button"
-        className={`sitesearch-btn ${className}`}
+        className={`btn btn--ghost sitebar__search ${className}`}
         onClick={() => setOpen(true)}
         aria-label="Search players and teams"
       >

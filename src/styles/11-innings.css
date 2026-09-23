@@ -19,7 +19,7 @@
    floating bar already carried one, and "shown again at the wide breakpoint
    below, where the floating one hides" — describing a pair of rules that
    swapped the two copies by breakpoint. Both rules are gone, and so is the
-   toolbar's copy: `.refreshbtn--float` is the only Refresh on this screen now
+   toolbar's copy: `.innings__refresh--float` is the only Refresh on this screen now
    and it shows at every width (InningViewer.jsx's floating-bar comment has
    the rest). The comment outlived the rule it was attached to, which is how it
    came to sit directly on top of an unrelated one. */
@@ -52,40 +52,10 @@
   color: var(--text-caption);
 }
 
-.refreshbtn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1h);
-  min-height: 34px;
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-pill);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: var(--shadow-card);
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-
-.refreshbtn:active {
-  transform: scale(0.96);
-}
-
-.refreshbtn:disabled {
-  opacity: 0.55;
-  cursor: default;
-  transform: none;
-}
-
-.refreshbtn__icon {
-  font-size: var(--fs-ui);
-  line-height: var(--lh-solid);
-}
+/* Refresh (TeamInfo.jsx's RefreshButton) is a Button: control size, outline,
+   the ↻ in its icon slot, and busy while it fetches. Nothing about its dress
+   is left here; where it stands is its hosts' — the floating bar
+   (.innings__refresh--float) and the box score's head. */
 
 /* "as of 7:42 PM" — the live-refresh staleness caption riding next to every
    RefreshButton (TeamInfo.jsx). Reads how fresh the on-screen feed actually
@@ -98,45 +68,13 @@
   white-space: nowrap;
 }
 
-/* Game Notes button (lineup page) — a compact pill riding in the team head,
-   right-aligned beside the Away/Home label (it took over the Refresh control's
-   old spot; Refresh moved to the floating bar). Links to the club's official
-   press-notes PDF (opens in a new tab), or opens the What's Brewing sheet for
-   the Brewers. See api/gameNotes.js / TeamInfo.jsx. */
-.notesbtn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  min-height: 30px;
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-pill);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  text-decoration: none;
-  white-space: nowrap;
+/* Game Notes (lineup page and team hub) — a Button, control size, outline,
+   riding in the team head right-aligned beside the Away/Home label. It is an
+   anchor, because the action really is an address: the club's press-notes PDF,
+   in a new tab, which the ↗ in its icon slot says. See api/gameNotes.js. It
+   keeps only its refusal to shrink in the head's flex row. */
+.innings__notes {
   flex: none;
-  cursor: pointer;
-}
-
-.notesbtn:active {
-  transform: scale(0.96);
-}
-
-.notesbtn:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
-
-.notesbtn__ext {
-  font-size: var(--fs-small);
-  line-height: var(--lh-solid);
-  color: var(--text-caption);
 }
 
 /* What's Brewing sheet — the Brewers' Game notes button opens this instead of
@@ -267,35 +205,9 @@
   margin: 4px 0 10px;
 }
 
-/* Same button language as .stepnav__btn (the Lineups/Innings/Box row this
-   sits beside on the shared iPad/desktop chrome row, min-width:740px) —
-   condensed uppercase display type at a matching height, not the taller
-   sentence-case body-font button this used to be. */
-.inningnav button {
-  min-height: 34px;
-  padding: 0 var(--space-3h);
-  border-radius: var(--radius-sm);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: var(--shadow-card);
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-
-.inningnav button:active:not(:disabled) {
-  transform: scale(0.96);
-}
-
-.inningnav button:disabled {
-  opacity: 0.45;
-  box-shadow: none;
-}
+/* ‹ Back and Next › are Buttons (control size, outline), the same control as
+   the .stepnav__btn row they sit beside on the shared iPad/desktop chrome row
+   (min-width: 740px). Nothing is left to say about them here. */
 
 .inningnav__label {
   font-family: var(--font-display);

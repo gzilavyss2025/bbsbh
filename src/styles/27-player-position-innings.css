@@ -10,35 +10,13 @@
   margin: 0 0 10px;
 }
 
+/* A Button (control size, outline) that is one cell of an equal-width row.
+   All it keeps is where it stands: the row sizes it, not its label, so the
+   side padding is the row's too — at the control size's own 12px, three
+   scopes crowd a phone column. */
 .posinn__scopebtn {
   flex: 1 1 0;
-  min-height: 34px;
-  padding: 0 var(--space-1);
-  border-radius: var(--radius-sm);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-muted);
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: var(--inset-cell);
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.posinn__scopebtn:active {
-  transform: scale(0.96);
-}
-.posinn__scopebtn.is-active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-  box-shadow: none;
-}
-.posinn__scopebtn:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+  padding-inline: var(--space-1);
 }
 
 .posinn__loading {

@@ -1,7 +1,7 @@
 import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'
 import { teamTransactionsPath } from '../../lib/route.js'
-import { Door } from '../../components/ui/Door.jsx'
+import { Door } from '../../components/ui/control/Door.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { TeamTransactionsCard } from '../../components/transactions/TeamTransactionsCard.jsx'
 import { isMlbTeamId } from '../../lib/teams.js'

@@ -275,10 +275,10 @@
    GamePhotosStrip.jsx — a .metriccard like Season Series / Bullpen Health
    above, wearing the same navy/gold masthead, with a "VIEW ALL" shortcut as a
    white filled pill (reversed off the bar's own navy, so it reads as the
-   one call-to-action in it — same footing as .watchbtn's filled-pill
+   one call-to-action in it — same footing as .masthead__watch's filled-pill
    treatment, just light-on-dark where that one's dark-on-light) sitting in
    the bar's right-aligned aside slot; ink navy, golds on hover, same
-   external-link arrow glyph as .watchbtn__ext. The body packs photos into a
+   external-link arrow glyph as the Watch button's ↗ (.btn__icon). The body packs photos into a
    CSS grid that
    fills DOWN before wrapping to a new column (grid-auto-flow: column) — one
    row of larger thumbnails on phone, three rows from the wide breakpoint up
@@ -311,7 +311,7 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-/* The external-link arrow, same glyph/role as .watchbtn__ext. */
+/* The external-link arrow, same glyph/role as the Watch button's ↗ (.btn__icon). */
 .photostrip__viewallarrow {
   font-size: var(--fs-compact);
   line-height: var(--lh-solid);

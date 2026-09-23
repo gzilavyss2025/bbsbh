@@ -88,12 +88,11 @@
    near-invisible, dark on dark. Every ghost button inside `.xl` takes the
    foil instead. Scoped to this surface so nothing else in the app moves. */
 .xl .btn--ghost {
-  color: var(--album-foil);
-  border-color: var(--album-foil-soft);
-  background: transparent;
-}
-.xl .btn--ghost:disabled {
-  opacity: 0.45;
+  --btn-ink: var(--album-foil);
+  --btn-edge: var(--album-foil-soft);
+  --btn-fill: transparent;
+  --btn-fill-hover: transparent;
+  --btn-edge-hover: var(--album-foil);
 }
 
 /* The empty-half screen has no arrows to sit between, so the label centres

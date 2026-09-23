@@ -68,14 +68,14 @@ function GameNotesLink({ teamId }) {
   if (!notes?.url) return null
   return (
     <a
-      className="notesbtn"
+      className="btn btn--control innings__notes"
       href={notes.url}
       target="_blank"
       rel="noopener noreferrer"
       title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
     >
       Game Notes
-      <span className="notesbtn__ext" aria-hidden="true">↗</span>
+      <span className="btn__icon" aria-hidden="true">↗</span>
     </a>
   )
 }

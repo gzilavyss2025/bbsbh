@@ -39,7 +39,7 @@ import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from 
 import { useStampUnseal } from '../hooks/useStamps.js'
 import { useBoxScoreReveal } from '../hooks/useRevealProgress.js'
 import { BoxRevealSyncMount } from '../components/sync/BoxRevealSyncMount.jsx'
-import { Door } from '../components/ui/Door.jsx'
+import { Door } from '../components/ui/control/Door.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -193,7 +193,7 @@ export function BoxScore({
 
       {/* Mobile-only: Refresh moves down here as a floating pill, same
           placement as the Innings page's own mobile Refresh (see
-          .refreshbtn--float), instead of sitting in the header — the wide
+          .innings__refresh--float), instead of sitting in the header — the wide
           layout keeps it inline up top (see the boxscore__headright rule in
           index.css). Never shown once the game is Final. */}
       {!isFinal && (
@@ -202,7 +202,7 @@ export function BoxScore({
             onReload={onReload}
             loading={loading}
             lastUpdated={lastUpdated}
-            className="refreshbtn--float"
+            className="innings__refresh--float"
           />
         </div>
       )}

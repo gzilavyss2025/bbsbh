@@ -7,7 +7,7 @@ import { TeamLeadersLedger } from '../components/teamstats/TeamLeadersLedger.jsx
 import { MilbAlumni } from '../components/teamstats/MilbAlumni.jsx'
 import { TeamScoreCard } from '../components/teamstats/TeamScoreCard.jsx'
 import { TeamTransactionsCard } from '../components/transactions/TeamTransactionsCard.jsx'
-import { Door } from '../components/ui/Door.jsx'
+import { Door } from '../components/ui/control/Door.jsx'
 import { LEDGER_HITTING, LEDGER_PITCHING } from '../api/teamLeaders.js'
 import { TeamHubShell } from './team/TeamHubShell.jsx'
 import { loadOverview } from './team/data/loadOverview.js'

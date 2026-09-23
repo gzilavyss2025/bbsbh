@@ -15,8 +15,8 @@ import { teamLogoUrl } from '../../lib/teams.js'
 // — it is the header's account identity, and My Tally is where it is changed.
 const teamAvatarAppearance = {
   elements: {
-    userButtonAvatarBox: 'accountbtn__avatarbox',
-    userButtonAvatarImage: 'accountbtn__avatarimg',
+    userButtonAvatarBox: 'account__avatarbox',
+    userButtonAvatarImage: 'account__avatarimg',
   },
 }
 
@@ -55,9 +55,9 @@ export function AccountButton({ className = '' }) {
   if (!isClerkEnabled) return null
   const logo = teamLogoUrl(favoriteTeamId)
   return (
-    <div className={`accountbtn ${className}`}>
+    <div className={`account__btn ${className}`}>
       <SignedIn>
-        <span className="accountbtn__team">
+        <span className="account__team">
           {/* Clerk's composition API. Declaring the two default actions
               explicitly is what fixes their ORDER around the custom links —
               custom items are otherwise appended after whatever Clerk renders.
@@ -76,12 +76,12 @@ export function AccountButton({ className = '' }) {
               <UserButton.Action label="signOut" />
             </UserButton.MenuItems>
           </UserButton>
-          {logo && <img className="accountbtn__teamlogo" src={logo} alt="" aria-hidden="true" />}
+          {logo && <img className="account__teamlogo" src={logo} alt="" aria-hidden="true" />}
         </span>
       </SignedIn>
       <SignedOut>
         <SignInButton mode="modal">
-          <button type="button" className="accountbtn__signin" aria-label="Sign in to sync reveal progress across devices">
+          <button type="button" className="btn btn--ghost account__signin" aria-label="Sign in to sync reveal progress across devices">
             Sign in
           </button>
         </SignInButton>

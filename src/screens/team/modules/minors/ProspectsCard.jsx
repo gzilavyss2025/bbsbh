@@ -1,5 +1,5 @@
 import { Headshot } from '../../../../components/player/Headshot.jsx'
-import { Door } from '../../../../components/ui/Door.jsx'
+import { Door } from '../../../../components/ui/control/Door.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 

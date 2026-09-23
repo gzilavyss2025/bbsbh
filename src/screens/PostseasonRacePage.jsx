@@ -13,7 +13,7 @@ import { TeamLink } from '../components/team/TeamLink.jsx'
 import { ClinchMark, ClinchKey } from '../components/team/ClinchMark.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
-import { Door } from '../components/ui/Door.jsx'
+import { Door } from '../components/ui/control/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 // The league mark that rides the bar's right edge — same convention (and same

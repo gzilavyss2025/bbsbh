@@ -120,6 +120,13 @@
   --accent-primary:   var(--navy);
   --accent-positive:  var(--field);
   --accent-negative:  var(--clay);
+  /* The two filled button skins under a pointer (styles/system/button.css,
+     #1130). A step toward the paper for ink and a step deeper for clay, each
+     one primitive already in the palette, so hover is a change of shade and
+     never a new hue. Both are asserted against --text-on-ink in
+     src/lib/design/contrastPairings.js. */
+  --accent-primary-hover:  var(--ink-2);
+  --accent-negative-hover: var(--clay-deep);
   /* Text that is a LINK or a text-button: "See all ›", the deck steppers, a
      "more" affordance, an inline link inside a hint. Four rules across three
      partials asked for this token and it was never defined, so `color:
