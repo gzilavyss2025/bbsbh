@@ -1,7 +1,8 @@
 # Testing
 
 Two layers, deliberately split by what each can check cheaply and
-deterministically.
+deterministically, plus a local screenshot suite for design-system changes
+(`npm run visual`, below).
 
 ## Unit suite — `npm test` (CI-gated)
 
@@ -115,6 +116,87 @@ The unit suite's `invariant-real-game.test.js` now pins the same spoiler
 guarantee at the **data layer** deterministically in CI, so a regression in the
 reveal-only selectors is caught automatically even though the browser specs
 aren't.
+
+## Screenshot suite — `npm run visual` (not CI-gated)
+
+A design-system change moves many pages at once: one edit to `Pill`, `Card` or a
+token changes every page that uses it (#1177). This suite shows which pages a
+change moved. It takes a screenshot of each page in `e2e/visual/routes.js` at
+390px (the phone) and at 760px (just past the 740px breakpoint), and compares
+each one with a committed baseline image in `e2e/visual/baselines/`.
+
+**When to run it.** Before you open a design-system PR, run it on your branch.
+Put the list of changed pages in the PR body. A changed page that the PR did not
+mean to change is a bug.
+
+**How to run it.** Start your worktree's dev server, then point the suite at its
+port. The first run on a cold server is a warm-up: read the second.
+
+```bash
+E2E_PORT=5172 npm run visual            # compare every page with its baseline
+npx playwright show-report playwright-report/visual   # before, after, and the difference
+```
+
+The report shows each changed page three ways: the baseline, the new shot, and
+a difference image that marks each changed pixel in red. A green run changes
+nothing.
+
+**How to update the baselines.** Do this only when the change is correct and
+you mean it. Commit the new images in the same PR as the change.
+
+```bash
+E2E_PORT=5172 npm run visual:update     # rewrite each baseline that changed
+```
+
+`npm run visual:update` rewrites only the images that changed. Look at each new
+image before you commit it. A baseline must never show a score from a sealed
+surface (see "The pages" below).
+
+**Frozen data.** The live pages read statsapi.mlb.com, and the nightly cron
+rewrites `public/data/*.json`, so a screenshot of a live page would change every
+day. The suite replays each page's traffic from a HAR file in `e2e/visual/har/`
+(one per page and width; the response bodies sit beside them, named by their
+hash). A request that the HAR does not hold is aborted, never sent live, and the
+test fails with the list of those requests. The clock is fixed at the recording
+time (`FROZEN_NOW` in `routes.js`), and `Math.random` is seeded.
+
+**How to record the HARs again.** Do this when you add a page, when a page
+starts to ask for a new request, or when you move `FROZEN_NOW`. It reads the
+live network, so the sandbox must be off.
+
+```bash
+VISUAL_RECORD=1 E2E_PORT=5172 npx playwright test -c playwright.visual.config.js
+E2E_PORT=5172 npm run visual:update
+```
+
+Add `-g <page name>` to record one page. A recording run takes no screenshots,
+and it deletes each response body that no HAR names any more
+(`e2e/visual/prune-har.js`). New data changes the pages, so look at every new
+baseline.
+
+**The pages.** `/design-lab` (as five element shots: the page head and its four
+bands), the anchor date's slate (2026-07-07), the slate's result filter chips,
+the anchor game's lineup page, innings viewer and box score (823035, see
+`docs/test-games.md`), the Brewers' team hub (Overview and Numbers), a hitter
+and a pitcher (each with a contract card), `/salaries`, `/standings`,
+`/postseason-race` and `/situational-records`. `routes.js` says why each one is
+there.
+
+Every shot is of a **sealed** page. The game pages are shot with nothing
+revealed. The filter chips exist only after "Reveal all results", so that shot
+is the chip bar alone: the revealed cards, which hold the scores, are not in
+the image.
+
+**Zero tolerance.** `maxDiffPixels` and `threshold` are both 0, so one changed
+pixel fails a page. The frozen data, the frozen clock and a set of Chromium
+raster flags make this possible (`playwright.visual.config.js` says why).
+If a page is not the same on two runs, find what moves and freeze it or mask it
+(`MASKS` in `routes.js`). Do not raise the tolerance.
+
+**Why it is not in CI.** The baselines are Windows images. Font rendering
+differs on a Linux runner, so there every page shows as changed. The snapshot
+paths have no platform part, so a run on another OS fails; it does not quietly
+write a second set of baselines.
 
 ## Making the tests actually bite
 
