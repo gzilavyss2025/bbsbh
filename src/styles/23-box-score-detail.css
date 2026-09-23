@@ -284,17 +284,22 @@
 .tlead__badges:empty {
   display: none;
 }
+/* The level is a paper Pill tag (#1131) on the inset paper with a hairline
+   edge. It keeps the mono face, and its tight block padding: on a chaser row
+   it sits beside the prospect tag, which pads 1px to match it (below). The
+   top is one pixel more than the bottom: at 1px/1px the mono caps sat 0.6px
+   high, and the browser snaps text to a whole pixel, so an em nudge does
+   nothing. 2px over 1px centres them (measured with
+   .scratch/design-system/pill-collapse/centre.mjs). */
 .tlead__level {
+  --pill-fill: var(--surface-inset);
+  --pill-edge: var(--border-hairline);
+  --pill-ink: var(--text-muted);
   flex: none;
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
-  color: var(--text-muted);
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-pill);
-  padding: 1px var(--space-1h);
+  padding-block: 2px 1px;
 }
 /* On a chaser row the pill/level sit small and inline before the value: the
    prospect pill keeps a 1px pad here, a hair under the tag's own 2px, so it

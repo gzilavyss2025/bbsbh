@@ -12,6 +12,7 @@ import {
 import { DayStrip, DayStripKey } from '../workload/DayStrip.jsx'
 import { ThresholdBullets } from '../workload/ThresholdBullets.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // THE MOUND CARD — the pitcher's counterpart to a hitter's Recent form.
 //
@@ -148,7 +149,7 @@ function BullpenLead({ data, playerId, asOfDate }) {
   return (
     <div className="moundcard__verdict">
       <p className="moundcard__lead">
-        <span className={`moundcard__avail moundcard__avail--${status}`}>{status}</span>
+        <Pill className={`moundcard__avail moundcard__avail--${status}`}>{status}</Pill>
       </p>
       <ThresholdBullets flags={avail?.flags} />
     </div>

@@ -472,25 +472,20 @@
   background: var(--clay);
   border-color: var(--clay-deep);
 }
+/* The plate appearance's result, a Pill tag (#1131). The two kinds are tints
+   on the pill's custom properties: a soft fill, a deep ink, a mid edge. */
 .scorebug__result {
   flex: none;
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-caps);
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  border: var(--bw-hair) solid transparent;
 }
 .scorebug__result.is-positive {
-  background: var(--field-soft);
-  color: var(--field-deep);
-  border-color: color-mix(in srgb, var(--field) 35%, var(--border-rule));
+  --pill-fill: var(--field-soft);
+  --pill-edge: color-mix(in srgb, var(--field) 35%, var(--border-rule));
+  --pill-ink: var(--field-deep);
 }
 .scorebug__result.is-negative {
-  background: var(--clay-soft);
-  color: var(--clay-deep);
-  border-color: color-mix(in srgb, var(--clay) 35%, var(--border-rule));
+  --pill-fill: var(--clay-soft);
+  --pill-edge: color-mix(in srgb, var(--clay) 35%, var(--border-rule));
+  --pill-ink: var(--clay-deep);
 }
 /* Fills the white space the diamond/out-dots/result pill leave to their right
    with the play's own feed prose — natural sentence case, so it needs the

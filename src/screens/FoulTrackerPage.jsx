@@ -25,6 +25,7 @@ import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { teamAbbr, teamFullName, teamClubName, favoriteAccentColor } from '../lib/teams.js'
+import { Pill } from '../components/ui/control/Pill.jsx'
 
 // The Foul Tracker — season-long foul-ball counting nobody else publishes:
 // league leaders (total, per game, single-game highs), two-strike "spoiling",
@@ -561,7 +562,7 @@ function PaScorebug({ pa }) {
           ))}
         </span>
         {pa.resultEvent && (
-          <span className={`scorebug__result ${positive ? 'is-positive' : 'is-negative'}`}>{pa.resultEvent}</span>
+          <Pill className={`scorebug__result ${positive ? 'is-positive' : 'is-negative'}`}>{pa.resultEvent}</Pill>
         )}
         {pa.resultDescription && (
           <p className="scorebug__prose">

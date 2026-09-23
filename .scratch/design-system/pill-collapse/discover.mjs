@@ -15,8 +15,12 @@ const URLS = (process.env.URLS || [
   '/09222026/tbnyy/lineup1', '/09222026/tbnyy/lineup2', '/05272025/bosmil/top10', '/design-lab',
 ].join(' ')).split(' ')
 
+// SEED='{"bbsbh:reveal:777747":"19"}' puts a reveal mark in localStorage
+// before each load, so a tag that renders only after a reveal can be found.
+const SEED = process.env.SEED ? JSON.parse(process.env.SEED) : null
 const b = await chromium.launch()
-const p = await b.newPage({ viewport: { width: 390, height: 900 } })
+const p = await b.newPage({ viewport: { width: +(process.env.W || 390), height: 900 } })
+if (SEED) await p.addInitScript((s) => { for (const [k, v] of Object.entries(s)) localStorage.setItem(k, v) }, SEED)
 for (const u of URLS) {
   const sep = u.includes('?') ? '&' : '?'
   await p.goto(`${base}${u}${sep}nointro`, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {})

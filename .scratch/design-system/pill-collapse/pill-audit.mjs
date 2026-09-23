@@ -10,7 +10,8 @@
 // --pill-fill covers background, --pill-edge covers border-color, --pill-ink
 // covers color. That is the whole point of the skin model.
 //
-//   node pill-audit.mjs            (merge base ef2eb7ba7 vs the working tree)
+//   node pill-audit.mjs            (slice 1: merge base ef2eb7ba7 vs the working tree)
+//   SLICE=2 node pill-audit.mjs    (slice 2: merge base 0aaa46737 vs the working tree)
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -18,7 +19,8 @@ import { fileURLToPath } from 'node:url'
 import postcss from 'postcss'
 
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url))
-const BASE = process.env.BASE || 'ef2eb7ba7'
+const SLICE = process.env.SLICE || '1'
+const BASE = process.env.BASE || (SLICE === '1' ? 'ef2eb7ba7' : '0aaa46737')
 const sh = (c) => execSync(c, { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 })
 const atBase = (f) => { try { return sh(`git show ${BASE}:src/styles/${f}`) } catch { return '' } }
 const now = (f) => { try { return readFileSync(join(ROOT, 'src/styles', f), 'utf8') } catch { return '' } }
@@ -57,7 +59,7 @@ const pill = (mods = []) => [
 
 // old selector @ file  →  what it became. `residual` is [file, selector] of
 // the rule the slice kept; `mods` the pill modifiers the consumer wears.
-const PAIRS = [
+const PAIRS_1 = [
   { old: '.milestonepill', file: '31-wild-card.css' },
   { old: '.rookiepill', file: '31-wild-card.css' },
   { old: '.rookiepill__short', file: '31-wild-card.css', residual: ['31-wild-card.css', '.rookie__short'] },
@@ -95,7 +97,7 @@ const PAIRS = [
 ]
 
 // Dropped on purpose. Key: `old selector|property`. Every entry says why.
-const DROPPED = {
+const DROPPED_1 = {
   '.tierpill|line-height': 'the tag line is --lh-compact for every tag (tier grows 18 → 20.4px)',
   '.umpmodal__glevel|line-height': 'the tag line is --lh-compact for every tag (15 → 20.4px)',
   '.simlike__term|line-height': 'the tag line is --lh-compact for every tag (18 → 20.4px)',
@@ -108,6 +110,47 @@ const DROPPED = {
   '.cthist__fuzzy|font-weight': 'the display face ships one weight; a weight is a no-op',
   '.tlead__row .prospectpill|font-size': 'it restated --fs-label, which is the pill tag size already',
 }
+
+// Slice 2: the paper tags and the tints. Every host keeps its old class, so a
+// residual is the same selector re-read in the working tree.
+const own = (file, sel, extra = {}) => ({ old: sel, file, residual: [file, sel], ...extra })
+const PAIRS_2 = [
+  { old: '.wiredock__count', file: '04a-wire-dock.css', residual: ['04a-wire-dock.css', '.pill.wiredock__count'], mods: ['.pill--paper'] },
+  own('12-sealbox.css', '.wcall__pill'),
+  own('12-sealbox.css', '.wcall__pill--wrong'),
+  own('12-sealbox.css', '.wcall__pill--right'),
+  own('12-sealbox.css', '.favormeter__tierpill'),
+  own('12-sealbox.css', '.favormeter__tierpill--routine'),
+  own('12-sealbox.css', '.favormeter__tierpill--standout'),
+  own('12-sealbox.css', '.favormeter__tierpill--outlier'),
+  own('20-charts.css', '.winprob__ledger-chip', { mods: ['.pill--ink'] }),
+  { old: '.flipback__pill', file: '22-box-score-tables.css' },
+  { old: '.flipback__pill--tag', file: '22-box-score-tables.css' },
+  own('22-box-score-tables.css', '.flipback__pill--crown', { mods: ['.pill--ink'] }),
+  own('22-box-score-tables.css', '.flipback__pill--scenario', { mods: ['.pill--ink'] }),
+  own('23-box-score-detail.css', '.tlead__level', { mods: ['.pill--paper'] }),
+  { old: '.moundcard__avail', file: '26c-mound-card.css' },
+  own('26c-mound-card.css', '.moundcard__avail--fresh'),
+  own('26c-mound-card.css', '.moundcard__avail--limited'),
+  own('26c-mound-card.css', '.moundcard__avail--down'),
+  own('28a-team-hub-hero.css', '.team-hub__level'),
+  own('31-wild-card.css', '.cbk__badge'),
+  own('31-wild-card.css', '.thub-affiliate__level', { mods: ['.pill--paper'] }),
+  own('31-wild-card.css', '.prospecttable__top'),
+  own('43-foul-tracker.css', '.scorebug__result'),
+  own('43-foul-tracker.css', '.scorebug__result.is-positive'),
+  own('43-foul-tracker.css', '.scorebug__result.is-negative'),
+  own('72-player-hover-card.css', '.phcard__tag', { mods: ['.pill--paper'] }),
+  { old: '.phcard__tag--level', file: '72-player-hover-card.css', mods: ['.pill--paper'] },
+  own('72-player-hover-card.css', '.phcard__tag--rehab'),
+  own('74-contract-workbench.css', '.cwb__chip', { mods: ['.pill--paper'] }),
+  own('74-contract-workbench.css', '.cwb__chip--none'),
+  own('74-contract-workbench.css', '.cwb__chip--share'),
+]
+const DROPPED_2 = {}
+
+const PAIRS = SLICE === '1' ? PAIRS_1 : PAIRS_2
+const DROPPED = SLICE === '1' ? DROPPED_1 : DROPPED_2
 
 let lost = 0
 let dropped = 0

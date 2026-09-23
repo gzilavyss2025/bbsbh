@@ -69,15 +69,15 @@ export function CandidateList({ rawName, candidates, onPick, disabled, showRowSh
               </div>
               <ul className="cwb__chips">
                 {(c.reasons ?? []).map((reason) => (
-                  <li key={reason} className="cwb__chip caps-exempt">
+                  <li key={reason} className="pill pill--paper cwb__chip caps-exempt">
                     {reason}
                   </li>
                 ))}
                 {!(c.reasons ?? []).length && (
-                  <li className="cwb__chip cwb__chip--none caps-exempt">no context clues</li>
+                  <li className="pill pill--paper cwb__chip cwb__chip--none caps-exempt">no context clues</li>
                 )}
                 {showRowShare && c.ofRows > 1 && (
-                  <li className="cwb__chip cwb__chip--share caps-exempt">
+                  <li className="pill pill--paper cwb__chip cwb__chip--share caps-exempt">
                     in {c.inRows} of {c.ofRows} rows
                   </li>
                 )}

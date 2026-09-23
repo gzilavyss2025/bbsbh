@@ -593,8 +593,8 @@ export function WinProbChart({
                 >
                   <span className="winprob__ledger-meta">
                     <span
-                      className="winprob__ledger-chip"
-                      style={{ background: colors.primary, color: colors.text }}
+                      className="pill pill--ink winprob__ledger-chip"
+                      style={{ '--pill-fill': colors.primary, '--pill-edge': colors.primary, '--pill-text': colors.text }}
                     >
                       {chipText}
                     </span>

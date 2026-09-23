@@ -435,24 +435,25 @@
   flex-wrap: wrap;
   font-family: var(--font-display);
 }
+/* The two calls are Pill tags (#1131), and each is a tint: it sets the pill's
+   custom properties and does not repaint it. They render inside StatBox's
+   reveal render function, so only the class names moved there — no JSX left
+   the function. The pill leaves the face to its host here: the calls take the
+   display face of .wcall__calls, as they always did. */
 .wcall__pill {
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  white-space: nowrap;
+  font-family: inherit;
 }
 .wcall__pill--wrong {
-  background: var(--clay-soft);
-  color: var(--clay-deep);
+  --pill-fill: var(--clay-soft);
+  --pill-edge: transparent;
+  --pill-ink: var(--clay-deep);
   text-decoration: line-through; /* strike-link-exempt: a pill, not a name */
   text-decoration-thickness: 1.5px;
 }
 .wcall__pill--right {
-  background: var(--field-soft);
-  color: var(--field);
+  --pill-fill: var(--field-soft);
+  --pill-edge: transparent;
+  --pill-ink: var(--field);
 }
 .wcall__arrow {
   color: var(--graphite-soft);
@@ -569,28 +570,28 @@
    A normal flex child (own row, right-aligned via align-self), NOT
    position:absolute — an overlay here collided with the track-row right
    below it at this card's narrow 50%-column width, hiding the home club's
-   logo under the pill. */
+   logo under the pill.
+   It is a Pill tag (#1131), and each tier is a tint on the pill's custom
+   properties. Like the calls above, it renders inside StatBox's reveal, so
+   only its class names moved. --marker is the outlier's FILL, never an ink
+   (ADR-0083): the ink on it is --ink-0. */
 .favormeter__tierpill {
   align-self: flex-end;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  padding: 2px var(--space-1h);
-  border-radius: 999px;
 }
 .favormeter__tierpill--routine {
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  color: var(--text-caption);
+  --pill-fill: var(--surface-inset);
+  --pill-edge: var(--border-hairline);
+  --pill-ink: var(--text-caption);
 }
 .favormeter__tierpill--standout {
-  background: var(--award-soft);
-  color: var(--award-ink);
+  --pill-fill: var(--award-soft);
+  --pill-edge: transparent;
+  --pill-ink: var(--award-ink);
 }
 .favormeter__tierpill--outlier {
-  background: var(--marker);
-  color: var(--ink-0);
+  --pill-fill: var(--marker);
+  --pill-edge: transparent;
+  --pill-ink: var(--ink-0);
 }
 .favormeter__track-row {
   display: flex;

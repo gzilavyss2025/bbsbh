@@ -5,6 +5,9 @@
 //   node .scratch/design-system/pill-collapse/census.mjs --rev db3d0b972
 //   node .scratch/design-system/pill-collapse/census.mjs --variants # the reconciliation table
 //
+// A row that a slice moved onto Pill leaves the census; its override keeps a
+// `landed` field, and the map counts it as merge done.
+//
 // Writes census.json beside this file (working-tree run only) and prints a table.
 //
 // ---------------------------------------------------------------------------
@@ -352,8 +355,16 @@ const rows = census.map((r) => {
   return { ...row, ...o, heuristicRole: role0, heuristicFill: row.fill }
 })
 
-// ---------- stale overrides ----------
-const stale = Object.keys(OVERRIDES).filter((k) => !k.startsWith('_') && !rows.some((r) => r.selector === k || `${r.file}:${r.selector}` === k))
+// ---------- stale and landed overrides ----------
+// A key that matches no row is STALE, unless its override says which slice
+// LANDED it: that row moved onto Pill and left the census on purpose, so it is
+// counted as done. A landed key that still matches a row is a mistake either
+// way, and prints as such.
+const matches = (k) => rows.some((r) => r.selector === k || `${r.file}:${r.selector}` === k)
+const overrideKeys = Object.keys(OVERRIDES).filter((k) => !k.startsWith('_'))
+const stale = overrideKeys.filter((k) => !matches(k) && !OVERRIDES[k].landed)
+const landed = overrideKeys.filter((k) => !matches(k) && OVERRIDES[k].landed)
+const landedButLive = overrideKeys.filter((k) => matches(k) && OVERRIDES[k].landed)
 const unreviewed = rows.filter((r) => !r.verdict)
 
 // ---------- slices ----------
@@ -421,6 +432,14 @@ function renderMap() {
   L.push('## Tally', '')
   L.push(`- **Total: ${rows.length}** pill base rules (${rows.filter((r) => r.nameSaysPill).length} say "pill")`)
   L.push(`- Verdict: ${count((r) => r.verdict || 'UNREVIEWED')}`)
+  if (landed.length) {
+    const bySlice = {}
+    for (const k of landed) bySlice[OVERRIDES[k].landed] = (bySlice[OVERRIDES[k].landed] || 0) + 1
+    const left = rows.filter((r) => r.verdict === 'merge').length
+    L.push(`- **Merge done ${landed.length}** (${Object.entries(bySlice).map(([k, n]) => `${k}: ${n}`).join(' · ')}) · merge left ${left}. Of the ${rows.length + landed.length} capsule rules first counted, ${landed.length} are on Pill now.`)
+    L.push(`- Landed (no longer a row): ${landed.map((k) => '`' + k + '`').join(', ')}`)
+  }
+  if (landedButLive.length) L.push(`- **Marked landed but still a row**: ${landedButLive.join(', ')}`)
   L.push(`- Fill: ${count((r) => r.fill)}`)
   L.push(`- Role: ${count((r) => r.role)}`)
   L.push(`- Role x verdict: ${count((r) => `${r.role}/${r.verdict}`)}`)
@@ -469,5 +488,7 @@ if (!QUIET) {
 }
 console.log(`\n${rows.length} pill base rules (${REV || 'working tree'}); ${rows.filter((r) => r.nameSaysPill).length} say "pill".`)
 if (stale.length) console.log(`STALE overrides: ${stale.join(', ')}`)
+if (landed.length) console.log(`Landed (merge done): ${landed.length}; merge left: ${rows.filter((r) => r.verdict === 'merge').length}`)
+if (landedButLive.length) console.log(`MARKED LANDED BUT STILL A ROW: ${landedButLive.join(', ')}`)
 if (unreviewed.length) console.log(`UNREVIEWED: ${unreviewed.map((r) => r.selector).join(', ')}`)
 if (target.length) console.log(`TARGET (system/pill.css, not counted): ${target.map((r) => r.selector).join(" | ")}`)

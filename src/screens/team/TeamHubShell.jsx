@@ -24,6 +24,7 @@ import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { TeamTabBar } from './TeamTabBar.jsx'
 import { parentOrgIdOf } from './data/shared.js'
 import { useIdentityDraft } from './modules/identity/useIdentityDraft.js'
+import { Pill } from '../../components/ui/control/Pill.jsx'
 
 // Both halves of the identity editor are lazy, for two different reasons — the
 // same split BallparkCard makes.
@@ -204,7 +205,7 @@ export function TeamHubShell({
             <div className="team-hub__namerow">
               <h1>{team.name}</h1>
               {isMilb && (
-                <span className="team-hub__level">{SPORT_LABEL[team.sport?.id] ?? DASH}</span>
+                <Pill className="team-hub__level">{SPORT_LABEL[team.sport?.id] ?? DASH}</Pill>
               )}
             </div>
             {record && (

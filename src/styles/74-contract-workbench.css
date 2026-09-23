@@ -477,25 +477,26 @@
   list-style: none;
 }
 
+/* One reason per chip: a paper Pill tag (#1131), set by hand on the <li> so
+   the list stays a list. It is the one tag in the body face, at the caption
+   size and with no tracking, because a reason is a phrase and not a label. */
 .cwb__chip {
-  padding: 1px var(--space-2);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-pill);
-  background: var(--surface-inset);
-  color: var(--text-caption);
+  --pill-fill: var(--surface-inset);
+  --pill-edge: var(--border-hairline);
+  --pill-ink: var(--text-caption);
   font-family: var(--font-body);
   font-size: var(--fs-caption);
-  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-none);
 }
 
 .cwb__chip--none {
-  color: var(--text-muted);
+  --pill-ink: var(--text-muted);
   font-style: italic;
 }
 
 .cwb__chip--share {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
+  --pill-edge: var(--accent-primary);
+  --pill-ink: var(--accent-primary);
 }
 
 /* ---- Roster search, per-row list ---- */

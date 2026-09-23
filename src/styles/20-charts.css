@@ -402,16 +402,18 @@
   gap: 3px;
 }
 
+/* The swing's club and size, a solid Pill tag (#1131) in the club's own
+   colour. It names that club in its text, so the colour is identity, not a
+   score and not a control (ADR-0030): the chart's rows are the control. The
+   ink fill's custom properties take the club's triad inline
+   (WinProbChart.jsx); this rule keeps only the figure face, and one more
+   pixel on top: the mono figures sat 0.4px high in the 2px/2px box, and the
+   browser snaps text to a whole pixel. 3px over 2px centres them (measured
+   with .scratch/design-system/pill-collapse/centre.mjs). */
 .winprob__ledger-chip {
-  display: inline-flex;
-  align-items: center;
+  padding-top: 3px;
   font-family: var(--font-mono);
-  font-weight: var(--w-bold);
   font-size: var(--fs-cell);
-  letter-spacing: var(--ls-label);
-  padding: 2px var(--space-1h);
-  border-radius: var(--radius-pill);
-  white-space: nowrap;
 }
 
 .winprob__ledger-half {

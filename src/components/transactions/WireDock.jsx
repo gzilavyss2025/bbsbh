@@ -13,6 +13,7 @@ import {
   settleMs,
   velocityFrom,
 } from './dockPhysics.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // THE WIRE DOCK — the phone's presentation of the league's roster moves.
 //
@@ -438,7 +439,7 @@ export function WireDock({ endDate, sportId, onPresence, singleDay = false }) {
                 <span className="wiredock__club">{newestAbbr}</span>
                 <span className="wiredock__cut">{newestLine}</span>
               </span>
-              <span className="wiredock__count">{total}</span>
+              <Pill fill="paper" className="wiredock__count">{total}</Pill>
               <span className="wiredock__chevron" aria-hidden="true">⌃</span>
             </button>
 

@@ -65,6 +65,14 @@
    a caller sets (Pill's `ink` prop writes it inline); outline draws its edge
    and text from it, paper its text.
 
+   A TINT IS THE SAME MODEL, ON THE HOST (signed off for #1131). A soft fill,
+   a deep ink and a mid edge — the tier, the rank, a good or bad result, an
+   arm's rest — is a host rule that sets --pill-fill, --pill-edge and
+   --pill-ink. It never repaints background, color or border;
+   test/pill-cascade.test.js lists every tint host and holds each one to
+   that. A club's colour reaches a pill only this way, never through `ink`,
+   and only on an identity label, never on a control (ADR-0030).
+
    THE STATES — a control's only. A tag has none: it is not focusable, it has
    no hover and it cannot be pressed.
 
