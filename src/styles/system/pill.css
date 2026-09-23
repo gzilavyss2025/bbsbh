@@ -36,6 +36,10 @@
      gap        --space-1, between an icon (the MLB mark on Top 100) and the
                 label.
 
+   A FIGURE PILL (a rank, a level, a count) keeps the mono face, and its
+   HOST pins it: `font-family: var(--font-mono)` plus tabular-nums, written
+   two-class. The face is not a third axis on the pill (signed off for #1131).
+
    The tag's 2px is the recipe every tag already drew. It is the one literal
    here, and it is not a new one: the scale starts at 4px, and 4px vertical
    padding would lift a tag to 24px, into the band a control reads as.

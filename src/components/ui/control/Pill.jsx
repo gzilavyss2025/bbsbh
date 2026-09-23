@@ -26,6 +26,12 @@ import { buttonAria } from '../../../lib/design/buttonClass.js'
 //          selected state. Leave it undefined for an ordinary action.
 //   href   control only: renders an anchor, for a pill that is an address.
 //
+// WHEN A CONTROL IS A PILL AND NOT A BUTTON (signed off for #1131). A pill
+// control does one of two jobs: it FILTERS the list under it ("MLB only", the
+// slate's filter chips), or it is the one action a coloured BAND carries
+// ("Postseason odds"). Anything else that acts on the page is a Button. Both
+// are 34px; the capsule is what tells them apart.
+//
 // A tag takes no onClick. A tappable tag is a control wearing the wrong height,
 // which is the exact confusion #1131 exists to remove, so it throws instead.
 export function Pill({
