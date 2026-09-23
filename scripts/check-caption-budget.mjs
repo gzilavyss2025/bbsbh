@@ -43,7 +43,10 @@ import { resolve, join } from 'node:path'
 // .movedup__pool, which this budget already counts. A raise is NOT the way to
 // land a new rule: this one paid for concurrent work the ratchet could not see,
 // and the number goes down from here.
-const BUDGET = 127
+//
+// 127 -> 126: #1131 slice 2 moved the umpire card's two calls (.wcall__pill)
+// onto the Pill tag, which is --fs-label.
+const BUDGET = 126
 
 const stylesDir = resolve('src/styles')
 const sheets = []

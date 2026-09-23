@@ -65,6 +65,14 @@
    a caller sets (Pill's `ink` prop writes it inline); outline draws its edge
    and text from it, paper its text.
 
+   A TINT IS THE SAME MODEL, ON THE HOST (signed off for #1131). A soft fill,
+   a deep ink and a mid edge — the tier, the rank, a good or bad result, an
+   arm's rest — is a host rule that sets --pill-fill, --pill-edge and
+   --pill-ink. It never repaints background, color or border;
+   test/pill-cascade.test.js lists every tint host and holds each one to
+   that. A club's colour reaches a pill only this way, never through `ink`,
+   and only on an identity label, never on a control (ADR-0030).
+
    THE STATES — a control's only. A tag has none: it is not focusable, it has
    no hover and it cannot be pressed.
 
@@ -80,6 +88,10 @@
      disabled        :disabled or [aria-disabled="true"]. The fill stays and
                      drops to --opacity-disabled. Never repainted.
 
+   The colour defaults are written in :where(), so they weigh nothing: a
+   one-class tint wins over them in any load order, even from a sheet that
+   loads before this one. test/pill-cascade.test.js holds that.
+
    WHERE IT SITS IN THE CASCADE. src/index.css imports this file immediately
    before system/button.css, which is pinned directly before 07. Every per-site rule in 07 onward
    loads after it and still wins on order; a rule in 01–06b that styles a pill
@@ -87,12 +99,18 @@
    test/pill-cascade.test.js pins the slot.
    --------------------------------------------------------------------------- */
 
-.pill {
+/* The colour defaults sit in :where(), at zero specificity, apart from the
+   shape. A tint host is one class; at zero it wins whichever sheet loads
+   first, so a tint never depends on the cascade slot below. The seal fill
+   keeps class weight: nothing tints a seal. */
+:where(.pill) {
   --pill-ink: var(--text-muted);
   --pill-fill: transparent;
   --pill-edge: var(--pill-ink);
   --pill-text: var(--pill-ink);
+}
 
+.pill {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -112,12 +130,14 @@
 
 /* ---- the control role ---- */
 
-.pill--control {
+:where(.pill--control) {
   --pill-ink: var(--text-body);
   --pill-edge: var(--border-rule);
   --pill-fill-hover: var(--surface-inset);
   --pill-edge-hover: var(--text-caption);
+}
 
+.pill--control {
   justify-content: center;
   gap: var(--space-1h);
   min-height: var(--control-min);
@@ -132,7 +152,7 @@
 
 /* ---- fills ---- */
 
-.pill--paper {
+:where(.pill--paper) {
   --pill-ink: var(--text-body);
   --pill-fill: var(--surface-card);
   --pill-edge: var(--border-rule);
@@ -140,7 +160,7 @@
   --pill-edge-hover: var(--text-caption);
 }
 
-.pill--ink {
+:where(.pill--ink) {
   --pill-fill: var(--accent-primary);
   --pill-edge: var(--accent-primary);
   --pill-text: var(--text-on-ink);

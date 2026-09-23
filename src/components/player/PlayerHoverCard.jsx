@@ -6,6 +6,7 @@ import { usePlayerHoverStats } from '../../hooks/usePlayerHoverStats.js'
 import { subscribeHover, getHoverSnapshot, hideHoverNow } from '../../lib/playerHoverStore.js'
 import { playerHoverCardPosition } from '../../lib/playerHoverPosition.js'
 import { teamPrimaryColor } from '../../lib/teams.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 const CARD_ID = 'player-hover-card'
 
@@ -110,7 +111,7 @@ function PlayerHoverCardBody({ data }) {
         <div className="phcard__id">
           <div className="phcard__name">{data.fullName}</div>
           <div className="phcard__meta">{metaLine(data)}</div>
-          {tag && <span className={`phcard__tag phcard__tag--${tag.kind}`}>{tag.text}</span>}
+          {tag && <Pill fill="paper" className={`phcard__tag phcard__tag--${tag.kind}`}>{tag.text}</Pill>}
         </div>
         {data.team && (
           <TeamLogo teamId={data.team.id} name={data.team.name} size={30} className="phcard__crest" />

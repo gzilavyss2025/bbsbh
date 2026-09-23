@@ -18,6 +18,7 @@ import {
   scorePairsLine,
   showsPerformerCard,
 } from '../../lib/resultCards.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // The flip card's back face: what a past, Final game's card turns into once
 // revealed. Deliberately a SUMMARY, not the full box score — final R/H/E, the
@@ -219,19 +220,20 @@ function ResultPills({ game, cardMeta }) {
   return (
     <div className="flipback__pills">
       {isGameOfTheNight && (
-        <span className="flipback__pill flipback__pill--crown">
+        <Pill fill="ink" className="flipback__pill flipback__pill--crown">
           <span className="flipback__pill-star" aria-hidden="true">★</span> Game of the Night
-        </span>
+        </Pill>
       )}
       {scenarioStyle && (
-        <span
+        <Pill
+          fill="ink"
           className="flipback__pill flipback__pill--scenario"
           style={{ '--pill-accent': scenarioStyle.accent, '--pill-text': scenarioStyle.text }}
         >
           {SCENARIO_LABEL[scenario]}
-        </span>
+        </Pill>
       )}
-      {dhLabel && <span className="flipback__pill flipback__pill--tag">{dhLabel}</span>}
+      {dhLabel && <Pill className="flipback__pill flipback__pill--tag">{dhLabel}</Pill>}
     </div>
   )
 }

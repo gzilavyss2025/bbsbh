@@ -199,26 +199,17 @@
   flex-wrap: wrap;
   gap: var(--space-1h);
 }
-.flipback__pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-}
+/* Each pill is a Pill tag (#1131). The crown and the scenario are solid: the
+   ink fill with its ground swapped. The doubleheader label is a quiet tint:
+   the page fill and a hairline edge, so its muted text always sits on
+   --bg-page (a checked pair), never on a pinned card's club-tinted ground. */
 .flipback__pill--tag {
-  background: var(--bg-page);
-  color: var(--text-muted);
-  border: var(--bw-hair) solid var(--border-hairline);
+  --pill-fill: var(--bg-page);
+  --pill-edge: var(--border-hairline);
 }
 .flipback__pill--crown {
-  background: var(--award-ink);
-  color: var(--text-on-ink);
+  --pill-fill: var(--award-ink);
+  --pill-edge: var(--award-ink);
 }
 /* The ★ glyph's own em-box doesn't sit centered against the label's caps at
    this caption size — nudged onto the same visual center as the label
@@ -238,9 +229,8 @@
    highlighter yellow — reversed, dark ink text is what actually holds
    WCAG AA against IT specifically. */
 .flipback__pill--scenario {
-  background: var(--pill-accent);
-  color: var(--pill-text);
-  border: var(--bw-hair) solid var(--pill-accent);
+  --pill-fill: var(--pill-accent);
+  --pill-edge: var(--pill-accent);
 }
 /* The Game of the Night's conditional second beat, and the Dominant
    Performance / Blowout / Extra-Innings performer-card variant — a

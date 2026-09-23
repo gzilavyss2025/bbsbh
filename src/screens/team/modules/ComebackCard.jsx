@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { beeswarmRows } from '../../../lib/beeswarm.js'
 import { teamClubName } from '../../../lib/teams.js'
+import { Pill } from '../../../components/ui/control/Pill.jsx'
 
 const DASH = '—'
 
@@ -113,7 +114,7 @@ export function ComebackCard({ data, teamId, clubName }) {
                     </span>
                     <span className="cbk__of"> · {t.wins} of {t.att || DASH}</span>
                     {t.rank === 1 && t.wins > 0 && (
-                      <span className="cbk__badge">{t.tied ? 'T-MLB best' : 'MLB best'}</span>
+                      <Pill className="cbk__badge">{t.tied ? 'T-MLB best' : 'MLB best'}</Pill>
                     )}
                   </span>
                 </div>

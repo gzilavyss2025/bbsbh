@@ -43,31 +43,22 @@
 }
 
 /* The availability verdict — the SAME word the Bullpen Board prints, in the
-   same three inks, because it is the same call off the same file. */
-.moundcard__avail {
-  padding: var(--space-1) var(--space-2h);
-  border: var(--bw-hair) solid;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  line-height: var(--lh-solid);
-}
+   same three inks, because it is the same call off the same file. It is a
+   Pill tag (#1131); each verdict is a tint on the pill's custom properties. */
 .moundcard__avail--fresh {
-  color: var(--field-deep);
-  background: var(--field-soft);
-  border-color: var(--field);
+  --pill-fill: var(--field-soft);
+  --pill-edge: var(--field);
+  --pill-ink: var(--field-deep);
 }
 .moundcard__avail--limited {
-  color: var(--award-ink);
-  background: var(--award-soft);
-  border-color: var(--award-line);
+  --pill-fill: var(--award-soft);
+  --pill-edge: var(--award-line);
+  --pill-ink: var(--award-ink);
 }
 .moundcard__avail--down {
-  color: var(--clay-deep);
-  background: var(--clay-soft);
-  border-color: var(--clay);
+  --pill-fill: var(--clay-soft);
+  --pill-edge: var(--clay);
+  --pill-ink: var(--clay-deep);
 }
 
 /* --- the outing rows --- */

@@ -96,6 +96,21 @@ export const PAIRINGS = [
   { fg: 'clay', bg: 'surface-card', min: TEXT, note: 'pill ink --clay on card' },
   { fg: 'clay', bg: 'bg-page', min: TEXT, note: 'pill ink --clay on page' },
   { fg: 'text-body', bg: 'surface-card', min: TEXT, note: 'pill paper fill text' },
+  // THE PILL'S TINTS AND INSET CHIPS (#1131 slice 2). A tint sets the pill's
+  // fill and ink as a pair, so each pair a host passes is asserted here. The
+  // pairs already on this list elsewhere are not repeated: --field-deep on
+  // --field-soft, --text-body on --surface-inset, --text-on-ink on
+  // --award-ink, the four scenario fills, and --text-caption on the canvas
+  // (--bg-page is --bg-canvas). Two tags take a club's colour and are not
+  // token pairs: the win-probability chip (the club's own chip triad) and the
+  // team hub's level tag (the hero's --ink, a mix of itself behind it).
+  { fg: 'clay-deep', bg: 'clay-soft', min: TEXT, note: 'pill tint: clay (wrong call, Top 100 rank, out, down arm)' },
+  { fg: 'field', bg: 'field-soft', min: TEXT, note: 'pill tint: the right call' },
+  { fg: 'award-ink', bg: 'award-soft', min: TEXT, note: 'pill tint: award (standout night, limited arm)' },
+  { fg: 'ink-0', bg: 'marker', min: TEXT, note: 'pill tint: --marker as a FILL (outlier night)' },
+  { fg: 'text-muted', bg: 'surface-inset', min: TEXT, note: 'inset pill: a level tag' },
+  { fg: 'text-caption', bg: 'surface-inset', min: TEXT, note: 'inset pill: routine night, rehab tag, a reason' },
+  { fg: 'accent-primary', bg: 'surface-inset', min: TEXT, note: 'inset pill: the row-share reason' },
   // The slate result card's scenario pills (GameResultFace.jsx's
   // SCENARIO_STYLE) — each filled solid in its own accent, so the fg/bg pair
   // (and which text color a given accent needs) is asserted here rather than

@@ -8,6 +8,7 @@ import { Headshot } from '../player/Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // TEAM LEADERS, CARD FORM — per-category season leaderboards for a team. Each
 // category features its leader as a headshot card (styled like the slate's Top
@@ -40,7 +41,7 @@ function LeaderBadges({ entry, showLevel, prospectSnapshot }) {
   const level = showLevel ? levelLabel(entry) : ''
   return (
     <>
-      {level && <span className="tlead__level">{level}</span>}
+      {level && <Pill fill="paper" className="tlead__level">{level}</Pill>}
       {prospectSnapshot && <ProspectPill {...prospectBadge(prospectSnapshot, entry.id)} />}
     </>
   )

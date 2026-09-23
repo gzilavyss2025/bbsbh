@@ -11,6 +11,9 @@
 //      is a no-op that implies a choice which does not exist.
 //   5. THE INK. There is no tone: a caller passes a token by name, and the
 //      seal, a club's bar and the marker are refused as inks.
+//   6. A TINT IS CUSTOM PROPERTIES. A host that colours its pill sets
+//      --pill-fill / --pill-edge / --pill-ink and never repaints background,
+//      color or border itself, or the pill's rules stop drawing every part.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
@@ -72,6 +75,20 @@ test('there is exactly one .pill base rule, and it is in system/pill.css', () =>
   assert.deepEqual(owners, ['system/pill.css'])
 })
 
+test('the pill\'s colour defaults carry zero specificity, so a host tint wins in any load order', () => {
+  // A tint host is one class, the same weight as .pill. Written plain, the
+  // defaults beat a tint whose sheet happens to load BEFORE index.css (a lazy
+  // chunk turned static), and every tint goes grey with no error.
+  const css = read('system/pill.css')
+  const colours = /--pill-(ink|fill|edge|text):/
+  for (const sel of ['.pill', '.pill--control', '.pill--paper', '.pill--ink']) {
+    const plain = ruleBody(css, sel)
+    if (plain !== null) assert.doesNotMatch(plain, colours, `${sel} sets a colour default at class weight; move it into :where(${sel})`)
+    const zero = ruleBody(css, `:where(${sel})`)
+    assert.ok(zero !== null && colours.test(zero), `:where(${sel}) should carry ${sel}'s colour defaults`)
+  }
+})
+
 test('a control is --control-min tall and a tag declares no height, so the two never meet', () => {
   const css = read('system/pill.css')
   assert.doesNotMatch(css, /(?<![0-9.])34px/, 'the control height is var(--control-min), never a literal')
@@ -104,6 +121,56 @@ test('only .pill--seal reads the seal', () => {
   const css = read('system/pill.css')
   const reads = [...css.matchAll(/([^{}]+)\{[^}]*var\(--seal/g)].map((m) => m[1].trim())
   assert.deepEqual(reads, ['.pill--seal'])
+})
+
+// Every host that colours a pill, slice by slice (#1131). A new one belongs here.
+const TINTS = {
+  '04a-wire-dock.css': ['.pill.wiredock__count'],
+  '09-team-info.css': ['.tier__tag--elite', '.tier__tag--good', '.tier__tag--average', '.tier__tag--below'],
+  '12-sealbox.css': [
+    '.wcall__pill--wrong',
+    '.wcall__pill--right',
+    '.favormeter__tierpill--routine',
+    '.favormeter__tierpill--standout',
+    '.favormeter__tierpill--outlier',
+  ],
+  '22-box-score-tables.css': ['.flipback__pill--crown', '.flipback__pill--scenario', '.flipback__pill--tag'],
+  '23-box-score-detail.css': ['.tlead__level'],
+  '26c-mound-card.css': ['.moundcard__avail--fresh', '.moundcard__avail--limited', '.moundcard__avail--down'],
+  '28a-team-hub-hero.css': ['.team-hub__level'],
+  '31-wild-card.css': ['.rank__tag--good', '.rank__tag--bad', '.cbk__badge', '.thub-affiliate__level', '.prospecttable__top'],
+  '43-foul-tracker.css': ['.scorebug__result.is-positive', '.scorebug__result.is-negative'],
+  '72-player-hover-card.css': ['.phcard__tag', '.phcard__tag--rehab'],
+  '74-contract-workbench.css': ['.cwb__chip', '.cwb__chip--none', '.cwb__chip--share'],
+}
+
+test('a tint sets the pill\'s custom properties and never repaints it', () => {
+  for (const [rel, selectors] of Object.entries(TINTS)) {
+    const css = read(rel)
+    for (const sel of selectors) {
+      const body = ruleBody(css, sel)
+      assert.ok(body !== null, `${rel}: ${sel} should still exist`)
+      assert.match(body, /--pill-(fill|edge|ink):/, `${sel} should set a --pill-* property`)
+      for (const property of ['background', 'background-color', 'color', 'border', 'border-color']) {
+        assert.equal(decl(body, property), undefined, `${sel} repaints ${property}; set --pill-* instead`)
+      }
+    }
+  }
+})
+
+test('--marker reaches a pill only as its fill, never as its ink', () => {
+  const body = ruleBody(read('12-sealbox.css'), '.favormeter__tierpill--outlier')
+  assert.equal(decl(body, '--pill-fill'), 'var(--marker)')
+  assert.doesNotMatch(decl(body, '--pill-ink'), /marker/)
+})
+
+test('the win-probability chip takes its club colour through the pill, not a repaint', () => {
+  const jsx = readFileSync(join(SRC, 'components/charts/WinProbChart.jsx'), 'utf8')
+  const at = jsx.indexOf('winprob__ledger-chip')
+  const chip = jsx.slice(at, jsx.indexOf('{chipText}', at))
+  assert.match(chip, /'--pill-fill': colors\.primary/)
+  assert.match(chip, /'--pill-text': colors\.text/)
+  assert.doesNotMatch(chip, /background:|color:/)
 })
 
 test('the defaults carry no class, and a typo throws', () => {

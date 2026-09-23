@@ -80,29 +80,24 @@
   color: var(--text-caption);
 }
 
+/* The club tag under the name, a paper Pill tag (#1131) on the inset paper.
+   The level tag takes the paper fill's own rule edge and body ink. The rehab
+   tag is dashed in pencil, because a rehab stint is temporary. The card
+   stays bespoke; the tag keeps its place under the name, its overflow rules,
+   and its tighter caps tracking. It is as wide as the name column at most,
+   and at the pill's --ls-label "On rehab · AAA · Iowa Cubs" ran 5px past it. */
 .phcard__tag {
-  display: inline-flex;
-  align-items: center;
+  --pill-fill: var(--surface-inset);
   max-width: 100%;
   margin-top: var(--space-2);
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);
-  background: var(--surface-inset);
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.phcard__tag--level {
-  border: var(--bw-hair) solid var(--border-rule);
-  color: var(--text-body);
-}
 .phcard__tag--rehab {
-  border: var(--bw-hair) dashed var(--graphite-soft);
-  color: var(--text-caption);
+  --pill-edge: var(--graphite-soft);
+  --pill-ink: var(--text-caption);
+  border-style: dashed;
 }
 
 .phcard__crest {

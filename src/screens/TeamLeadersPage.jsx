@@ -11,6 +11,7 @@ import { AsOfBanner } from '../components/seal/AsOfBanner.jsx'
 import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
+import { Pill } from '../components/ui/control/Pill.jsx'
 
 const DASH = '—'
 
@@ -63,7 +64,7 @@ export function TeamLeadersPage({ id, asOf, sportId }) {
             <div className="team-hub__namerow">
               <h1>{team.name}</h1>
               {isMilb && (
-                <span className="team-hub__level">{SPORT_LABEL[team.sport?.id] ?? DASH}</span>
+                <Pill className="team-hub__level">{SPORT_LABEL[team.sport?.id] ?? DASH}</Pill>
               )}
             </div>
             <p className="team-hub__rec">

@@ -452,9 +452,9 @@ function WorstCallCard({ data }) {
         </div>
         <div className="wcall__side">
           <div className="wcall__calls">
-            <span className="wcall__pill wcall__pill--wrong">{strikeCall ? 'Strike' : 'Ball'}</span>
+            <span className="pill wcall__pill wcall__pill--wrong">{strikeCall ? 'Strike' : 'Ball'}</span>
             <span className="wcall__arrow" aria-hidden="true">→</span>
-            <span className="wcall__pill wcall__pill--right">{strikeCall ? 'Ball' : 'Strike'}</span>
+            <span className="pill wcall__pill wcall__pill--right">{strikeCall ? 'Ball' : 'Strike'}</span>
           </div>
           {batterName && (
             <div className="wcall__locator">
@@ -525,7 +525,7 @@ function FavorMeter({ net, awayId, homeId, awayFranchise, homeFranchise, totalMi
   return (
     <div className={`favormeter ${tier ? `favormeter--${tier}` : ''}`}>
       {tier && (
-        <span className={`favormeter__tierpill favormeter__tierpill--${tier}`} aria-hidden="true">
+        <span className={`pill favormeter__tierpill favormeter__tierpill--${tier}`} aria-hidden="true">
           {FAVOR_TIERS[tier]}
           {/* The same cumulative count as the stat grid's "Total missed
               calls" cell (StatBox's rollingMissedCalls) — repeated here so

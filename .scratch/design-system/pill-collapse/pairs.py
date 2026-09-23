@@ -1,5 +1,6 @@
 # Stitch before/after crops side by side, one row per target, as JPEG pages
 # small enough to read. Usage: python pairs.py [suffix] [names,...]
+#   SLICE=2 python pairs.py ...   reads and writes s2/ instead of this folder
 #   suffix ''      the tag in its row  (<name>.png)
 #   suffix '--tag' the tight 2x tag   (<name>--tag.png)
 import os
@@ -8,6 +9,8 @@ import sys
 from PIL import Image, ImageDraw
 
 here = os.path.dirname(os.path.abspath(__file__))
+if os.environ.get('SLICE', '1') != '1':
+    here = os.path.join(here, 's' + os.environ['SLICE'])
 suffix = sys.argv[1] if len(sys.argv) > 1 else ''
 only = sys.argv[2].split(',') if len(sys.argv) > 2 else None
 names = sorted({f[: -len(f'{suffix}.png')] for f in os.listdir(os.path.join(here, 'before'))

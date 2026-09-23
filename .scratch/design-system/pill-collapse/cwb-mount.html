@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cwb chip mount</title>
+  </head>
+  <body>
+    <!-- A static mount of the contract workbench's candidate list (#1131 slice 2).
+         /admin/contracts is Clerk-gated, and no Clerk key exists locally, so
+         capture.mjs reads the .cwb__chip tags here instead: the real component
+         and the real stylesheets, fed one made-up candidate list. -->
+    <div id="root"></div>
+    <script type="module" src="./cwb-mount.jsx"></script>
+  </body>
+</html>

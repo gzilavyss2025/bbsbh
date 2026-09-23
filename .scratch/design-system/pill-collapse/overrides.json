@@ -1,200 +1,228 @@
 {
-  "_comment": "Hand-checked calls, keyed by the census row's selector. A key that no longer matches a row is reported by census.mjs as STALE. fill: outline | paper | ink | seal | other:<what>. slice: see SLICES in census.mjs.",
+  "_comment": "Hand-checked calls, keyed by the census row's selector. A key that no longer matches a row is reported by census.mjs as STALE. fill: outline | paper | ink | seal | other:<what>. slice: see SLICES in census.mjs. landed: the slice that moved the row onto Pill; a landed key that matches no row is counted as merge done, not STALE.",
   ".milestonepill": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "canonical recipe (inventory); colour token = --accent-primary"
+    "reason": "canonical recipe (inventory); colour token = --accent-primary",
+    "landed": "slice 1, #1181"
   },
   ".rookiepill": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "identical to .milestonepill but ink (--field); keep .rookiepill__short/__full phone swap as children"
+    "reason": "identical to .milestonepill but ink (--field); keep .rookiepill__short/__full phone swap as children",
+    "landed": "slice 1, #1181"
   },
   ".prospectpill": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "identical + gap:4px for the logo; ProspectPill.jsx has 10 importers (incl. offseason/MovedUp.jsx) + a hand-rolled copy in PlayerHubShell.jsx:149-155; two context overrides (.tlead__row .prospectpill, .tradecard__playerinfo .prospectpill) must survive"
+    "reason": "identical + gap:4px for the logo; ProspectPill.jsx has 10 importers (incl. offseason/MovedUp.jsx) + a hand-rolled copy in PlayerHubShell.jsx:149-155; two context overrides (.tlead__row .prospectpill, .tradecard__playerinfo .prospectpill) must survive",
+    "landed": "slice 1, #1181"
   },
   ".rankchip": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "the recipe in mono (face = --font-mono, tabular-nums); --good/--bad modifiers become a passed colour token"
+    "reason": "the recipe in mono (face = --font-mono, tabular-nums); --good/--bad modifiers become a passed colour token",
+    "landed": "slice 1, #1181"
   },
   ".tierpill": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "inventory: outline; inline-block + --ls-caps + line-height:1 are residue"
+    "reason": "inventory: outline; inline-block + --ls-caps + line-height:1 are residue",
+    "landed": "slice 1, #1181"
   },
   ".dlab__verdict": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "the lab's own capsule; critique: the lab should consume Pill (first real test)"
+    "reason": "the lab's own capsule; critique: the lab should consume Pill (first real test)",
+    "landed": "slice 1, #1181"
   },
   ".umpmodal__glevel": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "1px 4px — tightest tag; will grow to 2px 7px"
+    "reason": "1px 4px — tightest tag; will grow to 2px 7px",
+    "landed": "slice 1, #1181"
   },
   ".simlike__term": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "accent outline on --surface-card, rendered on <li>"
+    "reason": "accent outline on --surface-card, rendered on <li>",
+    "landed": "slice 1, #1181"
   },
   ".awards__chip": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "player-page award chips (NL MVP x1) — critique names it; semibold, 3px 8px"
+    "reason": "player-page award chips (NL MVP x1) — critique names it; semibold, 3px 8px",
+    "landed": "slice 1, #1181"
   },
   ".leaguerank__chip": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "same recipe as .awards__chip (3px 8px, --surface-card)"
+    "reason": "same recipe as .awards__chip (3px 8px, --surface-card)",
+    "landed": "slice 1, #1181"
   },
   ".cwb__badge": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "admin (contract workbench); no weight, no transform"
+    "reason": "admin (contract workbench); no weight, no transform",
+    "landed": "slice 1, #1181"
   },
   ".awardord__tier": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "admin (/admin award order); border = currentColor"
+    "reason": "admin (/admin award order); border = currentColor",
+    "landed": "slice 1, #1181"
   },
   ".pbp__placed": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "DASHED hairline (placed runner = provisional); needs an edge=dashed residual or a local rule"
+    "reason": "DASHED hairline (placed runner = provisional); needs an edge=dashed residual or a local rule",
+    "landed": "slice 1, #1181"
   },
   ".cthist__fuzzy": {
     "role": "tag",
     "fill": "outline",
     "verdict": "merge",
     "slice": 1,
-    "reason": "DASHED hairline (fuzzy date); grid placement residual stays local"
+    "reason": "DASHED hairline (fuzzy date); grid placement residual stays local",
+    "landed": "slice 1, #1181"
   },
   ".cbk__badge": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "tint: --field-soft / --field-deep, no border"
+    "reason": "tint: --field-soft / --field-deep, no border",
+    "landed": "slice 2"
   },
   ".prospecttable__top": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "tint: --clay-soft / --clay-deep, mono"
+    "reason": "tint: --clay-soft / --clay-deep, mono",
+    "landed": "slice 2"
   },
   ".tlead__level": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "--surface-inset + hairline, mono level label (AAA)"
+    "reason": "--surface-inset + hairline, mono level label (AAA)",
+    "landed": "slice 2"
   },
   ".thub-affiliate__level": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "same as .tlead__level; position:absolute stays local"
+    "reason": "same as .tlead__level; position:absolute stays local",
+    "landed": "slice 2"
   },
   ".wiredock__count": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "--bg-canvas count bubble, mono, no border, not uppercase"
+    "reason": "--bg-canvas count bubble, mono, no border, not uppercase",
+    "landed": "slice 2"
   },
   ".cwb__chip": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "admin; --font-body at --fs-caption (the only body-face tag)"
+    "reason": "admin; --font-body at --fs-caption (the only body-face tag)",
+    "landed": "slice 2"
   },
   ".phcard__tag": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "--surface-inset; --il/--dashed modifiers; ellipsis residual. The card (.phcard) stays bespoke, the tag need not"
+    "reason": "--surface-inset; --il/--dashed modifiers; ellipsis residual. The card (.phcard) stays bespoke, the tag need not",
+    "landed": "slice 2"
   },
   ".moundcard__avail": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "tint set on --fresh/--limited/--down modifiers (field/award/clay soft)"
+    "reason": "tint set on --fresh/--limited/--down modifiers (field/award/clay soft)",
+    "landed": "slice 2"
   },
   ".scorebug__result": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "tint set on .is-positive/.is-negative (tone classes, not states)"
+    "reason": "tint set on .is-positive/.is-negative (tone classes, not states)",
+    "landed": "slice 2"
   },
   ".wcall__pill": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "tint on --wrong/--right; lives in 12-sealbox.css and renders inside StatBox's reveal — CSS-only merge is spoiler-neutral, do NOT move the JSX out of the reveal render fn"
+    "reason": "tint on --wrong/--right; lives in 12-sealbox.css and renders inside StatBox's reveal — CSS-only merge is spoiler-neutral, do NOT move the JSX out of the reveal render fn",
+    "landed": "slice 2"
   },
   ".favormeter__tierpill": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "tint on --routine/--standout/--outlier (--standout/--outlier use --award-soft and --marker); raw 999px literal; inside the reveal, same note as .wcall__pill"
+    "reason": "tint on --routine/--standout/--outlier (--standout/--outlier use --award-soft and --marker); raw 999px literal; inside the reveal, same note as .wcall__pill",
+    "landed": "slice 2"
   },
   ".flipback__pill": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "already takes --pill-accent/--pill-text tokens (the target model); --crown is ink (--award-ink). On GameResultFace (a slate flip face, stamp FORBIDDEN_SURFACE) — CSS-only"
+    "reason": "already takes --pill-accent/--pill-text tokens (the target model); --crown is ink (--award-ink). On GameResultFace (a slate flip face, stamp FORBIDDEN_SURFACE) — CSS-only",
+    "landed": "slice 2"
   },
   ".team-hub__level": {
     "role": "tag",
     "fill": "paper",
     "verdict": "merge",
     "slice": 2,
-    "reason": "tint of the club's --ink (14% fill / 30% edge) on the themed hero; ADR-0030 lets a club colour an identity surface — pass it as the colour token"
+    "reason": "tint of the club's --ink (14% fill / 30% edge) on the themed hero; ADR-0030 lets a club colour an identity surface — pass it as the colour token",
+    "landed": "slice 2"
   },
   ".winprob__ledger-chip": {
     "role": "tag",
     "fill": "other:club colour",
     "verdict": "merge",
     "slice": 2,
-    "reason": "fill + ink set INLINE from the club triad (WinProbChart.jsx:597); mono. Solid club fill = the ink fill with a passed colour"
+    "reason": "fill + ink set INLINE from the club triad (WinProbChart.jsx:597); mono. Solid club fill = the ink fill with a passed colour",
+    "landed": "slice 2"
   },
   ".contractcard__regime": {
     "role": "tag",

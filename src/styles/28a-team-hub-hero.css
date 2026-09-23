@@ -178,18 +178,15 @@
    every club's — instead the pill's own fill/border are mixed FROM `--ink`
    at low strength, so it stays legible whether the row's ink came out light
    or dark, with no per-club exception to hand-tune. Same `color-mix` idiom
-   31-wild-card.css already uses for the radar-team dot. */
+   31-wild-card.css already uses for the radar-team dot.
+   It is a Pill tag (#1131), and the mix is a tint on the pill's custom
+   properties. `--ink` is the hero's readable text colour, a light or a dark
+   pick, so the tag reads like the club name beside it. The hero is an
+   identity surface and the tag is a label, not a control (ADR-0030). */
 .team-hub__level {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  color: var(--ink, var(--text-muted));
-  background: color-mix(in srgb, var(--ink, var(--text-muted)) 14%, transparent);
-  border: var(--bw-hair) solid color-mix(in srgb, var(--ink, var(--text-muted)) 30%, transparent);
-  border-radius: var(--radius-pill);
-  padding: 2px var(--space-2);
+  --pill-ink: var(--ink, var(--text-muted));
+  --pill-fill: color-mix(in srgb, var(--ink, var(--text-muted)) 14%, transparent);
+  --pill-edge: color-mix(in srgb, var(--ink, var(--text-muted)) 30%, transparent);
 }
 .team-hub__id h1 {
   margin: 0;
