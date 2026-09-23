@@ -3,6 +3,14 @@
 #
 #   python centre.py                 before and after
 #   python centre.py trial           any phase folder by name
+#   python centre.py mono-before mono-before-webkit mono-after mono-after-webkit
+#                                    the #1186 runs, in Chromium and WebKit
+#   python centre.py mount mount-webkit
+#                                    the figure pill mount (MOUNT=1 in centre.mjs)
+#
+# "pad T/B" is the computed padding. A figure pill (#1186) gives back as
+# padding what its text-box trim cut from the line, so it reads 3.58 or 4.58,
+# not 1 or 2: --pill-pad-block + (1lh - 1cap) / 2.
 #
 # The inner box is the tag's DOM box minus its border, in device pixels. The
 # glyph box is every whole device row inside the inner box (a row the capsule's
@@ -71,7 +79,7 @@ for phase in phases:
             ms = [m for m in (measure(r, folder) for r in rs if r['dpr'] == d) if m]
             hs = [m['high'] for m in ms]
             cells.append(f"{sum(hs) / len(hs):+5.2f} [{min(hs):+5.2f}, {max(hs):+5.2f}]" if hs else '(no glyphs)'.ljust(21))
-        pad = f"{rs[0]['pt']}/{rs[0]['pb']}".replace('px', '')
+        pad = '/'.join(f"{float(rs[0][k].replace('px', '')):g}" if '.' not in rs[0][k] else f"{float(rs[0][k].replace('px', '')):.2f}" for k in ('pt', 'pb'))
         n = len([r for r in rs if r['dpr'] == 1])
         print(f'{name:16} {pad:9} {n:>2}  ' + '   '.join(cells))
     sys.stdout.flush()
