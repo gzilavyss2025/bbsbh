@@ -29,7 +29,11 @@ Measured on `main` at `ba07d2c93`:
 | `__chip` elements | 23 |
 | of those, measurably tappable | **12** |
 | classes on the reject list of clause 3 | 59 |
-| classes this ADR's ledger renames or holds | **143** |
+| classes this ADR's ledger renames or holds | **156** |
+
+The last row is kept current. It was 143 at `ba07d2c93`. `.bs__noteMore` added
+one (#1130), and the `sheet` family added twelve (#1155), which the first count
+missed. The rows above it were not measured again.
 
 ## Decision
 
@@ -169,7 +173,7 @@ and this ADR only governs the second.
   already touches that family, so no PR is a pure rename sweep. A rename sweep
   is the change that is hardest to review and easiest to get wrong, because
   nothing on screen moves and a missed call site fails silently.
-- **Eight rows are held, and each says why.** `.scorecard` is 86 files and the
+- **Nine rows are held, and each says why.** `.scorecard` is 86 files and the
   app's reason to exist. `.stampcard` is held on ADR-0035, and the discovery
   that makes the hold necessary is that `scripts/check-stamp-surfaces.mjs`
   tracks the JS identifiers `GameStamp`, `StampGameButton` and `useStamps` — not
@@ -186,7 +190,7 @@ and this ADR only governs the second.
   is a stylesheet and neither is a component, so a rename that greps only
   `src/styles/` and `*.jsx` misses both. The ledger's file column is measured
   over `src/`, `e2e/`, `test/`, `scripts/` and `api/` for that reason.
-- **A class can have no call site to grep for.** Two of the 143 rows are
+- **A class can have no call site to grep for.** Two of the 156 rows are
   invisible to a text rename. `.pitcherhandoff__chip--open` is built at runtime
   as `` `pitcherhandoff__chip--${bookOpen ? "open" : "closed"}` ``, so the
   literal string is in no file; rename the rule and it silently stops applying.
@@ -197,7 +201,7 @@ and this ADR only governs the second.
   assertion: it checks that an allowlisted SELECTOR is still in the stylesheet,
   not that anything renders it, so an orphan passes. That is a narrower promise
   than ADR-0083's prose suggests, and worth knowing before the next allowlist.
-- **The count is the argument.** 143 classes break at least one clause. That is
+- **The count is the argument.** 156 classes break at least one clause. That is
   not a tidiness backlog; it is the measure of how far a system drifts in the
   absence of a written rule, which is the case for writing one down now rather
   than after four more collapse PRs each pick a taste.

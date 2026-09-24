@@ -769,10 +769,10 @@
   box-shadow: var(--shadow-card);
   text-align: center;
 }
-/* The affiliate's level, a paper Pill tag (#1131) pinned in the card's
-   corner — the same inset paper, hairline and mono face as the leaders' level
-   tag (23-box-score-detail.css), and the same block padding: 2px over 1px,
-   which centres the mono caps that sat 0.6px high at 1px/1px. */
+/* The affiliate's level, a paper figure Pill tag (#1131, #1186) pinned in
+   the card's corner — the same inset paper and hairline as the leaders' level
+   tag (23-box-score-detail.css). The figure rule sets the face, the pad and
+   the centring for both. */
 .thub-affiliate__level {
   --pill-fill: var(--surface-inset);
   --pill-edge: var(--border-hairline);
@@ -780,10 +780,6 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  letter-spacing: var(--ls-caps);
-  padding-block: 2px 1px;
 }
 .thub-affiliate__name {
   font-size: var(--fs-small);
@@ -916,18 +912,16 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
-/* A Top 100 rank beside the name: a Pill tag (#1131) with a clay tint and no
-   edge. It keeps the figure face (mono, tabular, no tracking) and its own
-   tight padding, so the rank sits inside the name's line. */
+/* A Top 100 rank beside the name: a figure Pill tag (#1131, #1186) with a
+   clay tint and no edge. The figure rule sets the face and the 1px block pad,
+   so the rank sits inside the name's line; it keeps no tracking and a
+   narrower side pad. */
 .prospecttable__top {
   --pill-fill: var(--clay-soft);
   --pill-edge: transparent;
   --pill-ink: var(--clay-deep);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-cell);
   letter-spacing: var(--ls-none);
-  padding: 1px var(--space-1);
+  padding-inline: var(--space-1);
 }
 .prospecttable__level {
   display: flex;

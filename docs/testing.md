@@ -1,7 +1,8 @@
 # Testing
 
 Two layers, deliberately split by what each can check cheaply and
-deterministically.
+deterministically, plus a local screenshot suite for design-system changes
+(`npm run visual`, below).
 
 ## Unit suite — `npm test` (CI-gated)
 
@@ -115,6 +116,102 @@ The unit suite's `invariant-real-game.test.js` now pins the same spoiler
 guarantee at the **data layer** deterministically in CI, so a regression in the
 reveal-only selectors is caught automatically even though the browser specs
 aren't.
+
+## Screenshot suite — `npm run visual` (not CI-gated)
+
+A design-system change moves many pages at once: one edit to `Pill`, `Card` or a
+token changes every page that uses it (#1177). This suite shows which pages a
+change moved. It shoots each page in `e2e/visual/routes.js` on two dev servers,
+one that runs `main` (the BASE) and one that runs your branch (the BRANCH), at
+390px (the phone) and at 760px (just past the 740px breakpoint). Then it
+compares each pair of shots, to the pixel.
+
+**When to run it.** Before you open a design-system PR, run it on your branch.
+Put the list of changed pages in the PR body. A changed page that the PR did not
+mean to change is a bug.
+
+**How to run it.** You need two dev servers:
+
+1. The BASE: a dev server on current `main`, in its own worktree. For example,
+   `git worktree add --detach ../bbsbh-baseline origin/main`, then `npm install`
+   and `npm run dev` there (port 5173). Update it to the `main` that your branch
+   starts from.
+2. The BRANCH: your worktree's own dev server, on your reserved port. If it is
+   not running, the suite starts it.
+
+Then, in your worktree (the sandbox must be off, because the suite reads the
+live network):
+
+```bash
+VISUAL_BASE=http://localhost:5173 E2E_PORT=5172 npm run visual
+npx playwright show-report visual-report/html   # base, branch, and the difference
+```
+
+| Variable | What it sets |
+|---|---|
+| `VISUAL_BASE` | The base server's URL. Default `http://localhost:5173`. |
+| `E2E_PORT` | The branch server's port, as for `npm run e2e`. It must not be the base's. |
+| `VISUAL_REUSE=1` | Replay the last run's recording and do not record again. Use it to run again after a fix, with the same data. |
+
+At the end, the run prints the list of changed shots (`[visual] … changed
+shot(s)`), and then each page that could not be shot. It exits non-zero when
+either list has a line. In the report, each changed shot has three images:
+"expected" is the BASE shot, "actual" is the BRANCH shot, and "diff" marks each
+changed pixel in red.
+
+**How a run works.** Three passes (`playwright.visual.config.js`):
+
+1. RECORD (`e2e/visual/record.visual.js`). Open each route on the BASE server at
+   both widths, and record its external traffic: statsapi.mlb.com, the image
+   CDNs and the weather. One recording per route serves both widths. Requests
+   to the dev servers are NOT recorded: each server serves its own tree's code
+   and `public/data`, and a change there is a change the suite must show.
+2. BASE. Open each route on the BASE server, replay the recording, and shoot it.
+3. BRANCH. Open the same route on the BRANCH server, replay the SAME recording,
+   shoot it, and compare.
+
+So the two shots of a page get the same data. The clock is fixed at
+`FROZEN_NOW` (`routes.js`) on both servers, and `Math.random` is seeded. Images
+are replayed from the recording, not replaced with a placeholder: a logo or a
+photo sets the size of its box on some pages, and a placeholder would hide a
+layout change there. A request that the recording does not hold is aborted,
+never sent live, and the test fails with the list of those requests.
+
+**Why nothing is committed.** The first design of this suite committed a
+baseline image for each shot and a HAR file for each page's traffic: about 70 MB
+that grew with every baseline update. Gary chose on 2026-09-23 to compare with
+`main` on the spot instead. The "before" image is shot from `main` on every run.
+Everything the suite writes goes to `visual-report/` (git-ignored): the
+recording (`recording/`), the base shots (`base/`), the test results
+(`results/`) and the report (`html/`). The next run replaces all of it.
+
+**The pages.** `/design-lab` (as five element shots: the page head and its four
+bands), the anchor date's slate (2026-07-07), the slate's result filter chips,
+the anchor game's lineup page, innings viewer and box score (823035, see
+`docs/test-games.md`), the Brewers' team hub (Overview and Numbers), a hitter
+and a pitcher (each with a contract card), `/salaries`, `/standings`,
+`/postseason-race` and `/situational-records`. `routes.js` says why each one is
+there.
+
+Every shot is of a **sealed** page. The game pages are shot with nothing
+revealed. The filter chips exist only after "Reveal all results", so that shot
+is the chip bar alone: the revealed cards, which hold the scores, are not in
+the image.
+
+**Zero tolerance.** `maxDiffPixels` and `threshold` are both 0
+(`pages.visual.js`), so one changed pixel is a change. Two servers on the same
+tree draw the same pixels: the replayed data, the frozen clock, the settle steps
+and a set of Chromium raster flags (`playwright.visual.config.js`) make that
+true. If a page differs between two servers on the same tree, find what moves
+and freeze it or mask it (`MASKS` in `routes.js`). Do not raise the tolerance.
+A part that differs between two servers BY DESIGN is hidden from every shot
+(`HIDDEN` in `routes.js`): today only the footer's "build 1234567" link, which
+prints the commit each server was started from. The one allowance is for LOADING, not pixels: a route's `offShot` names requests
+the recording may not hold, for parts of the page that no shot shows, and says
+why beside it.
+
+**Why it is not in CI.** It needs two dev servers and the live network, and it
+takes about seven minutes.
 
 ## Making the tests actually bite
 

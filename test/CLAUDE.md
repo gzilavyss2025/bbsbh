@@ -116,6 +116,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | probable-pitcher-fallback.test.js | 10 | src/api/select.js, prehalf-callouts.js, between-innings.js | Fall back to the half's derived starter (its first logged play's pitcher) when gameData.probablePitchers is empty — TeamInfo's Starting pitcher card and both starter-record notes, each still respecting its own reveal gate (issue #851) |
 | prospect-trend.test.js | 14 | src/api/prospectTrend.js | vs. Level percentile label + levelTier 5-dot bucketing |
 | prospects.test.js | 20 | src/api/prospects.js | Top-100/org-prospect selectors + resolveCurrentLevels' live-roster resolution and MLB/MiLB "Line" split, incl. the "ALL (n)" fallback fix |
+| raw-values.test.js | 13 | scripts/check-raw-values.mjs | The raw-value ratchet's counting (#1178): each case runs both ways and asserts they agree first. Comments, var() reads (a digit-ending token name included, #1156's trap), fallbacks and zeros are not raw; a non-zero length beside a token is; an exemption needs a reason |
 | record-ranks.test.js | 10 | src/api/callout-notes/rank.js, checkpoints.js, heldNotes.js | League ranks on the W-L record families — tie/floor math, the no-"#" display rule, a legacy bundle reading byte-identical, and a folded sentence staying bare |
 | recent-decided-games.test.js | 4 | src/api/scheduleGames.js | recentDecidedGames' `won != null` cutoff invariant (Last 10 Games) |
 | recent-form.test.js | 14 | src/api/recentForm.js | Recent form roster eligibility |

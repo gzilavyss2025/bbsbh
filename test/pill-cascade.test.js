@@ -14,6 +14,9 @@
 //   6. A TINT IS CUSTOM PROPERTIES. A host that colours its pill sets
 //      --pill-fill / --pill-edge / --pill-ink and never repaints background,
 //      color or border itself, or the pill's rules stop drawing every part.
+//      A scan of every stylesheet finds the hosts, so no list is kept by hand,
+//      and a host may draw a dashed edge only where dashed means pencilled-in
+//      (#1188).
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
@@ -123,38 +126,81 @@ test('only .pill--seal reads the seal', () => {
   assert.deepEqual(reads, ['.pill--seal'])
 })
 
-// Every host that colours a pill, slice by slice (#1131). A new one belongs here.
-const TINTS = {
-  '04a-wire-dock.css': ['.pill.wiredock__count'],
-  '09-team-info.css': ['.tier__tag--elite', '.tier__tag--good', '.tier__tag--average', '.tier__tag--below'],
-  '12-sealbox.css': [
-    '.wcall__pill--wrong',
-    '.wcall__pill--right',
-    '.favormeter__tierpill--routine',
-    '.favormeter__tierpill--standout',
-    '.favormeter__tierpill--outlier',
-  ],
-  '22-box-score-tables.css': ['.flipback__pill--crown', '.flipback__pill--scenario', '.flipback__pill--tag'],
-  '23-box-score-detail.css': ['.tlead__level'],
-  '26c-mound-card.css': ['.moundcard__avail--fresh', '.moundcard__avail--limited', '.moundcard__avail--down'],
-  '28a-team-hub-hero.css': ['.team-hub__level'],
-  '31-wild-card.css': ['.rank__tag--good', '.rank__tag--bad', '.cbk__badge', '.thub-affiliate__level', '.prospecttable__top'],
-  '43-foul-tracker.css': ['.scorebug__result.is-positive', '.scorebug__result.is-negative'],
-  '72-player-hover-card.css': ['.phcard__tag', '.phcard__tag--rehab'],
-  '74-contract-workbench.css': ['.cwb__chip', '.cwb__chip--none', '.cwb__chip--share'],
+// Every host that colours a pill is a rule that sets --pill-fill, --pill-edge
+// or --pill-ink (#1188). A scan of every stylesheet finds them, so a later
+// slice adds a host without editing a list here. The scan reads the innermost
+// `selector { body }`, so a rule inside @media is found too. system/pill.css
+// is the pill itself, not a host.
+function tintHostsIn(rel, css) {
+  const hosts = []
+  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (!/--pill-(fill|edge|ink)\s*:/.test(m[2])) continue
+    hosts.push({ rel, selector: m[1].trim().replace(/\s+/g, ' '), body: m[2] })
+  }
+  return hosts
+}
+const tintHosts = () =>
+  sheets(STYLES)
+    .filter((rel) => rel !== 'system/pill.css')
+    .flatMap((rel) => tintHostsIn(rel, read(rel)))
+
+// A dashed edge means pencilled-in (#1132). A host may draw one only when its
+// tag says something provisional, and each entry says what.
+const DASHED_EDGE = {
+  '.pbp__placed': 'a placed runner: given, not run (slice 1)',
+  '.cthist__fuzzy': 'a fuzzy contract match: pencilled in (slice 1)',
+  '.phcard__tag--rehab': 'a rehab stint: provisional, so the level is pencilled in (#1188)',
 }
 
-test('a tint sets the pill\'s custom properties and never repaints it', () => {
-  for (const [rel, selectors] of Object.entries(TINTS)) {
-    const css = read(rel)
-    for (const sel of selectors) {
-      const body = ruleBody(css, sel)
-      assert.ok(body !== null, `${rel}: ${sel} should still exist`)
-      assert.match(body, /--pill-(fill|edge|ink):/, `${sel} should set a --pill-* property`)
-      for (const property of ['background', 'background-color', 'color', 'border', 'border-color']) {
-        assert.equal(decl(body, property), undefined, `${sel} repaints ${property}; set --pill-* instead`)
-      }
+// A tint sets none of these itself. The pill's own rules draw each one from its
+// custom properties; a host that sets one draws a part the pill cannot reach.
+const REPAINTS = [
+  'background',
+  'background-color',
+  'background-image',
+  'color',
+  'border',
+  'border-color',
+  'border-style',
+  'border-width',
+]
+
+test('the tint scan finds a host by its --pill-* properties, in @media too', () => {
+  const css = stripComments(`
+    .a { color: red; }
+    .b { --pill-fill: var(--x); }
+    /* .c { --pill-ink: var(--y); } */
+    @media (min-width: 740px) {
+      .d .e,
+      .f { --pill-edge: var(--z); border-style: dashed; }
     }
+    .g { --pill-text: var(--w); }
+  `)
+  assert.deepEqual(
+    tintHostsIn('x.css', css).map((h) => h.selector),
+    ['.b', '.d .e, .f'],
+  )
+})
+
+test('a tint sets the pill\'s custom properties and never repaints it', () => {
+  const hosts = tintHosts()
+  assert.ok(hosts.length > 0, 'the scan found no tint host at all')
+  for (const { rel, selector, body } of hosts) {
+    for (const property of REPAINTS) {
+      const value = decl(body, property)
+      if (value === undefined) continue
+      if (property === 'border-style' && value === 'dashed' && DASHED_EDGE[selector]) continue
+      assert.fail(`${rel}: ${selector} repaints ${property} (${value}); set --pill-* instead`)
+    }
+  }
+})
+
+test('a dashed edge on a pill is kept only where dashed means pencilled-in', () => {
+  const hosts = tintHosts()
+  for (const [selector, why] of Object.entries(DASHED_EDGE)) {
+    const host = hosts.find((h) => h.selector === selector)
+    assert.ok(host, `${selector} (${why}) is no longer a tint host; take it out of DASHED_EDGE`)
+    assert.equal(decl(host.body, 'border-style'), 'dashed', `${selector} no longer draws a dashed edge; take it out of DASHED_EDGE`)
   }
 })
 

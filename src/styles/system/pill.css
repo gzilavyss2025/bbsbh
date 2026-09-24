@@ -36,9 +36,12 @@
      gap        --space-1, between an icon (the MLB mark on Top 100) and the
                 label.
 
-   A FIGURE PILL (a rank, a level, a count) keeps the mono face, and its
-   HOST pins it: `font-family: var(--font-mono)` plus tabular-nums, written
-   two-class. The face is not a third axis on the pill (signed off for #1131).
+   A FIGURE PILL (a rank, a level, a count) is set in the mono face. It is
+   .pill--figure, which Pill's `figure` prop writes (#1186): one rule, for a
+   tag and for a control. It is not a third colour axis — no fill, edge or
+   ink changes — it is the face, and how that face is centred (see "THE
+   FIGURE FACE" below). A host adds only its tint, its place in the row, and
+   any tracking or size of its own.
 
    The tag's 2px is the recipe every tag already drew. It is the one literal
    here, and it is not a new one: the scale starts at 4px, and 4px vertical
@@ -177,6 +180,70 @@
   --pill-text: var(--text-on-seal);
   --pill-fill-hover: var(--seal-hatch);
   --pill-edge-hover: var(--seal-hatch);
+}
+
+/* ---- the figure face (#1186) ----
+
+   THE FIGURE FACE. The mono face, tabular figures, the cell size and the caps
+   tracking: the face every rank, level and count already wore.
+
+   WHY IT IS CENTRED ON ITS CAP HEIGHT. In the pill's --lh-compact line, the
+   engines put the mono figures in different places. With the same padding
+   above and below, Chromium drew them about 0.5px high and WebKit (iPhone
+   Safari, the main target) drew them on centre. Four hosts each added 1px of
+   top padding, which centred them in Chromium and put them 0.5px LOW in
+   WebKit. No whole-pixel padding suits both engines.
+
+   So the figure pill trims its line to the figures themselves:
+   `text-box: trim-both cap alphabetic` cuts the line box to the cap height
+   above the baseline. The two engines then agree, and equal padding centres
+   the figures. A trim applies only to a block container, and a flex
+   container is not one, so a figure pill is inline-block (a figure pill has
+   no icon, so it needs no flex gap).
+
+   THE HEIGHT DOES NOT CHANGE. The padding gives back what the trim cut: half
+   of (the line - the cap height) on each side, plus --pill-pad-block. So a
+   figure tag is --pill-pad-block + the line + --pill-pad-block + the edge,
+   the same sum as an untrimmed tag. --pill-pad-block is 1px, the pad the
+   level and rank tags use; a host that wants the pill's 2px sets
+   --pill-pad-block, never padding-block. A figure CONTROL takes no block
+   padding: it is --control-min tall, and align-content centres the trimmed
+   line in it at any font size.
+
+   An engine without text-box (older Firefox) keeps the untrimmed line and the
+   plain padding: the same height, with no centring correction. */
+
+:where(.pill--figure) {
+  --pill-pad-block: 1px;
+}
+
+.pill--figure {
+  display: inline-block;
+  padding-block: var(--pill-pad-block);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-caps);
+  text-align: center;
+}
+
+/* Two classes, so it outweighs the trimmed tag padding in @supports below. */
+.pill--control.pill--figure {
+  align-content: center;
+  padding-block: 0;
+}
+
+/* inline-block has no flex gap, so the selected tick keeps its space here. */
+.pill--control.pill--figure[aria-pressed='true']::before,
+.pill--control.pill--figure[aria-current='page']::before {
+  margin-inline-end: var(--space-1h);
+}
+
+@supports (text-box: trim-both cap alphabetic) {
+  .pill--figure {
+    text-box: trim-both cap alphabetic;
+    padding-block: calc(var(--pill-pad-block) + (1lh - 1cap) / 2);
+  }
 }
 
 /* ---- states: a control's only ---- */

@@ -1,8 +1,14 @@
-// Is the text of a figure tag centred in its pill? (#1131 slice 2)
+// Is the text of a figure tag centred in its pill? (#1131 slice 2, #1186)
 //
 //   SLICE=2 node centre.mjs before http://localhost:5172
 //   SLICE=2 node centre.mjs after  http://localhost:5173
+//   SLICE=2 BROWSER=webkit node centre.mjs after-webkit http://localhost:5173
 //   python centre.py            (reads s2/centre/, prints the table)
+//
+// BROWSER is chromium (the default) or webkit: iPhone Safari is the main
+// target, and WebKit rounds font ascent and line boxes in its own way (#1186).
+// Run `npx playwright install webkit` once first. The phase is the folder
+// name, so give a WebKit run its own phase (for example "after-webkit").
 //
 // For each mono tag, at dpr 1, 2 and 3: a screenshot of the tag plus a 3px
 // margin, and the tag's own box (fractional CSS px, from the DOM), its border
@@ -11,14 +17,13 @@
 // measures against the pill's own FILL colour, not white: the page is paper.
 //
 // The browser snaps text to whole device pixels, so a sub-pixel (em) nudge
-// changes nothing; the fix, when one is needed, is a whole-pixel padding-top.
-// Where the text lands also depends on the tag's own fractional position on
-// the page, so each tag is sampled up to N times (N=8), at the different
-// positions its copies happen to sit at.
+// changes nothing. Where the text lands also depends on the tag's own
+// fractional position on the page, so each tag is sampled up to N times
+// (N=8), at the different positions its copies happen to sit at.
 //
 //   CSS='.tlead__level { padding-top: 2px }' SLICE=2 node centre.mjs trial http://localhost:5173
 // injects a style before measuring, to try a fix without editing a file.
-import { chromium } from '@playwright/test'
+import { chromium, webkit } from '@playwright/test'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -30,13 +35,26 @@ const out = join(here, `s${process.env.SLICE || '2'}`, 'centre', phase)
 mkdirSync(out, { recursive: true })
 
 const REVEAL_BOX = { 'bbsbh:boxreveal:777747': '1' }
-const TARGETS = [
-  { name: 'wiredock-count', url: '/09222026', sel: '.wiredock__count' },
-  { name: 'winprob-chip', url: '/05272025/bosmil/boxscore', seed: REVEAL_BOX, sel: '.winprob__ledger-chip' },
-  { name: 'tlead-level', url: '/leaders/org/158', sel: '.tlead__level' },
-  { name: 'affiliate-level', url: '/team/158/minors', sel: '.thub-affiliate__level' },
-  { name: 'prospect-top', url: '/team/158/minors', sel: '.prospecttable__top' },
-]
+// The targets of each slice. One slot per line, with a comment line between
+// the slots, so that parallel slice branches each fill their own slot and
+// merge cleanly. An empty slot measures nothing.
+const TARGETS_BY_SLICE = {
+  // slice 2: the four mono figure tags, and the Top 100 rank for comparison
+  2: [
+    { name: 'wiredock-count', url: '/09222026', sel: '.wiredock__count' },
+    { name: 'winprob-chip', url: '/05272025/bosmil/boxscore', seed: REVEAL_BOX, sel: '.winprob__ledger-chip' },
+    { name: 'tlead-level', url: '/leaders/org/158', sel: '.tlead__level' },
+    { name: 'affiliate-level', url: '/team/158/minors', sel: '.thub-affiliate__level' },
+    { name: 'prospect-top', url: '/team/158/minors', sel: '.prospecttable__top' },
+  ],
+  // slice 3
+  3: [],
+  // slice 4
+  4: [],
+  // slice 5
+  5: [],
+}
+const TARGETS = [...(TARGETS_BY_SLICE[process.env.SLICE || '2'] ?? [])]
 // The display-face tags, for comparison (DISPLAY=1): the pill's own base type,
 // which slice 1 signed off, on the hosts slice 2 moved.
 const DISPLAY_TARGETS = [
@@ -47,9 +65,21 @@ const DISPLAY_TARGETS = [
   { name: 'flipback-scenario', url: '/09222026', seed: { 'bbsbh:spoiledDays': '["2026-09-22"]' }, sel: '.flipback__pill--scenario' },
 ]
 if (process.env.DISPLAY) TARGETS.splice(0, TARGETS.length, ...DISPLAY_TARGETS)
+// The figure pill on a static mount (MOUNT=1, #1186): figure tags and figure
+// controls, 8 copies each at 8 sub-pixel offsets, beside the same pills with
+// no figure rule (figure-mount.jsx). The scroll is a whole pixel here, so
+// each copy keeps its offset.
+const MOUNT_URL = '/.scratch/design-system/pill-collapse/figure-mount.html'
+const MOUNT_TARGETS = ['tag-1px', 'tag-2px', 'tag-ink', 'ctl-11', 'ctl-13', 'plain-tag-1px', 'plain-tag-2px', 'plain-ctl-11', 'plain-ctl-13'].map(
+  (v) => ({ name: v, url: MOUNT_URL, sel: `[data-v="${v}"]` }),
+)
+if (process.env.MOUNT) TARGETS.splice(0, TARGETS.length, ...MOUNT_TARGETS)
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null
 
-const browser = await chromium.launch()
+const engines = { chromium, webkit }
+const engine = engines[process.env.BROWSER || 'chromium']
+if (!engine) throw new Error(`BROWSER must be chromium or webkit, not ${process.env.BROWSER}`)
+const browser = await engine.launch()
 const rows = []
 for (const t of TARGETS.filter((x) => !ONLY || ONLY.includes(x.name))) {
   for (const dpr of [1, 2, 3]) {
@@ -66,7 +96,7 @@ for (const t of TARGETS.filter((x) => !ONLY || ONLY.includes(x.name))) {
     const el = all.nth(i)
     if (!(await el.isVisible())) continue
     await el.scrollIntoViewIfNeeded()
-    await el.evaluate((n) => window.scrollBy(0, n.getBoundingClientRect().top - 300))
+    await el.evaluate((n, whole) => window.scrollBy(0, whole ? Math.round(n.getBoundingClientRect().top - 300) : n.getBoundingClientRect().top - 300), !!process.env.MOUNT)
     await page.waitForTimeout(150)
     const m = await el.evaluate((n) => {
       const r = n.getBoundingClientRect()
@@ -91,4 +121,4 @@ for (const t of TARGETS.filter((x) => !ONLY || ONLY.includes(x.name))) {
 }
 await browser.close()
 writeFileSync(join(out, 'boxes.json'), JSON.stringify(rows, null, 2))
-console.log('wrote', out)
+console.log('wrote', out, `(${process.env.BROWSER || 'chromium'} ${browser.version()})`)

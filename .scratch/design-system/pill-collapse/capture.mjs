@@ -4,8 +4,9 @@
 //   node .scratch/design-system/pill-collapse/capture.mjs after  http://localhost:5171
 //   SLICE=2 node .scratch/design-system/pill-collapse/capture.mjs before http://localhost:5172
 //
-// Slice 1 writes before/ and after/; slice 2 writes s2/before/ and s2/after/,
-// so a later slice never overwrites an earlier slice's evidence. A slice 2
+// Slice 1 writes before/ and after/; slice N writes sN/before/ and sN/after/,
+// so a later slice never overwrites an earlier slice's evidence. OUT=<folder>
+// overrides the output folder (a smoke test, or a scratch run). A slice 2
 // target can also take: `w` (its own viewport width), `seed` (localStorage
 // entries set before the load, for a tag that renders only after a reveal),
 // `click` (a tab to open first), `focus` (a PlayerLink to focus, for the hover
@@ -26,7 +27,7 @@ const phase = process.argv[2] || 'before'
 const base = process.argv[3] || 'http://localhost:5170'
 const here = dirname(fileURLToPath(import.meta.url))
 const SLICE = process.env.SLICE || '1'
-const out = SLICE === '1' ? join(here, phase) : join(here, `s${SLICE}`, phase)
+const out = process.env.OUT || (SLICE === '1' ? join(here, phase) : join(here, `s${SLICE}`, phase))
 mkdirSync(out, { recursive: true })
 
 const W = process.env.W ? +process.env.W : 390
@@ -74,7 +75,20 @@ const TARGETS_2 = [
   { name: 'cwb-chip-share', url: '/.scratch/design-system/pill-collapse/cwb-mount.html', sel: ['.cwb__chip--share'] },
   { name: 'cwb-chip-none', url: '/.scratch/design-system/pill-collapse/cwb-mount.html', sel: ['.cwb__chip--none'] },
 ]
-const TARGETS_ALL = SLICE === '1' ? TARGETS_1 : TARGETS_2
+// One slot per slice, each on its own line, so parallel slices never edit the
+// same line. A slice fills only its own slot.
+// ---- slice 3 ----
+const TARGETS_3 = []
+// ---- slice 4 ----
+const TARGETS_4 = []
+// ---- slice 5 ----
+const TARGETS_5 = []
+// ---- slice 6 ----
+const TARGETS_6 = []
+// ---- end of slots ----
+const TARGETS_BY_SLICE = { 1: TARGETS_1, 2: TARGETS_2, 3: TARGETS_3, 4: TARGETS_4, 5: TARGETS_5, 6: TARGETS_6 }
+const TARGETS_ALL = TARGETS_BY_SLICE[SLICE]
+if (!TARGETS_ALL) throw new Error(`capture.mjs: no target slot for SLICE=${SLICE}`)
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null
 const TARGETS = ONLY ? TARGETS_ALL.filter((t) => ONLY.includes(t.name)) : TARGETS_ALL
 

@@ -186,23 +186,17 @@
   line-height: var(--lh-snug);
   color: var(--text-body);
 }
-/* The count is a paper Pill (#1131) filled with the canvas colour and drawn
-   with no edge. This file loads before system/pill.css, so the rule is written
-   two-class, or the pill's own rule would win. It keeps its place in the row
-   and the figure face: mono, tabular, the cell size, no tracking.
-   One more pixel on top: in the tag's 2px/2px box the figures sat 1px high,
-   at 1x, 2x and 3x alike, and the browser snaps text to a whole pixel, so an
-   em nudge does nothing. 3px over 2px centres them (measured with
-   .scratch/design-system/pill-collapse/centre.mjs). */
+/* The count is a paper figure Pill (#1131, #1186) filled with the canvas
+   colour and drawn with no edge. This file loads before system/pill.css, so
+   the rule is written two-class, or the pill's own rule would win. The figure
+   rule sets the face and centres it; the count keeps its place in the row, no
+   tracking, and the pill's 2px block pad. */
 .pill.wiredock__count {
   --pill-fill: var(--bg-canvas);
   --pill-edge: transparent;
   --pill-ink: var(--text-caption);
+  --pill-pad-block: 2px;
   flex: 0 0 auto;
-  padding-top: 3px;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-cell);
   letter-spacing: var(--ls-none);
 }
 .wiredock__chevron {
