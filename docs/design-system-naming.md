@@ -8,18 +8,19 @@ and only there.** This file does not restate it. Two copies of a rule drift, and
 the copy a reader happens to open is the one they follow. Read the ADR for what
 the six clauses say and what each one rejects; read this file for what moves.
 
-Measured on `main` at `9a578dcb7`. **144 rows**, of which **8 are held**.
+Measured on `main` at `9a578dcb7`. **156 rows**, of which **9 are held**.
 
 One row was added after the measurement, by the rename that found it: see
-`.bs__noteMore` under #1130.
+`.bs__noteMore` under #1130. Twelve more, the `sheet` family under #1113, were
+added by #1155 and measured on `main` at `ffd91507a`.
 
 | collapse issue | rows |
 | --- | --- |
 | Button and Door (#1130) | 26 |
 | Pill (#1131) | 33 |
-| SectionHead and Card (#1113) | 75 |
+| SectionHead and Card (#1113) | 87 |
 | Table, EmptyState and Notice (#1132) | 10 |
-| **total** | **144** |
+| **total** | **156** |
 
 ## How to read a row
 
@@ -67,7 +68,8 @@ target column names the class the way every other row does.
 evidence for the hold instead of a work list.
 
 **Blocks that own the base rule for their shape keep the word and are not rows:**
-`.thub-card` and `.gamecard` (card), `.btn` (btn), `.sheet` (sheet) and
+`.thub-card` and `.gamecard` (card), `.btn` (btn), `.sheet` (sheet, in
+`styles/14-strike-zone.css`) and
 `.pill` (pill). `.milestonepill` owned the pill recipe until #1131 moved it into
 `.pill` (`styles/system/pill.css`); it is absorbed, and no class is left.
 
@@ -215,10 +217,13 @@ elements are measurably tappable, and six states are written as modifiers.
 | `.pitcherhandoff__chip--open` | 4 | `.pitcherhandoff__chip.is-open` | #1131 | `styles/12-sealbox.css` | no literal call site — `PitcherHandoffCard.jsx` builds the name as `` `pitcherhandoff__chip--${bookOpen ? "open" : "closed"}` ``, so a grep-driven rename misses it and the rule silently stops applying. `--closed` moves with it. |
 | `.index-group__badge` | — (for #1114) | hold | #1131 | 1 file — none move | HOLD — `badge` is not one of clause 1's eight shape words, so no clause reaches this class. It is recorded because it draws the pill shape and #1114 counts shapes, not words. It is also the same surface as `.cta__go`: server-rendered landing copy styled from `public/learn.css`. |
 
-## SectionHead and Card — #1113 — 75 rows
+## SectionHead and Card — #1113 — 87 rows
 
 Twenty-nine blocks carry `card` without owning the base rule for it.
-`.thub-card` and `.gamecard` draw their own box and are not rows. The other
+`.thub-card` and `.gamecard` draw their own box and are not rows. Twelve blocks
+carry `sheet` without owning the base rule for it; `.sheet` owns it and is not a
+row. They ride with #1113 because `Card`'s `frame="sheet"` is the one rule the
+word will name, and two of them already have `__eyebrow` rows here. The other
 forty-six rows are the head: four titles, thirty-nine second lines that
 become `__note`, one eyebrow retired, one orphan deleted, and one row
 #1113 must name.
@@ -254,6 +259,18 @@ become `__note`, one eyebrow retired, one orphan deleted, and one row
 | `.scorecard` | 1 | hold | #1113 | 86 files — none move | HOLD — the scoring grid, 13 custom properties read by 39 modules including `src/api/`. `inventory.md` puts it on the bespoke list: leave it alone and rename nothing about it. |
 | `.stampcard` | 1 | hold | #1113 | 5 files — none move | HOLD — a stamp IS a final score. `scripts/check-stamp-surfaces.mjs` tracks the JS identifiers `GameStamp`/`StampGameButton`/`useStamps`, NOT this CSS class, so a rename passes lint in silence. The hold rests on ADR-0035, which contains stamps by WHERE the art may render; a shared name any surface may take is what that ADR prevents. |
 | `.tally-cl-card` | 1 | hold | #1113 | 4 files — none move | HOLD — this class is handed to Clerk's `appearance` API from `lib/clerkAppearance.js` and every declaration is `!important` because it overrides a third party's stylesheet. No Clerk key exists in a local checkout, so the rename cannot be verified before it ships. |
+| `.erasesheet` | 1, 2 | `.erase` | #1113 | `components/profile/EraseDataDialog.jsx`, `styles/54-my-tally.css`, `styles/55-my-tally-account.css`, `e2e/my-tally.spec.js`, `test/button-placement.test.js` | Also a namespace: its one bare selector is the descendant scope `#root .erasesheet .caps-exempt`, and the box is `.sheet`'s. The rename edits `test/button-placement.test.js`, which pins `.erasesheet__btn` by name (#1166). |
+| `.introsheet` | 1, 2 | `.intro` | #1113 | `components/account/AccountPitch.jsx`, `components/account/FavoriteTeamModal.jsx`, `styles/56-my-tally-intro.css`, `e2e/intro-two-step.spec.js` | Also a namespace: its one bare selector is the descendant scope `#root .introsheet .caps-exempt`. It rides as a co-class on `.favteamsheet`, which draws the box. The `.introsheet__eyebrow` row below moves with it, so that target becomes `.intro__note`. |
+| `.bpsheet` | 1 | `.parkfacts` | #1113 | `components/ballpark/BallparkModal.jsx`, `screens/team/modules/ballpark/BallparkCard.jsx`, `styles/39-manager-page.css`, `styles/57-ballpark-card.css` † | not `.ballpark` — that is `.ballparkcard`'s target in this same issue. `BallparkCard.jsx` already wears `.bpsheet__facts` and `.bpsheet__ranks`: the elements are the park's facts, shared by the card and the modal, and that is the job. |
+| `.brewsheet` | 1 | `.brew` | #1113 | `components/game/WhatsBrewingModal.jsx`, `styles/11-innings.css` | — |
+| `.favteamsheet` | 1 | `.favteam` | #1113 | `components/account/FavoriteTeamModal.jsx`, `screens/GameView.jsx` †, `styles/01-base.css` †, `styles/08-site-shell.css`, `styles/56-my-tally-intro.css` † | it does not wear `.sheet`; it draws its own box in `08-site-shell.css`. |
+| `.gamefindersheet` | 1 | `.gamefinderframe` | #1113 | `components/game/GameFinderModal.jsx`, `styles/08-site-shell.css` | two-step — `.gamefinder` is NOT a free name. It is the finder's own block (`GameFinder.jsx`, `08-site-shell.css`), which this sheet wraps, so the target may not be `.gamefinder`. Same case as `.abscard`. |
+| `.hlsheet` | 1 | `.hlview` | #1113 | `components/highlights/SaveClipButton.jsx`, `components/playbyplay/HighlightSheet.jsx`, `styles/40-game-modals.css`, `e2e/inning-modal-stacking.spec.js`, `e2e/invariants/spoiler-dom.spec.js` | `e2e/invariants/spoiler-dom.spec.js` names it. That spec is a spoiler invariant and is not CI-gated, so run it after the rename; lint does not see it. |
+| `.printsheet` | 1 | `.printpage` | #1113 | `screens/sheet/ScoreSheet.jsx`, `styles/63-print-sheet.css`, `e2e/print-sheet.spec.js` | the printable scorecard. #1132 leaves `scorecard/*` bespoke, and this block is not in it: its rules are its own partial, and a rename flattens nothing. |
+| `.sc-editsheet` | 1 | `.sc-edit` | #1113 | `components/scoring/ScorecardCellEditor.jsx`, `styles/scorecard/page.css`, `e2e/scorecard.spec.js` | the scorecard's cell editor, a modal on `.sheet` — not the grid, so the `.scorecard` hold does not reach it. |
+| `.sitemenusheet` | 1 | `.sitemenu` | #1113 | `components/account/AdminMenuLink.jsx`, `components/chrome/SiteMenu.jsx`, `styles/08-site-shell.css`, `styles/08a-site-menu.css`, `e2e/site-directory.spec.js` | NOT a namespace, although #1155 reported one: `.sheet.sitemenusheet` in `08a-site-menu.css` is a rule on the block itself, so clause 2 does not apply. The `.sitemenusheet__eyebrow` row below moves with it, so that target becomes `.sitemenu__note`. |
+| `.stampsheet` | 1 | `.stampset` | #1113 | `components/logbook/StampSheet.jsx`, `styles/48c-stamp-sheet.css`, `styles/48d-stamp-detail.css` † | a sheet of stamps, not the modal shape. The `.stampcard` hold does not reach a rename to a name no other surface takes: `scripts/check-stamp-surfaces.mjs` names no CSS class, and ADR-0035 contains the art by where it renders. |
+| `.sc-sheet` | 1 | hold | #1113 | 5 files — none move | HOLD — the scoring grid's own `<table>` (`ScorecardSheet.jsx`, `styles/scorecard/grid.css`). The `.scorecard` hold covers it: the grid is bespoke and nothing about it is renamed. #1132 also leaves `scorecard/*` bespoke by name, as "the sheet you score on". |
 | `.awardord__hd` | 3 | `.awardord__title` | #1113 | `components/admin/AwardOrderEditor.jsx`, `styles/45-admin-copy-editor.css` | — |
 | `.coverpick__heading` | 3 | `.coverpick__title` | #1113 | `components/passport/BookCoverPicker.jsx`, `styles/60-book-cover-picker.css` | — |
 | `.gamelines__heading` | 3 | `.gamelines__title` | #1113 | `components/playerstats/GameLinesCard.jsx`, `styles/boxlines/gamelines.css`, `e2e/box-lines.spec.js` | — |
