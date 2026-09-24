@@ -11,13 +11,18 @@
 // since anyone looked, which needs no network and so can gate every push.
 //
 // Run by `npm run lint` (so it gates every push).
+//
+// Two environment variables exist for test/fixture-freshness.test.js only:
+// FIXTURE_FRESHNESS_NOW (an ISO date) stands in for today, so a test can run
+// the guard on a future date; FIXTURE_FRESHNESS_DIR points it at another
+// fixtures folder (manifest.json plus its files).
 
 import { readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = path.join(fileURLToPath(new URL('.', import.meta.url)), '..')
-const FIXTURES_DIR = path.join(ROOT, 'e2e/fixtures')
+const FIXTURES_DIR = process.env.FIXTURE_FRESHNESS_DIR || path.join(ROOT, 'e2e/fixtures')
 const MANIFEST_PATH = path.join(FIXTURES_DIR, 'manifest.json')
 const MAX_AGE_DAYS = 180
 
@@ -39,7 +44,14 @@ if (entries.length === 0) {
   process.exit(1)
 }
 
-const now = Date.now()
+const now = process.env.FIXTURE_FRESHNESS_NOW
+  ? new Date(process.env.FIXTURE_FRESHNESS_NOW).getTime()
+  : Date.now()
+if (Number.isNaN(now)) {
+  console.error(`\n✗ FIXTURE_FRESHNESS_NOW "${process.env.FIXTURE_FRESHNESS_NOW}" isn't a valid date.\n`)
+  process.exit(1)
+}
+
 const missingFiles = []
 const stale = []
 
@@ -71,7 +83,8 @@ if (missingFiles.length || stale.length) {
   console.error(
     '\n  Recapture stale fixtures against the live API (capture recipe in docs/testing.md),\n' +
       '  update their capturedAt in e2e/fixtures/manifest.json, and re-run. A fixture only\n' +
-      '  earns noExpiry:true if its content genuinely never goes stale (e.g. a generic logo).\n',
+      '  earns noExpiry:true if its content genuinely never goes stale (e.g. a generic logo,\n' +
+      '  or a finished game day whose shape check-feed-shape-drift.mjs checks each night).\n',
   )
   process.exit(1)
 }

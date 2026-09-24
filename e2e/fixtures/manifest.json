@@ -2,12 +2,14 @@
   "api/feed-823035.json": {
     "capturedAt": "2026-08-18",
     "sourceUrl": "https://statsapi.mlb.com/api/v1.1/game/823035/feed/live",
-    "note": "Anchor game feed (2026-07-07 MIL@STL g2). Trimmed: each playEvent's pitchData/hitData is stripped to keep the file a manageable size — see docs/testing.md's capture recipe."
+    "note": "Anchor game feed (2026-07-07 MIL@STL g2). Trimmed: each playEvent's pitchData/hitData is stripped to keep the file a manageable size — see docs/testing.md's capture recipe. A finished game day: its content cannot change, so it has no age budget (noExpiry). check-feed-shape-drift.mjs checks its shape each night.",
+    "noExpiry": true
   },
   "api/schedule-20260707.json": {
     "capturedAt": "2026-08-18",
     "sourceUrl": "https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-07-07&hydrate=team,venue(timezone),probablePitcher,linescore,broadcasts(all)",
-    "note": "The anchor game's full day slate (16 games), untrimmed."
+    "note": "The anchor game's full day slate (16 games), untrimmed. A finished game day: its content cannot change, so it has no age budget (noExpiry). check-feed-shape-drift.mjs checks its shape each night.",
+    "noExpiry": true
   },
   "images/team-logo.svg": {
     "capturedAt": "2026-08-18",

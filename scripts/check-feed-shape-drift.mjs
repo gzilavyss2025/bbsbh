@@ -9,11 +9,13 @@
 // manually (`npm run check:feed-shape-drift`) or from the nightly cron
 // (update-nightly-data.yml), which does have real network.
 //
-// Fetches a FRESH copy of the same anchor game (823035) the fixture was
-// captured from — a completed historical game's own content never changes, so
-// any path present in the captured fixture but missing from a fresh fetch is
-// real API-shape drift (MLB renamed/removed/restructured something), not the
-// game moving on. One-directional on purpose: a field MLB ADDED since capture
+// Fetches a FRESH copy of each captured anchor-day fixture — the anchor game's
+// feed (823035) and that day's schedule (2026-07-07). A completed historical
+// game day's own content never changes, so any path present in a captured
+// fixture but missing from a fresh fetch is real API-shape drift (MLB
+// renamed/removed/restructured something), not the game moving on. This is why
+// those two fixtures carry noExpiry in e2e/fixtures/manifest.json: their risk is
+// shape, not age (#1194). One-directional on purpose: a field MLB ADDED since capture
 // isn't a break and isn't flagged, only a path bbsbh already depends on that
 // disappeared.
 //
@@ -23,8 +25,6 @@
 // class of break this repo has actually hit (a field selectors read moving or
 // disappearing), without pretending to be a full JSON-schema diff.
 
-const ANCHOR_GAME_PK = 823035
-const FEED_URL = `https://statsapi.mlb.com/api/v1.1/game/${ANCHOR_GAME_PK}/feed/live`
 const MAX_DEPTH = 5
 
 import { readFileSync } from 'node:fs'
@@ -32,7 +32,14 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = path.join(fileURLToPath(new URL('.', import.meta.url)), '..')
-const FIXTURE_PATH = path.join(ROOT, 'e2e/fixtures/api', `feed-${ANCHOR_GAME_PK}.json`)
+const FIXTURES_DIR = path.join(ROOT, 'e2e/fixtures')
+
+// Each fixture is fetched again from its own manifest sourceUrl, so the fresh
+// copy asks for exactly what was captured (the schedule's hydrate list too).
+const TARGETS = [
+  { label: 'anchor-game feed (823035)', file: 'api/feed-823035.json' },
+  { label: 'anchor-day schedule (2026-07-07)', file: 'api/schedule-20260707.json' },
+]
 
 function collectPaths(value, prefix, depth, out) {
   if (depth > MAX_DEPTH || value === null || typeof value !== 'object') return
@@ -62,52 +69,63 @@ function resolvePath(root, dotPath) {
   return cur
 }
 
-let fixture
+let manifest
 try {
-  fixture = JSON.parse(readFileSync(FIXTURE_PATH, 'utf8'))
+  manifest = JSON.parse(readFileSync(path.join(FIXTURES_DIR, 'manifest.json'), 'utf8'))
 } catch (error) {
-  console.error(`\n✗ Feed-shape drift check couldn't read ${FIXTURE_PATH}: ${error.message}\n`)
+  console.error(`\n✗ Feed-shape drift check couldn't read manifest.json: ${error.message}\n`)
   process.exit(1)
 }
-
-const expectedPaths = new Set()
-collectPaths(fixture, '', 0, expectedPaths)
 
 // process.exitCode (not process.exit()) from here on: Node on Windows hits a
 // libuv assertion tearing down a fetch's still-closing handle if the process
 // exits immediately after an await fetch() — exitCode lets the loop drain
 // naturally instead of forcing a teardown mid-close.
-let fresh
-try {
-  const res = await fetch(FEED_URL)
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  fresh = await res.json()
-} catch (error) {
-  console.error(
-    `\n✗ Feed-shape drift check couldn't reach statsapi (${error.message}).\n` +
-      '  This needs real network — run it from the nightly cron, or manually somewhere\n' +
-      '  that can reach statsapi.mlb.com. It is deliberately not part of `npm run lint`.\n',
-  )
-  process.exitCode = 1
-  fresh = null
-}
+for (const { label, file } of TARGETS) {
+  const url = manifest[file]?.sourceUrl
+  let fixture
+  try {
+    if (!url) throw new Error(`manifest.json has no sourceUrl for ${file}`)
+    fixture = JSON.parse(readFileSync(path.join(FIXTURES_DIR, file), 'utf8'))
+  } catch (error) {
+    console.error(`\n✗ Feed-shape drift check couldn't read the ${label} fixture: ${error.message}\n`)
+    process.exitCode = 1
+    continue
+  }
 
-if (fresh) {
+  const expectedPaths = new Set()
+  collectPaths(fixture, '', 0, expectedPaths)
+
+  let fresh
+  try {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    fresh = await res.json()
+  } catch (error) {
+    console.error(
+      `\n✗ Feed-shape drift check couldn't reach statsapi for the ${label} (${error.message}).\n` +
+        '  This needs real network — run it from the nightly cron, or manually somewhere\n' +
+        '  that can reach statsapi.mlb.com. It is deliberately not part of `npm run lint`.\n',
+    )
+    process.exitCode = 1
+    continue
+  }
+
   const missing = [...expectedPaths].filter((p) => resolvePath(fresh, p) === undefined).sort()
 
   if (missing.length) {
     console.error(
-      `\n✗ Feed-shape drift: ${missing.length} path(s) the captured anchor-game fixture depends ` +
-        `on\n  no longer resolve in a fresh fetch of gamePk ${ANCHOR_GAME_PK}'s feed. MLB changed\n` +
-        '  the API shape, not the game — verify against a real response (CLAUDE.md), then\n' +
-        '  recapture the fixture (docs/testing.md) and update e2e/fixtures/manifest.json.\n\n',
+      `\n✗ Feed-shape drift: ${missing.length} path(s) the captured ${label} fixture depends\n` +
+        `  on no longer resolve in a fresh fetch of ${url}.\n` +
+        '  MLB changed the API shape, not the game — verify against a real response (CLAUDE.md),\n' +
+        '  then recapture the fixture (docs/testing.md) and update e2e/fixtures/manifest.json.\n\n',
     )
     for (const p of missing) console.error(`  ${p}`)
     console.error('')
     process.exitCode = 1
   } else {
     console.log(
-      `✓ Feed-shape check holds — ${expectedPaths.size} path(s) from the captured anchor-game ` +
+      `✓ Feed-shape check holds — ${expectedPaths.size} path(s) from the captured ${label} ` +
         'fixture still resolve in a fresh fetch.',
     )
   }
