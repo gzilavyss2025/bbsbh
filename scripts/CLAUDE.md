@@ -152,6 +152,12 @@ process automatically.
   color; a ring-less focus style (reusing a `:hover` border/background change) is
   fine, and a deliberate one-off opts out with a `focus-ring-exempt` comment. See
   ADR-0023.
+- `check-raw-values.mjs` — a ratchet on the `src/styles/` declarations that write a
+  colour hex, a `border-radius` length, a transition/animation time, or a
+  `box-shadow` literal instead of reading a token (#1178). Per-kind budgets, same
+  shape as `check-caption-budget.mjs`: growth fails, a drop warns until you lower
+  the budget in the same PR. Each count is taken two ways (regex and a character
+  scanner) and must agree. A one-off takes `raw-value-exempt: <reason>`.
 - `check-strike-links.mjs` — every rule that draws a `line-through` must name
   `.plink` in its selector list, because a player name is a `<button
   class="plink">` and neither inherits an ancestor's decoration nor keeps its
