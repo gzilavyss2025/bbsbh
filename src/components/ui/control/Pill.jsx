@@ -22,6 +22,9 @@ import { buttonAria } from '../../../lib/design/buttonClass.js'
 //          This is where a pill's meaning goes: the copy says what it is, the
 //          ink says which kind. There is no tone prop. See lib/design/pillClass.js
 //          for the three token families it refuses, and why.
+//   figure  true for a figure pill — a rank, a level, a count. It sets the
+//          mono face and centres it on its cap height, for a tag or a control
+//          (pill--figure, #1186). The host adds only its tint and its place.
 //   pressed  control only: makes it a TOGGLE (aria-pressed), which draws the
 //          selected state. Leave it undefined for an ordinary action.
 //   href   control only: renders an anchor, for a pill that is an address.
@@ -38,6 +41,7 @@ export function Pill({
   role = 'tag',
   fill = 'outline',
   ink,
+  figure = false,
   pressed,
   href,
   type = 'button',
@@ -46,7 +50,7 @@ export function Pill({
   children,
   ...rest
 }) {
-  const cls = pillClassName({ fill, role, className })
+  const cls = pillClassName({ fill, role, figure, className })
   const inkStyle = pillInkStyle({ fill, ink })
   const merged = inkStyle || style ? { ...inkStyle, ...style } : undefined
 

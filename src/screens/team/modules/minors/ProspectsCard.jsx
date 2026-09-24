@@ -54,7 +54,7 @@ export function ProspectsCard({ prospects, showAllProspects, onShowAll }) {
                   <td className="lft yr">{p.orgRank}</td>
                   <td className="lft ledger__sub">
                     <PlayerLink id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>
-                    {isTop && <Pill className="prospecttable__top">#{p.topRank}</Pill>}
+                    {isTop && <Pill figure className="prospecttable__top">#{p.topRank}</Pill>}
                   </td>
                   <td>{p.position || DASH}</td>
                   <td className="prospecttable__level">

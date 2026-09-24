@@ -12,12 +12,17 @@
 export const FILLS = ['outline', 'paper', 'ink', 'seal']
 export const ROLES = ['tag', 'control']
 
-export function pillClassName({ fill = 'outline', role = 'tag', className = '' } = {}) {
+// `figure` is the mono figure face (#1186): a rank, a level, a count. It is not
+// a third colour axis; it sets the face and centres it on its cap height, for
+// a tag and a control alike (styles/system/pill.css, "THE FIGURE FACE"). A
+// hand-written pill opts in with the same class, pill--figure.
+export function pillClassName({ fill = 'outline', role = 'tag', figure = false, className = '' } = {}) {
   if (!FILLS.includes(fill)) throw new Error(`Pill: unknown fill "${fill}" (${FILLS.join(', ')})`)
   if (!ROLES.includes(role)) throw new Error(`Pill: unknown role "${role}" (${ROLES.join(', ')})`)
   const parts = ['pill']
   if (role !== 'tag') parts.push(`pill--${role}`)
   if (fill !== 'outline') parts.push(`pill--${fill}`)
+  if (figure) parts.push('pill--figure')
   if (className) parts.push(className)
   return parts.join(' ')
 }
