@@ -14,6 +14,21 @@ Some words used below:
 
 ---
 
+## Gary's answers (2026-09-24)
+
+| # | Question | Answer |
+| --- | --- | --- |
+| Q1 | Two card shapes? | Yes: Sheet and Ledger only. |
+| Q2 | The band with no club colour | Keep both faces as they are today. Navy + kraft on club-less pages (`/salaries`); a plain label on a player page with no club (a retired player or a free agent). |
+| Q3 | Box score sheets on card paper? | Yes. |
+| Q4 | Boxes inside boxes | Later, in a separate issue. |
+| Q5 | Lab and admin pages | No, leave them. The design lab shows the new parts. |
+| Q6 | A report look | Later, after the rest. This replaces the 2026-09-18 sign-off to build a `report` frame in this work. Report cards take `frame="sheet"` for now. |
+
+All six are answered. Card work can start when #1131 merges and #1177 lands.
+
+---
+
 ## Q1. Can all cards use one of two shapes?
 
 Today the app draws cards in four shapes. Two of the differences are only a shadow.
