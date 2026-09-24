@@ -9,8 +9,9 @@
 //   - the themed team hub whose Standings card shows "Postseason odds"
 //     (`.psodds-pill`, slice 5), and /situational-records (`.trrank__*`, 4 + 5).
 //
-// THE SPOILER RULE. Every shot is of a SEALED page. The baselines are committed
-// images, and a committed image must never hold a score from a sealed surface.
+// THE SPOILER RULE. Every shot is of a SEALED page. The shots are never
+// committed, but they land in a report that is easy to open and pass around, and
+// a picture of a sealed surface must never hold a score.
 // The game pages (lineup, innings, box score) are shot with nothing revealed.
 // The one shot that needs a revealed state, the filter chips, is an ELEMENT
 // shot of the chip bar alone: the chips are storyline labels, and the cards
@@ -18,13 +19,14 @@
 // standings and reports are outside the spoiler scope (CLAUDE.md, ADR-0034).
 //
 // THE DATE. The pinned anchor game (docs/test-games.md: 823035, MIL@STL game 2,
-// 2026-07-07) supplies the game pages. The frozen clock below is the moment the
-// HARs were recorded, so a page that reads "today" reads the same day each run.
+// 2026-07-07) supplies the game pages. The frozen clock below is the same on
+// both servers and on every run, so a page that reads "today" reads the same
+// day: a September postseason race, not whatever the calendar says.
 
 import { expect } from '../fixtures.js'
 
-// 2026-09-23, 11:00 in Chicago (the config's timezone). Re-record the HARs if
-// you move it: a page asks statsapi for dates computed from this clock.
+// 2026-09-23, 11:00 in Chicago (the timezone in setup.js). A page asks statsapi
+// for dates computed from this clock, and each run records what it asks for.
 export const FROZEN_NOW = '2026-09-23T11:00:00-05:00'
 
 const ANCHOR = '/07072026/milstl-2'
@@ -35,11 +37,20 @@ const ANCHOR = '/07072026/milstl-2'
 // clip's poster frame is chosen by MLB and can change under the same URL).
 export const MASKS = ['.skel__ball', '.loader__scoreboard', '.hlclip__poster', 'video']
 
-// Each route: `name` (the baseline file name), `path`, and `shots`. A shot with
-// no `selector` is the full page; with one, it is that element alone. `ready` is
-// a selector the page draws once its data has arrived. `prepare` runs after the
-// page settles and before the shots. `offShot` names requests that only feed
-// parts of the page no shot shows, so the HAR not holding one is not a failure.
+// Parts of a page that differ between the two servers BY DESIGN, taken out of
+// every shot. The footer's "build 1234567" link prints the git commit each
+// server was started from (vite.config.js, resolveBuildCommit), so it never
+// matches between a branch and main. It is hidden, not masked: a mask box is as
+// wide as the text under it, and two commits' glyphs need not be as wide. It is
+// the last item on its line, so hiding it moves nothing else.
+export const HIDDEN = ['.sitefooter__build-link']
+
+// Each route: `name` (the start of each shot's file name), `path`, and `shots`.
+// A shot with no `selector` is the full page; with one, it is that element
+// alone. `ready` is a selector the page draws once its data has arrived.
+// `prepare` runs after the page settles and before the shots. `offShot` names
+// requests that only feed parts of the page no shot shows, so the recording not
+// holding one is not a failure.
 export const ROUTES = [
   {
     // The catalog, in its four bands plus the page head. Split because the
@@ -84,8 +95,8 @@ export const ROUTES = [
     shots: [{ name: 'bar', selector: '.slate-filterbar' }],
     // The flipped cards' photos. They are outside the shot, and whether a face
     // asks for one depends on a race between two fetches (BoxScoreSkeleton.jsx
-    // describes it), so the HAR cannot promise to hold them. Not holding one is
-    // not a failure here.
+    // describes it), so the recording cannot promise to hold them. Not holding
+    // one is not a failure here: a LOADING allowance, for this route alone.
     offShot: /^https:\/\/img\.mlbstatic\.com\//,
   },
   { name: 'lineup', path: `${ANCHOR}/lineup1`, ready: '.lineup', shots: [{ name: 'page' }] },
