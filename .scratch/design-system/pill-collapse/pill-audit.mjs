@@ -12,6 +12,8 @@
 //
 //   node pill-audit.mjs            (slice 1: merge base ef2eb7ba7 vs the working tree)
 //   SLICE=2 node pill-audit.mjs    (slice 2: merge base 0aaa46737 vs the working tree)
+//   SLICE=3 node pill-audit.mjs    (slice 3 on: `git merge-base HEAD origin/main` vs the working tree)
+//   BASE=<rev> SLICE=N node pill-audit.mjs   (a BASE env always wins)
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -20,8 +22,9 @@ import postcss from 'postcss'
 
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url))
 const SLICE = process.env.SLICE || '1'
-const BASE = process.env.BASE || (SLICE === '1' ? 'ef2eb7ba7' : '0aaa46737')
 const sh = (c) => execSync(c, { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 })
+const FIXED_BASE = { 1: 'ef2eb7ba7', 2: '0aaa46737' }
+const BASE = process.env.BASE || FIXED_BASE[SLICE] || sh('git merge-base HEAD origin/main').trim()
 const atBase = (f) => { try { return sh(`git show ${BASE}:src/styles/${f}`) } catch { return '' } }
 const now = (f) => { try { return readFileSync(join(ROOT, 'src/styles', f), 'utf8') } catch { return '' } }
 
@@ -116,7 +119,9 @@ const DROPPED_1 = {
 const own = (file, sel, extra = {}) => ({ old: sel, file, residual: [file, sel], ...extra })
 const PAIRS_2 = [
   { old: '.wiredock__count', file: '04a-wire-dock.css', residual: ['04a-wire-dock.css', '.pill.wiredock__count'], mods: ['.pill--paper'] },
-  own('12-sealbox.css', '.wcall__pill'),
+  // The slice 2 review fixes (84f56628b) deleted the residual .wcall__pill
+  // rule, a no-op face rule: the base rule is absorbed into .pill now.
+  { old: '.wcall__pill', file: '12-sealbox.css' },
   own('12-sealbox.css', '.wcall__pill--wrong'),
   own('12-sealbox.css', '.wcall__pill--right'),
   own('12-sealbox.css', '.favormeter__tierpill'),
@@ -149,8 +154,24 @@ const PAIRS_2 = [
 ]
 const DROPPED_2 = {}
 
-const PAIRS = SLICE === '1' ? PAIRS_1 : PAIRS_2
-const DROPPED = SLICE === '1' ? DROPPED_1 : DROPPED_2
+// One slot per slice, each on its own line, so parallel slices never edit the
+// same line. A slice fills only its own PAIRS_N and DROPPED_N.
+// ---- slice 3 ----
+const PAIRS_3 = []
+const DROPPED_3 = {}
+// ---- slice 4 ----
+const PAIRS_4 = []
+const DROPPED_4 = {}
+// ---- slice 5 ----
+const PAIRS_5 = []
+const DROPPED_5 = {}
+// ---- end of slots ----
+const PAIRS_BY_SLICE = { 1: PAIRS_1, 2: PAIRS_2, 3: PAIRS_3, 4: PAIRS_4, 5: PAIRS_5 }
+const DROPPED_BY_SLICE = { 1: DROPPED_1, 2: DROPPED_2, 3: DROPPED_3, 4: DROPPED_4, 5: DROPPED_5 }
+const PAIRS = PAIRS_BY_SLICE[SLICE]
+const DROPPED = DROPPED_BY_SLICE[SLICE]
+if (!PAIRS) throw new Error(`pill-audit.mjs: no pair slot for SLICE=${SLICE}`)
+console.log(`Slice ${SLICE}, base ${BASE}`)
 
 let lost = 0
 let dropped = 0

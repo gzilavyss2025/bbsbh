@@ -1,5 +1,5 @@
 {
-  "_comment": "Hand-checked calls, keyed by the census row's selector. A key that no longer matches a row is reported by census.mjs as STALE. fill: outline | paper | ink | seal | other:<what>. slice: see SLICES in census.mjs. landed: the slice that moved the row onto Pill; a landed key that matches no row is counted as merge done, not STALE.",
+  "_comment": "Hand-checked calls, keyed by the census row's selector. A key that no longer matches a row is reported by census.mjs as STALE. fill: outline | paper | ink | seal | other:<what>. slice: see SLICES in census.mjs. landed: the slice that moved the row onto Pill; a landed key that matches no row is counted as merge done, not STALE. settled: an outcome other than Pill, such as \"moved to Button (slice N)\", \"moved to Door (slice N)\", \"deferred to #N\", \"kept: stamp slot\" or \"deleted (slice N)\"; a settled key counts as settled whether its row still matches or has left the census, and it is never STALE and never merge done.",
   ".milestonepill": {
     "role": "tag",
     "fill": "outline",
