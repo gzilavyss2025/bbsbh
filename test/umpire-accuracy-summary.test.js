@@ -81,9 +81,11 @@ function stubFetch() {
     const body =
       url === '/data/umpire-accuracy-summary.json'
         ? SUMMARY
+        : url === '/data/umpires/seasons.json'
+          ? { seasons: [2026], current: 2026 }
         : shard
           ? { id: Number(shard[1]), name: 'Ada Ump', games: ROWS[shard[1]] ?? [] }
-          : UMPIRE_SHARD // /data/umpires/{id}.json — his assignment log
+          : UMPIRE_SHARD // /data/umpires/{season}/{id}.json — his assignment log
     return { ok: true, status: 200, json: async () => body }
   }
 }
@@ -138,7 +140,12 @@ test('the umpire page reads one aggregates file and one row shard', async () => 
   assert.ok(u.lean.tier, 'and it is placed on the scale')
   assert.deepEqual(
     [...new Set(fetched)].sort(),
-    ['/data/umpire-accuracy-summary.json', '/data/umpire-accuracy/1.json', '/data/umpires/1.json'],
+    [
+      '/data/umpire-accuracy-summary.json',
+      '/data/umpire-accuracy/1.json',
+      '/data/umpires/2026/1.json',
+      '/data/umpires/seasons.json',
+    ],
   )
 })
 

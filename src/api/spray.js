@@ -1,4 +1,4 @@
-import { staticJsonBy } from './staticJson.js'
+import { currentSeasonOf, staticJsonBy } from './staticJson.js'
 import { shardKey100 } from '../lib/shardKey.js'
 import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
 
@@ -17,7 +17,8 @@ import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
 // lib/ballpark/hitProjection.js, so nothing here imports the reveal-only file.
 //
 // THE FILE SHAPE, and why it is written in numbers rather than words. One
-// shard per `personId % 100` bucket (shardKey100 — the same join the rookie
+// folder per season (`spray/{season}/`, ADR-0086; `spray/seasons.json` names the
+// season served), and in it one shard per `personId % 100` bucket (shardKey100 — the same join the rookie
 // records, career WAR and the pitch arsenal use), each holding every batter in
 // that bucket:
 //
@@ -43,8 +44,11 @@ import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
 // spray card can read these same shards rather than sweeping the season twice.
 const shard = staticJsonBy((key) => `/data/spray/${key}.json`, { fallback: null })
 
-export const fetchSprayFor = (personId) =>
-  personId == null ? Promise.resolve(null) : shard(shardKey100(personId))
+export async function fetchSprayFor(personId) {
+  if (personId == null) return null
+  const season = await currentSeasonOf('spray')
+  return season == null ? null : shard(`${season}/${shardKey100(personId)}`)
+}
 
 // The card floor: how many balls in play a season needs before a spray map is
 // a picture of anything. Below it the dots are anecdotes and the direction bar

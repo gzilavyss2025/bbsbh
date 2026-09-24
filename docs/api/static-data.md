@@ -132,7 +132,8 @@ for each generator; the reader modules:
   or the compact flag interchangeably, which is what lets the two files share
   them.
 - `umpires.js` — the umpire detail page (every game an umpire worked this season +
-  base, most recent first), from `public/data/umpires/{personId}.json` — one shard
+  base, most recent first), from `public/data/umpires/{season}/{personId}.json` (the
+  season `umpires/seasons.json` names, via `currentSeasonOf`, ADR-0086) — one shard
   per umpire (~22 KB), because every reader here is after a single man: the detail
   page, and the accuracy modal one tap away on the lineup page. The league-wide file
   this replaced reached 3.2 MB by August and grows all season. Cost-driven: no
@@ -414,8 +415,8 @@ for each generator; the reader modules:
   is dropped — so an unusual arsenal returns a SHORT list or none rather than
   filler. See `.scratch/player-profile-card/scope.md` §4.
 - `spray.js` — one batter's season balls in play and where they landed, from
-  `public/data/spray/{NN}.json` (`gen-spray.mjs`, nightly, buckets on
-  `personId % 100`). Completed-game season aggregates over games that were
+  `public/data/spray/{season}/{NN}.json` (`gen-spray.mjs`, nightly, buckets on
+  `personId % 100`; the season `spray/seasons.json` names, ADR-0086). Completed-game season aggregates over games that were
   already DECIDED when the sweep touched them, so spoiler-free with no
   `SealBox` — same footing as `war.js`/`pitchArsenal.js` (ADR-0034). Worth
   stating out loud because the same COORDINATES are reveal-only in

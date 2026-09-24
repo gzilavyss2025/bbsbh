@@ -89,3 +89,40 @@ export async function writeShardsWithStamp(dir, entries, meta = {}) {
   const { written, swept } = await writeShards(dir, [...entries, stamp])
   return { written: written - 1, swept }
 }
+
+// --- season stores (ADR-0086) ------------------------------------------------
+//
+// A SEASON STORE KEEPS EVERY SEASON. Its files live in one folder per season,
+// `<store>/<season>/…`, beside a `<store>/seasons.json` index that names the
+// seasons on file and the one the app serves (`current`). A run writes ONLY
+// its own season's folder, so a completed season is frozen: the new year can
+// neither delete it nor empty it.
+//
+// `current` is the latest season WITH DATA. On January 1 the new season has no
+// game yet, so the generator writes nothing and the index keeps pointing at
+// last season until the new season's first game lands. That is the whole fix
+// for the umpire pages and the spray card going blank all winter.
+
+export const seasonsIndexPath = (storeDir) => join(storeDir, 'seasons.json')
+
+export async function readSeasons(storeDir) {
+  return readJsonOr(seasonsIndexPath(storeDir), { seasons: [], current: null })
+}
+
+// Pure: the index after a run that WROTE data for `season`. A run with no data
+// does not call this, and leaves the index as it is.
+export function seasonsAfter(prev, season) {
+  const seasons = [...new Set([...(prev?.seasons ?? []), season])].sort((a, b) => a - b)
+  return { seasons, current: seasons[seasons.length - 1] }
+}
+
+// Writes the index only when it changes, so a normal night does not dirty it
+// with a new stamp.
+export async function writeSeasons(storeDir, season) {
+  const prev = await readSeasons(storeDir)
+  const next = seasonsAfter(prev, season)
+  if (prev.current !== next.current || prev.seasons?.join() !== next.seasons.join()) {
+    await writeJsonAtomic(seasonsIndexPath(storeDir), { ...next, generatedAt: new Date().toISOString() })
+  }
+  return next
+}

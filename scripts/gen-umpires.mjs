@@ -1,4 +1,4 @@
-// Regenerates public/data/umpires/{personId}.json — for every umpire who has
+// Regenerates public/data/umpires/{season}/{personId}.json — for every umpire who has
 // worked an MLB game this season, the list of games he's worked and which base
 // he had (src/api/umpires.js just reads these files; the umpire detail page
 // renders one). Keyed by MLB Stats API personId (umpires get real personIds,
@@ -11,8 +11,12 @@
 // it grows all season), so the modal behind one tap on the lineup page paid for
 // 145 umpires nobody had asked about. A shard is ~22 KB.
 //
-// The run is a FULL REBUILD, so it also deletes shards no longer in the season's
-// schedule — otherwise last season's umpires would linger forever.
+// The run is a FULL REBUILD of ONE SEASON'S FOLDER, so it also deletes shards
+// no longer in that season's schedule. Other seasons' folders are never touched
+// (ADR-0086): a season store keeps every season. A run that finds no Final game
+// (January 1 to Opening Day) writes nothing, and `umpires/seasons.json` keeps
+// serving last season. Before this, the January run swept every shard and the
+// umpire pages were blank all winter.
 //
 // This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at request
 // time. Building a season-wide, umpire-indexed view isn't something a page load
@@ -33,16 +37,17 @@
 // below stay out: their officials data is thinner and, more to the point, AA
 // parks carry no pitch-tracking so gen-umpire-accuracy.mjs can't score them.
 // Game dates/assignments carry no score, so the file is spoiler-free.
-// Run by hand: node scripts/gen-umpires.mjs
+// Run by hand: node scripts/gen-umpires.mjs [--season=2026]
 import { dirname, join } from 'node:path'
 import { readdir, rm } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { teamAbbr } from '../src/lib/teams.js'
 import { getJson } from './lib/statsapi.mjs'
-import { writeJsonAtomic } from './lib/io.js'
+import { writeJsonAtomic, writeSeasons } from './lib/io.js'
+import { parseArgs } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const outDir = join(here, '..', 'public', 'data', 'umpires')
+const storeDir = join(here, '..', 'public', 'data', 'umpires')
 // Crew roles, mapped to short scorecard labels. Left/Right Field only appear in
 // six-man crews (All-Star Game + postseason); a two- or three-man MiLB crew just
 // omits the bases it doesn't staff. Any role not listed falls through to its raw
@@ -68,7 +73,8 @@ const LEVELS = [
   { sportId: 11, level: 'AAA' },
 ]
 
-const season = currentSeason()
+const season = Number(parseArgs(process.argv.slice(2)).season) || currentSeason()
+const outDir = join(storeDir, String(season))
 
 const umpires = new Map()
 let gamesSeen = 0
@@ -133,6 +139,13 @@ for (const { sportId, level } of LEVELS) {
   }
 }
 
+// No Final game yet: the new year before Opening Day. Write nothing and sweep
+// nothing, so last season's folder and the index stay as they are.
+if (umpires.size === 0) {
+  console.log(`no Final ${season} games yet — wrote nothing; seasons.json still serves the last season on file`)
+  process.exit(0)
+}
+
 const generatedAt = new Date().toISOString()
 const kept = new Set()
 for (const [id, u] of umpires) {
@@ -143,8 +156,8 @@ for (const [id, u] of umpires) {
   kept.add(`${id}.json`)
 }
 
-// Sweep shards this run didn't write (an umpire who worked last season and not
-// this one). A full rebuild owns the whole directory.
+// Sweep shards this run didn't write (a game reassigned away from an umpire).
+// A full rebuild owns its own season's folder, and only that folder.
 let swept = 0
 for (const name of await readdir(outDir).catch(() => [])) {
   if (!name.endsWith('.json') || kept.has(name)) continue
@@ -152,7 +165,10 @@ for (const name of await readdir(outDir).catch(() => [])) {
   swept++
 }
 
+const index = await writeSeasons(storeDir, season)
+
 console.log(
   `wrote ${umpires.size} shards to ${outDir} (${gamesSeen} games, MLB + AAA)` +
-    (swept ? `, swept ${swept} stale` : ''),
+    (swept ? `, swept ${swept} stale` : '') +
+    `; serving ${index.current} of [${index.seasons.join(', ')}]`,
 )

@@ -2,12 +2,15 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 
-// public/data/umpires/{personId}.json — one shard per umpire, replacing the
+// public/data/umpires/{season}/{personId}.json — one shard per umpire, replacing the
 // league-wide file that reached 3.2 MB by August. Every reader is after a single
 // man (the detail page, and the accuracy modal one tap away on the lineup page),
 // so the shard is what a visit costs. See scripts/gen-umpires.mjs.
 
-const DIR = new URL('../public/data/umpires/', import.meta.url)
+// A season store (ADR-0086): the app reads the season that seasons.json names.
+const STORE = new URL('../public/data/umpires/', import.meta.url)
+const { current } = JSON.parse(readFileSync(new URL('seasons.json', STORE), 'utf8'))
+const DIR = new URL(`${current}/`, STORE)
 const shards = readdirSync(DIR).filter((f) => f.endsWith('.json'))
 
 test('every shard is one umpire, self-describing, and named for his id', () => {
@@ -21,7 +24,7 @@ test('every shard is one umpire, self-describing, and named for his id', () => {
     assert.ok(Array.isArray(u.games) && u.games.length, `${f}: no games`)
     // Season + stamp ride along so a reader needs one fetch, not a shard plus
     // an index.
-    assert.ok(u.season, `${f}: no season`)
+    assert.equal(u.season, current, `${f}: filed under ${current} but says ${u.season}`)
     assert.ok(u.generatedAt, `${f}: no generatedAt`)
   }
 })
@@ -38,7 +41,7 @@ test('every umpire with accuracy data has a shard to open', () => {
   // game log from the shard. An umpire in one file and not the other renders as
   // "no such umpire" on a link the app itself printed.
   const acc = JSON.parse(
-    readFileSync(new URL('../umpire-accuracy-summary.json', DIR), 'utf8'),
+    readFileSync(new URL('../umpire-accuracy-summary.json', STORE), 'utf8'),
   )
   const have = new Set(shards.map((f) => f.replace('.json', '')))
   const missing = Object.keys(acc.umpires).filter((id) => !have.has(id))

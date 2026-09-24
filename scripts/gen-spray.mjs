@@ -1,4 +1,4 @@
-// Regenerates public/data/spray/{NN}.json — every batter's season balls in
+// Regenerates public/data/spray/{season}/{NN}.json — every batter's season balls in
 // play, with where each one landed, how hard it was hit, and which hand threw
 // the pitch. The player page's spray map reads one bucket (src/api/spray.js).
 //
@@ -41,24 +41,36 @@
 // double-counts. The ledger is scripts/data/spray-ingested.json, beside the SQL
 // dumps and owned by this script alone.
 //
+// ONE FOLDER PER SEASON (ADR-0086). A run folds games into its own season's
+// folder and nothing else, and `spray/seasons.json` names the season the card
+// serves: the latest one with data. The run's season is the year of the
+// window's last day (or --season), and a game from another year is skipped. A
+// run that has nothing for its season (January 1 to Opening Day) writes
+// nothing, so the card keeps last season all winter. Before this, the January
+// run wrote 100 empty buckets over the 2026 data. The ledger holds ONE season,
+// the one last written: a new season's first game replaces it, and by then the
+// season before is complete and never swept again.
+//
 // Runs on the nightly cron; also by hand:
 //   node scripts/gen-spray.mjs                     # trailing 3 days, both levels
 //   node scripts/gen-spray.mjs --days=7
 //   node scripts/gen-spray.mjs --since=2026-03-20 [--until=2026-08-22]
 //   node scripts/gen-spray.mjs --since=2026-03-20 --sports=11   # backfill AAA alone
+//   node scripts/gen-spray.mjs --season=2026 --since=2026-09-20  # name the season
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window.
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { readdir } from 'node:fs/promises'
 import { getJson } from './lib/statsapi.mjs'
-import { readJsonOr, writeJsonAtomic, writeShards } from './lib/io.js'
+import { readJsonOr, writeJsonAtomic, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { HARD_HIT_MPH } from '../src/lib/ballpark/hitProjection.js'
 import { parseArgs, dateRange, isoDay } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const outDir = join(here, '..', 'public', 'data', 'spray')
+const storeDir = join(here, '..', 'public', 'data', 'spray')
+const seasonDir = (season) => join(storeDir, String(season))
 const ledgerPath = join(here, 'data', 'spray-ingested.json')
 
 const DEFAULT_DAYS = 3
@@ -231,15 +243,15 @@ export function foldGame(store, agg, date) {
 
 // --- store IO ----------------------------------------------------------------
 
-// Every committed bucket, merged back into one map. A season boundary resets:
-// this card is season-to-date, so shards written for last season are simply not
-// carried into this one (writeShards then sweeps the files they lived in).
+// Every committed bucket of ONE season, merged back into one map. Other
+// seasons' folders are never read or written here.
 async function readStore(season) {
-  const files = (await readdir(outDir).catch(() => [])).filter((f) => /^\d\d\.json$/.test(f))
+  const dir = seasonDir(season)
+  const files = (await readdir(dir).catch(() => [])).filter((f) => /^\d\d\.json$/.test(f))
   const store = {}
   let carried = 0
   for (const f of files) {
-    const shard = await readJsonOr(join(outDir, f), null)
+    const shard = await readJsonOr(join(dir, f), null)
     if (!shard || shard.season !== season) continue
     for (const [id, entry] of Object.entries(shard.bat ?? {})) {
       store[id] = entry
@@ -267,7 +279,7 @@ async function writeStore(store, season) {
     const key = String(i).padStart(2, '0')
     if (!buckets.has(key)) buckets.set(key, { season, asOf, bat: {} })
   }
-  return writeShards(outDir, [...buckets].sort((a, b) => (a[0] < b[0] ? -1 : 1)))
+  return writeShards(seasonDir(season), [...buckets].sort((a, b) => (a[0] < b[0] ? -1 : 1)))
 }
 
 // --- CLI ---------------------------------------------------------------------
@@ -281,7 +293,7 @@ async function main() {
     : null
   const LEVELS = sportsFilter ? ALL_LEVELS.filter((l) => sportsFilter.has(l.sportId)) : ALL_LEVELS
 
-  const season = new Date().getFullYear()
+  const season = Number(args.season) || Number(endDate.slice(0, 4))
   const { store, carried } = await readStore(season)
   const ledger = await readJsonOr(ledgerPath, { season, games: [] })
   const ingested = new Set(ledger.season === season ? ledger.games : [])
@@ -308,6 +320,7 @@ async function main() {
         if (g.status?.detailedState === 'Cancelled') continue
         if (d.date !== g.officialDate) continue
         if (g.officialDate >= today) continue // decided games only, never today's
+        if (!g.officialDate.startsWith(`${season}-`)) continue // this season's folder only
         if (ingested.has(g.gamePk)) continue
         pending.push({ gamePk: g.gamePk, level, date: g.officialDate })
       }
@@ -351,14 +364,22 @@ async function main() {
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker))
+  // Nothing for this season yet (the new year before Opening Day): write
+  // nothing, so last season's folder, the ledger and the index stay as they are.
+  if (Object.keys(store).length === 0) {
+    console.log(`no ${season} balls in play yet — wrote nothing; seasons.json still serves the last season on file`)
+    return
+  }
   const { written, swept } = await writeStore(store, season)
   await writeJsonAtomic(ledgerPath, { season, games: [...ingested].sort((a, b) => a - b) })
+  const index = await writeSeasons(storeDir, season)
 
   if (empty > 0) console.error(`${empty} decided game(s) yielded no tracked contact — check the feed shape`)
   const balls = Object.values(store).reduce((n, e) => n + e.p.length, 0)
   console.log(
     `wrote ${written} buckets (${swept} swept) — ${Object.keys(store).length} batters, ` +
-      `${balls} plotted balls, ${ingested.size} games on file (+${done} swept this run)`,
+      `${balls} plotted balls, ${ingested.size} games on file (+${done} swept this run); ` +
+      `serving ${index.current} of [${index.seasons.join(', ')}]`,
   )
 }
 
