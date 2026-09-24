@@ -42,7 +42,8 @@ it's a sandbox limitation, not something a visible browser fixes.
 
 - [ ] `npm run lint` passes
 - [ ] `npm run build` passes
-- [ ] Exercised the affected flow (`npm run dev` / `npm run e2e`) against a live or recent game — <!-- gamePk / how -->
+- [ ] Exercised the affected flow in `npm run dev` against a live or recent game — <!-- gamePk / how -->
+<!-- Run `npm run e2e` only when Gary asks for it. -->
 
 ## Files touched
 

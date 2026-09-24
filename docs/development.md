@@ -117,7 +117,7 @@ files. Treat isolation as a hard requirement:
   in parallel — the longer one lives, the more likely another session's PR conflicts
   with it.
 - No branch other than `main` gets its own Vercel preview deployment (see
-  `git.deploymentEnabled` below) — verify locally (`npm run dev` / `npm run e2e`)
+  `git.deploymentEnabled` below) — verify locally (`npm run dev`)
   before opening the PR rather than expecting a preview URL on the PR check.
 
 ## End-of-task handoff and cleanup

@@ -88,7 +88,7 @@ Produce a plan document at .scratch/bvp-matchup-card/plan.md covering:
 4. Spoiler audit: confirm every displayed number is career-to-date pregame
    data, note the staging-time-fetch requirement, and confirm nothing needs
    a SealBox.
-5. A verification plan using npm run dev / npm run e2e and a gamePk from
+5. A verification plan using npm run dev and a gamePk from
    docs/test-games.md or the live slate.
 Keep the plan scoped to this one card; list every file you expect to touch.
 ```
