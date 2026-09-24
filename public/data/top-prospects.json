@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T12:41:22.806Z",
+  "generatedAt": "2026-09-24T12:39:41.632Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -156,7 +156,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".301, 18 HR, 40 RBI",
+      "statLine": ".302, 18 HR, 41 RBI",
       "age": 21,
       "number": "11"
     },
@@ -252,7 +252,7 @@
       "team": "sd",
       "position": "C",
       "levelRaw": "ALL (3)",
-      "statLine": ".286, 12 HR, 65 RBI",
+      "statLine": ".287, 12 HR, 65 RBI",
       "age": 20,
       "number": "8"
     },
@@ -504,7 +504,7 @@
       "team": "sea",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".285, 19 HR, 84 RBI",
+      "statLine": ".284, 19 HR, 84 RBI",
       "age": 21,
       "number": "96"
     },
@@ -624,7 +624,7 @@
       "team": "sea",
       "position": "RF",
       "levelRaw": "ALL (3)",
-      "statLine": ".244, 42 HR, 106 RBI",
+      "statLine": ".243, 42 HR, 106 RBI",
       "age": 21,
       "number": "99"
     },
@@ -668,8 +668,8 @@
       "rank": 57,
       "playerId": 816111,
       "name": "Tate Southisene",
-      "teamId": 11,
-      "team": "",
+      "teamId": 144,
+      "team": "atl",
       "position": "SS",
       "levelRaw": "ALL (3)",
       "statLine": ".278, 12 HR, 46 RBI",
@@ -1140,7 +1140,7 @@
       "team": "stl",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".282, 20 HR, 94 RBI",
+      "statLine": ".281, 20 HR, 95 RBI",
       "age": 22,
       "number": "13"
     },
@@ -1158,30 +1158,6 @@
     }
   ],
   "orgProspects": [
-    {
-      "orgRank": 3,
-      "playerId": 816111,
-      "name": "Tate Southisene",
-      "teamId": 11,
-      "team": "",
-      "position": "SS",
-      "levelRaw": "ALL (3)",
-      "statLine": ".278, 12 HR, 46 RBI",
-      "age": 19,
-      "topRank": 57
-    },
-    {
-      "orgRank": 8,
-      "playerId": 828987,
-      "name": "Briggs McKenzie",
-      "teamId": 11,
-      "team": "",
-      "position": "LHP",
-      "levelRaw": "ALL (3)",
-      "statLine": "26.0 IP, 2.08 ERA, 31 SO",
-      "age": 19,
-      "topRank": null
-    },
     {
       "orgRank": 8,
       "playerId": 703610,
@@ -1216,18 +1192,6 @@
       "levelRaw": "ROK",
       "statLine": "6.2 IP, 2.70 ERA, 9 SO",
       "age": 23,
-      "topRank": null
-    },
-    {
-      "orgRank": 29,
-      "playerId": 806061,
-      "name": "Isaiah Drake",
-      "teamId": 11,
-      "team": "",
-      "position": "OF",
-      "levelRaw": "A+",
-      "statLine": ".264, 12 HR, 36 RBI",
-      "age": 21,
       "topRank": null
     },
     {
@@ -1946,7 +1910,7 @@
       "team": "bal",
       "position": "LHP",
       "levelRaw": "ALL (3)",
-      "statLine": "107.2 IP, 4.51 ERA, 126 SO",
+      "statLine": "108.1 IP, 4.49 ERA, 127 SO",
       "age": 23,
       "topRank": null
     },
@@ -2066,7 +2030,7 @@
       "team": "bal",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "124.2 IP, 5.13 ERA, 116 SO",
+      "statLine": "131.1 IP, 4.87 ERA, 123 SO",
       "age": 24,
       "topRank": null
     },
@@ -3710,7 +3674,7 @@
       "team": "col",
       "position": "RHP",
       "levelRaw": "ALL (5)",
-      "statLine": "85.0 IP, 3.92 ERA, 84 SO",
+      "statLine": "91.0 IP, 3.66 ERA, 92 SO",
       "age": 26,
       "topRank": null
     },
@@ -4034,7 +3998,7 @@
       "team": "det",
       "position": "LF",
       "levelRaw": "ALL (3)",
-      "statLine": ".261, 14 HR, 64 RBI",
+      "statLine": ".260, 14 HR, 64 RBI",
       "age": 24,
       "topRank": null
     },
@@ -4058,7 +4022,7 @@
       "team": "det",
       "position": "SS",
       "levelRaw": "ALL (5)",
-      "statLine": ".267, 11 HR, 54 RBI",
+      "statLine": ".265, 11 HR, 54 RBI",
       "age": 24,
       "topRank": null
     },
@@ -4167,7 +4131,7 @@
       "position": "C",
       "levelRaw": "ALL (2)",
       "statLine": ".311, 7 HR, 48 RBI",
-      "age": 21,
+      "age": 22,
       "topRank": null
     },
     {
@@ -4274,7 +4238,7 @@
       "team": "hou",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "111.1 IP, 4.37 ERA, 105 SO",
+      "statLine": "114.0 IP, 4.50 ERA, 107 SO",
       "age": 24,
       "topRank": null
     },
@@ -4298,7 +4262,7 @@
       "team": "hou",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".231, 13 HR, 66 RBI",
+      "statLine": ".229, 13 HR, 66 RBI",
       "age": 23,
       "topRank": null
     },
@@ -4383,7 +4347,7 @@
       "position": "C",
       "levelRaw": "ALL (3)",
       "statLine": ".250, 10 HR, 48 RBI",
-      "age": 23,
+      "age": 24,
       "topRank": null
     },
     {
@@ -5000,18 +4964,6 @@
     },
     {
       "orgRank": 20,
-      "playerId": 669899,
-      "name": "Ryan Ward",
-      "teamId": 119,
-      "team": "la",
-      "position": "LF",
-      "levelRaw": "ALL (2)",
-      "statLine": ".246, 21 HR, 94 RBI",
-      "age": 28,
-      "topRank": null
-    },
-    {
-      "orgRank": 21,
       "playerId": 826538,
       "name": "Aidan Foeller",
       "teamId": 119,
@@ -5023,7 +4975,7 @@
       "topRank": null
     },
     {
-      "orgRank": 22,
+      "orgRank": 21,
       "playerId": 809944,
       "name": "Elijah Hainline",
       "teamId": 119,
@@ -5035,7 +4987,7 @@
       "topRank": null
     },
     {
-      "orgRank": 23,
+      "orgRank": 22,
       "playerId": 703639,
       "name": "Nico Perez",
       "teamId": 119,
@@ -5047,7 +4999,7 @@
       "topRank": null
     },
     {
-      "orgRank": 24,
+      "orgRank": 23,
       "playerId": 814507,
       "name": "Sterling Patick",
       "teamId": 119,
@@ -5059,7 +5011,7 @@
       "topRank": null
     },
     {
-      "orgRank": 25,
+      "orgRank": 24,
       "playerId": 695771,
       "name": "Jacob Kmatz",
       "teamId": 119,
@@ -5071,7 +5023,7 @@
       "topRank": null
     },
     {
-      "orgRank": 26,
+      "orgRank": 25,
       "playerId": 695653,
       "name": "Noah Miller",
       "teamId": 119,
@@ -5083,7 +5035,7 @@
       "topRank": null
     },
     {
-      "orgRank": 27,
+      "orgRank": 26,
       "playerId": 812363,
       "name": "Marlon Nieves",
       "teamId": 119,
@@ -5095,7 +5047,7 @@
       "topRank": null
     },
     {
-      "orgRank": 28,
+      "orgRank": 27,
       "playerId": 828140,
       "name": "Aidan West",
       "teamId": 119,
@@ -5107,7 +5059,7 @@
       "topRank": null
     },
     {
-      "orgRank": 29,
+      "orgRank": 28,
       "playerId": 824624,
       "name": "Brooks Auger",
       "teamId": 119,
@@ -5119,7 +5071,7 @@
       "topRank": null
     },
     {
-      "orgRank": 30,
+      "orgRank": 29,
       "playerId": 821672,
       "name": "Eduardo Rojas",
       "teamId": 119,
@@ -5128,6 +5080,18 @@
       "levelRaw": "ALL (3)",
       "statLine": ".333, 1 HR, 15 RBI",
       "age": 19,
+      "topRank": null
+    },
+    {
+      "orgRank": 30,
+      "playerId": 806221,
+      "name": "Easton Shelton",
+      "teamId": 119,
+      "team": "la",
+      "position": "1B",
+      "levelRaw": "A",
+      "statLine": ".297, 37 HR, 112 RBI",
+      "age": 21,
       "topRank": null
     },
     {
@@ -5378,7 +5342,7 @@
       "team": "was",
       "position": "RHP",
       "levelRaw": "ALL (4)",
-      "statLine": "56.1 IP, 3.83 ERA, 71 SO",
+      "statLine": "57.2 IP, 3.90 ERA, 73 SO",
       "age": 27,
       "topRank": null
     },
@@ -6242,7 +6206,7 @@
       "team": "pit",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "103.2 IP, 4.86 ERA, 118 SO",
+      "statLine": "107.1 IP, 4.86 ERA, 121 SO",
       "age": 24,
       "topRank": null
     },
@@ -6278,7 +6242,7 @@
       "team": "pit",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "105.2 IP, 4.34 ERA, 80 SO",
+      "statLine": "107.2 IP, 4.26 ERA, 83 SO",
       "age": 23,
       "topRank": null
     },
@@ -6410,7 +6374,7 @@
       "team": "sd",
       "position": "C",
       "levelRaw": "ALL (3)",
-      "statLine": ".286, 12 HR, 65 RBI",
+      "statLine": ".287, 12 HR, 65 RBI",
       "age": 20,
       "topRank": 21
     },
@@ -6770,7 +6734,7 @@
       "team": "sea",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".285, 19 HR, 84 RBI",
+      "statLine": ".284, 19 HR, 84 RBI",
       "age": 21,
       "topRank": 42
     },
@@ -6794,7 +6758,7 @@
       "team": "sea",
       "position": "RF",
       "levelRaw": "ALL (3)",
-      "statLine": ".244, 42 HR, 106 RBI",
+      "statLine": ".243, 42 HR, 106 RBI",
       "age": 21,
       "topRank": 53
     },
@@ -7442,7 +7406,7 @@
       "team": "stl",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".282, 20 HR, 94 RBI",
+      "statLine": ".281, 20 HR, 95 RBI",
       "age": 22,
       "topRank": 99
     },
@@ -7802,7 +7766,7 @@
       "team": "tb",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "97.0 IP, 5.20 ERA, 126 SO",
+      "statLine": "98.0 IP, 5.14 ERA, 128 SO",
       "age": 24,
       "topRank": null
     },
@@ -8702,7 +8666,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".301, 18 HR, 40 RBI",
+      "statLine": ".302, 18 HR, 41 RBI",
       "age": 21,
       "topRank": 13
     },
@@ -8750,7 +8714,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".258, 13 HR, 41 RBI",
+      "statLine": ".259, 13 HR, 41 RBI",
       "age": 23,
       "topRank": null
     },
@@ -8834,7 +8798,7 @@
       "team": "min",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".268, 20 HR, 72 RBI",
+      "statLine": ".269, 20 HR, 72 RBI",
       "age": 25,
       "topRank": null
     },
@@ -9319,6 +9283,18 @@
       "topRank": 40
     },
     {
+      "orgRank": 3,
+      "playerId": 816111,
+      "name": "Tate Southisene",
+      "teamId": 144,
+      "team": "atl",
+      "position": "SS",
+      "levelRaw": "ALL (3)",
+      "statLine": ".278, 12 HR, 46 RBI",
+      "age": 19,
+      "topRank": 57
+    },
+    {
       "orgRank": 5,
       "playerId": 822676,
       "name": "Alex Lodise",
@@ -9328,6 +9304,18 @@
       "levelRaw": "ALL (3)",
       "statLine": ".272, 28 HR, 84 RBI",
       "age": 22,
+      "topRank": null
+    },
+    {
+      "orgRank": 8,
+      "playerId": 828987,
+      "name": "Briggs McKenzie",
+      "teamId": 144,
+      "team": "atl",
+      "position": "LHP",
+      "levelRaw": "ALL (3)",
+      "statLine": "26.0 IP, 2.08 ERA, 31 SO",
+      "age": 19,
       "topRank": null
     },
     {
@@ -9453,7 +9441,7 @@
     {
       "orgRank": 20,
       "playerId": 691548,
-      "name": "Rolddy Muñoz",
+      "name": "Rolddy Munoz",
       "teamId": 144,
       "team": "atl",
       "position": "RHP",
@@ -9532,6 +9520,18 @@
       "levelRaw": "ROK",
       "statLine": ".302, 1 HR, 16 RBI",
       "age": 17,
+      "topRank": null
+    },
+    {
+      "orgRank": 29,
+      "playerId": 806061,
+      "name": "Isaiah Drake",
+      "teamId": 144,
+      "team": "atl",
+      "position": "OF",
+      "levelRaw": "A+",
+      "statLine": ".264, 12 HR, 36 RBI",
+      "age": 21,
       "topRank": null
     },
     {
