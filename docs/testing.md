@@ -89,8 +89,10 @@ not something a visible browser window fixes.
 
 **`e2e/fixtures/manifest.json`** is the registry for what's captured — one
 entry per file under `e2e/fixtures/`, each naming its capture date, source
-URL, and a short note (a generic image sets `noExpiry: true` since it doesn't
-go stale the way live-game data does). It's the source of truth; don't
+URL, and a short note. Two kinds of fixture set `noExpiry: true`: a generic
+image, and a finished game day (the anchor feed and its schedule). A finished
+game's content cannot change, so its only risk is API shape, which the nightly
+drift check covers (#1194). It's the source of truth; don't
 hand-duplicate its contents elsewhere. Two guards read it:
 
 - `check-fixture-freshness.mjs` (`npm run lint`, no network needed) fails a
@@ -99,8 +101,8 @@ hand-duplicate its contents elsewhere. Two guards read it:
   fixture age instead of directory size.
 - `check-feed-shape-drift.mjs` (`npm run check:feed-shape-drift`, needs live
   network so it's **not** part of `npm run lint` — see the PR template) fetches
-  a fresh copy of the anchor game's feed and checks that every path the
-  captured fixture depends on still resolves. A completed historical game's
+  a fresh copy of the anchor game's feed and of that day's schedule, and checks
+  that every path each captured fixture depends on still resolves. A completed historical game's
   own content never changes, so a missing path means MLB changed the API
   shape, not the game — this automates the half of "confirm a new field
   against a real response; do not guess" (root CLAUDE.md) a script can do. It

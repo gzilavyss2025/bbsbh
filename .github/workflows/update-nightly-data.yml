@@ -531,7 +531,7 @@ jobs:
       # committed file — it needs real network to catch statsapi renaming or
       # dropping a field bbsbh's captured e2e fixture depends on, which is
       # exactly what this cron has and CI (npm run lint) doesn't. See the
-      # script's own header for why it's scoped to the anchor game only.
+      # script's own header for why it's scoped to the anchor game day only.
       - name: Feed-shape drift check
         id: feed-shape-drift
         continue-on-error: true
