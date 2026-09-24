@@ -9,9 +9,10 @@ import { monthDayShort } from '../../lib/dates.js'
 // The winter has a shape a scorer keeps in their head: the GM meetings, the
 // 40-man deadline, the Rule 5 draft, arbitration filing, the Hall of Fame vote,
 // the day pitchers and catchers report. None of those six is in statsapi, and
-// every one of them moves from winter to winter, so they are typed at /admin
-// (`offseason.calendar` in the copy registry) rather than shipped as a table
-// this file would be asserting without a source.
+// every one of them moves from winter to winter, so they live in the copy
+// registry (`offseason.calendar`), editable at /admin, rather than in a table
+// this file would be asserting without a source. The registry's default holds
+// one winter's estimates, marked "(est.)" (issue #1038).
 //
 // TWO DATES ARE NOT TYPED, because two of them can be checked: spring
 // training's first game and Opening Day come off the next season's own row and

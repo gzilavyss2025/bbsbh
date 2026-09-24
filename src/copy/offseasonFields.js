@@ -46,12 +46,24 @@ export function offseasonFields() {
       help: 'One milestone per line, written “2026-12-10 | Rule 5 draft”. The winter’s own dates: GM meetings, the 40-man roster deadline, the Rule 5 draft, the arbitration filing deadline, the Hall of Fame vote, the day pitchers and catchers report. A line that is not written that way, or whose date falls outside the offseason now on screen, is not shown — so last winter’s dates left here print nothing rather than print wrong. Spring training and Opening Day are added for you off the schedule; do not type them.',
       maxLength: 900,
       multiline: true,
-      // Ships EMPTY on purpose. Every date on that list moves from winter to
-      // winter and none of them is in statsapi, so a shipped default would be
-      // this file asserting a Rule 5 date it has no way to check. The two dates
-      // the app CAN check are appended by the strip itself, so an unedited
-      // calendar is short rather than wrong.
-      default: '',
+      // The 2026-27 winter, shipped as a default at the owner's request (issue
+      // #1038) — none of these dates is in statsapi. Only the labor-deal line
+      // is confirmed. Every "(est.)" line is an estimate from the same event's
+      // day of the week in the last three winters, and a lockout from December
+      // 2 can move the Rule 5 draft, arbitration and report day. Replace a
+      // line at /admin when MLB publishes the real date. Next winter these
+      // dates fall outside the offseason on screen, so parseWinterCalendar
+      // drops them and the strip goes back to the two schedule dates: it
+      // cannot reprint this winter's dates as next winter's.
+      default: [
+        '2026-11-10 | GM meetings (est.)',
+        '2026-11-17 | 40-man roster deadline (est.)',
+        '2026-12-01 | Labor deal expires',
+        '2026-12-09 | Rule 5 draft (est.)',
+        '2027-01-07 | Arbitration figures due (est.)',
+        '2027-01-19 | Hall of Fame vote (est.)',
+        '2027-02-10 | Pitchers and catchers report (est.)',
+      ].join('\n'),
     },
   ]
 }
