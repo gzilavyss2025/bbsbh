@@ -441,7 +441,7 @@ jobs:
         run: node scripts/gen-command-received.mjs
       # The batter-side sibling of the pitch-arsenal step above, off the same two levels and
       # the same trailing window: where every ball in play landed. It writes a
-      # DIRECTORY (public/data/spray/, one bucket per `personId % 100`) plus its
+      # DIRECTORY (public/data/spray/{season}/, one bucket per `personId % 100`) plus its
       # own ingested-games ledger (scripts/data/spray-ingested.json), and BOTH
       # are staged below — the ledger is what stops the next run re-sweeping the
       # season, so committing the buckets without it would make every night a

@@ -12,7 +12,13 @@ import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 // found — and nothing fails loudly when that happens. These tests are that
 // join, checked against the committed files.
 
-const dir = (name) => new URL(`../public/data/${name}/`, import.meta.url)
+// spray is a season store (ADR-0086): its buckets sit in the folder of the
+// season that spray/seasons.json names, which is the one the app reads.
+const SEASON_STORES = new Set(['spray'])
+const currentOf = (name) =>
+  JSON.parse(readFileSync(new URL(`../public/data/${name}/seasons.json`, import.meta.url), 'utf8')).current
+const dir = (name) =>
+  new URL(`../public/data/${name}/${SEASON_STORES.has(name) ? `${currentOf(name)}/` : ''}`, import.meta.url)
 const list = (name) => readdirSync(dir(name)).filter((f) => f.endsWith('.json'))
 const read = (name, f) => JSON.parse(readFileSync(new URL(f, dir(name)), 'utf8'))
 

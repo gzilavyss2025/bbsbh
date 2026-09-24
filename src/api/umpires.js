@@ -1,9 +1,10 @@
 import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
-import { staticJson } from './staticJson.js'
+import { currentSeasonOf, staticJson } from './staticJson.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
 // he's worked this season plus which base he had — read from a static
-// same-origin file (public/data/umpires/{personId}.json) rather than computed
+// same-origin file (public/data/umpires/{season}/{personId}.json, the season
+// that umpires/seasons.json names — ADR-0086) rather than computed
 // live. ONE FILE PER UMPIRE: every surface here reads a single umpire and
 // already knows his id, and the league-wide file this replaced reached 3.2 MB
 // by August. See scripts/gen-umpires.mjs.
@@ -213,8 +214,10 @@ async function load(id) {
   if (cached.has(id)) return cached.get(id)
   let rec = null
   try {
-    const res = await fetch(`/data/umpires/${id}.json`)
-    if (!res.ok) throw new Error(`umpires/${id}.json ${res.status}`)
+    const season = await currentSeasonOf('umpires')
+    if (season == null) throw new Error('umpires/seasons.json has no current season')
+    const res = await fetch(`/data/umpires/${season}/${id}.json`)
+    if (!res.ok) throw new Error(`umpires/${season}/${id}.json ${res.status}`)
     rec = await res.json()
   } catch {
     rec = null

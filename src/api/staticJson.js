@@ -77,3 +77,19 @@ export function staticJsonBy(urlFor, { shape = (d) => d, fallback = null } = {})
     return inFlight.get(k)
   }
 }
+
+// The season a SEASON STORE serves (ADR-0086): `current` from
+// `/data/{store}/seasons.json`, or null when the index is missing. A season
+// store keeps one folder per season, and `current` is the latest season with
+// data, so on January 1 it still names last season. Read it, then fetch
+// `/data/{store}/{current}/…`. Memoized per store, like every read here.
+const seasonIndexes = new Map()
+export function currentSeasonOf(store) {
+  if (!seasonIndexes.has(store)) {
+    seasonIndexes.set(
+      store,
+      staticJson(`/data/${store}/seasons.json`, { shape: (d) => d?.current ?? null, fallback: null }),
+    )
+  }
+  return seasonIndexes.get(store)()
+}

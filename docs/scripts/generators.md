@@ -73,9 +73,11 @@ don't run these by hand.
   list. Starts from a transaction scan, then verifies each candidate against his
   game log + club's schedule to drop ended stints. Keeps its own self-contained copy
   of the transaction-scan logic (mirrors `person.js`'s `detectRehabAssignment`).
-- `gen-umpires.mjs` → `public/data/umpires/{personId}.json` — each MLB + AAA umpire's
-  season game log, ONE FILE PER UMPIRE (readers want one man; the league-wide file hit
-  3.2 MB). Full rebuild, sweeping stale shards, from a season scan per level
+- `gen-umpires.mjs` → `public/data/umpires/{season}/{personId}.json` + `umpires/seasons.json`
+  — each MLB + AAA umpire's season game log, ONE FILE PER UMPIRE (readers want one man;
+  the league-wide file hit 3.2 MB). A season store (ADR-0086): a run rebuilds only its
+  own season's folder, and a run with no Final game yet writes nothing, so the
+  pages keep last season all winter. Full rebuild of that folder, sweeping stale shards, from a season scan per level
   (`/api/v1/schedule?...&hydrate=officials,team`, one each for sportId 1 + 11)
   re-indexed by umpire id, each row tagged `level` + `gameType`. AAA rides along
   because the same umpires shuttle between the levels (shared personIds); AA and below
@@ -719,8 +721,10 @@ don't run these by hand.
   and lives in the data layer for that reason: the figure is mostly each
   PITCHER's own command, and a ranked list under a catcher's name reads as a
   catcher's skill unless something says otherwise.
-- `gen-spray.mjs` → `public/data/spray/{NN}.json` (per-batter buckets on
-  `personId % 100`) — the batter-side sibling of `gen-pitch-arsenal.mjs`: every
+- `gen-spray.mjs` → `public/data/spray/{season}/{NN}.json` + `spray/seasons.json`
+  (per-batter buckets on `personId % 100`; a season store, ADR-0086: a run folds
+  only its own season's games into its own folder, and writes nothing until the
+  new season has a ball in play) — the batter-side sibling of `gen-pitch-arsenal.mjs`: every
   ball in play this season, with the raw Gameday landing coordinate, the exit
   velocity, the result class, the pitcher's hand, the side the batter used that
   time up, the level and the pitcher's id. Read by `src/api/spray.js` for the
