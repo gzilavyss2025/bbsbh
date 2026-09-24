@@ -767,7 +767,12 @@ const BUDGETS = {
   // exactly the reason above, and ONE file rather than two — scripts/lib/ is at
   // its own budget, and the guard has no pure half worth splitting out anyway.
   // +1: gen-nine-keys.mjs, one more generator beside the other gen-*.mjs.
-  scripts: 120,
+  // +1 for check-raw-values.mjs, the ratchet on colour, radius, motion and
+  // shadow values that read no token (#1178). Flat beside check-caption-budget.mjs,
+  // the ratchet it copies, for the reason that entry gives: `npm run lint` runs
+  // this directory as a flat chain of guards. Its pure half is exported from the
+  // same file for test/raw-values.test.js, because scripts/lib/ is at its budget.
+  scripts: 121,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
