@@ -117,3 +117,7 @@ undefined/
 # The seeded design canvas carries a 2 MB editor payload; the .dc.html
 # artboards beside it are the source.
 .scratch/abs-reports/design/abs-challenge-report.html
+
+# the screenshot suite's output (npm run visual, docs/testing.md): the recorded
+# traffic, the base shots and the report. Rebuilt on every run; never committed.
+/visual-report/
