@@ -77,7 +77,7 @@ export function DesignLab() {
           The verdicts on each entry are proposals for issue #1113, and they are Gary&rsquo;s to sign
           off. The reasoning, the consumer counts and the four open questions are in{' '}
           <code>.scratch/design-system/inventory.md</code>. The naming grammar every rename below
-          follows is ADR-0084, and the 143 classes that break it are{' '}
+          follows is ADR-0084, and the 156 classes that break it are{' '}
           <code>docs/design-system-naming.md</code>.
         </p>
       </section>

@@ -399,7 +399,7 @@ shape-gated in `lib/recentSearches.js` (identity fields only, never a score) wit
 
 ## Design system (`src/styles/*` + `src/tokens/*`)
 
-**Look before you add a partial:** `/design-lab` renders every token, component and card/pill block — 31 cards against 12 shared components is what not looking cost (verdicts: `.scratch/design-system/inventory.md`). **Name a block for its job, never its shape:** the six-clause grammar is ADR-0084, and the 143 classes that break it — with the collapse issue that renames each — are the ledger in `docs/design-system-naming.md`. **One control, one door:** a button acts on this page and is `.btn` (`styles/system/button.css`, `ui/control/Button.jsx` — `size` tap/control, `skin` outline/ink/ghost/danger/seal, selected is `aria-pressed`); a door opens more and is `.door` (`system/door.css`). Never hand-draw a third.
+**Look before you add a partial:** `/design-lab` renders every token, component and card/pill block — 31 cards against 12 shared components is what not looking cost (verdicts: `.scratch/design-system/inventory.md`). **Name a block for its job, never its shape:** the six-clause grammar is ADR-0084, and the 156 classes that break it — with the collapse issue that renames each — are the ledger in `docs/design-system-naming.md`. **One control, one door:** a button acts on this page and is `.btn` (`styles/system/button.css`, `ui/control/Button.jsx` — `size` tap/control, `skin` outline/ink/ghost/danger/seal, selected is `aria-pressed`); a door opens more and is `.door` (`system/door.css`). Never hand-draw a third.
 
 `src/index.css` holds **no rules** — a banner comment and `@import`s: the six
 `src/tokens/*.css` files, then the `src/styles/NN-name.css` partials in cascade order.
