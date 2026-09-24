@@ -959,7 +959,12 @@ const BUDGETS = {
   // stealing is typed 'atBat' like everything else, and what a player's age on
   // June 30 is. test/long-at-bats.test.js and test/youngest-regulars.test.js
   // pin all three.
-  'scripts/lib': 38,
+  // +1 for former-teammates.mjs, the pure half of gen-former-teammates.mjs
+  // (issue #1171). Same testable-helper reason: which winter games ship, that
+  // a winter stint never makes two players teammates, that org ties stay off
+  // for a winter club, and the per-shard row cap that holds the 40 KB
+  // hot-path ceiling. test/former-teammates.test.js pins all four.
+  'scripts/lib': 39,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

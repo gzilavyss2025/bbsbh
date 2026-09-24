@@ -196,11 +196,20 @@ don't run these by hand.
   ascending; one file per MATCHUP, which is what a game view reads) plus an `index.json`
   that holds the run's `generatedAt` for the freshness guard (no shard carries a stamp,
   #1145) — for each upcoming
-  matchup (MLB + MiLB), pairs of players on the two OPPOSING clubs once teammates. Two players are teammates iff their careers
+  matchup (MLB + MiLB + winter ball), pairs of players on the two OPPOSING clubs once teammates. Two players are teammates iff their careers
   share a (teamId, season) pair — a year-by-year pull PER MiLB level per player.
-  Self-contained; scopes to the next few days' slate, skips Rookie/complex ball
+  Scopes to the next few days' slate, skips Rookie/complex ball
   (sportId 16), reuses `person.js`'s REHAB_CAP idea to drop a rehab cameo. App reads
-  it via `src/api/formerTeammates.js`.
+  it via `src/api/formerTeammates.js`. **Winter ball (issue #1171):** the sweep
+  includes sportId 17, filtered to the four leagues that ship (`WINTER_LEAGUE_IDS`;
+  the same call also returns Liga Roberto Clemente and the Australian league). A
+  winter stint never counts as a shared (team, season) — only MLB and AAA/AA/A+/A
+  do — and the org-ties fallback is off for a winter game, because every winter
+  club reports the Commissioner's Office (org 11) as its parent. **Row cap:** a
+  shard keeps its top 100 rows by score at EVERY level, so a Dominican game between
+  two 60-man rosters (about 170 pairs) stays under the 40 KB hot-path ceiling. The
+  pure rules live in `scripts/lib/former-teammates.mjs`
+  (`test/former-teammates.test.js`).
 - `gen-career-matchups.mjs` → `public/data/career-matchups.json` — for each
   upcoming GAME (MLB or MiLB), how every batter on a club has fared in his
   career against the OPPOSING club's probable starting pitcher. Keyed by

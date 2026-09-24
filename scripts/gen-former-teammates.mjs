@@ -1,5 +1,5 @@
 // Regenerates public/data/former-teammates/{teamA}-{teamB}.json (ids ascending)
-// — for every upcoming matchup (MLB or MiLB), the pairs of players on the two
+// — for every upcoming matchup (MLB, MiLB or winter ball), the pairs of players on the two
 // OPPOSING clubs who were once teammates (majors or minors), already shaped for
 // the lineup page's FORMER TEAMMATES card (src/api/formerTeammates.js reads one
 // file). ONE FILE PER MATCHUP, because a game view wants exactly one: the
@@ -17,12 +17,18 @@
 // read. Mirrors scripts/gen-rehab.mjs's build-time-fetch pattern (see
 // docs/data-enrichment.md §5).
 //
-// Covers every scheduled matchup — MLB and MiLB (AAA/AA/A+/A) alike — for the
-// rosters of clubs actually scheduled to play each other in a short window, not
-// the whole league. Extending past MLB-only widens the player pool a lot (every
-// MiLB game each night, not just the majors' slate), so this is the costliest
-// part of the run; the per-player career fetch is still deduped across every
-// matchup a club appears in.
+// Covers every scheduled matchup — MLB, MiLB (AAA/AA/A+/A) and the four
+// winter leagues that ship (sportId 17, issue #1171) — for the rosters of clubs
+// actually scheduled to play each other in a short window, not the whole
+// league. Extending past MLB-only widens the player pool a lot (every MiLB game
+// each night, not just the majors' slate), so this is the costliest part of the
+// run; the per-player career fetch is still deduped across every matchup a club
+// appears in. Winter ball replaces the dark MiLB work from October to January:
+// a winter game's card is built from its players' MLB and MiLB careers, and a
+// winter club never counts as a shared (team, season) itself. The pure rules
+// (which games ship, which stints count, the row cap) live in
+// scripts/lib/former-teammates.mjs, where test/former-teammates.test.js pins
+// them.
 //
 // Two accuracy guards, both mirroring src/api/person.js:
 //   - Rookie/complex ball (sportId 16) is skipped: its huge, churny short-season
@@ -61,22 +67,23 @@
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { meetsStintCap } from '../src/api/rehab-policy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeShardsWithStamp } from './lib/io.js'
+import {
+  MATCHUP_SPORT_IDS,
+  capRows,
+  careerRequests,
+  isShippedGame,
+  orgTiesApply,
+  reduceCareer,
+} from './lib/former-teammates.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'former-teammates')
 // Days of slate to precompute (today + the next two), so late-night and next-day
 // browsing find their game. Rosters are as-of-build; ties barely shift daily.
 const WINDOW_DAYS = 2
-// MiLB levels, high to low (AAA/AA/A+/A); rookie (16) excluded, see header. A
-// copy of src/lib/teams.js's list, so the script stays self-contained.
-const MILB_SPORT_IDS = [11, 12, 13, 14]
-// Sport ids swept for matchups: MLB plus every MiLB full-season level (header).
-const MATCHUP_SPORT_IDS = [1, ...MILB_SPORT_IDS]
-const SPORT_LABEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK' }
 
 const isoDay = (offset = 0) => {
   const d = new Date()
@@ -84,21 +91,14 @@ const isoDay = (offset = 0) => {
   return d.toISOString().slice(0, 10)
 }
 
-// meetsStintCap (the REHAB_CAP filter): see src/api/rehab-policy.js — shared
-// with the player page so a rehabbing veteran can't match a level's prospects
-// here while being classified as a real demotion there (or vice versa).
-const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
-
-// Run an async mapper across items with a small concurrency cap, keeping results
-// in order (be polite to statsapi rather than firing hundreds at once). Mirrors
-// gen-rehab.mjs's keepConcurrent, but returns each item's mapped value.
 // --- schedule: the matchups to precompute --------------------------------------
-// Every scheduled game across the window, MLB and MiLB alike (see
-// MATCHUP_SPORT_IDS), as unique (away, home) team-id pairs plus the union of
-// clubs involved. Regular season isn't forced — spring and postseason games get
+// Every scheduled game across the window, MLB, MiLB and winter ball alike (see
+// MATCHUP_SPORT_IDS; a winter game only from a league that ships, see
+// isShippedGame), as unique (away, home) team-id pairs, each with the sportId
+// it was found under, plus the union of clubs involved. Regular season isn't forced — spring and postseason games get
 // the card too.
 async function fetchMatchups() {
-  const pairs = new Map() // "awayId-homeId" -> { awayId, homeId, awayName, homeName }
+  const pairs = new Map() // "awayId-homeId" -> { awayId, homeId, awayName, homeName, sportId }
   const teams = new Map() // teamId -> teamName
   let answered = 0
   for (let d = 0; d <= WINDOW_DAYS; d++) {
@@ -112,6 +112,7 @@ async function fetchMatchups() {
       }
       for (const date of data.dates ?? []) {
         for (const g of date.games ?? []) {
+          if (!isShippedGame(sportId, g)) continue
           const a = g.teams?.away?.team
           const h = g.teams?.home?.team
           if (!a?.id || !h?.id) continue
@@ -120,6 +121,7 @@ async function fetchMatchups() {
             homeId: h.id,
             awayName: a.name ?? '',
             homeName: h.name ?? '',
+            sportId,
           })
           teams.set(a.id, a.name ?? '')
           teams.set(h.id, h.name ?? '')
@@ -170,54 +172,19 @@ async function fetchYearByYear(personId, group, sportId) {
   return data.stats?.[0]?.splits ?? []
 }
 
-// A player's career reduced to a Set of "teamId|season" strings, plus a
-// club-label lookup (teamId -> { name, level }) for the shared-team caption
-// and a games-played lookup ("teamId|season" -> gamesPlayed) for the
-// overlap-confidence term in stintScore (see below). Union of hitting +
-// pitching, MLB + AAA/AA/A+/A. The synthetic team-less aggregate split a
-// mid-season trade produces has no team.id and is skipped, so BOTH real clubs
-// of a trade are kept. Post-debut minor-league seasons below REHAB_CAP are
-// dropped (rehab/shuttle noise).
+// A player's career reduced to a Set of "teamId|season" strings plus its club
+// and games-played lookups — see reduceCareer in scripts/lib/former-teammates.mjs
+// for the rules (career levels only, never winter ball; the rehab cap).
 async function buildPairSet(personId) {
   const debutYear = await fetchDebutYear(personId)
-  const groups = ['hitting', 'pitching']
-  const requests = []
-  for (const group of groups) {
-    requests.push({ group, sportId: 1 })
-    for (const sid of MILB_SPORT_IDS) requests.push({ group, sportId: sid })
-  }
+  const requests = careerRequests()
   const results = await Promise.allSettled(
     requests.map((r) => fetchYearByYear(personId, r.group, r.sportId)),
   )
-
-  const pairs = new Set()
-  const clubs = new Map() // teamId -> { name, level }
-  const games = new Map() // "teamId|season" -> gamesPlayed (max across hit/pitch groups)
-  results.forEach((res, i) => {
-    if (res.status !== 'fulfilled') return
-    const { group, sportId } = requests[i]
-    for (const s of res.value) {
-      const teamId = s.team?.id
-      const season = Number(s.season)
-      if (!teamId || !season) continue
-      // Drop a rehabbing veteran's token minor-league cameo.
-      if (sportId !== 1 && debutYear && season > debutYear && !meetsStintCap(s.stat, group)) {
-        continue
-      }
-      const key = `${teamId}|${season}`
-      pairs.add(key)
-      const gp = num(s.stat?.gamesPlayed)
-      if (!games.has(key) || gp > games.get(key)) games.set(key, gp)
-      if (!clubs.has(teamId)) {
-        clubs.set(teamId, {
-          name: s.team?.name ?? '',
-          level: SPORT_LABEL[s.sport?.id ?? sportId] ?? '',
-          sportId: s.sport?.id ?? sportId,
-        })
-      }
-    }
-  })
-  return { pairs, clubs, games }
+  return reduceCareer(
+    results.map((res, i) => (res.status === 'fulfilled' ? { request: requests[i], splits: res.value } : null)),
+    debutYear,
+  )
 }
 
 // --- peak WAR (star power) -----------------------------------------------------
@@ -544,10 +511,10 @@ const orgCache = new Map() // teamId -> {id, name} — shared across every match
 
 const matchups = {}
 let orgTieMatchups = 0
-for (const { awayId, homeId } of pairs) {
+for (const { awayId, homeId, sportId } of pairs) {
   const awayRoster = rosterByTeam.get(awayId) ?? []
   const homeRoster = rosterByTeam.get(homeId) ?? []
-  const rows = connectionsFor(
+  const rows = capRows(connectionsFor(
     awayRoster,
     homeRoster,
     careers,
@@ -556,7 +523,7 @@ for (const { awayId, homeId } of pairs) {
     peakWar,
     awayId,
     homeId,
-  )
+  ))
   // Sorted "low-high" key so either lineup page finds the same entry; teamA/teamB
   // record which club each row's `a`/`b` player is on (or, for an org-ties
   // fallback, which roster each tie's player is on) so the reader can orient
@@ -567,7 +534,10 @@ for (const { awayId, homeId } of pairs) {
     matchups[key] = { teamA: awayId, teamB: homeId, kind: 'teammates', rows }
     continue
   }
-  // No literal shared-teammate pairs — fall back to org ties (see header).
+  // No literal shared-teammate pairs — fall back to org ties (see header). Not
+  // for a winter game: a winter club has no MLB parent org (orgTiesApply). The
+  // schedule call's sportId is the game's, and both clubs share it.
+  if (!orgTiesApply(sportId, sportId)) continue
   const orgTies = await computeOrgTies(
     awayRoster,
     homeRoster,
