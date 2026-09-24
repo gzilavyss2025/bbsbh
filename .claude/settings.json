@@ -67,6 +67,15 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/api-reference-reminder.mjs\""
           }
         ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/e2e-on-request.mjs\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -101,6 +110,16 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/contender-diary-reminder.mjs\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/e2e-on-request.mjs\""
           }
         ]
       }

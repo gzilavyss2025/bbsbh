@@ -61,7 +61,7 @@ npm run preview    # serve the built app
 npm run lint       # eslint + guard scripts (caps, casing, typography, contrast, claude-md, …)
 npm test           # node:test unit suite (pure logic; CI-gated)
 npm run test:coverage  # same, with a per-file coverage report
-npm run e2e        # playwright test — browser verification harness, not CI-gated
+npm run e2e        # playwright — ONLY when Gary asks (hook-enforced, see docs/testing.md)
 ```
 
 **Reserved dev ports (multi-agent safe).** `dev` uses port `5173`; `preview` uses
@@ -75,8 +75,8 @@ holds that port, use the next numbered script: `npm run dev:2` through `dev:5`
 CI-gated) covers the pure data layer: reveal-only derivations, spoiler gates,
 routing, and run-expectancy/tiering math, including the spoiler invariant pinned on a
 captured real-game feed (`docs/testing.md`). This suite does not replace the
-browser-level check. For anything user-visible, also run `npm run dev` or `npm run
-e2e` against a live or recent game. `docs/test-games.md` lists verified gamePks with
+browser-level check. For anything user-visible, also check it in `npm run dev`
+against a live or recent game. `docs/test-games.md` lists verified gamePks with
 rare in-game events; `.claude/skills/run/` documents that loop.
 
 **Test discipline: the suite only has value if it stays honest.** Never delete,

@@ -16,12 +16,12 @@ npm run build      # production build → dist/
 npm run preview    # serve the built app
 npm run lint       # eslint + guard scripts (caps, casing, typography, contrast, claude-md, …)
 npm test           # node:test unit suite (pure logic; CI-gated)
-npm run e2e        # playwright test — verification harness, not a CI suite
+npm run e2e        # playwright — only when Gary asks (hook-enforced)
 ```
 
 CI (`ci.yml`) runs lint + `npm test` + build. `npm test` is a pure-logic unit suite;
 it is not a substitute for the browser check. Verify user-visible changes by running
-`npm run dev` (or `npm run e2e`, which boots the dev server itself) and exercising the
+`npm run dev` and exercising the
 game-select → team-info → innings flow against a live or recent game.
 `docs/test-games.md` has a pack of real, verified gamePks with rare in-game events
 (triple play, immaculate inning, position player pitching, suspended/resumed game,

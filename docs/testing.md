@@ -66,19 +66,22 @@ Prefer a hand-built minimal fixture (`test/fixtures/mini-game.js`) for
 unit-level assertions where you want to control exactly one behavior; use the
 captured real feed for "does the real shape still parse" confidence.
 
-## Browser harness — `npm run e2e` (not CI-gated)
+## Browser harness — `npm run e2e` (only when Gary asks)
 
 Playwright specs under `e2e/`. This is a **verification harness**, not a
-regression suite (see the config header and CLAUDE.md), and it's **opt-in**:
-reach for it only when a change is something the unit suite can't see —
-layout, interaction, DOM-level spoiler timing — not routinely on top of a
-passing `npm test`. The invariant specs (`e2e/invariants/**`) fetch the live
+regression suite (see the config header and CLAUDE.md). **An agent runs it only
+when Gary asks for it in that session.** `.claude/hooks/e2e-on-request.mjs`
+enforces this: a `UserPromptSubmit` hook sets a flag for the session when
+Gary's prompt asks to run the browser tests, and a `PreToolUse` hook refuses
+`npm run e2e`, `npm run visual` and `playwright test` without that flag.
+`test/e2e-on-request-hook.test.js` pins which prompts and commands count. The
+default checks are `npm test`, `npm run lint`, the build and a dev-server link. The invariant specs (`e2e/invariants/**`) fetch the live
 statsapi at test time, so they depend on network and on games that age out —
 deliberately kept out of CI. They're the only place the **DOM-level**
 guarantee is checked (a `SealBox` never renders its children until revealed),
-which the unit suite can't reach because `SealBox` is a `.jsx` component. Run
-them locally against a live or recent game when changing anything
-user-visible; `docs/test-games.md` lists gamePks with rare events.
+which the unit suite can't reach because `SealBox` is a `.jsx` component. When
+Gary asks for them, run them against a live or recent game;
+`docs/test-games.md` lists gamePks with rare events.
 
 Specs pinned to the anchor game (823035) can skip live network entirely via
 `e2e/fixtures/mock-api.js` — a captured real feed/schedule/logo/headshot,

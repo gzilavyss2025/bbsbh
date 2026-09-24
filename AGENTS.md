@@ -30,9 +30,11 @@ These rules apply to every agent and every session in this repository.
 - The shared skills live under `.agents/skills/` and are available to both agents.
   `.claude/skills/` contains Claude-oriented entrypoints and pointers; it is not a
   substitute for the repository rules above.
-- Preserve the test harness honestly: run the relevant unit/lint/E2E checks, add a
+- Preserve the test harness honestly: run the relevant unit/lint checks, add a
   regression test for a bug fix when practical, and never delete, skip, weaken, or
   bypass an assertion just to get a green result. Record validation in the handoff.
+- Run the Playwright browser suite (`npm run e2e`, `npm run visual`,
+  `playwright test`) only when the maintainer asks for it in that session.
 
 ## Local visual handoff
 

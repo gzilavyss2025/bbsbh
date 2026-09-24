@@ -1,6 +1,6 @@
 ---
 name: run
-description: Launch bbsbh's dev server and drive it with Playwright to verify a change
+description: Launch bbsbh's dev server to verify a change; run the Playwright suite only when Gary asks
 ---
 
 # Running and verifying bbsbh
@@ -22,19 +22,20 @@ manual server start/stop/poll cycle, a pinned set of real games with
 known-rare events so you're not hunting for a live game each session, and
 captured API/image fixtures so a spec doesn't need live network at all.
 
-## e2e is opt-in, not a default step
+## e2e runs only when Gary asks
 
-The unit suite (`npm test`, CI-gated) already covers the highest-risk logic —
-spoiler gating, reveal derivations, routing — deterministically and without a
-browser. Reach for Playwright only when the change is genuinely something the
-unit suite can't see: layout, an interaction/animation, or DOM-level
-spoiler-timing. For a logic-only change, `npm test` passing is enough; don't
-run a browser sweep on top of it just to be thorough.
+Do not run the Playwright suite on your own. Run it only when Gary asks for it
+in this session ("run e2e", "run the playwright tests"). A hook enforces this:
+`.claude/hooks/e2e-on-request.mjs` refuses `npm run e2e`, `npm run visual` and
+`playwright test` until Gary's prompt asks. Your default checks are `npm test`,
+`npm run lint`, the build, and a dev-server link that Gary can open. You can
+still write or edit a spec when a change needs one; say in the handoff that it
+has not run.
 
-When e2e IS warranted, scope it to the change: one spec (or `-g "name"`), one
+When Gary asks for e2e, scope it to the change: one spec (or `-g "name"`), one
 `--project` when the check doesn't care about breakpoint (most don't — see
-below). Reserve the full `npm run e2e` (all specs × all three projects) for a
-final pre-handoff pass, not every iteration.
+below). Run the full `npm run e2e` (all specs × all three projects) only when
+Gary asks for the full suite.
 
 **Never troubleshoot a failing run by going headed (`--headed`, `--debug`,
 `--ui`) or reaching for an interactive/computer-use browser tool.** Nothing in
@@ -85,8 +86,7 @@ assuming a spec needs its own new mock.
 port (`5173`, `strictPort: true` in `vite.config.js`) and reuses it if one's
 already running — no separate "start dev server, poll for ready" step needed.
 
-For a one-off check, write a small spec under `e2e/` (or reuse/extend
-`e2e/smoke.spec.js`) and run:
+When Gary asks for a run, these are the scoped forms:
 
 ```bash
 npx playwright test e2e/smoke.spec.js        # single file
