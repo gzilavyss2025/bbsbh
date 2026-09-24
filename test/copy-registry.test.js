@@ -17,6 +17,7 @@ import {
   sanitizeOverrides,
 } from '../src/copy/registry.js'
 import { BALLPARKS } from '../src/lib/ballpark/ballparkData.js'
+import { parseWinterCalendar } from '../src/lib/time/seasonPhase.js'
 import { CREDITS, creditLine, fieldIds, resolvePhoto, venueKey } from '../src/lib/ballpark/ballparkArt.js'
 import MILB_BALLPARKS from '../src/lib/data/milb-ballparks.json' with { type: 'json' }
 
@@ -36,10 +37,9 @@ test('every field has a string default within its own maxLength', () => {
 // for every MiLB park field (`ballparksMilb`) — BallparkCard renders each of
 // them only when the owner has set one. The offseason page's winter calendar is
 // the third case, and the same shape: WinterCalendar.jsx renders the strip only
-// once it has rows, and an empty default parses to no rows. Its own test below
-// pins that it ships empty, which is a stronger statement than this one's
-// exemption. Splitting the assertion keeps the strong guarantee exactly where
-// it protects something.
+// once it has rows, and an empty default parses to no rows. It shipped empty
+// until issue #1038 and may again in a winter nobody fills in, so it keeps the
+// exemption; its own test below pins what a shipped calendar may say.
 const SHIPS_EMPTY = new Set(['offseason.calendar'])
 
 test('every unconditionally-rendered field has a non-empty default', () => {
@@ -50,20 +50,30 @@ test('every unconditionally-rendered field has a non-empty default', () => {
   }
 })
 
-// The winter calendar ships EMPTY on purpose, and that is worth pinning rather
-// than merely permitting. Every date on it — the GM meetings, the 40-man
-// deadline, the Rule 5 draft, arbitration filing, the Hall of Fame vote, report
-// day — moves from winter to winter, and none of the six is in statsapi. A
-// shipped default would therefore be the registry asserting a Rule 5 date it
-// has no way to check, and it would go quietly wrong every November. The two
-// dates the app CAN check (spring training, Opening Day) are appended by the
-// strip off the schedule, so an unedited calendar is short rather than wrong.
-test('the winter calendar ships empty, so no date is claimed without a source', () => {
+// The winter calendar ships the 2026-27 dates as a default (issue #1038: the
+// owner asked for estimates rather than an empty strip). None of them is in
+// statsapi, so what this pins is the old worry behind shipping it empty: a
+// shipped date must never go quietly wrong NEXT November. Every line must
+// parse, every line must sit inside this winter's MLB offseason, and not one
+// may survive into the 2027-28 window, so a default left in place shows
+// nothing next winter rather than last winter's dates. Estimates say so in
+// their label.
+test('the winter calendar default is this winter only, and says what is an estimate', () => {
   const field = FIELDS.find((f) => f.id === 'offseason.calendar')
   assert.ok(field, 'the winter calendar field exists')
-  assert.equal(field.default, '')
   assert.equal(field.multiline, true)
-  // The other two offseason fields are ordinary copy and must NOT ship empty:
+  assert.ok(field.default.length <= field.maxLength)
+  const lines = field.default.split('\n').filter((l) => l.trim())
+  const thisWinter = parseWinterCalendar(field.default, { startDate: '2026-11-01', endDate: '2027-02-19' })
+  assert.equal(thisWinter.length, lines.length, 'every line parses and falls inside the 2026-27 offseason')
+  const nextWinter = parseWinterCalendar(field.default, { startDate: '2027-11-01', endDate: '2028-02-29' })
+  assert.equal(nextWinter.length, 0, 'no shipped date survives into next winter')
+  const confirmed = new Set(['Labor deal expires'])
+  for (const row of thisWinter) {
+    if (confirmed.has(row.label)) continue
+    assert.match(row.label, /\(est\.\)$/, `${row.date} is an estimate and must say so`)
+  }
+  // The other offseason fields are ordinary copy and must NOT ship empty:
   // they are rendered unconditionally beside the wire and the countdown.
   for (const f of FIELDS.filter((x) => x.group === 'offseason' && x.id !== 'offseason.calendar')) {
     assert.ok(f.default.length > 0, `${f.id} default is non-empty`)
