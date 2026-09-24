@@ -1,0 +1,282 @@
+# Hand-checked calls for census.mjs, one row per census row, keyed by selector (or file:selector).
+# Columns (TAB-separated): key  verdict  frame  head  body  slice  reason
+# An empty frame/head/body keeps the machine value. frame is the TARGET frame (see spec.md: the frame follows the RADIUS).
+# verdict: card | table | bespoke | hold | control | field | panel | well | media | notice | modal | lab | not-card | delete
+# slice: C1 hub · C2 player · C3 pregame · C4 innings+HUD · C5 box score · C6a postseason+All-Star · C6b people+records+reference · C6c fouls+offseason+slate off-day · C7 account+logbook+chrome · C8 labs+admin (only if Gary says yes) · - none
+# A key that matches no row prints STALE.
+.wordmarklab__colorlock	lab	sheet				C8	wordmark lab (/wordmark-lab), a dev page: the colour-lock panel
+.wordmarklab__option	lab	sheet	none	padded	C8	wordmark lab option tile; an <article> with its own hover — a lab specimen
+.wordmarklab__context	lab	sheet	none	flush	C8	wordmark lab context frame on page ground; holds a live mock of the slate
+.wordmarklab__levels span, .wordmarklab__levels b	not-card					level chips in the wordmark lab — a static tag drawn as a small ruled box, no content inside
+.wordmarklab__phonebody i	not-card					a grey skeleton bar inside the lab's phone mock (<i>, fixed width+height)
+.wordmarklab__pagecontent > div	not-card					a placeholder block inside the lab's phone mock (fixed width+height, no content)
+.datenav button	control					the slate's date arrows: <button> with its own font-size and min-height — Button family (#1130)
+.datenav__today	control					"Today" jump on the slate date bar: a <button>, caps label, min-height — Button family
+.daystate__chip--live	not-card					the slate LIVE chip: a --radius-sm tag with its own type. check-seal-scope allowlists its sibling .daystate__chip--live-on (03-slate-header.css) — leave both alone
+.tally-cl-card	bespoke					Clerk's card: handed to Clerk's appearance API, every declaration !important; no Clerk key locally, so unverifiable (inventory bespoke #6)
+.tally-cl-social	bespoke					Clerk's social-login button (lib/clerkAppearance.js socialButtonsBlockButton) — third-party DOM, same reason as .tally-cl-card
+.sitebar__box	delete					DEAD: no file under src/ outside styles names sitebar__box
+.masthead__logobox	media					the club-mark box in the game masthead (TeamTreatmentMark): a 2px-padded frame for a logo
+.gamecard	bespoke					the slate card: darker border by design, park art, @ watermark; the front door (inventory bespoke #4, critique finding 9)
+.gamecardstack__sheet	bespoke					the paper sheets fanned behind a slate card — part of .gamecard's own art, absolutely positioned
+.gamecard__box	control					the slate card's "Box score" <button>, caps type; a control on .gamecard, which stays bespoke
+.gamecard__logobox	media					slate card club-mark box, with backface-visibility for the flip; part of .gamecard
+.offdaycard	card	sheet	none	padded	C6c	slate off-day tile (GameSelect + offseason WinterRail) — a whole-card <button>: Card as="button"; its --offday-accent hover tint must ride through as the accent (ADR-0050). GameSelect.jsx is a stamp FORBIDDEN_SURFACE: Card imports nothing stamp-related
+.offdaycard__logobox	media					off-day tile's club-mark box; stays a namespace rule on the tile
+.searchbox__input	field					team search <input> (TeamSearchBox + two identity-lab consumers) — a form field, not a card
+.searchbox__results	bespoke					the team-search results listbox: absolutely positioned popover under the input, z-index — a popover, not a card
+.gamefinder__season select	field					a <select> in the game finder
+.gamefinder__result	control					a game-finder result row <button> with its own font-size and min-height
+.favteamsheet	modal					the favourite-team bottom sheet (FavoriteTeamModal): a sheet with safe-area padding and an entry animation — sheets stay bespoke (ADR-0037, critique "modals are correctly bespoke")
+.dirglyph	media					the site-menu directory glyph box (a small square with a left rule), an icon frame
+.sitemenusheet__group	card	sheet	none	padded	C7	a grouped block of links inside the site menu sheet. A card inside a modal; low traffic, lands last in C7
+.thub-card	card	sheet	band	flush	C1	CANONICAL. 16 team-hub modules; already carries the co-class namespace pattern (thub-card chalcard / rvclub). Head is a label that turns into the club band on a themed hub. Body: .thub-card__body pads, other modules run flush — body varies per module
+.factgrid	card	sheet	outside:label	flush	C2	a <dl> fact grid drawn on --border-rule (the 1px-gap rule trick) — CommandMap, SprayMap and the innings reference panel's ExtrasFacts. The grid must move to an inner element when Card owns the frame. ExtrasFacts is in the innings viewer: check seal scope in that slice
+.attendance__note	notice					a note paragraph with a pop-in animation on page ground (BoxScore + TeamInfo) — the Notice family (#1132)
+.fact__infonote	notice					an info note under a stat on the player page (AdvancedStatsCard), animated in — Notice family (#1132)
+.umps__list	card	sheet	outside:label	flush	C3	umpire crew list (UmpiresCard; ExtrasFacts in the innings reference) — a gap-rule grid (background = --border-rule); grid moves inside Card
+.umptier__note	notice					the umpire-tier explainer note (UmpireTierGlyph) — Notice family (#1132)
+.lineup__list	panel					NESTED SHEET: the batting-order <ol> sits inside the .lineup sheet, under its SectionMasthead (TeamInfo.jsx:624) — a second frame inside a frame. It becomes the flush body of the .lineup Card, not a Card of its own
+.teammatecard	card	sheet	none	padded	C3	a teammate tile in TeamInfo's lineup (inventory group A). Rename .teammate (ADR-0084 ledger). In a masonry column: break-inside stays a namespace rule
+.teammatecard__groupmore	control					"show more" inside a teammate group: a <button> on inset — a Door block (#1130)
+.defdiamond	card	sheet	none	padded	C3	the defence diamond diagram card (DefenseDiamond.jsx), used in TeamInfo AND the innings viewer. Renders OUTSIDE the SealBox by design (src/CLAUDE.md): CSS-only move, no data change
+.innings__extras	notice					the extra-innings banner (ExtrasBanner): a tinted inset line — Notice family (#1132). ADR-0008 gates what it says, not its box
+.half	card	sheet	label	flush	C4	one half-inning sheet (HalfInning.jsx:347, <section className="half">). The census counts 16 files because 'half' is also a string value elsewhere; the real consumer is one. SEAL SCOPE: the half's content is reveal-gated — move the box only
+.statline	panel					a gap-rule line of stats inside StatBox / HalfTally — a panel inside a card, not a card
+.wcall	panel					the win-call block inside StatBox — a box inside the statbox card
+.favormeter	panel					the umpire-favour meter inside StatBox — a box inside the statbox card
+.statbox	card	sheet	band	flush	C4	the at-bat stat box (StatBox.jsx). Band head .statbox__title is on check-seal-scope's allowlist: the band's kraft fallback moves with the SectionHead, and the allowlist moves in the same PR. SEAL SCOPE
+.halfcast	panel					a cast-of-players block inside StatBox — a box inside the statbox card
+.dueup	card	sheet	band	padded	C4	Due-up-next card (DueUpNextCard.jsx); band head .dueup__title is seal-scope allowlisted
+.lineupcard	card	sheet	band	flush	C4	the innings view's entering-lineup card (EnteringReference.jsx); renames .entering (ledger). .lineupcard__title is seal-scope allowlisted. Its .duepill stays guarded (pill census)
+.halfdefense	card	sheet	band	flush	C4	defence card in EnteringReference + BoxScore; .halfdefense__title band is seal-scope allowlisted. BoxScore.jsx renders it inside the reveal: CSS/markup only
+.stat	panel					a single stat tile (StatBox, PitcherHandoffCard, LevelProgressionCard, PositionInnings…) — a cell inside a card. 'stat' is also a common string, so the consumer count is noisy
+.pbp__card	panel					one play-by-play event box inside the half sheet (PlayByPlay, PlacedRunnerCard) — a row inside a card. SEAL SCOPE: reveal-gated content
+.roster	card	sheet	band	flush	C4	the roster/bench drawer (RosterPanel.jsx) — band head is .roster__toggle, a <button> that is seal-scope allowlisted. The toggle is the head's action, so the head must accept a button as its whole row
+.szmodal	modal					the strike-zone modal card (StrikeZone.jsx) — a modal; its kicker .szmodal__eyebrow is a head row (retire to __note)
+.umpmodal	modal					the umpire-accuracy modal — a modal
+.logotile	bespoke					a tile on LogoSheet, the PRINTABLE grayscale logo sheet: a shadow would print as a grey smear; keep it flat and its own
+.gamephotos__seasonselect	field					a <select> on /photos
+.gamephotos__gamerow	control					a game row <button> on /photos
+.gamephotos__tile	media					a photo thumbnail link (aspect-ratio box) on the photos pages
+.colorlab__logobox	lab					identity lab logo box
+.colorlab__wpapreview, .idlab__section	lab					identity lab WPA preview / section frame
+.idlabhint	lab					identity lab hint modal
+.idlab__stylecard	lab					identity lab style tile on inset ground
+.idlab__stepbtn	control					identity lab step button with its own font-size
+.idlab__barunit	lab					identity lab two-bars panel
+.idlab__monoink, .idlab__recolor, .idlab__stampplace	lab					identity lab editor sections
+.idlab__recolorsource	control					identity lab recolor source <button>
+.idlab__recolorpreview	media					identity lab preview <img>
+.idlab__wpaartitem	control					identity lab art picker <button>
+.idlab__recolorname	field					identity lab name <input>
+.idlab__shelf	lab					identity lab "Marks on file" shelf (LogoShelf.jsx). The first census run missed its consumer: a comment naming profiles/*.jsx opened a fake block comment
+.idlab__bench	lab					identity lab jersey bench
+.idlab__mastheadsource	field					identity lab <textarea>
+.audit__banner	lab					identity lab audit banner (a notice on a lab page)
+.patternlab__filterbtn	control					pattern lab filter <button>
+.patternlab__card	lab					pattern lab specimen card
+.copybox	bespoke					the shared CopyBox (components/ui/CopyBox.jsx): a code/copy well on page ground with a positioned copy button — already its own shared component
+.patternlab__notefield	field					pattern lab <textarea>
+.logomodal	modal					the logo modal (LogoModal.jsx) on inset ground with an entry animation
+.logomodal__variants	panel					the variant strip inside the logo modal
+.rolling__scroll	card	sheet	none	flush	C4	the rolling-line chart scroller in the game HUD (RollingLine.jsx) — a sheet around a horizontally scrolling chart. SEAL SCOPE
+.winprob	card	sheet	band	padded	C4	win-probability chart card (WinProbChart; box score + innings). .winprob__head band is seal-scope allowlisted. SEAL SCOPE
+.marginnotes	card	sheet	band	padded	C4	margin notes card (MarginNotes.jsx); .marginnotes__title band is seal-scope allowlisted. SEAL SCOPE
+.marginnotes__card	panel					one note tile inside the margin-notes card
+.pitchers	card	sheet	band	padded	C4	the Pitchers card (PitchersSection.jsx; also UmpireTendencies' board). .pitchers__title band is seal-scope allowlisted. ADR-0009: the table is gated by revealedThrough, not a SealBox — do not touch that gate, move the box only
+.gamestory	card	sheet	label	flush	C5	the game story card (GameStoryCard.jsx, MLB.com RSS). plain radius-md → sheet
+.gamestory__link	control					the story link row: an <a> with its own type on inset — a Door (#1130)
+.bs__team	card	sheet	band	padded	C5	box score team section, themed per card (.is-themed on the section). Inside the SealBox reveal render (screens/BoxScore.jsx, also on STAMP_ALLOWLIST): CSS + className only
+.bs__decisions	card	sheet	none	padded	C5	pitchers-of-record sheet. Ground is --paper-1 (page), not the card's paper: moving onto Card changes the ground (decisions.md Q4). Inside the reveal render
+.bs__potg	card	sheet	band	padded	C5	player-of-the-game sheet on --paper-1 (page ground). Inside the reveal render
+.bs__insights	card	sheet	band	padded	C5	box score insights sheet on --paper-1. Inside the reveal render
+.bs__statcastCard	card	sheet	band	padded	C5	box score Statcast sheet on --paper-1. Inside the reveal render
+.bs__noteCard	card	ledger	none	padded	C5	one game-note tile in a masonry column (break-inside) — a small ledger card. Inside the reveal render
+.bs__stars	card	sheet	band	padded	C5	box score stars sheet on --paper-1. Inside the reveal render
+.bs__tally	card	sheet	none	flush	C5	the inning tally sheet (boxscore/InningTally.jsx) on --paper-1, flush grid. Box score: inside the reveal render
+.flipback	bespoke					the back face of the 3D flip in BoxScoreSkeleton (the loading card) — sized to the flip stage, part of FlipCard
+.playercard	card	ledger	none	padded	C5	a performer line (PerformerCard; box score, awards, analytics tab). Inventory group B. Rename .playerline (ledger)
+.tlead__cat	card	sheet	label	padded	C1	a Team Leaders category card (TeamLeaders.jsx — team hub + leaders pages)
+.tledg__block	card	sheet	label	flush	C1	a Team Leaders ledger block (TeamLeadersLedger.jsx)
+.bs__info	card	sheet	none	padded	C5	box score game-info sheet. Inside the reveal render
+.bs__totalsCard	card	sheet	none	padded	C5	box score totals sheet. Inside the reveal render
+.bs__board	card	sheet	none	padded	C5	box score board sheet. Inside the reveal render
+.bs__fill	card	sheet	none	flush	C5	a gap-rule grid sheet in the box score detail — the grid moves inside Card
+.player__statgrid	card	sheet	outside:band	flush	C2	player-page stat grid on the gap-rule trick (issue #1113 comment 2 names it). The bleed band head sits above it, outside
+.player__career	delete					DEAD: no file under src/ names player__career outside styles
+.player__splits	card	sheet	outside:band	flush	C2	player-page splits grid, gap-rule trick (issue comment 2 names it)
+.vsteam__tray	well					the club tray under Splits vs Team / ClubPicker — an inset tray inside a card
+.teamfilterstrip__arrow	control					scroll arrow <button> on the team filter strip
+.vsteam__last	card	ledger	none	padded	C2	"last game vs this club" box in SplitsVsTeam: radius-sm + shadow — the radius says ledger (the shadow is invisible, critique finding 5)
+.gamelog	card	sheet	outside:band	flush	C2	player game log <ul> (issue comment 2 names it); head is the bleed band above
+.ledger, .standings	table					the boxed TABLE frame: 30 tables ride .standings by co-class (critique finding 8). This is Table frame="sheet" in #1132, not Card — moving it here would split one family across two issues
+.milestonewatch	card	sheet	label	padded	C2	Milestone Watch on the player page — the "label inside an inset box" idiom (critique finding 3). Plain radius-md → sheet; its label becomes the card's head
+.cthist__seasons	card	sheet	outside:label	flush	C2	Contract history ledger (issue comment 2): radius-md, no shadow. Head is .section__title + <em> note ABOVE it; the <ol> keeps its own inset. The toggle foot becomes a Door
+.posinn__diamond	card	sheet	none	padded	C2	position-innings diamond diagram (PositionInnings.jsx)
+.asof-banner__input	field					a date <input> in the as-of banner
+.jerseydeck__card	card	sheet	none	padded	C1	a jersey tile in the team hub's jersey deck (JerseyCombos.jsx): shadow-only sheet, no edge — Card adds the hairline. Its ground is var(--tint, var(--paper-1)), a per-jersey tint: the namespace rule keeps that background
+.team-score	card	sheet	band	flush	C1	Season Report card (TeamScoreCard.jsx) — one of the six band selectors. Critique finding 9 asks whether report surfaces get a report frame (decisions.md Q5)
+.team-hub__id	bespoke					the team hub's pinned identity header (TeamHubShell hero, ADR-0082) — a masthead, not a section card
+.txstory	card	sheet	none	padded	C1	a transaction story tile inside the Transactions scroll deck (TxStory.jsx). Plain radius-md → sheet. The deck bleeds past the gutter by design (09-team-info.css comment)
+.last10__nav	control					Last-10 rail arrow <button>
+.last10__card	bespoke					the Last 10 ticket stub: its home-game variant is kraft on check-seal-scope's allowlist (finding 9 must-survive list) — a ticket, not a sheet
+.teamphotos__nav	control					photo rail arrow <button>
+.teamphotos__thumb	media					photo thumbnail link
+.sstrip__series	bespoke					one series cell on the season strip (SeasonSchedule.jsx) — the strip's home/away kraft convention is seal-scope allowlisted; a cell, not a card
+.sstrip__cell	bespoke					one game cell on the season strip — same allowlisted convention
+.standings-daynav button	control					standings day-nav <button>
+.tstats-card	card	ledger	band	flush	C1	team-hub stat card (4 modules; inventory group B). One of the six band selectors. Rename .tstats (two-step: the inner .tstats grid becomes .tstats__grid)
+.radarpill__note	notice					the explainer note the RadarPill opens — Notice family (#1132)
+.thub-roster	panel					NESTED SHEET: RosterList's <ul> renders inside .thub-card__body (CurrentRosterCard, InjuredListCard) and inside AllStar/Postseason pages — a frame inside a frame. It becomes a flush body; verify the two non-hub pages still want a box
+.roster-super	card	ledger	band	flush	C1	roster projection super-group (RosterProjection + AllStarRostersPage). One of the six band selectors
+.thub-affiliate	card	sheet	none	padded	C1	affiliate tile (AffiliatesCard.jsx) — a whole-card link (TeamLink): Card as="a"
+.rehabcard	card	sheet	none	padded	C6b	rehab tile on /rehab (inventory: "flat" — critique: the missing shadow is invisible). Plain → sheet
+.horizontile	card	sheet	none	padded	C1	a depth-chart horizon tile (DepthChartCard.jsx) on the minors team page. Plain → sheet
+.horizontile__statbox	well					inset stat box inside a horizon tile
+.hzntile	card	sheet	label	padded	C1	a horizon tile (HorizonCard.jsx). Plain → sheet
+.hzntile__tile	well					inset box inside a horizon tile
+.prospects__filterdeck	card	sheet	label	padded	C6b	/prospects filter deck: a sheet that holds the filter controls, with a border-top of its own
+.levelprog	card	ledger	label	flush	C2	Level progression card (LevelProgressionCard.jsx): radius-sm, no shadow, plus a border-top rule — the ledger frame; the top rule stays a namespace rule like .prospectcard's
+.prospectcard	card	ledger	label	flush	C2	Prospect card (inventory group B). Its 3px accent top rule stays a namespace rule on the block (critique: accent has one consumer). Rename .prospect
+.prospectboard	table					the /prospects board <table> — Table (#1132), not Card
+.milestonewatch-page__card	card	sheet	none	padded	C6b	a milestone tile on /milestones. Plain → sheet
+.seedcard	card	ledger	none	padded	C6a	postseason seed tile (inventory group B), a <button> on the race page: Card as="button". Rename .seed
+.psyearnav button	control					postseason year nav <button>
+.psseries__result	card	sheet	label	flush	C6a	series result card (PostseasonSeriesPage)
+.psseries__log	card	sheet	outside:label	flush	C6a	series game log
+.psseries__lboard	card	sheet	label	padded	C6a	series leaderboard card
+.psseries__lrows	well					inset rows inside the series leaderboard
+.psseries__rostercard	card	sheet	none	padded	C6a	series roster card
+.psseries__rosterlist	well					inset list inside the series roster card
+.psleaders__teamboard	card	sheet	label	padded	C6a	postseason leaders team board
+.allstarrosters__year	card	sheet	none	padded	C6a	All-Star rosters year block (a section with controls). Plain → sheet
+.allstarrosters__rows	card	sheet	none	flush	C6a	All-Star roster rows <ul>. Plain → sheet
+.allstargame	card	sheet	none	padded	C6a	All-Star game result (AllStarGameResult.jsx). Plain → sheet
+.umpage__card	card	sheet	label	padded	C6b	umpire page card: a shadow-only sheet (no edge) — Card adds the hairline
+.umpage__list	card	sheet	none	flush	C6b	umpire page list: shadow-only sheet
+.mgrpage__card	card	sheet	label	padded	C6b	manager page card: shadow-only sheet
+.scorebookstory__gamecard	card	ledger	none	padded	C7	a game card link on /first-scorebook: radius-sm + shadow → ledger by radius; Card as="a"
+.scorebookstory__performer	card	ledger	none	padded	C7	a performer link card on /first-scorebook: Card as="a"
+.scorebookstory__leaders	card	ledger	label	flush	C7	leaders block on /first-scorebook
+.scorebookstory__nugget	card	ledger	none	padded	C7	a fact nugget on /first-scorebook
+.allstarlegacy__leadercard	card	sheet	none	padded	C6a	All-Star legacy leader card. Plain → sheet
+.allstarlegacy__teamcard	card	sheet	none	padded	C6a	All-Star legacy team card. Plain → sheet
+.allstarlegacy__rankrail	not-card					a positioned rank rail with a transition — a navigation strip, not a card
+.foulboard__hero	card	sheet	none	padded	C6c	/fouls hero sheet
+.foulavg	card	sheet	band	padded	C6c	/fouls average card
+.scorebug	bespoke					a broadcast scorebug replica on /fouls — a TV graphic, drawn on inset ground on purpose
+.sgh-list	card	sheet	none	flush	C6c	/fouls souvenir list <ol>
+.gamehigh-tiles	card	ledger	none	flush	C6c	/fouls game-high tiles on the gap-rule grid; grid moves inside Card
+.souvenir-row__tiles	card	ledger	none	flush	C6c	/fouls souvenir tiles on the gap-rule grid
+.metriccard	card	sheet	band	flush	C3	pre-game metric card (5 modules) — head is SectionMasthead (.metricbar band). Inventory group A. Rename .metric
+.lineup, .opp, .startercard	card	sheet	band	flush	C3	batting order / opposing defence / starting pitcher cards in TeamInfo — one rule for three blocks; head is the metricbar band. .startercard renames .starter
+.seasonseries__nav	control					season-series strip arrow <button>
+.photostrip__nav	control					photo strip arrow <button>
+.photostrip__thumb	media					photo strip thumbnail link
+.infopop__tip	bespoke					InfoPopover's tip bubble — a positioned popover with its own opacity/transform transition
+.admincopy__history	lab					/admin copy history panel (admin page, Clerk-gated — unverifiable locally)
+.admincopy__input	field					/admin copy input
+.awardord__step	control					award-order editor step <button>
+.awardord__list	lab					award-order editor list (admin)
+.awardord__mv	control					award-order move <button>
+.awardord__preview	lab					award-order preview panel (admin)
+.animlab__framebox	lab					animation lab frame box
+.teamtabs__btn	control					the hub tab/jump bar button — Button family (#1130 tab slice, pill map note)
+.tradecard	card	sheet	none	padded	C6b	trade card (TradeCard.jsx; trade-deadline page). Inventory group A. Rename .trade
+.logbook__seasons button	control					logbook season <button> — StampCollection.jsx is a STAMP_ALLOWLIST file: a control there moves with the Button family, not here
+.stampcard	hold					HOLD (ADR-0035): a stamp is a final score; the class sits on StampCollection.jsx (STAMP_ALLOWLIST). check-stamp-surfaces tracks JS identifiers, not this class, so a move would pass lint in silence
+.stampstrip	hold					HOLD (ADR-0035): the Game Log mint strip across the head of the revealed box score (StampGameButton.jsx, STAMP_ALLOWLIST)
+.logbookstats__splits div	card	ledger	none	padded	C7	a split tile on /logbook/stats. Stamp-ADJACENT: the page summarises the user's stamped games; it renders no stamp art and is not on STAMP_ALLOWLIST. Verify that before the slice
+.logbookstats__streaks article	card	ledger	outside:label	padded	C7	a streak tile on /logbook/stats (stamp-adjacent, see above)
+.logbookstats__toggle	control					a full-width toggle <button> on /logbook/stats
+.logbookstats__performer	card	ledger	none	padded	C7	a performer link card (LogbookGameLink) in the retrospective: Card as="a" (stamp-adjacent)
+.logbookstats__leaders	card	ledger	label	flush	C7	leaders block in the retrospective (stamp-adjacent)
+.logbookstats__records > div	card	ledger	none	padded	C7	a record tile on /logbook/stats (stamp-adjacent)
+.passportbook__blank	bespoke					a blank page of the passport book (ADR-0036) — book geometry, not a card
+.passportbook__nav button	control					passport book page-turn <button>
+.passportpage	bespoke					the ruled 2x4 passport page (finding 9 must-survive; PassportPage.jsx is on STAMP_ALLOWLIST)
+.logbooklanding__devicenote	notice					device note on the logbook landing — Notice family (#1132)
+.simlike__link	card	sheet	none	padded	C2	a similar-player tile link (SimilarPlayerGrid.jsx): Card as="a". Plain → sheet
+.hlclip	bespoke					a highlight clip card: a video-poster <button> with its own snap and hover — a media tile (clips: see the video memory notes)
+.cliprail__nav	control					clip rail arrow <button>
+.umptend	card	sheet	band	flush	C6b	umpire tendencies card (UmpireTendencies.jsx). Its .is-themed .umptend__bar opts OUT of club theming and is seal-scope allowlisted — the band head must support "unthemed on a themed page"
+.mytally__choice	control					My Tally choice <button>
+.mytally__switch	control					My Tally row switch <button>
+.mytally__rowbtn	control					My Tally row <button>
+.mytally__pitch	card	sheet	outside:label	padded	C7	the sign-in pitch block on My Tally (ProfileAccount.jsx). Plain → sheet
+.mergereceipt	notice					the merge receipt aside on inset ground (MergeReceipt.jsx) — a Notice (#1132)
+.introsheet__reaction	well					an inset reaction box inside the intro sheet (a modal)
+.bookmgmt	panel					the body box inside BookManagementSheet (a sheet) — a panel in a modal
+.bookmgmt__modes button	delete					DEAD: no file under src/ outside styles names bookmgmt__modes (git log -S: last touched in #632)
+.bookmgmt__field input	field					book-management <input>
+.bookmgmt__confirm	well					the confirm box inside BookManagementSheet
+.moredir__card	card	ledger	label	padded	C6b	a directory section card on /more (MorePage.jsx)
+.coverpick__step	control					cover picker step <button>
+.bpadmin .bpadmin__btn	control					ballpark admin <button> (admin gear)
+.posterstudio__sheet	bespoke					the poster preview paper in the poster studio (docs/preview-poster.md) — a print-sized artboard
+.posterstudio__panel	card	sheet	label	padded	C7	a control panel beside the poster. Plain → sheet
+.iddrawer__tile	control					identity drawer tile <button> (admin gear)
+.iddrawer__logomark	media					identity drawer logo frame
+.iddrawer__parkwash	media					identity drawer park-art frame
+.alum__card	card	sheet	outside:label	padded	C1	a MiLB alumni tile on the team Overview (MilbAlumni.jsx)
+.aboutrule	card	ledger	label	flush	C6b	a rule article on /about: radius-sm + shadow → ledger by radius
+.trec__half	control					records half-toggle <button>
+.trrank__scope	panel					the sticky scope-controls section on /records (positioned, z-index, on inset ground) — a control panel, not a card
+.trrank__chip	control					records chip <button>
+.trrank__tile	card	sheet	none	flush	C6b	a records tile link on /records: Card as="a"; has its own border-top
+.trrank__tilemark	media					club-mark frame on a records tile
+.awards	card	sheet	outside:band	padded	C2	the Awards ledger on the player page (AwardsLedger.jsx; the admin award-order editor previews it). Plain → sheet
+.hitchart	card	sheet	label	flush	C2	the hit chart card (HitChart.jsx) — player page AND the innings half (HalfInning). SEAL SCOPE on the half variant: move the box only
+.hitchart__chip	control					hit-chart filter chip (built by a template literal in HitChart.jsx:134, so the census found no literal consumer)
+.hitchart__readout	well					inset readout under the hit chart
+.bflight	card	sheet	none	padded	C2	the ball-flight chart card (BallFlight.jsx)
+.bflight__code	not-card					a code tag inside the ball-flight card (a small inset label)
+.pitchslab__tabs	control					the pitch-mix segmented tabs (PitchMix.jsx) — a control group
+.ctr__tile	card	ledger	none	padded	C1	a contract tile on the club Contracts tab: radius-sm + shadow → ledger by radius; its border-top stays a namespace rule
+.ctr__card	card	sheet	band	flush	C1	the contract grid card (ContractGrid.jsx; Contracts tab + /salaries)
+.payboard	card	sheet	band	flush	C6b	the /salaries league board (SalaryBoard.jsx)
+.payboard__chip	control					salary board chip <button>
+.posspend__chip	not-card					a positioned label chip on the position-spend chart
+.phcard	bespoke					the player hover card: position:fixed popover (inventory bespoke #7)
+.phcard__tile	well					inset tile inside the hover card
+.spray	card	sheet	label	flush	C2	the spray map card (SprayMap.jsx)
+.spray__chip	control					spray map chip <button>
+.cwb__narrow	lab					contract workbench narrow-screen notice (admin)
+.cwb__tab	control					contract workbench tab <button> (admin)
+.cwb__sheet	lab					contract workbench inset sheet (admin)
+.cwb__queue	lab					contract workbench review queue (admin)
+.cwb__pane	lab					contract workbench decision pane (admin)
+.cwb__primary, .cwb__danger, .cwb__mini, .cwb__use	control					contract workbench buttons (admin)
+.lookupdeck__panel	lab					contract lookup panel (admin)
+.penpage__grid	card	ledger	label	padded	C6b	/bullpen grid card (BullpenPage.jsx)
+.springcount	card	ledger	label	padded	C6c	offseason spring-training countdown (WinterCalendar.jsx). #1113 comment 1: the offseason page takes whatever card the lab settles on
+.pgame__card	card	sheet	none	padded	C6c	offseason picked-game card (PickedGame.jsx)
+.srecord	card	sheet	label	flush	C6c	offseason season-record card (SeasonRecord.jsx)
+.note__stories	card	sheet	outside:label	flush	C6c	offseason long-at-bats story list (LongAtBats.jsx). Plain → sheet
+.note__when	control					an <a> date link inside a story — a Door or a Pill control
+.boxlines__headline	well					inset headline strip inside the Box Lines sheet
+.boxline__series	not-card					a small inset tag on a box-line row
+.gamelines__rows	card	sheet	label	flush	C2	Game lines card rows (GameLinesCard.jsx; ADR-0073). Plain → sheet
+.boxlines__stats	panel					gap-rule stats grid inside the Box Lines sheet (a modal)
+.dlab__verdictbox	lab					design lab verdict box
+.dlab__recipe	lab					design lab recipe well
+.halftally	card	sheet	none	flush	C4	the half tally (HalfTally.jsx) in the game HUD console. Plain → sheet. SEAL SCOPE
+.betweeninnings	card	sheet	none	padded	C4	the between-innings card, a whole-card <button> (BetweenInnings.jsx): Card as="button". Plain → sheet. SEAL SCOPE
+.refpanel__tabs	control					the reference panel's tab row
+.refbar__chip	control					reference bar chip <button>
+.lineupcard__swap	control					swap <button> inside the entering-lineup card
+.chalcard__view	control					"view" toggle inside the challenge card
+.researchdiary__traps	lab					research diary / contender diary (/admin/contenders) — research pages
+.sc-labload__input	field					scorecard lab <input>
+.sc-logo__box	bespoke					the club-mark box on the #22 scorecard sheet — the scorecard is bespoke (inventory #1)
+.sc-editsheet__input	field					scorecard cell editor <input>
+.trrank__podiumcard	card	sheet	none	padded	C6b	a podium card on the records detail page
+.trrank__boardcontrols, .trrank__related	panel					control groups on inset ground on the records detail page
+.door--block	not-card					system/door.css — the Door's own block layout (#1130), written by Door.jsx as a template class. Not a card and not dead
+.searchoverlay__panel	bespoke					the site-search dialog panel from 560px (ADR-0037: site search is the one dialog that is not a sheet)
+.stars3__card	card	ledger	outside:band	padded	C5	a three-stars tile in the box score, boxed only from 740px (@media). Inside the reveal render
+.abscard	card	sheet	band	flush	C4	ABS challenges card, boxed only from 740px (@media); display:none below. Renames .absframe (ledger). SEAL SCOPE
+.pbp__zonecell	panel					a zone cell in the play-by-play, boxed only from 740px
+.awardblk	card	sheet	label	padded	C2	an awards block, boxed only from 740px (@media). Plain → sheet
+.dueupconsole__col	panel					a column inside the due-up console, boxed only from 740px. SEAL SCOPE
