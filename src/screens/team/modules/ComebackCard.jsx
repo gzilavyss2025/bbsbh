@@ -3,6 +3,7 @@ import { beeswarmRows } from '../../../lib/beeswarm.js'
 import { teamClubName } from '../../../lib/teams.js'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../components/ui/frame/Card.jsx'
 
 const DASH = '—'
 
@@ -91,11 +92,18 @@ function ComebackRail({ t, teamId, clubName }) {
 }
 export function ComebackCard({ data, teamId, clubName }) {
   return (
-    <div className="tstats-card cbk">
-      <SectionHead look="band" club note="all 30 teams">
-        Comeback wins
-      </SectionHead>
-      <div className="tstats-card__body">
+    <Card
+      as="div"
+      frame="ledger"
+      body="flush"
+      className="tstats cbk"
+      head={
+        <SectionHead look="band" club note="all 30 teams">
+          Comeback wins
+        </SectionHead>
+      }
+    >
+      <div className="tstats__body">
         <p className="cbk__gloss">
           How often {clubName || 'they'} rallied to win after their chance of winning the game
           sank this low. Each rail plots all 30 clubs from 0% to the MLB leader; ● is{' '}
@@ -129,6 +137,6 @@ export function ComebackCard({ data, teamId, clubName }) {
           })}
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

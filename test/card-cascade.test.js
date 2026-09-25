@@ -414,3 +414,84 @@ test('the team hub keeps its space between cards, from the hub and not from Card
   assert.ok(hub, 'a hub rule for a top-level card only; a card inside a card is a tile')
   assert.equal(decl(hub, 'margin-top'), 'var(--space-4)')
 })
+
+// ---- 12. slice C1: the rest of the team hub ----
+
+// The thirteen hub blocks that drew their own copy of the card. Each one is a
+// Card now, and its namespace rule keeps only what is its own: the layout, the
+// padding, the space above it. `keep` names the one frame property a block
+// may still set, because it is that block's look and not the frame: the
+// jersey tile's per-jersey tint, the alumni card's inset ring, and the
+// contract tile's 3px top rule.
+const C1 = [
+  { css: '23-box-score-detail.css', sel: '.tlead__cat', jsx: 'components/teamstats/TeamLeaders.jsx', ns: 'tlead__cat' },
+  { css: '23-box-score-detail.css', sel: '.tledg__block', jsx: 'components/teamstats/TeamLeadersLedger.jsx', ns: 'tledg__block' },
+  { css: '28-team-hub.css', sel: '.jerseydeck__card', jsx: 'components/logo/JerseyCombos.jsx', ns: 'jerseydeck__card', keep: ['background'] },
+  { css: '28-team-hub.css', sel: '.team-score', jsx: 'components/teamstats/TeamScoreCard.jsx', ns: 'team-score' },
+  { css: '29-team-transactions.css', sel: '.txstory', jsx: 'components/transactions/TxStory.jsx', ns: 'txstory' },
+  { css: '31-wild-card.css', sel: '.tstats', jsx: 'screens/team/modules/TeamStatsCard.jsx', ns: 'tstats' },
+  { css: '31-wild-card.css', sel: '.roster-super', jsx: 'screens/team/modules/RosterProjection.jsx', ns: 'roster-super' },
+  { css: '31-wild-card.css', sel: '.thub-affiliate', jsx: 'screens/team/modules/minors/AffiliatesCard.jsx', ns: 'thub-affiliate' },
+  { css: '31-wild-card.css', sel: '.horizontile', jsx: 'screens/team/modules/minors/DepthChartCard.jsx', ns: 'horizontile' },
+  { css: '31-wild-card.css', sel: '.hzntile', jsx: 'screens/team/modules/minors/HorizonCard.jsx', ns: 'hzntile' },
+  { css: '64-milb-alumni.css', sel: '.alum__card', jsx: 'components/teamstats/MilbAlumni.jsx', ns: 'alum__card', keep: ['box-shadow'] },
+  { css: '70-contracts-grid.css', sel: '.ctr__tile', jsx: 'screens/team/ContractsTab.jsx', ns: 'ctr__tile', keep: ['border-top'] },
+  { css: '70-contracts-grid.css', sel: '.ctr__card', jsx: 'components/salaries/ContractGrid.jsx', ns: 'ctr__card' },
+]
+const FRAME_DECL = /^(border|border-radius|background|box-shadow|overflow)\s*:/
+
+test('C1: no hub block draws a second frame over its Card', () => {
+  for (const { css, sel, keep = [] } of C1) {
+    const body = ruleBody(read(css), sel)
+    if (body === null) continue // the whole rule was the frame, and it is gone
+    const extra = body
+      .split(';')
+      .map((d) => d.trim())
+      .filter((d) => FRAME_DECL.test(d))
+      .filter((d) => !keep.some((k) => d.startsWith(`${k}:`)))
+    assert.deepEqual(extra, [], `${css}: ${sel} still draws its own frame`)
+  }
+})
+
+test('C1: every hub block renders on Card, never on a bare element', () => {
+  for (const { jsx, ns } of C1) {
+    const code = readFileSync(join(SRC, jsx), 'utf8')
+    assert.match(code, /<Card[\s>]/, `${jsx} renders a Card`)
+    const bare = new RegExp(`<(div|section|li|article)\s+(key=\{[^}]+\}\s+)?className=\{?["'\`]${ns}(?![\w-])`)
+    assert.doesNotMatch(code, bare, `${jsx}: .${ns} is on a bare element`)
+  }
+})
+
+test('C1: the all-star rosters page wears the roster card on Card too', () => {
+  const code = readFileSync(join(SRC, 'screens', 'AllStarRostersPage.jsx'), 'utf8')
+  assert.doesNotMatch(code, /<div className="roster-super"/)
+})
+
+test('C1: the contract tile is a ledger and keeps its 3px top rule', () => {
+  const tab = readFileSync(join(SRC, 'screens', 'team', 'ContractsTab.jsx'), 'utf8')
+  assert.match(tab, /frame="ledger"/)
+  assert.equal(decl(ruleBody(read('70-contracts-grid.css'), '.ctr__tile'), 'border-top'), '3px solid var(--border-rule)')
+})
+
+test('C1: the alumni card keeps its inset ring over the card shadow', () => {
+  const body = ruleBody(read('64-milb-alumni.css'), '.alum__card')
+  assert.equal(decl(body, 'box-shadow'), 'inset 0 0 0 3px var(--bg-canvas), var(--shadow-card)')
+})
+
+// The two-step rename (ADR-0084 ledger): the card is .tstats, and the grid
+// that held that name is .tstats__grid. Strict, comments too.
+const RETIRED_TSTATS = /(^|[^\w-])tstats-card(?![\w])/
+
+test('C1: .tstats-card is gone, from stylesheets, markup and comments', () => {
+  const css = files(STYLES, ['.css']).filter((rel) => RETIRED_TSTATS.test(readFileSync(join(STYLES, rel), 'utf8')))
+  const code = files(SRC, ['.jsx', '.js'])
+    .filter((rel) => !rel.startsWith('styles/'))
+    .filter((rel) => RETIRED_TSTATS.test(readFileSync(join(SRC, rel), 'utf8')))
+  assert.deepEqual([...css, ...code], [])
+})
+
+test('C1: the stat grid is .tstats__grid, and no rule still sizes a bare .tstats as a grid', () => {
+  const wild = read('31-wild-card.css')
+  assert.equal(decl(ruleBody(wild, '.tstats__grid'), 'display'), 'grid')
+  assert.equal(decl(ruleBody(wild, '.tstats') ?? '', 'display'), undefined)
+})

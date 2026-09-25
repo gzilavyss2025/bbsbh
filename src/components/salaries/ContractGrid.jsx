@@ -12,6 +12,7 @@ const total = (value) => (value > 0 ? moneyLabel(value) : DASH)
 const isMultiYear = (terms) => Boolean(terms) && !/^\s*1\s*y/i.test(terms)
 import { CELL_LABELS } from '../../api/salaries.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // The ledger itself: players down, seasons across, subtotals per band and one
 // club total at the foot — the shape a scorer already reads, and the shape the
@@ -46,10 +47,16 @@ function Cell({ cell }) {
 export function ContractGrid({ ledger }) {
   const { years, groups, totals, season } = ledger
   return (
-    <div className="ctr__card">
-      <SectionHead look="band" as="span">
-        Commitment by season
-      </SectionHead>
+    <Card
+      as="div"
+      body="flush"
+      className="ctr__card"
+      head={
+        <SectionHead look="band" as="span">
+          Commitment by season
+        </SectionHead>
+      }
+    >
       <div className="ctr__scroll">
         <table className="ctr__table">
           <thead>
@@ -125,7 +132,7 @@ export function ContractGrid({ ledger }) {
           </tfoot>
         </table>
       </div>
-    </div>
+    </Card>
   )
 }
 

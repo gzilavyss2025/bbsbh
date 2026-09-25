@@ -48,11 +48,8 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+/* A category is a Card (sheet, flush body; #1113). Its padding is its own. */
 .tlead__cat {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3);
 }
 .tlead__cat-title {
@@ -332,14 +329,8 @@
   flex-direction: column;
   gap: var(--space-2h);
 }
-.tledg__block {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  /* Clips the header band's square top corners to the card's radius. */
-  overflow: hidden;
-}
+/* Each block is a Card (sheet, flush body; #1113), which draws the frame and
+   clips the header band's square top corners to its radius. */
 .tledg__block-title {
   margin: 0;
   padding: var(--space-1h) var(--space-3);

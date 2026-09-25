@@ -11,6 +11,7 @@ import { teamPath } from '../../lib/route.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { TeamScoreExplainer } from './TeamScoreExplainer.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 export const DASH = '—'
 const RANKSTRIP_VISIBLE = 5
@@ -131,18 +132,24 @@ export function TeamScoreCard({
   const showFormMeta = open === 'form'
 
   return (
-    <section className={`team-score${open ? ' is-open' : ''}`} aria-label="Season Grade">
-      <SectionHead
-        look="band"
-        club
-        action={
-          <button type="button" className="team-score__howlink" onClick={() => setShowHow(true)}>
-            How this is calculated
-          </button>
-        }
-      >
-        Season report
-      </SectionHead>
+    <Card
+      body="flush"
+      className={`team-score${open ? ' is-open' : ''}`}
+      aria-label="Season Grade"
+      head={
+        <SectionHead
+          look="band"
+          club
+          action={
+            <button type="button" className="team-score__howlink" onClick={() => setShowHow(true)}>
+              How this is calculated
+            </button>
+          }
+        >
+          Season report
+        </SectionHead>
+      }
+    >
 
       <GradeHero
         grade={grade}
@@ -198,7 +205,7 @@ export function TeamScoreCard({
       {showHow && (
         <TeamScoreExplainer snapshot={snapshot} surprise={surprise} grade={grade} onClose={() => setShowHow(false)} />
       )}
-    </section>
+    </Card>
   )
 }
 

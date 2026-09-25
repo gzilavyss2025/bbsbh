@@ -81,17 +81,14 @@
   margin: 0;
 }
 
-/* Each story is its own bordered card — wider than the deck's first cut
-   (a 3-photo rail, a real 2-for-1 trade, needs the room so the cutline
-   doesn't crowd into a narrow wrap). */
+/* Each story is its own Card (sheet, flush body; #1113) — wider than the
+   deck's first cut (a 3-photo rail, a real 2-for-1 trade, needs the room so
+   the cutline doesn't crowd into a narrow wrap). */
 .txstory {
   flex: 0 0 auto;
   scroll-snap-align: start;
   width: 320px;
   padding: var(--space-2h) var(--space-2h) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
   /* A new block-formatting context, so the floated rail is contained here
      rather than bleeding past this card's own border. */
   display: flow-root;

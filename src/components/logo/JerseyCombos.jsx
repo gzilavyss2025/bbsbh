@@ -151,8 +151,10 @@ export function JerseyCombos({ combos, teamId, teamName, variant = 'record' }) {
             '--ink': tile.ink,
           }
           return (
-            <div
+            <Card
               key={c.code ?? c.side ?? c.name}
+              as="div"
+              body="flush"
               className={`jerseydeck__card${tile.pinstripeColor ? ' jerseydeck__card--pinstripe' : ''}`}
               style={style}
             >
@@ -166,7 +168,7 @@ export function JerseyCombos({ combos, teamId, teamName, variant = 'record' }) {
               />
               <span className="jerseydeck__name">{c.name}</span>
               <span className="jerseydeck__rec mono">{recordLabel(c)}</span>
-            </div>
+            </Card>
           )
         })}
       </div>
