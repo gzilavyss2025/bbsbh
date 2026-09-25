@@ -87,7 +87,7 @@ export const EXCEPT = {
 // New generators write `generatedAt`.
 // Three of these are DATE-ONLY ("2026-08-28"), which JS parses as midnight UTC.
 // That makes their measured age the run's time of day, so a nightly run at
-// 07:00-11:30 leaves them 7-12h old — comfortably inside the budget — while a
+// 08:17-14:00 leaves them 8-14h old — comfortably inside the budget — while a
 // hand dispatch after ~20:00 UTC would trip them for no real reason. The
 // alternative, reading a date-only stamp as the END of its day, would cost a
 // full 24h of sensitivity and hide a missed night on exactly these files. The

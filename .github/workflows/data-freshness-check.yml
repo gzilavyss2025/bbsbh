@@ -23,7 +23,7 @@ name: Data freshness check
 # is the entire point, and the only alerting this repo has.
 on:
   schedule:
-    - cron: '0 15 * * *' # ~11am US Eastern, eight hours behind the nightly's 07:00 UTC
+    - cron: '0 15 * * *' # ~11am US Eastern, about seven hours behind the nightly's 08:17 UTC
   workflow_dispatch: {}
 
 permissions:
@@ -35,7 +35,7 @@ jobs:
     steps:
       # 26 hours, not 24: the nightly's "Wait for yesterday's slate to go Final"
       # step backs off hourly up to four times, so a legitimate run can land
-      # well after its nominal 07:00, and a two-hour cushion keeps a late-but-
+      # well after its nominal 08:17, and a two-hour cushion keeps a late-but-
       # healthy night from crying wolf.
       - name: Nightly data landed in the last 26 hours
         env:

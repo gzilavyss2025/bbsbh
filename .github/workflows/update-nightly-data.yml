@@ -27,7 +27,7 @@ name: Update nightly data
 #
 # The three WEEKLY crons folded in here on 2026-08-28 (update-teams.yml,
 # update-affiliates.yml, update-top-prospects.yml — all deleted). They ran
-# Monday 09:00/10:00/10:00 UTC, i.e. AFTER this 07:00 batch, and five steps
+# Monday 09:00/10:00/10:00 UTC, i.e. AFTER this nightly batch (07:00 UTC then), and five steps
 # below read what they write: gen-minors-leaders + gen-team-records read
 # teams.json, gen-milb-alumni + gen-farm-system read affiliates.json, and
 # gen-farm-system + gen-prospect-trend read top-prospects.json. So every
@@ -81,7 +81,15 @@ name: Update nightly data
 # anything errored, but whatever succeeded is already committed by then.
 on:
   schedule:
-    - cron: '0 7 * * *' # ~3am US Eastern (2-3am during EST) — moved earlier 2026-07-22; the "Wait for yesterday's slate" step below backs off hourly if a late West Coast game is still in progress, up to the old ~7am ET ceiling, instead of always waiting that long
+    # ~4:17am US Eastern (3:17am during EST). Moved from '0 7 * * *' on
+    # 2026-09-25. Two reasons. The maintainer asked for ~4am ET. And a
+    # top-of-the-hour schedule is GitHub's busiest slot: from 2026-08-29 to
+    # 2026-09-24 the 07:00 cron was dispatched 4-8 hours late every night
+    # (run created 11:12-14:58 UTC). GitHub's docs warn that the start of
+    # every hour is high-load and advise another minute; ':17' is that.
+    # The "Wait for yesterday's slate" step below still backs off hourly if
+    # a late West Coast game is in progress.
+    - cron: '17 8 * * *'
   workflow_dispatch: {}
 
 permissions:
