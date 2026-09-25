@@ -344,8 +344,9 @@ export const PILLS = [
     partial: '39-manager-page.css',
     consumers: 2,
     group: 'interactive',
-    verdict: 'Merge — ink-filled + interactive',
-    fill: '--accent-primary / --text-on-ink / --border-rule, padding 4px 10px, cursor (was seal-filled until ADR-0083)',
+    verdict: 'Merged — Pill (#1131)',
+    fill: 'Now <Pill role="control" fill="ink">: the one action on a card’s band, 34px, navy with paper text (seal-filled until ADR-0083). On a club-themed band it is a paper chip, a host tint through the pill’s own properties (09-team-info.css).',
+    pill: { role: 'control', fill: 'ink' },
   },
   {
     cls: 'tierpill',

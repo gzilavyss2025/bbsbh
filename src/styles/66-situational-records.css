@@ -132,7 +132,6 @@
 }
 .trrank__chip:focus-visible,
 .trrank__tile:focus-visible,
-.trrank__jump a:focus-visible,
 .trrank__back:focus-visible {
   outline: var(--focus-ring);
   outline-offset: 2px;
@@ -156,20 +155,27 @@
 .trrank__jump::-webkit-scrollbar {
   display: none;
 }
+/* The rail's links are Buttons with an href (#1131 slice 5), the same answer
+   as the design lab's jump links: a ruled box at --control-min. The band is
+   navy, so the host re-inks the Button's own five properties, the way
+   .xl .btn--ghost does on the album board: see-through, paper ink, a 22% paper
+   edge. The hover fill stays dark (a 16% paper wash), because the stock
+   hover (inset paper) would hide paper text. It repaints nothing. */
 .trrank__jump a {
+  --btn-fill: transparent;
+  --btn-edge: color-mix(in srgb, var(--text-on-ink) 22%, transparent);
+  --btn-ink: var(--text-on-ink);
+  --btn-fill-hover: color-mix(in srgb, var(--text-on-ink) 16%, transparent);
+  --btn-edge-hover: var(--text-on-ink);
   flex: 0 0 auto;
-  min-height: 32px;
-  padding: var(--space-1h) var(--space-3);
-  border: var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 22%, transparent);
-  border-radius: var(--radius-pill);
-  color: var(--text-on-ink);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-caps);
-  text-decoration: none;
-  text-transform: uppercase;
   white-space: nowrap;
+}
+/* The stock focus ring is --field green, which is under the 3:1 non-text
+   bar on navy. On this band the ring is paper, the band's own text ink
+   (asserted as "inverse text on ink chip" in contrastPairings.js). Its width
+   and offset stay the Button's. */
+.trrank__jump a:focus-visible {
+  outline-color: var(--text-on-ink); /* focus-ring-exempt — the green ring is under 3:1 on this navy band */
 }
 
 .trrank__index {
@@ -384,9 +390,6 @@
   .trrank__tile:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-raised);
-  }
-  .trrank__jump a:hover {
-    border-color: var(--accent-link);
   }
 }
 

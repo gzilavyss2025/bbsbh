@@ -278,4 +278,16 @@ export const PAIRINGS = [
   { fg: 'text-heading', bg: '#F2E3B0', min: TEXT, note: 'slate filter chip on hover: close game (marker 28%)' },
   { fg: 'text-heading', bg: '#D3D5D0', min: TEXT, note: 'slate filter chip at rest: extra innings (allstar-blue 16%)' },
   { fg: 'text-heading', bg: '#B9C2C6', min: TEXT, note: 'slate filter chip on hover: extra innings (allstar-blue 28%)' },
+  // THE BAND CONTROLS (#1131 slice 5). The Postseason Odds and Stamp In pill
+  // on a club-themed card band is a paper chip tinted through the pill's own
+  // properties (09-team-info.css): heading ink on paper at rest (asserted
+  // above as 'heading on raised card') and on the inset paper under a
+  // pointer, new here. On a plain band it is the ink pill, whose two pairs are
+  // above. The situational records rail re-inks the Button for its navy band
+  // (66-situational-records.css): paper ink on the navy at rest (the ink-chip
+  // pair above), and on a 16% paper wash under a pointer. The checker does not
+  // parse color-mix(), so that wash is its sRGB result on --accent-primary
+  // (#1B2A3A). The rail's paper focus ring is the ink-chip pair too.
+  { fg: 'text-heading', bg: 'surface-inset', min: TEXT, note: 'band pill on a themed club band, under a pointer' },
+  { fg: 'text-on-ink', bg: '#3F4B56', min: TEXT, note: 'records rail jump link on navy, under a pointer (text-on-ink 16%)' },
 ]

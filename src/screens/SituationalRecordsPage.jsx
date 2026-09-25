@@ -18,6 +18,7 @@ import { TeamTreatmentMark } from '../components/logo/TeamTreatmentMark.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
+import { Button } from '../components/ui/control/Button.jsx'
 
 // One situational record, every club at one level, in rank order. The bare
 // route is a browse-first index: every split stays visible inside its
@@ -152,11 +153,15 @@ function SituationTile({ result, favoriteTeamId, linkProps, path }) {
 function SituationalIndex({ groups, favoriteTeamId, pathFor, linkProps, preview }) {
   return (
     <>
+      {/* In-page #anchors on a navy band: a Button with an href, as the
+          design lab's jump links are (#1131). They do not leave the page, so
+          they are not a Door, and they filter nothing, so they are not a Pill.
+          66-situational-records.css re-inks the Button for the navy band. */}
       {preview && <nav className="trrank__jump" aria-label="Situational record categories">
         {groups.map((group, index) => (
-          <a key={group.title} href={`#record-group-${index}`}>
+          <Button key={group.title} size="control" href={`#record-group-${index}`}>
             {group.title}
-          </a>
+          </Button>
         ))}
       </nav>}
 
