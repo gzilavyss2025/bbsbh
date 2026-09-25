@@ -3,6 +3,7 @@ import { BoxLinesDoor } from '../boxlines/BoxLinesDoor.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { vsTeamDoorLabel } from '../../api/vsTeamSplits.js'
 import { teamLocationName, teamClubName } from '../../lib/teams.js'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // SPLITS VS TEAM — a player's career line against a chosen opponent, with a
 // finger-scrollable strip of every MLB club's logo to pick a different one
@@ -87,10 +88,9 @@ export function SplitsVsTeam({ vsTeam, season, asOf, personId, playerSurname }) 
 
   return (
     <section className="vsteam">
-      <h3 className="section__title">
-        <span>Splits vs team</span>
-        {sel && <em>career{sel.abbr ? ` vs ${sel.abbr}` : ''}</em>}
-      </h3>
+      <SectionHead look="rule" note={sel && `career${sel.abbr ? ` vs ${sel.abbr}` : ''}`}>
+        Splits vs team
+      </SectionHead>
 
       {/* The opponent picker sits in its own inset "tray" (background + border)
           so it reads as an interactive control distinct from the page, and the

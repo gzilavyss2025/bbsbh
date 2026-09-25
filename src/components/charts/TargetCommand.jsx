@@ -1,5 +1,6 @@
 import { attributionFor, targetCommandRows } from '../../api/targetCommand.js'
 import { PercentileStrip } from './PercentileStrip.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // TARGET COMMAND — the second percentile strip on the Analytics tab, and the
 // only one on the page that measures INTENT.
@@ -35,14 +36,13 @@ export function TargetCommand({ entry, data }) {
 
   return (
     <section className="statcast-section">
-      <h3 className="section__title">
-        <span>Target command</span>
-        {/* Short enough to sit on one line at phone width, which the fuller
-            "rank among that pitch" did not. What the rank is taken against is
-            in each row's own tap-open gloss, where there is room to say it
-            properly. */}
-        <em>inches from the glove</em>
-      </h3>
+      {/* The note is short enough to sit on one line at phone width, which
+          the fuller "rank among that pitch" did not. What the rank is taken
+          against is in each row's own tap-open gloss, where there is room to
+          say it properly. */}
+      <SectionHead look="rule" note="inches from the glove">
+        Target command
+      </SectionHead>
       <PercentileStrip rows={rows} />
       {/* NOT a footnote to trim. CC BY-NC-SA 4.0 requires the credit wherever
           the data is shown, so it renders with the rows rather than on an

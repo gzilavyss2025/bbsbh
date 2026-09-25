@@ -70,7 +70,7 @@ export function DesignLab() {
       <section className="dlab__verdictbox">
         <h2 className="dlab__bandtitle">What the catalog shows</h2>
         <p className="dlab__lede">
-          {CARDS.length} card blocks and {PILLS.length} pill blocks, against 14 shared components.
+          {CARDS.length} card blocks and {PILLS.length} pill blocks, against 13 shared components.
           But there are not {CARDS.length} cards: <strong>{sheets} of them draw the same box</strong>,
           token for token, and <strong>{namespaces} draw no box at all</strong>. On the pill side,{' '}
           <strong>{tones} are the same pill</strong> differing in exactly three values. The team hub

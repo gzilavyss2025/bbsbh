@@ -11,7 +11,7 @@ import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
-import { SectionTitle } from '../components/ui/SectionTitle.jsx'
+import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
@@ -28,7 +28,7 @@ function TeamCountBoard({ title, entries, favoriteTeamId }) {
   if (!entries.length) return null
   return (
     <section className="psleaders__teamboard">
-      <SectionTitle title={title} />
+      <SectionHead look="label">{title}</SectionHead>
       <ol className="psleaders__teamlist">
         {entries.map((e, i) => {
           const isFavorite = favoriteTeamId != null && e.teamId === favoriteTeamId
@@ -62,7 +62,7 @@ function MvpAwardsBoard({ entries, favoriteTeamId }) {
   if (!entries.length) return null
   return (
     <section className="psleaders__teamboard">
-      <SectionTitle title="Multiple Series MVP Awards" />
+      <SectionHead look="label">Multiple Series MVP Awards</SectionHead>
       <ol className="psleaders__mvplist">
         {entries.map((e, i) => {
           const isFavorite = favoriteTeamId != null && e.teamId === favoriteTeamId

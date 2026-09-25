@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -80,7 +81,7 @@ export function TransactionTimeline({ rows }) {
   }))
   return (
     <section className="txntl">
-      <h3 className="section__title"><span>Transactions</span></h3>
+      <SectionHead look="rule">Transactions</SectionHead>
       <ol className="txntl__track">
         {withYearFlag.map(({ row: r, showYear }, i) => {
           return (

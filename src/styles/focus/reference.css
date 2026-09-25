@@ -417,9 +417,9 @@
    same way. Only the geometry changes here. */
 
 /* Each block's heading rides the panel's own flex gap instead of the 18px top
-   margin .section__title carries on a full-width page, which stacked on top of
+   margin a label head carries on a full-width page, which stacked on top of
    that gap and opened a hole between the benches and the facts under them. */
-.refextras .section__title {
+.refextras .sectionhead {
   margin: 0 0 var(--space-2);
 }
 

@@ -109,7 +109,7 @@ const BUDGETS = {
   //                                    the by-inning tally to 21b-box-score-tally.css
   'src/styles/22-box-score-tables.css': 800, // 789
   'src/styles/23-box-score-detail.css': 800, // 637 -> 721: the team hub's leader ledger (.tledg), which lands here beside the .tlead card board it renders instead of. It cannot be its own partial: src/styles is AT its directory budget (check-dir-size.mjs), the same squeeze 68-around-the-game.css records. Paid for in part by deleting the horizontal deck, its header-actions row and two dead .ilmark sizings.
-  'src/styles/26-player-page.css': 1200, // 1125 — the Trophy Case split out to 67-trophy-case.css
+  'src/styles/26-player-page.css': 1100, // 1200 -> 1100: the section title rules moved to system/section-head.css (#1113, slice H2). 1125 — the Trophy Case split out to 67-trophy-case.css
   'src/styles/27-player-position-innings.css': 700, // 636 — "Pitches like" / "Hits like" moved to 51-similar-players.css
   'src/styles/28-team-hub.css': 900, // 859 — the identity hero split out to 28a-team-hub-hero.css
   'src/styles/29-team-transactions.css': 950, // 844 -> 941: the deck's day tab (.txday), one divider standing before each day's run of cards. It replaced a dateline printed on EVERY card, which restated the previous card's date on 29.7% of them; the rule it enforces and the reason the tab is stacked rather than rotated are what the added prose carries.

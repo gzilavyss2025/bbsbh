@@ -1,5 +1,6 @@
 import { Loader } from '../ui/Loader.jsx'
 import { Button } from '../ui/control/Button.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // Career/season workload by fielding position, drawn on a small diamond that
 // echoes DefenseDiamond's SPOTS layout (see components/DefenseDiamond.jsx) —
@@ -58,10 +59,9 @@ export function PositionInnings({ options, scope, onScope, loading, fielding, pi
 
   return (
     <section className="posinn">
-      <h3 className="section__title">
-        <span>Innings by position</span>
-        {activeLabel && <em>{activeLabel}</em>}
-      </h3>
+      <SectionHead look="rule" note={activeLabel}>
+        Innings by position
+      </SectionHead>
 
       {options.length > 1 && (
         <div className="posinn__scope" aria-label="Scope">

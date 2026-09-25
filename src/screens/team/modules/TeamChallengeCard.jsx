@@ -10,6 +10,7 @@ import { absChallengesPath } from '../../../lib/route.js'
 import { ScatterChart } from '../../../components/around-the-game/BroadcastBar.jsx'
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
+import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 
 // THE TEAM HUB'S CHALLENGE CARD, on the Numbers tab — who on this club argues
 // with the plate umpire, against how much baseball they see.
@@ -109,10 +110,9 @@ export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
 
   return (
     <div className="thub-card chalcard">
-      <h3 className="section__title">
-        <span>Who challenges</span>
-        <em>against what they see</em>
-      </h3>
+      <SectionHead look="label" note="against what they see">
+        Who challenges
+      </SectionHead>
 
       {/* THE HEADLINE FOLLOWS THE CHIP. It led with the batter rate on both
           views in the first draft, which buried the one thing the card knows

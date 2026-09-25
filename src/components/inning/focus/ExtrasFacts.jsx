@@ -3,6 +3,7 @@ import { selectGameInfo, selectOfficials } from '../../../api/select.js'
 import { scorebookDate } from '../../../lib/dates.js'
 import { ManagerLink } from '../../team/ManagerLink.jsx'
 import { UmpireLink } from '../../umpire/UmpireLink.jsx'
+import { SectionHead } from '../../ui/frame/SectionHead.jsx'
 
 // The fill-in half of focus mode's EXTRAS tab (ReferencePanel.jsx): the
 // scorecard-header facts a hand-scorer writes down once and then looks up
@@ -31,7 +32,7 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
   return (
     <>
       <section className="refextras">
-        <h3 className="section__title">Clubs</h3>
+        <SectionHead look="label">Clubs</SectionHead>
         {/* One row per club, manager beside uniform. The club is named by
             ABBREVIATION: this grid is two cells wide in a ~300px rail, and a
             label reading "DIAMONDBACKS MANAGER" wraps to three lines where
@@ -58,7 +59,7 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
           place to start a fetch that answers a question nobody asked here. */}
       {officials.length > 0 && (
         <section className="umps refextras">
-          <h3 className="section__title">Umpires</h3>
+          <SectionHead look="label">Umpires</SectionHead>
           <ul className="umps__list">
             {officials.map((o) => (
               <li key={o.role}>
@@ -75,7 +76,7 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
       )}
 
       <section className="refextras">
-        <h3 className="section__title">Game</h3>
+        <SectionHead look="label">Game</SectionHead>
         <dl className="factgrid refextras__grid">
           <Fact label="Date" value={scorebookDate(info.officialDate)} />
           {/* The feed appends a period to the venue name ("Busch Stadium.") —

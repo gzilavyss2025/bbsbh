@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { CAUSATION_NOTE, commandReceivedFor } from '../../api/commandReceived.js'
 import { attributionFor } from '../../api/targetCommand.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // COMMAND RECEIVED — the staff that threw to this catcher, ranked by how close
 // they finished to his target while he was the one holding it.
@@ -49,10 +50,9 @@ export function CommandReceivedCard({ data, personId, season }) {
 
   return (
     <div className="cmdrecv">
-      <h3 className="section__title">
-        <span>Command received</span>
-        <em>inches from his target</em>
-      </h3>
+      <SectionHead look="rule" note="inches from his target">
+        Command received
+      </SectionHead>
 
       <p className="cmdrecv__season">
         <strong>{view.miss}&#8243;</strong> across {view.pitches.toLocaleString()} pitches caught

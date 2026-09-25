@@ -13,7 +13,6 @@ import { InfoPopover } from '../../components/ui/InfoPopover.jsx'
 import { Loader } from '../../components/ui/Loader.jsx'
 import { MasonryColumns } from '../../components/ui/MasonryColumns.jsx'
 import { SectionMasthead } from '../../components/ui/SectionMasthead.jsx'
-import { SectionTitle } from '../../components/ui/SectionTitle.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/headerTheme.js'
 
@@ -48,6 +47,12 @@ function Themed({ teamId, className = '', children }) {
 function SectionHeadDemo() {
   return (
     <>
+      <SectionHead look="label" as="span" note="regular season" action={<Door onClick={() => {}}>See all</Door>}>
+        Team leaders
+      </SectionHead>
+      <SectionHead look="rule" as="span" note="percentile rank">
+        Statcast
+      </SectionHead>
       <SectionHead look="band" as="span" note="no club">
         Bullpen health
       </SectionHead>
@@ -98,7 +103,7 @@ export function ComponentHalf() {
   return (
     <>
       <Group
-        title="src/components/ui — 14 shared components"
+        title="src/components/ui — 13 shared components"
         lede="The whole shared tier. Button and Door share control/, and Button has its own band above. Against 32 card blocks and 10 pill blocks, this is the ratio #1112 exists to state."
       >
         <Entry title="Loader" path={`${UI_PATH}/Loader.jsx`} note="The shared cold-load loader — a mini linescore whose cell cycles. size=&quot;inline&quot; here.">
@@ -107,13 +112,10 @@ export function ComponentHalf() {
         <Entry title="AsyncStatus" path={`${UI_PATH}/AsyncGate.jsx`} note="The loading/error/empty states every fetching screen shares. Shown in its error state.">
           <AsyncStatus loading={false} error={new Error('Nothing posted yet')} data={null} noun="lineup" />
         </Entry>
-        <Entry title="SectionTitle" path={`${UI_PATH}/SectionTitle.jsx`} note="A section heading with an optional note and a right-hand action.">
-          <SectionTitle title="Team leaders" note="Regular season" action={<Door onClick={() => {}}>See all</Door>} />
-        </Entry>
         <Entry
           title="SectionHead"
           path={`${UI_PATH}/frame/SectionHead.jsx`}
-          note="The one head (#1113). The band: the house navy and kraft with no club, the club's own bar under a themed root. With club, a plain label until a club colour arrives: the team hub's card heads and the player page's section bars. The label and rule looks come in slice H2."
+          note="The one head (#1113), three looks. The label: graphite caps on a hairline. The rule: the label, then a pencil rule to the note (the player page's sub-heads). The band: the house navy and kraft with no club, the club's own bar under a themed root. With club, a band that is a plain label until a club colour arrives: the team hub's card heads and the player page's section bars."
         >
           <SectionHeadDemo />
         </Entry>

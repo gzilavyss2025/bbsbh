@@ -51,7 +51,7 @@ export function MinorsTab({ id, asOf, sportId }) {
       active="minors"
       hiddenTabs={hiddenTeamTabs(data.team)}
     >
-      {showHistory && <CareerTimeline entries={affiliationHistory} title="Affiliation history" />}
+      {showHistory && <CareerTimeline entries={affiliationHistory} title="Affiliation history" headLook="label" />}
 
       {showAffiliates && <AffiliatesCard affiliates={affiliateCards} />}
 

@@ -7,7 +7,7 @@ import { Headshot } from '../components/player/Headshot.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
-import { SectionTitle } from '../components/ui/SectionTitle.jsx'
+import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
@@ -390,7 +390,7 @@ export function AwardsHistoryPage() {
                   .sort((a, b) => b - a)
                 return (
                   <section className="awardhistory__award" key={family.key}>
-                    <SectionTitle title={family.label} />
+                    <SectionHead look="label">{family.label}</SectionHead>
                     {isLeagueSplit(family) ? (
                       <AwardFamilySplit years={years} yearsData={family.years} favoriteTeamId={favoriteTeamId} />
                     ) : (
@@ -411,7 +411,7 @@ export function AwardsHistoryPage() {
 
             {view === 'award' && hasAllMlb && (
               <section className="awardhistory__award" key="all-mlb-teams">
-                <SectionTitle title="All-MLB Teams" />
+                <SectionHead look="label">All-MLB Teams</SectionHead>
                 <div className="awardhistory__years">
                   {allMlbYears.map((year) => (
                     <AllMlbYear
@@ -429,7 +429,7 @@ export function AwardsHistoryPage() {
             {view === 'year' &&
               byYear.map(({ year, awards }) => (
                 <section className="awardhistory__award" key={year}>
-                  <SectionTitle title={String(year)} />
+                  <SectionHead look="label">{String(year)}</SectionHead>
                   <div className="awardhistory__years">
                     {awards.map((a) =>
                       a.recipients.some((r) => r.league) ? (

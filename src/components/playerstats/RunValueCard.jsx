@@ -8,6 +8,7 @@ import {
   signed,
 } from '../../api/around-the-game/runValue.js'
 import { RunValueSplit, splitScale } from '../around-the-game/RunValueParts.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The player page's RUN VALUE card — his season split into the four things a
 // player can do to move a run, on the one scale that lets them be added.
@@ -39,10 +40,9 @@ export function RunValueCard({ playerId }) {
 
   return (
     <div className="rvcard">
-      <h3 className="section__title">
-        <span>Run value</span>
-        <em>runs above average</em>
-      </h3>
+      <SectionHead look="rule" note="runs above average">
+        Run value
+      </SectionHead>
 
       <div className="rvcard__head">
         <p className="rvcard__total">{signed(view.total)}</p>

@@ -1,5 +1,6 @@
 import { percentileRows } from '../../api/savantPercentiles.js'
 import { PercentileStrip } from './PercentileStrip.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // STATCAST — season percentile ranks (Baseball Savant), drawn as one ruled
 // strip on a shared 0–100 axis (PercentileStrip.jsx). Savant computes the
@@ -32,10 +33,9 @@ export function StatcastPercentiles({ savant, raw, median, group, limit }) {
 
   return (
     <section className="statcast-section">
-      <h3 className="section__title">
-        <span>Statcast</span>
-        <em>percentile rank</em>
-      </h3>
+      <SectionHead look="rule" note="percentile rank">
+        Statcast
+      </SectionHead>
       <PercentileStrip rows={rows} />
     </section>
   )

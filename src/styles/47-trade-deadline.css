@@ -58,7 +58,7 @@
 
 /* A small caption above the team filter strip — reads as a blended-in label
    for the control below it, not a section heading, so it stays a size down
-   from .section__title with no bottom rule. */
+   from a label head (SectionHead) with no bottom rule. */
 .tradedl__filterlabel {
   margin: var(--space-3) 0 6px;
   font-family: var(--font-display);

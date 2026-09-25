@@ -22,7 +22,7 @@ import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './player/PlayerHubShell.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
 import { gameLogDoorLabel } from './player/overviewPreview.js'
-import { DASH, Fact, SectionTitle, StatGrid, debutLabel, isoToday, monthDay, roleWord } from './player/parts.jsx'
+import { DASH, Fact, StatGrid, debutLabel, isoToday, monthDay, roleWord } from './player/parts.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 
@@ -214,13 +214,14 @@ export function PlayerPage({ id, asOf, sportId }) {
                 "entering today". */}
             {block.otherLevels?.map((lvl) => (
               <div className="player__otherlevel" key={lvl.sportId}>
-                <SectionTitle
-                  title={lvl.level}
-                  note={[
-                    block.group === 'pitching' && lvl.role ? roleWord(lvl.role) : null,
-                    'this season',
-                  ].filter(Boolean).join(' · ')}
-                />
+                <SectionHead
+                  look="rule"
+                  note={[block.group === 'pitching' && lvl.role ? roleWord(lvl.role) : null, 'this season']
+                    .filter(Boolean)
+                    .join(' · ')}
+                >
+                  {lvl.level}
+                </SectionHead>
                 <StatGrid tiles={lvl.tiles} />
               </div>
             ))}

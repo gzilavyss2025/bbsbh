@@ -3,7 +3,7 @@ import { Entry, Group } from './Entry.jsx'
 // The REAL Button and Door, rendered — never a copy of their markup.
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Door } from '../../components/ui/control/Door.jsx'
-import { SectionTitle } from '../../components/ui/SectionTitle.jsx'
+import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { SKINS } from '../../lib/design/buttonClass.js'
 
 const PATH = 'src/components/ui/control/Button.jsx'
@@ -47,7 +47,9 @@ function Neighbours({ face }) {
   const small = face === 'body' ? BODY_FACE : undefined
   return (
     <div className="thub-card dlab__neighbours">
-      <SectionTitle title="Innings by position" action={<Door onClick={() => {}}>See all</Door>} />
+      <SectionHead look="label" action={<Door onClick={() => {}}>See all</Door>}>
+        Innings by position
+      </SectionHead>
       <div className="dlab__row">
         <Button size="control" pressed style={small}>
           Season

@@ -5,7 +5,7 @@ import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 // One bordered soft-cream card (same convention as .tstats-card) around all
 // the projection subsections, so they read as one group distinct from the
 // actual 40-man list further down. The masthead is bolted directly onto its
-// own top border rather than floating as a separate SectionTitle above it.
+// own top border rather than floating as a separate section head above it.
 //
 // `preview` (the Overview's Lineup door) renders the diamond and nothing else —
 // no Season/Current toggle, no substitutes, no pitching staffs. The Overview

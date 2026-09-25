@@ -26,18 +26,6 @@ export function roleWord(role) {
   return role === 'SP' ? 'starter' : role === 'CL' ? 'closer' : 'reliever'
 }
 
-// A sub-card heading on the player page: the plain label tier. A tab's
-// top-level sections wear the club band instead, through SectionHead
-// (look="band" club bleed, #1113), not through this.
-export function SectionTitle({ title, note }) {
-  return (
-    <h3 className="section__title">
-      <span>{title}</span>
-      {note && <em>{note}</em>}
-    </h3>
-  )
-}
-
 // The five-tile "Current season" grid — shared by the main tiles and each
 // promoted other-level tile row (see block.otherLevels).
 export function StatGrid({ tiles }) {

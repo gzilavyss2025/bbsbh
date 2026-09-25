@@ -466,12 +466,12 @@
   box-shadow: var(--shadow-card);
   padding: var(--space-3);
 }
-/* Board titles share the .section__title overline with "Game by game" above
+/* Board titles share the label head (SectionHead) with "Game by game" above
    and the base TeamLeaders board this replaced; the card's own 12px padding
-   supplies the top gap, so cancel section__title's default top margin (same
+   supplies the top gap, so cancel the label head's default top margin (same
    override .psleaders__teamboard uses on the sibling Postseason Leaders
    page). */
-.psseries__lboard > .section__title:first-child {
+.psseries__lboard > .sectionhead:first-child {
   margin-top: 0;
 }
 /* The ledger page itself: brightest inset paper, rows butted together so

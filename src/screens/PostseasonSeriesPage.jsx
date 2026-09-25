@@ -21,6 +21,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { GameResultFace } from '../components/game/GameResultFace.jsx'
+import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 // No year — the page title and result banner already carry it, and a series'
@@ -214,7 +215,7 @@ export function PostseasonSeriesPage({ seriesId }) {
           award line under the clinching entry, the same --award-line trim
           the banner's seam wears. */}
       <section className="psseries__games">
-        <h3 className="section__title">Game by game</h3>
+        <SectionHead look="label">Game by game</SectionHead>
         <div className="psseries__log">
           <div className="psseries__logbody">
             {games.map((g, i) => {
@@ -374,7 +375,7 @@ function SeriesPlayOfTheGame({ potg, awayAbbr, homeAbbr }) {
 // Categories with no qualifying player in this thin sample (no saves in a
 // sweep, nobody past the AVG floor — see api/postseasonSeries.js) are
 // already empty arrays and simply don't render a line; a board with zero
-// lines renders nothing at all. Title uses the same .section__title overline
+// lines renders nothing at all. Title uses the same label head (SectionHead)
 // as "Game by game" above and the base TeamLeaders board it replaced, so the
 // page's section headers all read as one family.
 function SeriesLeaderBoard({ title, categories, byCategory }) {
@@ -384,7 +385,7 @@ function SeriesLeaderBoard({ title, categories, byCategory }) {
   if (ranked.length === 0) return null
   return (
     <section className="psseries__lboard">
-      <h3 className="section__title">{title}</h3>
+      <SectionHead look="label">{title}</SectionHead>
       <div className="psseries__lrows">
         {ranked.map(({ category, entries }) => (
           <SeriesLeaderLine key={category.key} category={category} entries={entries} />

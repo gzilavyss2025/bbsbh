@@ -4,6 +4,7 @@ import { signed, tone } from '../../../api/around-the-game/runValue.js'
 import { RunValueSplit, splitScale } from '../../../components/around-the-game/RunValueParts.jsx'
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
+import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 
 // The team hub's RUN VALUE card, on the Numbers tab — what this club's season
 // has been worth in runs, split four ways, and the men carrying it.
@@ -30,10 +31,9 @@ export function TeamRunValueCard({ data, clubName }) {
 
   return (
     <div className="thub-card rvclub">
-      <h3 className="section__title">
-        <span>Run value</span>
-        <em>runs above average</em>
-      </h3>
+      <SectionHead look="label" note="runs above average">
+        Run value
+      </SectionHead>
 
       <div className="rvcard__head">
         <p className="rvcard__total">{signed(club.total)}</p>

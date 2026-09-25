@@ -1,4 +1,4 @@
-import { SectionTitle } from '../ui/SectionTitle.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { SprayMap } from '../charts/SprayMap.jsx'
 import { fetchSprayFor, sprayView } from '../../api/spray.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -31,7 +31,7 @@ export function SprayMapSection({ playerId, group, asOf }) {
 
   return (
     <>
-      <SectionTitle title="Spray map" note="where his hits land" />
+      <SectionHead look="rule" note="where his hits land">Spray map</SectionHead>
       <SprayMap view={view} />
     </>
   )
