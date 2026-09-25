@@ -36,7 +36,32 @@ test('commands that start the Playwright test runner are caught', () => {
     'npx playwright test e2e/smoke.spec.js --project=mobile',
     'cd ../wt && npx playwright test',
     'node_modules/.bin/playwright.cmd test',
+    '$env:E2E_PORT=5172; npm run e2e',
+    'npm test && npm run visual',
+    'npm run lint | tail -5; npx playwright test',
+    'bash -c "npm run e2e"',
+    "sh -c 'cd ../wt && npm run visual'",
+    'pwsh -Command "npm run e2e"',
+    '& "C:\\Program Files\\nodejs\\npx.cmd" playwright test',
+    '& "node_modules\\.bin\\playwright.cmd" test',
+    'git commit -m "Fix the hook" && npm run e2e',
   ]) assert.equal(startsSuite(c), true, c)
+})
+
+// A command that only MENTIONS the runner — a search pattern, a commit
+// message, a heredoc body — is not a run. Refusing these cost agents a
+// retry each time they searched a run sheet for the words.
+test('a command that only mentions the runner in quoted text is not a run', () => {
+  for (const c of [
+    'grep -n -i "e2e\\|npm run visual\\|E2E_PORT\\|playwright" notes.md',
+    "grep -rn 'npm run e2e' docs",
+    'rg "playwright test" e2e/',
+    'git commit -m "Say: run npm run e2e only when Gary asks"',
+    "git commit -F - <<'EOF'\nDocs: the agents never run npm run visual.\nEOF",
+    'git commit -F - <<EOF\nnpm run e2e is on request.\nEOF',
+    "gh pr create --title 'Hook' --body 'npx playwright test is refused'",
+    "git commit -m @'\nnpm run e2e runs on request.\n'@",
+  ]) assert.equal(startsSuite(c), false, c)
 })
 
 test('other commands are not', () => {
