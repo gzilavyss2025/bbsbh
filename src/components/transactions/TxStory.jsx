@@ -1,6 +1,7 @@
 import { BANNER_TONE, Cutline, TYPE_TONE, datelineParts } from './MoveRow.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // One roster-move story drawn as a CARD — a headshot rail with surname
 // captions over a type pill and the cutline. The club deck
@@ -65,7 +66,7 @@ export function TxStory({ story }) {
   const wide = story.rail.length >= 3
   const strip = story.rail.length > RAIL_FLOAT_MAX
   return (
-    <div className={`txstory${wide ? ' txstory--wide' : ''}`}>
+    <Card as="div" body="flush" className={`txstory${wide ? ' txstory--wide' : ''}`}>
       {story.rail.length > 0 && (
         <div className={`photorail${strip ? ' photorail--strip' : ''}`}>
           {story.rail.map((slot, i) => (
@@ -75,7 +76,7 @@ export function TxStory({ story }) {
       )}
       {tone && <span className={`txstory__type txstory__type--${tone}`}>{story.typeLabel}</span>}
       <Cutline segments={story.cutline} className="txstory__cutline" />
-    </div>
+    </Card>
   )
 }
 

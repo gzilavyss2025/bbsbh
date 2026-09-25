@@ -30,13 +30,11 @@
   gap: var(--space-2);
   margin-bottom: var(--space-4);
 }
+/* A tile is a Card (ledger, flush body; #1113). The 3px top rule is the
+   tile's own: it turns green on a good figure. */
 .ctr__tile {
   padding: var(--space-2h) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
   border-top: 3px solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 .ctr__tile--good {
   border-top-color: var(--field);
@@ -124,14 +122,8 @@
 /* ----------------------------------------------------------- the matrix
    The player column is pinned and the seasons scroll under it — the move
    StandingsPage already makes with its club column, and for the same reason:
-   a row that loses its name mid-scroll stops being a row. */
-.ctr__card {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-}
+   a row that loses its name mid-scroll stops being a row. The box around it
+   is a Card (sheet, flush body; #1113). */
 .ctr__scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

@@ -35,7 +35,7 @@ function StatGrid({ stats }) {
 
 function PromotionTile({ p }) {
   return (
-    <li className="hzntile">
+    <Card as="li" body="flush" className="hzntile">
       <div className="hzntile__head">
         <span className="horizontile__shotwrap">
           <Headshot personId={p.playerId} name={p.name} teamId={p.affiliateTeamId} className="horizontile__shot" />
@@ -56,7 +56,7 @@ function PromotionTile({ p }) {
         </div>
       </div>
       {p.stats ? <StatGrid stats={p.stats} /> : <p className="hint hzntile__nostat">No full-season line at this level yet.</p>}
-    </li>
+    </Card>
   )
 }
 
@@ -66,7 +66,7 @@ function MilestoneTile({ p }) {
     { k: 'Since', v: monthDay(p.since) || DASH },
   ]
   return (
-    <li className="hzntile">
+    <Card as="li" body="flush" className="hzntile">
       <div className="hzntile__head">
         <span className="horizontile__shotwrap">
           <Headshot personId={p.playerId} name={p.playerName} teamId={p.orgId} className="horizontile__shot" />
@@ -86,7 +86,7 @@ function MilestoneTile({ p }) {
         </div>
       </div>
       <StatGrid stats={stats} />
-    </li>
+    </Card>
   )
 }
 

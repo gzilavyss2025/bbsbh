@@ -5,6 +5,7 @@ import { useNav } from '../../../../lib/nav.js'
 import { InningScoringGrid } from './InningScoringGrid.jsx'
 import '../../../../styles/65-team-records.css'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../../components/ui/frame/Card.jsx'
 
 // The Numbers tab's Records card: this club's W-L in ~50 situations, grouped
 // by subject, plus the season counts that are not records (come-from-behind
@@ -16,7 +17,7 @@ import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 // club's whole level at /situational-records
 // (screens/SituationalRecordsPage.jsx), because a
 // record read alone raises "out of thirty, where is that?" and this card can
-// only answer it for one club. It reuses `.tstats-card` / `.tstatrow` so it reads as a
+// only answer it for one club. It reuses `.tstats` / `.tstatrow` so it reads as a
 // sibling of the Team batting, Team pitching and Record by Day of Week cards
 // above it rather than a new kind of object; only the half toggle, the group
 // subheadings and the counts block are new (styles/64-team-records.css).
@@ -35,7 +36,7 @@ import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 function RecordRows({ rows, sportId, half, month }) {
   const navigate = useNav()
   return (
-    <div className="tstats">
+    <div className="tstats__grid">
       {rows.map((r) => (
         <div key={r.k} className="tstatrow">
           <button
@@ -103,10 +104,17 @@ export function RecordsCard({ data, cutoff }) {
   const months = monthsPlayed(data, { cutoff })
 
   return (
-    <div className="tstats-card trec">
-      <SectionHead look="band" club note={records ? `${records.gamesCounted} games · win pct` : 'win pct'}>
-        Records
-      </SectionHead>
+    <Card
+      as="div"
+      frame="ledger"
+      body="flush"
+      className="tstats trec"
+      head={
+        <SectionHead look="band" club note={records ? `${records.gamesCounted} games · win pct` : 'win pct'}>
+          Records
+        </SectionHead>
+      }
+    >
       {showHalves && (
         <div className="trec__halves" role="group" aria-label="Season half">
           {HALVES.map((h) => (
@@ -146,7 +154,7 @@ export function RecordsCard({ data, cutoff }) {
           ))}
         </div>
       )}
-      <div className="tstats-card__body">
+      <div className="tstats__body">
         {records ? (
           records.groups.map((g) => (
             <div key={g.title} className="trec__group">
@@ -168,6 +176,6 @@ export function RecordsCard({ data, cutoff }) {
           </div>
         )}
       </div>
-    </div>
+    </Card>
   )
 }
