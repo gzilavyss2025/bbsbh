@@ -133,7 +133,7 @@
 .trrank__chip:focus-visible,
 .trrank__tile:focus-visible,
 .trrank__back:focus-visible {
-  outline: var(--focus-ring);
+  outline: var(--bw-heavy) solid var(--focus-ring);
   outline-offset: 2px;
 }
 .trrank__flip {

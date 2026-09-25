@@ -89,7 +89,9 @@
                      forced-colors mode; the fill alone would not. A
                      PAPER control keeps a paper edge when selected, so
                      the navy chip still shows on a navy club bar.
-     focus-visible   a 2px --focus-ring outline, 2px off the capsule.
+     focus-visible   a 2px --focus-ring outline, 2px off the capsule. On a
+                     coloured band the host makes it the band ring (#1215):
+                     --focus-ring-band with the --ring-band halo.
      disabled        :disabled or [aria-disabled="true"]. The fill stays and
                      drops to --opacity-disabled. Never repainted.
 

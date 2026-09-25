@@ -670,7 +670,7 @@
   cursor: pointer;
 }
 .bs__potgWatch:focus-visible {
-  outline: var(--focus-ring);
+  outline: var(--bw-heavy) solid var(--focus-ring);
   outline-offset: 2px;
 }
 /* The poster form: the still fills the button, the badge rides the bottom-left

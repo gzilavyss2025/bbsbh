@@ -907,7 +907,7 @@
 }
 
 .dh__open:focus-visible {
-  outline: var(--focus-ring);
+  outline: var(--bw-heavy) solid var(--focus-ring);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
