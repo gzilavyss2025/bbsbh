@@ -4,6 +4,7 @@ import { favoriteAccentColor } from '../../../lib/teams.js'
 import { TeamLink } from '../../../components/team/TeamLink.jsx'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { PostseasonOddsModal } from '../../../components/teamstats/PostseasonOddsModal.jsx'
+import { Pill } from '../../../components/ui/control/Pill.jsx'
 
 // The three rows a preview shows: the club's own, plus the team above and the
 // team below it. A club at the top or bottom of its division still gets three
@@ -36,14 +37,18 @@ export function StandingsCard({ team, standings, asOf, divisionPostseasonOdds, p
         <div className="thub-card__head">
           <span>{team.division?.name || 'Standings'}</span>
           {asOf && <em>entering {humanDate(asOf)}</em>}
+          {/* The one action on the card's band: a Pill control, ink fill
+              (#1131). On a club-themed band, 09-team-info.css tints it to
+              a paper chip through the pill's own properties. */}
           {divisionPostseasonOdds.length > 0 && (
-            <button
-              type="button"
+            <Pill
+              role="control"
+              fill="ink"
               className="psodds-pill"
               onClick={() => setShowPostseasonOdds(true)}
             >
               Postseason Odds
-            </button>
+            </Pill>
           )}
         </div>
         <div className="thub-card__body">

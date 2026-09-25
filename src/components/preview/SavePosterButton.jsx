@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { posterFile } from '../../lib/preview/drawPoster.js'
+import { Button } from '../ui/control/Button.jsx'
 
 // Save the finished poster out of the canvas — on an iPhone, into Photos.
 //
@@ -69,8 +70,8 @@ export function SavePosterButton({ canvasRef, filename, title, disabled }) {
   }[state]
 
   return (
-    <button
-      type="button"
+    <Button
+      skin="ink"
       className={`posterstudio__save posterstudio__save--${state}`}
       onClick={onClick}
       disabled={disabled || state === 'working'}
@@ -79,6 +80,6 @@ export function SavePosterButton({ canvasRef, filename, title, disabled }) {
       }
     >
       {label}
-    </button>
+    </Button>
   )
 }

@@ -8,6 +8,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
+import { Pill } from '../components/ui/control/Pill.jsx'
 
 const DATE = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
 const FULL_DATE = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -420,7 +421,7 @@ export function FirstScorebookPage() {
         <SectionHead eyebrow="Every line in the ledger" title="All 39 games" />
         <div className="scorebookstory__filters" aria-label="Filter game log">
           {[['all', 'All 39'], ['brewers', 'Brewers 32'], ['close', 'One-run 16']].map(([key, label]) => (
-            <button type="button" key={key} className={logFilter === key ? 'is-active' : ''} aria-pressed={logFilter === key} onClick={() => setLogFilter(key)}>{label}</button>
+            <Pill role="control" key={key} pressed={logFilter === key} onClick={() => setLogFilter(key)}>{label}</Pill>
           ))}
         </div>
         <ol className="scorebookstory__ledger">

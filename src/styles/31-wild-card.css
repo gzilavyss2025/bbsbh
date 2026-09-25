@@ -1296,22 +1296,9 @@
   gap: var(--space-1h);
   margin-bottom: var(--space-4);
 }
-.depthpos {
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  padding: var(--space-1) var(--space-2h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  color: var(--text-caption);
-}
-.depthpos.is-active {
-  background: var(--ink-0);
-  border-color: var(--ink-0);
-  color: var(--text-on-ink);
-}
+/* The position chips (.depthpos) are figure Pill controls now (#1131 slice
+   4): <Pill role="control" figure pressed>. The face, the height and the
+   selected state are the Pill's, so .depthpos keeps no rule of its own. */
 
 .depthchart__columns {
   display: grid;

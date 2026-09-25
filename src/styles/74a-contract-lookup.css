@@ -77,8 +77,7 @@
 
 .lookupdeck__input:focus-visible,
 .lookupdeck__select:focus-visible,
-.lookupdeck__link:focus-visible,
-.lookupdeck__usebtn:focus-visible {
+.lookupdeck__link:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
@@ -168,21 +167,5 @@
   text-decoration: underline;
 }
 
-.lookupdeck__usebtn {
-  padding: var(--space-1) var(--space-3);
-  border: var(--bw-hair) solid var(--accent-primary);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--accent-primary);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  cursor: pointer;
-}
-
-.lookupdeck__usebtn:disabled {
-  border-color: var(--border-rule);
-  color: var(--text-muted);
-  cursor: not-allowed;
-}
+/* "Use as this row's match" is a Button (#1131 slice 4): <Button
+   size="control">. Its disabled look is the Button's. */

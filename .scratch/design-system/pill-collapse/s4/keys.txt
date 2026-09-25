@@ -1,0 +1,16 @@
+ok  /07072026/milstl-2/lineup1 .mastheadpill { ring: true, a0: 'false', a1: 'true', a2: 'false' }
+ok  /09222026 .slate-filterbar__chip { ring: true, a0: 'false', a1: 'true', a2: 'false' }
+ok  /player/jacob-misiorowski-694819/analytics .cmdmap__chip >> nth=1 { ring: true, a0: 'false', a1: 'true', a2: [ 'false', 'true' ] }
+ok  /team/158/minors .depthpos >> nth=1 { ring: true, a0: 'false', a1: 'true', a2: [ 'false', 'true' ] }
+ok  /first-scorebook .scorebookstory__filters .pill >> nth=1 { ring: true, a0: 'false', a1: 'true', a2: [ 'false', 'true' ] }
+ok  /logbook/stats .logbookstats__levels .pill >> nth=1 { ring: true, a0: 'false', a1: 'true', a2: [ 'false', 'true' ] }
+ok  /logbook .stampsheet__levels .pill >> nth=1 { ring: true, a0: 'false', a1: 'true', a2: [ 'false', 'true' ] }
+ok  records link {
+  clickRouted: true,
+  current: '/situational-records?s=1&metric=opp-scored-first',
+  href: '/situational-records?s=1&metric=opp-scored-first',
+  enterRouted: true,
+  current2: '/situational-records?s=1&metric=scored-first',
+  href2: '/situational-records?s=1&metric=scored-first'
+}
+all ok

@@ -4,6 +4,7 @@ import { setIdentityOverrides } from '../../../../lib/identity/overlay.js'
 import { cacheIdentityOverrides } from '../../../../lib/identity/hydrate.js'
 import { saveIdentityPatch } from '../../../../lib/admin/saveIdentityPatch.js'
 import { identityDraftRefusal, identityIdsForClub } from './identityFields.js'
+import { Button } from '../../../../components/ui/control/Button.jsx'
 import '../../../../styles/62-identity-admin.css'
 
 // The owner's controls at the right end of the team hub header: a gear when
@@ -88,17 +89,14 @@ export function IdentityAdminBar({ teamId, isMilb, draft }) {
 
   return (
     <span className="idadmin__actions">
-      <button type="button" className="idadmin__btn" onClick={draft.cancel} disabled={busy}>
+      {/* Two outline Buttons (#1131): a paper box reads on every club's hero
+          tile, where a navy ink Button would vanish into a navy one. */}
+      <Button size="control" className="idadmin__btn" onClick={draft.cancel} disabled={busy}>
         Cancel
-      </button>
-      <button
-        type="button"
-        className="idadmin__btn idadmin__btn--save"
-        onClick={save}
-        disabled={busy || !draft.dirty}
-      >
+      </Button>
+      <Button size="control" className="idadmin__btn" onClick={save} disabled={busy || !draft.dirty}>
         {busy ? 'Saving…' : 'Save'}
-      </button>
+      </Button>
       {/* The failure itself is printed in the drawer below, where a sentence
           fits. This only has to say that something went wrong to someone whose
           eyes are on the button they just pressed. */}

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AtBatTrail } from './AtBatTrail.jsx'
+import { Button } from '../../ui/control/Button.jsx'
 import { CLOSE_SEQUENCE_MS } from './beats.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 
@@ -296,13 +297,13 @@ export function FocusControls({ focus, turning }) {
   const { windowed, postHalf, openSummary } = focus
   if (!windowed || !postHalf) return null
   return (
-    <button
-      type="button"
+    <Button
+      size="control"
       className="trailstrip__summarybtn"
       aria-disabled={turning || undefined}
       onClick={openSummary}
     >
       See the whole half
-    </button>
+    </Button>
   )
 }

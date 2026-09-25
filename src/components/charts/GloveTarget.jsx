@@ -10,6 +10,7 @@ import {
 } from '../../api/gloveTarget.js'
 import { attributionFor } from '../../api/targetCommand.js'
 import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // THE GLOVE TARGET — where a pitcher's misses actually land, relative to the
 // glove he was throwing at.
@@ -73,12 +74,13 @@ export function GloveTarget({ entry, data }) {
     <div className="glovetarget">
       <div className="cmdmap__chips cmdmap__chips--types" role="group" aria-label="Pitch type">
         {types.map((t) => (
-          <button
+          <Pill
             key={t.code}
-            type="button"
-            className={`cmdmap__chip cmdmap__chip--sm${t.code === code ? ' cmdmap__chip--on' : ''}`}
+            role="control"
+            fill="paper"
+            className="cmdmap__chip"
             onClick={() => setCode(t.code)}
-            aria-pressed={t.code === code}
+            pressed={t.code === code}
             data-family={t.code === 'ALL' ? undefined : pitchFamily(t.code)}
           >
             {/* The pitch's NAME, not its code. "FF / FS / SL" is the scorer's
@@ -89,7 +91,7 @@ export function GloveTarget({ entry, data }) {
                 chips wrap to a second line on a deep arsenal, which costs a
                 row of height and is worth it. */}
             {t.code === 'ALL' ? 'All' : pitchLabel(t.code)}
-          </button>
+          </Pill>
         ))}
       </div>
 

@@ -9,6 +9,7 @@ import { LEVELS, SPORT_IDS } from '../../lib/teams.js'
 import { ClubPicker } from '../account/ClubPicker.jsx'
 import { LevelNav } from '../team/LevelNav.jsx'
 import { PassportCover } from './PassportCover.jsx'
+import { Button } from '../ui/control/Button.jsx'
 import { LEAGUE_MARK_LABELS, leagueMarkBox, leagueMarkUrl } from './leagueMarks.js'
 
 // How a Game Log book's cover is chosen — the one picker, used by the
@@ -168,14 +169,14 @@ export function BookCoverPicker({ book, onChange }) {
           <section className="coverpick__half">
             <h3 className="coverpick__heading">Use team colors</h3>
             <LevelNav sportId={level} onChange={setLevelPick} />
-            <button
-              type="button"
-              className={`coverpick__favorite${usingClub && book?.coverTeamId == null ? ' is-active' : ''}`}
-              aria-pressed={usingClub && book?.coverTeamId == null}
+            <Button
+              size="control"
+              className="coverpick__favorite"
+              pressed={usingClub && book?.coverTeamId == null}
               onClick={() => onChange({ coverMark: 'team', coverTeamId: null })}
             >
               Match my favorite team
-            </button>
+            </Button>
             <ClubPicker
               teams={teams}
               value={usingClub ? book?.coverTeamId : null}
@@ -221,14 +222,14 @@ export function BookCoverPicker({ book, onChange }) {
               setStep(2)
             }}
           />
-          <button
-            type="button"
-            className={`coverpick__favorite${book?.coverTeamId == null ? ' is-active' : ''}`}
-            aria-pressed={book?.coverTeamId == null}
+          <Button
+            size="control"
+            className="coverpick__favorite"
+            pressed={book?.coverTeamId == null}
             onClick={() => onChange({ coverMark: 'team', coverTeamId: null })}
           >
             Match my favorite team
-          </button>
+          </Button>
         </>
       )}
 

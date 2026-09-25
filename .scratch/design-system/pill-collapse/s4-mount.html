@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>slice 4 admin mount</title>
+  </head>
+  <body>
+    <!-- A static mount of the three admin controls in #1131 slice 4. The team
+         hub's identity editor (IdentityAdminBar, IdentityLogoField) and the
+         contract lookup (LookupDeck) are Clerk-gated, and no Clerk key exists
+         locally, so capture.mjs reads them here. LookupDeck is the real
+         component. The two identity components call Clerk hooks, so they
+         cannot render without Clerk: their MARKUP is mounted here with the real
+         classes and the real stylesheets (?after renders the slice 4 markup). -->
+    <div id="root"></div>
+    <script type="module" src="./s4-mount.jsx"></script>
+  </body>
+</html>

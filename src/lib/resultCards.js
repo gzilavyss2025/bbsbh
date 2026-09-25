@@ -86,12 +86,14 @@ export const SCENARIO_STYLE = {
 
 // Every filter chip GameSelect's ResultFilterBar can show, in a fixed display
 // order — crown first (the single biggest deal), then the four scenarios in
-// the same order their own pills render on a card. The crown's colors match
-// its existing pill (--award-ink fill, --text-on-ink text, see
-// .flipback__pill--crown) so a chip and the card pill it filters for are
-// always the identical color.
+// the same order their own pills render on a card. A chip's `accent` is its
+// card pill's colour (the crown's is --award-ink, see .flipback__pill--crown),
+// worn as the chip's tint and edge, so a chip and the card pill it filters for
+// read as one colour. A pressed chip is the Pill's navy, with a tick (#1131
+// slice 4), so the chip reads no `text` colour; the scenarios' `text` is their
+// card pill's.
 export const FILTER_CHIPS = [
-  { key: 'crown', label: '★ Game of the Night', accent: 'var(--award-ink)', text: 'var(--text-on-ink)' },
+  { key: 'crown', label: '★ Game of the Night', accent: 'var(--award-ink)' },
   ...Object.entries(SCENARIO_LABEL).map(([key, label]) => ({ key, label, ...SCENARIO_STYLE[key] })),
 ]
 

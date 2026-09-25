@@ -1,0 +1,9 @@
+rail: Tab reached link 2 after 22 stops
+rail: focus-visible true, outline 2px solid rgb(251, 246, 233), offset 2px
+rail: Enter on #record-group-1 -> hash #record-group-1, section top 12px, reloaded false
+team 158: Tab reached Postseason Odds after 46 stops; focus-visible true, outline 2px solid rgb(47, 110, 79), offset 2px
+team 158: Enter -> odds sheet visible true
+team 110: Tab reached Postseason Odds after 46 stops; focus-visible true, outline 2px solid rgb(47, 110, 79), offset 2px
+team 110: Enter -> odds sheet visible true
+team 406 games: Tab reached Stamp In after 96 stops; focus-visible true, outline 2px solid rgb(47, 110, 79)
+team 406 games: Enter -> /team/406/stamp-in, reloaded false

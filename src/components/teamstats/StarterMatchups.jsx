@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { matchupLine } from '../../api/careerMatchups.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // How each batter has done in his career against the starter he's about to
 // face, rendered as a margin note under his name in the batting order rather
@@ -70,15 +71,16 @@ export function useMatchupNotes() {
 export function MatchupNotesToggle({ pitcherLast, showNotes, onToggle }) {
   if (!pitcherLast) return null
   return (
-    <button
-      type="button"
+    <Pill
+      role="control"
+      fill="paper"
       className="mastheadpill"
-      aria-pressed={showNotes}
+      pressed={showNotes}
       onClick={() => onToggle(!showNotes)}
     >
       <span className="mastheadpill__dot" aria-hidden="true" />
       vs {pitcherLast}
-    </button>
+    </Pill>
   )
 }
 

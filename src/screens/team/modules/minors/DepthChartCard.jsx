@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
+import { Pill } from '../../../../components/ui/control/Pill.jsx'
 
 const DASH = '—'
 
@@ -89,14 +90,16 @@ export function DepthChartCard({ depthChart }) {
       <div className="thub-card__body">
         <div className="depthchart__positions">
           {positions.map((pos) => (
-            <button
+            <Pill
               key={pos}
-              type="button"
-              className={`depthpos${pos === active ? ' is-active' : ''}`}
+              role="control"
+              figure
+              className="depthpos"
+              pressed={pos === active}
               onClick={() => setActive(pos)}
             >
               {pos}
-            </button>
+            </Pill>
           ))}
         </div>
 

@@ -23,8 +23,7 @@
 
 /* ---- the header cluster: gear, Save, Cancel ---- */
 
-.idadmin__gear,
-.idadmin__actions .idadmin__btn {
+.idadmin__gear {
   font: inherit;
   color: inherit;
   cursor: pointer;
@@ -63,35 +62,12 @@
   color: var(--ink, var(--text-body));
 }
 
-.idadmin__actions .idadmin__btn {
-  padding: var(--space-1) var(--space-2h);
-  border: var(--bw-hair) solid currentColor;
-  border-radius: var(--radius-pill);
-  background: none;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-}
-/* Save is the affirmative action, so it is the filled one — the hero's own ink
-   as the fill, with the label punched back out in the hero's own tile colour.
-   That inversion needs no palette of its own: the shell already picked those
-   two to read against each other for this club. `-webkit-text-fill-color`
-   rather than `color`, because `color` is what `background: currentColor` is
-   reading — setting it would repaint the fill too. */
-.idadmin__actions .idadmin__btn--save {
-  background: currentColor;
-  -webkit-text-fill-color: var(--tint, var(--surface-card));
-}
-.idadmin__actions .idadmin__btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-.idadmin__actions .idadmin__btn:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
+/* Cancel and Save are Buttons (#1131 slice 4): <Button size="control">, both
+   in the outline skin. They drew in the hero's own ink before, which put a
+   club's colour on a control (ADR-0030). The Button's paper box reads on every
+   club's tile, where a navy ink Button would vanish into a navy one. Save is
+   told apart by its label and its place, and it stays disabled until the
+   draft changes. */
 
 .idadmin__flag {
   font-family: var(--font-display);
@@ -446,30 +422,8 @@
   gap: var(--space-2);
 }
 
-/* The drawer's own working-surface button — the idadmin__btn look, re-inked
-   for paper (that one draws in the hero's `currentColor`, which down here
-   would be body text on body text). */
-.iddrawer__btn {
-  padding: var(--space-1) var(--space-2h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-.iddrawer__btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-.iddrawer__btn:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
+/* The drawer's "Upload a PNG" is a Button too (#1131 slice 4):
+   <Button size="control">, with no rule of its own. */
 
 /* ---- the stamp previews ---- */
 
