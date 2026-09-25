@@ -5,6 +5,7 @@ import { Pill } from '../../components/ui/control/Pill.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Door } from '../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
 import { FILLS } from '../../lib/design/pillClass.js'
 import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/headerTheme.js'
 import { leagueLogoUrl } from '../../lib/teams.js'
@@ -77,12 +78,16 @@ function Ground({ teamId, title, children, body }) {
   const theme = teamId ? headerThemeFor(teamId, 'main') : null
   return (
     <div className={`team-hub ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
-      <div className="thub-card">
-        <SectionHead look="band" club as="span" action={children}>
-          {title}
-        </SectionHead>
-        {body && <div className="thub-card__body">{body}</div>}
-      </div>
+      <Card
+        body={body ? 'padded' : 'flush'}
+        head={
+          <SectionHead look="band" club as="span" action={children}>
+            {title}
+          </SectionHead>
+        }
+      >
+        {body}
+      </Card>
     </div>
   )
 }

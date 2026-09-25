@@ -4,6 +4,7 @@ import { Entry, Group } from './Entry.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Door } from '../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
 import { SKINS } from '../../lib/design/buttonClass.js'
 
 const PATH = 'src/components/ui/control/Button.jsx'
@@ -46,10 +47,15 @@ function Neighbours({ face }) {
   const style = face === 'body' ? BODY_FACE : undefined
   const small = face === 'body' ? BODY_FACE : undefined
   return (
-    <div className="thub-card dlab__neighbours">
-      <SectionHead look="label" action={<Door onClick={() => {}}>See all</Door>}>
-        Innings by position
-      </SectionHead>
+    <Card
+      className="dlab__neighbours"
+      body="flush"
+      head={
+        <SectionHead look="label" action={<Door onClick={() => {}}>See all</Door>}>
+          Innings by position
+        </SectionHead>
+      }
+    >
       <div className="dlab__row">
         <Button size="control" pressed style={small}>
           Season
@@ -84,7 +90,7 @@ function Neighbours({ face }) {
           Cancel
         </Button>
       </div>
-    </div>
+    </Card>
   )
 }
 

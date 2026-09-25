@@ -4,6 +4,7 @@ import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../../components/ui/frame/Card.jsx'
 
 const DASH = '—'
 
@@ -83,49 +84,51 @@ export function DepthChartCard({ depthChart }) {
   const current = byPosition[active] ?? byPosition[positions[0]]
 
   return (
-    <div className="thub-card depthchart">
-      <SectionHead look="band" club note="scouting vs. performance">
-        Depth chart
-      </SectionHead>
-      <div className="thub-card__body">
-        <div className="depthchart__positions">
-          {positions.map((pos) => (
-            <Pill
-              key={pos}
-              role="control"
-              figure
-              className="depthpos"
-              pressed={pos === active}
-              onClick={() => setActive(pos)}
-            >
-              {pos}
-            </Pill>
-          ))}
-        </div>
+    <Card
+      className="depthchart"
+      head={
+        <SectionHead look="band" club note="scouting vs. performance">
+          Depth chart
+        </SectionHead>
+      }
+    >
+      <div className="depthchart__positions">
+        {positions.map((pos) => (
+          <Pill
+            key={pos}
+            role="control"
+            figure
+            className="depthpos"
+            pressed={pos === active}
+            onClick={() => setActive(pos)}
+          >
+            {pos}
+          </Pill>
+        ))}
+      </div>
 
-        <div className="depthchart__columns">
-          <div className="depthchart__col">
-            <h3 className="horizoncard__section">Scouting</h3>
+      <div className="depthchart__columns">
+        <div className="depthchart__col">
+          <h3 className="horizoncard__section">Scouting</h3>
+          <ul className="horizoncard__list">
+            {current.scouting.map((p) => (
+              <ScoutTile key={p.playerId} p={p} />
+            ))}
+          </ul>
+        </div>
+        <div className="depthchart__col">
+          <h3 className="horizoncard__section">Performance</h3>
+          {current.performance.length > 0 ? (
             <ul className="horizoncard__list">
-              {current.scouting.map((p) => (
-                <ScoutTile key={p.playerId} p={p} />
+              {current.performance.map((p) => (
+                <PerformTile key={p.playerId} p={p} />
               ))}
             </ul>
-          </div>
-          <div className="depthchart__col">
-            <h3 className="horizoncard__section">Performance</h3>
-            {current.performance.length > 0 ? (
-              <ul className="horizoncard__list">
-                {current.performance.map((p) => (
-                  <PerformTile key={p.playerId} p={p} />
-                ))}
-              </ul>
-            ) : (
-              <p className="hint">Too early for a level-relative read at this position.</p>
-            )}
-          </div>
+          ) : (
+            <p className="hint">Too early for a level-relative read at this position.</p>
+          )}
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

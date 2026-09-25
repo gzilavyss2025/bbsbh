@@ -4,6 +4,7 @@
 # verdict: card | table | bespoke | hold | control | field | panel | well | media | notice | modal | lab | not-card | delete
 # slice: C1 hub · C2 player · C3 pregame · C4 innings+HUD · C5 box score · C6a postseason+All-Star · C6b people+records+reference · C6c fouls+offseason+slate off-day · C7 account+logbook+chrome · C8 labs+admin (only if Gary says yes) · - none
 # A key that matches no row prints STALE.
+# LANDED in slice C0 (#1113): .thub-card is the Card component now (components/ui/frame/Card.jsx, styles/system/card.css), so its row left this file. Its sixteen modules render <Card>; the co-class .chalcard is <Card className="chal">.
 .wordmarklab__colorlock	lab	sheet				C8	wordmark lab (/wordmark-lab), a dev page: the colour-lock panel
 .wordmarklab__option	lab	sheet	none	padded	C8	wordmark lab option tile; an <article> with its own hover — a lab specimen
 .wordmarklab__context	lab	sheet	none	flush	C8	wordmark lab context frame on page ground; holds a live mock of the slate
@@ -30,7 +31,6 @@
 .favteamsheet	modal					the favourite-team bottom sheet (FavoriteTeamModal): a sheet with safe-area padding and an entry animation — sheets stay bespoke (ADR-0037, critique "modals are correctly bespoke")
 .dirglyph	media					the site-menu directory glyph box (a small square with a left rule), an icon frame
 .sitemenusheet__group	card	sheet	none	padded	C7	a grouped block of links inside the site menu sheet. A card inside a modal; low traffic, lands last in C7
-.thub-card	card	sheet	band	flush	C1	CANONICAL. 16 team-hub modules; already carries the co-class namespace pattern (thub-card chalcard / rvclub). Head is a label that turns into the club band on a themed hub. Body: .thub-card__body pads, other modules run flush — body varies per module
 .factgrid	card	sheet	outside:label	flush	C2	a <dl> fact grid drawn on --border-rule (the 1px-gap rule trick) — CommandMap, SprayMap and the innings reference panel's ExtrasFacts. The grid must move to an inner element when Card owns the frame. ExtrasFacts is in the innings viewer: check seal scope in that slice
 .attendance__note	notice					a note paragraph with a pop-in animation on page ground (BoxScore + TeamInfo) — the Notice family (#1132)
 .fact__infonote	notice					an info note under a stat on the player page (AdvancedStatsCard), animated in — Notice family (#1132)
@@ -266,7 +266,7 @@
 .refpanel__tabs	control					the reference panel's tab row
 .refbar__chip	control					reference bar chip <button>
 .lineupcard__swap	control					swap <button> inside the entering-lineup card
-.chalcard__view	control					"view" toggle inside the challenge card
+.chal__view	control					"view" toggle inside the challenge card
 .researchdiary__traps	lab					research diary / contender diary (/admin/contenders) — research pages
 .sc-labload__input	field					scorecard lab <input>
 .sc-logo__box	bespoke					the club-mark box on the #22 scorecard sheet — the scorecard is bespoke (inventory #1)

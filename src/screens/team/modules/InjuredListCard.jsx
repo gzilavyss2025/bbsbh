@@ -1,14 +1,17 @@
 import { RosterList } from './RosterList.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../components/ui/frame/Card.jsx'
 
 export function InjuredListCard({ injured, season, showInjured, onShowInjured }) {
   return (
-    <div className="thub-card">
-      <SectionHead look="band" club>
-        Injured List
-      </SectionHead>
-      <div className="thub-card__body">
+    <Card
+      head={
+        <SectionHead look="band" club>
+          Injured List
+        </SectionHead>
+      }
+    >
       {showInjured ? (
         <RosterList
           season={season}
@@ -20,7 +23,6 @@ export function InjuredListCard({ injured, season, showInjured, onShowInjured })
           Show {injured.length} injured
         </Door>
       )}
-      </div>
-    </div>
+    </Card>
   )
 }

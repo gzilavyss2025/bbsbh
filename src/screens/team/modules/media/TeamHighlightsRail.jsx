@@ -5,6 +5,7 @@ import { HighlightSheet } from '../../../../components/playbyplay/HighlightSheet
 import { HighlightClipCard } from '../../../../components/highlights/HighlightClipCard.jsx'
 import { MONTH_LABELS } from '../TeamStatsCard.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../../components/ui/frame/Card.jsx'
 
 // A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
 // copy of this helper for why `scroll-behavior: smooth` has to be bypassed.
@@ -123,52 +124,53 @@ export function TeamHighlightsRail({ teamId, games, limit = null }) {
   if (!loading && clips.length === 0) return null
 
   return (
-    <div className="thub-card">
-      <SectionHead look="band" club>
-        Highlights
-      </SectionHead>
-      <div className="thub-card__body">
-        <div className="teamphotos">
-          {canScroll && (
-            <button
-              type="button"
-              className="teamphotos__nav"
-              onClick={() => scroll(-1)}
-              disabled={atStart}
-              aria-label="Scroll to older highlights"
-            >
-              &lsaquo;
-            </button>
+    <Card
+      head={
+        <SectionHead look="band" club>
+          Highlights
+        </SectionHead>
+      }
+    >
+      <div className="teamphotos">
+        {canScroll && (
+          <button
+            type="button"
+            className="teamphotos__nav"
+            onClick={() => scroll(-1)}
+            disabled={atStart}
+            aria-label="Scroll to older highlights"
+          >
+            &lsaquo;
+          </button>
+        )}
+        <div className="teamphotos__track" ref={trackRef}>
+          {clips.length === 0 && loading && (
+            <div className="hlclip__loading" aria-hidden="true">
+              Loading&hellip;
+            </div>
           )}
-          <div className="teamphotos__track" ref={trackRef}>
-            {clips.length === 0 && loading && (
-              <div className="hlclip__loading" aria-hidden="true">
-                Loading&hellip;
-              </div>
-            )}
-            {clips.map((clip) => (
-              <HighlightClipCard
-                key={clip.clipId}
-                clip={clip}
-                caption={gameCaption(clip, gamesByPk.get(clip.gamePk))}
-                onOpen={() => setOpen(clip)}
-              />
-            ))}
-          </div>
-          {canScroll && (
-            <button
-              type="button"
-              className="teamphotos__nav"
-              onClick={() => scroll(1)}
-              disabled={atEnd}
-              aria-label="Scroll to more recent highlights"
-            >
-              &rsaquo;
-            </button>
-          )}
+          {clips.map((clip) => (
+            <HighlightClipCard
+              key={clip.clipId}
+              clip={clip}
+              caption={gameCaption(clip, gamesByPk.get(clip.gamePk))}
+              onOpen={() => setOpen(clip)}
+            />
+          ))}
         </div>
+        {canScroll && (
+          <button
+            type="button"
+            className="teamphotos__nav"
+            onClick={() => scroll(1)}
+            disabled={atEnd}
+            aria-label="Scroll to more recent highlights"
+          >
+            &rsaquo;
+          </button>
+        )}
       </div>
       {open && <HighlightSheet item={open} onClose={() => setOpen(null)} />}
-    </div>
+    </Card>
   )
 }

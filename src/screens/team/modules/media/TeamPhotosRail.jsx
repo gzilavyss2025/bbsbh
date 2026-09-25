@@ -4,6 +4,7 @@ import { useNav } from '../../../../lib/nav.js'
 import { teamPhotosPath } from '../../../../lib/route.js'
 import { Door } from '../../../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../../components/ui/frame/Card.jsx'
 
 // A setup jump, not a user-visible scroll gesture — bypasses the track's own
 // `scroll-behavior: smooth` (index.css) so it lands instantly. Without this,
@@ -227,62 +228,63 @@ export function TeamPhotosRail({ teamId, games, limit = null }) {
   if (photos.length === 0 && !loading && (exhausted || limit != null)) return null
 
   return (
-    <div className="thub-card">
-      <SectionHead look="band" club action={<Door onClick={() => navigate(teamPhotosPath(teamId))}>Full season</Door>}>
-        Photos
-      </SectionHead>
-      <div className="thub-card__body">
-        <div className="teamphotos">
-          {canScroll && (
-            <button
-              type="button"
-              className="teamphotos__nav"
-              onClick={() => scroll(-1)}
-              disabled={atStart}
-              aria-label="Scroll to older photos"
-            >
-              &lsaquo;
-            </button>
+    <Card
+      head={
+        <SectionHead look="band" club action={<Door onClick={() => navigate(teamPhotosPath(teamId))}>Full season</Door>}>
+          Photos
+        </SectionHead>
+      }
+    >
+      <div className="teamphotos">
+        {canScroll && (
+          <button
+            type="button"
+            className="teamphotos__nav"
+            onClick={() => scroll(-1)}
+            disabled={atStart}
+            aria-label="Scroll to older photos"
+          >
+            &lsaquo;
+          </button>
+        )}
+        <div className="teamphotos__track" ref={trackRef}>
+          {!exhausted && limit == null && (
+            <div ref={sentinelRef} className="teamphotos__sentinel" aria-hidden="true" />
           )}
-          <div className="teamphotos__track" ref={trackRef}>
-            {!exhausted && limit == null && (
-              <div ref={sentinelRef} className="teamphotos__sentinel" aria-hidden="true" />
-            )}
-            {photos.length === 0 && loading && (
-              <div className="teamphotos__loading" aria-hidden="true">
-                Loading&hellip;
-              </div>
-            )}
-            {photos.map((photo) => (
-              <a
-                key={photo.id}
-                href={photo.original}
-                target="_blank"
-                rel="noreferrer"
-                className="teamphotos__thumb"
-                aria-label={
-                  photo.focus?.playerName
-                    ? `Open full-resolution photo of ${photo.focus.playerName} in a new tab`
-                    : 'Open full-resolution photo in a new tab'
-                }
-              >
-                <img src={photo.thumb} alt="" loading="lazy" />
-              </a>
-            ))}
-          </div>
-          {canScroll && (
-            <button
-              type="button"
-              className="teamphotos__nav"
-              onClick={() => scroll(1)}
-              disabled={atEnd}
-              aria-label="Scroll to more recent photos"
-            >
-              &rsaquo;
-            </button>
+          {photos.length === 0 && loading && (
+            <div className="teamphotos__loading" aria-hidden="true">
+              Loading&hellip;
+            </div>
           )}
+          {photos.map((photo) => (
+            <a
+              key={photo.id}
+              href={photo.original}
+              target="_blank"
+              rel="noreferrer"
+              className="teamphotos__thumb"
+              aria-label={
+                photo.focus?.playerName
+                  ? `Open full-resolution photo of ${photo.focus.playerName} in a new tab`
+                  : 'Open full-resolution photo in a new tab'
+              }
+            >
+              <img src={photo.thumb} alt="" loading="lazy" />
+            </a>
+          ))}
         </div>
+        {canScroll && (
+          <button
+            type="button"
+            className="teamphotos__nav"
+            onClick={() => scroll(1)}
+            disabled={atEnd}
+            aria-label="Scroll to more recent photos"
+          >
+            &rsaquo;
+          </button>
+        )}
       </div>
-    </div>
+    </Card>
   )
 }

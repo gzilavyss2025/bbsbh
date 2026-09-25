@@ -14,6 +14,7 @@ import { Loader } from '../../components/ui/Loader.jsx'
 import { MasonryColumns } from '../../components/ui/MasonryColumns.jsx'
 import { SectionMasthead } from '../../components/ui/SectionMasthead.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
 import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/headerTheme.js'
 
 import { DebutPill } from '../../components/badges/DebutPill.jsx'
@@ -44,6 +45,71 @@ function Themed({ teamId, className = '', children }) {
   )
 }
 
+// The card in composition (#1113): the three the spec names, then the frame
+// and body pairs they leave out. A sheet with a club band head over a flush
+// table, a ledger with a label head over a padded body, and a tile that is the
+// tap target. Every class is the Card's own or a real table's; nothing here is
+// drawn for the lab.
+function CardDemo() {
+  return (
+    <div className="dlab__candidates">
+      <Themed teamId={158}>
+        <Card
+          body="flush"
+          head={
+            <SectionHead look="band" club as="span" note="season">
+              Sheet, band head, flush
+            </SectionHead>
+          }
+        >
+          <table className="bs__grid">
+            <thead>
+              <tr>
+                <th className="bs__nameCol">Pos</th>
+                <th>G</th>
+                <th>GS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="bs__nameCol">LF</td>
+                <td>112</td>
+                <td>108</td>
+              </tr>
+              <tr>
+                <td className="bs__nameCol">CF</td>
+                <td>31</td>
+                <td>24</td>
+              </tr>
+            </tbody>
+          </table>
+        </Card>
+      </Themed>
+      <Card
+        frame="ledger"
+        head={
+          <SectionHead look="label" as="span" note="org rank">
+            Ledger, label head, padded
+          </SectionHead>
+        }
+      >
+        <span className="dlab__filler">{sample}</span>
+      </Card>
+      <Card as="button" frame="ledger" accent="--accent-primary" onClick={() => {}}>
+        <span className="dlab__filler">Interactive tile: hover it, tab to it</span>
+      </Card>
+      <Card>
+        <span className="dlab__filler">Sheet, no head, padded</span>
+      </Card>
+      <Card frame="ledger" body="flush">
+        <span className="dlab__filler">Ledger, no head, flush</span>
+      </Card>
+    </div>
+  )
+}
+
+const sample = 'Bottom 9th, two out'
+
 function SectionHeadDemo() {
   return (
     <>
@@ -61,18 +127,24 @@ function SectionHeadDemo() {
           Batting order
         </SectionHead>
       </Themed>
-      <div className="thub-card">
-        <SectionHead look="band" club as="span" note="entering Sep 25">
-          Club head, no club
-        </SectionHead>
-      </div>
+      <Card
+        body="flush"
+        head={
+          <SectionHead look="band" club as="span" note="entering Sep 25">
+            Club head, no club
+          </SectionHead>
+        }
+      />
       {[158, 110].map((id) => (
         <Themed key={id} teamId={id}>
-          <div className="thub-card">
-            <SectionHead look="band" club as="span" note="entering Sep 25" action={<Door onClick={() => {}}>Full season</Door>}>
-              Club head, themed
-            </SectionHead>
-          </div>
+          <Card
+            body="flush"
+            head={
+              <SectionHead look="band" club as="span" note="entering Sep 25" action={<Door onClick={() => {}}>Full season</Door>}>
+                Club head, themed
+              </SectionHead>
+            }
+          />
         </Themed>
       ))}
     </>
@@ -103,7 +175,7 @@ export function ComponentHalf() {
   return (
     <>
       <Group
-        title="src/components/ui — 13 shared components"
+        title="src/components/ui — 14 shared components"
         lede="The whole shared tier. Button and Door share control/, and Button has its own band above. Against 32 card blocks and 10 pill blocks, this is the ratio #1112 exists to state."
       >
         <Entry title="Loader" path={`${UI_PATH}/Loader.jsx`} note="The shared cold-load loader — a mini linescore whose cell cycles. size=&quot;inline&quot; here.">
@@ -118,6 +190,14 @@ export function ComponentHalf() {
           note="The one head (#1113), three looks. The label: graphite caps on a hairline. The rule: the label, then a pencil rule to the note (the player page's sub-heads). The band: the house navy and kraft with no club, the club's own bar under a themed root. With club, a band that is a plain label until a club colour arrives: the team hub's card heads and the player page's section bars."
         >
           <SectionHeadDemo />
+        </Entry>
+        <Entry
+          title="Card"
+          path={`${UI_PATH}/frame/Card.jsx`}
+          wide
+          note="The one card (#1113). Two frames: the sheet (md radius, the card shadow) and the ledger (sm radius, no shadow). A head is a SectionHead or nothing; the body is padded or flush. As a link or a button, the whole card is the tap target and its accent tints the hover. Card owns no margin: the space between cards is the parent's."
+        >
+          <CardDemo />
         </Entry>
         <Entry title="SectionMasthead" path={`${UI_PATH}/SectionMasthead.jsx`} note="A thin wrapper over the SectionHead band, kept for its sixteen call sites. No logo passed here, so it draws its undressed state.">
           <SectionMasthead title="Milwaukee" />

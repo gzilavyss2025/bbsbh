@@ -17,13 +17,15 @@
 //   5. NO IMPORTS. SectionHead may render inside a SealBox reveal and beside
 //      a stamp surface, so it imports no api/ module and no stamp module.
 //
-// Slice C0 extends this file with Card's slot, beside the head's.
+// Slice C0 adds Card beside the head (7 to 11 below): its slot, its one
+// frame rule, its two frames, its class helper, and the retired .thub-card.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { sectionHeadClassName, sectionHeadTitleTag } from '../src/lib/design/sectionHeadClass.js'
+import { cardAccentStyle, cardBodyClassName, cardClassName, cardHead, cardTag } from '../src/lib/design/cardClass.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const STYLES = join(SRC, 'styles')
@@ -256,4 +258,159 @@ test('SectionHead imports no api/ module and no stamp module', () => {
     assert.doesNotMatch(spec, /\/api\//, `${spec}: a head computes nothing`)
     assert.doesNotMatch(spec, /stamp/i, `${spec}: stamp art renders only on its own surfaces (ADR-0035)`)
   }
+})
+
+// ---- 7. the card's slot ----
+
+test('system/card.css is imported right after section-head.css and before 06', () => {
+  const imports = [...readFileSync(join(SRC, 'index.css'), 'utf8').matchAll(/@import '\.\/styles\/([^']+)';/g)].map(
+    (m) => m[1],
+  )
+  const head = imports.indexOf('system/section-head.css')
+  const card = imports.indexOf('system/card.css')
+  const six = imports.indexOf('06-loader-and-cards.css')
+  assert.ok(card !== -1, 'index.css should import system/card.css')
+  assert.equal(card, head + 1, 'card.css sits right after section-head.css')
+  assert.equal(six, card + 1, 'card.css sits right before 06, so every namespace rule wins on order')
+})
+
+// ---- 8. one frame rule ----
+
+// Every rule in a stylesheet, as [selector, body], comments stripped.
+const rules = (css) => [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => [m[1].trim(), m[2]])
+const FRAME_PROPS = ['border', 'border-radius', 'box-shadow', 'overflow']
+const drawsFrame = (body) => FRAME_PROPS.some((p) => decl(body, p) !== undefined)
+// Any edge, corner, shadow or ground, longhands included.
+const paintsFrame = (body) =>
+  body
+    .split(';')
+    .map((d) => d.trim())
+    .some((d) => /^(border|background|box-shadow)[\w-]*\s*:/.test(d))
+const namesCard = (selector) => /\.card(?![\w-])|\.card--/.test(selector)
+
+test('card.css draws the frame in exactly one rule, .card', () => {
+  const framing = rules(read('system/card.css')).filter(([, body]) => drawsFrame(body))
+  assert.deepEqual(
+    framing.map(([sel]) => sel),
+    ['.card'],
+  )
+  const card = ruleBody(read('system/card.css'), '.card')
+  assert.equal(decl(card, 'border'), 'var(--bw-hair) solid var(--border-rule)')
+  assert.equal(decl(card, 'background'), 'var(--surface-card)')
+  assert.equal(decl(card, 'border-radius'), 'var(--card-radius)')
+  assert.equal(decl(card, 'box-shadow'), 'var(--card-shadow)')
+  assert.equal(decl(card, 'overflow'), 'hidden', 'the card clips a band head to its corners')
+  for (const prop of ['margin', 'margin-top', 'margin-bottom', 'display', 'gap', 'padding']) {
+    assert.equal(decl(card, prop), undefined, `.card sets no ${prop}: spacing and layout are the parent's and the namespace's`)
+  }
+})
+
+test('no other stylesheet frames a card', () => {
+  const found = files(STYLES, ['.css'])
+    .filter((rel) => rel !== 'system/card.css')
+    .flatMap((rel) =>
+      rules(read(rel))
+        .filter(([sel, body]) => namesCard(sel) && paintsFrame(body))
+        .map(([sel]) => `${rel}: ${sel}`),
+    )
+  assert.deepEqual(found, [])
+})
+
+// ---- 9. the two frames ----
+
+test('the sheet is the md radius with the card shadow; the ledger is the sm radius with none', () => {
+  const css = read('system/card.css')
+  const sheet = ruleBody(css, '.card--sheet')
+  const ledger = ruleBody(css, '.card--ledger')
+  assert.equal(decl(sheet, '--card-radius'), 'var(--radius-md)')
+  assert.equal(decl(sheet, '--card-shadow'), 'var(--shadow-card)')
+  assert.equal(decl(ledger, '--card-radius'), 'var(--radius-sm)')
+  assert.equal(decl(ledger, '--card-shadow'), 'none')
+})
+
+test('the padded body is the old team hub body', () => {
+  assert.equal(decl(ruleBody(read('system/card.css'), '.card__body'), 'padding'), 'var(--space-3) var(--space-4) var(--space-4)')
+})
+
+test('club colour never reaches the card (ADR-0030)', () => {
+  assert.doesNotMatch(read('system/card.css'), /--bar-|--seal|--navy/)
+})
+
+test('an interactive card tints with its accent and shows the focus ring', () => {
+  const css = read('system/card.css')
+  assert.match(css, /var\(--card-accent, var\(--border-rule\)\)/)
+  assert.equal(decl(ruleBody(css, '.card--interactive:focus-visible'), 'outline'), 'var(--bw-heavy) solid var(--focus-ring)')
+})
+
+// ---- 10. the card's helper ----
+
+test('sheet and padded are the defaults, and each prop turns into its class', () => {
+  assert.equal(cardClassName(), 'card card--sheet')
+  assert.equal(cardClassName({ frame: 'ledger', className: 'chal' }), 'card card--ledger chal')
+  assert.equal(cardClassName({ as: 'a' }), 'card card--sheet card--interactive')
+  assert.equal(cardClassName({ as: 'button', accent: '--offday-accent' }), 'card card--sheet card--interactive')
+  assert.equal(cardBodyClassName(), 'card__body')
+  assert.equal(cardBodyClassName('padded'), 'card__body')
+  assert.equal(cardBodyClassName('flush'), null)
+  assert.equal(cardTag(), 'section')
+  for (const tag of ['section', 'div', 'article', 'li', 'aside', 'a', 'button']) assert.equal(cardTag(tag), tag)
+  assert.deepEqual(cardAccentStyle('--offday-accent'), { '--card-accent': 'var(--offday-accent)' })
+  assert.equal(cardAccentStyle(undefined), undefined)
+})
+
+test('an unknown frame, body or element, or an accent on a still card, is refused', () => {
+  assert.throws(() => cardClassName({ frame: 'plain' }), /unknown frame/)
+  assert.throws(() => cardClassName({ frame: 'report' }), /unknown frame/)
+  assert.throws(() => cardBodyClassName('tight'), /unknown body/)
+  assert.throws(() => cardTag('span'), /as="span"/)
+  assert.throws(() => cardClassName({ accent: '--offday-accent' }), /interactive/)
+  assert.throws(() => cardClassName({ as: 'div', accent: '--offday-accent' }), /interactive/)
+  assert.throws(() => cardAccentStyle('#ff0000'), /custom property/)
+  assert.throws(() => cardClassName({ as: 'span' }), /as="span"/)
+})
+
+test('a link or button card takes no head: it holds phrasing content only', () => {
+  assert.throws(() => cardHead('button', 'Head'), /no head/)
+  assert.throws(() => cardHead('a', 'Head'), /no head/)
+  assert.equal(cardHead('button', undefined), undefined)
+  assert.equal(cardHead('section', 'Head'), 'Head')
+})
+
+test('the padded body says display: block, so it can be a span in a link card', () => {
+  assert.equal(decl(ruleBody(read('system/card.css'), '.card__body'), 'display'), 'block')
+})
+
+test('Card imports no api/ module, no stamp module and no club theme', () => {
+  const code = readFileSync(join(SRC, 'components', 'ui', 'frame', 'Card.jsx'), 'utf8')
+  const imports = [...code.matchAll(/^import .* from '([^']+)'/gm)].map((m) => m[1])
+  assert.ok(imports.length > 0)
+  for (const spec of imports) {
+    assert.doesNotMatch(spec, /\/api\//, `${spec}: a card computes nothing`)
+    assert.doesNotMatch(spec, /stamp/i, `${spec}: stamp art renders only on its own surfaces (ADR-0035)`)
+    assert.doesNotMatch(spec, /headerTheme|teams\.js|identity/, `${spec}: a card takes no club colour (ADR-0030)`)
+  }
+})
+
+// ---- 11. .thub-card is gone ----
+
+// Strict: comments count too. A comment that names a retired class sends the
+// next reader to a rule that does not exist.
+const RETIRED_CARD = /(^|[^\w-])(thub-card|chalcard)(?![\w-])|(^|[^\w-])(thub-card|chalcard)__/
+
+test('no stylesheet names .thub-card or .chalcard, not even in a comment', () => {
+  const found = files(STYLES, ['.css']).filter((rel) => RETIRED_CARD.test(readFileSync(join(STYLES, rel), 'utf8')))
+  assert.deepEqual(found, [])
+})
+
+test('no component or catalog names .thub-card or .chalcard', () => {
+  const found = files(SRC, ['.jsx', '.js'])
+    .filter((rel) => !rel.startsWith('styles/'))
+    .filter((rel) => RETIRED_CARD.test(readFileSync(join(SRC, rel), 'utf8')))
+  assert.deepEqual(found, [])
+})
+
+test('the team hub keeps its space between cards, from the hub and not from Card', () => {
+  const hub = ruleBody(read('09-team-info.css'), '.team-hub :where(.card):not(:where(.card .card))')
+  assert.ok(hub, 'a hub rule for a top-level card only; a card inside a card is a tile')
+  assert.equal(decl(hub, 'margin-top'), 'var(--space-4)')
 })

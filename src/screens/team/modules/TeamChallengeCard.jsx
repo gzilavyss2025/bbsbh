@@ -11,6 +11,7 @@ import { ScatterChart } from '../../../components/around-the-game/BroadcastBar.j
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../components/ui/frame/Card.jsx'
 
 // THE TEAM HUB'S CHALLENGE CARD, on the Numbers tab — who on this club argues
 // with the plate umpire, against how much baseball they see.
@@ -109,28 +110,33 @@ export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
   const maxY = Math.max(...players.map((p) => p.calls), 1)
 
   return (
-    <div className="thub-card chalcard">
-      <SectionHead look="label" note="against what they see">
-        Who challenges
-      </SectionHead>
+    <Card
+      className="chal"
+      body="flush"
+      head={
+        <SectionHead look="label" note="against what they see">
+          Who challenges
+        </SectionHead>
+      }
+    >
 
       {/* THE HEADLINE FOLLOWS THE CHIP. It led with the batter rate on both
           views in the first draft, which buried the one thing the card knows
           that no other page does. The rank sits on its own line from the
           figure it ranks. */}
-      <p className="chalcard__rate">{num2(board.rate)}</p>
-      <p className="chalcard__unit">Per {kind.ratePer === 9 ? '9 innings caught' : '1,000 pitches seen'}</p>
-      <p className="chalcard__rank">
+      <p className="chal__rate">{num2(board.rate)}</p>
+      <p className="chal__unit">Per {kind.ratePer === 9 ? '9 innings caught' : '1,000 pitches seen'}</p>
+      <p className="chal__rank">
         {board.rank != null ? `${ordinal(board.rank)} of ${board.of} clubs` : '—'}
       </p>
-      <p className="chalcard__league">League {num2(league)}</p>
+      <p className="chal__league">League {num2(league)}</p>
 
-      <div className="chalcard__views" role="group" aria-label="At the plate or behind it">
+      <div className="chal__views" role="group" aria-label="At the plate or behind it">
         {EXPOSURE_KINDS.map((k) => (
           <button
             key={k.key}
             type="button"
-            className={`chalcard__view${k.key === shown ? ' is-on' : ''}`}
+            className={`chal__view${k.key === shown ? ' is-on' : ''}`}
             aria-pressed={k.key === shown}
             onClick={() => setView(k.key)}
           >
@@ -161,12 +167,12 @@ export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
         />
       ) : null}
 
-      <table className="chalcard__board">
+      <table className="chal__board">
         <thead>
           <tr>
-            <th className="chalcard__who">
+            <th className="chal__who">
               Player
-              <span className="chalcard__floor">
+              <span className="chal__floor">
                 {commas(board.players.length)} of {commas(board.roster)} with{' '}
                 {commas(kind.floor)}+ {kind.unit}
               </span>
@@ -179,14 +185,14 @@ export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
         <tbody>
           {players.map((p) => (
             <tr key={p.playerId}>
-              <th scope="row" className="chalcard__who">
+              <th scope="row" className="chal__who">
                 <PlayerLink id={p.playerId} name={p.name}>
                   {p.name}
                 </PlayerLink>
               </th>
               <td>{commas(p.exposure)}</td>
               <td>{commas(p.calls)}</td>
-              <td className={league != null && p.rate < league ? 'chalcard__under' : undefined}>
+              <td className={league != null && p.rate < league ? 'chal__under' : undefined}>
                 {num2(p.rate)}
               </td>
             </tr>
@@ -197,7 +203,7 @@ export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
       {/* The one real sentence on the card, so it takes `.rptprose` — the name
           inside it needs `.rptprose .plink` for the reason report/chrome.css
           records. */}
-      <p className="chalcard__note rptprose">
+      <p className="chal__note rptprose">
         {board.below} of {players.length} ask less often than the league rate predicts
         from {kind.theirs}
         {board.leader && league != null && board.leader.rate > league ? (
@@ -220,6 +226,6 @@ export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
           League challenge board
         </Door>
       </div>
-    </div>
+    </Card>
   )
 }

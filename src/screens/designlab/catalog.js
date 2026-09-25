@@ -35,12 +35,12 @@ export const PILL_RECIPE = [
 // CARDS — 31 blocks.
 export const CARDS = [
   {
-    cls: 'thub-card',
-    partial: '09-team-info.css',
+    cls: 'card card--sheet',
+    partial: 'system/card.css',
     consumers: 16,
     group: 'sheet',
     verdict: 'Canonical',
-    note: 'The team hub’s card, and the most-used box in the app. Four of its sixteen consumers already put a second, box-less class beside it — which is the variant pattern #1113 proposes, already shipped.',
+    note: 'The Card component’s sheet (#1113). The team hub’s card moved onto it first: sixteen modules. Four of them pass a box-less namespace as className (chal, rvclub, depthchart, horizoncard), the variant pattern the hub already used.',
   },
   {
     cls: 'abscard',
@@ -187,12 +187,12 @@ export const CARDS = [
   },
 
   {
-    cls: 'chalcard',
+    cls: 'chal',
     partial: 'report/challenge-card.css',
     consumers: 1,
     group: 'namespace',
     verdict: 'Already correct',
-    note: 'Renders as `className="thub-card chalcard"` — a canonical card plus a box-less namespace. This is the pattern step 2 should generalise, not change.',
+    note: 'Renders as `<Card className="chal">`: a canonical card plus a box-less namespace. The Card component generalises this pattern (#1113).',
   },
   {
     cls: 'rvcard',
@@ -200,7 +200,7 @@ export const CARDS = [
     consumers: 2,
     group: 'namespace',
     verdict: 'Already correct',
-    note: 'Same shape: `className="thub-card rvclub"`, with every .rvcard rule an __element.',
+    note: 'Same shape: `<Card className="rvclub">`, with every .rvcard rule an __element.',
   },
   {
     cls: 'ballparkcard',
@@ -208,7 +208,7 @@ export const CARDS = [
     consumers: 1,
     group: 'namespace',
     verdict: 'Already correct',
-    note: 'Fifteen selector hits, every one an __element, inside a .thub-card.',
+    note: 'Fifteen selector hits, every one an __element, inside a Card.',
   },
   {
     cls: 'horizoncard',
@@ -216,7 +216,7 @@ export const CARDS = [
     consumers: 2,
     group: 'namespace',
     verdict: 'Already correct',
-    note: 'No base rule. Sits on a .thub-card.',
+    note: 'No base rule. Sits on a Card.',
   },
   {
     cls: 'advcard',

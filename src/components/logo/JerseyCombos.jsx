@@ -4,6 +4,7 @@ import { treatmentTile, isMlbTeamId } from '../../lib/teams.js'
 import { milbTreatmentTile } from '../../lib/milbColors.js'
 import { readableTextColor } from '../../lib/contrast.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // The two ink choices a card picks between — --text-heading and --paper-2,
 // literally, since readableTextColor needs real hex to run WCAG math against
@@ -132,41 +133,43 @@ export function JerseyCombos({ combos, teamId, teamName, variant = 'record' }) {
   if (!combos?.length) return null
   const isMlb = isMlbTeamId(teamId)
   return (
-    <div className="thub-card">
-      <SectionHead look="band" club note={variant === 'static' ? 'home and away' : 'record by jersey'}>
-        Logos & jerseys
-      </SectionHead>
-      <div className="thub-card__body" style={{ padding: 0 }}>
-        <div className="jerseydeck" ref={ref} {...handlers}>
-          {combos.map((c) => {
-            const tile = cardTile(teamId, isMlb, c.treatment, c.side)
-            const style = {
-              '--tint': tile.tint || undefined,
-              '--pinstripe-color': tile.pinstripeColor || undefined,
-              '--pinstripe-bg': tile.pinstripeBg || undefined,
-              '--ink': tile.ink,
-            }
-            return (
-              <div
-                key={c.code ?? c.side ?? c.name}
-                className={`jerseydeck__card${tile.pinstripeColor ? ' jerseydeck__card--pinstripe' : ''}`}
-                style={style}
-              >
-                <TeamTreatmentMark
-                  teamId={teamId}
-                  name={teamName}
-                  treatment={c.treatment}
-                  side={c.side}
-                  size={88}
-                  block="jerseydeck__logobox"
-                />
-                <span className="jerseydeck__name">{c.name}</span>
-                <span className="jerseydeck__rec mono">{recordLabel(c)}</span>
-              </div>
-            )
-          })}
-        </div>
+    <Card
+      body="flush"
+      head={
+        <SectionHead look="band" club note={variant === 'static' ? 'home and away' : 'record by jersey'}>
+          Logos & jerseys
+        </SectionHead>
+      }
+    >
+      <div className="jerseydeck" ref={ref} {...handlers}>
+        {combos.map((c) => {
+          const tile = cardTile(teamId, isMlb, c.treatment, c.side)
+          const style = {
+            '--tint': tile.tint || undefined,
+            '--pinstripe-color': tile.pinstripeColor || undefined,
+            '--pinstripe-bg': tile.pinstripeBg || undefined,
+            '--ink': tile.ink,
+          }
+          return (
+            <div
+              key={c.code ?? c.side ?? c.name}
+              className={`jerseydeck__card${tile.pinstripeColor ? ' jerseydeck__card--pinstripe' : ''}`}
+              style={style}
+            >
+              <TeamTreatmentMark
+                teamId={teamId}
+                name={teamName}
+                treatment={c.treatment}
+                side={c.side}
+                size={88}
+                block="jerseydeck__logobox"
+              />
+              <span className="jerseydeck__name">{c.name}</span>
+              <span className="jerseydeck__rec mono">{recordLabel(c)}</span>
+            </div>
+          )
+        })}
       </div>
-    </div>
+    </Card>
   )
 }

@@ -25,7 +25,7 @@
    figure it ranks — "4.53" and "30 of 30" are two different measurements and
    running them together reads as one. Same split .rvcard__total /
    .rvcard__rank keeps on the card above this one. */
-.chalcard__rate {
+.chal__rate {
   margin: 0;
   font-family: var(--font-mono);
   font-size: var(--fs-hero-sm);
@@ -35,7 +35,7 @@
   color: var(--text-heading);
 }
 
-.chalcard__unit {
+.chal__unit {
   margin: var(--space-2) 0 0;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -43,14 +43,14 @@
   color: var(--text-caption);
 }
 
-.chalcard__rank {
+.chal__rank {
   margin: var(--space-1) 0 0;
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   color: var(--text-body);
 }
 
-.chalcard__league {
+.chal__league {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -62,13 +62,13 @@
 
 /* `.trec__half`'s shape, because the Records card two along uses it and a
    second control language on one tab is a second thing to learn. */
-.chalcard__views {
+.chal__views {
   display: flex;
   gap: var(--space-1);
   margin: var(--space-3) 0 0;
 }
 
-.chalcard__view {
+.chal__view {
   flex: 1;
   padding: var(--space-1h) var(--space-2);
   border: var(--bw-hair) solid var(--border-rule);
@@ -82,14 +82,14 @@
   cursor: pointer;
 }
 
-.chalcard__view.is-on {
+.chal__view.is-on {
   background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
   border-color: var(--accent-primary);
   color: var(--text-heading);
   font-weight: var(--w-bold);
 }
 
-.chalcard__view:focus-visible {
+.chal__view:focus-visible {
   outline: var(--bw-heavy) solid var(--focus-ring);
   outline-offset: 2px;
 }
@@ -98,20 +98,20 @@
 
 /* THE ONLY WAY TO REACH A PLAYER PAGE FROM HERE — an SVG text node cannot be a
    link — and what gives the unlabelled dots their names. */
-.chalcard__board {
+.chal__board {
   width: 100%;
   margin: var(--space-3) 0 0;
   border-collapse: collapse;
 }
 
-.chalcard__board th,
-.chalcard__board td {
+.chal__board th,
+.chal__board td {
   padding: var(--space-1h) 0;
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
-.chalcard__board thead th {
+.chal__board thead th {
   border-top: 0;
   border-bottom: var(--bw-heavy) solid var(--navy);
   font-family: var(--font-display);
@@ -121,7 +121,7 @@
   white-space: nowrap;
 }
 
-.chalcard__board th.chalcard__who {
+.chal__board th.chal__who {
   text-align: left;
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
@@ -130,14 +130,14 @@
   color: var(--text-body);
 }
 
-.chalcard__board td {
+.chal__board td {
   font-family: var(--font-mono);
   font-size: var(--fs-compact);
   font-variant-numeric: tabular-nums;
   color: var(--text-body);
 }
 
-.chalcard__floor {
+.chal__floor {
   display: block;
   font-family: var(--font-body);
   font-size: var(--fs-small);
@@ -149,11 +149,11 @@
 /* A man under the league line, which is the card's whole finding. Clay ink on
    the figure rather than a second dot colour on the chart, so the table and
    the scatter mark the same men the same way. */
-.chalcard__under {
+.chal__under {
   color: var(--clay-deep);
 }
 
-.chalcard__note {
+.chal__note {
   margin: var(--space-3) 0 0;
   font-family: var(--font-body);
   font-size: var(--fs-small);

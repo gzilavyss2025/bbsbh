@@ -61,11 +61,14 @@ function NamespaceSpecimen({ cls, host }) {
   )
 }
 
+// The Card's own class list (components/ui/frame/Card.jsx, a sheet), so
+// the host is the real frame and not a copy of it.
+const CARD_HOST = 'card card--sheet'
 const HOSTS = {
-  chalcard: 'thub-card',
-  rvcard: 'thub-card',
-  ballparkcard: 'thub-card',
-  horizoncard: 'thub-card',
+  chal: CARD_HOST,
+  rvcard: CARD_HOST,
+  ballparkcard: CARD_HOST,
+  horizoncard: CARD_HOST,
 }
 
 const TONE = {
@@ -87,7 +90,7 @@ function CardGroup({ group }) {
       {rows.map((c) => (
         <Entry
           key={c.cls}
-          title={`.${c.cls}`}
+          title={`.${c.cls.split(' ').join('.')}`}
           path={`src/styles/${c.partial}`}
           consumers={c.consumers}
           verdict={c.verdict}

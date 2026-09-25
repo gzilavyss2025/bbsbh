@@ -116,25 +116,22 @@
    themed section below reads THIS triad instead, each a masthead BOLTED onto
    the table/list/grid it labels — the same metricbar+metriccard idiom the
    lineup page uses, not a label floating disconnected above its content.
-   `.thub-card` is the
-   shared shell for sections that had no card of their own (Standings,
-   Schedule, Team Leaders, Current Roster, Injured List, Affiliates,
-   Prospects, Logos & jerseys); `.tstats-card`, `.roster-super` and
-   `.team-score` already had one, so the head bolts onto their existing
-   border instead of a second wrapper. Every one of those heads is the
-   SectionHead club band (system/section-head.css, #1113): a plain label until
-   the club colour arrives. `overflow:hidden` on every card clips the head's
-   square corners to the card's radius. */
-.thub-card {
+   The shared shell for sections that had no card of their own (Standings, Schedule,
+   Current Roster, Injured List, Affiliates, Prospects, Logos & jerseys, and
+   the rest) is the Card component now (system/card.css, #1113); `.tstats-card`,
+   `.roster-super` and `.team-score` already had one, so the head bolts onto
+   their existing border instead of a second wrapper. Every one of those heads
+   is the SectionHead club band (system/section-head.css, #1113): a plain label
+   until the club colour arrives. The card's `overflow: hidden` clips the
+   head's square corners to the card's radius. */
+
+/* The space above each card on the hub. Card owns no margin (#1113): the
+   space between cards is the parent's until #1180 gives the parent a Stack.
+   A card inside a card is a tile in its grid, not a section, so it gets none.
+   `:where()` keeps this at one class, so a card's own namespace rule that
+   sets a margin wins on order. */
+.team-hub :where(.card):not(:where(.card .card)) {
   margin-top: var(--space-4);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
-}
-.thub-card__body {
-  padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
 

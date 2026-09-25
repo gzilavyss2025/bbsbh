@@ -6,6 +6,7 @@ import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { PostseasonOddsModal } from '../../../components/teamstats/PostseasonOddsModal.jsx'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../components/ui/frame/Card.jsx'
 
 // The three rows a preview shows: the club's own, plus the team above and the
 // team below it. A club at the top or bottom of its division still gets three
@@ -34,25 +35,27 @@ export function StandingsCard({ team, standings, asOf, divisionPostseasonOdds, p
 
   return (
     <>
-      <div className="thub-card">
-        {/* The one action on the card's band: a Pill control, ink fill
-            (#1131). On a club-themed band, 09-team-info.css tints it to a
-            paper chip through the pill's own properties. */}
-        <SectionHead
-          look="band"
-          club
-          note={asOf && `entering ${humanDate(asOf)}`}
-          action={
-            divisionPostseasonOdds.length > 0 && (
-              <Pill role="control" fill="ink" className="psodds-pill" onClick={() => setShowPostseasonOdds(true)}>
-                Postseason Odds
-              </Pill>
-            )
-          }
-        >
-          {team.division?.name || 'Standings'}
-        </SectionHead>
-        <div className="thub-card__body">
+      <Card
+        head={
+          /* The one action on the card's band: a Pill control, ink fill
+             (#1131). On a club-themed band, 09-team-info.css tints it to a
+             paper chip through the pill's own properties. */
+          <SectionHead
+            look="band"
+            club
+            note={asOf && `entering ${humanDate(asOf)}`}
+            action={
+              divisionPostseasonOdds.length > 0 && (
+                <Pill role="control" fill="ink" className="psodds-pill" onClick={() => setShowPostseasonOdds(true)}>
+                  Postseason Odds
+                </Pill>
+              )
+            }
+          >
+            {team.division?.name || 'Standings'}
+          </SectionHead>
+        }
+      >
         <div className="ledger-wrap">
           <table className="standings">
             <thead>
@@ -86,8 +89,7 @@ export function StandingsCard({ team, standings, asOf, divisionPostseasonOdds, p
             </tbody>
           </table>
         </div>
-        </div>
-      </div>
+      </Card>
 
       {showPostseasonOdds && (
         <PostseasonOddsModal

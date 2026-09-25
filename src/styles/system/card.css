@@ -1,0 +1,81 @@
+/* ---------------------------------------------------------------------------
+   CARD — the one box of paper a section sits on (#1113).
+   components/ui/frame/Card.jsx draws it; lib/design/cardClass.js names its
+   classes.
+
+   Before this file, the team hub's own card class drew this box, and about a
+   hundred other blocks each drew their own copy of it, under names that
+   mostly did not say "card". This is the one copy. Later slices move those
+   blocks onto it.
+
+   WHAT IT OWNS: the frame (edge, radius, ground, shadow), the clip that makes
+   a band head follow the corners, the padded body, and the interactive state.
+   WHAT IT DOES NOT OWN: the space above and below a card (the parent's,
+   #1180), the layout inside it (the namespace's), and an accent that only one
+   block wears (the namespace's too). A namespace rule loads later, so it wins
+   on order at equal specificity.
+
+   TWO FRAMES, and the radius decides (#1113 Q1). The frame rule below is the
+   only rule that draws; a frame class sets only the two values that differ.
+
+   HERE IN THE ORDER, right after system/section-head.css and before
+   06-loader-and-cards.css. test/card-cascade.test.js pins the slot.
+
+   No club colour reaches the card (ADR-0030). A club colours the band head
+   that names it, through the head's own theme hook, never the card's frame.
+   --------------------------------------------------------------------------- */
+.card {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--card-radius);
+  background: var(--surface-card);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+.card--sheet {
+  --card-radius: var(--radius-md);
+  --card-shadow: var(--shadow-card);
+}
+.card--ledger {
+  --card-radius: var(--radius-sm);
+  --card-shadow: none;
+}
+
+/* The padded body: the old team hub body, so the rows line up under a head
+   that uses the default --space-4 inset. It is a <span> inside a link or a
+   button card (phrasing content only), so it says display: block itself. */
+.card__body {
+  display: block;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+/* THE INTERACTIVE CARD: the whole card is the tap target (as="a" or
+   "button"). It drops the anchor's underline and the button's own face, and
+   the hover mixes the card's accent into the edge and the ground. The accent
+   is a custom property the caller names (--offday-accent); with none, the
+   tint is the rule colour. */
+.card--interactive {
+  display: block;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .card--interactive:hover {
+    border-color: color-mix(in srgb, var(--card-accent, var(--border-rule)) 55%, var(--border-rule));
+    background-color: color-mix(in srgb, var(--card-accent, var(--border-rule)) 8%, var(--surface-card));
+  }
+}
+.card--interactive:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card--interactive {
+    transition: none;
+  }
+}
