@@ -573,7 +573,7 @@ hold the two apart.
 Settled in ADR-0064. The club surfaces read the nightly file for the season and
 lay a **live three-day window** over its newest days, so a move filed at noon
 reaches the club's own page as fast as it reaches the home wire. The cron writes
-those files at 07:00 UTC, so the gap being closed is up to a full day.
+those files once a night (cron 08:17 UTC), so the gap being closed is up to a full day.
 
 Three measurements decided the shape.
 
