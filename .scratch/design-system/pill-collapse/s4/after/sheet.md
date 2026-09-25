@@ -1,6 +1,6 @@
 # Contact sheet — after
 
-390px unless a target sets its own width (1280px for the reveal, hover-card and tab targets), ?nointro, captured from http://localhost:5171. Crops: `<name>.png` (tag in its row) and `<name>--tag.png` (2x).
+390px unless a target sets its own width (1280px for the reveal, hover-card and tab targets), ?nointro, captured from http://localhost:5169. Crops: `<name>.png` (tag in its row) and `<name>--tag.png` (2x).
 
 | tag | selector | h | w | host h | padding T R B L | font | size | tracking | line-h | border | fill | ink | edge |
 | --- | --- | ---: | ---: | ---: | --- | --- | ---: | --- | --- | --- | --- | --- | --- |
@@ -8,7 +8,7 @@
 | mastheadpill-navybar | `.mastheadpill` | 34 | 86.2 | 34 | 0 12 0 12 | Barlow Condensed | 12 | 1.08px | 14.4px | 1 solid | rgb(251, 246, 233) | rgb(27, 42, 58) | rgb(203, 193, 167) |
 | slate-chip | `.slate-filterbar__chip` | 34 | 142.5 | 76 | 0 12 0 12 | Barlow Condensed | 12 | 1.08px | 14.4px | 1 solid | color(srgb 0.896941 0.843765 0.743529) | rgb(15, 24, 34) | rgb(138, 90, 30) |
 | cmdmap-chip | `.cmdmap__chip` | 34 | 107.5 | 34 | 0 12 0 12 | Barlow Condensed | 12 | 1.08px | 14.4px | 1 solid | rgb(255, 253, 246) | rgb(60, 74, 90) | rgb(203, 193, 167) |
-| cmdmap-chip-on | `.cmdmap__chip[aria-pressed="true"]` | 34 | 105.7 | 34 | 0 12 0 12 | Barlow Condensed | 12 | 1.08px | 14.4px | 1 solid | rgb(27, 42, 58) | rgb(251, 246, 233) | rgb(27, 42, 58) |
+| cmdmap-chip-on | `.cmdmap__chip[aria-pressed="true"]` | 34 | 105.7 | 34 | 0 12 0 12 | Barlow Condensed | 12 | 1.08px | 14.4px | 1 solid | rgb(27, 42, 58) | rgb(251, 246, 233) | rgb(251, 246, 233) |
 | cmdmap-chip-thin | `.cmdmap__chip--thin` | 34 | 80 | 76 | 0 12 0 12 | Barlow Condensed | 12 | 1.08px | 14.4px | 1 dashed | rgb(246, 239, 220) | rgb(107, 101, 88) | rgb(203, 193, 167) |
 | depthpos | `.depthpos` | 34 | 40.3 | 74 | 0 12 0 12 | JetBrains Mono | 11 | 0.55px | 13.2px | 1 solid | rgba(0, 0, 0, 0) | rgb(27, 42, 58) | rgb(203, 193, 167) |
 | scorebook-filter | `.scorebookstory__filters button` | 34 | 90.8 | 42 | 0 12 0 12 | Barlow Condensed | 12 | 1.08px | 14.4px | 1 solid | rgba(0, 0, 0, 0) | rgb(27, 42, 58) | rgb(203, 193, 167) |

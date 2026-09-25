@@ -36,7 +36,7 @@
       "ariaCurrent": null,
       "fill": "rgb(27, 42, 58)",
       "ink": "rgb(251, 246, 233)",
-      "edge": "rgb(27, 42, 58)",
+      "edge": "rgb(251, 246, 233)",
       "tick": "\"✓\" / \"\"",
       "h": 34
     },
@@ -86,7 +86,7 @@
       "ariaCurrent": null,
       "fill": "rgb(27, 42, 58)",
       "ink": "rgb(251, 246, 233)",
-      "edge": "rgb(27, 42, 58)",
+      "edge": "rgb(251, 246, 233)",
       "tick": "\"✓\" / \"\"",
       "h": 34
     },
@@ -134,7 +134,7 @@
       "ariaCurrent": null,
       "fill": "rgb(27, 42, 58)",
       "ink": "rgb(251, 246, 233)",
-      "edge": "rgb(27, 42, 58)",
+      "edge": "rgb(251, 246, 233)",
       "tick": "\"✓\" / \"\"",
       "h": 34
     },
@@ -185,7 +185,7 @@
       "ariaCurrent": null,
       "fill": "rgb(27, 42, 58)",
       "ink": "rgb(251, 246, 233)",
-      "edge": "rgb(27, 42, 58)",
+      "edge": "rgb(251, 246, 233)",
       "tick": "\"✓\" / \"\"",
       "h": 34
     },
@@ -219,7 +219,7 @@
     "textTransform": "uppercase",
     "borderTopWidth": "1px",
     "borderTopStyle": "solid",
-    "borderTopColor": "rgb(27, 42, 58)",
+    "borderTopColor": "rgb(251, 246, 233)",
     "borderRadius": "999px",
     "backgroundColor": "rgb(27, 42, 58)",
     "color": "rgb(251, 246, 233)",

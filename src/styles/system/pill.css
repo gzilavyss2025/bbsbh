@@ -86,7 +86,9 @@
      selected        [aria-pressed="true"] or [aria-current="page"]. Ink fill
                      AND a leading tick — the contract button.css wrote for
                      "Pill (#1131) inherits exactly this". The tick survives
-                     forced-colors mode; the fill alone would not.
+                     forced-colors mode; the fill alone would not. A
+                     PAPER control keeps a paper edge when selected, so
+                     the navy chip still shows on a navy club bar.
      focus-visible   a 2px --focus-ring outline, 2px off the capsule.
      disabled        :disabled or [aria-disabled="true"]. The fill stays and
                      drops to --opacity-disabled. Never repainted.
@@ -272,6 +274,16 @@
   content: '✓' / '';
   flex: none;
   line-height: var(--lh-solid);
+}
+
+/* A pressed PAPER control keeps a paper edge. Paper is the fill that rides a
+   coloured band, and the selected navy vanishes into a navy club bar (1.01:1
+   on the Brewers'). The paper edge keeps the chip's outline on any bar. It
+   reads a paper token, never the bar (ADR-0030).
+   test/pill-paper-pressed.test.js holds it. */
+.pill--control.pill--paper[aria-pressed='true'],
+.pill--control.pill--paper[aria-current='page'] {
+  border-color: var(--surface-card);
 }
 
 .pill--control:focus-visible {

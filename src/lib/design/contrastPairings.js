@@ -96,6 +96,9 @@ export const PAIRINGS = [
   { fg: 'clay', bg: 'surface-card', min: TEXT, note: 'pill ink --clay on card' },
   { fg: 'clay', bg: 'bg-page', min: TEXT, note: 'pill ink --clay on page' },
   { fg: 'text-body', bg: 'surface-card', min: TEXT, note: 'pill paper fill text' },
+  // A pressed paper control's paper edge, against a navy club bar (the
+  // Brewers' bar is the house navy). A non-text edge, so the 3:1 bar.
+  { fg: 'surface-card', bg: 'navy', min: UI, note: 'pressed paper pill edge on a navy bar' },
   // THE PILL'S TINTS AND INSET CHIPS (#1131 slice 2). A tint sets the pill's
   // fill and ink as a pair, so each pair a host passes is asserted here. The
   // pairs already on this list elsewhere are not repeated: --field-deep on
