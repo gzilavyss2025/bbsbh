@@ -99,7 +99,6 @@
 .coverpick__preset:focus-visible,
 .coverpick__color:focus-visible,
 .coverpick__step:focus-visible,
-.coverpick__favorite:focus-visible,
 .coverpick__back:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
@@ -178,23 +177,10 @@
   cursor: pointer;
 }
 
+/* "Match my favorite team" is a Button toggle (#1131 slice 4):
+   <Button size="control" pressed>. It picks a cover setting; it filters no
+   list, so it is a ruled box, not a Pill. Selected is the Button's own state
+   (navy, with a tick), and paper does not float, so no shadow. */
 .coverpick__favorite {
   align-self: flex-start;
-  padding: var(--space-1) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.coverpick__favorite.is-active {
-  border-color: var(--accent-primary);
-  color: var(--text-heading);
-  box-shadow: var(--shadow-card);
 }

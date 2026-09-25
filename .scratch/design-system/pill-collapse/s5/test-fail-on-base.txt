@@ -1,0 +1,100 @@
+# node --test test/band-controls.test.js, run with the three stylesheets (09, 39, 66) put back to their base (HEAD = claude/pill-slice-4) text and the new test in place. Exit 1: all four fail. Restored after.
+✖ the card band pill keeps no paint of its own and never reads the seal (3.6366ms)
+✖ on a club-themed band the pill is a paper chip through its own five properties (1.5503ms)
+✖ the records rail re-inks the Button, and its hover fill stays dark under paper text (1.0872ms)
+✖ the records rail draws a focus ring, in paper on the navy band (1.0508ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 158.1469
+
+✖ failing tests:
+
+test at test\band-controls.test.js:48:1
+✖ the card band pill keeps no paint of its own and never reads the seal (3.6366ms)
+  AssertionError [ERR_ASSERTION]: .psodds-pill paints background; the Pill draws it
+  + actual - expected
+  
+  + 'var(--accent-primary)'
+  - undefined
+  
+      at TestContext.<anonymous> (file:///<worktree>/test/band-controls.test.js:52:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1103:25)
+      at Test.start (node:internal/test_runner/test:1000:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'var(--accent-primary)',
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\band-controls.test.js:57:1
+✖ on a club-themed band the pill is a paper chip through its own five properties (1.5503ms)
+  AssertionError [ERR_ASSERTION]: the themed band sets --pill-fill
+      at TestContext.<anonymous> (file:///<worktree>/test/band-controls.test.js:63:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1103:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:785:18)
+      at Test.postRun (node:internal/test_runner/test:1232:19)
+      at Test.run (node:internal/test_runner/test:1160:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test\band-controls.test.js:71:1
+✖ the records rail re-inks the Button, and its hover fill stays dark under paper text (1.0872ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'var(--text-on-ink)'
+  
+      at TestContext.<anonymous> (file:///<worktree>/test/band-controls.test.js:75:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1103:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:785:18)
+      at Test.postRun (node:internal/test_runner/test:1232:19)
+      at Test.run (node:internal/test_runner/test:1160:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'var(--text-on-ink)',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\band-controls.test.js:85:1
+✖ the records rail draws a focus ring, in paper on the navy band (1.0508ms)
+  AssertionError [ERR_ASSERTION]: the Button draws the ring; the rail sets only its colour
+  + actual - expected
+  
+  + 'var(--focus-ring)'
+  - undefined
+  
+      at TestContext.<anonymous> (file:///<worktree>/test/band-controls.test.js:90:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1103:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:785:18)
+      at Test.postRun (node:internal/test_runner/test:1232:19)
+      at Test.run (node:internal/test_runner/test:1160:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'var(--focus-ring)',
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

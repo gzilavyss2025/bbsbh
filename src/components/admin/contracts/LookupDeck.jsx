@@ -14,6 +14,7 @@ import { searchPeople } from '../../../api/search.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue.js'
 import { playerPath } from '../../../lib/route.js'
+import { Button } from '../../ui/control/Button.jsx'
 import '../../../styles/74a-contract-lookup.css'
 
 const SEARCH_INDEX_URL = '/data/contracts-history/search-index.json'
@@ -344,14 +345,14 @@ function PlayerSearchPanel({ selectedRow, onUseAsMatch, disabled }) {
                 View player
               </a>
               {selectedRow && (
-                <button
-                  type="button"
+                <Button
+                  size="control"
                   className="lookupdeck__usebtn"
                   disabled={disabled}
                   onClick={() => onUseAsMatch(person.id)}
                 >
                   Use as this row’s match
-                </button>
+                </Button>
               )}
             </div>
           </li>

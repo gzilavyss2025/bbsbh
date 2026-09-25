@@ -40,23 +40,10 @@
   border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 
-.dlab__jumplink {
-  padding: var(--space-1) var(--space-2h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  color: var(--accent-link);
-  text-decoration: none;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-}
-
-.dlab__jumplink:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
+/* The jump links are Buttons with an href (#1131 slice 4): <Button
+   size="control" href="#…">, with no rule of their own. An in-page anchor does
+   not leave the page, so it is not a Door, and it filters nothing, so it is not
+   a Pill: it is a ruled box, like the team hub's jump bar. */
 
 .dlab__verdictbox {
   margin: var(--space-4) var(--app-gutter);

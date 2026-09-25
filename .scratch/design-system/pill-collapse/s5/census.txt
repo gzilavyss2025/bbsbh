@@ -1,0 +1,26 @@
+selector                           file:line                            fill     role    verdict    font-size        padding                consumers
+.contractcard__regime              26b-player-contract.css:63           ink      tag     merge      var(--fs-label)  var(--space-1) var(--s components/playerstats/PlayerContractCard.jsx
+.stampstrip__modes button          48-stamp-strip.css:166               outline  control merge      var(--fs-label)  0 var(--space-3)       components/logbook/StampGameButton.jsx
+.gamecard__live                    06-loader-and-cards.css:340          other:cl tag     bespoke    var(--fs-label)  3px var(--space-2) 3px components/game/GameCard.jsx screens/animlab/motionDemos.jsx
+.gamecard__delay                   06-loader-and-cards.css:380          other:ma tag     bespoke    var(--fs-label)  3px var(--space-2)     components/game/GameCard.jsx
+.duepill                           31-wild-card.css:361                 seal     tag     bespoke    var(--fs-label)  2px var(--space-1h)    components/inning/EnteringReference.jsx screens/designlab/catalog.js
+.photostrip__viewall               44-pre-game-cards.css:290            other:#F control bespoke    var(--fs-label)  0 var(--space-2h)      components/game/GamePhotosStrip.jsx
+.stampin__mark                     59-stamp-in.css:103                  paper    control bespoke    var(--fs-label)  var(--space-1) var(--s components/logbook/StampInButton.jsx
+.wiredock__close                   04a-wire-dock.css:234                paper    control rename-out var(--fs-body)   0                      components/transactions/WireDock.jsx
+.gamefindersheet__close            08-site-shell.css:268                other:no control rename-out var(--fs-num-md)                        components/game/GameFinderModal.jsx
+.searchfield__clear                08-site-shell.css:398                other:no control rename-out var(--fs-num-md)                        components/chrome/SiteSearch.jsx
+.favteamsheet__close               08-site-shell.css:691                other:no control rename-out var(--fs-num-md)                        components/account/FavoriteTeamModal.jsx
+.sheet__close                      14-strike-zone.css:562               other:no control rename-out var(--fs-num-md)                        components/boxlines/BoxLinesSheet.jsx components/chrome/SiteMenu.jsx components/inning/focus/ReferencePanel.jsx
+.logomodal__close                  19-pattern-and-sketch-labs.css:282   other:no control rename-out var(--fs-num-md)                        components/logo/LogoModal.jsx
+.infopop__btn                      44-pre-game-cards.css:401            outline  control rename-out var(--fs-caption 0                      components/ui/InfoPopover.jsx
+.logbook__pending                  48-logbook.css:104                   outline  tag     rename-out var(--fs-small)                         screens/logbook/StampCollection.jsx
+.passportpage__pending             49-passport-book.css:456             outline  tag     rename-out var(--fs-cell)                          components/passport/PassportPage.jsx
+.posterstudio__save                62-game-preview.css:149              ink      control rename-out var(--fs-body)   var(--space-3) var(--s components/preview/SavePosterButton.jsx
+.pbp__rbi                          13-play-by-play.css:290              paper    tag     delete     var(--fs-label)  2px var(--space-2)     (none found)
+.penboard__pill                    44-pre-game-cards.css:487            paper    tag     delete     var(--fs-label)  var(--space-1) var(--s (none found)
+.penboard__tag                     44-pre-game-cards.css:539            paper    tag     delete     var(--fs-label)  3px var(--space-2h)    (none found)
+
+20 pill base rules (working tree); 2 say "pill".
+Landed (merge done): 37; merge left: 1
+Settled 10 (deferred to #1174 (a Button, not a Pill): 1 · moved to Button (slice 4): 8 · moved to Button (slice 5): 1; 9 no longer a row) · 20 rows + 37 landed + 9 settled and gone = 66 capsule rules first counted.
+TARGET (system/pill.css, not counted): .pill

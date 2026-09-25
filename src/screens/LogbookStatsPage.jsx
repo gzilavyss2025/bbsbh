@@ -17,6 +17,7 @@ import { LEVELS } from '../lib/teams.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { Pill } from '../components/ui/control/Pill.jsx'
 import { dateLabel, SectionHead } from './logbook/statsShared.jsx'
 import { RetrospectiveSections } from './logbook/RetrospectiveSections.jsx'
 import { LogbookMilestones } from './logbook/LogbookMilestones.jsx'
@@ -96,24 +97,19 @@ const LEVEL_ALL = 'all'
 function LevelFilterBar({ value, onChange }) {
   return (
     <div className="logbookstats__levels" aria-label="Filter by level">
-      <button
-        type="button"
-        aria-pressed={value === LEVEL_ALL}
-        className={value === LEVEL_ALL ? 'is-active' : ''}
-        onClick={() => onChange(LEVEL_ALL)}
-      >
+      <Pill role="control" figure pressed={value === LEVEL_ALL} onClick={() => onChange(LEVEL_ALL)}>
         All
-      </button>
+      </Pill>
       {LEVELS.map((lvl) => (
-        <button
+        <Pill
           key={lvl.sportId}
-          type="button"
-          aria-pressed={value === lvl.sportId}
-          className={value === lvl.sportId ? 'is-active' : ''}
+          role="control"
+          figure
+          pressed={value === lvl.sportId}
           onClick={() => onChange(lvl.sportId)}
         >
           {lvl.label}
-        </button>
+        </Pill>
       ))}
     </div>
   )

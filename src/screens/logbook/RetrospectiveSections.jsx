@@ -2,6 +2,7 @@ import { eligibleHighlightForPlay } from '../../api/highlights.js'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { HighlightSheet } from '../../components/playbyplay/HighlightSheet.jsx'
+import { Button } from '../../components/ui/control/Button.jsx'
 import { dateLabel, SectionHead, gameTitle, LogbookGameLink } from './statsShared.jsx'
 
 // The Logbook retrospective's ported First Scorebook sections — best
@@ -71,9 +72,9 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
                     <strong>{Math.round(m.swing)}-point swing</strong>
                   </LogbookGameLink>
                   {clip && (
-                    <button type="button" className="logbookstats__watch" onClick={() => onOpenClip(clip)}>
-                      ▶ Watch highlight
-                    </button>
+                    <Button size="control" icon="▶" className="logbookstats__watch" onClick={() => onOpenClip(clip)}>
+                      Watch highlight
+                    </Button>
                   )}
                 </li>
               )

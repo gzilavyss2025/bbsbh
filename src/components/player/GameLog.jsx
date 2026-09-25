@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { GameLink } from './GameLink.jsx'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // The player page's game-by-game log. A player who split real season time
 // between two levels (buildBlock's `otherLevels` gate, api/person/activity.js —
@@ -27,15 +28,16 @@ export function GameLog({ gameLog, gameLogAlt, altLevel, note, limit }) {
         <span>Game log</span>
         <em>{`last ${rows.length} · ${note}`}</em>
         {gameLogAlt && (
-          <button
-            type="button"
+          <Pill
+            role="control"
+            fill="paper"
             className="mastheadpill"
-            aria-pressed={showAlt}
+            pressed={showAlt}
             onClick={() => setShowAlt((v) => !v)}
           >
             <span className="mastheadpill__dot" aria-hidden="true" />
             {altLevel} log
-          </button>
+          </Pill>
         )}
       </h3>
       <ul className="gamelog">

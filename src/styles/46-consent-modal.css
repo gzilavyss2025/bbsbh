@@ -136,24 +136,12 @@
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
+/* Play / Stop is a Button (#1131 slice 4): <Button size="control">. Only its
+   place in the head row is its own: it does not shrink, and "Play" and "Stop"
+   keep one width so the head does not jump. */
 .animlab__play {
   flex: none;
   min-width: 62px;
-  padding: var(--space-1) var(--space-3);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-body);
-  cursor: pointer;
-}
-.animlab__play:hover {
-  border-color: var(--ink-1);
-  color: var(--text-heading);
 }
 .animlab__live {
   padding: var(--space-3h);

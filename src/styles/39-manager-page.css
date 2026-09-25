@@ -532,31 +532,16 @@
 }
 
 /* ---------------------------------------------------- postseason odds pill
-   The Standings section's "Postseason Odds" trigger (SectionTitle's action
-   slot) — same interactive-pill contract as .attendance__glyph--open (ink
-   fill, inverse text, pill radius) rather than a plain text link, since
-   the ask was specifically a pill. Both wore kraft until ADR-0083, which
-   named this pill as one of the four wearing it wrongly. Opens
+   The Standings section's "Postseason Odds" trigger, and the Schedule card's
+   "Stamp In": the one action on a card's band. Each is <Pill role="control"
+   fill="ink"> now (#1131 slice 5): navy, paper text, 34px, with the Pill's
+   hover, press and focus ring. It wore kraft until ADR-0083, which named it
+   as one of the four wearing it wrongly; it must not go back to --seal*. On a
+   club-themed band, 09-team-info.css tints it to a paper chip through the
+   pill's own properties. Only its place in the head row is its own. Opens
    PostseasonOddsModal. */
 .psodds-pill {
   flex: none;
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-1) var(--space-2h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--accent-primary);
-  color: var(--text-on-ink);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-.psodds-pill:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
 }
 /* Same bottom-sheet head/close chrome as .gsmodal__head/.gsmodal__close
    (.sheet, both reused as-is) — only the subtitle and table below the head

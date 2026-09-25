@@ -25,39 +25,26 @@
   margin-block-end: var(--space-2);
 }
 
+/* Each chip is a Pill control (#1131 slice 4): <Pill role="control"
+   fill="paper" pressed>, drawn by system/pill.css at --control-min. The host
+   is a tint, the inset paper and the muted ink it always wore, set through the
+   pill's custom properties. The selected chip is the Pill's own state: navy,
+   with a tick. The old --sm modifier was a second, smaller size; a control has
+   one height, so it is gone. */
 .cmdmap__chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1h);
-  padding: var(--space-1h) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-inset);
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-wide);
-  color: var(--text-muted);
-  cursor: pointer;
+  --pill-fill: var(--surface-inset);
+  --pill-ink: var(--text-muted);
 }
 
-.cmdmap__chip--sm {
-  padding: var(--space-1) var(--space-2);
-}
-
-.cmdmap__chip--on {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-}
-
-/* Under the sample floor. The label stays at --text-caption rather than fading
-   toward the paper: the chip is grey BECAUSE of the number on it, so the number
-   has to stay readable. The border carries the state, not the ink. */
+/* Under the sample floor: a kind, not a size. The label stays at
+   --text-caption rather than fading toward the paper: the chip is grey
+   BECAUSE of the number on it, so the number has to stay readable. The dashed
+   edge carries the state, not the ink: a read on too few pitches is pencilled
+   in. */
 .cmdmap__chip--thin {
-  background: var(--bg-page);
+  --pill-fill: var(--bg-page);
+  --pill-ink: var(--text-caption);
   border-style: dashed;
-  color: var(--text-caption);
 }
 
 .cmdmap__chipn {
@@ -66,7 +53,7 @@
   font-weight: var(--w-regular);
   color: var(--text-caption);
 }
-.cmdmap__chip--on .cmdmap__chipn {
+.cmdmap__chip[aria-pressed='true'] .cmdmap__chipn {
   color: var(--text-on-ink);
 }
 

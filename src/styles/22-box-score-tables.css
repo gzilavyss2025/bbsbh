@@ -26,15 +26,21 @@
 }
 
 /* The revealed slate's category filter (ResultFilterBar, GameSelect.jsx) —
-   one toggle chip per storyline that occurs somewhere today. Unselected: a
-   light tint of the chip's OWN accent color (--chip-accent) behind a colored
-   border, but ALWAYS dark heading-ink text — the raw accent itself isn't a
-   safe text color at every one of these hues (--marker, in particular, fails
-   WCAG AA as text on the page) so text never carries the accent directly,
-   only the background tint + border do. Selected: filled solid, the exact
-   same accent/text pairing the matching card's own pill uses (see
-   .flipback__pill--scenario/--crown, already contrast-checked) — a chip and
-   the cards it's currently filtering to read as one color. */
+   one toggle chip per storyline that occurs somewhere today. Each chip is a
+   Pill control (#1131 slice 4): <Pill role="control" fill="paper" pressed>.
+   The height, the focus ring and the states are the Pill's.
+
+   AT REST, A HOST TINT: a light tint of the chip's OWN accent colour
+   (--chip-accent, a SCENARIO colour from FILTER_CHIPS in lib/resultCards.js,
+   not a club colour) behind an edge in that colour, but ALWAYS dark
+   heading-ink text — the raw accent is not a safe text colour at every one of
+   these hues (--marker, in particular, fails WCAG AA as text on the page), so
+   the text never carries the accent. The tint is the pill's custom properties,
+   never a repaint (test/pill-cascade.test.js).
+
+   SELECTED is the Pill's own state: navy, with a tick. It no longer fills
+   with the scenario colour, so a pressed chip reads the same as every other
+   filter in the app. */
 .slate-filterbar {
   margin: 12px 0;
 }
@@ -57,29 +63,11 @@
   color: var(--text-caption);
 }
 .slate-filterbar__chip {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  padding: var(--space-1) var(--space-3h);
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--chip-accent) 16%, var(--bg-page));
-  color: var(--text-heading);
-  border: var(--bw-rule) solid var(--chip-accent);
-}
-.slate-filterbar__chip--active {
-  background: var(--chip-accent);
-  color: var(--chip-text);
-}
-.slate-filterbar__chip:active {
-  transform: translateY(1px);
-}
-.slate-filterbar__chip:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
+  --pill-fill: color-mix(in srgb, var(--chip-accent) 16%, var(--bg-page));
+  --pill-edge: var(--chip-accent);
+  --pill-ink: var(--text-heading);
+  --pill-fill-hover: color-mix(in srgb, var(--chip-accent) 28%, var(--bg-page));
+  --pill-edge-hover: var(--chip-accent);
 }
 
 .flipcard {

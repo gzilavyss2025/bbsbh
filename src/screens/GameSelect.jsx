@@ -38,6 +38,7 @@ import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
 import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { Pill } from '../components/ui/control/Pill.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
 import {
   FILTER_CHIPS,
@@ -1127,21 +1128,19 @@ function ResultFilterBar({ chips, active, onToggle, shown, total }) {
   return (
     <div className="slate-filterbar">
       <div className="slate-filterbar__chips" role="group" aria-label="Filter by result" aria-controls="slate-games">
-        {chips.map((c) => {
-          const isActive = active.has(c.key)
-          return (
-            <button
-              key={c.key}
-              type="button"
-              className={`slate-filterbar__chip ${isActive ? 'slate-filterbar__chip--active' : ''}`}
-              style={{ '--chip-accent': c.accent, '--chip-text': c.text }}
-              aria-pressed={isActive}
-              onClick={() => onToggle(c.key)}
-            >
-              {c.label}
-            </button>
-          )
-        })}
+        {chips.map((c) => (
+          <Pill
+            key={c.key}
+            role="control"
+            fill="paper"
+            className="slate-filterbar__chip"
+            style={{ '--chip-accent': c.accent }}
+            pressed={active.has(c.key)}
+            onClick={() => onToggle(c.key)}
+          >
+            {c.label}
+          </Pill>
+        ))}
       </div>
       <p className="slate-filterbar__count" role="status">
         {active.size > 0 ? `Showing ${shown} of ${total} games` : ''}

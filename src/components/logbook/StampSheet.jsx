@@ -9,6 +9,7 @@ import { resolveStampArt } from '../../lib/ballpark/stampPrint.js'
 import { useCopy } from '../../copy/copyContext.js'
 import { LEVELS } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Pill } from '../ui/control/Pill.jsx'
 import { StampDetailModal } from './StampDetailModal.jsx'
 
 // THE STAMP SHEET — the clubs and the ballparks in your book, drawn as two
@@ -91,15 +92,15 @@ export function StampSheet({ stamps = [], factsByPk = {}, counts = false }) {
     <div className="stampsheet">
       <div className="stampsheet__levels" role="group" aria-label="Level">
         {LEVELS.map((lvl) => (
-          <button
+          <Pill
             key={lvl.sportId}
-            type="button"
-            aria-pressed={lvl.sportId === sportId}
-            className={lvl.sportId === sportId ? 'is-active' : ''}
+            role="control"
+            figure
+            pressed={lvl.sportId === sportId}
             onClick={() => setSportId(lvl.sportId)}
           >
             {lvl.label}
-          </button>
+          </Pill>
         ))}
       </div>
 

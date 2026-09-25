@@ -264,12 +264,18 @@
 /* Header buttons/pills/toggles ride on a themed bar as neutral opaque
    chips — the same "card floating on the bar" convention the lineup page's
    Game Notes button already uses (this file, ~4440) — rather than
-   recoloring the app's own kraft/seal chrome per club, which would fight
-   some clubs' colors and vanish into others'. */
+   recoloring the app's own chrome per club, which would fight some clubs'
+   colors and vanish into others'. A navy ink pill disappears on a navy bar.
+   The band's Pill (#1131 slice 5) takes the paper chip as a host tint: it
+   sets the pill's own fill, edge, text and the two hover values, and never
+   repaints background, color or border (test/pill-cascade.test.js). No club
+   colour reaches the control (ADR-0030). */
 .team-hub.is-themed .psodds-pill {
-  border-color: var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-heading);
+  --pill-fill: var(--surface-card);
+  --pill-edge: var(--border-rule);
+  --pill-text: var(--text-heading);
+  --pill-fill-hover: var(--surface-inset);
+  --pill-edge-hover: var(--text-caption);
 }
 .team-hub.is-themed .roster-super__toggle {
   border-color: var(--border-rule);
