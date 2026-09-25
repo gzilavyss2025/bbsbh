@@ -270,9 +270,15 @@ const DROPPED_5 = {
   '.team-hub.is-themed .psodds-pill|color':
     'carried by --pill-text: an ink pill reads its text from --pill-text, not --pill-ink, so the tint sets that one (COVERS maps only --pill-ink to color)',
 }
+// ---- slice 6 ----
+// Empty on purpose: none of slice 6's 10 rows land on Pill. The CTA moves to
+// Button (see button-audit or the PR body), the seven icon buttons and the
+// two stamp slots change no code.
+const PAIRS_6 = []
+const DROPPED_6 = {}
 // ---- end of slots ----
-const PAIRS_BY_SLICE = { 1: PAIRS_1, 2: PAIRS_2, 3: PAIRS_3, 4: PAIRS_4, 5: PAIRS_5 }
-const DROPPED_BY_SLICE = { 1: DROPPED_1, 2: DROPPED_2, 3: DROPPED_3, 4: DROPPED_4, 5: DROPPED_5 }
+const PAIRS_BY_SLICE = { 1: PAIRS_1, 2: PAIRS_2, 3: PAIRS_3, 4: PAIRS_4, 5: PAIRS_5, 6: PAIRS_6 }
+const DROPPED_BY_SLICE = { 1: DROPPED_1, 2: DROPPED_2, 3: DROPPED_3, 4: DROPPED_4, 5: DROPPED_5, 6: DROPPED_6 }
 const PAIRS = PAIRS_BY_SLICE[SLICE]
 const DROPPED = DROPPED_BY_SLICE[SLICE]
 if (!PAIRS) throw new Error(`pill-audit.mjs: no pair slot for SLICE=${SLICE}`)

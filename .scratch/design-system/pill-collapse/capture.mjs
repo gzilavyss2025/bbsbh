@@ -88,7 +88,9 @@ const TARGETS_4 = (await import('./s4/targets.mjs')).TARGETS
 // ---- slice 5 ----
 const TARGETS_5 = (await import('./s5/targets.mjs')).TARGETS
 // ---- slice 6 ----
-const TARGETS_6 = []
+const TARGETS_6 = [
+  { name: 'poster-save', url: '/09222026/tbnyy/preview', w: 1280, sel: ['.posterstudio__save'] },
+]
 // ---- end of slots ----
 const TARGETS_BY_SLICE = { 1: TARGETS_1, 2: TARGETS_2, 3: TARGETS_3, 4: TARGETS_4, 5: TARGETS_5, 6: TARGETS_6 }
 const TARGETS_ALL = TARGETS_BY_SLICE[SLICE]

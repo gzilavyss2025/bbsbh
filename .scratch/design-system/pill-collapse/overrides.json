@@ -424,70 +424,80 @@
     "fill": "paper",
     "verdict": "rename-out",
     "slice": 6,
-    "reason": "x icon button, 44px wide hit area, no text — an IconButton (Button family, #1130), not a capsule"
+    "reason": "x icon button, 44px wide hit area, no text — an IconButton (Button family, #1130), not a capsule",
+    "settled": "deferred to #1209"
   },
   ".gamefindersheet__close": {
     "role": "control",
     "fill": "other:none",
     "verdict": "rename-out",
     "slice": 6,
-    "reason": "44x44 x close — radius only rounds the hover/focus ring"
+    "reason": "44x44 x close — radius only rounds the hover/focus ring",
+    "settled": "deferred to #1209"
   },
   ".searchfield__clear": {
     "role": "control",
     "fill": "other:none",
     "verdict": "rename-out",
     "slice": 6,
-    "reason": "44x44 x clear — icon button"
+    "reason": "44x44 x clear — icon button",
+    "settled": "deferred to #1209"
   },
   ".favteamsheet__close": {
     "role": "control",
     "fill": "other:none",
     "verdict": "rename-out",
     "slice": 6,
-    "reason": "44x44 x close — icon button"
+    "reason": "44x44 x close — icon button",
+    "settled": "deferred to #1209"
   },
   ".sheet__close": {
     "role": "control",
     "fill": "other:none",
     "verdict": "rename-out",
     "slice": 6,
-    "reason": "44x44 x close (3 consumers) — icon button"
+    "reason": "44x44 x close (3 consumers) — icon button",
+    "settled": "deferred to #1209"
   },
   ".logomodal__close": {
     "role": "control",
     "fill": "other:none",
     "verdict": "rename-out",
     "slice": 6,
-    "reason": "32x32 x close, absolute — icon button (a circle)"
+    "reason": "32x32 x close, absolute — icon button (a circle)",
+    "settled": "deferred to #1209"
   },
   ".infopop__btn": {
     "role": "control",
     "fill": "outline",
     "verdict": "rename-out",
     "slice": 6,
-    "reason": "18x18 italic 'i' — a circle icon button, not a capsule"
+    "reason": "18x18 italic 'i' — a circle icon button, not a capsule",
+    "settled": "deferred to #1209"
   },
   ".posterstudio__save": {
     "role": "control",
     "fill": "ink",
     "verdict": "rename-out",
     "slice": 6,
-    "reason": "primary CTA at --fs-body, 12px 20px padding — a Button (btn--primary), not a Pill"
+    "reason": "primary CTA at --fs-body, 12px 20px padding — a Button (btn--primary), not a Pill",
+    "settled": "moved to Button (slice 6)"
   },
   ".logbook__pending": {
     "role": "tag",
     "fill": "outline",
     "verdict": "rename-out",
     "slice": 6,
-    "reason": "aspect-ratio:1 dashed CIRCLE = an empty stamp slot on StampCollection.jsx (a STAMP_ALLOWLIST surface). Geometry is the stamp's footprint — leave it alone"
+    "reason": "aspect-ratio:1 dashed CIRCLE = an empty stamp slot on StampCollection.jsx (a STAMP_ALLOWLIST surface). Geometry is the stamp's footprint — leave it alone",
+    "settled": "kept: stamp slot"
   },
   ".passportpage__pending": {
     "role": "tag",
     "fill": "outline",
     "verdict": "rename-out",
     "slice": 6,
-    "reason": "same empty stamp slot on PassportPage.jsx (STAMP_ALLOWLIST surface)"
+    "reason": "same empty stamp slot on PassportPage.jsx (STAMP_ALLOWLIST surface)",
+    "settled": "kept: stamp slot"
   },
   ".pbp__rbi": {
     "role": "tag",
