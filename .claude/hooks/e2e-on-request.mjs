@@ -25,16 +25,33 @@ const ASK = new RegExp(
   'i',
 )
 
-// The Playwright TEST runner. `playwright install` and the one-off shot
-// scripts (`e2e/shots/*.mjs`) are not tests, so they stay open.
-const RUNNER = /\bnpm\s+run\s+(?:e2e|visual)\b|\bplaywright(?:\.cmd)?\s+test\b/
+// The Playwright TEST runner, at the START of a command: after any env
+// assignments (`E2E_PORT=5172`, `$env:E2E_PORT=5172`), an optional `npx`,
+// and an optional path. `playwright install` and the one-off shot scripts
+// (`e2e/shots/*.mjs`) are not tests, so they stay open.
+const RUNNER =
+  /^(?:(?:[A-Za-z_]\w*=\S*|\$env:\w+\s*=\s*\S+)\s+)*(?:\S*[\\/])?(?:npx(?:\.cmd)?\s+)?(?:npm(?:\.cmd)?\s+run\s+(?:e2e|visual)\b|(?:\S*[\\/])?playwright(?:\.cmd)?\s+test\b)/i
 
 export function asksForSuite(prompt) {
   return typeof prompt === 'string' && ASK.test(prompt)
 }
 
+// A command that only MENTIONS the runner (a grep pattern, a commit message,
+// a heredoc body) is not a run. So drop text that is data, not a command,
+// then test each command in the chain from its start.
 export function startsSuite(command) {
-  return typeof command === 'string' && RUNNER.test(command)
+  if (typeof command !== 'string') return false
+  const code = command
+    // Heredoc bodies (<<EOF … EOF, <<'EOF' … EOF) and PowerShell here-strings.
+    .replace(/<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*?\n\s*\2[ \t]*(?=\n|$)/g, ' ')
+    .replace(/@(['"])\r?\n[\s\S]*?\r?\n\1@/g, ' ')
+    // `bash -c "…"` / `pwsh -Command "…"`: the quoted text IS a command.
+    .replace(/(^|\s)-(?:c|Command)\s+(["'])([\s\S]*?)\2/g, '$1;$3;')
+    // PowerShell's call operator: `& "C:\…\playwright.cmd" test`.
+    .replace(/(?<!&)&(?!&)\s*(["'])([^"']*)\1/g, (_, _q, p) => `;${p.replace(/\s/g, '_')}`)
+    // Any other quoted text is an argument, not a command.
+    .replace(/"(?:[^"\\]|\\.)*"|'[^']*'/g, ' ')
+  return code.split(/&&|\|\||[;|&()\n]/).some((part) => RUNNER.test(part.trim()))
 }
 
 function flagPath(sessionId) {
