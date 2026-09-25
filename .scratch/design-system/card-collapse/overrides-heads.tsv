@@ -3,6 +3,7 @@
 # verdict: band | label | rule | note (a second line: the ADR-0084 ledger renames it __note) | title-keep (a PAGE or MODAL title, not a section head) | bespoke | hold | lab | notice
 # slice: H1 band · H2 label (+rule) · H3 notes (the ledger's __kicker/__eyebrow renames) · - none
 # LANDED in slice H1a (#1113): the nine band rows (.metricbar, .metricbar__title, .is-themed .metricbar, the four hub heads and their themed rule, .player.is-themed .section__title--bar) are system/section-head.css now, so their rows left this file.
+# LANDED in slice H2 (#1113): .section__title (both SectionTitle components and 20 hand-written heads), .milestonewatch__title, .txcard__head, .rankgrp__title, .clubsseen__title, .coverpick__heading and the offseason section heads are SectionHead labels or rules now, so their rows left this file.
 .wordmarklab__eyebrow, .wordmarklab__contextlabel, .wordmarklab__selection > span	lab	kicker	-	wordmark lab lines; the ledger renames .wordmarklab__eyebrow → __note (five different lines on one page)
 .topbar__title	title-keep	title	-	the app's page title in the top bar (35 files). A page title, not a section head
 .wiredock__title, .wiredock__note	label	label	H2	the wire dock's caps title + note in one rule — a label head with its note slot
@@ -14,7 +15,6 @@
 .is-themed .abs__title, .is-themed .halfdefense__title	band	band	H1	themed ABS + defence bands (box score + innings). Allowlisted. SEAL SCOPE
 .lineupteam.is-themed .lineupteam__name	band	band	H1	a PER-TEAM band inside the entering-lineup card — two bands in one card, each its own club. Allowlisted. SectionHead must allow a band that is not the card's first row
 .roster.is-themed .roster__toggle	band	band	H1	the roster drawer's band IS a <button> (it opens the drawer). Allowlisted. SectionHead needs as="button", or the toggle stays bespoke
-.section__title	label	label	H2	SectionTitle.jsx's class, 26 files. No hairline in its own rule; margin 18px 0 8px is off-scale. SectionHead replaces SectionTitle
 .brewblurb__title	label	label	H2	a small title inside the What's Brewing modal blurb
 .pregameboard__title	bespoke	title	-	the pre-game scoreboard's own title (PregameScoreboard.jsx) — part of a scoreboard graphic. SEAL SCOPE
 .abs__title	band	band	H1	undressed navy+kraft band on the ABS block. Allowlisted (12-sealbox.css). SEAL SCOPE
@@ -38,20 +38,16 @@
 .pitchers__title	band	band	H1	Pitchers band. Allowlisted. SEAL SCOPE (ADR-0009 gates the table, not the head)
 .boxscore__title	title-keep	title	-	the box score page title. SEAL SCOPE
 .gamestory__title	label	label	H2	game story card label
-.milestonewatch__title	label	label	H2	"MILESTONE WATCH" — the label-inside-an-inset-box idiom (critique finding 3) becomes a plain label head
 .contractcard__eyebrow, .contractcard__salary > span, .contractcard__scorebug dt, .contractcard__ticker dt, .contractcard__factcaption, .contractcard__segyear, .contractcard__baryear, .contractcard__controlhead span	note	kicker	H3	ledger: .contractcard__eyebrow → .contract__note ("Player compensation" over <h2>Contract</h2>) — the kicker-over-title idiom the issue retires. The other seven selectors in this list are figure and caption labels that share the caps recipe; they move with the block, not onto SectionHead
 .delaycard__title	notice	plain	-	the rain-delay card title — Notice family (#1132). SEAL SCOPE
-.txcard__head	label	label	H2	Transactions head stays a plain label ON PURPOSE: its deck bleeds past the card, so a bolted band reads as broken (09-team-info.css comment). Never band
 .roster-sub__title	label	label	H2	an <h4> SUB-head inside a card body ("Position players · season WAR") — a second-level head: SectionHead needs a level, or this stays a namespace rule
 .levelprog__title	label	title	H2	the card's name in --fs-h3 INSIDE the card: "a card's name is its head" turns it into the label head
 .prospectcard__title	label	title	H2	same as .levelprog__title
-.rankgrp__title	label	label	H2	hairline caps label (BallparkFacts rank groups)
 .tscoremodal__kicker	note	kicker	H3	ledger: → .tscoremodal__note ("How We Score It")
 .scorebookstory__kicker	note	kicker	H3	ledger: → .scorebookstory__note ("The 22 Scorebook")
 .awardord__hd	lab	plain	-	admin award-order editor (ledger: → .awardord__title)
 .animlab__title	lab	plain	-	animation lab
 .bilab__title	lab	plain	-	between-innings lab
-.clubsseen__title	label	label	H2	"Clubs seen" caps label in the logbook (ClubsSeen.jsx) — stamp-adjacent page, no stamp art in this block
 .stampcard__title	hold	plain	-	HOLD with .stampcard (ADR-0035)
 .stampstrip__eyebrow	note	kicker	H3	ledger: → .stampstrip__note (three-way two-step). StampGameButton.jsx is on STAMP_ALLOWLIST: a class RENAME only, no new import
 .passcover__title	bespoke	title	-	the passport cover title (ADR-0036) — book art
@@ -61,7 +57,6 @@
 .introsheet__eyebrow	note	kicker	H3	ledger: → .introsheet__note (the step line in a modal)
 .moredir__title	title-keep	title	-	/more page title (--fs-display-md)
 .stampin__title	title-keep	title	-	Stamp In page title (ADR-0042)
-.coverpick__heading	label	plain	H2	ledger: → .coverpick__title; a caps label in the cover picker
 .bpadmin__title	lab	plain	-	ballpark admin gear
 .posterstudio__title	label	title	H2	poster studio panel name in --fs-h3
 .iddrawer__title	lab	plain	-	identity drawer (admin gear)

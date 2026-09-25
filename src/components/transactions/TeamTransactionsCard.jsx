@@ -3,6 +3,7 @@ import { loadMoreTeamTransactions } from '../../api/teamTransactions.js'
 import { DayTab, TxStory, dayTabParts } from './TxStory.jsx'
 import { DeckNudge } from '../teamstats/DeckNudge.jsx'
 import { Door } from '../ui/control/Door.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The deck's per-card scroll step (card width + gap, both from .txcard__scroll
 // / .txstory in index.css) — DeckNudge's click target. Most cards are 320px
@@ -133,10 +134,12 @@ export function TeamTransactionsCard({
 
   return (
     <section className="txcard" aria-label="Team Transactions">
-      <div className="txcard__head">
-        <span>Transactions</span>
-        <DeckNudge scrollRef={scrollRef} cardStep={CARD_STEP} label="team transactions" />
-      </div>
+      <SectionHead
+        className="txcard__head"
+        action={<DeckNudge scrollRef={scrollRef} cardStep={CARD_STEP} label="team transactions" />}
+      >
+        Transactions
+      </SectionHead>
       <div
         className="txcard__scroll"
         ref={scrollRef}

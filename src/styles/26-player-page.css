@@ -1024,14 +1024,9 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
 }
+/* A SectionHead label (#1113); only its place in the box is kept here. */
 .milestonewatch__title {
   margin: 0 0 4px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--graphite);
 }
 .milestonewatch__row {
   display: flex;

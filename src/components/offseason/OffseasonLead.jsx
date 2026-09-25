@@ -6,6 +6,7 @@ import { LongAtBats } from './LongAtBats.jsx'
 import { SeasonRecord } from './SeasonRecord.jsx'
 import { WinterCalendar } from './WinterCalendar.jsx'
 import { useCopy } from '../../copy/copyContext.js'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // THE OFFSEASON LEAD — the same roster wire, promoted.
 //
@@ -63,14 +64,11 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
       className="oseason"
       aria-label={`The ${winter.seasonEnded} offseason`}
     >
-      <div className="oseason__head">
-        {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
-            invariant is never a per-component .toUpperCase() (ADR-0017). */}
-        <h2 className="oseason__title">Transactions</h2>
-        <p className="oseason__note">
-          {t('offseason.leadNote')}
-        </p>
-      </div>
+      {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
+          invariant is never a per-component .toUpperCase() (ADR-0017). */}
+      <SectionHead as="h2" className="oseason__head" note={t('offseason.leadNote')}>
+        Transactions
+      </SectionHead>
 
       {/* The wire renders nothing at all while its fetch is in flight and on a
           failure — the same silence the rail keeps. On the offseason page that

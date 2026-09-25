@@ -11,6 +11,7 @@ import { LevelNav } from '../team/LevelNav.jsx'
 import { PassportCover } from './PassportCover.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { LEAGUE_MARK_LABELS, leagueMarkBox, leagueMarkUrl } from './leagueMarks.js'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // How a Game Log book's cover is chosen — the one picker, used by the
 // create-a-book page and by a book's Settings sheet, so the two can never
@@ -163,11 +164,11 @@ export function BookCoverPicker({ book, onChange }) {
         {preview}
         <div className="coverpick__halves">
           <section className="coverpick__half">
-            <h3 className="coverpick__heading">Use a league logo</h3>
+            <SectionHead className="coverpick__heading">Use a league logo</SectionHead>
             <PresetGrid book={book} onChange={onChange} />
           </section>
           <section className="coverpick__half">
-            <h3 className="coverpick__heading">Use team colors</h3>
+            <SectionHead className="coverpick__heading">Use team colors</SectionHead>
             <LevelNav sportId={level} onChange={setLevelPick} />
             <Button
               size="control"
@@ -214,7 +215,7 @@ export function BookCoverPicker({ book, onChange }) {
 
       {step === 1 && usingClub && (
         <>
-          <h3 className="coverpick__heading">Pick a level</h3>
+          <SectionHead className="coverpick__heading">Pick a level</SectionHead>
           <LevelNav
             sportId={level}
             onChange={(sportId) => {
@@ -235,14 +236,14 @@ export function BookCoverPicker({ book, onChange }) {
 
       {step === 1 && !usingClub && (
         <>
-          <h3 className="coverpick__heading">Pick a color</h3>
+          <SectionHead className="coverpick__heading">Pick a color</SectionHead>
           <ColorRow book={book} onChange={onChange} />
         </>
       )}
 
       {step === 2 && usingClub && (
         <>
-          <h3 className="coverpick__heading">Pick a club</h3>
+          <SectionHead className="coverpick__heading">Pick a club</SectionHead>
           <ClubPicker
             teams={teams}
             value={book?.coverTeamId ?? null}

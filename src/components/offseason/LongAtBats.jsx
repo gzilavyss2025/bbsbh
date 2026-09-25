@@ -5,6 +5,7 @@ import { useRouteLink } from '../../lib/nav.js'
 import { monthDayShort } from '../../lib/dates.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // THE NOTEBOOK, AT MLB — one note about the season that just finished (issue
 // #1078, step 4 of #1038).
@@ -78,12 +79,11 @@ export function LongAtBats({ season }) {
 
   return (
     <section className="note note--stories" aria-label={`Twelve-pitch at-bats in the ${season} season`}>
-      <div className="oseason__head">
-        {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
-            invariant is never a per-component .toUpperCase() (ADR-0017). */}
-        <h3 className="oseason__title">The notebook</h3>
-        <p className="oseason__note">{season} season</p>
-      </div>
+      {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
+          invariant is never a per-component .toUpperCase() (ADR-0017). */}
+      <SectionHead as="h3" className="oseason__head" note={<>{season} season</>}>
+        The notebook
+      </SectionHead>
 
       <div className="note__body">
         <div className="note__figure">

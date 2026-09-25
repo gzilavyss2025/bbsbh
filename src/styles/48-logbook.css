@@ -159,14 +159,9 @@
   margin: var(--space-6) 0;
 }
 
+/* A SectionHead label (#1113); only its place is kept here. */
 .clubsseen__title {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-heading);
 }
 
 .clubsseen__lede {
