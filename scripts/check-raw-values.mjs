@@ -71,8 +71,8 @@ const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 export const BUDGETS = {
   hex: 26,
   radius: 83,
-  motion: 65,
-  shadow: 44,
+  motion: 63,
+  shadow: 43,
 }
 
 export const KINDS = Object.keys(BUDGETS)
