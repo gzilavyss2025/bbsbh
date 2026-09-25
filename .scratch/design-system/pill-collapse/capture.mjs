@@ -11,6 +11,9 @@
 // entries set before the load, for a tag that renders only after a reveal),
 // `click` (a tab to open first), `focus` (a PlayerLink to focus, for the hover
 // card) and `scroll` (wheel down first, for a card that mounts on sight).
+// Slice 4 adds `states` (a control's states, see capture-states.mjs), `type`
+// ([selector, text]: type into a field first, for a list that fills on a
+// search) and `clicks` (several locators to click in order).
 //
 // Adapted from ../button-collapse/capture.mjs. A tag has no states, so each
 // target is one 2x crop at rest (two, when a page shows a second variant worth
@@ -22,6 +25,7 @@ import { chromium } from '@playwright/test'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { shootStates } from './capture-states.mjs'
 
 const phase = process.argv[2] || 'before'
 const base = process.argv[3] || 'http://localhost:5170'
@@ -80,7 +84,7 @@ const TARGETS_2 = [
 // ---- slice 3 ----
 const TARGETS_3 = []
 // ---- slice 4 ----
-const TARGETS_4 = []
+const TARGETS_4 = (await import('./s4/targets.mjs')).TARGETS
 // ---- slice 5 ----
 const TARGETS_5 = []
 // ---- slice 6 ----
@@ -134,6 +138,9 @@ for (const t of TARGETS) {
     await page.goto(`${base}${t.url}${sep}nointro`, { waitUntil: 'domcontentloaded' })
     await settle(page)
     if (t.click) { await page.locator(t.click).first().click(); await settle(page) }
+    // A step that is already done (a half revealed earlier in the same context) is skipped.
+    for (const c of t.clicks || []) { await page.locator(c).first().click({ timeout: 10000 }).catch(() => console.log('skip', c)); await settle(page) }
+    if (t.type) { await page.locator(t.type[0]).first().fill(t.type[1]); await page.waitForTimeout(1500); await settle(page) }
     if (t.scroll) { for (let i = 0; i < 12; i++) { await page.mouse.wheel(0, 900); await page.waitForTimeout(200) } await settle(page) }
     if (t.focus) {
       const links = page.locator(t.focus)
@@ -186,7 +193,8 @@ for (const t of TARGETS) {
     const tight = `${t.name}--tag.png`
     const b = await el.boundingBox()
     await page.screenshot({ path: join(out, tight), clip: { x: Math.max(0, b.x - 4), y: Math.max(0, b.y - 4), width: b.width + 8, height: b.height + 8 } })
-    rows.push({ name: t.name, url: t.url, vw: t.w || W, sel, ...m, shots: [file, tight] })
+    const st = t.states ? await shootStates(page, el, t, out) : { shots: [], facts: {} }
+    rows.push({ name: t.name, url: t.url, vw: t.w || W, sel, ...m, ...st.facts, shots: [file, tight, ...st.shots] })
     console.log('ok', t.name.padEnd(18), m.rectH, m.fontSize, m.fontFamily.split(',')[0], m.color, m.borderTopColor)
   } catch (e) {
     rows.push({ name: t.name, url: t.url, error: String(e).slice(0, 200) })

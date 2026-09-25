@@ -233,122 +233,139 @@
   },
   ".mastheadpill": {
     "role": "control",
-    "fill": "outline",
+    "fill": "paper",
     "verdict": "merge",
     "slice": 4,
-    "reason": "button with aria-pressed (the 'MLB only' toggle); 3px 8px today, becomes a 34px control"
+    "reason": "button with aria-pressed (the 'MLB only' toggle); 3px 8px today, becomes a 34px control. Slice 4: fill=\"paper\", not outline: it rides a club-themed bar (ADR-0030), where a see-through pill would take 30 backdrops",
+    "landed": "slice 4"
   },
   ".depthpos": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "button, mono; selected via .is-active — convert to aria-pressed per #1166"
+    "reason": "button, mono; selected via .is-active — convert to aria-pressed per #1166",
+    "landed": "slice 4"
   },
   ".cmdmap__chip": {
     "role": "control",
     "fill": "paper",
     "verdict": "merge",
     "slice": 4,
-    "reason": "toggle button on --surface-inset; --ls-wide"
+    "reason": "toggle button on --surface-inset; --ls-wide",
+    "landed": "slice 4"
   },
   ".slate-filterbar__chip": {
     "role": "control",
     "fill": "paper",
     "verdict": "merge",
     "slice": 4,
-    "reason": "tint from inline --chip-accent (GameSelect.jsx:1137); 1.5px edge (--bw-rule). GameSelect.jsx is a stamp FORBIDDEN_SURFACE — fine, Pill imports nothing stamp-related"
+    "reason": "tint from inline --chip-accent (GameSelect.jsx:1137); 1.5px edge (--bw-rule). GameSelect.jsx is a stamp FORBIDDEN_SURFACE — fine, Pill imports nothing stamp-related",
+    "landed": "slice 4"
   },
   ".scorebookstory__filters button": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "36px filter buttons (only 36px control)"
+    "reason": "36px filter buttons (only 36px control)",
+    "landed": "slice 4"
   },
   ".stampstrip__modes button": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "32px mode toggle on the Game Log mint strip. Its consumer StampGameButton.jsx IS on check-stamp-surfaces STAMP_ALLOWLIST (one importer: BoxScore.jsx, inside the SealBox reveal). A CSS-only merge is safe; Pill.jsx must never import a stamp module, and the JSX must not move"
+    "reason": "32px mode toggle on the Game Log mint strip. Its consumer StampGameButton.jsx IS on check-stamp-surfaces STAMP_ALLOWLIST (one importer: BoxScore.jsx, inside the SealBox reveal). A CSS-only merge is safe; Pill.jsx must never import a stamp module, and the JSX must not move",
+    "settled": "deferred to #1174 (a Button, not a Pill)"
   },
   ".logbookstats__levels button": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "34px, mono --fs-small; Logbook stats level filter (stamp-adjacent, no art)"
+    "reason": "34px, mono --fs-small; Logbook stats level filter (stamp-adjacent, no art)",
+    "landed": "slice 4"
   },
   ".stampsheet__levels button": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "declaration-identical twin of .logbookstats__levels button"
+    "reason": "declaration-identical twin of .logbookstats__levels button",
+    "landed": "slice 4"
   },
   ".logbookstats__watch": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "32px, accent edge + ink"
+    "reason": "32px, accent edge + ink",
+    "settled": "moved to Button (slice 4)"
   },
   ".animlab__play": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "dev/QA page (/animation-lab); min-width 62px residual"
+    "reason": "dev/QA page (/animation-lab); min-width 62px residual",
+    "settled": "moved to Button (slice 4)"
   },
   ".coverpick__favorite": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "passport book cover picker; .is-* selected state -> aria-pressed"
+    "reason": "passport book cover picker; .is-* selected state -> aria-pressed",
+    "settled": "moved to Button (slice 4)"
   },
   ".iddrawer__btn": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "team hub identity drawer (admin gear)"
+    "reason": "team hub identity drawer (admin gear)",
+    "settled": "moved to Button (slice 4)"
   },
   ".idadmin__actions .idadmin__btn": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "border = currentColor, no fill"
+    "reason": "border = currentColor, no fill",
+    "settled": "moved to Button (slice 4)"
   },
   ".lookupdeck__usebtn": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "admin; accent edge + ink"
+    "reason": "admin; accent edge + ink",
+    "settled": "moved to Button (slice 4)"
   },
   ".trailstrip__followbtn, .trailstrip__summarybtn": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "34px already; carries --shadow-card (drop it); no own font-family (inherits body)"
+    "reason": "34px already; carries --shadow-card (drop it); no own font-family (inherits body)",
+    "settled": "moved to Button (slice 4)"
   },
   ".dlab__jumplink": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "design-lab jump links (<a>)"
+    "reason": "design-lab jump links (<a>)",
+    "settled": "moved to Button (slice 4)"
   },
   ".trrank__related a": {
     "role": "control",
     "fill": "outline",
     "verdict": "merge",
     "slice": 4,
-    "reason": "<a> links, 8px 12px padding"
+    "reason": "<a> links, 8px 12px padding",
+    "landed": "slice 4"
   },
   ".psodds-pill": {
     "role": "control",

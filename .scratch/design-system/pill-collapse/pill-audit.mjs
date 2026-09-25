@@ -30,14 +30,16 @@ const now = (f) => { try { return readFileSync(join(ROOT, 'src/styles', f), 'utf
 
 // Properties of the rule written exactly as `sel`, top level only unless
 // `media` names the at-rule params it sits in.
-function props(css, sel, media = null) {
+function props(css, sel, media = null, nth = 0) {
   if (!css) return null
   let found = null
+  let seen = 0
   postcss.parse(css).walkRules((r) => {
     if (found) return
     const inMedia = r.parent?.type === 'atrule' ? r.parent.params : null
     if (inMedia !== media) return
     if (r.selectors.map((s) => s.trim()).includes(sel)) {
+      if (seen++ < nth) return
       found = r.nodes.filter((n) => n.type === 'decl').map((d) => d.prop)
     }
   })
@@ -49,6 +51,10 @@ const COVERS = {
   '--pill-edge': ['border-color'],
   '--pill-ink': ['color', 'border-color'],
   'border-style': ['border'],
+  // The Button's skin is custom properties too (system/button.css).
+  '--btn-fill': ['background', 'background-color'],
+  '--btn-edge': ['border-color'],
+  '--btn-ink': ['color'],
 }
 const expand = (list) => new Set(list.flatMap((p) => [p, ...(COVERS[p] || [])]))
 
@@ -58,6 +64,16 @@ const pill = (mods = []) => [
   ...mods.flatMap((m) => props(pillCss, m) || []),
   // The component writes --pill-ink inline when a consumer passes `ink`.
   '--pill-ink',
+]
+
+// A row that became a BUTTON, not a pill (slice 4 on), sets `button: true`:
+// its cover is .btn plus the size modifier it wears (.btn--control), read from
+// system/button.css, instead of the pill's rules.
+const btnCss = now('system/button.css')
+const btn = (mods = []) => [
+  ...(props(btnCss, '.btn') || []),
+  ...(props(btnCss, '.btn--control') || []),
+  ...mods.flatMap((m) => props(btnCss, m) || []),
 ]
 
 // old selector @ file  →  what it became. `residual` is [file, selector] of
@@ -160,8 +176,84 @@ const DROPPED_2 = {}
 const PAIRS_3 = []
 const DROPPED_3 = {}
 // ---- slice 4 ----
-const PAIRS_4 = []
-const DROPPED_4 = {}
+// Slice 4: the controls. A Pill row covers with .pill + .pill--control (+ the
+// selected, pressed or focus rule it replaced); a Button row sets `button`.
+const CTL = '.pill--control'
+const SEL = ".pill--control[aria-pressed='true']"
+const FOCUS = '.pill--control:focus-visible'
+const BSEL = ".btn[aria-pressed='true']"
+const BFOCUS = '.btn:focus-visible'
+const BOFF = ".btn[aria-disabled='true']"
+const PAIRS_4 = [
+  { old: '.mastheadpill', file: '10-lineup.css', mods: [CTL] },
+  { old: ".mastheadpill[aria-pressed='true']", file: '10-lineup.css', mods: [SEL] },
+  own('22-box-score-tables.css', '.slate-filterbar__chip', { mods: [CTL] }),
+  { old: '.slate-filterbar__chip--active', file: '22-box-score-tables.css', mods: [SEL] },
+  { old: '.slate-filterbar__chip:active', file: '22-box-score-tables.css', mods: ['.pill--control:active'] },
+  { old: '.slate-filterbar__chip:focus-visible', file: '22-box-score-tables.css', mods: [FOCUS] },
+  own('26d-command-map.css', '.cmdmap__chip', { mods: [CTL] }),
+  { old: '.cmdmap__chip--sm', file: '26d-command-map.css', mods: [CTL] },
+  { old: '.cmdmap__chip--on', file: '26d-command-map.css', mods: [SEL] },
+  own('26d-command-map.css', '.cmdmap__chip--thin'),
+  { old: '.cmdmap__chip--on .cmdmap__chipn', file: '26d-command-map.css', residual: ['26d-command-map.css', ".cmdmap__chip[aria-pressed='true'] .cmdmap__chipn"] },
+  { old: '.depthpos', file: '31-wild-card.css', mods: [CTL, '.pill--figure'] },
+  { old: '.depthpos.is-active', file: '31-wild-card.css', mods: [SEL] },
+  { old: '.scorebookstory__filters button', file: '42-first-scorebook.css', whole: true, mods: [CTL] },
+  { old: '.scorebookstory__filters button.is-active', file: '42-first-scorebook.css', whole: true, mods: [SEL] },
+  { old: '.logbookstats__levels button', file: '48a-logbook-stats.css', whole: true, mods: [CTL, '.pill--figure'], residual: ['48a-logbook-stats.css', '.logbookstats__levels .pill'] },
+  { old: '.logbookstats__levels button.is-active', file: '48a-logbook-stats.css', whole: true, mods: [SEL] },
+  { old: '.stampsheet__levels button', file: '48c-stamp-sheet.css', whole: true, mods: [CTL, '.pill--figure'], residual: ['48c-stamp-sheet.css', '.stampsheet__levels .pill'] },
+  { old: '.stampsheet__levels button.is-active', file: '48c-stamp-sheet.css', whole: true, mods: [SEL] },
+  { old: '.trrank__related a', file: 'situational-records/66a-detail.css', whole: true, mods: [CTL], residual: ['situational-records/66a-detail.css', '.trrank__related a'] },
+  { old: '.trrank__related a.is-active', file: 'situational-records/66a-detail.css', whole: true, mods: [".pill--control[aria-current='page']"] },
+  { old: '.trrank__related a:hover', file: 'situational-records/66a-detail.css', media: '(hover: hover) and (pointer: fine)' },
+  { old: '.trrank__related a:focus-visible', file: '66-situational-records.css', whole: true, mods: [FOCUS] },
+  // ---- the rows that became Buttons ----
+  { old: '.animlab__play', file: '46-consent-modal.css', button: true, residual: ['46-consent-modal.css', '.animlab__play'] },
+  { old: '.animlab__play:hover', file: '46-consent-modal.css', button: true },
+  { old: '.logbookstats__watch', file: '48a-logbook-stats.css', button: true, residual: ['48a-logbook-stats.css', '.logbookstats__watch'] },
+  { old: '.coverpick__favorite', file: '60-book-cover-picker.css', button: true, residual: ['60-book-cover-picker.css', '.coverpick__favorite'] },
+  { old: '.coverpick__favorite.is-active', file: '60-book-cover-picker.css', button: true, mods: [BSEL] },
+  { old: '.coverpick__favorite:focus-visible', file: '60-book-cover-picker.css', button: true, mods: [BFOCUS] },
+  { old: '.idadmin__actions .idadmin__btn', file: '62-identity-admin.css', button: true },
+  { old: '.idadmin__actions .idadmin__btn', nth: 1, file: '62-identity-admin.css', button: true },
+  { old: '.idadmin__actions .idadmin__btn--save', file: '62-identity-admin.css', button: true },
+  { old: '.idadmin__actions .idadmin__btn:disabled', file: '62-identity-admin.css', button: true, mods: [BOFF] },
+  { old: '.idadmin__actions .idadmin__btn:focus-visible', file: '62-identity-admin.css', button: true, mods: [BFOCUS] },
+  { old: '.iddrawer__btn', file: '62-identity-admin.css', button: true },
+  { old: '.iddrawer__btn:disabled', file: '62-identity-admin.css', button: true, mods: [BOFF] },
+  { old: '.iddrawer__btn:focus-visible', file: '62-identity-admin.css', button: true, mods: [BFOCUS] },
+  { old: '.lookupdeck__usebtn', file: '74a-contract-lookup.css', button: true },
+  { old: '.lookupdeck__usebtn:disabled', file: '74a-contract-lookup.css', button: true, mods: [BOFF] },
+  { old: '.lookupdeck__usebtn:focus-visible', file: '74a-contract-lookup.css', button: true, mods: [BFOCUS] },
+  { old: '.dlab__jumplink', file: 'designlab/lab.css', button: true },
+  { old: '.dlab__jumplink:focus-visible', file: 'designlab/lab.css', button: true, mods: [BFOCUS] },
+  { old: '.trailstrip__followbtn', file: 'focus/reference.css', button: true },
+  { old: '.trailstrip__followbtn', nth: 1, file: 'focus/reference.css', button: true, residual: ['focus/reference.css', '.trailstrip__followbtn'] },
+  { old: '.trailstrip__followbtn:hover', file: 'focus/reference.css', button: true },
+  { old: '.trailstrip__followbtn:focus-visible', file: 'focus/reference.css', button: true, mods: [BFOCUS] },
+  { old: ".trailstrip__followbtn[aria-disabled='true']", file: 'focus/reference.css', button: true, mods: [BOFF], residual: ['focus/reference.css', ".trailstrip__followbtn[aria-disabled='true']"] },
+]
+const RING = "the focus ring is the control's 2px outline (#1166 point 2), not box-shadow --ring"
+const HOVER = "the control's own hover, inside (hover: hover): the fill and edge a step darker"
+const DROPPED_4 = {
+  '.slate-filterbar__chip:focus-visible|box-shadow': RING,
+  '.cmdmap__chip--sm|padding': 'a second, smaller size: a control has one height (--control-min)',
+  '.trrank__related a:hover@(hover: hover) and (pointer: fine)|border-color': HOVER,
+  '.animlab__play:hover|border-color': HOVER,
+  '.animlab__play:hover|color': HOVER + '; the ink does not change',
+  '.coverpick__favorite.is-active|box-shadow': 'paper does not float (#1166 point 3); selected is navy with a tick',
+  '.idadmin__actions .idadmin__btn|font': "a reset to the hero's type: the Button sets its own face",
+  '.idadmin__actions .idadmin__btn--save|background': "Save was the hero's ink as a fill (a club colour on a control, ADR-0030); it is an outline Button now",
+  '.idadmin__actions .idadmin__btn--save|-webkit-text-fill-color': 'the same inversion; the outline Button draws its own ink',
+  '.idadmin__actions .idadmin__btn:focus-visible|box-shadow': RING,
+  '.iddrawer__btn:focus-visible|box-shadow': RING,
+  '.lookupdeck__usebtn:disabled|cursor': "the Button's disabled cursor (default), not not-allowed",
+  '.trailstrip__followbtn|min-width': "a reset for the rail's tabs; the Button needs none",
+  '.trailstrip__followbtn#1|box-shadow': 'paper does not float (#1166 point 3)',
+  '.trailstrip__followbtn:hover|background': HOVER,
+  '.trailstrip__followbtn:focus-visible|box-shadow': RING,
+}
 // ---- slice 5 ----
 const PAIRS_5 = []
 const DROPPED_5 = {}
@@ -176,15 +268,17 @@ console.log(`Slice ${SLICE}, base ${BASE}`)
 let lost = 0
 let dropped = 0
 for (const p of PAIRS) {
-  const before = props(atBase(p.file), p.old, p.media ?? null)
-  const tag = p.media ? `${p.old}@${p.media}` : p.old
+  const before = props(atBase(p.file), p.old, p.media ?? null, p.nth ?? 0)
+  const tag = `${p.media ? `${p.old}@${p.media}` : p.old}${p.nth ? `#${p.nth}` : ''}`
   if (!before) { console.log(`${tag}: NOT FOUND at ${BASE}`); lost += 1; continue }
   const residual = p.residual ? props(now(p.residual[0]), p.residual[1]) : []
   if (p.residual && residual === null) { console.log(`${tag}: residual ${p.residual[1]} NOT FOUND`); lost += 1; continue }
   // A context rule, an element, or a media copy restates the base on purpose,
   // so the pill's base cannot be what covers it: only a residual can.
-  const isContext = p.old.includes(' ') || /__(short|full|logo)$/.test(p.old) || p.media
-  const covered = expand([...(isContext ? [] : pill(p.mods)), ...residual])
+  // `whole: true` marks a context selector that WAS the control's base rule
+  // (`.trrank__related a`): the pill it became covers it (slice 4).
+  const isContext = !p.whole && (p.old.includes(' ') || /__(short|full|logo)$/.test(p.old) || p.media)
+  const covered = expand([...(p.button ? btn(p.mods) : isContext ? [] : pill(p.mods)), ...residual])
   const lostHere = []
   const droppedHere = []
   for (const d of before) {
