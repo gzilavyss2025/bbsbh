@@ -86,7 +86,7 @@ const TARGETS_3 = []
 // ---- slice 4 ----
 const TARGETS_4 = (await import('./s4/targets.mjs')).TARGETS
 // ---- slice 5 ----
-const TARGETS_5 = []
+const TARGETS_5 = (await import('./s5/targets.mjs')).TARGETS
 // ---- slice 6 ----
 const TARGETS_6 = []
 // ---- end of slots ----

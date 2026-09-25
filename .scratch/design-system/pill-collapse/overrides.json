@@ -372,14 +372,16 @@
     "fill": "ink",
     "verdict": "merge",
     "slice": 5,
-    "reason": "the 'Postseason odds' button on the club band; navy fill. Inventory said 'seal-filled' — ADR-0083 moved it off kraft"
+    "reason": "the 'Postseason odds' button on the club band; navy fill. Inventory said 'seal-filled' — ADR-0083 moved it off kraft",
+    "landed": "slice 5"
   },
   ".trrank__jump a": {
     "role": "control",
     "fill": "ink",
     "verdict": "merge",
     "slice": 5,
-    "reason": "outline drawn ON an ink band (paper ink, 22% paper edge) — the one reversed outline"
+    "reason": "outline drawn ON an ink band (paper ink, 22% paper edge) — the one reversed outline",
+    "settled": "moved to Button (slice 5)"
   },
   ".duepill": {
     "role": "tag",

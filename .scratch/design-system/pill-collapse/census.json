@@ -1,8 +1,8 @@
 {
   "generated": "2026-09-25",
-  "rev": "22a5c2bf6 (working tree)",
+  "rev": "bbb71594e (working tree)",
   "definition": "see census.mjs header",
-  "count": 22,
+  "count": 20,
   "geometry": {
     "tag": {
       "n": 4,
@@ -30,30 +30,29 @@
       ]
     },
     "control": {
-      "n": 5,
+      "n": 3,
       "height": [
-        "(none) x2",
-        "min-h 32px x2",
-        "min-h 24px x1"
+        "min-h 24px x1",
+        "min-h 32px x1",
+        "(none) x1"
       ],
       "padding": [
-        "4px 10px x2",
         "0 10px x1",
         "0 12px x1",
-        "6px 12px x1"
+        "4px 10px x1"
       ],
       "fontSize": [
-        "var(--fs-label) (12px) x5"
+        "var(--fs-label) (12px) x3"
       ],
       "fontFamily": [
-        "var(--font-display) x5"
+        "var(--font-display) x3"
       ],
       "fontWeight": [
-        "var(--w-bold) x3",
-        "var(--w-semibold) x2"
+        "var(--w-bold) x2",
+        "var(--w-semibold) x1"
       ],
       "lineHeight": [
-        "(none) x5"
+        "(none) x3"
       ]
     }
   },
@@ -660,66 +659,6 @@
       "heuristicFill": "seal"
     },
     {
-      "selector": ".psodds-pill",
-      "file": "39-manager-page.css",
-      "line": 541,
-      "block": "psodds-pill",
-      "element": null,
-      "consumers": [
-        "screens/designlab/catalog.js",
-        "screens/team/modules/SeasonSchedule.jsx",
-        "screens/team/modules/StandingsCard.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "focus"
-      ],
-      "fill": "ink",
-      "role": "control",
-      "background": "var(--accent-primary)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-on-ink)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1) var(--space-2h)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": "var(--ls-label)",
-      "textTransform": "uppercase",
-      "decls": {
-        "flex": "none",
-        "display": "inline-flex",
-        "align-items": "center",
-        "padding": "var(--space-1) var(--space-2h)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--accent-primary)",
-        "color": "var(--text-on-ink)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-label)",
-        "text-transform": "uppercase",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": true,
-      "verdict": "merge",
-      "slice": 5,
-      "reason": "the 'Postseason odds' button on the club band; navy fill. Inventory said 'seal-filled' — ADR-0083 moved it off kraft",
-      "heuristicRole": "control",
-      "heuristicFill": "ink"
-    },
-    {
       "selector": ".photostrip__viewall",
       "file": "44-pre-game-cards.css",
       "line": 290,
@@ -1213,61 +1152,6 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "primary CTA at --fs-body, 12px 20px padding — a Button (btn--primary), not a Pill",
-      "heuristicRole": "control",
-      "heuristicFill": "ink"
-    },
-    {
-      "selector": ".trrank__jump a",
-      "file": "66-situational-records.css",
-      "line": 159,
-      "block": "trrank__jump",
-      "element": "a",
-      "consumers": [
-        "screens/SituationalRecordsPage.jsx"
-      ],
-      "tags": [
-        "nav"
-      ],
-      "states": [],
-      "fill": "ink",
-      "role": "control",
-      "background": null,
-      "border": "var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 22%, transparent)",
-      "color": "var(--text-on-ink)",
-      "height": null,
-      "minHeight": "32px",
-      "lineHeight": null,
-      "padding": "var(--space-1h) var(--space-3)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-semibold)",
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": "var(--ls-caps)",
-      "textTransform": "uppercase",
-      "decls": {
-        "flex": "0 0 auto",
-        "min-height": "32px",
-        "padding": "var(--space-1h) var(--space-3)",
-        "border": "var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 22%, transparent)",
-        "border-radius": "var(--radius-pill)",
-        "color": "var(--text-on-ink)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-semibold)",
-        "letter-spacing": "var(--ls-caps)",
-        "text-decoration": "none",
-        "text-transform": "uppercase",
-        "white-space": "nowrap"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 5,
-      "reason": "outline drawn ON an ink band (paper ink, 22% paper edge) — the one reversed outline",
       "heuristicRole": "control",
       "heuristicFill": "ink"
     }

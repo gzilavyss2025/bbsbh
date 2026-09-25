@@ -255,8 +255,21 @@ const DROPPED_4 = {
   '.trailstrip__followbtn:focus-visible|box-shadow': RING,
 }
 // ---- slice 5 ----
-const PAIRS_5 = []
-const DROPPED_5 = {}
+// Slice 5: the two band controls. .psodds-pill is a Pill control, ink fill,
+// with a themed-band tint; .trrank__jump a is a Button with an href (S4's
+// answer for the design lab's jump links), re-inked for its navy band.
+const PAIRS_5 = [
+  { old: '.psodds-pill', file: '39-manager-page.css', mods: ['.pill--control'], residual: ['39-manager-page.css', '.psodds-pill'] },
+  { old: '.psodds-pill:focus-visible', file: '39-manager-page.css', mods: ['.pill--control:focus-visible'] },
+  { old: '.team-hub.is-themed .psodds-pill', file: '09-team-info.css', residual: ['09-team-info.css', '.team-hub.is-themed .psodds-pill'] },
+  { old: '.trrank__jump a', file: '66-situational-records.css', button: true, residual: ['66-situational-records.css', '.trrank__jump a'] },
+  { old: '.trrank__jump a:focus-visible', file: '66-situational-records.css', button: true, mods: ['.btn:focus-visible'], residual: ['66-situational-records.css', '.trrank__jump a:focus-visible'] },
+  { old: '.trrank__jump a:hover', file: '66-situational-records.css', media: '(hover: hover) and (pointer: fine)', button: true, residual: ['66-situational-records.css', '.trrank__jump a'] },
+]
+const DROPPED_5 = {
+  '.team-hub.is-themed .psodds-pill|color':
+    'carried by --pill-text: an ink pill reads its text from --pill-text, not --pill-ink, so the tint sets that one (COVERS maps only --pill-ink to color)',
+}
 // ---- end of slots ----
 const PAIRS_BY_SLICE = { 1: PAIRS_1, 2: PAIRS_2, 3: PAIRS_3, 4: PAIRS_4, 5: PAIRS_5 }
 const DROPPED_BY_SLICE = { 1: DROPPED_1, 2: DROPPED_2, 3: DROPPED_3, 4: DROPPED_4, 5: DROPPED_5 }

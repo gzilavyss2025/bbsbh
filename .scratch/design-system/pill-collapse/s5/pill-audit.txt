@@ -1,0 +1,36 @@
+Slice 5, base 22a5c2bf6024f66cd1cd942956d1e4cfbc3c4940
+
+.psodds-pill  (39-manager-page.css)
+  before  : flex, display, align-items, padding, border, border-radius, background, color, font-family, font-size, font-weight, letter-spacing, text-transform, cursor
+  residual: .psodds-pill → flex
+  dropped : font-weight (one weight)
+  all covered
+
+.psodds-pill:focus-visible  (39-manager-page.css)
+  before  : outline, outline-offset
+  residual: (none — absorbed)
+  all covered
+
+.team-hub.is-themed .psodds-pill  (09-team-info.css)
+  before  : border-color, background, color
+  residual: .team-hub.is-themed .psodds-pill → --pill-fill, --pill-edge, --pill-text, --pill-fill-hover, --pill-edge-hover
+  dropped : color — carried by --pill-text: an ink pill reads its text from --pill-text, not --pill-ink, so the tint sets that one (COVERS maps only --pill-ink to color)
+  all covered
+
+.trrank__jump a  (66-situational-records.css)
+  before  : flex, min-height, padding, border, border-radius, color, font-family, font-size, font-weight, letter-spacing, text-decoration, text-transform, white-space
+  residual: .trrank__jump a → --btn-fill, --btn-edge, --btn-ink, --btn-fill-hover, --btn-edge-hover, flex, white-space
+  dropped : font-weight (one weight)
+  all covered
+
+.trrank__jump a:focus-visible  (66-situational-records.css)
+  before  : outline, outline-offset
+  residual: .trrank__jump a:focus-visible → outline-color
+  all covered
+
+.trrank__jump a:hover@(hover: hover) and (pointer: fine)  (66-situational-records.css)
+  before  : border-color
+  residual: .trrank__jump a → --btn-fill, --btn-edge, --btn-ink, --btn-fill-hover, --btn-edge-hover, flex, white-space
+  all covered
+
+No declaration lost. 3 dropped on purpose, each listed above.
