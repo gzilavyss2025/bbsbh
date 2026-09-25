@@ -304,17 +304,16 @@
 }
 
 /* ADR-0030's club theme dresses the lineup page's section mastheads, and it
-   finds them by `.is-themed .metricbar` — which catches this card too, since
+   finds them through the nearest themed root's --bar-* properties, which
+   catch this card's band too, since
    the modal opens inside that page. Opt back out. The theme's whole contract
    is that it expresses ONE CLUB's identity; this card is about the umpire, and
    a crew member's tendencies wearing the home side's colours would claim a
-   relationship that doesn't exist. Equal specificity to the rule in
-   09-team-info.css, and this partial loads later, so it wins on order. */
+   relationship that doesn't exist. Two classes beat the band's one
+   (system/section-head.css), so the house navy and kraft come back. */
 .is-themed .umptend__bar {
   background: var(--navy);
   border-bottom-color: var(--seal);
-}
-.is-themed .umptend__bar .metricbar__title {
   color: var(--text-on-ink);
 }
 
@@ -354,8 +353,8 @@
 
 /* "Series tied at 2-2" / "Cardinals lead series, 4-2" — the Season series
    card's masthead aside (SeasonSeriesStrip.jsx), deliberately matched to
-   .metricbar__title's own face (44-pre-game-cards.css) rather than
-   .metricbar__aside's plain-body default — that class is shared with every
+   .sectionhead__title's own face (system/section-head.css) rather than
+   .sectionhead__action's plain-body default — that class is shared with every
    other card's info-popover aside, which has no reason to shout like a
    heading. Same font, size, weight, tracking, and ink as "SEASON SERIES" to
    its left — two halves of one statement, not a title plus a footnote. */

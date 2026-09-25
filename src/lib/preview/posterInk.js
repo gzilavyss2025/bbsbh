@@ -140,7 +140,7 @@ export function panel(ctx, x, y, w, h, { radius = 10, fill = null, stroke = null
   }
 }
 
-// The section masthead — the poster's copy of `.metricbar`
+// The section masthead — the poster's copy of the SectionHead band (`.sectionhead--band`)
 // (styles/44-pre-game-cards.css): a solid bar, a kraft-gold under-edge,
 // condensed caps title left, an optional aside right, and the club's mark at
 // the right edge (SectionMasthead's `logo` slot).

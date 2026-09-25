@@ -1,6 +1,7 @@
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { teamChipColors } from '../../lib/teams.js'
 import { Money } from './Money.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // Highest paid players, filtered two ways at once — by club from the rail above
 // the page, by position from the chips under this masthead. Rank, club-colour
@@ -14,12 +15,14 @@ import { Money } from './Money.jsx'
 export function SalaryBoard({ players, positions, position, onPosition, context, top }) {
   return (
     <section className="payboard" aria-labelledby="payboard-title">
-      <div className="metricbar">
-        <span className="metricbar__title" id="payboard-title">
-          Highest paid players
-        </span>
-        <span className="payboard__context">{context}</span>
-      </div>
+      <SectionHead
+        look="band"
+        as="span"
+        titleId="payboard-title"
+        note={<span className="payboard__context">{context}</span>}
+      >
+        Highest paid players
+      </SectionHead>
 
       <div className="payboard__filter" role="group" aria-label="Filter by position">
         <button

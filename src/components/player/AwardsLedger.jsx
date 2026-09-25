@@ -4,6 +4,7 @@ import { useCopy } from '../../copy/copyContext.js'
 import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { teamAbbr, teamFullName, teamLogoUrl } from '../../lib/teams.js'
 import { Pill } from '../ui/control/Pill.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // Awards — the player page's career-honors section (api/person/awards.js's
 // awardsView). Replaces the Trophy Case, which promoted ONE honor to a marquee
@@ -72,12 +73,18 @@ export function AwardsLedger({ ledger, preview = false, limit }) {
 
   return (
     <>
-      <h3 className="section__title section__title--bar section__title--aside">
-        <span>Awards</span>
-        <em className="awards__tally">
-          {tabled.length} of {ledger.totals.categories} · {ledger.totals.selections} selections
-        </em>
-      </h3>
+      <SectionHead
+        look="band"
+        club
+        bleed
+        note={
+          <span className="awards__tally">
+            {tabled.length} of {ledger.totals.categories} · {ledger.totals.selections} selections
+          </span>
+        }
+      >
+        Awards
+      </SectionHead>
       <div className="awards">
         {tabled.map((cat) => (
           <AwardTable key={cat.key} category={cat} />

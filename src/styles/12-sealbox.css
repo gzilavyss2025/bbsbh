@@ -1584,8 +1584,8 @@
   cursor: pointer;
 }
 
-/* Same bleed formula as .metricbar > .teamlogo-crop-bar
-   (44-pre-game-cards.css) — height from the bar's own type + padding, a
+/* Same bleed formula as .sectionhead > .teamlogo-crop-bar
+   (system/section-head.css) — height from the bar's own type + padding, a
    matching negative margin so the mark's top/bottom crop clean to the bar's
    edges instead of sitting inset like a normal inline icon (identity lab's
    own "the mark may clip" convention). 8px padding here vs. that bar's 10px,

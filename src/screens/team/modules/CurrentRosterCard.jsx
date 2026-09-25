@@ -1,13 +1,14 @@
 import { RosterList } from './RosterList.jsx'
+import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 
 const DASH = '—'
 
 export function CurrentRosterCard({ position, pitchers, season, isMilb, sportId }) {
   return (
     <div className="thub-card">
-      <div className="thub-card__head">
-        <span>Current Roster</span>
-      </div>
+      <SectionHead look="band" club>
+        Current Roster
+      </SectionHead>
       <div className="thub-card__body">
       <div className="roster-cols">
         {position.length > 0 && (

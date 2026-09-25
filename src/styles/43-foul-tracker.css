@@ -3,7 +3,7 @@
    wearing the same navy/gold SectionMasthead the rest of the app's card
    sections use (Bullpen Health, batting order, opposing defense, …) —
    .foulboard-block only adds page-specific tweaks on top of the shared
-   .metriccard/.metricbar rules. Reuses .standings/.ledger-wrap ledger styling
+   .metriccard / SectionHead band rules. Reuses .standings/.ledger-wrap ledger styling
    (same right-aligned mono figures, left-aligned .team cell) for the tables;
    only the muted team abbreviation riding a player's name and the by-inning
    rate bar are specific to this page. No note/description copy under any

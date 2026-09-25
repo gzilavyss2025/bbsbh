@@ -1,6 +1,7 @@
 import '../../styles/26b-recent-form.css'
 import { fetchHitterForm, hitterFormView } from '../../api/hitterForm.js'
 import { useAsync } from '../../hooks/useAsync.js'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The player page's recent-form card for hitters: his last 7 / 15 / 30 games
 // read against his own full-season line — the hitter analog of
@@ -36,10 +37,9 @@ export function RecentFormCard({ playerId, asOf, season }) {
       {/* The note names what the card MEASURES AGAINST, not the windows — the
           Window column below already lists those, and a subtitle that repeats
           the first column teaches nobody anything. */}
-      <h3 className="section__title section__title--bar">
-        <span>Recent form</span>
-        <em>vs. his season line</em>
-      </h3>
+      <SectionHead look="band" club bleed note="vs. his season line">
+        Recent form
+      </SectionHead>
 
       <div className="ledger-wrap">
         <table className="ledger formtrend__table">

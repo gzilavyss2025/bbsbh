@@ -1,6 +1,7 @@
 import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
+import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 
 const DASH = '—'
 
@@ -105,9 +106,9 @@ export function HorizonCard({ horizon }) {
   if (!promotionWatch.length && !milestones.length) return null
   return (
     <div className="thub-card horizoncard">
-      <div className="thub-card__head">
-        <span>On the horizon</span>
-      </div>
+      <SectionHead look="band" club>
+        On the horizon
+      </SectionHead>
       <div className="thub-card__body">
         {promotionWatch.length > 0 && (
           <>

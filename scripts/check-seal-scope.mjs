@@ -70,11 +70,15 @@ const ALLOWLIST = {
   // already names. It carries its own hover values, like .btn--seal, so the
   // seal never leaves this one selector.
   'system/pill.css': ['.pill--seal'],
+  // .sectionhead--band is the club band's one home (#1113). Its unthemed
+  // underline is `var(--bar-accent, var(--seal))`: the club-accent SLOT with
+  // kraft as its fallback (ADR-0083 clause 4). It replaced .metricbar (44) and
+  // .is-themed .metricbar (09); the innings bands below move here in slice H1b.
+  'system/section-head.css': ['.sectionhead--band'],
 
   // The club band's 3px accent underline, themed. `var(--bar-accent, var(--seal))`
   // is the club-accent SLOT with kraft as its unthemed fallback (ADR-0030).
   '09-team-info.css': [
-    '.is-themed .metricbar',
     '.is-themed .abs__title',
     '.is-themed .halfdefense__title',
     '.lineupteam.is-themed .lineupteam__name',
@@ -97,7 +101,6 @@ const ALLOWLIST = {
   ],
   '13-play-by-play.css': ['.roster__toggle'],
   '20-charts.css': ['.winprob__head', '.marginnotes__title', '.pitchers__title'],
-  '44-pre-game-cards.css': ['.metricbar'],
   '69-pitch-arsenal.css': ['.pitchslab__head', '.pitchslab__heat'],
   'focus/console.css': ['.gamehud--console'],
   // The two mock bands — the identity lab's and the team hub's identity drawer —

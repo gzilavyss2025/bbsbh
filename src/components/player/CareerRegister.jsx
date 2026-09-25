@@ -3,6 +3,7 @@ import { spanCell } from '../../lib/ledger.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Ledger } from './Ledger.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 const DASH = '—'
 const NARROW_HIDE_COLS = new Set(['GS', 'K', 'BB'])
@@ -62,15 +63,21 @@ export function CareerRegister({ register }) {
 
   return (
     <>
-      <h3 className="section__title section__title--bar section__title--aside">
-        <span>Career stats</span>
-        {canFilter && (
-          <Pill role="control" fill="paper" className="mastheadpill" pressed={mlbOnly} onClick={() => setMlbOnly(!mlbOnly)}>
-            <span className="mastheadpill__dot" aria-hidden="true" />
-            MLB only
-          </Pill>
-        )}
-      </h3>
+      <SectionHead
+        look="band"
+        club
+        bleed
+        action={
+          canFilter && (
+            <Pill role="control" fill="paper" className="mastheadpill" pressed={mlbOnly} onClick={() => setMlbOnly(!mlbOnly)}>
+              <span className="mastheadpill__dot" aria-hidden="true" />
+              MLB only
+            </Pill>
+          )
+        }
+      >
+        Career stats
+      </SectionHead>
       <Ledger
         leftCols={2}
         head={['Year', 'Team', ...columns]}

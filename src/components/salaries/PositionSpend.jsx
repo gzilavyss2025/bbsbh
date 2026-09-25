@@ -1,4 +1,5 @@
 import { moneyLabel } from './Money.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // Position spend on a field, not in a pie. The shape of a roster is spatial —
 // every reader already knows where a shortstop stands — so the money goes where
@@ -50,11 +51,9 @@ export function PositionSpend({ positions, note }) {
 
   return (
     <section className="posspend" aria-labelledby="posspend-title">
-      <div className="metricbar">
-        <span className="metricbar__title" id="posspend-title">
-          Spend by position
-        </span>
-      </div>
+      <SectionHead look="band" as="span" titleId="posspend-title">
+        Spend by position
+      </SectionHead>
       <div className="posspend__grid">
         <div className="posspend__field" aria-hidden="true">
           <svg className="posspend__art" viewBox="0 0 408 300" role="presentation">

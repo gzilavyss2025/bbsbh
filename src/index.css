@@ -36,6 +36,10 @@
 @import './styles/04a-wire-dock.css';
 @import './styles/05-masthead-nav.css';
 @import './styles/05a-career-timeline.css';
+/* The SECTION HEAD — the one head a section or a card wears (#1113). Before
+   06, so every per-site partial that places a head (a bleed, a corner) loads
+   after it and wins on order. test/card-cascade.test.js pins the slot. */
+@import './styles/system/section-head.css';
 @import './styles/06-loader-and-cards.css';
 @import './styles/06a-gamecard-parkart.css';
 @import './styles/06b-offday-cards.css';

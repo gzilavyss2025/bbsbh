@@ -7,7 +7,7 @@
    can affect a visitor's page.
 
    THE MASTHEAD HALF INHERITS THE CLUB'S COLOURS, it does not pick its own.
-   `.thub-card__head` is the themed bar: on a themed hub it is painted
+   The card's SectionHead is the themed bar: on a themed hub it is painted
    `--bar-fill` with `--bar-text` on top, and on an unthemed one it is
    plain caption text on the card. A gear or a Save button with a
    hard-coded navy would be invisible on half the clubs in the league. So

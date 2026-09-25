@@ -1,6 +1,7 @@
 import { SLOT_BY_ID, EVENT_BY_ID, droughtsFor } from '../../../../api/scheduleShape.js'
 import { ALL_MLB_TEAM_IDS, teamClubName, teamLocationName } from '../../../../lib/teams.js'
 import '../../../../styles/65-team-records.css'
+import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 
 // The Numbers tab's "Last Time" card: what this club has stopped doing, and
 // when it last did it. Two kinds of row, ranked together.
@@ -117,10 +118,9 @@ export function LastTimeCard({ data, cutoff }) {
 
   return (
     <div className="tstats-card trec trec--lasttime">
-      <div className="tstats-card__head">
-        <span>Last Time</span>
-        <em>chances since</em>
-      </div>
+      <SectionHead look="band" club note="chances since">
+        Last Time
+      </SectionHead>
       <div className="tstats-card__body">
         <div className="tstats">
           {rows.map((r) => (

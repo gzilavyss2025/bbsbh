@@ -54,16 +54,10 @@
   opacity: 0.78;
 }
 
-/* The section mastheads on a themed page — same three properties, same
-   fallbacks, so this single rule covers Batting order / Starting pitcher /
-   Defense and every .metriccard header on the page at once. */
-.is-themed .metricbar {
-  background: var(--bar-fill, var(--navy));
-  border-bottom-color: var(--bar-accent, var(--seal));
-}
-.is-themed .metricbar__title {
-  color: var(--bar-text, var(--text-on-ink));
-}
+/* The section mastheads on a themed page (Batting order / Starting pitcher /
+   Defense and every .metriccard header) are the SectionHead band now, which
+   reads the same three properties with the same fallbacks from the nearest
+   themed root: system/section-head.css (#1113). */
 
 /* A masthead's club mark is the MONO knockout art — a flat, single-ink white
    silhouette (ADR-0031, lib/logoMono.js). On a light bar that disappears, so a
@@ -138,44 +132,11 @@
   color: var(--bar-text, var(--text-on-ink));
 }
 
-/* The player page's section headers — same club bar idiom as
-   .teaminfo.is-themed above, but opt-in via `.section__title--bar` rather
-   than blanket-applied to every `.section__title` on the page: the eight
-   top-level sections (2026 Stats, Analytics, Game log, Recent workload,
-   Splits, Career stats, Photos, Player history) carry the modifier and get
-   the club bar; their sub-card headings underneath (Statcast, Advanced,
-   Foul Balls, Pitches, Pitches Like under Analytics; Situational, Splits vs
-   Team under Splits; Innings by position, Firsts, Path to the Majors, Team
-   history, Transactions under Player history) stay the plain unthemed
-   label, same as Milestone Watch. Not tied to any one game,
-   so PlayerPage.jsx always resolves the club's Main/Home triad rather than
-   a jersey actually worn tonight. */
-.player.is-themed .section__title--bar {
-  padding: var(--space-2h) var(--app-gutter);
-  margin-left: calc(-1 * var(--app-gutter));
-  margin-right: calc(-1 * var(--app-gutter));
-  background: var(--bar-fill, transparent);
-  border-bottom: 3px solid var(--bar-accent, transparent);
-}
-/* DIRECT children only. A descendant `span` also caught the aside pill's
-   state dot, which draws itself in currentColor — it took the bar's ink
-   (white on most clubs) while sitting on the pill's own paper fill, so the
-   dot vanished in the unpressed state. The pill paints its own text and dot;
-   the bar must not reach inside it. */
-.player.is-themed .section__title--bar > span {
-  color: var(--bar-text, var(--text-caption));
-}
-.player.is-themed .section__title--bar em {
-  color: var(--bar-text, var(--graphite-soft));
-  opacity: 0.78;
-}
-/* "2026 Stats" keeps its own larger size (see .section__title--primary
-   below) but still takes the bar's ink rather than the accent color that
-   role normally carries — the accent-primary/bar-fill pairing isn't a
-   reviewed combination. */
-.player.is-themed .section__title--bar.section__title--primary > span {
-  color: var(--bar-text, var(--accent-primary));
-}
+/* The player page's top-level section heads (2026 Stats, Game log, Career
+   stats, Awards, Photos…) wear the club band through SectionHead
+   (look="band" club bleed, #1113); their sub-card headings stay the plain
+   unthemed label. Not tied to any one game, so PlayerPage.jsx always resolves
+   the club's Main/Home triad rather than a jersey worn tonight. */
 
 /* The team page (TeamPage.jsx, /team/:id) — not tied to any one game, so it
    always resolves the club's Main/Home triad rather than tonight's jersey (see
@@ -194,11 +155,12 @@
    `.thub-card` is the
    shared shell for sections that had no card of their own (Standings,
    Schedule, Team Leaders, Current Roster, Injured List, Affiliates,
-   Prospects, Logos & jerseys); `.tstats-card`, `.roster-super`, `.txcard`,
-   and `.team-score` already had one, so those just grow a `*__head` bolted
-   onto their existing border instead of a second wrapper. `overflow:hidden`
-   on every card lets the head's own square corners get clipped to the
-   card's radius for free, same trick `.team-score` already used. */
+   Prospects, Logos & jerseys); `.tstats-card`, `.roster-super` and
+   `.team-score` already had one, so the head bolts onto their existing
+   border instead of a second wrapper. Every one of those heads is the
+   SectionHead club band (system/section-head.css, #1113): a plain label until
+   the club colour arrives. `overflow:hidden` on every card clips the head's
+   square corners to the card's radius. */
 .thub-card {
   margin-top: var(--space-4);
   border: var(--bw-hair) solid var(--border-rule);
@@ -207,51 +169,10 @@
   box-shadow: var(--shadow-card);
   overflow: hidden;
 }
-.thub-card__head {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-2h) var(--space-4);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
-}
-.thub-card__head > span,
-.tstats-card__head > span,
-.roster-super__head > span {
-  font-size: 1.2em;
-}
-.thub-card__head em {
-  font-style: normal;
-  font-weight: var(--w-regular);
-  color: var(--graphite-soft);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-caps);
-}
 .thub-card__body {
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
-
-.team-hub.is-themed .thub-card__head,
-.team-hub.is-themed .tstats-card__head,
-.team-hub.is-themed .roster-super__head,
-.team-hub.is-themed .team-score__head {
-  background: var(--bar-fill, transparent);
-  border-bottom: 3px solid var(--bar-accent, transparent);
-  color: var(--bar-text, var(--text-caption));
-}
-.team-hub.is-themed .thub-card__head em,
-.team-hub.is-themed .tstats-card__head em,
-.team-hub.is-themed .roster-super__head em {
-  color: var(--bar-text, var(--graphite-soft));
-}
 
 /* Transactions carries a swipeable deck that deliberately bleeds past the
    card gutter (.txcard__scroll — see the .txcard comment above) — a bordered
@@ -533,36 +454,6 @@
   color: var(--text-caption);
   margin: 18px 0 8px;
 }
-/* "2026 Stats" is the player page's primary mid-game glance — every other
-   SectionTitle reads as an equal, generic label, so this one alone gets
-   inked in the accent color to read as the page's headline stat block, not
-   just another section among many. */
-.section__title--primary {
-  font-size: var(--fs-h2);
-  color: var(--accent-primary);
-}
-/* The player page's eight top-level bar headings (2026 Stats, Analytics,
-   Game log, Recent workload, Splits, Career stats, Photos, Player history —
-   see .section__title--bar theming above) share one consistent size, split
-   the difference between the generic label's fs-label and "2026 Stats"'s
-   own fs-h2 — overrides --primary's font-size on that heading (same
-   specificity, declared after it) so the whole set of bar headings reads as
-   one visual tier despite "2026 Stats" alone also carrying the accent-color
-   treatment above. */
-.section__title--bar {
-  font-size: var(--fs-h3);
-}
-/* A heading that carries a control (SectionTitle's `aside` — the Career
-   register's MLB-only pill) becomes a row, so the pill sits at the far end of
-   the bar rather than running on after the label. Opt-in modifier: every other
-   heading keeps its plain inline flow. */
-.section__title--aside {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
 .umps__list {
   list-style: none;
   margin: 0;

@@ -4,6 +4,7 @@ import { situationalRecordsPath } from '../../../../lib/route.js'
 import { useNav } from '../../../../lib/nav.js'
 import { InningScoringGrid } from './InningScoringGrid.jsx'
 import '../../../../styles/65-team-records.css'
+import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 
 // The Numbers tab's Records card: this club's W-L in ~50 situations, grouped
 // by subject, plus the season counts that are not records (come-from-behind
@@ -103,10 +104,9 @@ export function RecordsCard({ data, cutoff }) {
 
   return (
     <div className="tstats-card trec">
-      <div className="tstats-card__head">
-        <span>Records</span>
-        <em>{records ? `${records.gamesCounted} games · win pct` : 'win pct'}</em>
-      </div>
+      <SectionHead look="band" club note={records ? `${records.gamesCounted} games · win pct` : 'win pct'}>
+        Records
+      </SectionHead>
       {showHalves && (
         <div className="trec__halves" role="group" aria-label="Season half">
           {HALVES.map((h) => (

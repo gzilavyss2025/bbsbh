@@ -1,4 +1,5 @@
 import { moneyLabel } from './Money.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // One bar per season the source covers, drawn against the tallest of them. This
 // is the club ledger's headline graphic and the reason the page exists: a book
@@ -12,9 +13,9 @@ export function CommitmentCliff({ totals, scale }) {
   const max = scale || Math.max(1, ...totals.map((entry) => entry.committed))
   return (
     <div className="cliff">
-      <div className="metricbar">
-        <span className="metricbar__title">The commitment cliff</span>
-      </div>
+      <SectionHead look="band" as="span">
+        The commitment cliff
+      </SectionHead>
       <div className="cliff__row">
         {totals.map((entry) => (
           <div key={entry.year} className="cliff__col">

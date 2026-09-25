@@ -2,15 +2,16 @@ import { SPORT_LABEL } from '../../../../lib/teams.js'
 import { TeamLink } from '../../../../components/team/TeamLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
+import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 
 const DASH = '—'
 
 export function AffiliatesCard({ affiliates }) {
   return (
     <div className="thub-card">
-      <div className="thub-card__head">
-        <span>Affiliates</span>
-      </div>
+      <SectionHead look="band" club>
+        Affiliates
+      </SectionHead>
       <div className="thub-card__body">
       <div className="thub-affiliates">
         {affiliates.map((a) => (

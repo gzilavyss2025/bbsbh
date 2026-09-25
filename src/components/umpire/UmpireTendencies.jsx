@@ -3,6 +3,7 @@ import { humanDate } from '../../lib/dates.js'
 import { LEAN_TIERS, LEAN_TIER_LABELS, leanCaretFraction } from '../../lib/statTiers.js'
 import { HomePlateIcon } from '../badges/UmpireTierGlyph.jsx'
 import { UmpireZoneMap } from './UmpireZoneMap.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The Umpire Tendencies card — a broadcast-style read on how an umpire calls
 // the zone, modelled structurally on the in-game TV graphic and rendered in the
@@ -130,10 +131,14 @@ export function UmpireTendencies({ umpire }) {
 
   return (
     <section className="umptend">
-      <div className="metricbar umptend__bar">
-        <h2 className="metricbar__title">Umpire tendencies</h2>
-        {umpire.season && <span className="metricbar__aside umptend__season">{umpire.season}</span>}
-      </div>
+      <SectionHead
+        look="band"
+        as="h2"
+        className="umptend__bar"
+        note={umpire.season && <span className="umptend__season">{umpire.season}</span>}
+      >
+        Umpire tendencies
+      </SectionHead>
 
       <div className="umptend__id">
         <span className="umptend__mark" aria-hidden="true">

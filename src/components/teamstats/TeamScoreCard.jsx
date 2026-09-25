@@ -10,6 +10,7 @@ import { useNav, useLinkScope } from '../../lib/nav.js'
 import { teamPath } from '../../lib/route.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { TeamScoreExplainer } from './TeamScoreExplainer.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 export const DASH = '—'
 const RANKSTRIP_VISIBLE = 5
@@ -131,12 +132,17 @@ export function TeamScoreCard({
 
   return (
     <section className={`team-score${open ? ' is-open' : ''}`} aria-label="Season Grade">
-      <div className="team-score__head">
+      <SectionHead
+        look="band"
+        club
+        action={
+          <button type="button" className="team-score__howlink" onClick={() => setShowHow(true)}>
+            How this is calculated
+          </button>
+        }
+      >
         Season report
-        <button type="button" className="team-score__howlink" onClick={() => setShowHow(true)}>
-          How this is calculated
-        </button>
-      </div>
+      </SectionHead>
 
       <GradeHero
         grade={grade}

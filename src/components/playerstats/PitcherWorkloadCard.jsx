@@ -13,6 +13,7 @@ import { DayStrip, DayStripKey } from '../workload/DayStrip.jsx'
 import { ThresholdBullets } from '../workload/ThresholdBullets.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { Pill } from '../ui/control/Pill.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // THE MOUND CARD — the pitcher's counterpart to a hitter's Recent form.
 //
@@ -81,10 +82,9 @@ export function PitcherWorkloadCard({ playerId, asOf, role = null, gameLog = nul
 
   return (
     <div className="moundcard">
-      <h3 className="section__title section__title--bar">
-        <span>On the mound</span>
-        <em>{word}</em>
-      </h3>
+      <SectionHead look="band" club bleed note={word}>
+        On the mound
+      </SectionHead>
 
       {turn ? <TurnLead turn={turn} /> : <BullpenLead data={data} playerId={playerId} asOfDate={asOfDate} />}
 

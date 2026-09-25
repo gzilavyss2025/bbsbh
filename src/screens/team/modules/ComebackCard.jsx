@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { beeswarmRows } from '../../../lib/beeswarm.js'
 import { teamClubName } from '../../../lib/teams.js'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
+import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 
 const DASH = '—'
 
@@ -91,10 +92,9 @@ function ComebackRail({ t, teamId, clubName }) {
 export function ComebackCard({ data, teamId, clubName }) {
   return (
     <div className="tstats-card cbk">
-      <div className="tstats-card__head">
-        <span>Comeback wins</span>
-        <em>all 30 teams</em>
-      </div>
+      <SectionHead look="band" club note="all 30 teams">
+        Comeback wins
+      </SectionHead>
       <div className="tstats-card__body">
         <p className="cbk__gloss">
           How often {clubName || 'they'} rallied to win after their chance of winning the game

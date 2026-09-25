@@ -81,14 +81,15 @@ const hex = (ref) => {
 
 // Each control that rides a coloured band, as its focus rule is written.
 // Pill controls: the card band's Postseason Odds / Stamp In, and the masthead
-// toggles (Bullpen, "vs pitcher", MLB only, AAA log) on a section masthead
-// (always a bar: navy or the club's) or on a themed player page's section bar.
+// toggles (Bullpen, "vs pitcher", MLB only, AAA log) on a band head (always a
+// bar: navy or the club's) or on a themed club head (the player page's section
+// bars), the two SectionHead faces (#1113).
 // Button: Game Notes, on a themed lineup page's club-name bar and on the team
 // hub's hero, which wears the club's tile colour.
 const BAND_CONTROLS = [
   ['09-team-info.css', '.team-hub.is-themed .psodds-pill'],
-  ['10-lineup.css', '.metricbar .mastheadpill'],
-  ['10-lineup.css', '.player.is-themed .section__title--bar .mastheadpill'],
+  ['10-lineup.css', '.sectionhead--band .mastheadpill'],
+  ['10-lineup.css', '.is-themed .sectionhead--club .mastheadpill'],
   ['11-innings.css', '.teaminfo.is-themed > .teaminfo__head .innings__notes'],
   ['11-innings.css', '.team-hub__id .innings__notes'],
 ]

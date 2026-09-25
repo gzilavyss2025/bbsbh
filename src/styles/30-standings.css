@@ -207,16 +207,16 @@
   margin-bottom: 22px;
 }
 /* A league's header is the same navy/gold bar a club wears on the lineup and
-   innings pages (.metricbar, via SectionMasthead) rather than a ruled text
+   innings pages (the SectionHead band, via SectionMasthead) rather than a ruled text
    heading, with the league mark riding the right edge exactly where a club mark
-   does. Every other .metricbar caps a card, so it rounds only its top corners;
+   does. Every other band caps a card, so it rounds only its top corners;
    this one stands alone above a stack of division tables, so it rounds all
    four. The wrapper exists purely to own that spacing — the bar itself is
    shared markup. */
 .lgstand__bar {
   margin: 0 0 10px;
 }
-.lgstand__bar .metricbar {
+.lgstand__bar .sectionhead {
   border-radius: var(--radius-md);
 }
 .lgstand__div {

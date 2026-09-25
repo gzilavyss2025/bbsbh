@@ -17,6 +17,7 @@ import { ClubPayrolls } from '../components/salaries/ClubPayrolls.jsx'
 import { PositionSpend } from '../components/salaries/PositionSpend.jsx'
 import { SourceLine } from '../components/salaries/SourceLine.jsx'
 import { moneyLabel, Money } from '../components/salaries/Money.jsx'
+import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 
 // The thirty-club money page, beside Standings rather than inside any one club:
 // who is paid the most, who spends the most, who is committed the most, and
@@ -94,14 +95,18 @@ export function SalariesPage() {
           />
 
           <section className="payowed" aria-labelledby="payowed-title">
-            <div className="metricbar">
-              <span className="metricbar__title" id="payowed-title">
-                Most committed
-              </span>
-              <span className="payboard__context">
-                {data.season}–{data.throughYear}
-              </span>
-            </div>
+            <SectionHead
+              look="band"
+              as="span"
+              titleId="payowed-title"
+              note={
+                <span className="payboard__context">
+                  {data.season}–{data.throughYear}
+                </span>
+              }
+            >
+              Most committed
+            </SectionHead>
             {data.owed.map((player) => (
               <div key={player.id} className="payowed__row">
                 <span className="payclubs__mark">
