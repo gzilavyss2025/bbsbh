@@ -1,0 +1,38 @@
+[
+  {
+    "name": "poster-save",
+    "url": "/09222026/tbnyy/preview",
+    "vw": 1280,
+    "sel": ".posterstudio__save",
+    "tag": "button",
+    "cls": "btn btn--ink posterstudio__save posterstudio__save--idle",
+    "text": "Save image",
+    "height": "44px",
+    "paddingTop": "8px",
+    "paddingRight": "16px",
+    "paddingBottom": "8px",
+    "paddingLeft": "16px",
+    "fontFamily": "\"Barlow Condensed\", \"Arial Narrow\", sans-serif",
+    "fontSize": "14px",
+    "letterSpacing": "1.26px",
+    "lineHeight": "16.8px",
+    "textTransform": "uppercase",
+    "borderTopWidth": "1px",
+    "borderTopStyle": "solid",
+    "borderTopColor": "rgb(27, 42, 58)",
+    "borderRadius": "6px",
+    "backgroundColor": "rgb(27, 42, 58)",
+    "color": "rgb(251, 246, 233)",
+    "display": "flex",
+    "alignSelf": "auto",
+    "marginTop": "0px",
+    "gap": "6px",
+    "rectH": 44,
+    "rectW": 104.3,
+    "hostH": 348.5,
+    "shots": [
+      "poster-save.png",
+      "poster-save--tag.png"
+    ]
+  }
+]

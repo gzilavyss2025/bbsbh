@@ -146,37 +146,22 @@
   color: var(--accent-negative);
 }
 
+/* .posterstudio__save is a Button (skin="ink", #1131 slice 6) — this file only
+   places it in the grid and re-inks its two outcome states. A skin is five
+   custom properties, not a repaint (system/button.css): --btn-fill/--btn-edge
+   carry the colour, --btn-ink stays --text-on-ink from the ink skin. */
 .posterstudio__save {
   justify-self: start;
-  padding: var(--space-3) var(--space-5);
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: var(--accent-primary);
-  color: var(--text-on-ink);
-  font-family: var(--font-display);
-  font-size: var(--fs-body);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.posterstudio__save:focus-visible {
-  outline: var(--ring) solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.posterstudio__save:disabled {
-  background: var(--graphite-soft);
-  cursor: default;
 }
 
 .posterstudio__save--done {
-  background: var(--accent-positive);
+  --btn-fill: var(--accent-positive);
+  --btn-edge: var(--accent-positive);
 }
 
 .posterstudio__save--error {
-  background: var(--accent-negative);
+  --btn-fill: var(--accent-negative);
+  --btn-edge: var(--accent-negative);
 }
 
 /* Wide layout: the sheet keeps its portrait shape and the panel rides beside

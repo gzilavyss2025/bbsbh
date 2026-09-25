@@ -1,8 +1,8 @@
 {
-  "generated": "2026-09-23",
-  "rev": "ffd91507a (working tree)",
+  "generated": "2026-09-25",
+  "rev": "22a5c2bf6 (working tree)",
   "definition": "see census.mjs header",
-  "count": 38,
+  "count": 37,
   "geometry": {
     "tag": {
       "n": 4,
@@ -75,7 +75,7 @@
     {
       "selector": ".wiredock__close",
       "file": "04a-wire-dock.css",
-      "line": 240,
+      "line": 234,
       "block": "wiredock__close",
       "element": null,
       "consumers": [
@@ -124,6 +124,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "x icon button, 44px wide hit area, no text — an IconButton (Button family, #1130), not a capsule",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "paper"
     },
@@ -299,6 +300,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "44x44 x close — radius only rounds the hover/focus ring",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "bare"
     },
@@ -351,6 +353,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "44x44 x clear — icon button",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "bare"
     },
@@ -402,6 +405,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "44x44 x close — icon button",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "bare"
     },
@@ -564,6 +568,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "44x44 x close (3 consumers) — icon button",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "bare"
     },
@@ -620,6 +625,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "32x32 x close, absolute — icon button (a circle)",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "bare"
     },
@@ -851,7 +857,7 @@
     {
       "selector": ".depthpos",
       "file": "31-wild-card.css",
-      "line": 1305,
+      "line": 1299,
       "block": "depthpos",
       "element": null,
       "consumers": [
@@ -1128,6 +1134,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "18x18 italic 'i' — a circle icon button, not a capsule",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "ink"
     },
@@ -1343,6 +1350,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "aspect-ratio:1 dashed CIRCLE = an empty stamp slot on StampCollection.jsx (a STAMP_ALLOWLIST surface). Geometry is the stamp's footprint — leave it alone",
+      "settled": "kept: stamp slot",
       "heuristicRole": "tag",
       "heuristicFill": "outline"
     },
@@ -1605,6 +1613,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "same empty stamp slot on PassportPage.jsx (STAMP_ALLOWLIST surface)",
+      "settled": "kept: stamp slot",
       "heuristicRole": "tag",
       "heuristicFill": "outline"
     },
@@ -1717,63 +1726,6 @@
       "reason": "passport book cover picker; .is-* selected state -> aria-pressed",
       "heuristicRole": "control",
       "heuristicFill": "outline"
-    },
-    {
-      "selector": ".posterstudio__save",
-      "file": "62-game-preview.css",
-      "line": 149,
-      "block": "posterstudio__save",
-      "element": null,
-      "consumers": [
-        "components/preview/SavePosterButton.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "focus",
-        "disabled"
-      ],
-      "fill": "ink",
-      "role": "control",
-      "background": "var(--accent-primary)",
-      "border": "0",
-      "color": "var(--text-on-ink)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-3) var(--space-5)",
-      "fontSize": "var(--fs-body)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": "var(--ls-caps)",
-      "textTransform": "uppercase",
-      "decls": {
-        "justify-self": "start",
-        "padding": "var(--space-3) var(--space-5)",
-        "border": "0",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--accent-primary)",
-        "color": "var(--text-on-ink)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-body)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-caps)",
-        "text-transform": "uppercase",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "rename-out",
-      "slice": 6,
-      "reason": "primary CTA at --fs-body, 12px 20px padding — a Button (btn--primary), not a Pill",
-      "heuristicRole": "control",
-      "heuristicFill": "ink"
     },
     {
       "selector": ".idadmin__actions .idadmin__btn",
