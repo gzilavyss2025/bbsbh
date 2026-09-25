@@ -25,7 +25,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { sectionHeadClassName, sectionHeadTitleTag } from '../src/lib/design/sectionHeadClass.js'
-import { cardAccentStyle, cardBodyClassName, cardClassName, cardTag } from '../src/lib/design/cardClass.js'
+import { cardAccentStyle, cardBodyClassName, cardClassName, cardHead, cardTag } from '../src/lib/design/cardClass.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const STYLES = join(SRC, 'styles')
@@ -280,6 +280,12 @@ test('system/card.css is imported right after section-head.css and before 06', (
 const rules = (css) => [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => [m[1].trim(), m[2]])
 const FRAME_PROPS = ['border', 'border-radius', 'box-shadow', 'overflow']
 const drawsFrame = (body) => FRAME_PROPS.some((p) => decl(body, p) !== undefined)
+// Any edge, corner, shadow or ground, longhands included.
+const paintsFrame = (body) =>
+  body
+    .split(';')
+    .map((d) => d.trim())
+    .some((d) => /^(border|background|box-shadow)[\w-]*\s*:/.test(d))
 const namesCard = (selector) => /\.card(?![\w-])|\.card--/.test(selector)
 
 test('card.css draws the frame in exactly one rule, .card', () => {
@@ -304,7 +310,7 @@ test('no other stylesheet frames a card', () => {
     .filter((rel) => rel !== 'system/card.css')
     .flatMap((rel) =>
       rules(read(rel))
-        .filter(([sel, body]) => namesCard(sel) && (drawsFrame(body) || decl(body, 'background') !== undefined))
+        .filter(([sel, body]) => namesCard(sel) && paintsFrame(body))
         .map(([sel]) => `${rel}: ${sel}`),
     )
   assert.deepEqual(found, [])
@@ -360,6 +366,18 @@ test('an unknown frame, body or element, or an accent on a still card, is refuse
   assert.throws(() => cardClassName({ accent: '--offday-accent' }), /interactive/)
   assert.throws(() => cardClassName({ as: 'div', accent: '--offday-accent' }), /interactive/)
   assert.throws(() => cardAccentStyle('#ff0000'), /custom property/)
+  assert.throws(() => cardClassName({ as: 'span' }), /as="span"/)
+})
+
+test('a link or button card takes no head: it holds phrasing content only', () => {
+  assert.throws(() => cardHead('button', 'Head'), /no head/)
+  assert.throws(() => cardHead('a', 'Head'), /no head/)
+  assert.equal(cardHead('button', undefined), undefined)
+  assert.equal(cardHead('section', 'Head'), 'Head')
+})
+
+test('the padded body says display: block, so it can be a span in a link card', () => {
+  assert.equal(decl(ruleBody(read('system/card.css'), '.card__body'), 'display'), 'block')
 })
 
 test('Card imports no api/ module, no stamp module and no club theme', () => {
@@ -392,7 +410,7 @@ test('no component or catalog names .thub-card or .chalcard', () => {
 })
 
 test('the team hub keeps its space between cards, from the hub and not from Card', () => {
-  const hub = ruleBody(read('09-team-info.css'), '.team-hub :where(.card)')
-  assert.ok(hub, 'a .team-hub :where(.card) rule')
+  const hub = ruleBody(read('09-team-info.css'), '.team-hub :where(.card):not(:where(.card .card))')
+  assert.ok(hub, 'a hub rule for a top-level card only; a card inside a card is a tile')
   assert.equal(decl(hub, 'margin-top'), 'var(--space-4)')
 })

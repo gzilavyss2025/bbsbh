@@ -41,8 +41,10 @@
 }
 
 /* The padded body: the old team hub body, so the rows line up under a head
-   that uses the default --space-4 inset. */
+   that uses the default --space-4 inset. It is a <span> inside a link or a
+   button card (phrasing content only), so it says display: block itself. */
 .card__body {
+  display: block;
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 

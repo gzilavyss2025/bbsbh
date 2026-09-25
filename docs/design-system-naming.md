@@ -220,7 +220,8 @@ elements are measurably tappable, and six states are written as modifiers.
 ## SectionHead and Card — #1113 — 87 rows
 
 Twenty-nine blocks carry `card` without owning the base rule for it.
-`.thub-card` and `.gamecard` draw their own box and are not rows. Twelve blocks
+`.card` (the Card component, which took over `.thub-card` in #1221) and
+`.gamecard` draw their own box and are not rows. Twelve blocks
 carry `sheet` without owning the base rule for it; `.sheet` owns it and is not a
 row. They ride with #1113 because `Card`'s `frame="sheet"` is the one rule the
 word will name, and two of them already have `__eyebrow` rows here. The other

@@ -25,6 +25,7 @@ const INTERACTIVE = ['a', 'button']
 
 export function cardClassName({ frame = 'sheet', as = 'section', accent, className = '' } = {}) {
   if (!FRAMES.includes(frame)) throw new Error(`Card: unknown frame "${frame}" (${FRAMES.join(', ')})`)
+  cardTag(as)
   const interactive = INTERACTIVE.includes(as)
   if (accent && !interactive) throw new Error('Card: accent is for an interactive card (as="a" or "button")')
   const parts = ['card', `card--${frame}`]
@@ -32,6 +33,17 @@ export function cardClassName({ frame = 'sheet', as = 'section', accent, classNa
   if (className) parts.push(className)
   return parts.join(' ')
 }
+
+// A link or a button holds phrasing content only, and never a heading or a
+// second control. So an interactive card takes no head.
+export function cardHead(as = 'section', head) {
+  if (head != null && head !== false && INTERACTIVE.includes(as)) {
+    throw new Error('Card: a link or button card takes no head (its content is phrasing only)')
+  }
+  return head
+}
+
+export const isInteractive = (as) => INTERACTIVE.includes(as)
 
 export function cardBodyClassName(body = 'padded') {
   if (!BODIES.includes(body)) throw new Error(`Card: unknown body "${body}" (${BODIES.join(', ')})`)

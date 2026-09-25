@@ -1,4 +1,4 @@
-import { cardAccentStyle, cardBodyClassName, cardClassName, cardTag } from '../../../lib/design/cardClass.js'
+import { cardAccentStyle, cardBodyClassName, cardClassName, cardHead, isInteractive } from '../../../lib/design/cardClass.js'
 
 // THE CARD — the one box of paper a section sits on (#1113). Drawn once, in
 // styles/system/card.css. It is the box, never what is in it: the space
@@ -8,7 +8,9 @@ import { cardAccentStyle, cardBodyClassName, cardClassName, cardTag } from '../.
 //   frame   'sheet' (the default): the md radius with the card shadow.
 //           'ledger': the sm radius with no shadow (#1113 Q1).
 //   head    a SectionHead, or nothing. It renders first, so the card clips
-//           its band to the card's corners.
+//           its band to the card's corners. A link or button card takes none.
+//           Its padded body is a <span>, since a link or a button holds
+//           phrasing content only.
 //   body    'padded' (the default) wraps the children in .card__body.
 //           'flush' renders them bare: the table, list or grid runs to the
 //           card's edge and owns its own rules.
@@ -35,19 +37,20 @@ export function Card({
   children,
   ...rest
 }) {
-  cardTag(Tag)
+  const cls = cardClassName({ frame, as: Tag, accent, className })
+  cardHead(Tag, head)
   const bodyClass = cardBodyClassName(body)
   const accentStyle = cardAccentStyle(accent)
-  const extra = Tag === 'button' && rest.type == null ? { type: 'button' } : null
+  const BodyTag = isInteractive(Tag) ? 'span' : 'div'
   return (
     <Tag
-      className={cardClassName({ frame, as: Tag, accent, className })}
+      className={cls}
       style={accentStyle ? { ...accentStyle, ...style } : style}
-      {...extra}
       {...rest}
+      {...(Tag === 'button' ? { type: rest.type ?? 'button' } : null)}
     >
       {head}
-      {bodyClass ? <div className={bodyClass}>{children}</div> : children}
+      {bodyClass ? <BodyTag className={bodyClass}>{children}</BodyTag> : children}
     </Tag>
   )
 }

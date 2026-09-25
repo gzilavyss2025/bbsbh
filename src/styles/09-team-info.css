@@ -127,9 +127,10 @@
 
 /* The space above each card on the hub. Card owns no margin (#1113): the
    space between cards is the parent's until #1180 gives the parent a Stack.
+   A card inside a card is a tile in its grid, not a section, so it gets none.
    `:where()` keeps this at one class, so a card's own namespace rule that
    sets a margin wins on order. */
-.team-hub :where(.card) {
+.team-hub :where(.card):not(:where(.card .card)) {
   margin-top: var(--space-4);
 }
 
