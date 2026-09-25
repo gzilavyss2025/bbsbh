@@ -73,6 +73,11 @@ house style — it just has no name and no component.
 
 ### The app has already invented the right pattern, in one corner
 
+> **Since #1113 slice C0 (2026-09-25):** this pattern is the `Card` component
+> (`components/ui/frame/Card.jsx`, `styles/system/card.css`). `.thub-card` is gone:
+> the sixteen modules render `<Card>`, and `.chalcard` is `<Card className="chal">`.
+> The page's copy of this table (`screens/designlab/catalog.js`) says the same.
+
 `.thub-card` is the team hub's card. Sixteen modules consume it. Four of those
 modules put a **second class beside it** that carries no box of its own:
 

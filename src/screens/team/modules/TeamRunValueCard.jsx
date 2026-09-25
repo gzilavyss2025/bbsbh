@@ -5,6 +5,7 @@ import { RunValueSplit, splitScale } from '../../../components/around-the-game/R
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../components/ui/frame/Card.jsx'
 
 // The team hub's RUN VALUE card, on the Numbers tab — what this club's season
 // has been worth in runs, split four ways, and the men carrying it.
@@ -30,10 +31,15 @@ export function TeamRunValueCard({ data, clubName }) {
   const top = club.players.slice(0, TOP_PLAYERS)
 
   return (
-    <div className="thub-card rvclub">
-      <SectionHead look="label" note="runs above average">
-        Run value
-      </SectionHead>
+    <Card
+      className="rvclub"
+      body="flush"
+      head={
+        <SectionHead look="label" note="runs above average">
+          Run value
+        </SectionHead>
+      }
+    >
 
       <div className="rvcard__head">
         <p className="rvcard__total">{signed(club.total)}</p>
@@ -73,7 +79,7 @@ export function TeamRunValueCard({ data, clubName }) {
       <div className="thub__door">
         <Door onClick={() => navigate(runValuePath())}>League run value board</Door>
       </div>
-    </div>
+    </Card>
   )
 }
 

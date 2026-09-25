@@ -40,6 +40,10 @@
    06, so every per-site partial that places a head (a bleed, a corner) loads
    after it and wins on order. test/card-cascade.test.js pins the slot. */
 @import './styles/system/section-head.css';
+/* The CARD — the one box a section sits on (#1113). Right after the head and
+   before 06, for the same reason: a namespace rule that keeps a margin or a
+   grid loads later and wins on order. */
+@import './styles/system/card.css';
 @import './styles/06-loader-and-cards.css';
 @import './styles/06a-gamecard-parkart.css';
 @import './styles/06b-offday-cards.css';

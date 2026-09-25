@@ -4,6 +4,7 @@ import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../../components/ui/frame/Card.jsx'
 
 const DASH = '—'
 // Org prospect list starts collapsed to the top 10, expandable to the full ~30.
@@ -15,11 +16,13 @@ const PROSPECT_SHOWCASE_COUNT = 5
 
 export function ProspectsCard({ prospects, showAllProspects, onShowAll }) {
   return (
-    <div className="thub-card">
-      <SectionHead look="band" club note="org rank">
-        Prospects
-      </SectionHead>
-      <div className="thub-card__body">
+    <Card
+      head={
+        <SectionHead look="band" club note="org rank">
+          Prospects
+        </SectionHead>
+      }
+    >
       <div className="prospectshowcase">
         {prospects.slice(0, PROSPECT_SHOWCASE_COUNT).map((p) => (
           <PlayerLink
@@ -74,7 +77,6 @@ export function ProspectsCard({ prospects, showAllProspects, onShowAll }) {
           </Door>
         )}
       </div>
-      </div>
-    </div>
+    </Card>
   )
 }

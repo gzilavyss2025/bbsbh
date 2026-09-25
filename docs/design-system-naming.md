@@ -68,7 +68,7 @@ target column names the class the way every other row does.
 evidence for the hold instead of a work list.
 
 **Blocks that own the base rule for their shape keep the word and are not rows:**
-`.thub-card` and `.gamecard` (card), `.btn` (btn), `.sheet` (sheet, in
+`.card` and `.gamecard` (card; `.card` is the Card component's, which took over `.thub-card` in #NNNN), `.btn` (btn), `.sheet` (sheet, in
 `styles/14-strike-zone.css`) and
 `.pill` (pill). `.milestonepill` owned the pill recipe until #1131 moved it into
 `.pill` (`styles/system/pill.css`); it is absorbed, and no class is left.
@@ -232,7 +232,7 @@ become `__note`, one eyebrow retired, one orphan deleted, and one row
 | --- | --- | --- | --- | --- | --- |
 | `.advcard` | 1, 2 | `.adv` | #1113 | `components/player/AdvancedStatsCard.jsx`, `screens/designlab/catalog.js`, `styles/26-player-page.css` | — |
 | `.ballparkcard` | 1, 2 | `.ballpark` | #1113 | `screens/designlab/blocks.jsx`, `screens/designlab/catalog.js`, `screens/team/modules/ballpark/BallparkCard.jsx`, `styles/57-ballpark-card.css` | — |
-| `.chalcard` | 1, 2 | `.chal` | #1113 | `screens/designlab/blocks.jsx`, `screens/designlab/catalog.js`, `screens/team/modules/TeamChallengeCard.jsx`, `styles/report/challenge-card.css` | — |
+| `.chalcard` | 1, 2 | `.chal` | #1113 | `screens/designlab/blocks.jsx`, `screens/designlab/catalog.js`, `screens/team/modules/TeamChallengeCard.jsx`, `styles/report/challenge-card.css` | landed in #NNNN, with the card: `thub-card chalcard` is `<Card className="chal">`, and every `.chalcard__*` part is `.chal__*`. |
 | `.foulcard` | 1, 2 | `.foul` | #1113 | `components/playerstats/FoulCard.jsx`, `screens/designlab/catalog.js`, `styles/26-player-page.css` | — |
 | `.horizoncard` | 1, 2 | `.horizon` | #1113 | `screens/designlab/blocks.jsx`, `screens/designlab/catalog.js`, `screens/team/modules/minors/DepthChartCard.jsx`, `screens/team/modules/minors/HorizonCard.jsx`, `styles/31-wild-card.css` | — |
 | `.rvcard` | 1, 2 | `.rv` | #1113 | `components/playerstats/RunValueCard.jsx`, `screens/designlab/blocks.jsx`, `screens/designlab/catalog.js`, `screens/team/modules/TeamRunValueCard.jsx`, `styles/75-run-value.css`, `styles/report/challenge-card.css` † | two-step — `.rv` is NOT a free name. It is already the Run Value page's namespace (`rv__board`, `rv__num`, `rv__nameplate`, `rv__controls`, `rv__who`, `rv__pos`, `rv__face`), and both families live in `styles/75-run-value.css`, which `TeamRunValueCard.jsx` already draws from. No element name overlaps today, so the rename does not break on the day it lands — but two unrelated components then share one namespace in one file, and the next element added to either collides in silence. Give the card its own name, or move the page's rules out first. |

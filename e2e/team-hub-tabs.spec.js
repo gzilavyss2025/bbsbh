@@ -34,7 +34,7 @@ test('team hub: overview steps through all five tabs, each rendering its headlin
 
   await tabs.getByRole('button', { name: 'Numbers' }).click()
   await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/numbers$/)
-  await expect(page.locator('.thub-card > .sectionhead').first()).toBeVisible()
+  await expect(page.locator('.card > .sectionhead').first()).toBeVisible()
 
   await tabs.getByRole('button', { name: 'Minors' }).click()
   await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/minors$/)

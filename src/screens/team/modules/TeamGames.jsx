@@ -5,6 +5,7 @@ import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { DOW_LABELS, MONTH_LABELS } from './TeamStatsCard.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../components/ui/frame/Card.jsx'
 
 // Two surfaces over the same ticket-stub card, both fed lists the caller has
 // already `won != null`-filtered (see loadGames.js / loadOverview.js — never
@@ -206,14 +207,15 @@ function LastTenGamesStrip({ games }) {
 export function LastTenGames({ teamId, asOf, recentGames }) {
   const recentWins = recentGames.filter((g) => g.won).length
   return (
-    <div className="thub-card">
-      <SectionHead look="band" club note={`${recentWins}-${recentGames.length - recentWins}`}>
-        Last 10 Games
-      </SectionHead>
-      <div className="thub-card__body">
-        <LastTenGamesStrip key={`${teamId}-${asOf ?? ''}`} games={recentGames} />
-      </div>
-    </div>
+    <Card
+      head={
+        <SectionHead look="band" club note={`${recentWins}-${recentGames.length - recentWins}`}>
+          Last 10 Games
+        </SectionHead>
+      }
+    >
+      <LastTenGamesStrip key={`${teamId}-${asOf ?? ''}`} games={recentGames} />
+    </Card>
   )
 }
 

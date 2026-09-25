@@ -2,6 +2,7 @@ import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../../components/ui/frame/Card.jsx'
 
 const DASH = '—'
 
@@ -105,32 +106,34 @@ export function HorizonCard({ horizon }) {
   const { promotionWatch, milestones } = horizon
   if (!promotionWatch.length && !milestones.length) return null
   return (
-    <div className="thub-card horizoncard">
-      <SectionHead look="band" club>
-        On the horizon
-      </SectionHead>
-      <div className="thub-card__body">
-        {promotionWatch.length > 0 && (
-          <>
-            <h3 className="horizoncard__section">Promotion watch</h3>
-            <ul className="hznlist">
-              {promotionWatch.map((p) => (
-                <PromotionTile key={p.playerId} p={p} />
-              ))}
-            </ul>
-          </>
-        )}
-        {milestones.length > 0 && (
-          <>
-            <h3 className="horizoncard__section">Milestones</h3>
-            <ul className="hznlist">
-              {milestones.map((p) => (
-                <MilestoneTile key={p.playerId} p={p} />
-              ))}
-            </ul>
-          </>
-        )}
-      </div>
-    </div>
+    <Card
+      className="horizoncard"
+      head={
+        <SectionHead look="band" club>
+          On the horizon
+        </SectionHead>
+      }
+    >
+      {promotionWatch.length > 0 && (
+        <>
+          <h3 className="horizoncard__section">Promotion watch</h3>
+          <ul className="hznlist">
+            {promotionWatch.map((p) => (
+              <PromotionTile key={p.playerId} p={p} />
+            ))}
+          </ul>
+        </>
+      )}
+      {milestones.length > 0 && (
+        <>
+          <h3 className="horizoncard__section">Milestones</h3>
+          <ul className="hznlist">
+            {milestones.map((p) => (
+              <MilestoneTile key={p.playerId} p={p} />
+            ))}
+          </ul>
+        </>
+      )}
+    </Card>
   )
 }

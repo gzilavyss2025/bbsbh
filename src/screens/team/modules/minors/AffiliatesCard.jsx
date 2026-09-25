@@ -3,16 +3,19 @@ import { TeamLink } from '../../../../components/team/TeamLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../../components/ui/frame/Card.jsx'
 
 const DASH = '—'
 
 export function AffiliatesCard({ affiliates }) {
   return (
-    <div className="thub-card">
-      <SectionHead look="band" club>
-        Affiliates
-      </SectionHead>
-      <div className="thub-card__body">
+    <Card
+      head={
+        <SectionHead look="band" club>
+          Affiliates
+        </SectionHead>
+      }
+    >
       <div className="thub-affiliates">
         {affiliates.map((a) => (
           // A MiLB club is not in the static name table, so its address takes
@@ -29,7 +32,6 @@ export function AffiliatesCard({ affiliates }) {
           </TeamLink>
         ))}
       </div>
-      </div>
-    </div>
+    </Card>
   )
 }

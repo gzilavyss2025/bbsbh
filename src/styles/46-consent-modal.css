@@ -323,7 +323,7 @@
 /* The only new chrome the team-page IA rebuild introduces: the tab bar under
    the pinned identity header. Secondary modules render as full cards, same as
    any other module — no separate collapsed treatment. Existing card chrome
-   (.thub-card and friends) carries over unchanged — this effort moves
+   (the shared Card and friends) carries over unchanged — this effort moves
    modules, it does not restyle them. */
 
 /* Five tabs, phone-first: they fit across a phone at this size, and scroll
@@ -381,7 +381,7 @@
    same shared "See all ›" primitive TeamLeaders' own header action and
    NumbersTab's "Org leaders ›" use), NOT a second card: the tab bar and the
    Org index tile stay the only new chrome the IA rebuild introduces.
-   Right-aligned; `.thub-card` carries no bottom margin of its own, so the
+   Right-aligned; a Card carries no bottom margin of its own, so the
    door's own top margin is what keeps it from reading as glued to the
    card/table above. */
 .thub__door {

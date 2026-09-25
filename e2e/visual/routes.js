@@ -112,7 +112,7 @@ export const ROUTES = [
   {
     name: 'team-numbers',
     path: '/team/milwaukee-brewers-158/numbers',
-    ready: '.thub-card',
+    ready: '.card',
     shots: [{ name: 'page' }],
   },
   {

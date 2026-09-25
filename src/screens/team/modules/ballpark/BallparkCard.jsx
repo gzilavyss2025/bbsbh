@@ -13,6 +13,7 @@ import { BallparkDiagram } from '../../../../components/ballpark/BallparkDiagram
 import { Facts, RankGroup } from '../../../../components/ballpark/BallparkFacts.jsx'
 import { useBallparkDraft, useFocalPick } from './useBallparkDraft.js'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../../components/ui/frame/Card.jsx'
 
 // The Overview's Ballpark card. Two stacked rows: a HERO (a photograph of the
 // place beside its name) over the DETAILS (the field diagram beside the facts,
@@ -257,85 +258,86 @@ export function BallparkCard({ team, attendance }) {
   })
 
   return (
-    <div className="thub-card">
-      <SectionHead
-        look="band"
-        club
-        action={
-          isClerkEnabled && (
-            <Suspense fallback={null}>
-              <BallparkAdminBar parkKey={key} draft={draft} saved={saved} />
-            </Suspense>
-          )
-        }
-      >
-        Ballpark
-      </SectionHead>
-      <div className="thub-card__body">
-        <div className="ballparkcard__hero">
-          {photo && (
-            <ParkPhoto
-              name={name}
-              photo={photo}
-              onPickFocus={draft.editing ? pickFocus : null}
-              onBroken={noteBroken}
-            />
-          )}
-          <div className="ballparkcard__title">
-            {title.wordmark ? (
-              // Unguarded, unlike the photo: `text` is always behind a wordmark
-              // (resolveParkName), so a bundled mark that fails falls back to the
-              // typeset name just as an override does, and neither can loop.
-              <img
-                className="ballparkcard__logo"
-                src={title.wordmark}
-                alt={title.text}
-                loading="lazy"
-                onError={() => noteBroken(title.wordmark)}
-              />
-            ) : (
-              <p className="ballparkcard__name">{title.text}</p>
-            )}
-          </div>
-        </div>
-
-        {draft.editing && (
-          <Suspense fallback={null}>
-            <BallparkEditFields draft={draft} defaultName={name} />
-          </Suspense>
+    <Card
+      head={
+        <SectionHead
+          look="band"
+          club
+          action={
+            isClerkEnabled && (
+              <Suspense fallback={null}>
+                <BallparkAdminBar parkKey={key} draft={draft} saved={saved} />
+              </Suspense>
+            )
+          }
+        >
+          Ballpark
+        </SectionHead>
+      }
+    >
+      <div className="ballparkcard__hero">
+        {photo && (
+          <ParkPhoto
+            name={name}
+            photo={photo}
+            onPickFocus={draft.editing ? pickFocus : null}
+            onBroken={noteBroken}
+          />
         )}
-
-        {/* The diagram/dimensions half — MLB only. A MiLB park has no
-            BALLPARKS record (no hand-verified distances, no digitized wall
-            polygon), so there is nothing here to draw or rank; the card ends
-            at the hero + gear above rather than showing a broken diagram. */}
-        {park && (
-          <div className="ballparkcard__layout">
-            <BallparkDiagram
-              className="ballparkcard__diagram"
-              dist={park.dist}
-              wall={park.wall}
-              arc={park.arc}
+        <div className="ballparkcard__title">
+          {title.wordmark ? (
+            // Unguarded, unlike the photo: `text` is always behind a wordmark
+            // (resolveParkName), so a bundled mark that fails falls back to the
+            // typeset name just as an override does, and neither can loop.
+            <img
+              className="ballparkcard__logo"
+              src={title.wordmark}
+              alt={title.text}
+              loading="lazy"
+              onError={() => noteBroken(title.wordmark)}
             />
-            <div className="ballparkcard__details">
-              <dl className="bpsheet__facts">
-                <Facts label="Opened" value={park.built} />
-                <Facts label="Roof" value={park.roof} />
-                <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
-              </dl>
-              {attendance && <AttendanceFacts attendance={attendance} />}
-              {note && <p className="ballparkcard__note">{note}</p>}
-              <div className="bpsheet__ranks">
-                <RankGroup
-                  title="Outfield distances"
-                  rows={park.rows.filter((r) => r.group === 'dist')}
-                />
-                <RankGroup title="Wall heights" rows={park.rows.filter((r) => r.group === 'wall')} />
-              </div>
+          ) : (
+            <p className="ballparkcard__name">{title.text}</p>
+          )}
+        </div>
+      </div>
+
+      {draft.editing && (
+        <Suspense fallback={null}>
+          <BallparkEditFields draft={draft} defaultName={name} />
+        </Suspense>
+      )}
+
+      {/* The diagram/dimensions half — MLB only. A MiLB park has no
+          BALLPARKS record (no hand-verified distances, no digitized wall
+          polygon), so there is nothing here to draw or rank; the card ends
+          at the hero + gear above rather than showing a broken diagram. */}
+      {park && (
+        <div className="ballparkcard__layout">
+          <BallparkDiagram
+            className="ballparkcard__diagram"
+            dist={park.dist}
+            wall={park.wall}
+            arc={park.arc}
+          />
+          <div className="ballparkcard__details">
+            <dl className="bpsheet__facts">
+              <Facts label="Opened" value={park.built} />
+              <Facts label="Roof" value={park.roof} />
+              <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
+            </dl>
+            {attendance && <AttendanceFacts attendance={attendance} />}
+            {note && <p className="ballparkcard__note">{note}</p>}
+            <div className="bpsheet__ranks">
+              <RankGroup
+                title="Outfield distances"
+                rows={park.rows.filter((r) => r.group === 'dist')}
+              />
+              <RankGroup title="Wall heights" rows={park.rows.filter((r) => r.group === 'wall')} />
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </Card>
   )
 }

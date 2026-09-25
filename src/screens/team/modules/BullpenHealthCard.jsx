@@ -3,6 +3,7 @@ import { useAsync } from '../../../hooks/useAsync.js'
 import { fetchWorkload, staffGridFor } from '../../../api/workload.js'
 import { StaffGrid } from '../../../components/workload/StaffGrid.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../components/ui/frame/Card.jsx'
 
 // THE CLUB'S PEN, on the club's own page.
 //
@@ -32,13 +33,14 @@ export function BullpenHealthCard({ teamId }) {
   if (!rows || rows.length === 0) return null
 
   return (
-    <div className="thub-card">
-      <SectionHead look="band" club>
-        Bullpen health
-      </SectionHead>
-      <div className="thub-card__body">
-        <StaffGrid rows={rows} />
-      </div>
-    </div>
+    <Card
+      head={
+        <SectionHead look="band" club>
+          Bullpen health
+        </SectionHead>
+      }
+    >
+      <StaffGrid rows={rows} />
+    </Card>
   )
 }
