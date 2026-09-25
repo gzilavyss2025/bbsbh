@@ -157,8 +157,8 @@ const DROPPED_2 = {}
 // One slot per slice, each on its own line, so parallel slices never edit the
 // same line. A slice fills only its own PAIRS_N and DROPPED_N.
 // ---- slice 3 ----
-const PAIRS_3 = []
-const DROPPED_3 = {}
+const PAIRS_3 = [own('26b-player-contract.css', '.contractcard__regime', { mods: ['.pill--ink'] })]
+const DROPPED_3 = { '.contractcard__regime|box-shadow': 'paper does not float (#1166); a planned visible change' }
 // ---- slice 4 ----
 const PAIRS_4 = []
 const DROPPED_4 = {}

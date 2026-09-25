@@ -78,7 +78,7 @@ const TARGETS_2 = [
 // One slot per slice, each on its own line, so parallel slices never edit the
 // same line. A slice fills only its own slot.
 // ---- slice 3 ----
-const TARGETS_3 = []
+const TARGETS_3 = [{ name: 'regime-signed', url: '/player/christian-yelich-592885', sel: ['.contractcard__regime'] }, { name: 'regime-prearb', url: '/player/jacob-misiorowski-694819', sel: ['.contractcard__regime'] }, { name: 'regime-pitcher', url: '/player/freddy-peralta-642547', sel: ['.contractcard__regime'] }]
 // ---- slice 4 ----
 const TARGETS_4 = []
 // ---- slice 5 ----

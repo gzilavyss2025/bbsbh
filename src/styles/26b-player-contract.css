@@ -60,20 +60,11 @@
   line-height: var(--lh-title);
   text-transform: uppercase;
 }
+/* The regime tag is a Pill (fill="ink", #1131 slice 3): the pill draws the
+   navy fill, the paper text, the capsule and the type. The host keeps only its
+   place in the header row. No shadow: paper does not float (#1166). */
 .contractcard__regime {
   flex: none;
-  padding: var(--space-1) var(--space-2);
-  color: var(--text-on-ink);
-  background: var(--navy);
-  border: var(--bw-hair) solid var(--navy);
-  border-radius: var(--radius-pill);
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--ink-0) 16%, transparent);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  line-height: var(--lh-solid);
-  text-transform: uppercase;
 }
 .contractcard__hero {
   display: grid;

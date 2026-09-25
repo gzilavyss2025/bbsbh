@@ -1,5 +1,6 @@
 import '../../styles/26b-player-contract.css'
 import { contractView } from '../../api/person/contract/view.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // WHAT THIS CARD LEADS WITH DEPENDS ON THE PLAYER, and that is the whole
 // design. A pre-arbitration player's salary is the least interesting fact about
@@ -172,10 +173,10 @@ export function PlayerContractCard({ contract, optioned = false }) {
             <span className="contractcard__eyebrow">Player compensation</span>
             <h2 id="player-contract-title">Contract</h2>
           </div>
-          <span className="contractcard__regime">
+          <Pill fill="ink" className="contractcard__regime">
             {PILL[view.regime]
               ?? (contract.estimated ? 'Estimated' : PLAIN_PILL[contract.regime] ?? 'Contract')}
-          </span>
+          </Pill>
         </header>
 
         {/* A player on the 40-man roster who is pitching or hitting in the
