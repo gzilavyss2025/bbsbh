@@ -4,13 +4,14 @@ import { sectionHeadClassName, sectionHeadTitleTag } from '../../../lib/design/s
 // once, in styles/system/section-head.css. It is the head, never the card: the
 // card under it, and the space above and below it, belong to the parent.
 //
-//   look    'band' — the club band: --bar-fill ground, a 3px --bar-accent
+//   look    'label' (the default) — graphite caps on a hairline.
+//           'rule' — the label, then a pencil rule running to the note.
+//           'band' — the club band: --bar-fill ground, a 3px --bar-accent
 //           underline, --bar-text ink, all three read from the NEAREST
 //           ancestor that sets them (lib/headerTheme.js). With no club, the
 //           house navy with a kraft line. SectionHead takes no theme prop: a
 //           club may colour a head that names the club, and the theme stays on
 //           the card or page root, where it is now (ADR-0030).
-//           'label' and 'rule' come in slice H2 (lib/design/sectionHeadClass.js).
 //   club    band only: a plain label until a club colour arrives (the team
 //           hub's card heads, the player page's section bars).
 //   bleed   band only: runs to the page edge, square corners, one size up.
@@ -30,7 +31,7 @@ import { sectionHeadClassName, sectionHeadTitleTag } from '../../../lib/design/s
 // computes or fetches nothing may render anywhere — inside a SealBox reveal
 // too — so this file imports no api/ module and no stamp module, ever.
 export function SectionHead({
-  look,
+  look = 'label',
   club = false,
   bleed = false,
   as: Title = 'h3',

@@ -13,7 +13,8 @@ import { PositionInnings } from '../../components/player/PositionInnings.jsx'
 import { TransactionTimeline } from '../../components/transactions/TransactionTimeline.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
-import { SectionTitle, debutLabel } from './parts.jsx'
+import { debutLabel } from './parts.jsx'
+import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 
 // Reads as the story of a rookie season: the MLB debut, first taking the field,
 // then each milestone at the plate in the order it's likeliest to arrive. The
@@ -78,7 +79,7 @@ export function PlayerHistoryTab({ id, asOf, sportId }) {
 
       {hasFirsts && (
         <section>
-          <SectionTitle title="Firsts" />
+          <SectionHead look="rule">Firsts</SectionHead>
           <div className="player__splits">
             {firstsOrder.map((key) => {
               const f = data.firsts[key]

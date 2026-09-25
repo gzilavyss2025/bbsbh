@@ -18,7 +18,7 @@ import { RunValueCard } from '../../components/playerstats/RunValueCard.jsx'
 import { SprayMapSection } from '../../components/playerstats/SprayMapSection.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
-import { SectionTitle } from './parts.jsx'
+import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 
 // The player hub's ANALYTICS tab — `/player/{id}/analytics`. What is under the
 // numbers on the Overview: the Prospect card below the majors, Statcast
@@ -115,7 +115,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
 
           {block.arsenal && (
             <>
-              <SectionTitle title="Pitches" note="share of pitches · avg velo" />
+              <SectionHead look="rule" note="share of pitches · avg velo">Pitches</SectionHead>
               <PitchMix
                 arsenal={block.arsenal}
                 heat={block.heat}
@@ -131,7 +131,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
               renders nothing rather than an empty zone. */}
           {block.command && (
             <>
-              <SectionTitle title="Command" note="where each pitch goes" />
+              <SectionHead look="rule" note="where each pitch goes">Command</SectionHead>
               <CommandMap
                 entry={block.command}
                 level={block.tileSportId === 1 ? 'mlb' : 'aaa'}
@@ -156,7 +156,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
               a reader meets the same statistic twice without being told. */}
           {block.gloveTarget && (
             <>
-              <SectionTitle title="Glove target" note="every miss, from the catcher&#8217;s target" />
+              <SectionHead look="rule" note="every miss, from the catcher&#8217;s target">Glove target</SectionHead>
               <GloveTarget entry={block.gloveTarget} data={block.targetCommandData} />
             </>
           )}
@@ -167,7 +167,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
               card's fetch; null below the balls-in-play floor. */}
           {block.battedBall && (
             <>
-              <SectionTitle title="Batted balls" note="share of contact · average when hit" />
+              <SectionHead look="rule" note="share of contact · average when hit">Batted balls</SectionHead>
               <BattedBallMix battedBall={block.battedBall} />
             </>
           )}
@@ -192,12 +192,12 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
           {block.similar?.length > 0 && (
             block.group === 'pitching' ? (
               <>
-                <SectionTitle title="Pitches like" />
+                <SectionHead look="rule">Pitches like</SectionHead>
                 <SimilarPitchers similar={block.similar} />
               </>
             ) : (
               <>
-                <SectionTitle title="Hits like" />
+                <SectionHead look="rule">Hits like</SectionHead>
                 <SimilarHitters similar={block.similar} />
               </>
             )

@@ -3,11 +3,15 @@
 // components/ui/frame/SectionHead.jsx and its tests. Pure, so node --test can
 // pin it, the way pillClass.js pins the pill.
 //
-// LOOKS. Slice H1a builds the band only. Slice H2 adds `label` (graphite caps
-// on a hairline) and `rule` (the label, then a pencil rule to the right edge),
-// and `label` becomes the look a head gets when it names none. Until H2 lands,
-// asking for either is refused rather than drawn as a band: a silent fallback
-// would paint the club's colour on a head that asked to be quiet.
+// LOOKS. Three, and the default is the quiet one:
+//   label  graphite caps on a hairline: a section's name on the page.
+//   rule   the label, then a pencil rule that runs to the note: the player
+//          page's sub-heads, where a long analytics shelf needs each card's
+//          top edge drawn.
+//   band   the club band (below).
+// An unknown look is a caller's typo, and it throws: a silent fallback would
+// draw a quiet label where someone asked for the club's colour, or the other
+// way round.
 //
 // THE BAND'S TWO SWITCHES. Both are band-only, and both throw anywhere else.
 //   club   a band that is a plain label until a club colour arrives: the team
@@ -17,13 +21,9 @@
 //   bleed  the band runs to the page edge with square corners, one size up:
 //          the player page's top-level sections, which head a page section
 //          and not a card.
-export const LOOKS = ['band']
-export const LOOKS_LATER = ['label', 'rule']
+export const LOOKS = ['label', 'rule', 'band']
 
 export function sectionHeadClassName({ look = 'label', club = false, bleed = false, className = '' } = {}) {
-  if (LOOKS_LATER.includes(look)) {
-    throw new Error(`SectionHead: look="${look}" is not built yet (#1113 slice H2); pass look="band"`)
-  }
   if (!LOOKS.includes(look)) throw new Error(`SectionHead: unknown look "${look}" (${LOOKS.join(', ')})`)
   if ((club || bleed) && look !== 'band') throw new Error('SectionHead: club and bleed are band switches')
   const parts = ['sectionhead', `sectionhead--${look}`]

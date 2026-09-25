@@ -10,8 +10,10 @@
 //   3. THE FALLBACKS. With no club, the band is the house navy with a kraft
 //      line; a club head is a plain label and never falls back to navy or
 //      kraft (#1113 Q2: both unthemed faces stay as they are).
-//   4. THE HELPER. The looks H2 has not built yet are refused, not drawn as a
-//      band.
+//   4. THE HELPER. Label is the default; an unknown look and a band switch
+//      on a quiet look are refused, not drawn as something else.
+//   6. THE QUIET LOOKS. The label and the rule never read a club colour or
+//      kraft, and the rule draws its leader (#1113 slice H2).
 //   5. NO IMPORTS. SectionHead may render inside a SealBox reveal and beside
 //      a stamp surface, so it imports no api/ module and no stamp module.
 //
@@ -86,6 +88,7 @@ const RETIRED = [
   'tstats-card__head',
   'roster-super__head',
   'team-score__head',
+  'section__title',
   'section__title--bar',
   'section__title--aside',
   'section__title--primary',
@@ -154,11 +157,39 @@ test('the band and its two switches turn into classes', () => {
   )
 })
 
-test('the looks slice H2 builds are refused, not drawn as a band', () => {
-  assert.throws(() => sectionHeadClassName(), /H2/)
-  assert.throws(() => sectionHeadClassName({ look: 'label' }), /H2/)
-  assert.throws(() => sectionHeadClassName({ look: 'rule' }), /H2/)
+test('label is the default look; an unknown look or a band switch on a quiet one is refused', () => {
+  assert.equal(sectionHeadClassName(), 'sectionhead sectionhead--label')
+  assert.equal(sectionHeadClassName({ look: 'rule' }), 'sectionhead sectionhead--rule')
   assert.throws(() => sectionHeadClassName({ look: 'navy' }), /unknown look/)
+  assert.throws(() => sectionHeadClassName({ look: 'label', club: true }), /band switches/)
+  assert.throws(() => sectionHeadClassName({ look: 'rule', bleed: true }), /band switches/)
+})
+
+// ---- 6. the quiet looks ----
+
+test('the label and the rule read no club colour and no kraft', () => {
+  const css = read('system/section-head.css')
+  const quiet = [
+    '.sectionhead--label',
+    '.sectionhead--rule',
+    '.sectionhead--rule .sectionhead__note',
+    '.sectionhead--rule .sectionhead__title',
+    '.sectionhead--rule .sectionhead__title::after',
+  ]
+  for (const sel of quiet) {
+    const body = ruleBody(css, sel)
+    assert.ok(body !== null, `${sel} is found`)
+    assert.doesNotMatch(body, /--bar-|--seal|--navy/, sel)
+  }
+})
+
+test('the label sits on a hairline and the rule draws a leader to its note', () => {
+  const css = read('system/section-head.css')
+  assert.match(decl(ruleBody(css, '.sectionhead--label'), 'border-bottom'), /^var\(--bw-hair\) solid/)
+  const leader = ruleBody(css, '.sectionhead--rule .sectionhead__title::after')
+  assert.ok(leader, 'a leader rule')
+  assert.equal(decl(leader, 'height'), 'var(--bw-hair)')
+  assert.equal(decl(leader, 'flex'), '1 1 auto')
 })
 
 test('the title is a heading or a span, nothing else', () => {

@@ -442,14 +442,9 @@
   margin-top: 14px;
 }
 
+/* A SectionHead label (#1113); only its place in the group is kept here. */
 .rankgrp__title {
   margin: 0 0 6px;
-  padding-bottom: var(--space-1);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-  font-size: var(--fs-caption);
-  letter-spacing: var(--ls-wide);
-  text-transform: uppercase;
-  color: var(--text-caption);
 }
 
 .rankgrp__strip {

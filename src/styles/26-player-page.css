@@ -1,7 +1,7 @@
 /* ============================================================
    PLAYER & TEAM PAGES
    Baseball-card treatment on the app's paper-and-ink system.
-   Reuses the .stat tiles, .factgrid bio grid, .section__title
+   Reuses the .stat tiles, .factgrid bio grid, SectionHead
    and .hint; everything below is page-specific.
    ============================================================ */
 
@@ -53,56 +53,9 @@
   text-transform: uppercase;
 }
 
-/* Section titles on these pages carry an optional right-aligned note. */
-.player .section__title,
-.team-hub .section__title {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-.player .section__title em,
-.team-hub .section__title em {
-  font-style: normal;
-  color: var(--graphite-soft);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-caps);
-}
-/* All copy on these pages is forced uppercase (the "scorebook all-caps"
-   convention — see the ALL-CAPS INVARIANT in this file's header). */
-.player .section__title em {
-  text-transform: uppercase;
-}
-/* SUB-SECTION LEADER RULE. The player page has two heading tiers and they
-   were a full octave apart: the top-level headings wear a solid club bar
-   (SectionHead look="band" club bleed), while every sub-card heading under
-   them — Statcast,
-   Advanced, Foul balls, Pitches, Pitches like / Hits like, By handedness,
-   Situational, Splits vs team, Firsts — was small graphite caps floating on
-   the page with nothing under it, so a reader scrolling a long analytics
-   shelf could not see where one card stopped and the next started. A hairline
-   leader running from the label across to its right-hand note gives that tier
-   a middle weight: still quiet, but it draws the card's top edge, and it ties
-   the label to the note it belongs to instead of leaving them as two loose
-   ends of a wide row. Almanac/scorecard idiom, and on-metaphor for ruled
-   paper. Only this label tier gets it: a band head is not a .section__title,
-   and it already has all the structure it needs. */
-.player .section__title > span {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.player .section__title > span::after {
-  content: '';
-  flex: 1 1 auto;
-  height: var(--bw-hair);
-  background: var(--border-rule);
-}
-.team-hub .section__title em {
-  text-transform: uppercase;
-}
+/* Section heads on these pages are SectionHead now (#1113): the sub-heads
+   draw look="rule", the pencil leader that used to live here, and the hub's
+   draw look="label". system/section-head.css. */
 
 /* ---- player hero ---- */
 .player__hero {
@@ -1071,14 +1024,9 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
 }
+/* A SectionHead label (#1113); only its place in the box is kept here. */
 .milestonewatch__title {
   margin: 0 0 4px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--graphite);
 }
 .milestonewatch__row {
   display: flex;

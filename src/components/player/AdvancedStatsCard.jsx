@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The player page's "Advanced" card, either group: the rates behind the
 // headline tiles. For a pitcher that's FIP, league-adjusted ERA−, the K/BB
@@ -18,10 +19,9 @@ export function AdvancedStatsCard({ adv }) {
   if (!adv?.facts?.length) return null
   return (
     <div className="advcard">
-      <h3 className="section__title">
-        <span>Advanced</span>
-        <em>full season</em>
-      </h3>
+      <SectionHead look="rule" note="full season">
+        Advanced
+      </SectionHead>
       <dl className="factgrid">
         {adv.facts.map((f) => (
           <AdvancedFact key={f.label} label={f.label} value={f.value} note={f.note} />

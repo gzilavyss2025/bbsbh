@@ -141,9 +141,8 @@
 /* The team page (TeamPage.jsx, /team/:id) — not tied to any one game, so it
    always resolves the club's Main/Home triad rather than tonight's jersey (see
    TeamPage.jsx's own theme useMemo). Scoped to .team-hub so it never leaks
-   onto the shared SectionTitle/section__title used by the player and
-   team-leaders pages — the player page now themes that shared class itself
-   via an opt-in modifier (see `.player.is-themed .section__title--bar`
+   onto the heads the player and team-leaders pages share. The player page
+   themes its own section bars (SectionHead look="band" club bleed, see
    above); team-leaders is the one surface still deliberately unthemed.
 
    The hero (.team-hub__id) wears its own SEPARATE tile-color theming —
@@ -445,14 +444,6 @@
   font-weight: var(--w-regular);
   line-height: var(--lh-body);
   animation: postponed-in var(--dur-med) var(--ease-out) both;
-}
-.section__title {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  margin: 18px 0 8px;
 }
 .umps__list {
   list-style: none;

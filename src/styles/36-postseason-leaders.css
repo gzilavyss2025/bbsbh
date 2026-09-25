@@ -25,11 +25,11 @@
   box-shadow: var(--shadow-card);
   padding: var(--space-3);
 }
-/* .section__title's default 18px top margin assumes it follows other page
+/* The label head's default 18px top margin assumes it follows other page
    content; here it's the card's first child sitting on top of the card's
    own 12px padding, so the two stack into a lopsided gap above the heading
    vs. below it. */
-.psleaders__teamboard > .section__title:first-child {
+.psleaders__teamboard > .sectionhead:first-child {
   margin-top: 0;
 }
 .psleaders__teamlist,

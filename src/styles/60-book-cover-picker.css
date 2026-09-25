@@ -43,14 +43,9 @@
   box-shadow: var(--shadow-card);
 }
 
+/* A SectionHead label (#1113); only its place is kept here. */
 .coverpick__heading {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
 }
 
 /* Wide screens only — the two halves are rendered by the component's own

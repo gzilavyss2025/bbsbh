@@ -4,6 +4,7 @@ import { contractHistoryView } from '../../api/person/contract/history.js'
 import { teamFullName } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // CONTRACT HISTORY — the money half of a career, season by season, newest
 // first. Arbitration cases, extensions, free-agency signings and the season
@@ -47,10 +48,9 @@ export function ContractHistoryLedger({ rows }) {
           inversion nothing else in src/components does, and both neighbours
           (CareerTimeline, TransactionTimeline) write this same three-line
           heading inline. */}
-      <h3 className="section__title">
-        <span>Contract history</span>
-        <em>{tally(view)}</em>
-      </h3>
+      <SectionHead look="rule" note={tally(view)}>
+        Contract history
+      </SectionHead>
       <ol className="cthist__seasons">
         {seasons.map((season) => (
           <SeasonBlock key={season.season ?? 'undated'} season={season} />

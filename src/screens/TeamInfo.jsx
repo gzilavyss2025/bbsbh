@@ -59,6 +59,7 @@ import { BullpenBoard, useBullpenReveal, BullpenToggle } from '../components/tea
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
 import { SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
+import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -1130,7 +1131,7 @@ function OrgTies({ ties }) {
   if (!ties || ties.length === 0) return null
   return (
     <section className="teammates">
-      <h3 className="section__title">Org ties</h3>
+      <SectionHead look="label">Org ties</SectionHead>
       <p className="hint">No shared roster tonight — but these players have history in the other side&rsquo;s organization.</p>
       <ul className="teammates__grid">
         {ties.map((t) => (

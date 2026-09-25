@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { StampSheet } from './StampSheet.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The league, laid out under the book: the clubs and the ballparks you have
 // stamped a game of, drawn as two panes of postage stamps, at whichever level
@@ -47,9 +48,9 @@ export function ClubsSeen({ stamps = [], factsByPk = {} }) {
 
   return (
     <section className="clubsseen" aria-labelledby="clubsseen-title">
-      <h2 className="clubsseen__title" id="clubsseen-title">
+      <SectionHead as="h2" titleId="clubsseen-title" className="clubsseen__title">
         Clubs you’ve seen
-      </h2>
+      </SectionHead>
       <p className="clubsseen__lede">
         {count === 0
           ? 'Every club in the league. The ones you stamp a game of come up in their own colours.'

@@ -7,6 +7,7 @@ import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { SPORT_LABEL } from '../../lib/teams.js'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // PLAYERS WHO MOVED UP — the minor levels' offseason page, issue #1077.
 //
@@ -78,14 +79,11 @@ export function MovedUp({ sportId, season }) {
 
   return (
     <section className="movedup" aria-label={`Players who moved up from ${label} in ${season}`}>
-      <div className="oseason__head">
-        {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
-            invariant is never a per-component .toUpperCase() (ADR-0017). */}
-        <h3 className="oseason__title">Players who moved up</h3>
-        <p className="oseason__note">
-          {season} {label} leaders
-        </p>
-      </div>
+      {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
+          invariant is never a per-component .toUpperCase() (ADR-0017). */}
+      <SectionHead as="h3" className="oseason__head" note={<>{season} {label} leaders</>}>
+        Players who moved up
+      </SectionHead>
 
       <table className="movedup__table">
         <thead>

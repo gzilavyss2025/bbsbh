@@ -1,5 +1,5 @@
 import { Ledger } from '../player/Ledger.jsx'
-import { SectionTitle } from '../ui/SectionTitle.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { SplitsVsTeam } from './SplitsVsTeam.jsx'
 import { spanCell } from '../../lib/ledger.js'
 
@@ -115,7 +115,7 @@ export function SplitsSection({ block, vsTeam, season, asOf, personId, playerSur
     <>
       {block.splits && (
         <div className="player__seasonsplits">
-          <SectionTitle title="By handedness" note="full season" />
+          <SectionHead look="rule" note="full season">By handedness</SectionHead>
           <Ledger
             leftCols={1}
             head={splitHead(block.group)}
@@ -146,7 +146,7 @@ export function SplitsSection({ block, vsTeam, season, asOf, personId, playerSur
           it in the table's own grammar. */}
       {block.situational && (
         <>
-          <SectionTitle title="Situational" note="full season" />
+          <SectionHead look="rule" note="full season">Situational</SectionHead>
           <Ledger
             leftCols={1}
             head={splitHead(block.group)}

@@ -1,7 +1,7 @@
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
-import { SectionTitle } from '../ui/SectionTitle.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { isMlbTeamId } from '../../lib/teams.js'
 
 // "Made The Show" — the big-league players who came through THIS farm club,
@@ -25,7 +25,7 @@ export function MilbAlumni({ players, minGames }) {
   if (!players?.length) return null
   return (
     <section className="alum">
-      <SectionTitle title="Made The Show" note={minGames ? `${minGames}+ games here` : undefined} />
+      <SectionHead look="label" note={minGames ? `${minGames}+ games here` : undefined}>Made The Show</SectionHead>
       <ul className="alum__grid">
         {players.map((p) => (
           <li key={p.id} className="alum__card">

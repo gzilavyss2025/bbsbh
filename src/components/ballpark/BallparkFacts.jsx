@@ -1,4 +1,5 @@
 import { ordinal } from '../../lib/ballpark/ballparkData.js'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The two small building blocks of a park's "details" — a labeled built/roof/
 // capacity stat, and one ranked dimension family (distances or wall heights).
@@ -48,7 +49,7 @@ function outlierNote({ rank, total, group }) {
 export function RankGroup({ title, rows }) {
   return (
     <section className="rankgrp">
-      <h3 className="rankgrp__title">{title}</h3>
+      <SectionHead className="rankgrp__title">{title}</SectionHead>
       <ul className="rankgrp__strip">
         {rows.map((r) => {
           const note = outlierNote(r)

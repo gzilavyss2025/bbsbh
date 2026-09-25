@@ -4,6 +4,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { UmpireTierGlyph } from '../badges/UmpireTierGlyph.jsx'
 import { UmpireAccuracyModal } from './UmpireAccuracyModal.jsx'
 import { UmpireLink } from './UmpireLink.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The lineup page's Umpires section (moved out of TeamInfo.jsx when that
 // screen hit its file-size budget): the crew grid, the plate ump's accuracy
@@ -40,7 +41,7 @@ export function UmpiresCard({ officials }) {
   const sixMan = officials.length === 6
   return (
     <section className="umps">
-      <h3 className="section__title">Umpires</h3>
+      <SectionHead look="label">Umpires</SectionHead>
       <ul className={`umps__list${sixMan ? ' umps__list--six' : ''}`}>
         {officials.map((o) => (
           <li key={o.role}>

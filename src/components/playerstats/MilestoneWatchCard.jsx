@@ -1,5 +1,6 @@
 import { useAsync } from '../../hooks/useAsync.js'
 import { loadMilestoneWatch, milestonesForPlayer, formatMilestoneProjection } from '../../api/milestones.js'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // Milestone Watch — the player page's forward-looking companion to the plain
 // "X shy of Y" progress line: a projected timeframe for each career-total
@@ -23,9 +24,9 @@ export function MilestoneWatchCard({ playerId, asOf, milestones, groupLabel }) {
 
   return (
     <div className="milestonewatch">
-      <p className="milestonewatch__title">
+      <SectionHead as="span" className="milestonewatch__title">
         Milestone Watch{groupLabel ? ` — ${groupLabel}` : ''}
-      </p>
+      </SectionHead>
       {milestones.map((m) => {
         const proj = projections.find((p) => p.stat === m.stat)
         const eta = formatMilestoneProjection(proj?.projection)

@@ -12,19 +12,10 @@
   display: grid;
   margin: 14px 0 14px;
 }
+/* A SectionHead label (#1113); only its place on the card is kept here. */
 .txcard__head {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-2);
   padding-bottom: var(--space-1h);
-  margin-bottom: 4px;
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  margin: 0 0 4px;
 }
 
 /* A horizontally swipeable deck of story cards, full-bleed to the screen's

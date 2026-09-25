@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { computeLeaders, positionTag } from '../../api/teamLeaders.js'
-import { SectionTitle } from '../ui/SectionTitle.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { InjuredMark } from '../badges/InjuredMark.jsx'
 import { Door } from '../ui/control/Door.jsx'
@@ -73,8 +73,8 @@ export function TeamLeadersLedger({
 
   return (
     <div className="tledg">
-      <SectionTitle
-        title={title}
+      <SectionHead
+        look="label"
         action={
           onSeeAll || secondaryAction ? (
             <span className="tledg__actions">
@@ -83,7 +83,9 @@ export function TeamLeadersLedger({
             </span>
           ) : null
         }
-      />
+      >
+        {title}
+      </SectionHead>
       <div className="tledg__blocks">
         {blocks.map((block) => (
           <section key={block.key} className="tledg__block">

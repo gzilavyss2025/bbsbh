@@ -3,7 +3,7 @@ import { computeLeaders } from '../../api/teamLeaders.js'
 import { splitDisplayName } from '../../api/person.js'
 import { prospectBadge } from '../../api/prospects.js'
 import { SPORT_LABEL, favoriteAccentColor, isMlbTeamId } from '../../lib/teams.js'
-import { SectionTitle } from '../ui/SectionTitle.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -267,7 +267,7 @@ export function TeamLeaders({
 
   return (
     <div className="tlead">
-      <SectionTitle title={title} />
+      <SectionHead look="label">{title}</SectionHead>
       <div className="tlead__grid">
         {ranked.map(({ category, entries }) => (
           <LeaderCategory

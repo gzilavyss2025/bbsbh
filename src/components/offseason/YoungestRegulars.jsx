@@ -9,6 +9,7 @@ import {
 } from '../../api/notebook.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // THE NOTEBOOK, AT A FARM LEVEL — one note about the season that just finished
 // (issue #1078, step 4 of #1038).
@@ -69,14 +70,11 @@ export function YoungestRegulars({ sportId, season }) {
 
   return (
     <section className="note" aria-label={`The youngest regulars in the ${season} ${league.name}`}>
-      <div className="oseason__head">
-        {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
-            invariant is never a per-component .toUpperCase() (ADR-0017). */}
-        <h3 className="oseason__title">The notebook</h3>
-        <p className="oseason__note">
-          {season} {league.name}
-        </p>
-      </div>
+      {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
+          invariant is never a per-component .toUpperCase() (ADR-0017). */}
+      <SectionHead as="h3" className="oseason__head" note={<>{season} {league.name}</>}>
+        The notebook
+      </SectionHead>
 
       {leagues.length > 1 && (
         <div className="note__leagues" role="group" aria-label="League">

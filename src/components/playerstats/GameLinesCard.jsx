@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BoxLinesDoor } from "../boxlines/BoxLinesDoor.jsx";
-import { SectionTitle } from "../ui/SectionTitle.jsx";
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import {
   cardFacetsFor,
   FAMILIES,
@@ -173,7 +173,7 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
 
   return (
     <div className={`gamelines gamelines--${group}`}>
-      <SectionTitle title="Game lines" note="career" />
+      <SectionHead look="rule" note="career">Game lines</SectionHead>
       {/* The promise each door used to repeat twenty-five times. */}
       <p className="gamelines__hint">Tap a line for the games behind it</p>
       {/* A wrapper so the four panels can pair up past the wide breakpoint;

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // A career map, shown above the "Path to the Majors" card: one stop per club
 // the player logged real time with (see careerTimelineView's threshold),
@@ -40,7 +41,10 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // affordance (no corner icon, no first-run hint) — asked for the interaction
 // itself, not a way to advertise it.
 
-export function CareerTimeline({ entries, title = 'Team history' }) {
+// `headLook`: the player page's sub-heads draw a trailing rule; the team
+// hub's Minors tab, which reuses this for its affiliation history, draws the
+// plain label its other cards wear (#1113).
+export function CareerTimeline({ entries, title = 'Team history', headLook = 'rule' }) {
   const [hoverKey, setHoverKey] = useState(null)
   const [pinned, setPinned] = useState(() => new Set())
   if (!entries?.length) return null
@@ -54,7 +58,7 @@ export function CareerTimeline({ entries, title = 'Team history' }) {
 
   return (
     <section className="careertl">
-      <h3 className="section__title"><span>{title}</span></h3>
+      <SectionHead look={headLook}>{title}</SectionHead>
       <ol className="careertl__track">
         {entries.map((e) => {
           const key = `${e.teamId}-${e.minSeason}`

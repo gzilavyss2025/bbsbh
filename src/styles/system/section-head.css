@@ -5,7 +5,9 @@
 
    Before this file, six selectors in five partials painted the same club band
    (.metricbar, the team hub's four card heads, the player page's section bar),
-   each with its own padding, size and tracking. This is the one copy.
+   each with its own padding, size and tracking, and two SectionTitle
+   components plus twenty hand-written <h3>s drew .section__title. This is
+   the one copy of both.
 
    WHAT IT OWNS: the look (ground, underline, ink, type), the padding, and the
    row that puts the title left and the note, action and mark right.
@@ -72,6 +74,47 @@
   flex: 0 0 auto;
   height: calc(var(--fs-body) * var(--lh-solid) + 20px);
   margin-block: -10px;
+}
+
+/* THE LABEL. A section's name on the page: graphite caps, one step down from
+   a band's title, on a hairline. It carries its own space above and below
+   until the parent owns that (#1180); the 18px is .section__title's, kept so
+   no page moves. */
+.sectionhead--label,
+.sectionhead--rule {
+  margin: 18px 0 8px;
+  padding: 0;
+  color: var(--text-caption);
+}
+.sectionhead--label {
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+}
+.sectionhead--label .sectionhead__title,
+.sectionhead--rule .sectionhead__title {
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+.sectionhead--label .sectionhead__note,
+.sectionhead--rule .sectionhead__note {
+  color: var(--graphite-soft);
+}
+
+/* THE RULE. The label, then a pencil leader from the label across to its
+   note. It draws the top edge of the card under it, and it ties the label to
+   the note it belongs to instead of leaving two loose ends of a wide row:
+   the almanac idiom, and ruled paper. The title takes the row, so the rule
+   fills whatever the note leaves. */
+.sectionhead--rule .sectionhead__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-right: 0;
+}
+.sectionhead--rule .sectionhead__title::after {
+  content: '';
+  flex: 1 1 auto;
+  height: var(--bw-hair);
+  background: var(--border-rule);
 }
 
 /* THE BAND. Club ground, club underline, club ink, from the nearest ancestor
