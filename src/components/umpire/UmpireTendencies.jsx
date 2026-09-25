@@ -133,6 +133,7 @@ export function UmpireTendencies({ umpire }) {
     <section className="umptend">
       <SectionHead
         look="band"
+        house
         as="h2"
         className="umptend__bar"
         note={umpire.season && <span className="umptend__season">{umpire.season}</span>}

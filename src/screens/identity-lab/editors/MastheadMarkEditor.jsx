@@ -50,7 +50,7 @@ import { assignCustomMark, saveCustomMark } from '../saveStores.js'
 // The knockout route BAKES ITS INK IN rather than leaving the conversion's own
 // white. logoMono.js emits `fill="#fff"` because the club-wide mono mark is
 // re-inked at render time by CSS; a bar override's whole contract is the
-// opposite (`.metricbar__logo--custom` turns that filter back off), so a white
+// opposite (`.sectionhead__mark--custom` turns that filter back off), so a white
 // silhouette saved here would simply vanish on a light bar. Picking the color
 // at save time keeps that contract intact — what lands on disk is finished art
 // either way, and this panel never becomes a second thing the renderer has to

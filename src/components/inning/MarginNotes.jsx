@@ -67,7 +67,7 @@ export const MarginNotes = memo(function MarginNotes({ notes, feed, bundle, half
   const groups = groupNotesBySubject(shown)
   return (
     <section className="marginnotes">
-      <h3 className="marginnotes__title">Margin Notes</h3>
+      <h3 className="marginnotes__title sectionhead--band sectionhead--house">Margin Notes</h3>
       <div className="marginnotes__grid">
         {groups.map((g) => {
           const teamId = g.side ? bundle?.[g.side]?.teamId ?? null : null

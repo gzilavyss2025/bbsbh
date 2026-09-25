@@ -156,14 +156,14 @@
 
 /* The club's mono knockout mark, drawn exactly as the real masthead draws it —
    white art, re-inked to black on a light bar (.idlab__barmock--darkmark, the
-   lab's copy of .is-themed--dark .metricbar__logo). Same caveat as there: this
+   lab's copy of .is-themed--dark .sectionhead__mark). Same caveat as there: this
    is not the brightness(0) invert(1) whitening ADR-0031 forbids, because the
    art arrives already flat.
    `crop="bar"` (TeamLogo.jsx) gives the wrapper this explicit height so it
    bleeds to .idlab__barmock's own full height, 7% clipped off its own top and
    bottom (07-team-logo-and-buttons.css) — since .idlab__barmock's height is
    already an explicit px value rather than auto-computed, no negative-margin
-   padding-cancel trick is needed here the way .metricbar__logo needs one. */
+   padding-cancel trick is needed here the way .sectionhead__mark needs one. */
 .idlab__barmock__logo {
   flex: 0 0 auto;
   height: 100%;
@@ -175,7 +175,7 @@
 
 /* The City Connect bar's own uploaded override (HeaderBarMock's overrideUrl)
    is finished art, not a silhouette to re-ink — same reasoning and the same
-   specificity trick (two classes beat one) as .metricbar__logo--custom in
+   specificity trick (two classes beat one) as .sectionhead__mark--custom in
    09-team-info.css, this file's copy of the real masthead rule. */
 .idlab__barmock--darkmark .idlab__barmock__logo.idlab__barmock__logo--custom {
   filter: none;

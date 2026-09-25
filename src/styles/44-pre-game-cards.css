@@ -27,10 +27,10 @@
    the decorative flourish, never the sole identifier (the title names the same
    club), so the image carries no alt text. The one-color white lockup is the
    ART, not a treatment: callers ask TeamLogo for the `mono` variant (ADR-0031,
-   src/lib/logoMono.js). `.metricbar__logo` also names the mark for the dark-theme
-   re-ink rule (`--mark-filter`, 09-team-info.css), which DueUpNextCard and
-   EnteringReference share, so it keeps its name until slice H1b moves them. */
-.metricbar__logo {
+   src/lib/logoMono.js). `.sectionhead__mark` also names the mark for the dark-theme
+   re-ink rule (`--mark-filter`, 09-team-info.css), which the innings bars'
+   marks (DueUpNextCard, EnteringReference, RosterPanel) share. */
+.sectionhead__mark {
   flex: 0 0 auto;
 }
 /* Batting order, opposing defense, and opposing starter each wear the navy

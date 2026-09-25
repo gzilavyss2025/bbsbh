@@ -303,20 +303,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ADR-0030's club theme dresses the lineup page's section mastheads, and it
-   finds them through the nearest themed root's --bar-* properties, which
-   catch this card's band too, since
-   the modal opens inside that page. Opt back out. The theme's whole contract
-   is that it expresses ONE CLUB's identity; this card is about the umpire, and
-   a crew member's tendencies wearing the home side's colours would claim a
-   relationship that doesn't exist. Two classes beat the band's one
-   (system/section-head.css), so the house navy and kraft come back. */
-.is-themed .umptend__bar {
-  background: var(--navy);
-  border-bottom-color: var(--seal);
-  color: var(--text-on-ink);
-}
-
+/* The card's band is the HOUSE band (UmpireTendencies.jsx passes `house`):
+   the modal opens inside a club-themed lineup page, and a crew member's
+   tendencies wearing the home side's colours would claim a relationship that
+   doesn't exist (ADR-0030). system/section-head.css draws it. */
 /* Inside the modal the card IS the content, so it loses its own frame — the
    dialog already provides one. */
 .umpmodal .umptend {

@@ -66,20 +66,20 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
       size={22}
       variant="mono"
       crop="bar"
-      className="metricbar__logo"
+      className="sectionhead__mark"
     />
   )
   return (
     <section className={`halfdefense ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       {bare ? (
-        <h4 className="halfdefense__title halfdefense__title--bare">
+        <h4 className="halfdefense__title halfdefense__title--bare sectionhead--band">
           Defensive alignment
           {mark}
         </h4>
       ) : (
         <button
           type="button"
-          className="halfdefense__title"
+          className="halfdefense__title sectionhead--band"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
         >
@@ -207,7 +207,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
       {!bare && (
         <button
           type="button"
-          className="lineupcard__title"
+          className="lineupcard__title sectionhead--band sectionhead--house"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
         >
@@ -270,9 +270,9 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
   return (
     <div className={`lineupteam ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
-      <h5 className="lineupteam__name">
+      <h5 className="lineupteam__name sectionhead--band">
         <span className="lineupteam__namelabel">{name} Lineup</span>
-        <TeamLogo teamId={teamId} name={name} size={20} variant="mono" crop="bar" className="metricbar__logo" />
+        <TeamLogo teamId={teamId} name={name} size={20} variant="mono" crop="bar" className="sectionhead__mark" />
       </h5>
       <ol className="lineupcard__list">
         {slots.map((s) => {

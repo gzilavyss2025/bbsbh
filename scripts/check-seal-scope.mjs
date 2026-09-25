@@ -70,46 +70,22 @@ const ALLOWLIST = {
   // already names. It carries its own hover values, like .btn--seal, so the
   // seal never leaves this one selector.
   'system/pill.css': ['.pill--seal'],
-  // .sectionhead--band is the club band's one home (#1113). Its unthemed
-  // underline is `var(--bar-accent, var(--seal))`: the club-accent SLOT with
-  // kraft as its fallback (ADR-0083 clause 4). It replaced .metricbar (44) and
-  // .is-themed .metricbar (09); the innings bands below move here in slice H1b.
-  'system/section-head.css': ['.sectionhead--band'],
+  // The club band's one home (#1113). Its unthemed underline is
+  // `var(--bar-accent, var(--seal))`: the club-accent SLOT with kraft as its
+  // fallback (ADR-0083 clause 4). The house band pins navy and kraft for a
+  // head that names no club (ADR-0030). Together they replaced 17 band
+  // entries in 09, 12, 13, 20, 44 and 53: every band in the app, the innings
+  // view's included, wears this paint now.
+  'system/section-head.css': ['.sectionhead--band', '.sectionhead--band.sectionhead--house'],
 
-  // The club band's 3px accent underline, themed. `var(--bar-accent, var(--seal))`
-  // is the club-accent SLOT with kraft as its unthemed fallback (ADR-0030).
-  '09-team-info.css': [
-    '.is-themed .abs__title',
-    '.is-themed .halfdefense__title',
-    '.lineupteam.is-themed .lineupteam__name',
-    '.roster.is-themed .roster__toggle',
-  ],
-
-  // The cover, its copy, the tear — and the six mastheads that wear the club
-  // band's recipe unthemed.
-  '12-sealbox.css': [
-    '.sealbox.cover',
-    '.sealtear__face',
-    '.cover__main',
-    '.cover__sub',
-    '.abs__title',
-    '.statbox__title',
-    '.dueup__title',
-    '.lineupcard__title',
-    '.lineupteam__name',
-    '.halfdefense__title',
-  ],
-  '13-play-by-play.css': ['.roster__toggle'],
-  '20-charts.css': ['.winprob__head', '.marginnotes__title', '.pitchers__title'],
+  // The cover, its copy, the tear.
+  '12-sealbox.css': ['.sealbox.cover', '.sealtear__face', '.cover__main', '.cover__sub'],
   '69-pitch-arsenal.css': ['.pitchslab__head', '.pitchslab__heat'],
   'focus/console.css': ['.gamehud--console'],
   // The two mock bands — the identity lab's and the team hub's identity drawer —
   // preview the real one, so they carry the real one's fallback.
   '17-identity-lab-workbench.css': ['.idlab__barmock'],
   '62-identity-admin.css': ['.idlab__barmock'],
-  // The umpire-tendencies card opts OUT of club theming and restores the
-  // DEFAULT band, so it moves with the band rather than away from it.
-  '53-umpire-tendencies.css': ['.is-themed .umptend__bar'],
 
   // The pencilled-in option year on a contract. Finding 9's must-survive list.
   // `.contractcard__seg--option` sets --seg-dot, a CUSTOM PROPERTY rather than

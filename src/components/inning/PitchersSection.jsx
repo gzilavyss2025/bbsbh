@@ -35,7 +35,7 @@ export const PitchersSection = memo(function PitchersSection({ teams }) {
   if (shown.length === 0) return null
   return (
     <section className="pitchers">
-      <h3 className="pitchers__title">Pitchers</h3>
+      <h3 className="pitchers__title sectionhead--band sectionhead--house">Pitchers</h3>
       {shown.map((t) => (
         <div className="pitchers__team" key={t.name}>
           <h4 className="pitchers__teamname">

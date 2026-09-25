@@ -86,7 +86,7 @@ function LeagueBar({ league }) {
             name={league.name}
             variant="mono"
             crop="bar"
-            className="metricbar__logo"
+            className="sectionhead__mark"
           />
         ) : null
       }

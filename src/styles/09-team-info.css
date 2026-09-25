@@ -77,7 +77,7 @@
    The mono asset has already been through that reduction — it is one opaque
    shape plus transparency — so darkening it is exact, losing nothing there was
    left to lose. Applied only here, only to art that is already a silhouette. */
-.metricbar__logo {
+.sectionhead__mark {
   filter: var(--mark-filter, none);
 }
 
@@ -87,50 +87,15 @@
    club's actual pick. Higher specificity than the rule above (two classes,
    not one) rather than an !important; unconditional because custom art is
    never re-inked, dark theme or not. */
-.metricbar__logo.metricbar__logo--custom {
+.sectionhead__mark.sectionhead__mark--custom {
   filter: none;
 }
 
-/* The box score's ABS and Defense cards (.bs__abscard/.bs__defensecard,
-   BoxScore.jsx) carry no club mark of their own — just a text title — so
-   unlike .metricbar above there's no light/dark re-inking to do, only the
-   fill/edge/text triad. */
-.is-themed .abs__title,
-.is-themed .halfdefense__title {
-  background: var(--bar-fill, var(--navy));
-  border-bottom-color: var(--bar-accent, var(--seal));
-  color: var(--bar-text, var(--text-on-ink));
-}
-.is-themed .halfdefense__chevron {
-  color: var(--bar-text, var(--text-on-ink));
-}
-
-/* The innings view's own lineup masthead (.lineupteam__name,
-   EnteringReference.jsx) — same triad, same fallback, one per team rather
-   than per half (each team's `.lineupteam` carries its OWN `is-themed`, since
-   the two clubs in a lineup card wear two different bars). It does carry a
-   club mark, so it gets the dark re-ink rule above for free by reusing
-   `.metricbar__logo`. */
-.lineupteam.is-themed .lineupteam__name {
-  background: var(--bar-fill, var(--navy));
-  border-bottom-color: var(--bar-accent, var(--seal));
-  color: var(--bar-text, var(--text-on-ink));
-}
-
-/* The roster/bench drawer's own club bar (RosterPanel.jsx) — same triad, same
-   fallback, one per team like the lineup masthead above. It carries a club
-   mark too, so the dark re-ink rule applies for free via `.metricbar__logo`.
-   The chevron is spelled out separately because it inherits nothing: it is a
-   sibling span with its own colour, not text inside the button's own flow. */
-.roster.is-themed .roster__toggle {
-  background: var(--bar-fill, var(--navy));
-  border-bottom-color: var(--bar-accent, var(--seal));
-  color: var(--bar-text, var(--text-on-ink));
-}
-
-.roster.is-themed .roster__chevron {
-  color: var(--bar-text, var(--text-on-ink));
-}
+/* The innings view's and box score's club bars (ABS, Defense, the lineup
+   masthead, the roster drawer) wear the SectionHead band's paint now
+   (.sectionhead--band, system/section-head.css), which reads the same three
+   properties from the nearest themed root — per team, since each
+   .lineupteam and .roster carries its own theme (#1113, slice H1b). */
 
 /* The player page's top-level section heads (2026 Stats, Game log, Career
    stats, Awards, Photos…) wear the club band through SectionHead

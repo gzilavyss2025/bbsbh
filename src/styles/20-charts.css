@@ -171,8 +171,6 @@
   gap: var(--space-1) var(--space-2);
   margin: -12px -14px 8px;
   padding: var(--space-2) var(--space-2h);
-  background: var(--navy);
-  border-bottom: 3px solid var(--seal);
 }
 
 .winprob__title {
@@ -183,7 +181,6 @@
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-on-ink);
 }
 
 /* Current/final split — the two team shares, each swatch/figure in that
@@ -465,9 +462,6 @@
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-on-ink);
-  background: var(--navy);
-  border-bottom: 3px solid var(--seal);
 }
 .marginnotes__grid {
   display: grid;
@@ -562,9 +556,6 @@
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-on-ink);
-  background: var(--navy);
-  border-bottom: 3px solid var(--seal);
 }
 
 /* Team name sits above that team's header row. */

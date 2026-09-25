@@ -78,12 +78,12 @@ test('system/section-head.css is imported before 06, so a host that places a hea
 // ---- 2. one band ----
 
 // The six painters #1113 names, and the element classes that went with them.
-// `.metricbar__logo` is not here: it names the club mark for the dark re-ink
-// rule, which the innings bars share until slice H1b.
+// `.metricbar__logo` is `.sectionhead__mark` now (slice H1b).
 const RETIRED = [
   'metricbar',
   'metricbar__title',
   'metricbar__aside',
+  'metricbar__logo',
   'thub-card__head',
   'tstats-card__head',
   'roster-super__head',
@@ -126,9 +126,57 @@ test('the band is drawn once: only system/section-head.css reads --bar-fill for 
 
 test('with no club, the band is the house navy with a kraft line', () => {
   const band = ruleBody(read('system/section-head.css'), '.sectionhead--band')
-  assert.equal(decl(band, 'background'), 'var(--bar-fill, var(--navy))')
-  assert.equal(decl(band, 'border-bottom'), '3px solid var(--bar-accent, var(--seal))')
-  assert.equal(decl(band, 'color'), 'var(--bar-text, var(--text-on-ink))')
+  assert.equal(decl(band, '--band-fill'), 'var(--bar-fill, var(--navy))')
+  assert.equal(decl(band, '--band-accent'), 'var(--bar-accent, var(--seal))')
+  assert.equal(decl(band, '--band-text'), 'var(--bar-text, var(--text-on-ink))')
+  assert.equal(decl(band, 'background'), 'var(--band-fill)')
+  assert.equal(decl(band, 'border-bottom'), '3px solid var(--band-accent)')
+  assert.equal(decl(band, 'color'), 'var(--band-text)')
+})
+
+test('the house band is navy and kraft whatever club the page wears', () => {
+  // Two classes, so it beats the band's own --band-* defaults in any order.
+  const house = ruleBody(read('system/section-head.css'), '.sectionhead--band.sectionhead--house')
+  assert.ok(house, 'a .sectionhead--band.sectionhead--house rule')
+  assert.equal(decl(house, '--band-fill'), 'var(--navy)')
+  assert.equal(decl(house, '--band-accent'), 'var(--seal)')
+  assert.equal(decl(house, '--band-text'), 'var(--text-on-ink)')
+  assert.doesNotMatch(house, /--bar-/, 'the house band reads no club colour (ADR-0030)')
+})
+
+test('the paint travels alone: the band sets no layout, and only a real head gets corners', () => {
+  const css = read('system/section-head.css')
+  const band = ruleBody(css, '.sectionhead--band')
+  for (const prop of ['padding', 'display', 'margin', 'border-radius', 'font-size']) {
+    assert.equal(decl(band, prop), undefined, `.sectionhead--band sets no ${prop}; the innings heads keep their own`)
+  }
+  const corners = ruleBody(css, ':where(.sectionhead).sectionhead--band')
+  assert.equal(decl(corners, 'border-radius'), 'var(--radius-md) var(--radius-md) 0 0')
+})
+
+test('every band in the innings view and the box score wears the band paint', () => {
+  // The heads that drew their own navy and kraft before slice H1b. Each must
+  // carry .sectionhead--band in its markup, or it draws no band at all now.
+  const heads = {
+    'components/gamehud/StatBox.jsx': ['statbox__title', 'abs__title'],
+    'components/playbyplay/DueUpNextCard.jsx': ['dueup__title'],
+    'components/inning/EnteringReference.jsx': ['lineupcard__title', 'lineupteam__name', 'halfdefense__title'],
+    'components/inning/RosterPanel.jsx': ['roster__toggle'],
+    'components/umpire/UmpireTendenciesFold.jsx': ['roster__toggle'],
+    'components/charts/WinProbChart.jsx': ['winprob__head'],
+    'components/inning/MarginNotes.jsx': ['marginnotes__title'],
+    'components/inning/PitchersSection.jsx': ['pitchers__title'],
+    'screens/BoxScore.jsx': ['abs__title', 'halfdefense__title'],
+  }
+  for (const [rel, classes] of Object.entries(heads)) {
+    const code = readFileSync(join(SRC, rel), 'utf8')
+    for (const cls of classes) {
+      const own = new RegExp(`["\`]${cls}(?![\\w-])`)
+      const uses = code.split('\n').filter((l) => own.test(l))
+      assert.ok(uses.length > 0, `${rel} renders .${cls}`)
+      for (const line of uses) assert.match(line, /sectionhead--band/, `${rel}: .${cls} wears the band paint`)
+    }
+  }
 })
 
 test('a club head is a plain label with no club, and never falls back to navy or kraft', () => {

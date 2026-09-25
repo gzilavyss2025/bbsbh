@@ -104,7 +104,7 @@ test('onBarTone flags a dark ink so a themed masthead can re-ink its mono mark',
 // A nested section (the opposing club's own-themed card, TeamInfo.jsx) sets
 // its OWN --mark-filter inline, which must win over an outer page's — a CSS
 // custom property resolves nearest-ancestor-wins, unlike the `.is-themed--dark
-// .metricbar__logo` descendant selector this replaced, which matched ANY
+// .sectionhead__mark` descendant selector this replaced, which matched ANY
 // themed ancestor and re-inked a light-themed mark just because it sat inside
 // a dark-themed page.
 test('headerThemeStyle carries --mark-filter, keyed to this theme\'s own onBarTone', () => {

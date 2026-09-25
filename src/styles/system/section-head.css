@@ -119,13 +119,39 @@
 
 /* THE BAND. Club ground, club underline, club ink, from the nearest ancestor
    that sets them. With no club, the house navy with a kraft line: ADR-0083
-   clause 4 allows kraft here, as the club band's accent underline, and this is
-   the one selector that carries it (scripts/check-seal-scope.mjs). */
+   clause 4 allows kraft here, as the club band's accent underline, and these
+   two selectors (the band, and the house band below) are the only ones that
+   carry it (scripts/check-seal-scope.mjs).
+
+   THE PAINT TRAVELS ALONE. A head that is not drawn by the SectionHead
+   component (the innings view's collapsible bars are <button>s, and the game
+   HUD's bands keep their own tuned sizes and bleeds) wears the band by
+   carrying .sectionhead--band on its own element. It gets the ground, the
+   underline and the ink, and nothing else: no padding, no layout, no corners.
+   The corners below apply only to a real .sectionhead. */
 .sectionhead--band {
-  background: var(--bar-fill, var(--navy));
-  border-bottom: 3px solid var(--bar-accent, var(--seal));
+  --band-fill: var(--bar-fill, var(--navy));
+  --band-accent: var(--bar-accent, var(--seal));
+  --band-text: var(--bar-text, var(--text-on-ink));
+  background: var(--band-fill);
+  border-bottom: 3px solid var(--band-accent);
+  color: var(--band-text);
+}
+/* :where() keeps this at one class, so a host that squares or rounds the
+   corners (.umptend__bar, .lgstand__bar .sectionhead) wins on order. */
+:where(.sectionhead).sectionhead--band {
   border-radius: var(--radius-md) var(--radius-md) 0 0;
-  color: var(--bar-text, var(--text-on-ink));
+}
+
+/* THE HOUSE BAND: navy and kraft whatever club the page wears. A club may
+   colour a head that names the club, and nothing else (ADR-0030): the at-bat
+   stat box, "Due up", win probability, the margin notes, the pitchers table
+   and the umpire card name no club, so they stay the house band inside a
+   themed page. */
+.sectionhead--band.sectionhead--house {
+  --band-fill: var(--navy);
+  --band-accent: var(--seal);
+  --band-text: var(--text-on-ink);
 }
 
 /* THE CLUB BAND: a plain label until a club colour arrives. Unthemed it is

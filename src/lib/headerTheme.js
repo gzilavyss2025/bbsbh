@@ -39,14 +39,14 @@ import { contrastRatio } from './contrast.js'
 // knockout art — a flat single-ink silhouette, drawn white. On a light bar that
 // vanishes, so the tone of `onBar` decides whether the mark stays white or gets
 // re-inked dark, via the `--mark-filter` custom property `headerThemeStyle` sets
-// below (09-team-info.css's `.metricbar__logo` reads it). A custom property
+// below (09-team-info.css's `.sectionhead__mark` reads it). A custom property
 // rather than the `.is-themed--dark` class the bar/accent/text rules key off:
 // those three read `var(--bar-fill)` etc., which the cascade resolves from the
 // NEAREST ancestor that set it, so a light-themed section correctly ignores an
 // outer dark-themed page (TeamInfo.jsx nests the opposing club's own-themed
 // Defense/Starting-pitcher cards inside the page's own themed shell). A class-
 // based descendant selector has no such "nearest wins" — `.is-themed--dark
-// .metricbar__logo` used to match ANY themed mark anywhere under a dark page,
+// .sectionhead__mark` used to match ANY themed mark anywhere under a dark page,
 // which is exactly how a light-themed opponent's knockout mark went black
 // while its own onBar-driven text correctly stayed white. Split at the
 // midpoint of the WCAG range against white: an `onBar` that reads as ink

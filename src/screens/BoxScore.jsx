@@ -831,7 +831,7 @@ function BoxAbs({ feed, sideKey, abbr, theme }) {
   const side = selectChallengeState(feed, Infinity, 'bottom')[sideKey]
   return (
     <div className={`abs bs__abscard ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
-      <span className="abs__title">ABS Challenges</span>
+      <span className="abs__title sectionhead--band">ABS Challenges</span>
       <div className="abs__rows">
         <AbsRow teamId={side.teamId} abbr={abbr} outcomes={side.outcomes} showOpenPips={false} />
       </div>
@@ -859,7 +859,7 @@ function BoxDefense({ feed, sideKey, theme }) {
       className={`halfdefense bs__defensecard ${headerThemeClass(theme)}`.trim()}
       style={headerThemeStyle(theme)}
     >
-      <h4 className="halfdefense__title">Defense</h4>
+      <h4 className="halfdefense__title sectionhead--band">Defense</h4>
       <DefenseDiamond defense={defense} />
     </section>
   )
