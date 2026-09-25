@@ -229,7 +229,8 @@
     "fill": "ink",
     "verdict": "merge",
     "slice": 3,
-    "reason": "navy fill, paper text; carries a drop shadow (paper does not float, #1166) — dropping it is a visible change"
+    "reason": "navy fill, paper text; carries a drop shadow (paper does not float, #1166) — dropping it is a visible change",
+    "landed": "slice 3"
   },
   ".mastheadpill": {
     "role": "control",

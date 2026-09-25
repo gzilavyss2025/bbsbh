@@ -1,32 +1,30 @@
 {
-  "generated": "2026-09-23",
-  "rev": "ffd91507a (working tree)",
+  "generated": "2026-09-25",
+  "rev": "22a5c2bf6 (working tree)",
   "definition": "see census.mjs header",
-  "count": 38,
+  "count": 37,
   "geometry": {
     "tag": {
-      "n": 4,
+      "n": 3,
       "height": [
-        "(none) x4"
+        "(none) x3"
       ],
       "padding": [
         "3px 8px 3px 8px x1",
         "3px 8px x1",
-        "4px 8px x1",
         "2px 6px x1"
       ],
       "fontSize": [
-        "var(--fs-label) (12px) x4"
+        "var(--fs-label) (12px) x3"
       ],
       "fontFamily": [
-        "var(--font-display) x4"
+        "var(--font-display) x3"
       ],
       "fontWeight": [
-        "var(--w-bold) x4"
+        "var(--w-bold) x3"
       ],
       "lineHeight": [
-        "(none) x3",
-        "var(--lh-solid) x1"
+        "(none) x3"
       ]
     },
     "control": {
@@ -75,7 +73,7 @@
     {
       "selector": ".wiredock__close",
       "file": "04a-wire-dock.css",
-      "line": 240,
+      "line": 234,
       "block": "wiredock__close",
       "element": null,
       "consumers": [
@@ -683,61 +681,6 @@
       "heuristicFill": "paper"
     },
     {
-      "selector": ".contractcard__regime",
-      "file": "26b-player-contract.css",
-      "line": 63,
-      "block": "contractcard__regime",
-      "element": null,
-      "consumers": [
-        "components/playerstats/PlayerContractCard.jsx"
-      ],
-      "tags": [
-        "span"
-      ],
-      "states": [],
-      "fill": "ink",
-      "role": "tag",
-      "background": "var(--navy)",
-      "border": "var(--bw-hair) solid var(--navy)",
-      "color": "var(--text-on-ink)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": "var(--lh-solid)",
-      "padding": "var(--space-1) var(--space-2)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": "var(--ls-label)",
-      "textTransform": "uppercase",
-      "decls": {
-        "flex": "none",
-        "padding": "var(--space-1) var(--space-2)",
-        "color": "var(--text-on-ink)",
-        "background": "var(--navy)",
-        "border": "var(--bw-hair) solid var(--navy)",
-        "border-radius": "var(--radius-pill)",
-        "box-shadow": "0 3px 10px color-mix(in srgb, var(--ink-0) 16%, transparent)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-label)",
-        "line-height": "var(--lh-solid)",
-        "text-transform": "uppercase"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 3,
-      "reason": "navy fill, paper text; carries a drop shadow (paper does not float, #1166) — dropping it is a visible change",
-      "heuristicRole": "tag",
-      "heuristicFill": "ink"
-    },
-    {
       "selector": ".cmdmap__chip",
       "file": "26d-command-map.css",
       "line": 28,
@@ -851,7 +794,7 @@
     {
       "selector": ".depthpos",
       "file": "31-wild-card.css",
-      "line": 1305,
+      "line": 1299,
       "block": "depthpos",
       "element": null,
       "consumers": [
