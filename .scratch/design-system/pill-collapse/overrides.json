@@ -474,20 +474,23 @@
     "fill": "paper",
     "verdict": "delete",
     "slice": 7,
-    "reason": "DEAD: no JSX consumer anywhere in src/"
+    "reason": "DEAD: no JSX consumer anywhere in src/",
+    "settled": "deleted (slice 7)"
   },
   ".penboard__pill": {
     "role": "tag",
     "fill": "paper",
     "verdict": "delete",
     "slice": 7,
-    "reason": "DEAD: no .penboard__* class in any JSX (whole penboard block is orphaned)"
+    "reason": "DEAD: no .penboard__* class in any JSX (whole penboard block is orphaned)",
+    "settled": "deleted (slice 7)"
   },
   ".penboard__tag": {
     "role": "tag",
     "fill": "paper",
     "verdict": "delete",
     "slice": 7,
-    "reason": "DEAD: same orphaned block"
+    "reason": "DEAD: same orphaned block",
+    "settled": "deleted (slice 7)"
   }
 }
