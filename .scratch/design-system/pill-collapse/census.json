@@ -1,71 +1,56 @@
 {
   "generated": "2026-09-25",
-  "rev": "c4cf7770f (working tree)",
+  "rev": "f66c3878c (working tree)",
   "definition": "see census.mjs header",
-  "count": 35,
+  "count": 15,
   "geometry": {
     "tag": {
-      "n": 4,
+      "n": 3,
       "height": [
-        "(none) x4"
+        "(none) x3"
       ],
       "padding": [
         "3px 8px 3px 8px x1",
         "3px 8px x1",
-        "4px 8px x1",
         "2px 6px x1"
       ],
       "fontSize": [
-        "var(--fs-label) (12px) x4"
+        "var(--fs-label) (12px) x3"
       ],
       "fontFamily": [
-        "var(--font-display) x4"
+        "var(--font-display) x3"
       ],
       "fontWeight": [
-        "var(--w-bold) x4"
+        "var(--w-bold) x3"
       ],
       "lineHeight": [
-        "(none) x3",
-        "var(--lh-solid) x1"
+        "(none) x3"
       ]
     },
     "control": {
-      "n": 21,
+      "n": 3,
       "height": [
-        "(none) x13",
-        "min-h 32px x3",
-        "min-h 34px x3",
-        "min-h 36px x1",
-        "min-h 24px x1"
-      ],
-      "padding": [
-        "4px 10px x6",
-        "0 12px x6",
-        "4px 12px x3",
-        "6px 12px x2",
-        "3px 8px x1",
-        "4px 14px x1",
-        "0 10px x1",
-        "8px 12px x1"
-      ],
-      "fontSize": [
-        "var(--fs-label) (12px) x15",
-        "var(--fs-compact) (12px) x3",
-        "var(--fs-small) (13px) x2",
-        "var(--fs-cell) (11px) x1"
-      ],
-      "fontFamily": [
-        "var(--font-display) x17",
-        "var(--font-mono) x3",
+        "min-h 24px x1",
+        "min-h 32px x1",
         "(none) x1"
       ],
+      "padding": [
+        "0 10px x1",
+        "0 12px x1",
+        "4px 10px x1"
+      ],
+      "fontSize": [
+        "var(--fs-label) (12px) x3"
+      ],
+      "fontFamily": [
+        "var(--font-display) x3"
+      ],
       "fontWeight": [
-        "var(--w-bold) x11",
-        "var(--w-semibold) x7",
-        "(none) x3"
+        "var(--w-bold) x2",
+        "var(--w-semibold) x1"
       ],
       "lineHeight": [
-        "(none) x21"
+        "(none) x3"
       ]
     }
   },
@@ -124,6 +109,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "x icon button, 44px wide hit area, no text — an IconButton (Button family, #1130), not a capsule",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "paper"
     },
@@ -299,6 +285,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "44x44 x close — radius only rounds the hover/focus ring",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "bare"
     },
@@ -351,6 +338,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "44x44 x clear — icon button",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "bare"
     },
@@ -402,70 +390,9 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "44x44 x close — icon button",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "bare"
-    },
-    {
-      "selector": ".mastheadpill",
-      "file": "10-lineup.css",
-      "line": 531,
-      "block": "mastheadpill",
-      "element": null,
-      "consumers": [
-        "components/player/CareerRegister.jsx",
-        "components/player/GameLog.jsx",
-        "components/teamstats/BullpenBoard.jsx",
-        "components/teamstats/StarterMatchups.jsx",
-        "screens/designlab/catalog.js"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "aria-pressed"
-      ],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-body)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "3px var(--space-2)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": "var(--ls-caps)",
-      "textTransform": "uppercase",
-      "decls": {
-        "display": "inline-flex",
-        "align-items": "center",
-        "gap": "var(--space-1)",
-        "padding": "3px var(--space-2)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-card)",
-        "color": "var(--text-body)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-caps)",
-        "text-transform": "uppercase",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": true,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "button with aria-pressed (the 'MLB only' toggle); 3px 8px today, becomes a 34px control",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
     },
     {
       "selector": ".sheet__close",
@@ -517,6 +444,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "44x44 x close (3 consumers) — icon button",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "bare"
     },
@@ -573,178 +501,9 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "32x32 x close, absolute — icon button (a circle)",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "bare"
-    },
-    {
-      "selector": ".slate-filterbar__chip",
-      "file": "22-box-score-tables.css",
-      "line": 59,
-      "block": "slate-filterbar__chip",
-      "element": null,
-      "consumers": [
-        "screens/GameSelect.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "active",
-        "focus"
-      ],
-      "fill": "paper",
-      "role": "control",
-      "background": "color-mix(in srgb, var(--chip-accent) 16%, var(--bg-page))",
-      "border": "var(--bw-rule) solid var(--chip-accent)",
-      "color": "var(--text-heading)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1) var(--space-3h)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": "var(--ls-label)",
-      "textTransform": "uppercase",
-      "decls": {
-        "display": "inline-flex",
-        "align-items": "center",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-label)",
-        "text-transform": "uppercase",
-        "padding": "var(--space-1) var(--space-3h)",
-        "border-radius": "var(--radius-pill)",
-        "background": "color-mix(in srgb, var(--chip-accent) 16%, var(--bg-page))",
-        "color": "var(--text-heading)",
-        "border": "var(--bw-rule) solid var(--chip-accent)"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [
-        "screens/GameSelect.jsx"
-      ],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "tint from inline --chip-accent (GameSelect.jsx:1137); 1.5px edge (--bw-rule). GameSelect.jsx is a stamp FORBIDDEN_SURFACE — fine, Pill imports nothing stamp-related",
-      "heuristicRole": "control",
-      "heuristicFill": "paper"
-    },
-    {
-      "selector": ".contractcard__regime",
-      "file": "26b-player-contract.css",
-      "line": 63,
-      "block": "contractcard__regime",
-      "element": null,
-      "consumers": [
-        "components/playerstats/PlayerContractCard.jsx"
-      ],
-      "tags": [
-        "span"
-      ],
-      "states": [],
-      "fill": "ink",
-      "role": "tag",
-      "background": "var(--navy)",
-      "border": "var(--bw-hair) solid var(--navy)",
-      "color": "var(--text-on-ink)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": "var(--lh-solid)",
-      "padding": "var(--space-1) var(--space-2)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": "var(--ls-label)",
-      "textTransform": "uppercase",
-      "decls": {
-        "flex": "none",
-        "padding": "var(--space-1) var(--space-2)",
-        "color": "var(--text-on-ink)",
-        "background": "var(--navy)",
-        "border": "var(--bw-hair) solid var(--navy)",
-        "border-radius": "var(--radius-pill)",
-        "box-shadow": "0 3px 10px color-mix(in srgb, var(--ink-0) 16%, transparent)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-label)",
-        "line-height": "var(--lh-solid)",
-        "text-transform": "uppercase"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 3,
-      "reason": "navy fill, paper text; carries a drop shadow (paper does not float, #1166) — dropping it is a visible change",
-      "heuristicRole": "tag",
-      "heuristicFill": "ink"
-    },
-    {
-      "selector": ".cmdmap__chip",
-      "file": "26d-command-map.css",
-      "line": 28,
-      "block": "cmdmap__chip",
-      "element": null,
-      "consumers": [
-        "components/charts/CommandMap.jsx",
-        "components/charts/GloveTarget.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [],
-      "fill": "paper",
-      "role": "control",
-      "background": "var(--surface-inset)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-muted)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1h) var(--space-3)",
-      "fontSize": "var(--fs-compact)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": "var(--ls-wide)",
-      "textTransform": null,
-      "decls": {
-        "display": "inline-flex",
-        "align-items": "center",
-        "gap": "var(--space-1h)",
-        "padding": "var(--space-1h) var(--space-3)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-inset)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-compact)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-wide)",
-        "color": "var(--text-muted)",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "toggle button on --surface-inset; --ls-wide",
-      "heuristicRole": "control",
-      "heuristicFill": "paper"
     },
     {
       "selector": ".duepill",
@@ -800,170 +559,6 @@
       "reason": "GUARDED: '.duepill' is on check-seal-scope.mjs's ALLOWLIST (31-wild-card.css). Its shape can adopt Pill, but the seal paint must stay on a selector the guard names — rename = edit the allowlist in the same PR",
       "heuristicRole": "tag",
       "heuristicFill": "seal"
-    },
-    {
-      "selector": ".depthpos",
-      "file": "31-wild-card.css",
-      "line": 1299,
-      "block": "depthpos",
-      "element": null,
-      "consumers": [
-        "screens/team/modules/minors/DepthChartCard.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "class-state"
-      ],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-caption)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1) var(--space-2h)",
-      "fontSize": "var(--fs-cell)",
-      "fontFamily": "var(--font-mono)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": "var(--ls-caps)",
-      "textTransform": null,
-      "decls": {
-        "font-family": "var(--font-mono)",
-        "font-size": "var(--fs-cell)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-caps)",
-        "padding": "var(--space-1) var(--space-2h)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-card)",
-        "color": "var(--text-caption)"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "button, mono; selected via .is-active — convert to aria-pressed per #1166",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
-    },
-    {
-      "selector": ".psodds-pill",
-      "file": "39-manager-page.css",
-      "line": 541,
-      "block": "psodds-pill",
-      "element": null,
-      "consumers": [
-        "screens/designlab/catalog.js",
-        "screens/team/modules/SeasonSchedule.jsx",
-        "screens/team/modules/StandingsCard.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "focus"
-      ],
-      "fill": "ink",
-      "role": "control",
-      "background": "var(--accent-primary)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-on-ink)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1) var(--space-2h)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": "var(--ls-label)",
-      "textTransform": "uppercase",
-      "decls": {
-        "flex": "none",
-        "display": "inline-flex",
-        "align-items": "center",
-        "padding": "var(--space-1) var(--space-2h)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--accent-primary)",
-        "color": "var(--text-on-ink)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-label)",
-        "text-transform": "uppercase",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": true,
-      "verdict": "merge",
-      "slice": 5,
-      "reason": "the 'Postseason odds' button on the club band; navy fill. Inventory said 'seal-filled' — ADR-0083 moved it off kraft",
-      "heuristicRole": "control",
-      "heuristicFill": "ink"
-    },
-    {
-      "selector": ".scorebookstory__filters button",
-      "file": "42-first-scorebook.css",
-      "line": 462,
-      "block": "scorebookstory__filters",
-      "element": "button",
-      "consumers": [
-        "screens/FirstScorebookPage.jsx"
-      ],
-      "tags": [
-        "div"
-      ],
-      "states": [],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": null,
-      "height": null,
-      "minHeight": "36px",
-      "lineHeight": null,
-      "padding": "0 var(--space-3)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-semibold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": null,
-      "textTransform": null,
-      "decls": {
-        "min-height": "36px",
-        "padding": "0 var(--space-3)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-card)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-semibold)",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "36px filter buttons (only 36px control)",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
     },
     {
       "selector": ".photostrip__viewall",
@@ -1081,65 +676,9 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "18x18 italic 'i' — a circle icon button, not a capsule",
+      "settled": "deferred to #1209",
       "heuristicRole": "control",
       "heuristicFill": "ink"
-    },
-    {
-      "selector": ".animlab__play",
-      "file": "46-consent-modal.css",
-      "line": 139,
-      "block": "animlab__play",
-      "element": null,
-      "consumers": [
-        "screens/animlab/Entry.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "hover"
-      ],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-body)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1) var(--space-3)",
-      "fontSize": "var(--fs-compact)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": "var(--ls-label)",
-      "textTransform": "uppercase",
-      "decls": {
-        "flex": "none",
-        "min-width": "62px",
-        "padding": "var(--space-1) var(--space-3)",
-        "background": "var(--surface-card)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-compact)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-label)",
-        "text-transform": "uppercase",
-        "color": "var(--text-body)",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "dev/QA page (/animation-lab); min-width 62px residual",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
     },
     {
       "selector": ".logbook__pending",
@@ -1195,6 +734,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "aspect-ratio:1 dashed CIRCLE = an empty stamp slot on StampCollection.jsx (a STAMP_ALLOWLIST surface). Geometry is the stamp's footprint — leave it alone",
+      "settled": "kept: stamp slot",
       "heuristicRole": "tag",
       "heuristicFill": "outline"
     },
@@ -1249,159 +789,7 @@
       "verdict": "merge",
       "slice": 4,
       "reason": "32px mode toggle on the Game Log mint strip. Its consumer StampGameButton.jsx IS on check-stamp-surfaces STAMP_ALLOWLIST (one importer: BoxScore.jsx, inside the SealBox reveal). A CSS-only merge is safe; Pill.jsx must never import a stamp module, and the JSX must not move",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
-    },
-    {
-      "selector": ".logbookstats__levels button",
-      "file": "48a-logbook-stats.css",
-      "line": 287,
-      "block": "logbookstats__levels",
-      "element": "button",
-      "consumers": [
-        "screens/LogbookStatsPage.jsx"
-      ],
-      "tags": [
-        "div"
-      ],
-      "states": [],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-muted)",
-      "height": null,
-      "minHeight": "34px",
-      "lineHeight": null,
-      "padding": "0 var(--space-3)",
-      "fontSize": "var(--fs-small)",
-      "fontFamily": "var(--font-mono)",
-      "fontWeight": null,
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": null,
-      "textTransform": null,
-      "decls": {
-        "min-height": "34px",
-        "padding": "0 var(--space-3)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-card)",
-        "color": "var(--text-muted)",
-        "font-family": "var(--font-mono)",
-        "font-size": "var(--fs-small)"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "34px, mono --fs-small; Logbook stats level filter (stamp-adjacent, no art)",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
-    },
-    {
-      "selector": ".logbookstats__watch",
-      "file": "48a-logbook-stats.css",
-      "line": 429,
-      "block": "logbookstats__watch",
-      "element": null,
-      "consumers": [
-        "screens/logbook/RetrospectiveSections.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [],
-      "fill": "outline",
-      "role": "control",
-      "background": "none",
-      "border": "var(--bw-hair) solid var(--accent-primary)",
-      "color": "var(--accent-primary)",
-      "height": null,
-      "minHeight": "32px",
-      "lineHeight": null,
-      "padding": "0 var(--space-3)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-semibold)",
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": null,
-      "textTransform": null,
-      "decls": {
-        "align-self": "flex-start",
-        "margin-top": "var(--space-2)",
-        "min-height": "32px",
-        "padding": "0 var(--space-3)",
-        "border": "var(--bw-hair) solid var(--accent-primary)",
-        "border-radius": "var(--radius-pill)",
-        "background": "none",
-        "color": "var(--accent-primary)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-semibold)"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "32px, accent edge + ink",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
-    },
-    {
-      "selector": ".stampsheet__levels button",
-      "file": "48c-stamp-sheet.css",
-      "line": 44,
-      "block": "stampsheet__levels",
-      "element": "button",
-      "consumers": [
-        "components/logbook/StampSheet.jsx"
-      ],
-      "tags": [
-        "div"
-      ],
-      "states": [],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-muted)",
-      "height": null,
-      "minHeight": "34px",
-      "lineHeight": null,
-      "padding": "0 var(--space-3)",
-      "fontSize": "var(--fs-small)",
-      "fontFamily": "var(--font-mono)",
-      "fontWeight": null,
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": null,
-      "textTransform": null,
-      "decls": {
-        "min-height": "34px",
-        "padding": "0 var(--space-3)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-card)",
-        "color": "var(--text-muted)",
-        "font-family": "var(--font-mono)",
-        "font-size": "var(--fs-small)"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "declaration-identical twin of .logbookstats__levels button",
+      "settled": "deferred to #1174 (a Button, not a Pill)",
       "heuristicRole": "control",
       "heuristicFill": "outline"
     },
@@ -1457,6 +845,7 @@
       "verdict": "rename-out",
       "slice": 6,
       "reason": "same empty stamp slot on PassportPage.jsx (STAMP_ALLOWLIST surface)",
+      "settled": "kept: stamp slot",
       "heuristicRole": "tag",
       "heuristicFill": "outline"
     },
@@ -1512,502 +901,6 @@
       "reason": "Stamp In (ADR-0042): one class is a <span> when stamped (--on, --accent-positive fill) and a <button> when not (--off) — the tag and the control MUST share geometry here, which is the opposite of the Pill rule",
       "heuristicRole": "control",
       "heuristicFill": "bare"
-    },
-    {
-      "selector": ".coverpick__favorite",
-      "file": "60-book-cover-picker.css",
-      "line": 181,
-      "block": "coverpick__favorite",
-      "element": null,
-      "consumers": [
-        "components/passport/BookCoverPicker.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "focus",
-        "class-state"
-      ],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-body)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1) var(--space-3)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-semibold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": "var(--ls-label)",
-      "textTransform": "uppercase",
-      "decls": {
-        "align-self": "flex-start",
-        "padding": "var(--space-1) var(--space-3)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-card)",
-        "color": "var(--text-body)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-semibold)",
-        "letter-spacing": "var(--ls-label)",
-        "text-transform": "uppercase",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "passport book cover picker; .is-* selected state -> aria-pressed",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
-    },
-    {
-      "selector": ".posterstudio__save",
-      "file": "62-game-preview.css",
-      "line": 149,
-      "block": "posterstudio__save",
-      "element": null,
-      "consumers": [
-        "components/preview/SavePosterButton.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "focus",
-        "disabled"
-      ],
-      "fill": "ink",
-      "role": "control",
-      "background": "var(--accent-primary)",
-      "border": "0",
-      "color": "var(--text-on-ink)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-3) var(--space-5)",
-      "fontSize": "var(--fs-body)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": "var(--ls-caps)",
-      "textTransform": "uppercase",
-      "decls": {
-        "justify-self": "start",
-        "padding": "var(--space-3) var(--space-5)",
-        "border": "0",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--accent-primary)",
-        "color": "var(--text-on-ink)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-body)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-caps)",
-        "text-transform": "uppercase",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "rename-out",
-      "slice": 6,
-      "reason": "primary CTA at --fs-body, 12px 20px padding — a Button (btn--primary), not a Pill",
-      "heuristicRole": "control",
-      "heuristicFill": "ink"
-    },
-    {
-      "selector": ".idadmin__actions .idadmin__btn",
-      "file": "62-identity-admin.css",
-      "line": 66,
-      "block": "idadmin__btn",
-      "element": null,
-      "consumers": [
-        "screens/team/modules/identity/IdentityAdminBar.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "disabled",
-        "focus"
-      ],
-      "fill": "outline",
-      "role": "control",
-      "background": "none",
-      "border": "var(--bw-hair) solid currentColor",
-      "color": null,
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1) var(--space-2h)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": "var(--ls-caps)",
-      "textTransform": "uppercase",
-      "decls": {
-        "padding": "var(--space-1) var(--space-2h)",
-        "border": "var(--bw-hair) solid currentColor",
-        "border-radius": "var(--radius-pill)",
-        "background": "none",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-caps)",
-        "text-transform": "uppercase"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "border = currentColor, no fill",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
-    },
-    {
-      "selector": ".iddrawer__btn",
-      "file": "62-identity-admin.css",
-      "line": 452,
-      "block": "iddrawer__btn",
-      "element": null,
-      "consumers": [
-        "screens/team/modules/identity/IdentityLogoField.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "disabled",
-        "focus"
-      ],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-body)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1) var(--space-2h)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": "var(--ls-caps)",
-      "textTransform": "uppercase",
-      "decls": {
-        "padding": "var(--space-1) var(--space-2h)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-card)",
-        "color": "var(--text-body)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-caps)",
-        "text-transform": "uppercase",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "team hub identity drawer (admin gear)",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
-    },
-    {
-      "selector": ".trrank__jump a",
-      "file": "66-situational-records.css",
-      "line": 160,
-      "block": "trrank__jump",
-      "element": "a",
-      "consumers": [
-        "screens/SituationalRecordsPage.jsx"
-      ],
-      "tags": [
-        "nav"
-      ],
-      "states": [],
-      "fill": "ink",
-      "role": "control",
-      "background": null,
-      "border": "var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 22%, transparent)",
-      "color": "var(--text-on-ink)",
-      "height": null,
-      "minHeight": "32px",
-      "lineHeight": null,
-      "padding": "var(--space-1h) var(--space-3)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-semibold)",
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": "var(--ls-caps)",
-      "textTransform": "uppercase",
-      "decls": {
-        "flex": "0 0 auto",
-        "min-height": "32px",
-        "padding": "var(--space-1h) var(--space-3)",
-        "border": "var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 22%, transparent)",
-        "border-radius": "var(--radius-pill)",
-        "color": "var(--text-on-ink)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-semibold)",
-        "letter-spacing": "var(--ls-caps)",
-        "text-decoration": "none",
-        "text-transform": "uppercase",
-        "white-space": "nowrap"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 5,
-      "reason": "outline drawn ON an ink band (paper ink, 22% paper edge) — the one reversed outline",
-      "heuristicRole": "control",
-      "heuristicFill": "ink"
-    },
-    {
-      "selector": ".lookupdeck__usebtn",
-      "file": "74a-contract-lookup.css",
-      "line": 171,
-      "block": "lookupdeck__usebtn",
-      "element": null,
-      "consumers": [
-        "components/admin/contracts/LookupDeck.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "focus",
-        "disabled"
-      ],
-      "fill": "outline",
-      "role": "control",
-      "background": "transparent",
-      "border": "var(--bw-hair) solid var(--accent-primary)",
-      "color": "var(--accent-primary)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1) var(--space-3)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-semibold)",
-      "radius": "var(--radius-pill)",
-      "cursor": "pointer",
-      "width": null,
-      "letterSpacing": "var(--ls-label)",
-      "textTransform": null,
-      "decls": {
-        "padding": "var(--space-1) var(--space-3)",
-        "border": "var(--bw-hair) solid var(--accent-primary)",
-        "border-radius": "var(--radius-pill)",
-        "background": "transparent",
-        "color": "var(--accent-primary)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-semibold)",
-        "letter-spacing": "var(--ls-label)",
-        "cursor": "pointer"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "admin; accent edge + ink",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
-    },
-    {
-      "selector": ".dlab__jumplink",
-      "file": "designlab/lab.css",
-      "line": 43,
-      "block": "dlab__jumplink",
-      "element": null,
-      "consumers": [
-        "screens/designlab/index.jsx"
-      ],
-      "tags": [
-        "a"
-      ],
-      "states": [
-        "focus"
-      ],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--accent-link)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-1) var(--space-2h)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-bold)",
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": "var(--ls-label)",
-      "textTransform": null,
-      "decls": {
-        "padding": "var(--space-1) var(--space-2h)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-card)",
-        "color": "var(--accent-link)",
-        "text-decoration": "none",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-bold)",
-        "letter-spacing": "var(--ls-label)"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "design-lab jump links (<a>)",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
-    },
-    {
-      "selector": ".trailstrip__followbtn, .trailstrip__summarybtn",
-      "file": "focus/reference.css",
-      "line": 207,
-      "block": "trailstrip__followbtn",
-      "element": null,
-      "consumers": [
-        "components/inning/focus/AtBatTrail.jsx"
-      ],
-      "tags": [
-        "button"
-      ],
-      "states": [
-        "hover",
-        "focus"
-      ],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": null,
-      "height": null,
-      "minHeight": "34px",
-      "lineHeight": null,
-      "padding": "0 var(--space-3)",
-      "fontSize": "var(--fs-compact)",
-      "fontFamily": null,
-      "fontWeight": null,
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": null,
-      "textTransform": null,
-      "decls": {
-        "align-self": "flex-start",
-        "min-height": "34px",
-        "padding": "0 var(--space-3)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-card)",
-        "font-size": "var(--fs-compact)",
-        "box-shadow": "var(--shadow-card)"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "34px already; carries --shadow-card (drop it); no own font-family (inherits body)",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
-    },
-    {
-      "selector": ".trrank__related a",
-      "file": "situational-records/66a-detail.css",
-      "line": 115,
-      "block": "trrank__related",
-      "element": "a",
-      "consumers": [
-        "screens/SituationalRecordsPage.jsx"
-      ],
-      "tags": [
-        "nav"
-      ],
-      "states": [],
-      "fill": "outline",
-      "role": "control",
-      "background": "var(--surface-card)",
-      "border": "var(--bw-hair) solid var(--border-rule)",
-      "color": "var(--text-body)",
-      "height": null,
-      "minHeight": null,
-      "lineHeight": null,
-      "padding": "var(--space-2) var(--space-3)",
-      "fontSize": "var(--fs-label)",
-      "fontFamily": "var(--font-display)",
-      "fontWeight": "var(--w-semibold)",
-      "radius": "var(--radius-pill)",
-      "cursor": null,
-      "width": null,
-      "letterSpacing": "var(--ls-caps)",
-      "textTransform": "uppercase",
-      "decls": {
-        "flex": "0 0 auto",
-        "padding": "var(--space-2) var(--space-3)",
-        "border": "var(--bw-hair) solid var(--border-rule)",
-        "border-radius": "var(--radius-pill)",
-        "background": "var(--surface-card)",
-        "color": "var(--text-body)",
-        "font-family": "var(--font-display)",
-        "font-size": "var(--fs-label)",
-        "font-weight": "var(--w-semibold)",
-        "letter-spacing": "var(--ls-caps)",
-        "text-decoration": "none",
-        "text-transform": "uppercase",
-        "white-space": "nowrap"
-      },
-      "sealGuarded": false,
-      "stampSurface": [],
-      "stampForbidden": [],
-      "nameSaysPill": false,
-      "verdict": "merge",
-      "slice": 4,
-      "reason": "<a> links, 8px 12px padding",
-      "heuristicRole": "control",
-      "heuristicFill": "outline"
     }
   ]
 }
