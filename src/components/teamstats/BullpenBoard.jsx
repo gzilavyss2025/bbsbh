@@ -4,6 +4,7 @@ import { InfoPopover } from '../ui/InfoPopover.jsx'
 import { SectionMasthead } from '../ui/SectionMasthead.jsx'
 import { StaffGrid } from '../workload/StaffGrid.jsx'
 import { headerThemeClass, headerThemeStyle } from '../../lib/headerTheme.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // The bullpen availability board — who's rested, who's limited, who's likely
 // down tonight, from each reliever's recent completed appearances
@@ -45,15 +46,16 @@ export function useBullpenReveal() {
 export function BullpenToggle({ hasArms, showBullpen, onToggle }) {
   if (!hasArms) return null
   return (
-    <button
-      type="button"
+    <Pill
+      role="control"
+      fill="paper"
       className="mastheadpill"
-      aria-pressed={showBullpen}
+      pressed={showBullpen}
       onClick={() => onToggle(!showBullpen)}
     >
       <span className="mastheadpill__dot" aria-hidden="true" />
       Bullpen
-    </button>
+    </Pill>
   )
 }
 

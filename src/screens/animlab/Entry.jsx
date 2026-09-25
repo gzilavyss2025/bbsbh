@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { Button } from '../../components/ui/control/Button.jsx'
 
 // ---------------------------------------------------------------------------
 // ONE ENTRY ON THE ANIMATION LAB: the title and its Play control, the prose,
@@ -58,8 +59,8 @@ export function Entry({ title, note, live, hover = false, children }) {
       <div className="animlab__head">
         <h2 className="animlab__title">{title}</h2>
         {!hover && (
-          <button
-            type="button"
+          <Button
+            size="control"
             className="animlab__play"
             /* Fifteen buttons reading "Play" are one button to a screen reader
                unless each says which entry it belongs to. */
@@ -74,7 +75,7 @@ export function Entry({ title, note, live, hover = false, children }) {
             }}
           >
             {running ? 'Stop' : 'Play'}
-          </button>
+          </Button>
         )}
       </div>
       <p className="hint hint--prose">{note}</p>

@@ -150,6 +150,7 @@ const DASHED_EDGE = {
   '.pbp__placed': 'a placed runner: given, not run (slice 1)',
   '.cthist__fuzzy': 'a fuzzy contract match: pencilled in (slice 1)',
   '.phcard__tag--rehab': 'a rehab stint: provisional, so the level is pencilled in (#1188)',
+  '.cmdmap__chip--thin': 'a pitch type under the sample floor: a read on too few pitches, pencilled in (slice 4)',
 }
 
 // A tint sets none of these itself. The pill's own rules draw each one from its

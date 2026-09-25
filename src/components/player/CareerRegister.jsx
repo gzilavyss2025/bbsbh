@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { spanCell } from '../../lib/ledger.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Ledger } from './Ledger.jsx'
+import { Pill } from '../ui/control/Pill.jsx'
 
 const DASH = '—'
 const NARROW_HIDE_COLS = new Set(['GS', 'K', 'BB'])
@@ -64,10 +65,10 @@ export function CareerRegister({ register }) {
       <h3 className="section__title section__title--bar section__title--aside">
         <span>Career stats</span>
         {canFilter && (
-          <button type="button" className="mastheadpill" aria-pressed={mlbOnly} onClick={() => setMlbOnly(!mlbOnly)}>
+          <Pill role="control" fill="paper" className="mastheadpill" pressed={mlbOnly} onClick={() => setMlbOnly(!mlbOnly)}>
             <span className="mastheadpill__dot" aria-hidden="true" />
             MLB only
-          </button>
+          </Pill>
         )}
       </h3>
       <Ledger

@@ -17,6 +17,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { TeamTreatmentMark } from '../components/logo/TeamTreatmentMark.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { Pill } from '../components/ui/control/Pill.jsx'
 
 // One situational record, every club at one level, in rank order. The bare
 // route is a browse-first index: every split stays visible inside its
@@ -462,14 +463,14 @@ export function SituationalRecordsPage({
               <span>More in {activeGroup.title}</span>
               <div>
                 {activeGroup.metrics.map((item) => (
-                  <a
+                  <Pill
                     key={item.id}
-                    className={item.id === resolvedId ? 'is-active' : ''}
+                    role="control"
                     aria-current={item.id === resolvedId ? 'page' : undefined}
                     {...linkProps(pathFor({ metric: item.id, sort: null, order: null }))}
                   >
                     {item.k}
-                  </a>
+                  </Pill>
                 ))}
               </div>
             </nav>

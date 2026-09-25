@@ -504,57 +504,26 @@ button.startercard__careervs {
   color: var(--text-caption);
 }
 
-/* The toggle-pill control shared by every section masthead's aside slot that
-   switches something on/off in place — the batting order's "vs [pitcher]"
-   matchup-notes switch (StarterMatchups.jsx) and the starting pitcher card's
-   "Bullpen" switch (BullpenBoard.jsx). One class so the look only needs
-   tuning once; each caller supplies its own label and press handler.
+/* The toggle in a section masthead's aside slot — the batting order's
+   "vs [pitcher]" matchup-notes switch (StarterMatchups.jsx), the starting
+   pitcher card's "Bullpen" switch (BullpenBoard.jsx), and the player page's
+   "MLB only" and "AAA log" switches. It is a Pill control now (#1131 slice 4):
+   <Pill role="control" fill="paper" pressed>, so the shape, the 34px height,
+   the states and the selected look (navy, with a tick) are the Pill's
+   (system/pill.css). .mastheadpill is only the hook for the dot below.
 
-   Colour here is load-bearing, not decorative. Neither state paints gold
-   text: kraft gold on the bar measured 4.35:1, under the 4.5:1
-   check-contrast.mjs demands, and the pill left the kraft family entirely in
-   ADR-0083 — a switch is not a seal. Both states are FILLED pills instead of
-   filled-vs-outline: the bar is club-themed (ADR-0030), so a transparent pill
-   inherits a different backdrop for all 30 clubs, while a paper fill is the
-   same chip everywhere and matches the card rows beneath it.
+   PAPER, NOT OUTLINE: the bar is club-themed (ADR-0030), so a see-through pill
+   would sit on 30 different backdrops. The paper fill is the same chip on every
+   club's bar — the fill the Pill keeps for a control that rides a band.
 
-   THE BORDER is what carries the state now. Highlighter yellow separates from
-   paper by only 1.58:1 — worse than the kraft it replaced (3.11:1) — so the ON
-   pill takes a --text-heading edge against the OFF pill's --border-rule one,
-   a separation no club bar can wash out. Measured: OFF text 13.5:1, ON text
-   10.5:1 (the pair the Close Game pill already asserts), and each pill clears
-   3:1 against the bar — the yellow better than the kraft did, at 8.6:1 on
-   navy. The dot carries the state by SHAPE as well — a hollow ring when off,
-   filled when on — leaving four redundant cues (aria-pressed, border colour,
-   fill colour, dot shape). Don't collapse the dot back to an
-   opacity change. */
-.mastheadpill {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 3px var(--space-2);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  cursor: pointer;
-}
+   The dot carries the state by SHAPE as well as the tick: a hollow ring when
+   off, filled when on. */
 .mastheadpill__dot {
   width: 8px;
   height: 8px;
   border: var(--bw-hair) solid currentColor;
   border-radius: 50%;
   background: none;
-}
-.mastheadpill[aria-pressed='true'] {
-  background: var(--marker);
-  border-color: var(--text-heading);
-  color: var(--text-heading);
 }
 .mastheadpill[aria-pressed='true'] .mastheadpill__dot {
   background: currentColor;

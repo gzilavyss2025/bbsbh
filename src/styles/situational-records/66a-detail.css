@@ -105,32 +105,23 @@
   margin-bottom: var(--space-2);
   color: var(--text-caption);
 }
+/* A scroll box clips what is outside it, so the row keeps room for the Pill's
+   focus ring (2px, 2px off the capsule, #1131); the inline margin gives that
+   room back, so the chips keep their left edge. */
 .trrank__related > div {
   display: flex;
   gap: var(--space-1);
   overflow-x: auto;
-  padding-bottom: 2px;
+  padding: var(--space-1);
+  margin-inline: calc(-1 * var(--space-1));
   scrollbar-width: thin;
 }
+/* The sibling records are Pill controls with an href (#1131 slice 4): a
+   scope toggle over the ranking below. The record on screen is
+   aria-current="page", which draws the Pill's selected state (navy, with a
+   tick). Only the chip's place in the scrolling row is its own. */
 .trrank__related a {
   flex: 0 0 auto;
-  padding: var(--space-2) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-caps);
-  text-decoration: none;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.trrank__related a.is-active {
-  border-color: var(--accent-primary);
-  background: var(--accent-primary);
-  color: var(--text-on-ink);
 }
 
 .trrank__tablewrap {
@@ -181,12 +172,6 @@
 }
 .trrank__row--none {
   color: var(--text-caption);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .trrank__related a:hover {
-    border-color: var(--accent-link);
-  }
 }
 
 @media (max-width: 430px) {

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { TeamTreatmentMark } from '../../../../components/logo/TeamTreatmentMark.jsx'
+import { Button } from '../../../../components/ui/control/Button.jsx'
 import {
   describeLogoCaveat,
   describeLogoRejection,
@@ -135,15 +136,15 @@ export function IdentityLogoField({ teamId, name, isMilb, treatment, field, valu
             aria-label="Upload logo art for this tile"
             onChange={(e) => handleFile(e.target.files?.[0])}
           />
-          <button
-            type="button"
+          <Button
+            size="control"
             className="iddrawer__btn"
             onClick={() => inputRef.current?.click()}
             disabled={busy}
             title={`A ${LOGO_SIZE}x${LOGO_SIZE} PNG under ${LOGO_MAX_BYTES / 1024} KB — the curated-art standard`}
           >
             {busy ? 'Uploading…' : 'Upload a PNG'}
-          </button>
+          </Button>
         </span>
         <p className="iddrawer__hint">
           {LOGO_SIZE}×{LOGO_SIZE} PNG, under {LOGO_MAX_BYTES / 1024} KB. An empty box means &ldquo;use

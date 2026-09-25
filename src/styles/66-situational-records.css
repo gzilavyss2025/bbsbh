@@ -133,8 +133,7 @@
 .trrank__chip:focus-visible,
 .trrank__tile:focus-visible,
 .trrank__jump a:focus-visible,
-.trrank__back:focus-visible,
-.trrank__related a:focus-visible {
+.trrank__back:focus-visible {
   outline: var(--focus-ring);
   outline-offset: 2px;
 }

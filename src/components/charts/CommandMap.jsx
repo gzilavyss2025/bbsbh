@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { GRID, commandCell, normalizePitch, viewCol } from '../../lib/zone/zoneGeometry.js'
 import { MIN_COMMAND_PITCHES, commandHandCounts, commandTypes, commandView } from '../../api/commandMap.js'
 import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // THE COMMAND MAP — where a pitcher puts each pitch, over a season.
 //
@@ -79,7 +80,7 @@ export function CommandMap({ entry, level = 'mlb', throws = null }) {
         <Chip on={stand === 'L'} onSelect={() => setStand('L')} label="vs LHH" n={hands.L} />
       </div>
       <div className="cmdmap__chips cmdmap__chips--types" role="group" aria-label="Pitch type">
-        <Chip on={code === null} onSelect={() => setCode(null)} label="All" small />
+        <Chip on={code === null} onSelect={() => setCode(null)} label="All" />
         {types.map((t) => (
           <Chip
             key={t.code}
@@ -93,7 +94,6 @@ export function CommandMap({ entry, level = 'mlb', throws = null }) {
                further down this same tab so all three name a pitch alike. */
             label={pitchLabel(t.code)}
             family={pitchFamily(t.code)}
-            small
           />
         ))}
       </div>
@@ -172,18 +172,22 @@ export function CommandMap({ entry, level = 'mlb', throws = null }) {
   )
 }
 
-function Chip({ on, thin, onSelect, label, n, small, family }) {
+// A filter chip: a Pill control (#1131). Selected is aria-pressed, never a
+// class. A pitch type under the sample floor is `--thin`, a kind, not a size:
+// every control is one height (--control-min).
+function Chip({ on, thin, onSelect, label, n, family }) {
   return (
-    <button
-      type="button"
-      className={`cmdmap__chip${on ? ' cmdmap__chip--on' : ''}${small ? ' cmdmap__chip--sm' : ''}${thin ? ' cmdmap__chip--thin' : ''}`}
+    <Pill
+      role="control"
+      fill="paper"
+      className={`cmdmap__chip${thin ? ' cmdmap__chip--thin' : ''}`}
       onClick={onSelect}
-      aria-pressed={on}
+      pressed={on}
       data-family={family}
     >
       {label}
       {n != null && <span className="cmdmap__chipn">{n.toLocaleString()}</span>}
-    </button>
+    </Pill>
   )
 }
 

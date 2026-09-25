@@ -1,3 +1,5 @@
+import { Button } from '../../ui/control/Button.jsx'
+
 // The at-bat trail: every step already revealed this half, drawn as the row of
 // scorecard cells you have already filled in — because that is literally what
 // it is. WINDOWED (`!stacked`): tapping a cell reviews that step WITHOUT
@@ -105,14 +107,14 @@ export function AtBatTrail({
         })}
       </div>
       {!stacked && !following && (
-        <button
-          type="button"
+        <Button
+          size="control"
           className="trailstrip__followbtn"
           aria-disabled={turning || undefined}
           onClick={onFollowLatest}
         >
           Back to the live at-bat
-        </button>
+        </Button>
       )}
     </div>
   )

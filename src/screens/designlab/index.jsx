@@ -7,6 +7,7 @@ import { ComponentHalf } from './components.jsx'
 import { ButtonHalf } from './buttons.jsx'
 import { PillSystemHalf } from './pills.jsx'
 import { CARDS, PILLS } from './catalog.js'
+import { Button } from '../../components/ui/control/Button.jsx'
 import '../../styles/designlab/lab.css'
 
 // UNLISTED CATALOG PAGE (see route.js), reachable only by direct URL
@@ -57,10 +58,13 @@ export function DesignLab() {
       </p>
 
       <nav className="dlab__jump" aria-label="Design lab sections">
-        <a className="dlab__jumplink" href="#tokens">Tokens</a>
-        <a className="dlab__jumplink" href="#components">Components</a>
-        <a className="dlab__jumplink" href="#cards">Cards</a>
-        <a className="dlab__jumplink" href="#pills">Pills</a>
+        {/* In-page #anchors: a Button with an href, not a Door (they do not
+            leave the page) and not a Pill (they filter nothing). The team
+            hub's jump bar is a ruled box for the same reason (#1131). */}
+        <Button size="control" className="dlab__jumplink" href="#tokens">Tokens</Button>
+        <Button size="control" className="dlab__jumplink" href="#components">Components</Button>
+        <Button size="control" className="dlab__jumplink" href="#cards">Cards</Button>
+        <Button size="control" className="dlab__jumplink" href="#pills">Pills</Button>
       </nav>
 
       <section className="dlab__verdictbox">

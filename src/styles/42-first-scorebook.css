@@ -7,7 +7,9 @@
   padding-bottom: var(--space-6);
 }
 
-.scorebookstory button {
+/* A bare button on this page inherits the page's type. The ledger filters are
+   Pills (#1131), which draw their own, so the reset leaves them alone. */
+.scorebookstory button:not(.pill) {
   font: inherit;
   color: inherit;
 }
@@ -459,18 +461,8 @@
   gap: var(--space-2);
   margin: var(--space-4) 0 var(--space-3);
 }
-.scorebookstory__filters button {
-  min-height: 36px;
-  padding: 0 var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  cursor: pointer;
-}
-.scorebookstory__filters button.is-active { border-color: var(--text-heading); background: var(--text-heading); color: var(--text-on-ink); }
+/* The three filters are Pill controls (#1131 slice 4): <Pill role="control"
+   pressed>, 34px, selected in navy with a tick. */
 .scorebookstory__ledger { margin: 0; padding: 0; list-style: none; border-top: var(--bw-rule) solid var(--border-rule); }
 .scorebookstory__ledger li { border-bottom: var(--bw-hair) solid var(--border-hairline); }
 .scorebookstory__ledgerrow {
@@ -537,7 +529,10 @@
   .scorebookstory__records { grid-template-columns: 1fr; }
   .scorebookstory__matchup strong { font-size: var(--fs-title-sm); }
   .scorebookstory__leaderhead, .scorebookstory__leaderrow { grid-template-columns: minmax(118px, 1fr) repeat(4, 38px); }
-  .scorebookstory__filters { overflow-x: auto; }
+  /* A scroll box clips what is outside it, so it keeps room for the Pill's
+     focus ring (2px, 2px off the capsule); the inline margin gives that room
+     back, so the row keeps its left edge. */
+  .scorebookstory__filters { overflow-x: auto; padding: var(--space-1); margin-inline: calc(-1 * var(--space-1)); }
   .scorebookstory__filters button { flex: none; }
 }
 

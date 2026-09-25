@@ -335,8 +335,9 @@ export const PILLS = [
     partial: '10-lineup.css',
     consumers: 4,
     group: 'interactive',
-    verdict: 'Merge — outline + interactive',
-    fill: '--surface-card / --text-body / --border-rule, padding 3px 9px, cursor; pressed is --marker on a --text-heading edge (ADR-0083)',
+    verdict: 'Merged — Pill (#1131)',
+    fill: 'Now <Pill role="control" fill="paper" pressed>: a 34px paper control, because it rides a club bar. Pressed is the Pill’s navy with a tick. .mastheadpill keeps only its state dot.',
+    pill: { role: 'control', fill: 'paper', pressed: false },
   },
   {
     cls: 'psodds-pill',
