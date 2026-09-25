@@ -14,6 +14,8 @@ import { Loader } from '../../components/ui/Loader.jsx'
 import { MasonryColumns } from '../../components/ui/MasonryColumns.jsx'
 import { SectionMasthead } from '../../components/ui/SectionMasthead.jsx'
 import { SectionTitle } from '../../components/ui/SectionTitle.jsx'
+import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
+import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/headerTheme.js'
 
 import { DebutPill } from '../../components/badges/DebutPill.jsx'
 import { InjuredMark } from '../../components/badges/InjuredMark.jsx'
@@ -30,6 +32,47 @@ import { DirectoryHeading } from '../../components/chrome/DirectoryHeading.jsx'
 import { HubTabBar } from '../../components/chrome/HubTabBar.jsx'
 
 const UI_PATH = 'src/components/ui'
+
+// The band on the grounds it really lands on (#1113): no club at all, then a
+// club root that sets the three --bar-* properties, the way a themed page does.
+// The Brewers are the dark bar; the Orioles are the loudest light one.
+function Themed({ teamId, className = '', children }) {
+  const theme = teamId ? headerThemeFor(teamId, 'main') : null
+  return (
+    <div className={`${className} ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
+      {children}
+    </div>
+  )
+}
+
+function SectionHeadDemo() {
+  return (
+    <>
+      <SectionHead look="band" as="span" note="no club">
+        Bullpen health
+      </SectionHead>
+      <Themed teamId={158}>
+        <SectionHead look="band" as="span" action={<InfoPopover label="What is this?">A demo.</InfoPopover>}>
+          Batting order
+        </SectionHead>
+      </Themed>
+      <div className="thub-card">
+        <SectionHead look="band" club as="span" note="entering Sep 25">
+          Club head, no club
+        </SectionHead>
+      </div>
+      {[158, 110].map((id) => (
+        <Themed key={id} teamId={id}>
+          <div className="thub-card">
+            <SectionHead look="band" club as="span" note="entering Sep 25" action={<Door onClick={() => {}}>Full season</Door>}>
+              Club head, themed
+            </SectionHead>
+          </div>
+        </Themed>
+      ))}
+    </>
+  )
+}
 const BADGE_PATH = 'src/components/badges'
 const CHROME_PATH = 'src/components/chrome'
 
@@ -55,7 +98,7 @@ export function ComponentHalf() {
   return (
     <>
       <Group
-        title="src/components/ui — 13 shared components"
+        title="src/components/ui — 14 shared components"
         lede="The whole shared tier. Button and Door share control/, and Button has its own band above. Against 32 card blocks and 10 pill blocks, this is the ratio #1112 exists to state."
       >
         <Entry title="Loader" path={`${UI_PATH}/Loader.jsx`} note="The shared cold-load loader — a mini linescore whose cell cycles. size=&quot;inline&quot; here.">
@@ -67,7 +110,14 @@ export function ComponentHalf() {
         <Entry title="SectionTitle" path={`${UI_PATH}/SectionTitle.jsx`} note="A section heading with an optional note and a right-hand action.">
           <SectionTitle title="Team leaders" note="Regular season" action={<Door onClick={() => {}}>See all</Door>} />
         </Entry>
-        <Entry title="SectionMasthead" path={`${UI_PATH}/SectionMasthead.jsx`} note="The club-dressed band. No logo passed here, so it draws its undressed state.">
+        <Entry
+          title="SectionHead"
+          path={`${UI_PATH}/frame/SectionHead.jsx`}
+          note="The one head (#1113). The band: the house navy and kraft with no club, the club's own bar under a themed root. With club, a plain label until a club colour arrives: the team hub's card heads and the player page's section bars. The label and rule looks come in slice H2."
+        >
+          <SectionHeadDemo />
+        </Entry>
+        <Entry title="SectionMasthead" path={`${UI_PATH}/SectionMasthead.jsx`} note="A thin wrapper over the SectionHead band, kept for its sixteen call sites. No logo passed here, so it draws its undressed state.">
           <SectionMasthead title="Milwaukee" />
         </Entry>
         <Entry title="Door" path={`${UI_PATH}/control/Door.jsx`} note="The app&#39;s one door — &quot;there is more behind this&quot;. Inline is the text link and writes its own chevron; block is the row that closes a list, and carries none.">

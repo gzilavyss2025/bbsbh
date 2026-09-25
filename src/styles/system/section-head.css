@@ -1,0 +1,121 @@
+/* ---------------------------------------------------------------------------
+   SECTION HEAD — the one head a section or a card wears (#1113).
+   components/ui/frame/SectionHead.jsx draws it; lib/design/sectionHeadClass.js
+   names its classes.
+
+   Before this file, six selectors in five partials painted the same club band
+   (.metricbar, the team hub's four card heads, the player page's section bar),
+   each with its own padding, size and tracking. This is the one copy.
+
+   WHAT IT OWNS: the look (ground, underline, ink, type), the padding, and the
+   row that puts the title left and the note, action and mark right.
+   WHAT IT DOES NOT OWN: the space above and below it (the parent's, #1180),
+   and the card it sits on (#1113's Card).
+
+   HERE IN THE ORDER, before 06-loader-and-cards.css. Every per-site partial
+   from 06 on loads later, so a host that places a head (.bs__team > .sectionhead
+   bleeds it to the card edge, .lgstand__bar .sectionhead rounds all four
+   corners) wins on order at equal specificity. test/card-cascade.test.js pins
+   the slot.
+
+   A HOST TINTS IT THROUGH TWO PROPERTIES, never by repainting it:
+     --sectionhead-inset  the side padding. A card whose body is inset by
+                          --space-3 sets it, so the title lines up with the
+                          rows under it (.tstats-card, .roster-super).
+     --sectionhead-rule   the unthemed club head's underline colour
+                          (.horizoncard's award rail).
+   --------------------------------------------------------------------------- */
+.sectionhead {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2h) var(--sectionhead-inset, var(--space-4));
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+/* The title claims the leftover space, so it stays hard left whatever mix of
+   note, action and mark follows it. `justify-content: space-between` let the
+   child count decide where the title sat: a mark before it shoved it right,
+   and a note plus an action parked the note mid-bar. */
+.sectionhead__title {
+  margin: 0 auto 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  color: inherit;
+}
+.sectionhead__note {
+  font-style: normal;
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  color: inherit;
+}
+.sectionhead__action {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* THE MARK. The club's mono knockout art (ADR-0031), last in the row. A crop
+   of "bar" stretches it to the band's true top and bottom edges: an explicit
+   height matching the title line plus the band's padding, then a negative
+   margin cancelling that padding. Not `align-self: stretch`: the image's
+   percentage-height crop resolves to auto inside a box whose own height is
+   still auto-computing (CSS2 §10.5), and the mark's width starves to 0. */
+.sectionhead > .teamlogo-crop-bar {
+  flex: 0 0 auto;
+  height: calc(var(--fs-body) * var(--lh-solid) + 20px);
+  margin-block: -10px;
+}
+
+/* THE BAND. Club ground, club underline, club ink, from the nearest ancestor
+   that sets them. With no club, the house navy with a kraft line: ADR-0083
+   clause 4 allows kraft here, as the club band's accent underline, and this is
+   the one selector that carries it (scripts/check-seal-scope.mjs). */
+.sectionhead--band {
+  background: var(--bar-fill, var(--navy));
+  border-bottom: 3px solid var(--bar-accent, var(--seal));
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  color: var(--bar-text, var(--text-on-ink));
+}
+
+/* THE CLUB BAND: a plain label until a club colour arrives. Unthemed it is
+   graphite caps on a hairline; under a themed root it is the club's band.
+   Its fallbacks are transparent and caption, never navy and kraft, so a club
+   with no colours reads as a label and not as the house band. Square corners:
+   the card under it clips them (overflow: hidden), or it bleeds. */
+.sectionhead--club {
+  background: transparent;
+  border-bottom: var(--bw-hair) solid var(--sectionhead-rule, var(--rule-soft));
+  border-radius: 0;
+  color: var(--text-caption);
+}
+.sectionhead--club .sectionhead__note {
+  color: var(--graphite-soft);
+}
+.is-themed .sectionhead--club {
+  background: var(--bar-fill, transparent);
+  border-bottom: 3px solid var(--bar-accent, transparent);
+  color: var(--bar-text, var(--text-caption));
+}
+.is-themed .sectionhead--club .sectionhead__note {
+  color: var(--bar-text, var(--graphite-soft));
+}
+
+/* THE BLEED: a page section's head, not a card's. It runs to the page edge
+   with square corners, one size up from a card head, so a page's top-level
+   sections read as one tier above the cards inside them. */
+.sectionhead--bleed {
+  margin: var(--space-5) calc(-1 * var(--app-gutter)) var(--space-2);
+  padding-inline: var(--app-gutter);
+  border-radius: 0;
+}
+.sectionhead--bleed .sectionhead__title {
+  font-size: var(--fs-h3);
+}

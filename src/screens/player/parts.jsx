@@ -26,21 +26,14 @@ export function roleWord(role) {
   return role === 'SP' ? 'starter' : role === 'CL' ? 'closer' : 'reliever'
 }
 
-// `bar` marks one of a tab's top-level sections (2026 Stats, Analytics, Game
-// log, Splits, Career stats, Player history — Recent workload / Recent form and
-// Photos opt in the same way from their own components) so it wears the club bar
-// (.section__title--bar in index.css); the sub-card headings underneath render
-// through this same component without it.
-// `aside` puts a control (the Career register's MLB-only pill) on the far end of
-// the bar, the way SectionMasthead carries the lineup page's toggles.
-export function SectionTitle({ title, note, primary = false, bar = false, aside = null }) {
+// A sub-card heading on the player page: the plain label tier. A tab's
+// top-level sections wear the club band instead, through SectionHead
+// (look="band" club bleed, #1113), not through this.
+export function SectionTitle({ title, note }) {
   return (
-    <h3
-      className={`section__title${primary ? ' section__title--primary' : ''}${bar ? ' section__title--bar' : ''}${aside ? ' section__title--aside' : ''}`}
-    >
+    <h3 className="section__title">
       <span>{title}</span>
       {note && <em>{note}</em>}
-      {aside}
     </h3>
   )
 }

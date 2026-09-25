@@ -3,6 +3,7 @@ import { gamePath, teamStampInPath } from '../../../lib/route.js'
 import { useNav } from '../../../lib/nav.js'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
+import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 
 // Season progress strip for the team page — one block per series (a run of
 // consecutive games against the same opponent), one small cell per game
@@ -105,22 +106,27 @@ export function SeasonSchedule({ teamId, asOf, sportId, schedule, allStarGame, r
   const navigate = useNav()
   return (
     <div className="thub-card">
-      <div className="thub-card__head">
-        <span>Schedule</span>
-        {/* The ONLY door to /team/{id}/stamp-in (ADR-0042). One entry point by
-            design: the page's own consent is what makes a season of results
-            legitimate, and a second door would be a second way to walk into
-            them. The same band control as StandingsCard.jsx's Postseason
-            Odds: a Pill control, ink fill (#1131). */}
-        <Pill
-          role="control"
-          fill="ink"
-          className="psodds-pill"
-          onClick={() => navigate(teamStampInPath(teamId, { d: asOf, s: sportId }))}
-        >
-          Stamp In
-        </Pill>
-      </div>
+      {/* The ONLY door to /team/{id}/stamp-in (ADR-0042). One entry point by
+          design: the page's own consent is what makes a season of results
+          legitimate, and a second door would be a second way to walk into
+          them. The same band control as StandingsCard.jsx's Postseason Odds:
+          a Pill control, ink fill (#1131). */}
+      <SectionHead
+        look="band"
+        club
+        action={
+          <Pill
+            role="control"
+            fill="ink"
+            className="psodds-pill"
+            onClick={() => navigate(teamStampInPath(teamId, { d: asOf, s: sportId }))}
+          >
+            Stamp In
+          </Pill>
+        }
+      >
+        Schedule
+      </SectionHead>
       <div className="thub-card__body">
         <SeriesStrip
           key={`${teamId}-${asOf ?? ''}`}

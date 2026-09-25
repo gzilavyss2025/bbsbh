@@ -154,25 +154,8 @@
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
-}
-.team-score__head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  padding: var(--space-2h) var(--space-3);
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-}
-.team-score__head em {
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  font-style: normal;
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-none);
+  /* The head is a SectionHead (#1113), inset to match the grade under it. */
+  --sectionhead-inset: var(--space-3);
 }
 .team-score__grade {
   min-width: 0;

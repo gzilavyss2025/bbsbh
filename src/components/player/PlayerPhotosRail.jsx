@@ -1,6 +1,7 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
 import { fetchGamePhotos, photosForPlayer, onlyPhotographer } from '../../api/gamePhotos.js'
 import { Door } from '../ui/control/Door.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
 // copy of this helper for why `scroll-behavior: smooth` has to be bypassed.
@@ -184,9 +185,9 @@ export function PlayerPhotosRail({ personId, games, limit }) {
 
   return (
     <section>
-      <h3 className="section__title section__title--bar">
-        <span>Photos</span>
-      </h3>
+      <SectionHead look="band" club bleed>
+        Photos
+      </SectionHead>
       <div className="teamphotos">
         {canScroll && (
           <button

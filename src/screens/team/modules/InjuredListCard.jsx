@@ -1,12 +1,13 @@
 import { RosterList } from './RosterList.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
+import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 
 export function InjuredListCard({ injured, season, showInjured, onShowInjured }) {
   return (
     <div className="thub-card">
-      <div className="thub-card__head">
-        <span>Injured List</span>
-      </div>
+      <SectionHead look="band" club>
+        Injured List
+      </SectionHead>
       <div className="thub-card__body">
       {showInjured ? (
         <RosterList

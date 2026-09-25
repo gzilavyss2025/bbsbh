@@ -4,6 +4,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { HighlightClipCard } from '../highlights/HighlightClipCard.jsx'
 import { Door } from '../ui/control/Door.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
 // copy of this helper for why `scroll-behavior: smooth` has to be bypassed.
@@ -134,9 +135,9 @@ export function PlayerHighlightsRail({ playerId, teamId, limit }) {
 
   return (
     <section>
-      <h3 className="section__title section__title--bar">
-        <span>Highlights</span>
-      </h3>
+      <SectionHead look="band" club bleed>
+        Highlights
+      </SectionHead>
       <div className="teamphotos">
         {canScroll && (
           <button

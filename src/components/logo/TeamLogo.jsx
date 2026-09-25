@@ -27,7 +27,7 @@ export function TeamLogo({
   className = '',
   // `crop={true}` is the square "vibe" treatment below. `crop="bar"` is the
   // SectionMasthead treatment: the mark stretches to the full height of its
-  // `.metricbar`, cancelling that bar's own vertical padding to bleed edge to
+  // band (`.sectionhead`), cancelling that bar's own vertical padding to bleed edge to
   // edge, with 7% clipped off its own top and bottom (see the CSS partial) —
   // `size` is unused in this mode since the bar's height, not a pixel prop,
   // drives it.
@@ -159,7 +159,7 @@ export function TeamLogo({
   }
 
   // `crop="bar"` — the wrapper's own height comes from the CSS bleed (it
-  // stretches to fill and overshoot `.metricbar`'s padding, see the partial),
+  // stretches to fill and overshoot the band's padding, see the partial),
   // never from `size`, so no inline style here.
   if (cropBar) {
     return <span className={`teamlogo-crop-bar ${className}`}>{img}</span>

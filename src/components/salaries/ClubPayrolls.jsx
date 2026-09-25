@@ -2,6 +2,7 @@ import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { teamChipColors } from '../../lib/teams.js'
 import { moneyLabel } from './Money.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // All thirty, never a top ten. The point of the graphic is the shape of the
 // whole league — the gap between the top four and the bottom four is the story,
@@ -13,11 +14,9 @@ import { moneyLabel } from './Money.jsx'
 export function ClubPayrolls({ clubs, pickedTeamId, max }) {
   return (
     <section className="payclubs" aria-labelledby="payclubs-title">
-      <div className="metricbar">
-        <span className="metricbar__title" id="payclubs-title">
-          Club payrolls
-        </span>
-      </div>
+      <SectionHead look="band" as="span" titleId="payclubs-title">
+        Club payrolls
+      </SectionHead>
       <div className="payclubs__grid">
         {clubs.map((club) => {
           const chip = teamChipColors(club.teamId)

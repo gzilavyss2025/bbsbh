@@ -1,5 +1,6 @@
 import { DefenseDiamond } from '../../../components/scoring/DefenseDiamond.jsx'
 import { RosterList } from './RosterList.jsx'
+import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 
 // One bordered soft-cream card (same convention as .tstats-card) around all
 // the projection subsections, so they read as one group distinct from the
@@ -28,32 +29,38 @@ export function RosterProjection({
 }) {
   return (
     <div className="roster-super">
-      <div className="roster-super__head">
-        <span>Roster</span>
-        {(preview || !hasRecentRoster) && <em>preferred lineup</em>}
-        {!preview && hasRecentRoster && (
-          <div className="roster-super__toggle" role="tablist" aria-label="Roster projection basis">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={!showRecentRoster}
-              className={`roster-super__toggle-btn${!showRecentRoster ? ' is-active' : ''}`}
-              onClick={onShowSeason}
-            >
-              Season
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={showRecentRoster}
-              className={`roster-super__toggle-btn${showRecentRoster ? ' is-active' : ''}`}
-              onClick={onShowCurrent}
-            >
-              Current
-            </button>
-          </div>
-        )}
-      </div>
+      <SectionHead
+        look="band"
+        club
+        note={(preview || !hasRecentRoster) && 'preferred lineup'}
+        action={
+          !preview &&
+          hasRecentRoster && (
+            <div className="roster-super__toggle" role="tablist" aria-label="Roster projection basis">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={!showRecentRoster}
+                className={`roster-super__toggle-btn${!showRecentRoster ? ' is-active' : ''}`}
+                onClick={onShowSeason}
+              >
+                Season
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={showRecentRoster}
+                className={`roster-super__toggle-btn${showRecentRoster ? ' is-active' : ''}`}
+                onClick={onShowCurrent}
+              >
+                Current
+              </button>
+            </div>
+          )
+        }
+      >
+        Roster
+      </SectionHead>
       <div className="roster-super__body">
       <div className="roster-super__row">
         {/* Left column: the defensive nine, with the bench (Top

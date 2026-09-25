@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { fetchWorkload, staffGridFor } from '../../../api/workload.js'
 import { StaffGrid } from '../../../components/workload/StaffGrid.jsx'
+import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 
 // THE CLUB'S PEN, on the club's own page.
 //
@@ -32,9 +33,9 @@ export function BullpenHealthCard({ teamId }) {
 
   return (
     <div className="thub-card">
-      <div className="thub-card__head">
-        <span>Bullpen health</span>
-      </div>
+      <SectionHead look="band" club>
+        Bullpen health
+      </SectionHead>
       <div className="thub-card__body">
         <StaffGrid rows={rows} />
       </div>

@@ -3,6 +3,7 @@ import { fetchTeamPhotoBatch } from '../../../../api/gamePhotos.js'
 import { useNav } from '../../../../lib/nav.js'
 import { teamPhotosPath } from '../../../../lib/route.js'
 import { Door } from '../../../../components/ui/control/Door.jsx'
+import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 
 // A setup jump, not a user-visible scroll gesture — bypasses the track's own
 // `scroll-behavior: smooth` (index.css) so it lands instantly. Without this,
@@ -227,10 +228,9 @@ export function TeamPhotosRail({ teamId, games, limit = null }) {
 
   return (
     <div className="thub-card">
-      <div className="thub-card__head">
-        <span>Photos</span>
-        <Door onClick={() => navigate(teamPhotosPath(teamId))}>Full season</Door>
-      </div>
+      <SectionHead look="band" club action={<Door onClick={() => navigate(teamPhotosPath(teamId))}>Full season</Door>}>
+        Photos
+      </SectionHead>
       <div className="thub-card__body">
         <div className="teamphotos">
           {canScroll && (

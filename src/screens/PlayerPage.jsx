@@ -24,6 +24,7 @@ import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCa
 import { gameLogDoorLabel } from './player/overviewPreview.js'
 import { DASH, Fact, SectionTitle, StatGrid, debutLabel, isoToday, monthDay, roleWord } from './player/parts.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
+import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 
 // The player hub's OVERVIEW tab — the bare `/player/{id}`, and the tab the
 // other three hang off (screens/player/PlayerHubShell.jsx). Who he is now: the
@@ -174,18 +175,20 @@ export function PlayerPage({ id, asOf, sportId }) {
           <section key={block.group}>
             {blocks.length > 1 && <h2 className="player__blocktitle">{block.title}</h2>}
 
-            <SectionTitle
-              title={`${data.currentYear} Stats`}
-              primary
-              bar
-              note={
-                [
-                  liveLevel,
-                  block.group === 'pitching' && block.role ? roleWord(block.role) : null,
-                  enteringLabel,
-                ].filter(Boolean).join(' · ')
-              }
-            />
+            <SectionHead
+              look="band"
+              club
+              bleed
+              note={[
+                liveLevel,
+                block.group === 'pitching' && block.role ? roleWord(block.role) : null,
+                enteringLabel,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            >
+              {`${data.currentYear} Stats`}
+            </SectionHead>
             <StatGrid tiles={block.tiles} />
 
             {/* League-rank chips right under the tiles they contextualize —

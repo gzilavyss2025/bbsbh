@@ -75,7 +75,8 @@
 }
 /* SUB-SECTION LEADER RULE. The player page has two heading tiers and they
    were a full octave apart: the top-level headings wear a solid club bar
-   (.section__title--bar), while every sub-card heading under them — Statcast,
+   (SectionHead look="band" club bleed), while every sub-card heading under
+   them — Statcast,
    Advanced, Foul balls, Pitches, Pitches like / Hits like, By handedness,
    Situational, Splits vs team, Firsts — was small graphite caps floating on
    the page with nothing under it, so a reader scrolling a long analytics
@@ -84,16 +85,16 @@
    a middle weight: still quiet, but it draws the card's top edge, and it ties
    the label to the note it belongs to instead of leaving them as two loose
    ends of a wide row. Almanac/scorecard idiom, and on-metaphor for ruled
-   paper. Only the un-barred tier gets it — a bar heading already has all the
-   structure it needs, and --primary is the page headline. */
-.player .section__title:not(.section__title--bar):not(.section__title--primary) > span {
+   paper. Only this label tier gets it: a band head is not a .section__title,
+   and it already has all the structure it needs. */
+.player .section__title > span {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   flex: 1 1 auto;
   min-width: 0;
 }
-.player .section__title:not(.section__title--bar):not(.section__title--primary) > span::after {
+.player .section__title > span::after {
   content: '';
   flex: 1 1 auto;
   height: var(--bw-hair);

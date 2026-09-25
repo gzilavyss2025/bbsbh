@@ -98,7 +98,7 @@ const BUDGETS = {
   'src/styles/05-masthead-nav.css': 700, // 697 — current player-page masthead and level-progression rules after CareerTimeline moved to 05a
   'src/styles/06-loader-and-cards.css': 800, // 900 -> 742: the off-day club tiles left for 06b-offday-cards.css, taking their hover/focus states with them
   'src/styles/08-site-shell.css': 900, // 1000 -> 898: the footer's flat link-list rules left for 08a-site-menu.css, which holds the shared site-directory language the sheet, the footer and /more all read
-  'src/styles/09-team-info.css': 800, // 700 -> 716: the innings view's lineup masthead (.lineupteam__name) joined the header-theme system (EnteringReference.jsx), the same `.is-themed`/`--bar-fill` triad .halfdefense__title already wore — one more selector in the same family, not a new one. 687 — the Ballpark card moved out to 57-ballpark-card.css
+  'src/styles/09-team-info.css': 700, // 800 -> 700: the club band's rules moved to system/section-head.css (#1113, slice H1a). 700 -> 716: the innings view's lineup masthead (.lineupteam__name) joined the header-theme system (EnteringReference.jsx), the same `.is-themed`/`--bar-fill` triad .halfdefense__title already wore — one more selector in the same family, not a new one. 687 — the Ballpark card moved out to 57-ballpark-card.css
   'src/styles/10-lineup.css': 800, // 797
   'src/styles/12-sealbox.css': 1700, // 1639 — unified focus/stacked layout: dropped the unfocused page's .prehalf, .half__entering/.halfentering, .innings__reference/.innings__ref-*, .innings__rosters, and .innings__row2 rules
   'src/styles/14-strike-zone.css': 1000, // 909 — both pitch-colour keys left (PitchColorsKey's button/modal and StrikeZoneLegend's swatch row); the pitch list names each dot beside it
@@ -113,7 +113,7 @@ const BUDGETS = {
   'src/styles/27-player-position-innings.css': 700, // 636 — "Pitches like" / "Hits like" moved to 51-similar-players.css
   'src/styles/28-team-hub.css': 900, // 859 — the identity hero split out to 28a-team-hub-hero.css
   'src/styles/29-team-transactions.css': 950, // 844 -> 941: the deck's day tab (.txday), one divider standing before each day's run of cards. It replaced a dateline printed on EVERY card, which restated the previous card's date on 29.7% of them; the rule it enforces and the reason the tab is stacked rather than rotated are what the added prose carries.
-  'src/styles/31-wild-card.css': 1400, // 1088 -> 1365: the Minors tab's Horizon + Depth Chart cards share one broadcast-card tile (.horizontile, its stat box reusing the hover card's .phcard__tile recipe) plus the depth chart's position pill row; Horizon's own .hznlist/.hzntile grid (real stat-line tiles, multi-column past phone width) came after the first pass looked "terrible" as one full-width column of sparse rows.
+  'src/styles/31-wild-card.css': 1300, // 1400 -> 1300: the two card heads moved to system/section-head.css (#1113, slice H1a). 1088 -> 1365: the Minors tab's Horizon + Depth Chart cards share one broadcast-card tile (.horizontile, its stat box reusing the hover card's .phcard__tile recipe) plus the depth chart's position pill row; Horizon's own .hznlist/.hzntile grid (real stat-line tiles, multi-column past phone width) came after the first pass looked "terrible" as one full-width column of sparse rows.
   'src/styles/35-postseason-series.css': 700, // 693
   'src/styles/42-first-scorebook.css': 900, // 854
   'src/styles/43-foul-tracker.css': 900, // 877

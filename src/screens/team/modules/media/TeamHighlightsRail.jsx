@@ -4,6 +4,7 @@ import { fetchTeamHighlights, flattenPositiveClips } from '../../../../api/gameh
 import { HighlightSheet } from '../../../../components/playbyplay/HighlightSheet.jsx'
 import { HighlightClipCard } from '../../../../components/highlights/HighlightClipCard.jsx'
 import { MONTH_LABELS } from '../TeamStatsCard.jsx'
+import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 
 // A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
 // copy of this helper for why `scroll-behavior: smooth` has to be bypassed.
@@ -123,9 +124,9 @@ export function TeamHighlightsRail({ teamId, games, limit = null }) {
 
   return (
     <div className="thub-card">
-      <div className="thub-card__head">
-        <span>Highlights</span>
-      </div>
+      <SectionHead look="band" club>
+        Highlights
+      </SectionHead>
       <div className="thub-card__body">
         <div className="teamphotos">
           {canScroll && (

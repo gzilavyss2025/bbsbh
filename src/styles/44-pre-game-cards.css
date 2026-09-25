@@ -21,61 +21,17 @@
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
-/* Navy/gold masthead — title left, then an info affordance and the club mark right;
-   the kraft-gold (--seal) bottom border is the "tape" edge of the scorebook metaphor.
-   Packed from the START, not `space-between` — that let the child count decide where the
-   title sat (mark + title shoved it right; adding an aside parked it mid-bar). The title
-   claims the leftover space itself (`margin-right: auto` below). */
-.metricbar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: var(--space-2h);
-  padding: var(--space-2h) var(--space-4);
-  background: var(--navy);
-  border-bottom: 3px solid var(--seal);
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-}
-.metricbar__title {
-  margin: 0 auto 0 0; /* UA margin off; the auto is what keeps the title hard left */
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-body);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  line-height: var(--lh-solid);
-  text-transform: uppercase;
-  color: var(--text-on-ink);
-}
-/* The batting-order / opposing-starter / opposing-defense mastheads' club mark
-   (SectionMasthead's `logo` prop) — a decorative flourish, never the sole identifier
-   (the title names the same club), so the image itself carries no alt text. It rides
-   the bar's RIGHT edge, last child, opposite a title that never moves (SectionMasthead.jsx's
-   header has the why). The one-color white lockup these wear is the ART, not a treatment:
-   callers ask TeamLogo for the `mono` variant, a knockout mark precomputed per club
-   by scripts/gen-mono-logos.mjs. This used to be a `filter: brightness(0) invert(1)`
-   on the full-color CDN mark, which crushed every logo whose interior detail is drawn
-   in a light fill into an unreadable solid blob — see ADR-0031 and src/lib/logoMono.js.
-   The mark also wears TeamLogo's `crop="bar"` treatment (SectionMasthead renders
-   `logo` as a direct child of .metricbar, a sibling of the title): an explicit height
-   matching the bar's title-line formula (font-size + the same 20px of padding), then a
-   negative margin cancelling that padding so the mark bleeds to the bar's true
-   top/bottom edges. Deliberately NOT `align-self: stretch` off the line's
-   auto-computed cross size — the <img>'s percentage-height crop
-   (teamlogo-and-buttons.css) resolves to 'auto' inside a box whose own height is still
-   auto-computing (CSS2 §10.5), starving the mark's width to 0; an explicit height
-   sidesteps that. `.metricbar__logo` still names the img/wrapper for the dark-theme
-   re-ink rule below (`--mark-filter` read by `.metricbar__logo`, 09-team-info.css) —
-   shared with DueUpNextCard/EnteringReference's unstretched inline mark, why the
-   bleed rule lives on `.teamlogo-crop-bar`, not folded in here. */
+/* The navy/gold masthead these cards wear is the SectionHead band now (#1113):
+   system/section-head.css draws it, SectionMasthead.jsx is its thin wrapper.
+   What stays here is the club mark class the band and the innings bars share —
+   the decorative flourish, never the sole identifier (the title names the same
+   club), so the image carries no alt text. The one-color white lockup is the
+   ART, not a treatment: callers ask TeamLogo for the `mono` variant (ADR-0031,
+   src/lib/logoMono.js). `.metricbar__logo` also names the mark for the dark-theme
+   re-ink rule (`--mark-filter`, 09-team-info.css), which DueUpNextCard and
+   EnteringReference share, so it keeps its name until slice H1b moves them. */
 .metricbar__logo {
   flex: 0 0 auto;
-}
-.metricbar > .teamlogo-crop-bar {
-  height: calc(var(--fs-body) * var(--lh-solid) + 20px);
-  margin-block: -10px;
 }
 /* Batting order, opposing defense, and opposing starter each wear the navy
    masthead as the header of a real card. The CONTAINER owns the border / radius /
@@ -122,10 +78,6 @@
 }
 .lineup .roster__notice {
   margin: 8px 12px;
-}
-.metricbar__aside {
-  display: inline-flex;
-  align-items: center;
 }
 
 /* ------------------------------------------------------- season series strip

@@ -69,31 +69,8 @@
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   overflow: hidden;
-}
-/* The masthead bolted onto the card's own top border — same title/note
-   layout as .thub-card__head, on the same hairline the shared shell uses —
-   kraft-bordered until ADR-0083. */
-.tstats-card__head {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-2h) var(--space-3);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  border-bottom: var(--bw-hair) solid var(--border-rule);
-}
-.tstats-card__head em {
-  font-style: normal;
-  font-weight: var(--w-regular);
-  color: var(--graphite-soft);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-caps);
+  /* The head (SectionHead, #1113) lines up with this card's --space-3 rows. */
+  --sectionhead-inset: var(--space-3);
 }
 .tstats-card__body {
   padding: var(--space-1) var(--space-3);
@@ -620,31 +597,9 @@
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   overflow: hidden;
-}
-/* The masthead bolted onto the card's own top border, same title/note/action
-   layout as .thub-card__head — the Season/Last 10 Games toggle rides here as
-   the action slot. */
-.roster-super__head {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-2h) var(--space-3);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  border-bottom: var(--bw-hair) solid var(--border-rule);
-}
-.roster-super__head em {
-  font-style: normal;
-  font-weight: var(--w-regular);
-  color: var(--graphite-soft);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-caps);
+  /* The head (SectionHead, #1113; the Season/Current toggle is its action)
+     lines up with this card's --space-3 rows. */
+  --sectionhead-inset: var(--space-3);
 }
 .roster-super__body {
   display: flex;
@@ -1197,8 +1152,8 @@
    the prospect timeline's award nodes use — so the tab's one forward-looking
    card reads as distinct from the recap cards around it without a second
    color vocabulary. */
-.horizoncard > .thub-card__head {
-  border-bottom-color: var(--award-line);
+.horizoncard {
+  --sectionhead-rule: var(--award-line);
 }
 
 /* Horizon's own tile — a compact card (head row, then a real stat-line grid

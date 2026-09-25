@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { GameLink } from './GameLink.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The player page's game-by-game log. A player who split real season time
 // between two levels (buildBlock's `otherLevels` gate, api/person/activity.js —
@@ -24,22 +25,28 @@ export function GameLog({ gameLog, gameLogAlt, altLevel, note, limit }) {
 
   return (
     <>
-      <h3 className="section__title section__title--bar section__title--aside">
-        <span>Game log</span>
-        <em>{`last ${rows.length} · ${note}`}</em>
-        {gameLogAlt && (
-          <Pill
-            role="control"
-            fill="paper"
-            className="mastheadpill"
-            pressed={showAlt}
-            onClick={() => setShowAlt((v) => !v)}
-          >
-            <span className="mastheadpill__dot" aria-hidden="true" />
-            {altLevel} log
-          </Pill>
-        )}
-      </h3>
+      <SectionHead
+        look="band"
+        club
+        bleed
+        note={`last ${rows.length} · ${note}`}
+        action={
+          gameLogAlt && (
+            <Pill
+              role="control"
+              fill="paper"
+              className="mastheadpill"
+              pressed={showAlt}
+              onClick={() => setShowAlt((v) => !v)}
+            >
+              <span className="mastheadpill__dot" aria-hidden="true" />
+              {altLevel} log
+            </Pill>
+          )
+        }
+      >
+        Game log
+      </SectionHead>
       <ul className="gamelog">
         {rows.map((r) => (
           <li className="gamelog__row" key={r.gamePk ?? r.date}>

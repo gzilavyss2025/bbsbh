@@ -3,6 +3,7 @@ import { TeamTreatmentMark } from './TeamTreatmentMark.jsx'
 import { treatmentTile, isMlbTeamId } from '../../lib/teams.js'
 import { milbTreatmentTile } from '../../lib/milbColors.js'
 import { readableTextColor } from '../../lib/contrast.js'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The two ink choices a card picks between — --text-heading and --paper-2,
 // literally, since readableTextColor needs real hex to run WCAG math against
@@ -132,10 +133,9 @@ export function JerseyCombos({ combos, teamId, teamName, variant = 'record' }) {
   const isMlb = isMlbTeamId(teamId)
   return (
     <div className="thub-card">
-      <div className="thub-card__head">
-        <span>Logos & jerseys</span>
-        <em>{variant === 'static' ? 'home and away' : 'record by jersey'}</em>
-      </div>
+      <SectionHead look="band" club note={variant === 'static' ? 'home and away' : 'record by jersey'}>
+        Logos & jerseys
+      </SectionHead>
       <div className="thub-card__body" style={{ padding: 0 }}>
         <div className="jerseydeck" ref={ref} {...handlers}>
           {combos.map((c) => {

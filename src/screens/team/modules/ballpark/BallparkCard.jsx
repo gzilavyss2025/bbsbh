@@ -12,6 +12,7 @@ import { useCopy } from '../../../../copy/copyContext.js'
 import { BallparkDiagram } from '../../../../components/ballpark/BallparkDiagram.jsx'
 import { Facts, RankGroup } from '../../../../components/ballpark/BallparkFacts.jsx'
 import { useBallparkDraft, useFocalPick } from './useBallparkDraft.js'
+import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 
 // The Overview's Ballpark card. Two stacked rows: a HERO (a photograph of the
 // place beside its name) over the DETAILS (the field diagram beside the facts,
@@ -257,14 +258,19 @@ export function BallparkCard({ team, attendance }) {
 
   return (
     <div className="thub-card">
-      <div className="thub-card__head">
-        <span>Ballpark</span>
-        {isClerkEnabled && (
-          <Suspense fallback={null}>
-            <BallparkAdminBar parkKey={key} draft={draft} saved={saved} />
-          </Suspense>
-        )}
-      </div>
+      <SectionHead
+        look="band"
+        club
+        action={
+          isClerkEnabled && (
+            <Suspense fallback={null}>
+              <BallparkAdminBar parkKey={key} draft={draft} saved={saved} />
+            </Suspense>
+          )
+        }
+      >
+        Ballpark
+      </SectionHead>
       <div className="thub-card__body">
         <div className="ballparkcard__hero">
           {photo && (

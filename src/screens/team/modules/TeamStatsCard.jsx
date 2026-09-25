@@ -1,3 +1,5 @@
+import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+
 const DASH = '—'
 
 function isoToday() {
@@ -40,10 +42,9 @@ export function todayDowLabel() {
 export function TeamStats({ title, stats, note = 'rank out of 30', highlightKey }) {
   return (
     <div className="tstats-card">
-      <div className="tstats-card__head">
-        <span>{title}</span>
-        {note && <em>{note}</em>}
-      </div>
+      <SectionHead look="band" club note={note}>
+        {title}
+      </SectionHead>
       <div className="tstats-card__body">
         <div className="tstats">
           {stats.map((s) => (

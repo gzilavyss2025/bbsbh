@@ -3,6 +3,7 @@ import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
+import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 
 const DASH = '—'
 
@@ -83,10 +84,9 @@ export function DepthChartCard({ depthChart }) {
 
   return (
     <div className="thub-card depthchart">
-      <div className="thub-card__head">
-        <span>Depth chart</span>
-        <em>scouting vs. performance</em>
-      </div>
+      <SectionHead look="band" club note="scouting vs. performance">
+        Depth chart
+      </SectionHead>
       <div className="thub-card__body">
         <div className="depthchart__positions">
           {positions.map((pos) => (

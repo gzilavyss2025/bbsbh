@@ -530,20 +530,21 @@ button.startercard__careervs {
 }
 
 /* On a bar, the green ring sits on the bar's colour and falls under 3:1
-   (2.41:1 on the house navy). A section masthead is always a bar, navy or
-   the club's; a player page's section title is a bar only when it is themed.
+   (2.41:1 on the house navy). A band head is always a bar, navy or the
+   club's; a club head (the player page's section bars) is a bar only when it
+   is themed.
    There the ring is the two-colour band ring (#1215): a paper outline with an
    ink halo. The Pill keeps the ring's width, style and offset. A pressed
    chip's paper edge stays apart from the ring: the halo's ink fills the gap
    between them. Focused and pressed, one box-shadow carries the press inset
    and the halo. test/band-focus-ring.test.js holds it. */
-.metricbar .mastheadpill:focus-visible,
-.player.is-themed .section__title--bar .mastheadpill:focus-visible {
+.sectionhead--band .mastheadpill:focus-visible,
+.is-themed .sectionhead--club .mastheadpill:focus-visible {
   outline-color: var(--focus-ring-band);
   box-shadow: var(--ring-band);
 }
-.metricbar .mastheadpill:focus-visible:active,
-.player.is-themed .section__title--bar .mastheadpill:focus-visible:active {
+.sectionhead--band .mastheadpill:focus-visible:active,
+.is-themed .sectionhead--club .mastheadpill:focus-visible:active {
   box-shadow: var(--inset-cell), var(--ring-band);
 }
 
