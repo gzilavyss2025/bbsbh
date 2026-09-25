@@ -64,13 +64,13 @@ export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = n
   return (
     <section className={`roster ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <button
-        className="roster__toggle"
+        className="roster__toggle sectionhead--band"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
         <span className="roster__club">{title}</span>
         {teamId != null && (
-          <TeamLogo teamId={teamId} name={title} size={20} variant="mono" crop="bar" className="metricbar__logo" />
+          <TeamLogo teamId={teamId} name={title} size={20} variant="mono" crop="bar" className="sectionhead__mark" />
         )}
         <span className="roster__chevron" aria-hidden="true">
           {open ? '▾' : '▸'}

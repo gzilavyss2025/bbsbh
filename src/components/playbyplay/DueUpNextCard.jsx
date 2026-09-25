@@ -18,8 +18,8 @@ export function DueUpNextCard({ feed, inning, half, revealedThrough, awayId, hom
 
   return (
     <div className="dueup">
-      <span className="dueup__title">
-        <TeamLogo teamId={teamId} name={teamName} size={18} variant="mono" className="metricbar__logo" />
+      <span className="dueup__title sectionhead--band sectionhead--house">
+        <TeamLogo teamId={teamId} name={teamName} size={18} variant="mono" className="sectionhead__mark" />
         Due up next for the {teamName}
       </span>
       <div className="dueup__row">

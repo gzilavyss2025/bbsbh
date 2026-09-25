@@ -340,7 +340,7 @@ export function WinProbChart({
 
   return (
     <section className={`winprob${hasActive ? ' is-active' : ''}`} onClick={() => setPinnedIdx(null)}>
-      <div className="winprob__head">
+      <div className="winprob__head sectionhead--band sectionhead--house">
         <h3 className="winprob__title">Win probability</h3>
         <div className="winprob__split" aria-hidden="true">
           <span className="winprob__team winprob__team--away" style={{ '--team-color': awayColors.primary }}>

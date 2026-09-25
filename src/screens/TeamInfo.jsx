@@ -69,7 +69,7 @@ import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 // (see GameView) carries the main away@home logo pairing; the batting-order /
 // opposing-starter / opposing-defense section headers below also carry a
 // small club mark of their own, forced to solid white for the navy bar (see
-// index.css's .metricbar__logo).
+// index.css's .sectionhead__mark).
 //
 // THEMING (ADR-0030). This page dresses its club-name bar and its section
 // mastheads in the header colors of the jersey that club is actually wearing
@@ -609,7 +609,7 @@ function TeamSections({
                 variant="mono"
                 crop="bar"
                 overrideUrl={ownMasthead.url}
-                className={`metricbar__logo${ownMasthead.url ? ' metricbar__logo--custom' : ''}`}
+                className={`sectionhead__mark${ownMasthead.url ? ' sectionhead__mark--custom' : ''}`}
               />
             }
           >
@@ -734,7 +734,7 @@ function TeamSections({
                   variant="mono"
                   crop="bar"
                   overrideUrl={oppMasthead.url}
-                  className={`metricbar__logo${oppMasthead.url ? ' metricbar__logo--custom' : ''}`}
+                  className={`sectionhead__mark${oppMasthead.url ? ' sectionhead__mark--custom' : ''}`}
                 />
               }
             />
@@ -803,7 +803,7 @@ function OpposingStarterCard({
             variant="mono"
             crop="bar"
             overrideUrl={masthead.url}
-            className={`metricbar__logo${masthead.url ? ' metricbar__logo--custom' : ''}`}
+            className={`sectionhead__mark${masthead.url ? ' sectionhead__mark--custom' : ''}`}
           />
         }
       >

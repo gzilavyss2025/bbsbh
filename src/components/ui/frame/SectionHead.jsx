@@ -15,6 +15,8 @@ import { sectionHeadClassName, sectionHeadTitleTag } from '../../../lib/design/s
 //   club    band only: a plain label until a club colour arrives (the team
 //           hub's card heads, the player page's section bars).
 //   bleed   band only: runs to the page edge, square corners, one size up.
+//   house   band only: the house navy and kraft whatever club the page
+//           wears, for a head that names no club (ADR-0030).
 //   as      the title element: 'h3' (the default), 'h2', 'h4', or 'span' inside
 //           a card that already has a heading.
 //   titleId an id on the title, for a section's aria-labelledby.
@@ -34,6 +36,7 @@ export function SectionHead({
   look = 'label',
   club = false,
   bleed = false,
+  house = false,
   as: Title = 'h3',
   titleId,
   note,
@@ -44,7 +47,7 @@ export function SectionHead({
 }) {
   sectionHeadTitleTag(Title)
   return (
-    <div className={sectionHeadClassName({ look, club, bleed, className })}>
+    <div className={sectionHeadClassName({ look, club, bleed, house, className })}>
       <Title className="sectionhead__title" id={titleId}>
         {children}
       </Title>

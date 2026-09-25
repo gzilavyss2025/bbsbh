@@ -142,9 +142,6 @@
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-on-ink);
-  background: var(--navy);
-  border-bottom: 3px solid var(--seal);
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   margin-bottom: 0;
 }
@@ -790,9 +787,6 @@
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-on-ink);
-  background: var(--navy);
-  border-bottom: 3px solid var(--seal);
 }
 
 /* The SealBox's own .statgrid wrapper paints --surface-inset once revealed,
@@ -1266,9 +1260,6 @@
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-on-ink);
-  background: var(--navy);
-  border-bottom: 3px solid var(--seal);
 }
 /* Same headshot-column recipe as .upnext (UpNextBatters.jsx) — this card
    previews the OTHER side's next half instead of the batting side's own, so
@@ -1364,10 +1355,8 @@
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
-  color: var(--text-on-ink);
-  background: var(--navy);
-  border: none;
-  border-bottom: 3px solid var(--seal);
+  border-top: 0;
+  border-inline: 0;
   border-radius: 0;
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -1404,12 +1393,9 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  background: var(--navy);
-  border-bottom: 3px solid var(--seal);
   font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
-  color: var(--text-on-ink);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
@@ -1573,10 +1559,8 @@
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
-  color: var(--text-on-ink);
-  background: var(--navy);
-  border: none;
-  border-bottom: 3px solid var(--seal);
+  border-top: 0;
+  border-inline: 0;
   border-radius: 0;
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -1601,7 +1585,7 @@
 
 .halfdefense__chevron {
   margin-left: auto;
-  color: var(--text-on-ink);
+  color: inherit; /* the band's ink, house or club */
   opacity: 0.8;
 }
 

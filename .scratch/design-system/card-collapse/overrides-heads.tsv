@@ -4,6 +4,7 @@
 # slice: H1 band · H2 label (+rule) · H3 notes (the ledger's __kicker/__eyebrow renames) · - none
 # LANDED in slice H1a (#1113): the nine band rows (.metricbar, .metricbar__title, .is-themed .metricbar, the four hub heads and their themed rule, .player.is-themed .section__title--bar) are system/section-head.css now, so their rows left this file.
 # LANDED in slice H2 (#1113): .section__title (both SectionTitle components and 20 hand-written heads), .milestonewatch__title, .txcard__head, .rankgrp__title, .clubsseen__title, .coverpick__heading and the offseason section heads are SectionHead labels or rules now, so their rows left this file.
+# LANDED in slice H1b (#1113): the innings view and box score bands wear .sectionhead--band (club) or .sectionhead--band.sectionhead--house (no club) as PAINT on their own elements; their rows that no longer draw a band left this file. .abs__title, .statbox__title, .dueup__title, .lineupcard__title, .halfdefense__title, .marginnotes__title and .pitchers__title keep a row: their size and bleed are still their own.
 .wordmarklab__eyebrow, .wordmarklab__contextlabel, .wordmarklab__selection > span	lab	kicker	-	wordmark lab lines; the ledger renames .wordmarklab__eyebrow → __note (five different lines on one page)
 .topbar__title	title-keep	title	-	the app's page title in the top bar (35 files). A page title, not a section head
 .wiredock__title, .wiredock__note	label	label	H2	the wire dock's caps title + note in one rule — a label head with its note slot
@@ -12,9 +13,6 @@
 .sitemenusheet__eyebrow	note	kicker	H3	ledger: → .sitemenusheet__note ("Tally Baseball", the app's name)
 .guidelink__eyebrow	note	kicker	H3	ledger: → .guidelink__note (renders a prop)
 .teaminfo.is-themed > .teaminfo__head	bespoke	band	-	the TeamInfo club-name bar CHANGES SHAPE when themed (09-team-info.css:31) and carries Away/Home + the Game Notes button — a page masthead, not a section head. Its band recipe must still match H1's
-.is-themed .abs__title, .is-themed .halfdefense__title	band	band	H1	themed ABS + defence bands (box score + innings). Allowlisted. SEAL SCOPE
-.lineupteam.is-themed .lineupteam__name	band	band	H1	a PER-TEAM band inside the entering-lineup card — two bands in one card, each its own club. Allowlisted. SectionHead must allow a band that is not the card's first row
-.roster.is-themed .roster__toggle	band	band	H1	the roster drawer's band IS a <button> (it opens the drawer). Allowlisted. SectionHead needs as="button", or the toggle stays bespoke
 .brewblurb__title	label	label	H2	a small title inside the What's Brewing modal blurb
 .pregameboard__title	bespoke	title	-	the pre-game scoreboard's own title (PregameScoreboard.jsx) — part of a scoreboard graphic. SEAL SCOPE
 .abs__title	band	band	H1	undressed navy+kraft band on the ABS block. Allowlisted (12-sealbox.css). SEAL SCOPE
@@ -23,16 +21,13 @@
 .statbox__title	band	band	H1	statbox band. Allowlisted. SEAL SCOPE
 .dueup__title	band	band	H1	due-up band. Allowlisted
 .lineupcard__title	band	band	H1	entering-lineup band. Allowlisted. Renames with .lineupcard → .entering (the allowlist names it)
-.lineupteam__name	band	band	H1	per-team sub-band inside the lineup card (unthemed form). Allowlisted
 .halfdefense__title	band	band	H1	defence band. Allowlisted
-.roster__toggle	band	band	H1	roster drawer band-as-button (unthemed form). Allowlisted (13-play-by-play.css)
 .szmodal__eyebrow	note	kicker	H3	ledger: → .szmodal__note ("Pitch zone")
 .umpmodal__eyebrow	note	kicker	H3	ledger: → .umpmodal__note ("Plate accuracy")
 .sheet__title	title-keep	title	-	the bottom-sheet title (14 sheets) — modals stay bespoke (ADR-0037)
 .idlabhint__title	lab	title	-	identity lab hint modal title
 17-identity-lab-workbench.css:.idlab__barmock	lab	band	-	identity lab mock of the band (allowlisted: "previews the real one"). When H1 changes the band's recipe, this mock must follow
 17-identity-lab-workbench.css:.idlab__barmock__title	lab	title	-	title inside the lab's band mock
-.winprob__head	band	band	H1	win-probability band. Allowlisted (20-charts.css)
 .winprob__title	band	band	H1	the title text INSIDE .winprob__head — the band's title slot, not a second head
 .marginnotes__title	band	band	H1	margin-notes band. Allowlisted. SEAL SCOPE
 .pitchers__title	band	band	H1	Pitchers band. Allowlisted. SEAL SCOPE (ADR-0009 gates the table, not the head)

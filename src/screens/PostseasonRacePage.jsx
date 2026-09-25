@@ -36,7 +36,7 @@ function LeagueBar({ league }) {
       as="h2"
       logo={
         markId ? (
-          <TeamLogo teamId={markId} name={league.name} variant="mono" crop="bar" className="metricbar__logo" />
+          <TeamLogo teamId={markId} name={league.name} variant="mono" crop="bar" className="sectionhead__mark" />
         ) : null
       }
     />

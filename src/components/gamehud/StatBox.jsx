@@ -74,7 +74,7 @@ export function StatBox({
   if (!revealed && placeholder) return null
   return (
     <div className={`statbox ${className}`} key={`${inning}-${half}`}>
-      <h3 className="statbox__title">Insights</h3>
+      <h3 className="statbox__title sectionhead--band sectionhead--house">Insights</h3>
       <SealBox forceRevealed={revealed} coverless>
         {() => {
           // R/H/LOB are the batting side's; E is a *fielding* stat, so it
@@ -182,7 +182,7 @@ function AbsChallengesCard({ challenges, awayAbbr, homeAbbr }) {
   if (!challenges) return null
   return (
     <div className="abs">
-      <span className="abs__title">ABS challenges</span>
+      <span className="abs__title sectionhead--band">ABS challenges</span>
       <div className="abs__rows">
         <AbsRow teamId={challenges.away.teamId} abbr={awayAbbr || 'AWAY'} outcomes={challenges.away.outcomes} />
         <AbsRow teamId={challenges.home.teamId} abbr={homeAbbr || 'HOME'} outcomes={challenges.home.outcomes} />

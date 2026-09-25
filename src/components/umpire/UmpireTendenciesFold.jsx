@@ -35,7 +35,7 @@ export function UmpireTendenciesFold({ feed }) {
 
   return (
     <section className="roster umptendfold">
-      <button className="roster__toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+      <button className="roster__toggle sectionhead--band sectionhead--house" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         <span className="roster__club">Umpire tendencies</span>
         <span className="roster__chevron" aria-hidden="true">
           {open ? '▾' : '▸'}
