@@ -29,6 +29,14 @@
   /* Focus ring */
   --ring: 0 0 0 3px rgba(47,110,79,0.35);
 
+  /* The ink halo of the band ring (#1215, --focus-ring-band in colors.css).
+     The paper outline is --bw-heavy wide and --bw-heavy off the control, so
+     it ends 2 x --bw-heavy out; the halo reaches 3 x. That is one --bw-heavy
+     of ink outside the paper ring, and ink in the gap inside it. A control
+     whose :active press is an inset box-shadow writes both in one value on
+     :focus-visible:active, so neither erases the other. */
+  --ring-band: 0 0 0 calc(var(--bw-heavy) * 3) var(--focus-ring-band-halo);
+
   /* A control that cannot be used right now (#1130). One value for every
      disabled button, where there were four (.4, .55, .6 and a repaint): the
      skin stays, so the reader still sees WHICH control it is, and only its

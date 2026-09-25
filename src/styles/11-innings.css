@@ -76,6 +76,21 @@
 .innings__notes {
   flex: none;
 }
+/* On a themed lineup page the team head is the club's bar, and on the team
+   hub the hero wears the club's tile colour. The green ring sits on that
+   colour and falls under 3:1, so there it is the two-colour band ring
+   (#1215): a paper outline with an ink halo. The Button keeps the ring's
+   width, style and offset. Focused and pressed, one box-shadow carries the
+   Button's press inset and the halo. test/band-focus-ring.test.js holds it. */
+.teaminfo.is-themed > .teaminfo__head .innings__notes:focus-visible,
+.team-hub__id .innings__notes:focus-visible {
+  outline-color: var(--focus-ring-band);
+  box-shadow: var(--ring-band);
+}
+.teaminfo.is-themed > .teaminfo__head .innings__notes:focus-visible:active,
+.team-hub__id .innings__notes:focus-visible:active {
+  box-shadow: var(--inset-cell), var(--ring-band);
+}
 
 /* What's Brewing sheet — the Brewers' Game notes button opens this instead of
    jumping straight to the PDF: the parsed narrative blurbs as scrollable text,

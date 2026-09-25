@@ -43,7 +43,7 @@
   font-weight: var(--w-bold);
 }
 .trec__half:focus-visible {
-  outline: var(--focus-ring);
+  outline: var(--bw-heavy) solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -130,7 +130,7 @@ button.tstatrow__k.trec__rank,
   gap: 2px;
 }
 .trec__rank:focus-visible {
-  outline: var(--focus-ring);
+  outline: var(--bw-heavy) solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -209,7 +209,7 @@ button.tstatrow__k.trec__rank,
   cursor: default;
 }
 .trecinn__cell:focus-visible {
-  outline: var(--focus-ring);
+  outline: var(--bw-heavy) solid var(--focus-ring);
   outline-offset: 2px;
 }
 .trecinn__rec {

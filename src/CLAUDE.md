@@ -445,7 +445,7 @@ Type size, weight, leading, and tracking must use the semantic roles in
 `tokens/typography.css`; `scripts/check-typography.mjs` rejects ad hoc values. Small
 text is split BY JOB: `--fs-label` 12px display labels, `--fs-cell` 11px mono figures,
 `--fs-small` 13px running copy; `--fs-caption` is short body-face text only, and
-`scripts/check-caption-budget.mjs` only ever lets its count shrink. Focus rings use `var(--focus-ring)`/`var(--ring)` (`check-focus-ring.mjs`); text-on-
+`scripts/check-caption-budget.mjs` only ever lets its count shrink. Focus rings use `var(--focus-ring)`/`var(--ring)`, on a band `--focus-ring-band`+`--ring-band` (`check-focus-ring.mjs`); text-on-
 background pairings hold WCAG AA (`check-contrast.mjs`) — ADR-0023. The ALL-CAPS
 invariant (`src/styles/01-base.css`) is guarded by `scripts/check-caps.mjs` and
 `scripts/check-name-casing.mjs` (no per-component `.toUpperCase()`; ADR-0017).

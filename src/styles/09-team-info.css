@@ -277,6 +277,19 @@
   --pill-fill-hover: var(--surface-inset);
   --pill-edge-hover: var(--text-caption);
 }
+/* The ring sits 2px off the chip, on the club's colour, where the green ring
+   falls under 3:1. On the band it is the two-colour band ring (#1215): a
+   paper outline with an ink halo. The Pill keeps the ring's width, style and
+   offset; the band sets its colour and the halo. Focused and pressed, the one
+   box-shadow carries the Pill's press inset and the halo.
+   test/band-focus-ring.test.js holds it. */
+.team-hub.is-themed .psodds-pill:focus-visible {
+  outline-color: var(--focus-ring-band);
+  box-shadow: var(--ring-band);
+}
+.team-hub.is-themed .psodds-pill:focus-visible:active {
+  box-shadow: var(--inset-cell), var(--ring-band);
+}
 .team-hub.is-themed .roster-super__toggle {
   border-color: var(--border-rule);
 }

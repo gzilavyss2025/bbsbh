@@ -196,6 +196,12 @@ export const PAIRINGS = [
   // The focus ring is an outline OFF the box, so it lands on whatever the
   // button sits on — the canvas (asserted above) or a card.
   { fg: 'focus-ring', bg: 'surface-card', min: UI, note: 'focus ring on a raised card' },
+  // The band ring (#1215): on a coloured band the ring is a paper outline with
+  // an ink halo. Each ring colour against the other, and the paper ring on the
+  // house navy masthead. A club's bar is not a token; every landed bar and
+  // hero tile is checked in test/band-focus-ring.test.js.
+  { fg: 'focus-ring-band', bg: 'focus-ring-band-halo', min: UI, note: 'band focus ring, paper against its ink halo' },
+  { fg: 'focus-ring-band', bg: 'navy', min: UI, note: 'band focus ring on the house navy masthead' },
   // A pinned pairing earns its place here for one of two failure classes this
   // checker cannot see on its own, since it only ever compares TOKENS: a token
   // used in a new role nobody asserted before, or an ALPHA laid over an

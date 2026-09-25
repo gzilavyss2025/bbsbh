@@ -6,6 +6,13 @@
 //     token in tokens/colors.css)
 //   - inset box-shadow rings use  box-shadow: var(--ring)  (the full shadow
 //     token in tokens/effects.css)
+//   - on a COLOURED BAND (a club's bar, the navy masthead, a hero tile) the
+//     ring is two colours (#1215): outline-color: var(--focus-ring-band) and
+//     box-shadow: var(--ring-band), plus var(--inset-cell) beside it on
+//     :focus-visible:active, so a focused and pressed control shows both
+//
+// It also fails an `outline` shorthand that names a colour and no style
+// (`outline: var(--focus-ring)`): the style is then none and no ring draws.
 //
 // A `:focus-visible` rule may also indicate focus WITHOUT a ring — by reusing
 // its own :hover treatment (a border-color/background/transform change). Those
@@ -87,17 +94,38 @@ for (const { rel, raw } of sheets) {
     const line = lineAt(bodyStart + decl.index)
     if (/focus-ring-exempt/i.test(rawLines[line - 1] ?? '')) continue
 
+    // An `outline` shorthand that names a colour but no style sets the style
+    // to none, so NO ring draws — and it still names var(--focus-ring), so
+    // the token test below alone passed it. #1215 found seven such rules.
+    const noStyle =
+      prop === 'outline' &&
+      !/^(none|0|transparent)$/.test(value) &&
+      !/\b(solid|dashed|dotted|double|groove|ridge|inset|outset|auto)\b/.test(value)
+    if (noStyle) {
+      errors.push(
+        `${rel}:${line}: outline: ${value}; — a colour with no style, so the outline style ` +
+          'is none and no ring draws. Use outline: <width> solid var(--focus-ring)',
+      )
+      continue
+    }
+
+    // box-shadow: the ring token, or on a coloured band the band halo
+    // (--ring-band, #1215). A control whose :active press is an inset
+    // box-shadow may list --inset-cell beside the ring, so a focused and
+    // pressed control shows both; the inset alone is not a ring.
+    const shadowParts = value.split(',').map((part) => part.trim())
     const ok =
       prop === 'box-shadow'
-        ? /^var\(--ring\)$/.test(value)
+        ? shadowParts.every((part) => /^var\(--(ring|ring-band|inset-cell)\)$/.test(part)) &&
+          shadowParts.some((part) => /^var\(--(ring|ring-band)\)$/.test(part))
         : value === 'none' ||
           value === 'transparent' ||
-          value.includes('var(--focus-ring)')
+          /var\(--focus-ring(-band)?\)/.test(value)
 
     if (!ok) {
       const fix =
         prop === 'box-shadow'
-          ? 'use box-shadow: var(--ring)'
+          ? 'use box-shadow: var(--ring) (or var(--ring-band) on a coloured band)'
           : 'use outline: <width> solid var(--focus-ring)'
       errors.push(
         `${rel}:${line}: ${prop}: ${value}; — ${fix} ` +
@@ -117,4 +145,4 @@ if (errors.length) {
   process.exit(1)
 }
 
-console.log('✓ FOCUS-RING invariant holds — every focus ring uses var(--focus-ring)/var(--ring).')
+console.log('✓ FOCUS-RING invariant holds — every focus ring uses the shared ring tokens and draws.')
