@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-26T13:06:52.760Z",
+  "generatedAt": "2026-09-27T14:00:17.822Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -60,7 +60,7 @@
       "team": "sea",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "125.2 IP, 1.86 ERA, 163 SO",
+      "statLine": "129.0 IP, 1.81 ERA, 167 SO",
       "age": 22,
       "number": "13"
     },
@@ -156,7 +156,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".301, 18 HR, 41 RBI",
+      "statLine": ".298, 18 HR, 41 RBI",
       "age": 21,
       "number": "11"
     },
@@ -252,7 +252,7 @@
       "team": "sd",
       "position": "C",
       "levelRaw": "ALL (3)",
-      "statLine": ".290, 12 HR, 66 RBI",
+      "statLine": ".292, 12 HR, 66 RBI",
       "age": 20,
       "number": "8"
     },
@@ -372,7 +372,7 @@
       "team": "min",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".272, 17 HR, 57 RBI",
+      "statLine": ".273, 17 HR, 57 RBI",
       "age": 23,
       "number": "12"
     },
@@ -504,7 +504,7 @@
       "team": "sea",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".285, 19 HR, 85 RBI",
+      "statLine": ".288, 19 HR, 85 RBI",
       "age": 21,
       "number": "96"
     },
@@ -624,7 +624,7 @@
       "team": "sea",
       "position": "RF",
       "levelRaw": "ALL (3)",
-      "statLine": ".245, 42 HR, 106 RBI",
+      "statLine": ".246, 42 HR, 107 RBI",
       "age": 21,
       "number": "99"
     },
@@ -655,7 +655,7 @@
     {
       "rank": 56,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -745,7 +745,7 @@
       "position": "SS",
       "levelRaw": "A",
       "statLine": ".220, 4 HR, 17 RBI",
-      "age": 18,
+      "age": 19,
       "number": null
     },
     {
@@ -1140,7 +1140,7 @@
       "team": "stl",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".281, 20 HR, 95 RBI",
+      "statLine": ".278, 20 HR, 95 RBI",
       "age": 22,
       "number": "13"
     },
@@ -1742,7 +1742,7 @@
       "team": "ari",
       "position": "RHP",
       "levelRaw": "ALL (3)",
-      "statLine": "124.1 IP, 4.99 ERA, 121 SO",
+      "statLine": "125.2 IP, 5.30 ERA, 123 SO",
       "age": 24,
       "topRank": null
     },
@@ -1905,7 +1905,7 @@
     {
       "orgRank": 7,
       "playerId": 801725,
-      "name": "Luis De Leon",
+      "name": "Luis De León",
       "teamId": 110,
       "team": "bal",
       "position": "LHP",
@@ -3627,7 +3627,7 @@
       "position": "RHP",
       "levelRaw": "A+",
       "statLine": "20.2 IP, 5.23 ERA, 31 SO",
-      "age": 23,
+      "age": 24,
       "topRank": null
     },
     {
@@ -4262,7 +4262,7 @@
       "team": "hou",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".232, 16 HR, 71 RBI",
+      "statLine": ".234, 17 HR, 73 RBI",
       "age": 23,
       "topRank": null
     },
@@ -5786,7 +5786,7 @@
       "team": "oak",
       "position": "3B",
       "levelRaw": "ALL (3)",
-      "statLine": ".330, 8 HR, 48 RBI",
+      "statLine": ".329, 8 HR, 48 RBI",
       "age": 23,
       "topRank": null
     },
@@ -5942,7 +5942,7 @@
       "team": "oak",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "71.2 IP, 7.41 ERA, 89 SO",
+      "statLine": "74.0 IP, 7.66 ERA, 91 SO",
       "age": 27,
       "topRank": null
     },
@@ -6374,7 +6374,7 @@
       "team": "sd",
       "position": "C",
       "levelRaw": "ALL (3)",
-      "statLine": ".290, 12 HR, 66 RBI",
+      "statLine": ".292, 12 HR, 66 RBI",
       "age": 20,
       "topRank": 21
     },
@@ -6710,7 +6710,7 @@
       "team": "sea",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "125.2 IP, 1.86 ERA, 163 SO",
+      "statLine": "129.0 IP, 1.81 ERA, 167 SO",
       "age": 22,
       "topRank": 5
     },
@@ -6734,7 +6734,7 @@
       "team": "sea",
       "position": "SS",
       "levelRaw": "ALL (3)",
-      "statLine": ".285, 19 HR, 85 RBI",
+      "statLine": ".288, 19 HR, 85 RBI",
       "age": 21,
       "topRank": 42
     },
@@ -6758,7 +6758,7 @@
       "team": "sea",
       "position": "RF",
       "levelRaw": "ALL (3)",
-      "statLine": ".245, 42 HR, 106 RBI",
+      "statLine": ".246, 42 HR, 107 RBI",
       "age": 21,
       "topRank": 53
     },
@@ -7118,7 +7118,7 @@
       "team": "sf",
       "position": "LF",
       "levelRaw": "ALL (3)",
-      "statLine": ".291, 29 HR, 94 RBI",
+      "statLine": ".293, 29 HR, 95 RBI",
       "age": 24,
       "topRank": null
     },
@@ -7346,7 +7346,7 @@
       "team": "sf",
       "position": "LHP",
       "levelRaw": "ALL (5)",
-      "statLine": "114.2 IP, 3.45 ERA, 114 SO",
+      "statLine": "117.2 IP, 3.44 ERA, 116 SO",
       "age": 23,
       "topRank": null
     },
@@ -7358,7 +7358,7 @@
       "team": "sf",
       "position": "LF",
       "levelRaw": "ALL (3)",
-      "statLine": ".315, 13 HR, 94 RBI",
+      "statLine": ".313, 13 HR, 94 RBI",
       "age": 25,
       "topRank": null
     },
@@ -7389,7 +7389,7 @@
     {
       "orgRank": 3,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -7406,7 +7406,7 @@
       "team": "stl",
       "position": "C",
       "levelRaw": "ALL (2)",
-      "statLine": ".281, 20 HR, 95 RBI",
+      "statLine": ".278, 20 HR, 95 RBI",
       "age": 22,
       "topRank": 99
     },
@@ -7454,7 +7454,7 @@
       "team": "stl",
       "position": "LHP",
       "levelRaw": "ALL (2)",
-      "statLine": "143.1 IP, 3.39 ERA, 159 SO",
+      "statLine": "148.1 IP, 3.46 ERA, 166 SO",
       "age": 25,
       "topRank": null
     },
@@ -7766,7 +7766,7 @@
       "team": "tb",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "98.1 IP, 5.22 ERA, 128 SO",
+      "statLine": "99.1 IP, 5.16 ERA, 129 SO",
       "age": 24,
       "topRank": null
     },
@@ -7802,7 +7802,7 @@
       "team": "tb",
       "position": "RHP",
       "levelRaw": "ALL (2)",
-      "statLine": "69.0 IP, 3.13 ERA, 95 SO",
+      "statLine": "70.0 IP, 3.09 ERA, 95 SO",
       "age": 25,
       "topRank": null
     },
@@ -8379,7 +8379,7 @@
       "position": "3B",
       "levelRaw": "A",
       "statLine": ".213, 7 HR, 43 RBI",
-      "age": 18,
+      "age": 19,
       "topRank": null
     },
     {
@@ -8595,7 +8595,7 @@
       "position": "C",
       "levelRaw": "ALL (3)",
       "statLine": ".300, 11 HR, 58 RBI",
-      "age": 21,
+      "age": 22,
       "topRank": null
     },
     {
@@ -8641,8 +8641,8 @@
       "teamId": 141,
       "team": "tor",
       "position": "RHP",
-      "levelRaw": "ALL (3)",
-      "statLine": "90.2 IP, 6.25 ERA, 97 SO",
+      "levelRaw": "ALL (4)",
+      "statLine": "94.2 IP, 5.99 ERA, 102 SO",
       "age": 24,
       "topRank": null
     },
@@ -8666,7 +8666,7 @@
       "team": "min",
       "position": "CF",
       "levelRaw": "ALL (4)",
-      "statLine": ".301, 18 HR, 41 RBI",
+      "statLine": ".298, 18 HR, 41 RBI",
       "age": 21,
       "topRank": 13
     },
@@ -8690,7 +8690,7 @@
       "team": "min",
       "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": ".272, 17 HR, 57 RBI",
+      "statLine": ".273, 17 HR, 57 RBI",
       "age": 23,
       "topRank": 31
     },
@@ -9339,7 +9339,7 @@
       "position": "RHP",
       "levelRaw": "ALL (3)",
       "statLine": "129.1 IP, 3.83 ERA, 130 SO",
-      "age": 22,
+      "age": 23,
       "topRank": null
     },
     {
@@ -9855,7 +9855,7 @@
       "position": "SS",
       "levelRaw": "A",
       "statLine": ".220, 4 HR, 17 RBI",
-      "age": 18,
+      "age": 19,
       "topRank": 64
     },
     {
@@ -10149,7 +10149,7 @@
     {
       "orgRank": 2,
       "playerId": 695684,
-      "name": "Elmer Rodriguez",
+      "name": "Elmer Rodríguez",
       "teamId": 147,
       "team": "nyy",
       "position": "RHP",
