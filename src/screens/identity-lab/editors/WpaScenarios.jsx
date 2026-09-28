@@ -35,7 +35,7 @@ const WPA_MOCK_SCENARIOS = [
 // `headerColors` (this treatment's resolved Header colors, shared with
 // HeaderPreview so the two can't drift) recolors each mockup's OWN real
 // .winprob__head bar, not a second fake header: WinProbChart's header reads the
-// plain --navy/--seal/--text-on-ink tokens, and CSS custom properties cascade,
+// plain --navy/--band-rule/--text-on-ink tokens, and CSS custom properties cascade,
 // so setting those three as inline style on this wrapper overrides them for
 // everything inside it without touching the real tokens (or any other chart on
 // the page).
@@ -54,7 +54,7 @@ export function WpaScenarios({
   return (
     <div
       className="colorlab__wpascenarios"
-      style={{ '--navy': headerColors.bar, '--seal': headerColors.accent, '--text-on-ink': headerColors.onBar }}
+      style={{ '--navy': headerColors.bar, '--band-rule': headerColors.accent, '--text-on-ink': headerColors.onBar }}
     >
       {/* Says whose the away band is, so the mockup's realism is explained
           rather than read as an arbitrary second club. */}

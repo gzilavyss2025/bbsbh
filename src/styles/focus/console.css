@@ -449,7 +449,7 @@
    its own @media block below scales the card's content up to fill it, rather
    than leaving 246px-card-sized text stranded in a full-width bar.
 
-   Navy ground under a kraft rule, deliberately the masthead signature
+   Navy ground under the band rule (--band-rule), deliberately the masthead signature
    .half__title already carries, so the band and the half's own title bar read
    as siblings rather than as a floating chip from somewhere else.
 
@@ -461,7 +461,7 @@
    header for the full note. */
 .gamehud--console {
   width: 100%;
-  border-bottom: 3px solid var(--seal);
+  border-bottom: 3px solid var(--band-rule);
   /* The band holds its height even when it has nothing to say. Once the half's
      3rd out lands nobody is up, Scorebug drops both the batter and pitcher rows
      (its `blank`), and without this floor the band collapsed by ~50px and

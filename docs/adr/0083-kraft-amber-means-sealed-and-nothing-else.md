@@ -171,3 +171,27 @@ attached — and worse, because a measurement looks checked. So the third half o
   fifty comments across `src/styles/` that described a kraft rule now describe
   what the rule actually paints. A comment that lies about a colour is how the
   colour drifted in the first place.
+
+## Amendment (2026-09-28, #1151): the club band leaves kraft
+
+The step the second Consequence expected was taken. The club band's 3px
+underline was the one family on the allowlist that wore kraft with no reveal,
+and the #1150 crawl found it rendering as kraft on an unthemed page
+(`/salaries`). So the fourth surface in clause 4 is now three: the `@`
+watermark, the Last 10 home-game ticket, and the pencilled-in option year.
+
+- A new token, `--band-rule` (`var(--border-rule)`, a pencil rule), is the
+  line under every band that no club has coloured: the unthemed fallback of
+  the club band (`var(--bar-accent, var(--band-rule))`), the house band, the
+  focus-mode game HUD, the pitch slab's head and heat footer, and the identity
+  lab's two band mocks.
+- A themed band is unchanged: its line is still the club's accent (ADR-0030),
+  and the fallback never fires there.
+- This reverses answer 2 of #1113's design decisions (2026-09-24), which kept
+  the unthemed band as navy with a kraft line. Gary chose #1151 over it on
+  2026-09-28.
+- The OG share poster (`src/lib/preview/posterHead.js`, `posterInk.js`) still
+  paints its band edge in kraft on a canvas. It is outside `src/styles/` and
+  outside this change.
+- `scripts/check-seal-scope.mjs` lost the seven band selectors and the
+  identity lab's inline `--seal` override, which now sets `--band-rule`.

@@ -7,9 +7,9 @@
 //      rule that places a head (a bleed, a corner) still wins on order.
 //   2. ONE BAND. The six selectors that each painted the club band are gone,
 //      from the stylesheets and from the markup, and the band is drawn once.
-//   3. THE FALLBACKS. With no club, the band is the house navy with a kraft
-//      line; a club head is a plain label and never falls back to navy or
-//      kraft (#1113 Q2: both unthemed faces stay as they are).
+//   3. THE FALLBACKS. With no club, the band is the house navy with a
+//      pencil-rule line (--band-rule; kraft until #1151, ADR-0083); a club
+//      head is a plain label and never falls back to navy or kraft.
 //   4. THE HELPER. Label is the default; an unknown look and a band switch
 //      on a quiet look are refused, not drawn as something else.
 //   6. THE QUIET LOOKS. The label and the rule never read a club colour or
@@ -126,22 +126,22 @@ test('the band is drawn once: only system/section-head.css reads --bar-fill for 
 
 // ---- 3. the fallbacks ----
 
-test('with no club, the band is the house navy with a kraft line', () => {
+test('with no club, the band is the house navy with a pencil-rule line, not kraft (#1151)', () => {
   const band = ruleBody(read('system/section-head.css'), '.sectionhead--band')
   assert.equal(decl(band, '--band-fill'), 'var(--bar-fill, var(--navy))')
-  assert.equal(decl(band, '--band-accent'), 'var(--bar-accent, var(--seal))')
+  assert.equal(decl(band, '--band-accent'), 'var(--bar-accent, var(--band-rule))')
   assert.equal(decl(band, '--band-text'), 'var(--bar-text, var(--text-on-ink))')
   assert.equal(decl(band, 'background'), 'var(--band-fill)')
   assert.equal(decl(band, 'border-bottom'), '3px solid var(--band-accent)')
   assert.equal(decl(band, 'color'), 'var(--band-text)')
 })
 
-test('the house band is navy and kraft whatever club the page wears', () => {
+test('the house band is navy and the pencil rule whatever club the page wears', () => {
   // Two classes, so it beats the band's own --band-* defaults in any order.
   const house = ruleBody(read('system/section-head.css'), '.sectionhead--band.sectionhead--house')
   assert.ok(house, 'a .sectionhead--band.sectionhead--house rule')
   assert.equal(decl(house, '--band-fill'), 'var(--navy)')
-  assert.equal(decl(house, '--band-accent'), 'var(--seal)')
+  assert.equal(decl(house, '--band-accent'), 'var(--band-rule)')
   assert.equal(decl(house, '--band-text'), 'var(--text-on-ink)')
   assert.doesNotMatch(house, /--bar-/, 'the house band reads no club colour (ADR-0030)')
 })
@@ -507,4 +507,28 @@ test('the leader card grid lets its columns shrink below the widest row', () => 
   const columns = [...css.matchAll(/\.tlead__grid\s*\{([^}]*)\}/g)].map((m) => decl(m[1], 'grid-template-columns'))
   assert.equal(columns.length, 2, 'the phone rule and the 560px rule')
   for (const value of columns) assert.doesNotMatch(value.replaceAll('minmax(0, 1fr)', ''), /1fr/, `.tlead__grid uses a bare 1fr track (${value}); write minmax(0, 1fr)`)
+})
+
+// Kraft means "sealed" and nothing else (ADR-0083). A band's underline lifts no
+// seal, so no band reads the seal: not the house band, not an unthemed club
+// band, not the game HUD, not the pitch slab, not the identity lab's mocks
+// (#1151). Their line is --band-rule, a pencil rule.
+test('no band underline reads the seal', () => {
+  const tokens = readFileSync(join(SRC, 'tokens', 'colors.css'), 'utf8')
+  assert.match(tokens, /--band-rule:\s*var\(--border-rule\);/)
+  const bands = [
+    ['system/section-head.css', '.sectionhead--band'],
+    ['system/section-head.css', '.sectionhead--band.sectionhead--house'],
+    ['focus/console.css', '.gamehud--console'],
+    ['69-pitch-arsenal.css', '.pitchslab__head'],
+    ['69-pitch-arsenal.css', '.pitchslab__heat'],
+    ['17-identity-lab-workbench.css', '.idlab__barmock'],
+    ['62-identity-admin.css', '.idlab__barmock'],
+  ]
+  for (const [rel, sel] of bands) {
+    const body = ruleBody(read(rel), sel)
+    assert.ok(body, `${rel} should still have ${sel}`)
+    assert.doesNotMatch(body, /--seal/, `${sel} in ${rel} reads the seal`)
+    assert.match(body, /--band-rule/, `${sel} in ${rel} should draw its line in --band-rule`)
+  }
 })
