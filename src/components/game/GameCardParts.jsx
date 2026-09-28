@@ -90,8 +90,8 @@ export function PostseasonLine({ lines }) {
   )
 }
 
-// The postponed treatment: a kraft-tape strip under the matchup carrying a
-// rubber-stamped "POSTPONED", the cause ("Inclement Weather"), and — once MLB
+// The called-off treatment: a kraft-tape strip under the matchup carrying a
+// rubber-stamped "POSTPONED" or "CANCELLED" (status.label), the cause ("Inclement Weather"), and — once MLB
 // has set one — the make-up date the game moved to (rescheduleGameDate, a
 // spoiler-free calendar date, never a score). Replaces both the corner delay
 // pill and the readiness strip: neither applies to a game that isn't happening.
@@ -99,7 +99,7 @@ export function PostponedBanner({ game, status }) {
   const makeup = rescheduleLabel(game)
   return (
     <div className="postponed" role="status">
-      <span className="postponed__stamp">Postponed</span>
+      <span className="postponed__stamp">{status.label}</span>
       {(status.reason || makeup) && (
         <span className="postponed__lines">
           {status.reason && (

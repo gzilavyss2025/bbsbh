@@ -70,12 +70,12 @@ export function GameCard({
 }) {
   const live = game.abstractState === 'Live'
   const status = selectGameStatus(game)
-  // A postponed game gets its own stamped treatment (see PostponedBanner) rather
+  // A postponed or cancelled game gets its own stamped treatment (see PostponedBanner) rather
   // than the corner pill — and, critically, is never wrapped in the past-day
   // flip card (see GameSelect), whose rotated back face made an absolutely-
   // positioned corner pill leak through mirrored on iOS. There's also no result
   // to reveal: the game didn't happen.
-  const postponed = status.isPostponed
+  const postponed = status.isCalledOff
   // One flag for what the Scores Unlocked line displaces while it's showing:
   // the corner Final text, relocated into its center slot. Pre-game cards
   // keep the corner text: no line renders before first pitch. (The readiness

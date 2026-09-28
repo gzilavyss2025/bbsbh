@@ -57,6 +57,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | fouls.test.js | 16 | scripts/gen-fouls.mjs, src/api/fouls.js | Foul Tracker stats/leaderboards |
 | fresh-pitcher.test.js | 4 | src/api/select.js | selectIsFreshPitcher |
 | game-feed-diff.test.js | 6 | src/api/game.js | mergeFeedDiff |
+| game-status-called-off.test.js | 6 | src/api/select.js | A game called off (postponed OR cancelled) reports Final with no result behind it (#1248): `selectGameStatus`'s `isCalledOff`/`Cancelled` label and `selectHasResult`, which the slate's result-face flip gates on |
 | game-notes-regressions.test.js | 3 | src/api/whatsBrewing.js | "What's Brewing" / Game Notes extraction |
 | game-photos.test.js | 20 | src/api/gamePhotos.js | /photos page: photographer/broadcast/graphic classification + subject attribution (unsealed, non-spoiler) |
 | gidp-full-chain.test.js | 4 | src/api/playbyplay.js, src/api/scorecardGame.js | Full relay-chain double-play display |

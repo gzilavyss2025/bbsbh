@@ -17,7 +17,7 @@ import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.j
 import { offDayAliveTeams } from '../lib/postseason/bracketDisplay.js'
 import { cardLines } from '../api/postseason/text.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
-import { selectGameStatus } from '../api/select.js'
+import { selectGameStatus, selectHasResult } from '../api/select.js'
 import { GameCard } from '../components/game/GameCard.jsx'
 import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
 import { PastGameFlipCard } from '../components/game/PastGameFlipCard.jsx'
@@ -470,8 +470,8 @@ export function GameSelect({
   // gone Final — at that point there's no more live refreshing to do, so it's
   // effectively already a "day you're looking back on". Before that (any game
   // still in Preview/Live), today keeps the ordinary live-refresh slate.
-  // A postponed game reports abstractGameState 'Final' (coded 'D') but has no
-  // result to reveal, so it's excluded from the flip-card set, the day recap,
+  // A postponed or cancelled game reports abstractGameState 'Final' (coded
+  // 'D' / 'C') but has no result to reveal (#1248), so it's excluded from the flip-card set, the day recap,
   // AND the "every game Final" check below — a day with only a postponed game
   // never flips to the past-day treatment, since there's nothing to reveal.
   // A postponed game also reports abstractGameState 'Final' (see above), so
@@ -484,9 +484,7 @@ export function GameSelect({
   const finals = useMemo(
     () =>
       showPastDayTreatment
-        ? sorted.filter(
-            (g) => g.abstractState === 'Final' && !selectGameStatus(g).isPostponed,
-          )
+        ? sorted.filter(selectHasResult)
         : [],
     [sorted, showPastDayTreatment],
   )
@@ -1000,10 +998,7 @@ export function GameSelect({
                 // lazy loading (which would defer exactly the images the first
                 // paint is waiting on). Two cards ≈ one phone viewport.
                 const eager = idx < 2
-                const isPastFinal =
-                  showPastDayTreatment &&
-                  g.abstractState === 'Final' &&
-                  !selectGameStatus(g).isPostponed
+                const isPastFinal = showPastDayTreatment && selectHasResult(g)
                 // Suspended: a paused checkpoint (like a Final's box score) that still gets the ordinary GameCard, so it needs its own onBoxScore.
                 const isSuspended = selectGameStatus(g).isSuspended
                 const postseasonLine = postseasonBracket.bracket ? cardLines(g, postseasonBracket.bracket) : null
