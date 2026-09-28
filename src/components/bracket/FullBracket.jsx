@@ -1,137 +1,293 @@
-// The full bracket behind "Open the bracket" (#1224, slice 5) — Concept D's
-// picked look for it, Concept A's "back page": each league's Wild Card ->
-// Division -> Championship tree, boxes and connector lines, the World
-// Series centered below both. Every value comes from
+// The full bracket behind "Open the bracket" (#1224, slice 5) — Gary's
+// approved Concept D, built on Concept A's "back page": each league's Wild
+// Card -> Division -> LCS tree runs left to right in three columns, a
+// finished round shrinks to a compact strip, and elbow connector lines run
+// pencil-gray until a series is decided, then ink navy into the next round.
+// The World Series sits centered below both leagues. Every value comes from
 // src/api/postseason/bracket.js's derived shape (docs/api/postseason.md);
 // this file draws it and reads no feed of its own.
+//
+// Real data carries no seed number (the skeleton read never asks statsapi
+// for one — docs/api/postseason.md), so a box shows a club's mark, name and
+// pips, never a seed digit the way the reference concept's mock data could.
 import { useRouteLink } from '../../lib/nav.js'
 import { seriesHref } from '../../lib/route.js'
 import { recordLine } from '../../api/postseason/text.js'
-import { feederSeries, isBoldMoment, isDecidingGame } from '../../lib/postseason/bracketDisplay.js'
+import { humanDate } from '../../lib/dates.js'
+import {
+  byeSlotIndex,
+  feederSeries,
+  isDecidingGame,
+  isElimination,
+  leaguePhase,
+  winningSlotIndex,
+} from '../../lib/postseason/bracketDisplay.js'
 import { BlankSlot, ClubMark, Pips, Trophy } from './bracketParts.jsx'
-import { SectionMasthead } from '../ui/SectionMasthead.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 
-function ClubRow({ slot, series, bracket }) {
+const R = 26 // one club row
+const BOX = R * 2 // a two-row box, border drawn outside
+const GAP = 14
+const TREE_W = 358
+
+// Column widths by the league's current round: the active round is wide,
+// a finished one narrow, a future one in between (Concept A's own values).
+function columns(phase) {
+  if (phase === 'wildcard') return { wc: 124, ds: 104, lcs: 102 }
+  if (phase === 'division') return { wc: 64, ds: 148, lcs: 118 }
+  if (phase === 'lcs') return { wc: 64, ds: 84, lcs: 182 }
+  return { wc: 64, ds: 84, lcs: 94 } // done
+}
+
+// A connector's source point: the box's vertical middle unless it is both
+// compact AND decided, in which case it leaves from the winner's own row —
+// a compact box still draws both rows (winner plain, loser struck), so the
+// line has to pick one.
+function rowCenter(series, compact, top) {
+  const idx = winningSlotIndex(series)
+  if (idx === -1 || !compact) return top + R
+  return top + (idx === 0 ? R / 2 : R + R / 2)
+}
+
+// An elbow connector, bending at the middle x. Ink once the source series
+// is decided, pencil while it is still open — independent of compactness.
+function Elbow({ x1, y1, x2, y2, inked }) {
+  const mx = x1 + (x2 - x1) / 2
+  return <path d={`M${x1} ${y1} H${mx} V${y2} H${x2}`} className={inked ? 'pbkt-ink' : 'pbkt-pencil'} />
+}
+
+function BoxRow({ slot, series, bracket, compact, x, y, w }) {
+  const style = { left: x, top: y, width: w, height: R }
   if (!slot.club) {
     const feeder = feederSeries(bracket, slot.from)
-    // `feeder.label` ("NLDS 'A'") tells two same-round feeders apart; `name`
-    // alone ("NL Division Series") would name both of a league's feeders
-    // identically. Display only — nothing here wires by it (docs/api/postseason.md).
     const label = feeder ? `Winner of ${feeder.label || feeder.name}, to come` : 'To come'
     return (
-      <span className="pbkt-row pbkt-row--empty">
-        <ClubMark club={null} size={16} />
+      <div className="pbkt-trow pbkt-trow--empty" style={style}>
         <BlankSlot label={label} />
-      </span>
+      </div>
     )
   }
   const isOut = series.eliminated?.id === slot.club.id
+  const isWon = series.decided && series.winner.id === slot.club.id
   return (
-    <span className={`pbkt-row${isOut ? ' pbkt-row--out' : ''}`}>
-      <ClubMark club={slot.club} eliminated={isOut} size={16} />
-      <span className="pbkt-row__abbr">{slot.club.abbreviation}</span>
-      <Pips winsNeeded={series.winsNeeded} wins={slot.wins} />
-    </span>
+    <div className={`pbkt-trow${isOut ? ' pbkt-trow--out' : isWon ? ' pbkt-trow--won' : ''}`} style={style}>
+      <ClubMark club={slot.club} eliminated={isOut} size={compact ? 14 : 16} />
+      <span className="pbkt-trow__abbr">{slot.club.abbreviation}</span>
+      {!compact && <Pips winsNeeded={series.winsNeeded} wins={slot.wins} />}
+    </div>
   )
 }
 
-// The brief's one bold moment, or the plain "Today · Game N" note, for a
-// series playing on the cutoff date — null otherwise.
-function noteFor(series) {
-  if (!series.playsOnCutoff) return null
-  if (isBoldMoment(series)) return isDecidingGame(series) ? 'Winner take all' : 'One loss from out'
-  return `Today · Game ${series.cutoffGame.gameNumber}`
+// The brief's one bold moment, or a plain "Today · Game N" / "To the next
+// round" note. Shown for a deciding game even on a day it isn't played
+// (Concept A: a 2-2 series still reads "Winner take all", with its next
+// date, before the day it actually plays).
+function BoxNote({ series, nextRoundName, x, y, w }) {
+  if (series.decided) return null
+  const style = { left: x, top: y, width: w }
+  if (isDecidingGame(series)) {
+    const next = series.upcoming.find((u) => u.date)?.date
+    return (
+      <div className="pbkt-note" style={style}>
+        <span className="pbkt-marker">Winner take all</span>
+        {!series.playsOnCutoff && next && <span className="pbkt-when"> {humanDate(next).split(',')[0]}</span>}
+      </div>
+    )
+  }
+  if (series.playsOnCutoff) {
+    return (
+      <div className="pbkt-note" style={style}>
+        <span className="pbkt-today">Today · Game {series.cutoffGame.gameNumber}</span>
+        {isElimination(series) && <span className="pbkt-when"> · one from out</span>}
+      </div>
+    )
+  }
+  if (nextRoundName) {
+    return (
+      <div className="pbkt-note pbkt-when" style={style}>
+        To the {nextRoundName}
+      </div>
+    )
+  }
+  return null
 }
 
-// The whole box's screen-reader label — the round, each club's pips (the
-// brief's "Cubs 1 win, Brewers 0, best of 3"), and the note, all in one
-// string. `aria-label` on the wrapper replaces its visible content for
-// assistive tech, so the note has to be folded in here rather than left as a
-// sibling that would otherwise go unheard.
-function seriesLabel(series, note) {
-  const sides = series.slots
-    .map((slot) => (slot.club ? `${slot.club.name} ${slot.wins} ${slot.wins === 1 ? 'win' : 'wins'}` : 'to come'))
-    .join(', ')
-  const tail = note ? ` ${note}.` : ''
-  return `${series.name}. ${sides}, best of ${series.bestOf}.${tail}`
-}
-
-// One series box: two club rows and, playing today, a note — "Today · Game
-// N", or the brief's one bold moment ("Winner take all" / "One loss from
-// out"). A decided series shrinks to a one-line finished strip instead
-// (ADR-0087's theme: ink goes over the pencil once a series is settled).
-function SeriesBox({ series, bracket, cutoff, historyIds }) {
+// One series box: two club rows (full, or compact once its round is past),
+// and a note. Every series taps through with slice 3's `seriesHref`.
+function SeriesBox({ series, bracket, cutoff, historyIds, x, y, w, compact, note }) {
   const linkProps = useRouteLink()
   const href = series.id ? seriesHref(series, cutoff, historyIds) : null
   const Wrapper = href ? 'a' : 'div'
   const wrapperProps = href ? linkProps(href) : { role: 'group' }
-
-  if (series.decided) {
-    return (
-      <Wrapper className="pbkt-box pbkt-box--compact" aria-label={recordLine(series)} {...wrapperProps}>
-        <span className="pbkt-box__done">{recordLine(series)}</span>
-      </Wrapper>
-    )
-  }
-
-  const note = noteFor(series)
+  const sides = series.slots
+    .map((slot) => (slot.club ? `${slot.club.name} ${slot.wins} ${slot.wins === 1 ? 'win' : 'wins'}` : 'to come'))
+    .join(', ')
+  const label = series.decided
+    ? `${series.name}. ${recordLine(series)}.`
+    : `${series.name}. ${sides}, best of ${series.bestOf}.`
   return (
-    <Wrapper
-      className={`pbkt-box${isBoldMoment(series) ? ' pbkt-box--bold' : ''}`}
-      aria-label={seriesLabel(series, note)}
-      {...wrapperProps}
-    >
-      {series.slots.map((slot, i) => (
-        <ClubRow key={i} slot={slot} series={series} bracket={bracket} />
-      ))}
-      {note && <span className="pbkt-box__note">{note}</span>}
-    </Wrapper>
+    <>
+      <Wrapper
+        className={`pbkt-box${compact ? ' pbkt-box--compact' : ''}${isDecidingGame(series) ? ' pbkt-box--bold' : ''}${series.decided ? ' pbkt-box--done' : ''}`}
+        style={{ left: x, top: y, width: w, height: BOX }}
+        aria-label={label}
+        {...wrapperProps}
+      />
+      <BoxRow slot={series.slots[0]} series={series} bracket={bracket} compact={compact} x={x} y={y} w={w} />
+      <BoxRow slot={series.slots[1]} series={series} bracket={bracket} compact={compact} x={x} y={y + R} w={w} />
+      {note}
+    </>
   )
 }
 
 // One league's tree: Wild Card and Division side by side (a lane per
 // Division series, fed by whichever Wild Card series names it — never by
-// slot position), the Championship Series centered against both lanes.
-function LeagueBracket({ league, leagueId, name, bracket, cutoff, historyIds }) {
-  const { wildcard, division, lcs, byes } = league
-  const wcFor = (ds) => wildcard.find((w) => w.feeds === ds.key) ?? null
+// slot position), the LCS centered against both lanes.
+function League({ league, leagueId, name, roundName, bracket, cutoff, historyIds }) {
+  const phase = leaguePhase(league)
+  const c = columns(phase)
+  const xWC = 0
+  const xDS = c.wc + GAP
+  const xLCS = xDS + c.ds + GAP
+  const compactWC = phase !== 'wildcard'
+  const compactDS = phase === 'lcs' || phase === 'done'
+  const compactLCS = phase === 'done'
+  // Per half: the Division box at 0, the Wild Card box under it.
+  const HALF = 132
+  const halves = [0, HALF + 12]
+  const dsY = (h) => halves[h] + 16
+  const wcY = (h) => halves[h] + 16 + BOX + 14
+  const lcsY = (dsY(0) + dsY(1)) / 2 + R / 2
+  const H = halves[1] + HALF + 14
+  const wcFor = (ds) => league.wildcard.find((w) => w.feeds === ds.key) ?? null
+
+  const lanes = league.division.map((ds, h) => ({ ds, wc: wcFor(ds), h, bye: byeSlotIndex(ds) }))
+
   return (
     <section className="pbkt-league" aria-label={name}>
-      <SectionMasthead
-        title={name}
-        as="h3"
-        logo={<TeamLogo teamId={leagueId} name={name} variant="mono" crop="bar" className="sectionhead__mark" />}
-      />
-      {byes.length > 0 && (
-        <p className="pbkt-byes">
-          Bye: {byes.map((c) => c.abbreviation).join(', ')}
-        </p>
-      )}
-      <div className="pbkt-grid">
-        {division.map((ds) => {
-          const wc = wcFor(ds)
-          return (
-            <div className="pbkt-lane" key={ds.key}>
-              {wc && (
-                <div className="pbkt-cell pbkt-cell--wc">
-                  <SeriesBox series={wc} bracket={bracket} cutoff={cutoff} historyIds={historyIds} />
-                </div>
-              )}
-              <div className="pbkt-cell pbkt-cell--ds">
-                <SeriesBox series={ds} bracket={bracket} cutoff={cutoff} historyIds={historyIds} />
+      <header className="pbkt-lghead">
+        <TeamLogo teamId={leagueId} name={name} size={22} className="pbkt-mark" />
+        <h3 className="pbkt-lgname">{name}</h3>
+      </header>
+      <div className="pbkt-colheads" style={{ gridTemplateColumns: `${c.wc}px ${c.ds}px ${c.lcs}px` }}>
+        <span className={`pbkt-colhead${phase === 'wildcard' ? ' pbkt-colhead--now' : ''}`}>
+          Wild Card
+          <span className="pbkt-bestof">Best of 3</span>
+        </span>
+        <span className={`pbkt-colhead${phase === 'division' ? ' pbkt-colhead--now' : ''}`}>
+          Division
+          <span className="pbkt-bestof">Best of 5</span>
+        </span>
+        <span className={`pbkt-colhead${phase === 'lcs' || phase === 'done' ? ' pbkt-colhead--now' : ''}`}>
+          {roundName}
+          <span className="pbkt-bestof">Best of 7</span>
+        </span>
+      </div>
+      <div className="pbkt-tree" style={{ height: H, width: TREE_W }}>
+        <svg className="pbkt-lines" width={TREE_W} height={H} aria-hidden="true">
+          {lanes.map(({ ds, wc, h, bye }) => {
+            const dsFedRow = bye === 0 ? 1 : 0
+            return (
+              <g key={ds.key}>
+                {wc && (
+                  <Elbow
+                    x1={c.wc}
+                    y1={rowCenter(wc, compactWC, wcY(h))}
+                    x2={xDS}
+                    y2={dsY(h) + (dsFedRow === 0 ? R / 2 : R + R / 2)}
+                    inked={wc.decided}
+                  />
+                )}
+                {!compactWC && bye !== -1 && (
+                  <path
+                    d={`M${c.wc - 30} ${dsY(h) + (bye === 0 ? R / 2 : R + R / 2)} H${xDS}`}
+                    className="pbkt-pencil pbkt-dash"
+                  />
+                )}
+                <Elbow
+                  x1={xDS + c.ds}
+                  y1={rowCenter(ds, compactDS, dsY(h))}
+                  x2={xLCS}
+                  y2={lcsY + (h === 0 ? R / 2 : R + R / 2)}
+                  inked={ds.decided}
+                />
+              </g>
+            )
+          })}
+        </svg>
+        {lanes.map(({ ds, wc, h, bye }) => (
+          <div key={ds.key}>
+            {!compactWC && bye !== -1 && (
+              <div
+                className="pbkt-bye"
+                style={{ left: 0, top: dsY(h) + (bye === 1 ? R : 0), width: c.wc - 36, height: R }}
+              >
+                Bye
               </div>
-            </div>
-          )
-        })}
-        {lcs && (
-          <div className="pbkt-cell pbkt-cell--lcs">
-            <SeriesBox series={lcs} bracket={bracket} cutoff={cutoff} historyIds={historyIds} />
+            )}
+            {wc && (
+              <SeriesBox
+                series={wc}
+                bracket={bracket}
+                cutoff={cutoff}
+                historyIds={historyIds}
+                x={xWC}
+                y={wcY(h)}
+                w={c.wc}
+                compact={compactWC}
+                note={
+                  <BoxNote series={wc} nextRoundName="Division Series" x={xWC} y={wcY(h) + BOX + 2} w={c.wc} />
+                }
+              />
+            )}
+            <SeriesBox
+              series={ds}
+              bracket={bracket}
+              cutoff={cutoff}
+              historyIds={historyIds}
+              x={xDS}
+              y={dsY(h)}
+              w={c.ds}
+              compact={compactDS}
+              note={
+                <BoxNote
+                  series={ds}
+                  nextRoundName={roundName}
+                  x={xDS}
+                  y={dsY(h) + BOX + 2}
+                  w={c.ds + GAP + 20}
+                />
+              }
+            />
           </div>
+        ))}
+        {league.lcs && (
+          <SeriesBox
+            series={league.lcs}
+            bracket={bracket}
+            cutoff={cutoff}
+            historyIds={historyIds}
+            x={xLCS}
+            y={lcsY}
+            w={c.lcs}
+            compact={compactLCS}
+            note={<BoxNote series={league.lcs} nextRoundName="World Series" x={xLCS} y={lcsY + BOX + 2} w={c.lcs} />}
+          />
         )}
       </div>
     </section>
   )
+}
+
+// The World Series band's note is plain flow text, not absolutely
+// positioned like a tree box's — the same wording as `BoxNote` above.
+function wsNoteText(series) {
+  if (series.decided) return null
+  if (isDecidingGame(series)) return 'Winner take all'
+  if (series.playsOnCutoff) {
+    return `Today · Game ${series.cutoffGame.gameNumber}${isElimination(series) ? ' · one from out' : ''}`
+  }
+  return null
 }
 
 // The World Series taps through like any other series (seriesHref), but it
@@ -142,14 +298,16 @@ function WorldSeriesBand({ bracket, cutoff, historyIds }) {
   const ws = bracket.worldSeries
   if (!ws) return null
   const champion = bracket.champion
-  const note = champion ? null : noteFor(ws)
   const href = ws.id ? seriesHref(ws, cutoff, historyIds) : null
   const Wrapper = href ? 'a' : 'div'
   const wrapperProps = href ? linkProps(href) : { role: 'group' }
+  const label = champion
+    ? `World Series. ${recordLine(ws)}.`
+    : `World Series. ${ws.slots.map((s) => (s.club ? `${s.club.name} ${s.wins} ${s.wins === 1 ? 'win' : 'wins'}` : 'to come')).join(', ')}, best of 7.`
   return (
     <Wrapper
-      className={`pbkt-ws${champion ? ' pbkt-ws--champ' : ''}${isBoldMoment(ws) ? ' pbkt-ws--bold' : ''}`}
-      aria-label={seriesLabel(ws, champion ? recordLine(ws) : note)}
+      className={`pbkt-ws${champion ? ' pbkt-ws--champ' : ''}${isDecidingGame(ws) ? ' pbkt-ws--bold' : ''}`}
+      aria-label={label}
       {...wrapperProps}
     >
       <div className="pbkt-ws__head">
@@ -162,11 +320,25 @@ function WorldSeriesBand({ bracket, cutoff, historyIds }) {
         <Trophy size={champion ? 56 : 40} />
       </div>
       <div className="pbkt-ws__rows">
-        {ws.slots.map((slot, i) => (
-          <ClubRow key={i} slot={slot} series={ws} bracket={bracket} />
-        ))}
+        {ws.slots.map((slot, i) => {
+          const isOut = ws.eliminated?.id === slot.club?.id
+          const isWon = ws.decided && ws.winner.id === slot.club?.id
+          return (
+            <div key={i} className={`pbkt-row${isOut ? ' pbkt-row--out' : isWon ? ' pbkt-row--won' : ''}`}>
+              {slot.club ? (
+                <>
+                  <ClubMark club={slot.club} eliminated={isOut} size={20} />
+                  <span className="pbkt-row__abbr">{slot.club.name}</span>
+                  <Pips winsNeeded={7} wins={slot.wins} />
+                </>
+              ) : (
+                <BlankSlot label={feederSeries(bracket, slot.from)?.label ? `Winner of ${feederSeries(bracket, slot.from).label}, to come` : 'To come'} />
+              )}
+            </div>
+          )
+        })}
       </div>
-      {note && <p className="pbkt-box__note">{note}</p>}
+      {wsNoteText(ws) && <p className="pbkt-box__note">{wsNoteText(ws)}</p>}
     </Wrapper>
   )
 }
@@ -174,8 +346,24 @@ function WorldSeriesBand({ bracket, cutoff, historyIds }) {
 export function FullBracket({ bracket, cutoff, historyIds }) {
   return (
     <div className="pbkt-full">
-      <LeagueBracket league={bracket.leagues.AL} leagueId={159} name="American League" bracket={bracket} cutoff={cutoff} historyIds={historyIds} />
-      <LeagueBracket league={bracket.leagues.NL} leagueId={160} name="National League" bracket={bracket} cutoff={cutoff} historyIds={historyIds} />
+      <League
+        league={bracket.leagues.AL}
+        leagueId={159}
+        name="American League"
+        roundName="ALCS"
+        bracket={bracket}
+        cutoff={cutoff}
+        historyIds={historyIds}
+      />
+      <League
+        league={bracket.leagues.NL}
+        leagueId={160}
+        name="National League"
+        roundName="NLCS"
+        bracket={bracket}
+        cutoff={cutoff}
+        historyIds={historyIds}
+      />
       <WorldSeriesBand bracket={bracket} cutoff={cutoff} historyIds={historyIds} />
     </div>
   )
