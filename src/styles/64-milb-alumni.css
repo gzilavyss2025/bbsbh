@@ -26,11 +26,14 @@
    card's white border inside its cut edge, drawn in this app's paper tokens
    rather than literal white. The ring is this card's own, so its shadow stays
    here and wins over the Card's on order. */
+/* margin-top: 0 overrides .team-hub's per-card spacing rule (09-team-info.css)
+   — these sit in .alum__grid, a grid with its own gap, not stacked sections. */
 .alum__card {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2h);
+  margin-top: 0;
   box-shadow: inset 0 0 0 3px var(--bg-canvas), var(--shadow-card);
 }
 /* The portrait IS the link here (unlike the Team Leaders card, where it is

@@ -31,8 +31,11 @@
   margin-bottom: var(--space-4);
 }
 /* A tile is a Card (ledger, flush body; #1113). The 3px top rule is the
-   tile's own: it turns green on a good figure. */
+   tile's own: it turns green on a good figure. margin-top: 0 overrides
+   .team-hub's per-card spacing rule (09-team-info.css) — these sit in
+   .ctr__wall, a grid with its own gap, not stacked sections. */
 .ctr__tile {
+  margin-top: 0;
   padding: var(--space-2h) var(--space-3);
   border-top: 3px solid var(--border-rule);
 }
@@ -123,7 +126,12 @@
    The player column is pinned and the seasons scroll under it — the move
    StandingsPage already makes with its club column, and for the same reason:
    a row that loses its name mid-scroll stops being a row. The box around it
-   is a Card (sheet, flush body; #1113). */
+   is a Card (sheet, flush body; #1113): its own margin-top: 0 overrides
+   .team-hub's per-card spacing rule (09-team-info.css), collapsed here
+   against .ctr__wall's own margin-bottom rather than doubling it. */
+.ctr__card {
+  margin-top: 0;
+}
 .ctr__scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

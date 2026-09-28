@@ -89,6 +89,9 @@
   scroll-snap-align: start;
   width: 320px;
   padding: var(--space-2h) var(--space-2h) var(--space-3);
+  /* Overrides .team-hub's per-card spacing rule (09-team-info.css) — these sit
+     in .txcard__scroll, a flex row with its own gap, not stacked sections. */
+  margin-top: 0;
   /* A new block-formatting context, so the floated rail is contained here
      rather than bleeding past this card's own border. */
   display: flow-root;
