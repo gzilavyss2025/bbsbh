@@ -1,6 +1,7 @@
 import '../../styles/35-postseason-series.css'
 import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracket.js'
 import { recordLine } from '../../api/postseason/text.js'
+import { fetchSeriesRoster, rosterReadDate } from '../../api/postseason/roster.js'
 import { loadSeriesStats, BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postseasonSeries.js'
 import { fetchGameCardsByPk } from '../../api/schedule.js'
 import { computePlayOfTheGame } from '../../api/boxscore.js'
@@ -82,8 +83,24 @@ export function LiveSeriesPage({ seriesId, asOf }) {
   // The season rides along in the id itself ({year}-{round}-{awayId}-{homeId}),
   // so there is no need to infer it from the cutoff's own year.
   const season = Number(String(seriesId).split('-')[0]) || undefined
-  const { bracket, loading: bracketLoading, error: bracketError } = usePostseasonBracket(cutoffInput, { season })
+  const { bracket, loading: bracketLoading, error: bracketError, cutoff } = usePostseasonBracket(cutoffInput, {
+    season,
+  })
   const series = bracket?.series.find((s) => s.id === seriesId) ?? null
+
+  // Each club's declared roster: its active roster on the last date the
+  // series played by the cutoff (api/postseason/roster.js has the why).
+  // Before Game 1 day, its current roster stands in. A failed read falls
+  // back to the box-score roster.
+  const rosterDate = rosterReadDate(series, cutoff)
+  const rosterClubIds = (series?.slots ?? []).map((slot) => slot.club?.id).filter(Boolean)
+  const { data: declaredRosters } = useAsync(
+    (signal) =>
+      rosterDate && rosterClubIds.length
+        ? Promise.all(rosterClubIds.map((id) => fetchSeriesRoster(id, series, cutoff, { signal }).catch(() => null)))
+        : Promise.resolve(null),
+    [rosterDate, rosterClubIds.join(',')],
+  )
 
   const getSignals = usePastGameSignals()
   const games = series?.games ?? []
@@ -119,6 +136,12 @@ export function LiveSeriesPage({ seriesId, asOf }) {
   const hasBatting = stats && Object.values(stats.batting).some((v) => v.length > 0)
   const hasPitching = stats && Object.values(stats.pitching).some((v) => v.length > 0)
   const clubs = series.slots.map((slot) => slot.club).filter(Boolean)
+  const rosterCards = clubs
+    .map((club) => ({
+      club,
+      roster: declaredRosters?.[rosterClubIds.indexOf(club.id)] ?? stats?.rosters?.[club.id] ?? null,
+    }))
+    .filter(({ roster }) => roster)
 
   return (
     <div className="screen psseries pslive">
@@ -277,10 +300,15 @@ export function LiveSeriesPage({ seriesId, asOf }) {
         </div>
       )}
 
-      {stats && clubs.length > 0 && (
+      {rosterCards.some(({ roster }) => roster.declared === false) && (
+        <p className="hint">
+          Each club names its postseason roster on the morning of Game 1. Until then, this is its current roster.
+        </p>
+      )}
+      {rosterCards.length > 0 && (
         <div className="psseries__rosters">
-          {clubs.map((club) => (
-            <RosterCard key={club.id} teamId={club.id} roster={stats.rosters[club.id]} />
+          {rosterCards.map(({ club, roster }) => (
+            <RosterCard key={club.id} teamId={club.id} roster={roster} />
           ))}
         </div>
       )}

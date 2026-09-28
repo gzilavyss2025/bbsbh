@@ -694,7 +694,7 @@
 }
 
 /* ---------------------------------------------------- live series page only
-   (LiveSeriesPage.jsx, /postseason-live/{seriesId}) — today's game (named,
+   (LiveSeriesPage.jsx, /postseason/{seriesId}?d=) — today's game (named,
    never scored) and the games still to play. Neither has a counterpart on
    the finished page, so they're new blocks in the same family rather than a
    second stylesheet: same card shell, same clay-margin/ledger vocabulary as

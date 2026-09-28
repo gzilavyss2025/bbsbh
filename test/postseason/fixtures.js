@@ -6,6 +6,7 @@
 //   {year}-results.json   resultsUrl(year, …) with endDate {year}-12-31 — every game's
 //                          winner, so a test can ask for any cutoff and the derivation
 //                          must re-apply that cutoff itself
+//   2025-rosters.json     rosterUrl(teamId, date) for four club-days, keyed "{teamId}@{date}"
 // 2025 is the whole finished postseason. 2026 is the skeleton on the eve of the
 // first game (no results exist). 2022 holds two real postponed games (ALDS
 // NYY-CLE Games 2 and 5). 2008 holds the real suspended World Series Game 5

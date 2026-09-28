@@ -331,7 +331,7 @@ const BUDGETS = {
   // barrel over src/api/player/ now, one loader per tab of the player hub.
   'src/api/tradeDeadline.js': 700, // 629
   'src/components/charts/WinProbChart.jsx': 700, // 612
-  'src/App.jsx': 800, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it. 701: the postseason-live route branch (#1230, slice 6)
+  'src/App.jsx': 700, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it. 701: the postseason series route branch (#1230, slice 6). 693: one /postseason/{id} route (SeriesRoute)
 }
 
 function walk(dir, out = []) {

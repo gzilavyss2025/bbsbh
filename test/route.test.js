@@ -46,6 +46,7 @@ import {
   bookStatsPath,
   profilePath,
   postseasonLivePath,
+  seriesPageFor,
   seriesHref,
 } from '../src/lib/route.js'
 
@@ -248,10 +249,6 @@ test('player and team routes carry the id plus the optional cutoff hints', () =>
 test('umpire and manager routes carry no cutoff query (never score-revealing)', () => {
   assert.deepEqual(parseRoute('/umpire/427'), { name: 'umpire', id: '427' })
   assert.deepEqual(parseRoute('/manager/999'), { name: 'manager', id: '999' })
-  assert.deepEqual(parseRoute('/postseason/2025-division-112-158'), {
-    name: 'postseason-series',
-    seriesId: '2025-division-112-158',
-  })
 })
 
 test('trade deadline routes: index, per-season, and a non-numeric season falls back to the index', () => {
@@ -1069,28 +1066,44 @@ test('a name only changes the spelling of an address, never the page', () => {
 // 2026 series the history file does not hold yet (trap 7)
 // --------------------------------------------------------------------------
 
-test('the live series route parses the series id and the ?d= cutoff', () => {
-  assert.deepEqual(parseRoute('/postseason-live/2026-wildcard-143-144?d=2026-09-30'), {
-    name: 'postseason-live',
+// Gary, 2026-09-28: one address, /postseason/{id}, for both series pages.
+test('the series route parses the series id and the ?d= cutoff', () => {
+  assert.deepEqual(parseRoute('/postseason/2026-wildcard-143-144?d=2026-09-30'), {
+    name: 'postseason-series',
     seriesId: '2026-wildcard-143-144',
     asOf: '2026-09-30',
   })
   // No ?d= means today, which the page works out; a bad date degrades the same way.
-  assert.equal(parseRoute('/postseason-live/2026-wildcard-143-144').asOf, null)
-  assert.equal(parseRoute('/postseason-live/2026-wildcard-143-144?d=2026-02-30').asOf, null)
-  // The finished page keeps its own route.
-  assert.equal(parseRoute('/postseason/2025-division-112-158').name, 'postseason-series')
+  assert.deepEqual(parseRoute('/postseason/2025-division-112-158'), {
+    name: 'postseason-series',
+    seriesId: '2025-division-112-158',
+    asOf: null,
+  })
+  assert.equal(parseRoute('/postseason/2026-wildcard-143-144?d=2026-02-30').asOf, null)
+  // The old live slug is gone.
+  assert.notEqual(parseRoute('/postseason-live/2026-wildcard-143-144').name, 'postseason-series')
 })
 
 test('the live series path round-trips through parseRoute', () => {
   const path = postseasonLivePath('2026-division-143-119', '2026-10-04')
-  assert.equal(path, '/postseason-live/2026-division-143-119?d=2026-10-04')
+  assert.equal(path, '/postseason/2026-division-143-119?d=2026-10-04')
   assert.deepEqual(parseRoute(path), {
-    name: 'postseason-live',
+    name: 'postseason-series',
     seriesId: '2026-division-143-119',
     asOf: '2026-10-04',
   })
-  assert.equal(postseasonLivePath('2026-division-143-119'), '/postseason-live/2026-division-143-119')
+  assert.equal(postseasonLivePath('2026-division-143-119'), '/postseason/2026-division-143-119')
+})
+
+// Which page one /postseason/{id} address opens: the finished page only with
+// no ?d= and an id the history file holds (the link seriesHref builds for a
+// decided series); the live page, heading into ?d= or today, otherwise.
+test('seriesPageFor: finished page for a history id with no ?d=, the live page otherwise', () => {
+  const history = new Set(['2025-division-112-158'])
+  assert.equal(seriesPageFor('2025-division-112-158', null, history), 'finished')
+  assert.equal(seriesPageFor('2025-division-112-158', '2025-10-09', history), 'live')
+  assert.equal(seriesPageFor('2026-wildcard-143-144', null, history), 'live')
+  assert.equal(seriesPageFor('2025-division-112-158', null, ['2025-division-112-158']), 'finished')
 })
 
 test('seriesHref: the finished page only for a series decided before the cutoff AND in the history file', () => {
@@ -1101,10 +1114,10 @@ test('seriesHref: the finished page only for a series decided before the cutoff 
   // Decided, but the history file does not have it yet (every 2026 series until the hand-run generator).
   assert.equal(
     seriesHref({ id: '2026-wildcard-143-144', decided: true }, '2026-10-02', history),
-    '/postseason-live/2026-wildcard-143-144?d=2026-10-02',
+    '/postseason/2026-wildcard-143-144?d=2026-10-02',
   )
   // In the history file, but still running heading into the cutoff (a past slate).
-  assert.equal(seriesHref(running, '2025-10-09', history), '/postseason-live/2025-division-112-158?d=2025-10-09')
+  assert.equal(seriesHref(running, '2025-10-09', history), '/postseason/2025-division-112-158?d=2025-10-09')
   // An array of ids works the same as a Set.
   assert.equal(seriesHref(decided, '2025-10-12', ['2025-division-112-158']), '/postseason/2025-division-112-158')
   // A series with an empty slot has no id, so no link.

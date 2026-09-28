@@ -30,6 +30,7 @@ The bracket shows each series **heading into the cutoff date**.
 | `fetch.js` | The two statsapi reads, the row normalizers, and `loadPostseasonBracket(cutoff, season)`. |
 | `bracket.js` | `deriveBracket(skeletonRows, resultRows, cutoffDate)`, pure. Also `seriesForGame` and `isClub`. |
 | `text.js` | `recordLine(series)`, `seriesLine(series, gameNumber)`, `cardLines(game, bracket)`. |
+| `roster.js` | A club's declared postseason roster: `rosterUrl`, `seriesRosterDate`, `shapeRoster`, `fetchSeriesRoster`. Spoiler-free. |
 | `src/hooks/postseason/usePostseasonBracket.js` | The hook, and `bracketCutoff(date, today)`. |
 
 ### The two reads (`fetch.js`)
@@ -183,17 +184,42 @@ Example: 2025 NLDS, heading into 2025-10-09.
 - `cardLines(game, bracket)`: both lines for a slate game row, by `gamePk`, or
   `null` for a game not in the bracket. The slate model needs no new field.
 
+## The declared roster (`roster.js`)
+
+statsapi has **no postseason roster type** (`/api/v1/rosterTypes`, checked
+2026-09-28). A club's declared series roster is its **active** roster
+(`/teams/{id}/roster?rosterType=active&date=`) on a date the series plays:
+
+- 26 players, named by the morning of Game 1. The day before, the same call
+  answers the September roster (28 or more).
+- It can change between rounds and, for an injury, inside a series. The
+  transaction wire shows only "roster status changed".
+- A beaten club is back on its 40-man roster the next day.
+
+So `seriesRosterDate(series, cutoff)` picks the last date the series played by
+the cutoff (null before Game 1 day). Before that, `rosterReadDate` falls back
+to the cutoff: the club's CURRENT roster stands in (Gary, 2026-09-28), and the
+page says the club names its roster by Game 1. `shapeRoster` marks a roster
+`declared` only on a series date with 26 or fewer players. The live series page
+falls back to the box-score roster (`postseasonSeries.js`) when a read fails.
+Spoiler-free: a roster move is not a result.
+
 ## The route (`src/lib/route.js`)
 
-- `/postseason-live/{seriesId}?d={ISO}` parses to
-  `{ name: 'postseason-live', seriesId, asOf }`. `postseasonLivePath(id, cutoff)`
-  builds it.
+- One address for both series pages (Gary, 2026-09-28):
+  `/postseason/{seriesId}?d={ISO}` parses to
+  `{ name: 'postseason-series', seriesId, asOf }`. `postseasonLivePath(id, cutoff)`
+  builds the dated form. `seriesPageFor(id, asOf, historyIds)` picks the page:
+  the finished page for a `postseason-history.json` id with no `?d=`, the live
+  page otherwise.
 - `seriesHref(series, cutoffDate, historyIds)` gives the finished page
   `/postseason/{id}` only when the series was decided before the cutoff AND
   `postseason-history.json` holds its id (trap 7: that file gets a season only
   after its World Series, by a hand-run script). Otherwise the live page with
   `?d=`. A series with no id has no link (`null`).
-- `App.jsx`'s `postseason-live` branch renders `screens/postseason-live/LiveSeriesPage.jsx`
+- `App.jsx`'s `postseason-series` branch renders `screens/postseason-live/SeriesRoute.jsx`,
+  which reads the history file and opens `PostseasonSeriesPage.jsx` or
+  `screens/postseason-live/LiveSeriesPage.jsx`. The live page covers
   (slice 6): a series still in progress, or a decided 2026 series with nowhere
   else to go yet (trap 7). It reads `series.games`/`cutoffGame`/`upcoming` and
   fetches nothing for the cutoff date's own game.
@@ -203,6 +229,7 @@ Example: 2025 NLDS, heading into 2025-10-09.
 `test/postseason/` (fixtures in `test/fixtures/postseason/`, rebuilt by
 `capture.mjs` there): `bracket-cutoff`, `bracket-wiring`, `bracket-text`,
 `bracket-fetch`, `bracket-hook`, `live-series-selectors` (the live series
-page's pure game-bucket sort, slice 6). The route is in `test/route.test.js`,
+page's pure game-bucket sort, slice 6), `series-roster` (the declared roster's
+date and its 26-player check). The route is in `test/route.test.js`,
 and the slate model's `seriesStatus`/`leagueRecord` guard in
 `test/slate-scores.test.js`.

@@ -20,3 +20,15 @@ export const loadPostseasonHistory = staticJson('/data/postseason-history.json',
   shape: (d) => ({ seasons: d.seasons ?? [], generatedAt: d.generatedAt ?? null }),
   fallback: { seasons: [], generatedAt: null },
 })
+
+// Every series id the file holds, as a Set. The bracket's links (seriesHref)
+// and the /postseason/{id} address (seriesPageFor) both ask it.
+export function historySeriesIds(history) {
+  const ids = new Set()
+  for (const season of history?.seasons ?? []) {
+    for (const round of season.rounds ?? []) {
+      for (const series of round.series ?? []) if (series.id) ids.add(series.id)
+    }
+  }
+  return ids
+}
