@@ -37,10 +37,7 @@
   color: var(--accent-link);
   line-height: var(--lh-solid);
 }
-/* Responsive card grid — one column on a phone, filling out as width allows.
-   minmax(0, …): a bare 1fr track cannot shrink below its widest chaser row, and
-   on the org scope that row (name, club, level, prospect tag) is wider than a
-   phone (#1184). The row's name truncates instead. */
+/* One column, two from 560px; minmax(0, …) lets a long row truncate (#1184). */
 .tlead__grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
