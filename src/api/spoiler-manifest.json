@@ -167,7 +167,8 @@
         "components/inning/HalfInning.jsx",
         "screens/BoxScore.jsx",
         "screens/boxscore/revealBoxScore.js",
-        "screens/PostseasonSeriesPage.jsx"
+        "screens/PostseasonSeriesPage.jsx",
+        "screens/postseason-live/LiveSeriesPage.jsx"
       ]
     },
     "boxscore/gameNotes.js": {
@@ -782,7 +783,7 @@
     },
     "postseasonSeries.js": {
       "class": "spoiler-free",
-      "why": "One completed series, aggregated live from boxscores. Every game in postseason-history.json is already Final, so no live-game spoiler risk."
+      "why": "One series' game log, aggregated live from boxscores. `loadSeriesStats(games)` needs only each game's `gamePk`, so it also runs directly on the bracket module's `Series.games` (screens/postseason-live/LiveSeriesPage.jsx, #1230 slice 6), not only on postseason-history.json's completed series. Safe either way: postseason-history.json ships only completed postseasons, and bracket.js's `settle()` filters `Series.games` to games already Final BEFORE the cutoff (docs/api/postseason.md) — so no caller can hand this module a still-live or upcoming game, whichever source it reads from."
     },
     "prehalf-callouts.js": {
       "class": "caller-gated",

@@ -188,12 +188,16 @@ Example: 2025 NLDS, heading into 2025-10-09.
   `postseason-history.json` holds its id (trap 7: that file gets a season only
   after its World Series, by a hand-run script). Otherwise the live page with
   `?d=`. A series with no id has no link (`null`).
-- Until slice 6 adds the screen, `App.jsx` has no branch for `postseason-live`,
-  so the route falls through to the home slate.
+- `App.jsx`'s `postseason-live` branch renders `screens/postseason-live/LiveSeriesPage.jsx`
+  (slice 6): a series still in progress, or a decided 2026 series with nowhere
+  else to go yet (trap 7). It reads `series.games`/`cutoffGame`/`upcoming` and
+  fetches nothing for the cutoff date's own game.
 
 ## Tests
 
 `test/postseason/` (fixtures in `test/fixtures/postseason/`, rebuilt by
 `capture.mjs` there): `bracket-cutoff`, `bracket-wiring`, `bracket-text`,
-`bracket-fetch`, `bracket-hook`. The route is in `test/route.test.js`, and the
-slate model's `seriesStatus`/`leagueRecord` guard in `test/slate-scores.test.js`.
+`bracket-fetch`, `bracket-hook`, `live-series-selectors` (the live series
+page's pure game-bucket sort, slice 6). The route is in `test/route.test.js`,
+and the slate model's `seriesStatus`/`leagueRecord` guard in
+`test/slate-scores.test.js`.
