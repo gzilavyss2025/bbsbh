@@ -265,7 +265,15 @@ const BUDGETS = {
   // cap check's own season-row fetch and the forward arrow's disabled state.
   // The rule itself is a pure module (src/lib/postseason/capSlateDate.js);
   // what is left here is the wiring a screen has to own.
-  'src/screens/GameSelect.jsx': 1225, // 1212
+  // 1225 -> 1300: the bracket above the cards (#1224, slice 5) — the
+  // window's own season-row fetch (keyed to the slate's own year, not
+  // today's), the Off Day grid's postseason branch, and suppressing the
+  // generic off-day banner and empty-slate message for a window the bracket
+  // already covers. The bracket itself is a component
+  // (components/bracket/PostseasonBracket.jsx) over a pure module
+  // (src/lib/postseason/bracketDisplay.js); what is left here is the same
+  // kind of wiring the cutoff above already owns.
+  'src/screens/GameSelect.jsx': 1300, // 1247
   // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's
   // one new reader tipped it. fetchSeasonMeta belongs here and nowhere else:
   // this module already owned the seasons endpoint (fetchAllStarInfo was a

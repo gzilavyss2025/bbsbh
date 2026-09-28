@@ -1,0 +1,479 @@
+/* The postseason bracket above the slate cards (#1224, slice 5). Concept D's
+   picked look: Concept B's ticket fold + pennant, Concept A's "back page"
+   full bracket (boxes, simple connector stubs — the same deliberately-simple
+   technique 34-postseason.css already uses for the history bracket, not a
+   full elbow/tree join). Semantic tokens only; the metaphor is pencil for an
+   open series, ink once it is decided. Component-imported (not in
+   src/index.css) since it only ever loads on the home slate during the
+   postseason window — see PostseasonBracket.jsx. */
+
+.pbkt {
+  margin: var(--space-3) 0;
+}
+
+/* ---------- shared parts ---------- */
+.pbkt-pips {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  flex: none;
+  margin-left: auto;
+}
+.pbkt-pip {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-rule) solid var(--graphite);
+  background: transparent;
+}
+.pbkt-pip--on {
+  background: var(--graphite);
+}
+
+.pbkt-mark {
+  flex: none;
+  display: inline-block;
+  object-fit: contain;
+}
+.pbkt-mark--out {
+  background: var(--graphite);
+  -webkit-mask: var(--pbkt-mono, none) center / contain no-repeat;
+  mask: var(--pbkt-mono, none) center / contain no-repeat;
+}
+.pbkt-mark--empty {
+  border: var(--bw-hair) dashed var(--graphite);
+  border-radius: var(--radius-pill);
+}
+
+/* A future slot: a blank ruled line, never the word "TBD". */
+.pbkt-blank {
+  display: inline-block;
+  flex: 1 1 auto;
+  min-width: 28px;
+  height: 0;
+  border-bottom: var(--bw-hair) dashed var(--graphite);
+  align-self: center;
+}
+
+.pbkt-trophy {
+  flex: none;
+  display: block;
+}
+
+/* A highlighter swipe for the brief's one bold moment — --marker is a fill
+   behind dark ink, never an ink of its own (see root CLAUDE.md's do-nots:
+   no bold weight, no rubber stamp, no red/green). */
+.pbkt-ticket--bold .pbkt-ticket__note,
+.pbkt-ws--bold .pbkt-box__note {
+  display: inline-block;
+  background: var(--marker);
+  color: var(--text-heading);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+}
+
+/* ---------- the fold ---------- */
+.pbkt-fold {
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--graphite);
+  border-top: var(--bw-heavy) solid var(--text-heading);
+  border-radius: var(--radius-sm);
+}
+.pbkt-fold__tickets {
+  list-style: none;
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+.pbkt-ticket {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1h) var(--space-2h) var(--space-2);
+  border: var(--bw-hair) solid var(--graphite);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+  text-decoration: none;
+  color: inherit;
+}
+.pbkt-ticket__head {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+  padding-bottom: 2px;
+}
+.pbkt-ticket__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  min-height: 26px;
+}
+.pbkt-ticket__abbr {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+.pbkt-ticket--bold {
+  border-color: var(--accent-primary);
+  border-width: 2px;
+}
+.pbkt-ticket__note {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  align-self: flex-start;
+}
+.pbkt-fold__quiet {
+  padding: var(--space-2) 0;
+}
+.pbkt-fold__quiethead {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  color: var(--text-heading);
+  letter-spacing: var(--ls-title);
+}
+.pbkt-fold__waiting {
+  margin: 0;
+  padding-left: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+.pbkt-fold__waiting li + li {
+  margin-top: var(--space-1);
+}
+.pbkt-fold__door {
+  margin-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.pbkt-fold__champ {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+.pbkt-fold__champtext {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.pbkt-fold__champname {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  color: var(--accent-primary);
+  line-height: var(--lh-tight);
+}
+.pbkt-fold__champsub {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+/* ---------- the full bracket (Concept A's "back page") ---------- */
+.pbkt-full {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-3);
+}
+.pbkt-lghead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-1h);
+  border-bottom: var(--bw-rule) solid var(--text-heading);
+}
+.pbkt-lghead .pbkt-mark {
+  filter: grayscale(1);
+}
+.pbkt-lgname {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+  line-height: var(--lh-tight);
+}
+.pbkt-colheads {
+  display: grid;
+  column-gap: var(--space-3h); /* 14px — matches the tree's own GAP constant below */
+  margin: var(--space-2) 0 var(--space-1);
+}
+.pbkt-colhead {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  line-height: var(--lh-compact);
+}
+.pbkt-colhead--now {
+  color: var(--text-heading);
+}
+.pbkt-bestof {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* The tree: every box, row, note and Bye label inside is absolutely
+   positioned against this one container — the same layout Concept A used,
+   ported onto real bracket geometry instead of fixture pixels. */
+.pbkt-tree {
+  position: relative;
+  overflow-x: auto;
+}
+.pbkt-lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.pbkt-pencil {
+  fill: none;
+  stroke: var(--graphite);
+  stroke-width: 1;
+}
+.pbkt-dash {
+  stroke-dasharray: 3 3;
+}
+.pbkt-ink {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 2;
+}
+
+.pbkt-box {
+  position: absolute;
+  box-sizing: border-box;
+  border: var(--bw-hair) solid var(--graphite);
+  background: var(--surface-card);
+  border-radius: var(--radius-xs);
+  text-decoration: none;
+}
+.pbkt-box::after {
+  /* the ruled line between the two clubs */
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.pbkt-box--done {
+  border-color: var(--text-muted);
+}
+/* The one bold moment: the deciding/elimination game gets a doubled rule. */
+.pbkt-box--bold {
+  border: 3px double var(--accent-primary);
+}
+.pbkt-box--compact {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--graphite);
+}
+.pbkt-box__note {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.pbkt-trow {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-1h);
+  /* Purely decorative, drawn OVER the box's own <a>/<div> (docs/api/postseason.md's
+     shape has no per-row link) — without this a tap on a mark, name or pip
+     would hit the row instead of the link beneath it. */
+  pointer-events: none;
+}
+.pbkt-trow .pbkt-pips {
+  margin-left: auto;
+}
+.pbkt-trow__abbr {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+  flex: 1 1 auto;
+}
+.pbkt-trow--won .pbkt-trow__abbr {
+  color: var(--accent-primary);
+}
+/* strike-link-exempt: a plain club abbreviation, never a TeamLink/PlayerLink */
+.pbkt-trow--out .pbkt-trow__abbr {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.pbkt-trow--empty .pbkt-blank {
+  margin: 0 var(--space-1);
+}
+.pbkt-bye {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  pointer-events: none;
+}
+.pbkt-note {
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-compact);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pbkt-today {
+  color: var(--text-heading);
+}
+.pbkt-when {
+  color: var(--text-muted);
+}
+.pbkt-marker {
+  background: var(--marker);
+  color: var(--text-heading);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.pbkt-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 24px;
+}
+.pbkt-row .pbkt-pips {
+  margin-left: auto;
+}
+.pbkt-row__abbr {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-title);
+  color: var(--text-body);
+  flex: 1 1 auto;
+}
+.pbkt-row--won .pbkt-row__abbr {
+  color: var(--accent-primary);
+}
+/* strike-link-exempt: a plain club name, never a TeamLink/PlayerLink */
+.pbkt-row--out .pbkt-row__abbr {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.pbkt-ws {
+  display: block;
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+}
+.pbkt-ws--bold {
+  border-width: 2px;
+}
+.pbkt-ws__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent-primary);
+  border-bottom: var(--bw-heavy) solid var(--award-line);
+}
+.pbkt-ws__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  color: var(--text-on-ink);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-tight);
+}
+.pbkt-ws--champ .pbkt-ws__name {
+  font-size: var(--fs-h1);
+}
+.pbkt-ws__sub {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+}
+.pbkt-ws__rows {
+  padding: var(--space-1) var(--space-3) var(--space-2);
+}
+.pbkt-ws .pbkt-row {
+  min-height: 32px;
+}
+.pbkt-ws .pbkt-row + .pbkt-row {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.pbkt-ws .pbkt-box__note {
+  padding: 0 var(--space-3) var(--space-2);
+}
+
+/* ---------- wide screens (Gary's decision, 2026-09-28) ---------- */
+@media (min-width: 900px) {
+  /* Two classes, not one: `.door--block` (system/door.css) sets the same
+     three properties at equal specificity, and this partial is
+     component-imported — Vite's dev server can inject it BEFORE the core
+     sheet, where a same-specificity rule loses on order. Compounding the
+     selector wins regardless of load order, in dev and in the production
+     build alike. */
+  .pbkt-fold__door.door--block {
+    display: inline-flex;
+    width: auto;
+    margin: var(--space-2) 0 0;
+    padding: var(--space-1) var(--space-3);
+  }
+  .pbkt-full {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-6);
+    row-gap: var(--space-3);
+    align-items: start;
+  }
+  .pbkt-league:nth-of-type(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .pbkt-league:nth-of-type(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .pbkt-ws {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+    width: 100%;
+    max-width: 460px;
+  }
+}
