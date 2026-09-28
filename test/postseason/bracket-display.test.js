@@ -8,11 +8,14 @@ import test from 'node:test'
 import { deriveBracket } from '../../src/api/postseason/bracket.js'
 import {
   aliveClubs,
+  byeSlotIndex,
   isBoldMoment,
   isDecidingGame,
   isElimination,
+  leaguePhase,
   offDayAliveTeams,
   seriesPlayingToday,
+  winningSlotIndex,
 } from '../../src/lib/postseason/bracketDisplay.js'
 import { results, seriesWith, skeleton } from './fixtures.js'
 
@@ -88,4 +91,29 @@ test('isDecidingGame/isElimination: an empty slot is never a bold moment', () =>
   assert.equal(isDecidingGame(alcs), false)
   assert.equal(isElimination(alcs), false)
   assert.equal(isBoldMoment(alcs), false)
+})
+
+test('leaguePhase: the full bracket’s current round, per league (Concept A)', () => {
+  // Heading into 2025-10-04, every Wild Card is already decided and every
+  // Division Series is 0-0: Division is current for both leagues.
+  const wc = bracket2025('2025-10-04')
+  assert.equal(leaguePhase(wc.leagues.AL), 'division')
+  assert.equal(leaguePhase(wc.leagues.NL), 'division')
+
+  // Heading into 2025-10-09, AL's Division round is NOT fully decided
+  // (SEA-DET is tied 2-2) even though TOR's series is — Division stays
+  // current for AL. NL's is not fully decided either (MIL/LAD in progress).
+  const mid = bracket2025('2025-10-09')
+  assert.equal(leaguePhase(mid.leagues.AL), 'division')
+  assert.equal(leaguePhase(mid.leagues.NL), 'division')
+})
+
+test('winningSlotIndex / byeSlotIndex: read off the real away/home slots, never assumed position', () => {
+  const b = bracket2025('2025-10-09')
+  const tor = seriesWith(b, 'AL', 'division', 'TOR') // ALDS 'A': NYY (slot 0), TOR the bye seed (slot 1)
+  assert.equal(byeSlotIndex(tor), 1)
+  assert.equal(winningSlotIndex(tor), 1, 'TOR (the bye seed) won, and TOR sits in slot 1')
+
+  const sea = seriesWith(b, 'AL', 'division', 'SEA') // not decided yet
+  assert.equal(winningSlotIndex(sea), -1)
 })

@@ -66,3 +66,32 @@ export function isElimination(series) {
 export function isBoldMoment(series) {
   return Boolean(series?.playsOnCutoff) && (isDecidingGame(series) || isElimination(series))
 }
+
+// Which round is "current" for one league, for the full bracket's Concept A
+// look: the earliest round with something still undecided. Every earlier
+// round has already been fully decided and draws compact; every later round
+// is still a blank future slot. Per-league rather than one bracket-wide
+// value, so a real postseason where the two leagues fall out of step (a
+// rainout, a suspended game) still reads correctly.
+export function leaguePhase(league) {
+  if (!league?.wildcard?.every((s) => s.decided)) return 'wildcard'
+  if (!league.division.every((s) => s.decided)) return 'division'
+  if (!(league.lcs?.decided ?? false)) return 'lcs'
+  return 'done'
+}
+
+// The slot index (0 or 1) of a decided series' winner, or -1 before it's
+// decided. Never by letter or position — by the winner club's own id, so a
+// connector line always leaves from the row that club actually occupies.
+export function winningSlotIndex(series) {
+  if (!series?.decided) return -1
+  return series.slots.findIndex((slot) => slot.club?.id === series.winner.id)
+}
+
+// The slot index (0 or 1) carrying a bye — the seed no Wild Card series
+// feeds — or -1 when neither slot is one. Read off the slot's own `bye`
+// flag rather than assumed position: statsapi's away/home order decides
+// which slot that is, and the app must not guess it.
+export function byeSlotIndex(series) {
+  return series?.slots?.findIndex((slot) => slot.bye) ?? -1
+}

@@ -63,7 +63,6 @@
 /* A highlighter swipe for the brief's one bold moment — --marker is a fill
    behind dark ink, never an ink of its own (see root CLAUDE.md's do-nots:
    no bold weight, no rubber stamp, no red/green). */
-.pbkt-box--bold .pbkt-box__note,
 .pbkt-ticket--bold .pbkt-ticket__note,
 .pbkt-ws--bold .pbkt-box__note {
   display: inline-block;
@@ -181,79 +180,110 @@
   color: var(--text-muted);
 }
 
-/* ---------- the full bracket ---------- */
+/* ---------- the full bracket (Concept A's "back page") ---------- */
 .pbkt-full {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
   margin-top: var(--space-3);
 }
-.pbkt-league .sectionhead {
-  margin-bottom: var(--space-2);
+.pbkt-lghead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-1h);
+  border-bottom: var(--bw-rule) solid var(--text-heading);
 }
-.pbkt-byes {
-  margin: 0 0 var(--space-2);
+.pbkt-lghead .pbkt-mark {
+  filter: grayscale(1);
+}
+.pbkt-lgname {
+  margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-muted);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+  line-height: var(--lh-tight);
 }
-.pbkt-grid {
+.pbkt-colheads {
+  display: grid;
+  column-gap: var(--space-3h); /* 14px — matches the tree's own GAP constant below */
+  margin: var(--space-2) 0 var(--space-1);
+}
+.pbkt-colhead {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  line-height: var(--lh-compact);
 }
-.pbkt-lane {
-  display: grid;
-  grid-template-columns: minmax(72px, 1fr) minmax(96px, 1.3fr);
-  gap: var(--space-2);
-  align-items: center;
+.pbkt-colhead--now {
+  color: var(--text-heading);
 }
-.pbkt-cell {
+.pbkt-bestof {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* The tree: every box, row, note and Bye label inside is absolutely
+   positioned against this one container — the same layout Concept A used,
+   ported onto real bracket geometry instead of fixture pixels. */
+.pbkt-tree {
   position: relative;
+  overflow-x: auto;
 }
-/* Simple connector stub, WC -> DS — the same deliberately-simple horizontal
-   tick 34-postseason.css already uses, not a full elbow join. */
-.pbkt-cell--wc::after {
-  content: '';
+.pbkt-lines {
   position: absolute;
-  top: 50%;
-  right: calc(-1 * var(--space-2) - 1px);
-  width: var(--space-2);
-  height: var(--bw-hair);
-  background: var(--border-rule);
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
 }
-.pbkt-cell--lcs {
-  margin-top: var(--space-1);
-  padding-top: var(--space-2);
-  border-top: var(--bw-hair) dashed var(--border-rule);
+.pbkt-pencil {
+  fill: none;
+  stroke: var(--graphite);
+  stroke-width: 1;
+}
+.pbkt-dash {
+  stroke-dasharray: 3 3;
+}
+.pbkt-ink {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 2;
 }
 
 .pbkt-box {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-1) var(--space-1h);
+  position: absolute;
+  box-sizing: border-box;
   border: var(--bw-hair) solid var(--graphite);
-  border-radius: var(--radius-xs);
   background: var(--surface-card);
+  border-radius: var(--radius-xs);
   text-decoration: none;
-  color: inherit;
 }
+.pbkt-box::after {
+  /* the ruled line between the two clubs */
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.pbkt-box--done {
+  border-color: var(--text-muted);
+}
+/* The one bold moment: the deciding/elimination game gets a doubled rule. */
 .pbkt-box--bold {
   border: 3px double var(--accent-primary);
 }
 .pbkt-box--compact {
-  padding: var(--space-1) var(--space-1h);
-  border-style: dashed;
-  border-color: var(--text-muted);
   background: transparent;
-}
-.pbkt-box__done {
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  letter-spacing: var(--ls-caps);
-  color: var(--accent-primary);
+  border-style: dashed;
+  border-color: var(--graphite);
 }
 .pbkt-box__note {
   margin-top: 2px;
@@ -262,26 +292,101 @@
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
+.pbkt-trow {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-1h);
+  /* Purely decorative, drawn OVER the box's own <a>/<div> (docs/api/postseason.md's
+     shape has no per-row link) — without this a tap on a mark, name or pip
+     would hit the row instead of the link beneath it. */
+  pointer-events: none;
+}
+.pbkt-trow .pbkt-pips {
+  margin-left: auto;
+}
+.pbkt-trow__abbr {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+  flex: 1 1 auto;
+}
+.pbkt-trow--won .pbkt-trow__abbr {
+  color: var(--accent-primary);
+}
+/* strike-link-exempt: a plain club abbreviation, never a TeamLink/PlayerLink */
+.pbkt-trow--out .pbkt-trow__abbr {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.pbkt-trow--empty .pbkt-blank {
+  margin: 0 var(--space-1);
+}
+.pbkt-bye {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  pointer-events: none;
+}
+.pbkt-note {
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-compact);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pbkt-today {
+  color: var(--text-heading);
+}
+.pbkt-when {
+  color: var(--text-muted);
+}
+.pbkt-marker {
+  background: var(--marker);
+  color: var(--text-heading);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 .pbkt-row {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   min-height: 24px;
 }
+.pbkt-row .pbkt-pips {
+  margin-left: auto;
+}
 .pbkt-row__abbr {
   font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-title);
   color: var(--text-body);
+  flex: 1 1 auto;
 }
-/* strike-link-exempt: a plain club abbreviation, never a TeamLink/PlayerLink */
+.pbkt-row--won .pbkt-row__abbr {
+  color: var(--accent-primary);
+}
+/* strike-link-exempt: a plain club name, never a TeamLink/PlayerLink */
 .pbkt-row--out .pbkt-row__abbr {
   color: var(--text-caption);
   text-decoration: line-through;
   text-decoration-thickness: 1px;
-}
-.pbkt-row--empty .pbkt-row__abbr {
-  display: none;
 }
 
 .pbkt-ws {
@@ -337,7 +442,13 @@
 
 /* ---------- wide screens (Gary's decision, 2026-09-28) ---------- */
 @media (min-width: 900px) {
-  .pbkt-fold__door {
+  /* Two classes, not one: `.door--block` (system/door.css) sets the same
+     three properties at equal specificity, and this partial is
+     component-imported — Vite's dev server can inject it BEFORE the core
+     sheet, where a same-specificity rule loses on order. Compounding the
+     selector wins regardless of load order, in dev and in the production
+     build alike. */
+  .pbkt-fold__door.door--block {
     display: inline-flex;
     width: auto;
     margin: var(--space-2) 0 0;
