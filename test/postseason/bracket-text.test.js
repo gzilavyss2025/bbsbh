@@ -44,21 +44,25 @@ test('test 5: a decided series reads as won', () => {
   assert.equal(recordLine(null), '')
 })
 
-test('the series line: "Game 2 · NL Wild Card Series"', () => {
-  const s = seriesWith(bracket2025('2025-10-01'), 'NL', 'wildcard', 'CHC')
-  assert.equal(seriesLine(s, 2), 'Game 2 · NL Wild Card Series')
-  assert.equal(seriesLine(bracket2025('2025-10-24').worldSeries, 1), 'Game 1 · World Series')
+test('the series line drops "Series" from every round but the World Series itself (Gary, 2026-09-28)', () => {
+  const wc = seriesWith(bracket2025('2025-10-01'), 'NL', 'wildcard', 'CHC')
+  assert.equal(seriesLine(wc, 2), 'Game 2 · NL Wild Card')
+  const b = bracket2025('2025-10-24')
+  const ds = seriesWith(b, 'AL', 'division', 'TOR')
+  assert.equal(seriesLine(ds, 3), 'Game 3 · ALDS')
+  assert.equal(seriesLine(b.leagues.NL.lcs, 5), 'Game 5 · NLCS')
+  assert.equal(seriesLine(b.worldSeries, 1), 'Game 1 · World Series')
 })
 
 test('cardLines reads a slate game row by gamePk: its game number and the heading-in record', () => {
   // 2025-10-01 slate: SD @ CHC, NL Wild Card Game 2 (gamePk 813064).
   assert.deepEqual(cardLines({ gamePk: 813064 }, bracket2025('2025-10-01')), {
-    seriesLine: 'Game 2 · NL Wild Card Series',
+    seriesLine: 'Game 2 · NL Wild Card',
     recordLine: 'CHC leads 1–0',
   })
   // 2025-10-09 slate: MIL @ CHC, NLDS Game 4 (813050).
   assert.deepEqual(cardLines({ gamePk: 813050 }, bracket2025('2025-10-09')), {
-    seriesLine: 'Game 4 · NL Division Series',
+    seriesLine: 'Game 4 · NLDS',
     recordLine: 'MIL leads 2–1',
   })
   // A regular-season game, or no bracket: no lines.
@@ -70,7 +74,7 @@ test("cardLines on the cutoff date never shows that game's own result", () => {
   // 2025-10-05: ALDS Game 2 SEA-DET went Final that day (SEA won). The card
   // on the 10-05 slate still reads the state heading in.
   assert.deepEqual(cardLines({ gamePk: 813057 }, bracket2025('2025-10-05')), {
-    seriesLine: 'Game 2 · AL Division Series',
+    seriesLine: 'Game 2 · ALDS',
     recordLine: 'DET leads 1–0',
   })
 })
