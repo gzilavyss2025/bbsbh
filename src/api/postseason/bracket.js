@@ -17,8 +17,10 @@
 //     in the skeleton from the first day.
 //   - "If necessary" is worked out from the heading-in wins, never read off a
 //     row (a future row's flag flips when it becomes necessary).
-//   - When today's game can end a series, its later "if necessary" games
-//     carry no date: their rows are the ones that vanish.
+//   - An "if necessary" game NEVER carries a date or a gamePk, live or
+//     historical. Whether the skeleton still lists it reflects how the real
+//     series played out AFTER the cutoff, not the cutoff itself — trusting
+//     that row on an old `?d=` would leak how many games the series took.
 //
 // WIRING, NEVER BY LETTER. NL Wild Card 'A' (PHI @ ATL) feeds NLDS 'B' in
 // 2026, and the AL crosses the same way. A Division Series slot names its
@@ -157,12 +159,15 @@ function upcomingGames(series) {
   if (series.decided) return []
   const lead = Math.max(...series.slots.map((s) => s.wins))
   const certainThrough = series.gamesPlayed + (series.winsNeeded - lead)
-  const canEndToday = series.playsOnCutoff && lead === series.winsNeeded - 1
   const out = []
   for (let n = series.gamesPlayed + 1; n <= series.bestOf; n++) {
     const row = series._rows.find((r) => r.gameNumber === n)
+    // `ifNecessary` is fixed by the win count AS OF the cutoff, so gating on
+    // it alone never depends on anything that happened after. The row's own
+    // presence is not a safe signal here: the live skeleton can have dropped
+    // (or kept) it for reasons only the real, later outcome explains.
     const ifNecessary = n > certainThrough
-    const hide = !row || (canEndToday && ifNecessary && n > series.cutoffGame.gameNumber)
+    const hide = !row || ifNecessary
     out.push({
       gameNumber: n,
       gamePk: hide ? null : row.gamePk,

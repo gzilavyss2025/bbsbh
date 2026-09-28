@@ -203,24 +203,30 @@ test('test 6: the 2008 champion follows the resumed game', () => {
 // ---------------------------------------------------------------------------
 // An unplayed "if necessary" game drops off the schedule when its series ends,
 // and a future game's own `ifNecessary` flag flips when it becomes necessary.
-// Both happen the moment TODAY's game ends. So `upcoming` never reads either:
-// "if necessary" comes from the heading-in wins, and when today's game can end
-// the series, the later if-necessary games carry no date.
+// So `upcoming` never reads either: "if necessary" comes from the heading-in
+// wins alone, and an "if necessary" game never carries a date or a gamePk —
+// live or historical. Whether the skeleton still lists it reflects how the
+// real series played out AFTER the cutoff, not the cutoff itself: on an old
+// `?d=`, the fixture here is captured from the real, already-finished 2025
+// season, so a row existing for a later game leaks that the series went that
+// far. `bracket2025('2025-10-06')` below is exactly that case — 2 games into
+// a Division Series, nobody can clinch for at least 2 more — and it must not
+// say games 4 and 5 have real dates just because the real series went to 5.
 
-test('upcoming: game numbers from the heading-in state, with dates when nothing today can drop them', () => {
+test('upcoming: only the certain game numbers carry dates; every if-necessary game is blank', () => {
   const mil = seriesWith(bracket2025('2025-10-06'), 'NL', 'division', 'MIL')
   assert.deepEqual(
     mil.upcoming.map((g) => [g.gameNumber, g.date, g.ifNecessary]),
     [
       [2, '2025-10-06', false],
       [3, '2025-10-08', false],
-      [4, '2025-10-09', true],
-      [5, '2025-10-11', true],
+      [4, null, true],
+      [5, null, true],
     ],
   )
 })
 
-test('upcoming: when today can end the series, a later if-necessary game has no date', () => {
+test('upcoming: an if-necessary game has no date even when today alone cannot yet end the series', () => {
   const mil = seriesWith(bracket2025('2025-10-09'), 'NL', 'division', 'MIL')
   assert.deepEqual(
     mil.upcoming.map((g) => [g.gameNumber, g.date, g.gamePk, g.ifNecessary]),

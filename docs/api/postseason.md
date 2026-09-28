@@ -66,9 +66,10 @@ becomes necessary. So `deriveBracket`:
 - fills a slot fed by an earlier series from **that series' derived winner**,
   never from the club the skeleton names there;
 - works out "if necessary" from the heading-in wins, never from a row;
-- gives no date to a later "if necessary" game when the cutoff game can end
-  its series (the heading-in leader is one win away and the series plays that
-  day), because that is the row that vanishes;
+- gives no date or gamePk to ANY "if necessary" game, live or historical —
+  whether the skeleton still lists it reflects how the real series played out
+  AFTER the cutoff, not the cutoff itself, so trusting that row on an old
+  `?d=` would leak how many games the series took;
 - indexes (`gameIndex`) only games dated on or before the cutoff.
 
 `test/postseason/bracket-cutoff.test.js` pins that the derived bracket is the
@@ -143,7 +144,7 @@ A `Series`:
 | `playsOnCutoff`, `cutoffGame` | Whether the series plays on the cutoff date, and `{ gamePk, gameNumber }` of that game. |
 | `feeds` | The `key` of the series its winner goes to. |
 | `games` | Counted games: `{ gamePk, gameNumber, date, winnerId }`. No score. |
-| `upcoming` | From the next game to `bestOf`: `{ gameNumber, gamePk, date, ifNecessary }`. `date` and `gamePk` are `null` for a game the cutoff game can remove. |
+| `upcoming` | From the next game to `bestOf`: `{ gameNumber, gamePk, date, ifNecessary }`. `date` and `gamePk` are `null` for every `ifNecessary` game — its date is never taken from the live skeleton, since presence there depends on how the real series turned out after the cutoff. |
 
 Example: 2025 NLDS, heading into 2025-10-09.
 
