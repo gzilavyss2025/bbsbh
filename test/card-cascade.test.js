@@ -457,7 +457,7 @@ test('C1: every hub block renders on Card, never on a bare element', () => {
   for (const { jsx, ns } of C1) {
     const code = readFileSync(join(SRC, jsx), 'utf8')
     assert.match(code, /<Card[\s>]/, `${jsx} renders a Card`)
-    const bare = new RegExp(`<(div|section|li|article)\s+(key=\{[^}]+\}\s+)?className=\{?["'\`]${ns}(?![\w-])`)
+    const bare = new RegExp(`<(div|section|li|article)\\s+(key=\\{[^}]+\\}\\s+)?className=\\{?["'\`]${ns}(?![\\w-])`)
     assert.doesNotMatch(code, bare, `${jsx}: .${ns} is on a bare element`)
   }
 })
