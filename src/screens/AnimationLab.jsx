@@ -515,14 +515,14 @@ function StaticScoreboardPlate({ digit }) {
   )
 }
 
-// PostponedBanner takes the two fields it actually reads (game.rescheduleGameDate,
-// status.reason) rather than a real game/status pair — this page never touches
+// PostponedBanner takes the three fields it actually reads (game.rescheduleGameDate,
+// status.label, status.reason) rather than a real game/status pair — this page never touches
 // live game data.
 function PostponedGameCardDemo() {
   return (
     <PostponedBanner
       game={{ rescheduleGameDate: '2026-08-02' }}
-      status={{ reason: 'Inclement Weather' }}
+      status={{ label: 'Postponed', reason: 'Inclement Weather' }}
     />
   )
 }

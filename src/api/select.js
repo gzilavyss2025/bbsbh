@@ -855,6 +855,12 @@ export function selectGameStatus(source) {
   const reason = status.reason ?? ''
   const lower = detailedState.toLowerCase()
   const isPostponed = lower.includes('postponed')
+  // "Cancelled" (MLB's spelling; the substring also takes "Canceled"). Like a
+  // postponement it reports abstractGameState 'Final' with no game behind it
+  // (#1248), so callers that ask "was it called off?" read isCalledOff, which
+  // takes both.
+  const isCancelled = lower.includes('cancel')
+  const isCalledOff = isPostponed || isCancelled
   const isSuspended = lower.includes('suspended')
   const isDelayed = lower.includes('delayed')
   // Exact match, not a substring test — "Warmup" is the literal detailedState
@@ -869,14 +875,36 @@ export function selectGameStatus(source) {
   // phrasing nests them (a postponed game is never also "delayed").
   const label = isPostponed
     ? 'Postponed'
-    : isSuspended
+    : isCancelled
+      ? 'Cancelled'
+      : isSuspended
       ? 'Suspended'
       : isDelayed
         ? 'Delayed'
         : isWarmup
           ? 'Warmups'
           : null
-  return { detailedState, reason, isDelayed, isSuspended, isPostponed, isWarmup, label }
+  return {
+    detailedState,
+    reason,
+    isDelayed,
+    isSuspended,
+    isPostponed,
+    isCancelled,
+    isCalledOff,
+    isWarmup,
+    label,
+  }
+}
+
+// True for a game that went Final AND was played, so it has a result to
+// reveal. statsapi reports a postponed or cancelled game as 'Final' too
+// (#1248), so "Final" alone drew a rained-out game as a 0-0 result card.
+// Structural, not a score. Takes a slate row or a full feed, like
+// selectGameStatus.
+export function selectHasResult(source) {
+  const abstract = source?.gameData?.status?.abstractGameState ?? source?.abstractState
+  return abstract === 'Final' && !selectGameStatus(source).isCalledOff
 }
 
 // In-game delays (rain, etc.) for the between-half-innings notice (see
