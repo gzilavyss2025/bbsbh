@@ -7,6 +7,7 @@ import { rescheduleLabel, resumeLabel } from '../../lib/resultCards.js'
 import { jerseyTreatmentFor } from '../../api/jerseys.js'
 import { liveTreatmentFor } from '../../api/uniforms.js'
 import { broadcastLogoFor } from '../../lib/broadcastLogos.js'
+import { SeriesMark } from '../postseason/SeriesMark.jsx'
 
 // Pure (no JSX), so it also has to be importable from a plain Node test and
 // from the team hub's identity drawer (test/identity-drawer-fields.test.js
@@ -76,13 +77,24 @@ export function ScoreLine({ liveLine }) {
 // result hero uses (`35-postseason-series.css`'s `.psseries__banner`) — text
 // only, no pips (the bracket alone draws those). The record half is dropped
 // before a series has a result ("Game 1" carries nothing new to say), and the
-// deciding game gets the one bold moment the design brief calls for.
+// deciding game gets the one bold moment the design brief calls for. A season
+// with series art on file leads the band with the mark and says only
+// "Game 2" beside it; the mark names the round, and its alt text says it too.
 export function PostseasonLine({ lines }) {
   if (!lines) return null
   const deciding = lines.recordLine === 'Winner take all'
   return (
-    <div className={`gamecard__seriesline${deciding ? ' gamecard__seriesline--deciding' : ''}`}>
-      <span>{lines.seriesLine}</span>
+    <div
+      className={`gamecard__seriesline${deciding ? ' gamecard__seriesline--deciding' : ''}${lines.mark ? ' gamecard__seriesline--marked' : ''}`}
+    >
+      {lines.mark ? (
+        <span className="gamecard__seriesline-round">
+          <SeriesMark mark={lines.mark} height={24} />
+          <span>{lines.gameLine}</span>
+        </span>
+      ) : (
+        <span>{lines.seriesLine}</span>
+      )}
       {lines.recordLine !== 'Game 1' && (
         <span className="gamecard__seriesline-rec">{lines.recordLine}</span>
       )}

@@ -14,6 +14,8 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 import { humanDateWithYear } from '../lib/dates.js'
+import { seriesMarkForFeed } from '../lib/postseason/seriesMarks.js'
+import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime } from '../lib/scoresUnlocked.js'
@@ -154,6 +156,7 @@ export function GameView({ game, section, onSection }) {
   }
 
   const sketchTeam = sketching ? game[sketching] : null
+  const seriesMark = seriesMarkForFeed(feed)
 
   // CATCH UP TO LIVE (ADR-0055) — the extra button on the home lineup page for
   // a reader who opened a game already in progress. `catchUpPlan` decides
@@ -267,6 +270,17 @@ export function GameView({ game, section, onSection }) {
         onSetKeepAwake={setKeepAwake}
         treatment={jerseyTreatments}
       />
+
+      {/* A postseason game's series mark, on a navy band under the masthead —
+          on both lineup pages and the box score, so the game reads as October
+          before a name is read. Not on the innings view, where a phone's
+          height belongs to the half being scored. A round name, never a
+          score; null for a regular-season game or a season with no art. */}
+      {seriesMark && (step === 0 || step === 1 || step === 3) && (
+        <div className="gameseries">
+          <SeriesMark mark={seriesMark} height={40} />
+        </div>
+      )}
 
       {/* The spoilers-off strip, on EVERY section of the game (both lineups,
           innings, box score) — not just the innings view, so you can never be

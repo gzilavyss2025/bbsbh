@@ -14,6 +14,8 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Door } from '../components/ui/control/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { teamClubNameShort, teamFullName } from '../lib/teams.js'
+import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
+import { seriesMark } from '../lib/postseason/seriesMarks.js'
 
 const AL = 103
 const NL = 104
@@ -151,10 +153,35 @@ function Lane({ lane, onOpenSeries }) {
   )
 }
 
-function BracketColumn({ side, label, lanes, onOpenSeries }) {
+// `mark` is the round's series art for a season that has it (2026 on): it
+// stands in for the words, on its navy plate, with the words as its alt text.
+function RoundLabel({ label, mark }) {
+  return mark ? <SeriesMark mark={{ ...mark, alt: label }} height={22} plate /> : label
+}
+
+// The World Series round label: the trophy icon and the words, or the
+// season's World Series mark where there is one.
+function WorldSeriesLabel({ mark }) {
+  if (mark) return <SeriesMark mark={mark} height={34} plate />
+  return (
+    <>
+      <img
+        src="/brand/world-series-trophy-icon.png"
+        alt=""
+        className="psbracket__roundtrophy"
+        aria-hidden="true"
+      />
+      World Series
+    </>
+  )
+}
+
+function BracketColumn({ side, label, mark, lanes, onOpenSeries }) {
   return (
     <div className={`psbracket__col psbracket__col--${side}`}>
-      <p className={`psbracket__collabel psbracket__collabel--${side}`}>{label}</p>
+      <p className={`psbracket__collabel psbracket__collabel--${side}`}>
+        <RoundLabel label={label} mark={mark} />
+      </p>
       <div className="psbracket__lanes">
         {lanes.map((lane) => (
           <Lane key={lane.key} lane={lane} onOpenSeries={onOpenSeries} />
@@ -207,6 +234,7 @@ function SeriesMvp({ mvp }) {
 // (psbracket--no-wc collapses the grid to 5 tracks) rather than rendering
 // a column of fake "Bye" cards for every Division Series team.
 function BracketGrid({ season, onOpenSeries }) {
+  const roundMark = (round, league) => seriesMark({ season: season.year, round, league })
   const al = leagueBracket(season, AL)
   const nl = leagueBracket(season, NL)
   const ws = season.rounds.find((r) => r.key === 'worldseries')?.series?.[0] ?? null
@@ -215,19 +243,13 @@ function BracketGrid({ season, onOpenSeries }) {
   return (
     <div className={`psbracket${hasWildCard ? '' : ' psbracket--no-wc'}`}>
       {hasWildCard && (
-        <BracketColumn side="al" label="AL Wild Card" lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
+        <BracketColumn side="al" label="AL Wild Card" mark={roundMark('wildcard', 'AL')} lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
       )}
-      <BracketColumn side="al" label="AL Division Series" lanes={al.dsLanes} onOpenSeries={onOpenSeries} />
-      <BracketColumn side="al" label="AL Championship" lanes={al.csLanes} onOpenSeries={onOpenSeries} />
+      <BracketColumn side="al" label="AL Division Series" mark={roundMark('division', 'AL')} lanes={al.dsLanes} onOpenSeries={onOpenSeries} />
+      <BracketColumn side="al" label="AL Championship" mark={roundMark('lcs', 'AL')} lanes={al.csLanes} onOpenSeries={onOpenSeries} />
       <div className="psbracket__col psbracket__col--ws">
         <p className="psbracket__collabel psbracket__collabel--ws">
-          <img
-            src="/brand/world-series-trophy-icon.png"
-            alt=""
-            className="psbracket__roundtrophy"
-            aria-hidden="true"
-          />
-          World Series
+          <WorldSeriesLabel mark={roundMark('worldseries')} />
         </p>
         <div className="psbracket__lanes">
           {ws && (
@@ -248,19 +270,21 @@ function BracketGrid({ season, onOpenSeries }) {
           )}
         </div>
       </div>
-      <BracketColumn side="nl" label="NL Championship" lanes={nl.csLanes} onOpenSeries={onOpenSeries} />
-      <BracketColumn side="nl" label="NL Division Series" lanes={nl.dsLanes} onOpenSeries={onOpenSeries} />
+      <BracketColumn side="nl" label="NL Championship" mark={roundMark('lcs', 'NL')} lanes={nl.csLanes} onOpenSeries={onOpenSeries} />
+      <BracketColumn side="nl" label="NL Division Series" mark={roundMark('division', 'NL')} lanes={nl.dsLanes} onOpenSeries={onOpenSeries} />
       {hasWildCard && (
-        <BracketColumn side="nl" label="NL Wild Card" lanes={nl.wcLanes} onOpenSeries={onOpenSeries} />
+        <BracketColumn side="nl" label="NL Wild Card" mark={roundMark('wildcard', 'NL')} lanes={nl.wcLanes} onOpenSeries={onOpenSeries} />
       )}
     </div>
   )
 }
 
-function StackRound({ side, label, lanes, onOpenSeries }) {
+function StackRound({ side, label, mark, lanes, onOpenSeries }) {
   return (
     <>
-      <p className={`psstack__roundlabel psstack__roundlabel--${side}`}>{label}</p>
+      <p className={`psstack__roundlabel psstack__roundlabel--${side}`}>
+        <RoundLabel label={label} mark={mark} />
+      </p>
       {lanes.map((lane) => (
         <Lane key={lane.key} lane={lane} onOpenSeries={onOpenSeries} />
       ))}
@@ -274,6 +298,7 @@ function StackRound({ side, label, lanes, onOpenSeries }) {
 // survive iPhone width. Round labels become thin dividers rather than a
 // column header.
 function BracketStack({ season, onOpenSeries }) {
+  const roundMark = (round, league) => seriesMark({ season: season.year, round, league })
   const al = leagueBracket(season, AL)
   const nl = leagueBracket(season, NL)
   const ws = season.rounds.find((r) => r.key === 'worldseries')?.series?.[0] ?? null
@@ -282,18 +307,12 @@ function BracketStack({ season, onOpenSeries }) {
   return (
     <div className="psstack">
       {hasWildCard && (
-        <StackRound side="al" label="AL Wild Card" lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
+        <StackRound side="al" label="AL Wild Card" mark={roundMark('wildcard', 'AL')} lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
       )}
-      <StackRound side="al" label="AL Division Series" lanes={al.dsLanes} onOpenSeries={onOpenSeries} />
-      <StackRound side="al" label="AL Championship" lanes={al.csLanes} onOpenSeries={onOpenSeries} />
+      <StackRound side="al" label="AL Division Series" mark={roundMark('division', 'AL')} lanes={al.dsLanes} onOpenSeries={onOpenSeries} />
+      <StackRound side="al" label="AL Championship" mark={roundMark('lcs', 'AL')} lanes={al.csLanes} onOpenSeries={onOpenSeries} />
       <p className="psstack__roundlabel psstack__roundlabel--ws">
-        <img
-          src="/brand/world-series-trophy-icon.png"
-          alt=""
-          className="psbracket__roundtrophy"
-          aria-hidden="true"
-        />
-        World Series
+        <WorldSeriesLabel mark={roundMark('worldseries')} />
       </p>
       {ws && (
         <button type="button" className="pswscard pswscard--stack" onClick={() => onOpenSeries({ ...ws, isWorldSeries: true })}>
@@ -310,10 +329,10 @@ function BracketStack({ season, onOpenSeries }) {
           ))}
         </button>
       )}
-      <StackRound side="nl" label="NL Championship" lanes={nl.csLanes} onOpenSeries={onOpenSeries} />
-      <StackRound side="nl" label="NL Division Series" lanes={nl.dsLanes} onOpenSeries={onOpenSeries} />
+      <StackRound side="nl" label="NL Championship" mark={roundMark('lcs', 'NL')} lanes={nl.csLanes} onOpenSeries={onOpenSeries} />
+      <StackRound side="nl" label="NL Division Series" mark={roundMark('division', 'NL')} lanes={nl.dsLanes} onOpenSeries={onOpenSeries} />
       {hasWildCard && (
-        <StackRound side="nl" label="NL Wild Card" lanes={nl.wcLanes} onOpenSeries={onOpenSeries} />
+        <StackRound side="nl" label="NL Wild Card" mark={roundMark('wildcard', 'NL')} lanes={nl.wcLanes} onOpenSeries={onOpenSeries} />
       )}
     </div>
   )

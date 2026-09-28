@@ -13,6 +13,7 @@
 // Card", "Game 3 · ALDS", "Game 5 · NLCS", "Game 1 · World Series".
 
 import { seriesForGame } from './bracket.js'
+import { seriesMark } from '../../lib/postseason/seriesMarks.js'
 
 export function recordLine(series) {
   if (!series) return ''
@@ -44,9 +45,17 @@ export function seriesLine(series, gameNumber) {
 
 // Both lines for one slate game row (anything with a `gamePk`), or null when
 // the game is not in this bracket (a regular-season game) or there is no
-// bracket yet.
+// bracket yet. `mark` is the series' art ({ src, alt }), or null for a season
+// with none on file (lib/postseason/seriesMarks.js). A card that draws the
+// mark prints `gameLine` ("Game 2") beside it in place of `seriesLine`, since
+// the mark already names the round.
 export function cardLines(game, bracket) {
   const hit = seriesForGame(bracket, game?.gamePk)
   if (!hit) return null
-  return { seriesLine: seriesLine(hit.series, hit.gameNumber), recordLine: recordLine(hit.series) }
+  return {
+    seriesLine: seriesLine(hit.series, hit.gameNumber),
+    gameLine: `Game ${hit.gameNumber}`,
+    recordLine: recordLine(hit.series),
+    mark: seriesMark({ season: bracket.season, round: hit.series.round, league: hit.series.league }),
+  }
 }

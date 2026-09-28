@@ -58,12 +58,16 @@ test('cardLines reads a slate game row by gamePk: its game number and the headin
   // 2025-10-01 slate: SD @ CHC, NL Wild Card Game 2 (gamePk 813064).
   assert.deepEqual(cardLines({ gamePk: 813064 }, bracket2025('2025-10-01')), {
     seriesLine: 'Game 2 · NL Wild Card',
+    gameLine: 'Game 2',
     recordLine: 'CHC leads 1–0',
+    mark: null, // 2025 has no series mark on file
   })
   // 2025-10-09 slate: MIL @ CHC, NLDS Game 4 (813050).
   assert.deepEqual(cardLines({ gamePk: 813050 }, bracket2025('2025-10-09')), {
     seriesLine: 'Game 4 · NLDS',
+    gameLine: 'Game 4',
     recordLine: 'MIL leads 2–1',
+    mark: null, // 2025 has no series mark on file
   })
   // A regular-season game, or no bracket: no lines.
   assert.equal(cardLines({ gamePk: 1 }, bracket2025('2025-10-09')), null)
@@ -75,6 +79,8 @@ test("cardLines on the cutoff date never shows that game's own result", () => {
   // on the 10-05 slate still reads the state heading in.
   assert.deepEqual(cardLines({ gamePk: 813057 }, bracket2025('2025-10-05')), {
     seriesLine: 'Game 2 · ALDS',
+    gameLine: 'Game 2',
     recordLine: 'DET leads 1–0',
+    mark: null, // 2025 has no series mark on file
   })
 })
