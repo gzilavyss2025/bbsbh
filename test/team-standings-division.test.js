@@ -47,3 +47,17 @@ test('divisionRecordFor still matches normally when both sides carry a real divi
   ]
   assert.equal(divisionRecordFor(standings, team), standings[0])
 })
+
+test('standingsRowsFor names the run-differential sign as a variant, not a state (ADR-0084, #1185)', () => {
+  const standings = [
+    {
+      teamRecords: [
+        { team: { id: 419, name: 'Hillsboro Hops' }, runDifferential: -8 },
+        { team: { id: 403, name: 'Everett AquaSox' }, runDifferential: 31 },
+        { team: { id: 401, name: 'Eugene Emeralds' }, runDifferential: 0 },
+      ],
+    },
+  ]
+  const tones = standingsRowsFor(standings, hillsboroHops, 419).map((r) => r.diffTone)
+  assert.deepEqual(tones, ['standings__diff--negative', 'standings__diff--positive', ''])
+})

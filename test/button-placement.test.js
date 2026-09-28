@@ -61,6 +61,8 @@ const KEPT = [
   ['08-site-shell.css', '.sitefooter__btn', 'min-width', '0', 'a long label wraps inside its grid cell'],
   ['26-player-page.css', '.player__back', 'margin-left', 'calc(-1 * var(--space-2h))', 'the word sits on the page’s edge'],
   ['42-first-scorebook.css', '.allstarlegacy__door', 'margin-top', 'var(--space-3)', 'the door stands clear of the last honoree card'],
+  ['48-logbook.css', '.logbook__season', 'align-items', 'baseline', 'the year, its count and the tick share a baseline'],
+  ['35-postseason-series.css', '.psseries__facewrap .flipback__door', 'margin-bottom', 'var(--space-1)', 'the Box score door stands off the ledger row below it'],
 ]
 
 for (const [file, selector, property, value, why] of KEPT) {
@@ -91,4 +93,46 @@ test('the floating bar keeps its primary-action rules off Refresh', () => {
   assert.ok(ruleBody(css, '.pagenav .btn:where(:not(.innings__refresh))'), '.pagenav .btn must exclude Refresh')
   assert.equal(ruleBody(css, '.pagenav .btn'), null)
   assert.ok(ruleBody(css, '.pagenav--innings .btn:where(:not(.innings__refresh))::after'))
+})
+
+// The last hand-drawn copies (#1174). Each drew its own fill, edge, radius,
+// type or selected state; each is now the one Button (or, for Box score, a
+// Door) and keeps placement only, so none of these rules may come back.
+test('the swept controls draw nothing of their own', () => {
+  const gone = [
+    ['48-stamp-strip.css', '.stampstrip__modes button'],
+    ['48-stamp-strip.css', '.stampstrip__modes button.is-active'],
+    ['48-logbook.css', '.logbook__seasons button'],
+    ['48-logbook.css', '.logbook__seasons button.is-active'],
+    ['58-logbook-shelf.css', '.bookmgmt__modes'],
+    ['58-logbook-shelf.css', '.bookmgmt__modes button'],
+    ['22-box-score-tables.css', '.flipback__boxbtn'],
+    ['35-postseason-series.css', '.psseries__facewrap .flipback__boxbtn'],
+    ['59-stamp-in.css', '.stampin__facewrap .flipback__boxbtn'],
+    ['52-highlight-clip-card.css', '.flipback__watchbtn'],
+  ]
+  for (const [file, selector] of gone) assert.equal(ruleBody(read(file), selector), null, `${file} still draws ${selector}`)
+})
+
+test('the swept toggles take their selected state from aria, not .is-active or a skin', () => {
+  const SRC = join(STYLES, '..')
+  const jsx = (rel) => readFileSync(join(SRC, rel), 'utf8')
+  const strip = jsx('components/logbook/StampGameButton.jsx')
+  assert.match(strip, /<Button size="control" key=\{mode\} pressed=\{existing\.mode === mode\}/)
+  const seasons = jsx('screens/logbook/StampCollection.jsx')
+  assert.match(seasons, /aria-current=\{year === season \? 'page' : undefined\}/)
+  for (const rel of ['components/logbook/StampGameButton.jsx', 'screens/logbook/StampCollection.jsx']) {
+    assert.doesNotMatch(jsx(rel), /is-active/, `${rel} still writes .is-active`)
+  }
+  for (const rel of ['screens/scorecard/ScorecardPage.jsx', 'screens/ScorecardLab.jsx']) {
+    const all = jsx(rel)
+    const at = all.indexOf('aria-label="Half of inning"')
+    const src = all.slice(at, all.indexOf('</div>', at))
+    assert.doesNotMatch(src, /btn--ghost|skin=/, `${rel}: the unselected half is outline; pressed carries the state`)
+    assert.equal(src.match(/<Button size="control" pressed=\{side === '(top|bottom)'\}/g)?.length, 2, rel)
+  }
+  const watch = jsx('components/highlights/WatchCondensedButton.jsx')
+  assert.match(watch, /<Button size="control" skin="ink" className="flipback__watchbtn"/)
+  const face = jsx('components/game/GameResultFace.jsx')
+  assert.match(face, /<Door className="flipback__door" \{\.\.\.routeLink\(boxScorePath\)\}>/, 'Box score leaves the card, so it is a door')
 })

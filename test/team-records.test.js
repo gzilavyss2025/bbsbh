@@ -13,6 +13,7 @@ import { readFileSync } from 'node:fs'
 import { DatabaseSync } from 'node:sqlite'
 import {
   inningRuns,
+  isPlayedFinal,
   encodeInnings,
   decodeInnings,
   scoredFirstSide,
@@ -798,4 +799,28 @@ test('inning names and short dates print the way the two surfaces read them', ()
   assert.equal(shortDate('2026-08-26'), 'Aug 26')
   assert.equal(shortDate('2026-04-01'), 'Apr 1')
   assert.equal(shortDate(null), '—')
+})
+
+// statsapi marks a rained-out game "Final" (abstractGameState) whether it was
+// played or not: a cancelled game reads Final / Cancelled / C, and a postponed
+// one Final / Postponed / D. Only codedGameState 'F' is a game with a score.
+// Ingesting the other two wrote a 0-0 tie with no innings into the ledger, one
+// row per club, so a club's games-played count ran one over (Yankees, 2026-09-27).
+test('isPlayedFinal takes a played game and refuses a cancelled or postponed one', () => {
+  const g = (abstractGameState, detailedState, codedGameState) => ({
+    status: { abstractGameState, detailedState, codedGameState },
+  })
+  assert.equal(isPlayedFinal(g('Final', 'Final', 'F')), true)
+  assert.equal(isPlayedFinal(g('Final', 'Cancelled', 'C')), false)
+  assert.equal(isPlayedFinal(g('Final', 'Postponed', 'D')), false)
+  assert.equal(isPlayedFinal(g('Live', 'In Progress', 'I')), false)
+  assert.equal(isPlayedFinal({}), false)
+})
+
+test('the committed ledger carries no tie that was never played', () => {
+  const sql = readFileSync('scripts/data/team-records.sql', 'utf8')
+  const phantoms = sql
+    .split('\n')
+    .filter((line) => line.startsWith('INSERT INTO team_record_games') && line.includes(", 'T', ") && line.includes('"innings":[]'))
+  assert.deepEqual(phantoms.slice(0, 3), [], `${phantoms.length} rows are a 0-0 tie with no innings: a cancelled or postponed game`)
 })

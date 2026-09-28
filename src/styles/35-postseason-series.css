@@ -264,15 +264,9 @@
 .psseries__facewrap .flipback__abbr {
   font-size: var(--fs-title-sm);
 }
-/* One navy band per entry (the slate card's BOX SCORE button) would fight the
-   pennant band above five to seven times over — quiet it to a compact
-   secondary button, left-aligned like a ledger's margin note. */
-.psseries__facewrap .flipback__boxbtn {
+/* The result face's Box score door stands off the ledger row below it. */
+.psseries__facewrap .flipback__door {
   margin-bottom: var(--space-1);
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-rule);
-  color: var(--text-body);
-  font-size: var(--fs-small);
 }
 /* Headshot-led Play of the Game (SeriesPlayOfTheGame) — same idea as the full
    box score's own .bs__potg* (BoxScore.jsx), scoped to its own psseries__potg*

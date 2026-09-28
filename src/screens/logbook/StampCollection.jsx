@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { GameStamp } from '../../components/logbook/GameStamp.jsx'
+import { Button } from '../../components/ui/control/Button.jsx'
 
 // Every stamp you hold, season by season — the grid that has always sat below
 // the book, now behind a disclosure and CLOSED when the page loads.
@@ -58,16 +59,16 @@ export function StampCollection({
           {seasons.length > 1 && (
             <nav className="logbook__seasons" aria-label="Game Log seasons">
               {seasons.map((year) => (
-                <button
-                  type="button"
+                <Button
+                  size="control"
                   key={year}
-                  className={year === season ? 'is-active' : ''}
+                  className="logbook__season"
                   aria-current={year === season ? 'page' : undefined}
                   onClick={() => onSeason?.(year)}
                 >
                   {year}
                   <small>{counts[year]}</small>
-                </button>
+                </Button>
               ))}
             </nav>
           )}

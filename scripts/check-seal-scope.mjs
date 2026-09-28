@@ -18,9 +18,9 @@
 //     behind on the far side of a seal (ADR-0035);
 //   - the surfaces finding 9 of the design critique put on its must-survive
 //     list, where kraft carries real meaning: the @ watermark, the Last 10
-//     home-game ticket, the pencilled-in option year, and the club band's 3px
-//     accent underline — on a themed page that underline is the CLUB's accent
-//     (ADR-0030) and kraft is only its unthemed fallback.
+//     home-game ticket and the pencilled-in option year. The fourth, the club
+//     band's 3px underline, left kraft in #1151: its unthemed fallback is now
+//     --band-rule, because no tap lifts anything there.
 //
 // Everything else went to --marker (rank and flag emphasis) or to a structural
 // token. The full classification, one row per read, is the ledger this guard
@@ -70,22 +70,9 @@ const ALLOWLIST = {
   // already names. It carries its own hover values, like .btn--seal, so the
   // seal never leaves this one selector.
   'system/pill.css': ['.pill--seal'],
-  // The club band's one home (#1113). Its unthemed underline is
-  // `var(--bar-accent, var(--seal))`: the club-accent SLOT with kraft as its
-  // fallback (ADR-0083 clause 4). The house band pins navy and kraft for a
-  // head that names no club (ADR-0030). Together they replaced 17 band
-  // entries in 09, 12, 13, 20, 44 and 53: every band in the app, the innings
-  // view's included, wears this paint now.
-  'system/section-head.css': ['.sectionhead--band', '.sectionhead--band.sectionhead--house'],
 
   // The cover, its copy, the tear.
   '12-sealbox.css': ['.sealbox.cover', '.sealtear__face', '.cover__main', '.cover__sub'],
-  '69-pitch-arsenal.css': ['.pitchslab__head', '.pitchslab__heat'],
-  'focus/console.css': ['.gamehud--console'],
-  // The two mock bands — the identity lab's and the team hub's identity drawer —
-  // preview the real one, so they carry the real one's fallback.
-  '17-identity-lab-workbench.css': ['.idlab__barmock'],
-  '62-identity-admin.css': ['.idlab__barmock'],
 
   // The pencilled-in option year on a contract. Finding 9's must-survive list.
   // `.contractcard__seg--option` sets --seg-dot, a CUSTOM PROPERTY rather than
@@ -126,10 +113,6 @@ const ALLOWLIST = {
 // Outside src/styles/, a component may name --seal only if it is one of these.
 // Each sets or reads the token rather than painting with it.
 const NON_STYLE_ALLOWLIST = {
-  // The band mock again, this time as an inline custom-property override: the
-  // lab feeds a club's Bar/Accent/On-bar into --navy/--seal/--text-on-ink and
-  // lets the cascade dress the real masthead rules.
-  'src/screens/identity-lab/editors/WpaScenarios.jsx': true,
   // The OG poster renderer reads the token off :root to paint the same band on
   // a canvas, where no CSS rule can reach (api/preview.js, ADR-0012).
   'src/lib/preview/posterPaper.js': true,

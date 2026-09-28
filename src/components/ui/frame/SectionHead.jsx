@@ -9,13 +9,13 @@ import { sectionHeadClassName, sectionHeadTitleTag } from '../../../lib/design/s
 //           'band' — the club band: --bar-fill ground, a 3px --bar-accent
 //           underline, --bar-text ink, all three read from the NEAREST
 //           ancestor that sets them (lib/headerTheme.js). With no club, the
-//           house navy with a kraft line. SectionHead takes no theme prop: a
+//           house navy with a pencil-rule line. SectionHead takes no theme prop: a
 //           club may colour a head that names the club, and the theme stays on
 //           the card or page root, where it is now (ADR-0030).
 //   club    band only: a plain label until a club colour arrives (the team
 //           hub's card heads, the player page's section bars).
 //   bleed   band only: runs to the page edge, square corners, one size up.
-//   house   band only: the house navy and kraft whatever club the page
+//   house   band only: the house navy and pencil rule whatever club the page
 //           wears, for a head that names no club (ADR-0030).
 //   as      the title element: 'h3' (the default), 'h2', 'h4', or 'span' inside
 //           a card that already has a heading.

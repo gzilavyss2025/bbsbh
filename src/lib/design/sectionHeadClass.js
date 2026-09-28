@@ -21,7 +21,7 @@
 //   bleed  the band runs to the page edge with square corners, one size up:
 //          the player page's top-level sections, which head a page section
 //          and not a card.
-//   house  the house navy and kraft whatever club the page wears: a head
+//   house  the house navy and pencil rule whatever club the page wears: a head
 //          that names no club (the umpire card) inside a themed page
 //          (ADR-0030).
 export const LOOKS = ['label', 'rule', 'band']

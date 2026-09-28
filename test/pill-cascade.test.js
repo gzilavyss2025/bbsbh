@@ -239,3 +239,32 @@ test('the ink is a token by name, and the seal, a club bar and the marker are re
   assert.throws(() => pillInkStyle({ ink: '--marker' }), /fill, never an ink/)
   assert.throws(() => pillInkStyle({ fill: 'ink', ink: '--field' }), /carries its own ink/)
 })
+
+// The pill is a flex container (display: inline-flex), and text-overflow acts
+// only on a block container: the text inside a flex box is an anonymous flex
+// item, so the ellipsis never draws and a long label is cut mid-letter (#1183).
+// A host that asks for an ellipsis must also make itself a block.
+test('a pill host that asks for an ellipsis also makes itself a block, or the ellipsis never draws', () => {
+  const hosts = tintHosts().filter((h) => decl(h.body, 'text-overflow') === 'ellipsis')
+  assert.ok(hosts.some((h) => h.selector === '.phcard__tag'), 'the hover card tag should be found by the scan')
+  for (const { rel, selector, body } of hosts) {
+    assert.match(
+      decl(body, 'display') ?? '',
+      /^(inline-)?block$/,
+      `${rel}: ${selector} declares text-overflow: ellipsis on an inline-flex pill; add display: inline-block`,
+    )
+  }
+})
+
+// A result tag is positive or negative from the moment it is drawn and never
+// changes on screen, so its kind is a variant (--modifier), not a state (.is-*)
+// (ADR-0084 clause 4, #1185).
+test('the foul tracker\'s result tag names its two kinds as variants, not states', () => {
+  const css = read('43-foul-tracker.css')
+  for (const kind of ['positive', 'negative']) {
+    assert.ok(ruleBody(css, `.scorebug__result--${kind}`) !== null, `.scorebug__result--${kind} should carry the ${kind} tint`)
+    assert.equal(ruleBody(css, `.scorebug__result.is-${kind}`), null)
+  }
+  const jsx = readFileSync(join(SRC, 'screens/FoulTrackerPage.jsx'), 'utf8')
+  assert.match(jsx, /scorebug__result scorebug__result--\$\{positive \? 'positive' : 'negative'\}/)
+})

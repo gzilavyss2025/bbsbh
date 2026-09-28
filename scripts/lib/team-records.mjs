@@ -21,6 +21,21 @@
 // import them (the lib/roster.mjs convention).
 
 // ---------------------------------------------------------------------------
+// Which games count
+// ---------------------------------------------------------------------------
+
+// A game that was played to a result. statsapi marks a rained-out game
+// abstractGameState "Final" whether it was played or not: a cancelled game is
+// Final / Cancelled / C, and a postponed one Final / Postponed / D. Neither
+// carries a linescore, so ingesting one writes a 0-0 tie with no innings.
+// codedGameState 'F' is the gate, the same one gen-schedule-shape.mjs uses. A
+// game still at 'O' (Game Over) is skipped and picked up by the next run's
+// trailing window, once it reads 'F'.
+export function isPlayedFinal(game) {
+  return game?.status?.codedGameState === 'F'
+}
+
+// ---------------------------------------------------------------------------
 // Linescore
 // ---------------------------------------------------------------------------
 

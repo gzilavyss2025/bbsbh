@@ -61,6 +61,7 @@ import { parseArgs, dateRange } from './lib/args.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import {
   inningRuns,
+  isPlayedFinal,
   encodeInnings,
   decodeInnings,
   scoredFirstSide,
@@ -172,8 +173,9 @@ async function pitcherRolesFor(sportId, season) {
 }
 
 // Final regular-season games in the window, at every swept level, that aren't
-// already on file. A Postponed row keeps its original date in the feed and
-// carries no linescore, so it is dropped rather than ingested as a 0-0 tie.
+// already on file. A Postponed or Cancelled row reads "Final" too, keeps its
+// original date in the feed and carries no linescore, so isPlayedFinal drops
+// it rather than ingesting it as a 0-0 tie.
 async function candidatesFor(dates, existing) {
   const out = []
   for (const sportId of sports) {
@@ -188,8 +190,7 @@ async function candidatesFor(dates, existing) {
         continue
       }
       for (const g of (slate.dates ?? []).flatMap((d) => d.games ?? [])) {
-        if (g.status?.abstractGameState !== 'Final') continue
-        if (g.status?.detailedState === 'Postponed') continue
+        if (!isPlayedFinal(g)) continue
         if (existing.has(String(g.gamePk))) continue
         const away = g.teams?.away?.team
         const home = g.teams?.home?.team

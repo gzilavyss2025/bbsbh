@@ -869,7 +869,7 @@
 .standings tr.is-me .team {
   color: var(--fav-accent, var(--field-deep));
 }
-.standings td.is-positive {
+.standings td.standings__diff--positive {
   color: var(--accent-positive);
 }
 /* Home/Away split columns — phone width is too narrow for them alongside
@@ -883,11 +883,11 @@
     display: table-cell;
   }
 }
-.standings td.is-negative {
+.standings td.standings__diff--negative {
   color: var(--accent-negative);
 }
 /* Division magic-number column once a club has clinched (at least a tie for)
-   its division — same "good news" tone as is-positive, bolded to read as a
+   its division — same "good news" tone as the positive run differential, bolded to read as a
    verdict rather than just another number. */
 .standings td.is-clinched {
   color: var(--accent-positive);

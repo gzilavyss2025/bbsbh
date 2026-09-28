@@ -323,33 +323,14 @@
 
 /* ---- "Condensed game" button on a revealed slate card.
 
-   It lives HERE, not beside its .flipback__* siblings in
-   22-box-score-tables.css, for two reasons: that file is at its
-   check-file-size ceiling, and this rule belongs to the video family
-   anyway — every affordance in the app that means "there is video
-   here" wears the same ink tab (the WATCH tab above, the condensed
-   panel's tab, the player's SAVE pill), and they should be read
-   together. They wore kraft tape until ADR-0083. */
-.flipback__watchbtn {
-  width: auto;
-  min-height: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-2h);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-}
-.flipback__watchbtn:hover:not(:disabled) {
-  background: var(--ink-1);
-  border-color: var(--ink-1);
-}
-/* The same border-drawn ▶ the clip cards use, at caption scale. */
+   The button itself is a Button, ink skin at control size (#1174), so it
+   has no rule of its own here. Its glyph lives HERE, not beside its
+   .flipback__* siblings in 22-box-score-tables.css, because it belongs to
+   the video family: every affordance in the app that means "there is video
+   here" wears the same ink (the WATCH tab above, the condensed panel's tab,
+   the player's SAVE pill). They wore kraft tape until ADR-0083.
+
+   The same border-drawn ▶ the clip cards use, at caption scale. */
 .flipback__watchIcon {
   width: 0;
   height: 0;

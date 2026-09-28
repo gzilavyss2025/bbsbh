@@ -163,25 +163,6 @@
   gap: var(--space-2);
 }
 
-.stampstrip__modes button {
-  min-height: 32px;
-  padding: 0 var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  color: var(--text-muted);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-}
-
-.stampstrip__modes button.is-active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-}
-
 .stampstrip__note {
   display: flex;
   flex-direction: column;
