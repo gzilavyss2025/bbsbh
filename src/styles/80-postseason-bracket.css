@@ -1,0 +1,368 @@
+/* The postseason bracket above the slate cards (#1224, slice 5). Concept D's
+   picked look: Concept B's ticket fold + pennant, Concept A's "back page"
+   full bracket (boxes, simple connector stubs — the same deliberately-simple
+   technique 34-postseason.css already uses for the history bracket, not a
+   full elbow/tree join). Semantic tokens only; the metaphor is pencil for an
+   open series, ink once it is decided. Component-imported (not in
+   src/index.css) since it only ever loads on the home slate during the
+   postseason window — see PostseasonBracket.jsx. */
+
+.pbkt {
+  margin: var(--space-3) 0;
+}
+
+/* ---------- shared parts ---------- */
+.pbkt-pips {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  flex: none;
+  margin-left: auto;
+}
+.pbkt-pip {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-rule) solid var(--graphite);
+  background: transparent;
+}
+.pbkt-pip--on {
+  background: var(--graphite);
+}
+
+.pbkt-mark {
+  flex: none;
+  display: inline-block;
+  object-fit: contain;
+}
+.pbkt-mark--out {
+  background: var(--graphite);
+  -webkit-mask: var(--pbkt-mono, none) center / contain no-repeat;
+  mask: var(--pbkt-mono, none) center / contain no-repeat;
+}
+.pbkt-mark--empty {
+  border: var(--bw-hair) dashed var(--graphite);
+  border-radius: var(--radius-pill);
+}
+
+/* A future slot: a blank ruled line, never the word "TBD". */
+.pbkt-blank {
+  display: inline-block;
+  flex: 1 1 auto;
+  min-width: 28px;
+  height: 0;
+  border-bottom: var(--bw-hair) dashed var(--graphite);
+  align-self: center;
+}
+
+.pbkt-trophy {
+  flex: none;
+  display: block;
+}
+
+/* A highlighter swipe for the brief's one bold moment — --marker is a fill
+   behind dark ink, never an ink of its own (see root CLAUDE.md's do-nots:
+   no bold weight, no rubber stamp, no red/green). */
+.pbkt-box--bold .pbkt-box__note,
+.pbkt-ticket--bold .pbkt-ticket__note,
+.pbkt-ws--bold .pbkt-box__note {
+  display: inline-block;
+  background: var(--marker);
+  color: var(--text-heading);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+}
+
+/* ---------- the fold ---------- */
+.pbkt-fold {
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--graphite);
+  border-top: var(--bw-heavy) solid var(--text-heading);
+  border-radius: var(--radius-sm);
+}
+.pbkt-fold__tickets {
+  list-style: none;
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+.pbkt-ticket {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1h) var(--space-2h) var(--space-2);
+  border: var(--bw-hair) solid var(--graphite);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+  text-decoration: none;
+  color: inherit;
+}
+.pbkt-ticket__head {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+  padding-bottom: 2px;
+}
+.pbkt-ticket__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  min-height: 26px;
+}
+.pbkt-ticket__abbr {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+.pbkt-ticket--bold {
+  border-color: var(--accent-primary);
+  border-width: 2px;
+}
+.pbkt-ticket__note {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  align-self: flex-start;
+}
+.pbkt-fold__quiet {
+  padding: var(--space-2) 0;
+}
+.pbkt-fold__quiethead {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  color: var(--text-heading);
+  letter-spacing: var(--ls-title);
+}
+.pbkt-fold__waiting {
+  margin: 0;
+  padding-left: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+.pbkt-fold__waiting li + li {
+  margin-top: var(--space-1);
+}
+.pbkt-fold__door {
+  margin-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.pbkt-fold__champ {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+.pbkt-fold__champtext {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.pbkt-fold__champname {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  color: var(--accent-primary);
+  line-height: var(--lh-tight);
+}
+.pbkt-fold__champsub {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+/* ---------- the full bracket ---------- */
+.pbkt-full {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-3);
+}
+.pbkt-league .sectionhead {
+  margin-bottom: var(--space-2);
+}
+.pbkt-byes {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+}
+.pbkt-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.pbkt-lane {
+  display: grid;
+  grid-template-columns: minmax(72px, 1fr) minmax(96px, 1.3fr);
+  gap: var(--space-2);
+  align-items: center;
+}
+.pbkt-cell {
+  position: relative;
+}
+/* Simple connector stub, WC -> DS — the same deliberately-simple horizontal
+   tick 34-postseason.css already uses, not a full elbow join. */
+.pbkt-cell--wc::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: calc(-1 * var(--space-2) - 1px);
+  width: var(--space-2);
+  height: var(--bw-hair);
+  background: var(--border-rule);
+}
+.pbkt-cell--lcs {
+  margin-top: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+.pbkt-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-hair) solid var(--graphite);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  text-decoration: none;
+  color: inherit;
+}
+.pbkt-box--bold {
+  border: 3px double var(--accent-primary);
+}
+.pbkt-box--compact {
+  padding: var(--space-1) var(--space-1h);
+  border-style: dashed;
+  border-color: var(--text-muted);
+  background: transparent;
+}
+.pbkt-box__done {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-primary);
+}
+.pbkt-box__note {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.pbkt-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 24px;
+}
+.pbkt-row__abbr {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+}
+/* strike-link-exempt: a plain club abbreviation, never a TeamLink/PlayerLink */
+.pbkt-row--out .pbkt-row__abbr {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.pbkt-row--empty .pbkt-row__abbr {
+  display: none;
+}
+
+.pbkt-ws {
+  display: block;
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+}
+.pbkt-ws--bold {
+  border-width: 2px;
+}
+.pbkt-ws__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent-primary);
+  border-bottom: var(--bw-heavy) solid var(--award-line);
+}
+.pbkt-ws__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  color: var(--text-on-ink);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-tight);
+}
+.pbkt-ws--champ .pbkt-ws__name {
+  font-size: var(--fs-h1);
+}
+.pbkt-ws__sub {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+}
+.pbkt-ws__rows {
+  padding: var(--space-1) var(--space-3) var(--space-2);
+}
+.pbkt-ws .pbkt-row {
+  min-height: 32px;
+}
+.pbkt-ws .pbkt-row + .pbkt-row {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.pbkt-ws .pbkt-box__note {
+  padding: 0 var(--space-3) var(--space-2);
+}
+
+/* ---------- wide screens (Gary's decision, 2026-09-28) ---------- */
+@media (min-width: 900px) {
+  .pbkt-fold__door {
+    display: inline-flex;
+    width: auto;
+    margin: var(--space-2) 0 0;
+    padding: var(--space-1) var(--space-3);
+  }
+  .pbkt-full {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-6);
+    row-gap: var(--space-3);
+    align-items: start;
+  }
+  .pbkt-league:nth-of-type(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .pbkt-league:nth-of-type(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .pbkt-ws {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+    width: 100%;
+    max-width: 460px;
+  }
+}

@@ -12,12 +12,15 @@ import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useIntroFlag } from '../hooks/preferences/useIntroFlag.js'
 import { usePromptDismiss } from '../hooks/preferences/usePromptDismiss.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
-import { capSlateDate, atForwardLimit } from '../lib/postseason/capSlateDate.js'
+import { capSlateDate, atForwardLimit, isPostseasonWindow } from '../lib/postseason/capSlateDate.js'
+import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
+import { offDayAliveTeams } from '../lib/postseason/bracketDisplay.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { GameCard } from '../components/game/GameCard.jsx'
 import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
 import { PastGameFlipCard } from '../components/game/PastGameFlipCard.jsx'
+import { PostseasonBracket } from '../components/bracket/PostseasonBracket.jsx'
 import { LevelNav } from '../components/team/LevelNav.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { TallyLockup } from '../components/chrome/TallyBrand.jsx'
@@ -134,6 +137,22 @@ export function GameSelect({
     sportId === SPORT_IDS.MLB ? capSlateDate(rawDateStr, todayStr, postseasonCapMeta.data) : rawDateStr
   const isToday = dateStr === todayStr
   const forwardLimited = atForwardLimit(dateStr, todayStr, postseasonCapMeta.data)
+
+  // The bracket above the cards (#1224, slice 5) — MLB only, every date in
+  // the postseason window, off days included. Keyed to the SLATE's own
+  // YEAR, not today's: a browsed-to past postseason (`/10092025`) needs
+  // THAT year's season row, not today's — `postseasonCapMeta` above answers
+  // a different question (today's own forward-cap) and can't serve this
+  // one. Keyed on the year alone (not the full date), so paging day to day
+  // within one postseason re-fetches nothing.
+  const bracketSeason = Number(dateStr.slice(0, 4))
+  const bracketSeasonMeta = useAsync(
+    () => (sportId === SPORT_IDS.MLB ? fetchSeasonMeta(bracketSeason) : Promise.resolve(null)),
+    [sportId, bracketSeason],
+  )
+  const inPostseasonWindow =
+    sportId === SPORT_IDS.MLB && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
+  const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null)
 
   // The league's roster moves have two presentations of the SAME feed, split at
   // the app's one layout breakpoint. Neither one stands above the game list any
@@ -364,19 +383,23 @@ export function GameSelect({
   // carries squad ids no club owns). That all-league case is kept ON PURPOSE:
   // the break has no club games, so the full grid gives the slate something
   // to browse instead of a bare "No games scheduled."
+  // In the postseason window (Gary's decision, 2026-09-28): only postseason
+  // clubs still alive with no game today — not every idle club at the level.
+  // Uses the SAME bracket the fold and the full view draw, so "alive" can
+  // never disagree between the grid and the bracket above it.
   const offDayTeams = useMemo(() => {
-    const all = levelTeams.data ?? []
-    if (!all.length) return []
     const playing = new Set(sorted.flatMap((g) => [g.away.id, g.home.id]))
-    return all
-      .filter((t) => !playing.has(t.id))
-      .sort((a, b) => {
-        const pa = isPinnedTeam(a.id, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
-        const pb = isPinnedTeam(b.id, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
-        if (pa !== pb) return pa - pb
-        return (a.name ?? '').localeCompare(b.name ?? '')
-      })
-  }, [levelTeams.data, sorted, favoriteTeamId, favoriteAffiliateIds])
+    const all = inPostseasonWindow
+      ? offDayAliveTeams(postseasonBracket.bracket, playing)
+      : (levelTeams.data ?? []).filter((t) => !playing.has(t.id))
+    if (!all.length) return []
+    return [...all].sort((a, b) => {
+      const pa = isPinnedTeam(a.id, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
+      const pb = isPinnedTeam(b.id, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
+      if (pa !== pb) return pa - pb
+      return (a.name ?? '').localeCompare(b.name ?? '')
+    })
+  }, [inPostseasonWindow, postseasonBracket.bracket, levelTeams.data, sorted, favoriteTeamId, favoriteAffiliateIds])
 
   // All-Star break detection — only worth a fetch once the MLB slate has
   // already come back empty (every other day, this never fires). Turns a
@@ -422,8 +445,12 @@ export function GameSelect({
   // away, so the scan can only ever answer null — expensively, on exactly the
   // day it cannot help. The calendar already knows the league is out of season.
   const winterDark = onWinter && winterBall.ready && !winterBall.tabVisible
+  // A postseason off day is not the generic "Off Day" banner: the bracket's
+  // fold above the cards already says so (Gary's decision, 2026-09-28 — the
+  // bracket is the whole page there), and this lookup would otherwise ask
+  // fetchNextGameDate a question the bracket already answers.
   const needsResumeLookup =
-    isEmptyDay && !isDerbyDay && !allStarPending && !offseason && !winterDark
+    isEmptyDay && !isDerbyDay && !allStarPending && !offseason && !winterDark && !inPostseasonWindow
   const resumeLookup = useAsync(
     () =>
       needsResumeLookup
@@ -898,11 +925,19 @@ export function GameSelect({
             // neither flashes "No games scheduled." before the fetch resolves.
             emptyMessage={
               seasonMeta.loading || breakWindow || resumeLookupPending ||
-              showOffDayBanner || offseason
+              showOffDayBanner || offseason || inPostseasonWindow
                 ? null
                 : 'No games scheduled.'
             }
           />
+
+          {/* The postseason bracket (#1224, slice 5) — above the cards, every
+              date in the window, off days included. On an off day this is
+              the only thing here besides the chrome above (Gary's decision,
+              2026-09-28: "the bracket is the whole page"). */}
+          {inPostseasonWindow && (
+            <PostseasonBracket bracket={postseasonBracket.bracket} cutoff={postseasonBracket.cutoff} />
+          )}
 
           {/* THE OFFSEASON PAGE (issues #1038, #1077). It moves nothing: the
               club strip, the level tabs and the date banner all stay where they
