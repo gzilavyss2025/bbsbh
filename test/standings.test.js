@@ -301,3 +301,14 @@ test('attachRankTrend is null for a team missing from the previous snapshot', ()
   attachRankTrend(leagues, 'division', new Map())
   assert.equal(leagues[0].divisions[0].teams[0].trend, null)
 })
+
+test('shapeStandings names the run-differential sign as a variant, not a state (ADR-0084, #1185)', () => {
+  const records = rawRecords()
+  const [lg] = shapeStandings(records)
+  const [leader, even] = lg.divisions[0].teams
+  assert.equal(leader.diffTone, 'standings__diff--positive')
+  assert.equal(even.diffTone, '')
+  records[0].teamRecords[1].runDifferential = -12
+  const [lg2] = shapeStandings(records)
+  assert.equal(lg2.divisions[0].teams[1].diffTone, 'standings__diff--negative')
+})

@@ -46,7 +46,7 @@ function signed(n) {
 }
 function diffTone(n) {
   if (!Number.isFinite(n) || n === 0) return ''
-  return n > 0 ? 'is-positive' : 'is-negative'
+  return n > 0 ? 'standings__diff--positive' : 'standings__diff--negative'
 }
 
 // Expected W-L as of THIS cutoff — the record a club's runs scored and allowed
