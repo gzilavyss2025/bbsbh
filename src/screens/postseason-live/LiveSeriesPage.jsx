@@ -12,22 +12,15 @@ import { toApiDate } from '../../lib/dates.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { TeamLink } from '../../components/team/TeamLink.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
-import { Headshot } from '../../components/player/Headshot.jsx'
-import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { GameResultFace } from '../../components/game/GameResultFace.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { seriesGameBuckets, upcomingGameLabel } from './selectors.js'
+import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../../components/postseason/SeriesParts.jsx'
+import { monthDay } from '../../components/postseason/monthDay.js'
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-// No year, same reasoning as PostseasonSeriesPage.jsx's own monthDay: a
-// series' games all land inside one October.
-function monthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
-}
 
 // The record AS OF one logged game, in the same three wordings recordLine
 // (text.js) uses for the series' current state — mirrored here rather than
@@ -291,158 +284,6 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           ))}
         </div>
       )}
-    </div>
-  )
-}
-
-function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
-}
-
-// Same idea as PostseasonSeriesPage.jsx's own SeriesPlayOfTheGame — a
-// headshot-led panel for the wide layout's second column, suppressed
-// entirely with no WPA or a failed box-score resolution.
-function SeriesPlayOfTheGame({ potg, awayAbbr, homeAbbr }) {
-  if (!potg?.desc) return null
-  const halfLabel = potg.half === 'top' ? 'Top' : 'Bottom'
-  const hasScore = potg.awayScore != null && potg.homeScore != null
-  return (
-    <div className="psseries__potg">
-      <h4 className="psseries__potgTitle">Play of the game</h4>
-      <div className="psseries__potgBody">
-        <Headshot personId={potg.batterId} name={potg.batterName} teamId={potg.batterTeamId} className="psseries__potgShot" />
-        <div className="psseries__potgMain">
-          {potg.batterName && (
-            <div className="psseries__potgWho">
-              <PlayerLink id={potg.batterId} className="psseries__potgName">
-                {potg.batterName}
-              </PlayerLink>
-              {(potg.batterTeamAbbr || potg.batterPos) && (
-                <span className="psseries__potgMeta">{[potg.batterTeamAbbr, potg.batterPos].filter(Boolean).join(' · ')}</span>
-              )}
-            </div>
-          )}
-          <p className="psseries__potgDesc">
-            {potg.inning != null && (
-              <span className="psseries__potgWhen">
-                {halfLabel} {ordinal(potg.inning)}{' '}
-              </span>
-            )}
-            {potg.desc}
-            {hasScore && (
-              <span className="psseries__potgScore">
-                {' '}
-                {awayAbbr} {potg.awayScore}, {homeAbbr} {potg.homeScore}
-              </span>
-            )}
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Same agate board as PostseasonSeriesPage.jsx's SeriesLeaderBoard/
-// SeriesLeaderLine, over a 1-3 game sample instead of a full series — renders
-// nothing when no category clears postseasonSeries.js's own qualifying floor,
-// which is expected for a Wild Card series' first game or two.
-function SeriesLeaderBoard({ title, categories, byCategory }) {
-  const ranked = categories
-    .map((category) => ({ category, entries: byCategory[category.key] ?? [] }))
-    .filter((r) => r.entries.length > 0)
-  if (ranked.length === 0) return null
-  return (
-    <section className="psseries__lboard">
-      <SectionHead look="label">{title}</SectionHead>
-      <div className="psseries__lrows">
-        {ranked.map(({ category, entries }) => (
-          <SeriesLeaderLine key={category.key} category={category} entries={entries} />
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function SeriesLeaderLine({ category, entries }) {
-  const [leader, ...chasers] = entries
-  const leaderTied = chasers.length > 0 && chasers[0].value === leader.value
-  return (
-    <div className="psseries__lcat">
-      <span className="psseries__lkey" aria-label={category.label} title={category.label}>
-        {category.short}
-        {leaderTied && (
-          <span className="psseries__ltied" aria-hidden="true">
-            tied
-          </span>
-        )}
-      </span>
-      <div className="psseries__lmain">
-        <div className="psseries__ltop">
-          <TeamLogo teamId={leader.teamId} name={teamClubNameShort(leader.teamId)} size={18} />
-          <PlayerLink id={leader.id} className="psseries__lname">
-            {leader.name}
-          </PlayerLink>
-          <span className="psseries__lval">{leader.display}</span>
-        </div>
-        {chasers.length > 0 && (
-          <p className="psseries__lchase">
-            {chasers.map((e, i) => (
-              <span key={e.id} className="psseries__lchaser">
-                <TeamLogo teamId={e.teamId} name={teamClubNameShort(e.teamId)} size={13} />
-                <PlayerLink id={e.id} className="psseries__lchasername">
-                  {e.name}
-                </PlayerLink>
-                <span className="psseries__lchaserval">{e.display}</span>
-                {i < chasers.length - 1 && (
-                  <span className="psseries__ldot" aria-hidden="true">
-                    ·
-                  </span>
-                )}
-              </span>
-            ))}
-          </p>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// Same reference-roster card as PostseasonSeriesPage.jsx's RosterCard/
-// RosterGroup — every player who dressed for at least one counted game.
-function RosterCard({ teamId, roster }) {
-  const positionPlayers = roster?.positionPlayers ?? []
-  const pitchers = roster?.pitchers ?? []
-  if (positionPlayers.length === 0 && pitchers.length === 0) return null
-  return (
-    <section className="psseries__rostercard">
-      <div className="psseries__rosterhead">
-        <TeamLogo teamId={teamId} name={teamClubNameShort(teamId)} size={24} />
-        <span className="psseries__rosterteam">{teamClubNameShort(teamId)} roster</span>
-      </div>
-      {positionPlayers.length > 0 && <RosterGroup title="Position players" rows={positionPlayers} />}
-      {pitchers.length > 0 && <RosterGroup title="Pitchers" rows={pitchers} />}
-    </section>
-  )
-}
-
-function RosterGroup({ title, rows }) {
-  return (
-    <div className="psseries__rostergroup">
-      <h4 className="psseries__rostergrouptitle">{title}</h4>
-      <ul className="psseries__rosterlist">
-        {rows.map((p) => (
-          <li key={p.id} className="psseries__rosterrow">
-            <span className="psseries__rosternum">{p.jersey}</span>
-            <PlayerLink id={p.id} className="psseries__rostername">
-              {p.name}
-            </PlayerLink>
-            <span className="psseries__rosterpos">{p.position}</span>
-            <span className="psseries__rosterchev">›</span>
-          </li>
-        ))}
-      </ul>
     </div>
   )
 }
