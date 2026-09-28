@@ -193,3 +193,75 @@ open, and the shorter label read as the latter.
   in-house. What #1078 listed as unverified is now half-answered: the half
   records exist and are internally consistent at every level for 2026. That is
   evidence about the data, not about the rules.
+
+## Addendum (2026-09-28): the champion replaces the warning
+
+Gary's decision, 2026-09-28, as slice 7 of #1224 builds it: the Season record
+row shows the MLB champion on its own face for the whole offseason, and the
+full postseason bracket is one tap away. It keeps results in the one row this
+page already built for them, rather than opening a second door onto the same
+season.
+
+### Why the tape and the warning line come off
+
+The row's design, above, was a LABEL in front of a door: kraft-weave tape
+down the edge, and "Opening this shows results" in words beside it, so a
+reader knew what a tap would do before they made it. That is still the right
+shape for a row that only LINKS to results.
+
+It stops being the right shape the moment the row also SHOWS one. Once the
+champion sits on the row's own face — the club, the mark, the World Series
+line — the warning is no longer in front of a door. It is in front of a
+result the reader has already read. A warning that a thing "shows results"
+is false once the result is already shown; keeping it would have the row lie
+to a reader in its own first sentence.
+
+**This is not ADR-0083's reason.** ADR-0083 scoped `var(--seal*)` to
+surfaces where a reveal is possible, and by the time slice 7 opened, the
+row's tape had already moved off kraft to `--hold-texture` under that ADR —
+a weave in the flag colour, not the cover's own. ADR-0083 never asked this
+row to lose its tape; it only asked the tape to stop borrowing a colour that
+promises a reveal nothing here performs. This addendum's reason is
+independent and came later: a flat warning in front of a face that already
+carries the thing it warns about is false, whatever colour the tape wears.
+
+So both come off. The row keeps its title and one plain sentence saying how
+the season finished — prose, not a warning — plus its "Final standings" and
+"The postseason" links, unchanged.
+
+### The correction
+
+The original text above states: *"The offseason page has exactly one row
+that opens onto results, and it is the only thing on the page wearing kraft
+tape."* Both halves need correcting. By the time this addendum was written,
+the row's tape was already `--hold-texture`, not kraft (ADR-0083) — so even
+before slice 7, the sentence overstated its own colour. And as of slice 7,
+the row wears no tape at all, of either colour.
+
+### The source, never the history file
+
+The champion comes from slice 3's live-schedule derivation
+(`src/api/postseason/bracket.js`'s `deriveBracket`, `docs/api/postseason.md`),
+read the same way the home page's bracket reads it
+(`usePostseasonBracket`), never from `public/data/postseason-history.json`.
+That file gets a season only after a hand-run script sees its whole bracket
+Final (ADR-0087's build prompt, trap 7); the live schedule is already correct
+the day after the last World Series game, with no hand-run step, which is
+what lets the row show the champion on offseasonStartDate itself.
+
+### Consequences
+
+- `SeasonRecord.jsx` takes a `dateStr` prop now, so it can ask
+  `usePostseasonBracket` for the bracket heading into the date the offseason
+  page is showing — a past offseason date the reader paged back to gets that
+  date's own reading, same as the home page bracket does.
+- The row renders `PostseasonBracket` (`src/components/bracket/`,
+  #1224 slice 5) exactly as the home page does, depended on only by its
+  `bracket`/`cutoff` props — its own folded view already puts the champion on
+  its face and a tap behind "Open the bracket" opens the full bracket, so
+  this row needed no new bracket-drawing code of its own.
+  MLB only: a minor level's row never fetches a bracket and never changes.
+- No `SealBox`, no seal, no kraft — ADR-0087's rule for the postseason
+  bracket now covers this row's use of it too. Nothing here persists, reveals
+  or consents; the champion is public the same way the standings and
+  postseason-history links already were.
