@@ -12,6 +12,7 @@
 import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { resultsUrl, skeletonUrl } from '../../../src/api/postseason/fetch.js'
+import { rosterUrl } from '../../../src/api/postseason/roster.js'
 
 const DIR = fileURLToPath(new URL('.', import.meta.url))
 const BASE = 'https://statsapi.mlb.com'
@@ -25,3 +26,14 @@ async function save(name, path) {
 
 for (const year of [2008, 2022, 2025, 2026]) await save(`${year}-skeleton`, skeletonUrl(year))
 for (const year of [2008, 2022, 2025]) await save(`${year}-results`, resultsUrl(year, `${year + 1}-01-01`))
+
+// Active rosters, with the SAME URL src/api/postseason/roster.js sends: MIL on
+// NLDS Game 1, CHC the day before its first game, on its last day, and after.
+const rosters = {}
+for (const [teamId, date] of [[158, '2025-10-04'], [112, '2025-09-29'], [112, '2025-10-11'], [112, '2025-10-20']]) {
+  const res = await fetch(`${BASE}${rosterUrl(teamId, date)}`)
+  if (!res.ok) throw new Error(`roster ${teamId}@${date}: HTTP ${res.status}`)
+  rosters[`${teamId}@${date}`] = await res.json()
+}
+writeFileSync(`${DIR}2025-rosters.json`, JSON.stringify(rosters))
+console.log('wrote 2025-rosters.json')

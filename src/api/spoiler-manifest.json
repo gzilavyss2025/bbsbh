@@ -765,6 +765,10 @@
       "class": "cutoff-gated",
       "why": "The bracket's two statsapi reads, separate from fetchSchedule like fetchSlateScores. The results read asks only for dates BEFORE the cutoff (endDate is the day before) and only for `isWinner` and the game state: never runs, a score, a linescore, `seriesStatus` or `leagueRecord`, the last two being the state AFTER a game (trap 1). The skeleton read asks for every date but for no result field at all, not even the game state. The heading-into-the-date gate is the cutoff the caller passes; bracket.js applies it a second time."
     },
+    "postseason/roster.js": {
+      "class": "spoiler-free",
+      "why": "A club's declared postseason roster: its active roster (`/teams/{id}/roster?rosterType=active&date=`) on the last date its series played by the cutoff. Names, jersey numbers and positions only; a roster move is not a result. statsapi has no postseason roster type."
+    },
     "postseason/text.js": {
       "class": "cutoff-gated",
       "why": "The slate card's two lines and the series page's record line ('Game 2 · NL Wild Card', 'Game 3 · ALDS', 'World Series' kept whole; 'CHC leads 1–0', 'Series tied 1–1', 'Winner take all'), read off one series from bracket.js and nothing else. It inherits that module's footing whole: the state heading into the cutoff date, so a game on the slate never changes its own card."
