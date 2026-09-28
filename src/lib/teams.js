@@ -74,8 +74,10 @@ function byTreatment(pick, { includeMain = false } = {}) {
   return byTreatmentIn(MLB_TUNING_STORE, pick, { includeMain })
 }
 
-// The user scores Brewers games most often, so we pin them to the top of the
-// slate. teamId 158 is the Milwaukee Brewers in the MLB Stats API.
+// The default club: the slate pins the user's favorite team (useFavoriteTeam),
+// and this is the fallback until they pick one (preferences.js `club`). Some
+// tool pages (LogoSheet, GamePhotosPage) still start from it directly.
+// teamId 158 is the Milwaukee Brewers in the MLB Stats API.
 export const PINNED_TEAM_ID = 158
 
 // MLB Stats API sportId codes. sportId 1 is MLB; the minors use the codes
