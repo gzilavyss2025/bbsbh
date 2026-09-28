@@ -243,6 +243,47 @@
   border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
 }
 
+/* The postseason series line (#1224, slice 4) — "Game 2 · NL Wild Card" plus
+   the heading-in record, text only, no pips (the bracket alone draws those).
+   Same bleed-to-the-edges technique as .gamecard__datebanner above, but
+   inked as a navy pennant band — the idiom the series page's result hero
+   already uses (35-postseason-series.css's .psseries__banner) — since this
+   line, like that headline, is a fact about the SERIES, not the matchup.
+   GameCard.jsx renders it only when handed a `postseasonLine`, so a MiLB or
+   regular-season card never grows this band. */
+.gamecard__seriesline {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: -14px -16px 0;
+  /* Wider on both sides than .gamecard__datebanner's plain --space-4: the
+     pinned-team star (.gamecard__pinbadge, top:8/left:8) and the live/delay
+     corner pill (.gamecard__live/.gamecard__delay, top:10/right:10) both sit
+     ON TOP of this band (they're position: absolute against the card, not
+     this band), so the band's own text needs the same clearance the design
+     reference (concepts-b.css's .pscb-sl) gives the star on its side. */
+  padding: var(--space-1) var(--space-10);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-on-ink);
+  background: var(--accent-primary);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+/* The one bold moment the design brief calls for: a deciding game (each club
+   one win from the series) turns the record half into the headline — same
+   award-line seam and size step the series page's own pennant uses. */
+.gamecard__seriesline--deciding {
+  border-bottom: var(--bw-heavy) solid var(--award-line);
+}
+.gamecard__seriesline--deciding .gamecard__seriesline-rec {
+  font-size: var(--fs-h3);
+  letter-spacing: var(--ls-title);
+}
+
 /* The card's main tap target: everything but the optional box-score shortcut. */
 .gamecard__open {
   width: 100%;

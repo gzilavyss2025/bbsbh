@@ -692,3 +692,83 @@
   font-size: var(--fs-body);
   line-height: var(--lh-solid);
 }
+
+/* ---------------------------------------------------- live series page only
+   (LiveSeriesPage.jsx, /postseason-live/{seriesId}) — today's game (named,
+   never scored) and the games still to play. Neither has a counterpart on
+   the finished page, so they're new blocks in the same family rather than a
+   second stylesheet: same card shell, same clay-margin/ledger vocabulary as
+   the sections above. */
+.psseries__today {
+  margin: 0 0 var(--space-3);
+}
+.psseries__todaycard {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-3);
+}
+.psseries__todaygame {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.psseries__todayteams {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-2) 0;
+}
+.psseries__todayteam {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+}
+/* The games still to play — a plain ruled list, same clay-margin ledger
+   vocabulary as the game log above, one row per game. */
+.psseries__upcoming {
+  margin: 0 0 var(--space-3);
+}
+.psseries__upcominglist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.psseries__upcomingrow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.psseries__upcominglist li:first-child {
+  border-top: none;
+}
+.psseries__upcominggame {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.psseries__upcomingdate {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}

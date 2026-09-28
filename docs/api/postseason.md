@@ -174,7 +174,11 @@ Example: 2025 NLDS, heading into 2025-10-09.
 
 - `recordLine(series)`: "Game 1", "CHC leads 1–0", "Series tied 1–1", "Winner
   take all" (each club one win from the series), "TOR won 3–1" (decided).
-- `seriesLine(series, gameNumber)`: "Game 2 · NL Wild Card Series".
+- `seriesLine(series, gameNumber)`: "Game 2 · NL Wild Card", "Game 3 · ALDS",
+  "Game 5 · NLCS", "Game 1 · World Series". Its own `roundTitle` drops the word
+  "Series" from every round but the World Series itself (slice 4, Gary's copy
+  decision 2026-09-28) — never read `series.name` (statsapi's
+  `seriesDescription`) for this line.
 - `cardLines(game, bracket)`: both lines for a slate game row, by `gamePk`, or
   `null` for a game not in the bracket. The slate model needs no new field.
 
@@ -188,12 +192,16 @@ Example: 2025 NLDS, heading into 2025-10-09.
   `postseason-history.json` holds its id (trap 7: that file gets a season only
   after its World Series, by a hand-run script). Otherwise the live page with
   `?d=`. A series with no id has no link (`null`).
-- Until slice 6 adds the screen, `App.jsx` has no branch for `postseason-live`,
-  so the route falls through to the home slate.
+- `App.jsx`'s `postseason-live` branch renders `screens/postseason-live/LiveSeriesPage.jsx`
+  (slice 6): a series still in progress, or a decided 2026 series with nowhere
+  else to go yet (trap 7). It reads `series.games`/`cutoffGame`/`upcoming` and
+  fetches nothing for the cutoff date's own game.
 
 ## Tests
 
 `test/postseason/` (fixtures in `test/fixtures/postseason/`, rebuilt by
 `capture.mjs` there): `bracket-cutoff`, `bracket-wiring`, `bracket-text`,
-`bracket-fetch`, `bracket-hook`. The route is in `test/route.test.js`, and the
-slate model's `seriesStatus`/`leagueRecord` guard in `test/slate-scores.test.js`.
+`bracket-fetch`, `bracket-hook`, `live-series-selectors` (the live series
+page's pure game-bucket sort, slice 6). The route is in `test/route.test.js`,
+and the slate model's `seriesStatus`/`leagueRecord` guard in
+`test/slate-scores.test.js`.

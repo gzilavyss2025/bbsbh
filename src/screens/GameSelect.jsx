@@ -15,6 +15,7 @@ import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { capSlateDate, atForwardLimit, isPostseasonWindow } from '../lib/postseason/capSlateDate.js'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
 import { offDayAliveTeams } from '../lib/postseason/bracketDisplay.js'
+import { cardLines } from '../api/postseason/text.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { GameCard } from '../components/game/GameCard.jsx'
@@ -138,7 +139,8 @@ export function GameSelect({
   const isToday = dateStr === todayStr
   const forwardLimited = atForwardLimit(dateStr, todayStr, postseasonCapMeta.data)
 
-  // The bracket above the cards (#1224, slice 5) — MLB only, every date in
+  // The bracket above the cards (#1224, slice 5), and the cards' series
+  // line (slice 4) off the same one bracket — MLB only, every date in
   // the postseason window, off days included. Keyed to the SLATE's own
   // YEAR, not today's: a browsed-to past postseason (`/10092025`) needs
   // THAT year's season row, not today's — `postseasonCapMeta` above answers
@@ -1002,6 +1004,7 @@ export function GameSelect({
                   !selectGameStatus(g).isPostponed
                 // Suspended: a paused checkpoint (like a Final's box score) that still gets the ordinary GameCard, so it needs its own onBoxScore.
                 const isSuspended = selectGameStatus(g).isSuspended
+                const postseasonLine = postseasonBracket.bracket ? cardLines(g, postseasonBracket.bracket) : null
                 return (
                   <li key={`${g.sportId}-${g.gamePk}`}>
                     {isPastFinal ? (
@@ -1016,6 +1019,7 @@ export function GameSelect({
                         liveJerseys={liveJerseys.data}
                         national={nationalBroadcasts[g.gamePk]}
                         eager={eager}
+                        postseasonLine={postseasonLine}
                         onSelect={() => onPick(g, dateStr)}
                         onBoxScore={() => onPick(g, dateStr, 'boxscore')}
                       />
@@ -1028,6 +1032,7 @@ export function GameSelect({
                         liveJerseys={liveJerseys.data}
                         national={nationalBroadcasts[g.gamePk]}
                         eager={eager}
+                        postseasonLine={postseasonLine}
                         stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
                         onSelect={() => onPick(g, dateStr)}
                         onBoxScore={isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}

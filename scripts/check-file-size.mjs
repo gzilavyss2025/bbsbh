@@ -114,7 +114,7 @@ const BUDGETS = {
   'src/styles/28-team-hub.css': 900, // 859 — the identity hero split out to 28a-team-hub-hero.css
   'src/styles/29-team-transactions.css': 950, // 844 -> 941: the deck's day tab (.txday), one divider standing before each day's run of cards. It replaced a dateline printed on EVERY card, which restated the previous card's date on 29.7% of them; the rule it enforces and the reason the tab is stacked rather than rotated are what the added prose carries.
   'src/styles/31-wild-card.css': 1300, // 1400 -> 1300: the two card heads moved to system/section-head.css (#1113, slice H1a). 1088 -> 1365: the Minors tab's Horizon + Depth Chart cards share one broadcast-card tile (.horizontile, its stat box reusing the hover card's .phcard__tile recipe) plus the depth chart's position pill row; Horizon's own .hznlist/.hzntile grid (real stat-line tiles, multi-column past phone width) came after the first pass looked "terrible" as one full-width column of sparse rows.
-  'src/styles/35-postseason-series.css': 700, // 693
+  'src/styles/35-postseason-series.css': 800, // 693 -> 774: the live series page's today/still-to-play blocks (#1230, slice 6), new sections with no finished-page counterpart, added to this same partial rather than a second one
   'src/styles/42-first-scorebook.css': 900, // 854
   'src/styles/43-foul-tracker.css': 900, // 877
   // 1000 -> 1100 was CoverColorPicker.jsx's rules (ADR-0036's shelf). That
@@ -332,7 +332,7 @@ const BUDGETS = {
   // barrel over src/api/player/ now, one loader per tab of the player hub.
   'src/api/tradeDeadline.js': 700, // 629
   'src/components/charts/WinProbChart.jsx': 700, // 612
-  'src/App.jsx': 700, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it
+  'src/App.jsx': 800, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it. 701: the postseason-live route branch (#1230, slice 6)
 }
 
 function walk(dir, out = []) {
