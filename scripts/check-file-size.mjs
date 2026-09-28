@@ -220,7 +220,11 @@ const BUDGETS = {
   // that record WHY sportId 17 needs a second key, and why slatePath had to
   // learn it or every winter league would build the same URL, are worth more
   // here than beside the four-line table they explain.
-  'src/lib/route.js': 950, // 934
+  // 950 -> 1000: the live postseason series route (#1224, slice 3) — one parse
+  // branch, its path builder, and seriesHref, which decides between that page
+  // and the finished one. They sit beside postseasonSeriesPath because the two
+  // pages share one series id, and a second module would split that pair.
+  'src/lib/route.js': 1000, // 970
   'scripts/gen-fouls.mjs': 1000, // 996
   // The sweep gained a batter-side dimension: the side is read off the matchup,
   // it keys the type buckets, and the export folds the sides back into the one

@@ -147,6 +147,7 @@ one you need:
 | `docs/api/live-game.md` | The live-feed modules: fetchers, `feed/live` selectors, the reveal-only derivations, the pre-pitch staging selectors, and the live leader boards. |
 | `docs/api/static-data.md` | The build-time-fetch readers — one entry per `public/data/*.json` file and the module that reads it. |
 | `docs/api/account-layer.md` | `src/lib/account/` — the per-user state that crosses a signed-in user's devices (ADR-0039, ADR-0026). |
+| `docs/api/postseason.md` | `postseason/` — the running postseason's bracket heading into a cutoff date: its two reads, the skeleton it may not trust, and the shape the UI reads. |
 
 `around-the-game/` is the fourth subdirectory and the odd one out: it holds no
 new fetching and no new spoiler footing, only the spoiler-FREE readers behind
