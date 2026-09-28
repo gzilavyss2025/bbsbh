@@ -21,7 +21,7 @@ function ordinal(value) {
 
 function ScoutTile({ p }) {
   return (
-    <li className="horizontile horizontile--compact">
+    <Card as="li" body="flush" className="horizontile horizontile--compact">
       <span className="horizontile__shotwrap">
         <Headshot personId={p.playerId} name={p.name} teamId={p.affiliateTeamId} className="horizontile__shot" />
         {p.position && <span className="horizontile__posbadge">{p.position}</span>}
@@ -39,13 +39,13 @@ function ScoutTile({ p }) {
         <span className="horizontile__statv">#{p.orgRank}</span>
         <span className="horizontile__statk">org rank</span>
       </div>
-    </li>
+    </Card>
   )
 }
 
 function PerformTile({ p }) {
   return (
-    <li className="horizontile horizontile--compact">
+    <Card as="li" body="flush" className="horizontile horizontile--compact">
       <span className="horizontile__shotwrap">
         <Headshot personId={p.playerId} name={p.name} teamId={p.affiliateTeamId} className="horizontile__shot" />
         {p.position && <span className="horizontile__posbadge">{p.position}</span>}
@@ -63,7 +63,7 @@ function PerformTile({ p }) {
         <span className="horizontile__statv">{ordinal(p.trend.percentile)}</span>
         <span className="horizontile__statk">{p.trend.group === 'pitching' ? 'ERA' : 'OPS'} pctile</span>
       </div>
-    </li>
+    </Card>
   )
 }
 

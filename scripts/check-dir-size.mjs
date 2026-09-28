@@ -297,7 +297,7 @@ const BUDGETS = {
   // prefix with `65-about-page.css` above — the two branches picked the next
   // free integer independently, and the collision is harmless because neither
   // is @imported by index.css, so no cascade order depends on the numbers.
-  // Deliberately small: the card reuses `.tstats-card`/`.tstatrow` from
+  // Deliberately small: the card reuses `.tstats`/`.tstatrow` from
   // 31-wild-card.css; only the half toggle, the group subheadings and the
   // counts block are new.
   // +1 for `66-situational-records.css`: the standalone page that ranks one of

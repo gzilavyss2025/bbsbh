@@ -11,6 +11,7 @@ import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadContracts } from './data/loadContracts.js'
 import { hiddenTeamTabs } from './data/shared.js'
+import { Card } from '../../components/ui/frame/Card.jsx'
 
 // The club's book: what it owes, to whom, and for how long — players down the
 // page, seasons across it. Its own tab rather than a card on Numbers, because a
@@ -23,11 +24,11 @@ import { hiddenTeamTabs } from './data/shared.js'
 // a linescore.
 function Tile({ label, value, note, tone }) {
   return (
-    <div className={`ctr__tile${tone ? ` ctr__tile--${tone}` : ''}`}>
+    <Card as="div" frame="ledger" body="flush" className={`ctr__tile${tone ? ` ctr__tile--${tone}` : ''}`}>
       <span className="ctr__tilelabel">{label}</span>
       <span className="ctr__tilevalue">{value}</span>
       {note && <span className="ctr__tilenote">{note}</span>}
-    </div>
+    </Card>
   )
 }
 

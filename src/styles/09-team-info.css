@@ -118,9 +118,10 @@
    lineup page uses, not a label floating disconnected above its content.
    The shared shell for sections that had no card of their own (Standings, Schedule,
    Current Roster, Injured List, Affiliates, Prospects, Logos & jerseys, and
-   the rest) is the Card component now (system/card.css, #1113); `.tstats-card`,
-   `.roster-super` and `.team-score` already had one, so the head bolts onto
-   their existing border instead of a second wrapper. Every one of those heads
+   the rest) is the Card component now (system/card.css, #1113), and so are
+   `.tstats`, `.roster-super` and `.team-score`, which had a box of their own
+   until slice C1. The head bolts onto the card's border, never a second
+   wrapper. Every one of those heads
    is the SectionHead club band (system/section-head.css, #1113): a plain label
    until the club colour arrives. The card's `overflow: hidden` clips the
    head's square corners to the card's radius. */

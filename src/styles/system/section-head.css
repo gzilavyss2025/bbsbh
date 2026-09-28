@@ -23,7 +23,7 @@
    A HOST TINTS IT THROUGH TWO PROPERTIES, never by repainting it:
      --sectionhead-inset  the side padding. A card whose body is inset by
                           --space-3 sets it, so the title lines up with the
-                          rows under it (.tstats-card, .roster-super).
+                          rows under it (.tstats, .roster-super).
      --sectionhead-rule   the unthemed club head's underline colour
                           (.horizoncard's award rail).
    --------------------------------------------------------------------------- */

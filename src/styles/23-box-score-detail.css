@@ -48,11 +48,11 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+/* A category is a Card (sheet, flush body; #1113). Its padding is its own.
+   margin-top: 0 overrides .team-hub's per-card spacing rule (09-team-info.css)
+   — these sit in .tlead__grid, a grid with its own gap, not stacked sections. */
 .tlead__cat {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
+  margin-top: 0;
   padding: var(--space-3);
 }
 .tlead__cat-title {
@@ -332,13 +332,12 @@
   flex-direction: column;
   gap: var(--space-2h);
 }
+/* Each block is a Card (sheet, flush body; #1113), which draws the frame and
+   clips the header band's square top corners to its radius. margin-top: 0
+   overrides .team-hub's per-card spacing rule (09-team-info.css) — these sit
+   in .tledg__blocks, a flex column with its own gap, not stacked sections. */
 .tledg__block {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  /* Clips the header band's square top corners to the card's radius. */
-  overflow: hidden;
+  margin-top: 0;
 }
 .tledg__block-title {
   margin: 0;

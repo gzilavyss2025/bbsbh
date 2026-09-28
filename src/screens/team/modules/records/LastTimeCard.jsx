@@ -2,6 +2,7 @@ import { SLOT_BY_ID, EVENT_BY_ID, droughtsFor } from '../../../../api/scheduleSh
 import { ALL_MLB_TEAM_IDS, teamClubName, teamLocationName } from '../../../../lib/teams.js'
 import '../../../../styles/65-team-records.css'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../../components/ui/frame/Card.jsx'
 
 // The Numbers tab's "Last Time" card: what this club has stopped doing, and
 // when it last did it. Two kinds of row, ranked together.
@@ -117,12 +118,19 @@ export function LastTimeCard({ data, cutoff }) {
   if (!rows.length) return null
 
   return (
-    <div className="tstats-card trec trec--lasttime">
-      <SectionHead look="band" club note="chances since">
-        Last Time
-      </SectionHead>
-      <div className="tstats-card__body">
-        <div className="tstats">
+    <Card
+      as="div"
+      frame="ledger"
+      body="flush"
+      className="tstats trec trec--lasttime"
+      head={
+        <SectionHead look="band" club note="chances since">
+          Last Time
+        </SectionHead>
+      }
+    >
+      <div className="tstats__body">
+        <div className="tstats__grid">
           {rows.map((r) => (
             <div key={`${r.slotId ?? r.eventId}-${r.opponentId ?? 'all'}`} className="tstatrow">
               <span className="tstatrow__k">{r.k}</span>
@@ -138,6 +146,6 @@ export function LastTimeCard({ data, cutoff }) {
           ))}
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

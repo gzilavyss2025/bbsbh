@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { computeLeaders, positionTag } from '../../api/teamLeaders.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { InjuredMark } from '../badges/InjuredMark.jsx'
 import { Door } from '../ui/control/Door.jsx'
@@ -88,7 +89,7 @@ export function TeamLeadersLedger({
       </SectionHead>
       <div className="tledg__blocks">
         {blocks.map((block) => (
-          <section key={block.key} className="tledg__block">
+          <Card key={block.key} body="flush" className="tledg__block">
             <h4 className="tledg__block-title">{block.label}</h4>
             <ul className="tledg__rows">
               {block.rows.map(({ category, entry }) => {
@@ -111,7 +112,7 @@ export function TeamLeadersLedger({
                 )
               })}
             </ul>
-          </section>
+          </Card>
         ))}
       </div>
     </div>

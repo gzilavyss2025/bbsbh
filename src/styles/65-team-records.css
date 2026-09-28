@@ -1,6 +1,6 @@
 /* Numbers tab → Records card (screens/team/modules/records/RecordsCard.jsx).
 
-   Deliberately small. The card reuses `.tstats-card` / `.tstats` / `.tstatrow`
+   Deliberately small. The card reuses `.tstats` / `.tstats__grid` / `.tstatrow`
    from 31-wild-card.css wholesale, so it inherits the two-column ledger, the
    tabular figures and the themed masthead the Team batting, Team pitching and
    Record by Day of Week cards beside it already use. Only three things here
@@ -247,10 +247,10 @@ button.tstatrow__k.trec__rank,
 
 /* The Last Time card. Its rows carry a PHRASE, a date and a count where the
    Records card's carry a short label and two figures, so the two-column
-   `.tstats` grid it otherwise shares breaks "Series opener in Baltimore" one
+   `.tstats__grid` it otherwise shares breaks "Series opener in Baltimore" one
    word to a line at phone width. One row per line instead; everything else —
    the card chrome, the rules, the caps treatment — is inherited unchanged, so
    it still reads as a sibling of the cards above it rather than a new object. */
-.trec--lasttime .tstats {
+.trec--lasttime .tstats__grid {
   grid-template-columns: 1fr;
 }
