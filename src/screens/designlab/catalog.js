@@ -170,12 +170,12 @@ export const CARDS = [
     note: '#1112 asks whether this and .prospectcard are one card. They are: both are the tight sheet. This one adds a pointer.',
   },
   {
-    cls: 'tstats-card',
-    partial: '31-wild-card.css',
+    cls: 'card card--ledger tstats',
+    partial: 'system/card.css',
     consumers: 4,
     group: 'dense',
-    verdict: 'Merge — dense',
-    note: 'The tight sheet plus overflow:hidden.',
+    verdict: 'Merged — ledger',
+    note: 'Was the tstats card block: the tight sheet plus overflow:hidden. It is a ledger Card now (#1113, slice C1), and .tstats is its namespace.',
   },
   {
     cls: 'prospectcard',

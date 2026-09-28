@@ -69,6 +69,27 @@ export function ScoreLine({ liveLine }) {
   )
 }
 
+// The postseason series line (#1224, slice 4): `{ seriesLine, recordLine }`
+// from `api/postseason/text.js`'s `cardLines` — GameCard reads slice 3's
+// derived state through this shape alone and never re-derives it. A navy
+// pennant band across the card's top edge, the same idiom the series page's
+// result hero uses (`35-postseason-series.css`'s `.psseries__banner`) — text
+// only, no pips (the bracket alone draws those). The record half is dropped
+// before a series has a result ("Game 1" carries nothing new to say), and the
+// deciding game gets the one bold moment the design brief calls for.
+export function PostseasonLine({ lines }) {
+  if (!lines) return null
+  const deciding = lines.recordLine === 'Winner take all'
+  return (
+    <div className={`gamecard__seriesline${deciding ? ' gamecard__seriesline--deciding' : ''}`}>
+      <span>{lines.seriesLine}</span>
+      {lines.recordLine !== 'Game 1' && (
+        <span className="gamecard__seriesline-rec">{lines.recordLine}</span>
+      )}
+    </div>
+  )
+}
+
 // The postponed treatment: a kraft-tape strip under the matchup carrying a
 // rubber-stamped "POSTPONED", the cause ("Inclement Weather"), and — once MLB
 // has set one — the make-up date the game moved to (rescheduleGameDate, a

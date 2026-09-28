@@ -41,6 +41,11 @@ export function PastGameFlipCard({
   liveJerseys = null,
   national = '',
   eager = false,
+  // `{ seriesLine, recordLine }` from `cardLines` (#1224, slice 4), or null —
+  // forwarded to the front face's GameCard untouched. A past postseason game
+  // still shows the state heading into ITS OWN slate date, not this game's
+  // result, so it rides the front face only, never the revealed back face.
+  postseasonLine = null,
   onSelect,
   onBoxScore,
 }) {
@@ -88,6 +93,7 @@ export function PastGameFlipCard({
           liveJerseys={liveJerseys}
           national={national}
           eager={eager}
+          postseasonLine={postseasonLine}
           onSelect={onSelect}
           onBoxScore={onBoxScore}
         />

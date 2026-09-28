@@ -62,20 +62,18 @@
    on phone width, collapsing to one on the narrowest viewports. The whole
    block sits on one soft-cream card with a ruled border, rather than
    each row floating over the page's own graph-paper background — the grid
-   lines behind an unbounded ledger made the rows hard to read at a glance. */
-.tstats-card {
+   lines behind an unbounded ledger made the rows hard to read at a glance.
+   That card is a Card (ledger, flush body; #1113): .tstats is its namespace,
+   and .tstats__grid the two columns inside it. */
+.tstats {
   margin-top: var(--space-4);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
   /* The head (SectionHead, #1113) lines up with this card's --space-3 rows. */
   --sectionhead-inset: var(--space-3);
 }
-.tstats-card__body {
+.tstats__body {
   padding: var(--space-1) var(--space-3);
 }
-.tstats {
+.tstats__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   column-gap: 18px;
@@ -89,7 +87,7 @@
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 /* The top row of each column sits flush against the card's own top border
-   (see .tstats-card) — dropping its rule keeps the two from doubling up. */
+   (see .tstats) — dropping its rule keeps the two from doubling up. */
 .tstatrow:nth-child(-n + 2) {
   border-top: none;
 }
@@ -145,7 +143,7 @@
   background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
 }
 @media (max-width: 359px) {
-  .tstats {
+  .tstats__grid {
     grid-template-columns: 1fr;
     column-gap: 0;
   }
@@ -160,7 +158,7 @@
    a fill bar for the club's own comeback rate and a tick at the pooled MLB
    baseline, so "better/worse than a typical club" is legible without a rank
    table. Fixed 0–100% bar scale (comebacks ARE rare, so the short fill is the
-   honest picture). Reuses the .tstats-card chrome. */
+   honest picture). Reuses the .tstats card. */
 .cbk__gloss {
   font-family: var(--font-body);
   font-size: var(--fs-small);
@@ -588,15 +586,11 @@
 }
 
 /* Roster super-section (Preferred Lineup / Starting Pitchers / Bullpen) — one
-   bordered soft-cream card (same convention as .tstats-card) so the three
+   bordered soft-cream card (a ledger Card, like .tstats; #1113) so the three
    projection subsections read as one group, distinct from the actual
    40-man Current Roster section below. */
 .roster-super {
   margin-top: var(--space-4);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
   /* The head (SectionHead, #1113; the Season/Current toggle is its action)
      lines up with this card's --space-3 rows. */
   --sectionhead-inset: var(--space-3);
@@ -711,6 +705,8 @@
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-2h);
 }
+/* Each tile is an interactive Card, a button (sheet, flush body; #1113): the
+   Card draws the frame, the hover tint and the focus ring. */
 .thub-affiliate {
   position: relative;
   display: flex;
@@ -718,10 +714,6 @@
   align-items: center;
   gap: var(--space-1h);
   padding: var(--space-3h) var(--space-2) var(--space-3);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
   text-align: center;
 }
 /* The affiliate's level, a paper figure Pill tag (#1131, #1186) pinned in
@@ -1036,15 +1028,13 @@
 
 /* The tile itself — headshot, a name+meta column that can shrink, and a
    fixed-width stat box that never does (a long standing string like "Bottom
-   12% ERA" must not squeeze the name column). */
+   12% ERA" must not squeeze the name column). The box is a Card (sheet,
+   flush body; #1113). */
 .horizontile {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
 }
 .horizontile--compact {
   padding: var(--space-2);
@@ -1183,11 +1173,9 @@
   }
 }
 
+/* A Card (sheet, flush body; #1113); the padding is the tile's own. */
 .hzntile {
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
 }
 .hzntile__head {
   display: flex;

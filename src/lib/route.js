@@ -23,7 +23,7 @@
 //   '/nine-keys'                        -> { name: 'nine-keys' }
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason-race'                  -> { name: 'postseason-race' }
-//   '/postseason/{seriesId}'            -> { name: 'postseason-series', seriesId }
+//   '/postseason/{seriesId}?d='         -> { name: 'postseason-series', seriesId, asOf }
 //   '/trade-deadline'                   -> { name: 'trade-deadline' }  (redirects to the latest season)
 //   '/trade-deadline/{year}'            -> { name: 'trade-deadline-season', season: year }
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
@@ -541,8 +541,11 @@ export function parseRoute(url) {
     return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
   // A series id (e.g. '2025-division-112-158') already matches
   // postseason-history.json's own `series.id` 1:1 — no separate slug scheme.
+  // One address for both series pages (Gary, 2026-09-28); seriesPageFor picks
+  // the page. `?d=` is the cutoff the live page shows the series heading
+  // into; no `?d=` means today.
   if (parts.length === 2 && parts[0] === 'postseason')
-    return { name: 'postseason-series', seriesId: parts[1] }
+    return { name: 'postseason-series', seriesId: parts[1], asOf }
   // The year matches the precomputed file's own name 1:1 (public/data/
   // trade-deadline/{year}.json) — no separate slug scheme, same idea as the
   // postseason series id above. A non-numeric segment falls back to the
@@ -809,6 +812,29 @@ export function teamPath(id, opts = {}) {
 }
 export function postseasonSeriesPath(seriesId) {
   return `/postseason/${seriesId}`
+}
+export function postseasonLivePath(seriesId, cutoffDate = null) {
+  return `/postseason/${seriesId}${linkQuery({ d: cutoffDate })}`
+}
+// Which page one /postseason/{id} address opens. The finished page only with
+// no `?d=` and an id postseason-history.json holds (the link seriesHref below
+// builds for a decided series); the live page, heading into `?d=` or today,
+// for everything else. `historyIds`: Set or array.
+export function seriesPageFor(seriesId, asOf, historyIds) {
+  const ids = historyIds instanceof Set ? historyIds : new Set(historyIds ?? [])
+  return !asOf && ids.has(seriesId) ? 'finished' : 'live'
+}
+// Where a bracket series links. The finished page reads only
+// postseason-history.json, which gets a season after its World Series, by a
+// hand-run script (trap 7). So: the finished page when the series was decided
+// before the cutoff AND that file holds its id; the live page otherwise. A
+// series with an empty slot has no id and no link. `historyIds`: Set or array.
+export function seriesHref(series, cutoffDate, historyIds) {
+  if (!series?.id) return null
+  const ids = historyIds instanceof Set ? historyIds : new Set(historyIds ?? [])
+  return series.decided && ids.has(series.id)
+    ? postseasonSeriesPath(series.id)
+    : postseasonLivePath(series.id, cutoffDate)
 }
 export function tradeDeadlinePath() {
   return '/trade-deadline'

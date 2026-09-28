@@ -108,13 +108,13 @@ const BUDGETS = {
   'src/styles/21-box-score.css': 900, // 800 -> 869: the Coverage card's lead-story treatment (.gamestory__lead*) — a full-bleed photo, team badge, headline and blurb for the first enriched story, same .gamestory namespace the compact-row rules already live in here. 771 — the Three Stars card split out to 21a-box-score-stars.css,
   //                                    the by-inning tally to 21b-box-score-tally.css
   'src/styles/22-box-score-tables.css': 800, // 789
-  'src/styles/23-box-score-detail.css': 800, // 637 -> 721: the team hub's leader ledger (.tledg), which lands here beside the .tlead card board it renders instead of. It cannot be its own partial: src/styles is AT its directory budget (check-dir-size.mjs), the same squeeze 68-around-the-game.css records. Paid for in part by deleting the horizontal deck, its header-actions row and two dead .ilmark sizings.
+  'src/styles/23-box-score-detail.css': 700, // 800 -> 700 at 692: .tlead__cat and .tledg__block moved their frames onto Card (#1113, slice C1). 637 -> 721: the team hub's leader ledger (.tledg), which lands here beside the .tlead card board it renders instead of. It cannot be its own partial: src/styles is AT its directory budget (check-dir-size.mjs), the same squeeze 68-around-the-game.css records. Paid for in part by deleting the horizontal deck, its header-actions row and two dead .ilmark sizings.
   'src/styles/26-player-page.css': 1100, // 1200 -> 1100: the section title rules moved to system/section-head.css (#1113, slice H2). 1125 — the Trophy Case split out to 67-trophy-case.css
   'src/styles/27-player-position-innings.css': 700, // 636 — "Pitches like" / "Hits like" moved to 51-similar-players.css
   'src/styles/28-team-hub.css': 900, // 859 — the identity hero split out to 28a-team-hub-hero.css
   'src/styles/29-team-transactions.css': 950, // 844 -> 941: the deck's day tab (.txday), one divider standing before each day's run of cards. It replaced a dateline printed on EVERY card, which restated the previous card's date on 29.7% of them; the rule it enforces and the reason the tab is stacked rather than rotated are what the added prose carries.
   'src/styles/31-wild-card.css': 1300, // 1400 -> 1300: the two card heads moved to system/section-head.css (#1113, slice H1a). 1088 -> 1365: the Minors tab's Horizon + Depth Chart cards share one broadcast-card tile (.horizontile, its stat box reusing the hover card's .phcard__tile recipe) plus the depth chart's position pill row; Horizon's own .hznlist/.hzntile grid (real stat-line tiles, multi-column past phone width) came after the first pass looked "terrible" as one full-width column of sparse rows.
-  'src/styles/35-postseason-series.css': 700, // 693
+  'src/styles/35-postseason-series.css': 800, // 693 -> 774: the live series page's today/still-to-play blocks (#1230, slice 6), new sections with no finished-page counterpart, added to this same partial rather than a second one
   'src/styles/42-first-scorebook.css': 900, // 854
   'src/styles/43-foul-tracker.css': 900, // 877
   // 1000 -> 1100 was CoverColorPicker.jsx's rules (ADR-0036's shelf). That
@@ -203,7 +203,12 @@ const BUDGETS = {
   // live here — teamLogoUrl's, ahead of the *_USES_BASE_LOGO early returns
   // that would shadow it, and mainOverrideLogoUrl's, which is what routes
   // Main's tile through 'main-recolor'.
-  'src/lib/teams.js': 1225, // 1212
+  // 1225 -> 1240: found already over budget on `origin/claude/postseason`
+  // (base branch drift the guard's own header warns about — a merged
+  // favorite-team comment edit re-expanded past the pinned count) while
+  // building #1225. Not this slice's growth; bumped only so this PR's own
+  // lint passes, and flagged on the issue per #1224's rule 9.
+  'src/lib/teams.js': 1240, // 1227
   // 700 -> 800: the slug helpers that put a name in front of an id
   // (slugify/idFromSlug/entitySegment, ADR-0057). They belong to routing and to
   // nothing else — a one-file src/lib/url/ existing only to dodge this number
@@ -220,7 +225,11 @@ const BUDGETS = {
   // that record WHY sportId 17 needs a second key, and why slatePath had to
   // learn it or every winter league would build the same URL, are worth more
   // here than beside the four-line table they explain.
-  'src/lib/route.js': 950, // 934
+  // 950 -> 1000: the live postseason series route (#1224, slice 3) — one parse
+  // branch, its path builder, and seriesHref, which decides between that page
+  // and the finished one. They sit beside postseasonSeriesPath because the two
+  // pages share one series id, and a second module would split that pair.
+  'src/lib/route.js': 1000, // 970
   'scripts/gen-fouls.mjs': 1000, // 996
   // The sweep gained a batter-side dimension: the side is read off the matchup,
   // it keys the type buckets, and the export folds the sides back into the one
@@ -252,7 +261,18 @@ const BUDGETS = {
   // strip and the empty day. It fits because both halves moved out first — the
   // gate into hooks/useWinter.js over pure rules in src/lib/winter/, and the
   // surface into components/winter/LeaguePicker.jsx.
-  'src/screens/GameSelect.jsx': 1200, // 1187
+  // 1200 -> 1225: the postseason slate date cutoff (ADR-0087, #1225). Gary
+  // took the cap off the slate again the same day (the ADR's addendum), so
+  // that wiring is gone; the bracket below uses the room.
+  // 1225 -> 1300: the bracket above the cards (#1224, slice 5) — the
+  // window's own season-row fetch (keyed to the slate's own year, not
+  // today's), the Off Day grid's postseason branch, and suppressing the
+  // generic off-day banner and empty-slate message for a window the bracket
+  // already covers. The bracket itself is a component
+  // (components/bracket/PostseasonBracket.jsx) over a pure module
+  // (src/lib/postseason/bracketDisplay.js); what is left here is the same
+  // kind of wiring the cutoff above already owns.
+  'src/screens/GameSelect.jsx': 1300, // 1247
   // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's
   // one new reader tipped it. fetchSeasonMeta belongs here and nowhere else:
   // this module already owned the seasons endpoint (fetchAllStarInfo was a
@@ -311,7 +331,7 @@ const BUDGETS = {
   // barrel over src/api/player/ now, one loader per tab of the player hub.
   'src/api/tradeDeadline.js': 700, // 629
   'src/components/charts/WinProbChart.jsx': 700, // 612
-  'src/App.jsx': 700, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it
+  'src/App.jsx': 700, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it. 701: the postseason series route branch (#1230, slice 6). 693: one /postseason/{id} route (SeriesRoute)
 }
 
 function walk(dir, out = []) {

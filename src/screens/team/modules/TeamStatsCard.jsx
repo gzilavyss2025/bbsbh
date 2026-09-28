@@ -1,4 +1,5 @@
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../../components/ui/frame/Card.jsx'
 
 const DASH = '—'
 
@@ -41,12 +42,19 @@ export function todayDowLabel() {
 
 export function TeamStats({ title, stats, note = 'rank out of 30', highlightKey }) {
   return (
-    <div className="tstats-card">
-      <SectionHead look="band" club note={note}>
-        {title}
-      </SectionHead>
-      <div className="tstats-card__body">
-        <div className="tstats">
+    <Card
+      as="div"
+      frame="ledger"
+      body="flush"
+      className="tstats"
+      head={
+        <SectionHead look="band" club note={note}>
+          {title}
+        </SectionHead>
+      }
+    >
+      <div className="tstats__body">
+        <div className="tstats__grid">
           {stats.map((s) => (
             <div
               key={s.k}
@@ -59,6 +67,6 @@ export function TeamStats({ title, stats, note = 'rank out of 30', highlightKey 
           ))}
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

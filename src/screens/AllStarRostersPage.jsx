@@ -18,6 +18,7 @@ import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { favoriteAccentColor } from '../lib/teams.js'
 import { Door } from '../components/ui/control/Door.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function monthDay(iso) {
@@ -128,7 +129,7 @@ function RosterLeagues({ roster, effectiveTeamId, filtering }) {
       {leagues.map(({ key, name, headClass }) => {
         const bucket = roster[key]
         return (
-          <div className="roster-super" key={key}>
+          <Card as="div" frame="ledger" body="flush" className="roster-super" key={key}>
             <div className={`allstarrosters__leaguehead ${headClass}`}>{name}</div>
             <div className="roster-super__row">
               {SECTIONS.map(({ key: sectionKey, label }) => {
@@ -148,7 +149,7 @@ function RosterLeagues({ roster, effectiveTeamId, filtering }) {
                 )
               })}
             </div>
-          </div>
+          </Card>
         )
       })}
     </div>

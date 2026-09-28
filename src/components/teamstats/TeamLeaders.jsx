@@ -4,6 +4,7 @@ import { splitDisplayName } from '../../api/person.js'
 import { prospectBadge } from '../../api/prospects.js'
 import { SPORT_LABEL, favoriteAccentColor, isMlbTeamId } from '../../lib/teams.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -159,7 +160,7 @@ function LeaderCategory({
   const [leader, ...rest] = entries
   const ranks = displayRanks(entries)
   return (
-    <section className="tlead__cat">
+    <Card body="flush" className="tlead__cat">
       <h4 className="tlead__cat-title">{category.label}</h4>
       <FeaturedLeader
         entry={leader}
@@ -199,7 +200,7 @@ function LeaderCategory({
           })}
         </ol>
       )}
-    </section>
+    </Card>
   )
 }
 

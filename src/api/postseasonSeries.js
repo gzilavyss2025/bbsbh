@@ -17,6 +17,7 @@
 import { getJson } from './statsapi.js'
 import { BATTING_CATEGORIES, int, rate3 } from './postseasonLeaders.js'
 import { startingPositionAbbr } from './select.js'
+import { rosterGroups } from './postseason/roster.js'
 
 export { BATTING_CATEGORIES }
 
@@ -140,27 +141,11 @@ function rosterEntry(p, teamId) {
   }
 }
 
-// Scorebook defensive order (2 through 9), DH tacked on at the end since it
-// carries no defensive number; anything else a box score might list a
-// substitute under (PH, PR, IF, OF, …) falls back to last, alphabetical
-// among itself.
-const POSITION_ORDER = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
-function positionRank(position) {
-  const idx = POSITION_ORDER.indexOf(position)
-  return idx === -1 ? POSITION_ORDER.length : idx
-}
-
+// Scorebook order, split into position players and pitchers — the same
+// rosterGroups the live page's declared roster uses (postseason/roster.js).
 function buildRosters(rosterByTeam) {
   const out = {}
-  for (const [teamId, players] of rosterByTeam.entries()) {
-    const all = [...players.values()]
-    out[teamId] = {
-      positionPlayers: all
-        .filter((p) => p.position !== 'P')
-        .sort((a, b) => positionRank(a.position) - positionRank(b.position) || a.name.localeCompare(b.name)),
-      pitchers: all.filter((p) => p.position === 'P').sort((a, b) => a.name.localeCompare(b.name)),
-    }
-  }
+  for (const [teamId, players] of rosterByTeam.entries()) out[teamId] = rosterGroups(players.values())
   return out
 }
 

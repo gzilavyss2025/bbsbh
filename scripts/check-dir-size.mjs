@@ -297,7 +297,7 @@ const BUDGETS = {
   // prefix with `65-about-page.css` above — the two branches picked the next
   // free integer independently, and the collision is harmless because neither
   // is @imported by index.css, so no cascade order depends on the numbers.
-  // Deliberately small: the card reuses `.tstats-card`/`.tstatrow` from
+  // Deliberately small: the card reuses `.tstats`/`.tstatrow` from
   // 31-wild-card.css; only the half toggle, the group subheadings and the
   // counts block are new.
   // +1 for `66-situational-records.css`: the standalone page that ranks one of
@@ -455,7 +455,11 @@ const BUDGETS = {
   // also grow: steps 3 and 4 of that issue add the picked-game card and the
   // season notebook to the same page.
   // +1: 79-nine-keys.css, the Nine Keys report's own partial.
-  'src/styles': 116,
+  // +1 for 80-postseason-bracket.css — the bracket above the home slate
+  // during the postseason window (#1224, slice 5), component-imported by
+  // PostseasonBracket.jsx rather than in src/index.css since it only ever
+  // loads on that one screen during that one window.
+  'src/styles': 117,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
