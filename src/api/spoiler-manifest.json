@@ -167,7 +167,8 @@
         "components/inning/HalfInning.jsx",
         "screens/BoxScore.jsx",
         "screens/boxscore/revealBoxScore.js",
-        "screens/PostseasonSeriesPage.jsx"
+        "screens/PostseasonSeriesPage.jsx",
+        "screens/postseason-live/LiveSeriesPage.jsx"
       ]
     },
     "boxscore/gameNotes.js": {
@@ -756,6 +757,18 @@
       "class": "spoiler-free",
       "why": "The global name-link hover card (PlayerLink, desktop only) — season stat tiles, same open-surface footing as the player page's own season tiles (person/stats.js). No per-game result."
     },
+    "postseason/bracket.js": {
+      "class": "cutoff-gated",
+      "why": "The running postseason's bracket HEADING INTO the cutoff date (#1224): each series' wins, winner, eliminated club and the champion. It carries results, so it is gated by DATE, not by a seal: a game counts only when it went Final with a winner strictly BEFORE the cutoff, on its officialDate or, for a suspended game, its resumeGameDate. It re-applies that cutoff itself rather than trusting its caller's fetch. The skeleton rows it reads are the live schedule, which names a series' winner in the next round and drops its unplayed if-necessary games the moment that series ends; so a fed slot is filled only from a winner derived here, 'if necessary' is worked out from the heading-in wins, a later if-necessary game carries no date when today's game can end its series, and the gamePk index holds only games dated on or before the cutoff. Yesterday's results are NOT protected (a decision, not a gap, ADR-0087), and Scores Unlocked does not apply: the state is the same with the switch on or off."
+    },
+    "postseason/fetch.js": {
+      "class": "cutoff-gated",
+      "why": "The bracket's two statsapi reads, separate from fetchSchedule like fetchSlateScores. The results read asks only for dates BEFORE the cutoff (endDate is the day before) and only for `isWinner` and the game state: never runs, a score, a linescore, `seriesStatus` or `leagueRecord`, the last two being the state AFTER a game (trap 1). The skeleton read asks for every date but for no result field at all, not even the game state. The heading-into-the-date gate is the cutoff the caller passes; bracket.js applies it a second time."
+    },
+    "postseason/text.js": {
+      "class": "cutoff-gated",
+      "why": "The slate card's two lines and the series page's record line ('Game 2 · NL Wild Card', 'Game 3 · ALDS', 'World Series' kept whole; 'CHC leads 1–0', 'Series tied 1–1', 'Winner take all'), read off one series from bracket.js and nothing else. It inherits that module's footing whole: the state heading into the cutoff date, so a game on the slate never changes its own card."
+    },
     "postseasonHistory.js": {
       "class": "spoiler-free",
       "why": "Static postseason-history.json — completed brackets back to 2000. Immutable history, outside the rule's scope."
@@ -770,7 +783,7 @@
     },
     "postseasonSeries.js": {
       "class": "spoiler-free",
-      "why": "One completed series, aggregated live from boxscores. Every game in postseason-history.json is already Final, so no live-game spoiler risk."
+      "why": "One series' game log, aggregated live from boxscores. `loadSeriesStats(games)` needs only each game's `gamePk`, so it also runs directly on the bracket module's `Series.games` (screens/postseason-live/LiveSeriesPage.jsx, #1230 slice 6), not only on postseason-history.json's completed series. Safe either way: postseason-history.json ships only completed postseasons, and bracket.js's `settle()` filters `Series.games` to games already Final BEFORE the cutoff (docs/api/postseason.md) — so no caller can hand this module a still-live or upcoming game, whichever source it reads from."
     },
     "prehalf-callouts.js": {
       "class": "caller-gated",

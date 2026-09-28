@@ -14,6 +14,7 @@ import {
   tileColorFor,
   ScoreLine,
   PostponedBanner,
+  PostseasonLine,
   ReadyPill,
   NationalTvIcon,
   TeamMark,
@@ -60,6 +61,10 @@ export function GameCard({
   // into DOUBLEHEADER and floats a second sheet under the card; the card still
   // opens game 1, which is the game you'd score first either way.
   stackedGame = null,
+  // `{ seriesLine, recordLine }` from `api/postseason/text.js`'s `cardLines`
+  // (#1224, slice 4), or null for a regular-season game — see GameSelect.jsx.
+  // The card never derives this itself; it only prints what it's handed.
+  postseasonLine = null,
   onSelect,
   onBoxScore,
 }) {
@@ -215,6 +220,7 @@ export function GameCard({
       ) : (
         live && <span className="gamecard__live">Live</span>
       )}
+      {postseasonLine && <PostseasonLine lines={postseasonLine} />}
       <button
         type="button"
         className="gamecard__open"

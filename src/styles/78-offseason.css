@@ -791,39 +791,24 @@
 }
 
 /* ---------------------------------------------------------------------------
-   THE SEASON RECORD — the one door on this page that opens onto results.
+   THE SEASON RECORD — the one door on this page that opens onto results, and
+   at MLB the one place the champion shows for the whole offseason.
 
    Everything else the offseason page draws is neutral by construction: roster
    moves, careers, a sealed game, a length and an age. This row is the
-   exception, so it is the only thing on the page wearing tape — and the
-   warning is in words
-   beside it, never in the tape alone (SeasonRecord.jsx says why it is a LABEL
-   and not a SealBox).
-
-   The tape is --hold-texture: the covers' own weave, in the flag colour
-   rather than the cover's kraft. ADR-0083 reserved kraft for a surface a tap
-   can actually lift, and this row is a label that opens nothing.
+   exception, and its own note says so in words. It no longer wears tape and
+   carries no warning line (ADR-0081's addendum): a warning in front of a
+   result already on the row's own face — the champion, once the World Series
+   is over — was false the moment slice 7 put one there.
    --------------------------------------------------------------------------- */
 .srecord {
-  display: flex;
-  align-items: stretch;
-  overflow: hidden;
   margin-top: var(--space-6);
   border: var(--bw-rule) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
 }
-/* Decoration, and aria-hidden in the markup to match: it carries no word a
-   reader needs, and the sentence beside it carries every word they do. */
-.srecord__tape {
-  flex: 0 0 auto;
-  width: 56px;
-  background: var(--hold-texture);
-}
 .srecord__body {
-  flex: 1 1 auto;
-  min-width: 0;
   padding: var(--space-4);
 }
 .srecord__title {
@@ -836,12 +821,11 @@
   text-transform: uppercase;
   color: var(--text-heading);
 }
-/* The <strong> takes its own rule: #root * matches it too, and without this the
-   one sentence on the page that has to be read as a warning was shouted back
-   as a label. */
+/* #root * matches too, and this row's note is a plain prose sentence, not a
+   label — shouting it back to caps would misread as one. */
 #root .srecord__note,
 #root .srecord__note strong {
-  text-transform: none; /* caps-exempt: the warning, in words */
+  text-transform: none; /* caps-exempt: prose, not a label */
 }
 .srecord__note {
   margin: var(--space-2) 0 0;
@@ -1153,4 +1137,22 @@
     text-overflow: clip;
     white-space: normal;
   }
+}
+
+/* A row with no champion on its face (a minor level, or MLB before a
+   champion) keeps its tape: the --hold-texture weave down the left edge,
+   beside the warning in words (ADR-0081 addendum, ADR-0083). */
+.srecord--labelled {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+.srecord--labelled .srecord__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.srecord__tape {
+  flex: 0 0 auto;
+  width: 56px;
+  background: var(--hold-texture);
 }

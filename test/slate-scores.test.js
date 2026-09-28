@@ -61,6 +61,44 @@ test('normalizeGame copies no score-bearing field into the slate model', () => {
   assert.equal(model.abstractState, 'Live')
 })
 
+// Test 7 of #1227 (build prompt trap 1). On a postseason game, `seriesStatus`
+// and `teams.{side}.leagueRecord` give the state AFTER that game: the
+// 2025-10-04 NLDS Game 1 row reads "MIL leads 1-0" and a 1-0 leagueRecord,
+// and on today's game both change the moment it ends. The slate model must
+// carry neither, even handed a row that has them. The bracket reads the state
+// heading in from src/api/postseason/ instead.
+test('normalizeGame carries no seriesStatus or leagueRecord from a postseason row', () => {
+  const postseasonRow = {
+    ...scoreLadenRow,
+    gamePk: 813047,
+    gameType: 'D',
+    officialDate: '2025-10-04',
+    status: { statusCode: 'F', abstractGameState: 'Final' },
+    seriesStatus: {
+      gameNumber: 1,
+      totalGames: 5,
+      isTied: false,
+      isOver: false,
+      wins: 1,
+      losses: 0,
+      winningTeam: { id: 158 },
+      losingTeam: { id: 112 },
+      description: 'NLDS Game 1',
+      shortDescription: 'NLDS',
+      result: 'MIL leads 1-0',
+      shortName: 'NLDS',
+    },
+    teams: {
+      away: { ...scoreLadenRow.teams.away, leagueRecord: { wins: 0, losses: 1, pct: '.000' } },
+      home: { ...scoreLadenRow.teams.home, leagueRecord: { wins: 1, losses: 0, pct: '1.000' } },
+    },
+  }
+  const model = normalizeGame(postseasonRow, 1)
+  const text = JSON.stringify(model)
+  assert.ok(!/seriesStatus|leagueRecord|leads|isOver|isTied|winningTeam|losingTeam/.test(text), text)
+  for (const side of ['away', 'home']) assert.deepEqual(Object.keys(model[side]).sort(), ['abbreviation', 'id', 'name', 'teamName'])
+})
+
 // --------------------------------------------------------------------------
 // 2. fetchSlateScores — the toggle-gated score fetch
 // --------------------------------------------------------------------------

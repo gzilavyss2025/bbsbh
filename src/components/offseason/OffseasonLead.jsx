@@ -105,7 +105,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
           when its file is not the season this page names. */}
       <LongAtBats season={winter.seasonEnded} />
 
-      <SeasonRecord sportId={sportId} season={winter.seasonEnded} />
+      <SeasonRecord sportId={sportId} season={winter.seasonEnded} dateStr={endDate} />
 
       <WinterCalendar winter={winter} />
 
