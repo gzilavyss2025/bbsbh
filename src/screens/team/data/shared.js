@@ -92,7 +92,7 @@ function runDiff(rec) {
 function runDiffTone(rec) {
   const d = rec.runDifferential
   if (!Number.isFinite(d) || d === 0) return ''
-  return d > 0 ? 'is-positive' : 'is-negative'
+  return d > 0 ? 'standings__diff--positive' : 'standings__diff--negative'
 }
 
 // The club's own division out of a fetchStandings response. Undefined for a

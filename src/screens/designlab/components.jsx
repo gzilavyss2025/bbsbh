@@ -187,7 +187,7 @@ export function ComponentHalf() {
         <Entry
           title="SectionHead"
           path={`${UI_PATH}/frame/SectionHead.jsx`}
-          note="The one head (#1113), three looks. The label: graphite caps on a hairline. The rule: the label, then a pencil rule to the note (the player page's sub-heads). The band: the house navy and kraft with no club, the club's own bar under a themed root. With club, a band that is a plain label until a club colour arrives: the team hub's card heads and the player page's section bars."
+          note="The one head (#1113), three looks. The label: graphite caps on a hairline. The rule: the label, then a pencil rule to the note (the player page's sub-heads). The band: the house navy and a pencil rule with no club, the club's own bar under a themed root. With club, a band that is a plain label until a club colour arrives: the team hub's card heads and the player page's section bars."
         >
           <SectionHeadDemo />
         </Entry>

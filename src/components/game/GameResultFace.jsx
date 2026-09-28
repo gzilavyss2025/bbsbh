@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { selectBoxscore, computePlayOfTheGame } from '../../api/boxscore.js'
-import { useNav } from '../../lib/nav.js'
+import { useRouteLink } from '../../lib/nav.js'
 import { favoriteAccentColor } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -19,6 +19,7 @@ import {
   showsPerformerCard,
 } from '../../lib/resultCards.js'
 import { Pill } from '../ui/control/Pill.jsx'
+import { Door } from '../ui/control/Door.jsx'
 
 // The flip card's back face: what a past, Final game's card turns into once
 // revealed. Deliberately a SUMMARY, not the full box score — final R/H/E, the
@@ -56,7 +57,7 @@ export function GameResultFace({
   video = null,
   trailing = null,
 }) {
-  const navigate = useNav()
+  const routeLink = useRouteLink()
   const box = selectBoxscore(feed)
   const potg = computePlayOfTheGame(winProb, feed)
   const totalInnings = box.innings?.length ?? 9
@@ -121,13 +122,10 @@ export function GameResultFace({
   return (
     <div className={cardClassName} style={Object.keys(cardStyle).length ? cardStyle : undefined}>
       <div className="flipback__topRow">
-        <button
-          type="button"
-          className="btn btn--ink flipback__boxbtn"
-          onClick={() => navigate(boxScorePath)}
-        >
+        {/* A door, not a button: it leaves the card for the box score (#1174). */}
+        <Door className="flipback__door" {...routeLink(boxScorePath)}>
           Box score
-        </button>
+        </Door>
         {/* Beside Box score, because both are "where this card can take you"
             — and in the row that already exists, so video costs the card no
             height. MLB only: an affiliate game has no content package at all,

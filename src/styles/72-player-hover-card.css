@@ -88,6 +88,9 @@
    and at the pill's --ls-label "On rehab · AAA · Iowa Cubs" ran 5px past it. */
 .phcard__tag {
   --pill-fill: var(--surface-inset);
+  /* A block, not the pill's inline-flex: text-overflow acts only on a block
+     container, so without this the ellipsis never draws (#1183). */
+  display: inline-block;
   max-width: 100%;
   margin-top: var(--space-2);
   letter-spacing: var(--ls-caps);

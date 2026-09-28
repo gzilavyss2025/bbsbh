@@ -465,7 +465,7 @@
   align-items: center;
   justify-content: center;
   border: var(--bw-hair) solid var(--border-rule);
-  border-bottom: 3px solid var(--header-accent, var(--seal));
+  border-bottom: 3px solid var(--header-accent, var(--band-rule));
   border-radius: var(--radius-sm);
   background: var(--header-bar, var(--navy));
   gap: var(--space-2);

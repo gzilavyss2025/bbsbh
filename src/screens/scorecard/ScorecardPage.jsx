@@ -10,6 +10,7 @@ import { scorecardFull, scorecardStep } from '../../api/scorecardGame.js'
 import { Scorecard } from '../Scorecard.jsx'
 import { ScorecardCellEditor } from '../../components/scoring/ScorecardCellEditor.jsx'
 import { RefreshButton } from '../TeamInfo.jsx'
+import { Button } from '../../components/ui/control/Button.jsx'
 import { useStampUnseal } from '../../hooks/useStamps.js'
 
 // The live scorecard — `/{date}/{matchup}/scorecard`, the Numbers Game "22"
@@ -186,22 +187,12 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     <div className="scorecard-page">
       <div className="scpage__bar">
         <div className="scpage__ctl" role="group" aria-label="Half of inning">
-          <button
-            type="button"
-            className={`btn ${side === 'top' ? '' : 'btn--ghost'}`}
-            aria-pressed={side === 'top'}
-            onClick={() => setSide('top')}
-          >
+          <Button size="control" pressed={side === 'top'} onClick={() => setSide('top')}>
             Top
-          </button>
-          <button
-            type="button"
-            className={`btn ${side === 'bottom' ? '' : 'btn--ghost'}`}
-            aria-pressed={side === 'bottom'}
-            onClick={() => setSide('bottom')}
-          >
+          </Button>
+          <Button size="control" pressed={side === 'bottom'} onClick={() => setSide('bottom')}>
             Bottom
-          </button>
+          </Button>
         </div>
         <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />
       </div>

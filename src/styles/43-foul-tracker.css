@@ -477,12 +477,12 @@
 .scorebug__result {
   flex: none;
 }
-.scorebug__result.is-positive {
+.scorebug__result--positive {
   --pill-fill: var(--field-soft);
   --pill-edge: color-mix(in srgb, var(--field) 35%, var(--border-rule));
   --pill-ink: var(--field-deep);
 }
-.scorebug__result.is-negative {
+.scorebug__result--negative {
   --pill-fill: var(--clay-soft);
   --pill-edge: color-mix(in srgb, var(--clay) 35%, var(--border-rule));
   --pill-ink: var(--clay-deep);

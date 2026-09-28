@@ -137,8 +137,8 @@
   outline-offset: 2px;
 }
 
-/* The masthead this club wears in this jersey — the app's default navy/kraft
-   chrome recolored to its Bar/Accent/On-bar. What it previews is real since
+/* The masthead this club wears in this jersey — the app's default navy and
+   band-rule chrome recolored to its Bar/Accent/On-bar. What it previews is real since
    ADR-0030: the same triad dresses .teaminfo__head and that side's .metricbar
    mastheads on the lineup page. It is NOT the .topbar/.sitebar, which stay
    plain navy-on-paper. */
@@ -148,7 +148,7 @@
   align-items: center;
   justify-content: center;
   border: var(--bw-hair) solid var(--border-rule);
-  border-bottom: 3px solid var(--header-accent, var(--seal));
+  border-bottom: 3px solid var(--header-accent, var(--band-rule));
   border-radius: var(--radius-sm);
   background: var(--header-bar, var(--navy));
   gap: var(--space-2);

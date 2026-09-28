@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useBooks } from '../../hooks/useBooks.js'
 import { useStamps } from '../../hooks/useStamps.js'
 import { useNav } from '../../lib/nav.js'
+import { Button } from '../ui/control/Button.jsx'
 import { pathForBook } from '../../lib/logbookNav.js'
 import { MAX_NOTE_LENGTH, STAMP_MODES, seasonFromDate } from '../../lib/stamps.js'
 import { logbookPath, logbookPlacePath } from '../../lib/route.js'
@@ -190,15 +191,9 @@ export function StampGameButton({ game }) {
         <div className="stampstrip__details" id={detailsId}>
           <div className="stampstrip__modes" role="group" aria-label="How you took this game in">
             {STAMP_MODES.map((mode) => (
-              <button
-                type="button"
-                key={mode}
-                className={existing.mode === mode ? 'is-active' : ''}
-                aria-pressed={existing.mode === mode}
-                onClick={() => save({ mode })}
-              >
+              <Button size="control" key={mode} pressed={existing.mode === mode} onClick={() => save({ mode })}>
                 {mode}
-              </button>
+              </Button>
             ))}
           </div>
 

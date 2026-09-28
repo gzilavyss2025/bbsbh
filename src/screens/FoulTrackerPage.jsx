@@ -562,7 +562,7 @@ function PaScorebug({ pa }) {
           ))}
         </span>
         {pa.resultEvent && (
-          <Pill className={`scorebug__result ${positive ? 'is-positive' : 'is-negative'}`}>{pa.resultEvent}</Pill>
+          <Pill className={`scorebug__result scorebug__result--${positive ? 'positive' : 'negative'}`}>{pa.resultEvent}</Pill>
         )}
         {pa.resultDescription && (
           <p className="scorebug__prose">
