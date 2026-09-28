@@ -203,7 +203,12 @@ const BUDGETS = {
   // live here — teamLogoUrl's, ahead of the *_USES_BASE_LOGO early returns
   // that would shadow it, and mainOverrideLogoUrl's, which is what routes
   // Main's tile through 'main-recolor'.
-  'src/lib/teams.js': 1225, // 1212
+  // 1225 -> 1240: found already over budget on `origin/claude/postseason`
+  // (base branch drift the guard's own header warns about — a merged
+  // favorite-team comment edit re-expanded past the pinned count) while
+  // building #1225. Not this slice's growth; bumped only so this PR's own
+  // lint passes, and flagged on the issue per #1224's rule 9.
+  'src/lib/teams.js': 1240, // 1227
   // 700 -> 800: the slug helpers that put a name in front of an id
   // (slugify/idFromSlug/entitySegment, ADR-0057). They belong to routing and to
   // nothing else — a one-file src/lib/url/ existing only to dodge this number
@@ -256,7 +261,11 @@ const BUDGETS = {
   // strip and the empty day. It fits because both halves moved out first — the
   // gate into hooks/useWinter.js over pure rules in src/lib/winter/, and the
   // surface into components/winter/LeaguePicker.jsx.
-  'src/screens/GameSelect.jsx': 1200, // 1187
+  // 1200 -> 1225: the postseason slate date cutoff (ADR-0087, #1225) — the
+  // cap check's own season-row fetch and the forward arrow's disabled state.
+  // The rule itself is a pure module (src/lib/postseason/capSlateDate.js);
+  // what is left here is the wiring a screen has to own.
+  'src/screens/GameSelect.jsx': 1225, // 1212
   // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's
   // one new reader tipped it. fetchSeasonMeta belongs here and nowhere else:
   // this module already owned the seasons endpoint (fetchAllStarInfo was a
