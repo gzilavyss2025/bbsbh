@@ -13,7 +13,11 @@
 //   - A beaten club goes back to its 40-man roster the day after it is out
 //     (CHC on 2025-10-20: 40).
 // So the date is the LAST date the series played on or before the cutoff,
-// never later, and a list of more than 26 is "not named yet", never shown.
+// never later, and a list of more than 26 is "not named yet".
+//
+// Before the series plays (Gary, 2026-09-28), the page shows each club's
+// CURRENT roster (the cutoff date's active roster) as a stand-in, marked
+// `declared: false`, with a note that the club names its roster by Game 1.
 // A roster move is not a result, so this module is spoiler-free.
 
 import { getJson } from '../statsapi.js'
@@ -59,14 +63,22 @@ export function rosterGroups(players) {
   }
 }
 
-// A /roster answer to RosterCard's shape, or null when it is not a
-// postseason roster: empty, or more than 26 (not named yet, or the club is
-// out and back on its 40-man roster). The answer does not carry the club
-// (the fields list leaves it out), so the caller names it.
-export function shapeRoster(json, teamId) {
+// The date to read a club's roster on: the series date once the series
+// plays (seriesRosterDate), else the cutoff itself — the current roster.
+export function rosterReadDate(series, cutoff) {
+  if (!series) return null
+  return seriesRosterDate(series, cutoff) ?? cutoff ?? null
+}
+
+// A /roster answer to RosterCard's shape plus `declared`, or null when empty.
+// `declared` only when read on a date the series played AND 26 or fewer: on
+// Game 1 morning, before the club names its roster, the same call answers
+// the September roster (28 or more). The answer does not carry the club (the
+// fields list leaves it out), so the caller names it.
+export function shapeRoster(json, teamId, { onSeriesDate = false } = {}) {
   const rows = json?.roster ?? []
-  if (!rows.length || rows.length > POSTSEASON_ROSTER_SIZE) return null
-  return rosterGroups(
+  if (!rows.length) return null
+  const groups = rosterGroups(
     rows.map((r) => ({
       id: r.person?.id ?? null,
       name: r.person?.fullName ?? '',
@@ -75,8 +87,14 @@ export function shapeRoster(json, teamId) {
       jersey: r.jerseyNumber ?? '',
     })),
   )
+  return { ...groups, declared: onSeriesDate && rows.length <= POSTSEASON_ROSTER_SIZE }
 }
 
-export async function fetchSeriesRoster(teamId, date, { signal } = {}) {
-  return shapeRoster(await getJson(rosterUrl(teamId, date), { signal }), teamId)
+// One club's roster for a series page heading into `cutoff`: declared, or
+// the current roster as a stand-in before the series plays.
+export async function fetchSeriesRoster(teamId, series, cutoff, { signal } = {}) {
+  const date = rosterReadDate(series, cutoff)
+  if (!date) return null
+  const json = await getJson(rosterUrl(teamId, date), { signal })
+  return shapeRoster(json, teamId, { onSeriesDate: seriesRosterDate(series, cutoff) !== null })
 }

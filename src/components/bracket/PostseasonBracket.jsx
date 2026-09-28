@@ -9,20 +9,10 @@
 import '../../styles/80-postseason-bracket.css'
 import { useMemo, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
-import { loadPostseasonHistory } from '../../api/postseasonHistory.js'
+import { historySeriesIds, loadPostseasonHistory } from '../../api/postseasonHistory.js'
 import { BracketFold } from './BracketFold.jsx'
 import { FullBracket } from './FullBracket.jsx'
 import { bracketOpensByItself } from '../../lib/postseason/bracketDisplay.js'
-
-function historyIdsFrom(history) {
-  const ids = new Set()
-  for (const season of history?.seasons ?? []) {
-    for (const round of season.rounds ?? []) {
-      for (const series of round.series ?? []) if (series.id) ids.add(series.id)
-    }
-  }
-  return ids
-}
 
 // On a day with no postseason game (an off day, or the champion's days before
 // the offseason page), the full bracket is the page: it is always open, and
@@ -40,7 +30,7 @@ export function PostseasonBracket({ bracket, cutoff, autoOpen = true }) {
     setChoice(null)
   }
   const history = useAsync(() => loadPostseasonHistory(), [])
-  const historyIds = useMemo(() => historyIdsFrom(history.data), [history.data])
+  const historyIds = useMemo(() => historySeriesIds(history.data), [history.data])
 
   if (!bracket) return null
   const alwaysOpen = autoOpen && bracketOpensByItself(bracket)

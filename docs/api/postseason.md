@@ -197,22 +197,29 @@ statsapi has **no postseason roster type** (`/api/v1/rosterTypes`, checked
 - A beaten club is back on its 40-man roster the next day.
 
 So `seriesRosterDate(series, cutoff)` picks the last date the series played by
-the cutoff (null before Game 1 day), and `shapeRoster` returns null for more
-than 26 players ("not named yet"). The live series page shows these rosters and
+the cutoff (null before Game 1 day). Before that, `rosterReadDate` falls back
+to the cutoff: the club's CURRENT roster stands in (Gary, 2026-09-28), and the
+page says the club names its roster by Game 1. `shapeRoster` marks a roster
+`declared` only on a series date with 26 or fewer players. The live series page
 falls back to the box-score roster (`postseasonSeries.js`) when a read fails.
 Spoiler-free: a roster move is not a result.
 
 ## The route (`src/lib/route.js`)
 
-- `/postseason-live/{seriesId}?d={ISO}` parses to
-  `{ name: 'postseason-live', seriesId, asOf }`. `postseasonLivePath(id, cutoff)`
-  builds it.
+- One address for both series pages (Gary, 2026-09-28):
+  `/postseason/{seriesId}?d={ISO}` parses to
+  `{ name: 'postseason-series', seriesId, asOf }`. `postseasonLivePath(id, cutoff)`
+  builds the dated form. `seriesPageFor(id, asOf, historyIds)` picks the page:
+  the finished page for a `postseason-history.json` id with no `?d=`, the live
+  page otherwise.
 - `seriesHref(series, cutoffDate, historyIds)` gives the finished page
   `/postseason/{id}` only when the series was decided before the cutoff AND
   `postseason-history.json` holds its id (trap 7: that file gets a season only
   after its World Series, by a hand-run script). Otherwise the live page with
   `?d=`. A series with no id has no link (`null`).
-- `App.jsx`'s `postseason-live` branch renders `screens/postseason-live/LiveSeriesPage.jsx`
+- `App.jsx`'s `postseason-series` branch renders `screens/postseason-live/SeriesRoute.jsx`,
+  which reads the history file and opens `PostseasonSeriesPage.jsx` or
+  `screens/postseason-live/LiveSeriesPage.jsx`. The live page covers
   (slice 6): a series still in progress, or a decided 2026 series with nowhere
   else to go yet (trap 7). It reads `series.games`/`cutoffGame`/`upcoming` and
   fetches nothing for the cutoff date's own game.

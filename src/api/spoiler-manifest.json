@@ -767,7 +767,7 @@
     },
     "postseason/roster.js": {
       "class": "spoiler-free",
-      "why": "A club's declared postseason roster: its active roster (`/teams/{id}/roster?rosterType=active&date=`) on the last date its series played by the cutoff. Names, jersey numbers and positions only; a roster move is not a result. statsapi has no postseason roster type."
+      "why": "A club's declared postseason roster: its active roster (`/teams/{id}/roster?rosterType=active&date=`) on the last date its series played by the cutoff. Names, jersey numbers and positions only; a roster move is not a result. statsapi has no postseason roster type. Before Game 1 day, the club's current roster on the cutoff date stands in."
     },
     "postseason/text.js": {
       "class": "cutoff-gated",

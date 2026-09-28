@@ -128,14 +128,8 @@ const PostseasonLeadersPage = lazyNamed(
   () => import('./screens/PostseasonLeadersPage.jsx'),
   'PostseasonLeadersPage',
 )
-const PostseasonSeriesPage = lazyNamed(
-  () => import('./screens/PostseasonSeriesPage.jsx'),
-  'PostseasonSeriesPage',
-)
-const LiveSeriesPage = lazyNamed(
-  () => import('./screens/postseason-live/LiveSeriesPage.jsx'),
-  'LiveSeriesPage',
-)
+// /postseason/{id} opens the finished or the live series page (SeriesRoute).
+const SeriesRoute = lazyNamed(() => import('./screens/postseason-live/SeriesRoute.jsx'), 'SeriesRoute')
 const PostseasonRacePage = lazyNamed(
   () => import('./screens/PostseasonRacePage.jsx'),
   'PostseasonRacePage',
@@ -390,9 +384,7 @@ export default function App() {
   } else if (route.name === 'postseason-leaders') {
     content = <PostseasonLeadersPage />
   } else if (route.name === 'postseason-series') {
-    content = <PostseasonSeriesPage seriesId={route.seriesId} />
-  } else if (route.name === 'postseason-live') {
-    content = <LiveSeriesPage seriesId={route.seriesId} asOf={route.asOf} />
+    content = <SeriesRoute seriesId={route.seriesId} asOf={route.asOf} />
   } else if (route.name === 'postseason-race') {
     content = <PostseasonRacePage />
   } else if (route.name === 'trade-deadline') {
