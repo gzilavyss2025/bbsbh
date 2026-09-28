@@ -175,7 +175,11 @@ Example: 2025 NLDS, heading into 2025-10-09.
 
 - `recordLine(series)`: "Game 1", "CHC leads 1–0", "Series tied 1–1", "Winner
   take all" (each club one win from the series), "TOR won 3–1" (decided).
-- `seriesLine(series, gameNumber)`: "Game 2 · NL Wild Card Series".
+- `seriesLine(series, gameNumber)`: "Game 2 · NL Wild Card", "Game 3 · ALDS",
+  "Game 5 · NLCS", "Game 1 · World Series". Its own `roundTitle` drops the word
+  "Series" from every round but the World Series itself (slice 4, Gary's copy
+  decision 2026-09-28) — never read `series.name` (statsapi's
+  `seriesDescription`) for this line.
 - `cardLines(game, bracket)`: both lines for a slate game row, by `gamePk`, or
   `null` for a game not in the bracket. The slate model needs no new field.
 
