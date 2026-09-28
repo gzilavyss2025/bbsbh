@@ -8,12 +8,14 @@ import test from 'node:test'
 import { deriveBracket } from '../../src/api/postseason/bracket.js'
 import {
   aliveClubs,
+  bracketOpensByItself,
   byeSlotIndex,
   isBoldMoment,
   isDecidingGame,
   isElimination,
   leaguePhase,
   offDayAliveTeams,
+  recordRowIsLabelled,
   seriesPlayingToday,
   winningSlotIndex,
 } from '../../src/lib/postseason/bracketDisplay.js'
@@ -116,4 +118,32 @@ test('winningSlotIndex / byeSlotIndex: read off the real away/home slots, never 
 
   const sea = seriesWith(b, 'AL', 'division', 'SEA') // not decided yet
   assert.equal(winningSlotIndex(sea), -1)
+})
+
+// Review of #1233: a series with a game on the cutoff date but a slot the
+// bracket never filled (a missed feeder match) must not become a ticket —
+// the ticket reads both clubs, and a missing one crashed the slate.
+test('seriesPlayingToday: a series with an empty slot is not a ticket', () => {
+  const b = bracket2025('2025-10-09')
+  const mil = b.series.find((s) => s.playsOnCutoff && s.slots.some((slot) => slot.club?.abbreviation === 'MIL'))
+  const broken = { ...b, series: b.series.map((s) => (s === mil ? { ...s, slots: [s.slots[0], { ...s.slots[1], club: null }] } : s)) }
+  const abbrs = seriesPlayingToday(broken).map((s) => s.slots.map((slot) => slot.club?.abbreviation).sort().join('-'))
+  assert.deepEqual(abbrs, ['LAD-PHI'])
+})
+
+// Review of #1233: the Season record row drops its tape and its warning only
+// when the champion is on its own face (ADR-0081 addendum). A minor level's
+// row, or an MLB row with no champion, still only links to results, so it
+// still says so.
+test('recordRowIsLabelled: the warning stays unless the champion is on the face', () => {
+  assert.equal(recordRowIsLabelled(null), true)
+  assert.equal(recordRowIsLabelled({ id: 119, abbreviation: 'LAD' }), false)
+})
+
+// Gary, 2026-09-28: on a day with no postseason game the full bracket opens
+// by itself; on a game day it stays folded behind the tickets.
+test('bracketOpensByItself: open on a day with no game, folded on a game day', () => {
+  assert.equal(bracketOpensByItself(bracket2025('2025-10-09')), false)
+  const offDay = bracket2025('2025-10-09')
+  assert.equal(bracketOpensByItself({ ...offDay, series: offDay.series.map((s) => ({ ...s, playsOnCutoff: false })) }), true)
 })

@@ -7,7 +7,6 @@ import { useRouteLink } from '../../lib/nav.js'
 import { seriesHref } from '../../lib/route.js'
 import { recordLine, seriesLine } from '../../api/postseason/text.js'
 import { isBoldMoment, isDecidingGame, seriesPlayingToday } from '../../lib/postseason/bracketDisplay.js'
-import { humanDate } from '../../lib/dates.js'
 import { ClubMark, Pips, Trophy } from './bracketParts.jsx'
 import { Door } from '../ui/control/Door.jsx'
 
@@ -47,20 +46,9 @@ function SeriesTicket({ series, cutoff, historyIds }) {
   )
 }
 
-// A series not playing today and not decided — waiting for its next game,
-// or (a swept-early series) for the other half of its round to finish.
-function waitingLine(series) {
-  const [a, b] = series.slots
-  const next = series.upcoming.find((u) => u.date)?.date
-  return `${recordLine(series)} in the ${series.name}${next ? ` — next ${humanDate(next)}` : ''} (${a.club.abbreviation} ${a.wins}, ${b.club.abbreviation} ${b.wins})`
-}
-
-export function BracketFold({ bracket, cutoff, historyIds, open, onToggle }) {
+export function BracketFold({ bracket, cutoff, historyIds, open, onToggle, showDoor = true }) {
   const champion = bracket.champion
   const today = seriesPlayingToday(bracket)
-  const waiting = bracket.series.filter(
-    (s) => !s.decided && !s.playsOnCutoff && s.slots.every((slot) => slot.club),
-  )
   return (
     <section className="pbkt-fold" aria-label="Postseason bracket">
       {champion ? (
@@ -84,19 +72,16 @@ export function BracketFold({ bracket, cutoff, historyIds, open, onToggle }) {
         </ul>
       ) : (
         <div className="pbkt-fold__quiet">
+          {/* Gary, 2026-09-28: the words stay short, and the full bracket
+              opens by itself below (PostseasonBracket.jsx). */}
           <p className="pbkt-fold__quiethead">No games today</p>
-          {waiting.length > 0 && (
-            <ul className="pbkt-fold__waiting">
-              {waiting.map((s) => (
-                <li key={s.key}>{waitingLine(s)}</li>
-              ))}
-            </ul>
-          )}
         </div>
       )}
-      <Door layout="block" className="pbkt-fold__door" onClick={onToggle} aria-expanded={open}>
-        {open ? 'Close the bracket' : 'Open the bracket'}
-      </Door>
+      {showDoor && (
+        <Door layout="block" className="pbkt-fold__door" onClick={onToggle} aria-expanded={open}>
+          {open ? 'Close the bracket' : 'Open the bracket'}
+        </Door>
+      )}
     </section>
   )
 }

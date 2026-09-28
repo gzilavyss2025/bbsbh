@@ -225,9 +225,14 @@ promises a reveal nothing here performs. This addendum's reason is
 independent and came later: a flat warning in front of a face that already
 carries the thing it warns about is false, whatever colour the tape wears.
 
-So both come off. The row keeps its title and one plain sentence saying how
-the season finished — prose, not a warning — plus its "Final standings" and
-"The postseason" links, unchanged.
+So both come off, but only where the champion is on the face. The row keeps
+its title and one plain sentence saying how the season finished, plus its
+"Final standings" and "The postseason" links, unchanged.
+
+A row with no champion on its face keeps both (review of #1233). That is
+every minor level's row, which never folds in a bracket, and an MLB row
+before a champion exists. Such a row still only links to results, so the
+reason above for the warning still holds for it.
 
 ### The correction
 
@@ -236,7 +241,7 @@ that opens onto results, and it is the only thing on the page wearing kraft
 tape."* Both halves need correcting. By the time this addendum was written,
 the row's tape was already `--hold-texture`, not kraft (ADR-0083) — so even
 before slice 7, the sentence overstated its own colour. And as of slice 7,
-the row wears no tape at all, of either colour.
+a row with the champion on its face wears no tape at all, of either colour.
 
 ### The source, never the history file
 

@@ -12,6 +12,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { loadPostseasonHistory } from '../../api/postseasonHistory.js'
 import { BracketFold } from './BracketFold.jsx'
 import { FullBracket } from './FullBracket.jsx'
+import { bracketOpensByItself } from '../../lib/postseason/bracketDisplay.js'
 
 function historyIdsFrom(history) {
   const ids = new Set()
@@ -23,20 +24,27 @@ function historyIdsFrom(history) {
   return ids
 }
 
-export function PostseasonBracket({ bracket, cutoff }) {
-  const [open, setOpen] = useState(false)
+// On a day with no postseason game (an off day, or the champion's days before
+// the offseason page), the full bracket is the page: it is always open, and
+// there is no door to close it (Gary, 2026-09-28). `autoOpen={false}` keeps it
+// folded, for the offseason page's Season record row.
+export function PostseasonBracket({ bracket, cutoff, autoOpen = true }) {
+  // null = the day's default; a tap sets it.
+  const [choice, setChoice] = useState(null)
   // Re-seal on a day change (a different cutoff), computed during render —
   // the same pattern GameSelect.jsx uses for its own per-day resets, rather
   // than an effect.
   const [prevCutoff, setPrevCutoff] = useState(cutoff)
   if (cutoff !== prevCutoff) {
     setPrevCutoff(cutoff)
-    setOpen(false)
+    setChoice(null)
   }
   const history = useAsync(() => loadPostseasonHistory(), [])
   const historyIds = useMemo(() => historyIdsFrom(history.data), [history.data])
 
   if (!bracket) return null
+  const alwaysOpen = autoOpen && bracketOpensByItself(bracket)
+  const open = alwaysOpen || (choice ?? false)
 
   return (
     <section className="pbkt" aria-label="Postseason">
@@ -45,7 +53,8 @@ export function PostseasonBracket({ bracket, cutoff }) {
         cutoff={cutoff}
         historyIds={historyIds}
         open={open}
-        onToggle={() => setOpen((o) => !o)}
+        showDoor={!alwaysOpen}
+        onToggle={() => setChoice(!open)}
       />
       {open && <FullBracket bracket={bracket} cutoff={cutoff} historyIds={historyIds} />}
     </section>

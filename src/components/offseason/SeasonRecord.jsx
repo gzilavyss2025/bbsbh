@@ -2,6 +2,7 @@ import { useRouteLink } from '../../lib/nav.js'
 import { SPORT_IDS } from '../../lib/teams.js'
 import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracket.js'
 import { PostseasonBracket } from '../bracket/PostseasonBracket.jsx'
+import { recordRowIsLabelled } from '../../lib/postseason/bracketDisplay.js'
 
 // THE SEASON RECORD — the one door on the offseason page that opens onto
 // results (issue #1078, step 4 of #1038; the MLB champion, #1224 slice 7).
@@ -60,9 +61,14 @@ export function SeasonRecord({ sportId, season, dateStr }) {
   const inward = sportId === SPORT_IDS.MLB
   const { bracket, cutoff } = usePostseasonBracket(inward ? dateStr : null, { season })
   const champion = bracket?.champion ?? null
+  const labelled = recordRowIsLabelled(champion)
 
   return (
-    <section className="srecord" aria-label={`The ${season} season record`}>
+    <section className={`srecord${labelled ? ' srecord--labelled' : ''}`} aria-label={`The ${season} season record`}>
+      {/* A row with no champion on its face only links to results, so it
+          keeps its tape and its warning (ADR-0081 addendum). The tape is
+          hidden from the reading order; the warning is in words. */}
+      {labelled && <div className="srecord__tape" aria-hidden="true" />}
       <div className="srecord__body">
         {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
             invariant is never a per-component .toUpperCase() (ADR-0017). */}
@@ -71,9 +77,15 @@ export function SeasonRecord({ sportId, season, dateStr }) {
           {inward
             ? `How the ${season} season finished, and every postseason series.`
             : `How the ${season} season finished, on MiLB.com.`}
+          {labelled && (
+            <>
+              {' '}
+              <strong>Opening this shows results.</strong>
+            </>
+          )}
         </p>
 
-        {champion && <PostseasonBracket bracket={bracket} cutoff={cutoff} />}
+        {champion && <PostseasonBracket bracket={bracket} cutoff={cutoff} autoOpen={false} />}
 
         <div className="srecord__doors">
           {inward ? (

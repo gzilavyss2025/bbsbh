@@ -767,7 +767,7 @@
     },
     "postseason/text.js": {
       "class": "cutoff-gated",
-      "why": "The slate card's two lines and the series page's record line ('Game 2 · NL Wild Card Series', 'CHC leads 1–0', 'Series tied 1–1', 'Winner take all'), read off one series from bracket.js and nothing else. It inherits that module's footing whole: the state heading into the cutoff date, so a game on the slate never changes its own card."
+      "why": "The slate card's two lines and the series page's record line ('Game 2 · NL Wild Card', 'Game 3 · ALDS', 'World Series' kept whole; 'CHC leads 1–0', 'Series tied 1–1', 'Winner take all'), read off one series from bracket.js and nothing else. It inherits that module's footing whole: the state heading into the cutoff date, so a game on the slate never changes its own card."
     },
     "postseasonHistory.js": {
       "class": "spoiler-free",

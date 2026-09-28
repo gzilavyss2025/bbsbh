@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
-import { bracketCutoff, usePostseasonBracket } from '../../src/hooks/postseason/usePostseasonBracket.js'
+import { bracketCutoff, bracketFor, usePostseasonBracket } from '../../src/hooks/postseason/usePostseasonBracket.js'
 
 test('bracketCutoff caps a future slate date at today', () => {
   assert.equal(bracketCutoff('2026-10-15', '2026-09-28'), '2026-09-28')
@@ -37,4 +37,16 @@ test('the bracket code never reads Scores Unlocked and never touches storage', (
       assert.ok(!src.includes(banned), `${fileURLToPath(url)} reads ${banned}`)
     }
   }
+})
+
+// Review of #1233: useAsync keeps the last cutoff's data for one render after
+// the cutoff changes. Paging from 10-06 back to 10-05 would then draw the
+// bracket heading into 10-06 on 10-05's slate — a later result on an earlier
+// date. The hook hands back a bracket only when it was built for THIS cutoff.
+test('a bracket built for another cutoff is never handed back', () => {
+  const built = { cutoff: '2025-10-06', series: [] }
+  assert.equal(bracketFor(built, '2025-10-06'), built)
+  assert.equal(bracketFor(built, '2025-10-05'), null)
+  assert.equal(bracketFor(null, '2025-10-05'), null)
+  assert.equal(bracketFor(built, null), null)
 })

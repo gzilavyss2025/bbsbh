@@ -7,7 +7,9 @@
 // A decided series never plays again, so `playsOnCutoff` alone is the test
 // (bracket.js clears it once a series is decided).
 export function seriesPlayingToday(bracket) {
-  return bracket?.series?.filter((s) => s.playsOnCutoff) ?? []
+  // Both clubs known, or no ticket: a ticket reads both, and a slot the
+  // bracket never filled must not crash the slate.
+  return bracket?.series?.filter((s) => s.playsOnCutoff && s.slots.every((slot) => slot.club)) ?? []
 }
 
 // Every club still alive in the bracket heading into the cutoff: named in
@@ -94,4 +96,18 @@ export function winningSlotIndex(series) {
 // which slot that is, and the app must not guess it.
 export function byeSlotIndex(series) {
   return series?.slots?.findIndex((slot) => slot.bye) ?? -1
+}
+
+// The Season record row keeps its tape and its "Opening this shows results"
+// line unless the champion is on its own face (ADR-0081 addendum). A minor
+// level's row, or an MLB row with no champion yet, only links to results.
+export function recordRowIsLabelled(champion) {
+  return !champion
+}
+
+// On a day with no postseason game (an off day, or the champion's days
+// before the offseason page) the full bracket IS the page, so it opens by
+// itself (Gary, 2026-09-28). On a game day it stays folded behind the tickets.
+export function bracketOpensByItself(bracket) {
+  return Boolean(bracket) && seriesPlayingToday(bracket).length === 0
 }

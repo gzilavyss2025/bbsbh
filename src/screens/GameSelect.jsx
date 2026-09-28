@@ -152,9 +152,16 @@ export function GameSelect({
     () => (sportId === SPORT_IDS.MLB ? fetchSeasonMeta(bracketSeason) : Promise.resolve(null)),
     [sportId, bracketSeason],
   )
+  // The bracket draws the 12-club format (2022 on): two Wild Card series per
+  // league, each feeding one Division Series. An older postseason has a
+  // different shape, so its slate stays the plain one.
   const inPostseasonWindow =
-    sportId === SPORT_IDS.MLB && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
+    sportId === SPORT_IDS.MLB && bracketSeason >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
   const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null)
+  // The bracket stands in for the off-day banner and the empty-slate line
+  // only when it can draw. A failed read falls back to the plain slate, never
+  // to a blank page.
+  const bracketCoversPage = inPostseasonWindow && !postseasonBracket.error
 
   // The league's roster moves have two presentations of the SAME feed, split at
   // the app's one layout breakpoint. Neither one stands above the game list any
@@ -391,7 +398,7 @@ export function GameSelect({
   // never disagree between the grid and the bracket above it.
   const offDayTeams = useMemo(() => {
     const playing = new Set(sorted.flatMap((g) => [g.away.id, g.home.id]))
-    const all = inPostseasonWindow
+    const all = bracketCoversPage
       ? offDayAliveTeams(postseasonBracket.bracket, playing)
       : (levelTeams.data ?? []).filter((t) => !playing.has(t.id))
     if (!all.length) return []
@@ -401,7 +408,7 @@ export function GameSelect({
       if (pa !== pb) return pa - pb
       return (a.name ?? '').localeCompare(b.name ?? '')
     })
-  }, [inPostseasonWindow, postseasonBracket.bracket, levelTeams.data, sorted, favoriteTeamId, favoriteAffiliateIds])
+  }, [bracketCoversPage, postseasonBracket.bracket, levelTeams.data, sorted, favoriteTeamId, favoriteAffiliateIds])
 
   // All-Star break detection — only worth a fetch once the MLB slate has
   // already come back empty (every other day, this never fires). Turns a
@@ -452,7 +459,7 @@ export function GameSelect({
   // bracket is the whole page there), and this lookup would otherwise ask
   // fetchNextGameDate a question the bracket already answers.
   const needsResumeLookup =
-    isEmptyDay && !isDerbyDay && !allStarPending && !offseason && !winterDark && !inPostseasonWindow
+    isEmptyDay && !isDerbyDay && !allStarPending && !offseason && !winterDark && !bracketCoversPage
   const resumeLookup = useAsync(
     () =>
       needsResumeLookup
@@ -927,7 +934,7 @@ export function GameSelect({
             // neither flashes "No games scheduled." before the fetch resolves.
             emptyMessage={
               seasonMeta.loading || breakWindow || resumeLookupPending ||
-              showOffDayBanner || offseason || inPostseasonWindow
+              showOffDayBanner || offseason || bracketCoversPage
                 ? null
                 : 'No games scheduled.'
             }
