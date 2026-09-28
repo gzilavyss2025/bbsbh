@@ -173,8 +173,8 @@ Two of those nested files carry the architecture detail, loaded when you work th
   logos. Every selector falls back to `''`/`null`/`—`, and callers render "not
   posted yet" instead of crashing. Keep this pattern for any new field you read.
 - **Team ids are the universal key.** The same `teamId` drives schedule data, box
-  scores, and the logo CDN (`teamLogoUrl` in `teams.js`). The Brewers (id 158) are
-  pinned to the top of the slate (`PINNED_TEAM_ID`).
+  scores, and the logo CDN (`teamLogoUrl` in `teams.js`). The user's favorite team
+  (`useFavoriteTeam`) pins to the top of the slate; the Brewers (158) are only the default.
 - **Verify feed field paths against a live game.** The MLB feed shape is
   undocumented; `src/api/statsapi.js` notes which paths were checked against
   gamePk. Confirm a new field against a real response; do not guess.
