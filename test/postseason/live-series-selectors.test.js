@@ -44,7 +44,7 @@ test('seriesGameBuckets sorts a Series into results/today/upcoming, disjoint', (
   const { results, today, upcoming } = seriesGameBuckets(s)
   assert.deepEqual(results.map((g) => g.gamePk), [813047, 813048, 813049])
   assert.deepEqual(today, { gamePk: 813050, gameNumber: 4 })
-  assert.deepEqual(upcoming.map((g) => g.gamePk), [813050, null])
+  assert.deepEqual(upcoming.map((g) => g.gamePk), [null])
 
   const resultPks = new Set(results.map((g) => g.gamePk))
   assert.ok(!resultPks.has(today.gamePk), 'a counted result never repeats as today’s game')
@@ -82,4 +82,17 @@ test('seriesGameBuckets degrades to empty buckets for a missing series', () => {
   assert.deepEqual(results, [])
   assert.equal(today, null)
   assert.deepEqual(upcoming, [])
+})
+
+test('upcoming never repeats today’s game', () => {
+  const { today, upcoming } = seriesGameBuckets(fixtureSeries())
+  assert.ok(!upcoming.some((g) => g.gameNumber === today.gameNumber), 'today’s game shows once, under Today')
+  assert.deepEqual(upcoming.map((g) => g.gameNumber), [5])
+})
+
+test('a dated game that may not be needed says so next to its date', () => {
+  const g = { gameNumber: 3, gamePk: 1, date: '2026-10-01', ifNecessary: true }
+  assert.equal(upcomingGameLabel(g), '2026-10-01 · If necessary')
+  assert.equal(upcomingGameLabel(g, () => 'Oct 1'), 'Oct 1 · If necessary')
+  assert.equal(upcomingGameLabel({ ...g, ifNecessary: false }, () => 'Oct 1'), 'Oct 1')
 })

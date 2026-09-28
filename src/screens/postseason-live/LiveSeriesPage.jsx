@@ -257,7 +257,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             {upcoming.map((g) => (
               <li key={g.gameNumber} className="psseries__upcomingrow">
                 <span className="psseries__upcominggame">Game {g.gameNumber}</span>
-                <span className="psseries__upcomingdate">{g.date ? monthDay(g.date) : upcomingGameLabel(g)}</span>
+                <span className="psseries__upcomingdate">{upcomingGameLabel(g, monthDay)}</span>
               </li>
             ))}
           </ul>

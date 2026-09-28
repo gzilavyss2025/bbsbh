@@ -10,13 +10,15 @@
 //                  score or feed.
 //   - `upcoming`   the games still ahead of the cutoff game (or every
 //                  remaining game, when nothing plays today).
-// bracket.js's `upcomingGames()` never repeats the cutoff game inside
-// `upcoming` (see that module's header), so the three never overlap.
+// bracket.js's `upcomingGames()` starts at the first unplayed game, which is
+// the cutoff game itself when the series plays today. It shows once, under
+// Today, so `upcoming` drops it here and the three never overlap.
 export function seriesGameBuckets(series) {
+  const today = series?.cutoffGame ?? null
   return {
     results: series?.games ?? [],
-    today: series?.cutoffGame ?? null,
-    upcoming: series?.upcoming ?? [],
+    today,
+    upcoming: (series?.upcoming ?? []).filter((g) => !today || g.gameNumber !== today.gameNumber),
   }
 }
 
@@ -25,6 +27,10 @@ export function seriesGameBuckets(series) {
 // upcomingGames) — showing a date there would say the series went on past
 // today, which is the result this page must not leak. "If necessary" reads
 // the same whether or not the game turns out to be needed.
-export function upcomingGameLabel(game) {
-  return game?.date ?? 'If necessary'
+// A dated game that the series may not need says "If necessary" beside its
+// date. `formatDate` turns the ISO date into the page's own form.
+export function upcomingGameLabel(game, formatDate = (d) => d) {
+  if (!game?.date) return 'If necessary'
+  const date = formatDate(game.date)
+  return game.ifNecessary ? `${date} · If necessary` : date
 }
