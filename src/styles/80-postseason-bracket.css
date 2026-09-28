@@ -9,6 +9,8 @@
 
 .pbkt {
   margin: var(--space-3) 0;
+  /* The wide layout below measures this column, not the window. */
+  container: pbkt / inline-size;
 }
 
 /* ---------- shared parts ---------- */
@@ -141,17 +143,6 @@
   color: var(--text-heading);
   letter-spacing: var(--ls-title);
 }
-.pbkt-fold__waiting {
-  margin: 0;
-  padding-left: var(--space-4);
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-  color: var(--text-muted);
-}
-.pbkt-fold__waiting li + li {
-  margin-top: var(--space-1);
-}
 .pbkt-fold__door {
   margin-top: var(--space-2);
   border-top: var(--bw-hair) solid var(--border-rule);
@@ -234,7 +225,10 @@
    ported onto real bracket geometry instead of fixture pixels. */
 .pbkt-tree {
   position: relative;
-  overflow-x: auto;
+  /* Never a scroll box: the notes under the last boxes hang below H, so the
+     tree keeps room for them instead of clipping them into scrollbars. */
+  overflow: visible;
+  margin-bottom: var(--space-6);
 }
 .pbkt-lines {
   position: absolute;
@@ -454,6 +448,13 @@
     margin: var(--space-2) 0 0;
     padding: var(--space-1) var(--space-3);
   }
+}
+
+/* AL and NL side by side only when the BRACKET'S OWN column has room for two
+   trees, not when the window is wide: beside the transactions rail the slate
+   column is far narrower than the window, and two trees squeezed into it
+   scrolled inside their boxes. A container query measures the column. */
+@container pbkt (min-width: 820px) {
   .pbkt-full {
     display: grid;
     grid-template-columns: 1fr 1fr;

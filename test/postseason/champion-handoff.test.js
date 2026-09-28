@@ -26,9 +26,13 @@ const seasonRecordSrc = readFileSync(
   'utf8',
 )
 
-test('the row wears no tape and carries no "Opening this shows results" warning (ADR-0081 addendum)', () => {
-  assert.ok(!seasonRecordSrc.includes('srecord__tape'), 'the tape div should be gone')
-  assert.ok(!seasonRecordSrc.includes('Opening this shows results'), 'the warning line should be gone')
+// The tape and the warning come off ONLY when the champion is on the row's
+// face (ADR-0081 addendum). A minor level's row, or an MLB row with no
+// champion, still only links to results, so both stay, gated on one flag.
+test('the tape and the warning show only on a row with no champion on its face (ADR-0081 addendum)', () => {
+  assert.ok(seasonRecordSrc.includes('recordRowIsLabelled(champion)'), 'the row asks one helper whether it is labelled')
+  assert.ok(/\{labelled && <div className="srecord__tape"/.test(seasonRecordSrc), 'the tape is gated on the label')
+  assert.ok(/labelled && \([\s\S]{0,80}Opening this shows results/.test(seasonRecordSrc), 'the warning is gated on the label')
 })
 
 test('the row renders the champion through PostseasonBracket, never through the history file', () => {

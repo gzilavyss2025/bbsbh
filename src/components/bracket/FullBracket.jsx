@@ -78,11 +78,12 @@ function BoxRow({ slot, series, bracket, compact, x, y, w }) {
   )
 }
 
-// The brief's one bold moment, or a plain "Today · Game N" / "To the next
-// round" note. Shown for a deciding game even on a day it isn't played
+// The brief's one bold moment, or a plain "Today · Game N" note. No "To the
+// next round" line: the connector already says where a winner goes (Gary,
+// 2026-09-28). Shown for a deciding game even on a day it isn't played
 // (Concept A: a 2-2 series still reads "Winner take all", with its next
 // date, before the day it actually plays).
-function BoxNote({ series, nextRoundName, x, y, w }) {
+function BoxNote({ series, x, y, w }) {
   if (series.decided) return null
   const style = { left: x, top: y, width: w }
   if (isDecidingGame(series)) {
@@ -99,13 +100,6 @@ function BoxNote({ series, nextRoundName, x, y, w }) {
       <div className="pbkt-note" style={style}>
         <span className="pbkt-today">Today · Game {series.cutoffGame.gameNumber}</span>
         {isElimination(series) && <span className="pbkt-when"> · one from out</span>}
-      </div>
-    )
-  }
-  if (nextRoundName) {
-    return (
-      <div className="pbkt-note pbkt-when" style={style}>
-        To the {nextRoundName}
       </div>
     )
   }
@@ -236,7 +230,7 @@ function League({ league, leagueId, name, roundName, bracket, cutoff, historyIds
                 w={c.wc}
                 compact={compactWC}
                 note={
-                  <BoxNote series={wc} nextRoundName="Division Series" x={xWC} y={wcY(h) + BOX + 2} w={c.wc} />
+                  <BoxNote series={wc} x={xWC} y={wcY(h) + BOX + 2} w={c.wc} />
                 }
               />
             )}
@@ -252,7 +246,6 @@ function League({ league, leagueId, name, roundName, bracket, cutoff, historyIds
               note={
                 <BoxNote
                   series={ds}
-                  nextRoundName={roundName}
                   x={xDS}
                   y={dsY(h) + BOX + 2}
                   w={c.ds + GAP + 20}
@@ -271,7 +264,7 @@ function League({ league, leagueId, name, roundName, bracket, cutoff, historyIds
             y={lcsY}
             w={c.lcs}
             compact={compactLCS}
-            note={<BoxNote series={league.lcs} nextRoundName="World Series" x={xLCS} y={lcsY + BOX + 2} w={c.lcs} />}
+            note={<BoxNote series={league.lcs} x={xLCS} y={lcsY + BOX + 2} w={c.lcs} />}
           />
         )}
       </div>
@@ -329,7 +322,7 @@ function WorldSeriesBand({ bracket, cutoff, historyIds }) {
                 <>
                   <ClubMark club={slot.club} eliminated={isOut} size={20} />
                   <span className="pbkt-row__abbr">{slot.club.name}</span>
-                  <Pips winsNeeded={7} wins={slot.wins} />
+                  <Pips winsNeeded={ws.winsNeeded} wins={slot.wins} />
                 </>
               ) : (
                 <BlankSlot label={feederSeries(bracket, slot.from)?.label ? `Winner of ${feederSeries(bracket, slot.from).label}, to come` : 'To come'} />

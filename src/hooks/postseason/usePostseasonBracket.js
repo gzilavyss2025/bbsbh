@@ -30,6 +30,14 @@ export function bracketCutoff(date, today = toApiDate(new Date())) {
   return capSlateDate(date, today, null)
 }
 
+// useAsync keeps the last result for one render after its deps change. So a
+// slate paged from 10-06 back to 10-05 would draw the bracket heading into
+// 10-06 on 10-05's slate: a later result on an earlier date. Hand a bracket
+// back only when it was built for THIS cutoff.
+export function bracketFor(data, cutoff) {
+  return cutoff && data?.cutoff === cutoff ? data : null
+}
+
 export function usePostseasonBracket(cutoffDate, { season } = {}) {
   const cutoff = bracketCutoff(cutoffDate)
   const year = season ?? (cutoff ? Number(cutoff.slice(0, 4)) : null)
@@ -37,5 +45,5 @@ export function usePostseasonBracket(cutoffDate, { season } = {}) {
     (signal) => (cutoff && year ? loadPostseasonBracket(cutoff, year, { signal }) : Promise.resolve(null)),
     [cutoff, year],
   )
-  return { bracket: cutoff ? data : null, loading: Boolean(cutoff) && loading, error, cutoff }
+  return { bracket: bracketFor(data, cutoff), loading: Boolean(cutoff) && loading, error, cutoff }
 }
