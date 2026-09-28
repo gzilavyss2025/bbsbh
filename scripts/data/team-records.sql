@@ -14962,6 +14962,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822518, 573, 2026, 13, '2026-04-21', 428, 'L', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[1,0],[0,3],[3,0],[4,1]],"isHome":true,"runs":4,"oppRuns":8,"hits":6,"oppHits":13,"errors":2,"oppErrors":2,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2807,"starterId":812160,"starterOuts":17,"starterEr":1,"oppStarterId":695293,"oppStarterOuts":11,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822678, 120, 2026, 1, '2026-09-26', 121, 'L', '{"innings":[[0,0],[0,0],[0,1],[0,0],[0,0],[0,0],[4,0],[1,0],[2,0]],"isHome":true,"runs":1,"oppRuns":7,"hits":3,"oppHits":9,"errors":1,"oppErrors":1,"homeRuns":0,"oppHomeRuns":3,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3309,"starterId":813349,"starterOuts":9,"starterEr":0,"oppStarterId":804636,"oppStarterOuts":15,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822678, 121, 2026, 1, '2026-09-26', 120, 'W', '{"innings":[[0,0],[0,0],[0,1],[0,0],[0,0],[0,0],[4,0],[1,0],[2,0]],"isHome":false,"runs":7,"oppRuns":1,"hits":9,"oppHits":3,"errors":1,"oppErrors":1,"homeRuns":3,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3309,"starterId":804636,"starterOuts":15,"starterEr":1,"oppStarterId":813349,"oppStarterOuts":9,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822679, 120, 2026, 1, '2026-09-27', 121, 'W', '{"innings":[[1,1],[3,1],[0,2],[0,0],[0,1],[0,0],[0,1],[0,0],[0,null]],"isHome":true,"runs":6,"oppRuns":4,"hits":9,"oppHits":9,"errors":1,"oppErrors":0,"homeRuns":2,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3309,"starterId":687792,"starterOuts":9,"starterEr":4,"oppStarterId":640455,"oppStarterOuts":18,"oppStarterEr":5,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822679, 121, 2026, 1, '2026-09-27', 120, 'L', '{"innings":[[1,1],[3,1],[0,2],[0,0],[0,1],[0,0],[0,1],[0,0],[0,null]],"isHome":false,"runs":4,"oppRuns":6,"hits":9,"oppHits":9,"errors":0,"oppErrors":1,"homeRuns":2,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3309,"starterId":640455,"starterOuts":18,"starterEr":5,"oppStarterId":687792,"oppStarterOuts":9,"oppStarterEr":4,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822680, 120, 2026, 1, '2026-09-16', 143, 'L', '{"innings":[[2,0],[0,0],[0,0],[0,0],[0,0],[0,0],[1,0],[0,0],[0,0]],"isHome":true,"runs":0,"oppRuns":3,"hits":4,"oppHits":5,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":3309,"starterId":688692,"starterOuts":1,"starterEr":2,"oppStarterId":554430,"oppStarterOuts":21,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822680, 143, 2026, 1, '2026-09-16', 120, 'W', '{"innings":[[2,0],[0,0],[0,0],[0,0],[0,0],[0,0],[1,0],[0,0],[0,0]],"isHome":false,"runs":3,"oppRuns":0,"hits":5,"oppHits":4,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":3309,"starterId":554430,"starterOuts":21,"starterEr":0,"oppStarterId":688692,"oppStarterOuts":1,"oppStarterEr":2,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822681, 120, 2026, 1, '2026-09-25', 121, 'W', '{"innings":[[1,2],[0,0],[2,4],[0,0],[2,0],[0,0],[0,1],[1,0],[0,null]],"isHome":true,"runs":7,"oppRuns":6,"hits":11,"oppHits":9,"errors":0,"oppErrors":1,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":3309,"starterId":674841,"starterOuts":14,"starterEr":5,"oppStarterId":642376,"oppStarterOuts":5,"oppStarterEr":2,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
@@ -15124,6 +15126,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822759, 141, 2026, 1, '2026-09-26', 113, 'L', '{"innings":[[0,0],[1,0],[2,0],[0,0],[2,0],[0,0],[0,1],[0,0],[0,0]],"isHome":true,"runs":1,"oppRuns":5,"hits":5,"oppHits":6,"errors":2,"oppErrors":0,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":14,"starterId":702056,"starterOuts":6,"starterEr":1,"oppStarterId":695076,"oppStarterOuts":18,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822760, 113, 2026, 1, '2026-09-25', 141, 'L', '{"innings":[[0,2],[1,0],[4,0],[0,0],[0,0],[0,0],[0,4],[0,0],[0,null]],"isHome":false,"runs":5,"oppRuns":6,"hits":12,"oppHits":10,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":14,"starterId":666157,"starterOuts":15,"starterEr":2,"oppStarterId":667755,"oppStarterOuts":9,"oppStarterEr":5,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822760, 141, 2026, 1, '2026-09-25', 113, 'W', '{"innings":[[0,2],[1,0],[4,0],[0,0],[0,0],[0,0],[0,4],[0,0],[0,null]],"isHome":true,"runs":6,"oppRuns":5,"hits":10,"oppHits":12,"errors":0,"oppErrors":1,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":14,"starterId":667755,"starterOuts":9,"starterEr":5,"oppStarterId":666157,"oppStarterOuts":15,"oppStarterEr":2,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822761, 113, 2026, 1, '2026-09-27', 141, 'L', '{"innings":[[0,0],[0,2],[1,2],[0,0],[0,0],[0,0],[0,0],[0,1],[0,null]],"isHome":false,"runs":1,"oppRuns":5,"hits":7,"oppHits":5,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":14,"starterId":682227,"starterOuts":9,"starterEr":4,"oppStarterId":453286,"oppStarterOuts":21,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822761, 141, 2026, 1, '2026-09-27', 113, 'W', '{"innings":[[0,0],[0,2],[1,2],[0,0],[0,0],[0,0],[0,0],[0,1],[0,null]],"isHome":true,"runs":5,"oppRuns":1,"hits":5,"oppHits":7,"errors":0,"oppErrors":0,"homeRuns":2,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":14,"starterId":453286,"starterOuts":21,"starterEr":1,"oppStarterId":682227,"oppStarterOuts":9,"oppStarterEr":4,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822762, 116, 2026, 1, '2026-09-15', 141, 'W', '{"innings":[[0,0],[0,0],[0,0],[4,0],[1,0],[1,0],[0,0],[2,1],[2,0]],"isHome":false,"runs":10,"oppRuns":1,"hits":10,"oppHits":6,"errors":1,"oppErrors":2,"homeRuns":2,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":14,"starterId":623454,"starterOuts":15,"starterEr":0,"oppStarterId":680755,"oppStarterOuts":4,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822762, 141, 2026, 1, '2026-09-15', 116, 'L', '{"innings":[[0,0],[0,0],[0,0],[4,0],[1,0],[1,0],[0,0],[2,1],[2,0]],"isHome":true,"runs":1,"oppRuns":10,"hits":6,"oppHits":10,"errors":2,"oppErrors":1,"homeRuns":0,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":14,"starterId":680755,"starterOuts":4,"starterEr":0,"oppStarterId":623454,"oppStarterOuts":15,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (822763, 116, 2026, 1, '2026-09-16', 141, 'L', '{"innings":[[1,0],[0,0],[0,0],[0,2],[0,1],[0,2],[0,0],[0,0],[0,null]],"isHome":false,"runs":1,"oppRuns":5,"hits":7,"oppHits":9,"errors":3,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":14,"starterId":672456,"starterOuts":12,"starterEr":2,"oppStarterId":453286,"oppStarterOuts":15,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -15768,6 +15772,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823082, 139, 2026, 1, '2026-03-28', 138, 'L', '{"innings":[[0,2],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,2],[4,0],[1,2]],"isHome":false,"runs":5,"oppRuns":6,"hits":7,"oppHits":6,"errors":1,"oppErrors":2,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2889,"starterId":671212,"starterOuts":18,"starterEr":2,"oppStarterId":700241,"oppStarterOuts":18,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823083, 108, 2026, 1, '2026-09-26', 136, 'L', '{"innings":[[0,0],[0,1],[0,0],[0,1],[0,2],[4,0],[0,4],[0,0],[0,null]],"isHome":false,"runs":4,"oppRuns":8,"hits":7,"oppHits":12,"errors":1,"oppErrors":2,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":680,"starterId":696270,"starterOuts":15,"starterEr":4,"oppStarterId":807739,"oppStarterOuts":10,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823083, 136, 2026, 1, '2026-09-26', 108, 'W', '{"innings":[[0,0],[0,1],[0,0],[0,1],[0,2],[4,0],[0,4],[0,0],[0,null]],"isHome":true,"runs":8,"oppRuns":4,"hits":12,"oppHits":7,"errors":2,"oppErrors":1,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":680,"starterId":807739,"starterOuts":10,"starterEr":0,"oppStarterId":696270,"oppStarterOuts":15,"oppStarterEr":4,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823084, 108, 2026, 1, '2026-09-27', 136, 'L', '{"innings":[[0,0],[0,1],[0,2],[0,0],[0,0],[1,3],[0,0],[2,1],[0,null]],"isHome":false,"runs":3,"oppRuns":7,"hits":6,"oppHits":12,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":680,"starterId":579328,"starterOuts":15,"starterEr":3,"oppStarterId":669302,"oppStarterOuts":12,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823084, 136, 2026, 1, '2026-09-27', 108, 'W', '{"innings":[[0,0],[0,1],[0,2],[0,0],[0,0],[1,3],[0,0],[2,1],[0,null]],"isHome":true,"runs":7,"oppRuns":3,"hits":12,"oppHits":6,"errors":0,"oppErrors":1,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":680,"starterId":669302,"starterOuts":12,"starterEr":0,"oppStarterId":579328,"oppStarterOuts":15,"oppStarterEr":3,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823085, 108, 2026, 1, '2026-09-25', 136, 'W', '{"innings":[[1,0],[0,0],[0,0],[1,0],[0,0],[3,0],[1,0],[0,2],[1,3]],"isHome":false,"runs":7,"oppRuns":5,"hits":10,"oppHits":7,"errors":1,"oppErrors":1,"homeRuns":2,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":680,"starterId":672282,"starterOuts":18,"starterEr":0,"oppStarterId":682243,"oppStarterOuts":18,"oppStarterEr":5,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823085, 136, 2026, 1, '2026-09-25', 108, 'L', '{"innings":[[1,0],[0,0],[0,0],[1,0],[0,0],[3,0],[1,0],[0,2],[1,3]],"isHome":true,"runs":5,"oppRuns":7,"hits":7,"oppHits":10,"errors":1,"oppErrors":1,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":680,"starterId":682243,"starterOuts":18,"starterEr":5,"oppStarterId":672282,"oppStarterOuts":18,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823086, 117, 2026, 1, '2026-09-23', 136, 'L', '{"innings":[[0,0],[0,0],[4,3],[0,0],[0,1],[0,0],[0,0],[0,0],[0,0],[1,2]],"isHome":false,"runs":5,"oppRuns":6,"hits":10,"oppHits":9,"errors":0,"oppErrors":0,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":680,"starterId":814490,"starterOuts":8,"starterEr":3,"oppStarterId":669923,"oppStarterOuts":15,"oppStarterEr":4,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -15926,6 +15932,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823162, 136, 2026, 1, '2026-03-27', 114, 'W', '{"innings":[[1,0],[0,0],[0,0],[0,3],[0,0],[0,2],[0,0],[0,0],[0,null]],"isHome":true,"runs":5,"oppRuns":1,"hits":3,"oppHits":4,"errors":0,"oppErrors":0,"homeRuns":2,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":680,"starterId":669923,"starterOuts":18,"starterEr":1,"oppStarterId":668909,"oppStarterOuts":15,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823163, 114, 2026, 1, '2026-03-26', 136, 'W', '{"innings":[[1,1],[0,1],[0,0],[0,0],[2,1],[0,0],[2,1],[0,0],[1,0]],"isHome":false,"runs":6,"oppRuns":4,"hits":12,"oppHits":6,"errors":0,"oppErrors":0,"homeRuns":2,"oppHomeRuns":4,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":680,"starterId":676440,"starterOuts":15,"starterEr":3,"oppStarterId":669302,"oppStarterOuts":16,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823163, 136, 2026, 1, '2026-03-26', 114, 'L', '{"innings":[[1,1],[0,1],[0,0],[0,0],[2,1],[0,0],[2,1],[0,0],[1,0]],"isHome":true,"runs":4,"oppRuns":6,"hits":6,"oppHits":12,"errors":0,"oppErrors":0,"homeRuns":4,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":680,"starterId":669302,"starterOuts":16,"starterEr":3,"oppStarterId":676440,"oppStarterOuts":15,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823164, 119, 2026, 1, '2026-09-27', 137, 'W', '{"innings":[[0,0],[0,1],[0,0],[1,0],[0,0],[0,0],[0,0],[0,0],[0,0],[4,0]],"isHome":false,"runs":5,"oppRuns":1,"hits":8,"oppHits":5,"errors":0,"oppErrors":1,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2395,"starterId":676263,"starterOuts":6,"starterEr":1,"oppStarterId":693313,"oppStarterOuts":3,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823164, 137, 2026, 1, '2026-09-27', 119, 'L', '{"innings":[[0,0],[0,1],[0,0],[1,0],[0,0],[0,0],[0,0],[0,0],[0,0],[4,0]],"isHome":true,"runs":1,"oppRuns":5,"hits":5,"oppHits":8,"errors":1,"oppErrors":0,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2395,"starterId":693313,"starterOuts":3,"starterEr":0,"oppStarterId":676263,"oppStarterOuts":6,"oppStarterEr":1,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823165, 119, 2026, 1, '2026-09-26', 137, 'W', '{"innings":[[0,0],[0,0],[1,1],[2,0],[0,0],[0,0],[0,1],[0,1],[1,0]],"isHome":false,"runs":4,"oppRuns":3,"hits":9,"oppHits":9,"errors":0,"oppErrors":0,"homeRuns":2,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2395,"starterId":605483,"starterOuts":12,"starterEr":1,"oppStarterId":683363,"oppStarterOuts":9,"oppStarterEr":1,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823165, 137, 2026, 1, '2026-09-26', 119, 'L', '{"innings":[[0,0],[0,0],[1,1],[2,0],[0,0],[0,0],[0,1],[0,1],[1,0]],"isHome":true,"runs":3,"oppRuns":4,"hits":9,"oppHits":9,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2395,"starterId":683363,"starterOuts":9,"starterEr":1,"oppStarterId":605483,"oppStarterOuts":12,"oppStarterEr":1,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823166, 137, 2026, 1, '2026-09-22', 142, 'L', '{"innings":[[0,0],[0,1],[0,0],[0,0],[0,0],[2,0],[1,0],[0,0],[0,1]],"isHome":true,"runs":2,"oppRuns":3,"hits":6,"oppHits":6,"errors":1,"oppErrors":1,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2395,"starterId":683627,"starterOuts":18,"starterEr":2,"oppStarterId":671737,"oppStarterOuts":18,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -16088,6 +16096,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823244, 147, 2026, 1, '2026-03-25', 137, 'W', '{"innings":[[0,0],[5,0],[0,0],[0,0],[2,0],[0,0],[0,0],[0,0],[0,0]],"isHome":false,"runs":7,"oppRuns":0,"hits":10,"oppHits":3,"errors":1,"oppErrors":1,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2395,"starterId":608331,"starterOuts":19,"starterEr":0,"oppStarterId":657277,"oppStarterOuts":15,"oppStarterEr":6,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823245, 109, 2026, 1, '2026-09-26', 135, 'L', '{"innings":[[0,1],[1,0],[1,2],[2,3],[0,2],[0,2],[0,0],[0,0],[3,null]],"isHome":false,"runs":7,"oppRuns":10,"hits":10,"oppHits":13,"errors":0,"oppErrors":1,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2680,"starterId":664199,"starterOuts":2,"starterEr":1,"oppStarterId":621111,"oppStarterOuts":11,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823245, 135, 2026, 1, '2026-09-26', 109, 'W', '{"innings":[[0,1],[1,0],[1,2],[2,3],[0,2],[0,2],[0,0],[0,0],[3,null]],"isHome":true,"runs":10,"oppRuns":7,"hits":13,"oppHits":10,"errors":1,"oppErrors":0,"homeRuns":2,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2680,"starterId":621111,"starterOuts":11,"starterEr":3,"oppStarterId":664199,"oppStarterOuts":2,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823246, 109, 2026, 1, '2026-09-27', 135, 'L', '{"innings":[[0,0],[0,0],[0,1],[0,1],[0,1],[1,1],[3,3],[0,2],[0,null]],"isHome":false,"runs":4,"oppRuns":9,"hits":8,"oppHits":11,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2680,"starterId":647336,"starterOuts":14,"starterEr":3,"oppStarterId":681190,"oppStarterOuts":18,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823246, 135, 2026, 1, '2026-09-27', 109, 'W', '{"innings":[[0,0],[0,0],[0,1],[0,1],[0,1],[1,1],[3,3],[0,2],[0,null]],"isHome":true,"runs":9,"oppRuns":4,"hits":11,"oppHits":8,"errors":0,"oppErrors":0,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2680,"starterId":681190,"starterOuts":18,"starterEr":1,"oppStarterId":647336,"oppStarterOuts":14,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823247, 135, 2026, 1, '2026-09-20', 146, 'W', '{"innings":[[0,0],[0,2],[0,0],[0,2],[0,0],[0,0],[3,1],[0,2],[0,null]],"isHome":true,"runs":7,"oppRuns":3,"hits":10,"oppHits":4,"errors":0,"oppErrors":1,"homeRuns":3,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2680,"starterId":621111,"starterOuts":20,"starterEr":3,"oppStarterId":645261,"oppStarterOuts":18,"oppStarterEr":4,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823247, 146, 2026, 1, '2026-09-20', 135, 'L', '{"innings":[[0,0],[0,2],[0,0],[0,2],[0,0],[0,0],[3,1],[0,2],[0,null]],"isHome":false,"runs":3,"oppRuns":7,"hits":4,"oppHits":10,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":3,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2680,"starterId":645261,"starterOuts":18,"starterEr":4,"oppStarterId":621111,"oppStarterOuts":20,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823248, 109, 2026, 1, '2026-09-25', 135, 'W', '{"innings":[[3,0],[1,2],[2,0],[1,0],[0,0],[3,0],[1,1],[0,1],[0,0]],"isHome":false,"runs":11,"oppRuns":4,"hits":8,"oppHits":10,"errors":0,"oppErrors":0,"homeRuns":3,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2680,"starterId":694297,"starterOuts":23,"starterEr":4,"oppStarterId":663554,"oppStarterOuts":12,"oppStarterEr":7,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -16410,6 +16420,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823406, 134, 2026, 1, '2026-04-03', 110, 'W', '{"innings":[[0,0],[0,4],[0,0],[0,0],[2,1],[0,0],[1,0],[0,0],[1,null]],"isHome":true,"runs":5,"oppRuns":4,"hits":6,"oppHits":9,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":31,"starterId":656605,"starterOuts":18,"starterEr":2,"oppStarterId":680694,"oppStarterOuts":12,"oppStarterEr":4,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823407, 139, 2026, 1, '2026-09-26', 143, 'W', '{"innings":[[3,0],[0,0],[0,0],[0,0],[4,0],[3,0],[0,1],[0,0],[2,0]],"isHome":false,"runs":12,"oppRuns":1,"hits":17,"oppHits":7,"errors":1,"oppErrors":1,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2681,"starterId":643377,"starterOuts":9,"starterEr":0,"oppStarterId":605400,"oppStarterOuts":3,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823407, 143, 2026, 1, '2026-09-26', 139, 'L', '{"innings":[[3,0],[0,0],[0,0],[0,0],[4,0],[3,0],[0,1],[0,0],[2,0]],"isHome":true,"runs":1,"oppRuns":12,"hits":7,"oppHits":17,"errors":1,"oppErrors":1,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2681,"starterId":605400,"starterOuts":3,"starterEr":3,"oppStarterId":643377,"oppStarterOuts":9,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823408, 139, 2026, 1, '2026-09-27', 143, 'L', '{"innings":[[0,1],[0,3],[0,0],[0,0],[1,3],[0,0],[2,0],[0,0],[0,null]],"isHome":false,"runs":3,"oppRuns":7,"hits":8,"oppHits":12,"errors":0,"oppErrors":0,"homeRuns":2,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2681,"starterId":607259,"starterOuts":8,"starterEr":4,"oppStarterId":554430,"oppStarterOuts":18,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823408, 143, 2026, 1, '2026-09-27', 139, 'W', '{"innings":[[0,1],[0,3],[0,0],[0,0],[1,3],[0,0],[2,0],[0,0],[0,null]],"isHome":true,"runs":7,"oppRuns":3,"hits":12,"oppHits":8,"errors":0,"oppErrors":0,"homeRuns":2,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2681,"starterId":554430,"starterOuts":18,"starterEr":1,"oppStarterId":607259,"oppStarterOuts":8,"oppStarterEr":4,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823409, 139, 2026, 1, '2026-09-25', 143, 'W', '{"innings":[[1,0],[1,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]],"isHome":false,"runs":2,"oppRuns":0,"hits":6,"oppHits":4,"errors":0,"oppErrors":1,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2681,"starterId":642547,"starterOuts":16,"starterEr":0,"oppStarterId":650911,"oppStarterOuts":21,"oppStarterEr":2,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823409, 143, 2026, 1, '2026-09-25', 139, 'L', '{"innings":[[1,0],[1,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]],"isHome":true,"runs":0,"oppRuns":2,"hits":4,"oppHits":6,"errors":1,"oppErrors":0,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2681,"starterId":650911,"starterOuts":21,"starterEr":2,"oppStarterId":642547,"oppStarterOuts":16,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823410, 143, 2026, 1, '2026-09-23', 158, 'L', '{"innings":[[1,0],[1,1],[2,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]],"isHome":true,"runs":1,"oppRuns":4,"hits":6,"oppHits":6,"errors":1,"oppErrors":0,"homeRuns":0,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2681,"starterId":605400,"starterOuts":18,"starterEr":4,"oppStarterId":701656,"oppStarterOuts":15,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -16570,6 +16582,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823488, 143, 2026, 1, '2026-03-28', 140, 'L', '{"innings":[[1,0],[0,0],[2,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,3],[2,1]],"isHome":true,"runs":4,"oppRuns":5,"hits":5,"oppHits":10,"errors":0,"oppErrors":2,"homeRuns":0,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2681,"starterId":605400,"starterOuts":15,"starterEr":3,"oppStarterId":656641,"oppStarterOuts":12,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823489, 110, 2026, 1, '2026-09-25', 147, 'L', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,1],[0,3],[1,2],[0,0],[2,null]],"isHome":false,"runs":3,"oppRuns":6,"hits":11,"oppHits":8,"errors":1,"oppErrors":1,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"Y","gameNumber":2,"venueId":3313,"starterId":687064,"starterOuts":15,"starterEr":1,"oppStarterId":642232,"oppStarterOuts":7,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823489, 147, 2026, 1, '2026-09-25', 110, 'W', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,1],[0,3],[1,2],[0,0],[2,null]],"isHome":true,"runs":6,"oppRuns":3,"hits":8,"oppHits":11,"errors":1,"oppErrors":1,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"Y","gameNumber":2,"venueId":3313,"starterId":642232,"starterOuts":7,"starterEr":0,"oppStarterId":687064,"oppStarterOuts":15,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823490, 110, 2026, 1, '2026-09-27', 147, 'T', '{"innings":[],"isHome":false,"runs":0,"oppRuns":0,"hits":0,"oppHits":0,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3313,"starterId":null,"starterOuts":null,"starterEr":null,"oppStarterId":null,"oppStarterOuts":null,"oppStarterEr":null,"oppStarterHand":null,"battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823490, 147, 2026, 1, '2026-09-27', 110, 'T', '{"innings":[],"isHome":true,"runs":0,"oppRuns":0,"hits":0,"oppHits":0,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3313,"starterId":null,"starterOuts":null,"starterEr":null,"oppStarterId":null,"oppStarterOuts":null,"oppStarterEr":null,"oppStarterHand":null,"battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823491, 110, 2026, 1, '2026-09-25', 147, 'W', '{"innings":[[0,0],[0,0],[2,0],[5,1],[0,0],[1,0],[1,0],[1,0],[0,1]],"isHome":false,"runs":10,"oppRuns":2,"hits":13,"oppHits":9,"errors":1,"oppErrors":0,"homeRuns":4,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"Y","gameNumber":1,"venueId":3313,"starterId":669432,"starterOuts":12,"starterEr":1,"oppStarterId":694341,"oppStarterOuts":15,"oppStarterEr":7,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823491, 147, 2026, 1, '2026-09-25', 110, 'L', '{"innings":[[0,0],[0,0],[2,0],[5,1],[0,0],[1,0],[1,0],[1,0],[0,1]],"isHome":true,"runs":2,"oppRuns":10,"hits":9,"oppHits":13,"errors":0,"oppErrors":1,"homeRuns":0,"oppHomeRuns":4,"scheduledInnings":9,"dayNight":"night","doubleHeader":"Y","gameNumber":1,"venueId":3313,"starterId":694341,"starterOuts":15,"starterEr":7,"oppStarterId":669432,"oppStarterOuts":12,"oppStarterEr":1,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823492, 139, 2026, 1, '2026-09-23', 147, 'L', '{"innings":[[0,1],[0,1],[0,5],[1,1],[1,0],[0,0],[0,0],[0,1],[0,null]],"isHome":false,"runs":2,"oppRuns":9,"hits":6,"oppHits":12,"errors":1,"oppErrors":1,"homeRuns":1,"oppHomeRuns":4,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":3313,"starterId":669438,"starterOuts":11,"starterEr":8,"oppStarterId":543037,"oppStarterOuts":17,"oppStarterEr":2,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -16888,6 +16902,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823648, 121, 2026, 1, '2026-04-07', 109, 'W', '{"innings":[[0,1],[0,1],[0,0],[0,0],[3,0],[0,0],[0,0],[0,1],[0,0],[0,1]],"isHome":true,"runs":4,"oppRuns":3,"hits":8,"oppHits":9,"errors":1,"oppErrors":1,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3289,"starterId":642547,"starterOuts":14,"starterEr":3,"oppStarterId":668678,"oppStarterOuts":15,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823649, 121, 2026, 1, '2026-03-26', 134, 'W', '{"innings":[[2,5],[0,0],[1,0],[0,1],[1,3],[1,2],[0,0],[0,0],[2,null]],"isHome":true,"runs":11,"oppRuns":7,"hits":11,"oppHits":10,"errors":0,"oppErrors":1,"homeRuns":2,"oppHomeRuns":3,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3289,"starterId":642547,"starterOuts":15,"starterEr":4,"oppStarterId":694973,"oppStarterOuts":2,"oppStarterEr":5,"oppStarterHand":"R","battedAround":1,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823649, 134, 2026, 1, '2026-03-26', 121, 'L', '{"innings":[[2,5],[0,0],[1,0],[0,1],[1,3],[1,2],[0,0],[0,0],[2,null]],"isHome":false,"runs":7,"oppRuns":11,"hits":10,"oppHits":11,"errors":1,"oppErrors":0,"homeRuns":3,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3289,"starterId":694973,"starterOuts":2,"starterEr":5,"oppStarterId":642547,"oppStarterOuts":15,"oppStarterEr":4,"oppStarterHand":"R","battedAround":0,"oppBattedAround":1}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823650, 140, 2026, 1, '2026-09-27', 142, 'L', '{"innings":[[0,1],[0,0],[1,2],[0,0],[0,2],[0,0],[0,0],[1,1],[2,null]],"isHome":false,"runs":4,"oppRuns":6,"hits":6,"oppHits":10,"errors":0,"oppErrors":0,"homeRuns":3,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3312,"starterId":669022,"starterOuts":7,"starterEr":1,"oppStarterId":665152,"oppStarterOuts":21,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823650, 142, 2026, 1, '2026-09-27', 140, 'W', '{"innings":[[0,1],[0,0],[1,2],[0,0],[0,2],[0,0],[0,0],[1,1],[2,null]],"isHome":true,"runs":6,"oppRuns":4,"hits":10,"oppHits":6,"errors":0,"oppErrors":0,"homeRuns":2,"oppHomeRuns":3,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3312,"starterId":665152,"starterOuts":21,"starterEr":1,"oppStarterId":669022,"oppStarterOuts":7,"oppStarterEr":1,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823651, 121, 2026, 1, '2026-03-28', 134, 'W', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[1,1],[1,3]],"isHome":true,"runs":4,"oppRuns":2,"hits":6,"oppHits":12,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3289,"starterId":656849,"starterOuts":16,"starterEr":0,"oppStarterId":656605,"oppStarterOuts":18,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823651, 134, 2026, 1, '2026-03-28', 121, 'L', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[1,1],[1,3]],"isHome":false,"runs":2,"oppRuns":4,"hits":12,"oppHits":6,"errors":0,"oppErrors":1,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3289,"starterId":656605,"starterOuts":18,"starterEr":0,"oppStarterId":656849,"oppStarterOuts":16,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823652, 140, 2026, 1, '2026-09-25', 142, 'L', '{"innings":[[2,0],[0,6],[0,0],[0,2],[0,0],[0,2],[0,0],[0,0],[0,null]],"isHome":false,"runs":2,"oppRuns":10,"hits":6,"oppHits":11,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":3312,"starterId":594798,"starterOuts":12,"starterEr":8,"oppStarterId":657746,"oppStarterOuts":18,"oppStarterEr":2,"oppStarterHand":"R","battedAround":0,"oppBattedAround":1}');
@@ -17048,6 +17064,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823729, 142, 2026, 1, '2026-04-05', 139, 'L', '{"innings":[[0,0],[0,1],[0,0],[1,0],[0,0],[0,0],[0,0],[0,0],[0,0],[3,0]],"isHome":true,"runs":1,"oppRuns":4,"hits":3,"oppHits":8,"errors":0,"oppErrors":0,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3312,"starterId":680573,"starterOuts":20,"starterEr":1,"oppStarterId":607259,"oppStarterOuts":18,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823730, 139, 2026, 1, '2026-04-04', 142, 'W', '{"innings":[[0,0],[3,1],[1,0],[0,0],[2,0],[0,0],[0,0],[1,0],[0,0]],"isHome":false,"runs":7,"oppRuns":1,"hits":10,"oppHits":3,"errors":1,"oppErrors":1,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":3312,"starterId":571927,"starterOuts":18,"starterEr":1,"oppStarterId":690953,"oppStarterOuts":12,"oppStarterEr":4,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823730, 142, 2026, 1, '2026-04-04', 139, 'L', '{"innings":[[0,0],[3,1],[1,0],[0,0],[2,0],[0,0],[0,0],[1,0],[0,0]],"isHome":true,"runs":1,"oppRuns":7,"hits":3,"oppHits":10,"errors":1,"oppErrors":1,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":3312,"starterId":690953,"starterOuts":12,"starterEr":4,"oppStarterId":571927,"oppStarterOuts":18,"oppStarterEr":1,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823731, 138, 2026, 1, '2026-09-27', 158, 'L', '{"innings":[[0,3],[0,0],[0,2],[0,1],[0,0],[0,0],[0,0],[4,0],[0,null]],"isHome":false,"runs":4,"oppRuns":6,"hits":4,"oppHits":10,"errors":0,"oppErrors":1,"homeRuns":1,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":32,"starterId":669467,"starterOuts":15,"starterEr":6,"oppStarterId":694819,"oppStarterOuts":16,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823731, 158, 2026, 1, '2026-09-27', 138, 'W', '{"innings":[[0,3],[0,0],[0,2],[0,1],[0,0],[0,0],[0,0],[4,0],[0,null]],"isHome":true,"runs":6,"oppRuns":4,"hits":10,"oppHits":4,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":32,"starterId":694819,"starterOuts":16,"starterEr":0,"oppStarterId":669467,"oppStarterOuts":15,"oppStarterEr":6,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823732, 139, 2026, 1, '2026-04-03', 142, 'L', '{"innings":[[2,0],[0,0],[0,0],[1,3],[0,0],[0,0],[0,7],[1,0],[0,null]],"isHome":false,"runs":4,"oppRuns":10,"hits":8,"oppHits":7,"errors":3,"oppErrors":0,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3312,"starterId":671212,"starterOuts":16,"starterEr":2,"oppStarterId":641927,"oppStarterOuts":12,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":1}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823732, 142, 2026, 1, '2026-04-03', 139, 'W', '{"innings":[[2,0],[0,0],[0,0],[1,3],[0,0],[0,0],[0,7],[1,0],[0,null]],"isHome":true,"runs":10,"oppRuns":4,"hits":7,"oppHits":8,"errors":0,"oppErrors":3,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":3312,"starterId":641927,"starterOuts":12,"starterEr":3,"oppStarterId":671212,"oppStarterOuts":16,"oppStarterEr":2,"oppStarterHand":"R","battedAround":1,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823733, 138, 2026, 1, '2026-09-26', 158, 'L', '{"innings":[[0,0],[1,0],[1,1],[0,0],[0,2],[0,0],[0,0],[0,0],[0,null]],"isHome":false,"runs":2,"oppRuns":3,"hits":3,"oppHits":8,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":32,"starterId":687273,"starterOuts":15,"starterEr":3,"oppStarterId":669160,"oppStarterOuts":9,"oppStarterEr":2,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -17212,6 +17230,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823812, 158, 2026, 1, '2026-03-26', 145, 'W', '{"innings":[[1,0],[0,4],[0,0],[0,2],[0,2],[0,3],[0,3],[0,0],[1,null]],"isHome":true,"runs":14,"oppRuns":2,"hits":12,"oppHits":4,"errors":0,"oppErrors":0,"homeRuns":2,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":32,"starterId":694819,"starterOuts":15,"starterEr":1,"oppStarterId":681343,"oppStarterOuts":5,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823813, 144, 2026, 1, '2026-09-26', 146, 'W', '{"innings":[[1,0],[3,0],[0,0],[2,2],[0,0],[0,0],[0,1],[0,0],[2,0]],"isHome":false,"runs":8,"oppRuns":3,"hits":10,"oppHits":8,"errors":0,"oppErrors":1,"homeRuns":2,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":4169,"starterId":608718,"starterOuts":9,"starterEr":0,"oppStarterId":667652,"oppStarterOuts":4,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823813, 146, 2026, 1, '2026-09-26', 144, 'L', '{"innings":[[1,0],[3,0],[0,0],[2,2],[0,0],[0,0],[0,1],[0,0],[2,0]],"isHome":true,"runs":3,"oppRuns":8,"hits":8,"oppHits":10,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":4169,"starterId":667652,"starterOuts":4,"starterEr":3,"oppStarterId":608718,"oppStarterOuts":9,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823814, 144, 2026, 1, '2026-09-27', 146, 'L', '{"innings":[[0,0],[0,0],[1,0],[0,1],[0,0],[0,3],[2,1],[0,0],[0,null]],"isHome":false,"runs":3,"oppRuns":5,"hits":5,"oppHits":8,"errors":0,"oppErrors":1,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":4169,"starterId":702275,"starterOuts":17,"starterEr":4,"oppStarterId":676083,"oppStarterOuts":14,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823814, 146, 2026, 1, '2026-09-27', 144, 'W', '{"innings":[[0,0],[0,0],[1,0],[0,1],[0,0],[0,3],[2,1],[0,0],[0,null]],"isHome":true,"runs":5,"oppRuns":3,"hits":8,"oppHits":5,"errors":1,"oppErrors":0,"homeRuns":2,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":4169,"starterId":676083,"starterOuts":14,"starterEr":1,"oppStarterId":702275,"oppStarterOuts":17,"oppStarterEr":4,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823815, 119, 2026, 1, '2026-09-13', 146, 'L', '{"innings":[[0,0],[0,0],[0,0],[3,0],[0,0],[0,0],[0,0],[0,2],[1,4]],"isHome":false,"runs":4,"oppRuns":6,"hits":9,"oppHits":9,"errors":0,"oppErrors":0,"homeRuns":1,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":4169,"starterId":686218,"starterOuts":18,"starterEr":0,"oppStarterId":691587,"oppStarterOuts":15,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823815, 146, 2026, 1, '2026-09-13', 119, 'W', '{"innings":[[0,0],[0,0],[0,0],[3,0],[0,0],[0,0],[0,0],[0,2],[1,4]],"isHome":true,"runs":6,"oppRuns":4,"hits":9,"oppHits":9,"errors":0,"oppErrors":0,"homeRuns":1,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":4169,"starterId":691587,"starterOuts":15,"starterEr":3,"oppStarterId":686218,"oppStarterOuts":18,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (823816, 144, 2026, 1, '2026-09-25', 146, 'L', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,1],[0,2],[0,null]],"isHome":false,"runs":0,"oppRuns":3,"hits":1,"oppHits":10,"errors":0,"oppErrors":1,"homeRuns":0,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":4169,"starterId":678061,"starterOuts":9,"starterEr":0,"oppStarterId":691587,"oppStarterOuts":27,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -17692,6 +17712,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824053, 136, 2026, 1, '2026-04-05', 108, 'L', '{"innings":[[0,1],[2,0],[0,1],[0,2],[3,2],[0,0],[0,0],[0,0],[1,0],[1,1],[0,1]],"isHome":false,"runs":7,"oppRuns":8,"hits":7,"oppHits":11,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":1,"starterId":622491,"starterOuts":11,"starterEr":3,"oppStarterId":691946,"oppStarterOuts":8,"oppStarterEr":2,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824054, 108, 2026, 1, '2026-04-04', 136, 'W', '{"innings":[[0,1],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,null]],"isHome":true,"runs":1,"oppRuns":0,"hits":7,"oppHits":5,"errors":0,"oppErrors":0,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":1,"starterId":686799,"starterOuts":17,"starterEr":0,"oppStarterId":676106,"oppStarterOuts":20,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824054, 136, 2026, 1, '2026-04-04', 108, 'L', '{"innings":[[0,1],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,null]],"isHome":false,"runs":0,"oppRuns":1,"hits":5,"oppHits":7,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":1,"starterId":676106,"starterOuts":20,"starterEr":1,"oppStarterId":686799,"oppStarterOuts":17,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824055, 114, 2026, 1, '2026-09-27', 118, 'L', '{"innings":[[0,1],[0,0],[1,0],[0,0],[0,1],[1,0],[0,0],[0,1],[0,null]],"isHome":false,"runs":2,"oppRuns":3,"hits":9,"oppHits":9,"errors":0,"oppErrors":2,"homeRuns":2,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":7,"starterId":800048,"starterOuts":9,"starterEr":1,"oppStarterId":663738,"oppStarterOuts":16,"oppStarterEr":2,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824055, 118, 2026, 1, '2026-09-27', 114, 'W', '{"innings":[[0,1],[0,0],[1,0],[0,0],[0,1],[1,0],[0,0],[0,1],[0,null]],"isHome":true,"runs":3,"oppRuns":2,"hits":9,"oppHits":9,"errors":2,"oppErrors":0,"homeRuns":2,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":7,"starterId":663738,"starterOuts":16,"starterEr":2,"oppStarterId":800048,"oppStarterOuts":9,"oppStarterEr":1,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824056, 108, 2026, 1, '2026-04-03', 136, 'L', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[3,1]],"isHome":true,"runs":1,"oppRuns":3,"hits":1,"oppHits":7,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":1,"starterId":672282,"starterOuts":20,"starterEr":0,"oppStarterId":693433,"oppStarterOuts":21,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824056, 136, 2026, 1, '2026-04-03', 108, 'W', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[3,1]],"isHome":false,"runs":3,"oppRuns":1,"hits":7,"oppHits":1,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":1,"starterId":693433,"starterOuts":21,"starterEr":0,"oppStarterId":672282,"oppStarterOuts":20,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824057, 114, 2026, 1, '2026-09-26', 118, 'W', '{"innings":[[0,3],[4,0],[1,0],[0,0],[0,0],[1,0],[1,0],[0,2],[4,0]],"isHome":false,"runs":11,"oppRuns":5,"hits":14,"oppHits":10,"errors":1,"oppErrors":2,"homeRuns":5,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":7,"starterId":676440,"starterOuts":18,"starterEr":3,"oppStarterId":608379,"oppStarterOuts":19,"oppStarterEr":2,"oppStarterHand":"R","battedAround":1,"oppBattedAround":0}');
@@ -18014,6 +18036,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824215, 117, 2026, 1, '2026-03-29', 108, 'W', '{"innings":[[0,0],[0,4],[4,0],[2,0],[0,2],[0,0],[0,0],[0,3],[1,null]],"isHome":true,"runs":9,"oppRuns":7,"hits":7,"oppHits":7,"errors":0,"oppErrors":1,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2392,"starterId":837227,"starterOuts":8,"starterEr":4,"oppStarterId":686799,"oppStarterOuts":12,"oppStarterEr":5,"oppStarterHand":"R","battedAround":1,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824216, 108, 2026, 1, '2026-03-27', 117, 'W', '{"innings":[[1,1],[3,0],[0,0],[0,0],[1,1],[0,0],[0,0],[0,0],[1,0]],"isHome":false,"runs":6,"oppRuns":2,"hits":11,"oppHits":8,"errors":2,"oppErrors":0,"homeRuns":3,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2392,"starterId":579328,"starterOuts":13,"starterEr":2,"oppStarterId":681347,"oppStarterOuts":17,"oppStarterEr":5,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824216, 117, 2026, 1, '2026-03-27', 108, 'L', '{"innings":[[1,1],[3,0],[0,0],[0,0],[1,1],[0,0],[0,0],[0,0],[1,0]],"isHome":true,"runs":2,"oppRuns":6,"hits":8,"oppHits":11,"errors":0,"oppErrors":2,"homeRuns":1,"oppHomeRuns":3,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2392,"starterId":681347,"starterOuts":17,"starterEr":5,"oppStarterId":579328,"oppStarterOuts":13,"oppStarterEr":2,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824217, 116, 2026, 1, '2026-09-27', 134, 'L', '{"innings":[[1,0],[1,0],[0,0],[2,0],[0,0],[0,0],[0,2],[0,0],[0,0]],"isHome":true,"runs":2,"oppRuns":4,"hits":3,"oppHits":7,"errors":0,"oppErrors":0,"homeRuns":2,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2394,"starterId":689981,"starterOuts":4,"starterEr":2,"oppStarterId":683003,"oppStarterOuts":12,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824217, 134, 2026, 1, '2026-09-27', 116, 'W', '{"innings":[[1,0],[1,0],[0,0],[2,0],[0,0],[0,0],[0,2],[0,0],[0,0]],"isHome":false,"runs":4,"oppRuns":2,"hits":7,"oppHits":3,"errors":0,"oppErrors":0,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2394,"starterId":683003,"starterOuts":12,"starterEr":0,"oppStarterId":689981,"oppStarterOuts":4,"oppStarterEr":2,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824218, 108, 2026, 1, '2026-03-26', 117, 'W', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[1,0],[1,0],[1,0]],"isHome":false,"runs":3,"oppRuns":0,"hits":9,"oppHits":3,"errors":0,"oppErrors":0,"homeRuns":2,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2392,"starterId":667755,"starterOuts":18,"starterEr":0,"oppStarterId":686613,"oppStarterOuts":14,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824218, 117, 2026, 1, '2026-03-26', 108, 'L', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[1,0],[1,0],[1,0]],"isHome":true,"runs":0,"oppRuns":3,"hits":3,"oppHits":9,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2392,"starterId":686613,"starterOuts":14,"starterEr":0,"oppStarterId":667755,"oppStarterOuts":18,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824219, 116, 2026, 1, '2026-09-26', 134, 'W', '{"innings":[[0,0],[0,0],[0,0],[1,0],[1,0],[0,1],[0,0],[1,0],[0,3]],"isHome":true,"runs":4,"oppRuns":3,"hits":10,"oppHits":9,"errors":0,"oppErrors":1,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2394,"starterId":434378,"starterOuts":16,"starterEr":2,"oppStarterId":489446,"oppStarterOuts":5,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -18662,6 +18686,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824540, 113, 2026, 1, '2026-03-28', 111, 'W', '{"innings":[[0,2],[0,1],[1,1],[2,0],[0,1],[0,0],[1,0],[0,0],[1,0],[0,0],[0,1]],"isHome":true,"runs":6,"oppRuns":5,"hits":10,"oppHits":8,"errors":0,"oppErrors":1,"homeRuns":2,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2602,"starterId":663903,"starterOuts":12,"starterEr":3,"oppStarterId":543243,"oppStarterOuts":12,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824541, 111, 2026, 1, '2026-03-26', 113, 'W', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[1,0],[0,0],[2,0]],"isHome":false,"runs":3,"oppRuns":0,"hits":12,"oppHits":4,"errors":1,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2602,"starterId":676979,"starterOuts":18,"starterEr":0,"oppStarterId":671096,"oppStarterOuts":18,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824541, 113, 2026, 1, '2026-03-26', 111, 'L', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[1,0],[0,0],[2,0]],"isHome":true,"runs":0,"oppRuns":3,"hits":4,"oppHits":12,"errors":0,"oppErrors":1,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2602,"starterId":671096,"starterOuts":18,"starterEr":0,"oppStarterId":676979,"oppStarterOuts":18,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824542, 115, 2026, 1, '2026-09-27', 145, 'L', '{"innings":[[0,0],[0,0],[1,4],[0,0],[0,0],[0,0],[0,0],[1,0],[0,null]],"isHome":false,"runs":2,"oppRuns":4,"hits":6,"oppHits":8,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":4,"starterId":607536,"starterOuts":12,"starterEr":4,"oppStarterId":641743,"oppStarterOuts":15,"oppStarterEr":1,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824542, 145, 2026, 1, '2026-09-27', 115, 'W', '{"innings":[[0,0],[0,0],[1,4],[0,0],[0,0],[0,0],[0,0],[1,0],[0,null]],"isHome":true,"runs":4,"oppRuns":2,"hits":8,"oppHits":6,"errors":0,"oppErrors":1,"homeRuns":2,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":4,"starterId":641743,"starterOuts":15,"starterEr":1,"oppStarterId":607536,"oppStarterOuts":12,"oppStarterEr":4,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824543, 115, 2026, 1, '2026-09-26', 145, 'W', '{"innings":[[3,0],[0,1],[1,1],[1,0],[0,0],[0,0],[0,1],[0,0],[4,3]],"isHome":false,"runs":9,"oppRuns":6,"hits":11,"oppHits":8,"errors":1,"oppErrors":1,"homeRuns":3,"oppHomeRuns":3,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":4,"starterId":500779,"starterOuts":9,"starterEr":2,"oppStarterId":663436,"oppStarterOuts":2,"oppStarterEr":2,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824543, 145, 2026, 1, '2026-09-26', 115, 'L', '{"innings":[[3,0],[0,1],[1,1],[1,0],[0,0],[0,0],[0,1],[0,0],[4,3]],"isHome":true,"runs":6,"oppRuns":9,"hits":8,"oppHits":11,"errors":1,"oppErrors":1,"homeRuns":3,"oppHomeRuns":3,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":4,"starterId":663436,"starterOuts":2,"starterEr":2,"oppStarterId":500779,"oppStarterOuts":9,"oppStarterEr":2,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824544, 115, 2026, 1, '2026-09-25', 145, 'L', '{"innings":[[0,2],[1,0],[0,1],[0,0],[0,0],[0,0],[0,1],[0,2],[0,null]],"isHome":false,"runs":1,"oppRuns":6,"hits":4,"oppHits":10,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":4,"starterId":608372,"starterOuts":20,"starterEr":4,"oppStarterId":680732,"oppStarterOuts":16,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -18986,6 +19012,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824703, 112, 2026, 1, '2026-09-25', 111, 'L', '{"innings":[[1,0],[2,0],[0,1],[0,0],[0,2],[0,0],[0,1],[0,0],[0,null]],"isHome":false,"runs":3,"oppRuns":4,"hits":7,"oppHits":9,"errors":1,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"S","gameNumber":1,"venueId":3,"starterId":605280,"starterOuts":13,"starterEr":2,"oppStarterId":687941,"oppStarterOuts":6,"oppStarterEr":3,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824704, 112, 2026, 1, '2026-03-26', 120, 'L', '{"innings":[[0,0],[1,0],[0,2],[6,1],[0,0],[1,0],[0,1],[0,0],[2,0]],"isHome":true,"runs":4,"oppRuns":10,"hits":8,"oppHits":11,"errors":1,"oppErrors":2,"homeRuns":0,"oppHomeRuns":3,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":17,"starterId":571510,"starterOuts":11,"starterEr":6,"oppStarterId":676917,"oppStarterOuts":11,"oppStarterEr":2,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824704, 120, 2026, 1, '2026-03-26', 112, 'W', '{"innings":[[0,0],[1,0],[0,2],[6,1],[0,0],[1,0],[0,1],[0,0],[2,0]],"isHome":false,"runs":10,"oppRuns":4,"hits":11,"oppHits":8,"errors":2,"oppErrors":1,"homeRuns":3,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":17,"starterId":676917,"starterOuts":11,"starterEr":2,"oppStarterId":571510,"oppStarterOuts":11,"oppStarterEr":6,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824705, 111, 2026, 1, '2026-09-27', 112, 'L', '{"innings":[[2,1],[0,1],[1,0],[0,0],[0,0],[0,0],[0,0],[0,0],[3,0]],"isHome":true,"runs":2,"oppRuns":6,"hits":5,"oppHits":13,"errors":1,"oppErrors":0,"homeRuns":1,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":12,"starterId":656557,"starterOuts":9,"starterEr":3,"oppStarterId":684007,"oppStarterOuts":3,"oppStarterEr":1,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824705, 112, 2026, 1, '2026-09-27', 111, 'W', '{"innings":[[2,1],[0,1],[1,0],[0,0],[0,0],[0,0],[0,0],[0,0],[3,0]],"isHome":false,"runs":6,"oppRuns":2,"hits":13,"oppHits":5,"errors":0,"oppErrors":1,"homeRuns":2,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":12,"starterId":684007,"starterOuts":3,"starterEr":1,"oppStarterId":656557,"oppStarterOuts":9,"oppStarterEr":3,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824706, 111, 2026, 1, '2026-09-25', 112, 'W', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,2],[0,null]],"isHome":true,"runs":2,"oppRuns":0,"hits":4,"oppHits":7,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"S","gameNumber":2,"venueId":3,"starterId":678394,"starterOuts":12,"starterEr":0,"oppStarterId":656849,"oppStarterOuts":15,"oppStarterEr":0,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824706, 112, 2026, 1, '2026-09-25', 111, 'L', '{"innings":[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,2],[0,null]],"isHome":false,"runs":0,"oppRuns":2,"hits":7,"oppHits":4,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"S","gameNumber":2,"venueId":3,"starterId":656849,"starterOuts":15,"starterEr":0,"oppStarterId":678394,"oppStarterOuts":12,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824707, 111, 2026, 1, '2026-09-24', 114, 'L', '{"innings":[[0,0],[1,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]],"isHome":true,"runs":0,"oppRuns":1,"hits":2,"oppHits":4,"errors":1,"oppErrors":1,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":3,"starterId":624133,"starterOuts":15,"starterEr":1,"oppStarterId":682982,"oppStarterOuts":3,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -19470,6 +19498,8 @@ INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id,
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824946, 144, 2026, 1, '2026-03-27', 118, 'W', '{"innings":[[0,1],[0,0],[0,1],[0,2],[0,0],[0,0],[0,2],[0,0],[0,null]],"isHome":true,"runs":6,"oppRuns":0,"hits":11,"oppHits":5,"errors":0,"oppErrors":0,"homeRuns":3,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":4705,"starterId":519242,"starterOuts":18,"starterEr":0,"oppStarterId":666142,"oppStarterOuts":12,"oppStarterEr":4,"oppStarterHand":"L","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824947, 117, 2026, 1, '2026-09-25', 133, 'L', '{"innings":[[0,0],[0,0],[0,0],[1,0],[0,0],[0,6],[1,0],[3,0],[0,null]],"isHome":false,"runs":5,"oppRuns":6,"hits":5,"oppHits":8,"errors":2,"oppErrors":0,"homeRuns":2,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2529,"starterId":686613,"starterOuts":16,"starterEr":1,"oppStarterId":682052,"oppStarterOuts":18,"oppStarterEr":1,"oppStarterHand":"L","battedAround":0,"oppBattedAround":1}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824947, 133, 2026, 1, '2026-09-25', 117, 'W', '{"innings":[[0,0],[0,0],[0,0],[1,0],[0,0],[0,6],[1,0],[3,0],[0,null]],"isHome":true,"runs":6,"oppRuns":5,"hits":8,"oppHits":5,"errors":0,"oppErrors":2,"homeRuns":0,"oppHomeRuns":2,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2529,"starterId":682052,"starterOuts":18,"starterEr":1,"oppStarterId":686613,"oppStarterOuts":16,"oppStarterEr":1,"oppStarterHand":"R","battedAround":1,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824948, 117, 2026, 1, '2026-09-27', 133, 'W', '{"innings":[[0,0],[0,0],[4,0],[0,0],[0,0],[2,0],[2,0],[1,0],[0,0]],"isHome":false,"runs":9,"oppRuns":0,"hits":12,"oppHits":5,"errors":0,"oppErrors":0,"homeRuns":1,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2529,"starterId":663567,"starterOuts":6,"starterEr":0,"oppStarterId":686751,"oppStarterOuts":5,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
+INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824948, 133, 2026, 1, '2026-09-27', 117, 'L', '{"innings":[[0,0],[0,0],[4,0],[0,0],[0,0],[2,0],[2,0],[1,0],[0,0]],"isHome":true,"runs":0,"oppRuns":9,"hits":5,"oppHits":12,"errors":0,"oppErrors":0,"homeRuns":0,"oppHomeRuns":1,"scheduledInnings":9,"dayNight":"day","doubleHeader":"N","gameNumber":1,"venueId":2529,"starterId":686751,"starterOuts":5,"starterEr":0,"oppStarterId":663567,"oppStarterOuts":6,"oppStarterEr":0,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824949, 117, 2026, 1, '2026-09-26', 133, 'W', '{"innings":[[1,0],[0,0],[2,0],[0,1],[3,0],[0,0],[3,1],[3,0],[1,0]],"isHome":false,"runs":13,"oppRuns":2,"hits":16,"oppHits":6,"errors":1,"oppErrors":0,"homeRuns":5,"oppHomeRuns":0,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2529,"starterId":669713,"starterOuts":21,"starterEr":1,"oppStarterId":678022,"oppStarterOuts":15,"oppStarterEr":6,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824949, 133, 2026, 1, '2026-09-26', 117, 'L', '{"innings":[[1,0],[0,0],[2,0],[0,1],[3,0],[0,0],[3,1],[3,0],[1,0]],"isHome":true,"runs":2,"oppRuns":13,"hits":6,"oppHits":16,"errors":0,"oppErrors":1,"homeRuns":0,"oppHomeRuns":5,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2529,"starterId":678022,"starterOuts":15,"starterEr":6,"oppStarterId":669713,"oppStarterOuts":21,"oppStarterEr":1,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
 INSERT INTO team_record_games (game_pk, team_id, season, sport_id, date, opp_id, result, payload_json) VALUES (824950, 117, 2026, 1, '2026-09-24', 133, 'W', '{"innings":[[0,0],[3,0],[0,4],[0,0],[0,0],[1,0],[1,0],[1,1],[1,0]],"isHome":false,"runs":7,"oppRuns":5,"hits":10,"oppHits":11,"errors":0,"oppErrors":0,"homeRuns":5,"oppHomeRuns":3,"scheduledInnings":9,"dayNight":"night","doubleHeader":"N","gameNumber":1,"venueId":2529,"starterId":663567,"starterOuts":8,"starterEr":4,"oppStarterId":686930,"oppStarterOuts":18,"oppStarterEr":4,"oppStarterHand":"R","battedAround":0,"oppBattedAround":0}');
@@ -29550,6 +29580,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822516, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822517, '2026-04-22', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822518, '2026-04-21', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822678, '2026-09-26', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822679, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822680, '2026-09-16', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822681, '2026-09-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822682, '2026-09-13', 2026);
@@ -29631,6 +29662,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822757, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822758, '2026-04-03', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822759, '2026-09-26', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822760, '2026-09-25', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822761, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822762, '2026-09-15', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822763, '2026-09-16', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (822764, '2026-09-13', 2026);
@@ -29953,6 +29985,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823080, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823081, '2026-03-26', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823082, '2026-03-28', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823083, '2026-09-26', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823084, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823085, '2026-09-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823086, '2026-09-23', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823087, '2026-09-24', 2026);
@@ -30032,6 +30065,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823160, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823161, '2026-03-28', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823162, '2026-03-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823163, '2026-03-26', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823164, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823165, '2026-09-26', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823166, '2026-09-22', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823167, '2026-09-25', 2026);
@@ -30113,6 +30147,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823242, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823243, '2026-03-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823244, '2026-03-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823245, '2026-09-26', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823246, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823247, '2026-09-20', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823248, '2026-09-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823249, '2026-09-19', 2026);
@@ -30274,6 +30309,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823404, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823405, '2026-04-05', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823406, '2026-04-03', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823407, '2026-09-26', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823408, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823409, '2026-09-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823410, '2026-09-23', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823411, '2026-09-24', 2026);
@@ -30354,6 +30390,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823486, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823487, '2026-03-29', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823488, '2026-03-28', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823489, '2026-09-25', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823490, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823491, '2026-09-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823492, '2026-09-23', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823493, '2026-09-24', 2026);
@@ -30513,6 +30550,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823646, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823647, '2026-03-29', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823648, '2026-04-07', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823649, '2026-03-26', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823650, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823651, '2026-03-28', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823652, '2026-09-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823653, '2026-09-26', 2026);
@@ -30593,6 +30631,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823727, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823728, '2026-04-06', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823729, '2026-04-05', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823730, '2026-04-04', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823731, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823732, '2026-04-03', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823733, '2026-09-26', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823734, '2026-09-13', 2026);
@@ -30675,6 +30714,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823810, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823811, '2026-03-28', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823812, '2026-03-26', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823813, '2026-09-26', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823814, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823815, '2026-09-13', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823816, '2026-09-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (823817, '2026-09-11', 2026);
@@ -30915,6 +30955,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824051, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824052, '2026-04-06', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824053, '2026-04-05', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824054, '2026-04-04', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824055, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824056, '2026-04-03', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824057, '2026-09-26', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824058, '2026-09-25', 2026);
@@ -31076,6 +31117,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824213, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824214, '2026-03-30', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824215, '2026-03-29', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824216, '2026-03-27', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824217, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824218, '2026-03-26', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824219, '2026-09-26', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824220, '2026-09-25', 2026);
@@ -31400,6 +31442,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824538, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824539, '2026-03-30', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824540, '2026-03-28', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824541, '2026-03-26', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824542, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824543, '2026-09-26', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824544, '2026-09-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824545, '2026-09-19', 2026);
@@ -31562,6 +31605,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824701, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824702, '2026-03-30', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824703, '2026-09-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824704, '2026-03-26', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824705, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824706, '2026-09-25', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824707, '2026-09-24', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824708, '2026-09-13', 2026);
@@ -31804,6 +31848,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824944, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824945, '2026-03-28', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824946, '2026-03-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824947, '2026-09-25', 2026);
+INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824948, '2026-09-27', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824949, '2026-09-26', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824950, '2026-09-24', 2026);
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (824951, '2026-09-23', 2026);
@@ -33105,7 +33150,7 @@ INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (849534, '
 INSERT INTO team_record_ingested_games (game_pk, date, season) VALUES (849535, '2026-08-18', 2026);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (434378, 2026, 1, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (434378, 2026, 11, 2, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (453286, 2026, 1, 17, 17);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (453286, 2026, 1, 18, 18);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (453286, 2026, 11, 4, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (453286, 2026, 13, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (455119, 2026, 12, 1, 1);
@@ -33137,7 +33182,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (543243, 2026, 1, 29, 29);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (544150, 2026, 11, 6, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (547179, 2026, 1, 32, 25);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (554430, 2026, 1, 27, 27);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (554430, 2026, 1, 28, 28);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (554430, 2026, 11, 3, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (554430, 2026, 12, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (571510, 2026, 1, 22, 22);
@@ -33153,7 +33198,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (572143, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (572955, 2026, 11, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (572971, 2026, 11, 7, 7);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (579328, 2026, 1, 13, 13);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (579328, 2026, 1, 14, 14);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (579328, 2026, 11, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (579328, 2026, 14, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (592288, 2026, 1, 1, 1);
@@ -33183,7 +33228,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (594902, 2026, 13, 4, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (595345, 2026, 1, 68, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (595881, 2026, 11, 13, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (596001, 2026, 1, 52, 1);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (596001, 2026, 1, 53, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (596271, 2026, 11, 30, 30);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (596295, 2026, 11, 30, 23);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (600917, 2026, 13, 3, 1);
@@ -33217,7 +33262,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (606160, 2026, 11, 28, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (606965, 2026, 11, 11, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (606996, 2026, 1, 46, 4);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607067, 2026, 1, 33, 19);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607067, 2026, 1, 34, 19);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607074, 2026, 1, 16, 16);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607074, 2026, 11, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607074, 2026, 12, 2, 2);
@@ -33226,8 +33271,8 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607192, 2026, 11, 3, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607192, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607200, 2026, 1, 33, 15);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607259, 2026, 1, 30, 30);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607536, 2026, 1, 25, 25);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607259, 2026, 1, 31, 31);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607536, 2026, 1, 26, 26);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607625, 2026, 1, 32, 32);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607644, 2026, 11, 3, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (607644, 2026, 13, 2, 2);
@@ -33281,9 +33326,9 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (625643, 2026, 11, 3, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (628709, 2026, 11, 30, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (640454, 2026, 11, 40, 4);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (640455, 2026, 1, 32, 18);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (640455, 2026, 1, 33, 19);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (640470, 2026, 11, 8, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641302, 2026, 1, 74, 5);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641302, 2026, 1, 75, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641312, 2026, 11, 22, 6);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641540, 2026, 11, 11, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641540, 2026, 12, 1, 1);
@@ -33291,7 +33336,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641627, 2026, 11, 28, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641672, 2026, 11, 11, 11);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641739, 2026, 11, 35, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641743, 2026, 1, 32, 30);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641743, 2026, 1, 33, 31);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641778, 2026, 1, 22, 18);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641793, 2026, 1, 26, 14);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (641816, 2026, 1, 27, 27);
@@ -33319,10 +33364,10 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (643377, 2026, 1, 34, 23);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (643377, 2026, 11, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (644429, 2026, 11, 18, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (645261, 2026, 1, 35, 33);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (645261, 2026, 1, 36, 33);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (646242, 2026, 11, 29, 28);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (647315, 2026, 1, 7, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (647336, 2026, 1, 21, 20);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (647336, 2026, 1, 22, 21);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (647336, 2026, 11, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (650633, 2026, 1, 32, 32);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (650644, 2026, 1, 34, 15);
@@ -33334,12 +33379,12 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656212, 2026, 11, 24, 15);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656232, 2026, 11, 9, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656240, 2026, 11, 37, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656288, 2026, 1, 29, 11);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656288, 2026, 1, 30, 11);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656288, 2026, 11, 5, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656302, 2026, 1, 29, 29);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656302, 2026, 11, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656353, 2026, 11, 32, 15);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656427, 2026, 1, 19, 19);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656427, 2026, 1, 20, 19);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656427, 2026, 11, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656427, 2026, 12, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656457, 2026, 1, 5, 1);
@@ -33348,6 +33393,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656529, 2026, 11, 10, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656529, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656550, 2026, 1, 31, 29);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656557, 2026, 1, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656605, 2026, 1, 22, 22);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656620, 2026, 11, 27, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656641, 2026, 1, 58, 1);
@@ -33355,7 +33401,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656756, 2026, 11, 6, 6);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656756, 2026, 12, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656786, 2026, 11, 42, 8);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656794, 2026, 1, 59, 6);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656794, 2026, 1, 60, 6);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656849, 2026, 1, 32, 23);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656876, 2026, 1, 30, 30);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (656924, 2026, 11, 26, 11);
@@ -33411,11 +33457,11 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663554, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663556, 2026, 1, 24, 24);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663556, 2026, 11, 1, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663558, 2026, 1, 49, 3);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663558, 2026, 1, 50, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663559, 2026, 1, 7, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663559, 2026, 11, 25, 8);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663562, 2026, 11, 29, 25);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663567, 2026, 1, 28, 28);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663567, 2026, 1, 29, 29);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663567, 2026, 11, 3, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663568, 2026, 1, 10, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663568, 2026, 11, 5, 5);
@@ -33423,9 +33469,9 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663623, 2026, 1, 22, 20);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663623, 2026, 12, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663681, 2026, 11, 6, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663738, 2026, 1, 55, 9);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663738, 2026, 1, 56, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663765, 2026, 11, 14, 7);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663776, 2026, 1, 14, 13);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663776, 2026, 1, 15, 13);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663776, 2026, 11, 6, 6);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663776, 2026, 12, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (663795, 2026, 1, 3, 1);
@@ -33458,7 +33504,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (664353, 2026, 1, 13, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (664353, 2026, 11, 20, 20);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (664849, 2026, 1, 16, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (665152, 2026, 1, 16, 16);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (665152, 2026, 1, 17, 17);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (665152, 2026, 11, 4, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (665622, 2026, 1, 60, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (665795, 2026, 1, 18, 15);
@@ -33470,7 +33516,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (665993, 2026, 12, 32, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666123, 2026, 11, 7, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666123, 2026, 12, 2, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666129, 2026, 1, 2, 2);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666129, 2026, 1, 3, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666129, 2026, 11, 23, 22);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666142, 2026, 1, 8, 8);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666142, 2026, 11, 1, 1);
@@ -33482,7 +33528,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666157, 2026, 13, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666157, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666168, 2026, 11, 39, 3);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666200, 2026, 1, 29, 29);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666200, 2026, 1, 30, 29);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666201, 2026, 11, 10, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666201, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (666619, 2026, 11, 14, 1);
@@ -33514,16 +33560,16 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (668964, 2026, 1, 32, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (668964, 2026, 11, 15, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (668968, 2026, 13, 7, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (668984, 2026, 1, 54, 6);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (668984, 2026, 1, 55, 6);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669020, 2026, 1, 60, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669022, 2026, 1, 33, 33);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669022, 2026, 1, 34, 34);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669060, 2026, 11, 14, 12);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669062, 2026, 1, 57, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669062, 2026, 11, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669062, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669067, 2026, 11, 29, 13);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669081, 2026, 12, 21, 6);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669084, 2026, 1, 46, 1);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669084, 2026, 1, 47, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669084, 2026, 13, 2, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669145, 2026, 11, 15, 15);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669160, 2026, 1, 31, 31);
@@ -33531,16 +33577,16 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669169, 2026, 11, 7, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669183, 2026, 12, 11, 7);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669193, 2026, 11, 47, 3);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669194, 2026, 1, 18, 15);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669194, 2026, 1, 19, 15);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669194, 2026, 11, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669194, 2026, 14, 1, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669199, 2026, 1, 52, 12);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669199, 2026, 1, 53, 12);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669203, 2026, 1, 3, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669203, 2026, 11, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669211, 2026, 1, 24, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669285, 2026, 11, 35, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669294, 2026, 11, 18, 9);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669302, 2026, 1, 31, 31);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669302, 2026, 1, 32, 32);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669310, 2026, 1, 5, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669310, 2026, 11, 24, 18);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669358, 2026, 1, 31, 31);
@@ -33562,8 +33608,8 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669456, 2026, 11, 3, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669456, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669461, 2026, 1, 31, 31);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669467, 2026, 1, 28, 28);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669620, 2026, 1, 25, 7);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669467, 2026, 1, 29, 29);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669620, 2026, 1, 26, 7);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669620, 2026, 11, 22, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669682, 2026, 12, 6, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669684, 2026, 1, 33, 3);
@@ -33584,7 +33630,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669920, 2026, 1, 4, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669920, 2026, 11, 18, 16);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669923, 2026, 1, 30, 30);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669947, 2026, 1, 11, 2);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669947, 2026, 1, 12, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (669947, 2026, 11, 10, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (670062, 2026, 11, 21, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (670103, 2026, 11, 17, 15);
@@ -33603,7 +33649,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (671106, 2026, 1, 7, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (671106, 2026, 11, 21, 21);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (671109, 2026, 11, 18, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (671111, 2026, 1, 15, 1);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (671111, 2026, 1, 16, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (671111, 2026, 11, 39, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (671143, 2026, 11, 29, 18);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (671162, 2026, 11, 15, 2);
@@ -33617,7 +33663,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (671936, 2026, 11, 25, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (672021, 2026, 11, 47, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (672282, 2026, 1, 32, 32);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (672335, 2026, 1, 39, 2);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (672335, 2026, 1, 40, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (672391, 2026, 11, 57, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (672456, 2026, 1, 32, 25);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (672456, 2026, 11, 1, 1);
@@ -33631,7 +33677,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (673540, 2026, 12, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (673540, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (673929, 2026, 1, 18, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (674003, 2026, 1, 9, 8);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (674003, 2026, 1, 10, 8);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (674003, 2026, 11, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (674003, 2026, 12, 3, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (674022, 2026, 12, 33, 7);
@@ -33661,7 +33707,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (675540, 2026, 11, 16, 14);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (675627, 2026, 11, 23, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (675650, 2026, 13, 3, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (675660, 2026, 1, 32, 19);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (675660, 2026, 1, 33, 19);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (675660, 2026, 11, 3, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (675783, 2026, 12, 14, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (675848, 2026, 1, 65, 1);
@@ -33675,13 +33721,13 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676047, 2026, 11, 28, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676055, 2026, 12, 10, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676082, 2026, 12, 40, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676083, 2026, 1, 25, 24);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676083, 2026, 1, 26, 25);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676083, 2026, 11, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676105, 2026, 11, 28, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676105, 2026, 13, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676106, 2026, 1, 25, 25);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676249, 2026, 11, 41, 4);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676263, 2026, 1, 66, 2);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676263, 2026, 1, 67, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676272, 2026, 11, 9, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676282, 2026, 1, 33, 30);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (676333, 2026, 12, 38, 9);
@@ -33775,9 +33821,9 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680730, 2026, 11, 3, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680732, 2026, 1, 32, 27);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680734, 2026, 12, 28, 10);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680736, 2026, 1, 27, 22);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680736, 2026, 1, 28, 22);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680743, 2026, 11, 33, 10);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680744, 2026, 1, 19, 1);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680744, 2026, 1, 20, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680744, 2026, 11, 18, 11);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680755, 2026, 1, 75, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (680802, 2026, 1, 9, 2);
@@ -33794,7 +33840,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681116, 2026, 12, 16, 7);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681117, 2026, 11, 10, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681117, 2026, 12, 31, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681190, 2026, 1, 31, 22);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681190, 2026, 1, 32, 23);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681212, 2026, 12, 33, 7);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681252, 2026, 11, 28, 16);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681256, 2026, 12, 21, 15);
@@ -33823,7 +33869,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681751, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681806, 2026, 11, 32, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681808, 2026, 12, 18, 15);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681810, 2026, 1, 40, 2);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681810, 2026, 1, 41, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681854, 2026, 12, 22, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681869, 2026, 11, 6, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (681870, 2026, 12, 1, 1);
@@ -33840,13 +33886,13 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682120, 2026, 12, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682126, 2026, 11, 46, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682225, 2026, 12, 23, 5);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682227, 2026, 1, 11, 8);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682227, 2026, 1, 12, 9);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682227, 2026, 11, 5, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682227, 2026, 12, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682243, 2026, 1, 22, 21);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682243, 2026, 11, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682243, 2026, 13, 2, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682254, 2026, 1, 69, 5);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682254, 2026, 1, 70, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682620, 2026, 11, 18, 12);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682620, 2026, 12, 8, 8);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682719, 2026, 13, 11, 10);
@@ -33866,9 +33912,9 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682990, 2026, 13, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682995, 2026, 11, 21, 14);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (682999, 2026, 11, 31, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683000, 2026, 1, 17, 3);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683000, 2026, 1, 18, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683000, 2026, 11, 22, 9);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683003, 2026, 1, 20, 20);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683003, 2026, 1, 21, 21);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683003, 2026, 11, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683003, 2026, 12, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683003, 2026, 14, 1, 1);
@@ -33909,7 +33955,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683636, 2026, 13, 4, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683681, 2026, 12, 32, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (683742, 2026, 11, 16, 10);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (684007, 2026, 1, 31, 31);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (684007, 2026, 1, 32, 32);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (684128, 2026, 11, 6, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (684128, 2026, 12, 27, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (684320, 2026, 11, 13, 1);
@@ -33967,6 +34013,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (686731, 2026, 13, 17, 6);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (686745, 2026, 11, 8, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (686747, 2026, 11, 28, 2);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (686751, 2026, 1, 28, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (686762, 2026, 12, 34, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (686769, 2026, 11, 9, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (686790, 2026, 1, 14, 14);
@@ -34044,7 +34091,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687765, 2026, 1, 3, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687765, 2026, 11, 16, 16);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687776, 2026, 12, 41, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687792, 2026, 1, 1, 1);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687792, 2026, 1, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687792, 2026, 11, 4, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687792, 2026, 12, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687792, 2026, 14, 2, 2);
@@ -34058,7 +34105,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687881, 2026, 13, 17, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687900, 2026, 11, 27, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687905, 2026, 12, 34, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687911, 2026, 1, 59, 1);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687911, 2026, 1, 60, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687911, 2026, 11, 5, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687924, 2026, 11, 12, 12);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (687924, 2026, 13, 4, 4);
@@ -34091,7 +34138,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689181, 2026, 14, 4, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689225, 2026, 11, 23, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689225, 2026, 14, 2, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689254, 2026, 1, 82, 4);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689254, 2026, 1, 83, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689275, 2026, 11, 21, 19);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689275, 2026, 12, 7, 7);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689441, 2026, 1, 5, 4);
@@ -34110,7 +34157,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689818, 2026, 1, 8, 6);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689818, 2026, 11, 14, 14);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689818, 2026, 13, 2, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689981, 2026, 1, 1, 1);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689981, 2026, 1, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (689981, 2026, 11, 10, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (690148, 2026, 11, 10, 7);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (690155, 2026, 11, 39, 1);
@@ -34217,6 +34264,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (692632, 2026, 14, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693308, 2026, 11, 26, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693311, 2026, 11, 19, 3);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693313, 2026, 1, 25, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693313, 2026, 11, 22, 9);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693433, 2026, 1, 30, 30);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693440, 2026, 13, 21, 20);
@@ -34228,7 +34276,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693739, 2026, 11, 28, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693781, 2026, 11, 27, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693821, 2026, 1, 26, 26);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693855, 2026, 1, 46, 16);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (693855, 2026, 1, 47, 16);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694050, 2026, 13, 9, 8);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694057, 2026, 12, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694057, 2026, 13, 2, 2);
@@ -34270,7 +34318,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694462, 2026, 11, 3, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694462, 2026, 12, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694475, 2026, 13, 7, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694477, 2026, 1, 56, 6);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694477, 2026, 1, 57, 6);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694494, 2026, 11, 21, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694536, 2026, 11, 40, 12);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694537, 2026, 12, 7, 7);
@@ -34303,7 +34351,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694811, 2026, 13, 20, 14);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694813, 2026, 11, 6, 6);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694818, 2026, 12, 23, 17);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694819, 2026, 1, 29, 29);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694819, 2026, 1, 30, 30);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694833, 2026, 13, 23, 16);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694847, 2026, 13, 17, 7);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (694847, 2026, 14, 7, 5);
@@ -34431,7 +34479,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (698962, 2026, 14, 23, 15);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (698982, 2026, 13, 22, 22);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (699008, 2026, 11, 23, 17);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (699044, 2026, 1, 10, 2);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (699044, 2026, 1, 11, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (699044, 2026, 11, 39, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (699071, 2026, 11, 30, 22);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (699106, 2026, 13, 16, 16);
@@ -34482,7 +34530,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (700327, 2026, 11, 16, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (700354, 2026, 13, 17, 11);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (700357, 2026, 12, 17, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (700363, 2026, 1, 8, 5);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (700363, 2026, 1, 9, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (700363, 2026, 11, 5, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (700363, 2026, 14, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (700370, 2026, 12, 33, 1);
@@ -34577,7 +34625,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (701856, 2026, 12, 29, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (701908, 2026, 12, 7, 7);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (701908, 2026, 13, 15, 15);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702021, 2026, 1, 26, 1);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702021, 2026, 1, 27, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702023, 2026, 14, 9, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702045, 2026, 11, 28, 22);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702047, 2026, 11, 38, 6);
@@ -34593,7 +34641,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702103, 2026, 11, 46, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702111, 2026, 12, 17, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702130, 2026, 11, 43, 2);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702193, 2026, 1, 63, 3);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702193, 2026, 1, 64, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702193, 2026, 11, 2, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702254, 2026, 14, 11, 7);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702255, 2026, 14, 12, 12);
@@ -34604,7 +34652,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702273, 2026, 1, 19, 14);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702273, 2026, 11, 11, 10);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702274, 2026, 13, 16, 16);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702275, 2026, 1, 16, 10);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702275, 2026, 1, 17, 11);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702275, 2026, 11, 16, 16);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702279, 2026, 14, 22, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (702281, 2026, 1, 1, 1);
@@ -34695,7 +34743,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (800018, 2026, 12, 4, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (800018, 2026, 13, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (800045, 2026, 13, 30, 3);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (800048, 2026, 1, 31, 31);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (800048, 2026, 1, 32, 32);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (800059, 2026, 12, 20, 16);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (800063, 2026, 12, 4, 4);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (800063, 2026, 13, 5, 4);
@@ -35167,7 +35215,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (808893, 2026, 14, 12, 11);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (808911, 2026, 14, 4, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (808952, 2026, 12, 14, 1);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (808963, 2026, 1, 25, 23);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (808963, 2026, 1, 26, 23);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (808967, 2026, 1, 28, 28);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (808970, 2026, 11, 27, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (809059, 2026, 14, 11, 9);
@@ -35304,7 +35352,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (814487, 2026, 14, 4, 2);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (814489, 2026, 11, 19, 6);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (814489, 2026, 12, 10, 7);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (814490, 2026, 1, 7, 5);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (814490, 2026, 1, 8, 5);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (814490, 2026, 11, 17, 15);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (814490, 2026, 14, 3, 3);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (814492, 2026, 12, 9, 9);
@@ -35916,7 +35964,7 @@ INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (837184, 2026, 16, 12, 12);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (837212, 2026, 16, 12, 11);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (837214, 2026, 16, 13, 3);
-INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (837227, 2026, 1, 22, 15);
+INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (837227, 2026, 1, 23, 15);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (837227, 2026, 11, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (837227, 2026, 12, 1, 1);
 INSERT INTO team_record_pitcher_roles (person_id, season, sport_id, games_played, games_started) VALUES (837235, 2026, 16, 10, 3);
