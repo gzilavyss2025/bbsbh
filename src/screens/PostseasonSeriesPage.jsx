@@ -24,6 +24,8 @@ import { GameResultFace } from '../components/game/GameResultFace.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../components/postseason/SeriesParts.jsx'
 import { monthDay } from '../components/postseason/monthDay.js'
+import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
+import { seriesMarkForHistory } from '../lib/postseason/seriesMarks.js'
 
 
 // "Brewers lead 3-2" / "Series tied 2-2" / "Brewers win series 3-2" — the
@@ -143,6 +145,8 @@ export function PostseasonSeriesPage({ seriesId }) {
           <h2 className="psseries__headline">
             {teamClubNameShort(winner.teamId)} win in {games.length}
           </h2>
+          {/* 2026 on: the round's own mark (null for a season with no art). */}
+          <SeriesMark mark={seriesMarkForHistory(series)} height={40} decorative className="psseries__mark" />
           {isWorldSeries && (
             <img
               src="/brand/world-series-trophy.png"

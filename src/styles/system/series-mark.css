@@ -1,0 +1,38 @@
+/* ---------------------------------------------------------------------------
+   SERIES MARK — MLB's postseason round art (components/postseason/
+   SeriesMark.jsx, lib/postseason/seriesMarks.js). The marks are white-on-navy,
+   so they sit on navy: a band the host already draws, or this plate. Never
+   straight on paper, where the white letters wash out.
+
+   Global, not route-owned: the slate card, the game masthead, the bracket and
+   both series pages all draw one.
+   --------------------------------------------------------------------------- */
+.seriesmark {
+  display: block;
+  flex: none;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.seriesmark-plate {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1h) var(--space-2h);
+  background: var(--accent-primary);
+  border-radius: var(--radius-sm);
+}
+
+/* The game's own band: under the masthead on the lineup pages and the box
+   score, so a postseason game reads as one before a name is read. The same
+   navy-with-award-seam idiom as the slate card's series line and the series
+   page's banner. */
+.gameseries {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent-primary);
+  border-bottom: var(--bw-heavy) solid var(--award-line);
+}

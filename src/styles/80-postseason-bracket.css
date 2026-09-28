@@ -185,6 +185,11 @@
   padding-bottom: var(--space-1h);
   border-bottom: var(--bw-rule) solid var(--text-heading);
 }
+/* The league's current round, as MLB's mark on its navy plate, at the head's
+   right edge. */
+.pbkt-lghead .pbkt-roundmark {
+  margin-left: auto;
+}
 .pbkt-lghead .pbkt-mark {
   filter: grayscale(1);
 }

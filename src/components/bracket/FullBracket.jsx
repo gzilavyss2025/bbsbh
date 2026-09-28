@@ -24,6 +24,8 @@ import {
 } from '../../lib/postseason/bracketDisplay.js'
 import { BlankSlot, ClubMark, Pips, Trophy } from './bracketParts.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { SeriesMark } from '../postseason/SeriesMark.jsx'
+import { leagueRoundMark, seriesMark } from '../../lib/postseason/seriesMarks.js'
 
 const R = 26 // one club row
 const BOX = R * 2 // a two-row box, border drawn outside
@@ -137,7 +139,7 @@ function SeriesBox({ series, bracket, cutoff, historyIds, x, y, w, compact, note
 // One league's tree: Wild Card and Division side by side (a lane per
 // Division series, fed by whichever Wild Card series names it — never by
 // slot position), the LCS centered against both lanes.
-function League({ league, leagueId, name, roundName, bracket, cutoff, historyIds }) {
+function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff, historyIds }) {
   const phase = leaguePhase(league)
   const c = columns(phase)
   const xWC = 0
@@ -162,6 +164,15 @@ function League({ league, leagueId, name, roundName, bracket, cutoff, historyIds
       <header className="pbkt-lghead">
         <TeamLogo teamId={leagueId} name={name} size={22} className="pbkt-mark" />
         <h3 className="pbkt-lgname">{name}</h3>
+        {/* The round this league is in, as MLB's own mark — the column
+            head below already says it in words, so it is decorative. */}
+        <SeriesMark
+          mark={leagueRoundMark(bracket, leagueKey)}
+          height={22}
+          plate
+          decorative
+          className="pbkt-roundmark"
+        />
       </header>
       <div className="pbkt-colheads" style={{ gridTemplateColumns: `${c.wc}px ${c.ds}px ${c.lcs}px` }}>
         <span className={`pbkt-colhead${phase === 'wildcard' ? ' pbkt-colhead--now' : ''}`}>
@@ -291,6 +302,7 @@ function WorldSeriesBand({ bracket, cutoff, historyIds }) {
   const ws = bracket.worldSeries
   if (!ws) return null
   const champion = bracket.champion
+  const wsMark = seriesMark({ season: bracket.season, round: 'worldseries' })
   const href = ws.id ? seriesHref(ws, cutoff, historyIds) : null
   const Wrapper = href ? 'a' : 'div'
   const wrapperProps = href ? linkProps(href) : { role: 'group' }
@@ -305,7 +317,11 @@ function WorldSeriesBand({ bracket, cutoff, historyIds }) {
     >
       <div className="pbkt-ws__head">
         <div>
-          <h3 className="pbkt-ws__name">{champion ? champion.name : 'World Series'}</h3>
+          {/* Before a champion, the World Series mark names the band; its alt
+              text is the heading's name. A season with no art keeps the words. */}
+          <h3 className="pbkt-ws__name">
+            {champion ? champion.name : wsMark ? <SeriesMark mark={wsMark} height={40} /> : 'World Series'}
+          </h3>
           <span className="pbkt-ws__sub">
             {champion ? `World Series champions · won it in ${ws.gamesPlayed}` : 'Best of 7'}
           </span>
@@ -342,6 +358,7 @@ export function FullBracket({ bracket, cutoff, historyIds }) {
       <League
         league={bracket.leagues.AL}
         leagueId={159}
+        leagueKey="AL"
         name="American League"
         roundName="ALCS"
         bracket={bracket}
@@ -351,6 +368,7 @@ export function FullBracket({ bracket, cutoff, historyIds }) {
       <League
         league={bracket.leagues.NL}
         leagueId={160}
+        leagueKey="NL"
         name="National League"
         roundName="NLCS"
         bracket={bracket}

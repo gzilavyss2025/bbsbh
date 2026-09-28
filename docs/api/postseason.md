@@ -183,6 +183,22 @@ Example: 2025 NLDS, heading into 2025-10-09.
   `seriesDescription`) for this line.
 - `cardLines(game, bracket)`: both lines for a slate game row, by `gamePk`, or
   `null` for a game not in the bracket. The slate model needs no new field.
+  It returns `{ seriesLine, gameLine, recordLine, mark }`. `mark` is the
+  series' art (`{ src, alt }`) from `src/lib/postseason/seriesMarks.js`, or
+  `null` for a season with no art on file. A card that draws the mark prints
+  `gameLine` ("Game 2") beside it, not `seriesLine`.
+
+## Series marks (`src/lib/postseason/seriesMarks.js`)
+
+MLB's round art, per season, in `public/postseason-marks/{season}/`: 2026 is
+the first season on file. Each mark prints its year, so a season with no art
+gets `null` and the surface keeps its words. Never fall back to another year.
+The art is white-on-navy: `SeriesMark.jsx` draws it on a navy band the host
+already has, or on its own navy plate (`plate`). It is drawn on the slate
+card's series line, the full bracket (each league's current round, and the
+World Series band), both series pages' banners, the history bracket's round
+labels, and a band under the game masthead on both lineup pages and the box
+score (not the innings view). A mark names the round only, so no seal applies.
 
 ## The declared roster (`roster.js`)
 

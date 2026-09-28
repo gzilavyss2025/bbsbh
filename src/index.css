@@ -47,6 +47,10 @@
 @import './styles/06-loader-and-cards.css';
 @import './styles/06a-gamecard-parkart.css';
 @import './styles/06b-offday-cards.css';
+/* The postseason SERIES MARK and its navy plate (lib/postseason/
+   seriesMarks.js). Class-only rules that no earlier partial sets, so their
+   place in the order carries no cascade weight. */
+@import './styles/system/series-mark.css';
 /* The BUTTON — the app's one control (#1130): the base .btn rule, its two
    sizes, its skins and every state. A SUBDIRECTORY for the same reason as
    system/door.css below. HERE in the order, immediately BEFORE 07, and that is
