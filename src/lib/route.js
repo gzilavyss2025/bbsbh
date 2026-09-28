@@ -24,6 +24,7 @@
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason-race'                  -> { name: 'postseason-race' }
 //   '/postseason/{seriesId}'            -> { name: 'postseason-series', seriesId }
+//   '/postseason-live/{seriesId}?d='    -> { name: 'postseason-live', seriesId, asOf }
 //   '/trade-deadline'                   -> { name: 'trade-deadline' }  (redirects to the latest season)
 //   '/trade-deadline/{year}'            -> { name: 'trade-deadline-season', season: year }
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
@@ -543,6 +544,10 @@ export function parseRoute(url) {
   // postseason-history.json's own `series.id` 1:1 — no separate slug scheme.
   if (parts.length === 2 && parts[0] === 'postseason')
     return { name: 'postseason-series', seriesId: parts[1] }
+  // The same id, on the page for a series still running (#1224). `?d=` is the
+  // cutoff it shows the series heading into; no `?d=` means today.
+  if (parts.length === 2 && parts[0] === 'postseason-live')
+    return { name: 'postseason-live', seriesId: parts[1], asOf }
   // The year matches the precomputed file's own name 1:1 (public/data/
   // trade-deadline/{year}.json) — no separate slug scheme, same idea as the
   // postseason series id above. A non-numeric segment falls back to the
@@ -809,6 +814,21 @@ export function teamPath(id, opts = {}) {
 }
 export function postseasonSeriesPath(seriesId) {
   return `/postseason/${seriesId}`
+}
+export function postseasonLivePath(seriesId, cutoffDate = null) {
+  return `/postseason-live/${seriesId}${linkQuery({ d: cutoffDate })}`
+}
+// Where a bracket series links. The finished page reads only
+// postseason-history.json, which gets a season after its World Series, by a
+// hand-run script (trap 7). So: the finished page when the series was decided
+// before the cutoff AND that file holds its id; the live page otherwise. A
+// series with an empty slot has no id and no link. `historyIds`: Set or array.
+export function seriesHref(series, cutoffDate, historyIds) {
+  if (!series?.id) return null
+  const ids = historyIds instanceof Set ? historyIds : new Set(historyIds ?? [])
+  return series.decided && ids.has(series.id)
+    ? postseasonSeriesPath(series.id)
+    : postseasonLivePath(series.id, cutoffDate)
 }
 export function tradeDeadlinePath() {
   return '/trade-deadline'

@@ -756,6 +756,18 @@
       "class": "spoiler-free",
       "why": "The global name-link hover card (PlayerLink, desktop only) — season stat tiles, same open-surface footing as the player page's own season tiles (person/stats.js). No per-game result."
     },
+    "postseason/bracket.js": {
+      "class": "cutoff-gated",
+      "why": "The running postseason's bracket HEADING INTO the cutoff date (#1224): each series' wins, winner, eliminated club and the champion. It carries results, so it is gated by DATE, not by a seal: a game counts only when it went Final with a winner strictly BEFORE the cutoff, on its officialDate or, for a suspended game, its resumeGameDate. It re-applies that cutoff itself rather than trusting its caller's fetch. The skeleton rows it reads are the live schedule, which names a series' winner in the next round and drops its unplayed if-necessary games the moment that series ends; so a fed slot is filled only from a winner derived here, 'if necessary' is worked out from the heading-in wins, a later if-necessary game carries no date when today's game can end its series, and the gamePk index holds only games dated on or before the cutoff. Yesterday's results are NOT protected (a decision, not a gap, ADR-0087), and Scores Unlocked does not apply: the state is the same with the switch on or off."
+    },
+    "postseason/fetch.js": {
+      "class": "cutoff-gated",
+      "why": "The bracket's two statsapi reads, separate from fetchSchedule like fetchSlateScores. The results read asks only for dates BEFORE the cutoff (endDate is the day before) and only for `isWinner` and the game state: never runs, a score, a linescore, `seriesStatus` or `leagueRecord`, the last two being the state AFTER a game (trap 1). The skeleton read asks for every date but for no result field at all, not even the game state. The heading-into-the-date gate is the cutoff the caller passes; bracket.js applies it a second time."
+    },
+    "postseason/text.js": {
+      "class": "cutoff-gated",
+      "why": "The slate card's two lines and the series page's record line ('Game 2 · NL Wild Card Series', 'CHC leads 1–0', 'Series tied 1–1', 'Winner take all'), read off one series from bracket.js and nothing else. It inherits that module's footing whole: the state heading into the cutoff date, so a game on the slate never changes its own card."
+    },
     "postseasonHistory.js": {
       "class": "spoiler-free",
       "why": "Static postseason-history.json — completed brackets back to 2000. Immutable history, outside the rule's scope."

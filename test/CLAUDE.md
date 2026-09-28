@@ -110,6 +110,11 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | placed-runner.test.js | 11 | src/api/playbyplay.js | Placed-runner card |
 | play-diamond-out-geometry.test.js | 5 | src/components/scoring/playDiamondGeometry.js | outLegBases geometry |
 | playbyplay-pitching-change.test.js | 7 | src/api/playbyplay.js | Now Pitching card step-boundary logic |
+| postseason/bracket-cutoff.test.js | 16 | src/api/postseason/bracket.js | The bracket heading into the cutoff date (#1227, tests 1, 2, 3, 6) on real postseasons: the 2025 known answers (10-04, 10-05, 10-09), a game on the cutoff date never counting, the suspended 2008 World Series Game 5 counting on its resume date, the postponed 2022 ALDS games, the champion, and the games still to play — the same bracket whether or not the schedule still lists the if-necessary game today can drop |
+| postseason/bracket-wiring.test.js | 9 | src/api/postseason/bracket.js | Test 4: placeholders (5528 "HOU/CWS", 5513, 2711, …) are never a club, and 2026's crossed Wild Card to Division Series wiring by club pair then club id, never by letter; the series id; a Wild Card winner filling its slot only from results before the cutoff |
+| postseason/bracket-text.test.js | 8 | src/api/postseason/text.js | Test 5: the four record wordings ("Game 1", "CHC leads 1–0", "Series tied 1–1", "Winner take all") and the series line, read by a slate row's gamePk |
+| postseason/bracket-fetch.test.js | 8 | src/api/postseason/fetch.js | The two reads' URLs (results stop the day before the cutoff; no score, seriesStatus or leagueRecord; the skeleton asks for no result at all) and the one-listing-per-game normalizers on the captured 2022 and 2008 answers |
+| postseason/bracket-hook.test.js | 3 | src/hooks/postseason/usePostseasonBracket.js, src/lib/postseason/capSlateDate.js | The cutoff never passes today (in the window or out of it), and no bracket file reads Scores Unlocked or touches storage |
 | pre-pitch-selectors.test.js | 12 | src/api/select.js | Caller-gated pre-pitch selectors (ADR-0010) |
 | preferred-lineup-team-scope.test.js | 7 | src/screens/team/data/shared.js (preferTeamSplits, preferredLineupFrom) | A position/level-agnostic roster fetch (rosterType=sport level, not per-team) must not credit a rostered-but-unplayed pickup with another team's stats, must still credit a player promoted within the org, and must exclude one the club has since released — pinned on real captured statsapi rows (Bae/Williams/Lara/Marte, 2026-08-21) |
 | pregame-avg.test.js | 3 | src/api/boxscore.js | preGameAvg |
@@ -127,7 +132,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | rookies.test.js | 18 | src/api/rookies.js | Rookie pill + the sharded reads (compact status map, per-id record shard) |
 | roster-age-cache-completeness.test.js | 3 | .scratch/team-success/roster-age-cache.json, build-roster-age.mjs | Every club's per-player stints add up to the club's own captured season total, so a stint statsapi drops for a traded player (Correa 2025, Devers 2025) cannot sit in the committed cache unseen |
 | roster-availability.test.js | 3 | src/api/select.js | The bench/bullpen strike-through's two ceilings (`enteredAsOf`) — the reveal mark AND the half on screen, so a replayed inning shows the bench that half opened with |
-| route.test.js | 77 | src/lib/route.js | Full router surface, both hubs' tab tables included (the count was stale at 36; `node --test` reports 77) |
+| route.test.js | 84 | src/lib/route.js | Full router surface, both hubs' tab tables included, and the live postseason series route with `seriesHref` (#1227, test 8). `node --test` reports 84 |
 | sac-bunt-double-play.test.js | 4 | src/api/boxscore.js, src/api/scorecard/notation.js, src/api/playbyplay/scorebookCode.js, src/api/scorecardGame.js | sac_bunt_double_play IS an at-bat, unlike sac_fly_double_play — Rule 9.08(c) credits no sacrifice, scored as an ordinary double play (issue #765) |
 | sac-reached-notation.test.js | 3 | src/api/playbyplay.js | Sac-bunt error/FC notation edge cases |
 | scorecard-game.test.js | 9 | src/api/scorecardGame.js | The live scorecard's reveal clamp, P/TP/LOB agreement with derive/linescore, FINAL block + decisions gating, inning-end diagonals, skipped-half X, pinch-runner run on the origin card — pinned on the captured real feed |
@@ -140,7 +145,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | season-series.test.js | 7 | src/api/seasonSeries.js | Season series cells |
 | skipped-bottom-half.test.js | 9 | src/api/select.js | selectSkippedBottomHalf, selectFinalHalfIndex |
 | skipped-half-cells.test.js | 3 | src/api/boxscore.js, src/api/derive.js | A never-batted half prints X on the box score's line score and gets no by-inning row at all (the `runs` KEY, never its value) |
-| slate-scores.test.js | 13 | src/api/schedule.js, src/lib/slateScoreLine.js | Slate score line normalization |
+| slate-scores.test.js | 14 | src/api/schedule.js, src/lib/slateScoreLine.js | Slate score line normalization, and the slate model carrying no postseason `seriesStatus` or `leagueRecord` (#1227, test 7) |
 | spoiled-days.test.js | 21 | src/lib/spoiledDays.js | Spoiled-days consent persistence (ADR-0026) |
 | spoiler-gates.test.js | 4 | select.js, enteringHalf.js | Caller-gated pre-pitch rule |
 | spray.test.js | 43 | scripts/gen-spray.mjs, src/api/spray.js | The season spray map, both ends of the same stored row: the sweep's per-game fold and season merge, then the reader's split sums, spray-angle/direction math (the switch-hitter majority rule), the home-runs-without-a-landing-point footnote, and the two floors |
