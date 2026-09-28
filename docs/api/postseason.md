@@ -101,8 +101,9 @@ const { bracket, loading, error, cutoff } = usePostseasonBracket(slateDate)
 ```
 
 `cutoff` is `slateDate` capped at today. `season` defaults to the cutoff's
-year. Slice 1 adds the shared cap helper in `src/lib/postseason/`; the hook's
-own `bracketCutoff` does the same job until that lands.
+year. `bracketCutoff` calls the slate's own cap, `capSlateDate`
+(`src/lib/postseason/`, ADR-0087), with no season row. That is the helper's
+fail-closed branch, so every future date caps, in the window or out of it.
 
 ## The returned shape
 

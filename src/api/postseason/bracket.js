@@ -5,8 +5,8 @@
 // cutoff date. It went Final on its officialDate, or on its resumeGameDate
 // when it was suspended. A game on the cutoff date never counts, Final or
 // not, so the bracket shows all day what it showed that morning. Yesterday's
-// results are not protected: that is a decision, not a gap (ADR for the
-// bracket, slice 1). Scores Unlocked does not apply. There is no seal.
+// results are not protected: that is a decision, not a gap (ADR-0087).
+// Scores Unlocked does not apply. There is no seal.
 //
 // WHAT THE SKELETON MAY SAY, AND WHAT IT MAY NOT. The skeleton rows are the
 // live schedule, so on the day a series ends they already name its winner in

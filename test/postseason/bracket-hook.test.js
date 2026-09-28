@@ -13,6 +13,9 @@ test('bracketCutoff caps a future slate date at today', () => {
   assert.equal(bracketCutoff('2026-09-28', '2026-09-28'), '2026-09-28')
   assert.equal(bracketCutoff('2025-10-09', '2026-09-28'), '2025-10-09')
   assert.equal(bracketCutoff(null, '2026-09-28'), null)
+  // Outside the postseason window too: the slate may preview a future date
+  // there, but the bracket's results read would then run through today.
+  assert.equal(bracketCutoff('2027-04-01', '2027-03-20'), '2027-03-20')
 })
 
 test('the hook is a function the UI can call', () => {

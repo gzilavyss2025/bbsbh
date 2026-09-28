@@ -9,10 +9,12 @@
 // skip the reads on a date outside the postseason window). `season` defaults
 // to the cutoff's year; the offseason row passes it for a January date.
 //
-// THE CUTOFF IS CAPPED AT TODAY, so a future slate date can never ask for
-// today's results. Slice 1 adds the shared cap helper in src/lib/postseason/;
-// until that lands on the base branch, bracketCutoff below does the same job
-// and should be swapped for it.
+// THE CUTOFF IS CAPPED AT TODAY, so a future date can never ask for today's
+// results. bracketCutoff uses the slate's own cap (capSlateDate, ADR-0087)
+// with NO season row, which is that helper's fail-closed branch: every future
+// date caps, in the postseason window or out of it. The slate passes a date
+// after today through outside the window; the bracket never may, because its
+// results read runs to the day before the cutoff.
 //
 // Scores Unlocked does NOT apply (Gary's decision, 2026-09-28): this hook
 // never reads the switch, and it writes nothing to storage. The state is the
@@ -21,10 +23,11 @@
 import { useAsync } from '../useAsync.js'
 import { loadPostseasonBracket } from '../../api/postseason/fetch.js'
 import { toApiDate } from '../../lib/dates.js'
+import { capSlateDate } from '../../lib/postseason/capSlateDate.js'
 
 export function bracketCutoff(date, today = toApiDate(new Date())) {
   if (!date) return null
-  return date > today ? today : date
+  return capSlateDate(date, today, null)
 }
 
 export function usePostseasonBracket(cutoffDate, { season } = {}) {
