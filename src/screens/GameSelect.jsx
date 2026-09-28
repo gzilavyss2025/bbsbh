@@ -12,6 +12,7 @@ import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useIntroFlag } from '../hooks/preferences/useIntroFlag.js'
 import { usePromptDismiss } from '../hooks/preferences/usePromptDismiss.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
+import { capSlateDate, atForwardLimit } from '../lib/postseason/capSlateDate.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { GameCard } from '../components/game/GameCard.jsx'
@@ -119,8 +120,20 @@ export function GameSelect({
   // own Back/Forward retrace the days visited. Comparisons below lean on
   // YYYY-MM-DD ordering lexically — no offset math needed.
   const todayStr = toApiDate(new Date())
-  const dateStr = date ?? todayStr
+  const rawDateStr = date ?? todayStr
+
+  // MLB's postseason date cutoff (ADR-0087; rule in capSlateDate.js). Asked
+  // for once the URL names today or later — a browsed-back day never needs
+  // the window, and this same row also answers the forward arrow's limit.
+  const needsPostseasonWindowCheck = sportId === SPORT_IDS.MLB && rawDateStr >= todayStr
+  const postseasonCapMeta = useAsync(
+    () => (needsPostseasonWindowCheck ? fetchSeasonMeta(Number(todayStr.slice(0, 4))) : Promise.resolve(null)),
+    [needsPostseasonWindowCheck, todayStr],
+  )
+  const dateStr =
+    sportId === SPORT_IDS.MLB ? capSlateDate(rawDateStr, todayStr, postseasonCapMeta.data) : rawDateStr
   const isToday = dateStr === todayStr
+  const forwardLimited = atForwardLimit(dateStr, todayStr, postseasonCapMeta.data)
 
   // The league's roster moves have two presentations of the SAME feed, split at
   // the app's one layout breakpoint. Neither one stands above the game list any
@@ -745,7 +758,7 @@ export function GameSelect({
               </button>
             )}
           </span>
-          <button onClick={() => pageDay(1)} aria-label="Next day">
+          <button onClick={() => pageDay(1)} aria-label="Next day" disabled={forwardLimited}>
             ›
           </button>
         </div>
