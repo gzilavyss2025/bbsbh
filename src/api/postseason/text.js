@@ -7,6 +7,10 @@
 //   "Series tied 1–1"  level, and neither club is one win from the series
 //   "Winner take all"  each club one win from the series (1–1 of 3, 2–2 of 5, 3–3 of 7)
 //   "TOR won 3–1"      decided (no card shows this: a decided series plays no game)
+//
+// The heading title (slice 4, Gary's copy decision 2026-09-28) drops the word
+// "Series" from every round but the World Series itself: "Game 2 · NL Wild
+// Card", "Game 3 · ALDS", "Game 5 · NLCS", "Game 1 · World Series".
 
 import { seriesForGame } from './bracket.js'
 
@@ -23,10 +27,19 @@ export function recordLine(series) {
   return `${leader?.abbreviation ?? ''} leads ${hi}–${lo}`
 }
 
-// "Game 2 · NL Wild Card Series"
+// "NL Wild Card", "ALDS", "NLCS", "World Series" — Gary's copy decision
+// (2026-09-28): every round but the World Series drops the word "Series".
+function roundTitle(series) {
+  if (series.round === 'worldseries') return 'World Series'
+  if (series.round === 'wildcard') return `${series.league} Wild Card`
+  if (series.round === 'division') return `${series.league}DS`
+  return `${series.league}CS`
+}
+
+// "Game 2 · NL Wild Card"
 export function seriesLine(series, gameNumber) {
   if (!series || !gameNumber) return ''
-  return `Game ${gameNumber} · ${series.name}`
+  return `Game ${gameNumber} · ${roundTitle(series)}`
 }
 
 // Both lines for one slate game row (anything with a `gamePk`), or null when
