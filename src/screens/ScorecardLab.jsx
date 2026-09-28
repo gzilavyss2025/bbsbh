@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { Button } from '../components/ui/control/Button.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { Scorecard } from './Scorecard.jsx'
 import { loadScorecardGame } from '../api/loadScorecard.js'
@@ -103,22 +104,12 @@ export function ScorecardLab() {
       </form>
 
       <div className="sc-labctl" role="group" aria-label="Half of inning">
-        <button
-          type="button"
-          className={`btn ${side === 'top' ? '' : 'btn--ghost'}`}
-          aria-pressed={side === 'top'}
-          onClick={() => setSide('top')}
-        >
+        <Button size="control" pressed={side === 'top'} onClick={() => setSide('top')}>
           Top
-        </button>
-        <button
-          type="button"
-          className={`btn ${side === 'bottom' ? '' : 'btn--ghost'}`}
-          aria-pressed={side === 'bottom'}
-          onClick={() => setSide('bottom')}
-        >
+        </Button>
+        <Button size="control" pressed={side === 'bottom'} onClick={() => setSide('bottom')}>
           Bottom
-        </button>
+        </Button>
       </div>
 
       {gamePk && loaded.loading && <Loader />}

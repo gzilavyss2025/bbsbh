@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { fetchHighlights, selectCondensedGame } from '../../api/highlights.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
+import { Button } from '../ui/control/Button.jsx'
 
 // "Condensed game" on a revealed slate card (GameResultFace.jsx) — the whole
 // game in ~12 minutes, which is what "I'm done scoring, show me what happened"
@@ -73,9 +74,9 @@ export function WatchCondensedButton({ gamePk }) {
 
   return (
     <>
-      <button type="button" className="btn flipback__watchbtn" onClick={onClick}>
+      <Button size="control" skin="ink" className="flipback__watchbtn" onClick={onClick}>
         <span className="flipback__watchIcon" aria-hidden="true" /> Condensed game
-      </button>
+      </Button>
       {open && (
         <HighlightSheet
           item={item}

@@ -368,20 +368,6 @@
 #root .flipback__potg .plink {
   text-transform: none; /* caps-exempt: play of the game reads as a natural sentence */
 }
-/* Sits in .flipback__topRow next to the pill row (see above), left-aligned
-   above the logos/team names rather than the old full-width band pinned to
-   the card's bottom. Padding trimmed to a caption-sized pill (font/size match
-   .flipback__lsCol's R/H/E header) so it reads as scaled to that row, not a
-   full-size button that happens to be short. */
-.flipback__boxbtn {
-  width: auto;
-  min-height: 0;
-  padding: var(--space-1) var(--space-2h);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-}
 
 
 /* ---------------------------------------------------------------------------

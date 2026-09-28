@@ -156,6 +156,12 @@ written at two-class specificity or it silently loses.
 | `.btn--reveal` | **held** | — | everything | — |
 | `.teamtabs__btn` | **held** — moves with #1131 | — | everything | — |
 | `.cta__go` | **held** | — | everything | — |
+| `.stampstrip__modes button` | absorbed (#1174) | outline · control, `pressed` | — (the capsule and `.is-active` are gone; the group keeps its flex row) | after (48) |
+| `.logbook__seasons button` | renamed → `.logbook__season` (#1174) | outline · control, `aria-current` | `align-items: baseline` (year, count and tick on one line) | after (48) |
+| the scorecard Top / Bottom switch | absorbed (#1174) | outline · control, `pressed` (was ink vs ghost as the state) | — | — (no per-site rule) |
+| `.flipback__boxbtn` | re-homed onto `.door--inline` as `.flipback__door` (#1174) | — (a door, not a button) | the postseason ledger's `margin-bottom` | after (22, 35, 59) |
+| `.flipback__watchbtn` | absorbed (#1174); the class stays as the element name | ink · control | — | after (52) |
+| `.bookmgmt__modes` | deleted (#1174): no JSX named it | — | — | after (58) |
 
 **May a door wear a button skin? No.** The skin is how a reader knows what a
 tap will do: a ruled ink box acts on the page, a door opens more of what you
@@ -163,6 +169,14 @@ are reading. The two All-Star "load more" controls grow their list in place,
 which is exactly `.door--block`'s job, so they move onto it rather than
 onto a button — and their accent-primary capsule, a button's dress on a door,
 goes with it.
+
+**Is the slate card's Box score a door? Yes (#1174, Gary, 2026-09-28).** It
+leaves the card for the box score, so by the rule above it is a door. It was
+an ink button trimmed to a seventh height (about 24px). It is now
+`<Door>` inline, "Box score ›" in `--accent-link`, and an anchor with the
+client router's click, so a middle-click opens the box score in a new tab.
+The postseason ledger and Stamp In quieted the ink box to a secondary button;
+a door is already quiet, so those two overrides are gone.
 
 **Why `.mytally__rowbtn` is held.** It is an action ROW, not a button: a
 caps title over a sentence of body type, left-aligned, 66px tall because the

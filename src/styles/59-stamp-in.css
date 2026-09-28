@@ -80,16 +80,6 @@
   margin-left: auto;
 }
 
-/* Quieted to a compact secondary button, same treatment (and same reason) as
-   the Postseason Series ledger gives it: a full navy band per entry would
-   fight the stamp action beside it 162 times over. */
-.stampin__facewrap .flipback__boxbtn {
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-rule);
-  color: var(--text-body);
-  font-size: var(--fs-small);
-}
-
 /* The stamp action, in two states.
 
    OFF — a soft neutral: the page's own brightest inset paper, hairlined. It
