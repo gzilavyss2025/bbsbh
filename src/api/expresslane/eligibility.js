@@ -63,5 +63,5 @@ export function filmCanExist(feed) {
   const season = Number(game.season)
   if (!Number.isFinite(season) || season < FIRST_FILM_SEASON) return false
   if (!selectHasStarted(feed)) return false
-  return !selectGameStatus(feed).isPostponed
+  return !selectGameStatus(feed).isCalledOff
 }

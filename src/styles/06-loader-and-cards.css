@@ -273,6 +273,17 @@
   background: var(--accent-primary);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
+/* With the series mark: the mark leads the band and the game number rides
+   beside it, both centred on the mark rather than on a text baseline. */
+.gamecard__seriesline--marked {
+  align-items: center;
+}
+.gamecard__seriesline-round {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
 /* The one bold moment the design brief calls for: a deciding game (each club
    one win from the series) turns the record half into the headline — same
    award-line seam and size step the series page's own pennant uses. */

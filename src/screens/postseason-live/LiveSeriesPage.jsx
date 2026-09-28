@@ -21,6 +21,8 @@ import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { seriesGameBuckets, upcomingGameLabel } from './selectors.js'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../../components/postseason/SeriesParts.jsx'
 import { monthDay } from '../../components/postseason/monthDay.js'
+import { seriesMark } from '../../lib/postseason/seriesMarks.js'
+import { SeriesMark } from '../../components/postseason/SeriesMark.jsx'
 
 
 // The record AS OF one logged game, in the same three wordings recordLine
@@ -163,6 +165,12 @@ export function LiveSeriesPage({ seriesId, asOf }) {
       <section className="psseries__result">
         <div className="psseries__banner">
           <h2 className="psseries__headline">{recordLine(series)}</h2>
+          <SeriesMark
+            mark={seriesMark({ season: bracket.season, round: series.round, league: series.league })}
+            height={40}
+            decorative
+            className="psseries__mark"
+          />
         </div>
         <div className="psseries__ledger">
           {clubs.map((club) => {

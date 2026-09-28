@@ -41,6 +41,12 @@
   line-height: var(--lh-tight);
   color: var(--text-on-ink);
 }
+/* The headline takes the band's slack, so the series mark (and the trophy,
+   for a World Series) sit together at the right edge. */
+.psseries__banner .psseries__headline {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 /* The World Series trophy sits inside the band, not floating above the card. */
 .psseries__trophy {
   flex: none;

@@ -61,7 +61,7 @@ export function PregameScoreboard({ feed }) {
   const status = useMemo(() => selectGameStatus(feed), [feed])
   const scheduledAt = gameData.datetime?.dateTime ?? ''
   const startTimeTBD = gameData.status?.startTimeTBD === true
-  const countdownActive = !startTimeTBD && !status.isDelayed && !status.isPostponed && !status.isSuspended
+  const countdownActive = !startTimeTBD && !status.isDelayed && !status.isCalledOff && !status.isSuspended
   const now = useCountdownNow(scheduledAt, countdownActive)
   const clock = pregameCountdown(startTimeTBD ? '' : scheduledAt, now)
 
@@ -76,7 +76,13 @@ export function PregameScoreboard({ feed }) {
   let statusTag = status.isWarmup ? 'Warmups underway' : 'Pregame'
   let accessible = accessiblePregameCountdown(clock)
 
-  if (status.isPostponed) {
+  if (status.isCancelled) {
+    boardMessage = 'Cancelled'
+    headline = 'This game was cancelled'
+    detail = status.reason || 'MLB called this game off.'
+    statusTag = ''
+    accessible = `Game cancelled${status.reason ? `: ${status.reason}` : '.'}`
+  } else if (status.isPostponed) {
     boardMessage = 'Postponed'
     headline = 'This game was postponed'
     detail = status.reason || 'Check the game information for the updated schedule.'
