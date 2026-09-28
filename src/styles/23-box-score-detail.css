@@ -37,15 +37,18 @@
   color: var(--accent-link);
   line-height: var(--lh-solid);
 }
-/* Responsive card grid — one column on a phone, filling out as width allows. */
+/* Responsive card grid — one column on a phone, filling out as width allows.
+   minmax(0, …): a bare 1fr track cannot shrink below its widest chaser row, and
+   on the org scope that row (name, club, level, prospect tag) is wider than a
+   phone (#1184). The row's name truncates instead. */
 .tlead__grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3h);
 }
 @media (min-width: 560px) {
   .tlead__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 /* A category is a Card (sheet, flush body; #1113). Its padding is its own.

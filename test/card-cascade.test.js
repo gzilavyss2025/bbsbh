@@ -495,3 +495,16 @@ test('C1: the stat grid is .tstats__grid, and no rule still sizes a bare .tstats
   assert.equal(decl(ruleBody(wild, '.tstats__grid'), 'display'), 'grid')
   assert.equal(decl(ruleBody(wild, '.tstats') ?? '', 'display'), undefined)
 })
+
+// A grid track sized `1fr` has a min of `auto`, so it cannot shrink below its
+// widest row. On /leaders/org a chaser row carries a name, a club, a level tag
+// and a prospect tag on one line, and that row pushed the column to 418px on a
+// 390px phone (#1184). Card's `overflow: hidden` hides this today, because a
+// clipping grid item's automatic minimum is zero. The leader grid must not lean
+// on that clip: its tracks say `minmax(0, 1fr)` themselves.
+test('the leader card grid lets its columns shrink below the widest row', () => {
+  const css = read('23-box-score-detail.css')
+  const columns = [...css.matchAll(/\.tlead__grid\s*\{([^}]*)\}/g)].map((m) => decl(m[1], 'grid-template-columns'))
+  assert.equal(columns.length, 2, 'the phone rule and the 560px rule')
+  for (const value of columns) assert.doesNotMatch(value.replaceAll('minmax(0, 1fr)', ''), /1fr/, `.tlead__grid uses a bare 1fr track (${value}); write minmax(0, 1fr)`)
+})
