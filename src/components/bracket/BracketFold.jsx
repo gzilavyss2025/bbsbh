@@ -46,9 +46,12 @@ function SeriesTicket({ series, cutoff, historyIds }) {
   )
 }
 
-export function BracketFold({ bracket, cutoff, historyIds, open, onToggle, showDoor = true }) {
+export function BracketFold({ bracket, cutoff, slateDate = null, historyIds, open, onToggle, showDoor = true }) {
   const champion = bracket.champion
-  const today = seriesPlayingToday(bracket)
+  const today = seriesPlayingToday(bracket, slateDate)
+  // A slate day after today: the bracket is still today's (its cutoff never
+  // passes today), and the words say so.
+  const ahead = Boolean(slateDate && cutoff && slateDate > cutoff)
   return (
     <section className="pbkt-fold" aria-label="Postseason bracket">
       {champion ? (
@@ -74,7 +77,7 @@ export function BracketFold({ bracket, cutoff, historyIds, open, onToggle, showD
         <div className="pbkt-fold__quiet">
           {/* Gary, 2026-09-28: the words stay short, and the full bracket
               opens by itself below (PostseasonBracket.jsx). */}
-          <p className="pbkt-fold__quiethead">No games today</p>
+          <p className="pbkt-fold__quiethead">{ahead ? 'The bracket as of today' : 'No games today'}</p>
         </div>
       )}
       {showDoor && (

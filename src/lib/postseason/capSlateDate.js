@@ -5,8 +5,14 @@
 // ends, with no cancelled marker, and a placeholder club ("SD/CHC") turns
 // into the winner's real row the same moment. So a future date's slate can
 // show today's result plainly, even with no bracket drawn on the page at
-// all. Gary's decision: in the postseason window, the slate never shows a
-// date after today.
+// all. Gary's first decision: in the postseason window, the slate never
+// shows a date after today.
+//
+// Gary reversed that for the slate on 2026-09-28 (ADR-0087 addendum): the
+// slate pages ahead in the postseason again, and he takes the trap above as
+// the cost. GameSelect.jsx no longer calls `capSlateDate`. The bracket still
+// does, through usePostseasonBracket's `bracketCutoff` (with no season row,
+// so every future date caps): its results read must never run past today.
 //
 // The window is read off the season row `fetchSeasonMeta` already fetches
 // (`src/api/schedule.js`) — `postSeasonStartDate` through the day before
@@ -46,12 +52,4 @@ export function capSlateDate(dateStr, todayStr, seasonMeta) {
   if (dateStr <= todayStr) return dateStr
   if (seasonMeta && !isPostseasonWindow(todayStr, seasonMeta)) return dateStr
   return todayStr
-}
-
-// The forward date arrow's own limit: disable it once paging forward again
-// would only land back on today's own slate. True only sitting on today,
-// and only while today is in the postseason window — everywhere else the
-// arrow behaves as it always has.
-export function atForwardLimit(dateStr, todayStr, seasonMeta) {
-  return dateStr === todayStr && isPostseasonWindow(todayStr, seasonMeta)
 }

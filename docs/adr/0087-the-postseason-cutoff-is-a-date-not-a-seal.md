@@ -81,3 +81,23 @@ being in hand yet is never a reason to risk a flash of a spoiling slate.
 - Decision 5 is scoped to MLB and to the postseason window alone. A slice
   that wants the cap somewhere else (a different sport, a different date
   range) needs its own decision, not an extension of this one.
+
+## Addendum (2026-09-28): the slate pages ahead again
+
+Gary reversed decision 5 on the same day, after he used the finished home
+page. In the postseason window, the forward date arrow and a future
+`/{MMDDYYYY}` show that day's schedule again, the same as in the regular
+season.
+
+- **The cost is accepted.** A future day's slate can show today's result: an
+  "if necessary" game that is gone, or a placeholder club that is now the
+  winner. Gary takes this cost so that he can see the days ahead.
+- **The bracket does not move.** `usePostseasonBracket` still caps its own
+  cutoff at today (`bracketCutoff`, `capSlateDate` with no season row), so the
+  results read never runs past today. On a slate day after today, the bracket
+  shows the state heading into today, with no tickets for today's games
+  (`seriesPlayingToday(bracket, slateDate)`), and the full bracket opens by
+  itself. The cards on that day show no series line, because the bracket's
+  `gameIndex` holds only games dated on or before its cutoff.
+- `GameSelect.jsx` no longer calls `capSlateDate`. `atForwardLimit` is gone.
+  Decisions 1 to 4 do not change.

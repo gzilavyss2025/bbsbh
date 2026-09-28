@@ -27,8 +27,9 @@ function historyIdsFrom(history) {
 // On a day with no postseason game (an off day, or the champion's days before
 // the offseason page), the full bracket is the page: it is always open, and
 // there is no door to close it (Gary, 2026-09-28). `autoOpen={false}` keeps it
-// folded, for the offseason page's Season record row.
-export function PostseasonBracket({ bracket, cutoff, autoOpen = true }) {
+// folded, for the offseason page's Season record row. `slateDate` is the day
+// the slate shows; a day after today reads today's bracket, with no tickets.
+export function PostseasonBracket({ bracket, cutoff, slateDate = null, autoOpen = true }) {
   // null = the day's default; a tap sets it.
   const [choice, setChoice] = useState(null)
   // Re-seal on a day change (a different cutoff), computed during render —
@@ -43,7 +44,7 @@ export function PostseasonBracket({ bracket, cutoff, autoOpen = true }) {
   const historyIds = useMemo(() => historyIdsFrom(history.data), [history.data])
 
   if (!bracket) return null
-  const alwaysOpen = autoOpen && bracketOpensByItself(bracket)
+  const alwaysOpen = autoOpen && bracketOpensByItself(bracket, slateDate)
   const open = alwaysOpen || (choice ?? false)
 
   return (
@@ -51,6 +52,7 @@ export function PostseasonBracket({ bracket, cutoff, autoOpen = true }) {
       <BracketFold
         bracket={bracket}
         cutoff={cutoff}
+        slateDate={slateDate}
         historyIds={historyIds}
         open={open}
         showDoor={!alwaysOpen}

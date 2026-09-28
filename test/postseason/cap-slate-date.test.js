@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { capSlateDate, isPostseasonWindow, atForwardLimit } from '../../src/lib/postseason/capSlateDate.js'
+import { capSlateDate, isPostseasonWindow } from '../../src/lib/postseason/capSlateDate.js'
 
 // The 2026 season row, checked live 2026-09-28 (see docs/adr/0087-*): the
 // postseason window runs 2026-09-28 through 2026-10-31, the day before
@@ -63,12 +63,4 @@ test('capSlateDate: outside the window, a future date passes through', () => {
 test('capSlateDate: a missing or loading season row caps a future date (fails closed)', () => {
   assert.equal(capSlateDate('2026-10-15', '2026-09-29', null), '2026-09-29')
   assert.equal(capSlateDate('2026-10-15', '2026-09-29', undefined), '2026-09-29')
-})
-
-// The forward arrow's own limit: pinned so it cannot silently start allowing
-// a tap past today again.
-test('atForwardLimit: true only at today, and only while today is in the window', () => {
-  assert.equal(atForwardLimit('2026-09-29', '2026-09-29', SEASON_2026), true)
-  assert.equal(atForwardLimit('2026-09-15', '2026-09-29', SEASON_2026), false)
-  assert.equal(atForwardLimit('2026-06-01', '2026-06-01', SEASON_MIDYEAR), false)
 })
