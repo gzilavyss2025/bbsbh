@@ -261,10 +261,9 @@ const BUDGETS = {
   // strip and the empty day. It fits because both halves moved out first — the
   // gate into hooks/useWinter.js over pure rules in src/lib/winter/, and the
   // surface into components/winter/LeaguePicker.jsx.
-  // 1200 -> 1225: the postseason slate date cutoff (ADR-0087, #1225) — the
-  // cap check's own season-row fetch and the forward arrow's disabled state.
-  // The rule itself is a pure module (src/lib/postseason/capSlateDate.js);
-  // what is left here is the wiring a screen has to own.
+  // 1200 -> 1225: the postseason slate date cutoff (ADR-0087, #1225). Gary
+  // took the cap off the slate again the same day (the ADR's addendum), so
+  // that wiring is gone; the bracket below uses the room.
   // 1225 -> 1300: the bracket above the cards (#1224, slice 5) — the
   // window's own season-row fetch (keyed to the slate's own year, not
   // today's), the Off Day grid's postseason branch, and suppressing the

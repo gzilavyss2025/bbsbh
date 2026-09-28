@@ -12,7 +12,7 @@ import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useIntroFlag } from '../hooks/preferences/useIntroFlag.js'
 import { usePromptDismiss } from '../hooks/preferences/usePromptDismiss.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
-import { capSlateDate, atForwardLimit, isPostseasonWindow } from '../lib/postseason/capSlateDate.js'
+import { isPostseasonWindow } from '../lib/postseason/capSlateDate.js'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
 import { offDayAliveTeams } from '../lib/postseason/bracketDisplay.js'
 import { cardLines } from '../api/postseason/text.js'
@@ -124,29 +124,20 @@ export function GameSelect({
   // own Back/Forward retrace the days visited. Comparisons below lean on
   // YYYY-MM-DD ordering lexically — no offset math needed.
   const todayStr = toApiDate(new Date())
-  const rawDateStr = date ?? todayStr
-
-  // MLB's postseason date cutoff (ADR-0087; rule in capSlateDate.js). Asked
-  // for once the URL names today or later — a browsed-back day never needs
-  // the window, and this same row also answers the forward arrow's limit.
-  const needsPostseasonWindowCheck = sportId === SPORT_IDS.MLB && rawDateStr >= todayStr
-  const postseasonCapMeta = useAsync(
-    () => (needsPostseasonWindowCheck ? fetchSeasonMeta(Number(todayStr.slice(0, 4))) : Promise.resolve(null)),
-    [needsPostseasonWindowCheck, todayStr],
-  )
-  const dateStr =
-    sportId === SPORT_IDS.MLB ? capSlateDate(rawDateStr, todayStr, postseasonCapMeta.data) : rawDateStr
+  // A future date is open in the postseason too (Gary, 2026-09-28, reversing
+  // ADR-0087 decision 5): the forward arrow and a future `/{MMDDYYYY}` both
+  // show that day's schedule. The bracket above it still reads heading into
+  // today, never later (usePostseasonBracket caps its own cutoff).
+  const dateStr = date ?? todayStr
   const isToday = dateStr === todayStr
-  const forwardLimited = atForwardLimit(dateStr, todayStr, postseasonCapMeta.data)
 
   // The bracket above the cards (#1224, slice 5), and the cards' series
   // line (slice 4) off the same one bracket — MLB only, every date in
   // the postseason window, off days included. Keyed to the SLATE's own
   // YEAR, not today's: a browsed-to past postseason (`/10092025`) needs
-  // THAT year's season row, not today's — `postseasonCapMeta` above answers
-  // a different question (today's own forward-cap) and can't serve this
-  // one. Keyed on the year alone (not the full date), so paging day to day
-  // within one postseason re-fetches nothing.
+  // THAT year's season row, not today's. Keyed on the year alone (not the
+  // full date), so paging day to day within one postseason re-fetches
+  // nothing.
   const bracketSeason = Number(dateStr.slice(0, 4))
   const bracketSeasonMeta = useAsync(
     () => (sportId === SPORT_IDS.MLB ? fetchSeasonMeta(bracketSeason) : Promise.resolve(null)),
@@ -794,7 +785,7 @@ export function GameSelect({
               </button>
             )}
           </span>
-          <button onClick={() => pageDay(1)} aria-label="Next day" disabled={forwardLimited}>
+          <button onClick={() => pageDay(1)} aria-label="Next day">
             ›
           </button>
         </div>
@@ -945,7 +936,11 @@ export function GameSelect({
               the only thing here besides the chrome above (Gary's decision,
               2026-09-28: "the bracket is the whole page"). */}
           {inPostseasonWindow && (
-            <PostseasonBracket bracket={postseasonBracket.bracket} cutoff={postseasonBracket.cutoff} />
+            <PostseasonBracket
+              bracket={postseasonBracket.bracket}
+              cutoff={postseasonBracket.cutoff}
+              slateDate={dateStr}
+            />
           )}
 
           {/* THE OFFSEASON PAGE (issues #1038, #1077). It moves nothing: the

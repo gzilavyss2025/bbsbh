@@ -147,3 +147,18 @@ test('bracketOpensByItself: open on a day with no game, folded on a game day', (
   const offDay = bracket2025('2025-10-09')
   assert.equal(bracketOpensByItself({ ...offDay, series: offDay.series.map((s) => ({ ...s, playsOnCutoff: false })) }), true)
 })
+
+// Gary, 2026-09-28: the slate pages past today in the postseason again. The
+// bracket above a future day still reads heading into TODAY (the hook caps
+// its cutoff), so today's tickets must not stand above that later day's
+// cards: a slate date after the bracket's cutoff gets no tickets, and the
+// full bracket opens by itself, as on an off day.
+test('a slate date after the cutoff: no tickets, and the full bracket opens by itself', () => {
+  const b = bracket2025('2025-10-09')
+  assert.ok(seriesPlayingToday(b).length > 0)
+  assert.deepEqual(seriesPlayingToday(b, '2025-10-10'), [])
+  assert.equal(bracketOpensByItself(b, '2025-10-10'), true)
+  // On the cutoff date itself, nothing changes.
+  assert.equal(seriesPlayingToday(b, '2025-10-09').length, seriesPlayingToday(b).length)
+  assert.equal(bracketOpensByItself(b, '2025-10-09'), false)
+})

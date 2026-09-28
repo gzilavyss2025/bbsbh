@@ -6,7 +6,13 @@
 // The series playing on the cutoff date — the folded view's "today" tickets.
 // A decided series never plays again, so `playsOnCutoff` alone is the test
 // (bracket.js clears it once a series is decided).
-export function seriesPlayingToday(bracket) {
+//
+// `slateDate` is the day the page shows. The slate pages past today in the
+// postseason (Gary, 2026-09-28), but the bracket's cutoff never passes today,
+// so a later slate date gets no tickets: today's games do not stand above
+// that later day's cards.
+export function seriesPlayingToday(bracket, slateDate = null) {
+  if (slateDate && bracket?.cutoff && slateDate > bracket.cutoff) return []
   // Both clubs known, or no ticket: a ticket reads both, and a slot the
   // bracket never filled must not crash the slate.
   return bracket?.series?.filter((s) => s.playsOnCutoff && s.slots.every((slot) => slot.club)) ?? []
@@ -108,6 +114,7 @@ export function recordRowIsLabelled(champion) {
 // On a day with no postseason game (an off day, or the champion's days
 // before the offseason page) the full bracket IS the page, so it opens by
 // itself (Gary, 2026-09-28). On a game day it stays folded behind the tickets.
-export function bracketOpensByItself(bracket) {
-  return Boolean(bracket) && seriesPlayingToday(bracket).length === 0
+// A slate date after the cutoff has no tickets, so it opens too.
+export function bracketOpensByItself(bracket, slateDate = null) {
+  return Boolean(bracket) && seriesPlayingToday(bracket, slateDate).length === 0
 }
