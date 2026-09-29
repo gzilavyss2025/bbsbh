@@ -44,9 +44,6 @@ export function ratio(fg, bg) {
 
 // The enforced pairings. `fg`/`bg` are token names or literal hex.
 export const PAIRINGS = [
-  // The field ground continues through the DH row on both field illustrations.
-  { fg: 'field', bg: 'field-ground', min: TEXT, note: 'DH label on the field ground' },
-  { fg: 'text-body', bg: 'field-ground', min: TEXT, note: 'DH value on the field ground' },
   // Kraft seal cover: the sealed-cover ink over BOTH stripes of --seal-texture.
   { fg: 'seal-ink', bg: 'seal', min: TEXT, note: 'seal ink on kraft base stripe' },
   { fg: 'seal-ink', bg: 'seal-hatch', min: TEXT, note: 'seal ink on kraft hatch stripe' },

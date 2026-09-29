@@ -555,7 +555,7 @@ const C2 = [
   { css: '26-player-page.css', sel: '.gamelog', jsx: ['components/player/GameLog.jsx'], ns: 'gamelog' },
   { css: '26-player-page.css', sel: '.milestonewatch', jsx: ['components/playerstats/MilestoneWatchCard.jsx'], ns: 'milestonewatch' },
   { css: '26e-contract-history.css', sel: '.cthist__seasons', jsx: ['components/player/ContractHistoryLedger.jsx'], ns: 'cthist__seasons', mode: 'wrap' },
-  { css: '27-player-position-innings.css', sel: '.posinn__diamond', jsx: ['components/player/PositionInnings.jsx'], ns: 'posinn__diamond', keep: ['background'] },
+  { css: '27-player-position-innings.css', sel: '.posinn__diamond', jsx: ['components/player/PositionInnings.jsx'], ns: 'posinn__diamond' },
   { css: '31d-prospect-card.css', sel: '.levelprog', jsx: ['components/player/LevelProgressionCard.jsx'], ns: 'levelprog', frame: 'ledger', keep: ['border-top'] },
   { css: '31d-prospect-card.css', sel: '.prospectcard', jsx: ['components/playerstats/ProspectCard.jsx'], ns: 'prospectcard', frame: 'ledger', keep: ['border-top'] },
   { css: '51-similar-players.css', sel: '.simlike__link', jsx: ['components/playercard/SimilarPlayerGrid.jsx'], ns: 'simlike__link' },
@@ -987,7 +987,7 @@ const C3 = [
   { css: '44-pre-game-cards.css', sel: '.opp', jsx: ['screens/TeamInfo.jsx'], ns: 'opp', head: true },
   { css: '44-pre-game-cards.css', sel: '.starter', jsx: ['screens/TeamInfo.jsx'], ns: 'starter', head: true },
   { css: '10-lineup.css', sel: '.teammate', jsx: ['screens/TeamInfo.jsx'], ns: 'teammate', as: 'li' },
-  { css: '10-lineup.css', sel: '.defdiamond', jsx: ['components/scoring/DefenseDiamond.jsx'], ns: 'defdiamond', as: 'div', keep: ['background'] },
+  { css: '10-lineup.css', sel: '.defdiamond', jsx: ['components/scoring/DefenseDiamond.jsx'], ns: 'defdiamond', as: 'div' },
   {
     css: '09-team-info.css',
     sel: '.umps__list',
@@ -1074,7 +1074,7 @@ test('C3: the rules that reshape the diamond inside a host still win over the Ca
   const card = imports.indexOf('system/card.css')
   const hosts = [
     ['12-sealbox.css', '.bs__defensecard .defdiamond', { 'border-top': 'none', 'border-radius': '0 0 var(--radius-md) var(--radius-md)' }],
-    ['12-sealbox.css', '.refpanel__body .defdiamond', { border: 'none', 'box-shadow': 'none', background: 'var(--field-ground)' }],
+    ['12-sealbox.css', '.refpanel__body .defdiamond', { border: 'none', 'box-shadow': 'none', background: 'none' }],
     ['44-pre-game-cards.css', '.opp .defdiamond', { border: '0', 'border-radius': '0' }],
   ]
   for (const [rel, sel, want] of hosts) {
@@ -1115,10 +1115,6 @@ test('C3: each block keeps its own space and layout, from a rule that loads afte
   assert.equal(decl(mate, 'break-inside'), 'avoid', 'a teammate tile never splits across the masonry columns')
   assert.equal(decl(mate, 'display'), 'grid')
   assert.equal(decl(ruleBody(lineup, '.defdiamond'), 'padding'), 'var(--space-3) var(--space-2h) var(--space-2)')
-  // These two cards carry field artwork through the DH row; Card still owns
-  // their border, radius and shadow. Pin the requested ground, not any override.
-  assert.equal(decl(ruleBody(lineup, '.defdiamond'), 'background'), 'var(--field-ground)')
-  assert.equal(decl(ruleBody(read('27-player-position-innings.css'), '.posinn__diamond'), 'background'), 'var(--field-ground)')
 })
 
 // The animation lab draws the lineup strip with the real recipe, so it wraps

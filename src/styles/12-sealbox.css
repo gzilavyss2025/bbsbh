@@ -1612,7 +1612,7 @@
 .refpanel__body .defdiamond {
   border: none;
   box-shadow: none;
-  background: var(--field-ground);
+  background: none;
 }
 
 .stat {
