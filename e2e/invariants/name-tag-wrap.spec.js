@@ -39,11 +39,11 @@ const ROUTES = [
 ]
 
 // Shapes the raw probe flags that the audit screenshotted as deliberate design,
-// not the reported bug: `.tlead__teamtag` and `.playercard__shotwrap` are a
+// not the reported bug: `.tlead__teamtag` and `.playerline__shotwrap` are a
 // logo/headshot block meant to center against a taller text block (not a bare
 // text tag), and `.dirhd__label` sits beside an inline SVG (`.dirglyph`) whose
 // multiple client rects the probe reads as "wrapped text" — it never wraps.
-const ALLOWLISTED_SIBLING_CLASSES = ['tlead__teamtag', 'playercard__shotwrap', 'dirhd__label']
+const ALLOWLISTED_SIBLING_CLASSES = ['tlead__teamtag', 'playerline__shotwrap', 'dirhd__label']
 
 test.describe('a short sibling never floats off a wrapped name in a centered flex row', () => {
   for (const route of ROUTES) {

@@ -510,8 +510,8 @@ function StatcastLeadersCard({ feed, insights }) {
       <div className="bs__statcastRow">
         {cards.map(({ label, entry }) => (
           <div className="bs__statcastCol" key={label}>
-            <h4 className="playercard__bucket">{label}</h4>
-            <ul className="playercard__list">
+            <h4 className="playerline__bucket">{label}</h4>
+            <ul className="playerline__list">
               <PerformerCard entry={entry} />
             </ul>
           </div>

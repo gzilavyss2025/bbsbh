@@ -574,7 +574,7 @@
 }
 /* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
    this reliably outranks the base .shot sizing — same pattern as
-   .playercard__shot below. Sized up from the three-stars/insight-note headshots
+   .playerline__shot below. Sized up from the three-stars/insight-note headshots
    (52px/26px) so the card's lead player reads as the card's focal point,
    matching the slate's Top Performers card treatment. */
 .shot.bs__potgShot {
@@ -749,8 +749,8 @@
 
 /* The box score's own Statcast Leaders card — its own full-width row
    between the linescore column and the two team cards (see
-   BoxScoreBody), each superlative rendered as a .playercard__bucket +
-   .playercard__list, the same "baseball card" tile (headshot, team, stat
+   BoxScoreBody), each superlative rendered as a .playerline__bucket +
+   .playerline__list, the same "baseball card" tile (headshot, team, stat
    line) Top Performers uses (see PerformerCard.jsx) — so this card reads as
    the same idiom as that slate box rather than its own small tiles. Matches the
    frame of .bs__insights/.bs__stars beside it. */
@@ -761,7 +761,7 @@
   background: var(--paper-1);
   box-shadow: var(--shadow-card);
 }
-/* Phone: the three superlatives stack, same as any other playercard list.
+/* Phone: the three superlatives stack, same as any other playerline list.
    Desktop/ipad: one row, three columns wide (see the wide-layout block). */
 .bs__statcastRow {
   display: flex;

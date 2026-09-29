@@ -112,7 +112,7 @@ function unionYears(firstYears, secondYears) {
 // One recipient — the app's own "baseball card" idiom (headshot + position
 // badge floated on its bottom-left corner, name, team, optional stat line),
 // same pattern as Top Performers/slate result cards (see PerformerCard.jsx +
-// .playercard in index.css). `dense` (Silver Slugger/Gold Glove) breaks the
+// .playerline in index.css). `dense` (Silver Slugger/Gold Glove) breaks the
 // name onto two lines at the first/last boundary and
 // shrinks the face for a long name part on a phone, where a dense card is
 // half the width of a full one (desktop widens it back out — see index.css).
@@ -126,13 +126,13 @@ function AwardCard({ r, favoriteTeamId, dense = false }) {
   const [first, last] = dense ? splitFirstLast(r.name) : [r.name, '']
   const nameClass = dense ? nameSizeClass(first, last) : ''
   return (
-    <li className={`playercard awardhistory__card${isFavorite ? ' awardhistory__card--fav' : ''}`} style={favStyle}>
-      <span className="playercard__shotwrap">
-        <Headshot personId={r.playerId} name={r.name} teamId={r.teamId} className="playercard__shot" />
-        {r.position && <span className="playercard__posbadge">{r.position}</span>}
+    <li className={`playerline awardhistory__card${isFavorite ? ' awardhistory__card--fav' : ''}`} style={favStyle}>
+      <span className="playerline__shotwrap">
+        <Headshot personId={r.playerId} name={r.name} teamId={r.teamId} className="playerline__shot" />
+        {r.position && <span className="playerline__posbadge">{r.position}</span>}
       </span>
-      <div className="playercard__body">
-        <div className={`playercard__name ${nameClass}`}>
+      <div className="playerline__body">
+        <div className={`playerline__name ${nameClass}`}>
           <PlayerLink id={r.playerId} name={r.name}>
             {dense ? (
               <>
@@ -145,7 +145,7 @@ function AwardCard({ r, favoriteTeamId, dense = false }) {
             )}
           </PlayerLink>
         </div>
-        <div className="playercard__team">
+        <div className="playerline__team">
           {r.teamId ? (
             <TeamLink id={r.teamId} className="awardhistory__teamlink" ariaLabel={r.teamName}>
               <TeamLogo teamId={r.teamId} name={r.teamName} size={18} />
@@ -157,7 +157,7 @@ function AwardCard({ r, favoriteTeamId, dense = false }) {
             {r.teamId ? teamClubNameShort(r.teamId) : r.teamName}
           </span>
         </div>
-        {r.statLine && <div className="playercard__stat">{r.statLine}</div>}
+        {r.statLine && <div className="playerline__stat">{r.statLine}</div>}
       </div>
     </li>
   )
@@ -317,7 +317,7 @@ function AllMlbYear({ year, first, second, favoriteTeamId, showYearLabel = true 
 // war-history.json/milb-history.json) — no SealBox needed, same as Milestone
 // Watch/League Leaders/WAR: a past season's award roll carries no individual
 // game's score. Recipient cards reuse the app's own headshot idiom
-// (.playercard, see PerformerCard.jsx) rather than a bespoke avatar
+// (.playerline, see PerformerCard.jsx) rather than a bespoke avatar
 // treatment. A recipient who plays for the user's favoriteTeamId
 // (useFavoriteTeam, same preference the slate/standings/leaders pages already
 // highlight with) gets the same --fav-accent treatment as those surfaces.

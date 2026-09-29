@@ -801,7 +801,7 @@
    seamless list, same recipe as .abs__rows just below (paper-2 background,
    one hairline divider between rows instead of a border per card) rather
    than each PerformerCard floating in its own bordered tile like it does in
-   those other two spots — .playercard's own border/radius/background are
+   those other two spots — .playerline's own border/radius/background are
    stripped inside this scope only. */
 .halfcast {
   margin-top: 12px;
@@ -830,10 +830,10 @@
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-.halfcast .playercard__list {
+.halfcast .playerline__list {
   margin: 0;
 }
-.halfcast .playercard {
+.halfcast .playerline {
   border: none;
   border-radius: 0;
   background: none;

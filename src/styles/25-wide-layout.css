@@ -298,12 +298,12 @@
 
   /* Winners/Losers baseball-card tiles: back to the two-line first/last stack
      next to the bigger headshot (phone keeps them on one row instead — see
-     the base .playercard__name rule — since there's no extra vertical room
+     the base .playerline__name rule — since there's no extra vertical room
      to spend there). */
-  .playercard__namebreak {
+  .playerline__namebreak {
     display: block;
   }
-  .playercard__name {
+  .playerline__name {
     flex-direction: column;
     align-items: flex-start;
     font-size: var(--fs-small);
@@ -315,12 +315,12 @@
      narrow two-up grid the two-line stack was built for, so a stacked
      "Jackson<br>Merrill" just wastes a line for no reason at this width.
      Same override, same reasoning. */
-  .flipback__perfcard .playercard__name {
+  .flipback__perfcard .playerline__name {
     flex-direction: row;
     align-items: baseline;
     font-size: var(--fs-body);
   }
-  .flipback__perfcard .playercard__namebreak {
+  .flipback__perfcard .playerline__namebreak {
     display: none;
   }
 

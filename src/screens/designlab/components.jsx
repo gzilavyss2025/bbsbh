@@ -223,7 +223,7 @@ export function ComponentHalf() {
           {/* The component keys what children() returns (#1127), so this call
               does not have to — which is the point of the fix. */}
           <MasonryColumns items={[1, 2, 3, 4]} columnWidth={90} gap={8}>
-            {(n) => <div className="playercard"><span className="dlab__filler">Card {n}</span></div>}
+            {(n) => <div className="playerline"><span className="dlab__filler">Card {n}</span></div>}
           </MasonryColumns>
         </Entry>
         <Entry title="BuildStamp" path={`${UI_PATH}/BuildStamp.jsx`} note="The footer's build marker.">

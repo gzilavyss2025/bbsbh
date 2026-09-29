@@ -154,7 +154,7 @@ export const CARDS = [
   },
 
   {
-    cls: 'playercard',
+    cls: 'playerline',
     partial: '22-box-score-tables.css',
     consumers: 5,
     group: 'dense',

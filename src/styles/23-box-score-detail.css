@@ -3,7 +3,7 @@
    dedicated /team/{id}/leaders page. The featured (rank-1) card mirrors the
    slate's Top Performers card in spirit (headshot + logo ahead of a name/stat
    column); the parallel `.tlead__*` classes keep this always-visible board's
-   own markup from coupling to `.playercard`, which the spoiler-gated Top
+   own markup from coupling to `.playerline`, which the spoiler-gated Top
    Performers/Day Recap/Insights cards share.
    --------------------------------------------------------------------------- */
 .tlead {
@@ -90,7 +90,7 @@
   filter: grayscale(60%);
 }
 /* Compound with .shot/.shot--fallback (both always set by Headshot) so this
-   outranks the base .shot sizing, same reason as .playercard__shot. Sized well
+   outranks the base .shot sizing, same reason as .playerline__shot. Sized well
    past that shared 52px baseline — the leader card is this component's one
    hero image, so it earns a bigger, more readable frame. */
 .shot.tlead__shot {
@@ -308,7 +308,7 @@
    the `.tlead` card board above: two ink-banded blocks, BATTING over PITCHING,
    one ruled row per category. See TeamLeadersLedger.jsx for why the hub stopped
    rendering cards. Deliberately a PARALLEL class family rather than a modifier
-   on `.tlead`, for the same reason `.tlead` is parallel to `.playercard`: they
+   on `.tlead`, for the same reason `.tlead` is parallel to `.playerline`: they
    share a data source, not a box model, and a shared root here would mean every
    `.tlead__*` rule needs a "but not in the ledger" clause.
 
@@ -387,7 +387,7 @@
   gap: var(--space-1h);
 }
 /* Source Sans at the app's NAME role — every player name in this app is
-   --font-body at --fs-body/--w-semibold (.tlead__name-last, .playercard__name,
+   --font-body at --fs-body/--w-semibold (.tlead__name-last, .playerline__name,
    .lineup__name), and this row is no exception; it read a size small before,
    at --fs-ui, which is the role for UI chrome rather than for content.
    (Only one weight of Source Sans is registered, so --w-semibold renders at
