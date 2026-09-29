@@ -141,15 +141,11 @@
   gap: 2px;
   width: 100%;
   padding: var(--space-1) var(--space-2);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
+  /* The bracket connectors (::before / ::after) stick out of the tile, and
+     Card clips its edge. The tile has no head for a clip to serve. */
+  overflow: visible;
   text-align: left;
   cursor: pointer;
-}
-.seed:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
 }
 .seed--bye {
   flex-direction: row;

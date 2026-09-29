@@ -14,6 +14,7 @@ import { ClinchMark, ClinchKey } from '../components/team/ClinchMark.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Door } from '../components/ui/control/Door.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 // The league mark that rides the bar's right edge — same convention (and same
@@ -162,11 +163,11 @@ function SeedRow({ t, bye = false }) {
 
 function MatchupCard({ pair }) {
   return (
-    <div className="seed psrace__matchup">
+    <Card as="div" frame="ledger" body="flush" className="seed psrace__matchup">
       {pair.map((t) => (
         <SeedRow key={t.id} t={t} />
       ))}
-    </div>
+    </Card>
   )
 }
 
@@ -195,10 +196,10 @@ function PendingRow({ candidates }) {
 // names no single team to open.
 function DivisionSeriesCard({ bye, candidates }) {
   return (
-    <div className="seed psrace__ds">
+    <Card as="div" frame="ledger" body="flush" className="seed psrace__ds">
       <SeedRow t={bye} bye />
       <PendingRow candidates={candidates} />
-    </div>
+    </Card>
   )
 }
 
@@ -212,10 +213,10 @@ function TbdRow({ seed }) {
 }
 function TbdCard() {
   return (
-    <div className="seed seed--tbd">
+    <Card as="div" frame="ledger" body="flush" className="seed seed--tbd">
       <TbdRow seed={1} />
       <TbdRow seed={2} />
-    </div>
+    </Card>
   )
 }
 

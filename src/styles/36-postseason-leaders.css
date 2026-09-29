@@ -19,10 +19,6 @@
   }
 }
 .psleaders__teamboard {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3);
 }
 /* The label head's default 18px top margin assumes it follows other page

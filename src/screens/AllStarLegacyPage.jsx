@@ -15,6 +15,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
 import { Door } from '../components/ui/control/Door.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 // How many honorees a team card shows before "Show all" — most clubs' full
 // history runs well past this (a 90-year-old franchise can have 100+ distinct
@@ -51,7 +52,7 @@ function yearsLabel(years) {
 // of a stack of milestone chases.
 function LeaderCard({ row }) {
   return (
-    <article className="allstarlegacy__leadercard">
+    <Card as="article" body="flush" className="allstarlegacy__leadercard">
       <span className="allstarlegacy__leadermug">
         <Headshot
           personId={row.playerId}
@@ -75,7 +76,7 @@ function LeaderCard({ row }) {
         </span>
         <span className="allstarlegacy__leaderyears">{yearsLabel(row.years)}</span>
       </div>
-    </article>
+    </Card>
   )
 }
 
@@ -119,7 +120,7 @@ function TeamLegacyCard({ teamId, rank, honorees, cardRef }) {
   const remaining = honorees.length - visible.length
 
   return (
-    <section className="allstarlegacy__teamcard" data-rank={rank} ref={cardRef}>
+    <Card body="flush" className="allstarlegacy__teamcard" data-rank={rank} ref={cardRef}>
       <TeamLink id={teamId} className="allstarlegacy__teamhead">
         <span className="allstarlegacy__teamrank">{rank}</span>
         <TeamLogo teamId={teamId} size={28} />
@@ -144,7 +145,7 @@ function TeamLegacyCard({ teamId, rank, honorees, cardRef }) {
       ) : (
         <p className="hint">No one on the current roster has ever been named an All-Star.</p>
       )}
-    </section>
+    </Card>
   )
 }
 

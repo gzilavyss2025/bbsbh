@@ -162,12 +162,12 @@ export const CARDS = [
     note: '--radius-sm, no shadow, 8px padding, flex row.',
   },
   {
-    cls: 'seed',
-    partial: '34-postseason.css',
+    cls: 'card card--ledger seed',
+    partial: 'system/card.css',
     consumers: 2,
     group: 'dense',
-    verdict: 'Merge — dense + interactive',
-    note: '#1112 asks whether this and .prospectcard are one card. They are: both are the tight sheet. This one adds a pointer.',
+    verdict: 'Merged — ledger + interactive',
+    note: 'Was the tight sheet with a pointer. It is a ledger Card now (#1113, slice C6a); on the postseason history page the tap tile is a Card button. .seed keeps its layout and sets overflow: visible, so the bracket connectors still show.',
   },
   {
     cls: 'card card--ledger tstats',
