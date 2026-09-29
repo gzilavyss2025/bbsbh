@@ -622,11 +622,15 @@
   border-radius: var(--radius-sm);
 }
 
-/* A Card (sheet, flush body; #1113, slice C2) draws the edge, the corners and
-   the ground. The shadow stays here: this card floats over the feed, as a
-   popover or a sheet, so it wears the raised shadow a floating layer does,
-   not the card shadow of paper lying on paper. */
+/* A Card (sheet, flush body; #1113, slice C2) draws the corners and the
+   ground. The shadow and the edge colour stay here: this card floats over the
+   feed, as a popover or a sheet, so it wears the raised shadow a floating
+   layer does, not the card shadow of paper lying on paper. The raised shadow
+   already lifts it off the page, so its edge stays the light hairline it had
+   before Card; the darker --border-rule edge is for paper that lies flat
+   (#1257). */
 .bflight {
+  border-color: var(--border-hairline);
   width: 300px;
   max-width: 100%;
   box-shadow: var(--shadow-raised);
