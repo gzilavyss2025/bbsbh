@@ -120,9 +120,9 @@ function SeedRow({ teamId, seed, wins, winner, faded, iconSize = 16 }) {
 // button, since there's no series behind it to open.
 function ByeCard({ teamId, seed }) {
   return (
-    <div className="seedcard seedcard--bye">
+    <div className="seed seed--bye">
       <SeedRow teamId={teamId} seed={seed} />
-      <span className="seedcard__byetag">Bye</span>
+      <span className="seed__byetag">Bye</span>
     </div>
   )
 }
@@ -130,7 +130,7 @@ function ByeCard({ teamId, seed }) {
 function MatchupCard({ series, onOpen }) {
   const { teamA, teamB, winnerTeamId } = series
   return (
-    <button type="button" className="seedcard" onClick={() => onOpen(series)}>
+    <button type="button" className="seed" onClick={() => onOpen(series)}>
       {[teamA, teamB].map((t) => (
         <SeedRow
           key={t.teamId}

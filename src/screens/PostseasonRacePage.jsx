@@ -162,7 +162,7 @@ function SeedRow({ t, bye = false }) {
 
 function MatchupCard({ pair }) {
   return (
-    <div className="seedcard psrace__matchup">
+    <div className="seed psrace__matchup">
       {pair.map((t) => (
         <SeedRow key={t.id} t={t} />
       ))}
@@ -195,7 +195,7 @@ function PendingRow({ candidates }) {
 // names no single team to open.
 function DivisionSeriesCard({ bye, candidates }) {
   return (
-    <div className="seedcard psrace__ds">
+    <div className="seed psrace__ds">
       <SeedRow t={bye} bye />
       <PendingRow candidates={candidates} />
     </div>
@@ -212,7 +212,7 @@ function TbdRow({ seed }) {
 }
 function TbdCard() {
   return (
-    <div className="seedcard seedcard--tbd">
+    <div className="seed seed--tbd">
       <TbdRow seed={1} />
       <TbdRow seed={2} />
     </div>

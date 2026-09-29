@@ -162,7 +162,7 @@ export const CARDS = [
     note: '--radius-sm, no shadow, 8px padding, flex row.',
   },
   {
-    cls: 'seedcard',
+    cls: 'seed',
     partial: '34-postseason.css',
     consumers: 2,
     group: 'dense',
