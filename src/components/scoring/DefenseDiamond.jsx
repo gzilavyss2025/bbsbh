@@ -3,11 +3,10 @@ import { InjuredMark } from '../badges/InjuredMark.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { StruckLine } from './StruckLine.jsx'
+import { FieldBackdrop } from './field/FieldBackdrop.jsx'
 
-// The scorebook's defense diamond, drawn the way the #22 sheet prints it:
-// the infield square rotated onto its point, each fielder's surname on a
-// writing line at his position with the small position number beneath, and
-// a small pencil ring for the pitcher's mound at its center. Fielders only —
+// A grass-and-clay field with each fielder's surname at his position.
+// Position names remain available to assistive technology. Fielders only —
 // the pitcher has his own table and the DH bats but never takes the field,
 // so he rides a small line under the diamond instead.
 //
@@ -23,25 +22,17 @@ import { StruckLine } from './StruckLine.jsx'
 //    substitution stack. A replaced player is struck through with the reliever
 //    penciled above him and the inning he took the field in parentheses.
 
-// Scorer's position numbers, the same digits penciled under each name.
-const POSITION_NUMBER = {
-  C: 2, '1B': 3, '2B': 4, '3B': 5, SS: 6, LF: 7, CF: 8, RF: 9,
-}
-
-// Where each label sits, in percent of the diamond box. Mirrors the sheet:
-// outfield arc up top, middle infield off the upper edges, corners off the
-// lower edges, catcher over home plate. Catcher rides high enough that its
-// position number stays clear of the DH line below the field — the surname
-// overlapping the diamond graphic is fine.
+// Label anchors in percent of the 4:3 field. Names sit below each anchor.
+// The catcher sits below home plate; corner labels leave the bases visible.
 const SPOTS = {
-  LF: { x: 17, y: 10 },
-  CF: { x: 50, y: 3 },
-  RF: { x: 83, y: 10 },
-  SS: { x: 29, y: 33 },
-  '2B': { x: 71, y: 33 },
-  '3B': { x: 13, y: 57 },
-  '1B': { x: 87, y: 57 },
-  C: { x: 50, y: 79 },
+  LF: { x: 21, y: 16, label: 'Left field' },
+  CF: { x: 50, y: 6, label: 'Center field' },
+  RF: { x: 79, y: 16, label: 'Right field' },
+  SS: { x: 32, y: 42, label: 'Shortstop' },
+  '2B': { x: 68, y: 42, label: 'Second base' },
+  '3B': { x: 21, y: 60, label: 'Third base' },
+  '1B': { x: 79, y: 60, label: 'First base' },
+  C: { x: 50, y: 88, label: 'Catcher' },
 }
 
 // Normalize either input shape to a { position -> [{ last, inning, replaced }] }
@@ -81,39 +72,10 @@ export function DefenseDiamond({ defense }) {
   return (
     <Card as="div" body="flush" className="defdiamond">
       <div className="defdiamond__field">
-        {/* Infield square + a small mound ring, in pencil rule. The box is 4:3,
-            and the SVG stretches to fill it, so viewBox y-units compress to 75%
-            of x — the polygon is drawn taller than wide (and the mound ring is
-            an ellipse) so both READ as a true square-on-point diamond and a
-            round mound, like a real infield. */}
-        <svg
-          className="defdiamond__lines"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <polygon
-            points="50,89 76,54 50,19 24,54"
-            fill="none"
-            stroke="var(--rule)"
-            strokeWidth="0.8"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-          <ellipse
-            cx="50"
-            cy="54"
-            rx="3.4"
-            ry="4.5"
-            fill="none"
-            stroke="var(--rule)"
-            strokeWidth="0.8"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
+        <FieldBackdrop className="defdiamond__lines" />
 
         {Object.entries(SPOTS).map(([pos, spot]) => (
-          <DefenseSpot key={pos} pos={pos} stack={byPos[pos]} spot={spot} />
+          <DefenseSpot key={pos} stack={byPos[pos]} spot={spot} />
         ))}
       </div>
 
@@ -132,13 +94,14 @@ export function DefenseDiamond({ defense }) {
 }
 
 // One fielder's spot: the substitution stack (reliever above, replaced starter
-// struck through below), then the position number. An unposted spot keeps its
-// line + number so the sheet's shape never changes.
-function DefenseSpot({ pos, stack, spot }) {
+// struck through below). An unposted spot keeps its blank label.
+function DefenseSpot({ stack, spot }) {
   return (
     <span
       className="defdiamond__spot"
       style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
+      role="group"
+      aria-label={spot.label}
     >
       {stack ? (
         // Newest name on top (the scorebook pencils the sub above the crossed-out
@@ -150,14 +113,11 @@ function DefenseSpot({ pos, stack, spot }) {
       ) : (
         <span className="defdiamond__name defdiamond__name--tbd">—</span>
       )}
-      <span className="defdiamond__num" aria-label={pos}>
-        {POSITION_NUMBER[pos]}
-      </span>
     </span>
   )
 }
 
-// A single surname on its writing line. A replaced player is struck through; a
+// A single surname inside its spot's paper label. A replaced player is struck through; a
 // player who entered mid-game carries the inning he took the field and, while
 // he's the standing occupant, his surname is inked seam-red like the inning tag.
 // An entry carrying an `id` (only the Preferred Lineup card does today) links

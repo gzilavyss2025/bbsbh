@@ -144,8 +144,8 @@ dot that breathed harder in a close game would spoil the game.
   wrapper drew it the width of the BOX: `.abhero__name` is an item of a column
   flex container, so it stretches to the card's full cross size, and the line
   ran 175px past an 87px name; `.defdiamond__name` holds the 58px `min-width`
-  its writing line is printed at, and a short surname was left with a rule off
-  both ends. `.struckline` is inline, so it hugs the glyphs the decoration used
+  its writing line was printed at then, and a short surname was left with a
+  rule off both ends. `.struckline` is inline, so it hugs the glyphs the decoration used
   to cross. The two flex sites restate their own layout on it
   (`styles/motion/strike.css`). Before adding a fifth site, check it cannot wrap
   onto two lines: a bar over a two-line box draws one rule through the gap.

@@ -36,8 +36,8 @@
   max-width: 560px;
 }
 /* The defense diamond used to be pinned to 160px here, which is narrower
-   than the graphic was drawn for: eight surnames, each on its own writing
-   line with a position number under it, collided into one unreadable knot.
+   than the graphic was drawn for: eight surname labels collided into one
+   unreadable knot.
    Give it the room the diamond needs (it draws at up to 340px elsewhere in
    the app) and let it take a full column of the footer. */
 .sc-footer__defense {

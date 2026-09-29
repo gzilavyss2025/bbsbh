@@ -2,9 +2,10 @@ import { Loader } from '../ui/Loader.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { FieldBackdrop } from '../scoring/field/FieldBackdrop.jsx'
 
 // Career/season workload by fielding position, drawn on a small diamond that
-// echoes DefenseDiamond's SPOTS layout (see components/DefenseDiamond.jsx) —
+// shares the defense alignment's field drawing —
 // but here every position is always shown (a scorebook "innings log" rather
 // than a live alignment), so the box at each spot carries its own played/
 // unplayed styling instead of appearing/disappearing. Purely presentational:
@@ -12,8 +13,7 @@ import { Card } from '../ui/frame/Card.jsx'
 
 const DASH = '—'
 
-// Scorer's position numbers double as the accessible position name — the
-// visible box just shows the two/three-letter abbreviation.
+// Full position names for assistive technology; visible boxes use abbreviations.
 const POSITION_NAME = {
   C: 'Catcher',
   '1B': 'First base',
@@ -26,29 +26,20 @@ const POSITION_NAME = {
   P: 'Pitcher',
 }
 
-// Same x's and relative row spacing as DefenseDiamond.SPOTS (duplicated
-// locally so this file stays self-contained — see file header), but shifted
-// +8 on y: DefenseDiamond hangs a label BELOW its anchor point
-// (`translateX(-50%)` only), while this file centers a whole box ON its
-// anchor (`translate(-50%, -50%)`, see PositionSpot) — applied to
-// DefenseDiamond's un-shifted numbers, CF's box (y:3) would extend above
-// the field's own top edge before the diamond card's border even starts,
-// while C's (y:79) would float with excess empty field below it. The shift
-// centers that same relative layout lower in the box, balancing both.
+// Two-line stat boxes are centered on these anchors, unlike defense surnames.
 const SPOTS = {
-  LF: { x: 17, y: 18 },
-  CF: { x: 50, y: 11 },
-  RF: { x: 83, y: 18 },
-  SS: { x: 29, y: 41 },
-  '2B': { x: 71, y: 41 },
-  '3B': { x: 13, y: 65 },
-  '1B': { x: 87, y: 65 },
-  C: { x: 50, y: 87 },
+  LF: { x: 23, y: 24 },
+  CF: { x: 50, y: 12 },
+  RF: { x: 77, y: 24 },
+  SS: { x: 32, y: 45 },
+  '2B': { x: 68, y: 45 },
+  '3B': { x: 22, y: 65 },
+  '1B': { x: 78, y: 65 },
+  C: { x: 50, y: 94 },
 }
 
-// The mound sits at the diamond's true center — same point as the pencil-ring
-// ellipse drawn into the field lines below.
-const MOUND_SPOT = { x: 50, y: 54 }
+// FieldBackdrop's mound is at (170, 164.23) in its 340 × 255 viewBox.
+const MOUND_SPOT = { x: 50, y: 64.4 }
 
 export function PositionInnings({ options, scope, onScope, loading, fielding, pitching }) {
   const activeLabel = options.find((o) => o.key === scope)?.label ?? ''
@@ -90,33 +81,7 @@ export function PositionInnings({ options, scope, onScope, loading, fielding, pi
                 className="posinn__field"
                 aria-label={`Innings by fielding position, ${activeLabel || 'selected scope'}`}
               >
-                {/* Pencil-rule infield square + mound ring, same drawing as
-                    DefenseDiamond (kept local so this file has no import). */}
-                <svg
-                  className="posinn__lines"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                >
-                  <polygon
-                    points="50,89 76,54 50,19 24,54"
-                    fill="none"
-                    stroke="var(--rule)"
-                    strokeWidth="0.8"
-                    strokeLinejoin="round"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                  <ellipse
-                    cx="50"
-                    cy="54"
-                    rx="3.4"
-                    ry="4.5"
-                    fill="none"
-                    stroke="var(--rule)"
-                    strokeWidth="0.8"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </svg>
+                <FieldBackdrop className="posinn__lines" />
 
                 {Object.entries(SPOTS).map(([pos, spot]) => (
                   <PositionSpot key={pos} pos={pos} spot={spot} entry={byPos[pos]} />

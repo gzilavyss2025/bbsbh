@@ -210,16 +210,13 @@ export function BoxScore({
   )
 }
 
-// Two sections, since this page has grown well past the literal box score:
-// HIGHLIGHTS is the night's story — final totals, decisions, the win-prob
-// arc, Play of the Game, Three Stars, Statcast Leaders, Insights,
-// and now each team's own Game Story write-ups — everything you'd want above
-// the fold before you get into the scorebook itself. BOX SCORE is the literal
-// #22-page transcription: the line score (full-width, not squeezed into a
-// column), then each team paired with its own header card — the visiting
-// team's crew and first pitch above its batting/pitching, the home team's
-// ballpark/weather/times above its own — with the complete MLB-style
-// game-info text at the very bottom so nothing is lost.
+// One section, ordered for a wide screen; a phone re-ranks the same blocks with
+// CSS (styles/48-stamp-strip.css). Top to bottom on desktop: the Game Log stamp,
+// the HIGHLIGHTS rule, totals + Three Stars beside decisions + the win-prob arc,
+// the line score, the per-inning pitching tally, the game-story write-up, each
+// club's info / batting + pitching / ABS / defense cards (away beside home),
+// then Photos, Play of the Game, Statcast Leaders, Insights, the video row, the
+// hit chart, and the game-info text at the very bottom so nothing is lost.
 // Memoized: with the reveal cache above returning the same objects for the same
 // inputs, every prop crossing this boundary keeps its identity across a
 // re-render the feed didn't cause, so the whole sheet — hundreds of rows — sits
@@ -323,30 +320,33 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
 
   return (
     <div className="bs">
-      <section className="bs__section">
-        {/* The Logbook stamp, first thing on the sheet. It used to sit at the
-            very bottom, on the reasoning that a keepsake is not a headline —
-            which made the one thing here you can KEEP the one thing you had to
-            scroll a whole box score to find. It is now a thin strip across the
-            head of the page, and it is ONE element ordered two ways rather than
-            two renders: on a wide screen it sits above this section's
-            HIGHLIGHTS rule (its natural DOM position), and on a phone the flex
-            `order` rules in styles/48-stamp-strip.css float that title and the
-            R/H/E/LOB totals above it so it lands directly under the score.
-            Everything about why it is safe here — and only here — is in
-            StampGameButton.jsx's header: it renders inside this page's SealBox
-            reveal render, which is the whole client-side guarantee, and that is
-            a render-function boundary, not a position on the page. */}
+      <section className="bs__section" aria-labelledby="bs__title">
+        {/* ONE section, in the DESKTOP reading order. A phone reads a different
+            order (Gary's, 2026-09-29) and gets it from the flex `order` rules
+            in styles/48-stamp-strip.css, not from a second render: below the
+            wide breakpoint the duo/col wrappers are `display: contents`, so
+            every block here is a flex item of this one section and can be
+            ranked freely — which is also why this is a single section rather
+            than the old Highlights / Box score pair, whose boundary a phone
+            order has to cross. The masthead's own "Box score" h2
+            (id="bs__title") titles it. */}
+        {/* The Logbook stamp, first thing on the sheet: a thin strip across the
+            head of the page. Everything about why it is safe here — and only
+            here — is in StampGameButton.jsx's header: it renders inside this
+            page's SealBox reveal render, which is the whole client-side
+            guarantee, and that is a render-function boundary, not a position
+            on the page. */}
         <StampGameButton game={stampFacts} />
         <h2 className="bs__sectionTitle">Highlights</h2>
-        {/* The duo/col wrappers are transparent on a phone (display: contents
-            — everything keeps stacking in this order on .bs__section's own
-            gap) and become a two-up grid at the wide breakpoint: the left
-            column runs totals above the win-prob arc, the right column runs
-            the decisions above Play of the Game above Photos. */}
+        {/* Wide: totals over Three Stars beside decisions over the win-prob
+            arc. The wrappers are transparent on a phone. */}
         <div className="bs__duo">
           <div className="bs__col">
             <LineTotals away={box.away} home={box.home} />
+            <ThreeStars stars={stars} />
+          </div>
+          <div className="bs__col">
+            <Decisions decisions={box.decisions} />
             {/* The game's win-probability arc — the retrospective companion
                 to the three stars (both are the WPA story). Renders nothing
                 at a park with no win-prob feed. */}
@@ -361,40 +361,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
               homeTreatment={winProbTreatment?.home}
             />
           </div>
-          <div className="bs__col">
-            <Decisions decisions={box.decisions} />
-            <PlayOfTheGame
-              play={potg}
-              highlight={potgHighlight}
-              awayAbbr={box.away.abbreviation}
-              homeAbbr={box.home.abbreviation}
-            />
-            {/* Stacked in this right-hand column (rather than a full-width
-                row of its own) so on desktop/ipad it fills the space the
-                shorter right column leaves beside the left column's
-                totals/win-prob arc — see GamePhotosStrip.jsx for why it's
-                safe here (inside the seal) but not above it. */}
-            <GamePhotosStrip gamePk={feed?.gamePk} />
-          </div>
         </div>
-        {/* Three Stars breaks out of the duo into its own full-width row —
-            right beneath Photos, ahead of the day-level Statcast/Insights
-            digests — so its three cards can lay out horizontally instead of
-            being squeezed into the half-width right column. */}
-        <ThreeStars stars={stars} />
-        <GameStoryCard feed={feed} />
-        {/* Its own full-width row — three tiles across on desktop/ipad,
-            stacked on phone (see .bs__statcastRow's wide-breakpoint
-            override). */}
-        <StatcastLeadersCard feed={feed} insights={insights} />
-        {/* The catch-all for whatever the game turned up as notable. */}
-        <InsightsCard calloutNotes={calloutNotes} />
-      </section>
-
-      <section className="bs__section" aria-labelledby="bs__title">
-        {/* No section heading here — the masthead's own "Box score" h2
-            (id="bs__title" below) already titles this section; a second
-            identical h2 would just duplicate it in the heading list. */}
         {/* The line score spans the full section width (not squeezed into a
             duo column) on every breakpoint — the one row every scorebook page
             reads across in one line. */}
@@ -405,14 +372,13 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
           onSection={onSection}
           treatments={winProbTreatment}
         />
-        {/* Headingless on purpose — the kraft tab and the posters say what it
-            is, and the page already spends "Highlights" on the section above.
-            Rendered here, inside the seal, is what makes it safe: see
-            GameVideoRow.jsx. */}
-        <GameVideoRow items={highlights} />
         <InningTally rows={inningDigest} away={box.away} home={box.home} treatments={winProbTreatment} />
+        <GameStoryCard feed={feed} />
+        {/* Away beside home. `--away`/`--home` name the columns for the phone
+            order, which interleaves nothing between them but has to rank all
+            four of one club's cards ahead of the other's. */}
         <div className="bs__duo">
-          <div className="bs__col">
+          <div className="bs__col bs__col--away">
             <InfoCard fields={awayFields} />
             <TeamBlock side={box.away} theme={awayTheme} />
             {/* Each own independent card, outside the batting/pitching card
@@ -420,13 +386,32 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
             <BoxAbs feed={feed} sideKey="away" abbr={box.away.abbreviation} theme={awayTheme} />
             <BoxDefense feed={feed} sideKey="away" theme={awayTheme} />
           </div>
-          <div className="bs__col">
+          <div className="bs__col bs__col--home">
             <InfoCard fields={homeFields} />
             <TeamBlock side={box.home} theme={homeTheme} />
             <BoxAbs feed={feed} sideKey="home" abbr={box.home.abbreviation} theme={homeTheme} />
             <BoxDefense feed={feed} sideKey="home" theme={homeTheme} />
           </div>
         </div>
+        {/* Safe here (inside the seal) but not above it — see
+            GamePhotosStrip.jsx. */}
+        <GamePhotosStrip gamePk={feed?.gamePk} />
+        <PlayOfTheGame
+          play={potg}
+          highlight={potgHighlight}
+          awayAbbr={box.away.abbreviation}
+          homeAbbr={box.home.abbreviation}
+        />
+        {/* Its own full-width row — three tiles across on desktop/ipad,
+            stacked on phone (see .bs__statcastRow's wide-breakpoint
+            override). */}
+        <StatcastLeadersCard feed={feed} insights={insights} />
+        {/* The catch-all for whatever the game turned up as notable. */}
+        <InsightsCard calloutNotes={calloutNotes} />
+        {/* Headingless on purpose — the kraft tab and the posters say what it
+            is. Rendered here, inside the seal, is what makes it safe: see
+            GameVideoRow.jsx. */}
+        <GameVideoRow items={highlights} />
         <HitChartCard battedBalls={battedBalls} box={box} venue={get('Venue').replace(/\.\s*$/, '')} />
         <GameInfo rows={box.footNotes} />
       </section>

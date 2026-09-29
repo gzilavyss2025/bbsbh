@@ -27,7 +27,7 @@ import { PlayerLink } from '../components/player/PlayerLink.jsx'
 // override layer (lib/scorecardNotes.js), threaded down to every at-bat box.
 
 // The eight fielders + DH the footer diamond prints, with blank writing lines —
-// DefenseDiamond keeps a spot's line and position number even when unposted, so an
+// DefenseDiamond keeps a spot's writing space even when unposted, so an
 // empty template shows the fielding shape without any names (see DefenseDiamond).
 const EMPTY_DEFENSE = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH'].map(
   (position) => ({ position, last: '' }),

@@ -43,6 +43,12 @@
   --field:    #2F6E4F;   /* outfield green — positive / on-base */
   --field-deep:#255740;
   --field-soft:#E3EDE2;
+  /* Field illustration: shared by defense alignments and position innings. */
+  --field-outfield:#D8E6C9;
+  --field-infield: #A6C393;
+  --field-dirt:    #D6AA83;
+  --field-fence:   #80A376;
+  --field-chalk:   #FFF8E9;
   --clay:     #B4453A;   /* infield clay / seam red — outs, alerts */
   --clay-deep:#8E332B;
   --clay-soft:#F3E0DB;
