@@ -4,6 +4,7 @@ import { LEAN_TIERS, LEAN_TIER_LABELS, leanCaretFraction } from '../../lib/statT
 import { HomePlateIcon } from '../badges/UmpireTierGlyph.jsx'
 import { UmpireZoneMap } from './UmpireZoneMap.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // The Umpire Tendencies card — a broadcast-style read on how an umpire calls
 // the zone, modelled structurally on the in-game TV graphic and rendered in the
@@ -130,7 +131,7 @@ export function UmpireTendencies({ umpire }) {
   const last = rest.join(' ')
 
   return (
-    <section className="umptend">
+    <Card body="flush" className="umptend">
       <SectionHead
         look="band"
         house
@@ -196,6 +197,6 @@ export function UmpireTendencies({ umpire }) {
         {season.games} scored {season.games === 1 ? 'game' : 'games'}
         {umpire.generatedAt && ` · updated ${humanDate(umpire.generatedAt.slice(0, 10))}`}
       </div>
-    </section>
+    </Card>
   )
 }

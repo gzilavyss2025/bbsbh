@@ -2,6 +2,7 @@ import '../styles/65-about-page.css'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { TallyWordmark } from '../components/chrome/TallyBrand.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 // Four fixed properties of the app, set like a box-score totals row. Every one
 // is a constant about the product — none is read from a game, and none may
@@ -159,7 +160,7 @@ export function AboutPage({ onBack }) {
         <SectionHead id="about-principles">How it works</SectionHead>
         <div className="aboutrules">
           {PRINCIPLES.map((item, i) => (
-            <article key={item.label} className="aboutrule">
+            <Card as="article" frame="ledger" body="flush" key={item.label} className="aboutrule">
               <div className="aboutrule__bar">
                 <span className="aboutrule__n" aria-hidden="true">
                   {String(i + 1).padStart(2, '0')}
@@ -167,7 +168,7 @@ export function AboutPage({ onBack }) {
                 <h3>{item.label}</h3>
               </div>
               <p className="caps-exempt">{item.text}</p>
-            </article>
+            </Card>
           ))}
         </div>
       </section>

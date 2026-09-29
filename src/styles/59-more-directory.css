@@ -36,9 +36,6 @@
 
 .moredir__card {
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
 }
 
 /* A card's heading, its glyph, list and rows are the shared `.dirhd` /

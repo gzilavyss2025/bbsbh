@@ -252,14 +252,6 @@
   gap: var(--space-3);
 }
 
-.aboutrule {
-  overflow: hidden;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-}
-
 /* The dark header bar is the page's most ESPN-borrowed move and the reason
    these read as cards rather than as a list: --text-on-ink on
    --accent-primary is the pairing check-contrast.mjs already pins at 13.5:1. */

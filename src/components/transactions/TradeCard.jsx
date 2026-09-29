@@ -5,6 +5,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { teamFullName } from '../../lib/teams.js'
+import { Card } from '../ui/frame/Card.jsx'
 
 // The stats-to-date block under a traded player's name — one line for an MLB
 // player (role-gated hitting/SP/RP/CL line), or a MiLB player's three lines
@@ -169,7 +170,7 @@ export function TradeCard({ trade }) {
   const isSwap = trade.teams.length === 2
 
   return (
-    <article className="trade">
+    <Card as="article" body="flush" className="trade">
       {badge && <p className="trade__badge">{badge}</p>}
       {isSwap ? (
         <div className="trade__swap">
@@ -191,6 +192,6 @@ export function TradeCard({ trade }) {
           {line}
         </p>
       ))}
-    </article>
+    </Card>
   )
 }

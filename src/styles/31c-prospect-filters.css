@@ -29,11 +29,7 @@
 .prospects__filterdeck {
   margin: var(--space-3) 0;
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
   border-top: var(--bw-heavy) solid var(--accent-primary);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 .prospects__filterhead {
   display: flex;

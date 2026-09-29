@@ -1122,3 +1122,174 @@ test('C3: each block keeps its own space and layout, from a rule that loads afte
 test('C3: the animation lab draws the batting order on the same Card', () => {
   assert.match(src('screens/animlab/motionDemos.jsx'), /<Card as="div" body="flush">\s*<ol className="lineup__list">/)
 })
+
+// ---- slice C6b: people, records and reference pages ----
+
+// Fourteen blocks on the people, records and reference pages that drew their
+// own copy of the card. These pages open live (ADR-0034); one block, .umptend,
+// also renders in three game screens (the lineup page's top zone, the plate
+// accuracy modal and the focus-mode Extras drawer), so for it the slice moves
+// the box and nothing else. Each block renders through Card with body="flush":
+// each keeps its own padding, which is not the padded body's, so its layout does
+// not move (C2 and C4 did the same). Each band or label head stays the Card's
+// first child, as it was. Modes:
+//   card  the Card IS the block and carries its class.
+//   wrap  the Card wraps the block's <ul>, which keeps its class and row rules
+//         (Card has no <ul>).
+// `gone` means the block's whole rule was the frame, so it has no rule left.
+// `frame` is the ledger where the census says so (radius-sm, no shadow).
+const C6B = [
+  { css: '31-wild-card.css', sel: '.rehabcard', jsx: ['screens/RehabPage.jsx'], ns: 'rehabcard', as: 'article' },
+  { css: '31c-prospect-filters.css', sel: '.prospects__filterdeck', jsx: ['screens/ProspectsPage.jsx'], ns: 'prospects__filterdeck' },
+  { css: '32-milestone-watch.css', sel: '.milestonewatch-page__card', jsx: ['screens/MilestoneWatchPage.jsx'], ns: 'milestonewatch-page__card', as: 'article' },
+  { css: '38-umpire-pages.css', sel: '.umpage__card', jsx: ['screens/UmpirePage.jsx'], ns: 'umpage__card' },
+  { css: '38-umpire-pages.css', sel: '.umpage__list', jsx: ['screens/UmpirePage.jsx'], ns: 'umpage__list', mode: 'wrap', as: 'div' },
+  { css: '39-manager-page.css', sel: '.mgrpage__card', jsx: ['screens/ManagerPage.jsx'], ns: 'mgrpage__card' },
+  { css: '47-trade-deadline.css', sel: '.trade', jsx: ['components/transactions/TradeCard.jsx'], ns: 'trade', as: 'article' },
+  { css: '53-umpire-tendencies.css', sel: '.umptend', jsx: ['components/umpire/UmpireTendencies.jsx'], ns: 'umptend', gone: true },
+  { css: '59-more-directory.css', sel: '.moredir__card', jsx: ['screens/MorePage.jsx'], ns: 'moredir__card', frame: 'ledger' },
+  { css: '65-about-page.css', sel: '.aboutrule', jsx: ['screens/AboutPage.jsx'], ns: 'aboutrule', as: 'article', frame: 'ledger', gone: true },
+  // A link card: the whole tile is the tap target. It keeps its own heavy top edge.
+  { css: '66-situational-records.css', sel: '.trrank__tile', jsx: ['screens/SituationalRecordsPage.jsx'], ns: 'trrank__tile', as: 'a' },
+  { css: 'situational-records/66a-detail.css', sel: '.trrank__podiumcard', jsx: ['screens/SituationalRecordsPage.jsx'], ns: 'trrank__podiumcard', as: 'div' },
+  { css: '71-salaries-league.css', sel: '.payboard', jsx: ['components/salaries/SalaryBoard.jsx'], ns: 'payboard', gone: true },
+  { css: '76-workload-marks.css', sel: '.penpage__grid', jsx: ['screens/around-the-game/BullpenPage.jsx'], ns: 'penpage__grid', as: 'div', frame: 'ledger' },
+]
+// Every plain element (not a Card) whose opening tag names the class.
+const bareTagsC6B = (code, ns) =>
+  [...code.matchAll(/<(?:div|section|li|article|ul|ol|dl|a|button)\b([^>]*)>/g)].map((m) => m[1]).filter((attrs) => namesClass(attrs, ns))
+
+test('C6b: no people, records or reference block draws a second frame over its Card', () => {
+  for (const { css, sel, gone } of C6B) {
+    const bodies = bodiesOf(read(css), sel)
+    if (gone) assert.equal(bodies.length, 0, `${css}: ${sel} was only a frame, so it has no rule`)
+    else assert.ok(bodies.length > 0, `${css}: a ${sel} rule`)
+    for (const body of bodies) assert.deepEqual(frameDecls(body), [], `${css}: ${sel} still draws its own frame`)
+  }
+})
+
+test('C6b: every block renders on Card, with its frame, no head prop and a flush body', () => {
+  for (const { jsx, ns, mode = 'card', as, frame } of C6B) {
+    for (const rel of jsx) {
+      const code = src(rel)
+      assert.match(code, /import \{ Card \} from ["'][\w./]+\/ui\/frame\/Card\.jsx["']/, `${rel} imports Card`)
+      const tags = mode === 'wrap' ? wrappingTags(code, ns) : cardTags(code).filter((attrs) => namesClass(attrs, ns))
+      assert.ok(tags.length > 0, `${rel}: .${ns} renders ${mode === 'wrap' ? 'inside' : 'on'} a Card`)
+      for (const attrs of tags) {
+        assert.match(attrs, /body="flush"/, `${rel}: .${ns}'s Card keeps the block's own inset`)
+        if (frame) assert.match(attrs, new RegExp(`frame="${frame}"`), `${rel}: .${ns} is a ${frame}`)
+        else assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
+        if (as) assert.match(attrs, new RegExp(`as="${as}"`), `${rel}: .${ns} is a Card ${as}`)
+        assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its head as the Card's first child, as before`)
+      }
+      if (mode === 'card') {
+        assert.deepEqual(bareTagsC6B(code, ns), [], `${rel}: .${ns} is on a bare element`)
+      } else {
+        // The list stays a <ul> inside the Card, and every one sits in one.
+        const uses = code.match(new RegExp(`className=\\{?["'\`]${ns}(?![\\w-])`, 'g')) ?? []
+        assert.equal(uses.length, tags.length, `${rel}: every .${ns} sits inside a Card`)
+        assert.match(code, new RegExp(`<ul\\s+className="${ns}"`), `${rel}: .${ns} is still a list`)
+      }
+    }
+  }
+})
+
+// Card owns no margin, and a flush body adds no padding, so each block keeps
+// the space, the inset and the edge that is its own, in a namespace rule.
+test('C6b: each block keeps its own margin, inset and own edge', () => {
+  const kept = [
+    ['31-wild-card.css', '.rehabcard', 'padding', 'var(--space-3) var(--space-3) var(--space-4)'],
+    ['31c-prospect-filters.css', '.prospects__filterdeck', 'margin', 'var(--space-3) 0'],
+    ['31c-prospect-filters.css', '.prospects__filterdeck', 'padding', 'var(--space-3)'],
+    ['31c-prospect-filters.css', '.prospects__filterdeck', 'border-top', 'var(--bw-heavy) solid var(--accent-primary)'],
+    ['32-milestone-watch.css', '.milestonewatch-page__card', 'padding', 'var(--space-3)'],
+    ['38-umpire-pages.css', '.umpage__card', 'padding', 'var(--space-3)'],
+    ['38-umpire-pages.css', '.umpage__list', 'list-style', 'none'],
+    ['38-umpire-pages.css', '.umpage__list', 'margin', '0'],
+    ['38-umpire-pages.css', '.umpage__list', 'padding', '0'],
+    ['39-manager-page.css', '.mgrpage__card', 'padding', 'var(--space-3)'],
+    ['39-manager-page.css', '.mgrpage__card', 'margin-bottom', '12px'],
+    ['47-trade-deadline.css', '.trade', 'padding', 'var(--space-3) var(--space-4)'],
+    ['59-more-directory.css', '.moredir__card', 'padding', 'var(--space-3)'],
+    ['66-situational-records.css', '.trrank__tile', 'display', 'flex'],
+    ['66-situational-records.css', '.trrank__tile', 'min-width', '0'],
+    ['66-situational-records.css', '.trrank__tile', 'border-top', 'var(--bw-heavy) solid var(--trrank-edge)'],
+    ['situational-records/66a-detail.css', '.trrank__podiumcard', 'padding', 'var(--space-3) var(--space-2)'],
+    ['76-workload-marks.css', '.penpage__grid', 'padding', 'var(--space-4)'],
+  ]
+  for (const [css, sel, prop, value] of kept) {
+    assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
+  }
+})
+
+// The record tile lifts and raises its shadow under a mouse. Card's hover tint
+// sets border-color on all four sides, so the tile's own rule (same weight,
+// loads later) puts its heavy top edge back on hover.
+test('C6b: the record tile keeps its lift and its top edge on hover', () => {
+  const css = read('66-situational-records.css')
+  const hover = bodiesOf(css, '.trrank__tile:hover')[0] ?? ''
+  assert.equal(decl(hover, 'transform'), 'translateY(-2px)')
+  assert.equal(decl(hover, 'box-shadow'), 'var(--shadow-raised)')
+  assert.equal(decl(hover, 'border-top-color'), 'var(--trrank-edge)')
+  const base = ruleBody(css, '.trrank__tile') ?? ''
+  assert.match(decl(base, 'transition') ?? '', /border-color[^,]*,\s*background-color/, 'the hover tint eases in, as it does on every Card link')
+})
+
+// The tendencies card renders in four hosts. Three shed its frame (the umpire
+// modal, and the Extras drawer, whose own chrome frames it) or place it (the
+// lineup page's top zone). Each host rule names two classes, so it beats .card
+// on weight, and each partial loads after card.css. The card's band stays the
+// house navy on a themed page (ADR-0030): it keeps its `house` switch.
+test('C6b: the umpire tendencies card keeps its house band and its four hosts', () => {
+  assert.match(src('components/umpire/UmpireTendencies.jsx'), /<SectionHead\b[^>]*\bhouse\b/, 'the band is the house band')
+  const css = read('53-umpire-tendencies.css')
+  const shed = { border: '0', 'border-radius': '0', 'box-shadow': 'none' }
+  for (const sel of ['.umpmodal .umptend', '.umptendfold .umptend']) {
+    const body = ruleBody(css, sel)
+    assert.ok(body, `53-umpire-tendencies.css: ${sel}`)
+    for (const [prop, value] of Object.entries(shed)) assert.equal(decl(body, prop), value, `${sel} sheds ${prop}`)
+    assert.ok((sel.match(/\./g) ?? []).length > 1, `${sel} outranks .card`)
+  }
+  assert.equal(decl(ruleBody(css, '.umptendfold .umptend__bar') ?? '', 'display'), 'none')
+  assert.equal(decl(ruleBody(css, '.teaminfo__topzone > .umptend') ?? '', 'margin-top'), '14px')
+  assert.ok(css.includes('.teaminfo__topzone:has(> .umptend) > .umptend'), 'the wide zone still top-aligns the card')
+  assert.ok(css.includes('.teaminfo__topzone:has(> .umptend) {'), 'the wide zone still splits on the card')
+  // The three game screens still host the card under those class names.
+  assert.match(src('components/umpire/UmpireAccuracyModal.jsx'), /umpmodal/)
+  assert.match(src('components/umpire/UmpireTendenciesFold.jsx'), /umptendfold/)
+  assert.match(src('screens/TeamInfo.jsx'), /teaminfo__topzone/)
+})
+
+// The card is the box and nothing else: the tendencies card adds no reveal-only
+// import (ADR-0001). Written before the change, so it pins what was there.
+test('C6b: the umpire tendencies card adds no reveal-only import', () => {
+  const code = src('components/umpire/UmpireTendencies.jsx')
+  assert.doesNotMatch(code, /from ['"][./]+\/api\/(linescore|derive)\.js['"]/)
+  assert.doesNotMatch(code, /<SealBox|revealedThrough/)
+})
+
+// The ADR-0084 rename. Strict, comments too: a comment that names the retired
+// class sends the next reader to a rule that does not exist. The naming ledger
+// (docs/) keeps the old name on purpose.
+const RETIRED_C6B = /(^|[^\w-])tradecard(?![a-z0-9-])/
+test('C6b: .tradecard is .trade, gone from stylesheets, markup, comments and the lab', () => {
+  const css = files(STYLES, ['.css']).filter((rel) => RETIRED_C6B.test(readFileSync(join(STYLES, rel), 'utf8')))
+  const code = files(SRC, ['.jsx', '.js', '.md'])
+    .filter((rel) => !rel.startsWith('styles/'))
+    .filter((rel) => RETIRED_C6B.test(readFileSync(join(SRC, rel), 'utf8')))
+  const guard = readFileSync(join(SRC, '..', 'scripts', 'check-seal-scope.mjs'), 'utf8')
+  assert.deepEqual([...css, ...code], [])
+  assert.doesNotMatch(guard, RETIRED_C6B)
+  const lab = src('screens/designlab/catalog.js')
+  assert.match(lab, /cls: 'card card--sheet trade'/)
+  assert.match(lab, /cls: 'card card--sheet rehabcard'/)
+})
+
+// The lab's specimens are drawn from the class list alone, so each keeps the
+// shape its Card takes.
+test('C6b: the ledger frames stay ledgers, and the ledger keeps the old .tradecard name', () => {
+  assert.match(src('screens/AboutPage.jsx'), /<Card as="article" frame="ledger" body="flush"[^>]*className="aboutrule"/)
+  assert.match(src('screens/around-the-game/BullpenPage.jsx'), /<Card as="div" frame="ledger" body="flush" className="penpage__grid"/)
+  const ledger = readFileSync(join(SRC, '..', 'docs', 'design-system-naming.md'), 'utf8')
+  assert.match(ledger, /\| `\.tradecard` \|/)
+})

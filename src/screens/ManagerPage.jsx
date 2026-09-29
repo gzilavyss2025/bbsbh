@@ -15,6 +15,7 @@ import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 // One person's career coaching page: a header (photo, current role or "last
 // managed"), an awards strip, a compact per-team managerial win-loss record,
@@ -109,7 +110,7 @@ export function ManagerPage({ id }) {
 function AwardsStrip({ awards }) {
   const sorted = [...awards].sort((a, b) => (b.season ?? 0) - (a.season ?? 0))
   return (
-    <section className="mgrpage__card">
+    <Card body="flush" className="mgrpage__card">
       <h2 className="mgrpage__cardtitle">Awards</h2>
       <ul className="mgrpage__awards">
         {sorted.map((a, i) => (
@@ -119,7 +120,7 @@ function AwardsStrip({ awards }) {
           </li>
         ))}
       </ul>
-    </section>
+    </Card>
   )
 }
 
@@ -183,7 +184,7 @@ function PlayingCareer({ playing }) {
   const { group, lines } = playing
   const showLevels = lines.length > 1
   return (
-    <section className="mgrpage__card">
+    <Card body="flush" className="mgrpage__card">
       <h2 className="mgrpage__cardtitle">Playing career</h2>
       {lines.map((line) => (
         <div key={line.level} className="mgrpage__playline">
@@ -200,7 +201,7 @@ function PlayingCareer({ playing }) {
           </div>
         </div>
       ))}
-    </section>
+    </Card>
   )
 }
 
@@ -210,7 +211,7 @@ function PlayingCareer({ playing }) {
 // with the record/timeline cards. Reuses the shared .careertl__* stop styling.
 function PlayingTeams({ entries }) {
   return (
-    <section className="mgrpage__card">
+    <Card body="flush" className="mgrpage__card">
       <h2 className="mgrpage__cardtitle">Teams played for</h2>
       <ol className="careertl__track">
         {entries.map((e) => (
@@ -231,7 +232,7 @@ function PlayingTeams({ entries }) {
           </li>
         ))}
       </ol>
-    </section>
+    </Card>
   )
 }
 
@@ -241,7 +242,7 @@ function PlayingTeams({ entries }) {
 // graceful-degradation convention as the rest of this app's MiLB/umpire gaps.
 function RecordTable({ rows }) {
   return (
-    <section className="mgrpage__card">
+    <Card body="flush" className="mgrpage__card">
       <h2 className="mgrpage__cardtitle">Managerial record</h2>
       <ul className="mgrpage__recordlist">
         {rows.map((r, i) => {
@@ -269,7 +270,7 @@ function RecordTable({ rows }) {
           )
         })}
       </ul>
-    </section>
+    </Card>
   )
 }
 
@@ -278,7 +279,7 @@ function RecordTable({ rows }) {
 // roles (Bench Coach, Pitching Coach, …) penciled in a lighter weight.
 function CoachingTimeline({ stints }) {
   return (
-    <section className="mgrpage__card">
+    <Card body="flush" className="mgrpage__card">
       <h2 className="mgrpage__cardtitle">Coaching career</h2>
       <ul className="mgrpage__timeline">
         {stints.map((s, i) => (
@@ -298,6 +299,6 @@ function CoachingTimeline({ stints }) {
           </li>
         ))}
       </ul>
-    </section>
+    </Card>
   )
 }

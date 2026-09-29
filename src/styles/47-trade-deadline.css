@@ -95,10 +95,6 @@
 
 .trade {
   padding: var(--space-3) var(--space-4);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 .trade__badge {
   margin: 0 0 var(--space-2);
