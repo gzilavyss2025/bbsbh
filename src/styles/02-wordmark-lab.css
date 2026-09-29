@@ -635,7 +635,7 @@
 .datenav__label,
 .lineup__jersey,
 .roster__jersey,
-.startercard__jersey,
+.starter__jersey,
 .inningnav__chip {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

@@ -874,8 +874,8 @@
   font-weight: var(--w-bold);
 }
 /* Namespaced (not bare `.opp`) — a plain `.opp` class collides with the
-   opposing-lineup/defense/starter CARD container selector below (`.lineup,
-   .opp, .startercard`), which was leaking its border/background/shadow/
+   opposing-defense card's namespace (`.lineup, .opp, .starter` in
+   44-pre-game-cards.css), which once leaked its border/background/shadow/
    overflow:hidden onto every ledger's team/player column. */
 .ledger .ledger__sub {
   color: var(--text-muted);
@@ -1059,7 +1059,7 @@
 /* FoulCard's "League foul tracker ›" — a destination-named chevron link out
    of the card, same register as .door--inline's "See all ›". Compound to
    beat .plink's `font: inherit`/`color: inherit` reset (same fix as
-   .plink.lineup__name/.plink.startercard__name above). */
+   .plink.lineup__name/.plink.starter__name above). */
 .plink.foulcard__door {
   display: inline-block;
   margin-top: 6px;

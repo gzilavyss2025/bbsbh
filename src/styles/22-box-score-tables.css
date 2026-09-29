@@ -678,7 +678,7 @@
   background: var(--surface-card);
 }
 /* Headshot + its position badge, same wrapper idiom as
-   .teammatecard__shotwrap/__posbadge (former teammates cards). */
+   .teammate__shotwrap/__posbadge (former teammates cards). */
 .playercard__shotwrap {
   position: relative;
   display: block;

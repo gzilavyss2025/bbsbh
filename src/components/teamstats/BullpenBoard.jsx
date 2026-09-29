@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { staffGridFor } from '../../api/workload.js'
 import { InfoPopover } from '../ui/InfoPopover.jsx'
 import { SectionMasthead } from '../ui/SectionMasthead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { StaffGrid } from '../workload/StaffGrid.jsx'
 import { headerThemeClass, headerThemeStyle } from '../../lib/headerTheme.js'
 import { Pill } from '../ui/control/Pill.jsx'
@@ -72,20 +73,27 @@ export function BullpenBoard({ workload, teamId, gameDate, theme, masthead }) {
 
   if (!rows || rows.length === 0) return null
 
+  const head = (
+    <SectionMasthead title="Bullpen health">
+      <InfoPopover label="How bullpen availability is judged">
+        Rested vs. worked from recent appearances — a workload signal, not a
+        talent grade. Managers overrule it nightly.
+      </InfoPopover>
+    </SectionMasthead>
+  )
+
+  // The theme class sets the club's band colours on the card root, where the
+  // band head reads them. The Card's frame reads none of them (ADR-0030).
   return (
-    <section
-      className={`metriccard penboard ${headerThemeClass(theme)}`.trim()}
+    <Card
+      className={`metric penboard ${headerThemeClass(theme)}`.trim()}
       style={headerThemeStyle(theme, masthead?.scale)}
+      head={head}
+      body="flush"
     >
-      <SectionMasthead title="Bullpen health">
-        <InfoPopover label="How bullpen availability is judged">
-          Rested vs. worked from recent appearances — a workload signal, not a
-          talent grade. Managers overrule it nightly.
-        </InfoPopover>
-      </SectionMasthead>
-      <div className="metriccard__body">
+      <div className="metric__body">
         <StaffGrid rows={rows} />
       </div>
-    </section>
+    </Card>
   )
 }

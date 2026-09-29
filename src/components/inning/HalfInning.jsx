@@ -9,6 +9,7 @@ import { selectBattedBalls } from '../../api/hitchart.js'
 import { ordinal } from '../../lib/format.js'
 import { HitChart } from '../charts/HitChart.jsx'
 import { SealBox } from '../SealBox.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { PlayByPlay } from '../playbyplay/PlayByPlay.jsx'
 import { FielderNotice } from '../playbyplay/FielderNotice.jsx'
 import { PitcherNotice } from '../playbyplay/PitcherNotice.jsx'
@@ -344,7 +345,7 @@ export function HalfInning({
 
   return (
     <>
-      <section className="half">
+      <Card body="flush" className="half">
         {/* THE MASTHEAD IS THE BAND NOW, ALWAYS, so this title stands down to a
             heading nothing draws — the half was already named by
             `.inningnav__label` ("TOP 1ST") and by the console band's own
@@ -479,7 +480,7 @@ export function HalfInning({
             )
           }}
         </SealBox>
-      </section>
+      </Card>
 
       {/* Where this half's contact went. Mounted only once the half is
           committed, so the selector behind it never runs against a half the

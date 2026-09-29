@@ -2,6 +2,7 @@ import { memo, useLayoutEffect, useRef } from 'react'
 import { useNav, useLinkScope } from '../../lib/nav.js'
 import { playerPath } from '../../lib/route.js'
 import { PenDots } from '../workload/PenDots.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // Running pitching lines for every pitcher who has appeared in a revealed
 // half-inning — a separate block per team, each led by the team name with its
@@ -34,7 +35,7 @@ export const PitchersSection = memo(function PitchersSection({ teams }) {
   const shown = teams.filter((t) => t.rows.length > 0)
   if (shown.length === 0) return null
   return (
-    <section className="pitchers">
+    <Card body="flush" className="pitchers">
       <h3 className="pitchers__title sectionhead--band sectionhead--house">Pitchers</h3>
       {shown.map((t) => (
         <div className="pitchers__team" key={t.name}>
@@ -83,7 +84,7 @@ export const PitchersSection = memo(function PitchersSection({ teams }) {
           </table>
         </div>
       ))}
-    </section>
+    </Card>
   )
 })
 

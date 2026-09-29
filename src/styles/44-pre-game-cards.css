@@ -7,17 +7,18 @@
    Former Teammates (TeamInfo.jsx) reuses the same shell for its card chrome
    alone, purely for visual consistency with its pregame neighbors — it's
    still a posted-facts listing, not an interpretive one.
-   SectionMasthead.jsx + InfoPopover.jsx. */
-.metriccard {
+
+   The box is the Card now (#1113, slice C3): <Card className="metric"
+   head={<SectionMasthead …/>} body="flush">, so system/card.css draws the
+   edge, the corners and the shadow, and clips the band to the corners. The
+   Card owns no margin, so the 16px above each card stays here; this partial
+   loads after system/card.css, so it wins on order. The Card clip is safe:
+   the one info popover in a metric card (Bullpen health) opens over the
+   staff grid, well inside the card. */
+.metric {
   margin-top: var(--space-4);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  /* Not overflow:hidden — the masthead's info popover overflows the card. Top
-     corners are rounded on the bar itself instead. */
 }
-.metriccard__body {
+.metric__body {
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
@@ -34,37 +35,18 @@
   flex: 0 0 auto;
 }
 /* Batting order, opposing defense, and opposing starter each wear the navy
-   masthead as the header of a real card. The CONTAINER owns the border / radius /
-   shadow; the inner body sheds its own so the masthead caps one clean card. Skip
-   this and the masthead's square bottom corners + gold border overhang the body's
-   rounded top corners as little "ears". */
+   masthead as the head of a Card (#1113, slice C3). The Card draws the edge,
+   the corners and the shadow, and clips the band and the rows to its corners;
+   what stays here is the 16px above each card. The batting-order list is the
+   lineup Card's flush body, so it draws no frame of its own. */
 .lineup,
 .opp,
-.startercard {
+.starter {
   margin-top: var(--space-4);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
 }
-/* The batting-order rows and the defense diamond carry their own backgrounds, so
-   the card clips them (and the masthead) to its rounded corners. Safe here — these
-   two mastheads hold no info popover to escape, and the lineup list already ran
-   overflow:hidden. The starter card stays UNclipped (its pills' tooltips must
-   escape); its masthead rounds its own top corners to match, the .metriccard way. */
-.lineup,
-.opp {
-  overflow: hidden;
-}
-/* Bodies drop their own card chrome — the container owns it now. Scoped so
-   DefenseDiamond's six other (uncapped) usages keep their own border. */
-.lineup .lineup__list {
-  border: 0;
-  border-radius: 0;
-  overflow: visible;
-  background: none;
-  box-shadow: none;
-}
+/* The diamond is a Card of its own everywhere else. Inside the opposing-defense
+   card it is that card's body, so it drops its own edge and corners here. Two
+   classes, so this beats the Card's one-class frame rule. */
 .opp .defdiamond {
   border: 0;
   border-radius: 0;
@@ -82,7 +64,7 @@
 
 /* ------------------------------------------------------- season series strip
    The lineup page's "other meetings this season" widget — SeasonSeriesStrip.jsx.
-   A .metriccard like Bullpen Health below, so it wears the
+   A .metric Card like Bullpen Health below, so it wears the
    same navy/gold masthead; the body swaps the usual stacked layout for a
    horizontally-scrolling row of game cards with always-on square nav buttons
    (this app doesn't use circular chrome elsewhere, so the buttons stay square
@@ -224,7 +206,7 @@
 }
 
 /* --------------------------------------------------------- box score photos
-   GamePhotosStrip.jsx — a .metriccard like Season Series / Bullpen Health
+   GamePhotosStrip.jsx — a .metric Card like Season Series / Bullpen Health
    above, wearing the same navy/gold masthead, with a "VIEW ALL" shortcut as a
    white filled pill (reversed off the bar's own navy, so it reads as the
    one call-to-action in it — same footing as .masthead__watch's filled-pill

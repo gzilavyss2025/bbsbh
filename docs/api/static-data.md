@@ -229,7 +229,13 @@ for each generator; the reader modules:
   keeps a game reachable after mlb.com de-lists it). MLB only; the button hides for
   MiLB and any date with no note. Spoiler-free in-app (renders only a link), but the
   PDF recaps prior results, so it opens in a new tab as a user-initiated jump.
-  Kept OUT of the PWA precache (grows each game day).
+  Kept OUT of the PWA precache (grows each game day). `fetchArchiveShard(teamId)`
+  is the one strict read of a shard (#1258): it THROWS on a failed fetch and caches
+  only a shard that arrived. The `/game-notes` archive page calls it directly. The
+  button's loader wraps it and swallows a failure into `[]`, so the two share one
+  download per club. The page's pure half is
+  `src/lib/gameNotes/archive.js`; `scripts/download-game-notes.mjs` saves the same
+  archive's PDFs to a gitignored folder.
 - `whatsBrewing.js` — **QA-only since 2026-08-18.** For a CALIBRATED club (a
   `CONFIG` map keyed by teamId; all 30 MLB clubs), it parses the narrative blurbs
   out of the PDF for an in-app modal (`WhatsBrewingModal.jsx`). No game surface

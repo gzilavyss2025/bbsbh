@@ -4,6 +4,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'
 import { gamePhotosPath } from '../../lib/route.js'
 import { SectionMasthead } from '../ui/SectionMasthead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // This game's high-res photo thumbnails, capped by the same navy/gold
 // masthead as Bullpen Tonight / Season Series, with a "VIEW ALL" shortcut
@@ -64,23 +65,26 @@ export function GamePhotosStrip({ gamePk }) {
     el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
   }
 
+  const head = (
+    <SectionMasthead title="Photos">
+      <button
+        type="button"
+        className="photostrip__viewall"
+        onClick={() => navigate(gamePhotosPath(gamePk))}
+      >
+        View all
+        {/* Same external-link glyph as the masthead's own Watch button
+            (GameView.jsx's WatchButton, the Watch button's ↗ (.btn__icon)) — this hands off to
+            a whole other page, not an inline action, same as that one hands
+            off to MLB.TV. */}
+        <span className="photostrip__viewallarrow" aria-hidden="true">↗</span>
+      </button>
+    </SectionMasthead>
+  )
+
   return (
-    <section className="metriccard photostrip">
-      <SectionMasthead title="Photos">
-        <button
-          type="button"
-          className="photostrip__viewall"
-          onClick={() => navigate(gamePhotosPath(gamePk))}
-        >
-          View all
-          {/* Same external-link glyph as the masthead's own Watch button
-              (GameView.jsx's WatchButton, the Watch button's ↗ (.btn__icon)) — this hands off to
-              a whole other page, not an inline action, same as that one hands
-              off to MLB.TV. */}
-          <span className="photostrip__viewallarrow" aria-hidden="true">↗</span>
-        </button>
-      </SectionMasthead>
-      <div className="metriccard__body photostrip__wrap">
+    <Card className="metric photostrip" head={head} body="flush">
+      <div className="metric__body photostrip__wrap">
         {canScroll && (
           <button
             type="button"
@@ -120,6 +124,6 @@ export function GamePhotosStrip({ gamePk }) {
           </button>
         )}
       </div>
-    </section>
+    </Card>
   )
 }
