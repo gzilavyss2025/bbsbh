@@ -4,6 +4,7 @@ import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { isMlbTeamId } from '../../lib/teams.js'
+import { Card } from '../ui/frame/Card.jsx'
 
 // "Tyler Tolbert" -> ["Tyler", "Tolbert"] (everything after the first space).
 // Used so the name wraps to two lines next to the bigger headshot, without a
@@ -24,7 +25,7 @@ function splitFirstLast(full) {
 export function PerformerCard({ entry }) {
   const [first, last] = splitFirstLast(entry.name)
   return (
-    <li className="playerline">
+    <Card as="li" frame="ledger" body="flush" className="playerline">
       <span className="playerline__shotwrap">
         <Headshot
           personId={entry.id}
@@ -56,6 +57,6 @@ export function PerformerCard({ entry }) {
         </div>
         <div className="playerline__stat">{entry.stat}</div>
       </div>
-    </li>
+    </Card>
   )
 }

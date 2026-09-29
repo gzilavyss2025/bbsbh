@@ -460,13 +460,10 @@
   color: var(--text-caption);
 }
 
-/* Game-info foot: WP, umpires, weather, T, Att… */
+/* Game-info foot: WP, umpires, weather, T, Att… A Card (#1113, slice C5),
+   like the totals card and the line score below. */
 .bs__info {
   padding: var(--space-3) var(--space-3h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 .bs__infoRow {
   margin: 3px 0;
@@ -492,10 +489,6 @@
    each club by abbreviation. Matches the other summary cards' frame. */
 .bs__totalsCard {
   padding: var(--space-2h) var(--space-3h) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 /* Five equal columns (fixed layout), big enough to read across the room — the
    abbreviation and the R/H/E/LOB figures are the headline of the page. The team
@@ -528,10 +521,6 @@
    in a compact frame. */
 .bs__board {
   padding: var(--space-2h) var(--space-3h) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 /* The club's logo, hard against the innings — shrink-to-fit so there's no
    dead gap between it and inning 1. Linked (TeamLink) to the team page. A
@@ -652,16 +641,14 @@
    managers, weather, attendance…) — styled to match the lineup pages' fact grid,
    a seamless two-column grid with hairline dividers (the 1px gap reveals the rule
    beneath) rather than a strip of separately-bordered boxes. Wide fields span the
-   full row. */
+   full row. The grid is a Card (#1113, slice C5): the Card draws the edge and the
+   corners, and the grid keeps the rule ground its gaps show. It stays the
+   column's direct child, which the phone order (48-stamp-strip.css) ranks. */
 .bs__fill {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
   background: var(--border-rule);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
 }
 .bs__field {
   display: flex;

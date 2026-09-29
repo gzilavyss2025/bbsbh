@@ -667,15 +667,17 @@
 }
 /* Same layout on every viewport now (no phone-vs-wide split) — the bigger
    headshot + two-line name that used to only kick in at the wide breakpoint
-   is now the only version. */
+   is now the only version. A ledger Card (#1113, slice C5): the frame is the
+   Card's, and the tile keeps its own layout and inset. It has no band head
+   for the Card's clip to round, and the clip would cut the name link's focus
+   ring in the tight award tiles (up to 4px at 320px), so the tile does not
+   clip. */
 .playerline {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
+  overflow: visible;
 }
 /* Headshot + its position badge, same wrapper idiom as
    .teammate__shotwrap/__posbadge (former teammates cards). */

@@ -1122,3 +1122,288 @@ test('C3: each block keeps its own space and layout, from a rule that loads afte
 test('C3: the animation lab draws the batting order on the same Card', () => {
   assert.match(src('screens/animlab/motionDemos.jsx'), /<Card as="div" body="flush">\s*<ol className="lineup__list">/)
 })
+
+// ---- slice C5: the box score ----
+
+// The fifteen box-score blocks that drew their own copy of the card, and the
+// performer tile (.playercard, now .playerline) that the box score shares
+// with the slate, the innings view and /awards. SPOILER SCOPE: twelve of them
+// render inside the box score's SealBox reveal render, so each one is a box
+// move and nothing else. The Card IS the block (it carries the block's
+// class), and the namespace rule keeps the block's margin, its own inset and
+// its layout. Every Card takes body="flush": each block has its own inset
+// (12px 14px and the like), and the padded body's is 12px 16px 16px, so a
+// padded body would move the layout. Each band head stays the Card's first
+// child, as H1b left it, and .gamestory keeps its own large title (Gary,
+// 2026-09-29: the big card names wait on the design lab).
+//
+// Q3: the six sheets that sat on page paper (--paper-1) take the Card's paper.
+// The .bs__fill gap-rule grid IS its Card, not wrapped in one: the phone order
+// (48-stamp-strip.css) ranks it as a direct child of its club's column, so it
+// keeps its class on the outer box, and its --border-rule ground (`keep`).
+const C5 = [
+  { css: '21-box-score.css', sel: '.gamestory', jsx: ['components/game/GameStoryCard.jsx'], ns: 'gamestory' },
+  { css: '21-box-score.css', sel: '.bs__team', jsx: ['screens/BoxScore.jsx'], ns: 'bs__team' },
+  { css: '21-box-score.css', sel: '.bs__decisions', jsx: ['screens/BoxScore.jsx'], ns: 'bs__decisions', as: 'div' },
+  { css: '21-box-score.css', sel: '.bs__potg', jsx: ['screens/BoxScore.jsx'], ns: 'bs__potg', as: 'div' },
+  { css: '21-box-score.css', sel: '.bs__insights', jsx: ['screens/BoxScore.jsx'], ns: 'bs__insights' },
+  { css: '21-box-score.css', sel: '.bs__statcastCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__statcastCard' },
+  { css: '21-box-score.css', sel: '.bs__noteCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__noteCard', frame: 'ledger', as: 'div' },
+  { css: '21a-box-score-stars.css', sel: '.bs__stars', jsx: ['screens/BoxScore.jsx'], ns: 'bs__stars', as: 'div' },
+  // Boxed only from 740px: its phone rules strip the frame (test below).
+  { css: '21a-box-score-stars.css', sel: '.stars3__card', jsx: ['screens/BoxScore.jsx'], ns: 'stars3__card', frame: 'ledger', as: 'li', phoneOnly: true },
+  { css: '21b-box-score-tally.css', sel: '.bs__tally', jsx: ['screens/boxscore/InningTally.jsx'], ns: 'bs__tally', as: 'div' },
+  // No band head to round, so the tile opts out of the Card's clip, which
+  // cut the name link's focus ring in the tight award tiles (test below).
+  {
+    css: '22-box-score-tables.css',
+    sel: '.playerline',
+    jsx: ['components/player/PerformerCard.jsx', 'screens/AwardsHistoryPage.jsx'],
+    ns: 'playerline',
+    frame: 'ledger',
+    as: 'li',
+    keep: ['overflow'],
+  },
+  { css: '23-box-score-detail.css', sel: '.bs__info', jsx: ['screens/BoxScore.jsx'], ns: 'bs__info', as: 'div' },
+  { css: '23-box-score-detail.css', sel: '.bs__totalsCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__totalsCard', as: 'div' },
+  { css: '23-box-score-detail.css', sel: '.bs__board', jsx: ['screens/BoxScore.jsx'], ns: 'bs__board', as: 'div' },
+  { css: '23-box-score-detail.css', sel: '.bs__fill', jsx: ['screens/BoxScore.jsx'], ns: 'bs__fill', as: 'div', keep: ['background'] },
+]
+
+// Every rule in a stylesheet with the @media head it sits under ('' for none).
+function rulesInMedia(css) {
+  const found = []
+  let at = 0
+  for (;;) {
+    const open = css.indexOf('{', at)
+    if (open === -1) return found
+    const head = css.slice(at, open).trim()
+    if (head.startsWith('@media')) {
+      let depth = 1
+      let end = open + 1
+      while (depth > 0 && end < css.length) {
+        if (css[end] === '{') depth += 1
+        else if (css[end] === '}') depth -= 1
+        end += 1
+      }
+      for (const [sel, body] of rules(css.slice(open + 1, end - 1))) found.push([head, sel, body])
+      at = end
+    } else {
+      const close = css.indexOf('}', open)
+      found.push(['', head, css.slice(open + 1, close)])
+      at = close + 1
+    }
+  }
+}
+const PHONE_QUERY = '@media (max-width: 739.98px)'
+
+test('C5: no box-score block draws a second frame over its Card, inside media queries too', () => {
+  for (const { css, sel, keep = [], phoneOnly } of C5) {
+    const found = rulesInMedia(read(css)).filter(([, s]) => s === sel)
+    assert.ok(found.length > 0, `${css}: a ${sel} rule`)
+    for (const [media, , body] of found) {
+      if (phoneOnly && media === PHONE_QUERY) continue
+      assert.deepEqual(frameDecls(body, keep), [], `${css}: ${sel} ${media} still draws its own frame`)
+    }
+  }
+})
+
+test('C5: every box-score block renders on Card, with its frame and a flush body', () => {
+  for (const { jsx, ns, frame, as, mode = 'card' } of C5) {
+    for (const rel of jsx) {
+      const code = src(rel)
+      assert.match(code, /import \{ Card \} from ["'][\w./]+\/ui\/frame\/Card\.jsx["']/, `${rel} imports Card`)
+      const tags = mode === 'wrap' ? wrappingTags(code, ns) : cardTags(code).filter((attrs) => namesClass(attrs, ns))
+      assert.ok(tags.length > 0, `${rel}: .${ns} renders ${mode === 'wrap' ? 'inside' : 'on'} a Card`)
+      for (const attrs of tags) {
+        assert.match(attrs, /body="flush"/, `${rel}: .${ns}'s Card keeps the block's own inset`)
+        if (frame) assert.match(attrs, new RegExp(`frame="${frame}"`), `${rel}: .${ns} is a ${frame}`)
+        else assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
+        if (as) assert.match(attrs, new RegExp(`as="${as}"`), `${rel}: .${ns} is a <${as}>, as before`)
+        else assert.doesNotMatch(attrs, /as=/, `${rel}: .${ns} is a <section>, as before`)
+        assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its head as its first child`)
+      }
+      if (mode === 'card') assert.doesNotMatch(code, bareUse(ns), `${rel}: .${ns} is on a bare element`)
+      if (mode === 'wrap') {
+        const uses = code.match(new RegExp(`className=\\{?["'\`]${ns}(?![\\w-])`, 'g')) ?? []
+        assert.equal(uses.length, tags.length, `${rel}: every .${ns} sits inside a Card`)
+      }
+    }
+  }
+})
+
+// Card owns no margin, and a flush body adds no padding, so each block keeps
+// the space and the inset it had, in its own namespace rule, which loads
+// after system/card.css.
+test('C5: each block keeps its own margin and inset, from a rule that loads after card.css', () => {
+  const imports = importOrder()
+  const card = imports.indexOf('system/card.css')
+  for (const rel of new Set(C5.map((c) => c.css))) assert.ok(imports.indexOf(rel) > card, `${rel} loads after system/card.css`)
+  const kept = [
+    ['21-box-score.css', '.gamestory', 'margin-top', 'var(--space-4)'],
+    ['21-box-score.css', '.bs__team', 'padding', 'var(--space-3) var(--space-3h) var(--space-2h)'],
+    ['21-box-score.css', '.bs__decisions', 'padding', 'var(--space-3) var(--space-3h)'],
+    ['21-box-score.css', '.bs__decisions', 'display', 'flex'],
+    ['21-box-score.css', '.bs__potg', 'padding', 'var(--space-3) var(--space-3h)'],
+    ['21-box-score.css', '.bs__potg', 'margin-bottom', '10px'],
+    ['21-box-score.css', '.bs__insights', 'padding', 'var(--space-3) var(--space-3h)'],
+    ['21-box-score.css', '.bs__insights', 'margin-top', 'var(--space-3)'],
+    ['21-box-score.css', '.bs__statcastCard', 'padding', 'var(--space-3) var(--space-3h)'],
+    ['21-box-score.css', '.bs__noteCard', 'padding', 'var(--space-2)'],
+    ['21-box-score.css', '.bs__noteCard', 'margin-bottom', '8px'],
+    ['21a-box-score-stars.css', '.bs__stars', 'padding', 'var(--space-3) var(--space-3h)'],
+    ['21a-box-score-stars.css', '.stars3__card', 'padding', 'var(--space-2) 2px'],
+    ['21b-box-score-tally.css', '.bs__tally', 'margin-top', 'var(--space-3)'],
+    ['22-box-score-tables.css', '.playerline', 'padding', 'var(--space-2)'],
+    ['22-box-score-tables.css', '.playerline', 'display', 'flex'],
+    ['23-box-score-detail.css', '.bs__info', 'padding', 'var(--space-3) var(--space-3h)'],
+    ['23-box-score-detail.css', '.bs__totalsCard', 'padding', 'var(--space-2h) var(--space-3h) var(--space-3)'],
+    ['23-box-score-detail.css', '.bs__board', 'padding', 'var(--space-2h) var(--space-3h) var(--space-3)'],
+  ]
+  for (const [css, sel, prop, value] of kept) {
+    assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
+  }
+})
+
+// A note tile is one tile in a CSS-columns waterfall: it must never split
+// across two columns.
+test('C5: a note tile still never breaks across the waterfall columns', () => {
+  const css = read('21-box-score.css')
+  assert.equal(decl(ruleBody(css, '.bs__noteCard'), 'break-inside'), 'avoid')
+  assert.equal(decl(ruleBody(css, '.bs__noteGrid'), 'column-width'), '240px')
+})
+
+// The scorebook's fill-in boxes are a gap-rule grid: the rules between the
+// boxes are the grid's own --border-rule ground in 1px gaps. The Card paints
+// the edge and the corners. The grid stays its column's direct child, so the
+// phone order still ranks it after the stamp, the totals and the story.
+test('C5: the fill-in grid keeps its rules and its place in the phone order', () => {
+  const body = ruleBody(read('23-box-score-detail.css'), '.bs__fill')
+  assert.equal(decl(body, 'display'), 'grid')
+  assert.equal(decl(body, 'grid-template-columns'), '1fr 1fr')
+  assert.equal(decl(body, 'gap'), '1px')
+  assert.equal(decl(body, 'background'), 'var(--border-rule)')
+  assert.equal(decl(ruleBody(read('23-box-score-detail.css'), '.bs__field'), 'background'), 'var(--surface-card)')
+  const order = read('48-stamp-strip.css')
+  assert.match(order, /\.bs \.bs__col--away > \.bs__fill \{ order: 8; \}/)
+  assert.match(order, /\.bs \.bs__col--home > \.bs__fill \{ order: 12; \}/)
+  assert.match(src('screens/BoxScore.jsx'), /\n {4}<Card as="div" body="flush" className="bs__fill">\n/)
+})
+
+// The three-stars tile is a plain list row on a phone (a soft rule above it)
+// and a boxed tile from 740px. Card draws its frame at every width, so the
+// phone query strips it, and the wide query draws none of its own.
+test('C5: a three-stars tile is a list row below 740px and a ledger tile from 740px', () => {
+  const found = rulesInMedia(read('21a-box-score-stars.css')).filter(([, s]) => s === '.stars3__card')
+  const phone = found.filter(([media]) => media === PHONE_QUERY).map(([, , body]) => body)
+  const strip = phone.find((body) => decl(body, 'border-radius') !== undefined)
+  assert.ok(strip, 'a phone rule strips the Card frame')
+  assert.equal(decl(strip, 'border'), 'none')
+  assert.equal(decl(strip, 'border-top'), 'var(--bw-hair) solid var(--rule-soft)')
+  assert.equal(decl(strip, 'border-radius'), '0')
+  assert.equal(decl(strip, 'background'), 'none')
+  assert.equal(decl(strip, 'overflow'), 'visible', "the row's 2px side inset must not clip the name link's focus ring")
+  const wide = found.filter(([media]) => media === '@media (min-width: 740px)').map(([, , body]) => body)
+  assert.equal(wide.length, 1)
+  assert.equal(decl(wide[0], 'padding'), 'var(--space-3)')
+  assert.deepEqual(frameDecls(wide[0]), [], 'from 740px the Card draws the frame')
+})
+
+// Card clips its edge so a band head follows its corners. The performer tile
+// has no head, and in the tight award tiles the clip cut the name link's
+// focus ring by up to 4px (measured at 320px), so the tile does not clip.
+test('C5: the performer tile does not clip the focus ring of its name link', () => {
+  assert.equal(decl(ruleBody(read('22-box-score-tables.css'), '.playerline'), 'overflow'), 'visible')
+  const imports = importOrder()
+  assert.ok(imports.indexOf('22-box-score-tables.css') > imports.indexOf('system/card.css'), 'the tile wins over .card on order')
+})
+
+// GameStoryCard fetches MLB.com coverage and shows nothing without it. The
+// early return stays above the Card, so no empty frame ever says a story
+// exists, and the big "Coverage" title stays the Card's first child.
+test('C5: the coverage card keeps its large title and returns null before the Card', () => {
+  const code = src('components/game/GameStoryCard.jsx')
+  const empty = code.indexOf('if (stories.length === 0) return null')
+  assert.ok(empty > 0)
+  assert.ok(empty < code.indexOf('<Card'), 'the early return sits above the Card')
+  assert.match(code, /<Card body="flush" className="gamestory">\s*<div className="gamestory__head">\s*<h3 className="gamestory__title">Coverage<\/h3>/)
+  assert.equal(decl(ruleBody(read('21-box-score.css'), '.gamestory__title'), 'font-size'), 'var(--fs-ui)')
+})
+
+// The same for every box-score block that can be empty: an empty frame would
+// show that a star, a note or a decision exists.
+test('C5: every box-score block that can be empty returns null before its Card', () => {
+  const code = src('screens/BoxScore.jsx')
+  for (const name of ['StatcastLeadersCard', 'InsightsCard', 'Decisions', 'PlayOfTheGame', 'ThreeStars', 'GameInfo']) {
+    const from = code.indexOf(`\nfunction ${name}(`)
+    assert.ok(from > 0, name)
+    const next = code.indexOf('\nfunction ', from + 1)
+    const body = code.slice(from, next === -1 ? undefined : next)
+    const empty = body.indexOf('return null')
+    assert.ok(empty > 0, `${name} returns null when empty`)
+    assert.ok(empty < body.indexOf('<Card'), `${name}: the early return sits above the Card`)
+  }
+})
+
+// The rename (ADR-0084 ledger): .playercard is .playerline. Strict, comments
+// and e2e too. The folder components/playercard/ keeps its name, so a path
+// (a / before or after) does not count.
+const RETIRED_C5 = /(?<![/A-Za-z0-9_-])playercard(?![a-z0-9/-])/
+test('C5: .playercard is gone, from stylesheets, markup, comments and e2e', () => {
+  const E2E = join(SRC, '..', 'e2e')
+  const found = [
+    ...files(SRC, ['.css', '.jsx', '.js', '.md']).filter((rel) => RETIRED_C5.test(readFileSync(join(SRC, rel), 'utf8'))),
+    ...files(E2E, ['.js', '.mjs']).filter((rel) => RETIRED_C5.test(readFileSync(join(E2E, rel), 'utf8'))).map((rel) => `e2e/${rel}`),
+  ]
+  assert.deepEqual(found, [])
+})
+
+// Two hosts draw the tile with no frame of their own: the innings view's
+// Statcast row (.halfcast) and the slate result card's performer slot. Their
+// two-class rules outrank .card, in partials that load after system/card.css.
+test('C5: the two hosts that draw the tile unframed still drop its frame', () => {
+  const imports = importOrder()
+  const card = imports.indexOf('system/card.css')
+  const hosts = [
+    ['12-sealbox.css', '.halfcast .playerline', { border: 'none', 'border-radius': '0', background: 'none', padding: '0' }],
+    ['22-box-score-tables.css', '.flipback__perfcard .playerline', { border: 'none', background: 'none', padding: '0' }],
+  ]
+  for (const [rel, sel, want] of hosts) {
+    const body = ruleBody(read(rel), sel)
+    assert.ok(body, `${rel}: ${sel}`)
+    for (const [prop, value] of Object.entries(want)) assert.equal(decl(body, prop), value, `${sel} ${prop}`)
+    assert.ok(imports.indexOf(rel) > card, `${rel} loads after system/card.css`)
+  }
+})
+
+// The design lab draws the real tile, so it wears the real frame too (Q5:
+// the lab keeps its look).
+test('C5: the design lab draws the performer tile on the ledger frame', () => {
+  assert.match(src('screens/designlab/catalog.js'), /cls: 'card card--ledger playerline'/)
+  assert.match(src('screens/designlab/components.jsx'), /className="card card--ledger playerline"/)
+})
+
+// THE SEAL PIN. Written before this slice changed a line, from origin/main
+// 4f8b7c567: for each file the slice touches, the reveal-only modules it
+// imports (src/api/spoiler-manifest.json; a "mixed" module counts when a
+// sealed export is imported), and how many SealBoxes and revealedThrough
+// reads it holds. A frame move changes none of these. If this fails, the
+// slice moved a seal: stop and ask, never update the literal to match.
+const C5_SEAL = {
+  'screens/BoxScore.jsx': { reveal: ['boxscore.js', 'challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  'components/game/GameStoryCard.jsx': { reveal: ['gameStory.js'], sealBoxes: 0, revealedThrough: 0 },
+  'screens/boxscore/InningTally.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
+  'components/player/PerformerCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
+  'screens/AwardsHistoryPage.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
+  'components/gamehud/StatBox.jsx': { reveal: ['boxscore.js', 'challenges.js', 'derive.js', 'linescore.js', 'umpireFavor.js'], sealBoxes: 2, revealedThrough: 0 },
+  'components/game/GameResultFace.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
+}
+
+test('C5: the seal pin — no reveal-only import, SealBox or revealedThrough read moved', () => {
+  for (const [rel, want] of Object.entries(C5_SEAL)) {
+    const code = src(rel)
+    assert.deepEqual(revealOnlyImports(rel), want.reveal, `${rel}: its reveal-only imports changed`)
+    assert.equal((code.match(/<SealBox\b/g) ?? []).length, want.sealBoxes, `${rel}: a SealBox was added or removed`)
+    assert.equal((code.match(/revealedThrough/g) ?? []).length, want.revealedThrough, `${rel}: a revealedThrough read moved`)
+  }
+})

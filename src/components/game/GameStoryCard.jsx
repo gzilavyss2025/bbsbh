@@ -2,6 +2,7 @@ import { fetchGameStory } from '../../api/gameStory.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { teamClubName, teamPrimaryColor } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // Each team's own MLB.com coverage of this game — a recap, and any same-game
 // news (an in-game injury, e.g.) — resolved by api/gameStory.js, which also
@@ -34,7 +35,7 @@ export function GameStoryCard({ feed }) {
   const listed = lead ? rest : stories
 
   return (
-    <section className="gamestory">
+    <Card body="flush" className="gamestory">
       <div className="gamestory__head">
         <h3 className="gamestory__title">Coverage</h3>
         <span className="gamestory__note">MLB.com</span>
@@ -49,7 +50,7 @@ export function GameStoryCard({ feed }) {
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   )
 }
 

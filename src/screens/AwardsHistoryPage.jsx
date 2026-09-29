@@ -10,6 +10,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
 
@@ -126,7 +127,7 @@ function AwardCard({ r, favoriteTeamId, dense = false }) {
   const [first, last] = dense ? splitFirstLast(r.name) : [r.name, '']
   const nameClass = dense ? nameSizeClass(first, last) : ''
   return (
-    <li className={`playerline awardhistory__card${isFavorite ? ' awardhistory__card--fav' : ''}`} style={favStyle}>
+    <Card as="li" frame="ledger" body="flush" className={`playerline awardhistory__card${isFavorite ? ' awardhistory__card--fav' : ''}`} style={favStyle}>
       <span className="playerline__shotwrap">
         <Headshot personId={r.playerId} name={r.name} teamId={r.teamId} className="playerline__shot" />
         {r.position && <span className="playerline__posbadge">{r.position}</span>}
@@ -159,7 +160,7 @@ function AwardCard({ r, favoriteTeamId, dense = false }) {
         </div>
         {r.statLine && <div className="playerline__stat">{r.statLine}</div>}
       </div>
-    </li>
+    </Card>
   )
 }
 
