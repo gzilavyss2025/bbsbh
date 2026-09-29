@@ -14,6 +14,7 @@
 
 import { seriesForGame } from './bracket.js'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
+import { teamClubNameShort } from '../../lib/teams.js'
 
 export function recordLine(series) {
   if (!series) return ''
@@ -41,6 +42,29 @@ function roundTitle(series) {
 export function seriesLine(series, gameNumber) {
   if (!series || !gameNumber) return ''
   return `Game ${gameNumber} · ${roundTitle(series)}`
+}
+
+// The line under a game's own series mark: the game's number and the series
+// as it stood heading into it, by club NICKNAME (the mark already names the
+// round, and the lineup page has room to spell a club out):
+//   "Game 1 · Series Tied, 0–0"   "Game 2 · Braves Lead 1–0"
+// Same footing as recordLine: wins counted before the cutoff, never this game.
+// Empty for a decided series, which plays no game to head into.
+export function gameStatusLine(series, gameNumber) {
+  if (!series || !gameNumber || series.decided) return ''
+  const [a, b] = series.slots
+  const hi = Math.max(a.wins, b.wins)
+  const lo = Math.min(a.wins, b.wins)
+  if (a.wins === b.wins) return `Game ${gameNumber} · Series Tied, ${hi}–${lo}`
+  const leader = a.wins > b.wins ? a.club : b.club
+  const name = leader ? teamClubNameShort(leader.id) : ''
+  return `Game ${gameNumber} · ${name} Lead ${hi}–${lo}`.replace('  ', ' ')
+}
+
+// "Best of 3" — the series' length, for the live page's banner before any
+// game has a result to head the page with.
+export function bestOfLine(series) {
+  return series?.bestOf ? `Best of ${series.bestOf}` : ''
 }
 
 // Both lines for one slate game row (anything with a `gamePk`), or null when
