@@ -1,6 +1,7 @@
 import '../../styles/boxlines/boxlines.css'
 import { PitchLadder } from '../../components/scoring/PitchLadder.jsx'
 import { PlayDiamond } from '../../components/scoring/PlayDiamond.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
 
 // ---------------------------------------------------------------------------
 // THE MOTION STUDY'S DEMOS (issues #976-#983), for /animation-lab.
@@ -85,21 +86,24 @@ const DEMO_ORDER = [
 
 // The real .lineup__list/.lineup__row recipe, `--row-i` set per row exactly as
 // TeamInfo sets it — so this strip pauses additively and reads the true
-// stagger, and so the hover rule is the one the app runs.
+// stagger, and so the hover rule is the one the app runs. The list is the flush
+// body of a Card there (#1113, slice C3), so it is here too.
 export function LineupDemo() {
   return (
-    <ol className="lineup__list">
-      {DEMO_ORDER.map(([name, jersey, pos], i) => (
-        <li key={name} className="lineup__row" style={{ '--row-i': i }}>
-          <span className="lineup__order">{i + 1}</span>
-          <span className="lineup__namewrap">
-            <span className="lineup__name">{name}</span>
-          </span>
-          <span className="lineup__jersey">{jersey}</span>
-          <span className="lineup__pos">{pos}</span>
-        </li>
-      ))}
-    </ol>
+    <Card as="div" body="flush">
+      <ol className="lineup__list">
+        {DEMO_ORDER.map(([name, jersey, pos], i) => (
+          <li key={name} className="lineup__row" style={{ '--row-i': i }}>
+            <span className="lineup__order">{i + 1}</span>
+            <span className="lineup__namewrap">
+              <span className="lineup__name">{name}</span>
+            </span>
+            <span className="lineup__jersey">{jersey}</span>
+            <span className="lineup__pos">{pos}</span>
+          </li>
+        ))}
+      </ol>
+    </Card>
   )
 }
 

@@ -354,7 +354,7 @@
   }
 
   /* ---- opposing-starter card, wide layout: the pitch-mix bar (see
-     .startercard__arsenal above) fills the open space next to the
+     .starter__arsenal above) fills the open space next to the
      name/badges/stats column, which otherwise stretches full width for no
      reason — cap it so the mix has real room rather than a sliver.
 
@@ -365,13 +365,13 @@
      pitches the arm throws. Only inside this breakpoint: below it the mix is
      display:none and the headshot has nothing to be taller than it, so the base
      rule's `align-items: center` still reads best there. */
-  .startercard__body {
+  .starter__body {
     align-items: flex-start;
   }
-  .startercard__info {
+  .starter__info {
     flex: 0 1 320px;
   }
-  .startercard__arsenal {
+  .starter__arsenal {
     display: block;
     flex: 1;
     min-width: 0;

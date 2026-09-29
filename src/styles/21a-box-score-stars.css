@@ -163,7 +163,7 @@
    the three cards have room to sit in one horizontal row instead of a
    stacked list. Same photo-left, copy-stacked-right grid the phone layout
    above uses (just re-declared at card scale rather than a plain list row),
-   left-aligned like the opposing-starter card (.startercard__body,
+   left-aligned like the opposing-starter card (.starter__body,
    10-lineup.css) instead of the phone list's compact idiom — headshot and
    name lead the eye the same way there and here. flex on the row, not a
    3-col grid: with only 1 or 2 stars (WPA can turn up short of 3 candidates

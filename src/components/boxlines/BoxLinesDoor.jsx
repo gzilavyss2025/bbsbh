@@ -10,7 +10,7 @@ import { BoxLinesSheet } from './BoxLinesSheet.jsx'
 // wants a door pays one element, not a state hook and a mount of its own —
 // which is what keeps the lineup page's change to a handful of lines against
 // its file cap. `className` lets the host dress the line in its own row style
-// (the Starting pitcher card's mono, dashed-rule `.startercard__careervs`);
+// (the Starting pitcher card's mono, dashed-rule `.starter__careervs`);
 // `sheet` is everything BoxLinesSheet needs except the headline, which is
 // always this label, verbatim, so the door and the sheet cannot disagree.
 //

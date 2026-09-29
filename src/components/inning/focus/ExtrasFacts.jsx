@@ -5,6 +5,7 @@ import { ManagerLink } from '../../team/ManagerLink.jsx'
 import { UmpireLink } from '../../umpire/UmpireLink.jsx'
 import { SectionHead } from '../../ui/frame/SectionHead.jsx'
 import { FactGrid } from '../../ui/frame/FactGrid.jsx'
+import { Card } from '../../ui/frame/Card.jsx'
 
 // The fill-in half of focus mode's EXTRAS tab (ReferencePanel.jsx): the
 // scorecard-header facts a hand-scorer writes down once and then looks up
@@ -61,18 +62,20 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
       {officials.length > 0 && (
         <section className="umps refextras">
           <SectionHead look="label">Umpires</SectionHead>
-          <ul className="umps__list">
-            {officials.map((o) => (
-              <li key={o.role}>
-                <span className="umps__role">{o.role}</span>
-                <span className="umps__namerow">
-                  <UmpireLink id={o.id} className="umps__name">
-                    {o.name}
-                  </UmpireLink>
-                </span>
-              </li>
-            ))}
-          </ul>
+          <Card as="div" body="flush">
+            <ul className="umps__list">
+              {officials.map((o) => (
+                <li key={o.role}>
+                  <span className="umps__role">{o.role}</span>
+                  <span className="umps__namerow">
+                    <UmpireLink id={o.id} className="umps__name">
+                      {o.name}
+                    </UmpireLink>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Card>
         </section>
       )}
 

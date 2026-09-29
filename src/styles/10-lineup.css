@@ -1,13 +1,11 @@
 /* ---------------------------------------------------------------- lineup */
+/* The batting order's rows. The list is the flush body of the lineup Card
+   (TeamInfo.jsx, #1113 slice C3): the Card draws the edge and clips the rows
+   to its corners, so the list draws no frame of its own. */
 .lineup__list {
   list-style: none;
   margin: 0;
   padding: 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 
 .lineup__row,
@@ -163,33 +161,33 @@
    batting order, since it's the one useful fact on hand before the lineup
    posts. Same card chrome as .opp__defense below; the headshot anchors a
    name/handedness/jersey column, with the season line as its own row. */
-.startercard__body {
+.starter__body {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2h) var(--space-3);
-  /* border/radius/shadow now live on the .startercard container so the masthead
-     caps one card cleanly (see .startercard). */
+  /* The edge, the corners and the shadow are the Card's (.starter, #1113 slice
+     C3), so the masthead caps one card cleanly. */
 }
 /* No-pitcher fallback sits directly in the card (not the padded body), so inset
    it to match. */
-.startercard > .hint {
+.starter > .hint {
   margin: 0;
   padding: var(--space-2h) var(--space-3);
 }
 
-.shot.startercard__shot {
+.shot.starter__shot {
   flex: none;
   width: var(--shot-lg-w);
   height: var(--shot-lg-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
-.shot.startercard__shot.shot--fallback {
+.shot.starter__shot.shot--fallback {
   font-size: var(--fs-hero-md);
 }
 
-.startercard__info {
+.starter__info {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -197,7 +195,7 @@
   flex: 1;
 }
 
-.startercard__namewrap {
+.starter__namewrap {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -205,7 +203,7 @@
   min-width: 0;
 }
 
-.startercard__name {
+.starter__name {
   font-weight: var(--w-semibold);
   font-size: var(--fs-title-sm);
   color: var(--text-body);
@@ -216,12 +214,12 @@
 /* Rendered as a PlayerLink → .plink button, and .plink (declared later, same
    specificity) resets weight/color to `inherit` via its `font`/`color`
    shorthand — same fix as .plink.lineup__name/.plink.roster__name above. */
-.plink.startercard__name {
+.plink.starter__name {
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
 
-.startercard__badges {
+.starter__badges {
   display: flex;
   gap: var(--space-2h);
   font-family: var(--font-display);
@@ -230,10 +228,10 @@
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
 }
-.startercard__jersey {
+.starter__jersey {
   color: var(--clay);
 }
-.startercard__hand {
+.starter__hand {
   color: var(--field);
 }
 
@@ -242,10 +240,10 @@
    season, and (conditionally) his whole career against them, so the card
    reads as a stack of dated facts (badges, season-to-date, last time out,
    this year vs this club, career vs this club) rather than one lump. */
-.startercard__stats,
-.startercard__last,
-.startercard__seasonvs,
-.startercard__careervs {
+.starter__stats,
+.starter__last,
+.starter__seasonvs,
+.starter__careervs {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
@@ -257,12 +255,12 @@
 
 /* The career line doubles as the door to its Box Lines (ADR-0069) —
    components/boxlines/BoxLinesDoor.jsx, dressed by styles/boxlines/boxlines.css;
-   it wears .startercard__careervs above for the row look. That door is a
+   it wears .starter__careervs above for the row look. That door is a
    <button>, and .boxlines__door resets a button whole — padding and border
    both — from a partial that loads after this one. So the row's own dress is
    restated here at `button.` specificity: without it the career line loses
    the dashed divider every line above it wears, and the 4px of air under it. */
-button.startercard__careervs {
+button.starter__careervs {
   padding-top: var(--space-1);
   border-top: var(--bw-hair) dashed var(--border-hairline);
 }
@@ -270,7 +268,7 @@ button.startercard__careervs {
 /* The pitch-mix bar (PitchArsenalMix.jsx) — hidden below the wide breakpoint
    (see the WIDE LAYOUT section), where the card has no spare width for it
    next to the headshot + info column. */
-.startercard__arsenal {
+.starter__arsenal {
   display: none;
 }
 
@@ -296,7 +294,10 @@ button.startercard__careervs {
   column-gap: var(--space-3);
 }
 
-.teammatecard {
+/* One tile is a Card (as="li", #1113 slice C3): the Card draws the edge, the
+   corners and the shadow. The grid, the inset, the space under it and the
+   masonry column break stay here. */
+.teammate {
   position: relative;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -304,17 +305,13 @@ button.startercard__careervs {
   gap: var(--space-2);
   padding: var(--space-2h) var(--space-2);
   margin-bottom: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   break-inside: avoid;
 }
 
 /* 3+ players who all crossed paths on the SAME club at once (see
    groupTeammateCards) — every headshot pools on one side, the one shared
    club/years on the other, rather than repeating a card per opponent. */
-.teammatecard--group {
+.teammate--group {
   grid-template-columns: 1fr auto;
 }
 
@@ -324,20 +321,20 @@ button.startercard__careervs {
    GROUP_MATES_SHOWN) is exactly the case with enough headshots for that to
    show. auto-fill locks every row, including the wrapped ones, to the same
    column count for the card's actual width, left-aligned like the rows above. */
-.teammatecard__group {
+.teammate__group {
   display: grid;
   grid-template-columns: repeat(auto-fill, 64px);
   justify-content: start;
   gap: var(--space-2h);
 }
 
-.teammatecard__group .teammatecard__half {
+.teammate__group .teammate__half {
   width: 64px;
 }
 
 /* Clicking this reveals the rest of the group's headshots in place — see
    GroupCard's `expanded` state — so it reads as an action, not a count. */
-.teammatecard__groupmore {
+.teammate__groupmore {
   display: block;
   grid-column: 1 / -1;
   width: 100%;
@@ -353,14 +350,14 @@ button.startercard__careervs {
   text-align: center;
   cursor: pointer;
 }
-.teammatecard__groupmore:hover {
+.teammate__groupmore:hover {
   color: var(--text-body);
 }
 
 /* A pair/group both starting tonight — the connection is about to play out
    for real on the user's own scoresheet, the highest-value fact this card can
    surface (see TONIGHT_BOOST). */
-.teammatecard__badge {
+.teammate__badge {
   grid-column: 1 / -1;
   order: -1;
   margin: -2px -2px 2px;
@@ -377,7 +374,7 @@ button.startercard__careervs {
 /* The one-line story under a card ("MLB teammates, Marlins '19-'21") — a
    footer row spanning the full card regardless of the 2- or 3-column grid
    above it. */
-.teammatecard__caption {
+.teammate__caption {
   grid-column: 1 / -1;
   margin-top: 4px;
   padding-top: var(--space-1h);
@@ -387,7 +384,7 @@ button.startercard__careervs {
   text-align: center;
 }
 
-.teammatecard__half {
+.teammate__half {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -396,25 +393,25 @@ button.startercard__careervs {
   text-align: center;
 }
 
-.teammatecard__shotwrap {
+.teammate__shotwrap {
   position: relative;
   display: block;
   border-radius: var(--radius-md);
 }
 
-.shot.teammatecard__shot {
+.shot.teammate__shot {
   width: var(--shot-md-w);
   height: var(--shot-md-h);
 }
 
-.shot.teammatecard__shot.shot--fallback {
+.shot.teammate__shot.shot--fallback {
   font-size: var(--fs-title-lg);
 }
 
 /* The player's roster position, floated on the headshot's bottom-left corner
    like a jersey patch — a pitcher always reads as the plain "P" (see
    TeammateHalf's posLabel). */
-.teammatecard__posbadge {
+.teammate__posbadge {
   position: absolute;
   left: 2px;
   bottom: 2px;
@@ -431,14 +428,14 @@ button.startercard__careervs {
   text-align: center;
 }
 
-.teammatecard__name {
+.teammate__name {
   display: flex;
   flex-direction: column;
   min-width: 0;
   max-width: 100%;
 }
 
-.teammatecard__name-first {
+.teammate__name-first {
   font-weight: var(--w-semibold);
   font-size: var(--fs-caption);
   line-height: var(--lh-compact);
@@ -448,7 +445,7 @@ button.startercard__careervs {
   white-space: nowrap;
 }
 
-.teammatecard__name-last {
+.teammate__name-last {
   font-weight: var(--w-bold);
   font-size: var(--fs-small);
   line-height: var(--lh-compact);
@@ -458,7 +455,7 @@ button.startercard__careervs {
   white-space: nowrap;
 }
 
-.teammatecard__mid {
+.teammate__mid {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -466,13 +463,13 @@ button.startercard__careervs {
   padding-top: var(--space-5);
 }
 
-.teammatecard__logos {
+.teammate__logos {
   display: flex;
   align-items: center;
   gap: var(--space-1);
 }
 
-.teammatecard__years {
+.teammate__years {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-cell);
@@ -592,12 +589,14 @@ button.startercard__careervs {
    The sheet's bottom-left graphic: infield square on its point, surnames on
    writing lines at their positions, the position number penciled beneath,
    HOME/VISITOR DEFENSE ringed in the middle. Label spots share the SVG's
-   0–100 coordinate space (percent of the box). */
+   0–100 coordinate space (percent of the box).
+
+   The box is a Card (DefenseDiamond.jsx, #1113 slice C3), in all five places
+   it renders: the lineup page, the innings view's Field tab, the box score,
+   the scorecard sheet and the team page's projected lineup. A host that
+   reshapes it (.opp, .bs__defensecard, .refpanel__body) does so with two
+   classes, which beats the Card's one. Only the inset stays here. */
 .defdiamond {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3) var(--space-2h) var(--space-2);
 }
 

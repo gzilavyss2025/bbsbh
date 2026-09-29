@@ -760,3 +760,167 @@ test('C2: the awards ledger frames the whole ledger narrow and each table wide',
 test('C2: the level card loads its own stylesheet', () => {
   assert.match(src('components/player/LevelProgressionCard.jsx'), /^import '\.\.\/\.\.\/styles\/31d-prospect-card\.css'$/m)
 })
+
+// ---- 14. slice C3: the pre-game cards ----
+
+// The pre-game blocks that drew their own copy of the card: the metric card
+// (five modules, the foul boards among them), the batting order, the opposing
+// defence and the starting pitcher (one rule for three blocks), a former
+// teammate tile, the defence diamond and the umpire crew. Each one renders
+// through Card now, with body="flush": each keeps its own padding, which is not
+// the padded body's, so its layout does not move. `wrap` is the C2 mode: the
+// Card wraps the umpire grid, which keeps its class and its gap rules. No C3
+// block opts out of the Card's clip: nothing in them reaches past the edge.
+const C3 = [
+  {
+    css: '44-pre-game-cards.css',
+    sel: '.metric',
+    jsx: [
+      'components/game/GamePhotosStrip.jsx',
+      'components/teamstats/BullpenBoard.jsx',
+      'components/teamstats/SeasonSeriesStrip.jsx',
+      'screens/FoulTrackerPage.jsx',
+      'screens/TeamInfo.jsx',
+    ],
+    ns: 'metric',
+    head: true,
+  },
+  { css: '44-pre-game-cards.css', sel: '.lineup', jsx: ['screens/TeamInfo.jsx'], ns: 'lineup', head: true },
+  { css: '44-pre-game-cards.css', sel: '.opp', jsx: ['screens/TeamInfo.jsx'], ns: 'opp', head: true },
+  { css: '44-pre-game-cards.css', sel: '.starter', jsx: ['screens/TeamInfo.jsx'], ns: 'starter', head: true },
+  { css: '10-lineup.css', sel: '.teammate', jsx: ['screens/TeamInfo.jsx'], ns: 'teammate', as: 'li' },
+  { css: '10-lineup.css', sel: '.defdiamond', jsx: ['components/scoring/DefenseDiamond.jsx'], ns: 'defdiamond', as: 'div' },
+  {
+    css: '09-team-info.css',
+    sel: '.umps__list',
+    jsx: ['components/umpire/UmpiresCard.jsx', 'components/inning/focus/ExtrasFacts.jsx'],
+    ns: 'umps__list',
+    mode: 'wrap',
+    as: 'div',
+    keep: ['background'],
+  },
+]
+// Every rule whose selector LIST names `sel`: `.lineup, .opp, .starter` is one
+// rule for three blocks.
+const bodiesNaming = (css, sel) =>
+  rules(css)
+    .filter(([s]) => s.split(',').map((x) => x.trim()).includes(sel))
+    .map(([, body]) => body)
+const importOrder = () =>
+  [...readFileSync(join(SRC, 'index.css'), 'utf8').matchAll(/@import '\.\/styles\/([^']+)';/g)].map((m) => m[1])
+
+test('C3: no pre-game block draws a second frame over its Card', () => {
+  for (const { css, sel, keep = [] } of C3) {
+    for (const body of bodiesNaming(read(css), sel)) {
+      assert.deepEqual(frameDecls(body, keep), [], `${css}: ${sel} still draws its own frame`)
+    }
+  }
+  // The batting order's list was a frame inside the frame. It is the lineup
+  // Card's flush body now, so it draws nothing and nothing strips it.
+  for (const body of bodiesNaming(read('10-lineup.css'), '.lineup__list')) {
+    assert.deepEqual(frameDecls(body), [], '.lineup__list is a flush body, not a second card')
+  }
+  assert.equal(ruleBody(read('44-pre-game-cards.css'), '.lineup .lineup__list'), null, 'no rule strips a frame the list no longer draws')
+  // The foul boards clipped their bled tables with a clip of their own. The
+  // Card clips them now.
+  for (const body of bodiesNaming(read('43-foul-tracker.css'), '.foulboard-block')) {
+    assert.deepEqual(frameDecls(body), [], '.foulboard-block leaves the clip to the Card')
+  }
+})
+
+test('C3: every pre-game block renders on Card, with its frame, its head and a flush body', () => {
+  for (const { jsx, ns, mode = 'card', head = false, as } of C3) {
+    for (const rel of jsx) {
+      const code = src(rel)
+      assert.match(code, /import \{ Card \} from ["'](?:[\w./]+\/ui\/frame|\.)\/Card\.jsx["']/, `${rel} imports Card`)
+      const tags = mode === 'wrap' ? wrappingTags(code, ns) : cardTags(code).filter((attrs) => namesClass(attrs, ns))
+      assert.ok(tags.length > 0, `${rel}: .${ns} renders ${mode === 'wrap' ? 'inside' : 'on'} a Card`)
+      for (const attrs of tags) {
+        assert.match(attrs, /body="flush"/, `${rel}: .${ns}'s Card keeps the block's own padding`)
+        assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
+        if (head) assert.match(attrs, /head=\{/, `${rel}: .${ns}'s band is the Card's head`)
+        else assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} has no head`)
+        if (as) assert.match(attrs, new RegExp(`as="${as}"`), `${rel}: .${ns} is a <${as}>, as before`)
+      }
+      if (mode === 'card') assert.doesNotMatch(code, bareUse(ns), `${rel}: .${ns} is on a bare element`)
+      if (mode === 'wrap') {
+        const uses = code.match(new RegExp(`className=\\{?["'\`]${ns}(?![\\w-])`, 'g')) ?? []
+        assert.equal(uses.length, tags.length, `${rel}: every .${ns} sits inside a Card`)
+      }
+    }
+  }
+})
+
+// The umpire crew is a gap-rule grid: the rules between the umpires are the
+// grid's own --border-rule ground in 1px gaps. The Card paints card paper, so
+// that ground stays on the grid inside it, and the grid draws no edge.
+test('C3: the umpire grid keeps its rules inside the Card', () => {
+  const css = read('09-team-info.css')
+  const body = ruleBody(css, '.umps__list')
+  assert.ok(body, 'a .umps__list rule')
+  assert.equal(decl(body, 'display'), 'grid')
+  assert.equal(decl(body, 'grid-template-columns'), '1fr 1fr')
+  assert.equal(decl(body, 'gap'), '1px')
+  assert.equal(decl(body, 'background'), 'var(--border-rule)')
+  assert.deepEqual(frameDecls(body, ['background']), [], '.umps__list draws no frame of its own')
+  assert.equal(decl(ruleBody(css, '.umps__list li'), 'background'), 'var(--surface-card)')
+  assert.equal(decl(ruleBody(css, '.umps__list li:last-child:nth-child(odd)'), 'grid-column'), '1 / -1')
+})
+
+// Where a host reshapes the diamond, its rule must still beat the Card's frame:
+// two classes against the one of .card, in a partial that loads after
+// system/card.css. The box score joins the diamond to the title above it; the
+// reference panel and the opposing-defence card draw the frame themselves.
+test('C3: the rules that reshape the diamond inside a host still win over the Card', () => {
+  const imports = importOrder()
+  const card = imports.indexOf('system/card.css')
+  const hosts = [
+    ['12-sealbox.css', '.bs__defensecard .defdiamond', { 'border-top': 'none', 'border-radius': '0 0 var(--radius-md) var(--radius-md)' }],
+    ['12-sealbox.css', '.refpanel__body .defdiamond', { border: 'none', 'box-shadow': 'none', background: 'none' }],
+    ['44-pre-game-cards.css', '.opp .defdiamond', { border: '0', 'border-radius': '0' }],
+  ]
+  for (const [rel, sel, want] of hosts) {
+    const body = ruleBody(read(rel), sel)
+    assert.ok(body, `${rel}: ${sel}`)
+    for (const [prop, value] of Object.entries(want)) assert.equal(decl(body, prop), value, `${sel} ${prop}`)
+    assert.ok((sel.match(/\./g) ?? []).length > 1, `${sel} outranks .card`)
+    assert.ok(imports.indexOf(rel) > card, `${rel} loads after system/card.css`)
+  }
+})
+
+// Strict, comments too: a comment that names a retired class sends the next
+// reader to a rule that does not exist.
+const RETIRED_C3 = /(^|[^\w-])(metriccard|startercard|teammatecard)(?![\w])/
+
+test('C3: .metriccard, .startercard and .teammatecard are gone, from stylesheets, markup and comments', () => {
+  const css = files(STYLES, ['.css']).filter((rel) => RETIRED_C3.test(readFileSync(join(STYLES, rel), 'utf8')))
+  const code = files(SRC, ['.jsx', '.js', '.md'])
+    .filter((rel) => !rel.startsWith('styles/'))
+    .filter((rel) => RETIRED_C3.test(readFileSync(join(SRC, rel), 'utf8')))
+  assert.deepEqual([...css, ...code], [])
+})
+
+// Card owns no margin. Each block keeps its own space and its own layout in a
+// namespace rule that loads after system/card.css, so it wins on order.
+test('C3: each block keeps its own space and layout, from a rule that loads after card.css', () => {
+  const imports = importOrder()
+  const card = imports.indexOf('system/card.css')
+  for (const rel of ['09-team-info.css', '10-lineup.css', '44-pre-game-cards.css']) {
+    assert.ok(imports.indexOf(rel) > card, `${rel} loads after system/card.css`)
+  }
+  const pre = read('44-pre-game-cards.css')
+  assert.equal(decl(ruleBody(pre, '.metric') ?? '', 'margin-top'), 'var(--space-4)')
+  assert.equal(decl(bodiesNaming(pre, '.starter')[0] ?? '', 'margin-top'), 'var(--space-4)', '.lineup, .opp and .starter keep their 16px')
+  const lineup = read('10-lineup.css')
+  const mate = ruleBody(lineup, '.teammate') ?? ''
+  assert.equal(decl(mate, 'margin-bottom'), 'var(--space-3)')
+  assert.equal(decl(mate, 'break-inside'), 'avoid', 'a teammate tile never splits across the masonry columns')
+  assert.equal(decl(mate, 'display'), 'grid')
+  assert.equal(decl(ruleBody(lineup, '.defdiamond'), 'padding'), 'var(--space-3) var(--space-2h) var(--space-2)')
+})
+
+// The animation lab draws the lineup strip with the real recipe, so it wraps
+// the list in the same flush Card the batting order uses.
+test('C3: the animation lab draws the batting order on the same Card', () => {
+  assert.match(src('screens/animlab/motionDemos.jsx'), /<Card as="div" body="flush">\s*<ol className="lineup__list">/)
+})
